@@ -5,11 +5,11 @@
   "batch_objective": "Mapper MVP — TUI for concept/structure maps: concept maps with rich node fichas under a required-field schema, GitHub repo-as-map (branches/releases via gh), Mermaid round-trip, radial mind maps, main window (consult maps / plug repo / construct nodes & maps)",
   "mode": "full",
   "mode_history": [],
-  "current_phase": 0,
+  "current_phase": 1,
   "phase_status": "awaiting-gate",
   "iterations_per_phase": {
     "0": 1,
-    "1": 0,
+    "1": 1,
     "2": 0,
     "3": 0,
     "4": 0,
@@ -32,6 +32,16 @@
       "date": "2026-08-18",
       "phase": 0,
       "decision": "Phase-0 iteration 1 (operator): search must reach INSIDE node information (all ficha content incl. attachment names), not only titles — US-008 strengthened; new US-014 (nodes carry files, URLs, images as attachments, references not payloads) added, READY."
+    },
+    {
+      "date": "2026-08-21",
+      "phase": 0,
+      "decision": "Phase-0 gate approved. Operator instruction: 'Vamos a implementar desde aquí: C:/Users/jjgh8/Github/mapper/HANDOFF.md'. All 14 user stories remain READY; proceeding to Phase 1 to derive HLR/LLR (EARS, dual traceability)."
+    },
+    {
+      "date": "2026-08-21",
+      "phase": 1,
+      "decision": "Phase 1 derivation complete: 35 HLRs and 47 LLRs derived from 14 READY user stories using EARS patterns; validation strategy defined (28 TC + 14 AT); traceability matrix updated. Phase 1 at gate awaiting approval to proceed to Phase 2 (architecture)."
     }
   ],
   "standing_authorization": {

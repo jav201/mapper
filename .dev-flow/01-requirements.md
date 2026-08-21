@@ -341,15 +341,298 @@ building concept maps; the team sharing a versioned map.
 
 ## 3. High-level requirements (HLR)
 
-> Lands in Phase 1, derived from the READY stories above (EARS patterns, two-level HLR/LLR, dual traceability).
+> Derived from the READY user stories above using EARS patterns. Each HLR cites its source US(s); traceability to LLRs and tests is in §4 and §5.
+
+### 3.1 Main window (US-001)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-001 | When mapper launches, the system shall display a home surface with three entry paths: **Consult maps**, **Plug a repo**, and **Construct**. | US-001 |
+| HLR-002 | The Consult maps path shall list existing maps from the local store, ordered by most-recently opened by default. | US-001 |
+| HLR-003 | The home surface shall expose keyboard shortcuts for each door on the key bar and shall activate the selected door on `Enter`. | US-001 |
+
+### 3.2 Concept map — layered tree (US-002)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-004 | When the user opens a concept map, the system shall render it as a layered tree where every node is drawn as a ficha card. | US-002 |
+| HLR-005 | While the map view is active, the system shall support keyboard navigation (`j`/`k` next/previous sibling, `h`/`l` parent/child) with a visible cursor. | US-002 |
+| HLR-006 | The layered tree shall draw box-drawing edges between parent and child cards without visual breaks at cell crossings. | US-002 |
+
+### 3.3 Required-field schema and coverage (US-003)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-007 | Each map shall declare a per-map required-field schema in its `nodos.yml` sidecar. | US-003 |
+| HLR-008 | The system shall render per-node coverage of the required fields as letter badges (e.g. `D✓`/`D░` for document present/missing). | US-003 |
+| HLR-009 | The system shall display a per-map coverage summary in the view header, computed from the current node set. | US-003 |
+
+### 3.4 Super-legacy software tree (US-004)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-010 | The system shall load and render a super-legacy software system as a layered tree of module fichas. | US-004 |
+| HLR-011 | Each legacy module card shall display its document chip, schema coverage letters, and creation tags. | US-004 |
+| HLR-012 | The legacy tree shall reuse the same layered-tree renderer and navigation model as concept maps. | US-004 |
+
+### 3.5 Mermaid round-trip (US-005)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-013 | The system shall import a map from a `.mmd` file written in `graph TD` syntax. | US-005 |
+| HLR-014 | When the user saves a map, the system shall export it back to `.mmd` preserving node identifiers, labels, and parent/child edges. | US-005 |
+| HLR-015 | The MVP parser shall support bare node ids, labelled nodes `A[label]`, directed edges `-->`, and edge labels `-->|text|`. | US-005 |
+
+### 3.6 Repo as map — GitHub (US-006)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-016 | When the user plugs a GitHub repo, the system shall read it read-only via the authenticated `gh` CLI and render it as a lane map. | US-006 |
+| HLR-017 | The lane map shall render branches as horizontal lanes, releases as diamond milestones, and commits as dots on a timeline. | US-006 |
+| HLR-018 | For each branch lane the system shall display an ahead/behind chip and a CI verdict icon (`✓`/`✗`/`·`). | US-006 |
+
+### 3.7 Radial mind maps (US-007)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-019 | When the user switches a map to radial view, the system shall render the root node centred-left and branch nodes radiating outward. | US-007 |
+| HLR-020 | The radial view shall draw organic tapered Bézier edges and shall assign a distinct hue per top-level branch. | US-007 |
+
+### 3.8 Search / jump (US-008)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-021 | When the user presses `/`, the system shall open a search prompt that matches node titles and all ficha content (notes, field values, attachment names). | US-008 |
+| HLR-022 | While search results are active, the system shall reverse-light matched nodes on the canvas and display a tally of matching nodes. | US-008 |
+
+### 3.9 Persistence — text truth + SQLite index (US-009)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-023 | The system shall persist every map as a pair of text files: `map.mmd` and `map_nodos.yml`. | US-009 |
+| HLR-024 | When mapper opens a map, the system shall derive a local SQLite index from the text files and shall never commit that index to git. | US-009 |
+| HLR-025 | If the SQLite index is deleted, the system shall rebuild an identical index the next time the map is opened. | US-009 |
+
+### 3.10 Outline mode (US-010)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-026 | The system shall render the current map as an editable indented outline where indentation encodes parent/child relationships. | US-010 |
+| HLR-027 | When the user re-indents a line in outline mode, the system shall re-parent the corresponding node in the map. | US-010 |
+
+### 3.11 Export SVG/PNG (US-011)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-028 | When the user triggers export, the system shall write the current view to an SVG file. | US-011 |
+| HLR-029 | When the user triggers export, the system shall write the current view to a PNG file. | US-011 |
+
+### 3.12 Focus / collapse to subtree (US-012)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-030 | When the user focuses a node, the system shall hide all nodes outside the selected subtree and shall name the focus in the header. | US-012 |
+| HLR-031 | When the user exits focus, the system shall restore the full map view. | US-012 |
+
+### 3.13 Ficha in place (US-013)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-032 | When the user presses `Enter` on a node, the system shall display the node's ficha without leaving the map view. | US-013 |
+| HLR-033 | The ficha shall display the node's notes, required-field values, links, and attachments. | US-013 |
+
+### 3.14 Node attachments (US-014)
+
+| ID | Requirement (EARS) | Source US |
+|---|---|---|
+| HLR-034 | Each node shall support zero or more attachments of kind `file`, `url`, or `image`, stored as references in the sidecar. | US-014 |
+| HLR-035 | The ficha shall list attachments grouped by kind and shall open a URL or file path in the OS default application when activated. | US-014 |
 
 ## 4. Low-level requirements (LLR)
 
-> Lands in Phase 1.
+> Each LLR is a concrete design/implementation statement derived from one HLR. File references are `NEW` until implementation lands; they will be updated during Phase 3.
+
+### 4.1 Main window (HLR-001..003)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-001.1 | The home screen shall be implemented as a Textual `Screen` with three `Button`/`ListView` widgets labelled Consult, Plug, Construct. | HLR-001 |
+| LLR-001.2 | On `App.mount`, the system shall push `HomeScreen` as the initial screen. | HLR-001 |
+| LLR-002.1 | The map store shall maintain a `last_opened` timestamp per map in the SQLite index and return maps ordered by it. | HLR-002 |
+| LLR-003.1 | `HomeScreen` shall bind `q` to quit, `c` to focus Consult, `p` to focus Plug, `n` to focus Construct, and `Enter` to activate the focused door. | HLR-003 |
+
+### 4.2 Concept map layered tree (HLR-004..006)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-004.1 | The layered tree layout shall compute `(x, y)` coordinates for each node with children placed below their parent and siblings spaced horizontally. | HLR-004 |
+| LLR-004.2 | Each node shall be rendered as a `Canvas` cell region with a pill background, title line, and optional state chip. | HLR-004 |
+| LLR-005.1 | The navigation model shall maintain a cursor node id and expose `next_sibling()`, `prev_sibling()`, `parent()`, `first_child()`. | HLR-005 |
+| LLR-005.2 | The canvas shall redraw the selection highlight on every cursor move and shall scroll to keep the cursor visible. | HLR-005 |
+| LLR-006.1 | The canvas shall merge box-drawing characters using connectivity bits (up/down/left/right) before writing to the terminal buffer. | HLR-006 |
+
+### 4.3 Required-field schema and coverage (HLR-007..009)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-007.1 | The sidecar YAML shall contain a top-level `schema` list of field objects with `id`, `label`, `required`, and `kind`. | HLR-007 |
+| LLR-007.2 | The parser shall reject a node whose required fields are missing from the schema definition. | HLR-007 |
+| LLR-008.1 | Per-node coverage shall be rendered as a row of badge pairs `FIELD_SYMBOL+STATE` inside the card footer. | HLR-008 |
+| LLR-009.1 | The header widget shall compute coverage as `sum(present_fields) / sum(required_fields)` across all nodes and display it as a percentage. | HLR-009 |
+
+### 4.4 Super-legacy software tree (HLR-010..012)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-010.1 | A synthetic legacy fixture shall ship in `fixtures/legacy.mmd` and `fixtures/legacy_nodos.yml`. | HLR-010 |
+| LLR-011.1 | Legacy module cards shall append a document chip (`ACTA-NNNN` or `SIN ACTA`) derived from the node's `document` field. | HLR-011 |
+| LLR-012.1 | The legacy map shall be opened through the same `LayeredTreeScreen` class used for concept maps, with the fixture loaded into the store. | HLR-012 |
+
+### 4.5 Mermaid round-trip (HLR-013..015)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-013.1 | `MermaidImporter.parse(text: str) -> Graph` shall recognise `graph TD`, lines matching `A --> B` and `A[label] --> B[label]`. | HLR-013 |
+| LLR-013.2 | Edge labels `-->|text|` shall be parsed into the `GraphEdge.label` field. | HLR-013 |
+| LLR-014.1 | `MermaidExporter.dump(graph: Graph) -> str` shall emit lines in `graph TD` form preserving node labels and edge labels. | HLR-014 |
+| LLR-015.1 | The parser shall raise `ParseError` with line number on unknown syntax, and the MVP shall reject subgraphs and multiple parents. | HLR-015 |
+
+### 4.6 Repo as map — GitHub (HLR-016..018)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-016.1 | `GitHubConnector(repo: str)` shall call `gh repo view` and `gh api repos/{owner}/{repo}/branches` and cache results for the session. | HLR-016 |
+| LLR-016.2 | The connector shall cap fetched branches at 20 and commits per branch at 30, emitting `+N more` chips when exceeded. | HLR-016 |
+| LLR-017.1 | `RepoLaneRenderer` shall map each branch to a horizontal lane row, releases to `◆` cells, and commits to `●` cells on a left-to-right time axis. | HLR-017 |
+| LLR-018.1 | Each branch lane shall query `gh api repos/{owner}/{repo}/commits/{branch}` for ahead/behind against `HEAD` and query check-runs for the CI verdict. | HLR-018 |
+
+### 4.7 Radial mind maps (HLR-019..020)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-019.1 | `RadialRenderer` shall place the root at `(cx, cy)`, distribute children across angular sectors, and recurse outward by depth. | HLR-019 |
+| LLR-020.1 | Edges shall be drawn as quadratic Bézier curves whose stroke width tapers from root to leaf. | HLR-020 |
+| LLR-020.2 | Each top-level branch shall receive a distinct hue from a fixed 8-colour severity-rationed palette. | HLR-020 |
+
+### 4.8 Search / jump (HLR-021..022)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-021.1 | `SearchIndex` shall tokenise node titles, notes, field values, and attachment names into a SQLite `SEARCH` virtual table or equivalent inverted index. | HLR-021 |
+| LLR-021.2 | The `/` key shall mount a modal `Input` bound to `SearchIndex.query(q)`. | HLR-021 |
+| LLR-022.1 | Matching node ids shall be collected; the canvas shall paint matched cards with a reverse-video highlight and a footer tally `N nodos`. | HLR-022 |
+
+### 4.9 Persistence (HLR-023..025)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-023.1 | `MapStore.save(map_id, graph, sidecar)` shall write `<map_id>.mmd` and `<map_id>_nodos.yml` to the workspace directory. | HLR-023 |
+| LLR-024.1 | On open, `MapStore.open(map_id)` shall parse the text files and populate SQLite tables `nodes`, `edges`, `attachments`, `schema_fields`. | HLR-024 |
+| LLR-024.2 | `mapper.db` shall be listed in `.gitignore` and the README shall state it is rebuildable and must not be committed. | HLR-024 |
+| LLR-025.1 | A rebuild routine shall compare a hash of the text files against a stored hash; on mismatch or absence it shall re-create the index deterministically. | HLR-025 |
+
+### 4.10 Outline mode (HLR-026..027)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-026.1 | `OutlineScreen` shall render the tree as indented text lines using two spaces per depth level. | HLR-026 |
+| LLR-027.1 | On save in the outline editor, the parser shall compute parent from indentation and rebuild the `Graph` edges accordingly. | HLR-027 |
+| LLR-027.2 | Re-parenting shall preserve node ids, ficha content, and attachments. | HLR-027 |
+
+### 4.11 Export SVG/PNG (HLR-028..029)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-028.1 | Export shall use Rich `Console(record=True)` to capture the current view and call `console.save_svg(path, title=...)` for SVG output. | HLR-028 |
+| LLR-029.1 | PNG export shall render the SVG to a raster via an available helper (e.g. `cairosvg` or `pillow`) and shall degrade gracefully if unavailable. | HLR-029 |
+
+### 4.12 Focus / collapse (HLR-030..031)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-030.1 | `Graph.focus(node_id)` shall return a filtered graph containing only the selected node and its descendants. | HLR-030 |
+| LLR-030.2 | The view header shall display `Focus: <node title>` while focus is active. | HLR-030 |
+| LLR-031.1 | Pressing `Esc` or selecting "Unfocus" shall restore the unfiltered graph and clear the focus header. | HLR-031 |
+
+### 4.13 Ficha in place (HLR-032..033)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-032.1 | Pressing `Enter` on a node shall open a `FichaModal` or bottom `FichaStrip` over the map without replacing the screen stack. | HLR-032 |
+| LLR-033.1 | The ficha widget shall render sections: Title, State, Required fields, Notes, Links, Attachments. | HLR-033 |
+| LLR-033.2 | If the ficha content exceeds the allocated strip height, the system shall promote it to a modal with scrollable content. | HLR-033 |
+
+### 4.14 Node attachments (HLR-034..035)
+
+| ID | LLR | Parent HLR |
+|---|---|---|
+| LLR-034.1 | The sidecar shall support an `attachments` list per node with fields `kind ∈ {file,url,image}`, `path`, and optional `caption`. | HLR-034 |
+| LLR-035.1 | The ficha shall group attachments by kind and render `file` as `📎 path`, `url` as `🌐 caption`, `image` as `🖼️ path` (with Rich pixelation thumbnail when feasible). | HLR-035 |
+| LLR-035.2 | Activating a URL attachment shall call `webbrowser.open`; activating a file attachment shall call `os.startfile` / `xdg-open` by platform. | HLR-035 |
 
 ## 5. Validation strategy
 
-> Lands in Phase 1 (Layer A `TC-NNN` ↔ LLR/HLR, Layer B `AT-NNN` ↔ US).
+> Two-layer validation per dev-flow: Layer A (white-box) ties test cases `TC-NNN` to LLRs; Layer B (black-box) ties acceptance tests `AT-NNN` to user stories. All tests are automated unless marked manual.
+
+### 5.1 Layer A — white-box test cases (`TC-NNN`)
+
+| ID | Target LLR | Description | Oracles / reddening mutation |
+|---|---|---|---|
+| TC-001 | LLR-001.1 | `HomeScreen` mounts with three door widgets. | Remove a door → screen fails to mount. |
+| TC-002 | LLR-003.1 | Pressing `c` focuses Consult; `Enter` pushes map-list screen. | Unbind `c` → focus does not move. |
+| TC-003 | LLR-004.1, LLR-004.2 | A two-node graph renders parent above child with visible cards. | Swap y-coordinates → parent appears below child. |
+| TC-004 | LLR-005.1 | Cursor moves from parent to first child on `l`. | Remove `first_child()` → cursor stays. |
+| TC-005 | LLR-006.1 | A parent with two children renders a continuous `├─`/`└─` wire. | Clear connectivity bits → wires break into orphan segments. |
+| TC-006 | LLR-007.1 | Parse a sidecar with schema `[document, owner, state]` and read field labels. | Omit `schema` key → parser raises. |
+| TC-007 | LLR-008.1 | A node missing `document` renders `D░`; a complete node renders `D✓`. | Hard-code `D✓` → missing-field node appears complete. |
+| TC-008 | LLR-009.1 | Header shows 50% when one of two nodes is complete. | Return 0% always → header lies. |
+| TC-009 | LLR-010.1 | Fixture files exist and parse without error. | Delete fixture → load fails. |
+| TC-010 | LLR-013.1, LLR-013.2 | Parse `graph TD\nA[x] -->|uses| B[y]` into two nodes and one labelled edge. | Drop edge-label regex → label lost. |
+| TC-011 | LLR-014.1 | Export the parsed graph and re-parse; structure is identical. | Drop node labels → round-trip changes titles. |
+| TC-012 | LLR-015.1 | Multiple-parent input `A --> C; B --> C` raises `ParseError`. | Allow multiple parents → tree invariant broken. |
+| TC-013 | LLR-016.1 | `GitHubConnector` returns branch list for a public repo via `gh`. | Stub `gh` to fail → connector raises `GitHubError`. |
+| TC-014 | LLR-016.2, LLR-017.1 | Repo map renders at least one lane row for `main`; when branches exceed the cap it renders `+N more`. | Empty branch list → no lanes rendered; remove cap → overflow not indicated. |
+| TC-015 | LLR-018.1 | CI-failing branch renders `✗` chip. | Ignore check-runs → failing branch shows `·`. |
+| TC-016 | LLR-019.1 | Radial renderer produces non-overlapping coordinates for a 3-node star. | Place all children at angle 0 → overlap. |
+| TC-017 | LLR-020.2 | Two top-level branches receive different hues. | Use single colour → branches indistinguishable. |
+| TC-018 | LLR-021.1 | Search query `acta` matches node with `document: acta-2024`. | Index only titles → match missed. |
+| TC-019 | LLR-022.1 | A matched node is highlighted and tally reads `1 nodo`. | Disable highlighting → no visual feedback. |
+| TC-020 | LLR-023.1 | Save writes both `.mmd` and `_nodos.yml`. | Skip sidecar write → only one file exists. |
+| TC-021 | LLR-024.1, LLR-025.1 | Delete `mapper.db`; reopen rebuilds identical node count. | Corrupt hash → rebuild skipped, data missing. |
+| TC-022 | LLR-026.1 | Outline screen renders root and child as indented lines. | Flatten indentation → hierarchy lost. |
+| TC-023 | LLR-027.1 | Indent a line in outline and save; child becomes descendant. | Ignore indentation change → parent unchanged. |
+| TC-024 | LLR-028.1 | Export SVG creates a file with `<svg>` root. | Record=False → empty/no SVG written. |
+| TC-025 | LLR-030.1 | Focus on leaf returns graph with one node. | Focus includes siblings → subtree violated. |
+| TC-026 | LLR-032.1 | `Enter` on node opens ficha widget without replacing screen. | Push full-screen editor → map view lost. |
+| TC-027 | LLR-033.1 | Ficha widget contains attachment section when node has attachments. | Omit attachments section → US-014 invisible. |
+| TC-028 | LLR-034.1, LLR-035.2 | Node with `url` attachment opens browser when activated. | Kind mismatch → file opener called for URL. |
+
+### 5.2 Layer B — black-box acceptance tests (`AT-NNN`)
+
+| ID | Source US | Shipped surface | Observable outcome / deliverable |
+|---|---|---|---|
+| AT-001 | US-001 | Home screen | User sees Consult / Plug / Construct doors with live keybinds. |
+| AT-002 | US-002 | Concept map view | User sees layered tree with state-spined cards; cursor moves with j/k/h/l. |
+| AT-003 | US-003 | Concept map header + cards | Missing-document node shows `SIN ACTA`; header coverage updates. |
+| AT-004 | US-004 | Legacy fixture view | User sees module tree with document chips and schema letters; ficha shows owner/year. |
+| AT-005 | US-005 | `.mmd` file on disk | Saving and re-importing produces the same tree. |
+| AT-006 | US-006 | Repo lane view | User sees main lane with releases and feature lanes with CI chips. |
+| AT-007 | US-007 | Radial view toggle | User sees root centred-left, coloured branches, curved edges. |
+| AT-008 | US-008 | Search overlay | Typing `/acta` highlights matches and shows node tally. |
+| AT-009 | US-009 | Workspace files | Only `.mmd` and `_nodos.yml` tracked; deleting `mapper.db` rebuilds map. |
+| AT-010 | US-010 | Outline screen | User sees indented outline; re-indenting re-parents node. |
+| AT-011 | US-011 | Export dialog | User receives SVG and PNG files matching the screen. |
+| AT-012 | US-012 | Focus command | User sees only the focused subtree; unfocus restores full map. |
+| AT-013 | US-013 | Ficha overlay | User sees notes/fields/links without leaving the map. |
+| AT-014 | US-014 | Node ficha | User sees file/url/image attachments and can open a URL. |
+
+### 5.3 Coverage summary
+
+- **User stories:** 14 READY; each has at least one HLR, one LLR, one TC, and one AT.
+- **HLR:** 35 (HLR-001..HLR-035).
+- **LLR:** 47 (LLR-001.1..LLR-035.2).
+- **TC:** 28 planned; implementation and pass/fail recorded in Phase 3.
+- **AT:** 14 planned; execution recorded in Phase 4.
 
 ## 6. Appendices (optional)
 

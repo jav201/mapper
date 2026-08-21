@@ -17,8 +17,9 @@ SQLite = rebuildable index).
 
 ## Status per phase
 
-- **Phase 0 — story intake & refinement:** at gate. 13 US, all READY.
-- Phases 1-6: not started.
+- **Phase 0 — story intake & refinement:** approved at gate (2026-08-21). 14 US, all READY.
+- **Phase 1 — HLR/LLR derivation (EARS, dual traceability):** at gate (2026-08-21). 35 HLR, 47 LLR, 28 TC, 14 AT.
+- Phases 2-6: not started.
 
 ## Roadmap / increment plan (proposed for Phase 1 gate)
 
@@ -62,6 +63,12 @@ Mermaid diagrams.
   reaches inside the whole ficha (notes, field values, attachment names), not
   only titles; US-014 added — nodes carry files/URLs/images as attachments
   (references, never payloads). Both READY; requirements doc updated.
+- 2026-08-21 · Phase-0 gate approved on operator instruction
+  "Vamos a implementar desde aquí: C:/Users/jjgh8/Github/mapper/HANDOFF.md";
+  all 14 user stories remain READY; batch proceeds to Phase 1 (HLR/LLR).
+- 2026-08-21 · Phase 1 derivation complete: 35 HLRs, 47 LLRs, 28 TC, 14 AT;
+  traceability matrix populated; awaiting Phase-1 gate approval to enter
+  Phase 2 (architecture / ARQ).
 
 ## Test ledger
 
