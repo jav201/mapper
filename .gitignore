@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Derived index — never committed (text is the truth)
+mapper.db
+*.db
+
+# Exported artifacts (generated on demand)
+*.svg
+*.png
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

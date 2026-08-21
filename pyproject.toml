@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mapper"
+version = "0.1.0"
+description = "TUI for concept and structure maps where every node is a ficha"
+requires-python = ">=3.10"
+dependencies = [
+    "textual==8.2.8",
+    "rich==15.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+export = ["cairosvg>=2.7.0"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+mapper = "mapper.app:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
