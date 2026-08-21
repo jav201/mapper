@@ -18,8 +18,10 @@ SQLite = rebuildable index).
 ## Status per phase
 
 - **Phase 0 — story intake & refinement:** approved at gate (2026-08-21). 14 US, all READY.
-- **Phase 1 — HLR/LLR derivation (EARS, dual traceability):** at gate (2026-08-21). 35 HLR, 47 LLR, 28 TC, 14 AT.
-- Phases 2-6: not started.
+- **Phase 1 — HLR/LLR derivation (EARS, dual traceability):** approved at gate (2026-08-21). 35 HLR, 47 LLR, 28 TC, 14 AT.
+- **Phase 2 — Architecture (ARQ):** approved at gate (2026-08-21). Module map, dependencies, frozen interfaces recorded in `docs/ARCHITECTURE.md`.
+- **Phase 3 — Design / PDR:** in progress. Interfaces frozen per ARCHITECTURE.md §4.
+- Phases 4-6: not started.
 
 ## Roadmap / increment plan (proposed for Phase 1 gate)
 
@@ -54,6 +56,30 @@ SQLite = rebuildable index).
 Terminal honesty (width-1 glyphs, palette-rationed severity), no real data in
 committed artifacts, read-only GitHub, Mermaid round-trip never forks.
 
+## Design / PDR (Phase 3)
+
+Frozen interfaces for the fork (see `docs/ARCHITECTURE.md` §4):
+
+| Interface | Shape |
+|---|---|
+| `Graph` | `nodes: dict[str, Node]`; `edges: list[Edge]`; `root_id: str`; `focus(node_id) -> Graph`. |
+| `Canvas` | `put`, `wire`, `edge`, `elbow_down`, `text`, `dline`, `rows`. |
+| `MapStore` | `load(map_id) -> (Graph, Sidecar)`, `save(map_id, graph, sidecar)`, `reindex()`. |
+| `IRenderer.render` | `render(graph, selected_id, w, h, **kwargs) -> Text`. |
+| `SearchIndex.query` | `query(q) -> list[str]` (node ids). |
+| `MermaidImporter/Exporter` | `parse(src) -> Graph`, `dump(graph) -> str`. |
+| `GitHubConnector.fetch` | `fetch(repo_slug) -> Graph`. |
+| `save_svg` / `save_png` | `save_svg(text, path)`, `save_png(text, path)`. |
+
+Increment execution order (risk-driven, dependencies first):
+1. Inc-1: skeleton + store
+2. Inc-2: layered canvas
+3. Inc-3: fichas + schema + legacy fixture
+4. Inc-4: main window + nav + search/focus
+5. Inc-5: Mermaid + outline
+6. Inc-6: GitHub connector
+7. Inc-7: radial + export + polish
+
 ## Out-of-scope carries
 
 Real-time collaboration; web/mobile; write access to GitHub; non-`graph TD`
@@ -69,6 +95,14 @@ Mermaid diagrams.
 - 2026-08-21 · Phase 1 derivation complete: 35 HLRs, 47 LLRs, 28 TC, 14 AT;
   traceability matrix populated; awaiting Phase-1 gate approval to enter
   Phase 2 (architecture / ARQ).
+- 2026-08-21 · Phase-1 gate approved on operator instruction
+  "aprobado, sigue hasta commit push y merge"; batch proceeds to Phase 2
+  (architecture) and onward through implementation/validation/close.
+- 2026-08-21 · Phase 2 architecture approved: module map, dependency bans,
+  frozen interfaces, and parallelisation worksheet recorded in
+  `docs/ARCHITECTURE.md`; proceeding to Phase 3 (PDR).
+- 2026-08-21 · Phase 3 PDR complete: frozen interfaces listed in PLAN.md;
+  increment order confirmed; proceeding to Phase 4 (implementation).
 
 ## Test ledger
 
