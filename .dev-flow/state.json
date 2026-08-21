@@ -5,13 +5,13 @@
   "batch_objective": "Mapper MVP — TUI for concept/structure maps: concept maps with rich node fichas under a required-field schema, GitHub repo-as-map (branches/releases via gh), Mermaid round-trip, radial mind maps, main window (consult maps / plug repo / construct nodes & maps)",
   "mode": "full",
   "mode_history": [],
-  "current_phase": 1,
-  "phase_status": "awaiting-gate",
+  "current_phase": 4,
+  "phase_status": "in-progress",
   "iterations_per_phase": {
     "0": 1,
     "1": 1,
-    "2": 0,
-    "3": 0,
+    "2": 1,
+    "3": 1,
     "4": 0,
     "5": 0,
     "6": 0
@@ -42,6 +42,21 @@
       "date": "2026-08-21",
       "phase": 1,
       "decision": "Phase 1 derivation complete: 35 HLRs and 47 LLRs derived from 14 READY user stories using EARS patterns; validation strategy defined (28 TC + 14 AT); traceability matrix updated. Phase 1 at gate awaiting approval to proceed to Phase 2 (architecture)."
+    },
+    {
+      "date": "2026-08-21",
+      "phase": 1,
+      "decision": "Phase-1 gate approved on operator instruction 'aprobado, sigue hasta commit push y merge'; proceeding to Phase 2 (architecture / ARQ)."
+    },
+    {
+      "date": "2026-08-21",
+      "phase": 2,
+      "decision": "Phase 2 architecture complete: module map, dependency bans, frozen interfaces, and parallelisation worksheet recorded in docs/ARCHITECTURE.md; proceeding to Phase 3 (design / PDR)."
+    },
+    {
+      "date": "2026-08-21",
+      "phase": 3,
+      "decision": "Phase 3 PDR complete: frozen interfaces listed in PLAN.md; increment execution order confirmed; proceeding to Phase 4 (implementation)."
     }
   ],
   "standing_authorization": {
