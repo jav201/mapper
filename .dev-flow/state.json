@@ -1,0 +1,44 @@
+{
+  "project": "mapper",
+  "language": "en",
+  "batch_id": "2026-08-18-batch-01",
+  "batch_objective": "Mapper MVP — TUI for concept/structure maps: concept maps with rich node fichas under a required-field schema, GitHub repo-as-map (branches/releases via gh), Mermaid round-trip, radial mind maps, main window (consult maps / plug repo / construct nodes & maps)",
+  "mode": "full",
+  "mode_history": [],
+  "current_phase": 0,
+  "phase_status": "awaiting-gate",
+  "iterations_per_phase": {
+    "0": 1,
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0
+  },
+  "artifacts": {
+    "requirements": ".dev-flow/01-requirements.md",
+    "plan": ".dev-flow/2026-08-18-batch-01/PLAN.md",
+    "handoff": "HANDOFF.md"
+  },
+  "decisions_log": [
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Batch kickoff: new project dir Github/mapper/; artifacts in English; mode=full (default); autonomous run with merge authorized; autonomous decisions recorded in PLAN.md + state.json + postmortem + vault at sync.",
+      "operator_phrasing": "Github/mapper/ nuevo · English · Autónomo con merge autorizado · Sí, registrar todo"
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Phase-0 iteration 1 (operator): search must reach INSIDE node information (all ficha content incl. attachment names), not only titles — US-008 strengthened; new US-014 (nodes carry files, URLs, images as attachments, references not payloads) added, READY."
+    }
+  ],
+  "standing_authorization": {
+    "date": "2026-08-18",
+    "autonomy_and_merge": "Autonomous end-to-end run AND the agent is authorized to merge the PR (operator's words: 'Autónomo con merge autorizado').",
+    "decision_recording": "Confirmed — every autonomous decision is recorded in the living PLAN.md decision log, state.json decisions_log, the postmortem decisions summary, and carried to the vault at /dev-flow-sync (operator's words: 'Sí, registrar todo')."
+  },
+  "obsidian_synced": false,
+  "created_at": "2026-08-21T15:42:09"
+}
