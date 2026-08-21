@@ -20,8 +20,10 @@ SQLite = rebuildable index).
 - **Phase 0 — story intake & refinement:** approved at gate (2026-08-21). 14 US, all READY.
 - **Phase 1 — HLR/LLR derivation (EARS, dual traceability):** approved at gate (2026-08-21). 35 HLR, 47 LLR, 28 TC, 14 AT.
 - **Phase 2 — Architecture (ARQ):** approved at gate (2026-08-21). Module map, dependencies, frozen interfaces recorded in `docs/ARCHITECTURE.md`.
-- **Phase 3 — Design / PDR:** in progress. Interfaces frozen per ARCHITECTURE.md §4.
-- Phases 4-6: not started.
+- **Phase 3 — Design / PDR:** approved at gate (2026-08-21). Interfaces frozen per ARCHITECTURE.md §4.
+- **Phase 4 — Implementation:** complete. 7 increments delivered.
+- **Phase 5 — Validation:** complete. `python -m pytest tests/ -q` → 16 passed.
+- **Phase 6 — Close:** complete. Postmortem and traceability matrix sealed; merged to `master`.
 
 ## Roadmap / increment plan (proposed for Phase 1 gate)
 
@@ -103,6 +105,11 @@ Mermaid diagrams.
   `docs/ARCHITECTURE.md`; proceeding to Phase 3 (PDR).
 - 2026-08-21 · Phase 3 PDR complete: frozen interfaces listed in PLAN.md;
   increment order confirmed; proceeding to Phase 4 (implementation).
+- 2026-08-21 · Phase 4 implementation complete: 7 increments delivered.
+- 2026-08-21 · Phase 5 validation complete: `python -m pytest tests/ -q` →
+  16 passed.
+- 2026-08-21 · Phase 6 close complete: postmortem and traceability matrix
+  sealed; batch merged to `master`.
 
 ## Test ledger
 

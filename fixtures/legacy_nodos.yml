@@ -1,0 +1,86 @@
+schema:
+  - key: D
+    label: documento
+    required: true
+  - key: O
+    label: dueno
+    required: true
+  - key: E
+    label: estado
+    required: true
+  - key: C
+    label: criticidad
+    required: false
+  - key: N
+    label: notas
+    required: false
+
+nodes:
+  erp:
+    title: Sistema ERP Legacy
+    state: risk
+    meta: core 1998
+    notes: Sin mantenimiento formal desde 2018.
+    fields:
+      D: ACTA-2011-034
+      O: Juan Perez
+      E: obsoleto
+      C: alta
+      N: migracion planeada 2027
+  fin:
+    title: Finanzas
+    state: ok
+    meta: modulo critico
+    fields:
+      D: ACTA-2012-011
+      O: Ana Ruiz
+      E: estable
+      C: alta
+  rrhh:
+    title: RRHH
+    state: risk
+    meta: dependencias externas
+    fields:
+      D: ACTA-2013-005
+      O: Luis Gomez
+      E: riesgo
+      C: media
+  inv:
+    title: Inventarios
+    state: late
+    meta: alta rotacion
+    fields:
+      O: Maria Solis
+      E: atrasado
+      C: alta
+  cont:
+    title: Contabilidad
+    state: ok
+    fields:
+      D: ACTA-2012-015
+      O: Ana Ruiz
+      E: estable
+      C: media
+  pres:
+    title: Presupuesto
+    state: blocked
+    fields:
+      D: ACTA-2014-003
+      O: Carlos Vargas
+      E: bloqueado
+      C: alta
+  nom:
+    title: Nomina
+    state: ok
+    fields:
+      D: ACTA-2013-008
+      O: Luis Gomez
+      E: estable
+      C: alta
+  alm:
+    title: Almacen
+    state: risk
+    fields:
+      O: Maria Solis
+      E: riesgo
+      C: media
