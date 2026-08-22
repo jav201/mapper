@@ -141,7 +141,7 @@ class RepoScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)
-        yield Static(id="repo-canvas")
+        yield Static("(loading repo...)", id="repo-canvas")
         yield Footer()
 
     def on_mount(self) -> None:
@@ -155,11 +155,14 @@ class RepoScreen(Screen):
 
     def refresh_canvas(self) -> None:
         canvas = self.query_one("#repo-canvas", Static)
+        size = self.size or self.app.size
+        w = max(20, size.width)
+        h = max(5, size.height - 3)
         text = self.renderer.render(
             self.graph,
             selected_id=self.nav.cursor,
-            w=self.size.width,
-            h=self.size.height - 3,
+            w=w,
+            h=h,
         )
         canvas.update(text)
 
@@ -213,7 +216,7 @@ class MapScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)
-        yield Static(id="map-canvas")
+        yield Static("(loading map...)", id="map-canvas")
         yield Input(placeholder="/search", id="search-input")
         yield Footer()
 
@@ -244,11 +247,14 @@ class MapScreen(Screen):
             renderer = self.radial_renderer
         else:
             renderer = self.renderer
+        size = self.size or self.app.size
+        w = max(20, size.width)
+        h = max(5, size.height - 3)
         text = renderer.render(
             self.graph,
             selected_id=self.nav.cursor,
-            w=self.size.width,
-            h=self.size.height - 3,
+            w=w,
+            h=h,
             query=self.query_text,
         )
         canvas.update(text)
@@ -321,11 +327,12 @@ class MapScreen(Screen):
 
     def action_export_svg(self) -> None:
         try:
+            size = self.size or self.app.size
             text = self.renderer.render(
                 self.graph,
                 selected_id=self.nav.cursor,
-                w=self.size.width,
-                h=self.size.height - 3,
+                w=max(20, size.width),
+                h=max(5, size.height - 3),
                 query=self.query_text,
             )
             path = self.store.workspace / f"{self.map_id}.svg"
@@ -339,13 +346,15 @@ class MapperApp(App):
     """Main application entry point."""
 
     CSS = """
-    Screen { align: center middle; }
+    HomeScreen, PlugRepoScreen { align: center middle; }
     .title { text-align: center; text-style: bold; color: magenta; margin: 1; }
     .subtitle { text-align: center; color: $text-muted; margin-bottom: 2; }
     #doors { height: auto; align: center middle; }
     #doors Button { margin: 1; }
     #map-list { width: 60%; height: auto; border: solid $primary; }
+    MapScreen, RepoScreen { layout: vertical; }
     #map-canvas { width: 100%; height: 1fr; }
+    #repo-canvas { width: 100%; height: 1fr; }
     #search-input { dock: bottom; }
     """
 
