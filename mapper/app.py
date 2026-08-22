@@ -151,9 +151,9 @@ class RepoScreen(Screen):
             self.notify(str(exc), severity="error")
             self.graph = Graph()
         self.nav = NavigationModel(self.graph)
-        self._render()
+        self.refresh_canvas()
 
-    def _render(self) -> None:
+    def refresh_canvas(self) -> None:
         canvas = self.query_one("#repo-canvas", Static)
         text = self.renderer.render(
             self.graph,
@@ -167,24 +167,16 @@ class RepoScreen(Screen):
         nxt = self.nav.next_sibling()
         if nxt:
             self.nav.cursor = nxt
-            self._render()
+            self.refresh_canvas()
 
     def action_prev_sibling(self) -> None:
         prv = self.nav.prev_sibling()
         if prv:
             self.nav.cursor = prv
-            self._render()
+            self.refresh_canvas()
 
     def action_home(self) -> None:
         self.app.pop_screen()
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "btn-consult":
-            self.action_consult()
-        elif event.button.id == "btn-plug":
-            self.action_plug()
-        elif event.button.id == "btn-construct":
-            self.action_construct()
 
 
 class MapScreen(Screen):
@@ -215,7 +207,7 @@ class MapScreen(Screen):
         self.outline_renderer = OutlineRenderer()
         self.radial_renderer = RadialRenderer()
         self.query_text = ""
-        self.focused = False
+        self.focus_active = False
         self.outline_mode = False
         self.radial_mode = False
 
@@ -242,9 +234,9 @@ class MapScreen(Screen):
                 self.graph.add_node(Node(id="root", ficha=Ficha(title="Error")))
                 self.base_graph = self.graph
         self.nav = NavigationModel(self.graph)
-        self._render()
+        self.refresh_canvas()
 
-    def _render(self) -> None:
+    def refresh_canvas(self) -> None:
         canvas = self.query_one("#map-canvas", Static)
         if self.outline_mode:
             renderer = self.outline_renderer
@@ -265,25 +257,25 @@ class MapScreen(Screen):
         nxt = self.nav.next_sibling()
         if nxt:
             self.nav.cursor = nxt
-            self._render()
+            self.refresh_canvas()
 
     def action_prev_sibling(self) -> None:
         prv = self.nav.prev_sibling()
         if prv:
             self.nav.cursor = prv
-            self._render()
+            self.refresh_canvas()
 
     def action_child(self) -> None:
         ch = self.nav.first_child()
         if ch:
             self.nav.cursor = ch
-            self._render()
+            self.refresh_canvas()
 
     def action_parent(self) -> None:
         p = self.nav.parent()
         if p:
             self.nav.cursor = p
-            self._render()
+            self.refresh_canvas()
 
     def action_search(self) -> None:
         inp = self.query_one("#search-input", Input)
@@ -294,25 +286,25 @@ class MapScreen(Screen):
         if event.input.id == "search-input":
             self.query_text = event.value
             event.input.display = False
-            self._render()
+            self.refresh_canvas()
 
     def on_input_blurred(self, event: Input.Blurred) -> None:
         if event.input.id == "search-input":
             event.input.display = False
 
     def action_focus(self) -> None:
-        if self.nav.cursor and not self.focused:
+        if self.nav.cursor and not self.focus_active:
             self.graph = self.base_graph.focus(self.nav.cursor)
-            self.focused = True
+            self.focus_active = True
             self.nav = NavigationModel(self.graph)
-            self._render()
+            self.refresh_canvas()
 
     def action_unfocus(self) -> None:
-        if self.focused:
+        if self.focus_active:
             self.graph = self.base_graph
-            self.focused = False
+            self.focus_active = False
             self.nav = NavigationModel(self.graph)
-            self._render()
+            self.refresh_canvas()
 
     def action_home(self) -> None:
         self.app.pop_screen()
@@ -320,12 +312,12 @@ class MapScreen(Screen):
     def action_toggle_outline(self) -> None:
         self.outline_mode = not self.outline_mode
         self.radial_mode = False
-        self._render()
+        self.refresh_canvas()
 
     def action_toggle_radial(self) -> None:
         self.radial_mode = not self.radial_mode
         self.outline_mode = False
-        self._render()
+        self.refresh_canvas()
 
     def action_export_svg(self) -> None:
         try:
