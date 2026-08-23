@@ -144,6 +144,10 @@ class RepoScreen(Screen):
         yield Static("(loading repo...)", id="repo-canvas")
         yield Footer()
 
+    def render(self):
+        """Explicit render to avoid any accidental None from internal _render."""
+        return Text("")
+
     def on_mount(self) -> None:
         try:
             self.graph = GitHubConnector(self.repo).fetch()
@@ -219,6 +223,10 @@ class MapScreen(Screen):
         yield Static("(loading map...)", id="map-canvas")
         yield Input(placeholder="/search", id="search-input")
         yield Footer()
+
+    def render(self):
+        """Explicit render to avoid any accidental None from internal _render."""
+        return Text("")
 
     def on_mount(self) -> None:
         self.store = self.app.store  # type: ignore[attr-defined]
