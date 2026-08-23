@@ -6,8 +6,8 @@ from pathlib import Path
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.screen import Screen
-from textual.widgets import Button, Footer, Header, Input, ListItem, ListView, Static
+from textual.screen import ModalScreen, Screen
+from textual.widgets import Button, Footer, Header, Input, Label, ListItem, ListView, Static
 
 from .model import Edge, Ficha, Graph, Node
 from .export import save_svg
@@ -59,6 +59,31 @@ class NavigationModel:
         return ch[0] if ch else None
 
 
+class ConstructScreen(ModalScreen[str | None]):
+    """Ask for a new map name and create it."""
+
+    BINDINGS = [("escape", "cancel", "Cancel")]
+
+    def compose(self) -> ComposeResult:
+        yield Vertical(
+            Label("New map name", id="construct-label"),
+            Input(placeholder="mi-nuevo-mapa", id="construct-input"),
+            Static("[enter] create   [esc] cancel", id="construct-hints"),
+            id="construct-dialog",
+        )
+
+    def on_mount(self) -> None:
+        self.query_one("#construct-input", Input).focus()
+
+    def action_cancel(self) -> None:
+        self.dismiss(None)
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        name = event.value.strip().replace(" ", "-")
+        if name:
+            self.dismiss(name)
+
+
 class HomeScreen(Screen):
     """Three-door home screen."""
 
@@ -95,7 +120,17 @@ class HomeScreen(Screen):
         self.app.push_screen(PlugRepoScreen())
 
     def action_construct(self) -> None:
-        self.app.push_screen(MapScreen("new"))
+        def on_name(name: str | None) -> None:
+            if not name:
+                return
+            store: MapStore = self.app.store  # type: ignore[attr-defined]
+            try:
+                store.create_seed(name)
+                self.app.push_screen(MapScreen(name))
+            except Exception as e:
+                self.notify(f"Could not create map: {e}", severity="error")
+
+        self.app.push_screen(ConstructScreen(), callback=on_name)
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         map_id = str(event.item.name)
@@ -364,7 +399,23 @@ class MapperApp(App):
     #map-canvas { width: 100%; height: 1fr; }
     #repo-canvas { width: 100%; height: 1fr; }
     #search-input { dock: bottom; }
+    ConstructScreen { align: center middle; }
+    #construct-dialog {
+        width: 50;
+        height: auto;
+        border: thick $background 80%;
+        padding: 1 2;
+        background: $surface-darken-1;
+    }
+    #construct-label { text-align: center; text-style: bold; margin-bottom: 1; }
+    #construct-hints { text-align: center; color: $text-muted; margin-top: 1; }
     """
+
+    def on_screen_resume(self, event) -> None:
+        """Refresh the map list when returning to home."""
+        if isinstance(self.screen, HomeScreen):
+            self.screen.on_mount()
+
 
     def __init__(self, workspace: Path | str):
         super().__init__()

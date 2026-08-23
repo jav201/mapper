@@ -149,6 +149,20 @@ class MapStore:
         yml_path.write_text(yml_text, encoding="utf-8")
         self._reindex(map_id, mmd_text, yml_text, graph)
 
+    def create_seed(self, map_id: str) -> Graph:
+        """Create a new map with a small demo tree so it is immediately navigable."""
+        graph = Graph()
+        root = Node(id="root", ficha=Ficha(title=map_id, meta="nuevo mapa"))
+        graph.add_node(root)
+        child_a = Node(id="n1", ficha=Ficha(title="primer hijo", meta="presiona l"))
+        child_b = Node(id="n2", ficha=Ficha(title="segundo hijo", meta="navega con j/k"))
+        graph.add_node(child_a)
+        graph.add_node(child_b)
+        graph.add_edge(Edge(parent_id="root", child_id="n1"))
+        graph.add_edge(Edge(parent_id="root", child_id="n2"))
+        self.save(map_id, graph)
+        return graph
+
     def _reindex(self, map_id: str, mmd_text: str, yml_text: str, graph: Graph) -> None:
         text_hash = self._text_hash(mmd_text, yml_text)
         conn = sqlite3.connect(self.db_path)
