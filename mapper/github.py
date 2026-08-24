@@ -1,9 +1,19 @@
-"""Read-only GitHub repo-to-map adapter via the authenticated `gh` CLI."""
+"""Read-only repo-to-map adapter: local git path, remote URL, or GitHub owner/name.
+
+Priority:
+  1. Local filesystem path that points at a git repo -> read with `git` commands.
+  2. URL (`https://`, `http://`, `git@`) -> clone to a local cache and read with `git`.
+  3. `owner/name` -> use the authenticated `gh` CLI (existing behaviour) with optional
+     local clone/cache if the repo is public and git is available.
+"""
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from datetime import datetime, timezone
+from pathlib import Path
+from urllib.parse import urlparse
 
 from .model import Edge, Ficha, Graph, Node
 
@@ -12,11 +22,178 @@ class GitHubError(Exception):
     pass
 
 
+_URL_RE = re.compile(r"^(https?://|git@).+")
+
+
+def _is_url(value: str) -> bool:
+    return bool(_URL_RE.match(value))
+
+
+def _is_local_path(value: str) -> bool:
+    p = Path(value).expanduser()
+    return p.is_dir() and (p / ".git").is_dir()
+
+
+def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
+    try:
+        return subprocess.run(
+            ["git", "-C", str(cwd)] + args,
+            capture_output=True,
+            text=True,
+            check=check,
+            encoding="utf-8",
+        )
+    except FileNotFoundError as exc:
+        raise GitHubError("git CLI not found") from exc
+
+
+def _default_branch(cwd: Path) -> str:
+    """Return the default branch name for a local repo."""
+    result = _run_git(cwd, ["symbolic-ref", "refs/remotes/origin/HEAD"], check=False)
+    if result.returncode == 0 and result.stdout:
+        return result.stdout.strip().rsplit("/", 1)[-1]
+    result = _run_git(cwd, ["rev-parse", "--abbrev-ref", "HEAD"])
+    return result.stdout.strip() or "main"
+
+
+def _local_branches(cwd: Path) -> list[str]:
+    result = _run_git(cwd, ["branch", "-a", "--format=%(refname:short)"])
+    names = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    out = []
+    seen: set[str] = set()
+    for name in names:
+        # Strip remote prefix; keep local names and the unique short remotes.
+        short = name
+        if "/" in name and not name.startswith("remotes/"):
+            short = name.split("/", 1)[1]
+        if short in seen or short == "HEAD":
+            continue
+        seen.add(short)
+        out.append(short)
+    return out
+
+
+def _ahead_behind(cwd: Path, base: str, branch: str) -> tuple[int, int]:
+    """Return (ahead, behind) for `branch` relative to `base`."""
+    result = _run_git(
+        cwd,
+        ["rev-list", "--left-right", "--count", f"{base}...{branch}"],
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout:
+        return 0, 0
+    parts = result.stdout.strip().split("\t")
+    if len(parts) != 2:
+        return 0, 0
+    try:
+        return int(parts[0]), int(parts[1])
+    except ValueError:
+        return 0, 0
+
+
+def _last_commit_info(cwd: Path, branch: str) -> dict[str, str]:
+    """Return author and date for the latest commit on branch."""
+    fmt = "%an|%aI|%s"
+    result = _run_git(cwd, ["log", "-1", f"--format={fmt}", branch], check=False)
+    info = {"author": "", "date": "", "subject": ""}
+    if result.returncode != 0 or not result.stdout:
+        return info
+    parts = result.stdout.strip().split("|", 2)
+    if len(parts) >= 3:
+        info["author"] = parts[0]
+        info["date"] = parts[1]
+        info["subject"] = parts[2]
+    return info
+
+
+def _tags(cwd: Path) -> list[str]:
+    result = _run_git(cwd, ["tag", "-l"], check=False)
+    if result.returncode != 0:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def _repo_name_from_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.path:
+        name = parsed.path.rstrip("/").rsplit("/", 1)[-1]
+        return name.removesuffix(".git")
+    return "repo"
+
+
+def _ensure_cloned(url: str, cache_dir: Path) -> Path:
+    """Clone or refresh `url` into a cache directory and return the path."""
+    name = _repo_name_from_url(url)
+    target = cache_dir / name
+    if target.exists() and (target / ".git").is_dir():
+        _run_git(target, ["fetch", "--all"], check=False)
+        return target
+    target.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        ["git", "clone", "--mirror", url, str(target)],
+        capture_output=True,
+        text=True,
+        check=False,
+        encoding="utf-8",
+    )
+    if result.returncode != 0:
+        raise GitHubError(f"could not clone {url}: {result.stderr.strip()}")
+    return target
+
+
+def _build_graph_from_git(cwd: Path, display_name: str) -> Graph:
+    """Build a repo Graph from a local git checkout."""
+    default = _default_branch(cwd)
+    branches = _local_branches(cwd)
+    tags = _tags(cwd)
+
+    graph = Graph()
+    root_meta = f"ramas {len(branches)} · tags {len(tags)} · default {default}"
+    root = Node(id=display_name, ficha=Ficha(title=display_name, meta=root_meta))
+    graph.add_node(root)
+
+    for bname in branches[:50]:
+        ahead, behind = _ahead_behind(cwd, default, bname)
+        info = _last_commit_info(cwd, bname)
+        date_str = ""
+        if info.get("date"):
+            try:
+                dt = datetime.fromisoformat(info["date"].replace("Z", "+00:00"))
+                date_str = dt.astimezone(timezone.utc).strftime("%Y-%m-%d")
+            except ValueError:
+                date_str = info["date"][:10]
+
+        state = "ok"
+        if ahead > 10 or behind > 10:
+            state = "risk"
+
+        notes = ""
+        if info.get("author"):
+            notes = f"{info['author']} {date_str}".strip()
+
+        node = Node(
+            id=bname,
+            ficha=Ficha(
+                title=bname,
+                meta=f"+{ahead}/-{behind}",
+                state=state,
+                notes=notes,
+            ),
+        )
+        graph.add_node(node)
+        graph.add_edge(Edge(parent_id=display_name, child_id=bname))
+
+    return graph
+
+
 class GitHubConnector:
     """Fetch repository metadata and return a Graph representing branches as lanes."""
 
-    def __init__(self, repo: str):
+    def __init__(self, repo: str, cache_dir: Path | str | None = None):
         self.repo = repo
+        if cache_dir is None:
+            cache_dir = Path.home() / ".cache" / "mapper" / "repos"
+        self.cache_dir = Path(cache_dir)
 
     def _gh(self, args: list[str]) -> dict | list:
         cmd = ["gh"] + args
@@ -34,7 +211,7 @@ class GitHubConnector:
             raise GitHubError("gh CLI not found") from exc
         return json.loads(result.stdout or "{}")
 
-    def fetch(self) -> Graph:
+    def _fetch_gh(self) -> Graph:
         parts = self.repo.split("/")
         if len(parts) != 2:
             raise GitHubError(f"repo must be owner/name, got {self.repo}")
@@ -105,3 +282,12 @@ class GitHubConnector:
             graph.add_edge(Edge(parent_id=self.repo, child_id=bname))
 
         return graph
+
+    def fetch(self) -> Graph:
+        if _is_local_path(self.repo):
+            cwd = Path(self.repo).expanduser().resolve()
+            return _build_graph_from_git(cwd, cwd.name)
+        if _is_url(self.repo):
+            cwd = _ensure_cloned(self.repo, self.cache_dir)
+            return _build_graph_from_git(cwd, _repo_name_from_url(self.repo))
+        return self._fetch_gh()

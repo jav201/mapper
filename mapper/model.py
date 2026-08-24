@@ -62,10 +62,12 @@ class Document:
     """A document template attached to a node or inherited from a parent."""
 
     name: str
-    source: str
+    source: str = ""
     tags: dict[str, str] = field(default_factory=dict)
     inherited: dict[str, str] = field(default_factory=dict)
     template: bool = False
+    path: str = ""  # original office file path, relative to workspace
+    kind: str = "text"  # text | docx | pptx | xlsx
 
 
 @dataclass
@@ -104,6 +106,8 @@ class Graph:
             tags=merged_tags,
             inherited=merged_inherited,
             template=doc.template,
+            path=doc.path,
+            kind=doc.kind,
         )
 
     def add_node(self, node: Node) -> None:
