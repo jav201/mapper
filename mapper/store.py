@@ -16,6 +16,20 @@ class MapStoreError(Exception):
     pass
 
 
+TEMPLATES: dict[str, dict[str, Any]] = {
+    "legacy-audit": {
+        "schema": [
+            {"key": "D", "label": "documento", "required": True, "kind": "text"},
+            {"key": "O", "label": "dueño", "required": True, "kind": "text"},
+            {"key": "E", "label": "estado", "required": True, "kind": "text"},
+            {"key": "C", "label": "criticidad", "required": False, "kind": "text"},
+            {"key": "N", "label": "notas", "required": False, "kind": "text"},
+        ],
+        "seed_title": "auditoría legacy",
+    }
+}
+
+
 class MapStore:
     """The map lives as `.mmd` + `_nodos.yml`; `mapper.db` is rebuilt from them."""
 
@@ -181,6 +195,30 @@ class MapStore:
         graph.add_node(child_b)
         graph.add_edge(Edge(parent_id="root", child_id="n1"))
         graph.add_edge(Edge(parent_id="root", child_id="n2"))
+        self.save(map_id, graph)
+        return graph
+
+    def create_from_template(self, map_id: str, template_id: str) -> Graph:
+        """Create a new map seeded from a template definition."""
+        template = TEMPLATES.get(template_id)
+        if template is None:
+            raise MapStoreError(f"Template not found: {template_id}")
+
+        graph = Graph()
+        graph.schema = [
+            SchemaField(
+                key=f.get("key", ""),
+                label=f.get("label", ""),
+                required=f.get("required", False),
+                kind=f.get("kind", "text"),
+            )
+            for f in template.get("schema", [])
+        ]
+        root = Node(
+            id="root",
+            ficha=Ficha(title=template.get("seed_title", map_id)),
+        )
+        graph.add_node(root)
         self.save(map_id, graph)
         return graph
 

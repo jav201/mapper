@@ -10,16 +10,11 @@ from mapper.canvas import Canvas
 from mapper.model import Graph
 
 
-# Achromatic branch tints only — KMBlue is reserved for selection/interactivity.
-_HUES = (
+# Achromatic branch greys — KMBlue is reserved for the active path.
+_GREYS = (
     darkside.STEP,
-    "#3a3a3a",
-    "#4a4a4a",
     darkside.MUT,
-    "#5a5a5a",
-    "#666666",
-    darkside.INK,
-    "#2e2e2e",
+    darkside.WORDMARK,
 )
 
 
@@ -79,29 +74,43 @@ class RadialRenderer:
         acc = -span / 2
         for i, ch in enumerate(children):
             frac = _leaves(graph, ch) / total
-            branch_of[ch] = _HUES[i % len(_HUES)]
+            branch_of[ch] = _GREYS[i % len(_GREYS)]
             place(ch, 1, acc, acc + frac * span)
             acc += frac * span
 
-        # Propagate branch hues to descendants
-        def tag(nid: str, hue: str) -> None:
-            branch_of[nid] = hue
+        # Compute active path from root to selected node.
+        on_path: set[str] = set()
+        if selected_id and selected_id in graph.nodes:
+            current = selected_id
+            while current is not None:
+                on_path.add(current)
+                current = graph.parent_of(current)
+
+        # Assign an achromatic grey tint to each top-level branch.
+        for i, ch in enumerate(children):
+            branch_of[ch] = _GREYS[i % len(_GREYS)]
+
+        def tag(nid: str, grey: str) -> None:
+            branch_of[nid] = grey
             for c in graph.children_of(nid):
-                tag(c, hue)
+                tag(c, grey)
 
         for i, ch in enumerate(children):
-            tag(ch, _HUES[i % len(_HUES)])
+            tag(ch, _GREYS[i % len(_GREYS)])
         branch_of[graph.root_id] = darkside.INK
 
-        # Draw edges as simple lines in dot space
+        # Draw edges as simple lines in dot space.
         for nid in graph.nodes:
             parent = graph.parent_of(nid)
             if parent is None or parent not in pos or nid not in pos:
                 continue
             x0, y0 = pos[parent]
             x1, y1 = pos[nid]
-            hue = branch_of.get(nid, "frame")
-            # Draw a few dots along the line
+            if nid in on_path and parent in on_path:
+                hue = darkside.ACCENT
+            else:
+                hue = branch_of.get(nid, darkside.MUT)
+            # Draw a few dots along the line.
             steps = max(1, int(math.hypot(x1 - x0, y1 - y0) * 4))
             for s in range(steps + 1):
                 t = s / steps
@@ -109,7 +118,7 @@ class RadialRenderer:
                 dy = y0 + (y1 - y0) * t
                 cv.dots[(int(dx * 2), int(dy * 4))] = hue
 
-        # Draw nodes as pills
+        # Draw nodes as pills.
         for nid in graph.nodes:
             if nid not in pos:
                 continue
@@ -129,12 +138,16 @@ class RadialRenderer:
                     style = block
                 elif j == 0:
                     style = ""
+                elif nid in on_path:
+                    style = darkside.ACCENT
                 else:
-                    style = branch_of.get(nid, darkside.INK)
+                    style = branch_of.get(nid, darkside.MUT)
                 cv.put(x + j, y, ch, style)
             marker = "◆" if nid == graph.root_id else "●"
             if sel:
                 marker_style = block
+            elif nid in on_path:
+                marker_style = darkside.ACCENT
             elif nid == graph.root_id:
                 marker_style = darkside.INK
             else:

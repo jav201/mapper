@@ -44,6 +44,11 @@ class Node:
     id: str
     ficha: Ficha = field(default_factory=Ficha)
 
+    def linked_map_id(self) -> str | None:
+        """Return the target map id if this node links to another map."""
+        value = self.ficha.fields.get("map", "").strip()
+        return value if value else None
+
 
 @dataclass(frozen=True)
 class Edge:

@@ -111,6 +111,22 @@ Mermaid diagrams.
 - 2026-08-21 · Phase 6 close complete: postmortem and traceability matrix
   sealed; batch merged to `master`.
 
+- 2026-08-18 · darkside round (operator): the UI speaks DARKSIDE — achromatic,
+  KMBlue only on interactive affordances, depth by grey-steps never borders,
+  lowercase, computed moon doodle, semantic severity only, solid selection
+  (design decision D-1). Added US-015 empty states · US-016 ctrl+p palette ·
+  US-017 help surface · US-018 resume-last · US-019 undo — all READY, 19 US total.
+
+- 2026-08-18 · improvements round (operator, "implementar todas"): D-A radial
+  darkside render; US-020..023 READY (23 US total); HANDOFF-improvements.md.
+  Note: another session already implemented the darkside redesign into
+  production (`mapper/darkside.py`, `mapper/keymap.py`, screens) — commit
+  4cda8a9; the prototypes now read from those shared modules.
+
+- 2026-08-18 · design triplet (operator): D-A radial active-path + D-B motion
+  flipbook + D-C home identity, all rendered into prototypes/ui_darkside/out/;
+  the design part now lives in HANDOFF-improvements.md.
+
 ## Test ledger
 
 Empty until Phase 3.

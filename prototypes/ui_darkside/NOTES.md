@@ -40,6 +40,15 @@ palette. Regenerate: `python prototypes/ui_darkside/generate.py`.
   precedent).
 - **D-1** (§6.2): the darkside directive recorded as a batch design decision.
 
+## The radial map in darkside (D-A — added in the improvements round)
+
+Branch hues are ANTI-darkside (colour on passive data). The language's
+answer, rendered in `ds-mental.svg`: the whole map in grey steps (`#4a4a4a`
+trunk, `#262626` leaves), and ONLY the active path (root → selected node) in
+KMBlue, the selected node as the solid block. The production
+`mapper/views/radial.py` propagates branch hues — that is the violation this
+render fixes; port the active-path treatment into `RadialRenderer`.
+
 ## Verdict (placeholder — fill after operator review)
 
 - …
