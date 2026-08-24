@@ -34,10 +34,10 @@ def test_step_meter_zero():
 def test_tab_strip_has_tabs():
     text = darkside.tab_strip("c")
     plain = text.plain
-    assert "consult" in plain
+    assert "consultar" in plain
     assert "repo" in plain
-    assert "construct" in plain
-    assert "factory" in plain
+    assert "construir" in plain
+    assert "fábrica" in plain
     assert "mapper" in plain
 
 

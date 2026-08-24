@@ -37,6 +37,7 @@ def _fit(s: str, width: int) -> str:
 
 def _tree_layout(graph: Graph, card_w: int, gap: int = 3) -> dict[str, tuple[int, int]]:
     """In-order leaf slots; internal nodes centred over their children.
+    Handles forests (disconnected trees) by laying out each root tree side-by-side.
     Returns {id: (cx_cells, level)}.
     """
     pos: dict[str, tuple[float, int]] = {}
@@ -53,9 +54,20 @@ def _tree_layout(graph: Graph, card_w: int, gap: int = 3) -> dict[str, tuple[int
         xs = [pos[cid][0] for cid in children]
         pos[nid] = ((xs[0] + xs[-1]) / 2, depth)
 
-    if graph.root_id is None:
+    roots = [nid for nid in graph.nodes if graph.parent_of(nid) is None]
+    if not roots:
+        # Fallback to the declared root if the graph has no obvious roots.
+        roots = [graph.root_id] if graph.root_id in graph.nodes else []
+    if not roots:
         return {}
-    walk(graph.root_id, 0)
+
+    for root in roots:
+        start_slot = slot[0]
+        walk(root, 0)
+        # Add a gap between trees in the same forest.
+        if slot[0] > start_slot:
+            slot[0] += 1
+
     step = card_w + gap
     return {nid: (card_w // 2 + int(cx * step), lv) for nid, (cx, lv) in pos.items()}
 
@@ -215,7 +227,7 @@ class LayeredRenderer:
         lines.append(Text("─" * avail, style=darkside.STEP))
         if sel is not None:
             strip = Text()
-            strip.append("▸ ", style=darkside.ACCENT)
+            strip.append("▸ ", style=darkside.INK)
             strip.append(sel.ficha.title, style="bold")
             strip.append(f"   {sel.ficha.meta}", style=darkside.MUT)
             if legacy:

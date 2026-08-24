@@ -18,8 +18,8 @@ class HelpScreen(ModalScreen[None]):
     """Modal help overlay with the full grouped keymap."""
 
     BINDINGS = [
-        ("escape", "dismiss", "Close"),
-        ("q", "dismiss", "Close"),
+        ("escape", "dismiss", "Cerrar"),
+        ("q", "dismiss", "Cerrar"),
     ]
 
     CSS = """
@@ -48,7 +48,7 @@ class HelpScreen(ModalScreen[None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("atalhos", id="help-title"),
+            Static("atajos", id="help-title"),
             Static(self._render_keymap(), id="help-content"),
             id="help-dialog",
         )
@@ -60,8 +60,8 @@ class HelpScreen(ModalScreen[None]):
         ):
             parts.append((f"\n{escape(group)}\n", darkside.MUT))
             for binding in bindings:
-                parts.append((f"  {escape(binding.key)}  ", darkside.ACCENT))
-                parts.append((f"{escape(binding.action)}\n", darkside.INK))
+                parts.append((f"  {escape(binding.key)}  ", darkside.INK))
+                parts.append((f"{escape(binding.action)}\n", darkside.MUT))
         return Text.assemble(*parts)
 
     def action_dismiss(self) -> None:

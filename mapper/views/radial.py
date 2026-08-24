@@ -10,11 +10,13 @@ from mapper.canvas import Canvas
 from mapper.model import Graph
 
 
-# Achromatic branch greys — KMBlue is reserved for the active path.
+# Achromatic branch tints — KMBlue is reserved for the active path.
+# Avoid STEP/WORDMARK here because they are background greys and would be
+# nearly invisible as text on the black canvas.
 _GREYS = (
-    darkside.STEP,
+    darkside.INK,
+    "#a3a3a3",
     darkside.MUT,
-    darkside.WORDMARK,
 )
 
 

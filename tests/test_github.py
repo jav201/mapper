@@ -63,3 +63,20 @@ def test_fetch_local_repo_tags(tmp_path):
     graph = GitHubConnector(str(repo)).fetch()
     assert graph.root_id == "tagged"
     assert "tags 1" in graph.nodes["tagged"].ficha.meta
+
+
+def test_fetch_keeps_slash_in_branch_names(tmp_path):
+    repo = tmp_path / "slashed"
+    repo.mkdir()
+    _git_init_commit(repo, branch="master")
+
+    subprocess.run(["git", "checkout", "-b", "feature/login", "-q"], cwd=repo, check=True)
+    (repo / "login.txt").write_text("login", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-m", "login", "-q"], cwd=repo, check=True)
+    subprocess.run(["git", "checkout", "master", "-q"], cwd=repo, check=True)
+
+    graph = GitHubConnector(str(repo)).fetch()
+    assert "feature/login" in graph.nodes
+    # Make sure the category was not truncated away.
+    assert "login" not in graph.nodes

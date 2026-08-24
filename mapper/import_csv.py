@@ -22,7 +22,8 @@ def preview_csv(path: Path) -> Graph:
     """Return a Graph built from *path* (CSV or TSV).
 
     Columns:
-      - ``id`` (required) becomes the node id.
+      - ``id`` becomes the node id. When empty, a slug of ``title`` or an
+        auto-generated ``fila-N`` id is used so the row is not dropped.
       - ``title`` becomes the node title; falls back to id.
       - ``parent`` is an id reference to the parent row.
       - ``depth`` is an integer indentation level used when ``parent`` is absent.
@@ -46,13 +47,15 @@ def preview_csv(path: Path) -> Graph:
     last_at_depth: dict[int, str] = {}
 
     # First pass: create nodes so forward parent references resolve.
+    auto_counter = 0
     for row in reader:
         raw_id = (row.get("id") or "").strip()
+        title = (row.get("title") or "").strip()
         if not raw_id:
-            continue
+            auto_counter += 1
+            raw_id = title or f"fila-{auto_counter}"
         nid = slugify(raw_id)
 
-        title = (row.get("title") or "").strip()
         title = title if title else raw_id
 
         parent_id = slugify((row.get("parent") or "").strip())

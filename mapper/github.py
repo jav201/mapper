@@ -62,11 +62,14 @@ def _local_branches(cwd: Path) -> list[str]:
     out = []
     seen: set[str] = set()
     for name in names:
-        # Strip remote prefix; keep local names and the unique short remotes.
+        if name == "HEAD":
+            continue
+        # Keep the full branch name. Strip only the literal "remotes/" bookkeeping
+        # prefix; keep "origin/feature/x" intact so category branches survive.
         short = name
-        if "/" in name and not name.startswith("remotes/"):
-            short = name.split("/", 1)[1]
-        if short in seen or short == "HEAD":
+        if short.startswith("remotes/"):
+            short = short[len("remotes/"):]
+        if short in seen:
             continue
         seen.add(short)
         out.append(short)

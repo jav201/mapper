@@ -44,3 +44,14 @@ def test_preview_csv_empty_file(tmp_path):
     path.write_text("", encoding="utf-8")
     graph = preview_csv(path)
     assert graph.nodes == {}
+
+
+def test_preview_csv_generates_ids_for_empty_id_column(tmp_path):
+    path = tmp_path / "nodes.csv"
+    path.write_text(
+        "id,title,parent\nroot,raíz,\n,sin id,root\n,otro,root\n", encoding="utf-8"
+    )
+    graph = preview_csv(path)
+    assert graph.parent_of("sin-id") == "root"
+    assert graph.parent_of("otro") == "root"
+    assert len(graph.nodes) == 3

@@ -41,7 +41,31 @@ class MapStore:
     def _text_hash(self, mmd_text: str, yml_text: str) -> str:
         return hashlib.sha256((mmd_text + yml_text).encode()).hexdigest()[:16]
 
+    def _schema_columns(self, conn: sqlite3.Connection, table: str) -> set[str]:
+        return {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+
+    def _needs_recreate(self, conn: sqlite3.Connection) -> bool:
+        """Drop and recreate index tables when the on-disk schema is stale."""
+        required = {
+            "nodes": {"map_id", "id", "parent_id", "title", "state", "meta", "notes"},
+            "fields": {"map_id", "node_id", "key", "value"},
+            "attachments": {"map_id", "node_id", "kind", "path", "caption"},
+            "edges": {"map_id", "parent_id", "child_id", "label"},
+        }
+        for table, cols in required.items():
+            if not cols <= self._schema_columns(conn, table):
+                return True
+        return False
+
     def _init_db(self, conn: sqlite3.Connection) -> None:
+        if self._needs_recreate(conn):
+            conn.executescript(
+                "DROP TABLE IF EXISTS edges;"
+                "DROP TABLE IF EXISTS attachments;"
+                "DROP TABLE IF EXISTS fields;"
+                "DROP TABLE IF EXISTS nodes;"
+                "DROP TABLE IF EXISTS meta;"
+            )
         conn.executescript(
             """
             CREATE TABLE IF NOT EXISTS meta (
@@ -49,31 +73,39 @@ class MapStore:
                 value TEXT
             );
             CREATE TABLE IF NOT EXISTS nodes (
-                id TEXT PRIMARY KEY,
                 map_id TEXT NOT NULL,
+                id TEXT NOT NULL,
                 parent_id TEXT,
                 title TEXT,
                 state TEXT,
                 meta TEXT,
-                notes TEXT
+                notes TEXT,
+                PRIMARY KEY (map_id, id)
             );
             CREATE TABLE IF NOT EXISTS fields (
+                map_id TEXT NOT NULL,
                 node_id TEXT NOT NULL,
                 key TEXT NOT NULL,
                 value TEXT,
-                PRIMARY KEY (node_id, key)
+                PRIMARY KEY (map_id, node_id, key),
+                FOREIGN KEY (map_id, node_id) REFERENCES nodes(map_id, id)
             );
             CREATE TABLE IF NOT EXISTS attachments (
+                map_id TEXT NOT NULL,
                 node_id TEXT NOT NULL,
                 kind TEXT NOT NULL,
                 path TEXT NOT NULL,
-                caption TEXT
+                caption TEXT,
+                FOREIGN KEY (map_id, node_id) REFERENCES nodes(map_id, id)
             );
             CREATE TABLE IF NOT EXISTS edges (
+                map_id TEXT NOT NULL,
                 parent_id TEXT NOT NULL,
                 child_id TEXT NOT NULL,
                 label TEXT,
-                PRIMARY KEY (parent_id, child_id)
+                PRIMARY KEY (map_id, parent_id, child_id),
+                FOREIGN KEY (map_id, parent_id) REFERENCES nodes(map_id, id),
+                FOREIGN KEY (map_id, child_id) REFERENCES nodes(map_id, id)
             );
             """
         )
@@ -176,6 +208,12 @@ class MapStore:
         self._reindex(map_id, mmd_text, yml_text, graph)
         return graph
 
+    def _atomic_write(self, path: Path, text: str) -> None:
+        """Write `text` to `path` atomically via a temp file + rename."""
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(text, encoding="utf-8")
+        tmp.replace(path)
+
     def save(self, map_id: str, graph: Graph) -> None:
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
@@ -184,8 +222,8 @@ class MapStore:
         mmd_text = dump(graph)
         sidecar = self._build_sidecar(graph)
         yml_text = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
-        mmd_path.write_text(mmd_text, encoding="utf-8")
-        yml_path.write_text(yml_text, encoding="utf-8")
+        self._atomic_write(mmd_path, mmd_text)
+        self._atomic_write(yml_path, yml_text)
         self._reindex(map_id, mmd_text, yml_text, graph)
 
     def create_seed(self, map_id: str) -> Graph:
@@ -249,40 +287,42 @@ class MapStore:
 
     def _reindex(self, map_id: str, mmd_text: str, yml_text: str, graph: Graph) -> None:
         text_hash = self._text_hash(mmd_text, yml_text)
+        hash_key = f"hash:{map_id}"
         conn = sqlite3.connect(self.db_path)
         try:
             self._init_db(conn)
-            stored = conn.execute("SELECT value FROM meta WHERE key='hash'").fetchone()
+            stored = conn.execute("SELECT value FROM meta WHERE key=?", (hash_key,)).fetchone()
             if stored and stored[0] == text_hash:
                 return
+            # Delete child rows before parent rows to avoid FK violations.
+            conn.execute("DELETE FROM edges WHERE map_id=?", (map_id,))
+            conn.execute("DELETE FROM attachments WHERE map_id=?", (map_id,))
+            conn.execute("DELETE FROM fields WHERE map_id=?", (map_id,))
             conn.execute("DELETE FROM nodes WHERE map_id=?", (map_id,))
-            conn.execute("DELETE FROM fields WHERE node_id IN (SELECT id FROM nodes WHERE map_id=?)", (map_id,))
-            conn.execute("DELETE FROM attachments WHERE node_id IN (SELECT id FROM nodes WHERE map_id=?)", (map_id,))
-            conn.execute("DELETE FROM edges WHERE parent_id IN (SELECT id FROM nodes WHERE map_id=?)", (map_id,))
             for node in graph.nodes.values():
                 parent = graph.parent_of(node.id)
                 conn.execute(
-                    "INSERT OR REPLACE INTO nodes (id, map_id, parent_id, title, state, meta, notes) VALUES (?,?,?,?,?,?,?)",
-                    (node.id, map_id, parent, node.ficha.title, node.ficha.state, node.ficha.meta, node.ficha.notes),
+                    "INSERT OR REPLACE INTO nodes (map_id, id, parent_id, title, state, meta, notes) VALUES (?,?,?,?,?,?,?)",
+                    (map_id, node.id, parent, node.ficha.title, node.ficha.state, node.ficha.meta, node.ficha.notes),
                 )
                 for k, v in node.ficha.fields.items():
                     conn.execute(
-                        "INSERT OR REPLACE INTO fields (node_id, key, value) VALUES (?,?,?)",
-                        (node.id, k, v),
+                        "INSERT OR REPLACE INTO fields (map_id, node_id, key, value) VALUES (?,?,?,?)",
+                        (map_id, node.id, k, v),
                     )
                 for a in node.ficha.attachments:
                     conn.execute(
-                        "INSERT INTO attachments (node_id, kind, path, caption) VALUES (?,?,?,?)",
-                        (node.id, a.kind, a.path, a.caption),
+                        "INSERT INTO attachments (map_id, node_id, kind, path, caption) VALUES (?,?,?,?,?)",
+                        (map_id, node.id, a.kind, a.path, a.caption),
                     )
             for edge in graph.edges:
                 conn.execute(
-                    "INSERT OR REPLACE INTO edges (parent_id, child_id, label) VALUES (?,?,?)",
-                    (edge.parent_id, edge.child_id, edge.label),
+                    "INSERT OR REPLACE INTO edges (map_id, parent_id, child_id, label) VALUES (?,?,?,?)",
+                    (map_id, edge.parent_id, edge.child_id, edge.label),
                 )
             conn.execute(
                 "INSERT OR REPLACE INTO meta (key, value) VALUES (?,?)",
-                ("hash", text_hash),
+                (hash_key, text_hash),
             )
             conn.commit()
         finally:
