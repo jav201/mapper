@@ -681,7 +681,8 @@ class RepoScreen(Screen):
         canvas = self.query_one("#repo-canvas", Static)
         canvas.update("(cargando repo...)")
         try:
-            self.graph = await self.fetch_graph()
+            worker = self.fetch_graph()
+            self.graph = await worker.wait()
         except GitHubError as exc:
             self.notify(str(exc), severity="error")
             self.graph = Graph()
