@@ -16,6 +16,16 @@ _MERMAID_EDGE = re.compile(
 _MERMAID_NODE = re.compile(r"([\w-]+)(?:\[([^\]]*)\])?")
 
 
+def _escape_mermaid(value: str) -> str:
+    """Escape characters that break mermaid node/edge labels."""
+    return value.replace("]", "#93;").replace("|", "#124;")
+
+
+def _unescape_mermaid(value: str) -> str:
+    """Restore characters escaped by `_escape_mermaid`."""
+    return value.replace("#93;", "]").replace("#124;", "|")
+
+
 def slugify(value: str) -> str:
     """Return a safe mermaid id: lowercase, hyphens/underscores allowed."""
     value = value.lower().strip()
@@ -39,6 +49,7 @@ def parse(src: str) -> Graph:
     nodes: dict[str, Node] = {}
     children_by_parent: dict[str, list[str]] = {}
     child_to_parent: dict[str, str] = {}
+    edge_labels: dict[tuple[str, str], str] = {}
     root_id: str | None = None
 
     for line_no, raw in enumerate(src.splitlines(), 1):
@@ -51,14 +62,16 @@ def parse(src: str) -> Graph:
         m = _MERMAID_EDGE.search(line)
         if m:
             pid, plabel, edge_label, cid, clabel = m.groups()
-            _ensure_node(nodes, pid, plabel)
-            _ensure_node(nodes, cid, clabel)
+            _ensure_node(nodes, pid, _unescape_mermaid(plabel) if plabel else plabel)
+            _ensure_node(nodes, cid, _unescape_mermaid(clabel) if clabel else clabel)
             if cid in child_to_parent:
                 raise ParseError(
                     f"Line {line_no}: node '{cid}' has multiple parents (out of MVP scope)"
                 )
             child_to_parent[cid] = pid
             children_by_parent.setdefault(pid, []).append(cid)
+            if edge_label:
+                edge_labels[(pid, cid)] = _unescape_mermaid(edge_label)
             if root_id is None:
                 root_id = pid
             continue
@@ -66,7 +79,7 @@ def parse(src: str) -> Graph:
         nm = _MERMAID_NODE.fullmatch(line)
         if nm:
             nid, label = nm.groups()
-            _ensure_node(nodes, nid, label)
+            _ensure_node(nodes, nid, _unescape_mermaid(label) if label else label)
             if root_id is None:
                 root_id = nid
             continue
@@ -88,7 +101,8 @@ def parse(src: str) -> Graph:
     edges: list[Edge] = []
     for pid, cids in children_by_parent.items():
         for cid in cids:
-            edges.append(Edge(parent_id=pid, child_id=cid, label=""))
+            label = edge_labels.get((pid, cid), "")
+            edges.append(Edge(parent_id=pid, child_id=cid, label=label))
 
     graph = Graph(nodes=nodes, edges=edges, root_id=root_id)
     return graph
@@ -103,13 +117,13 @@ def dump(graph: Graph) -> str:
         c = graph.nodes.get(edge.child_id)
         if p is None or c is None:
             continue
-        plabel = p.ficha.title if p.ficha.title and p.ficha.title != p.id else ""
-        clabel = c.ficha.title if c.ficha.title and c.ficha.title != c.id else ""
+        plabel = _escape_mermaid(p.ficha.title) if p.ficha.title and p.ficha.title != p.id else ""
+        clabel = _escape_mermaid(c.ficha.title) if c.ficha.title and c.ficha.title != c.id else ""
         left = f"{p.id}[{plabel}]" if plabel else p.id
         right = f"{c.id}[{clabel}]" if clabel else c.id
         arrow = " --> "
         if edge.label:
-            arrow = f" -->|{edge.label}| "
+            arrow = f" -->|{_escape_mermaid(edge.label)}| "
         line = f"    {left}{arrow}{right}"
         if line not in emitted:
             lines.append(line)
@@ -117,7 +131,7 @@ def dump(graph: Graph) -> str:
     # Emit orphan nodes (no edges) so they are not lost
     for node in graph.nodes.values():
         if not any(e.parent_id == node.id or e.child_id == node.id for e in graph.edges):
-            label = node.ficha.title if node.ficha.title and node.ficha.title != node.id else ""
+            label = _escape_mermaid(node.ficha.title) if node.ficha.title and node.ficha.title != node.id else ""
             line = f"    {node.id}[{label}]" if label else f"    {node.id}"
             if line not in emitted:
                 lines.append(line)

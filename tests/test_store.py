@@ -52,3 +52,31 @@ def test_store_create_from_template(tmp_store):
 def test_store_create_from_template_unknown(tmp_store):
     with pytest.raises(MapStoreError):
         tmp_store.create_from_template("x", "no-such-template")
+
+
+def test_store_isolates_maps_with_same_node_ids(tmp_store):
+    """Two maps with the same node id must not collide in the index."""
+    g1 = Graph()
+    g1.add_node(Node(id="root", ficha=Ficha(title="Mapa Uno")))
+    g2 = Graph()
+    g2.add_node(Node(id="root", ficha=Ficha(title="Mapa Dos")))
+
+    tmp_store.save("m1", g1)
+    tmp_store.save("m2", g2)
+
+    assert tmp_store.load("m1").nodes["root"].ficha.title == "Mapa Uno"
+    assert tmp_store.load("m2").nodes["root"].ficha.title == "Mapa Dos"
+
+
+def test_store_atomic_save(tmp_store):
+    """Save should leave valid files even if interrupted (atomic via temp+rename)."""
+    g = Graph()
+    g.add_node(Node(id="root", ficha=Ficha(title="Atomico")))
+    tmp_store.save("atomic", g)
+
+    mmd = tmp_store.workspace / "atomic.mmd"
+    yml = tmp_store.workspace / "atomic_nodos.yml"
+    assert mmd.exists()
+    assert yml.exists()
+    # No stray temp files should remain.
+    assert not list(tmp_store.workspace.glob("atomic*.tmp"))

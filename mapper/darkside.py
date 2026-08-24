@@ -48,13 +48,13 @@ def moon(d: date) -> tuple[str, str]:
 
 
 # Tab strip ----------------------------------------------------------------
-def tab_strip(active: str, crumb: list[str] | None = None) -> Text:
+def tab_strip(active: str, crumb: list[str] | None = None, width: int = 0) -> Text:
     """Render the darkside tab strip."""
     tabs: list[tuple[str, str]] = [
-        ("c", "consult"),
+        ("c", "consultar"),
         ("p", "repo"),
-        ("n", "construct"),
-        ("f", "factory"),
+        ("n", "construir"),
+        ("f", "fábrica"),
     ]
     pieces: list[tuple[str, str]] = []
     for key, label in tabs:
@@ -69,8 +69,13 @@ def tab_strip(active: str, crumb: list[str] | None = None) -> Text:
 
     # Right-side moon + wordmark.
     glyph, _ = moon(date.today())
-    pieces.append(("", ""))  # spacer handled below
-    pieces.append((f" {glyph} mapper", f"{WORDMARK}"))
+    wordmark = f" {glyph} mapper"
+    # Use the available width to push the wordmark to the right.
+    left_text = Text.assemble(*pieces)
+    target_width = max(width, left_text.cell_len + len(wordmark) + 2)
+    spacer_width = max(1, target_width - left_text.cell_len - len(wordmark))
+    pieces.append((" " * spacer_width, ""))
+    pieces.append((wordmark, f"{WORDMARK}"))
 
     line = Text.assemble(*pieces)
 
@@ -121,14 +126,14 @@ def keybar(groups: Sequence[tuple[str, Sequence[tuple[str, str]]]], width: int =
 # Hint line ----------------------------------------------------------------
 def hint_line(text: str, key: str | None = None) -> Text:
     """Render a next-step hint line."""
-    parts: list[tuple[str, str]] = [("siguiente ▸ ", STEP), (escape(text), MUT)]
+    parts: list[tuple[str, str]] = [("siguiente ▸ ", MUT), (escape(text), MUT)]
     if key:
-        parts.append((f" {key}", ACCENT))
+        parts.append((f" {key}", INK))
     return Text.assemble(*parts)
 
 
 # Step meter ---------------------------------------------------------------
-def step_meter(filled: int, total: int, accent_current: bool = True) -> Text:
+def step_meter(filled: int, total: int, accent_current: bool = False) -> Text:
     """Render a step-meter as contiguous blocks."""
     if total <= 0:
         return Text("")
@@ -137,7 +142,7 @@ def step_meter(filled: int, total: int, accent_current: bool = True) -> Text:
         if i < filled:
             parts.append(("▰", INK))
         elif accent_current and i == filled:
-            parts.append(("▱", ACCENT))
+            parts.append(("▱", INK))
         else:
             parts.append(("▱", STEP))
     return Text.assemble(*parts)

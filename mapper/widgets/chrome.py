@@ -18,9 +18,12 @@ class TabStrip(Static):
         self.crumb = crumb
         self.update(darkside.tab_strip(active, crumb))
 
+    def on_resize(self) -> None:
+        self.update(darkside.tab_strip(self.active, self.crumb, width=self.size.width))
+
     def set_crumb(self, crumb: list[str] | None) -> None:
         self.crumb = crumb
-        self.update(darkside.tab_strip(self.active, crumb))
+        self.update(darkside.tab_strip(self.active, crumb, width=self.size.width))
 
 
 class KeyBar(Static):

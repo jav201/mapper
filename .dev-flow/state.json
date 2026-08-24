@@ -1,26 +1,31 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-08-24-fix-batch",
-  "batch_objective": "Mapper fix batch — address HIGH data-loss and crash findings from REVIEW-2026-08-18.md: hyphenated ids, focus+save data loss, ctrl+p palette dispatch, export SVG crash, office fragmented tags.",
+  "batch_id": "2026-08-24-medlow-batch",
+  "batch_objective": "Mapper MED/LOW batch — address remaining findings from REVIEW-2026-08-18.md: resume/undo/home refresh, keymap consistency, editor preview, store indexing, github branch names, UI polish, and robustness fixes.",
   "mode": "core",
   "mode_history": [
     {
       "batch_id": "2026-08-18-batch-01",
       "mode": "full",
       "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-fix-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
     }
   ],
   "current_phase": 6,
-  "phase_status": "complete",
+  "phase_status": "closed",
   "iterations_per_phase": {
-    "0": 1,
+    "0": 2,
     "1": 0,
     "2": 0,
     "3": 0,
-    "4": 0,
-    "5": 0,
-    "6": 0
+    "4": 1,
+    "5": 1,
+    "6": 1
   },
   "artifacts": {
     "requirements": ".dev-flow/01-requirements.md",
@@ -157,6 +162,26 @@
       "date": "2026-08-24",
       "phase": 6,
       "decision": "Phase 6 fix batch close complete: dev-flow state.json updated; all HIGH fixes committed and merged to master; MED/LOW items remain in backlog for next batch."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "MED/LOW batch kickoff (operator: 'Continua hasta tener la app con todos los cambios planteados'). New batch 2026-08-24-medlow-batch in mode=core; scope = MED/LOW stack from REVIEW-2026-08-18.md + regression tests."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 4,
+      "decision": "Phase 4 MED/LOW implementation complete: store._reindex composite PK + per-map hash + atomic save + schema migration; github.py full branch names + async RepoScreen fetch; mermaid escape/unescape for ] and | including edge-label round-trip; layered forest layout; FactoryScreen persist on edit/import + template-suffix generation; radial greys switched to readable text tints; passive blue removed from hint/step/palette/editor/help; wordmark right-aligned via width-aware spacer; UI labels internationalized to Spanish; MapScreen esc back from linked maps; root-archive confirmation modal; CSV import assigns auto-ids; motion pulse added to MapScreen and ImportPreviewScreen."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 5,
+      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 67 passed; regression tests added for store isolation/atomic save, mermaid escapes, github slash branch names, CSV auto-ids, layered forest layout."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 6,
+      "decision": "Phase 6 MED/LOW batch close complete: dev-flow state.json updated; all MED/LOW fixes committed and merged to master."
     }
   ],
   "standing_authorization": {

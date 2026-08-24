@@ -62,16 +62,16 @@ class FactoryScreen(Screen):
     """Factory mode: resolve documents against a process tree."""
 
     BINDINGS = [
-        ("j", "next_sibling", "Next"),
-        ("k", "prev_sibling", "Prev"),
-        ("h", "parent", "Parent"),
-        ("l", "child", "Child"),
-        ("d", "edit_doc", "Edit doc"),
-        ("i", "import_office", "Import office"),
-        ("g", "generate_office", "Generate"),
-        ("q", "home", "Home"),
-        ("ctrl+p", "palette", "Palette"),
-        ("?", "help", "Help"),
+        ("j", "next_sibling", "Siguiente"),
+        ("k", "prev_sibling", "Anterior"),
+        ("h", "parent", "Padre"),
+        ("l", "child", "Hijo"),
+        ("d", "edit_doc", "Editar doc"),
+        ("i", "import_office", "Importar office"),
+        ("g", "generate_office", "Generar"),
+        ("q", "home", "Inicio"),
+        ("ctrl+p", "palette", "Paleta"),
+        ("?", "help", "Ayuda"),
     ]
 
     CSS = """
@@ -108,10 +108,12 @@ class FactoryScreen(Screen):
         process_name: str = "proceso",
         node_id: str | None = None,
         document_name: str | None = None,
+        map_id: str | None = None,
     ) -> None:
         super().__init__()
         self.graph = graph
         self.process_name = process_name
+        self.map_id = map_id
         self.nav = _Nav(graph)
         if node_id is not None and node_id in graph.nodes:
             self.nav.cursor = node_id
@@ -128,6 +130,15 @@ class FactoryScreen(Screen):
 
     def on_mount(self) -> None:
         self._refresh()
+
+    def _persist(self) -> None:
+        """Persist graph changes to disk when we belong to a saved map."""
+        if not self.map_id:
+            return
+        store = getattr(self.app, "store", None)
+        if store is None:
+            return
+        store.save(self.map_id, self.graph)
 
     def _step_meter(self) -> Text:
         total = max(1, self._max_depth() + 1)
@@ -311,6 +322,7 @@ class FactoryScreen(Screen):
                     name=self.document_name,
                     source=source,
                 )
+            self._persist()
             self._refresh()
 
         self.app.push_screen(EditorScreen(doc.source), callback=on_save)
@@ -342,6 +354,7 @@ class FactoryScreen(Screen):
                 kind=kind,
                 template=True,
             )
+            self._persist()
             self._refresh()
             self.notify(f"plantilla importada: {rel}")
 
@@ -363,7 +376,8 @@ class FactoryScreen(Screen):
             self.notify("archivo de plantilla no encontrado", severity="error")
             return
         store = self.app.store  # type: ignore[attr-defined]
-        target = store.workspace / f"{self.document_name}-{node.id}.docx"
+        suffix = Path(doc.path).suffix or ".docx"
+        target = store.workspace / f"{self.document_name}-{node.id}{suffix}"
         try:
             office.resolve(path, doc.tags, target)
             self.notify(f"generado: {target}")

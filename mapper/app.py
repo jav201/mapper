@@ -8,6 +8,7 @@ from pathlib import Path
 
 from rich.markup import escape
 from rich.text import Text
+from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen, Screen
@@ -96,9 +97,9 @@ class _PromptScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         self.query_one("#prompt-input", Input).focus()
         hints = Text.assemble(
-            ("↵", darkside.ACCENT),
+            ("↵", darkside.INK),
             (" confirmar   ", darkside.MUT),
-            ("esc", darkside.ACCENT),
+            ("esc", darkside.INK),
             (" cancelar", darkside.MUT),
         )
         self.query_one("#prompt-hints", Static).update(hints)
@@ -109,6 +110,43 @@ class _PromptScreen(ModalScreen[str | None]):
     def on_input_submitted(self, event: Input.Submitted) -> None:
         value = event.value.strip()
         self.dismiss(value if value else None)
+
+
+class _ConfirmScreen(ModalScreen[bool]):
+    """Simple yes/no confirmation modal."""
+
+    BINDINGS = [
+        ("y", "confirm", "Sí"),
+        ("n", "dismiss", "No"),
+        ("escape", "dismiss", "No"),
+        ("q", "dismiss", "No"),
+    ]
+
+    def __init__(self, message: str) -> None:
+        super().__init__()
+        self.message = message
+
+    def compose(self) -> ComposeResult:
+        yield Vertical(
+            Static(self.message, id="confirm-label"),
+            Static("", id="confirm-hints"),
+            id="confirm-dialog",
+        )
+
+    def on_mount(self) -> None:
+        hints = Text.assemble(
+            ("y", darkside.INK),
+            (" sí   ", darkside.MUT),
+            ("n", darkside.INK),
+            (" no", darkside.MUT),
+        )
+        self.query_one("#confirm-hints", Static).update(hints)
+
+    def action_confirm(self) -> None:
+        self.dismiss(True)
+
+    def action_dismiss(self) -> None:
+        self.dismiss(False)
 
 
 class _TemplateScreen(ModalScreen[str | None]):
@@ -228,7 +266,7 @@ class _FichaScreen(ModalScreen[None]):
 class ConstructScreen(ModalScreen[str | None]):
     """Ask for a new map name and return it."""
 
-    BINDINGS = [("escape", "cancel", "Cancel")]
+    BINDINGS = [("escape", "cancel", "Cancelar")]
 
     def compose(self) -> ComposeResult:
         yield Vertical(
@@ -241,9 +279,9 @@ class ConstructScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         self.query_one("#construct-input", Input).focus()
         hints = Text.assemble(
-            ("↵", darkside.ACCENT),
+            ("↵", darkside.INK),
             (" crear   ", darkside.MUT),
-            ("esc", darkside.ACCENT),
+            ("esc", darkside.INK),
             (" cancelar", darkside.MUT),
         )
         self.query_one("#construct-hints", Static).update(hints)
@@ -266,13 +304,16 @@ class HomeScreen(Screen):
     """Home screen with resume row, recents and door shortcuts."""
 
     BINDINGS = [
-        ("c", "consult", "Consult maps"),
-        ("p", "plug", "Plug repo"),
-        ("n", "construct", "Construct"),
-        ("t", "template", "Template"),
-        ("i", "import_csv", "Import CSV"),
-        ("f", "factory", "Factory"),
-        ("q", "quit", "Quit"),
+        ("c", "consult", "Consultar mapas"),
+        ("p", "plug", "Conectar repo"),
+        ("n", "construct", "Construir"),
+        ("t", "template", "Plantilla"),
+        ("i", "import_csv", "Importar CSV"),
+        ("f", "factory", "Fábrica"),
+        ("r", "resume", "Retomar"),
+        ("j", "table_down", "Bajar"),
+        ("k", "table_up", "Subir"),
+        ("q", "quit", "Salir"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -290,10 +331,10 @@ class HomeScreen(Screen):
         yield HintLine("elige una puerta para empezar")
         yield KeyBar(
             [
-                ("nav", [("j/k", "elegir"), ("↵", "abrir")]),
-                ("doors", [("c", "consult"), ("p", "repo"), ("n", "construct"),
-                           ("t", "template"), ("i", "import csv"), ("f", "factory")]),
-                ("app", [("ctrl+p", "palette"), ("?", "help"), ("q", "quit")]),
+                ("nav", [("j/k", "elegir"), ("↵", "abrir"), ("r", "retomar")]),
+                ("doors", [("c", "consultar"), ("p", "repo"), ("n", "construir"),
+                           ("t", "plantilla"), ("i", "importar csv"), ("f", "fábrica")]),
+                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "salir")]),
             ]
         )
 
@@ -392,6 +433,22 @@ class HomeScreen(Screen):
         if table.display:
             table.focus()
 
+    def action_table_down(self) -> None:
+        table = self.query_one("#home-recents", DataTable)
+        if table.display and table.cursor_row is not None:
+            table.cursor_down()
+
+    def action_table_up(self) -> None:
+        table = self.query_one("#home-recents", DataTable)
+        if table.display and table.cursor_row is not None:
+            table.cursor_up()
+
+    def action_resume(self) -> None:
+        store: MapStore = self.app.store  # type: ignore[attr-defined]
+        map_id, node_id = store.last_session()
+        if map_id and node_id:
+            self.app.push_screen(MapScreen(map_id))
+
     def action_plug(self) -> None:
         self.app.push_screen(PlugRepoScreen())
 
@@ -473,15 +530,19 @@ class HomeScreen(Screen):
         map_id = str(event.row_key.value)
         self.app.push_screen(MapScreen(map_id))
 
+    def on_screen_resume(self) -> None:
+        """Refresh the recents list when returning to home."""
+        self.on_mount()
+
 
 class _ImportPreviewScreen(Screen):
     """Preview a CSV import before saving it as a named map."""
 
     BINDINGS = [
-        ("s", "save", "Save"),
-        ("escape", "home", "Back"),
-        ("ctrl+p", "palette", "Palette"),
-        ("?", "help", "Help"),
+        ("s", "save", "Guardar"),
+        ("escape", "home", "Volver"),
+        ("ctrl+p", "palette", "Paleta"),
+        ("?", "help", "Ayuda"),
     ]
 
     def __init__(self, preview_graph: Graph, source_path: Path) -> None:
@@ -509,6 +570,7 @@ class _ImportPreviewScreen(Screen):
             h=max(5, size.height - 10),
         )
         canvas.update(text)
+        pulse_cursor(canvas)
 
     def action_save(self) -> None:
         def on_name(name: str | None) -> None:
@@ -540,13 +602,13 @@ class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
     BINDINGS = [
-        ("escape", "home", "Back"),
-        ("ctrl+p", "palette", "Palette"),
-        ("?", "help", "Help"),
+        ("escape", "home", "Volver"),
+        ("ctrl+p", "palette", "Paleta"),
+        ("?", "help", "Ayuda"),
     ]
 
     def compose(self) -> ComposeResult:
-        yield TabStrip("p", crumb=["plug repo"])
+        yield TabStrip("p", crumb=["conectar repo"])
         yield Vertical(
             Label("conectar repositorio github", id="repo-title"),
             Input(placeholder="owner/name", id="repo-input"),
@@ -575,12 +637,12 @@ class RepoScreen(Screen):
     """A GitHub repo rendered as branch lanes."""
 
     BINDINGS = [
-        ("j", "next_sibling", "Next"),
-        ("k", "prev_sibling", "Prev"),
-        ("v", "cycle_view", "Cycle view"),
-        ("q", "home", "Home"),
-        ("ctrl+p", "palette", "Palette"),
-        ("?", "help", "Help"),
+        ("j", "next_sibling", "Siguiente"),
+        ("k", "prev_sibling", "Anterior"),
+        ("v", "cycle_view", "Cambiar vista"),
+        ("q", "home", "Inicio"),
+        ("ctrl+p", "palette", "Paleta"),
+        ("?", "help", "Ayuda"),
     ]
 
     def __init__(self, repo: str):
@@ -602,12 +664,24 @@ class RepoScreen(Screen):
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=[self.repo])
         yield Static("(cargando repo...)", id="repo-canvas")
-        yield HintLine("j/k navega · v cicla vista · q home")
-        yield KeyBar(groups_for_keybar(["nav", "view", "app"]))
+        yield HintLine("j/k navega · v cambia vista · q inicio")
+        yield KeyBar(
+            [
+                ("nav", [("j/k", "sig/ant")]),
+                ("view", [("v", "cambiar vista")]),
+                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "inicio")]),
+            ]
+        )
 
-    def on_mount(self) -> None:
+    @work(thread=True)
+    def fetch_graph(self) -> Graph:
+        return GitHubConnector(self.repo).fetch()
+
+    async def on_mount(self) -> None:
+        canvas = self.query_one("#repo-canvas", Static)
+        canvas.update("(cargando repo...)")
         try:
-            self.graph = GitHubConnector(self.repo).fetch()
+            self.graph = await self.fetch_graph()
         except GitHubError as exc:
             self.notify(str(exc), severity="error")
             self.graph = Graph()
@@ -660,25 +734,26 @@ class MapScreen(Screen):
     """A map rendered as a layered tree."""
 
     BINDINGS = [
-        ("j", "next_sibling", "Next"),
-        ("k", "prev_sibling", "Prev"),
-        ("l", "child", "Child"),
-        ("h", "parent", "Parent"),
-        ("enter", "open_ficha", "Open"),
-        ("slash", "search", "Search"),
-        ("f", "toggle_focus", "Focus"),
+        ("j", "next_sibling", "Siguiente"),
+        ("k", "prev_sibling", "Anterior"),
+        ("l", "child", "Hijo"),
+        ("h", "parent", "Padre"),
+        ("enter", "open_ficha", "Abrir"),
+        ("slash", "search", "Buscar"),
+        ("f", "toggle_focus", "Foco"),
         ("o", "toggle_outline", "Outline"),
         ("r", "toggle_radial", "Radial"),
-        ("e", "export_svg", "Export SVG"),
-        ("a", "add_child", "Add child"),
-        ("d", "open_documents", "Documents"),
-        ("x", "archive", "Archive"),
-        ("u", "undo", "Undo"),
+        ("e", "export_svg", "Exportar SVG"),
+        ("a", "add_child", "Agregar hijo"),
+        ("d", "open_documents", "Documentos"),
+        ("x", "archive", "Archivar"),
+        ("u", "undo", "Deshacer"),
         ("=", "toggle_diff", "Diff vs HEAD"),
-        ("m", "coverage", "Coverage"),
-        ("q", "home", "Home"),
-        ("ctrl+p", "palette", "Palette"),
-        ("?", "help", "Help"),
+        ("m", "coverage", "Cobertura"),
+        ("q", "home", "Inicio"),
+        ("escape", "back_or_home", "Volver"),
+        ("ctrl+p", "palette", "Paleta"),
+        ("?", "help", "Ayuda"),
     ]
 
     def __init__(self, map_id: str, source_crumb: list[str] | None = None) -> None:
@@ -707,7 +782,15 @@ class MapScreen(Screen):
         yield Input(placeholder="/buscar", id="search-input")
         yield GroupBox(Static(id="map-ficha"), id="map-ficha-box")
         yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
-        yield KeyBar(groups_for_keybar(["nav", "node", "view", "app"]))
+        yield KeyBar(
+            [
+                ("nav", [("j/k", "sig/ant"), ("h/l", "padre/hijo"), ("↵", "abrir")]),
+                ("node", [("a", "agregar hijo"), ("d", "documento"), ("x", "archivar")]),
+                ("view", [("f", "foco"), ("o", "outline"), ("r", "radial"),
+                          ("/", "buscar"), ("e", "exportar"), ("=", "diff"), ("m", "cobertura")]),
+                ("app", [("ctrl+p", "paleta"), ("u", "deshacer"), ("?", "ayuda"), ("q", "inicio")]),
+            ]
+        )
 
     def on_mount(self) -> None:
         self.store = self.app.store  # type: ignore[attr-defined]
@@ -736,10 +819,10 @@ class MapScreen(Screen):
 
         # Resume cursor from last session if it points into this map.
         if self.store is not None:
-            self.store.record_session(self.map_id, self.nav.cursor)
             last_map, last_node = self.store.last_session()
             if last_map == self.map_id and last_node in self.graph.nodes:
                 self.nav.cursor = last_node
+            self.store.record_session(self.map_id, self.nav.cursor)
 
         self.refresh_canvas()
 
@@ -771,6 +854,7 @@ class MapScreen(Screen):
             diff=self.diff if self.diff_active else None,
         )
         canvas.update(text)
+        pulse_cursor(canvas)
 
         tab = self.query_one(TabStrip)
         node = self.graph.nodes.get(self.nav.cursor or "")
@@ -844,6 +928,7 @@ class MapScreen(Screen):
         self.base_graph = graph
         if self.nav.cursor not in self.graph.nodes:
             self.nav.cursor = self.graph.root_id
+        self.store.save(self.map_id, self.graph)
         self.refresh_canvas()
         self.notify("deshacer aplicado")
 
@@ -1025,6 +1110,7 @@ class MapScreen(Screen):
                 process_name=self.map_id,
                 node_id=node_id,
                 document_name=doc_name,
+                map_id=self.map_id,
             )
         )
 
@@ -1034,13 +1120,25 @@ class MapScreen(Screen):
         if not self._guard_focus_mutation():
             return
         node = self.graph.nodes[self.nav.cursor]
-        self._push_snapshot()
-        self._remove_subtree(self.nav.cursor)
-        self.store.save(self.map_id, self.graph)
-        self.base_graph = self.graph
-        self.nav.cursor = self.graph.root_id
-        self.refresh_canvas()
-        self.notify(f"archivado: {node.ficha.title or node.id}")
+
+        def do_archive(confirmed: bool) -> None:
+            if not confirmed:
+                return
+            self._push_snapshot()
+            self._remove_subtree(self.nav.cursor)
+            self.store.save(self.map_id, self.graph)
+            self.base_graph = self.graph
+            self.nav.cursor = self.graph.root_id
+            self.refresh_canvas()
+            self.notify(f"archivado: {node.ficha.title or node.id}")
+
+        if self.nav.cursor == self.graph.root_id:
+            self.app.push_screen(
+                _ConfirmScreen("¿archivar el nodo raíz? esto reemplazará la raíz del mapa."),
+                callback=do_archive,
+            )
+        else:
+            do_archive(True)
 
     def _remove_subtree(self, root_id: str) -> None:
         remove: set[str] = set()
@@ -1063,6 +1161,13 @@ class MapScreen(Screen):
 
     def action_home(self) -> None:
         self.app.pop_screen()
+
+    def action_back_or_home(self) -> None:
+        """Pop one screen when coming from a linked map, otherwise go home."""
+        if self.source_crumb:
+            self.app.pop_screen()
+        else:
+            self.app.pop_screen()
 
     def action_palette(self) -> None:
         self.app.action_palette()
@@ -1123,11 +1228,11 @@ class MapperApp(App):
     #repo-dialog { width: 50; height: auto; background: #121212; padding: 1 2; }
     #repo-title { text-style: bold; color: #f5f5f5; margin-bottom: 1; }
 
-    ConstructScreen, _PromptScreen, _FichaScreen, _TemplateScreen {
+    ConstructScreen, _PromptScreen, _FichaScreen, _TemplateScreen, _ConfirmScreen {
         align: center middle;
         background: #000000 70%;
     }
-    #construct-dialog, #prompt-dialog, #ficha-dialog, #template-dialog {
+    #construct-dialog, #prompt-dialog, #ficha-dialog, #template-dialog, #confirm-dialog {
         width: 50;
         height: auto;
         background: #121212;
@@ -1137,13 +1242,13 @@ class MapperApp(App):
     #template-table > .datatable--header { background: #262626; color: #737373; text-style: bold; }
     #template-table > .datatable--cursor { background: #1783ff; color: #000000; }
     #ficha-dialog { width: 60; max-height: 28; }
-    #construct-label, #prompt-label, #template-title {
+    #construct-label, #prompt-label, #template-title, #confirm-label {
         text-align: center;
         text-style: bold;
         color: #f5f5f5;
         margin-bottom: 1;
     }
-    #construct-hints, #prompt-hints {
+    #construct-hints, #prompt-hints, #confirm-hints {
         text-align: center;
         color: #737373;
         margin-top: 1;
@@ -1154,9 +1259,9 @@ class MapperApp(App):
     """
 
     BINDINGS = [
-        ("ctrl+p", "palette", "Palette"),
-        ("?", "help", "Help"),
-        ("q", "quit", "Quit"),
+        ("ctrl+p", "palette", "Paleta"),
+        ("?", "help", "Ayuda"),
+        ("q", "quit", "Salir"),
     ]
 
     def __init__(self, workspace: Path | str):

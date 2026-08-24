@@ -12,12 +12,12 @@ def test_groups_for_keybar_order():
     names = [g[0] for g in groups]
     assert names == ["nav", "app"]
     nav_pairs = groups[0][1]
-    assert any(k == "j" and a == "next" for k, a in nav_pairs)
+    assert any(k == "j" and a == "siguiente" for k, a in nav_pairs)
 
 
 def test_palette_items_fuzzy_filter():
     items = palette_items("pal")
-    assert any("palette" in b.action for b in items)
+    assert any("paleta" in b.action for b in items)
 
 
 def test_palette_items_empty_query_returns_all():

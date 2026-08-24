@@ -18,8 +18,8 @@ class CommandPalette(ModalScreen[str | None]):
     """Fuzzy command palette; dismisses the selected action or None."""
 
     BINDINGS = [
-        ("escape", "dismiss_none", "Close"),
-        ("enter", "run_selected", "Run"),
+        ("escape", "dismiss_none", "Cerrar"),
+        ("enter", "run_selected", "Ejecutar"),
     ]
 
     CSS = """
@@ -36,7 +36,7 @@ class CommandPalette(ModalScreen[str | None]):
     #palette-input {
         border: none;
         background: #262626;
-        color: #1783ff;
+        color: #f5f5f5;
         padding: 0 1;
     }
     #palette-list {
@@ -57,7 +57,7 @@ class CommandPalette(ModalScreen[str | None]):
         color: #000000;
     }
     .palette-group { color: #737373; }
-    .palette-key { color: #1783ff; }
+    .palette-key { color: #f5f5f5; }
     #palette-list > ListItem.--highlight .palette-key {
         color: #000000;
     }
@@ -77,9 +77,9 @@ class CommandPalette(ModalScreen[str | None]):
     def _binding_label(self, binding: KeyBinding) -> Text:
         return Text.assemble(
             (f"{escape(binding.group)}  ", darkside.MUT),
-            (escape(binding.key), darkside.ACCENT),
+            (escape(binding.key), darkside.INK),
             ("  ", ""),
-            (escape(binding.action), darkside.INK),
+            (escape(binding.action), darkside.MUT),
         )
 
     def _refresh_list(self, query: str) -> None:

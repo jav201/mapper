@@ -36,4 +36,17 @@ def test_dump_and_parse_roundtrip_with_hyphens(tmp_path):
     assert loaded.parent_of("otro-nieto") == "mi-hijo"
 
 
+def test_dump_escapes_and_parse_restores_special_chars():
+    g = Graph()
+    root = Node(id="root", ficha=Ficha(title="Root"))
+    child = Node(id="child", ficha=Ficha(title="ver [detalle]"))
+    g.add_node(root)
+    g.add_node(child)
+    g.add_edge(Edge("root", "child", label="opción | A"))
+
+    text = dump(g)
+    loaded = parse(text)
+    assert loaded.nodes["child"].ficha.title == "ver [detalle]"
+    assert loaded.edges[0].label == "opción | A"
+
 
