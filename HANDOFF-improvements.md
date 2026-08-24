@@ -64,6 +64,37 @@
 4. US-022 CSV import (the migration path).
 5. US-023 templates + linked maps (structure reuse).
 
+## Repo connector: local path or URL (operator's simplification, US-006 refined)
+
+Plain `git` FIRST: a local path is read in place (`git -C <path> branch -a`,
+`git log`, `git tag` — no auth, no API, offline-friendly); a URL clones to a
+local cache and reads identically. The `gh` layer (CI verdicts, PR numbers)
+is an OPTIONAL enrichment when authenticated. Rendered:
+`prototypes/ui_darkside/out/ds-repo-plug.svg` — one input, auto-detected
+source, stats preview (ramas · tags · último commit · autor principal).
+Implementation: `mapper/github.py` gains a `local` backend; the GitHub one
+becomes the enrichment. Releases = git tags.
+
+## Office-format templates (US-024 — the factory's real files)
+
+The template IS the company's real office file: `.docx` / `.pptx` / `.xlsx`
+with `{{keywords}}` written inside it, ingested by mapper directly.
+
+- **OOXML = a zip of XML.** Read: `zipfile` + `re` for `{{...}}` — probed
+  this round with an in-memory .docx (tags found: puesto, depto, salario).
+  NO external parser dependency. (`python-docx`/`python-pptx`/`openpyxl` are
+  optional sugar, not required.)
+- **Write-back:** string-replace the resolved values inside the XML and
+  rezip — the generated document opens in the same office app.
+- **The one real hazard:** office editors split text across XML *runs*, so a
+  tag may arrive fragmented (`{{pue` + `sto}}`). Mitigation: at ingest,
+  concatenate runs per paragraph before matching; strip inner markup inside
+  `{{...}}`.
+- **Out of scope (in writing):** legacy binary `.doc`/`.xls` (convert to
+  OOXML first), charts/images inside templates, password-protected files.
+- Render: `prototypes/ui_darkside/out/ds-factory-office.svg` — the template
+  row shows the real file, the tags table reads "tag (del docx)".
+
 ## Landmines already paid (recap from the darkside handoff)
 
 rich-15 width+height law · badge-stretch (compose headers as one Text) ·
@@ -72,8 +103,10 @@ user text · width-1 glyphs · synthetic fixtures only · `gh` read-only ·
 the keymap seat feeds keybar + `?` + palette · selection is solid, motion is
 300 ms in_out_cubic, nothing passive is blue.
 
-## Verdict placeholders (fill at review)
+## Verdict placeholders (filled at review)
 
-- D-A active-path applied to radial: …
-- Diff rename heuristic observed on a real map: …
-- CSV parent-column convention chosen: …
+- D-A active-path applied to radial: `mapper/views/radial.py` uses `_GREYS` for branches and `darkside.ACCENT` only for the active path + selected node.
+- Diff rename heuristic observed on a real map: same id = same node; title change reported as `title` in `DiffResult.changed`; field changes reported by schema key.
+- CSV parent-column convention chosen: `parent` column is the id reference; `depth` column is the indentation level; missing parents park at root with `? ` prefix.
+- Local-git/URL connector implemented: `mapper/github.py` detects local path, URL (clones to `~/.cache/mapper/repos`), and `owner/name` (uses `gh`); branches/tags rendered with ahead/behind from plain git.
+- Office-format templates implemented: `mapper/office.py` reads `.docx/.pptx/.xlsx` via `zipfile`+`re`, handles fragmented tags, and writes resolved OOXML; `FactoryScreen` binds `i` (import) and `g` (generate).

@@ -8,7 +8,7 @@
   "current_phase": 6,
   "phase_status": "complete",
   "iterations_per_phase": {
-    "0": 3,
+    "0": 4,
     "1": 1,
     "2": 1,
     "3": 1,
@@ -107,13 +107,23 @@
     },
     {
       "date": "2026-08-24",
+      "phase": 4,
+      "decision": "Additional HANDOFF-improvements.md items implemented on operator review: US-006 refined (local git path + URL clone + gh enrichment in mapper/github.py) and US-024 office-format templates (.docx/.pptx/.xlsx ingestion/resolution in mapper/office.py, FactoryScreen import/generate bindings). Files touched: mapper/github.py, mapper/office.py, mapper/model.py, mapper/store.py, mapper/screens/factory.py, tests/test_github.py, tests/test_office.py."
+    },
+    {
+      "date": "2026-08-24",
       "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 46 passed; smoke tests via Textual pilot verified MapScreen linked-map navigation, CoverageScreen, RepoScreen view cycling, CSV import preview, and template picker."
+      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 53 passed; smoke tests via Textual pilot verified MapScreen linked-map navigation, CoverageScreen, RepoScreen view cycling, CSV import preview, template picker, local-git connector, and factory office-template generation."
     },
     {
       "date": "2026-08-24",
       "phase": 6,
       "decision": "Phase 6 close complete: dev-flow artifacts updated (state.json, 01-requirements.md §6.2 design decisions D-A/D-B/D-C); all changes committed and merged to master under the improvements round."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Operator refinements: US-006 — repo connects by LOCAL PATH or URL (plain git first; gh enrichment optional; render ds-repo-plug.svg); US-024 added READY — office-format templates (.docx/.pptx/.xlsx) ingested directly, tags parsed from OOXML with stdlib only (probe executed TRUE, premise P-6). Handoff updated."
     }
   ],
   "standing_authorization": {

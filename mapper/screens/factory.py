@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from rich.markup import escape
 from rich.text import Text
@@ -10,7 +11,7 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Static
 
-from mapper import darkside
+from mapper import darkside, office
 from mapper.model import Document, Graph, Node
 from mapper.widgets.chrome import TabStrip
 
@@ -66,6 +67,8 @@ class FactoryScreen(Screen):
         ("h", "parent", "Parent"),
         ("l", "child", "Child"),
         ("d", "edit_doc", "Edit doc"),
+        ("i", "import_office", "Import office"),
+        ("g", "generate_office", "Generate"),
         ("q", "home", "Home"),
         ("ctrl+p", "palette", "Palette"),
         ("?", "help", "Help"),
@@ -161,11 +164,44 @@ class FactoryScreen(Screen):
             walk(self.graph.root_id, 0)
         return Text.assemble(*lines)
 
+    def _is_office(self, doc: Document) -> bool:
+        return doc.kind in {"docx", "pptx", "xlsx"}
+
+    def _office_path(self, doc: Document) -> Path | None:
+        if not doc.path:
+            return None
+        store = self.app.store  # type: ignore[attr-defined]
+        candidate = Path(doc.path)
+        if candidate.is_absolute():
+            return candidate
+        return store.workspace / candidate
+
     def _preview(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
         if node is None or not self.document_name:
             return Text.assemble(("sin documento", darkside.MUT))
         doc = self.graph.resolve_document(self.document_name, node)
+
+        if self._is_office(doc):
+            path = self._office_path(doc)
+            if path is None or not path.exists():
+                return Text.assemble(("archivo de plantilla no encontrado", darkside.ALERT))
+            preview = office.extract_preview_text(path)
+            # Show a resolved preview by replacing tags in the plain text.
+            for key, value in doc.tags.items():
+                preview = preview.replace(f"{{{{{key}}}}}", value)
+            lines = [line.strip() for line in preview.splitlines() if line.strip()]
+            text = Text()
+            text.append(f"[{doc.kind}] ", style=darkside.ACCENT)
+            text.append(escape(str(path)), style=darkside.MUT)
+            text.append("\n", style="")
+            for line in lines[:12]:
+                text.append(escape(line[:120]), style=darkside.INK)
+                text.append("\n", style="")
+            if len(lines) > 12:
+                text.append("…", style=darkside.MUT)
+            return text
+
         parts: list[tuple[str, str]] = []
         pos = 0
         for match in _TAG_RE.finditer(doc.source):
@@ -188,6 +224,21 @@ class FactoryScreen(Screen):
         if node is None or not self.document_name:
             return Text.assemble(("", ""))
         doc = self.graph.resolve_document(self.document_name, node)
+
+        if self._is_office(doc):
+            path = self._office_path(doc)
+            keys: set[str] = set(doc.tags)
+            if path is not None and path.exists():
+                keys.update(office.extract_tags(path))
+            parts: list[tuple[str, str]] = []
+            for key in sorted(keys):
+                local = doc.tags.get(key, "")
+                inherited = doc.inherited.get(key, "")
+                parts.append((f"{{{{{escape(key)}}}}}  ", darkside.ACCENT))
+                parts.append((f"{escape(local) or '-'}  ", darkside.INK))
+                parts.append((f"{escape(inherited) or '-'}\n", darkside.MUT))
+            return Text.assemble(*parts) if parts else Text.assemble(("(sin tags)", darkside.MUT))
+
         parts: list[tuple[str, str]] = []
         for key in sorted(set(doc.tags) | set(_TAG_RE.findall(doc.source))):
             local = doc.tags.get(key, "")
@@ -244,11 +295,17 @@ class FactoryScreen(Screen):
             return
         doc = self.graph.resolve_document(self.document_name, node)
 
+        if self._is_office(doc):
+            self.action_generate_office()
+            return
+
         def on_save(source: str | None) -> None:
             if source is None:
                 return
             if self.document_name in self.graph.documents:
                 self.graph.documents[self.document_name].source = source
+                self.graph.documents[self.document_name].kind = "text"
+                self.graph.documents[self.document_name].path = ""
             else:
                 self.graph.documents[self.document_name] = Document(
                     name=self.document_name,
@@ -257,6 +314,61 @@ class FactoryScreen(Screen):
             self._refresh()
 
         self.app.push_screen(EditorScreen(doc.source), callback=on_save)
+
+    def action_import_office(self) -> None:
+        from mapper.app import _PromptScreen
+
+        def on_path(path_str: str | None) -> None:
+            if path_str is None:
+                return
+            source = Path(path_str).expanduser()
+            if not source.exists():
+                self.notify(f"archivo no encontrado: {source}", severity="error")
+                return
+            kind = source.suffix.lower().lstrip(".")
+            if kind not in {"docx", "pptx", "xlsx"}:
+                self.notify("solo .docx / .pptx / .xlsx", severity="error")
+                return
+            store = self.app.store  # type: ignore[attr-defined]
+            target = store.workspace / "templates" / source.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            import shutil
+
+            shutil.copy2(source, target)
+            rel = target.relative_to(store.workspace).as_posix()
+            self.graph.documents[self.document_name] = Document(
+                name=self.document_name,
+                path=rel,
+                kind=kind,
+                template=True,
+            )
+            self._refresh()
+            self.notify(f"plantilla importada: {rel}")
+
+        self.app.push_screen(
+            _PromptScreen("ruta del archivo office", "/ruta/a/plantilla.docx"),
+            callback=on_path,
+        )
+
+    def action_generate_office(self) -> None:
+        node = self.graph.nodes.get(self.nav.cursor or "")
+        if node is None or not self.document_name:
+            return
+        doc = self.graph.resolve_document(self.document_name, node)
+        if not self._is_office(doc):
+            self.notify("el documento actual no es office")
+            return
+        path = self._office_path(doc)
+        if path is None or not path.exists():
+            self.notify("archivo de plantilla no encontrado", severity="error")
+            return
+        store = self.app.store  # type: ignore[attr-defined]
+        target = store.workspace / f"{self.document_name}-{node.id}.docx"
+        try:
+            office.resolve(path, doc.tags, target)
+            self.notify(f"generado: {target}")
+        except Exception as exc:
+            self.notify(f"no se pudo generar: {exc}", severity="error")
 
     def action_home(self) -> None:
         self.app.pop_screen()

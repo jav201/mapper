@@ -95,6 +95,8 @@ class MapStore:
                     "tags": d.tags,
                     "inherited": d.inherited,
                     "template": d.template,
+                    "path": d.path,
+                    "kind": d.kind,
                 }
                 for d in graph.documents.values()
             ],
@@ -138,6 +140,8 @@ class MapStore:
                 tags=d.get("tags", {}),
                 inherited=d.get("inherited", {}),
                 template=d.get("template", False),
+                path=d.get("path", ""),
+                kind=d.get("kind", "text"),
             )
             for d in sidecar.get("documents", [])
             if d.get("name")

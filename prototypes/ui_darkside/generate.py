@@ -591,6 +591,119 @@ def ds_home_identity() -> None:
     save(console, "ds-home-identity.svg", "darkside — home, identity moment")
 
 
+
+
+# ---------------------------------------------------------------------------
+# repo plug — connect by local path or URL (plain git first, gh as enrichment)
+# ---------------------------------------------------------------------------
+def ds_repo_plug() -> None:
+    """The plug screen: one input that accepts a local path OR a URL; the
+    source detection is automatic; the preview says what the map will carry.
+    Plain `git` gives branches/commits/tags with no auth — the gh layer (CI,
+    PRs) is an optional enrichment on top."""
+    console = make_console()
+    console.print(darkside.tab_strip("p"))
+    console.print()
+
+    inp = Text()
+    inp.append("  ruta o url ▸ ", style=MUT)
+    inp.append("/home/jav201/repos/mapper", style=INK)
+    inp.append("▌", style=ACCENT)
+    console.print(group_box(inp, 2))
+
+    det = Text()
+    det.append("  detectado: ", style=STEP)
+    det.append(" repo local de git ", style=f"{INK} on {STEP}")
+    det.append("   leer con git plano — sin auth, sin API", style=MUT)
+    console.print(det)
+    console.print()
+
+    stats = Table(box=None, padding=(0, 2))
+    stats.add_column(style=MUT)
+    stats.add_column(style=INK)
+    stats.add_row("ramas", "12 (4 activas este mes)")
+    stats.add_row("tags / releases", "4 · último v1.2.0")
+    stats.add_row("commits", "312 · último hace 2h")
+    stats.add_row("autor principal", "@jav201")
+    console.print(group_box(stats, 2))
+    console.print()
+
+    alt = Text()
+    alt.append("  también: ", style=STEP)
+    alt.append("https://github.com/jav201/mapper", style=INK)
+    alt.append("  → se clona al cache y se lee igual", style=MUT)
+    alt.append("   (+ gh enriquece con CI y PRs si está autenticado)",
+               style=STEP)
+    console.print(alt)
+    console.print()
+
+    footer(console,
+           groups_for_keybar(["nav", "doors", "app"]),
+           "↵ conecta y mapea — una ruta local lee en el sitio, una url clona al cache",
+           "↵")
+    save(console, "ds-repo-plug.svg", "darkside — repo plug, path or url")
+
+
+
+
+# ---------------------------------------------------------------------------
+# factory with a REAL office template — the .docx/.pptx/.xlsx ingestion
+# ---------------------------------------------------------------------------
+def ds_factory_office() -> None:
+    """The template is a real office file with {{tags}} inside; mapper ingests
+    it directly (OOXML = a zip of XML — no external parser needed, probed this
+    round). The factory shows the file source, the parsed tags, and the
+    preview resolved against the selected node."""
+    console = make_console()
+    console.print(darkside.tab_strip("f", ["contratacion", "oferta"]))
+    console.print()
+
+    src = Text()
+    src.append("  template ▸ ", style=MUT)
+    src.append("oferta.docx", style=INK)
+    src.append("  ·  ", style=STEP)
+    src.append("archivo real ingerido", style=MUT)
+    src.append("   (docx = zip+xml: los {{tags}} se leen directo)", style=STEP)
+    console.print(group_box(src, 2))
+    console.print()
+
+    tree = Text("\n".join(FACT_TREE))
+    joined = "\n".join(FACT_TREE)
+    off = joined.index("├─▐ oferta")
+    tree.stylize(f"bold #000000 on {ACCENT}", off, off + len("├─▐ oferta  ◫"))
+    console.print(tree)
+    console.print()
+
+    prev = Text()
+    prev.append("documento: oferta.docx   ", style=INK)
+    prev.append("preview (tags resolved)\n", style=MUT)
+    prev.append("estimado/a candidato/a,\n\nle extendemos la oferta para el puesto ")
+    prev.append("ingeniero de datos", style=INK)
+    prev.append(".\ndepartamento: ")
+    prev.append("plataforma", style=INK)
+    prev.append("\nubicación: remoto\nsalario: ")
+    prev.append("—", style=ALERT)
+    prev.append("\n\naprobador: ")
+    prev.append("—", style=MUT)
+
+    tags = Table(box=None, padding=(0, 1))
+    tags.add_column(style=ACCENT)
+    tags.add_column(style=INK)
+    tags.add_column(style=MUT)
+    tags.add_row("tag (del docx)", "local", "inherited")
+    for tag, local, inh in TAGS:
+        tags.add_row(tag, local, inh)
+    console.print(Columns([group_box(prev, 2), group_box(tags, 1)],
+                          equal=False, padding=(0, 1)))
+    console.print()
+
+    footer(console,
+           groups_for_keybar(["nav", "doc", "app"]),
+           "t ingesta un .docx/.pptx/.xlsx como template — d edita, tab preview",
+           "t")
+    save(console, "ds-factory-office.svg", "darkside — factory, real office template")
+
+
 # ---------------------------------------------------------------------------
 # index
 # ---------------------------------------------------------------------------
@@ -609,6 +722,8 @@ def build_index() -> None:
         ("ds-palette.svg", "command palette — grouped, first match solid"),
         ("ds-mental.svg", "radial — grey steps, ONLY the active path blue"),
         ("ds-home-identity.svg", "home — the identity moment (wordmark + moon)"),
+        ("ds-repo-plug.svg", "repo plug — a local path or a URL, plain git first"),
+        ("ds-factory-office.svg", "factory — real .docx/.pptx/.xlsx template ingestion"),
     ]
     rows = []
     rows.append("<h2>motion — the 300 ms selection breath (flipbook)</h2>"
@@ -659,6 +774,8 @@ if __name__ == "__main__":
     ds_mental()
     ds_motion()
     ds_home_identity()
+    ds_repo_plug()
+    ds_factory_office()
     build_index()
     print("done")
 

@@ -101,7 +101,7 @@ building concept maps; the team sharing a versioned map.
 | US-003 | As an auditor, I want every node to carry the map's required-field set (document, owner, state, criticality, notes) with its coverage visible per node and per map, so that I see which element lacks its formal record at a glance. | prototype M4 + operator ask | READY |
 | US-004 | As an auditor, I want to map a super-legacy software system as a tree of modules with formal documents attached, so that the audit of an unmaintained system is a map and not a spreadsheet. | operator ask (specific interest) | READY |
 | US-005 | As a writer, I want to import and edit maps in standard Mermaid notation and export back to it, so that the map is versionable, portable text. | prototype M3 + operator ask | READY |
-| US-006 | As a developer, I want to read my own GitHub repo as a map — branches as lanes, releases as milestones on the timeline, ahead/behind and CI per branch — so that what is in flight, shipped, or stale reads at a glance. | prototype M2 + operator ask | READY |
+| US-006 | As a developer, I want to read a git repo as a map — by a LOCAL PATH or a URL (plain `git` reads branches/commits/tags with no auth; `gh` enriches with CI/PRs when authenticated) — so that what is in flight, shipped, or stale reads at a glance. | prototype M2 + operator refinement (path-or-URL, 2026-08-18) | READY |
 | US-007 | As a planner, I want radial mind maps with branch colours and organic curved edges, so that a brainstorm reads like a real mind map. | prototype M5 + polish round | READY |
 | US-008 | As a user, I want to press `/` and search across node titles AND everything the ficha carries (notes, field values, attachment names), so that any information anywhere in the map is findable. | prototype M3 + taskboard lesson + operator refinement (this gate) | READY |
 | US-009 | As a team, we want the map's truth as versioned text (Mermaid + ficha sidecar) in git with a rebuildable local SQLite index, so that the team shares the repo and queries locally. | operator ask (mid-round) | READY |
@@ -119,6 +119,7 @@ building concept maps; the team sharing a versioned map.
 | US-021 | As a reviewer, I want to see what changed in the map since the last commit — nodes added, removed, renamed, re-parented, fields changed — painted on the map itself, so that review happens on the map. | improvements round (operator) | READY |
 | US-022 | As an analyst, I want to import a CSV/TSV (one row per node, indent or parent column) as a tree, so that the company's Excel workflow migrates into mapper. | improvements round (operator); the operator's own "muchas compañías lo hacen en excel" | READY |
 | US-023 | As a user, I want map templates (the legacy-audit schema predeclared) and nodes that open other maps, so that starting an audit costs one key and big systems decompose into linked maps. | improvements round (operator) | READY |
+| US-024 | As an operator, I want the document factory to ingest real office files (.docx/.pptx/.xlsx) as templates — the keywords integrated INSIDE the document — and to generate the filled document in the same format, so that a template is an actual office file, not a parallel syntax. | improvements round (operator, 2026-08-18) | READY |
 
 #### Refinement log (one block per story)
 
@@ -204,10 +205,14 @@ building concept maps; the team sharing a versioned map.
   commits as ●, releases as ◆ milestones on the timeline, per-branch
   ahead/behind chip + CI verdict, a ficha strip per branch · why = the
   operator's own repos · out of scope = write actions, PR management, issues.
-- **Feasibility (E, S):** `gh api`/`gh repo view` + the prototype lane
-  renderer port; `gh` verified authenticated (P-1) · unknowns = rate limits
-  on big repos (bounded by a cap + `+N more` convention) · fits one batch? =
-  yes.
+- **Feasibility (E, S):** plain `git` first (operator's simplification,
+  2026-08-18): a LOCAL PATH is read in place (`git -C <path> branch -a`,
+  `log`, `tag` — no auth, no API, offline-friendly); a URL clones to a local
+  cache and reads identically. The `gh` layer (CI verdicts, PR numbers) is an
+  OPTIONAL enrichment when authenticated (P-1). Prototype plug screen:
+  `prototypes/ui_darkside/out/ds-repo-plug.svg` · unknowns = rate limits
+  disappear for local reads; clone depth for URL sources (default: full
+  clone, shallow flag later) · fits one batch? = yes.
 - **Evaluability (T):** "When the user plugs a repo, they observe its main
   lane with release milestones and its feature lanes with fork/merge
   connectors; when a branch's CI fails, they observe its lane in the alert
@@ -479,6 +484,29 @@ building concept maps; the team sharing a versioned map.
 - **Open questions:** none.
 - **Classification:** `READY`.
 
+**US-024 — office-format template ingestion (docx/pptx/xlsx)**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = operator · outcome = `t` ingests a real
+  .docx/.pptx/.xlsx as the node's document template; the `{{keywords}}` are
+  written INSIDE the office file; generation writes the filled document in
+  the SAME format · why = the operator's explicit ask: the template is the
+  real company file, not a parallel syntax · out of scope = .doc/.xls legacy
+  binaries (convert to OOXML first — declared in writing), charts/images
+  inside templates, password-protected files.
+- **Feasibility (E, S):** OOXML = a zip of XML: placeholders are read with
+  `zipfile` + regex and written back by string replacement + rezip — NO
+  external parser dependency. Probed this round (executed): a minimal in-memory
+  .docx yielded its three tags through exactly that path · unknowns = tags
+  split across XML runs by the office editor (mitigation: normalise runs at
+  ingest, strip tags inside `{{...}}` before matching) · fits one batch? =
+  yes.
+- **Evaluability (T):** "When the user ingests `oferta.docx` containing
+  `{{puesto}}`, they observe the tag in the factory table marked 'del docx';
+  when they generate, they observe a filled .docx that opens in Word with the
+  value in place of the tag."
+- **Open questions:** none blocking.
+- **Classification:** `READY`.
+
 ### 2.7 Premise evaluation (C-43) — MANDATORY, one row per premise
 
 | # | Premise, as a truth-apt proposition | Tier | Verdict | Executed evidence (command output / `file:line` — **NOT** a citation of another document) | Disposition |
@@ -487,6 +515,7 @@ building concept maps; the team sharing a versioned map.
 | P-2 | "The TUI stack (Textual 8.2.8 + Rich 15.0.0) is installed and is the same one taskboard's renderer is verified against." | premise | ✅ TRUE | `python -c …` → `textual 8.2.8`, `rich 15.0.0` | — |
 | P-3 | "The prototype machinery (`prototypes/mapper/proto.py`) renders the five views at 118×30 and 68×24 without errors." | premise | ✅ TRUE | `python prototypes/mapper/capture.py` → all five SVGs + txt written; browser check of `mapper.html` → `pageerrors: []` | — |
 | P-4 | "Mermaid `graph TD` with `A[x] --> B[y]` + bare ids suffices for the MVP's trees." | hypothesis | ❓ UNDECIDABLE | needs a probe against the real target maps (the legacy ERP tree may want edge labels / multiple parents) | decided in Phase 1 — edge labels `-->|text|` already scheduled as default; multiple parents declared out of MVP scope in writing here |
+| P-6 | "A .docx/.pptx/.xlsx's {{tags}} are parseable with the stdlib alone (OOXML = zip of XML)." | premise | ✅ TRUE | executed probe: in-memory .docx → `zipfile` + regex → `['depto', 'puesto', 'salario']` found | — |
 | P-5 | "The map stays legible at 68 columns for all four families." | hypothesis | ❓ UNDECIDABLE | the prototype verified 68×24 for the five views; a denser legacy tree was not swept | dispositioned: narrow terminals get the two-leftmost levels + a `+N` overflow chip (the `_phase_window` convention); verified in Phase 4 against a swept fixture |
 
 **Gate rule:** ❌ and ❓ both block. ❓ is dispositioned explicitly — decided, or declared out of scope **in writing**. A premise with no executed evidence is ❓, not ✅.

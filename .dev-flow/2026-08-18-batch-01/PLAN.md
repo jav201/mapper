@@ -127,6 +127,11 @@ Mermaid diagrams.
   flipbook + D-C home identity, all rendered into prototypes/ui_darkside/out/;
   the design part now lives in HANDOFF-improvements.md.
 
+- 2026-08-18 · operator: repo connector simplified to local-path-or-URL
+  (plain git first, gh as enrichment) — US-006 refined; US-024 office-format
+  template ingestion added READY with P-6 probed TRUE (stdlib zipfile+regex
+  parses docx tags); renders ds-repo-plug.svg + ds-factory-office.svg.
+
 ## Test ledger
 
 Empty until Phase 3.
