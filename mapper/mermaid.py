@@ -11,9 +11,17 @@ class ParseError(Exception):
 
 
 _MERMAID_EDGE = re.compile(
-    r"(\w+)(?:\[([^\]]+)\])?\s*-->(?:\|([^|]+)\|)?\s*(\w+)(?:\[([^\]]+)\])?"
+    r"([\w-]+)(?:\[([^\]]*)\])?\s*-->(?:\|([^|]*)\|)?\s*([\w-]+)(?:\[([^\]]*)\])?"
 )
-_MERMAID_NODE = re.compile(r"(\w+)(?:\[([^\]]+)\])?")
+_MERMAID_NODE = re.compile(r"([\w-]+)(?:\[([^\]]*)\])?")
+
+
+def slugify(value: str) -> str:
+    """Return a safe mermaid id: lowercase, hyphens/underscores allowed."""
+    value = value.lower().strip()
+    value = re.sub(r"[^\w\s-]", "-", value)
+    value = re.sub(r"[-\s]+", "-", value).strip("-")
+    return value[:32] or "n"
 
 
 def _ensure_node(nodes: dict[str, Node], nid: str, label: str | None) -> None:

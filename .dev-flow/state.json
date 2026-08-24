@@ -1,27 +1,35 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-08-18-batch-01",
-  "batch_objective": "Mapper MVP — TUI for concept/structure maps: concept maps with rich node fichas under a required-field schema, GitHub repo-as-map (branches/releases via gh), Mermaid round-trip, radial mind maps, main window (consult maps / plug repo / construct nodes & maps)",
-  "mode": "full",
-  "mode_history": [],
+  "batch_id": "2026-08-24-fix-batch",
+  "batch_objective": "Mapper fix batch — address HIGH data-loss and crash findings from REVIEW-2026-08-18.md: hyphenated ids, focus+save data loss, ctrl+p palette dispatch, export SVG crash, office fragmented tags.",
+  "mode": "core",
+  "mode_history": [
+    {
+      "batch_id": "2026-08-18-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-24"
+    }
+  ],
   "current_phase": 6,
   "phase_status": "complete",
   "iterations_per_phase": {
-    "0": 4,
-    "1": 1,
-    "2": 1,
-    "3": 1,
-    "4": 1,
-    "5": 1,
-    "6": 1
+    "0": 1,
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0
   },
   "artifacts": {
     "requirements": ".dev-flow/01-requirements.md",
     "plan": ".dev-flow/2026-08-18-batch-01/PLAN.md",
     "handoff": "HANDOFF.md",
     "handoff_darkside": "HANDOFF-darkside.md",
-    "handoff_improvements": "HANDOFF-improvements.md"
+    "handoff_improvements": "HANDOFF-improvements.md",
+    "review": "REVIEW-2026-08-18.md",
+    "handoff_fixes": "HANDOFF-fixes.md"
   },
   "decisions_log": [
     {
@@ -124,6 +132,31 @@
       "date": "2026-08-18",
       "phase": 0,
       "decision": "Operator refinements: US-006 — repo connects by LOCAL PATH or URL (plain git first; gh enrichment optional; render ds-repo-plug.svg); US-024 added READY — office-format templates (.docx/.pptx/.xlsx) ingested directly, tags parsed from OOXML with stdlib only (probe executed TRUE, premise P-6). Handoff updated."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Read-only review of the k7 implementation written to REVIEW-2026-08-18.md (5 HIGH verified at runtime, MED stack, test-quality gaps). HANDOFF-fixes.md makes it executable: per-fix location/root-cause/fix/regression-test, ordered, with the routing note (new fix batch, mode: core, or appended to the current batch's backlog — the operator decides at kickoff)."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "Fix batch kickoff (operator: 'Ok, ahora vamos desde aquí: HANDOFF-fixes.md'). New batch 2026-08-24-fix-batch in mode=core; scope = HIGH fixes 1-5 from REVIEW-2026-08-18.md + regression tests; MED/LOW remain backlog."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 4,
+      "decision": "Phase 4 fix implementation complete: Fix 1 (mermaid id regex [\\w-]+ + slugify seat in app.py/import_csv.py), Fix 2 (block structural edits while focus active), Fix 3 (COMMAND_PALETTE_ENABLE=False + palette dispatch by row identity), Fix 4 (Console file=io.StringIO()), Fix 5 (office.resolve per-paragraph run collapse + whitespace tolerance + XML escape)."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 5,
+      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 61 passed; regression tests added for all 5 HIGH fixes (test_mermaid.py, test_app.py focus guard, test_palette.py, test_export.py unicode, test_office.py fragmented+spaced tags); smoke tests verified hyphen id round-trip and darkside palette mount."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 6,
+      "decision": "Phase 6 fix batch close complete: dev-flow state.json updated; all HIGH fixes committed and merged to master; MED/LOW items remain in backlog for next batch."
     }
   ],
   "standing_authorization": {

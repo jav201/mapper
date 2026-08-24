@@ -8,9 +8,11 @@ from mapper.views.layered import LayeredRenderer
 
 def test_save_svg(tmp_path):
     g = Graph()
-    g.add_node(Node(id="a", ficha=Ficha(title="A")))
+    g.add_node(Node(id="a", ficha=Ficha(title="A ◆ unicode")))
     text = LayeredRenderer().render(g, selected_id="a", w=40, h=12)
     out = tmp_path / "out.svg"
     save_svg(text, out)
     assert out.exists()
-    assert "<svg" in out.read_text(encoding="utf-8")
+    content = out.read_text(encoding="utf-8")
+    assert "<svg" in content
+    assert "A" in content

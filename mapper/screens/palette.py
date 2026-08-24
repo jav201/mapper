@@ -87,12 +87,12 @@ class CommandPalette(ModalScreen[str | None]):
         list_view.clear()
         items = palette_items(query)
         # Group by group name to keep related commands together.
-        items = sorted(items, key=lambda b: b.group)
-        for binding in items:
+        self._items = sorted(items, key=lambda b: b.group)
+        for binding in self._items:
             label = Static(self._binding_label(binding))
             label.add_class("palette-binding")
             list_view.append(ListItem(label))
-        if items:
+        if self._items:
             list_view.index = 0
 
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -108,8 +108,7 @@ class CommandPalette(ModalScreen[str | None]):
             self.dismiss(None)
             return
         idx = list_view.index
-        items = palette_items(self.query_one("#palette-input", Input).value)
-        if 0 <= idx < len(items):
-            self.dismiss(items[idx].action)
+        if 0 <= idx < len(self._items):
+            self.dismiss(self._items[idx].action)
         else:
             self.dismiss(None)
