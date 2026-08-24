@@ -4,9 +4,11 @@ __pycache__/
 *.egg-info/
 .venv/
 
-# Derived index — never committed (text is the truth)
+# Derived index / local session state — never committed (text is the truth)
 mapper.db
 *.db
+maps/.mapper/
+.mapper/
 
 # Exported artifacts (generated on demand)
 *.svg
