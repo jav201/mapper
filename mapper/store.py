@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-from .model import Attachment, Edge, Ficha, Graph, Node, SchemaField
+from .model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
 
 
 class MapStoreError(Exception):
@@ -68,11 +68,21 @@ class MapStore:
         return sidecar
 
     def _build_sidecar(self, graph: Graph) -> dict[str, Any]:
-        """Serialize graph schema + fichas to sidecar dict."""
+        """Serialize graph schema + fichas + documents to sidecar dict."""
         sidecar: dict[str, Any] = {
             "schema": [
                 {"key": f.key, "label": f.label, "required": f.required, "kind": f.kind}
                 for f in graph.schema
+            ],
+            "documents": [
+                {
+                    "name": d.name,
+                    "source": d.source,
+                    "tags": d.tags,
+                    "inherited": d.inherited,
+                    "template": d.template,
+                }
+                for d in graph.documents.values()
             ],
             "nodes": {},
         }
@@ -107,6 +117,17 @@ class MapStore:
             for f in sidecar.get("schema", [])
         ]
         graph.schema = schema
+        graph.documents = {
+            d.get("name", ""): Document(
+                name=d.get("name", ""),
+                source=d.get("source", ""),
+                tags=d.get("tags", {}),
+                inherited=d.get("inherited", {}),
+                template=d.get("template", False),
+            )
+            for d in sidecar.get("documents", [])
+            if d.get("name")
+        }
         nodes_data = sidecar.get("nodes", {})
         for nid, ndata in nodes_data.items():
             if nid not in graph.nodes:
@@ -162,6 +183,27 @@ class MapStore:
         graph.add_edge(Edge(parent_id="root", child_id="n2"))
         self.save(map_id, graph)
         return graph
+
+    def _state_path(self) -> Path:
+        state_dir = self.workspace / ".mapper"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        return state_dir / "state.json"
+
+    def record_session(self, map_id: str, node_id: str | None) -> None:
+        """Persist the most recently visited map and node."""
+        state = {"map_id": map_id, "node_id": node_id}
+        self._state_path().write_text(json.dumps(state), encoding="utf-8")
+
+    def last_session(self) -> tuple[str | None, str | None]:
+        """Return the most recently visited (map_id, node_id), if any."""
+        path = self._state_path()
+        if not path.exists():
+            return (None, None)
+        try:
+            state = json.loads(path.read_text(encoding="utf-8"))
+            return (state.get("map_id"), state.get("node_id"))
+        except (json.JSONDecodeError, OSError):
+            return (None, None)
 
     def _reindex(self, map_id: str, mmd_text: str, yml_text: str, graph: Graph) -> None:
         text_hash = self._text_hash(mmd_text, yml_text)

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from rich.text import Text
 
+from mapper import darkside
 from mapper.model import Graph
 
 
@@ -23,8 +24,9 @@ class OutlineRenderer:
     ) -> Text:
         lines: list[Text] = []
         header = Text()
-        header.append("◆ MAPPER", style="bold magenta")
-        header.append(" · outline", style="dim")
+        header.append("◆ ", style=darkside.INK)
+        header.append("mapper", style=darkside.WORDMARK)
+        header.append(" · outline", style=darkside.MUT)
         lines.append(header)
 
         if graph.root_id is None:
@@ -35,11 +37,17 @@ class OutlineRenderer:
             node = graph.nodes[nid]
             prefix = _indent(depth) + ("- " if depth else "")
             line = Text()
-            line.append(prefix, style="dim")
-            style = "bold" if nid == selected_id else "default"
-            line.append(node.ficha.title, style=style)
-            if node.ficha.meta:
-                line.append(f"  {node.ficha.meta}", style="dim")
+            if nid == selected_id:
+                block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+                line.append(prefix, style=block)
+                line.append(node.ficha.title, style=block)
+                if node.ficha.meta:
+                    line.append(f"  {node.ficha.meta}", style=block)
+            else:
+                line.append(prefix, style=darkside.MUT)
+                line.append(node.ficha.title, style="bold")
+                if node.ficha.meta:
+                    line.append(f"  {node.ficha.meta}", style=darkside.MUT)
             lines.append(line)
             for cid in graph.children_of(nid):
                 walk(cid, depth + 1)

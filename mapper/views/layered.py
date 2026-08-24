@@ -3,16 +3,17 @@ from __future__ import annotations
 
 from rich.text import Text
 
+from mapper import darkside
 from mapper.canvas import Canvas
 from mapper.model import Graph, Node
 
 
 STATE_STYLE = {
-    "ok": "green",
-    "risk": "yellow",
-    "late": "red",
-    "blocked": "red",
-    "": "default",
+    "ok": darkside.INK,
+    "risk": darkside.WARN,
+    "late": darkside.WARN,
+    "blocked": darkside.ALERT,
+    "": darkside.INK,
 }
 
 
@@ -98,14 +99,16 @@ class LayeredRenderer:
         lines: list[Text] = []
         if with_header:
             header = Text()
-            header.append("◆ MAPPER", style="bold magenta")
+            header.append("◆ ", style=darkside.INK)
+            header.append("mapper", style=darkside.WORDMARK)
             title_suffix = " · árbol legacy" if legacy else " · mapa de conceptos"
-            header.append(title_suffix, style="dim")
+            header.append(title_suffix, style=darkside.MUT)
             if legacy:
-                header.append(" " * max(0, avail - 45))
-                header.append(f"cobertura {pct}%", style="bold" if pct > 80 else "yellow" if pct > 50 else "red")
+                filled = min(5, max(0, round(pct / 20)))
+                header.append(" " * max(0, avail - 48))
+                header.append(darkside.step_meter(filled, 5))
             header.append(" " * max(0, avail - 30))
-            header.append(f"{len(all_ids)} nodos", style="dim")
+            header.append(f"{len(all_ids)} nodos", style=darkside.MUT)
             lines.append(header)
 
         cv = Canvas(avail, body_h)
@@ -124,26 +127,31 @@ class LayeredRenderer:
             )
             title = _fit(node.ficha.title, card_w - 3)
             for j, ch in enumerate("▐ " + title):
-                style = "reverse" if hit else (tone if j == 0 else "default")
+                if hit:
+                    style = f"{darkside.INK} on {darkside.STEP}"
+                elif j == 0:
+                    style = darkside.STEP  # passive rail
+                else:
+                    style = tone
                 cv.put(cx + j, y, ch, style)
 
             if legacy:
                 # row 2: document chip
                 doc = node.ficha.fields.get("D", "")
-                doc_txt = f"◫ {doc}" if doc else "◫ SIN ACTA"
-                doc_style = "green" if doc else "red"
+                doc_txt = f"◫ {doc}" if doc else "◫ sin acta"
+                doc_style = darkside.INK if doc else darkside.ALERT
                 cv.text(cx + 1, y + 1, _fit(doc_txt, card_w - 2), doc_style)
                 # row 3: schema letters
                 xx = cx + 1
                 for sf in graph.schema:
                     have = bool(node.ficha.fields.get(sf.key))
-                    cv.put(xx, y + 2, sf.key, "default")
+                    cv.put(xx, y + 2, sf.key, darkside.MUT)
                     cv.put(xx + 1, y + 2, "✓" if have else "░",
-                           "green" if have else "dim")
+                           darkside.INK if have else darkside.STEP)
                     xx += 3
             else:
                 for j, ch in enumerate(_fit(node.ficha.meta, card_w - 2)):
-                    cv.put(cx + 1 + j, y + 1, ch, "dim")
+                    cv.put(cx + 1 + j, y + 1, ch, darkside.MUT)
 
             parent = graph.parent_of(nid)
             if parent is not None and parent in pos:
@@ -158,39 +166,39 @@ class LayeredRenderer:
             cx, lv = pos[selected_id]
             cx = cx - card_w // 2
             y = lv * level_h
+            block_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
             for j, ch in enumerate("▐ " + _fit(node.ficha.title, card_w - 3)):
-                style = "bold magenta" if j == 0 else "bold"
-                cv.put(cx + j, y, ch, style)
+                cv.put(cx + j, y, ch, block_style)
 
         lines.extend(cv.rows())
 
         # ficha strip
         sel = graph.nodes.get(selected_id)
-        lines.append(Text("─" * avail, style="frame"))
+        lines.append(Text("─" * avail, style=darkside.STEP))
         if sel is not None:
             strip = Text()
-            strip.append("▸ ", style="bold magenta")
+            strip.append("▸ ", style=darkside.ACCENT)
             strip.append(sel.ficha.title, style="bold")
-            strip.append(f"   {sel.ficha.meta}", style="dim")
+            strip.append(f"   {sel.ficha.meta}", style=darkside.MUT)
             if legacy:
                 have, req = sel.ficha.required_coverage(graph.schema)
-                strip.append(f"   {have}/{req} requeridos",
-                             style="bold" if have == req else "red" if have < req - 1 else "yellow")
+                strip.append("   cobertura ", style=darkside.MUT)
+                strip.append(darkside.step_meter(have, req))
             lines.append(strip)
             if legacy:
                 doc = sel.ficha.fields.get("D", "")
                 row = Text()
-                row.append("  documento ", style="dim")
-                row.append(doc or "SIN ACTA", style="green" if doc else "red")
-                row.append("   dueño ", style="dim")
-                row.append(sel.ficha.fields.get("O", "—"), style="default")
-                row.append("   creado ", style="dim")
-                row.append(sel.ficha.fields.get("Y", "—"), style="default")
+                row.append("  documento ", style=darkside.MUT)
+                row.append(doc or "sin acta", style=darkside.INK if doc else darkside.ALERT)
+                row.append("   dueño ", style=darkside.MUT)
+                row.append(sel.ficha.fields.get("O", "—"), style=darkside.INK)
+                row.append("   creado ", style=darkside.MUT)
+                row.append(sel.ficha.fields.get("Y", "—"), style=darkside.INK)
                 lines.append(row)
             if sel.ficha.notes:
-                lines.append(Text(_fit("  " + sel.ficha.notes, avail), style="dim"))
+                lines.append(Text(_fit("  " + sel.ficha.notes, avail), style=darkside.MUT))
         else:
-            lines.append(Text(_fit("  (selecciona un nodo — j/k/h/l, ↵ abre la ficha)", avail), style="dim"))
+            lines.append(Text(_fit("  (selecciona un nodo — j/k/h/l, ↵ abre la ficha)", avail), style=darkside.MUT))
 
         # Join rows into one Text with newlines
         result = Text()

@@ -53,12 +53,53 @@ class Edge:
 
 
 @dataclass
+class Document:
+    """A document template attached to a node or inherited from a parent."""
+
+    name: str
+    source: str
+    tags: dict[str, str] = field(default_factory=dict)
+    inherited: dict[str, str] = field(default_factory=dict)
+    template: bool = False
+
+
+@dataclass
 class Graph:
     """A navigable structure of nodes and edges."""
+
     nodes: dict[str, Node] = field(default_factory=dict)
     edges: list[Edge] = field(default_factory=list)
     root_id: str | None = None
     schema: list[SchemaField] = field(default_factory=list)
+    documents: dict[str, Document] = field(default_factory=dict)
+
+    def document_names(self) -> list[str]:
+        """Return all registered document names."""
+        return sorted(self.documents.keys())
+
+    def resolve_document(self, name: str, node: Node) -> Document:
+        """Return a document with missing local tags filled from the parent node's same-named document, if any."""
+        doc = self.documents.get(name)
+        if doc is None:
+            return Document(name=name, source="")
+        merged_tags = dict(doc.tags)
+        merged_inherited = dict(doc.inherited)
+        parent_id = self.parent_of(node.id)
+        if parent_id is not None:
+            parent = self.nodes.get(parent_id)
+            if parent is not None:
+                parent_doc = self.resolve_document(name, parent)
+                for key, value in parent_doc.tags.items():
+                    if key not in merged_tags:
+                        merged_tags[key] = value
+                        merged_inherited[key] = value
+        return Document(
+            name=doc.name,
+            source=doc.source,
+            tags=merged_tags,
+            inherited=merged_inherited,
+            template=doc.template,
+        )
 
     def add_node(self, node: Node) -> None:
         self.nodes[node.id] = node
@@ -94,6 +135,7 @@ class Graph:
             edges=[e for e in self.edges if e.parent_id in keep and e.child_id in keep],
             root_id=node_id,
             schema=self.schema,
+            documents=self.documents,
         )
 
     def coverage(self) -> tuple[int, int]:

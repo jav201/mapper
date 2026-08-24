@@ -5,11 +5,22 @@ import math
 
 from rich.text import Text
 
+from mapper import darkside
 from mapper.canvas import Canvas
 from mapper.model import Graph
 
 
-_HUES = ("cyan", "green", "yellow", "magenta", "red", "blue", "bright_green", "bright_magenta")
+# Achromatic branch tints only — KMBlue is reserved for selection/interactivity.
+_HUES = (
+    darkside.STEP,
+    "#3a3a3a",
+    "#4a4a4a",
+    darkside.MUT,
+    "#5a5a5a",
+    "#666666",
+    darkside.INK,
+    "#2e2e2e",
+)
 
 
 def _leaves(graph: Graph, nid: str) -> int:
@@ -80,7 +91,7 @@ class RadialRenderer:
 
         for i, ch in enumerate(children):
             tag(ch, _HUES[i % len(_HUES)])
-        branch_of[graph.root_id] = "magenta"
+        branch_of[graph.root_id] = darkside.INK
 
         # Draw edges as simple lines in dot space
         for nid in graph.nodes:
@@ -109,18 +120,32 @@ class RadialRenderer:
             cw = len(title) + 3
             x = max(0, min(inner - cw, x - cw // 2))
             y = max(0, min(body_h - 1, y))
+            pill_bg = darkside.PANEL
             for j in range(cw):
-                cv.bgs[(x + j, y)] = "#161b22"
+                cv.bgs[(x + j, y)] = pill_bg
+            block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
             for j, ch in enumerate(" " + title):
-                style = "bold" if sel else ("default" if j else branch_of.get(nid, "magenta"))
+                if sel:
+                    style = block
+                elif j == 0:
+                    style = ""
+                else:
+                    style = branch_of.get(nid, darkside.INK)
                 cv.put(x + j, y, ch, style)
-            cv.put(x, y, "◆" if nid == graph.root_id else "●",
-                   "magenta" if sel or nid == graph.root_id else branch_of.get(nid, "default"))
+            marker = "◆" if nid == graph.root_id else "●"
+            if sel:
+                marker_style = block
+            elif nid == graph.root_id:
+                marker_style = darkside.INK
+            else:
+                marker_style = branch_of.get(nid, darkside.MUT)
+            cv.put(x, y, marker, marker_style)
 
         lines = [Text()]
         header = Text()
-        header.append("◆ MAPPER", style="bold magenta")
-        header.append(" · mapa mental", style="dim")
+        header.append("◆ ", style=darkside.INK)
+        header.append("mapper", style=darkside.WORDMARK)
+        header.append(" · mapa mental", style=darkside.MUT)
         lines[0] = header
         lines.extend(cv.rows())
 
