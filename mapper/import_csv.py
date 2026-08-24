@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+from .mermaid import slugify
 from .model import Edge, Ficha, Graph, Node
 
 
@@ -46,14 +47,15 @@ def preview_csv(path: Path) -> Graph:
 
     # First pass: create nodes so forward parent references resolve.
     for row in reader:
-        nid = (row.get("id") or "").strip()
-        if not nid:
+        raw_id = (row.get("id") or "").strip()
+        if not raw_id:
             continue
+        nid = slugify(raw_id)
 
         title = (row.get("title") or "").strip()
-        title = title if title else nid
+        title = title if title else raw_id
 
-        parent_id = (row.get("parent") or "").strip()
+        parent_id = slugify((row.get("parent") or "").strip())
         depth_raw = (row.get("depth") or "").strip()
         depth = int(depth_raw) if depth_raw.lstrip("-").isdigit() else None
 

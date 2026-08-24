@@ -1,6 +1,7 @@
 """Export current view to SVG/PNG."""
 from __future__ import annotations
 
+import io
 from pathlib import Path
 
 from rich.console import Console
@@ -13,7 +14,7 @@ class ExportError(Exception):
 
 def save_svg(text: Text, path: Path | str) -> None:
     """Capture a Rich Text to SVG."""
-    console = Console(record=True, width=200, height=60)
+    console = Console(record=True, width=200, height=60, file=io.StringIO())
     console.print(text)
     console.save_svg(str(path), title="mapper")
 

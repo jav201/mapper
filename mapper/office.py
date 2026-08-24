@@ -8,6 +8,7 @@ concatenating text runs per paragraph before matching.
 from __future__ import annotations
 
 import re
+import xml.sax.saxutils as saxutils
 import zipfile
 from pathlib import Path
 
@@ -93,26 +94,93 @@ def extract_tags(path: Path) -> list[str]:
     return sorted(found)
 
 
+def _xml_escape(value: str) -> str:
+    """Escape characters that break OOXML text runs."""
+    return saxutils.escape(value)
+
+
+def _resolve_docx_paragraph(para_xml: str, tags: dict[str, str]) -> str:
+    """Resolve tags inside a single docx paragraph XML fragment.
+
+    Concatenates all <w:t> text runs, replaces tags, then distributes the
+    result back into the runs. This handles tags split across runs or with
+    whitespace inside the braces.
+    """
+    # Extract runs while preserving their XML wrappers.
+    runs: list[tuple[str, str]] = []
+    pos = 0
+    for match in re.finditer(r"(<w:t[^>]*>)([^<]*)(</w:t>)", para_xml):
+        prefix, text, suffix = match.groups()
+        runs.append((prefix + text + suffix, text))
+        pos = match.end()
+
+    if not runs:
+        return para_xml
+
+    # Concatenate plain text and resolve tags.
+    full_text = "".join(text for _, text in runs)
+    resolved_text = full_text
+    for key, value in tags.items():
+        # Tolerate whitespace inside braces: {{ key }} matches key.
+        pattern = re.compile(r"\{\{\s*" + re.escape(key) + r"\s*\}\}")
+        resolved_text = pattern.sub(_xml_escape(value), resolved_text)
+
+    if resolved_text == full_text:
+        return para_xml
+
+    # Distribute resolved text back into the first run; clear the rest.
+    # This preserves styles on the first run and keeps the paragraph valid.
+    first_run_prefix, first_run_suffix = runs[0][0].split(runs[0][1], 1)
+    out = [first_run_prefix + resolved_text + first_run_suffix]
+    for run_xml, _ in runs[1:]:
+        prefix, suffix = run_xml.split("</w:t>", 1)
+        # Keep the XML wrapper but empty the text content.
+        tag_open = prefix[: prefix.index(">") + 1]
+        out.append(tag_open + suffix)
+    return "".join(out)
+
+
+def _resolve_text_xml(text: str, tags: dict[str, str]) -> str:
+    """Resolve tags in a generic XML text string (pptx/xlsx)."""
+    resolved = text
+    for key, value in tags.items():
+        pattern = re.compile(r"\{\{\s*" + re.escape(key) + r"\s*\}\}")
+        resolved = pattern.sub(_xml_escape(value), resolved)
+    return resolved
+
+
 def resolve(path: Path, tags: dict[str, str], target: Path) -> Path:
     """Create a resolved copy of *path* at *target* with tags replaced.
 
-    Fragments are handled by replacing across the whole XML member string;
-    this works for tags that may be split across runs because the XML still
-    contains the marker characters contiguously.
+    For .docx, tags are resolved per paragraph by collapsing text runs, which
+    handles fragmentation and whitespace inside braces. Replacement values are
+    XML-escaped before insertion.
     """
     kind = _kind_from_path(path)
     if not kind:
         raise ValueError(f"unsupported office file: {path}")
 
+    members = set(_text_members(kind))
     target.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(path, "r") as zin:
         with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
                 data = zin.read(item.filename)
-                if item.filename in _text_members(kind):
+                if item.filename in members:
                     text = data.decode("utf-8")
-                    for key, value in tags.items():
-                        text = text.replace(f"{{{{{key}}}}}", value)
+                    if kind == "docx":
+                        # Process each <w:p>...</w:p> paragraph.
+                        parts = re.split(r"(</w:p>)", text)
+                        resolved_parts = []
+                        for i, part in enumerate(parts):
+                            if i % 2 == 1:
+                                # This is the closing tag itself.
+                                resolved_parts.append(part)
+                            else:
+                                resolved_parts.append(_resolve_docx_paragraph(part, tags))
+                        text = "".join(resolved_parts)
+                    else:
+                        text = _resolve_text_xml(text, tags)
                     data = text.encode("utf-8")
                 zout.writestr(item, data)
     return target

@@ -19,7 +19,7 @@ from .export import save_svg
 from .github import GitHubConnector, GitHubError
 from .import_csv import preview_csv
 from .keymap import groups_for_keybar
-from .mermaid import dump as dump_mermaid
+from .mermaid import dump as dump_mermaid, slugify
 from .model import Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen
@@ -530,7 +530,7 @@ class _ImportPreviewScreen(Screen):
         self.app.pop_screen()
 
     def action_palette(self) -> None:
-        self.app.push_screen(CommandPalette())
+        self.app.action_palette()
 
     def action_help(self) -> None:
         self.app.push_screen(HelpScreen())
@@ -565,7 +565,7 @@ class PlugRepoScreen(Screen):
         self.app.pop_screen()
 
     def action_palette(self) -> None:
-        self.app.push_screen(CommandPalette())
+        self.app.action_palette()
 
     def action_help(self) -> None:
         self.app.push_screen(HelpScreen())
@@ -650,7 +650,7 @@ class RepoScreen(Screen):
         self.app.pop_screen()
 
     def action_palette(self) -> None:
-        self.app.push_screen(CommandPalette())
+        self.app.action_palette()
 
     def action_help(self) -> None:
         self.app.push_screen(HelpScreen())
@@ -978,9 +978,18 @@ class MapScreen(Screen):
         except Exception as e:
             self.notify(f"exportación fallida: {e}", severity="error")
 
+    def _guard_focus_mutation(self) -> bool:
+        """Return True if a structural mutation should proceed."""
+        if self.focus_active:
+            self.notify("no se puede editar con focus activo (presiona f para salir)")
+            return False
+        return True
+
     def action_add_child(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes:
             self.notify("selecciona un nodo primero")
+            return
+        if not self._guard_focus_mutation():
             return
 
         def on_title(title: str | None) -> None:
@@ -988,7 +997,7 @@ class MapScreen(Screen):
                 return
             self._push_snapshot()
             parent_id = self.nav.cursor
-            base = re.sub(r"[^a-z0-9_-]", "-", title.lower()).strip("-")[:20] or "n"
+            base = slugify(title) or "n"
             nid = base
             counter = 1
             while nid in self.graph.nodes:
@@ -1022,6 +1031,8 @@ class MapScreen(Screen):
     def action_archive(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes or self.store is None:
             return
+        if not self._guard_focus_mutation():
+            return
         node = self.graph.nodes[self.nav.cursor]
         self._push_snapshot()
         self._remove_subtree(self.nav.cursor)
@@ -1054,7 +1065,7 @@ class MapScreen(Screen):
         self.app.pop_screen()
 
     def action_palette(self) -> None:
-        self.app.push_screen(CommandPalette())
+        self.app.action_palette()
 
     def action_help(self) -> None:
         self.app.push_screen(HelpScreen())
@@ -1062,6 +1073,8 @@ class MapScreen(Screen):
 
 class MapperApp(App):
     """Main application entry point."""
+
+    COMMAND_PALETTE_ENABLE = False
 
     CSS = """
     Screen { background: #000000; color: #f5f5f5; }
@@ -1159,7 +1172,18 @@ class MapperApp(App):
             self.screen.on_mount()
 
     def action_palette(self) -> None:
-        self.push_screen(CommandPalette())
+        target_screen = self.screen
+
+        def on_command(action: str | None) -> None:
+            if not action:
+                return
+            method_name = f"action_{action.replace(' ', '_')}"
+            if hasattr(target_screen, method_name):
+                getattr(target_screen, method_name)()
+            elif hasattr(self, method_name):
+                getattr(self, method_name)()
+
+        self.push_screen(CommandPalette(), callback=on_command)
 
     def action_help(self) -> None:
         self.push_screen(HelpScreen())

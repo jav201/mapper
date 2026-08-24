@@ -60,3 +60,37 @@ def test_extract_preview_text(tmp_path):
     preview = office.extract_preview_text(path)
     assert "Primer párrafo" in preview
     assert "Segundo párrafo" in preview
+
+
+def test_resolve_fragmented_tag(tmp_path):
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<w:document><w:body>'
+        '<w:p><w:r><w:t>Hola {{pue</w:t></w:r><w:r><w:t>sto}}</w:t></w:r></w:p>'
+        '</w:body></w:document>'
+    )
+    source = tmp_path / "frag.docx"
+    _make_docx(source, xml)
+    target = tmp_path / "out.docx"
+    office.resolve(source, {"puesto": "dev"}, target)
+    with zipfile.ZipFile(target, "r") as zf:
+        resolved = zf.read("word/document.xml").decode("utf-8")
+    assert "Hola dev" in resolved
+    assert "{{puesto}}" not in resolved
+
+
+def test_resolve_spaced_tag_and_xml_escape(tmp_path):
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<w:document><w:body>'
+        '<w:p><w:r><w:t>Notas: {{ nombre }}</w:t></w:r></w:p>'
+        '</w:body></w:document>'
+    )
+    source = tmp_path / "spaced.docx"
+    _make_docx(source, xml)
+    target = tmp_path / "out.docx"
+    office.resolve(source, {"nombre": "A & B <tag>"}, target)
+    with zipfile.ZipFile(target, "r") as zf:
+        resolved = zf.read("word/document.xml").decode("utf-8")
+    assert "A &amp; B &lt;tag&gt;" in resolved
+    assert "{{nombre}}" not in resolved
