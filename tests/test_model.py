@@ -38,3 +38,10 @@ def test_graph_coverage():
     g.add_node(Node(id="a", ficha=Ficha(fields={"D": "x"})))
     g.add_node(Node(id="b", ficha=Ficha(fields={})))
     assert g.coverage() == (1, 2)
+
+
+def test_node_linked_map_id():
+    link = Node(id="a", ficha=Ficha(fields={"map": "sistema-legacy"}))
+    assert link.linked_map_id() == "sistema-legacy"
+    plain = Node(id="b", ficha=Ficha(fields={"D": "x"}))
+    assert plain.linked_map_id() is None

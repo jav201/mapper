@@ -1,10 +1,12 @@
 """Layered tree renderer for concept and legacy maps."""
 from __future__ import annotations
 
+from rich.markup import escape
 from rich.text import Text
 
 from mapper import darkside
 from mapper.canvas import Canvas
+from mapper.diff import DiffResult
 from mapper.model import Graph, Node
 
 
@@ -69,9 +71,15 @@ class LayeredRenderer:
         h: int = 24,
         query: str = "",
         with_header: bool = True,
+        diff: DiffResult | None = None,
     ) -> Text:
         if graph.root_id is None or not graph.nodes:
             return Text("(no map loaded)")
+
+        added_ids = diff.added if diff else set()
+        removed_ids = diff.removed if diff else set()
+        changed = diff.changed if diff else {}
+        removed_titles = diff.removed_titles if diff else {}
 
         all_ids = list(graph.nodes)
         n_leaves = sum(1 for nid in all_ids if not graph.children_of(nid))
@@ -91,7 +99,9 @@ class LayeredRenderer:
 
         pos = _tree_layout(graph, card_w, gap)
         depth_max = max(lv for _, lv in pos.values()) if pos else 0
-        body_h = max((depth_max + 1) * card_h + depth_max * edge_h, h - 5)
+        tree_bottom = (depth_max + 1) * card_h + depth_max * edge_h
+        removed_h = (card_h + 2) if removed_ids else 0
+        body_h = max(tree_bottom + removed_h, h - 5)
 
         have_total, req_total = graph.coverage()
         pct = round(100 * have_total / req_total) if req_total else 100
@@ -125,15 +135,27 @@ class LayeredRenderer:
                 or qlower in node.ficha.notes.lower()
                 or any(qlower in v.lower() for v in node.ficha.fields.values())
             )
-            title = _fit(node.ficha.title, card_w - 3)
+            is_added = nid in added_ids
+            changed_keys = changed.get(nid, [])
+
+            chip_text = ""
+            if changed_keys:
+                chip_text = " " + ",".join(changed_keys) + " "
+            title_w = card_w - 3 - (len(chip_text) if changed_keys else 0)
+            title = _fit(node.ficha.title, max(1, title_w))
             for j, ch in enumerate("▐ " + title):
                 if hit:
                     style = f"{darkside.INK} on {darkside.STEP}"
                 elif j == 0:
-                    style = darkside.STEP  # passive rail
+                    style = darkside.ACCENT if is_added else darkside.STEP
                 else:
                     style = tone
                 cv.put(cx + j, y, ch, style)
+            if changed_keys:
+                chip = _fit(chip_text, len(chip_text))
+                chip_x = cx + card_w - len(chip)
+                for j, ch in enumerate(chip):
+                    cv.put(chip_x + j, y, ch, f"{darkside.GROUND} on {darkside.WARN}")
 
             if legacy:
                 # row 2: document chip
@@ -157,8 +179,24 @@ class LayeredRenderer:
             if parent is not None and parent in pos:
                 px, plv = pos[parent]
                 px = max(0, px - card_w // 2)
+                edge_tone = darkside.ACCENT if (is_added or parent in added_ids) else "frame"
                 cv.elbow_down(px + card_w // 2, plv * level_h + card_h,
-                              cx + card_w // 2, y - 1, "frame")
+                              cx + card_w // 2, y - 1, edge_tone)
+
+        # Removed nodes rendered as alert ghosts below the tree.
+        if removed_ids:
+            gy = tree_bottom + 1
+            cv.text(0, gy, "─" * avail, darkside.STEP)
+            cv.text(1, gy + 1, "eliminados", darkside.MUT)
+            gx = 12
+            for nid in sorted(removed_ids):
+                title = removed_titles.get(nid, nid)
+                ghost = _fit(escape(title), card_w - 2)
+                # strikethrough via unicode combining char is fragile; use a tilde prefix.
+                cv.text(gx, gy + 2, "~" + ghost[:-1], darkside.ALERT)
+                gx += card_w + gap
+                if gx + card_w > avail:
+                    break
 
         # selection highlight on top
         if selected_id and selected_id in pos:

@@ -7,12 +7,6 @@ from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from mapper.store import MapStore, MapStoreError
 
 
-@pytest.fixture
-def tmp_store(tmp_path):
-    ws = tmp_path / "workspace"
-    return MapStore(ws)
-
-
 def test_store_save_load_roundtrip(tmp_store):
     g = Graph(schema=[SchemaField(key="D", label="documento", required=True)])
     g.add_node(Node(id="root", ficha=Ficha(title="Root", fields={"D": "ACTA-1"})))
@@ -44,3 +38,17 @@ def test_store_rebuilds_index_when_deleted(tmp_store):
 def test_store_missing_map_raises(tmp_store):
     with pytest.raises(MapStoreError):
         tmp_store.load("missing")
+
+
+def test_store_create_from_template(tmp_store):
+    graph = tmp_store.create_from_template("legacy", "legacy-audit")
+    assert graph.root_id == "root"
+    assert graph.nodes["root"].ficha.title == "auditoría legacy"
+    keys = {f.key for f in graph.schema}
+    assert {"D", "O", "E"} <= keys
+    assert "C" in keys
+
+
+def test_store_create_from_template_unknown(tmp_store):
+    with pytest.raises(MapStoreError):
+        tmp_store.create_from_template("x", "no-such-template")

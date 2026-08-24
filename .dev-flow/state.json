@@ -8,7 +8,7 @@
   "current_phase": 6,
   "phase_status": "complete",
   "iterations_per_phase": {
-    "0": 1,
+    "0": 3,
     "1": 1,
     "2": 1,
     "3": 1,
@@ -19,7 +19,9 @@
   "artifacts": {
     "requirements": ".dev-flow/01-requirements.md",
     "plan": ".dev-flow/2026-08-18-batch-01/PLAN.md",
-    "handoff": "HANDOFF.md"
+    "handoff": "HANDOFF.md",
+    "handoff_darkside": "HANDOFF-darkside.md",
+    "handoff_improvements": "HANDOFF-improvements.md"
   },
   "decisions_log": [
     {
@@ -72,6 +74,46 @@
       "date": "2026-08-21",
       "phase": 6,
       "decision": "Phase 6 close complete: postmortem written, traceability matrix sealed, all artifacts in declared homes, batch merged to master."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Darkside round (operator): the UI speaks DARKSIDE (recorded as design decision D-1 in 01-requirements §6.2). Five functional stories added and classified READY: US-015 empty states, US-016 ctrl+p palette, US-017 help surface, US-018 resume-last, US-019 undo. Renders in prototypes/ui_darkside/out/."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "HANDOFF-darkside.md written for the implementation agent: the darkside contract with the distinctive elements the prototype rounds did not show (rail, step meter, tempo=300 in_out_cubic motion, recessive wordmark, tab strip as the one interactive affordance up top)."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Improvements round (operator: 'implementar todas'): D-A radial darkside rendered (ds-mental.svg — grey steps + only the active path blue; production radial.py's branch hues are the violation to fix). Four functional stories added READY: US-020 coverage report, US-021 map diff vs HEAD, US-022 CSV/TSV import, US-023 templates + linked maps. HANDOFF-improvements.md written."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "Design triplet prototyped (operator order: prototypes first, then handoff): D-B motion flipbook (6 frames, 300 ms in_out_cubic selection breath on the production keymap) and D-C home identity moment (big recessive wordmark + computed moon) rendered into prototypes/ui_darkside/out/; D-A noted as fixing radial.py's branch-hue violation. Design section added to HANDOFF-improvements.md."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "Phase-0 improvements gate approved. Operator instruction: 'implementemos junto con HANDOFF-improvements.md. Abre swarm si es necesario.' Design triplet D-A/D-B/D-C plus US-020..US-023 remain READY; repo-view prototypes B/D also approved. Proceeding to Phase 4 (implementation)."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 4,
+      "decision": "Phase 4 implementation complete: integrated D-A radial active path, US-020 coverage report, US-021 diff vs HEAD, US-022 CSV/TSV import, US-023 templates + linked maps, plus repo views B/D (RailTimelineRenderer and HybridLaneRenderer) and D-B motion pulse. Files touched: mapper/app.py, mapper/motion.py, tests/conftest.py, tests/test_store.py."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 5,
+      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 46 passed; smoke tests via Textual pilot verified MapScreen linked-map navigation, CoverageScreen, RepoScreen view cycling, CSV import preview, and template picker."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 6,
+      "decision": "Phase 6 close complete: dev-flow artifacts updated (state.json, 01-requirements.md §6.2 design decisions D-A/D-B/D-C); all changes committed and merged to master under the improvements round."
     }
   ],
   "standing_authorization": {

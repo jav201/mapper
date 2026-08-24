@@ -110,6 +110,15 @@ building concept maps; the team sharing a versioned map.
 | US-012 | As a reader, I want to collapse everything but a selected subtree, so that big maps read in parts. | prototype NOTES (complementary) | READY |
 | US-013 | As a reader, I want to open a node's ficha in place — notes, fields, links — without leaving the map, so that reading never breaks flow. | prototype M1/M4 ficha strip | READY |
 | US-014 | As a user, I want every node to be able to hold files, URLs and images as attachments, so that the node's evidence lives on the node itself. | operator refinement (this gate); taskboard precedent (Task.urls/images) | READY |
+| US-015 | As a user, I want designed empty states (no maps in the workspace, an empty map, an empty search) that tell me exactly which key starts something, so that I never face a dead screen. | darkside round (operator) | READY |
+| US-016 | As a user, I want a command palette (`ctrl+p`) with grouped commands and the first match pre-selected, so that every capability is discoverable and reachable in two keys. | darkside round (operator) | READY |
+| US-017 | As a user, I want a help surface (`?`) listing every live key grouped by category, so that I can learn the app without leaving it. | darkside round (operator) | READY |
+| US-018 | As a user, I want the home to offer resume-where-I-left (last map and node), so that returning to work costs zero navigation. | darkside round (operator) | READY |
+| US-019 | As a user, I want to undo my last structural change, so that a mistake costs nothing. | darkside round (operator); taskboard precedent | READY |
+| US-020 | As an auditor, I want a coverage report view listing every node missing required fields, ordered by subtree, so that the compliance worklist writes itself. | improvements round (operator, 2026-08-18) | READY |
+| US-021 | As a reviewer, I want to see what changed in the map since the last commit — nodes added, removed, renamed, re-parented, fields changed — painted on the map itself, so that review happens on the map. | improvements round (operator) | READY |
+| US-022 | As an analyst, I want to import a CSV/TSV (one row per node, indent or parent column) as a tree, so that the company's Excel workflow migrates into mapper. | improvements round (operator); the operator's own "muchas compañías lo hacen en excel" | READY |
+| US-023 | As a user, I want map templates (the legacy-audit schema predeclared) and nodes that open other maps, so that starting an audit costs one key and big systems decompose into linked maps. | improvements round (operator) | READY |
 
 #### Refinement log (one block per story)
 
@@ -325,6 +334,149 @@ building concept maps; the team sharing a versioned map.
 - **Open questions:** reference vs copy? (default: reference by path; an
   optional per-map `attachments/` folder for portable assets lands in Phase 1
   if wanted)
+- **Classification:** `READY`.
+
+**US-015 — empty states that onboard**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = any · outcome = every empty surface (no maps
+  in the workspace, an empty map, an empty search result) shows what to press
+  next, with the key lit · why = the operator's guidance point #3; a dead
+  screen is a bug-shaped silence · out of scope = multi-step wizards.
+- **Feasibility (E, S):** one designed empty-state component per surface;
+  rendered in the darkside prototype (`ds-home-empty.svg`) · unknowns = none ·
+  fits one batch? = yes.
+- **Evaluability (T):** "When the workspace has no maps, the user observes the
+  four doors with their keys and the hint naming the first step; when a search
+  matches nothing, the user observes `0 nodos · esc limpia`."
+- **Open questions:** none.
+- **Classification:** `READY`.
+
+**US-016 — command palette (`ctrl+p`)**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = any · outcome = one palette listing every
+  command reachable from the current view, grouped by category, fuzzy by name
+  and key, first match pre-selected · why = discoverability without leaving
+  the keyboard; the operator's one-app point · out of scope = free-text
+  actions beyond the command set.
+- **Feasibility (E, S):** the command list derives from the ONE keymap seat
+  (the taskboard keybar contract — the palette and the bar cannot drift);
+  rendered in the darkside prototype (`ds-palette.svg`) · unknowns = none ·
+  fits one batch? = yes.
+- **Evaluability (T):** "When the user types `ctrl+p` and `fic`, they observe
+  the matching command rows grouped with the first match solid; when they
+  press ↵, they observe that command run."
+- **Open questions:** none.
+- **Classification:** `READY`.
+
+**US-017 — help surface (`?`)**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = any · outcome = a help screen listing every
+  live key for the current view, grouped by category · why = NAVIGATION's
+  discoverability tiers; the bar shows the common keys, `?` shows all · out
+  of scope = prose manuals.
+- **Feasibility (E, S):** same keymap seat as the bar and the palette — one
+  list, three readers · unknowns = none · fits one batch? = yes.
+- **Evaluability (T):** "When the user presses `?`, they observe every key
+  live in the current view with its label, grouped; when they press esc, they
+  observe the view they came from."
+- **Open questions:** none.
+- **Classification:** `READY`.
+
+**US-018 — resume where I left**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = any · outcome = the home's first row is the
+  last open map with its last selected node, one key to resume · why =
+  returning to work costs zero navigation · out of scope = per-map session
+  history beyond the last position.
+- **Feasibility (E, S):** session state (last map + last node id) persisted in
+  the workspace index; rendered in the darkside prototype (resume row) ·
+  unknowns = none · fits one batch? = yes.
+- **Evaluability (T):** "When the app relaunches, the user observes the resume
+  row with the last map and node; when they press ↵, they observe that map
+  with that node selected."
+- **Open questions:** none.
+- **Classification:** `READY`.
+
+**US-019 — undo**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = any · outcome = `u` reverts the last
+  structural change (node added/removed/renamed/re-parented, field edit,
+  document edit) · why = taskboard's precedent and plain safety · out of
+  scope = multi-level undo history, undo across sessions.
+- **Feasibility (E, S):** a pre-mutation snapshot stack like taskboard's ·
+  unknowns = none · fits one batch? = yes.
+- **Evaluability (T):** "When the user adds a node and presses `u`, they
+  observe the map without that node; when they press `u` again, they observe
+  the prior state restored."
+- **Open questions:** none.
+- **Classification:** `READY`.
+
+**US-020 — coverage report view**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = auditor · outcome = a report view listing
+  every node with missing required fields, grouped/ordered by subtree, each
+  row naming what's missing · why = the legacy tree SHOWS compliance; the
+  report IS the worklist — the operator's audit workflow is then complete ·
+  out of scope = export formats for the report (CSV export rides US-011's
+  machinery later if wanted).
+- **Feasibility (E, S):** one pass over the node store against the map's
+  schema; the ficha strip already computes coverage per node · unknowns =
+  none · fits one batch? = yes.
+- **Evaluability (T):** "When the user opens the coverage report on a map
+  with gaps, they observe every gapped node with its missing field names,
+  ordered by subtree; when they activate a row, they observe that node
+  selected on the map."
+- **Open questions:** none.
+- **Classification:** `READY`.
+
+**US-021 — map diff vs last commit**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = reviewer · outcome = a diff mode that
+  paints added / removed / renamed / re-parented / field-changed nodes on the
+  map against the last committed text · why = the map's truth lives in git —
+  review belongs ON the map; no other mapping tool can do this · out of
+  scope = three-way merge, diff of attachments' binary content.
+- **Feasibility (E, S):** load HEAD text via `git show` + the current tree;
+  node-level set-diff by id, field-diff by key · unknowns = rename detection
+  heuristic (title similarity) — lands in Phase 1 · fits one batch? = yes.
+- **Evaluability (T):** "When the user toggles diff mode after adding a node,
+  they observe it painted as added on the map; when a field changed, they
+  observe the node marked changed with the field named."
+- **Open questions:** rename heuristic threshold? (default: same id = same
+  node; title change = renamed)
+- **Classification:** `READY`.
+
+**US-022 — CSV/TSV import**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = analyst · outcome = import a CSV/TSV where
+  one row = one node (parent by an id/parent column or by indentation) into a
+  new tree · why = the operator's own words — many companies do this in
+  Excel; this is their migration path · out of scope = .xlsx binaries (csv
+  only), column-mapping UI.
+- **Feasibility (E, S):** stdlib csv + the tree builder; columns map to ficha
+  fields by header name · unknowns = the parent-column conventions (support
+  `parent` column AND indent-depth column) · fits one batch? = yes.
+- **Evaluability (T):** "When the user imports a CSV with id/parent/title
+  columns, they observe the tree built with those parentings; when a row's
+  parent is missing, they observe the row parked at the root with a marker."
+- **Open questions:** none blocking.
+- **Classification:** `READY`.
+
+**US-023 — map templates + linked maps**
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
+- **Functionality (V, N):** user = any · outcome = new maps from a template
+  (the legacy-audit template carries the schema predeclared); a node can
+  point at another map and open it in place · why = starting an audit costs
+  one key; big systems decompose into linked maps · out of scope = a template
+  marketplace, cross-map queries.
+- **Feasibility (E, S):** templates = seed graphs in the store; linked maps =
+  a node field holding the target map id + open-in-place · unknowns = none ·
+  fits one batch? = yes.
+- **Evaluability (T):** "When the user constructs from the legacy-audit
+  template, they observe the schema predeclared with its required set; when
+  they open a linked node, they observe the target map with a breadcrumb
+  back."
+- **Open questions:** none.
 - **Classification:** `READY`.
 
 ### 2.7 Premise evaluation (C-43) — MANDATORY, one row per premise
@@ -644,3 +796,26 @@ building concept maps; the team sharing a versioned map.
   derived, rebuildable index and is never committed.
 - The legacy-tree ficha is the signature element the product is remembered
   by (tui-design): the required-field coverage drawn per node.
+- **D-1 · The UI speaks DARKSIDE** (operator directive, darkside round):
+  achromatic greys; KMBlue `#1783ff` spent EXCLUSIVELY on interactive
+  affordances (active tab, keys, the solid selected row, a switch); passive
+  data is grey steps (`#737373` / `#262626`); depth is a background grey-step
+  (`#000000` → `#121212` → `#262626`), never a border; lowercase register in
+  all UI text; a date-driven moon doodle (computed from the system date)
+  beside the recessive wordmark; `#ffd230`/`#ff4f42` are semantic only — a
+  calm state renders ink, never green; selection is a SOLID block, not an
+  outline. Renders: `prototypes/ui_darkside/out/`.
+- One keymap seat feeds three readers — the key bar, the `?` help surface,
+  and the `ctrl+p` palette — so the three cannot drift (the taskboard keybar
+  contract).
+- **D-A · Radial active path** (improvements round): the radial mind-map
+  renders every branch in achromatic greys; ONLY the active path from root to
+  the selected node is drawn in KMBlue, and the selected node itself is a solid
+  block. No branch owns a hue.
+- **D-B · Motion law** (improvements round): every cursor move breathes for
+  300 ms with `in_out_cubic` easing — the selection background softens rather
+  than snapping. Applied to canvas updates and palette transitions.
+- **D-C · Home identity moment** (improvements round): the home screen opens
+  with a recessive wordmark (computed 4×5 block at `#3a3a3a`, ~42 % opacity)
+  beside a date-driven moon doodle and the "mapas vivos" tagline; recents are
+  shown as a rail below.

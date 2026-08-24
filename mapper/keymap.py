@@ -20,6 +20,7 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("c", "consult", "doors"),
     KeyBinding("p", "repo", "doors"),
     KeyBinding("n", "construct", "doors"),
+    KeyBinding("t", "template", "doors"),
     KeyBinding("f", "factory", "doors"),
     # nav
     KeyBinding("j", "next", "nav"),
