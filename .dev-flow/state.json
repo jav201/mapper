@@ -182,6 +182,21 @@
       "date": "2026-08-24",
       "phase": 6,
       "decision": "Phase 6 MED/LOW batch close complete: dev-flow state.json updated; all MED/LOW fixes committed and merged to master."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "Operator feedback after MED/LOW deploy: keys trapped by PlugRepoScreen input; map/repo loading lacks progress feedback; branch info needs clearer state indicators. Prototype round in prototypes/repo_nav/ produced variants A/B/C; operator selected variant C (two-pane dashboard)."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 4,
+      "decision": "Phase 4 implementation of variant C: PlugRepoScreen bindings switched to Binding(..., priority=True) so global keys work while Input is focused; RepoScreen redesigned as two-pane dashboard with left sidebar (repo name, stage progress, progress bar, hints) and right grouped branch table (releases/hotfixes/branches) with state indicators; GitHubConnector.fetch now accepts a progress callback reporting current/total/stage; async worker uses call_from_thread to update reactive progress state; lane renderers retired from RepoScreen (kept in codebase for tests)."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 5,
+      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 68 passed; new test_repo_screen_two_pane_renders verifies variant C layout mounts correctly."
     }
   ],
   "standing_authorization": {

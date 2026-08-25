@@ -10,7 +10,9 @@ from rich.markup import escape
 from rich.text import Text
 from textual import work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
+from textual.reactive import reactive
 from textual.screen import ModalScreen, Screen
 from textual.widgets import DataTable, Input, Label, Static
 
@@ -25,7 +27,6 @@ from .model import Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen
 from .store import MapStore, TEMPLATES
-from .views.lane import HybridLaneRenderer, LaneRenderer, RailTimelineRenderer
 from .views.layered import LayeredRenderer
 from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
@@ -602,9 +603,9 @@ class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
     BINDINGS = [
-        ("escape", "home", "Volver"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
+        Binding("escape", "home", "Volver", priority=True),
+        Binding("ctrl+p", "palette", "Paleta", priority=True),
+        Binding("?", "help", "Ayuda", priority=True),
     ]
 
     def compose(self) -> ComposeResult:
@@ -634,92 +635,189 @@ class PlugRepoScreen(Screen):
 
 
 class RepoScreen(Screen):
-    """A GitHub repo rendered as branch lanes."""
+    """A GitHub repo rendered as a two-pane branch dashboard (variant C)."""
 
     BINDINGS = [
-        ("j", "next_sibling", "Siguiente"),
-        ("k", "prev_sibling", "Anterior"),
-        ("v", "cycle_view", "Cambiar vista"),
-        ("q", "home", "Inicio"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
+        Binding("j", "next_sibling", "Siguiente", priority=True),
+        Binding("k", "prev_sibling", "Anterior", priority=True),
+        Binding("q", "home", "Inicio", priority=True),
+        Binding("ctrl+p", "palette", "Paleta", priority=True),
+        Binding("?", "help", "Ayuda", priority=True),
     ]
+
+    progress_current: reactive[int] = reactive(0)
+    progress_total: reactive[int] = reactive(1)
+    progress_stage: reactive[str] = reactive("")
+    loading: reactive[bool] = reactive(True)
 
     def __init__(self, repo: str):
         super().__init__()
         self.repo = repo
         self.graph = Graph()
-        self.nav: NavigationModel = NavigationModel(self.graph)
-        self._renderers = [
-            LaneRenderer(),
-            RailTimelineRenderer(),
-            HybridLaneRenderer(),
-        ]
-        self._renderer_index = 0
-
-    @property
-    def renderer(self):
-        return self._renderers[self._renderer_index]
+        self.nav = NavigationModel(self.graph)
+        self.selected_index = 0
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=[self.repo])
-        yield Static("(cargando repo...)", id="repo-canvas")
-        yield HintLine("j/k navega · v cambia vista · q inicio")
+        with Horizontal(id="repo-dashboard"):
+            with Vertical(id="repo-sidebar"):
+                yield Static(self.repo, id="repo-name")
+                yield Static(self._stages_text(), id="repo-stages")
+                yield Static(self._progress_text(), id="repo-progress")
+                yield Static(
+                    "j/k navega tabla\n↵ detalle\nq inicio\n? ayuda",
+                    id="repo-sidebar-hints",
+                )
+            yield Static(self._render_table(), id="repo-table", expand=True)
         yield KeyBar(
             [
-                ("nav", [("j/k", "sig/ant")]),
-                ("view", [("v", "cambiar vista")]),
+                ("nav", [("j/k", "sig/ant"), ("↵", "detalle")]),
                 ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "inicio")]),
             ]
         )
 
+    def _stages_text(self) -> Text:
+        stages = ["iniciando", "leyendo ramas", "calculando métricas", "listo"]
+        if self.loading:
+            current = min(2, int(3 * self.progress_current / max(1, self.progress_total)))
+        else:
+            current = 3
+        text = Text()
+        for i, stage in enumerate(stages):
+            if i > 0:
+                text.append("\n", "")
+            if i < current:
+                text.append(f"● {stage}", darkside.INK)
+            elif i == current:
+                marker = "◐" if self.loading else "●"
+                text.append(f"{marker} {stage}", darkside.WARN if self.loading else darkside.INK)
+            else:
+                text.append(f"○ {stage}", darkside.STEP)
+        return text
+
+    def _progress_text(self) -> Text:
+        pct = min(100, int(100 * self.progress_current / max(1, self.progress_total)))
+        width = 22
+        filled = int(width * pct / 100)
+        return Text.assemble(
+            ("▰" * filled, darkside.INK),
+            ("▱" * (width - filled), darkside.STEP),
+            (f" {pct}%", darkside.MUT),
+        )
+
+    def watch_progress_current(self) -> None:
+        self._refresh_sidebar()
+
+    def watch_progress_total(self) -> None:
+        self._refresh_sidebar()
+
+    def watch_loading(self) -> None:
+        self._refresh_sidebar()
+
+    def _refresh_sidebar(self) -> None:
+        try:
+            stages = self.query_one("#repo-stages", Static)
+            progress = self.query_one("#repo-progress", Static)
+        except Exception:
+            return
+        stages.update(self._stages_text())
+        progress.update(self._progress_text())
+
+    def _branch_kind(self, name: str) -> str:
+        lowered = name.lower()
+        if lowered in {"main", "master"} or lowered.startswith("release/"):
+            return "release"
+        if lowered.startswith("hotfix/"):
+            return "hotfix"
+        return "branch"
+
+    def _state_indicator(self, state: str) -> Text:
+        if state == "blocked":
+            return Text.assemble(("● ", darkside.ALERT), ("bloqueado", darkside.ALERT))
+        if state == "risk":
+            return Text.assemble(("● ", darkside.WARN), ("riesgo", darkside.WARN))
+        return Text.assemble(("● ", darkside.INK), ("ok", darkside.MUT))
+
+    def _render_table(self) -> Text:
+        if not self.graph.nodes:
+            return Text("(no hay ramas cargadas)", style=darkside.MUT)
+
+        root_id = self.graph.root_id or ""
+        branches: list[tuple[str, Node]] = []
+        for nid, node in self.graph.nodes.items():
+            if nid == root_id:
+                continue
+            branches.append((nid, node))
+
+        order = {"release": 0, "hotfix": 1, "branch": 2}
+        branches.sort(key=lambda item: (order.get(self._branch_kind(item[0]), 2), item[0]))
+
+        lines = Text()
+        current_group = ""
+        for idx, (nid, node) in enumerate(branches):
+            kind = self._branch_kind(nid)
+            if kind != current_group:
+                if current_group:
+                    lines.append("\n", "")
+                lines.append(f"{kind}s\n", f"bold {darkside.MUT}")
+                current_group = kind
+
+            rail = "▶" if idx == self.selected_index else "▐"
+            icon = {"release": "◆", "hotfix": "◈", "branch": "◫"}.get(kind, "◫")
+            title = node.ficha.title or nid
+            meta = node.ficha.meta or "+0/-0"
+            lines.append(f"{rail} {icon} {title:24} {meta:10}  ", darkside.INK)
+            lines.append_text(self._state_indicator(node.ficha.state))
+            if node.ficha.notes:
+                lines.append(f"  {node.ficha.notes}", darkside.MUT)
+            lines.append("\n", "")
+        return lines
+
+    def _refresh_table(self) -> None:
+        table = self.query_one("#repo-table", Static)
+        table.update(self._render_table())
+
     @work(thread=True)
     def fetch_graph(self) -> Graph:
-        return GitHubConnector(self.repo).fetch()
+        def on_progress(current: int, total: int, stage: str) -> None:
+            self.app.call_from_thread(self._update_progress, current, total, stage)
+        return GitHubConnector(self.repo).fetch(progress=on_progress)
+
+    def _update_progress(self, current: int, total: int, stage: str) -> None:
+        self.progress_current = current
+        self.progress_total = total
+        self.progress_stage = stage
 
     async def on_mount(self) -> None:
-        canvas = self.query_one("#repo-canvas", Static)
-        canvas.update("(cargando repo...)")
+        self.loading = True
         try:
             worker = self.fetch_graph()
             self.graph = await worker.wait()
         except GitHubError as exc:
             self.notify(str(exc), severity="error")
             self.graph = Graph()
+        self.loading = False
         self.nav = NavigationModel(self.graph)
-        self.refresh_canvas()
-
-    def refresh_canvas(self) -> None:
-        canvas = self.query_one("#repo-canvas", Static)
-        size = self.size or self.app.size
-        w = max(20, size.width)
-        h = max(5, size.height - 6)
-        text = self.renderer.render(
-            self.graph,
-            selected_id=self.nav.cursor,
-            w=w,
-            h=h,
-        )
-        canvas.update(text)
-        pulse_cursor(canvas)
+        self.selected_index = 0
+        self._refresh_sidebar()
+        self._refresh_table()
+        pulse_cursor(self.query_one("#repo-table", Static))
 
     def action_next_sibling(self) -> None:
-        nxt = self.nav.next_sibling()
-        if nxt:
-            self.nav.cursor = nxt
-            self.refresh_canvas()
+        root_id = self.graph.root_id or ""
+        count = sum(1 for n in self.graph.nodes if n != root_id)
+        if count == 0:
+            return
+        self.selected_index = (self.selected_index + 1) % count
+        self._refresh_table()
 
     def action_prev_sibling(self) -> None:
-        prv = self.nav.prev_sibling()
-        if prv:
-            self.nav.cursor = prv
-            self.refresh_canvas()
-
-    def action_cycle_view(self) -> None:
-        self._renderer_index = (self._renderer_index + 1) % len(self._renderers)
-        self.refresh_canvas()
-        names = ["lista", "rail", "híbrido"]
-        self.notify(f"vista: {names[self._renderer_index]}")
+        root_id = self.graph.root_id or ""
+        count = sum(1 for n in self.graph.nodes if n != root_id)
+        if count == 0:
+            return
+        self.selected_index = (self.selected_index - 1) % count
+        self._refresh_table()
 
     def action_home(self) -> None:
         self.app.pop_screen()
@@ -1219,8 +1317,16 @@ class MapperApp(App):
     #home-empty { width: 100%; height: 100%; }
     #home-identity { width: 100%; text-align: center; padding: 1 0; }
 
-    MapScreen, RepoScreen, PlugRepoScreen { layout: vertical; }
-    #map-canvas, #repo-canvas { width: 100%; height: 1fr; }
+    MapScreen, PlugRepoScreen { layout: vertical; }
+    RepoScreen { layout: vertical; }
+    #repo-dashboard { height: 1fr; }
+    #repo-sidebar { width: 30; background: #121212; padding: 1 1; }
+    #repo-name { text-style: bold; color: #f5f5f5; margin-bottom: 1; }
+    #repo-stages { color: #737373; margin-bottom: 1; }
+    #repo-progress { color: #737373; margin-bottom: 1; }
+    #repo-sidebar-hints { color: #737373; }
+    #repo-table { height: 1fr; background: #000000; padding: 0 1; }
+    #map-canvas { width: 100%; height: 1fr; }
     #map-ficha-box { height: auto; }
     #map-ficha { height: auto; padding: 0 1; }
     #search-input { dock: bottom; display: none; }

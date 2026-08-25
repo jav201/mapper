@@ -1,7 +1,8 @@
 """Tests for mapper.app."""
 import pytest
+from textual.widgets import Static
 
-from mapper.app import MapScreen, MapperApp, NavigationModel
+from mapper.app import MapScreen, MapperApp, NavigationModel, RepoScreen
 from mapper.model import Edge, Ficha, Graph, Node
 
 
@@ -31,6 +32,19 @@ def test_map_screen_renders():
     # Just ensure render does not blow up
     text = screen.renderer.render(g, selected_id="root", w=60, h=20)
     assert "Root" in text.plain
+
+
+async def test_repo_screen_two_pane_renders(tmp_path):
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        app.push_screen(RepoScreen("jav201/taskboard"))
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, RepoScreen)
+        # After mounting the table widget should exist.
+        table = screen.query_one("#repo-table", Static)
+        assert table is not None
 
 
 async def test_focus_active_blocks_structural_edits(tmp_path):
