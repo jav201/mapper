@@ -21,8 +21,8 @@
       "closed_at": "2026-08-24"
     }
   ],
-  "current_phase": 5,
-  "phase_status": "active",
+  "current_phase": 6,
+  "phase_status": "closed",
   "iterations_per_phase": {
     "0": 1,
     "1": 0,
@@ -30,7 +30,7 @@
     "3": 0,
     "4": 1,
     "5": 1,
-    "6": 0
+    "6": 1
   },
   "artifacts": {
     "requirements": ".dev-flow/01-requirements.md",
@@ -240,6 +240,11 @@
       "date": "2026-08-25",
       "phase": 5,
       "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 86 passed; prototype regeneration and browser verification passed (7 figures, no page errors)."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 6,
+      "decision": "Phase 6 close complete: dev-flow artifacts updated (state.json, PLAN.md); all components-batch changes committed and merged to master; backlog deferred per HANDOFF-components.md §8 (desk keybar priorities, s19 per-screen legend, gbl collision policy, desk field budgets)."
     }
   ],
   "standing_authorization": {

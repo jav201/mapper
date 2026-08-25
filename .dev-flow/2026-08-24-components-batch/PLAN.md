@@ -15,7 +15,7 @@ OPERATED posture (R2). Audit and fix STEP-on-GROUND contrast violations.
 - **Phase 3 — Design / PDR:** waived; prototypes in `prototypes/ui_components/out/index.html` are the visual spec.
 - **Phase 4 — Implementation:** complete.
 - **Phase 5 — Validation:** complete. `python -m pytest tests/ -q` → 86 passed; prototype verification passed.
-- **Phase 6 — Close:** in progress.
+- **Phase 6 — Close:** complete. Changes committed and merged to master.
 
 ## User stories (US-025..US-030)
 
