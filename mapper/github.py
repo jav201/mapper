@@ -38,6 +38,9 @@ def _is_local_path(value: str) -> bool:
     return p.is_dir() and (p / ".git").is_dir()
 
 
+_SUBPROCESS_TIMEOUT = 30
+
+
 def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(
@@ -46,9 +49,12 @@ def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.Compl
             text=True,
             check=check,
             encoding="utf-8",
+            timeout=_SUBPROCESS_TIMEOUT,
         )
     except FileNotFoundError as exc:
         raise GitHubError("git CLI not found") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise GitHubError(f"git timeout: {' '.join(args)}") from exc
 
 
 def _default_branch(cwd: Path) -> str:
@@ -245,11 +251,14 @@ class GitHubConnector:
                 text=True,
                 check=True,
                 encoding="utf-8",
+                timeout=_SUBPROCESS_TIMEOUT,
             )
         except subprocess.CalledProcessError as exc:
             raise GitHubError(exc.stderr.strip() or exc.stdout.strip()) from exc
         except FileNotFoundError as exc:
             raise GitHubError("gh CLI not found") from exc
+        except subprocess.TimeoutExpired as exc:
+            raise GitHubError(f"gh timeout: {' '.join(args)}") from exc
         return json.loads(result.stdout or "{}")
 
     def _fetch_gh(self, progress: ProgressCallback | None = None) -> Graph:

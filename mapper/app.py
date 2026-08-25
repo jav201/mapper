@@ -1693,6 +1693,13 @@ class MapperApp(App):
 def main() -> None:
     import sys
 
+    # Windows terminals default to cp1252 and crash on box-drawing glyphs.
+    if sys.platform == "win32":
+        import io
+
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+
     workspace = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd() / "maps"
     app = MapperApp(workspace)
     app.run()
