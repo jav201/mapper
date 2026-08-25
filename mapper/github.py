@@ -11,11 +11,15 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
 from .model import Edge, Ficha, Graph, Node
+
+
+ProgressCallback = Callable[[int, int, str], None]
 
 
 class GitHubError(Exception):
@@ -144,7 +148,11 @@ def _ensure_cloned(url: str, cache_dir: Path) -> Path:
     return target
 
 
-def _build_graph_from_git(cwd: Path, display_name: str) -> Graph:
+def _build_graph_from_git(
+    cwd: Path,
+    display_name: str,
+    progress: ProgressCallback | None = None,
+) -> Graph:
     """Build a repo Graph from a local git checkout."""
     default = _default_branch(cwd)
     branches = _local_branches(cwd)
@@ -155,7 +163,11 @@ def _build_graph_from_git(cwd: Path, display_name: str) -> Graph:
     root = Node(id=display_name, ficha=Ficha(title=display_name, meta=root_meta))
     graph.add_node(root)
 
-    for bname in branches[:50]:
+    total = len(branches[:50])
+    if progress:
+        progress(0, total, "leyendo ramas")
+
+    for idx, bname in enumerate(branches[:50], 1):
         ahead, behind = _ahead_behind(cwd, default, bname)
         info = _last_commit_info(cwd, bname)
         date_str = ""
@@ -185,6 +197,8 @@ def _build_graph_from_git(cwd: Path, display_name: str) -> Graph:
         )
         graph.add_node(node)
         graph.add_edge(Edge(parent_id=display_name, child_id=bname))
+        if progress:
+            progress(idx, total, "calculando métricas")
 
     return graph
 
@@ -214,7 +228,7 @@ class GitHubConnector:
             raise GitHubError("gh CLI not found") from exc
         return json.loads(result.stdout or "{}")
 
-    def _fetch_gh(self) -> Graph:
+    def _fetch_gh(self, progress: ProgressCallback | None = None) -> Graph:
         parts = self.repo.split("/")
         if len(parts) != 2:
             raise GitHubError(f"repo must be owner/name, got {self.repo}")
@@ -233,7 +247,11 @@ class GitHubConnector:
         root = Node(id=self.repo, ficha=Ficha(title=self.repo, meta="repo"))
         graph.add_node(root)
 
-        for branch in branches:
+        total = len(branches)
+        if progress:
+            progress(0, total, "leyendo ramas")
+
+        for idx, branch in enumerate(branches, 1):
             bname = branch["name"]
             # ahead/behind against default branch
             comparison = self._gh([
@@ -283,14 +301,16 @@ class GitHubConnector:
             )
             graph.add_node(node)
             graph.add_edge(Edge(parent_id=self.repo, child_id=bname))
+            if progress:
+                progress(idx, total, "calculando métricas")
 
         return graph
 
-    def fetch(self) -> Graph:
+    def fetch(self, progress: ProgressCallback | None = None) -> Graph:
         if _is_local_path(self.repo):
             cwd = Path(self.repo).expanduser().resolve()
-            return _build_graph_from_git(cwd, cwd.name)
+            return _build_graph_from_git(cwd, cwd.name, progress=progress)
         if _is_url(self.repo):
             cwd = _ensure_cloned(self.repo, self.cache_dir)
-            return _build_graph_from_git(cwd, _repo_name_from_url(self.repo))
-        return self._fetch_gh()
+            return _build_graph_from_git(cwd, _repo_name_from_url(self.repo), progress=progress)
+        return self._fetch_gh(progress=progress)
