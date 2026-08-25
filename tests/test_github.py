@@ -80,3 +80,26 @@ def test_fetch_keeps_slash_in_branch_names(tmp_path):
     assert "feature/login" in graph.nodes
     # Make sure the category was not truncated away.
     assert "login" not in graph.nodes
+
+
+def test_fetch_local_repo_includes_branch_date_and_kind(tmp_path):
+    repo = tmp_path / "dated"
+    repo.mkdir()
+    _git_init_commit(repo)
+
+    graph = GitHubConnector(str(repo)).fetch()
+    master = graph.nodes["master"]
+    assert master.ficha.fields.get("kind") == "branch"
+    assert master.ficha.fields.get("date", "") != ""
+
+
+def test_fetch_local_repo_includes_releases(tmp_path):
+    repo = tmp_path / "released"
+    repo.mkdir()
+    _git_init_commit(repo)
+    subprocess.run(["git", "tag", "v1.0"], cwd=repo, check=True)
+
+    graph = GitHubConnector(str(repo)).fetch()
+    release_id = "release:v1.0"
+    assert release_id in graph.nodes
+    assert graph.nodes[release_id].ficha.fields.get("kind") == "release"

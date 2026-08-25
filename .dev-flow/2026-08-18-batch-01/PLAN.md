@@ -132,6 +132,33 @@ Mermaid diagrams.
   template ingestion added READY with P-6 probed TRUE (stdlib zipfile+regex
   parses docx tags); renders ds-repo-plug.svg + ds-factory-office.svg.
 
+- 2026-08-18 · ui_welcome round: five views rendered for appeal + welcoming
+  entry (desk/s19_app/taskboard lessons applied, darkside kept). Prototypes
+  read the REAL mapper.darkside + mapper.keymap modules so prototype and app
+  cannot drift.
+
+- 2026-08-24 · ui_components round (operator: "more elements"; source is
+  tui-design's COMPONENTS.md, no external skill needed): the darkside
+  component sheet — 9 interaction components (switch, stepper, slider,
+  segmented, progress, braille spinner, text field, pagination, tag chip) in
+  a default/focused/disabled state matrix, then applied to home (KPI tiles +
+  sparkline), map (accordion with declared fold counts, pagination, save
+  toast) and repo plug (skeleton + spinner fetch state). Verification
+  rulings: status words not glyphs (✓ failed font coverage), MUT is the
+  floor for readable chrome, grid prefix columns sized to the prefix.
+  prototypes/ui_components/{generate.py,NOTES.md,out/}.
+
+- 2026-08-24 · ui_components round 2 (operator: elements exist but not used
+  for their PURPOSE; reference repos desk/taskboard/s19_app/gbl studied via
+  agent swarm): home rebuilt as GLANCE posture — one drawn-number hero (the
+  loudest signal: nodos sin acta + severity cap), KPI tiles collapsed to one
+  s19 microbar distribution line, sparkline demoted to dim tier; map gained
+  a coverage minimap (s19 memstrip) and collapsed branches that still answer
+  (gbl BandHeader: "5 nodos · 2 sin acta"); repo gained one shared 30-day
+  time axis for branches+releases with a shared today rule and a source
+  honesty badge. New ruling: STEP is invisible on GROUND — dim floor there is
+  WORDMARK for glyph tracks/rules, MUT for words.
+
 ## Test ledger
 
 Empty until Phase 3.

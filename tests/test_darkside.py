@@ -57,3 +57,32 @@ def test_keybar_renders_groups():
     assert "down" in plain
     assert "app" in plain
     assert "q" in plain
+
+
+def test_draw_number_renders_block_digits():
+    text = darkside.draw_number("12")
+    assert "1" not in text.plain
+    assert "2" not in text.plain
+    assert text.plain.count("█") > 0
+
+
+def test_microbar_floor_never_zero_when_present():
+    text = darkside.microbar(1, 100)
+    plain = text.plain
+    assert "█" in plain
+    # Track uses WORDMARK glyph.
+    assert "░" in plain
+
+
+def test_time_row_has_today_rule_column():
+    text = darkside.time_row("main", 0, "●", darkside.INK, "hoy")
+    assert "main" in text.plain
+    assert "╎" in text.plain
+    assert "●" in text.plain
+
+
+def test_time_row_older_event_placed_left_of_today():
+    text = darkside.time_row("old", 15, "●", darkside.INK, "hace 15 d")
+    today_idx = text.plain.index("╎")
+    event_idx = text.plain.index("●")
+    assert event_idx < today_idx

@@ -81,7 +81,7 @@ class CoverageScreen(ModalScreen[str | None]):
             have, req = node.ficha.required_coverage(self.graph.schema)
             missing = self._missing_keys(node.ficha, self.graph.schema)
             table.add_row(
-                Text.assemble(("▐", darkside.STEP)),
+                Text.assemble(("▐", darkside.MUT)),
                 escape(node.ficha.title or node.id),
                 Text.assemble((escape(",".join(missing)), darkside.ALERT)),
                 darkside.step_meter(have, req),
@@ -90,7 +90,7 @@ class CoverageScreen(ModalScreen[str | None]):
 
         if table.row_count == 0:
             table.add_row(
-                Text.assemble(("▐", darkside.STEP)),
+                Text.assemble(("▐", darkside.MUT)),
                 "(todos los campos requeridos están completos)",
                 Text(""),
                 Text(""),

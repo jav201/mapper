@@ -33,6 +33,18 @@ class OutlineRenderer:
             lines.append(Text("(no map loaded)"))
             return Text("\n").join(lines)
 
+        def subtree_counts(nid: str) -> tuple[int, int]:
+            total = 1
+            sin_acta = 0 if graph.nodes[nid].ficha.fields.get("D", "").strip() else 1
+            stack = list(graph.children_of(nid))
+            while stack:
+                cid = stack.pop()
+                total += 1
+                if not graph.nodes[cid].ficha.fields.get("D", "").strip():
+                    sin_acta += 1
+                stack.extend(graph.children_of(cid))
+            return total, sin_acta
+
         def walk(nid: str, depth: int) -> None:
             node = graph.nodes[nid]
             prefix = _indent(depth) + ("- " if depth else "")
@@ -41,15 +53,24 @@ class OutlineRenderer:
                 block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
                 line.append(prefix, style=block)
                 line.append(node.ficha.title, style=block)
-                if node.ficha.meta:
-                    line.append(f"  {node.ficha.meta}", style=block)
             else:
                 line.append(prefix, style=darkside.MUT)
                 line.append(node.ficha.title, style="bold")
-                if node.ficha.meta:
-                    line.append(f"  {node.ficha.meta}", style=darkside.MUT)
+            # Collapsed branches still answer: declare counts inline.
+            children = graph.children_of(nid)
+            if children:
+                total, missing = subtree_counts(nid)
+                note = f"  {total} nodos"
+                if missing:
+                    note += f" · {missing} sin acta"
+                style = darkside.WARN if missing else darkside.MUT
+                if nid == selected_id:
+                    style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+                line.append(note, style=style)
+            elif node.ficha.meta:
+                line.append(f"  {node.ficha.meta}", style=darkside.MUT)
             lines.append(line)
-            for cid in graph.children_of(nid):
+            for cid in children:
                 walk(cid, depth + 1)
 
         walk(graph.root_id, 0)

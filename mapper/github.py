@@ -193,12 +193,36 @@ def _build_graph_from_git(
                 meta=f"+{ahead}/-{behind}",
                 state=state,
                 notes=notes,
+                fields={"kind": "branch", "date": date_str},
             ),
         )
         graph.add_node(node)
         graph.add_edge(Edge(parent_id=display_name, child_id=bname))
-        if progress:
-            progress(idx, total, "calculando métricas")
+
+    # Releases = git tags, rendered on the same time axis.
+    for tname in tags[:20]:
+        info = _last_commit_info(cwd, tname)
+        date_str = ""
+        if info.get("date"):
+            try:
+                dt = datetime.fromisoformat(info["date"].replace("Z", "+00:00"))
+                date_str = dt.astimezone(timezone.utc).strftime("%Y-%m-%d")
+            except ValueError:
+                date_str = info["date"][:10]
+        node = Node(
+            id=f"release:{tname}",
+            ficha=Ficha(
+                title=tname,
+                meta="release",
+                notes=info.get("subject", ""),
+                fields={"kind": "release", "date": date_str},
+            ),
+        )
+        graph.add_node(node)
+        graph.add_edge(Edge(parent_id=display_name, child_id=node.id))
+
+    if progress:
+        progress(total, total, "listo")
 
     return graph
 
@@ -242,6 +266,12 @@ class GitHubConnector:
         ])
         if not isinstance(branches, list):
             raise GitHubError("unexpected response from gh api branches")
+
+        tags = self._gh([
+            "api", f"repos/{owner}/{name}/tags?per_page=20",
+        ])
+        if not isinstance(tags, list):
+            tags = []
 
         graph = Graph()
         root = Node(id=self.repo, ficha=Ficha(title=self.repo, meta="repo"))
@@ -290,6 +320,12 @@ class GitHubConnector:
             elif ahead > 10 or behind > 10:
                 state = "risk"
 
+            date_str = ""
+            if commit and isinstance(commit, dict):
+                raw = commit.get("commit", {}).get("committer", {}).get("date", "")
+                if raw:
+                    date_str = raw[:10]
+
             node = Node(
                 id=bname,
                 ficha=Ficha(
@@ -297,12 +333,38 @@ class GitHubConnector:
                     meta=f"+{ahead}/-{behind}",
                     state=state,
                     notes=f"CI: {ci or 'unknown'}",
+                    fields={"kind": "branch", "date": date_str},
                 ),
             )
             graph.add_node(node)
             graph.add_edge(Edge(parent_id=self.repo, child_id=bname))
             if progress:
                 progress(idx, total, "calculando métricas")
+
+        for idx, tag in enumerate(tags, 1):
+            tname = tag.get("name", f"tag-{idx}")
+            raw = tag.get("commit", {}).get("url", "")
+            date_str = ""
+            if raw:
+                try:
+                    commit_data = self._gh(["api", raw])
+                    date_str = (
+                        commit_data.get("commit", {})
+                        .get("committer", {})
+                        .get("date", "")[:10]
+                    )
+                except GitHubError:
+                    pass
+            node = Node(
+                id=f"release:{tname}",
+                ficha=Ficha(
+                    title=tname,
+                    meta="release",
+                    fields={"kind": "release", "date": date_str},
+                ),
+            )
+            graph.add_node(node)
+            graph.add_edge(Edge(parent_id=self.repo, child_id=node.id))
 
         return graph
 
