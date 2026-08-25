@@ -7,13 +7,14 @@ from pathlib import Path
 from rich.markup import escape
 from rich.text import Text
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Static
 
 from mapper import darkside, office
 from mapper.model import Document, Graph, Node
-from mapper.widgets.chrome import TabStrip
+from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
 
 _TAG_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
@@ -62,16 +63,18 @@ class FactoryScreen(Screen):
     """Factory mode: resolve documents against a process tree."""
 
     BINDINGS = [
-        ("j", "next_sibling", "Siguiente"),
-        ("k", "prev_sibling", "Anterior"),
-        ("h", "parent", "Padre"),
-        ("l", "child", "Hijo"),
-        ("d", "edit_doc", "Editar doc"),
-        ("i", "import_office", "Importar office"),
-        ("g", "generate_office", "Generar"),
-        ("q", "home", "Inicio"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
+        Binding("j", "next_sibling", "Siguiente", priority=True),
+        Binding("k", "prev_sibling", "Anterior", priority=True),
+        Binding("h", "parent", "Padre", priority=True),
+        Binding("l", "child", "Hijo", priority=True),
+        Binding("d", "edit_doc", "Editar doc", priority=True),
+        Binding("i", "import_office", "Importar office", priority=True),
+        Binding("g", "generate_office", "Generar", priority=True),
+        Binding("0", "start_node", "Inicio", priority=True),
+        Binding("q", "home", "Salir", priority=True),
+        Binding("escape", "home", "Salir", priority=True),
+        Binding("ctrl+p", "palette", "Paleta", priority=True),
+        Binding("?", "help", "Ayuda", priority=True),
     ]
 
     CSS = """
@@ -114,6 +117,7 @@ class FactoryScreen(Screen):
         self.graph = graph
         self.process_name = process_name
         self.map_id = map_id
+        self._start_node_id = node_id if node_id in graph.nodes else graph.root_id
         self.nav = _Nav(graph)
         if node_id is not None and node_id in graph.nodes:
             self.nav.cursor = node_id
@@ -127,6 +131,14 @@ class FactoryScreen(Screen):
         with Horizontal(id="factory-body"):
             yield Static(id="factory-tree")
             yield Static(id="factory-preview")
+        yield HintLine("j/k/h/l navega · d edita · i importa · g genera · 0 inicio · q salir")
+        yield KeyBar(
+            [
+                ("nav", [("j/k", "sig/ant"), ("h/l", "padre/hijo"), ("0", "inicio")]),
+                ("doc", [("d", "editar"), ("i", "importar"), ("g", "generar")]),
+                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q/esc", "salir")]),
+            ]
+        )
 
     def on_mount(self) -> None:
         self._refresh()
@@ -383,6 +395,12 @@ class FactoryScreen(Screen):
             self.notify(f"generado: {target}")
         except Exception as exc:
             self.notify(f"no se pudo generar: {exc}", severity="error")
+
+    def action_start_node(self) -> None:
+        """Return to the node that was selected when the factory opened."""
+        if self._start_node_id and self._start_node_id in self.graph.nodes:
+            self.nav.cursor = self._start_node_id
+            self._refresh()
 
     def action_home(self) -> None:
         self.app.pop_screen()
