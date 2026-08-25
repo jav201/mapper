@@ -250,6 +250,11 @@
       "date": "2026-08-25",
       "phase": 6,
       "decision": "Hotfix after deploy: PlugRepoScreen accepted only owner/name, causing the app to hang when the operator pasted a full GitHub URL (https://github.com/jav201/s19_app). Added _normalize_repo to accept owner/name, https/git@ URLs, and local paths; updated placeholder/hint; added regression test."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 6,
+      "decision": "Follow-up hotfix: real GitHub fetch for jav201/s19_app takes ~16s due to multiple gh API calls. Added explicit 'conectando…' message in RepoScreen table, hardened progress callback against exceptions, and added success/error notifications so the UI does not appear frozen during slow fetches."
     }
   ],
   "standing_authorization": {

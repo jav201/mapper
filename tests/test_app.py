@@ -6,6 +6,34 @@ from mapper.app import HomeScreen, MapScreen, MapperApp, NavigationModel, PlugRe
 from mapper.model import Edge, Ficha, Graph, Node
 
 
+async def test_plug_repo_url_flow(tmp_path, monkeypatch):
+    from mapper.app import PlugRepoScreen
+    from mapper.screens import HelpScreen
+
+    fake_graph = Graph()
+    fake_graph.add_node(Node(id="jav201/s19_app", ficha=Ficha(title="s19_app")))
+
+    def fake_fetch(self, progress=None):
+        if progress:
+            progress(1, 1, "listo")
+        return fake_graph
+
+    monkeypatch.setattr("mapper.app.GitHubConnector.fetch", fake_fetch)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        app.push_screen(PlugRepoScreen())
+        await pilot.pause()
+        input_widget = app.screen.query_one("#repo-input")
+        input_widget.value = "https://github.com/jav201/s19_app"
+        await pilot.press("enter")
+        await pilot.pause()
+        # Should now be on RepoScreen with the normalized slug.
+        assert isinstance(app.screen, RepoScreen)
+        assert app.screen.repo == "jav201/s19_app"
+
+
 def test_plug_repo_normalizes_github_url():
     assert PlugRepoScreen._normalize_repo("jav201/s19_app") == "jav201/s19_app"
     assert (
