@@ -986,28 +986,41 @@ class RepoScreen(Screen):
     @work(thread=True)
     def fetch_graph(self) -> Graph:
         def on_progress(current: int, total: int, stage: str) -> None:
-            self.app.call_from_thread(self._update_progress, current, total, stage)
+            try:
+                self.app.call_from_thread(self._update_progress, current, total, stage)
+            except Exception:
+                pass
         return GitHubConnector(self.repo).fetch(progress=on_progress)
 
     def _update_progress(self, current: int, total: int, stage: str) -> None:
-        self.progress_current = current
-        self.progress_total = total
-        self.progress_stage = stage
+        try:
+            self.progress_current = current
+            self.progress_total = total
+            self.progress_stage = stage
+        except Exception:
+            pass
 
     async def on_mount(self) -> None:
         self.loading = True
+        self._refresh_sidebar()
+        table = self.query_one("#repo-table", Static)
+        table.update(Text("  conectando… esto puede tardar unos segundos", style=darkside.MUT))
         try:
             worker = self.fetch_graph()
             self.graph = await worker.wait()
+            self.notify(f"conectado: {len(self.graph.nodes)} nodos")
         except GitHubError as exc:
             self.notify(str(exc), severity="error")
+            self.graph = Graph()
+        except Exception as exc:
+            self.notify(f"error inesperado: {exc}", severity="error")
             self.graph = Graph()
         self.loading = False
         self.nav = NavigationModel(self.graph)
         self.selected_index = 0
         self._refresh_sidebar()
         self._refresh_table()
-        pulse_cursor(self.query_one("#repo-table", Static))
+        pulse_cursor(table)
 
     def action_next_sibling(self) -> None:
         root_id = self.graph.root_id or ""
