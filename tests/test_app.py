@@ -2,8 +2,21 @@
 import pytest
 from textual.widgets import Static
 
-from mapper.app import HomeScreen, MapScreen, MapperApp, NavigationModel, RepoScreen
+from mapper.app import HomeScreen, MapScreen, MapperApp, NavigationModel, PlugRepoScreen, RepoScreen
 from mapper.model import Edge, Ficha, Graph, Node
+
+
+def test_plug_repo_normalizes_github_url():
+    assert PlugRepoScreen._normalize_repo("<owner>/s19_app") == "<owner>/s19_app"
+    assert (
+        PlugRepoScreen._normalize_repo("https://github.com/<owner>/s19_app")
+        == "<owner>/s19_app"
+    )
+    assert (
+        PlugRepoScreen._normalize_repo("https://github.com/<owner>/s19_app.git")
+        == "<owner>/s19_app"
+    )
+    assert PlugRepoScreen._normalize_repo("git@github.com:<owner>/s19_app.git") == "<owner>/s19_app"
 
 
 def test_navigation_model():
