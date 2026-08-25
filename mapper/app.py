@@ -736,18 +736,37 @@ class PlugRepoScreen(Screen):
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=["conectar repo"])
         yield Vertical(
-            Label("conectar repositorio github", id="repo-title"),
-            Input(placeholder="owner/name", id="repo-input"),
+            Label("conectar repositorio", id="repo-title"),
+            Input(placeholder="owner/name o URL de github", id="repo-input"),
             id="repo-dialog",
         )
-        yield HintLine("ingresa owner/name y presiona ↵", "↵")
+        yield HintLine("ingresa owner/name, URL o ruta local y presiona ↵", "↵")
         yield KeyBar(groups_for_keybar(["app"]))
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "repo-input":
-            repo = event.value.strip()
+            raw = event.value.strip()
+            repo = self._normalize_repo(raw)
             if repo:
                 self.app.push_screen(RepoScreen(repo))
+
+    @staticmethod
+    def _normalize_repo(value: str) -> str:
+        """Accept owner/name, full GitHub URL, or local path."""
+        value = value.strip().rstrip("/")
+        if not value:
+            return ""
+        # Strip scheme and trailing .git from GitHub URLs.
+        lowered = value.lower()
+        if lowered.startswith("https://github.com/") or lowered.startswith("http://github.com/"):
+            path = value.split("github.com/", 1)[1]
+            path = path.removesuffix(".git")
+            return path  # owner/name
+        if ":" in value and "git@github.com" in lowered:
+            path = value.split(":", 1)[1]
+            path = path.removesuffix(".git")
+            return path
+        return value
 
     def action_home(self) -> None:
         self.app.pop_screen()

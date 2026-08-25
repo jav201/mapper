@@ -245,6 +245,11 @@
       "date": "2026-08-25",
       "phase": 6,
       "decision": "Phase 6 close complete: dev-flow artifacts updated (state.json, PLAN.md); all components-batch changes committed and merged to master; backlog deferred per HANDOFF-components.md §8 (desk keybar priorities, s19 per-screen legend, gbl collision policy, desk field budgets)."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 6,
+      "decision": "Hotfix after deploy: PlugRepoScreen accepted only owner/name, causing the app to hang when the operator pasted a full GitHub URL (https://github.com/jav201/s19_app). Added _normalize_repo to accept owner/name, https/git@ URLs, and local paths; updated placeholder/hint; added regression test."
     }
   ],
   "standing_authorization": {
