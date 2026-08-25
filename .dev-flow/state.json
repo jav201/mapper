@@ -255,6 +255,11 @@
       "date": "2026-08-25",
       "phase": 6,
       "decision": "Follow-up hotfix: real GitHub fetch for jav201/s19_app takes ~16s due to multiple gh API calls. Added explicit 'conectando…' message in RepoScreen table, hardened progress callback against exceptions, and added success/error notifications so the UI does not appear frozen during slow fetches."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 6,
+      "decision": "Pilot reproduction with real repo succeeded: PlugRepoScreen normalizes URL to jav201/s19_app, RepoScreen fetches 9 branches, renders shared time axis. Root cause narrowed to either outdated installed binary or Windows terminal encoding (cp1252) crashing on box-drawing glyphs. Added UTF-8 stdout/stderr wrapper in main() for win32 and 30s subprocess timeouts in github.py to fail fast instead of hanging."
     }
   ],
   "standing_authorization": {
