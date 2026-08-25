@@ -6,5 +6,6 @@ from mapper.screens.editor import EditorScreen
 from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
+from mapper.screens.settings import SettingsScreen
 
-__all__ = ["CommandPalette", "CoverageScreen", "EditorScreen", "FactoryScreen", "HelpScreen"]
+__all__ = ["CommandPalette", "CoverageScreen", "EditorScreen", "FactoryScreen", "HelpScreen", "SettingsScreen"]

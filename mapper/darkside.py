@@ -154,6 +154,68 @@ def kind_chip(kind: str) -> Text:
     return Text.assemble((f" {escape(kind)} ", f"{INK} on {STEP}"))
 
 
+# Drawn type (hero numbers) ------------------------------------------------
+_DIGITS = {
+    "0": ("███", "█ █", "█ █", "█ █", "███"),
+    "1": (" █ ", "██ ", " █ ", " █ ", "███"),
+    "2": ("███", "  █", "███", "█  ", "███"),
+    "3": ("███", "  █", " ██", "  █", "███"),
+    "4": ("█ █", "█ █", "███", "  █", "  █"),
+    "5": ("███", "█  ", "███", "  █", "███"),
+    "6": ("███", "█  ", "███", "█ █", "███"),
+    "7": ("███", "  █", " █ ", " █ ", " █ "),
+    "8": ("███", "█ █", "███", "█ █", "███"),
+    "9": ("███", "█ █", "███", "  █", "███"),
+}
+
+
+def draw_number(s: str, style: str = INK) -> Text:
+    """Render *s* as 3x5 block digits."""
+    rows = [Text() for _ in range(5)]
+    for ch in s:
+        glyph = _DIGITS.get(ch)
+        if glyph is None:
+            continue
+        for i, row in enumerate(glyph):
+            rows[i].append(row + " ", style=style)
+    return Text.assemble(*sum(([r, "\n"] for r in rows), [])[:-1])
+
+
+def microbar(count: int, total: int, width: int = 10, fill: str = INK) -> Text:
+    """Inline distribution bar: present never paints absent.
+
+    Track uses WORDMARK because STEP is invisible on GROUND.
+    """
+    if total <= 0 or count <= 0:
+        filled = 0
+    else:
+        filled = max(1, round(count / total * width))
+    return Text.assemble(("█" * filled, fill), ("░" * (width - filled), WORDMARK))
+
+
+def time_row(name: str, age_days: int, glyph: str, style: str, note: str,
+             width: int = 48) -> Text:
+    """One event on a shared *width*-day axis with a today rule.
+
+    The today rule ``╎`` sits in the same rightmost column on every row.
+    """
+    cells = [" "] * (width + 1)
+    cells[width] = "╎"
+    col = max(0, width - 1 - round(age_days / 30 * (width - 2)))
+    cells[col] = glyph
+    parts: list[tuple[str, str]] = [(f"{name:<14}", MUT)]
+    for c in cells:
+        if c == "╎":
+            parts.append((c, WORDMARK))
+        elif c == glyph:
+            parts.append((c, style))
+        else:
+            parts.append((c, ""))
+    parts.append(("  ", ""))
+    parts.append((note, MUT))
+    return Text.assemble(*parts)
+
+
 # Text helpers -------------------------------------------------------------
 def fit(s: str, w: int) -> str:
     """Pad or truncate *s* to exactly *w* display cells."""

@@ -1,8 +1,8 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-08-24-medlow-batch",
-  "batch_objective": "Mapper MED/LOW batch — address remaining findings from REVIEW-2026-08-18.md: resume/undo/home refresh, keymap consistency, editor preview, store indexing, github branch names, UI polish, and robustness fixes.",
+  "batch_id": "2026-08-24-components-batch",
+  "batch_objective": "Mapper component sheet + purpose-built view redesigns from HANDOFF-components.md: nine darkside components, settings canary, home GLANCE (H2), map OPERATED+READ (M2), repo OPERATED (R2), and STEP-on-GROUND contrast audit.",
   "mode": "core",
   "mode_history": [
     {
@@ -14,27 +14,35 @@
       "batch_id": "2026-08-24-fix-batch",
       "mode": "core",
       "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-medlow-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
     }
   ],
-  "current_phase": 6,
-  "phase_status": "closed",
+  "current_phase": 5,
+  "phase_status": "active",
   "iterations_per_phase": {
-    "0": 2,
+    "0": 1,
     "1": 0,
     "2": 0,
     "3": 0,
     "4": 1,
     "5": 1,
-    "6": 1
+    "6": 0
   },
   "artifacts": {
     "requirements": ".dev-flow/01-requirements.md",
-    "plan": ".dev-flow/2026-08-18-batch-01/PLAN.md",
+    "plan": ".dev-flow/2026-08-24-components-batch/PLAN.md",
     "handoff": "HANDOFF.md",
     "handoff_darkside": "HANDOFF-darkside.md",
     "handoff_improvements": "HANDOFF-improvements.md",
+    "handoff_fixes": "HANDOFF-fixes.md",
+    "handoff_components": "HANDOFF-components.md",
     "review": "REVIEW-2026-08-18.md",
-    "handoff_fixes": "HANDOFF-fixes.md"
+    "prototypes_welcome": "prototypes/ui_welcome/",
+    "prototypes_components": "prototypes/ui_components/"
   },
   "decisions_log": [
     {
@@ -197,6 +205,41 @@
       "date": "2026-08-24",
       "phase": 5,
       "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 68 passed; new test_repo_screen_two_pane_renders verifies variant C layout mounts correctly."
+    },
+    {
+      "date": "2026-08-18",
+      "phase": 0,
+      "decision": "ui_welcome round (operator: the implemented UI lacks appeal and a welcoming entry; references desk/taskboard/s19_app studied via subagents). Five views rendered darkside-compliant: W1 home as aperture (wordmark + moon + date + workspace pulse with step-meter coverage + resume + recents rail), W2 first-run welcome (sentence + ghost mini-map + doors, never blank), W3 map with rail + active path blue + inspector ficha, W4 factory, W5 help surface from the one keymap seat. NOTES.md documents the lessons per reference."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "ui_components round: darkside component sheet from tui-design COMPONENTS.md (operator asked for more elements; no external skill needed). 9 interaction components in a default/focused/disabled state matrix (focus = solid blue block, disabled sinks to STEP), applied to home (KPI tiles + sparkline), map (accordion with declared fold counts + pagination + save toast), repo plug (skeleton + braille spinner). Rulings: status words not glyphs (check glyph failed font coverage); MUT is the floor for readable chrome (STEP for tracks/disabled only); grid prefix columns sized to the prefix. prototypes/ui_components/."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "ui_components round 2: components matched to view PURPOSE after studying desk/taskboard/s19_app/gbl via agent swarm. home = GLANCE (one drawn-number hero = loudest signal, microbar distribution line replaces KPI tiles, sparkline dim tier); map = OPERATED+READ (coverage minimap, collapsed branches still answer with counts); repo = OPERATED (shared 30-day time axis, today rule, source honesty badge). Ruling: STEP invisible on GROUND — dim floor is WORDMARK for glyph tracks/rules, MUT for words."
+    },
+    {
+      "date": "2026-08-24",
+      "phase": 0,
+      "decision": "HANDOFF-components.md written for implementation by another agent: darkside component library (9 widgets, state matrix law), home hero (drawn number + microbar + dim sparkline), map minimap + answering branches, repo shared time axis, GROUND-contrast amendment (WORDMARK/MUT floor). Suggested US-025..030. Backlog deferred: desk keybar priorities, s19 per-screen legend, gbl collision policy, desk field budgets."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 0,
+      "decision": "Components batch kickoff (operator: 'ok, continuemos desde aquí: HANDOFF-components.md'). New batch 2026-08-24-components-batch in mode=core; scope = component library (US-025), home H2 (US-026), map M2 (US-027/US-028), repo R2 (US-029), contrast audit (US-030). Standing authorization inherited."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 4,
+      "decision": "Phase 4 implementation complete: darkside component library (9 Static widgets with default/focused/disabled state matrix) in mapper/widgets/components.py; SettingsScreen canary in mapper/screens/settings.py; HomeScreen rebuilt for GLANCE posture with drawn-number hero, microbar, dim-tier sparkline; MapScreen coverage minimap, answering branch counts in OutlineRenderer, pagination affordance, event-toast strip; RepoScreen shared 30-day time axis with source honesty badge and legend; GitHubConnector enriched with branch date and release/tag nodes; STEP-on-GROUND contrast audit applied (WORDMARK for tracks/disabled on GROUND, MUT for readable words)."
+    },
+    {
+      "date": "2026-08-25",
+      "phase": 5,
+      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 86 passed; prototype regeneration and browser verification passed (7 figures, no page errors)."
     }
   ],
   "standing_authorization": {

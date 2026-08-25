@@ -2,7 +2,7 @@
 import pytest
 from textual.widgets import Static
 
-from mapper.app import MapScreen, MapperApp, NavigationModel, RepoScreen
+from mapper.app import HomeScreen, MapScreen, MapperApp, NavigationModel, RepoScreen
 from mapper.model import Edge, Ficha, Graph, Node
 
 
@@ -75,3 +75,37 @@ async def test_focus_active_blocks_structural_edits(tmp_path):
         # Map on disk must still contain all original nodes.
         loaded = store.load("focus-test")
         assert set(loaded.nodes) == {"root", "keep", "focus-root"}
+
+
+async def test_home_screen_renders_hero_when_maps_exist(tmp_path):
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        store = app.store
+        g = Graph()
+        g.add_node(Node(id="root", ficha=Ficha(title="Root")))
+        g.add_node(Node(id="a", ficha=Ficha(title="A")))
+        g.add_edge(Edge("root", "a"))
+        store.save("hero-test", g)
+        store.record_session("hero-test", "root")
+
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        screen = app.screen
+        hero = screen.query_one("#home-hero", Static)
+        assert hero is not None
+        assert "nodos sin acta" in hero.render().plain
+
+
+async def test_settings_screen_canary_mounts(tmp_path):
+    from mapper.screens.settings import SettingsScreen
+
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        app.push_screen(SettingsScreen())
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, SettingsScreen)
+        grid = screen.query_one("#settings-grid")
+        assert grid is not None

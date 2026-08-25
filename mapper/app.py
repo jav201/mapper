@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from rich.markup import escape
@@ -25,7 +25,7 @@ from .keymap import groups_for_keybar
 from .mermaid import dump as dump_mermaid, slugify
 from .model import Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
-from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen
+from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .store import MapStore, TEMPLATES
 from .views.layered import LayeredRenderer
 from .views.outline import OutlineRenderer
@@ -302,7 +302,7 @@ class ConstructScreen(ModalScreen[str | None]):
 
 
 class HomeScreen(Screen):
-    """Home screen with resume row, recents and door shortcuts."""
+    """Home screen with GLANCE posture: one hero, everything else available."""
 
     BINDINGS = [
         ("c", "consult", "Consultar mapas"),
@@ -312,6 +312,7 @@ class HomeScreen(Screen):
         ("i", "import_csv", "Importar CSV"),
         ("f", "factory", "Fábrica"),
         ("r", "resume", "Retomar"),
+        ("s", "settings", "Componentes"),
         ("j", "table_down", "Bajar"),
         ("k", "table_up", "Subir"),
         ("q", "quit", "Salir"),
@@ -320,6 +321,8 @@ class HomeScreen(Screen):
     def compose(self) -> ComposeResult:
         yield TabStrip("c")
         yield Static("", id="home-identity")
+        yield GroupBox(Static(id="home-hero"), id="home-hero-box")
+        yield Static("", id="home-microbar")
         yield GroupBox(Static(id="home-resume"), id="home-resume-box")
         yield GroupBox(
             Vertical(
@@ -329,18 +332,136 @@ class HomeScreen(Screen):
             ),
             id="home-recents-box",
         )
+        yield Static("", id="home-archived")
         yield HintLine("elige una puerta para empezar")
         yield KeyBar(
             [
                 ("nav", [("j/k", "elegir"), ("↵", "abrir"), ("r", "retomar")]),
                 ("doors", [("c", "consultar"), ("p", "repo"), ("n", "construir"),
                            ("t", "plantilla"), ("i", "importar csv"), ("f", "fábrica")]),
-                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "salir")]),
+                ("app", [("s", "componentes"), ("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "salir")]),
             ]
         )
 
+    def _map_metrics(self, graph: Graph) -> dict[str, int]:
+        total = len(graph.nodes)
+        con_acta = sum(1 for n in graph.nodes.values() if n.ficha.fields.get("D", "").strip())
+        sin_acta = total - con_acta
+        today = date.today().isoformat()
+        vencen = sum(
+            1 for n in graph.nodes.values()
+            if n.ficha.fields.get("due", "").strip() == today
+        )
+        have, req = graph.coverage()
+        pct = int(100 * have / max(1, req))
+        return {
+            "total": total,
+            "con_acta": con_acta,
+            "sin_acta": sin_acta,
+            "vencen": vencen,
+            "coverage": pct,
+        }
+
+    def _hero_text(self, map_name: str, metrics: dict[str, int]) -> Text:
+        sin_acta = metrics["sin_acta"]
+        vencen = metrics["vencen"]
+        # calm board: count in INK with no WARN line
+        number_style = darkside.INK if sin_acta == 0 and vencen == 0 else darkside.WARN
+        lines = Text()
+        lines.append(darkside.draw_number(str(sin_acta), number_style))
+        lines.append("\n", "")
+        lines.append("nodos sin acta\n", darkside.MUT)
+        lines.append(escape(map_name) + "\n", darkside.INK)
+        if vencen > 0:
+            lines.append(f"▲ {vencen} vencen hoy", darkside.WARN)
+        return lines
+
+    def _microbar_text(self, metrics: dict[str, int]) -> Text:
+        total = max(1, metrics["total"])
+        con = metrics["con_acta"]
+        sin = metrics["sin_acta"]
+        pct = metrics["coverage"]
+        return Text.assemble(
+            ("  con acta ", darkside.MUT), (f"{con} ", darkside.MUT),
+            darkside.microbar(con, total), ("    ", ""),
+            ("sin acta ", darkside.WARN), (f"{sin} ", darkside.WARN),
+            darkside.microbar(sin, total, fill=darkside.WARN), ("    ", ""),
+            (f"cobertura {pct} %", darkside.INK),
+        )
+
+    def _sparkline_text(self, store: MapStore) -> Text:
+        today = date.today()
+        days = [today - timedelta(days=i) for i in range(13, -1, -1)]
+        counts: list[int] = []
+        for d in days:
+            day_count = 0
+            for mmd in store.workspace.glob("*.mmd"):
+                try:
+                    mtime = date.fromtimestamp(mmd.stat().st_mtime)
+                    if mtime == d:
+                        day_count += 1
+                except Exception:
+                    pass
+            counts.append(day_count)
+        max_count = max(counts) if counts else 1
+        bars = "▁▂▂▃▃▄▅▆▇█"
+        parts: list[tuple[str, str]] = [("actividad 14d  ", darkside.MUT)]
+        for c in counts:
+            idx = min(len(bars) - 1, int(c / max_count * (len(bars) - 1)))
+            # sparkline stays in the dim tier — never INK or ACCENT
+            style = darkside.WORDMARK if idx < 4 else darkside.MUT
+            parts.append((bars[idx], style))
+        return darkside.Text.assemble(*parts)
+
     def on_mount(self) -> None:
         store: MapStore = self.app.store  # type: ignore[attr-defined]
+
+        # Identity row
+        identity = self.query_one("#home-identity", Static)
+        glyph, _ = darkside.moon(date.today())
+        identity_text = Text()
+        identity_text.append(glyph, style=darkside.WORDMARK)
+        identity_text.append(" mapper", style=darkside.WORDMARK)
+        identity_text.append("   mapas vivos", style=darkside.MUT)
+        identity.update(identity_text)
+
+        mmd_files = sorted(store.workspace.glob("*.mmd"))
+        hero_map: str | None = None
+        hero_metrics: dict[str, int] | None = None
+
+        # Prefer the last session map for the hero; fall back to most recent mmd.
+        last_map, _ = store.last_session()
+        if last_map:
+            try:
+                graph = store.load(last_map)
+                hero_map = last_map
+                hero_metrics = self._map_metrics(graph)
+            except Exception:
+                pass
+
+        if hero_map is None and mmd_files:
+            hero_map = mmd_files[0].stem
+            try:
+                hero_metrics = self._map_metrics(store.load(hero_map))
+            except Exception:
+                hero_metrics = {"total": 0, "con_acta": 0, "sin_acta": 0, "vencen": 0, "coverage": 0}
+
+        hero_box = self.query_one("#home-hero-box", GroupBox)
+        hero = self.query_one("#home-hero", Static)
+        microbar = self.query_one("#home-microbar", Static)
+        if hero_map and hero_metrics:
+            hero.update(self._hero_text(hero_map, hero_metrics))
+            microbar.update(self._microbar_text(hero_metrics))
+            # Add the dim-tier sparkline beside the hero text inside the same box.
+            spark = self._sparkline_text(store)
+            hero.update(Text.assemble(
+                self._hero_text(hero_map, hero_metrics), ("\n", ""), spark,
+            ))
+            hero_box.display = True
+            microbar.display = True
+        else:
+            hero_box.display = False
+            microbar.display = False
 
         # Resume row
         resume = self.query_one("#home-resume", Static)
@@ -371,24 +492,25 @@ class HomeScreen(Screen):
         table.clear()
         table.add_columns("▐ name", "kind", "nodos", "docs")
 
-        identity = self.query_one("#home-identity", Static)
-        mmd_files = sorted(store.workspace.glob("*.mmd"))
+        archived = self.query_one("#home-archived", Static)
         if not mmd_files:
             table.display = False
             self.query_one("#home-empty", Static).update(self._empty_text())
             self.query_one("#home-empty", Static).display = True
-            identity.display = False
+            archived.display = False
             return
 
         table.display = True
         self.query_one("#home-empty", Static).display = False
-        glyph, _ = darkside.moon(date.today())
-        identity_text = Text()
-        identity_text.append(glyph, style=darkside.WORDMARK)
-        identity_text.append(" mapper", style=darkside.WORDMARK)
-        identity_text.append("   mapas vivos", style=darkside.MUT)
-        identity.update(identity_text)
-        identity.display = True
+        archived_count = 0  # placeholder until archive feature lands
+        if archived_count:
+            archived.update(
+                Text.assemble((f"  ({archived_count} mapa archivado — u restaura)", darkside.MUT))
+            )
+            archived.display = True
+        else:
+            archived.display = False
+
         for mmd in mmd_files:
             map_name = mmd.stem
             try:
@@ -461,6 +583,9 @@ class HomeScreen(Screen):
         demo.documents["plantilla"] = Document(name="plantilla", source="hola {{nombre}}")
         self.app.push_screen(FactoryScreen(demo, process_name="demo"))
 
+    def action_settings(self) -> None:
+        self.app.push_screen(SettingsScreen())
+
     def _open_map(self, name: str | None) -> None:
         if not name:
             return
@@ -532,7 +657,7 @@ class HomeScreen(Screen):
         self.app.push_screen(MapScreen(map_id))
 
     def on_screen_resume(self) -> None:
-        """Refresh the recents list when returning to home."""
+        """Refresh the home surface when returning."""
         self.on_mount()
 
 
@@ -692,7 +817,7 @@ class RepoScreen(Screen):
                 marker = "◐" if self.loading else "●"
                 text.append(f"{marker} {stage}", darkside.WARN if self.loading else darkside.INK)
             else:
-                text.append(f"○ {stage}", darkside.STEP)
+                text.append(f"○ {stage}", darkside.WORDMARK)
         return text
 
     def _progress_text(self) -> Text:
@@ -701,7 +826,7 @@ class RepoScreen(Screen):
         filled = int(width * pct / 100)
         return Text.assemble(
             ("▰" * filled, darkside.INK),
-            ("▱" * (width - filled), darkside.STEP),
+            ("▱" * (width - filled), darkside.WORDMARK),
             (f" {pct}%", darkside.MUT),
         )
 
@@ -738,39 +863,101 @@ class RepoScreen(Screen):
             return Text.assemble(("● ", darkside.WARN), ("riesgo", darkside.WARN))
         return Text.assemble(("● ", darkside.INK), ("ok", darkside.MUT))
 
+    def _source_kind(self) -> str:
+        repo_path = Path(self.repo).expanduser()
+        if repo_path.is_dir() and (repo_path / ".git").is_dir():
+            return "local"
+        if "://" in self.repo or self.repo.count("/") == 1:
+            return "github"
+        return "local"
+
+    def _source_badge(self) -> Text:
+        kind = self._source_kind()
+        return darkside.Text.assemble(
+            (f" {kind} ", f"{darkside.INK} on {darkside.STEP}"),
+        )
+
+    def _age_days(self, date_str: str) -> int:
+        if not date_str:
+            return -1
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d").date()
+            return (date.today() - dt).days
+        except ValueError:
+            return -1
+
+    def _time_row(self, name: str, age_days: int, glyph: str, style: str, note: str) -> Text:
+        return darkside.time_row(name, age_days, glyph, style, note)
+
     def _render_table(self) -> Text:
         if not self.graph.nodes:
             return Text("(no hay ramas cargadas)", style=darkside.MUT)
 
         root_id = self.graph.root_id or ""
-        branches: list[tuple[str, Node]] = []
+        items: list[tuple[str, Node]] = []
         for nid, node in self.graph.nodes.items():
             if nid == root_id:
                 continue
-            branches.append((nid, node))
+            items.append((nid, node))
+
+        branches = [(nid, n) for nid, n in items if n.ficha.fields.get("kind") != "release"]
+        releases = [(nid, n) for nid, n in items if n.ficha.fields.get("kind") == "release"]
+
+        lines = Text()
+        # Source honesty badge + counts
+        lines.append("  ")
+        lines.append_text(self._source_badge())
+        lines.append(f"   {len(branches)} ramas · {len(releases)} releases\n", darkside.MUT)
+        lines.append("\n", "")
+
+        def render_group(title: str, nodes: list[tuple[str, Node]], glyph: str,
+                         style: str) -> None:
+            if not nodes:
+                return
+            lines.append(f"  {title}\n", darkside.MUT)
+            for idx, (nid, node) in enumerate(nodes):
+                name = node.ficha.title or nid
+                if name.startswith("release:"):
+                    name = name[len("release:"):]
+                age = self._age_days(node.ficha.fields.get("date", ""))
+                note_parts: list[str] = []
+                if age >= 0:
+                    if age == 0:
+                        note_parts.append("hoy")
+                    elif age == 1:
+                        note_parts.append("ayer")
+                    elif age < 7:
+                        note_parts.append(f"hace {age} d")
+                    elif age < 30:
+                        note_parts.append(f"hace {age // 7} sem")
+                    else:
+                        note_parts.append(f"hace {age // 30} mes")
+                meta = node.ficha.meta or ""
+                if meta and meta != "release":
+                    note_parts.append(meta)
+                if node.ficha.notes and node.ficha.notes != "CI: unknown":
+                    note_parts.append(node.ficha.notes)
+                note = " · ".join(note_parts) or "sin datos"
+                row = self._time_row(name, max(0, age), glyph, style, note)
+                # selection marker
+                marker = "▶ " if idx == self.selected_index else "  "
+                lines.append(marker, darkside.ACCENT if idx == self.selected_index else "")
+                lines.append_text(row)
+                lines.append("\n", "")
+            lines.append("\n", "")
 
         order = {"release": 0, "hotfix": 1, "branch": 2}
         branches.sort(key=lambda item: (order.get(self._branch_kind(item[0]), 2), item[0]))
+        render_group("ramas", branches, "●", darkside.INK)
+        render_group("releases", releases, "◆", darkside.INK)
 
-        lines = Text()
-        current_group = ""
-        for idx, (nid, node) in enumerate(branches):
-            kind = self._branch_kind(nid)
-            if kind != current_group:
-                if current_group:
-                    lines.append("\n", "")
-                lines.append(f"{kind}s\n", f"bold {darkside.MUT}")
-                current_group = kind
-
-            rail = "▶" if idx == self.selected_index else "▐"
-            icon = {"release": "◆", "hotfix": "◈", "branch": "◫"}.get(kind, "◫")
-            title = node.ficha.title or nid
-            meta = node.ficha.meta or "+0/-0"
-            lines.append(f"{rail} {icon} {title:24} {meta:10}  ", darkside.INK)
-            lines.append_text(self._state_indicator(node.ficha.state))
-            if node.ficha.notes:
-                lines.append(f"  {node.ficha.notes}", darkside.MUT)
-            lines.append("\n", "")
+        lines.append("  ")
+        lines.append("●", darkside.INK)
+        lines.append(" commit   ", darkside.MUT)
+        lines.append("◆", darkside.INK)
+        lines.append(" release   ", darkside.MUT)
+        lines.append("╎", darkside.WORDMARK)
+        lines.append(" hoy   (30 días)\n", darkside.MUT)
         return lines
 
     def _refresh_table(self) -> None:
@@ -877,9 +1064,12 @@ class MapScreen(Screen):
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
         yield TabStrip("c", crumb=crumb_prefix + [""])
+        yield Static("", id="map-minimap")
         yield Static("(cargando mapa...)", id="map-canvas")
         yield Input(placeholder="/buscar", id="search-input")
         yield GroupBox(Static(id="map-ficha"), id="map-ficha-box")
+        yield Static("", id="map-pagination")
+        yield Static("", id="map-toast")
         yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
         yield KeyBar(
             [
@@ -938,6 +1128,68 @@ class MapScreen(Screen):
             prefix = prefix + [f"linked: {self.map_id}"]
         return prefix
 
+    def _branch_coverage_glyph(self, branch_root: str) -> tuple[str, str]:
+        """Return (glyph, style) for a top-level branch's coverage minimap."""
+        nodes = [branch_root]
+        stack = [branch_root]
+        while stack:
+            parent = stack.pop()
+            for cid in self.graph.children_of(parent):
+                nodes.append(cid)
+                stack.append(cid)
+        total = len(nodes)
+        con_acta = sum(1 for nid in nodes if self.graph.nodes[nid].ficha.fields.get("D", "").strip())
+        if total == 0:
+            return ("╱", darkside.WORDMARK)
+        pct = con_acta / total
+        if pct >= 1.0:
+            return ("█", darkside.INK)
+        if pct >= 0.5:
+            return ("▒", darkside.MUT)
+        return ("░", darkside.WARN)
+
+    def _minimap_text(self) -> Text:
+        if self.graph.root_id is None:
+            return Text("")
+        parts: list[tuple[str, str]] = [("  cobertura   ", darkside.MUT)]
+        for cid in self.graph.children_of(self.graph.root_id):
+            glyph, style = self._branch_coverage_glyph(cid)
+            name = self.graph.nodes[cid].ficha.title or cid
+            parts.append((f"{name} ", darkside.MUT))
+            parts.append((glyph, style))
+            parts.append(("   ", ""))
+        parts.extend([
+            ("█", darkside.INK), (" completa ", darkside.MUT),
+            ("▒", darkside.MUT), (" media ", darkside.MUT),
+            ("░", darkside.WARN), (" baja ", darkside.MUT),
+            ("╱", darkside.WORDMARK), (" sin datos", darkside.MUT),
+        ])
+        return darkside.Text.assemble(*parts)
+
+    def _pagination_text(self) -> Text:
+        total = len(self.graph.nodes)
+        page = 1
+        per_page = max(1, total)
+        # For now the tree is not paginated; this reserves the affordance.
+        return darkside.Text.assemble(
+            (" ", ""),
+            darkside.step_meter(min(page, per_page), per_page),
+            (f"   {page}/{per_page}  ", darkside.MUT),
+        )
+
+    def _event_toast(self, label: str, detail: str = "") -> None:
+        """Bottom strip for events only — status words, not glyphs."""
+        toast = self.query_one("#map-toast", Static)
+        if detail:
+            text = darkside.Text.assemble(
+                (f" {label}", f"bold {darkside.INK}"),
+                (f"   {detail}", darkside.MUT),
+            )
+        else:
+            text = darkside.Text.assemble((f" {label}", f"bold {darkside.INK}"))
+        toast.styles.background = darkside.PANEL
+        toast.update(text)
+
     def refresh_canvas(self) -> None:
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
@@ -961,6 +1213,8 @@ class MapScreen(Screen):
         tab.set_crumb(self._current_crumb() + [node_title])
 
         self.query_one("#map-ficha", Static).update(self._ficha_text(node, w - 4))
+        self.query_one("#map-minimap", Static).update(self._minimap_text())
+        self.query_one("#map-pagination", Static).update(self._pagination_text())
 
     def _ficha_text(self, node: Node | None, width: int) -> Text:
         if node is None:
@@ -1029,7 +1283,7 @@ class MapScreen(Screen):
             self.nav.cursor = self.graph.root_id
         self.store.save(self.map_id, self.graph)
         self.refresh_canvas()
-        self.notify("deshacer aplicado")
+        self._event_toast("deshacer", "estado restaurado")
 
     def action_next_sibling(self) -> None:
         nxt = self.nav.next_sibling()
@@ -1158,7 +1412,7 @@ class MapScreen(Screen):
             )
             path = self.store.workspace / f"{self.map_id}.svg"
             save_svg(text, path)
-            self.notify(f"svg exportado a {path}")
+            self._event_toast("exportado", str(path))
         except Exception as e:
             self.notify(f"exportación fallida: {e}", severity="error")
 
@@ -1229,7 +1483,7 @@ class MapScreen(Screen):
             self.base_graph = self.graph
             self.nav.cursor = self.graph.root_id
             self.refresh_canvas()
-            self.notify(f"archivado: {node.ficha.title or node.id}")
+            self._event_toast("archivado", node.ficha.title or node.id)
 
         if self.nav.cursor == self.graph.root_id:
             self.app.push_screen(
