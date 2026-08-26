@@ -1087,7 +1087,6 @@ class MapScreen(Screen):
         self.radial_mode = False
         self.diff_active = False
         self.diff: DiffResult | None = None
-        self._snapshots: list[bytes] = []
         self.rail_hidden = False
         self.inspector_hidden = False
         self._regions_pinned = False
@@ -1434,6 +1433,18 @@ class MapScreen(Screen):
     def action_remove_attachment(self) -> None:
         self.query_one("#map-inspector", FichaInspector).request_remove_attachment()
 
+    UNDO_DEPTH = 20
+
+    @property
+    def _snapshots(self) -> list[bytes]:
+        """This map's undo history, held by the App so it outlives the screen.
+
+        Keyed by `map_id`: one global stack would let an undo taken in map B
+        restore a snapshot of map A, which is data loss wearing a feature's
+        clothes.
+        """
+        return self.app.undo_stacks.setdefault(self.map_id, [])
+
     def _push_snapshot(self) -> None:
         if self.store is None:
             return
@@ -1442,7 +1453,9 @@ class MapScreen(Screen):
         import yaml
 
         yml = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
-        self._snapshots.append(json.dumps({"mmd": mmd, "yml": yml}).encode())
+        stack = self._snapshots
+        stack.append(json.dumps({"mmd": mmd, "yml": yml}).encode())
+        del stack[: max(0, len(stack) - self.UNDO_DEPTH)]
 
     def _pop_snapshot(self) -> None:
         if not self._snapshots:
@@ -1568,10 +1581,78 @@ class MapScreen(Screen):
         def on_select(node_id: str | None) -> None:
             if node_id is None or node_id not in self.graph.nodes:
                 return
-            self.nav.cursor = node_id
-            self.refresh_canvas()
+            self._goto_gap(node_id)
 
         self.app.push_screen(CoverageScreen(self.graph, self.map_id), callback=on_select)
+
+    # -- coverage worklist (US-N04) ----------------------------------------
+    def _incomplete_order(self) -> list[str]:
+        """Nodes with a missing required field, in the coverage report's order.
+
+        Walks the tree the same way `CoverageScreen` does, so "next" in the
+        worklist means the same thing as "next row" in the report.  Consumes
+        `Ficha.missing_required`, the model's single owner of what is missing.
+        """
+        out: list[str] = []
+        if self.graph.root_id is None:
+            return out
+        visited: set[str] = set()
+        stack = [self.graph.root_id]
+        while stack:
+            nid = stack.pop()
+            if nid in visited or nid not in self.graph.nodes:
+                continue
+            visited.add(nid)
+            if self.graph.nodes[nid].ficha.missing_required(self.graph.schema):
+                out.append(nid)
+            for cid in reversed(self.graph.children_of(nid)):
+                if cid not in visited:
+                    stack.append(cid)
+        return out
+
+    def _goto_gap(self, node_id: str) -> bool:
+        """Move the cursor to *node_id* and focus its first missing field."""
+        if node_id not in self.graph.nodes:
+            return False
+        self.nav.cursor = node_id
+        if self.inspector_hidden:
+            self.inspector_hidden = False
+            self._apply_region_visibility()
+        self.refresh_canvas()
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        # The inspector rebuilds on the next frame, so the focus request has to
+        # wait for the rows it is going to focus.
+        self.call_after_refresh(self._focus_first_gap)
+        return True
+
+    def _focus_first_gap(self) -> None:
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        key = inspector.first_missing_key()
+        if key is None:
+            return
+        if inspector.focus_field(key):
+            label = next(
+                (f.label for f in self.graph.schema if f.key == key), key
+            )
+            self.query_one(HintLine).set_hint(
+                f"completa «{label}» · esc deja el campo", "ctrl+s"
+            )
+
+    def action_next_gap(self) -> None:
+        """Advance to the next node that is missing a required field.
+
+        Wraps once.  When nothing anywhere is missing it says so, rather than
+        cycling silently on the same node forever.
+        """
+        order = self._incomplete_order()
+        if not order:
+            self._event_toast("cobertura completa", "no falta ningún campo requerido")
+            return
+        if self.nav.cursor in order:
+            idx = (order.index(self.nav.cursor) + 1) % len(order)
+        else:
+            idx = 0
+        self._goto_gap(order[idx])
 
     def action_export_svg(self) -> None:
         if self.store is None:
@@ -1661,13 +1742,36 @@ class MapScreen(Screen):
             self.refresh_canvas()
             self._event_toast("archivado", node.ficha.title or node.id)
 
+        # Every archive is confirmed, root or not.  A non-root subtree used to be
+        # destroyed with no prompt at all, and `x` sits next to the navigation
+        # keys.  The message names how much goes, because "archivar" alone does
+        # not tell the operator that the children go too.
+        count = self._subtree_size(self.nav.cursor)
+        name = node.ficha.title or node.id
         if self.nav.cursor == self.graph.root_id:
-            self.app.push_screen(
-                _ConfirmScreen("¿archivar el nodo raíz? esto reemplazará la raíz del mapa."),
-                callback=do_archive,
+            message = (
+                f"¿archivar la raíz «{name}» y sus {count - 1} descendientes? "
+                "esto reemplazará la raíz del mapa."
             )
+        elif count > 1:
+            message = f"¿archivar «{name}» y sus {count - 1} descendientes?"
         else:
-            do_archive(True)
+            message = f"¿archivar «{name}»?"
+        self.app.push_screen(_ConfirmScreen(message), callback=do_archive)
+
+    def _subtree_size(self, root_id: str | None) -> int:
+        """How many nodes would go if this subtree were archived."""
+        if root_id is None:
+            return 0
+        seen: set[str] = set()
+        stack = [root_id]
+        while stack:
+            nid = stack.pop()
+            if nid in seen or nid not in self.graph.nodes:
+                continue
+            seen.add(nid)
+            stack.extend(self.graph.children_of(nid))
+        return len(seen)
 
     def _remove_subtree(self, root_id: str) -> None:
         remove: set[str] = set()
@@ -1828,6 +1932,11 @@ class MapperApp(App):
     def __init__(self, workspace: Path | str):
         super().__init__()
         self.store = MapStore(workspace)
+        # Undo history lives here, not on MapScreen: a screen is rebuilt every
+        # time the operator re-enters a map, which used to discard the history
+        # silently and make an archived subtree unrecoverable.
+        self.undo_stacks: dict[str, list[bytes]] = {}
+        self.attachment_launcher = None
 
     def on_mount(self) -> None:
         self.push_screen(HomeScreen())
