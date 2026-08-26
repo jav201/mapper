@@ -2,8 +2,9 @@
 
 ## BLUF
 
-**The batch shipped all five P1 stories, grew the suite from 88 to 210, and found seven defects that
-already existed on `main` and that the previous suite structurally could not see.** Every one of
+**The batch shipped all five P1 stories, grew the suite from 88 to 245, and found six defects that
+already existed on `main` and that the previous suite structurally could not see** — plus one it
+introduced and caught before merge (the whole-map archive, §3). Every one of
 them lived in the gap between *"the action ran"* and *"the key the operator presses reaches the
 action"* — which is exactly the gap a static SVG prototype cannot show and a test that calls
 `action_*` directly cannot cross.
@@ -104,6 +105,28 @@ source comments: *writing about a control character keeps producing the control 
 discharge is the same shape as C-56's — describe it, or construct it programmatically (`chr(0)`),
 never spell the escape into a file.
 
+### 2.4b · The third control-character incident, and the only SILENT one
+
+While writing the very test that closes the "advertises an unbound key" finding, a word-boundary
+escape in a regex collapsed into a literal **BACKSPACE byte**. The compiled pattern became a
+backspace, the alternation, and another backspace — so it matched **nothing**, `advertised` came back
+empty, and the test **passed on everything**, including against a deliberate reintroduction of the
+defect it exists to catch.
+
+The two earlier incidents (§2.4) were caught for free because Python refused to parse the file. This
+one produced a perfectly valid, perfectly green, completely inert test. It was found only because
+the counterfactual was run and *did not redden* — the check that C-40 exists for.
+
+**Three consequences, and the third is the general one.**
+1. The pattern is now built with no backslash escape at all.
+2. It carries a **positive control**: the probe must find a known chord in a known string before its
+   result is trusted. A probe that can only return "nothing found" is not a probe.
+3. **The rule from §2.4 was not enough.** It said: do not spell a control-character escape into a
+   file. The real rule is broader — *any* escape sequence written into generated source can collapse,
+   and when it collapses inside a regex rather than inside a string the failure is silent. Every
+   file touched in this batch was subsequently scanned byte-by-byte: 89 files, zero stray control
+   bytes.
+
 ### 2.5 · The file budget was exceeded three times
 
 Increments 2, 3 and 4 touched 6, 5 and 5 source files against a cap of 4. Each was declared with a
@@ -134,8 +157,16 @@ mutation that never executed being recorded as proof that the gate holds. This i
 | 6 | `x` destroyed a non-root subtree unconfirmed; undo died on leaving the map | the story |
 | 7 | path traversal launched files outside the workspace | security lens, executed |
 
-Plus two found in code the batch itself wrote, by review rather than by me: `MapperApp.BINDINGS`
-escaping the seat, and `HelpScreen` binding a method it does not define.
+Plus three found in code **this batch wrote**, by review rather than by me: `MapperApp.BINDINGS`
+escaping the seat, `HelpScreen` binding a method it does not define, and — the serious one —
+**archiving the root wrote an empty map to disk**, `nodes {}` and `root_id None`, while the
+confirmation promised only to "replace the root". The only recovery was an in-memory undo stack that
+dies with the process. Found by the final PR gate, fixed, and now gated by `AT-N05e`, which the
+acceptance design had specified and which had been dropped without record.
+
+**The honest count for §BLUF is therefore six pre-existing plus one self-inflicted**, and the
+rider "every one of them lived in the gap between the action running and the key reaching it" is true
+of the pre-existing six, not of the archive bug.
 
 ---
 
@@ -144,14 +175,14 @@ escaping the seat, and `HelpScreen` binding a method it does not define.
 | Metric | Value |
 |---|---|
 | Stories delivered | 5 of 5 P1, plus HLR-N06 adopted mid-batch |
-| Tests | 88 → 210 (+123, −6 superseded) |
-| Increments | 6, cut as 5 commits |
+| Tests | 88 → 245 (−6 superseded, +163 added) |
+| Increments | 6, cut as 9 commits on the branch |
 | Source files over budget | 3 increments (6, 5, 5 vs cap 4), each declared |
-| Counterfactuals executed | 12, all restores hash-verified |
-| Counterfactuals that were themselves defective | 2 (one never ran; one poisoned by a flaky test) |
-| Review lenses | 5 (architect, qa, security ×2, ux, code-review) |
-| Blocking findings from review | 5 HIGH (code review) + 2 blockers (security sign-off) |
-| Mutations found by reviewers that left my suite green | **3** |
+| Counterfactuals executed | 19, all restores hash-verified |
+| Counterfactuals that were themselves defective | 3 (one never ran; one poisoned by a flaky test; one gated by an inert regex) |
+| Review lenses | 6 passes across 5 roles — architect, qa (design), security (design + implementation sign-off), ux, code-review, qa (final PR gate). The architect, code-review and PR-gate passes reported inline; security, ux, qa-design and the PR gate wrote artifacts under `.dev-flow/`. |
+| Blocking findings from review | 5 HIGH (code review, reported inline) + 2 blockers (security sign-off) + 3 HIGH (final PR gate) |
+| Mutations found by reviewers that left my suite green | **5** — two on the confinement check, one on the key/action pairing, one on the coercion range, and one more I found myself (the inert regex, §2.4b) |
 | Requirement amendments | 3, all recorded Before → After |
 | Frozen-interface changes | 0 |
 

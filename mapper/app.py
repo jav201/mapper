@@ -1639,7 +1639,10 @@ class MapScreen(Screen):
         self.refresh_canvas()
         if missing:
             self.query_one(HintLine).set_hint(
-                f"completa «{missing[0].label}» · esc deja el campo", "ctrl+s"
+                # `↵` is what commits, not ctrl+s — MapScreen binds no ctrl+s at
+                # all, and advertising a key that does nothing on the primary flow
+                # is the exact defect US-N03 exists to remove.
+                f"completa «{missing[0].label}» · ↵ guarda · esc deja el campo", "↵"
             )
         return True
 
@@ -1753,6 +1756,18 @@ class MapScreen(Screen):
         # not tell the operator that the children go too.
         count = self._subtree_size(self.nav.cursor)
         name = node.ficha.title or node.id
+        # Archiving everything is not archiving, it is erasing.  The confirmation
+        # used to promise it would "replace the root of the map" and then wrote an
+        # EMPTY map to disk — nodes {}, root_id None — with the only recovery an
+        # in-memory undo stack that dies with the process.  Refuse instead.
+        if count >= len(self.graph.nodes):
+            self.notify(
+                "no se puede archivar todo el mapa: quedaría vacío. "
+                "archiva una rama, o elimina el mapa desde inicio.",
+                severity="warning",
+                markup=False,
+            )
+            return
         if self.nav.cursor == self.graph.root_id:
             message = (
                 f"¿archivar la raíz «{name}» y sus {count - 1} descendientes? "

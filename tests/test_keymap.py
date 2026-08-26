@@ -9,6 +9,7 @@ guard.  A hand-listed set would survive every code mutation and prove nothing.
 from __future__ import annotations
 
 import inspect
+import pathlib
 
 import pytest
 
@@ -235,3 +236,73 @@ def test_palette_items_filters_by_scope_and_query():
     assert [b.action for b in hits] == ["coverage"]
     # A query matching nothing returns nothing rather than everything.
     assert palette_items("zzzzz", keymap.SCOPE_MAP) == []
+
+
+def test_no_hint_or_keybar_text_advertises_a_key_the_map_does_not_bind():
+    """M-1 — the primary flow advertised `ctrl+s`, which MapScreen binds nowhere.
+
+    Advertising a key that does nothing is the exact defect US-N03 exists to
+    remove, so it must not creep back in through prose. Scans the screen module's
+    literals for chord-shaped strings and checks each against the seat.
+    """
+    import ast
+    import re
+
+    import mapper.app as app_module
+
+    source = pathlib.Path(app_module.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    # STRING LITERALS only, via the AST -- scanning raw text would also read
+    # comments and docstrings, which discuss keys without advertising them.
+    literals = [
+        n.value for n in ast.walk(tree)
+        if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    ]
+    assert literals, "the AST walk found no string literals -- the probe is broken"
+    map_chords = {b.key for b in keymap.bindings_for(keymap.SCOPE_MAP)}
+    # Chords appear in prose as ctrl+x / alt+x; bare single letters are too
+    # ambiguous to scan for, so this covers the modifier forms only.
+    # Built without a backslash escape on purpose: writing one into a
+    # source file is how a literal control byte gets committed. An earlier
+    # version of this line compiled to a literal BACKSPACE byte instead of a
+    # word boundary, so the scan matched nothing and passed on everything.
+    # boundary -- so the scan matched nothing and passed on everything.
+    pattern = re.compile('(?:ctrl|alt|shift)[+][a-z]')
+    # Positive control: the probe must be able to find something.
+    assert pattern.findall('press ctrl+p now') == ['ctrl+p'], (
+        'the chord pattern is broken; this scan would pass on everything'
+    )
+    advertised = set()
+    for text in literals:
+        advertised.update(pattern.findall(text))
+    unbound = {c for c in advertised if c not in map_chords}
+    assert unbound == set(), f"MapScreen prose advertises unbound chords: {unbound}"
+
+
+def test_unmigrated_screens_is_a_live_list_not_decoration():
+    """M-3 — the constant claimed to record a carry but nothing checked it.
+
+    BACKLOG B-04 said "two tests fence the list"; those two fence
+    TAB_BINDING_EXCEPTIONS. This is the one that fences UNMIGRATED_SCREENS: each
+    named class must still exist AND still hold its own local BINDINGS, so a
+    screen that gets migrated into the seat cannot be left stale in the list.
+    """
+    import importlib
+    import inspect as _inspect
+
+    found = {}
+    for mod_name in ("factory", "editor", "settings", "coverage"):
+        module = importlib.import_module(f"mapper.screens.{mod_name}")
+        for _, cls in _inspect.getmembers(module, _inspect.isclass):
+            if cls.__name__ in keymap.UNMIGRATED_SCREENS and cls.__module__ == module.__name__:
+                found[cls.__name__] = cls
+
+    assert set(found) == set(keymap.UNMIGRATED_SCREENS), (
+        f"UNMIGRATED_SCREENS names {set(keymap.UNMIGRATED_SCREENS) - set(found)} "
+        "which no longer exist"
+    )
+    for name, cls in found.items():
+        assert cls.__dict__.get("BINDINGS"), (
+            f"{name} no longer holds local BINDINGS — it was migrated; "
+            "remove it from UNMIGRATED_SCREENS"
+        )

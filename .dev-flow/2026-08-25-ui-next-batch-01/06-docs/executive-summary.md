@@ -35,11 +35,12 @@ recorrido se rompía en tres puntos:
 
 ## Lo que se encontró por el camino
 
-El valor de este batch no está solo en lo construido. **Se encontraron siete defectos que ya existían
-y que las pruebas anteriores no podían ver**, porque todos viven en la distancia entre *"la acción se
-ejecutó"* y *"la tecla que el operador presiona llega a la acción"*.
+El valor de este batch no está solo en lo construido. **Se encontraron seis defectos que ya existían
+y que las pruebas anteriores no podían ver**, porque viven en la distancia entre *"la acción se
+ejecutó"* y *"la tecla que el operador presiona llega a la acción"* — más uno que este mismo batch
+introdujo y que la revisión final detectó antes de integrar.
 
-Dos merecen mención por su severidad:
+Tres merecen mención por su severidad:
 
 - **Una ruta de adjunto podía abrir cualquier archivo del disco.** No se dedujo: se ejecutó. Se
   abrieron `calc.exe` y `powershell.exe` desde un mapa. Los mapas se comparten y se clonan, así que
@@ -47,12 +48,17 @@ Dos merecen mención por su severidad:
   de entregarlo al sistema.
 - **`m cobertura` —la puerta de entrada al flujo principal— estaba cortada de la barra de teclas.**
   La barra se dibujaba a un ancho fijo y mostraba 9 de 17 atajos, sin decir que ocultaba algo.
+- **Archivar la raíz vaciaba el mapa en disco.** Este defecto lo introdujo este batch, no lo heredó:
+  la confirmación prometía *reemplazar* la raíz y en realidad borraba todo, dejando el archivo sin
+  nodos. Lo encontró la revisión final; ahora esa acción se rechaza y hay una prueba que lo cubre.
 
 ## Sobre la calidad de la verificación
 
-Las pruebas pasaron de **88 a 210**. Más relevante que el número: dos revisiones independientes
-lograron **romper un control dejando la suite en verde**, y en ambos casos mis propias pruebas de
-falsificación ya habían corrido y me habían convencido de lo contrario.
+Las pruebas pasaron de **88 a 245**. Más relevante que el número: dos revisiones independientes
+lograron **romper controles dejando la suite en verde** —cinco casos en total—, y en cada uno mis
+propias pruebas de falsificación ya habían corrido y me habían convencido de lo contrario. La
+revisión final encontró además un **defecto de pérdida de datos introducido por este mismo batch**:
+archivar la raíz vaciaba el mapa en disco. Se corrigió y quedó cubierto por una prueba.
 
 La lección quedó registrada y es la recomendación principal para el siguiente batch: **verificar un
 control borrándolo no basta.** Borrarlo es la modificación más fácil de imaginar y la menos probable
@@ -63,6 +69,12 @@ un refactor— y ahí es donde la suite dejaba pasar el error.
 
 Listo para integrar. El siguiente batch es **variante B «atlas»**: navegación del lienzo a escala
 —desplazamiento, plegado de ramas, minimapa— sobre el mismo esqueleto ya construido.
+
+**Un punto de verificación que NO es una prueba automatizada.** El último salto —que el sistema
+operativo efectivamente abra la aplicación asociada a un adjunto— no tiene forma honesta de
+verificarse sin lanzar un programa real. Se verifica por **inspección** del código, no por prueba, y
+así queda registrado (`MAN-01`). Las pruebas cubren toda la cadena hasta ese punto, pero no ese
+salto: darlo por probado sería falso.
 
 **Riesgos abiertos, declarados y no cerrados en silencio:** un archivo lateral mal formado todavía
 puede impedir cargar un mapa completo; cuatro pantallas modales aún no leen la declaración única de
