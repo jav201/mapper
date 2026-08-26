@@ -27,60 +27,94 @@ from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 
 MAP_BINDINGS = [b for b in keymap.KEYMAP if b.scope == keymap.SCOPE_MAP]
 
-# The INDEPENDENT referent, and it is hand-written on purpose.
+# The INDEPENDENT referent — the WHOLE seat, every field, hand-maintained.
 #
-# Deriving the expectation from the seat makes this test a tautology: the screen's
-# BINDINGS are generated FROM the seat, so swapping two `action` fields propagates
-# consistently and nothing can see it.  That is exactly what happened on the first
-# attempt at this file — the swap mutation stayed green.
+# Three narrower versions of this failed in review, and each failure is the reason
+# for one column here:
 #
-# C-31 warns that a hand-listed set is usually a weak oracle.  Here it is the
-# *specification*: this table says what the operator is promised when they read a
-# label next to a key.  Its value comes precisely from NOT being derived from the
-# thing it checks.  A deliberate rebinding must be made here too, in one line.
-EXPECTED_MAP_PAIRING = {
-    "j": "next_sibling",
-    "k": "prev_sibling",
-    "h": "parent",
-    "l": "child",
-    "enter": "open_ficha",
-    "slash": "search",
-    "a": "add_child",
-    "d": "open_documents",
-    "x": "archive",
-    "u": "undo",
-    "A": "add_attachment",
-    "X": "remove_attachment",
-    "f": "toggle_focus",
-    "o": "toggle_outline",
-    "r": "toggle_radial",
-    "e": "export_svg",
-    "equals_sign": "toggle_diff",
-    "m": "coverage",
-    "n": "next_gap",
-    "R": "toggle_rail",
-    "I": "toggle_inspector",
-    "g": "focus_rail",
-    "z": "collapse_branch",
-    "q": "home",
-    "escape": "back_or_home",
+#   1. Deriving the expectation from `KEYMAP` made it a tautology: the screens'
+#      BINDINGS are generated FROM the seat, so a swap propagates consistently and
+#      nothing can see it.
+#   2. Pinning only `key -> action` left the LABEL free. Swapping just the labels
+#      of `u` and `z` kept 245 tests green — the operator reads "u plegar rama",
+#      presses it, and performs an undo instead. Same deception, other field.
+#   3. Pinning only the map scope left 23 of 48 bindings unpinned. A home-scope
+#      `r`/`q` action swap stayed green, so "retomar último" quit the application.
+#
+# So the specification is the full tuple for all 48 entries, compared by SET
+# EQUALITY. C-31 warns that a hand-listed set is usually a weak oracle; here it is
+# the specification, and its whole value is that it is not derived from the thing
+# it checks. A deliberate rebinding is a two-line change: the seat, and this table.
+EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str]] = {
+    ("app", "ctrl+p"): ("palette", "paleta de acciones", "ctrl+p"),
+    ("app", "question_mark"): ("help", "ayuda", "?"),
+    ("help", "escape"): ("dismiss_none", "cerrar", "esc"),
+    ("help", "q"): ("dismiss_none", "cerrar", "q"),
+    ("home", "c"): ("consult", "consultar mapas", "c"),
+    ("home", "f"): ("factory", "fábrica", "f"),
+    ("home", "i"): ("import_csv", "importar csv", "i"),
+    ("home", "j"): ("table_down", "bajar", "j"),
+    ("home", "k"): ("table_up", "subir", "k"),
+    ("home", "n"): ("construct", "construir mapa", "n"),
+    ("home", "p"): ("plug", "conectar repo", "p"),
+    ("home", "q"): ("quit", "salir", "q"),
+    ("home", "r"): ("resume", "retomar último", "r"),
+    ("home", "s"): ("settings", "componentes", "s"),
+    ("home", "t"): ("template", "desde plantilla", "t"),
+    ("import", "escape"): ("home", "volver", "esc"),
+    ("import", "s"): ("save", "guardar mapa", "s"),
+    ("map", "A"): ("add_attachment", "agregar adjunto", "A"),
+    ("map", "I"): ("toggle_inspector", "mostrar/ocultar ficha", "I"),
+    ("map", "R"): ("toggle_rail", "mostrar/ocultar rail", "R"),
+    ("map", "X"): ("remove_attachment", "quitar adjunto", "X"),
+    ("map", "a"): ("add_child", "agregar hijo", "a"),
+    ("map", "d"): ("open_documents", "documentos", "d"),
+    ("map", "e"): ("export_svg", "exportar svg", "e"),
+    ("map", "enter"): ("open_ficha", "abrir ficha", "↵"),
+    ("map", "equals_sign"): ("toggle_diff", "alternar diff", "="),
+    ("map", "escape"): ("back_or_home", "volver", "esc"),
+    ("map", "f"): ("toggle_focus", "alternar foco", "f"),
+    ("map", "g"): ("focus_rail", "ir al rail", "g"),
+    ("map", "h"): ("parent", "padre", "h"),
+    ("map", "j"): ("next_sibling", "siguiente", "j"),
+    ("map", "k"): ("prev_sibling", "anterior", "k"),
+    ("map", "l"): ("child", "hijo", "l"),
+    ("map", "m"): ("coverage", "cobertura", "m"),
+    ("map", "n"): ("next_gap", "siguiente faltante", "n"),
+    ("map", "o"): ("toggle_outline", "alternar outline", "o"),
+    ("map", "q"): ("home", "inicio", "q"),
+    ("map", "r"): ("toggle_radial", "alternar radial", "r"),
+    ("map", "slash"): ("search", "buscar", "/"),
+    ("map", "u"): ("undo", "deshacer", "u"),
+    ("map", "x"): ("archive", "archivar", "x"),
+    ("map", "z"): ("collapse_branch", "plegar rama", "z"),
+    ("palette", "enter"): ("run_selected", "ejecutar", "↵"),
+    ("palette", "escape"): ("dismiss_none", "cerrar", "esc"),
+    ("plug", "escape"): ("home", "volver", "esc"),
+    ("repo", "j"): ("next_sibling", "siguiente", "j"),
+    ("repo", "k"): ("prev_sibling", "anterior", "k"),
+    ("repo", "q"): ("home", "inicio", "q"),
 }
 
 
-def test_at_n03h_the_seat_pairs_every_key_with_the_promised_action():
-    """AT-N03h — the seat's key->action pairing matches the specification.
+def test_at_n03h_the_whole_seat_matches_its_specification():
+    """AT-N03h — every (scope, key) maps to the promised (action, label, glyph).
 
-    The defect this closes: swapping the `action` fields of the `u` and `z`
-    entries left the entire suite green.  The operator would read `u deshacer`,
-    press it, and fold a branch; read `z plegar rama`, press it, and silently
-    destroy an edit.
+    Set equality over all 48 entries, so a drift in ANY field of ANY scope fails,
+    and so does an added or removed binding.
 
-    RED mutation: swap any two `action` fields in the map scope; both keys fail.
+    RED mutations, all verified: swap two `action` fields; swap two `label`
+    fields; corrupt a `glyph`; add or delete an entry.
     """
-    actual = {b.key: b.action for b in MAP_BINDINGS}
-    assert actual == EXPECTED_MAP_PAIRING, (
-        "the seat's key->action pairing drifted from the specification; "
-        "if the rebinding is deliberate, change EXPECTED_MAP_PAIRING too"
+    actual = {
+        (b.scope, b.key): (b.action, b.label, b.glyph) for b in keymap.KEYMAP
+    }
+    assert len(actual) == len(keymap.KEYMAP), (
+        "two seat entries share a (scope, key) — one of them can never fire"
+    )
+    assert actual == EXPECTED_SEAT, (
+        "the keymap seat drifted from its specification; if the rebinding is "
+        "deliberate, update EXPECTED_SEAT in the same commit"
     )
 
 
