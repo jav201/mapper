@@ -45,69 +45,77 @@ MAP_BINDINGS = [b for b in keymap.KEYMAP if b.scope == keymap.SCOPE_MAP]
 # EQUALITY. C-31 warns that a hand-listed set is usually a weak oracle; here it is
 # the specification, and its whole value is that it is not derived from the thing
 # it checks. A deliberate rebinding is a two-line change: the seat, and this table.
-EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str]] = {
-    ("app", "ctrl+p"): ("palette", "paleta de acciones", "ctrl+p"),
-    ("app", "question_mark"): ("help", "ayuda", "?"),
-    ("help", "escape"): ("dismiss_none", "cerrar", "esc"),
-    ("help", "q"): ("dismiss_none", "cerrar", "q"),
-    ("home", "c"): ("consult", "consultar mapas", "c"),
-    ("home", "f"): ("factory", "fábrica", "f"),
-    ("home", "i"): ("import_csv", "importar csv", "i"),
-    ("home", "j"): ("table_down", "bajar", "j"),
-    ("home", "k"): ("table_up", "subir", "k"),
-    ("home", "n"): ("construct", "construir mapa", "n"),
-    ("home", "p"): ("plug", "conectar repo", "p"),
-    ("home", "q"): ("quit", "salir", "q"),
-    ("home", "r"): ("resume", "retomar último", "r"),
-    ("home", "s"): ("settings", "componentes", "s"),
-    ("home", "t"): ("template", "desde plantilla", "t"),
-    ("import", "escape"): ("home", "volver", "esc"),
-    ("import", "s"): ("save", "guardar mapa", "s"),
-    ("map", "A"): ("add_attachment", "agregar adjunto", "A"),
-    ("map", "I"): ("toggle_inspector", "mostrar/ocultar ficha", "I"),
-    ("map", "R"): ("toggle_rail", "mostrar/ocultar rail", "R"),
-    ("map", "X"): ("remove_attachment", "quitar adjunto", "X"),
-    ("map", "a"): ("add_child", "agregar hijo", "a"),
-    ("map", "d"): ("open_documents", "documentos", "d"),
-    ("map", "e"): ("export_svg", "exportar svg", "e"),
-    ("map", "enter"): ("open_ficha", "abrir ficha", "↵"),
-    ("map", "equals_sign"): ("toggle_diff", "alternar diff", "="),
-    ("map", "escape"): ("back_or_home", "volver", "esc"),
-    ("map", "f"): ("toggle_focus", "alternar foco", "f"),
-    ("map", "g"): ("focus_rail", "ir al rail", "g"),
-    ("map", "h"): ("parent", "padre", "h"),
-    ("map", "j"): ("next_sibling", "siguiente", "j"),
-    ("map", "k"): ("prev_sibling", "anterior", "k"),
-    ("map", "l"): ("child", "hijo", "l"),
-    ("map", "m"): ("coverage", "cobertura", "m"),
-    ("map", "n"): ("next_gap", "siguiente faltante", "n"),
-    ("map", "o"): ("toggle_outline", "alternar outline", "o"),
-    ("map", "q"): ("home", "inicio", "q"),
-    ("map", "r"): ("toggle_radial", "alternar radial", "r"),
-    ("map", "slash"): ("search", "buscar", "/"),
-    ("map", "u"): ("undo", "deshacer", "u"),
-    ("map", "x"): ("archive", "archivar", "x"),
-    ("map", "z"): ("collapse_branch", "plegar rama", "z"),
-    ("palette", "enter"): ("run_selected", "ejecutar", "↵"),
-    ("palette", "escape"): ("dismiss_none", "cerrar", "esc"),
-    ("plug", "escape"): ("home", "volver", "esc"),
-    ("repo", "j"): ("next_sibling", "siguiente", "j"),
-    ("repo", "k"): ("prev_sibling", "anterior", "k"),
-    ("repo", "q"): ("home", "inicio", "q"),
+EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
+    ("app", "ctrl+p"): ("palette", "paleta de acciones", "ctrl+p", "app", False),
+    ("app", "question_mark"): ("help", "ayuda", "?", "app", False),
+    ("help", "escape"): ("dismiss_none", "cerrar", "esc", "help", False),
+    ("help", "q"): ("dismiss_none", "cerrar", "q", "help", False),
+    ("home", "c"): ("consult", "consultar mapas", "c", "doors", False),
+    ("home", "f"): ("factory", "fábrica", "f", "doors", False),
+    ("home", "i"): ("import_csv", "importar csv", "i", "doors", False),
+    ("home", "j"): ("table_down", "bajar", "j", "lista", False),
+    ("home", "k"): ("table_up", "subir", "k", "lista", False),
+    ("home", "n"): ("construct", "construir mapa", "n", "doors", False),
+    ("home", "p"): ("plug", "conectar repo", "p", "doors", False),
+    ("home", "q"): ("quit", "salir", "q", "lista", False),
+    ("home", "r"): ("resume", "retomar último", "r", "doors", False),
+    ("home", "s"): ("settings", "componentes", "s", "doors", False),
+    ("home", "t"): ("template", "desde plantilla", "t", "doors", False),
+    ("import", "escape"): ("home", "volver", "esc", "import", False),
+    ("import", "s"): ("save", "guardar mapa", "s", "import", False),
+    ("map", "A"): ("add_attachment", "agregar adjunto", "A", "node", False),
+    ("map", "I"): ("toggle_inspector", "mostrar/ocultar ficha", "I", "view", False),
+    ("map", "R"): ("toggle_rail", "mostrar/ocultar rail", "R", "view", False),
+    ("map", "X"): ("remove_attachment", "quitar adjunto", "X", "node", False),
+    ("map", "a"): ("add_child", "agregar hijo", "a", "node", False),
+    ("map", "d"): ("open_documents", "documentos", "d", "node", False),
+    ("map", "e"): ("export_svg", "exportar svg", "e", "view", False),
+    ("map", "enter"): ("open_ficha", "abrir ficha", "↵", "nav", False),
+    ("map", "equals_sign"): ("toggle_diff", "alternar diff", "=", "view", False),
+    ("map", "escape"): ("back_or_home", "volver", "esc", "salir", False),
+    ("map", "f"): ("toggle_focus", "alternar foco", "f", "view", False),
+    ("map", "g"): ("focus_rail", "ir al rail", "g", "view", False),
+    ("map", "h"): ("parent", "padre", "h", "nav", False),
+    ("map", "j"): ("next_sibling", "siguiente", "j", "nav", False),
+    ("map", "k"): ("prev_sibling", "anterior", "k", "nav", False),
+    ("map", "l"): ("child", "hijo", "l", "nav", False),
+    ("map", "m"): ("coverage", "cobertura", "m", "view", False),
+    ("map", "n"): ("next_gap", "siguiente faltante", "n", "view", False),
+    ("map", "o"): ("toggle_outline", "alternar outline", "o", "view", False),
+    ("map", "q"): ("home", "inicio", "q", "salir", False),
+    ("map", "r"): ("toggle_radial", "alternar radial", "r", "view", False),
+    ("map", "slash"): ("search", "buscar", "/", "nav", False),
+    ("map", "u"): ("undo", "deshacer", "u", "node", False),
+    ("map", "x"): ("archive", "archivar", "x", "node", False),
+    ("map", "z"): ("collapse_branch", "plegar rama", "z", "view", False),
+    ("palette", "enter"): ("run_selected", "ejecutar", "↵", "palette", False),
+    ("palette", "escape"): ("dismiss_none", "cerrar", "esc", "palette", False),
+    ("plug", "escape"): ("home", "volver", "esc", "plug", True),
+    ("repo", "j"): ("next_sibling", "siguiente", "j", "repo", True),
+    ("repo", "k"): ("prev_sibling", "anterior", "k", "repo", True),
+    ("repo", "q"): ("home", "inicio", "q", "repo", True),
 }
 
 
 def test_at_n03h_the_whole_seat_matches_its_specification():
-    """AT-N03h — every (scope, key) maps to the promised (action, label, glyph).
+    """AT-N03h — every (scope, key) maps to its promised tuple, all six fields.
 
     Set equality over all 48 entries, so a drift in ANY field of ANY scope fails,
     and so does an added or removed binding.
 
+    `priority` is pinned too, because it is a real dispatch field: dropping
+    `priority=True` from the plug-repo `escape` binding changes behaviour (the
+    operator can no longer abandon the input mid-typing) and left the suite green
+    while only four fields were pinned. `group` is pinned because `scope` is
+    derived from it, so a regrouping silently moves a key to another surface.
+
     RED mutations, all verified: swap two `action` fields; swap two `label`
-    fields; corrupt a `glyph`; add or delete an entry.
+    fields; corrupt a `glyph`; drop a `priority`; regroup an entry; add or delete
+    an entry.
     """
     actual = {
-        (b.scope, b.key): (b.action, b.label, b.glyph) for b in keymap.KEYMAP
+        (b.scope, b.key): (b.action, b.label, b.glyph, b.group, b.priority)
+        for b in keymap.KEYMAP
     }
     assert len(actual) == len(keymap.KEYMAP), (
         "two seat entries share a (scope, key) — one of them can never fire"

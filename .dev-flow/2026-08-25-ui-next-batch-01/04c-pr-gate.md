@@ -6,6 +6,8 @@
 **Pass 1 verdict: `merge blocked` — 3 HIGH findings.**
 **Pass 2 verdict (after `42d96e2`): `merge still blocked` — H-2 and H-3 discharged, H-1 remains
 open at HIGH. See §11.**
+**Pass 3 verdict (after `4979f4c`): `merge` — all three HIGH discharged, each re-verified by
+re-running my own mutations. Two residual gaps, MEDIUM and LOW, neither blocking. See §12.**
 
 Every claim below is an executed probe or a `file:line`. Where I re-derived something the batch
 already asserted, I say what I ran, not that it was verified.
@@ -771,3 +773,120 @@ mapper/app.py      4ec313aa344a5da90119470dfb5829fd977bf00b10306d4a53bb450f65e4a
 
 `__pycache__` purged. Nothing under `prototypes/` read or written. This file is still the only one
 this gate has created; the pass-2 edits are to this file alone.
+
+---
+
+# 12 · Pass 3 — re-gate of `4979f4c`
+
+**Verdict: `merge`.** All three HIGH findings are discharged. I re-ran every mutation I had filed,
+plus the two attacks the author asked for. Suite re-run by me: **`245 passed`**, three consecutive
+runs, no non-determinism.
+
+## 12.1 · Every filed mutation now reddens — verified by me, not reported
+
+Eight mutations, each applied to the real tree, full suite run, then reverted and hash-verified:
+
+| Mutation | Result | Test that caught it |
+|---|---|---|
+| `u`/`z` **action** swap (pass-1 H-1) | `1 failed` | `test_at_n03h` |
+| `u`/`z` **label** swap (pass-2 (a)) | `1 failed` | `test_at_n03h` |
+| **home-scope** `r`/`q` action swap (pass-2 (b)) | `1 failed` | `test_at_n03h` |
+| **glyph** corruption (`m` → `Z`) | `2 failed` | `test_at_n03h`, `test_glyph_is_a_plausible…` |
+| **entry deletion** (drop map `u`) | `3 failed` | `test_at_n03h`, input-set fence, completeness guard |
+| `TAB_BINDING_EXCEPTIONS` → ghost classes (pass-2 L-7) | `2 failed` | **`test_tab_binding_exceptions_are_still_real` now fails itself** |
+| `_CONTROL_MAP = {0x1B: …}` (H-2 regression) | `3 failed` | the three `plain()` range tests |
+| whole-map archive guard removed (H-3 regression) | `1 failed` | `AT-N05e` |
+
+The last two confirm pass 3 did not regress pass 2's fixes. **H-1, H-2 and H-3 are closed.**
+
+`EXPECTED_SEAT` is the right shape: `{(scope, key): (action, label, glyph)}` over all 48 entries by
+set equality, with `len(actual) == len(KEYMAP)` fencing the collapse case, hand-maintained and not
+derived from `KEYMAP`. Removing the superseded `EXPECTED_MAP_PAIRING` rather than leaving it
+alongside was correct — two specifications of one thing is how one of them goes stale.
+
+## 12.2 · Their question 1 — scope renames: **covered**
+
+Moving a whole group between scopes (`GROUP_SCOPE["view"]: SCOPE_MAP → SCOPE_HOME`) reddens
+**21 tests**, `test_at_n03h` among them. Because `scope` is a derived property of `group`, every
+affected binding's `(scope, key)` key changes at once and set equality cannot miss it. No gap here.
+
+## 12.3 · Their question 2 — drift that changes behaviour without touching the four pinned fields
+
+**Yes — two, and one of them matters.** `KeyBinding` has **six** fields; the specification pins
+four. The unpinned two are `group` and `priority`.
+
+### MED-1 · `priority` is a real dispatch field and is unpinned
+
+```python
+KeyBinding("escape", "esc", "home", "volver", "plug", priority=True)  →  priority dropped
+```
+**Result: `245 passed`.** Same for `("q", …, "repo", priority=True)`: **`245 passed`**.
+
+This is not a cosmetic field. It is threaded all the way through: `textual_bindings()` yields
+`(key, action, label, priority)` (`keymap.py:184`) and `app.py:56` passes it into
+`Binding(..., priority=priority)`, which is what decides whether the chord is handled *before* the
+focused widget sees it. The seat documents the requirement in its own comment:
+
+> `escape` stays priority here: the screen's only widget is a text input the operator must be able
+> to abandon mid-typing.
+
+So a one-word deletion silently removes the operator's documented way out of a text input, and the
+table that claims to be the specification of the whole seat does not record it. **The claim "pin
+the WHOLE seat" is currently true of four fields out of six.**
+
+*Not blocking* — it is a usability regression, not data loss, and the fix is to widen the tuple to
+`(action, label, glyph, priority)`, which is a mechanical change to one table.
+
+### LOW-8 · `group` is unpinned within a scope
+
+Moving `u` from group `node` to `view` — both map to `SCOPE_MAP` — leaves `(scope, key)` and all
+three pinned values identical: **`245 passed`**.
+
+I checked how far this can go before filing it higher, and it is genuinely capped: `keybar_groups`
+is itself *derived* from `GROUP_SCOPE` (`app.py:61-67`), so it returns every group belonging to the
+scope and a moved binding cannot vanish from the keybar — it only changes which heading it appears
+under (and, in `help.py:69`, which heading groups it there) and its order. Order does affect *which*
+bindings fall past the truncation point, but `AT-N03e` gates the truncation marker, so anything cut
+is still honestly reported as hidden. Display grouping only.
+
+## 12.4 · Documentation
+
+**L-4 discharged, and well.** `05-postmortem.md:155` now reads "**6, 6 and 5** source files …
+measured from the commits, not recalled", and line 159 writes the error up as a finding —
+"*the disclosure itself under-reported one of its own breaches*" — rather than silently correcting
+it. That is the right instinct. `P-06`/`P-07` are recorded in `BACKLOG.md`.
+
+**L-3 partially discharged.** Line 208 now reads "10 commits on the branch (9 touching code)" —
+correct when written. But **line 271 still reads "committed across 7 commits"**, now uncorrected
+across three passes, and line 208 is itself already stale: the branch is now at **11 commits, 10
+touching code**.
+
+The root cause is worth naming, because it is `P-06` in miniature: **a hand-maintained commit count
+living inside the branch it counts is stale by construction** — every commit that fixes it
+invalidates it. Either drop the figure, or qualify it as "at time of writing". LOW.
+
+## 12.5 · Flakiness and discipline
+
+Three consecutive flakiness runs on `4979f4c` plus the opening run: **`245 passed`** each, no
+failures, no errors. Counting only unmutated runs I executed myself — 8 in pass 1 (including one
+with the file order reversed), 4 in pass 2, 4 in pass 3 — that is **16 clean full-suite runs across
+three trees, zero flakes**, plus `AT-N04a` 20/20 in isolated processes. No test has been observed
+non-deterministic at any point in this gate.
+
+Eleven mutations were applied and reverted in this pass. After each, the file was restored from
+`git cat-file blob HEAD:<path>` and checked against a pre-pass baseline:
+
+```
+mapper/keymap.py   5da6a934a56b635e8dca0c4cce0fe1f70741e6da7ad30fd896aed7c60e29d3fe  OK
+mapper/darkside.py 29c302469d96ebeff03d1cead8ca4bb7f6206193cc825c1df6f05e7b50c2d8b4  OK
+mapper/app.py      4ec313aa344a5da90119470dfb5829fd977bf00b10306d4a53bb450f65e4a7d4  OK
+```
+
+`__pycache__` purged; source content diff empty; nothing under `prototypes/` read or written. This
+file remains the only one this gate has created or modified.
+
+## 12.6 · Gate closed
+
+`merge`. MED-1 and LOW-8 should be picked up — MED-1 by widening the tuple to include `priority`,
+LOW-8 by a line in `BACKLOG.md` — but neither meets the bar this gate blocks on, and neither should
+hold the branch.
