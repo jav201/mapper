@@ -1,9 +1,9 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-08-24-components-batch",
-  "batch_objective": "Mapper component sheet + purpose-built view redesigns from HANDOFF-components.md: nine darkside components, settings canary, home GLANCE (H2), map OPERATED+READ (M2), repo OPERATED (R2), and STEP-on-GROUND contrast audit.",
-  "mode": "core",
+  "batch_id": "2026-08-25-ui-next-batch-01",
+  "batch_objective": "Variant A «taller» from the round-9 prototype cycle: MapScreen recomposed as rail | canvas | editable inspector, closing the five P1 stories US-N01..US-N05 plus HLR-N06 (focus model, adopted mid-batch).",
+  "mode": "full",
   "mode_history": [
     {
       "batch_id": "2026-08-18-batch-01",
@@ -19,254 +19,151 @@
       "batch_id": "2026-08-24-medlow-batch",
       "mode": "core",
       "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-components-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
     }
   ],
   "current_phase": 6,
   "phase_status": "closed",
+  "stations_active": [
+    "P0",
+    "ARQ",
+    "P1",
+    "PDR",
+    "P2",
+    "P3",
+    "DDR",
+    "P4",
+    "P5",
+    "P6"
+  ],
   "iterations_per_phase": {
     "0": 1,
-    "1": 0,
-    "2": 0,
-    "3": 0,
-    "4": 1,
+    "1": 3,
+    "2": 1,
+    "3": 6,
+    "4": 4,
     "5": 1,
     "6": 1
   },
+  "triggers": {
+    "evaluated_at": "2026-08-25T22:17:00",
+    "fired": [
+      "A1",
+      "A2",
+      "A-staleness",
+      "B1",
+      "B4",
+      "C",
+      "D1",
+      "D2",
+      "E1"
+    ],
+    "not_fired": [
+      "A3",
+      "A4",
+      "B2",
+      "B3"
+    ],
+    "record": ".dev-flow/2026-08-25-ui-next-batch-01/PLAN.md#5--trigger-evaluation"
+  },
+  "artifact_homes": {
+    "requirements": "repo:.dev-flow/2026-08-25-ui-next-batch-01/01-requirements.md",
+    "traceability": "repo:.dev-flow/2026-08-25-ui-next-batch-01/06-docs/traceability-matrix.md",
+    "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-08-25-ui-next-batch-01/03-increments/",
+    "backlog": "repo:.dev-flow/BACKLOG.md",
+    "design_pdr": "repo:.dev-flow/2026-08-25-ui-next-batch-01/PDR-design-proposal.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-08-25-ui-next-batch-01/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-08-25-ui-next-batch-01/README.md"
+  },
   "artifacts": {
-    "requirements": ".dev-flow/01-requirements.md",
-    "plan": ".dev-flow/2026-08-24-components-batch/PLAN.md",
-    "handoff": "HANDOFF.md",
-    "handoff_darkside": "HANDOFF-darkside.md",
-    "handoff_improvements": "HANDOFF-improvements.md",
-    "handoff_fixes": "HANDOFF-fixes.md",
-    "handoff_components": "HANDOFF-components.md",
-    "review": "REVIEW-2026-08-18.md",
-    "prototypes_welcome": "prototypes/ui_welcome/",
-    "prototypes_components": "prototypes/ui_components/"
+    "plan": ".dev-flow/2026-08-25-ui-next-batch-01/PLAN.md",
+    "P1": ".dev-flow/2026-08-25-ui-next-batch-01/01-requirements.md",
+    "P1b": ".dev-flow/2026-08-25-ui-next-batch-01/01b-acceptance-design.md",
+    "PDR": ".dev-flow/2026-08-25-ui-next-batch-01/PDR-design-proposal.md",
+    "P2": ".dev-flow/2026-08-25-ui-next-batch-01/02-review.md",
+    "P2b": ".dev-flow/2026-08-25-ui-next-batch-01/02b-security-review.md",
+    "P2c": ".dev-flow/2026-08-25-ui-next-batch-01/02c-ux-review.md",
+    "P4": ".dev-flow/2026-08-25-ui-next-batch-01/04-validation.md",
+    "P4b": ".dev-flow/2026-08-25-ui-next-batch-01/04b-security-signoff.md",
+    "P4c": ".dev-flow/2026-08-25-ui-next-batch-01/04c-pr-gate.md",
+    "P5": ".dev-flow/2026-08-25-ui-next-batch-01/05-postmortem.md",
+    "P6": ".dev-flow/2026-08-25-ui-next-batch-01/06-docs/"
   },
   "decisions_log": [
     {
-      "date": "2026-08-18",
       "phase": 0,
-      "decision": "Batch kickoff: new project dir Github/mapper/; artifacts in English; mode=full (default); autonomous run with merge authorized; autonomous decisions recorded in PLAN.md + state.json + postmortem + vault at sync.",
-      "operator_phrasing": "Github/mapper/ nuevo · English · Autónomo con merge autorizado · Sí, registrar todo"
+      "date": "2026-08-25",
+      "decision": "approved",
+      "notes": "RC-1 clean at 695bd2d; 13 premises executed, P-9 and P-10 came back FALSE; mode=full."
     },
     {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "Phase-0 iteration 1 (operator): search must reach INSIDE node information (all ficha content incl. attachment names), not only titles — US-008 strengthened; new US-014 (nodes carry files, URLs, images as attachments, references not payloads) added, READY."
+      "phase": "ARQ",
+      "date": "2026-08-25",
+      "decision": "approved",
+      "notes": "Module map amended 9->18 modules; staleness sweep re-verified independently: 0 undeclared, 0 double-claimed."
     },
     {
-      "date": "2026-08-21",
-      "phase": 0,
-      "decision": "Phase-0 gate approved. Operator instruction: 'Vamos a implementar desde aquí: C:/Users/jjgh8/Github/mapper/HANDOFF.md'. All 14 user stories remain READY; proceeding to Phase 1 to derive HLR/LLR (EARS, dual traceability)."
-    },
-    {
-      "date": "2026-08-21",
       "phase": 1,
-      "decision": "Phase 1 derivation complete: 35 HLRs and 47 LLRs derived from 14 READY user stories using EARS patterns; validation strategy defined (28 TC + 14 AT); traceability matrix updated. Phase 1 at gate awaiting approval to proceed to Phase 2 (architecture)."
+      "date": "2026-08-25",
+      "decision": "approved",
+      "notes": "6 HLR, 40 LLR, 27 AT. Amendment 1 folded ARQ+QA findings; Amendment 2 folded the PDR security+UX conditions; Amendment 3 dropped an unreachable invariant with its reason."
     },
     {
-      "date": "2026-08-21",
-      "phase": 1,
-      "decision": "Phase-1 gate approved on operator instruction 'aprobado, sigue hasta commit push y merge'; proceeding to Phase 2 (architecture / ARQ)."
+      "phase": "PDR",
+      "date": "2026-08-25",
+      "decision": "approved-with-conditions",
+      "notes": "security: 2 blockers, 6 majors (path traversal executed: calc.exe and powershell.exe launched). ux: 4 blockers (no focus signal; escape discards text; tab kills traversal; edits not undoable). HLR-N06 adopted."
     },
     {
-      "date": "2026-08-21",
       "phase": 2,
-      "decision": "Phase 2 architecture complete: module map, dependency bans, frozen interfaces, and parallelisation worksheet recorded in docs/ARCHITECTURE.md; proceeding to Phase 3 (design / PDR)."
+      "date": "2026-08-25",
+      "decision": "approved",
+      "notes": "Cross-review folded into Amendments 1-2; consolidated in 02-review.md."
     },
     {
-      "date": "2026-08-21",
       "phase": 3,
-      "decision": "Phase 3 PDR complete: frozen interfaces listed in PLAN.md; increment execution order confirmed; proceeding to Phase 4 (implementation)."
+      "date": "2026-08-26",
+      "decision": "approved",
+      "notes": "6 increments, 5 feature commits. code-reviewer blocked Inc-1 with 5 HIGH incl. two mutations that broke the palette while the suite stayed green; all fixed and re-verified."
     },
     {
-      "date": "2026-08-21",
       "phase": 4,
-      "decision": "Phase 4 implementation complete: 7 increments delivered (skeleton+store, layered canvas, schema+legacy fixture, main window+nav+search, mermaid+outline, github connector, radial+export)."
+      "date": "2026-08-26",
+      "decision": "approved",
+      "notes": "245 passed, exit 0. C-18: 27 ATs, each exactly one node. Security sign-off blocked then granted. PR gate blocked twice then approved; H-3 was a data-loss defect this batch introduced."
     },
     {
-      "date": "2026-08-21",
       "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 16 passed."
+      "date": "2026-08-26",
+      "decision": "close batch",
+      "notes": "Post-mortem records 5 reviewer-found mutations that left the suite green, and the whole-seat specification as the durable control."
     },
     {
-      "date": "2026-08-21",
       "phase": 6,
-      "decision": "Phase 6 close complete: postmortem written, traceability matrix sealed, all artifacts in declared homes, batch merged to master."
+      "date": "2026-08-26",
+      "decision": "approved",
+      "notes": "Merged as e359148 after four review rounds. PR #1 squash-merged to master."
     },
     {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "Darkside round (operator): the UI speaks DARKSIDE (recorded as design decision D-1 in 01-requirements §6.2). Five functional stories added and classified READY: US-015 empty states, US-016 ctrl+p palette, US-017 help surface, US-018 resume-last, US-019 undo. Renders in prototypes/ui_darkside/out/."
-    },
-    {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "HANDOFF-darkside.md written for the implementation agent: the darkside contract with the distinctive elements the prototype rounds did not show (rail, step meter, tempo=300 in_out_cubic motion, recessive wordmark, tab strip as the one interactive affordance up top)."
-    },
-    {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "Improvements round (operator: 'implementar todas'): D-A radial darkside rendered (ds-mental.svg — grey steps + only the active path blue; production radial.py's branch hues are the violation to fix). Four functional stories added READY: US-020 coverage report, US-021 map diff vs HEAD, US-022 CSV/TSV import, US-023 templates + linked maps. HANDOFF-improvements.md written."
-    },
-    {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "Design triplet prototyped (operator order: prototypes first, then handoff): D-B motion flipbook (6 frames, 300 ms in_out_cubic selection breath on the production keymap) and D-C home identity moment (big recessive wordmark + computed moon) rendered into prototypes/ui_darkside/out/; D-A noted as fixing radial.py's branch-hue violation. Design section added to HANDOFF-improvements.md."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "Phase-0 improvements gate approved. Operator instruction: 'implementemos junto con HANDOFF-improvements.md. Abre swarm si es necesario.' Design triplet D-A/D-B/D-C plus US-020..US-023 remain READY; repo-view prototypes B/D also approved. Proceeding to Phase 4 (implementation)."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 4,
-      "decision": "Phase 4 implementation complete: integrated D-A radial active path, US-020 coverage report, US-021 diff vs HEAD, US-022 CSV/TSV import, US-023 templates + linked maps, plus repo views B/D (RailTimelineRenderer and HybridLaneRenderer) and D-B motion pulse. Files touched: mapper/app.py, mapper/motion.py, tests/conftest.py, tests/test_store.py."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 4,
-      "decision": "Additional HANDOFF-improvements.md items implemented on operator review: US-006 refined (local git path + URL clone + gh enrichment in mapper/github.py) and US-024 office-format templates (.docx/.pptx/.xlsx ingestion/resolution in mapper/office.py, FactoryScreen import/generate bindings). Files touched: mapper/github.py, mapper/office.py, mapper/model.py, mapper/store.py, mapper/screens/factory.py, tests/test_github.py, tests/test_office.py."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 53 passed; smoke tests via Textual pilot verified MapScreen linked-map navigation, CoverageScreen, RepoScreen view cycling, CSV import preview, template picker, local-git connector, and factory office-template generation."
-    },
-    {
-      "date": "2026-08-24",
       "phase": 6,
-      "decision": "Phase 6 close complete: dev-flow artifacts updated (state.json, 01-requirements.md §6.2 design decisions D-A/D-B/D-C); all changes committed and merged to master under the improvements round."
-    },
-    {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "Operator refinements: US-006 — repo connects by LOCAL PATH or URL (plain git first; gh enrichment optional; render ds-repo-plug.svg); US-024 added READY — office-format templates (.docx/.pptx/.xlsx) ingested directly, tags parsed from OOXML with stdlib only (probe executed TRUE, premise P-6). Handoff updated."
-    },
-    {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "Read-only review of the k7 implementation written to REVIEW-2026-08-18.md (5 HIGH verified at runtime, MED stack, test-quality gaps). HANDOFF-fixes.md makes it executable: per-fix location/root-cause/fix/regression-test, ordered, with the routing note (new fix batch, mode: core, or appended to the current batch's backlog — the operator decides at kickoff)."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "Fix batch kickoff (operator: 'Ok, ahora vamos desde aquí: HANDOFF-fixes.md'). New batch 2026-08-24-fix-batch in mode=core; scope = HIGH fixes 1-5 from REVIEW-2026-08-18.md + regression tests; MED/LOW remain backlog."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 4,
-      "decision": "Phase 4 fix implementation complete: Fix 1 (mermaid id regex [\\w-]+ + slugify seat in app.py/import_csv.py), Fix 2 (block structural edits while focus active), Fix 3 (COMMAND_PALETTE_ENABLE=False + palette dispatch by row identity), Fix 4 (Console file=io.StringIO()), Fix 5 (office.resolve per-paragraph run collapse + whitespace tolerance + XML escape)."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 61 passed; regression tests added for all 5 HIGH fixes (test_mermaid.py, test_app.py focus guard, test_palette.py, test_export.py unicode, test_office.py fragmented+spaced tags); smoke tests verified hyphen id round-trip and darkside palette mount."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 6,
-      "decision": "Phase 6 fix batch close complete: dev-flow state.json updated; all HIGH fixes committed and merged to master; MED/LOW items remain in backlog for next batch."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "MED/LOW batch kickoff (operator: 'Continua hasta tener la app con todos los cambios planteados'). New batch 2026-08-24-medlow-batch in mode=core; scope = MED/LOW stack from REVIEW-2026-08-18.md + regression tests."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 4,
-      "decision": "Phase 4 MED/LOW implementation complete: store._reindex composite PK + per-map hash + atomic save + schema migration; github.py full branch names + async RepoScreen fetch; mermaid escape/unescape for ] and | including edge-label round-trip; layered forest layout; FactoryScreen persist on edit/import + template-suffix generation; radial greys switched to readable text tints; passive blue removed from hint/step/palette/editor/help; wordmark right-aligned via width-aware spacer; UI labels internationalized to Spanish; MapScreen esc back from linked maps; root-archive confirmation modal; CSV import assigns auto-ids; motion pulse added to MapScreen and ImportPreviewScreen."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 67 passed; regression tests added for store isolation/atomic save, mermaid escapes, github slash branch names, CSV auto-ids, layered forest layout."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 6,
-      "decision": "Phase 6 MED/LOW batch close complete: dev-flow state.json updated; all MED/LOW fixes committed and merged to master."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "Operator feedback after MED/LOW deploy: keys trapped by PlugRepoScreen input; map/repo loading lacks progress feedback; branch info needs clearer state indicators. Prototype round in prototypes/repo_nav/ produced variants A/B/C; operator selected variant C (two-pane dashboard)."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 4,
-      "decision": "Phase 4 implementation of variant C: PlugRepoScreen bindings switched to Binding(..., priority=True) so global keys work while Input is focused; RepoScreen redesigned as two-pane dashboard with left sidebar (repo name, stage progress, progress bar, hints) and right grouped branch table (releases/hotfixes/branches) with state indicators; GitHubConnector.fetch now accepts a progress callback reporting current/total/stage; async worker uses call_from_thread to update reactive progress state; lane renderers retired from RepoScreen (kept in codebase for tests)."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 68 passed; new test_repo_screen_two_pane_renders verifies variant C layout mounts correctly."
-    },
-    {
-      "date": "2026-08-18",
-      "phase": 0,
-      "decision": "ui_welcome round (operator: the implemented UI lacks appeal and a welcoming entry; references desk/taskboard/s19_app studied via subagents). Five views rendered darkside-compliant: W1 home as aperture (wordmark + moon + date + workspace pulse with step-meter coverage + resume + recents rail), W2 first-run welcome (sentence + ghost mini-map + doors, never blank), W3 map with rail + active path blue + inspector ficha, W4 factory, W5 help surface from the one keymap seat. NOTES.md documents the lessons per reference."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "ui_components round: darkside component sheet from tui-design COMPONENTS.md (operator asked for more elements; no external skill needed). 9 interaction components in a default/focused/disabled state matrix (focus = solid blue block, disabled sinks to STEP), applied to home (KPI tiles + sparkline), map (accordion with declared fold counts + pagination + save toast), repo plug (skeleton + braille spinner). Rulings: status words not glyphs (check glyph failed font coverage); MUT is the floor for readable chrome (STEP for tracks/disabled only); grid prefix columns sized to the prefix. prototypes/ui_components/."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "ui_components round 2: components matched to view PURPOSE after studying desk/taskboard/s19_app/gbl via agent swarm. home = GLANCE (one drawn-number hero = loudest signal, microbar distribution line replaces KPI tiles, sparkline dim tier); map = OPERATED+READ (coverage minimap, collapsed branches still answer with counts); repo = OPERATED (shared 30-day time axis, today rule, source honesty badge). Ruling: STEP invisible on GROUND — dim floor is WORDMARK for glyph tracks/rules, MUT for words."
-    },
-    {
-      "date": "2026-08-24",
-      "phase": 0,
-      "decision": "HANDOFF-components.md written for implementation by another agent: darkside component library (9 widgets, state matrix law), home hero (drawn number + microbar + dim sparkline), map minimap + answering branches, repo shared time axis, GROUND-contrast amendment (WORDMARK/MUT floor). Suggested US-025..030. Backlog deferred: desk keybar priorities, s19 per-screen legend, gbl collision policy, desk field budgets."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 0,
-      "decision": "Components batch kickoff (operator: 'ok, continuemos desde aquí: HANDOFF-components.md'). New batch 2026-08-24-components-batch in mode=core; scope = component library (US-025), home H2 (US-026), map M2 (US-027/US-028), repo R2 (US-029), contrast audit (US-030). Standing authorization inherited."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 4,
-      "decision": "Phase 4 implementation complete: darkside component library (9 Static widgets with default/focused/disabled state matrix) in mapper/widgets/components.py; SettingsScreen canary in mapper/screens/settings.py; HomeScreen rebuilt for GLANCE posture with drawn-number hero, microbar, dim-tier sparkline; MapScreen coverage minimap, answering branch counts in OutlineRenderer, pagination affordance, event-toast strip; RepoScreen shared 30-day time axis with source honesty badge and legend; GitHubConnector enriched with branch date and release/tag nodes; STEP-on-GROUND contrast audit applied (WORDMARK for tracks/disabled on GROUND, MUT for readable words)."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 5,
-      "decision": "Phase 5 validation complete: python -m pytest tests/ -q -> 86 passed; prototype regeneration and browser verification passed (7 figures, no page errors)."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 6,
-      "decision": "Phase 6 close complete: dev-flow artifacts updated (state.json, PLAN.md); all components-batch changes committed and merged to master; backlog deferred per HANDOFF-components.md §8 (desk keybar priorities, s19 per-screen legend, gbl collision policy, desk field budgets)."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 6,
-      "decision": "Hotfix after deploy: PlugRepoScreen accepted only owner/name, causing the app to hang when the operator pasted a full GitHub URL (https://github.com/jav201/s19_app). Added _normalize_repo to accept owner/name, https/git@ URLs, and local paths; updated placeholder/hint; added regression test."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 6,
-      "decision": "Follow-up hotfix: real GitHub fetch for jav201/s19_app takes ~16s due to multiple gh API calls. Added explicit 'conectando…' message in RepoScreen table, hardened progress callback against exceptions, and added success/error notifications so the UI does not appear frozen during slow fetches."
-    },
-    {
-      "date": "2026-08-25",
-      "phase": 6,
-      "decision": "Pilot reproduction with real repo succeeded: PlugRepoScreen normalizes URL to jav201/s19_app, RepoScreen fetches 9 branches, renders shared time axis. Root cause narrowed to either outdated installed binary or Windows terminal encoding (cp1252) crashing on box-drawing glyphs. Added UTF-8 stdout/stderr wrapper in main() for win32 and 30s subprocess timeouts in github.py to fail fast instead of hanging."
+      "date": "2026-08-26",
+      "decision": "synced-to-obsidian",
+      "notes": "G:/My Drive/ConsultIA/Obsidian_Vaults/AI-Consulting-Brain/01 - Proyectos/mapper/dev-flow-batches/2026-08-25-ui-next-batch-01/ — vault project folder 'mapper' did not exist and was created; Dashboard.md created (none existed)."
     }
   ],
   "standing_authorization": {
-    "date": "2026-08-18",
-    "autonomy_and_merge": "Autonomous end-to-end run AND the agent is authorized to merge the PR (operator's words: 'Autónomo con merge autorizado').",
-    "decision_recording": "Confirmed — every autonomous decision is recorded in the living PLAN.md decision log, state.json decisions_log, the postmortem decisions summary, and carried to the vault at /dev-flow-sync (operator's words: 'Sí, registrar todo')."
+    "date": "2026-08-25",
+    "autonomy_and_merge": "Autonomous end-to-end run WITH merge authority (operator's words: 'delega la implementacion con /dev-flow... trabaja y hace push y merge').",
+    "decision_recording": "Every autonomous decision recorded in PLAN.md, state.json decisions_log, the postmortem decisions summary, and carried to the vault at sync."
   },
-  "obsidian_synced": false,
-  "created_at": "2026-08-21T15:42:09"
+  "merge_commit": "e359148195789298118cd1faf992093000b5926e",
+  "pr": "https://github.com/jav201/mapper/pull/1",
+  "obsidian_synced": true,
+  "created_at": "2026-08-25T22:16:00"
 }
