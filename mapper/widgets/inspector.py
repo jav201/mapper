@@ -19,7 +19,7 @@ from textual.widgets import Input, Static
 
 from mapper import darkside
 from mapper.model import Ficha, Graph, Node, SchemaField
-from mapper.widgets.components import DsProgress, DsSegmented
+from mapper.widgets.components import DsChip, DsProgress, DsSegmented
 
 # The four states a ficha may carry, and the Spanish words shown for them.
 STATE_VALUES = ["ok", "risk", "late", "blocked"]
@@ -135,6 +135,35 @@ class FichaInspector(Vertical):
         rows += [
             Static(self._label("notas"), classes="insp-label"),
             FieldInput(value=darkside.plain(ficha.notes), id="insp-notes"),
+            Static(self._label("adjuntos"), classes="insp-label"),
+        ]
+        for i, att in enumerate(ficha.attachments):
+            # Show the TARGET that would actually be opened, not only the caption:
+            # a friendly caption over a hostile path is how a link lies about where
+            # it goes (LLR-N02.10).
+            rows.append(
+                DsChip(
+                    label=darkside.plain(f"{att.kind} · {att.caption or att.path}"),
+                    id=f"insp-att-{i}",
+                    classes="insp-attachment",
+                )
+            )
+            rows.append(
+                Static(
+                    darkside.Text.assemble(
+                        ("   → ", darkside.WORDMARK),
+                        (darkside.plain(att.path), darkside.WORDMARK),
+                    ),
+                    classes="insp-att-target",
+                )
+            )
+        rows.append(
+            Static(
+                darkside.Text.assemble(("+ agregar adjunto", darkside.ACCENT)),
+                id="insp-att-add",
+            )
+        )
+        rows += [
             Static(self._label("cobertura"), classes="insp-label"),
             DsProgress(have, max(req, 1), id="insp-coverage"),
         ]
@@ -174,6 +203,59 @@ class FichaInspector(Vertical):
         except Exception:
             return False
         return True
+
+    # -- attachments (US-N02) ----------------------------------------------
+    class AttachmentActivated(Message):
+        """The operator asked to open attachment *index* of *node_id*."""
+
+        def __init__(self, node_id: str, index: int) -> None:
+            super().__init__()
+            self.node_id = node_id
+            self.index = index
+
+    class AttachmentAddRequested(Message):
+        def __init__(self, node_id: str) -> None:
+            super().__init__()
+            self.node_id = node_id
+
+    class AttachmentRemoveRequested(Message):
+        def __init__(self, node_id: str, index: int) -> None:
+            super().__init__()
+            self.node_id = node_id
+            self.index = index
+
+    def on_ds_chip_changed(self, event: DsChip.Changed) -> None:
+        """Activating an attachment chip asks the screen to open it."""
+        if self.node is None:
+            return
+        chip = event.control if hasattr(event, "control") else None
+        widget_id = getattr(chip, "id", None) or ""
+        if not widget_id.startswith("insp-att-"):
+            return
+        event.stop()
+        try:
+            index = int(widget_id[len("insp-att-") :])
+        except ValueError:
+            return
+        self.post_message(self.AttachmentActivated(self.node.id, index))
+
+    def request_add_attachment(self) -> None:
+        if self.node is not None:
+            self.post_message(self.AttachmentAddRequested(self.node.id))
+
+    def request_remove_attachment(self) -> None:
+        """Remove the attachment whose chip currently holds focus."""
+        if self.node is None or self.screen is None:
+            return
+        focused = self.screen.focused
+        widget_id = getattr(focused, "id", None) or ""
+        if not widget_id.startswith("insp-att-"):
+            return
+        try:
+            index = int(widget_id[len("insp-att-") :])
+        except ValueError:
+            return
+        self.post_message(self.AttachmentRemoveRequested(self.node.id, index))
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         event.stop()
