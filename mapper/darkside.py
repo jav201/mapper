@@ -103,24 +103,72 @@ def group_box(renderable, pad_x: int = 1) -> Panel:
 
 
 # Keybar -------------------------------------------------------------------
-def keybar(groups: Sequence[tuple[str, Sequence[tuple[str, str]]]], width: int = 118) -> Text:
-    """Render grouped key hints for the footer.
+def keybar(
+    groups: Sequence[tuple[str, Sequence[tuple[str, str]]]],
+    width: int = 118,
+    help_key: str = "?",
+) -> Text:
+    """Render grouped key hints for the footer, truncating VISIBLY.
 
     group names in STEP, key glyphs in ACCENT, labels in MUT.
+
+    When the bar does not fit, a bare `…` is a lie by omission: it says something
+    was cut but not that anything is missing, let alone how much or how to see it.
+    This ends with `… +N  ? todas`, naming the count hidden and the key that shows
+    them.  Measured before this change: the bar rendered 216 cells at a hard-coded
+    118, so 9 of 17 bindings were shown and `m cobertura` — the entry point to the
+    coverage flow — was simply invisible.
     """
+    def _binding_parts(key: str, label: str, first: bool) -> list[tuple[str, str]]:
+        out: list[tuple[str, str]] = []
+        if not first:
+            out.append(("  ", ""))
+        out.append((key, ACCENT))
+        out.append((f" {label}", MUT))
+        return out
+
+    total = sum(len(bindings) for _, bindings in groups)
     parts: list[tuple[str, str]] = []
     for gi, (group_name, bindings) in enumerate(groups):
         if gi > 0:
             parts.append(("   ", ""))
         parts.append((f"{group_name} ", f"{STEP}"))
         for bi, (key, label) in enumerate(bindings):
-            if bi > 0:
-                parts.append(("  ", ""))
-            parts.append((key, ACCENT))
-            parts.append((f" {label}", MUT))
+            parts.extend(_binding_parts(key, label, bi == 0))
+
     text = Text.assemble(*parts)
-    text.truncate(width, overflow="ellipsis")
-    return text
+    if text.cell_len <= width:
+        return text
+
+    # Re-assemble, counting how many bindings actually fit inside the budget the
+    # marker leaves behind.
+    marker_width = len(f" … +{total}  {help_key} todas")
+    budget = max(0, width - marker_width)
+    kept: list[tuple[str, str]] = []
+    shown = 0
+    running = Text()
+    for gi, (group_name, bindings) in enumerate(groups):
+        head: list[tuple[str, str]] = []
+        if gi > 0:
+            head.append(("   ", ""))
+        head.append((f"{group_name} ", f"{STEP}"))
+        for bi, (key, label) in enumerate(bindings):
+            candidate = head + _binding_parts(key, label, bi == 0)
+            probe = Text.assemble(*(kept + candidate))
+            if probe.cell_len > budget:
+                head = []
+                break
+            kept.extend(candidate)
+            head = []
+            shown += 1
+            running = probe
+
+    hidden = total - shown
+    out = Text.assemble(*kept)
+    out.append(f" … +{hidden}", style=WORDMARK)
+    out.append(f"  {help_key}", style=ACCENT)
+    out.append(" todas", style=MUT)
+    return out
 
 
 # Hint line ----------------------------------------------------------------

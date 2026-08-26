@@ -46,7 +46,7 @@ SCOPE_OWNER = {
 # must now be a deliberate edit here.
 EXPECTED_PER_SCOPE = {
     keymap.SCOPE_HOME: 11,
-    keymap.SCOPE_MAP: 18,
+    keymap.SCOPE_MAP: 22,
     keymap.SCOPE_REPO: 3,
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,

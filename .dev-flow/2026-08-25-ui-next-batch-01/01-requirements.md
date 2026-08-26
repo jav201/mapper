@@ -484,3 +484,39 @@ silence. Folded into `AT-N04c`, which already gates the exhaustion branch.
   the `screens → app` back-edge at `mapper/screens/factory.py:343` (ARQ A-7). Fixing the latter
   silently was explicitly rejected.
 - `docs/ARCHITECTURE.md` §1 is amended for the allowlist narrowing (S-M6).
+
+---
+
+#### Amendment 3 — 2026-08-25, forced during Inc-3 implementation
+
+**LLR-N06.2's invariant cannot be met as written, and saying so is cheaper than faking it.**
+
+> **Before:** *"A selection inside a region that does not hold focus **shall** render in `STEP`, not
+> in `ACCENT`, so that at most one ACCENT run is painted on screen at a time."*
+
+The canvas's selection block is painted by `LayeredRenderer`, which has no idea what holds focus.
+Telling it would mean passing focus state into `render(...)` — a **frozen-interface change**, which
+this batch is not authorised to make. So the global "at most one ACCENT run" invariant is not
+reachable without doing batch-2 work.
+
+> **After:** *"A selection inside a region that does not hold keyboard focus **shall** render in
+> `STEP` rather than `ACCENT`, for every region this batch owns — the rail and the inspector. The
+> canvas's selection block is **excluded and the exclusion is recorded**: it is drawn by a frozen
+> renderer that cannot know where focus is. The screen **shall** additionally name the region
+> holding focus in words on the hint line, which is the signal that works regardless of colour."*
+>
+> **New tokens:** the recorded canvas exclusion; the hint-line naming as the primary signal.
+> **Deleted:** the global one-ACCENT-run invariant.
+
+**Consequence for the acceptance test:** `AT-N06a` asserts the *rail's* selection style flips with
+focus and that the hint line names the live region. It does **not** assert a global ACCENT count,
+because that assertion would be false against correct code — a predicate that false-fails correct
+work costs as much as one that passes wrong work.
+
+**Carried to batch 2, where the canvas is already being reworked:** giving `LayeredRenderer` a
+focus-aware selection tone, which closes the invariant properly.
+
+**LLR-N06.3 (`DsChip` focused ≡ selected) moves to Inc-4.** It lives in
+`mapper/widgets/components.py`, and `DsChip`'s only consumer is the attachment list, which Inc-4
+builds. Doing it here would put a fifth source file in this increment for a component nothing yet
+renders.
