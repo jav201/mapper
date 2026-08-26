@@ -357,8 +357,16 @@ escaping does nothing about either.
 > `.mmd` source **shall** pass through one coercion helper that converts non-`str` to `str` and
 > replaces every C0/C1 control character other than `\n` and `\t` with U+FFFD, before it reaches any
 > renderable or an `Input.value`."*
-> **New — LLR-N01.11.** *"No inspector code path **shall** pass a file-derived `str` to a
-> markup-parsing sink — `Static.update(str)`, `Label(str)`, `Text.from_markup`, `Console.print(str)`."*
+> **New — LLR-N01.11.** *"**No code path** **shall** pass a file-derived `str` to a markup-parsing
+> sink — `Static.update(str)`, `Label(str)`, `Text.from_markup`, `Console.print(str)`, or
+> `App.notify(...)`, whose `markup` parameter defaults to `True`."*
+>
+> **Broadened at the Inc-4 security sign-off (was: "No inspector code path").** The narrow wording
+> was the root cause of two findings: the condition was implemented exactly to the edge of the file
+> it named, and the identical defect survived in sibling call sites — `notify` on the map-**load**
+> error path, reachable by merely opening a hostile map, because PyYAML quotes the offending source
+> line verbatim into its error text. A requirement scoped to a file gets satisfied at that file's
+> boundary; a requirement scoped to a *sink class* does not.
 
 **S-M3 · The file-derived inventory is larger than the design listed.** It also includes
 `SchemaField.label`, `Ficha.state`, `Ficha.meta`, `Attachment.path` and `node.id` — and LLR-N01.2

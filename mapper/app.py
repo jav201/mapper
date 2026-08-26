@@ -1130,7 +1130,11 @@ class MapScreen(Screen):
                 self.base_graph = self.store.load(self.map_id)
                 self.graph = self.base_graph
             except Exception as e:
-                self.notify(f"error cargando mapa: {e}", severity="error")
+                self.notify(
+                    f"error cargando mapa: {darkside.plain(str(e))}",
+                    severity="error",
+                    markup=False,
+                )
                 self.graph = Graph()
                 self.graph.add_node(Node(id="root", ficha=Ficha(title="error")))
                 self.base_graph = self.graph
@@ -1345,7 +1349,7 @@ class MapScreen(Screen):
         self.store.save(self.map_id, self.graph)
         self.base_graph = self.graph
         self.refresh_canvas()
-        self._event_toast("guardado", node.ficha.title or node.id)
+        self._event_toast("guardado", darkside.plain(node.ficha.title or node.id))
 
     @staticmethod
     def _ficha_value(ficha: Ficha, field: str) -> str:
@@ -1411,7 +1415,7 @@ class MapScreen(Screen):
             self.store.save(self.map_id, self.graph)
             self.base_graph = self.graph
             self.refresh_canvas()
-            self._event_toast("adjunto agregado", target)
+            self._event_toast("adjunto agregado", darkside.plain(target))
 
         self.app.push_screen(
             _PromptScreen("ruta o url del adjunto", "docs/acta.pdf"), callback=on_target
@@ -1431,7 +1435,9 @@ class MapScreen(Screen):
         self.store.save(self.map_id, self.graph)
         self.base_graph = self.graph
         self.refresh_canvas()
-        self._event_toast("adjunto quitado", removed.caption or removed.path)
+        self._event_toast(
+            "adjunto quitado", darkside.plain(removed.caption or removed.path)
+        )
 
     def action_add_attachment(self) -> None:
         self.query_one("#map-inspector", FichaInspector).request_add_attachment()
@@ -1739,7 +1745,7 @@ class MapScreen(Screen):
             self.base_graph = self.graph
             self.nav.cursor = self.graph.root_id
             self.refresh_canvas()
-            self._event_toast("archivado", node.ficha.title or node.id)
+            self._event_toast("archivado", darkside.plain(node.ficha.title or node.id))
 
         # Every archive is confirmed, root or not.  A non-root subtree used to be
         # destroyed with no prompt at all, and `x` sits next to the navigation

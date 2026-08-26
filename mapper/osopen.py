@@ -108,8 +108,11 @@ def open_external(
     # this fail?", not "should this open?" — so the containment test runs whether
     # or not the path is there.
     try:
-        resolved = (workspace / target).resolve() if not Path(target).is_absolute() \
-            else Path(target).resolve()
+        # `workspace / target` already discards the left operand when target is
+        # absolute, which is exactly what is wanted: an absolute target resolves
+        # as itself and is then judged by the containment test below.  The old
+        # is_absolute() ternary was dead code saying the same thing twice.
+        resolved = (workspace / target).resolve()
         root = Path(workspace).resolve()
     except (OSError, ValueError):
         return REFUSED_TYPE
