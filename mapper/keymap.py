@@ -109,6 +109,8 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("d", "d", "open_documents", "documentos", "node"),
     KeyBinding("x", "x", "archive", "archivar", "node"),
     KeyBinding("u", "u", "undo", "deshacer", "node"),
+    KeyBinding("A", "A", "add_attachment", "agregar adjunto", "node"),
+    KeyBinding("X", "X", "remove_attachment", "quitar adjunto", "node"),
     # -- map · view ---------------------------------------------------------
     KeyBinding("f", "f", "toggle_focus", "alternar foco", "view"),
     KeyBinding("o", "o", "toggle_outline", "alternar outline", "view"),

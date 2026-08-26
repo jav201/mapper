@@ -33,8 +33,9 @@ from .keymap import (
     textual_bindings,
 )
 from .mermaid import dump as dump_mermaid, slugify
-from .model import Document, Edge, Ficha, Graph, Node
+from .model import Attachment, Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
+from .osopen import OK as OSOPEN_OK, open_external
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .store import MapStore, TEMPLATES
 from .views.layered import LayeredRenderer
@@ -1362,6 +1363,76 @@ class MapScreen(Screen):
         event.stop()
         self.set_focus(None)
         self.query_one(HintLine).set_hint("navega con j/k/h/l · ↵ ficha · / buscar")
+
+    # -- attachments (US-N02) ----------------------------------------------
+    def on_ficha_inspector_attachment_activated(
+        self, event: FichaInspector.AttachmentActivated
+    ) -> None:
+        """Open an attachment through the one OS-handler boundary.
+
+        The refusal is always shown: a dropped status word would make a refused
+        launch indistinguishable from a successful one (LLR-N02.9).
+        """
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+        if not 0 <= event.index < len(node.ficha.attachments):
+            return
+        att = node.ficha.attachments[event.index]
+        status = open_external(
+            att.kind, att.path, workspace=self.store.workspace,
+            launcher=getattr(self.app, "attachment_launcher", None),
+        )
+        if status == OSOPEN_OK:
+            self._event_toast("abierto", att.caption or att.path)
+        else:
+            self.notify(f"{status}: {att.path}", severity="warning")
+
+    def on_ficha_inspector_attachment_add_requested(
+        self, event: FichaInspector.AttachmentAddRequested
+    ) -> None:
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+
+        def on_target(target: str | None) -> None:
+            if not target:
+                return
+            self._push_snapshot()
+            kind = "url" if "://" in target else "file"
+            node.ficha.attachments.append(Attachment(kind=kind, path=target))
+            self.store.save(self.map_id, self.graph)
+            self.base_graph = self.graph
+            self.refresh_canvas()
+            self._event_toast("adjunto agregado", target)
+
+        self.app.push_screen(
+            _PromptScreen("ruta o url del adjunto", "docs/acta.pdf"), callback=on_target
+        )
+
+    def on_ficha_inspector_attachment_remove_requested(
+        self, event: FichaInspector.AttachmentRemoveRequested
+    ) -> None:
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+        if not 0 <= event.index < len(node.ficha.attachments):
+            return
+        removed = node.ficha.attachments.pop(event.index)
+        self._push_snapshot()
+        self.store.save(self.map_id, self.graph)
+        self.base_graph = self.graph
+        self.refresh_canvas()
+        self._event_toast("adjunto quitado", removed.caption or removed.path)
+
+    def action_add_attachment(self) -> None:
+        self.query_one("#map-inspector", FichaInspector).request_add_attachment()
+
+    def action_remove_attachment(self) -> None:
+        self.query_one("#map-inspector", FichaInspector).request_remove_attachment()
 
     def _push_snapshot(self) -> None:
         if self.store is None:
