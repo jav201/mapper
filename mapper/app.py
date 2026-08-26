@@ -41,6 +41,7 @@ from .views.layered import LayeredRenderer
 from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
+from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
 
 
 def screen_bindings(scope: str) -> list[Binding]:
@@ -1061,6 +1062,11 @@ class MapScreen(Screen):
 
     KEY_SCOPE = SCOPE_MAP
     BINDINGS = screen_bindings(SCOPE_MAP)
+    # The inspector's fields mount after this screen does, and Textual would
+    # auto-focus the first of them — which silently disables every single-letter
+    # map binding, because a focused Input consumes printable keys.  The map, not
+    # a text field, owns the keyboard on arrival.
+    AUTO_FOCUS = None
 
     def __init__(self, map_id: str, source_crumb: list[str] | None = None) -> None:
         super().__init__()
@@ -1085,9 +1091,15 @@ class MapScreen(Screen):
         crumb_prefix = self.source_crumb or [self.map_id]
         yield TabStrip("c", crumb=crumb_prefix + [""])
         yield Static("", id="map-minimap")
-        yield Static("(cargando mapa...)", id="map-canvas")
+        # Variant A «taller»: rail | canvas | inspector.  The inspector is the ONE
+        # ficha surface — it replaces both the old `#map-ficha` GroupBox and the
+        # LayeredRenderer's own ficha strip, which rendered the same card twice.
+        yield Horizontal(
+            Static("", id="map-canvas"),
+            FichaInspector(id="map-inspector"),
+            id="map-body",
+        )
         yield Input(placeholder="/buscar", id="search-input")
-        yield GroupBox(Static(id="map-ficha"), id="map-ficha-box")
         yield Static("", id="map-pagination")
         yield Static("", id="map-toast")
         yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
@@ -1128,6 +1140,10 @@ class MapScreen(Screen):
             self.store.record_session(self.map_id, self.nav.cursor)
 
         self.refresh_canvas()
+        # Keep focus off the inspector's fields on arrival: a focused Input eats
+        # every single-letter key, so the map's own navigation would be dead until
+        # the operator blurred it by hand.
+        self.set_focus(None)
 
     def _current_renderer(self):
         if self.outline_mode:
@@ -1208,8 +1224,10 @@ class MapScreen(Screen):
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
         size = self.size or self.app.size
-        w = max(20, size.width)
-        h = max(5, size.height - 10)
+        # The canvas no longer owns the full width: the inspector takes a fixed
+        # column beside it, so render to what is actually left.
+        w = max(20, size.width - INSPECTOR_WIDTH)
+        h = max(5, size.height - 8)
         text = renderer.render(
             self.graph,
             selected_id=self.nav.cursor,
@@ -1226,51 +1244,57 @@ class MapScreen(Screen):
         node_title = node.ficha.title if node else ""
         tab.set_crumb(self._current_crumb() + [node_title])
 
-        self.query_one("#map-ficha", Static).update(self._ficha_text(node, w - 4))
+        self.query_one("#map-inspector", FichaInspector).show(node, self.graph)
         self.query_one("#map-minimap", Static).update(self._minimap_text())
         self.query_one("#map-pagination", Static).update(self._pagination_text())
 
-    def _ficha_text(self, node: Node | None, width: int) -> Text:
-        if node is None:
-            return Text.assemble(("  (selecciona un nodo)", darkside.MUT))
+    def on_ficha_inspector_field_committed(
+        self, event: FichaInspector.FieldCommitted
+    ) -> None:
+        """Persist an inspector edit.
 
-        ficha = node.ficha
-        text = Text()
-        text.append("▸ ", style=darkside.ACCENT)
-        text.append(escape(ficha.title or node.id), style=f"bold {darkside.INK}")
-        if ficha.meta:
-            text.append("   ")
-            text.append(escape(ficha.meta), style=darkside.MUT)
+        The widget cannot write: `widgets -> store` is banned, so it reports what
+        the operator did and this screen — which owns the graph and the store —
+        decides what that costs.
+        """
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+        current = self._ficha_value(node.ficha, event.field)
+        if current == event.value:
+            return
+        # Snapshot BEFORE mutating, so `u` reverts this edit rather than an
+        # unrelated earlier structural change.
+        self._push_snapshot()
+        if event.field == "title":
+            node.ficha.title = event.value
+        elif event.field == "notes":
+            node.ficha.notes = event.value
+        elif event.field == "state":
+            node.ficha.state = event.value
+        else:
+            node.ficha.fields[event.field] = event.value
+        self.store.save(self.map_id, self.graph)
+        self.base_graph = self.graph
+        self.refresh_canvas()
+        self._event_toast("guardado", node.ficha.title or node.id)
 
-        have, req = ficha.required_coverage(self.graph.schema)
-        if req:
-            text.append("   ")
-            text.append_text(darkside.step_meter(have, req))
+    @staticmethod
+    def _ficha_value(ficha: Ficha, field: str) -> str:
+        if field == "title":
+            return ficha.title
+        if field == "notes":
+            return ficha.notes
+        if field == "state":
+            return ficha.state
+        return ficha.fields.get(field, "")
 
-        text.append("\n")
-
-        doc = ficha.fields.get("D", "")
-        text.append("  documento ", style=darkside.MUT)
-        text.append(escape(doc) if doc else "sin acta",
-                    style=darkside.INK if doc else darkside.ALERT)
-        text.append("   dueño ", style=darkside.MUT)
-        text.append(escape(ficha.fields.get("O", "—")), style=darkside.INK)
-        text.append("   creado ", style=darkside.MUT)
-        text.append(escape(ficha.fields.get("Y", "—")), style=darkside.INK)
-
-        linked = node.linked_map_id()
-        if linked:
-            text.append("   enlace ", style=darkside.MUT)
-            text.append(escape(linked), style=darkside.ACCENT)
-
-        if ficha.notes:
-            note = ficha.notes
-            if len(note) > width - 4:
-                note = note[: width - 5] + "…"
-            text.append("\n  ")
-            text.append(escape(note), style=darkside.MUT)
-
-        return text
+    def on_field_input_left(self, event) -> None:
+        """`escape` inside a field returns focus to the map, keeping the value."""
+        event.stop()
+        self.set_focus(None)
+        self.query_one(HintLine).set_hint("navega con j/k/h/l · ↵ ficha · / buscar")
 
     def _push_snapshot(self) -> None:
         if self.store is None:
@@ -1598,9 +1622,26 @@ class MapperApp(App):
     #repo-progress { color: #737373; margin-bottom: 1; }
     #repo-sidebar-hints { color: #737373; }
     #repo-table { height: 1fr; background: #000000; padding: 0 1; }
-    #map-canvas { width: 100%; height: 1fr; }
-    #map-ficha-box { height: auto; }
-    #map-ficha { height: auto; padding: 0 1; }
+    /* Variant A «taller»: canvas + inspector side by side.  Depth comes from the
+       background step, never from a border — borders are reserved for modals. */
+    #map-body { height: 1fr; }
+    #map-canvas { width: 1fr; height: 100%; }
+    #map-inspector {
+        width: 36;
+        height: 100%;
+        background: #121212;
+        padding: 0 1;
+        overflow-y: auto;
+    }
+    #map-inspector .insp-label { color: #737373; }
+    #map-inspector Input {
+        border: none;
+        background: #262626;
+        color: #f5f5f5;
+        height: 1;
+        padding: 0 1;
+    }
+    #map-inspector Input:focus { background: #1783ff; color: #000000; }
     #search-input { dock: bottom; display: none; }
 
     PlugRepoScreen { align: center middle; }

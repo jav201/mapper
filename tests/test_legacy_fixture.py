@@ -19,11 +19,22 @@ def test_legacy_fixture_loads(tmp_path):
     assert any(f.key == "D" and f.required for f in graph.schema)
 
 
-def test_legacy_renderer_shows_coverage():
+def test_legacy_renderer_shows_per_card_coverage():
+    """The canvas still shows coverage per card, as letters on each node.
+
+    The word "cobertura" used to appear here too, from the renderer's own ficha
+    strip.  That strip was removed in batch `ui_next-01` because the inspector
+    panel renders the same card — the map was drawing it twice.  The assertion
+    was not dropped: it moved to `test_inspector.py`, which observes coverage on
+    the surface that now owns it.  What stays here is the per-card evidence, which
+    the canvas is still responsible for.
+    """
     store = MapStore(Path(__file__).parent.parent / "fixtures")
     graph = store.load("legacy")
     renderer = LayeredRenderer()
     text = renderer.render(graph, selected_id="erp", w=120, h=40)
-    assert "cobertura" in text.plain
     assert "SIN ACTA" not in text.plain or "ACTA-2011-034" in text.plain
     assert "D✓" in text.plain or "D░" in text.plain
+    # The strip is gone: its two distinctive strings must not come back here.
+    assert "selecciona un nodo" not in text.plain
+    assert "cobertura" not in text.plain

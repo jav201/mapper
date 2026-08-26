@@ -126,7 +126,7 @@ def keybar(groups: Sequence[tuple[str, Sequence[tuple[str, str]]]], width: int =
 # Hint line ----------------------------------------------------------------
 def hint_line(text: str, key: str | None = None) -> Text:
     """Render a next-step hint line."""
-    parts: list[tuple[str, str]] = [("siguiente ▸ ", MUT), (escape(text), MUT)]
+    parts: list[tuple[str, str]] = [("siguiente ▸ ", MUT), (plain(text), MUT)]
     if key:
         parts.append((f" {key}", INK))
     return Text.assemble(*parts)
@@ -217,9 +217,31 @@ def time_row(name: str, age_days: int, glyph: str, style: str, note: str,
 
 
 # Text helpers -------------------------------------------------------------
+# Control characters other than tab and newline are replaced, not escaped: a
+# terminal acts on them.  An ANSI cursor-move or an OSC-52 clipboard write inside
+# a ficha title reaches the compositor verbatim, and markup escaping does nothing
+# about either — measured, see 01-requirements.md §Amendment 2 S-B2.
+_CONTROL_MAP = {c: "�" for c in range(0x00, 0x20) if c not in (0x09, 0x0A)}
+_CONTROL_MAP.update({c: "�" for c in range(0x7F, 0xA0)})
+
+
+def plain(value: object) -> str:
+    """Coerce any file-derived value into a string that is safe to render.
+
+    The single coercion helper every renderer of sidecar text must pass through.
+    It deliberately does NOT call `rich.markup.escape`: these strings are placed
+    into `Text` objects with explicit styles, and `Text` does not parse markup, so
+    escaping there is a no-op that merely prints visible backslashes.  Safety from
+    markup comes from never handing a file-derived `str` to a markup-parsing sink.
+    """
+    if not isinstance(value, str):
+        value = "" if value is None else str(value)
+    return value.translate(_CONTROL_MAP)
+
+
 def fit(s: str, w: int) -> str:
     """Pad or truncate *s* to exactly *w* display cells."""
-    s = escape(s)
+    s = plain(s)
     text = Text(s)
     if text.cell_len > w:
         text.truncate(w, overflow="ellipsis")
