@@ -110,7 +110,7 @@ async def test_at_n04c_a_complete_map_reports_exhaustion_and_does_not_cycle(tmp_
         assert screen.nav.cursor == before, "the cursor moved on a complete map"
 
 
-async def test_at_n04c_complete_map_coverage_report_is_not_a_selectable_row(tmp_path):
+async def test_at_n04d_complete_map_coverage_report_is_not_a_selectable_row(tmp_path):
     """The report's empty state must read as a statement, not an empty list.
 
     It used to be a fake selectable row that `enter` dismissed in silence.

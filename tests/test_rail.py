@@ -145,8 +145,8 @@ async def test_at_n06d_regions_collapse_by_key_and_by_width(tmp_path):
         assert not inspector.display, "I must hide the inspector"
 
 
-async def test_at_n06d_narrow_terminal_auto_collapses_the_rail(tmp_path):
-    """The width half of AT-N06d, on a terminal too narrow for three regions."""
+async def test_at_n06e_narrow_terminal_auto_collapses_the_rail(tmp_path):
+    """AT-N06e — the width half, on a terminal too narrow for three regions."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=(100, 30)) as pilot:
         await pilot.pause()

@@ -113,7 +113,7 @@ async def test_at_n03d_help_shows_exactly_the_active_scope(tmp_path):
         assert "consultar mapas" not in shown, "help advertises a key that does nothing here"
 
 
-async def test_at_n03b_negative_empty_query_result_dispatches_nothing(tmp_path):
+async def test_palette_empty_query_dispatches_nothing(tmp_path):
     """Boundary: a query matching no entry must not dispatch anything.
 
     This is the case the superseded test accidentally exercised while claiming to
