@@ -211,7 +211,12 @@ def test_a_confined_file_does_reach_the_launcher(tmp_path):
     launcher = RecordingLauncher()
     status = osopen.open_external("file", "acta.pdf", workspace=ws, launcher=launcher)
     assert status == osopen.OK
-    assert launcher.calls and launcher.calls[0].endswith("acta.pdf")
+    # Pin the RESOLVED absolute path, not a suffix.  `endswith("acta.pdf")` is
+    # true of the raw target too, so it left a third substitution alive:
+    # launching `target` instead of `str(resolved)` stayed 29/29 green while the
+    # string that was CONFINED stopped being the string that was LAUNCHED — the
+    # OS then resolves it against the process CWD rather than the workspace.
+    assert launcher.calls == [str((ws / "acta.pdf").resolve())]
 
 
 @pytest.mark.parametrize("target", [12345, None, "", "   ", ["a"], {"k": "v"}])

@@ -9,6 +9,19 @@
 
 ## 0 · Verdict
 
+> ## Round 2 (`52d77bb`) — `sign-off granted`, with four recorded carries
+>
+> **Both blockers are fixed and independently re-verified — see §9.** No blocker remains outstanding,
+> and the shipped confinement control is correct and unbroken across 21 attack cases. Four majors are
+> carried explicitly (N-12, N-13, N-14, and the N-4 refusal *shape*); none is a defect in the shipped
+> control itself — three are gaps in the *gate*, one is a wrong status word.
+>
+> **Round 1 verdict (`dd83725`) was `sign-off blocked`. It is retained below as the record.**
+
+---
+
+## 0.1 · Round 1 verdict — superseded by §9, kept as the record
+
 > ## `sign-off blocked`
 
 Two blockers. Both are the **un-landed halves of conditions I raised at PDR** — not new territory, and
@@ -427,3 +440,195 @@ same untrusted string kept flowing (N-1 out of `open_external`'s contract, N-2 i
 `app.py`), and **the suite that is supposed to hold the confinement in place does not** (N-3).
 
 Re-review on re-submission, per `docs/ARCHITECTURE.md:287` (risk A-4).
+
+---
+
+# 9 · Round 2 — re-review of `52d77bb`
+
+**Verdict: `sign-off granted`, with four recorded carries.**
+
+Method: every finding from Round 1 was **re-executed**, not read. The corrective pass's own claims
+were treated as hypotheses. `mapper/osopen.py` as reviewed: `sha256 e9fce485…` (matches the value the
+author reported). Full suite: **210 passed**.
+
+## 9.1 · Discharge
+
+| # | Round-1 finding | Status | Re-executed evidence |
+|---|---|---|---|
+| **N-1** | NUL kills the app | ✅ **fixed** | `yaml.safe_load` of a `\0` escape → `open_external` returns `destino inválido`, **no raise**, on the production launcher path. NUL / 0x01 / ESC / TAB / NL / DEL / 0x9B all refused on **both** branches. `ValueError` now caught at both launch sites |
+| **N-2** | Refusal toast is a markup sink | ✅ **fixed** | On a **real** `Notification` object: `markup=False`; `[/bold]OWNED` → `Toast.render()` returns the text **with brackets intact and no `MarkupError`**; `[bold red on white]OWNED` is **no longer consumed**; OSC-52 arrives as `\ufffd]52;…\ufffd` |
+| **N-3** | Suite does not gate confinement | ⚠️ **improved, still incomplete** | My two mutants now redden — **M9 → 2 failed**, **M5 → 1 failed**, reproducing the author's numbers exactly. But a **third** exploitable substitution survives: **N-13** |
+| **N-4** | Userinfo launches | ✅ **fixed**, ⚠️ wrong status word | All three userinfo forms refused. **No false refusals**: `https://x.com/@handle`, `https://mastodon.social/@user@host`, `?to=a@b`, `#@frag`, `%40` all still launch — the netloc scoping is correct. But see N-4-shape |
+
+The five PDR conditions now stand: **C-1 ✅ · C-2 ✅ (control) · C-3 ✅ · C-6 ⚠️ (N-14) · C-7 ⚠️ (N-12, N-14).**
+
+## 9.2 · Confinement re-attacked — 0 escapes
+
+21 cases re-run against `52d77bb`. **Refused:** `..` traversal, nested traversal, absolute-outside,
+`.gitconfig`, `calc.exe`, sibling-absolute, sibling-via-`..`, UNC, `C:..`, symlink→outside,
+symlink-dir, `\\?\` long path, **directory** (newly refused), workspace-dot. **Launched, all
+confined:** `acta.pdf`, `sub/deep.txt`, trailing dot, case flip, `NUL` (inert), `payload.exe`
+(N-9 carry), `acta.pdf:evil` (N-6 carry). **ESCAPES: 0.**
+
+## 9.3 · New findings
+
+### N-12 · The same defect as N-2 survives on the map-**load** path  `[major]`
+
+- **Where.** `mapper/app.py:1133` — `self.notify(f"error cargando mapa: {e}", severity="error")`.
+  Markup defaults to `True`; no `darkside.plain()`.
+- **Reachability.** A PyYAML error **quotes the offending source line verbatim**, and that source is
+  the hostile map:
+
+  ```
+  ScannerError: while scanning a quoted scalar
+    in "<unicode string>", line 3, column 12:
+          title: "[/bold]OWNED
+  yaml error contains the hostile literal '[/bold]': True
+  ```
+
+  → `notify(markup=True)` → `Toast.render()` **RAISED MarkupError: closing tag '[/bold]' does not
+  match any open tag**.
+- **Why it matters — and why it is *not* a blocker.** It fires on **merely opening** a hostile map,
+  which is *more* reachable than N-2 (no activation needed). But I could **not** demonstrate app
+  death: under `run_test` the `ToastRack` never mounts, so I proved the *render* raises and stopped
+  there. I will not call something a blocker on a crash I did not reproduce. And unlike N-2, no
+  security decision hangs on this text, so the forgery half carries little weight here. Hence
+  **major**.
+- **Fix.** `self.notify(f"error cargando mapa: {darkside.plain(str(e))}", severity="error", markup=False)`.
+
+### N-13 · A third surviving substitution — the check/use invariant is ungated  `[major]`
+
+This is the mutant that was asked for. **Replacing `launch(str(resolved))` with `launch(target)`
+leaves the suite at 29/29 green.**
+
+```
+M-AB launch raw target, not resolved     29 passed in 1.41s   *** SURVIVES
+```
+
+It is exploitable, because the string that was **confined** stops being the string that is
+**launched** — the raw target is then resolved by the OS against the **process CWD**, not the
+workspace. Demonstrated in a cloned-repo layout, where both files ship in the clone:
+
+```
+sidecar target      : 'setup.exe'
+workspace           : <clone>\maps          process CWD: <clone>
+status              : OK
+string LAUNCHED     : 'setup.exe'
+OS resolves that to : <clone>\setup.exe
+content opened      : MALICIOUS - the file the OS actually opens
+content APPROVED    : BENIGN - the file the check approves
+```
+
+**Why the suite misses it:** the positive control asserts
+`launcher.calls[0].endswith("acta.pdf")`, and `"acta.pdf".endswith("acta.pdf")` is `True`. Nothing
+pins that the launched string is **absolute and equal to the resolved path**.
+
+**Fix — a test, not the code; the code is correct today.** Strengthen the positive control to
+`assert launcher.calls == [str((ws / "acta.pdf").resolve())]`. One line, and it closes the class.
+
+### N-14 · Other sinks still carry uncoerced file-derived text  `[major, aggregate]`
+
+The author asked directly whether sites were missed. **Yes** — census of `mapper/app.py`:
+
+**Markup sinks** (`notify`, markup defaults `True`), carrying exception text that can embed file
+content: `:626`, `:640`, `:661`, `:666`, `:729`, `:1024` (`self.notify(str(exc))`), `:1027`,
+**`:1133`** (N-12), `:1673`.
+
+**Control-character sinks** (`_event_toast` → `Text.assemble`; not markup-parsing, but control
+characters pass straight through to the terminal): `:1348` `("guardado", node.ficha.title or node.id)`
+· **`:1434` `("adjunto quitado", removed.caption or removed.path)`** · `:1671` · `:1742`.
+
+`:1434` is the sibling of the handler that *was* fixed — the activate path got `darkside.plain()`,
+the remove path did not. Measured on the exact expression at `:1434`:
+
+```
+uncoerced (app.py:1434 today)    OSC-52 introducer present: True
+with darkside.plain()            OSC-52 introducer present: False
+```
+
+Measured on the `ESC ]52;` **introducer** specifically — a bare-ESC test is useless here, because
+Rich emits its own ESC for the `bold`/`dim` styles. (I made exactly that mistake mid-probe and
+corrected it; flagging so the same false positive is not repeated.)
+
+**Fix.** Coerce every `_event_toast` detail argument, and add `markup=False` + `darkside.plain()` to
+every `notify` that interpolates. Then broaden LLR-N01.11 from *"no inspector code path"* to *"no
+code path"* and gate it with a source census — **the wording is what let this recur twice**.
+
+### N-4-shape · The userinfo refusal reports the wrong reason  `[major → cheap fix]`
+
+`osopen.py:98` returns `REFUSED_SCHEME` (`"esquema no permitido"` — *scheme not allowed*) for a URL
+whose **scheme is perfectly allowed**. The operator is told the wrong thing about why their link was
+refused, which is the one job these status words have. Add a distinct word — e.g.
+`REFUSED_USERINFO = "el destino oculta su host"` — and return that.
+
+## 9.4 · Gate gaps that are *not* exploitable (recorded, not blocking)
+
+| Mutant | Suite | Assessment |
+|---|---|---|
+| **M-W** `scheme.startswith(ALLOWED_SCHEMES)` | **survives** | C-4 **explicitly banned** prefix matching, and nothing gates that ban. Newly allowed: `httpx://`, `https-evil://`, `httpsa://`, `http0://` — reachable only if such a handler is registered on the box. Add one arm: a scheme starting with `http` that is not `http`/`https` |
+| **M-X** control guard narrowed to NUL only | **survives** | The stated control is "C0/C1"; the test covers only NUL. Other controls fail closed downstream, so impact is low — but widen the test to `0x01` and `0x1b` |
+| **M-Y** control guard applied only to `kind == "url"` | **survives** | Same class; the NUL test uses `kind="url"` only. Add a `kind="file"` arm |
+| **M-AD** userinfo check moved *after* `launch()` | **caught** | Correctly caught, because the new tests assert `launcher.calls == []`. That habit is what caught it — keep it everywhere |
+| **M-AE** `root = Path(workspace)` unresolved | **survives** | **Fails closed** (refuses everything under a symlinked or relative workspace), so not a bypass. But latent breakage: `mapper maps` with a relative argv would refuse every attachment |
+| **M-AC** drop the `is_absolute` ternary | **survives** | **Equivalence mutant — `osopen.py:111–112` is dead code.** `workspace / target` already discards the left operand for an absolute RHS; verified identical for `C:\…`, `\\host\share\x`, `C:foo` and relative paths. Not a security issue, but a dead branch inside a security-critical function misleads the next reader. Simplify to `resolved = (workspace / target).resolve()` |
+
+## 9.5 · The author's two self-reported issues
+
+- **Stray control bytes.** Scanned all five touched files for C0/C1 bytes outside `\t\n\r`:
+  `osopen.py`, `app.py`, `inspector.py`, `test_attachments.py`, `darkside.py` — **all CLEAN**. The
+  new test also builds its payload with `chr(0)` rather than a source escape, with a comment saying
+  why. That is the correct fix for the defect they hit, not a workaround.
+- **Flakiness.** `tests/test_attachments.py` run 5× consecutively: **29 passed** every time. The
+  `focus_after_rebuild` change replaces two racing scheduled callbacks with a pending-focus flag
+  applied at the end of the rebuild that creates the rows — causally ordered, and the right shape.
+  I found **no other timing-dependent assertion** in the attachment tests: every one drives state
+  through `post_message` + `pilot.pause()` and asserts on returned values or on a reloaded
+  `MapStore`, never on frame timing.
+
+## 9.6 · Status of the seven Round-1 minors
+
+| # | Round-1 minor | Now | Disposition |
+|---|---|---|---|
+| N-5 | Uncoerced success-path toast | **partially fixed** | `:1393` (activate) coerced ✅; `:1434` remove, `:1348` save, `:1742` archive, `:1671` export **not** → folded into **N-14**, fix this batch |
+| N-6 | ADS targets launched | **unchanged** | **Carry.** `acta.pdf:evil` still launches. Requires the stream to already exist, and git does not carry ADS — low reachability. Record the decision |
+| N-7 | Directory targets launched | ✅ **fixed** | `sub` and `.` → `no se pudo abrir`. Closed |
+| N-8 | `urlparse` vs C-4's `urlsplit` | **unchanged** | **Carry (documentation).** Re-confirmed zero scheme disagreements across the corpus. Either switch or amend C-4 — do not leave code and condition disagreeing in writing on a gated control |
+| N-9 | C-16 executable policy unrecorded | **unchanged** | **Carry.** `payload.exe` inside the workspace still launches. Non-blocking by C-16's own terms, but write the decision down |
+| N-10 | U+202E passes `plain()` | **unchanged** | **Carry.** Same display-honesty family as N-4. Consider adding U+202A–U+202E and U+2066–U+2069 to `_CONTROL_MAP` |
+| N-11 | Add-handler kind inference | **unchanged** | **Carry (informational).** Fails safe in every case tried; the input is operator-typed |
+
+## 9.7 · Must-fix before merge
+
+1. **N-12** — `app.py:1133`, one line. The same defect as a fixed blocker, on a more reachable path.
+2. **N-14** — the remaining `notify` / `_event_toast` sinks, and broaden LLR-N01.11 to *"no code path"*.
+3. **N-13** — strengthen the positive control to pin the resolved absolute path.
+4. **N-4-shape** — a status word that names the real reason.
+
+Recommended alongside: the three test arms in §9.4 (M-W, M-X, M-Y), and deleting the dead ternary.
+
+## 9.8 · Round-2 integrity
+
+| Item | ✓ | Evidence |
+|---|---|---|
+| Every discharge re-executed, not trusted | ✓ | §9.1–9.2; the author's mutant counts reproduced independently (M9 → 2 failed, M5 → 1 failed) |
+| Mutations reverted; confirmed by sha256 | ✓ | `mapper/osopen.py` → `e9fce4857825a482b62c0c0270e65b1a0ae2b3e71abad36e1905862133d9ce54`, identical to the pre-mutation baseline; `git diff --exit-code -- mapper/osopen.py` → **0** |
+| Line-ending incident disclosed | ✓ | My first harness round-tripped LF↔CRLF, and a subsequent `git checkout` converted the file to CRLF under `core.autocrlf=true`. Both reverted and byte-verified; content never differed from HEAD. Later mutants used byte-level I/O |
+| No secret values in output | ✓ | `.gitconfig` appears only as a resolved path; its contents were never read |
+| `prototypes/` untouched; no code changed | ✓ | Only `mapper/osopen.py` was mutated (transiently, 9 times, all restored). This artifact is the only file written |
+| Exploits demonstrated out-of-tree where possible | ✓ | N-13's exploit reproduces the mutant's logic in a scratchpad script, so the repo was not mutated a second time to prove it |
+
+## 9.9 · Gate verdict
+
+> ### `sign-off granted` — Inc-4 may close, with N-12, N-13, N-14 and N-4-shape recorded as carries.
+
+Both blockers are genuinely fixed, and I established that by attacking them rather than by reading
+the diff. The confinement control is correct and survived every escape I could construct. The
+corrective pass also fixed the *right* thing on N-3 — my two mutants now redden.
+
+What remains is the same lesson in a third place: **a condition scoped to a filename gets implemented
+to the edge of that filename.** N-12 and N-14 are the identical defect to N-2, in sibling call sites
+the wording never reached. Fix the wording (*"no code path"*), not just the lines — otherwise this
+recurs a fourth time.
+
+None of that is a defect in the shipped security control, which is why this is a grant rather than a
+block. But N-12 is one line, and it should not ship un-fixed.

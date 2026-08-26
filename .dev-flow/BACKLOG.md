@@ -43,6 +43,8 @@
 | B-03 | ~20 legacy `rich.markup.escape` call sites in `app.py`'s other renderers emit **visible backslashes** — the escape is a no-op in a `Text` path | security review F-M2 | `darkside.plain()` now exists as the replacement |
 | B-04 | Four modal screens (`FactoryScreen`, `EditorScreen`, `SettingsScreen`, `CoverageScreen`) still hold local `BINDINGS` | batch-01 Inc-1 | `keymap.UNMIGRATED_SCREENS` names them; two tests fence the list |
 | B-05 | The canvas's selection block is painted by a focus-unaware frozen renderer, so the global "at most one ACCENT run" invariant is unreachable | Amendment 3 | Close it in batch 2, which reworks that renderer anyway |
+| B-07 | **N-14 remainder** — uncoerced `notify` / `_event_toast` sinks on the repo, import, template and export paths (`app.py` ~`:626 :640 :661 :666 :729 :1024 :1027 :1671 :1673`). Same class as the ones fixed in batch 01 | Inc-4 sign-off | Enumerated, not left to rediscovery |
+| B-08 | **N-4 refusal shape** — userinfo URLs are refused as `REFUSED_SCHEME`; accurate outcome, misleading reason. Needs its own status word | Inc-4 sign-off | |
 | B-06 | Security minors: alternate-data-stream targets, `urlparse` vs `urlsplit`, no executable-extension policy, U+202E passes `plain()` | Inc-4 sign-off | Explicit carries, not closed quietly |
 
 ### Process carries

@@ -62,6 +62,19 @@ least one **plausible wrong implementation**, not only the empty one. The test f
 is adequate: can you write a version of this check that a competent engineer might plausibly commit,
 which the suite accepts?
 
+### 2.1b · A requirement scoped to a FILE gets satisfied at that file's boundary
+
+`LLR-N01.11` read *"no **inspector** code path shall pass a file-derived `str` to a markup-parsing
+sink"*. The inspector was made clean and the condition looked discharged. The security sign-off then
+found the identical defect in sibling call sites: `notify` on the map-**load** error path — more
+reachable than the one that was fixed, because PyYAML quotes the offending source line verbatim into
+its error text, so merely *opening* a hostile map renders attacker-controlled markup.
+
+**The root cause is the wording, not the omission.** Naming a file in a requirement invites an
+implementation that stops at that file. The requirement is now scoped to the **sink class**
+(`markup=True` anywhere), which is the property that actually matters. Same shape as §2.1: both are
+a control specified too narrowly to catch the realistic failure.
+
 ### 2.2 · My reverse census was incomplete, and the suite caught what the census did not
 
 For the removal of `LayeredRenderer`'s ficha strip I grepped two of its distinctive strings,
@@ -181,6 +194,13 @@ Per the kickoff authorisation, these were decided rather than asked, and are rec
 8. **Re-run the C-21 increment re-cut after every amendment**, not only after the first (§2.5).
 9. **Security minors** carried from the sign-off: ADS targets, `urlparse` vs `urlsplit`, an
    executable-extension policy, U+202E passing `plain()`.
+10. **N-14 remainder — the uncoerced `notify` / toast sinks not fixed in this batch.** Fixed here:
+    the map-load error path, the attachment remove/add/save/archive toasts. **Still uncoerced and
+    carried:** `app.py` lines around `:626`, `:640`, `:661`, `:666`, `:729`, `:1024`, `:1027`,
+    `:1671`, `:1673` — exception text on the repo, import, template and export paths. They are the
+    same class as the fixed ones; they are listed rather than left to be rediscovered.
+11. **N-4 refusal *shape*** — a URL with userinfo is refused as `REFUSED_SCHEME`, which is
+    accurate about the outcome but misleading about the reason. It deserves its own status word.
 
 ---
 
