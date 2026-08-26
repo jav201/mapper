@@ -83,17 +83,22 @@ class FichaInspector(Vertical):
             self.call_next(self._rebuild)
 
     async def _rebuild(self) -> None:
+        screen = self.screen
+        focus_was_elsewhere = screen is not None and (
+            screen.focused is None or screen.focused not in self.children
+        )
         # Removal must be awaited before mounting: Textual only schedules the
         # removal otherwise, so the new rows collide with the outgoing ones on
         # their ids.
         await self.remove_children()
         await self.mount_all(self._rows())
         # Mounting a focusable widget while nothing holds focus makes Textual
-        # focus it.  That would hand the keyboard to a text field on arrival and
-        # silently kill every single-letter map binding, so the map keeps it until
-        # the operator asks for a field (see `focus_field`).
-        if self.screen is not None:
-            self.screen.set_focus(None)
+        # focus it.  That would hand the keyboard to a text field and silently
+        # kill every single-letter map binding.  Only take focus back if it was
+        # NOT deliberately somewhere else — otherwise a rebuild triggered by, say,
+        # focusing the rail would immediately steal the focus it just granted.
+        if screen is not None and focus_was_elsewhere and screen.focused in self.children:
+            screen.set_focus(None)
 
     def _rows(self) -> list:
         if self.node is None:

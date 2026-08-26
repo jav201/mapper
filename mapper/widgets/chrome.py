@@ -27,16 +27,27 @@ class TabStrip(Static):
 
 
 class KeyBar(Static):
-    """Grouped key hint bar."""
+    """Grouped key hint bar that renders at its MEASURED width.
+
+    It previously rendered at a hard-coded 118 cells regardless of the terminal,
+    so on a narrower screen it silently over-ran and on a wider one it wasted
+    space.  Either way the operator could not tell which bindings were hidden.
+    """
 
     def __init__(self, groups: Sequence[tuple[str, Sequence[tuple[str, str]]]], **kwargs) -> None:
         super().__init__(**kwargs)
         self.groups = list(groups)
         self.update(darkside.keybar(self.groups))
 
+    def _width(self) -> int:
+        return self.size.width or 118
+
     def set_groups(self, groups: Sequence[tuple[str, Sequence[tuple[str, str]]]]) -> None:
         self.groups = list(groups)
-        self.update(darkside.keybar(self.groups))
+        self.update(darkside.keybar(self.groups, width=self._width()))
+
+    def on_resize(self) -> None:
+        self.update(darkside.keybar(self.groups, width=self._width()))
 
 
 class HintLine(Static):

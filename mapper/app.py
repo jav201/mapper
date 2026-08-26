@@ -42,6 +42,7 @@ from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
+from .widgets.rail import RAIL_WIDTH, OutlineRail
 
 
 def screen_bindings(scope: str) -> list[Binding]:
@@ -1086,6 +1087,9 @@ class MapScreen(Screen):
         self.diff_active = False
         self.diff: DiffResult | None = None
         self._snapshots: list[bytes] = []
+        self.rail_hidden = False
+        self.inspector_hidden = False
+        self._regions_pinned = False
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
@@ -1095,6 +1099,7 @@ class MapScreen(Screen):
         # ficha surface — it replaces both the old `#map-ficha` GroupBox and the
         # LayeredRenderer's own ficha strip, which rendered the same card twice.
         yield Horizontal(
+            OutlineRail(id="map-rail"),
             Static("", id="map-canvas"),
             FichaInspector(id="map-inspector"),
             id="map-body",
@@ -1139,10 +1144,71 @@ class MapScreen(Screen):
                 self.nav.cursor = last_node
             self.store.record_session(self.map_id, self.nav.cursor)
 
+        self._apply_region_visibility()
         self.refresh_canvas()
-        # Keep focus off the inspector's fields on arrival: a focused Input eats
-        # every single-letter key, so the map's own navigation would be dead until
-        # the operator blurred it by hand.
+        # Keep focus off the side regions on arrival: a focused Input eats every
+        # single-letter key, so the map's own navigation would be dead until the
+        # operator blurred it by hand.  Scheduled after the refresh because the
+        # rail and the inspector's fields are focusable and mount after this runs.
+        self.call_after_refresh(self._park_focus)
+
+    # -- region layout (LLR-N06.6) -----------------------------------------
+    # Below this width the canvas cannot show a card's coverage row without
+    # clipping it mid-field, and a clipped field is indistinguishable from a
+    # present one — the canvas would silently misreport coverage.  Measured by
+    # the UX lens: a 5-field schema needs card_w >= 15, so n*18-3 <= w-2.
+    MIN_CANVAS_WIDTH = 58
+
+    def _chrome_width(self) -> int:
+        """Columns taken by the rail and inspector at the current setting."""
+        return (0 if self.rail_hidden else RAIL_WIDTH) + (
+            0 if self.inspector_hidden else INSPECTOR_WIDTH
+        )
+
+    def _apply_region_visibility(self) -> None:
+        """Collapse the side regions when the terminal cannot afford them.
+
+        Auto-collapse is width-driven, but an explicit toggle wins: once the
+        operator has hidden or shown a region by hand, we stop second-guessing.
+        """
+        size = self.size or self.app.size
+        if not self._regions_pinned:
+            available = size.width - RAIL_WIDTH - INSPECTOR_WIDTH
+            if available < self.MIN_CANVAS_WIDTH:
+                self.rail_hidden = True
+            if size.width - INSPECTOR_WIDTH < self.MIN_CANVAS_WIDTH:
+                self.inspector_hidden = True
+        self.query_one("#map-rail", OutlineRail).display = not self.rail_hidden
+        self.query_one("#map-inspector", FichaInspector).display = not self.inspector_hidden
+
+    def action_toggle_rail(self) -> None:
+        self._regions_pinned = True
+        self.rail_hidden = not self.rail_hidden
+        self._apply_region_visibility()
+        self.refresh_canvas()
+
+    def action_toggle_inspector(self) -> None:
+        self._regions_pinned = True
+        self.inspector_hidden = not self.inspector_hidden
+        self._apply_region_visibility()
+        self.refresh_canvas()
+
+    def action_focus_rail(self) -> None:
+        """Move keyboard focus to the rail, and say so on the hint line."""
+        rail = self.query_one("#map-rail", OutlineRail)
+        if self.rail_hidden:
+            self.action_toggle_rail()
+        rail.focus()
+        self.query_one(HintLine).set_hint(
+            "rail · ↵ plegar rama · esc volver al mapa", "esc"
+        )
+        self.refresh_canvas()
+
+    def action_collapse_branch(self) -> None:
+        self.query_one("#map-rail", OutlineRail).toggle(self.nav.cursor)
+
+    def _park_focus(self) -> None:
+        """Hand the keyboard back to the map itself."""
         self.set_focus(None)
 
     def _current_renderer(self):
@@ -1226,7 +1292,7 @@ class MapScreen(Screen):
         size = self.size or self.app.size
         # The canvas no longer owns the full width: the inspector takes a fixed
         # column beside it, so render to what is actually left.
-        w = max(20, size.width - INSPECTOR_WIDTH)
+        w = max(20, size.width - self._chrome_width())
         h = max(5, size.height - 8)
         text = renderer.render(
             self.graph,
@@ -1245,6 +1311,7 @@ class MapScreen(Screen):
         tab.set_crumb(self._current_crumb() + [node_title])
 
         self.query_one("#map-inspector", FichaInspector).show(node, self.graph)
+        self.query_one("#map-rail", OutlineRail).show(self.graph, self.nav.cursor)
         self.query_one("#map-minimap", Static).update(self._minimap_text())
         self.query_one("#map-pagination", Static).update(self._pagination_text())
 

@@ -116,6 +116,10 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("e", "e", "export_svg", "exportar svg", "view"),
     KeyBinding("equals_sign", "=", "toggle_diff", "alternar diff", "view"),
     KeyBinding("m", "m", "coverage", "cobertura", "view"),
+    KeyBinding("R", "R", "toggle_rail", "mostrar/ocultar rail", "view"),
+    KeyBinding("I", "I", "toggle_inspector", "mostrar/ocultar ficha", "view"),
+    KeyBinding("g", "g", "focus_rail", "ir al rail", "view"),
+    KeyBinding("z", "z", "collapse_branch", "plegar rama", "view"),
     # -- map · leaving ------------------------------------------------------
     KeyBinding("q", "q", "home", "inicio", "salir"),
     KeyBinding("escape", "esc", "back_or_home", "volver", "salir"),
