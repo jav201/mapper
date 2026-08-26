@@ -21,7 +21,17 @@ from .diff import DiffResult, git_diff
 from .export import save_svg
 from .github import GitHubConnector, GitHubError
 from .import_csv import preview_csv
-from .keymap import groups_for_keybar
+from .keymap import (
+    GROUP_SCOPE,
+    SCOPE_APP,
+    SCOPE_HOME,
+    SCOPE_IMPORT,
+    SCOPE_MAP,
+    SCOPE_PLUG,
+    SCOPE_REPO,
+    groups_for_keybar,
+    textual_bindings,
+)
 from .mermaid import dump as dump_mermaid, slugify
 from .model import Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
@@ -31,6 +41,27 @@ from .views.layered import LayeredRenderer
 from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
+
+
+def screen_bindings(scope: str) -> list[Binding]:
+    """Generate a screen's `BINDINGS` from the one keymap seat (US-N03).
+
+    Screens never hand-write a binding list: the seat is the single source, so the
+    keys a screen binds and the keys the palette and help advertise cannot drift.
+    """
+    return [
+        Binding(key, action, label, priority=priority)
+        for key, action, label, priority in textual_bindings(scope)
+    ]
+
+
+def keybar_groups(scope: str) -> list[str]:
+    """The keybar's group order for *scope*, derived from the seat.
+
+    Derived rather than hand-listed: a second list naming the map's groups would
+    be exactly the drift the seat exists to prevent.
+    """
+    return [g for g, s in GROUP_SCOPE.items() if s in (scope, SCOPE_APP)]
 
 
 class NavigationModel:
@@ -304,19 +335,8 @@ class ConstructScreen(ModalScreen[str | None]):
 class HomeScreen(Screen):
     """Home screen with GLANCE posture: one hero, everything else available."""
 
-    BINDINGS = [
-        ("c", "consult", "Consultar mapas"),
-        ("p", "plug", "Conectar repo"),
-        ("n", "construct", "Construir"),
-        ("t", "template", "Plantilla"),
-        ("i", "import_csv", "Importar CSV"),
-        ("f", "factory", "Fábrica"),
-        ("r", "resume", "Retomar"),
-        ("s", "settings", "Componentes"),
-        ("j", "table_down", "Bajar"),
-        ("k", "table_up", "Subir"),
-        ("q", "quit", "Salir"),
-    ]
+    KEY_SCOPE = SCOPE_HOME
+    BINDINGS = screen_bindings(SCOPE_HOME)
 
     def compose(self) -> ComposeResult:
         yield TabStrip("c")
@@ -664,12 +684,8 @@ class HomeScreen(Screen):
 class _ImportPreviewScreen(Screen):
     """Preview a CSV import before saving it as a named map."""
 
-    BINDINGS = [
-        ("s", "save", "Guardar"),
-        ("escape", "home", "Volver"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
-    ]
+    KEY_SCOPE = SCOPE_IMPORT
+    BINDINGS = screen_bindings(SCOPE_IMPORT)
 
     def __init__(self, preview_graph: Graph, source_path: Path) -> None:
         super().__init__()
@@ -680,7 +696,7 @@ class _ImportPreviewScreen(Screen):
         yield TabStrip("i", crumb=["import", self.source_path.name])
         yield Static("", id="import-preview-canvas")
         yield HintLine("s guarda · esc volver")
-        yield KeyBar(groups_for_keybar(["app"]))
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
         self.refresh_canvas()
@@ -727,11 +743,8 @@ class _ImportPreviewScreen(Screen):
 class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
-    BINDINGS = [
-        Binding("escape", "home", "Volver", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
-    ]
+    KEY_SCOPE = SCOPE_PLUG
+    BINDINGS = screen_bindings(SCOPE_PLUG)
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=["conectar repo"])
@@ -741,7 +754,7 @@ class PlugRepoScreen(Screen):
             id="repo-dialog",
         )
         yield HintLine("ingresa owner/name, URL o ruta local y presiona ↵", "↵")
-        yield KeyBar(groups_for_keybar(["app"]))
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "repo-input":
@@ -781,13 +794,8 @@ class PlugRepoScreen(Screen):
 class RepoScreen(Screen):
     """A GitHub repo rendered as a two-pane branch dashboard (variant C)."""
 
-    BINDINGS = [
-        Binding("j", "next_sibling", "Siguiente", priority=True),
-        Binding("k", "prev_sibling", "Anterior", priority=True),
-        Binding("q", "home", "Inicio", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
-    ]
+    KEY_SCOPE = SCOPE_REPO
+    BINDINGS = screen_bindings(SCOPE_REPO)
 
     progress_current: reactive[int] = reactive(0)
     progress_total: reactive[int] = reactive(1)
@@ -1051,28 +1059,8 @@ class RepoScreen(Screen):
 class MapScreen(Screen):
     """A map rendered as a layered tree."""
 
-    BINDINGS = [
-        ("j", "next_sibling", "Siguiente"),
-        ("k", "prev_sibling", "Anterior"),
-        ("l", "child", "Hijo"),
-        ("h", "parent", "Padre"),
-        ("enter", "open_ficha", "Abrir"),
-        ("slash", "search", "Buscar"),
-        ("f", "toggle_focus", "Foco"),
-        ("o", "toggle_outline", "Outline"),
-        ("r", "toggle_radial", "Radial"),
-        ("e", "export_svg", "Exportar SVG"),
-        ("a", "add_child", "Agregar hijo"),
-        ("d", "open_documents", "Documentos"),
-        ("x", "archive", "Archivar"),
-        ("u", "undo", "Deshacer"),
-        ("=", "toggle_diff", "Diff vs HEAD"),
-        ("m", "coverage", "Cobertura"),
-        ("q", "home", "Inicio"),
-        ("escape", "back_or_home", "Volver"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
-    ]
+    KEY_SCOPE = SCOPE_MAP
+    BINDINGS = screen_bindings(SCOPE_MAP)
 
     def __init__(self, map_id: str, source_crumb: list[str] | None = None) -> None:
         super().__init__()
@@ -1103,15 +1091,9 @@ class MapScreen(Screen):
         yield Static("", id="map-pagination")
         yield Static("", id="map-toast")
         yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
-        yield KeyBar(
-            [
-                ("nav", [("j/k", "sig/ant"), ("h/l", "padre/hijo"), ("↵", "abrir")]),
-                ("node", [("a", "agregar hijo"), ("d", "documento"), ("x", "archivar")]),
-                ("view", [("f", "foco"), ("o", "outline"), ("r", "radial"),
-                          ("/", "buscar"), ("e", "exportar"), ("=", "diff"), ("m", "cobertura")]),
-                ("app", [("ctrl+p", "paleta"), ("u", "deshacer"), ("?", "ayuda"), ("q", "inicio")]),
-            ]
-        )
+        # The keybar reads the same seat the bindings are generated from, so it
+        # cannot advertise a key the screen does not bind (US-N03).
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
         self.store = self.app.store  # type: ignore[attr-defined]
@@ -1558,13 +1540,17 @@ class MapScreen(Screen):
         self.app.action_palette()
 
     def action_help(self) -> None:
-        self.app.push_screen(HelpScreen())
+        self.app.action_help()
 
 
 class MapperApp(App):
     """Main application entry point."""
 
-    COMMAND_PALETTE_ENABLE = False
+    # Textual's own attribute is ENABLE_COMMAND_PALETTE.  This app previously set
+    # COMMAND_PALETTE_ENABLE, a name Textual never reads, so the built-in palette
+    # silently owned ctrl+p and mapper's own palette was unreachable by keyboard.
+    # Caught only once a test pressed the real key instead of calling the action.
+    ENABLE_COMMAND_PALETTE = False
 
     CSS = """
     Screen { background: #000000; color: #f5f5f5; }
@@ -1651,11 +1637,14 @@ class MapperApp(App):
     #import-preview-canvas { width: 100%; height: 1fr; }
     """
 
-    BINDINGS = [
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
-        ("q", "quit", "Salir"),
-    ]
+    KEY_SCOPE = SCOPE_APP
+    # The app's own bindings come from the seat too — this was the one list that
+    # escaped it.  Its hand-written `q -> quit` was bound app-wide, so on the plug
+    # and import-preview screens (neither of which declares `q`) pressing `q` quit
+    # the application outright, discarding an unsaved import, while palette and
+    # help advertised no such key.  `q` now quits only in home scope, where it is
+    # advertised.
+    BINDINGS = screen_bindings(SCOPE_APP)
 
     def __init__(self, workspace: Path | str):
         super().__init__()
@@ -1671,20 +1660,23 @@ class MapperApp(App):
 
     def action_palette(self) -> None:
         target_screen = self.screen
+        scope = getattr(target_screen, "KEY_SCOPE", SCOPE_APP)
 
         def on_command(action: str | None) -> None:
             if not action:
                 return
-            method_name = f"action_{action.replace(' ', '_')}"
+            # `action` is an action_* method stem straight from the keymap seat,
+            # never a translated label — that is what makes the entry dispatch.
+            method_name = f"action_{action}"
             if hasattr(target_screen, method_name):
                 getattr(target_screen, method_name)()
             elif hasattr(self, method_name):
                 getattr(self, method_name)()
 
-        self.push_screen(CommandPalette(), callback=on_command)
+        self.push_screen(CommandPalette(scope), callback=on_command)
 
     def action_help(self) -> None:
-        self.push_screen(HelpScreen())
+        self.push_screen(HelpScreen(getattr(self.screen, "KEY_SCOPE", SCOPE_APP)))
 
     def action_quit(self) -> None:
         self.exit()
