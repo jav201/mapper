@@ -265,3 +265,44 @@ async def test_llr_n05_6_an_edit_is_undoable_and_undo_is_per_map(tmp_path):
         other = _seed(app, map_id="wl2")
         assert set(app.undo_stacks) <= {map_id, "wl2"}
         assert app.undo_stacks.get("wl2", []) == [], "a second map inherited another map's history"
+
+
+async def test_at_n05e_archiving_the_whole_map_is_refused(tmp_path):
+    """AT-N05e — the map is never left headless.
+
+    Specified in the acceptance design, then dropped without record, and the
+    behaviour was broken: archiving the root wrote an EMPTY map to disk — nodes
+    {}, root_id None — while the confirmation promised only to "replace the root
+    of the map". The only recovery was an in-memory undo stack that dies with the
+    process, so the map was gone.
+
+    Both directions are asserted: archiving everything is refused, and archiving a
+    branch still works. A test with only the first half would pass against code
+    that refuses every archive.
+
+    RED mutation: remove the `count >= len(self.graph.nodes)` guard; the map is
+    emptied and the surviving-nodes assertion fails.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        map_id = _seed(app)
+        screen = await _open(app, pilot, map_id)
+
+        screen.nav.cursor = "root"
+        await pilot.press("x")
+        await pilot.pause()
+        # Refused outright — no confirmation is even offered for erasing everything.
+        assert isinstance(app.screen, MapScreen), "a whole-map archive was offered"
+
+        survivors = MapStore(tmp_path).load(map_id)
+        assert set(survivors.nodes) == {"root", "a", "b", "b1"}, "the map was emptied"
+        assert survivors.root_id is not None, "the map was left headless"
+
+        # ...and a branch is still archivable, so the guard is not refusing everything.
+        screen.nav.cursor = "b"
+        await pilot.press("x")
+        await pilot.pause()
+        await pilot.press("y")
+        await pilot.pause()
+        assert set(MapStore(tmp_path).load(map_id).nodes) == {"root", "a"}

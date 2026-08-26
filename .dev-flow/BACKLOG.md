@@ -45,6 +45,9 @@
 | B-05 | The canvas's selection block is painted by a focus-unaware frozen renderer, so the global "at most one ACCENT run" invariant is unreachable | Amendment 3 | Close it in batch 2, which reworks that renderer anyway |
 | B-07 | **N-14 remainder** — uncoerced `notify` / `_event_toast` sinks on the repo, import, template and export paths (`app.py` ~`:626 :640 :661 :666 :729 :1024 :1027 :1671 :1673`). Same class as the ones fixed in batch 01 | Inc-4 sign-off | Enumerated, not left to rediscovery |
 | B-08 | **N-4 refusal shape** — userinfo URLs are refused as `REFUSED_SCHEME`; accurate outcome, misleading reason. Needs its own status word | Inc-4 sign-off | |
+| B-09 | `AT-N06c` is named in `01-requirements.md` but has no dedicated node — it is genuinely discharged by two unit tests (`test_no_seat_entry_binds_tab`, `test_llr_n06_5_no_screen_binds_tab_outside_the_recorded_exceptions`); reconcile the id or retire it | PR gate L-1 | Not a coverage hole; an id-hygiene one |
+| B-10 | The `notify(` source census the security sign-off conditioned N-2/N-14 on was never written as an artifact — B-07's line list is its partial substitute and may go stale | PR gate M-2 | |
+| B-11 | Security sign-off carries not yet elsewhere: M-W, M-X, M-Y, M-AE, N-11 | PR gate M-4 | Enumerated so they are findable |
 | B-06 | Security minors: alternate-data-stream targets, `urlparse` vs `urlsplit`, no executable-extension policy, U+202E passes `plain()` | Inc-4 sign-off | Explicit carries, not closed quietly |
 
 ### Process carries
