@@ -48,6 +48,17 @@ class HintLine(Static):
         self.key = key
         self.update(darkside.hint_line(text, key))
 
+    def set_hint(self, text: str, key: str | None = None) -> None:
+        """Replace the hint after mount.
+
+        Named to match its siblings `TabStrip.set_crumb` and `KeyBar.set_groups`.
+        Without it the hint was fixed at construction, so it could not say what
+        the operator's next step actually is — which is the whole point of a hint.
+        """
+        self.text = text
+        self.key = key
+        self.update(darkside.hint_line(text, key))
+
 
 class GroupBox(Container):
     """Container with darkside panel background depth.
