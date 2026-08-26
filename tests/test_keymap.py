@@ -103,8 +103,8 @@ def test_at_n03a_every_binding_resolves_to_a_real_action(binding):
 
 
 @pytest.mark.parametrize("scope", sorted(SCOPE_OWNER))
-def test_at_n03b_bound_keys_match_the_seat_exactly(scope):
-    """AT-N03b — what each screen really BINDS equals what the seat declares.
+def test_at_n03f_bound_keys_match_the_seat_exactly(scope):
+    """AT-N03f — what each screen really BINDS equals what the seat declares.
 
     The conformance test above checks the `action` field only, so corrupting a
     `key` or a `glyph` left the whole suite green while help, the palette and the
