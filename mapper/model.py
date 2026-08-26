@@ -38,6 +38,16 @@ class Ficha:
         have = sum(1 for f in req if self.fields.get(f.key))
         return have, len(req)
 
+    def missing_required(self, schema: list[SchemaField]) -> list[SchemaField]:
+        """Required fields this ficha has not filled, in schema order.
+
+        The single owner of "what is missing" (LLR-N01.9).  The inspector, the
+        rail's coverage lattice and the coverage worklist all consume this; none
+        of them re-derives it, so the three surfaces cannot drift on what
+        "complete" means.
+        """
+        return [f for f in schema if f.required and not self.fields.get(f.key, "").strip()]
+
 
 @dataclass
 class Node:

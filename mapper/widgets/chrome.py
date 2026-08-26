@@ -27,16 +27,27 @@ class TabStrip(Static):
 
 
 class KeyBar(Static):
-    """Grouped key hint bar."""
+    """Grouped key hint bar that renders at its MEASURED width.
+
+    It previously rendered at a hard-coded 118 cells regardless of the terminal,
+    so on a narrower screen it silently over-ran and on a wider one it wasted
+    space.  Either way the operator could not tell which bindings were hidden.
+    """
 
     def __init__(self, groups: Sequence[tuple[str, Sequence[tuple[str, str]]]], **kwargs) -> None:
         super().__init__(**kwargs)
         self.groups = list(groups)
         self.update(darkside.keybar(self.groups))
 
+    def _width(self) -> int:
+        return self.size.width or 118
+
     def set_groups(self, groups: Sequence[tuple[str, Sequence[tuple[str, str]]]]) -> None:
         self.groups = list(groups)
-        self.update(darkside.keybar(self.groups))
+        self.update(darkside.keybar(self.groups, width=self._width()))
+
+    def on_resize(self) -> None:
+        self.update(darkside.keybar(self.groups, width=self._width()))
 
 
 class HintLine(Static):
@@ -44,6 +55,17 @@ class HintLine(Static):
 
     def __init__(self, text: str, key: str | None = None, **kwargs) -> None:
         super().__init__(**kwargs)
+        self.text = text
+        self.key = key
+        self.update(darkside.hint_line(text, key))
+
+    def set_hint(self, text: str, key: str | None = None) -> None:
+        """Replace the hint after mount.
+
+        Named to match its siblings `TabStrip.set_crumb` and `KeyBar.set_groups`.
+        Without it the hint was fixed at construction, so it could not say what
+        the operator's next step actually is — which is the whole point of a hint.
+        """
         self.text = text
         self.key = key
         self.update(darkside.hint_line(text, key))
