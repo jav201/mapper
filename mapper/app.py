@@ -1383,10 +1383,16 @@ class MapScreen(Screen):
             att.kind, att.path, workspace=self.store.workspace,
             launcher=getattr(self.app, "attachment_launcher", None),
         )
+        # Both branches carry file-derived text, so both are coerced.  `notify`
+        # parses markup by default in textual 8.2.8 (Toast.render calls
+        # Content.from_markup), so a hostile path could crash the toast or, worse,
+        # REWRITE the refusal text the operator is reading — defeating the point
+        # of showing the real target at the exact moment it matters.
+        shown = darkside.plain(att.path)
         if status == OSOPEN_OK:
-            self._event_toast("abierto", att.caption or att.path)
+            self._event_toast("abierto", darkside.plain(att.caption or att.path))
         else:
-            self.notify(f"{status}: {att.path}", severity="warning")
+            self.notify(f"{status}: {shown}", severity="warning", markup=False)
 
     def on_ficha_inspector_attachment_add_requested(
         self, event: FichaInspector.AttachmentAddRequested
@@ -1618,25 +1624,18 @@ class MapScreen(Screen):
         if self.inspector_hidden:
             self.inspector_hidden = False
             self._apply_region_visibility()
+        # Ask for the focus BEFORE refreshing: the inspector applies the request
+        # at the end of the rebuild that creates the rows, so the two are ordered
+        # causally instead of racing on frame timing.
+        missing = self.graph.nodes[node_id].ficha.missing_required(self.graph.schema)
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        inspector.focus_after_rebuild(missing[0].key if missing else None)
         self.refresh_canvas()
-        inspector = self.query_one("#map-inspector", FichaInspector)
-        # The inspector rebuilds on the next frame, so the focus request has to
-        # wait for the rows it is going to focus.
-        self.call_after_refresh(self._focus_first_gap)
-        return True
-
-    def _focus_first_gap(self) -> None:
-        inspector = self.query_one("#map-inspector", FichaInspector)
-        key = inspector.first_missing_key()
-        if key is None:
-            return
-        if inspector.focus_field(key):
-            label = next(
-                (f.label for f in self.graph.schema if f.key == key), key
-            )
+        if missing:
             self.query_one(HintLine).set_hint(
-                f"completa «{label}» · esc deja el campo", "ctrl+s"
+                f"completa «{missing[0].label}» · esc deja el campo", "ctrl+s"
             )
+        return True
 
     def action_next_gap(self) -> None:
         """Advance to the next node that is missing a required field.

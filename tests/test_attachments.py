@@ -71,6 +71,100 @@ def test_llr_n02_7_existence_is_not_an_authorisation(tmp_path):
     assert launcher.calls == []
 
 
+def test_llr_n02_7_an_absolute_path_outside_the_workspace_is_refused(tmp_path):
+    """Confinement must hold for an ABSOLUTE path, not only a `..` traversal.
+
+    Added after the security sign-off: every negative confinement case in this
+    file used a `..`-relative target, so a mutant replacing the whole check with
+    `if ".." in target` satisfied all of them and stayed 24/24 green — while
+    absolute paths to `calc.exe` and `powershell.exe` launched again.
+
+    RED mutation: `if ".." in target: return REFUSED_OUTSIDE` in place of the
+    containment test; this test fails where the traversal tests do not.
+    """
+    ws = tmp_path / "maps"
+    ws.mkdir()
+    outside = tmp_path / "payload.exe"
+    outside.write_text("x", encoding="utf-8")
+
+    launcher = RecordingLauncher()
+    status = osopen.open_external(
+        "file", str(outside), workspace=ws, launcher=launcher
+    )
+    assert status == osopen.REFUSED_OUTSIDE
+    assert launcher.calls == [], "an absolute path outside the workspace launched"
+
+
+def test_llr_n02_7_a_sibling_directory_sharing_the_prefix_is_refused(tmp_path):
+    """`<root>-exfil` must not pass as being inside `<root>`.
+
+    Added after the security sign-off: a mutant using
+    `str(resolved).startswith(str(root))` instead of `is_relative_to` stayed
+    green across the whole suite, because no case distinguished a real ancestor
+    from a shared string prefix.  Reachable relatively too, so it is not the
+    absolute-path case restated.
+
+    RED mutation: the `startswith` prefix compare; this test fails, the others do not.
+    """
+    ws = tmp_path / "maps"
+    ws.mkdir()
+    sibling = tmp_path / "maps-exfil"
+    sibling.mkdir()
+    (sibling / "p.exe").write_text("x", encoding="utf-8")
+
+    launcher = RecordingLauncher()
+    for target in (str(sibling / "p.exe"), "../maps-exfil/p.exe"):
+        status = osopen.open_external("file", target, workspace=ws, launcher=launcher)
+        assert status == osopen.REFUSED_OUTSIDE, target
+    assert launcher.calls == [], "a sibling directory sharing the prefix launched"
+
+
+def test_n1_a_control_character_in_the_target_cannot_kill_the_app(tmp_path):
+    """A NUL reaches here from a plain-ASCII sidecar via YAML's escape syntax.
+
+    `urlparse` then reads a valid `https` scheme and the allowlist passes it, but
+    `os.startfile` raises ValueError — not OSError — and the application dies.
+
+    RED mutation: remove the control-character guard; this returns OK and the
+    launcher is called with a NUL-bearing target.
+    """
+    launcher = RecordingLauncher()
+    # Built with chr(0) rather than an escape: writing the escape into a
+    # source file is how a literal NUL gets committed, which is a defect of
+    # exactly the class this test is about.
+    hostile = chr(0) + "https://example.com/x"
+    assert chr(0) in hostile
+    status = osopen.open_external("url", hostile, workspace=tmp_path, launcher=launcher)
+    assert status == osopen.REFUSED_TYPE
+    assert launcher.calls == []
+
+
+def test_n4_userinfo_in_a_url_is_refused(tmp_path):
+    """`https://example.com@evil.example.com/` reads as one host and goes to another.
+
+    RED mutation: drop the netloc `@` check; the launcher is called.
+    """
+    launcher = RecordingLauncher()
+    for target in (
+        "https://example.com@evil.example.com/",
+        "https://user:pass@evil.example.com/",
+    ):
+        assert osopen.open_external(
+            "url", target, workspace=tmp_path, launcher=launcher
+        ) == osopen.REFUSED_SCHEME, target
+    assert launcher.calls == []
+
+
+def test_a_directory_is_not_an_attachment(tmp_path):
+    ws = tmp_path / "maps"
+    (ws / "sub").mkdir(parents=True)
+    launcher = RecordingLauncher()
+    assert osopen.open_external(
+        "file", "sub", workspace=ws, launcher=launcher
+    ) == osopen.REFUSED_ERROR
+    assert launcher.calls == []
+
+
 @pytest.mark.parametrize(
     "target",
     [

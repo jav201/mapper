@@ -69,6 +69,7 @@ class FichaInspector(Vertical):
         super().__init__(**kwargs)
         self.node: Node | None = None
         self.schema: list[SchemaField] = []
+        self._pending_focus: str | None = None
 
     # -- rendering ---------------------------------------------------------
     # No `compose`: the form's shape depends on the selected node's schema, so
@@ -97,6 +98,14 @@ class FichaInspector(Vertical):
         # kill every single-letter map binding.  Only take focus back if it was
         # NOT deliberately somewhere else — otherwise a rebuild triggered by, say,
         # focusing the rail would immediately steal the focus it just granted.
+        if self._pending_focus is not None:
+            # Focus a field the caller asked for BEFORE these rows existed.
+            # Applied here, at the end of the rebuild that created them, so the
+            # ordering is causal rather than a race between two scheduled
+            # callbacks — which measured 1 pass in 3.
+            key, self._pending_focus = self._pending_focus, None
+            if self.focus_field(key):
+                return
         if screen is not None and focus_was_elsewhere and screen.focused in self.children:
             screen.set_focus(None)
 
@@ -195,6 +204,10 @@ class FichaInspector(Vertical):
             return None
         missing = self.node.ficha.missing_required(self.schema)
         return missing[0].key if missing else None
+
+    def focus_after_rebuild(self, key: str | None) -> None:
+        """Focus field *key* once the rows for the current node exist."""
+        self._pending_focus = key
 
     def focus_field(self, key: str) -> bool:
         """Put keyboard focus on the input for schema field *key*."""
