@@ -150,6 +150,18 @@ corruption, entry deletion.
 partial pins are worse than useless — they *feel* like coverage while leaving most of the surface
 free. Pin the whole structure, or accept that it is unpinned and say so.
 
+### 2.4d · "Whole seat" was still only two-thirds of the seat
+
+Even the whole-seat specification shipped incomplete: `KeyBinding` carries six fields and the first
+version pinned four. The gate showed that dropping `priority=True` from the plug-repo `escape`
+binding stayed green — a real behaviour change (the operator can no longer abandon the input
+mid-typing) that the seat's **own comment** documents as required. `group` was unpinned too, and
+`scope` is derived from it, so a regrouping silently moves a key to a different surface.
+
+Both are now pinned; the priority-drop and regroup mutations each redden. **The pattern across
+§2.4c and here is one thing said twice: every time this control was narrowed for convenience, the
+narrowing was where the defect lived.**
+
 ### 2.5 · The file budget was exceeded three times
 
 Increments 2, 3 and 4 touched **6, 6 and 5** source files against a cap of 4 — measured from the
@@ -205,7 +217,7 @@ of the pre-existing six, not of the archive bug.
 |---|---|
 | Stories delivered | 5 of 5 P1, plus HLR-N06 adopted mid-batch |
 | Tests | 88 → 245 (−6 superseded, +163 added) |
-| Increments | 6, cut as 10 commits on the branch (9 touching code) |
+| Increments | 6; the branch's commit count is **derived**, not recorded here — `git rev-list --count master..HEAD`. Two successive hand-written values in this document went stale within an hour, which is the argument for deriving it. |
 | Source files over budget | 3 increments (6, 5, 5 vs cap 4), each declared |
 | Counterfactuals executed | 19, all restores hash-verified |
 | Counterfactuals that were themselves defective | 3 (one never ran; one poisoned by a flaky test; one gated by an inert regex) |
@@ -268,7 +280,7 @@ Per the kickoff authorisation, these were decided rather than asked, and are rec
 
 | File / area | State |
 |---|---|
-| All `mapper/**` and `tests/**` changes | ✅ committed across 7 commits on `feat/ui-next-batch-01` |
+| All `mapper/**` and `tests/**` changes | ✅ committed across the commits on `feat/ui-next-batch-01` (count derived, not recorded) |
 | `docs/ARCHITECTURE.md` | ✅ committed (ARQ amendment + the S-M6 allowlist narrowing) |
 | `.dev-flow/2026-08-25-ui-next-batch-01/**` | ✅ committed |
 | `prototypes/ui_next/` | 📋 **left untracked ON PURPOSE** — a parallel prototyping round owns it; never staged by this batch, verified at every commit |
