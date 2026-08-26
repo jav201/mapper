@@ -73,19 +73,33 @@ def open_external(
     # missing value to None.  Neither may reach a launcher, and neither may raise.
     if not isinstance(target, str) or not target.strip():
         return REFUSED_TYPE
+    # A NUL or other C0/C1 control reaches here from a plain-ASCII sidecar via
+    # YAML's escape syntax (a YAML double-quoted escape for the NUL character, followed by a URL).  `urlparse` then
+    # reads a perfectly good `https` scheme and the allowlist waves it through,
+    # but `os.startfile` raises ValueError — not OSError — on the embedded NUL,
+    # and the application dies.  Refuse the whole class here rather than relying
+    # on every downstream launcher to survive it.
+    if any(ord(ch) < 0x20 or 0x7F <= ord(ch) <= 0x9F for ch in target):
+        return REFUSED_TYPE
 
     launch = launcher or _default_launcher
 
     if kind == "url":
         try:
-            scheme = urlparse(target.strip()).scheme.lower()
+            parsed = urlparse(target.strip())
+            scheme = parsed.scheme.lower()
         except ValueError:
             return REFUSED_TYPE
         if scheme not in ALLOWED_SCHEMES:
             return REFUSED_SCHEME
+        # `https://example.com@evil.example.com/` reads as example.com and goes to
+        # evil.example.com.  Userinfo has no legitimate use in an attachment and
+        # is exactly the shape of a link that lies about its destination.
+        if "@" in parsed.netloc:
+            return REFUSED_SCHEME
         try:
             launch(target.strip())
-        except OSError:
+        except (OSError, ValueError):
             return REFUSED_ERROR
         return OK
 
@@ -101,10 +115,10 @@ def open_external(
         return REFUSED_TYPE
     if not resolved.is_relative_to(root):
         return REFUSED_OUTSIDE
-    if not resolved.exists():
+    if not resolved.exists() or resolved.is_dir():
         return REFUSED_ERROR
     try:
         launch(str(resolved))
-    except OSError:
+    except (OSError, ValueError):
         return REFUSED_ERROR
     return OK
