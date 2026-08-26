@@ -222,33 +222,10 @@ class LayeredRenderer:
 
         lines.extend(cv.rows())
 
-        # ficha strip
-        sel = graph.nodes.get(selected_id)
-        lines.append(Text("─" * avail, style=darkside.STEP))
-        if sel is not None:
-            strip = Text()
-            strip.append("▸ ", style=darkside.INK)
-            strip.append(sel.ficha.title, style="bold")
-            strip.append(f"   {sel.ficha.meta}", style=darkside.MUT)
-            if legacy:
-                have, req = sel.ficha.required_coverage(graph.schema)
-                strip.append("   cobertura ", style=darkside.MUT)
-                strip.append(darkside.step_meter(have, req))
-            lines.append(strip)
-            if legacy:
-                doc = sel.ficha.fields.get("D", "")
-                row = Text()
-                row.append("  documento ", style=darkside.MUT)
-                row.append(doc or "sin acta", style=darkside.INK if doc else darkside.ALERT)
-                row.append("   dueño ", style=darkside.MUT)
-                row.append(sel.ficha.fields.get("O", "—"), style=darkside.INK)
-                row.append("   creado ", style=darkside.MUT)
-                row.append(sel.ficha.fields.get("Y", "—"), style=darkside.INK)
-                lines.append(row)
-            if sel.ficha.notes:
-                lines.append(Text(_fit("  " + sel.ficha.notes, avail), style=darkside.MUT))
-        else:
-            lines.append(Text(_fit("  (selecciona un nodo — j/k/h/l, ↵ abre la ficha)", avail), style=darkside.MUT))
+        # The ficha strip that used to live here is gone: the inspector panel on
+        # MapScreen is now the single ficha surface.  Rendering it in both places
+        # showed the same card twice.  Suppressing it with a new render kwarg was
+        # rejected — IRenderer.render is a frozen interface this batch may not touch.
 
         # Join rows into one Text with newlines
         result = Text()

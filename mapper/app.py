@@ -21,16 +21,50 @@ from .diff import DiffResult, git_diff
 from .export import save_svg
 from .github import GitHubConnector, GitHubError
 from .import_csv import preview_csv
-from .keymap import groups_for_keybar
+from .keymap import (
+    GROUP_SCOPE,
+    SCOPE_APP,
+    SCOPE_HOME,
+    SCOPE_IMPORT,
+    SCOPE_MAP,
+    SCOPE_PLUG,
+    SCOPE_REPO,
+    groups_for_keybar,
+    textual_bindings,
+)
 from .mermaid import dump as dump_mermaid, slugify
-from .model import Document, Edge, Ficha, Graph, Node
+from .model import Attachment, Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
+from .osopen import OK as OSOPEN_OK, open_external
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .store import MapStore, TEMPLATES
 from .views.layered import LayeredRenderer
 from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
+from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
+from .widgets.rail import RAIL_WIDTH, OutlineRail
+
+
+def screen_bindings(scope: str) -> list[Binding]:
+    """Generate a screen's `BINDINGS` from the one keymap seat (US-N03).
+
+    Screens never hand-write a binding list: the seat is the single source, so the
+    keys a screen binds and the keys the palette and help advertise cannot drift.
+    """
+    return [
+        Binding(key, action, label, priority=priority)
+        for key, action, label, priority in textual_bindings(scope)
+    ]
+
+
+def keybar_groups(scope: str) -> list[str]:
+    """The keybar's group order for *scope*, derived from the seat.
+
+    Derived rather than hand-listed: a second list naming the map's groups would
+    be exactly the drift the seat exists to prevent.
+    """
+    return [g for g, s in GROUP_SCOPE.items() if s in (scope, SCOPE_APP)]
 
 
 class NavigationModel:
@@ -304,19 +338,8 @@ class ConstructScreen(ModalScreen[str | None]):
 class HomeScreen(Screen):
     """Home screen with GLANCE posture: one hero, everything else available."""
 
-    BINDINGS = [
-        ("c", "consult", "Consultar mapas"),
-        ("p", "plug", "Conectar repo"),
-        ("n", "construct", "Construir"),
-        ("t", "template", "Plantilla"),
-        ("i", "import_csv", "Importar CSV"),
-        ("f", "factory", "Fábrica"),
-        ("r", "resume", "Retomar"),
-        ("s", "settings", "Componentes"),
-        ("j", "table_down", "Bajar"),
-        ("k", "table_up", "Subir"),
-        ("q", "quit", "Salir"),
-    ]
+    KEY_SCOPE = SCOPE_HOME
+    BINDINGS = screen_bindings(SCOPE_HOME)
 
     def compose(self) -> ComposeResult:
         yield TabStrip("c")
@@ -664,12 +687,8 @@ class HomeScreen(Screen):
 class _ImportPreviewScreen(Screen):
     """Preview a CSV import before saving it as a named map."""
 
-    BINDINGS = [
-        ("s", "save", "Guardar"),
-        ("escape", "home", "Volver"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
-    ]
+    KEY_SCOPE = SCOPE_IMPORT
+    BINDINGS = screen_bindings(SCOPE_IMPORT)
 
     def __init__(self, preview_graph: Graph, source_path: Path) -> None:
         super().__init__()
@@ -680,7 +699,7 @@ class _ImportPreviewScreen(Screen):
         yield TabStrip("i", crumb=["import", self.source_path.name])
         yield Static("", id="import-preview-canvas")
         yield HintLine("s guarda · esc volver")
-        yield KeyBar(groups_for_keybar(["app"]))
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
         self.refresh_canvas()
@@ -727,11 +746,8 @@ class _ImportPreviewScreen(Screen):
 class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
-    BINDINGS = [
-        Binding("escape", "home", "Volver", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
-    ]
+    KEY_SCOPE = SCOPE_PLUG
+    BINDINGS = screen_bindings(SCOPE_PLUG)
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=["conectar repo"])
@@ -741,7 +757,7 @@ class PlugRepoScreen(Screen):
             id="repo-dialog",
         )
         yield HintLine("ingresa owner/name, URL o ruta local y presiona ↵", "↵")
-        yield KeyBar(groups_for_keybar(["app"]))
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "repo-input":
@@ -781,13 +797,8 @@ class PlugRepoScreen(Screen):
 class RepoScreen(Screen):
     """A GitHub repo rendered as a two-pane branch dashboard (variant C)."""
 
-    BINDINGS = [
-        Binding("j", "next_sibling", "Siguiente", priority=True),
-        Binding("k", "prev_sibling", "Anterior", priority=True),
-        Binding("q", "home", "Inicio", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
-    ]
+    KEY_SCOPE = SCOPE_REPO
+    BINDINGS = screen_bindings(SCOPE_REPO)
 
     progress_current: reactive[int] = reactive(0)
     progress_total: reactive[int] = reactive(1)
@@ -1051,28 +1062,13 @@ class RepoScreen(Screen):
 class MapScreen(Screen):
     """A map rendered as a layered tree."""
 
-    BINDINGS = [
-        ("j", "next_sibling", "Siguiente"),
-        ("k", "prev_sibling", "Anterior"),
-        ("l", "child", "Hijo"),
-        ("h", "parent", "Padre"),
-        ("enter", "open_ficha", "Abrir"),
-        ("slash", "search", "Buscar"),
-        ("f", "toggle_focus", "Foco"),
-        ("o", "toggle_outline", "Outline"),
-        ("r", "toggle_radial", "Radial"),
-        ("e", "export_svg", "Exportar SVG"),
-        ("a", "add_child", "Agregar hijo"),
-        ("d", "open_documents", "Documentos"),
-        ("x", "archive", "Archivar"),
-        ("u", "undo", "Deshacer"),
-        ("=", "toggle_diff", "Diff vs HEAD"),
-        ("m", "coverage", "Cobertura"),
-        ("q", "home", "Inicio"),
-        ("escape", "back_or_home", "Volver"),
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
-    ]
+    KEY_SCOPE = SCOPE_MAP
+    BINDINGS = screen_bindings(SCOPE_MAP)
+    # The inspector's fields mount after this screen does, and Textual would
+    # auto-focus the first of them — which silently disables every single-letter
+    # map binding, because a focused Input consumes printable keys.  The map, not
+    # a text field, owns the keyboard on arrival.
+    AUTO_FOCUS = None
 
     def __init__(self, map_id: str, source_crumb: list[str] | None = None) -> None:
         super().__init__()
@@ -1091,27 +1087,30 @@ class MapScreen(Screen):
         self.radial_mode = False
         self.diff_active = False
         self.diff: DiffResult | None = None
-        self._snapshots: list[bytes] = []
+        self.rail_hidden = False
+        self.inspector_hidden = False
+        self._regions_pinned = False
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
         yield TabStrip("c", crumb=crumb_prefix + [""])
         yield Static("", id="map-minimap")
-        yield Static("(cargando mapa...)", id="map-canvas")
+        # Variant A «taller»: rail | canvas | inspector.  The inspector is the ONE
+        # ficha surface — it replaces both the old `#map-ficha` GroupBox and the
+        # LayeredRenderer's own ficha strip, which rendered the same card twice.
+        yield Horizontal(
+            OutlineRail(id="map-rail"),
+            Static("", id="map-canvas"),
+            FichaInspector(id="map-inspector"),
+            id="map-body",
+        )
         yield Input(placeholder="/buscar", id="search-input")
-        yield GroupBox(Static(id="map-ficha"), id="map-ficha-box")
         yield Static("", id="map-pagination")
         yield Static("", id="map-toast")
         yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
-        yield KeyBar(
-            [
-                ("nav", [("j/k", "sig/ant"), ("h/l", "padre/hijo"), ("↵", "abrir")]),
-                ("node", [("a", "agregar hijo"), ("d", "documento"), ("x", "archivar")]),
-                ("view", [("f", "foco"), ("o", "outline"), ("r", "radial"),
-                          ("/", "buscar"), ("e", "exportar"), ("=", "diff"), ("m", "cobertura")]),
-                ("app", [("ctrl+p", "paleta"), ("u", "deshacer"), ("?", "ayuda"), ("q", "inicio")]),
-            ]
-        )
+        # The keybar reads the same seat the bindings are generated from, so it
+        # cannot advertise a key the screen does not bind (US-N03).
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
         self.store = self.app.store  # type: ignore[attr-defined]
@@ -1131,7 +1130,11 @@ class MapScreen(Screen):
                 self.base_graph = self.store.load(self.map_id)
                 self.graph = self.base_graph
             except Exception as e:
-                self.notify(f"error cargando mapa: {e}", severity="error")
+                self.notify(
+                    f"error cargando mapa: {darkside.plain(str(e))}",
+                    severity="error",
+                    markup=False,
+                )
                 self.graph = Graph()
                 self.graph.add_node(Node(id="root", ficha=Ficha(title="error")))
                 self.base_graph = self.graph
@@ -1145,7 +1148,72 @@ class MapScreen(Screen):
                 self.nav.cursor = last_node
             self.store.record_session(self.map_id, self.nav.cursor)
 
+        self._apply_region_visibility()
         self.refresh_canvas()
+        # Keep focus off the side regions on arrival: a focused Input eats every
+        # single-letter key, so the map's own navigation would be dead until the
+        # operator blurred it by hand.  Scheduled after the refresh because the
+        # rail and the inspector's fields are focusable and mount after this runs.
+        self.call_after_refresh(self._park_focus)
+
+    # -- region layout (LLR-N06.6) -----------------------------------------
+    # Below this width the canvas cannot show a card's coverage row without
+    # clipping it mid-field, and a clipped field is indistinguishable from a
+    # present one — the canvas would silently misreport coverage.  Measured by
+    # the UX lens: a 5-field schema needs card_w >= 15, so n*18-3 <= w-2.
+    MIN_CANVAS_WIDTH = 58
+
+    def _chrome_width(self) -> int:
+        """Columns taken by the rail and inspector at the current setting."""
+        return (0 if self.rail_hidden else RAIL_WIDTH) + (
+            0 if self.inspector_hidden else INSPECTOR_WIDTH
+        )
+
+    def _apply_region_visibility(self) -> None:
+        """Collapse the side regions when the terminal cannot afford them.
+
+        Auto-collapse is width-driven, but an explicit toggle wins: once the
+        operator has hidden or shown a region by hand, we stop second-guessing.
+        """
+        size = self.size or self.app.size
+        if not self._regions_pinned:
+            available = size.width - RAIL_WIDTH - INSPECTOR_WIDTH
+            if available < self.MIN_CANVAS_WIDTH:
+                self.rail_hidden = True
+            if size.width - INSPECTOR_WIDTH < self.MIN_CANVAS_WIDTH:
+                self.inspector_hidden = True
+        self.query_one("#map-rail", OutlineRail).display = not self.rail_hidden
+        self.query_one("#map-inspector", FichaInspector).display = not self.inspector_hidden
+
+    def action_toggle_rail(self) -> None:
+        self._regions_pinned = True
+        self.rail_hidden = not self.rail_hidden
+        self._apply_region_visibility()
+        self.refresh_canvas()
+
+    def action_toggle_inspector(self) -> None:
+        self._regions_pinned = True
+        self.inspector_hidden = not self.inspector_hidden
+        self._apply_region_visibility()
+        self.refresh_canvas()
+
+    def action_focus_rail(self) -> None:
+        """Move keyboard focus to the rail, and say so on the hint line."""
+        rail = self.query_one("#map-rail", OutlineRail)
+        if self.rail_hidden:
+            self.action_toggle_rail()
+        rail.focus()
+        self.query_one(HintLine).set_hint(
+            "rail · ↵ plegar rama · esc volver al mapa", "esc"
+        )
+        self.refresh_canvas()
+
+    def action_collapse_branch(self) -> None:
+        self.query_one("#map-rail", OutlineRail).toggle(self.nav.cursor)
+
+    def _park_focus(self) -> None:
+        """Hand the keyboard back to the map itself."""
+        self.set_focus(None)
 
     def _current_renderer(self):
         if self.outline_mode:
@@ -1226,8 +1294,10 @@ class MapScreen(Screen):
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
         size = self.size or self.app.size
-        w = max(20, size.width)
-        h = max(5, size.height - 10)
+        # The canvas no longer owns the full width: the inspector takes a fixed
+        # column beside it, so render to what is actually left.
+        w = max(20, size.width - self._chrome_width())
+        h = max(5, size.height - 8)
         text = renderer.render(
             self.graph,
             selected_id=self.nav.cursor,
@@ -1244,51 +1314,148 @@ class MapScreen(Screen):
         node_title = node.ficha.title if node else ""
         tab.set_crumb(self._current_crumb() + [node_title])
 
-        self.query_one("#map-ficha", Static).update(self._ficha_text(node, w - 4))
+        self.query_one("#map-inspector", FichaInspector).show(node, self.graph)
+        self.query_one("#map-rail", OutlineRail).show(self.graph, self.nav.cursor)
         self.query_one("#map-minimap", Static).update(self._minimap_text())
         self.query_one("#map-pagination", Static).update(self._pagination_text())
 
-    def _ficha_text(self, node: Node | None, width: int) -> Text:
-        if node is None:
-            return Text.assemble(("  (selecciona un nodo)", darkside.MUT))
+    def on_ficha_inspector_field_committed(
+        self, event: FichaInspector.FieldCommitted
+    ) -> None:
+        """Persist an inspector edit.
 
-        ficha = node.ficha
-        text = Text()
-        text.append("▸ ", style=darkside.ACCENT)
-        text.append(escape(ficha.title or node.id), style=f"bold {darkside.INK}")
-        if ficha.meta:
-            text.append("   ")
-            text.append(escape(ficha.meta), style=darkside.MUT)
+        The widget cannot write: `widgets -> store` is banned, so it reports what
+        the operator did and this screen — which owns the graph and the store —
+        decides what that costs.
+        """
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+        current = self._ficha_value(node.ficha, event.field)
+        if current == event.value:
+            return
+        # Snapshot BEFORE mutating, so `u` reverts this edit rather than an
+        # unrelated earlier structural change.
+        self._push_snapshot()
+        if event.field == "title":
+            node.ficha.title = event.value
+        elif event.field == "notes":
+            node.ficha.notes = event.value
+        elif event.field == "state":
+            node.ficha.state = event.value
+        else:
+            node.ficha.fields[event.field] = event.value
+        self.store.save(self.map_id, self.graph)
+        self.base_graph = self.graph
+        self.refresh_canvas()
+        self._event_toast("guardado", darkside.plain(node.ficha.title or node.id))
 
-        have, req = ficha.required_coverage(self.graph.schema)
-        if req:
-            text.append("   ")
-            text.append_text(darkside.step_meter(have, req))
+    @staticmethod
+    def _ficha_value(ficha: Ficha, field: str) -> str:
+        if field == "title":
+            return ficha.title
+        if field == "notes":
+            return ficha.notes
+        if field == "state":
+            return ficha.state
+        return ficha.fields.get(field, "")
 
-        text.append("\n")
+    def on_field_input_left(self, event) -> None:
+        """`escape` inside a field returns focus to the map, keeping the value."""
+        event.stop()
+        self.set_focus(None)
+        self.query_one(HintLine).set_hint("navega con j/k/h/l · ↵ ficha · / buscar")
 
-        doc = ficha.fields.get("D", "")
-        text.append("  documento ", style=darkside.MUT)
-        text.append(escape(doc) if doc else "sin acta",
-                    style=darkside.INK if doc else darkside.ALERT)
-        text.append("   dueño ", style=darkside.MUT)
-        text.append(escape(ficha.fields.get("O", "—")), style=darkside.INK)
-        text.append("   creado ", style=darkside.MUT)
-        text.append(escape(ficha.fields.get("Y", "—")), style=darkside.INK)
+    # -- attachments (US-N02) ----------------------------------------------
+    def on_ficha_inspector_attachment_activated(
+        self, event: FichaInspector.AttachmentActivated
+    ) -> None:
+        """Open an attachment through the one OS-handler boundary.
 
-        linked = node.linked_map_id()
-        if linked:
-            text.append("   enlace ", style=darkside.MUT)
-            text.append(escape(linked), style=darkside.ACCENT)
+        The refusal is always shown: a dropped status word would make a refused
+        launch indistinguishable from a successful one (LLR-N02.9).
+        """
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+        if not 0 <= event.index < len(node.ficha.attachments):
+            return
+        att = node.ficha.attachments[event.index]
+        status = open_external(
+            att.kind, att.path, workspace=self.store.workspace,
+            launcher=getattr(self.app, "attachment_launcher", None),
+        )
+        # Both branches carry file-derived text, so both are coerced.  `notify`
+        # parses markup by default in textual 8.2.8 (Toast.render calls
+        # Content.from_markup), so a hostile path could crash the toast or, worse,
+        # REWRITE the refusal text the operator is reading — defeating the point
+        # of showing the real target at the exact moment it matters.
+        shown = darkside.plain(att.path)
+        if status == OSOPEN_OK:
+            self._event_toast("abierto", darkside.plain(att.caption or att.path))
+        else:
+            self.notify(f"{status}: {shown}", severity="warning", markup=False)
 
-        if ficha.notes:
-            note = ficha.notes
-            if len(note) > width - 4:
-                note = note[: width - 5] + "…"
-            text.append("\n  ")
-            text.append(escape(note), style=darkside.MUT)
+    def on_ficha_inspector_attachment_add_requested(
+        self, event: FichaInspector.AttachmentAddRequested
+    ) -> None:
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
 
-        return text
+        def on_target(target: str | None) -> None:
+            if not target:
+                return
+            self._push_snapshot()
+            kind = "url" if "://" in target else "file"
+            node.ficha.attachments.append(Attachment(kind=kind, path=target))
+            self.store.save(self.map_id, self.graph)
+            self.base_graph = self.graph
+            self.refresh_canvas()
+            self._event_toast("adjunto agregado", darkside.plain(target))
+
+        self.app.push_screen(
+            _PromptScreen("ruta o url del adjunto", "docs/acta.pdf"), callback=on_target
+        )
+
+    def on_ficha_inspector_attachment_remove_requested(
+        self, event: FichaInspector.AttachmentRemoveRequested
+    ) -> None:
+        event.stop()
+        node = self.graph.nodes.get(event.node_id)
+        if node is None or self.store is None:
+            return
+        if not 0 <= event.index < len(node.ficha.attachments):
+            return
+        removed = node.ficha.attachments.pop(event.index)
+        self._push_snapshot()
+        self.store.save(self.map_id, self.graph)
+        self.base_graph = self.graph
+        self.refresh_canvas()
+        self._event_toast(
+            "adjunto quitado", darkside.plain(removed.caption or removed.path)
+        )
+
+    def action_add_attachment(self) -> None:
+        self.query_one("#map-inspector", FichaInspector).request_add_attachment()
+
+    def action_remove_attachment(self) -> None:
+        self.query_one("#map-inspector", FichaInspector).request_remove_attachment()
+
+    UNDO_DEPTH = 20
+
+    @property
+    def _snapshots(self) -> list[bytes]:
+        """This map's undo history, held by the App so it outlives the screen.
+
+        Keyed by `map_id`: one global stack would let an undo taken in map B
+        restore a snapshot of map A, which is data loss wearing a feature's
+        clothes.
+        """
+        return self.app.undo_stacks.setdefault(self.map_id, [])
 
     def _push_snapshot(self) -> None:
         if self.store is None:
@@ -1298,7 +1465,9 @@ class MapScreen(Screen):
         import yaml
 
         yml = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
-        self._snapshots.append(json.dumps({"mmd": mmd, "yml": yml}).encode())
+        stack = self._snapshots
+        stack.append(json.dumps({"mmd": mmd, "yml": yml}).encode())
+        del stack[: max(0, len(stack) - self.UNDO_DEPTH)]
 
     def _pop_snapshot(self) -> None:
         if not self._snapshots:
@@ -1424,10 +1593,74 @@ class MapScreen(Screen):
         def on_select(node_id: str | None) -> None:
             if node_id is None or node_id not in self.graph.nodes:
                 return
-            self.nav.cursor = node_id
-            self.refresh_canvas()
+            self._goto_gap(node_id)
 
         self.app.push_screen(CoverageScreen(self.graph, self.map_id), callback=on_select)
+
+    # -- coverage worklist (US-N04) ----------------------------------------
+    def _incomplete_order(self) -> list[str]:
+        """Nodes with a missing required field, in the coverage report's order.
+
+        Walks the tree the same way `CoverageScreen` does, so "next" in the
+        worklist means the same thing as "next row" in the report.  Consumes
+        `Ficha.missing_required`, the model's single owner of what is missing.
+        """
+        out: list[str] = []
+        if self.graph.root_id is None:
+            return out
+        visited: set[str] = set()
+        stack = [self.graph.root_id]
+        while stack:
+            nid = stack.pop()
+            if nid in visited or nid not in self.graph.nodes:
+                continue
+            visited.add(nid)
+            if self.graph.nodes[nid].ficha.missing_required(self.graph.schema):
+                out.append(nid)
+            for cid in reversed(self.graph.children_of(nid)):
+                if cid not in visited:
+                    stack.append(cid)
+        return out
+
+    def _goto_gap(self, node_id: str) -> bool:
+        """Move the cursor to *node_id* and focus its first missing field."""
+        if node_id not in self.graph.nodes:
+            return False
+        self.nav.cursor = node_id
+        if self.inspector_hidden:
+            self.inspector_hidden = False
+            self._apply_region_visibility()
+        # Ask for the focus BEFORE refreshing: the inspector applies the request
+        # at the end of the rebuild that creates the rows, so the two are ordered
+        # causally instead of racing on frame timing.
+        missing = self.graph.nodes[node_id].ficha.missing_required(self.graph.schema)
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        inspector.focus_after_rebuild(missing[0].key if missing else None)
+        self.refresh_canvas()
+        if missing:
+            self.query_one(HintLine).set_hint(
+                # `↵` is what commits, not ctrl+s — MapScreen binds no ctrl+s at
+                # all, and advertising a key that does nothing on the primary flow
+                # is the exact defect US-N03 exists to remove.
+                f"completa «{missing[0].label}» · ↵ guarda · esc deja el campo", "↵"
+            )
+        return True
+
+    def action_next_gap(self) -> None:
+        """Advance to the next node that is missing a required field.
+
+        Wraps once.  When nothing anywhere is missing it says so, rather than
+        cycling silently on the same node forever.
+        """
+        order = self._incomplete_order()
+        if not order:
+            self._event_toast("cobertura completa", "no falta ningún campo requerido")
+            return
+        if self.nav.cursor in order:
+            idx = (order.index(self.nav.cursor) + 1) % len(order)
+        else:
+            idx = 0
+        self._goto_gap(order[idx])
 
     def action_export_svg(self) -> None:
         if self.store is None:
@@ -1515,15 +1748,50 @@ class MapScreen(Screen):
             self.base_graph = self.graph
             self.nav.cursor = self.graph.root_id
             self.refresh_canvas()
-            self._event_toast("archivado", node.ficha.title or node.id)
+            self._event_toast("archivado", darkside.plain(node.ficha.title or node.id))
 
-        if self.nav.cursor == self.graph.root_id:
-            self.app.push_screen(
-                _ConfirmScreen("¿archivar el nodo raíz? esto reemplazará la raíz del mapa."),
-                callback=do_archive,
+        # Every archive is confirmed, root or not.  A non-root subtree used to be
+        # destroyed with no prompt at all, and `x` sits next to the navigation
+        # keys.  The message names how much goes, because "archivar" alone does
+        # not tell the operator that the children go too.
+        count = self._subtree_size(self.nav.cursor)
+        name = node.ficha.title or node.id
+        # Archiving everything is not archiving, it is erasing.  The confirmation
+        # used to promise it would "replace the root of the map" and then wrote an
+        # EMPTY map to disk — nodes {}, root_id None — with the only recovery an
+        # in-memory undo stack that dies with the process.  Refuse instead.
+        if count >= len(self.graph.nodes):
+            self.notify(
+                "no se puede archivar todo el mapa: quedaría vacío. "
+                "archiva una rama, o elimina el mapa desde inicio.",
+                severity="warning",
+                markup=False,
             )
+            return
+        if self.nav.cursor == self.graph.root_id:
+            message = (
+                f"¿archivar la raíz «{name}» y sus {count - 1} descendientes? "
+                "esto reemplazará la raíz del mapa."
+            )
+        elif count > 1:
+            message = f"¿archivar «{name}» y sus {count - 1} descendientes?"
         else:
-            do_archive(True)
+            message = f"¿archivar «{name}»?"
+        self.app.push_screen(_ConfirmScreen(message), callback=do_archive)
+
+    def _subtree_size(self, root_id: str | None) -> int:
+        """How many nodes would go if this subtree were archived."""
+        if root_id is None:
+            return 0
+        seen: set[str] = set()
+        stack = [root_id]
+        while stack:
+            nid = stack.pop()
+            if nid in seen or nid not in self.graph.nodes:
+                continue
+            seen.add(nid)
+            stack.extend(self.graph.children_of(nid))
+        return len(seen)
 
     def _remove_subtree(self, root_id: str) -> None:
         remove: set[str] = set()
@@ -1558,13 +1826,17 @@ class MapScreen(Screen):
         self.app.action_palette()
 
     def action_help(self) -> None:
-        self.app.push_screen(HelpScreen())
+        self.app.action_help()
 
 
 class MapperApp(App):
     """Main application entry point."""
 
-    COMMAND_PALETTE_ENABLE = False
+    # Textual's own attribute is ENABLE_COMMAND_PALETTE.  This app previously set
+    # COMMAND_PALETTE_ENABLE, a name Textual never reads, so the built-in palette
+    # silently owned ctrl+p and mapper's own palette was unreachable by keyboard.
+    # Caught only once a test pressed the real key instead of calling the action.
+    ENABLE_COMMAND_PALETTE = False
 
     CSS = """
     Screen { background: #000000; color: #f5f5f5; }
@@ -1612,9 +1884,26 @@ class MapperApp(App):
     #repo-progress { color: #737373; margin-bottom: 1; }
     #repo-sidebar-hints { color: #737373; }
     #repo-table { height: 1fr; background: #000000; padding: 0 1; }
-    #map-canvas { width: 100%; height: 1fr; }
-    #map-ficha-box { height: auto; }
-    #map-ficha { height: auto; padding: 0 1; }
+    /* Variant A «taller»: canvas + inspector side by side.  Depth comes from the
+       background step, never from a border — borders are reserved for modals. */
+    #map-body { height: 1fr; }
+    #map-canvas { width: 1fr; height: 100%; }
+    #map-inspector {
+        width: 36;
+        height: 100%;
+        background: #121212;
+        padding: 0 1;
+        overflow-y: auto;
+    }
+    #map-inspector .insp-label { color: #737373; }
+    #map-inspector Input {
+        border: none;
+        background: #262626;
+        color: #f5f5f5;
+        height: 1;
+        padding: 0 1;
+    }
+    #map-inspector Input:focus { background: #1783ff; color: #000000; }
     #search-input { dock: bottom; display: none; }
 
     PlugRepoScreen { align: center middle; }
@@ -1651,15 +1940,23 @@ class MapperApp(App):
     #import-preview-canvas { width: 100%; height: 1fr; }
     """
 
-    BINDINGS = [
-        ("ctrl+p", "palette", "Paleta"),
-        ("?", "help", "Ayuda"),
-        ("q", "quit", "Salir"),
-    ]
+    KEY_SCOPE = SCOPE_APP
+    # The app's own bindings come from the seat too — this was the one list that
+    # escaped it.  Its hand-written `q -> quit` was bound app-wide, so on the plug
+    # and import-preview screens (neither of which declares `q`) pressing `q` quit
+    # the application outright, discarding an unsaved import, while palette and
+    # help advertised no such key.  `q` now quits only in home scope, where it is
+    # advertised.
+    BINDINGS = screen_bindings(SCOPE_APP)
 
     def __init__(self, workspace: Path | str):
         super().__init__()
         self.store = MapStore(workspace)
+        # Undo history lives here, not on MapScreen: a screen is rebuilt every
+        # time the operator re-enters a map, which used to discard the history
+        # silently and make an archived subtree unrecoverable.
+        self.undo_stacks: dict[str, list[bytes]] = {}
+        self.attachment_launcher = None
 
     def on_mount(self) -> None:
         self.push_screen(HomeScreen())
@@ -1671,20 +1968,23 @@ class MapperApp(App):
 
     def action_palette(self) -> None:
         target_screen = self.screen
+        scope = getattr(target_screen, "KEY_SCOPE", SCOPE_APP)
 
         def on_command(action: str | None) -> None:
             if not action:
                 return
-            method_name = f"action_{action.replace(' ', '_')}"
+            # `action` is an action_* method stem straight from the keymap seat,
+            # never a translated label — that is what makes the entry dispatch.
+            method_name = f"action_{action}"
             if hasattr(target_screen, method_name):
                 getattr(target_screen, method_name)()
             elif hasattr(self, method_name):
                 getattr(self, method_name)()
 
-        self.push_screen(CommandPalette(), callback=on_command)
+        self.push_screen(CommandPalette(scope), callback=on_command)
 
     def action_help(self) -> None:
-        self.push_screen(HelpScreen())
+        self.push_screen(HelpScreen(getattr(self.screen, "KEY_SCOPE", SCOPE_APP)))
 
     def action_quit(self) -> None:
         self.exit()

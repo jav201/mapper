@@ -415,7 +415,16 @@ class DsChip(_DsBase):
         state = self._state()
         if state == "disabled":
             return darkside.Text(f" {self.chip_label} ", style=f"{darkside.STEP} on {darkside.PANEL}")
-        if state == "focused" or self.selected:
+        # Focused and selected must not render identically (LLR-N06.3).  They did:
+        # one `focused or selected` branch painted both the same, so "which chip
+        # does ↵ act on" was unanswerable from the screen.  Focus carries the edge
+        # marker; selection carries the block.
+        if state == "focused":
+            return darkside.Text.assemble(
+                ("▐", darkside.ACCENT),
+                (f" {self.chip_label} ", _ON_ACCENT if self.selected else f"{darkside.INK} on {darkside.STEP}"),
+            )
+        if self.selected:
             return darkside.Text(f" {self.chip_label} ", style=_ON_ACCENT)
         return darkside.Text(f" {self.chip_label} ", style=f"{darkside.INK} on {darkside.STEP}")
 

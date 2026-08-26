@@ -103,30 +103,78 @@ def group_box(renderable, pad_x: int = 1) -> Panel:
 
 
 # Keybar -------------------------------------------------------------------
-def keybar(groups: Sequence[tuple[str, Sequence[tuple[str, str]]]], width: int = 118) -> Text:
-    """Render grouped key hints for the footer.
+def keybar(
+    groups: Sequence[tuple[str, Sequence[tuple[str, str]]]],
+    width: int = 118,
+    help_key: str = "?",
+) -> Text:
+    """Render grouped key hints for the footer, truncating VISIBLY.
 
     group names in STEP, key glyphs in ACCENT, labels in MUT.
+
+    When the bar does not fit, a bare `…` is a lie by omission: it says something
+    was cut but not that anything is missing, let alone how much or how to see it.
+    This ends with `… +N  ? todas`, naming the count hidden and the key that shows
+    them.  Measured before this change: the bar rendered 216 cells at a hard-coded
+    118, so 9 of 17 bindings were shown and `m cobertura` — the entry point to the
+    coverage flow — was simply invisible.
     """
+    def _binding_parts(key: str, label: str, first: bool) -> list[tuple[str, str]]:
+        out: list[tuple[str, str]] = []
+        if not first:
+            out.append(("  ", ""))
+        out.append((key, ACCENT))
+        out.append((f" {label}", MUT))
+        return out
+
+    total = sum(len(bindings) for _, bindings in groups)
     parts: list[tuple[str, str]] = []
     for gi, (group_name, bindings) in enumerate(groups):
         if gi > 0:
             parts.append(("   ", ""))
         parts.append((f"{group_name} ", f"{STEP}"))
         for bi, (key, label) in enumerate(bindings):
-            if bi > 0:
-                parts.append(("  ", ""))
-            parts.append((key, ACCENT))
-            parts.append((f" {label}", MUT))
+            parts.extend(_binding_parts(key, label, bi == 0))
+
     text = Text.assemble(*parts)
-    text.truncate(width, overflow="ellipsis")
-    return text
+    if text.cell_len <= width:
+        return text
+
+    # Re-assemble, counting how many bindings actually fit inside the budget the
+    # marker leaves behind.
+    marker_width = len(f" … +{total}  {help_key} todas")
+    budget = max(0, width - marker_width)
+    kept: list[tuple[str, str]] = []
+    shown = 0
+    running = Text()
+    for gi, (group_name, bindings) in enumerate(groups):
+        head: list[tuple[str, str]] = []
+        if gi > 0:
+            head.append(("   ", ""))
+        head.append((f"{group_name} ", f"{STEP}"))
+        for bi, (key, label) in enumerate(bindings):
+            candidate = head + _binding_parts(key, label, bi == 0)
+            probe = Text.assemble(*(kept + candidate))
+            if probe.cell_len > budget:
+                head = []
+                break
+            kept.extend(candidate)
+            head = []
+            shown += 1
+            running = probe
+
+    hidden = total - shown
+    out = Text.assemble(*kept)
+    out.append(f" … +{hidden}", style=WORDMARK)
+    out.append(f"  {help_key}", style=ACCENT)
+    out.append(" todas", style=MUT)
+    return out
 
 
 # Hint line ----------------------------------------------------------------
 def hint_line(text: str, key: str | None = None) -> Text:
     """Render a next-step hint line."""
-    parts: list[tuple[str, str]] = [("siguiente ▸ ", MUT), (escape(text), MUT)]
+    parts: list[tuple[str, str]] = [("siguiente ▸ ", MUT), (plain(text), MUT)]
     if key:
         parts.append((f" {key}", INK))
     return Text.assemble(*parts)
@@ -217,9 +265,31 @@ def time_row(name: str, age_days: int, glyph: str, style: str, note: str,
 
 
 # Text helpers -------------------------------------------------------------
+# Control characters other than tab and newline are replaced, not escaped: a
+# terminal acts on them.  An ANSI cursor-move or an OSC-52 clipboard write inside
+# a ficha title reaches the compositor verbatim, and markup escaping does nothing
+# about either — measured, see 01-requirements.md §Amendment 2 S-B2.
+_CONTROL_MAP = {c: "�" for c in range(0x00, 0x20) if c not in (0x09, 0x0A)}
+_CONTROL_MAP.update({c: "�" for c in range(0x7F, 0xA0)})
+
+
+def plain(value: object) -> str:
+    """Coerce any file-derived value into a string that is safe to render.
+
+    The single coercion helper every renderer of sidecar text must pass through.
+    It deliberately does NOT call `rich.markup.escape`: these strings are placed
+    into `Text` objects with explicit styles, and `Text` does not parse markup, so
+    escaping there is a no-op that merely prints visible backslashes.  Safety from
+    markup comes from never handing a file-derived `str` to a markup-parsing sink.
+    """
+    if not isinstance(value, str):
+        value = "" if value is None else str(value)
+    return value.translate(_CONTROL_MAP)
+
+
 def fit(s: str, w: int) -> str:
     """Pad or truncate *s* to exactly *w* display cells."""
-    s = escape(s)
+    s = plain(s)
     text = Text(s)
     if text.cell_len > w:
         text.truncate(w, overflow="ellipsis")

@@ -86,3 +86,51 @@ def test_time_row_older_event_placed_left_of_today():
     today_idx = text.plain.index("╎")
     event_idx = text.plain.index("●")
     assert event_idx < today_idx
+
+
+# ---------------------------------------------------------------------------
+# darkside.plain() — the single coercion helper for file-derived text.
+#
+# It had NO direct tests. Its only exercise was AT-N01e, whose control payload is
+# a single ESC, so narrowing the whole map to `{0x1B: "�"}` left the suite at
+# 210 passed while NUL, BEL and the C1 introducers passed through verbatim to the
+# terminal. The range is now asserted as a range.
+# ---------------------------------------------------------------------------
+
+
+def test_plain_replaces_every_c0_control_except_tab_and_newline():
+    """Derived from the RULE (the C0 range), not from the bytes the code handles."""
+    for code in range(0x00, 0x20):
+        ch = chr(code)
+        out = darkside.plain(f"a{ch}b")
+        if code in (0x09, 0x0A):
+            assert out == f"a{ch}b", f"U+{code:04X} must be preserved"
+        else:
+            assert out == "a�b", f"U+{code:04X} reached the terminal"
+
+
+def test_plain_replaces_del_and_every_c1_control():
+    """DEL and the C1 block include the 8-bit CSI and OSC introducers."""
+    for code in range(0x7F, 0xA0):
+        ch = chr(code)
+        assert darkside.plain(f"a{ch}b") == "a�b", f"U+{code:04X} reached the terminal"
+
+
+def test_plain_leaves_ordinary_text_and_markup_untouched():
+    """Markup is preserved LITERALLY: safety comes from never using a markup sink."""
+    assert darkside.plain("acta-2013 · nómina") == "acta-2013 · nómina"
+    assert darkside.plain("[bold red]PWN[/]") == "[bold red]PWN[/]"
+    assert darkside.plain("") == ""
+
+
+def test_plain_coerces_non_strings_without_raising():
+    """A sidecar is YAML: a bare `path:` parses to None, `path: 12345` to an int."""
+    assert darkside.plain(None) == ""
+    assert darkside.plain(12345) == "12345"
+    assert darkside.plain(["a"]) == "['a']"
+
+
+def test_plain_is_what_fit_and_hint_line_use():
+    """The helper is the single owner; the two text helpers must route through it."""
+    assert "�" in darkside.fit("a\x00b", 8)
+    assert "\x00" not in darkside.hint_line("a\x00b").plain

@@ -1,25 +1,34 @@
 """Command palette screen (ctrl+p)."""
 from __future__ import annotations
 
-from itertools import groupby
-
-from rich.markup import escape
 from rich.text import Text
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Input, ListItem, ListView, Static
 
 from mapper import darkside
-from mapper.keymap import KEYMAP, KeyBinding, palette_items
+from mapper.keymap import (
+    SCOPE_APP,
+    SCOPE_PALETTE,
+    KeyBinding,
+    palette_items,
+    textual_bindings,
+)
 
 
 class CommandPalette(ModalScreen[str | None]):
-    """Fuzzy command palette; dismisses the selected action or None."""
+    """Fuzzy command palette; dismisses the selected action stem, or None.
+
+    The entries are the bindings reachable from *scope* — the scope of the screen
+    that opened the palette — so every row it offers is a key that works right
+    here, and selecting one dispatches a real `action_*` method.
+    """
 
     BINDINGS = [
-        ("escape", "dismiss_none", "Cerrar"),
-        ("enter", "run_selected", "Ejecutar"),
+        Binding(key, action, label, priority=priority)
+        for key, action, label, priority in textual_bindings(SCOPE_PALETTE)
     ]
 
     CSS = """
@@ -61,12 +70,23 @@ class CommandPalette(ModalScreen[str | None]):
     #palette-list > ListItem.--highlight .palette-key {
         color: #000000;
     }
+    #palette-count {
+        width: 100%;
+        height: 1;
+        background: #262626;
+    }
     """
+
+    def __init__(self, scope: str = SCOPE_APP) -> None:
+        super().__init__()
+        self.scope = scope
+        self._items: list[KeyBinding] = []
 
     def compose(self) -> ComposeResult:
         yield Vertical(
             Input(placeholder="/comando", id="palette-input"),
             ListView(id="palette-list"),
+            Static("", id="palette-count"),
             id="palette-dialog",
         )
 
@@ -75,28 +95,46 @@ class CommandPalette(ModalScreen[str | None]):
         self.query_one("#palette-input", Input).focus()
 
     def _binding_label(self, binding: KeyBinding) -> Text:
+        # Every field is placed as its own span with an explicit style: nothing is
+        # interpolated into a markup-parsed string.
         return Text.assemble(
-            (f"{escape(binding.group)}  ", darkside.MUT),
-            (escape(binding.key), darkside.INK),
+            (f"{binding.group:<8}", darkside.WORDMARK),
+            (binding.label, darkside.INK),
             ("  ", ""),
-            (escape(binding.action), darkside.MUT),
+            (binding.glyph, darkside.ACCENT),
         )
 
     def _refresh_list(self, query: str) -> None:
         list_view = self.query_one("#palette-list", ListView)
         list_view.clear()
-        items = palette_items(query)
         # Group by group name to keep related commands together.
-        self._items = sorted(items, key=lambda b: b.group)
+        self._items = sorted(palette_items(query, self.scope), key=lambda b: b.group)
         for binding in self._items:
             label = Static(self._binding_label(binding))
             label.add_class("palette-binding")
             list_view.append(ListItem(label))
         if self._items:
             list_view.index = 0
+        total = len(palette_items("", self.scope))
+        self.query_one("#palette-count", Static).update(
+            Text.assemble(
+                (f" {len(self._items)}/{total} acciones", darkside.MUT),
+                ("   ↵", darkside.ACCENT),
+                (" ejecutar   ", darkside.MUT),
+                ("esc", darkside.ACCENT),
+                (" cerrar", darkside.MUT),
+            )
+        )
 
     def on_input_changed(self, event: Input.Changed) -> None:
         self._refresh_list(event.value)
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        # The search box holds focus, so it consumes `enter` before the screen
+        # binding can see it; without this the palette could never be run from the
+        # keyboard at all.
+        event.stop()
+        self.action_run_selected()
 
     def action_dismiss_none(self) -> None:
         self.dismiss(None)
