@@ -58,4 +58,6 @@
 | P-02 | Derive census input sets from the deleted code, not from strings chosen by eye | post-mortem §2.2 |
 | P-03 | Re-run the C-21 increment re-cut after **every** amendment, not only the first — batch-01 exceeded the source-file budget in 3 increments partly because of this | post-mortem §2.5 |
 | P-04 | Never spell a control-character escape into source or into an evidence artifact; construct it (`chr(0)`) or describe it. C-56's family, extended to comments | post-mortem §2.4 |
+| P-06 | **When a structure is the single source of truth for derived artifacts, pin the WHOLE structure.** Three partial pins of the keymap seat each passed review-breaking mutations; only a full `{(scope,key): (action,label,glyph)}` set-equality spec holds. Portable | post-mortem §2.4c |
+| P-07 | **Every probe needs a positive control.** A regex escape collapsed to a literal backspace byte, so a scanner matched nothing and passed on everything — silently, unlike the two parse-breaking incidents | post-mortem §2.4b |
 | P-05 | Treat a flaky test as a poisoned instrument: it invalidates every counterfactual that touches it, not just its own run | post-mortem §2.3 |

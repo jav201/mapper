@@ -127,10 +127,39 @@ the counterfactual was run and *did not redden* — the check that C-40 exists f
    file touched in this batch was subsequently scanned byte-by-byte: 89 files, zero stray control
    bytes.
 
+### 2.4c · The durable control for keymap drift is a WHOLE-SEAT specification
+
+Three narrower versions of the key-pairing gate failed review in sequence, and the sequence is the
+lesson:
+
+1. **Derived from the seat** — a tautology. The screens' `BINDINGS` are generated from `KEYMAP`, so
+   swapping two `action` fields propagates consistently and nothing can observe it.
+2. **`key -> action` only** — left the LABEL free. Swapping just the labels of `u` and `z` kept all
+   245 tests green: the operator reads "u plegar rama", presses it, and performs an undo. Same
+   deception, different field.
+3. **Map scope only** — left 23 of 48 bindings unpinned. A home-scope `r`/`q` action swap stayed
+   green, so "retomar último" quit the application.
+
+The control that holds is a **single specification of the entire seat** — `{(scope, key): (action,
+label, glyph)}` for all 48 entries, compared by **set equality**, hand-maintained and deliberately
+not derived from the thing it checks. It reddens on a drift in any field of any scope, and on an
+added or removed binding. Verified against four mutation classes: action swap, label swap, glyph
+corruption, entry deletion.
+
+**Generalisation:** when a structure is the single source of truth for several derived artifacts,
+partial pins are worse than useless — they *feel* like coverage while leaving most of the surface
+free. Pin the whole structure, or accept that it is unpinned and say so.
+
 ### 2.5 · The file budget was exceeded three times
 
-Increments 2, 3 and 4 touched 6, 5 and 5 source files against a cap of 4. Each was declared with a
-reason in §2 of its packet and marked ✗ on its checklist rather than waved through. The honest
+Increments 2, 3 and 4 touched **6, 6 and 5** source files against a cap of 4 — measured from the
+commits, not recalled. Each was declared with a reason in §2 of its packet and marked ✗ on its
+checklist rather than waved through.
+
+**The disclosure itself under-reported one of its own breaches**, saying "6, 5 and 5" until the PR
+gate measured it. That is worth more than the breach: a budget disclosure written from memory is not
+a disclosure, and the whole point of declaring an overrun is that the number is right. It is now
+derived by `git show <commit> --stat`. The honest
 reading: **the cut was made before the PDR conditions landed**, and those conditions added
 single-purpose files (the coercion helper, the `HintLine` setter, the `DsChip` fix) that could not
 sensibly be split into increments of their own. The C-21 re-cut was performed for the AT set but
@@ -176,7 +205,7 @@ of the pre-existing six, not of the archive bug.
 |---|---|
 | Stories delivered | 5 of 5 P1, plus HLR-N06 adopted mid-batch |
 | Tests | 88 → 245 (−6 superseded, +163 added) |
-| Increments | 6, cut as 9 commits on the branch |
+| Increments | 6, cut as 10 commits on the branch (9 touching code) |
 | Source files over budget | 3 increments (6, 5, 5 vs cap 4), each declared |
 | Counterfactuals executed | 19, all restores hash-verified |
 | Counterfactuals that were themselves defective | 3 (one never ran; one poisoned by a flaky test; one gated by an inert regex) |

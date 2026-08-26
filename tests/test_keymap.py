@@ -201,15 +201,23 @@ def test_tab_binding_exceptions_are_still_real():
 
     from mapper.screens import editor, settings
 
+    found = []
     for module in (editor, settings):
         for _, cls in _inspect.getmembers(module, _inspect.isclass):
             if cls.__name__ not in keymap.TAB_BINDING_EXCEPTIONS:
                 continue
+            found.append(cls.__name__)
             keys = {
                 b[0] if isinstance(b, tuple) else b.key
                 for b in (cls.__dict__.get("BINDINGS") or [])
             }
             assert "tab" in keys, f"{cls.__name__} no longer binds tab; retire the exception"
+    # Without this the loop asserts NOTHING when it never enters: pointing
+    # TAB_BINDING_EXCEPTIONS at classes that do not exist would pass.
+    assert set(found) == set(keymap.TAB_BINDING_EXCEPTIONS), (
+        f"TAB_BINDING_EXCEPTIONS names {set(keymap.TAB_BINDING_EXCEPTIONS) - set(found)} "
+        "which this probe never found — the exception list points at ghosts"
+    )
 
 
 def test_bindings_for_includes_app_scope_but_not_other_screens():

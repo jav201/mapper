@@ -3,7 +3,9 @@
 **Target:** PR #1, `feat/ui-next-batch-01` → `master` · 39 files · +7983 / −319 · 9 commits on the branch
 (8 touch `mapper/**` or `tests/**`).
 **Gate run:** 2026-08-26, `qa-reviewer`, final PR-level pass over the whole merged diff.
-**Verdict: `merge blocked` — 3 HIGH findings.**
+**Pass 1 verdict: `merge blocked` — 3 HIGH findings.**
+**Pass 2 verdict (after `42d96e2`): `merge still blocked` — H-2 and H-3 discharged, H-1 remains
+open at HIGH. See §11.**
 
 Every claim below is an executed probe or a `file:line`. Where I re-derived something the batch
 already asserted, I say what I ran, not that it was verified.
@@ -557,3 +559,215 @@ sha256 `5da6a934a56b635e8dca0c4cce0fe1f70741e6da7ad30fd896aed7c60e29d3fe`; `mapp
 `29c302469d96ebeff03d1cead8ca4bb7f6206193cc825c1df6f05e7b50c2d8b4`. Both verified with
 `sha256sum -c`, both confirmed against HEAD by `git hash-object`. `__pycache__` purged. No file
 under `prototypes/` was read or written. This report is the only file this gate created.
+
+---
+
+# 11 · Pass 2 — re-gate of `42d96e2`
+
+**Verdict: `merge still blocked`.** H-2 and H-3 are fully discharged. H-1 is **partially**
+discharged: the exact mutation I filed now reddens, but two mutations of the same class still leave
+the suite at **`245 passed`**, and one of them produces the same data-loss-by-deception.
+
+I re-derived every discharge by re-running my own mutations against the new tree. I did not accept
+the author's account for any of them, as they asked. Suite re-run by me: **`245 passed`**,
+245 collected.
+
+## 11.1 · Discharge per finding
+
+| # | Status | Evidence I produced |
+|---|---|---|
+| **H-1** | **PARTIAL — still open at HIGH** | `u`/`z` **action** swap → `1 failed` (`test_at_n03h`). But `u`/`z` **label** swap → `245 passed`, and a **home-scope** action swap → `245 passed`. §11.2 |
+| **H-2** | **DISCHARGED** | `_CONTROL_MAP = {0x1B: "…"}` → `3 failed`. Tests iterate `range(0x00,0x20)` and `range(0x7F,0xA0)` — derived from the rule, not the implementation. §11.3 |
+| **H-3** | **DISCHARGED — and the guard condition is the right one** | Original attack now refused, map intact. Guard removal → `1 failed` (`AT-N05e`). Forest probes confirm it is *better* than a root-only check. §11.4 |
+| M-1 | DISCHARGED | Hint now reads `↵ guarda`. Scanner is non-vacuous and reddens on reintroduction. §11.5 |
+| M-3 | DISCHARGED | `UNMIGRATED_SCREENS` now fenced by exact set equality + a local-`BINDINGS` check; fails closed. |
+| M-2, M-4, L-1 | DISCHARGED | Carried as `B-10`, `B-11`, `B-09` in `.dev-flow/BACKLOG.md`. |
+| M-5, M-6, M-7, L-2 | DISCHARGED | §11.6 |
+| L-3, L-4 | **STILL STALE** | §11.6 |
+| **new L-7** | **NEW (LOW)** | An inert probe, found on the author's own invitation. §11.5 |
+
+## 11.2 · H-1 — the pairing table is right, but too narrow *(remains HIGH)*
+
+The fix is real and I want that on the record. `tests/test_key_dispatch.py::test_at_n03g` presses
+every one of the 25 map keys for real, with every map- and app-scope `action_*` replaced by a
+recorder, and asserts `fired == [binding.action]` — an exact identity, not a "something happened".
+That is a genuinely strong test, and it makes the destructive keys safe to press. The hand-written
+`EXPECTED_MAP_PAIRING` is the correct instinct: its value comes precisely from not being derived
+from the thing it checks, and the author's disclosure that the first attempt was a tautology is
+exactly the right kind of report.
+
+The answer to *"is there a rebinding it would not catch?"* is **yes, two classes.**
+
+### (a) The `label` field is unpinned — same deception, same data loss
+
+The table pins `key → action`. It does not pin `key → label`, and **the label is what the operator
+reads**. The file's own docstring defines the property as "every advertised key dispatches the
+action advertised **beside** it" — the thing beside it is the label.
+
+**Mutation** (`mapper/keymap.py`, actions left correct, only the two `label` fields swapped):
+
+```python
+KeyBinding("u", "u", "undo", "plegar rama", "node"),        # label was "deshacer"
+KeyBinding("z", "z", "collapse_branch", "deshacer", "view"), # label was "plegar rama"
+```
+
+**Result: `245 passed`.** The keybar, palette and help now render `u  plegar rama` and
+`z  deshacer`. An operator who wants to fold a branch presses `u` and **performs an undo**,
+reverting their last structural change. This is the identical operator-visible defect I filed as
+H-1, produced through the other field, with the same data-loss consequence.
+
+### (b) The table covers `map` scope only — 23 of 48 bindings are unpaired
+
+`EXPECTED_MAP_PAIRING` and the `test_at_n03g` parametrization are both built from
+`[b for b in KEYMAP if b.scope == SCOPE_MAP]`. The remaining scopes — home 11, repo 3, plug 1,
+import 2, palette 2, help 2, app 2 — have no pairing gate at all.
+
+**Mutation** (home scope):
+
+```python
+KeyBinding("r", "r", "quit",   "retomar último", "doors"),  # action was "resume"
+KeyBinding("q", "q", "resume", "salir",          "lista"),  # action was "quit"
+```
+
+**Result: `245 passed`.** On the home screen the operator reads `r  retomar último`, presses it,
+and **the application quits**; `q`, advertised as `salir`, resumes the last map. US-N03's promise is
+seat-wide — `AT-N03a` and `AT-N03f` both quantify over all eight scopes — so a pairing gate that
+stops at one scope leaves the promise unmet everywhere else.
+
+### What closes it
+
+One change, not two: replace the key→action table with a specification of the **whole seat** —
+`{(scope, key): (action, label, glyph)}` for all 48 bindings — and assert set equality against
+`KEYMAP`. That subsumes `EXPECTED_MAP_PAIRING`, pins the label and glyph, covers every scope, and
+keeps the property the author correctly identified: a deliberate rebinding must be written down in
+one place. `test_at_n03g`'s press-every-key arm can stay map-scoped; it is the *declaration* that
+needs to be total, not the pilot drive.
+
+## 11.3 · H-2 — discharged
+
+`tests/test_darkside.py` now has five direct tests for `plain()`. My mutation
+`_CONTROL_MAP = {0x1B: "…"}` reddens three of them:
+
+```
+FAILED test_plain_replaces_every_c0_control_except_tab_and_newline
+FAILED test_plain_replaces_del_and_every_c1_control
+FAILED test_plain_is_what_fit_and_hint_line_use
+```
+
+The tests iterate `range(0x00, 0x20)` and `range(0x7F, 0xA0)` — the ranges are the *rule*, so they
+cannot drift toward whatever the implementation happens to handle. They also pin the two
+preserved bytes (tab, newline), the non-string coercion path (`None`, `int`, `list` — the YAML
+shapes a sidecar really produces), literal markup preservation, and that `fit()` and `hint_line()`
+route through the helper rather than reimplementing it. Nothing further to ask for.
+
+## 11.4 · H-3 — discharged, and the guard is better than a root check
+
+My original attack, re-run: **no modal is offered** and the map is intact
+(`nodes: ['a','b','b1','root']`, `root_id: root`). Removing the
+`count >= len(self.graph.nodes)` guard reddens exactly `test_at_n05e_archiving_the_whole_map_is_refused`.
+
+`AT-N05e` asserts both directions — refusal *and* that a branch archive still removes exactly that
+branch — so code that refuses everything cannot pass it. That was the right way to write it.
+
+**On the author's question about the guard's condition and a forest.** I built a two-root forest
+(`r1 → c1`, `r2 → c2`, `root_id = r1`) and drove three cases:
+
+| Case | Action | Result |
+|---|---|---|
+| A | whole-map archive on a single-root tree | refused, no modal, map intact |
+| B | archive `r1`'s tree — the one **containing** `graph.root_id` (2 of 4 nodes) | allowed; survivors `['c2','r2']`, `root_id` **reassigned to `r2`**, cursor valid |
+| C | archive `r2`'s tree, then attempt `r1`'s | first allowed; **second refused**; final `['c1','r1']` |
+
+**`count >= len(self.graph.nodes)` is the correct condition, and a root-only check would have been
+wrong.** Case C is the proof: after `r2`'s tree is gone, archiving `r1` — which is *not* the
+`root_id` at that moment in a root-only reading, and in general need not be — would empty the map.
+The size-based guard catches it; a `cursor == root_id` guard would not have.
+
+Two supporting facts I verified rather than assumed: `_subtree_size` accumulates into a `seen` set
+(`app.py:1786-1794`), so `count` can never exceed `len(nodes)` and `>=` is exactly `==` plus
+defensiveness; and `_remove_subtree` already reassigns a removed `root_id` to a surviving node
+(`app.py:1809-1810`), which is why case B leaves a valid head instead of a dangling one.
+
+*Nit, not a finding:* the confirmation still reads "y sus 1 descendientes" for a single child.
+
+## 11.5 · The inert-probe hunt the author asked for — one found
+
+**M-1's own scanner is sound.** I checked it three ways rather than reading it: its positive control
+is real (`pattern.findall('press ctrl+p now') == ['ctrl+p']`); the scan is **non-vacuous in
+practice** — walking `app.py`'s 621 string literals it finds `['ctrl+p']`, a genuinely bound chord,
+so the comparison has something to compare; and reintroducing the defect
+(`"ctrl+s guarda"` back into `_goto_gap`) **reddens it**. The repair holds.
+
+*Scope note (LOW):* it scans `mapper/app.py` only. Chord-shaped prose in
+`mapper/widgets/**` or `mapper/screens/**` is not covered, and `hint_line`'s key argument can be
+passed from any of them.
+
+### New · L-7 · `test_tab_binding_exceptions_are_still_real` can be inert
+
+I swept every test file for the vacuous-loop shape — a test whose assertions all live inside a loop
+with no non-emptiness fence outside it. Five hits; three loop over literal ranges or tuples and are
+safe. One is not:
+
+`tests/test_keymap.py:193` filters classes with `if cls.__name__ not in TAB_BINDING_EXCEPTIONS:
+continue`, then asserts inside the loop. If no class matches, the body never runs and the test
+passes having asserted nothing — while its docstring claims it fences the list.
+
+**Proved, not argued.** Pointing the constant at classes that do not exist:
+
+```python
+TAB_BINDING_EXCEPTIONS = ("GhostScreenA", "GhostScreenB")
+```
+→ `test_tab_binding_exceptions_are_still_real`: **`1 passed`**, vacuously.
+
+**Severity LOW, because the pair is sound:** on the full suite that same mutation reddens the
+sibling `test_llr_n06_5_no_screen_binds_tab_outside_the_recorded_exceptions` (the two real screens
+now bind `tab` without a licence). So no coverage is actually lost. But the individual probe cannot
+produce a non-empty result under a stale constant, which is the class the author asked me to
+report. Fix is one line, the same one M-1's scanner already got: `assert found, "…"` before the
+loop.
+
+**Control-byte re-scan.** I scanned **all 128 tracked files** byte-by-byte (a superset of the
+author's 89): **zero** bytes `< 0x20` other than tab/LF/CR. The claim holds.
+
+## 11.6 · Documentation
+
+**Discharged:** M-5 — the BLUF now reads "six defects that already existed … plus one
+self-inflicted", and `executive-summary.md:38` matches in Spanish. M-6 — `MAN-01` now appears at
+`executive-summary.md:75-76`, correctly as *inspección … no por prueba*. M-7 — the lens row now
+distinguishes passes that wrote artifacts from passes reported inline, so nothing rests on files
+that do not exist. L-2 — the ledger reads `88 → 245 (−6 superseded, +163 added)`; 88 − 6 + 163 = 245. ✅
+
+**Still stale (LOW, uncorrected):**
+
+- **L-4** — `05-postmortem.md:132` still reads "Increments 2, 3 and 4 touched **6, 5 and 5** source
+  files against a cap of 4." Measured from the commits: Inc-2 (`df74da1`) **6**, Inc-3 (`0b69fe2`)
+  **6**, Inc-4 (`f37d824`) **5**. Actual is **6, 6 and 5**. This is the batch's own budget-breach
+  disclosure still under-reporting one of its breaches — the one section where the number is the
+  whole point.
+- **L-3** — `05-postmortem.md:242` still reads "committed across **7 commits**". The branch now has
+  **10** commits, **9** touching `mapper/**` or `tests/**`. Line 179's "9 commits" was right when
+  written and is now off by one too.
+- Minor: line 183 lists the PR gate among passes that "reported inline" and also among those that
+  "wrote artifacts under `.dev-flow/`" — it wrote this file.
+
+## 11.7 · Flakiness
+
+Three consecutive full runs on `42d96e2`, executed by me: **`245 passed`** each, no failures, no
+errors, no non-determinism. Combined with pass 1's seven runs, the gate has now been run ten times
+across two trees without a single flake.
+
+## 11.8 · Pass-2 discipline
+
+Six mutations applied and reverted in this pass: two on `mapper/keymap.py` (`u`/`z` action swap,
+`u`/`z` label swap, home `r`/`q` swap), one on `mapper/darkside.py` (`_CONTROL_MAP`), and two on
+`mapper/app.py` (guard removal, `ctrl+s` reintroduction). After each, the file was restored from
+`git cat-file blob HEAD:<path>` and verified against a pre-pass baseline:
+
+```
+mapper/keymap.py   5da6a934a56b635e8dca0c4cce0fe1f70741e6da7ad30fd896aed7c60e29d3fe  OK
+mapper/darkside.py 29c302469d96ebeff03d1cead8ca4bb7f6206193cc825c1df6f05e7b50c2d8b4  OK
+mapper/app.py      4ec313aa344a5da90119470dfb5829fd977bf00b10306d4a53bb450f65e4a7d4  OK
+```
+
+`__pycache__` purged. Nothing under `prototypes/` read or written. This file is still the only one
+this gate has created; the pass-2 edits are to this file alone.
