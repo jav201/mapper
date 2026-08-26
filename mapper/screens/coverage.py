@@ -64,11 +64,13 @@ class CoverageScreen(ModalScreen[str | None]):
         super().__init__()
         self.graph = graph
         self.map_id = map_id
+        self.complete = False
 
     def compose(self) -> ComposeResult:
         yield Vertical(
             Static("cobertura incompleta", id="coverage-title"),
             DataTable(id="coverage-table", cursor_type="row"),
+            Static("", id="coverage-empty"),
             id="coverage-dialog",
         )
 
@@ -88,12 +90,16 @@ class CoverageScreen(ModalScreen[str | None]):
                 key=node.id,
             )
 
-        if table.row_count == 0:
-            table.add_row(
-                Text.assemble(("▐", darkside.MUT)),
-                "(todos los campos requeridos están completos)",
-                Text(""),
-                Text(""),
+        self.complete = table.row_count == 0
+        if self.complete:
+            # Not a selectable row: pressing enter on a fake row used to dismiss
+            # the report in silence, which reads as "nothing happened".
+            table.display = False
+            self.query_one("#coverage-empty", Static).update(
+                Text.assemble(
+                    ("  todo completo. ", f"bold {darkside.INK}"),
+                    ("no falta ningún campo requerido.", darkside.MUT),
+                )
             )
 
     def _incomplete_nodes(self) -> list:
@@ -121,7 +127,13 @@ class CoverageScreen(ModalScreen[str | None]):
 
     @staticmethod
     def _missing_keys(ficha, schema: list[SchemaField]) -> list[str]:
-        return [f.key for f in schema if f.required and not ficha.fields.get(f.key)]
+        """Human labels for the fields this ficha is missing.
+
+        Consumes `Ficha.missing_required` — the model owns that definition, so the
+        report, the rail's lattice and the worklist cannot disagree about what
+        counts as complete (LLR-N01.9).  Shows `SchemaField.label`, never the raw
+        key letter: a report that says "D" tells the operator nothing."""
+        return [f.label for f in ficha.missing_required(schema)]
 
     def action_select(self) -> None:
         table = self.query_one("#coverage-table", DataTable)
