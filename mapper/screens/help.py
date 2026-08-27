@@ -6,7 +6,7 @@ from itertools import groupby
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical
+from textual.containers import Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Static
 
@@ -35,10 +35,21 @@ class HelpScreen(ModalScreen[None]):
     }
     #help-dialog {
         width: 80;
-        height: auto;
+        height: 90%;
         max-height: 28;
         background: #121212;
         padding: 1 2;
+    }
+    /* S-08 (LLR-R05.1).  The map scope carries 27 bindings in 5 groups, which the
+       body renders as 40 rows — more than `max-height` shows at any terminal
+       size.  Before this rule the surplus was clipped away with no way to reach
+       it, and the whole 11-member `view` group fell off the bottom in silence.
+       The BINDINGS scroll while the title does not: the title is the one row
+       that tells the operator which scope they are reading. */
+    #help-bindings {
+        height: 1fr;
+        overflow-y: auto;
+        scrollbar-size-vertical: 1;
     }
     #help-title {
         text-style: bold;
@@ -59,7 +70,10 @@ class HelpScreen(ModalScreen[None]):
     def compose(self) -> ComposeResult:
         yield Vertical(
             Static(f"atajos · {self.scope}", id="help-title"),
-            Static(self._render_keymap(), id="help-content"),
+            VerticalScroll(
+                Static(self._render_keymap(), id="help-content"),
+                id="help-bindings",
+            ),
             id="help-dialog",
         )
 

@@ -23,3 +23,11 @@ mapper = "mapper.app:main"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+# The depth-5000 acceptance nodes build and draw a 25 MB picture; measured, they
+# are 16 s of the suite's wall clock. They are deselected by default so the gate
+# stays fast, and they are NOT optional: CI must run `-m slow` as its own lane,
+# because that lane is where HLR-R02's acceptance actually lives.
+addopts = "-m 'not slow'"
+markers = [
+    "slow: depth-5000 acceptance; deselected by default, run with -m slow",
+]

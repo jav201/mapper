@@ -33,10 +33,16 @@ class Ficha:
     attachments: list[Attachment] = field(default_factory=list)
 
     def required_coverage(self, schema: list[SchemaField]) -> tuple[int, int]:
-        """(present required fields, total required fields)."""
+        """(present required fields, total required fields).
+
+        Counts by asking `missing_required`, which the docstring below calls the
+        single owner of "what is missing".  It re-derived that judgement here
+        with a bare truthiness test, so the two disagreed on a whitespace-only
+        value: the worklist called it missing while the coverage figure counted
+        it documented — the quiet inflation US-R03 exists to stop (A-9).
+        """
         req = [f for f in schema if f.required]
-        have = sum(1 for f in req if self.fields.get(f.key))
-        return have, len(req)
+        return len(req) - len(self.missing_required(schema)), len(req)
 
     def missing_required(self, schema: list[SchemaField]) -> list[SchemaField]:
         """Required fields this ficha has not filled, in schema order.
@@ -89,32 +95,44 @@ class Graph:
     root_id: str | None = None
     schema: list[SchemaField] = field(default_factory=list)
     documents: dict[str, Document] = field(default_factory=dict)
+    load_warnings: list[str] = field(default_factory=list)
 
     def document_names(self) -> list[str]:
         """Return all registered document names."""
         return sorted(self.documents.keys())
 
     def resolve_document(self, name: str, node: Node) -> Document:
-        """Return a document with missing local tags filled from the parent node's same-named document, if any."""
+        """Return the named document, with its tag maps copied so callers cannot alias them.
+
+        **There is no parent traversal, and its absence is the repair (A-3).**
+        `documents` is graph-level and keyed by name — there is no per-node
+        document store — so the shipped recursion walked the parent chain
+        rebuilding the *same* mapping at every level and returned what it started
+        with.  It was a no-op costing one stack frame per level, which is why a
+        depth-5000 map raised `RecursionError` inside `FactoryScreen._preview`,
+        outside every guard.
+
+        Increment 3 first replaced that recursion with an equivalent *iterative*
+        fold.  Review finding F1 established the fold was equally dead: an
+        implementation with the whole walk deleted is indistinguishable from it
+        over every graph — 173 comparisons, 0 mismatches — so the node certifying
+        the traversal could not fail, and the cycle guard it needed had a hang as
+        its only regression mode.  The walk is therefore removed rather than
+        merely de-recursed: a bounded no-op is still a no-op, and it was carrying
+        a guard nothing could test.
+
+        `node` stays in the signature because `FactoryScreen._preview` and the
+        document surface both pass it, and because per-node documents are the
+        shape this function would take were that store ever added.
+        """
         doc = self.documents.get(name)
         if doc is None:
             return Document(name=name, source="")
-        merged_tags = dict(doc.tags)
-        merged_inherited = dict(doc.inherited)
-        parent_id = self.parent_of(node.id)
-        if parent_id is not None:
-            parent = self.nodes.get(parent_id)
-            if parent is not None:
-                parent_doc = self.resolve_document(name, parent)
-                for key, value in parent_doc.tags.items():
-                    if key not in merged_tags:
-                        merged_tags[key] = value
-                        merged_inherited[key] = value
         return Document(
             name=doc.name,
             source=doc.source,
-            tags=merged_tags,
-            inherited=merged_inherited,
+            tags=dict(doc.tags),
+            inherited=dict(doc.inherited),
             template=doc.template,
             path=doc.path,
             kind=doc.kind,
@@ -135,6 +153,43 @@ class Graph:
         for e in self.edges:
             if e.child_id == node_id:
                 return e.parent_id
+        return None
+
+    def find_cycle(self) -> list[str] | None:
+        """Return one directed cycle's node ids, entry node repeated last.
+
+        Iterative on purpose: the edge set comes from a file, so its depth is
+        whatever the file says and recursion would trade one crash for another.
+        A node reached twice down *different* branches is a diamond, not a
+        cycle, so only an edge back into the currently active path counts.
+        """
+        children: dict[str, list[str]] = {}
+        for edge in self.edges:
+            children.setdefault(edge.parent_id, []).append(edge.child_id)
+
+        starts = list(self.nodes) + [p for p in children if p not in self.nodes]
+        done: set[str] = set()
+        for start in starts:
+            if start in done:
+                continue
+            path = [start]
+            on_path = {start}
+            stack = [iter(children.get(start, ()))]
+            while stack:
+                for child in stack[-1]:
+                    if child in on_path:
+                        return path[path.index(child):] + [child]
+                    if child in done:
+                        continue
+                    path.append(child)
+                    on_path.add(child)
+                    stack.append(iter(children.get(child, ())))
+                    break
+                else:
+                    stack.pop()
+                    finished = path.pop()
+                    on_path.discard(finished)
+                    done.add(finished)
         return None
 
     def focus(self, node_id: str) -> Graph:

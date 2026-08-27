@@ -157,34 +157,107 @@ class FactoryScreen(Screen):
         filled = self._depth(self.nav.cursor or "")
         return darkside.step_meter(filled, total)
 
+    def _parent_index(self) -> dict[str, str]:
+        """First parent per node, built once. `parent_of` rescans every edge."""
+        index: dict[str, str] = {}
+        for edge in self.graph.edges:
+            index.setdefault(edge.child_id, edge.parent_id)
+        return index
+
     def _depth(self, nid: str) -> int:
+        """Steps to the root along the parent chain.
+
+        A cycle makes depth undefined, and the shipped loop answered one by
+        never returning.  Depth here is a progress reading for the step meter,
+        not the picture, so a cyclic chain is answered with its acyclic prefix
+        instead of with a hang.
+        """
         depth = 0
         current = nid
+        seen = {nid}
         while True:
             parent = self.graph.parent_of(current)
-            if parent is None:
+            if parent is None or parent in seen:
                 return depth
             depth += 1
+            seen.add(parent)
             current = parent
 
     def _max_depth(self) -> int:
-        return max((self._depth(nid) for nid in self.graph.nodes), default=0)
+        """The deepest node, in one pass with the chains memoised.
+
+        The shipped version called `_depth` per node and `_depth` called
+        `parent_of` per step, each of which rescans every edge.  Measured on a
+        chain: 0.004 s at depth 100, 1.717 s at depth 800.
+        """
+        parent = self._parent_index()
+        depths: dict[str, int] = {}
+        deepest = 0
+        for start in self.graph.nodes:
+            chain: list[str] = []
+            current: str | None = start
+            seen: set[str] = set()
+            while current is not None and current not in depths and current not in seen:
+                seen.add(current)
+                chain.append(current)
+                current = parent.get(current)
+            # A chain that ran off the top is rooted at 0; one that ran into an
+            # already-measured node continues from it; one that closed on
+            # itself is a cycle, whose prefix is measured from 0 as `_depth`
+            # does.
+            base = depths[current] if current is not None and current in depths else -1
+            for offset, nid in enumerate(reversed(chain)):
+                depths[nid] = base + 1 + offset
+            if chain:
+                deepest = max(deepest, depths[chain[0]])
+        return deepest
 
     def _tree_lines(self) -> Text:
+        """Never propagates: `_refresh` runs from `on_mount`, outside any guard."""
+        try:
+            return self._tree_text()
+        except ValueError:
+            return Text.assemble(
+                ("no se puede dibujar: el mapa tiene un ciclo", darkside.ALERT)
+            )
+
+    def _tree_text(self) -> Text:
         lines: list[tuple[str, str]] = []
         block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
-
-        def walk(nid: str, depth: int) -> None:
-            node = self.graph.nodes[nid]
-            prefix = "  " * depth + "▸ "
-            selected = nid == self.nav.cursor
-            title = escape(node.ficha.title or nid)
-            lines.append((f"{prefix}{title}\n", block if selected else darkside.INK))
-            for cid in self.graph.children_of(nid):
-                walk(cid, depth + 1)
+        index: dict[str, list[str]] = {}
+        for edge in self.graph.edges:
+            index.setdefault(edge.parent_id, []).append(edge.child_id)
 
         if self.graph.root_id is not None:
-            walk(self.graph.root_id, 0)
+            # `visiting` is the active path: iterative alone turns the
+            # recursion's bounded crash into an unbounded hang.
+            visiting: set[str] = set()
+            stack: list[tuple[str, int, bool]] = [(self.graph.root_id, 0, False)]
+            while stack:
+                nid, depth, leaving = stack.pop()
+                if leaving:
+                    visiting.discard(nid)
+                    continue
+                if nid in visiting:
+                    raise ValueError(f"cycle through {nid}: the graph is not a tree")
+                node = self.graph.nodes[nid]
+                prefix = "  " * depth + "▸ "
+                selected = nid == self.nav.cursor
+                # `darkside.plain`, not `escape`: this string goes into a `Text`
+                # with an explicit style, and `Text` does not parse markup — so
+                # `escape` only prints visible backslashes while leaving the
+                # ANSI/OSC control bytes that `_CONTROL_MAP` exists to strip.  The
+                # rail already coerces the same file-derived titles this way; the
+                # two files disagreed about one threat.  (Increment 2b review, F4.)
+                title = darkside.plain(node.ficha.title or nid)
+                lines.append((f"{prefix}{title}\n", block if selected else darkside.INK))
+                children = index.get(nid)
+                if not children:
+                    continue
+                visiting.add(nid)
+                stack.append((nid, depth, True))
+                # Reversed, so the LIFO stack still emits left to right.
+                stack.extend((cid, depth + 1, False) for cid in reversed(children))
         return Text.assemble(*lines)
 
     def _is_office(self, doc: Document) -> bool:
@@ -347,7 +420,7 @@ class FactoryScreen(Screen):
                 return
             source = Path(path_str).expanduser()
             if not source.exists():
-                self.notify(f"archivo no encontrado: {source}", severity="error")
+                self.notify(f"archivo no encontrado: {source}", severity="error", markup=False)
                 return
             kind = source.suffix.lower().lstrip(".")
             if kind not in {"docx", "pptx", "xlsx"}:
@@ -368,7 +441,7 @@ class FactoryScreen(Screen):
             )
             self._persist()
             self._refresh()
-            self.notify(f"plantilla importada: {rel}")
+            self.notify(f"plantilla importada: {rel}", markup=False)
 
         self.app.push_screen(
             _PromptScreen("ruta del archivo office", "/ruta/a/plantilla.docx"),
@@ -392,9 +465,9 @@ class FactoryScreen(Screen):
         target = store.workspace / f"{self.document_name}-{node.id}{suffix}"
         try:
             office.resolve(path, doc.tags, target)
-            self.notify(f"generado: {target}")
+            self.notify(f"generado: {target}", markup=False)
         except Exception as exc:
-            self.notify(f"no se pudo generar: {exc}", severity="error")
+            self.notify(f"no se pudo generar: {exc}", severity="error", markup=False)
 
     def action_start_node(self) -> None:
         """Return to the node that was selected when the factory opened."""

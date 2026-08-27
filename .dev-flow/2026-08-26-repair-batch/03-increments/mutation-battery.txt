@@ -1,0 +1,137 @@
+ANCHORS: all 14 arms + 2 second-anchors matched exactly once, pre-battery
+BASELINE: 356 nodes resolved, 356 passed, COMPLETED, 60.4s
+
+N1 [deletion] rail.py: replace _rows's stack loop with a self-call per child
+  run: COMPLETED in 62.8s (bound 600s); 356 nodes resolved, 12 reddened, 0 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_at_r16_a_traversal_never_nests_deeper_than_the_declared_call_depth[rail.render]
+    RED  tests/test_repair_depth.py::test_at_r16_a_traversal_never_nests_deeper_than_the_declared_call_depth[rail.visible_rows]
+    RED  tests/test_repair_depth.py::test_at_r16_depth_safety_does_not_depend_on_the_recursion_limit[rail.render]
+    RED  tests/test_repair_depth.py::test_at_r16_depth_safety_does_not_depend_on_the_recursion_limit[rail.visible_rows]
+    RED  tests/test_repair_depth.py::test_at_r16_the_rail_survives_a_depth_5000_map_through_the_composed_screen
+    RED  tests/test_repair_depth.py::test_tc_r29_no_recursive_graph_traversal_outside_the_deferred_member
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[self_loop_below]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[self_loop_below]
+
+N2 [plausible-weaker] rail.py: N1 plus a recursion-limit raise inside visible_rows
+  run: COMPLETED in 666.1s (bound 1500s); 356 nodes resolved, 10 reddened, 0 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_at_r16_a_traversal_never_nests_deeper_than_the_declared_call_depth[rail.render]
+    RED  tests/test_repair_depth.py::test_at_r16_a_traversal_never_nests_deeper_than_the_declared_call_depth[rail.visible_rows]
+    RED  tests/test_repair_depth.py::test_at_r16_depth_safety_does_not_depend_on_the_recursion_limit[rail.render]
+    RED  tests/test_repair_depth.py::test_tc_r29_no_recursive_graph_traversal_outside_the_deferred_member
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[self_loop_below]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[self_loop_below]
+
+N3 [deletion] rail.py: delete _rows's active-path guard
+  run: COMPLETED in 69.2s (bound 240s); 350 nodes resolved, 3 reddened, 6 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[self_loop_below]
+
+N4 [deletion] rail.py: delete _missing_map's active-path guard
+  run: COMPLETED in 71.5s (bound 240s); 350 nodes resolved, 2 reddened, 6 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_in_a_disconnected_component]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+
+N5 [plausible-weaker] rail.py: drop _missing_map's multi-parent check, always sum post-order
+  run: COMPLETED in 64.7s (bound 600s); 356 nodes resolved, 1 reddened, 0 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_tc_r30_the_memoised_pass_declines_a_shape_it_cannot_answer
+
+N6 [plausible-weaker] rail.py: drop the order reversal on the child push in _rows
+  run: COMPLETED in 69.0s (bound 600s); 356 nodes resolved, 10 reddened, 0 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_rail.py::test_rail_collapses_a_branch
+    RED  tests/test_rail.py::test_rail_lists_the_tree_and_counts_missing_per_branch
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size0]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size1]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size2]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed0]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed2]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed3]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed4]
+    RED  tests/test_repair_depth.py::test_tc_r30_visible_rows_agrees_with_the_shipped_recursive_implementation
+
+N7 [plausible-weaker] rail.py: lower the indent cap from RAIL_WIDTH to 1
+  run: COMPLETED in 62.9s (bound 600s); 356 nodes resolved, 6 reddened, 0 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size0]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size1]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size2]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed0]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed2]
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed3]
+
+N8 [deletion] rail.py: render propagates instead of painting the notice
+  run: COMPLETED in 63.3s (bound 600s); 356 nodes resolved, 3 reddened, 0 unreported
+  restore rail.py: b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> b2202db31412a1d89016a00bb3621395424506691edf213f5d13548880761aed -> True
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating[self_loop_below]
+
+N9 [deletion] factory.py: replace _tree_text's stack loop with a self-call per child
+  run: COMPLETED in 57.0s (bound 600s); 356 nodes resolved, 10 reddened, 0 unreported
+  restore factory.py: 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> True
+    RED  tests/test_repair_depth.py::test_at_r16_a_traversal_never_nests_deeper_than_the_declared_call_depth[factory._tree_lines]
+    RED  tests/test_repair_depth.py::test_at_r16_depth_safety_does_not_depend_on_the_recursion_limit[factory._tree_lines]
+    RED  tests/test_repair_depth.py::test_at_r16_the_factory_tree_survives_a_depth_5000_map
+    RED  tests/test_repair_depth.py::test_tc_r29_no_recursive_graph_traversal_outside_the_deferred_member
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[self_loop_below]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating[self_loop_below]
+
+N10 [plausible-weaker] factory.py: N9 plus a recursion-limit raise inside _tree_text
+  run: COMPLETED in 1291.5s (bound 1500s); 356 nodes resolved, 8 reddened, 0 unreported
+  restore factory.py: 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> True
+    RED  tests/test_repair_depth.py::test_at_r16_a_traversal_never_nests_deeper_than_the_declared_call_depth[factory._tree_lines]
+    RED  tests/test_repair_depth.py::test_tc_r29_no_recursive_graph_traversal_outside_the_deferred_member
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[self_loop_below]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating[self_loop_below]
+
+N11 [deletion] factory.py: delete _tree_text's active-path guard
+  run: COMPLETED in 59.0s (bound 240s); 350 nodes resolved, 3 reddened, 6 unreported
+  restore factory.py: 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> True
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[cycle_off_root]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[self_loop_below]
+
+N12 [deletion] factory.py: restore _depth's unguarded parent-chain loop
+  run: COMPLETED in 145.6s (bound 240s); 350 nodes resolved, 1 reddened, 6 unreported
+  restore factory.py: 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> True
+    RED  tests/test_repair_depth.py::test_tc_r32_every_graph_touching_method_terminates_on_a_cyclic_graph[entry_in_cycle]
+
+N13 [plausible-weaker] factory.py: _max_depth answers with the node count
+  run: COMPLETED in 55.7s (bound 600s); 356 nodes resolved, 2 reddened, 0 unreported
+  restore factory.py: 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> 6a3e82909fe8781e1fbd12ccbd119bba9730df505f9ae6fb8a2390b70cc2dba0 -> True
+    RED  tests/test_repair_depth.py::test_at_r16_the_factory_tree_survives_a_depth_5000_map
+    RED  tests/test_repair_depth.py::test_tc_r31_max_depth_agrees_with_the_shipped_implementation
+
+N14 [plausible-weaker] test file: revert the probe to increment 2's self-name-only predicate
+  run: COMPLETED in 55.6s (bound 600s); 356 nodes resolved, 1 reddened, 0 unreported
+  restore test_repair_depth.py: 3be0c8dda5b9006e5a4e377310b35e769cda06ea7b37cfe3f6339aee8e337bde -> 3be0c8dda5b9006e5a4e377310b35e769cda06ea7b37cfe3f6339aee8e337bde -> True
+    RED  tests/test_repair_depth.py::test_tc_r10_the_ast_derivation_finds_the_functions_it_is_supposed_to_find
+
+ANCHORS: all matched exactly once, post-battery
+AFTER THE BATTERY: 356 nodes resolved, 356 passed, COMPLETED
+INERT ARMS: none
+FAILED RESTORES: none
+
+[exited with code 0]
