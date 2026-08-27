@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,45 @@ from .model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
 
 class MapStoreError(Exception):
     pass
+
+
+def _text_attributes() -> tuple[str, ...]:
+    """The `Ficha` attributes the model declares as text, derived from the model.
+
+    HLR-R03 (amendment A-7) requires this set to come from `Ficha`'s own
+    annotations rather than be named in the requirement or here.  A hand-listed
+    set repairs the members that break today and leaves their siblings — which is
+    why `state` is in this set even though no consumer joins it.
+    """
+    return tuple(
+        name
+        for name, spec in Ficha.__dataclass_fields__.items()
+        if spec.type in ("str", str)
+    )
+
+
+# `bool` is a subclass of `int`; it is spelled out for the reader, not the check.
+_SCALARS = (str, int, float, bool)
+
+
+def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
+    """Return `value` as text, or `""` when it cannot faithfully become text.
+
+    Scalars coerce (LLR-R03.1); containers are refused and recorded
+    (LLR-R03.2).  A container must NOT coerce: `str({})` is `"{}"`, a truthy
+    string, so `coverage()` would go on counting the malformed field as
+    documented and the miscount would survive its own fix.
+    """
+    if isinstance(value, str):
+        return value
+    if value is None:
+        return ""
+    if isinstance(value, _SCALARS):
+        return str(value)
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    graph.load_warnings.append(f"campo ilegible: {node_id}.{key}")
+    return ""
 
 
 TEMPLATES: dict[str, dict[str, Any]] = {
@@ -183,12 +223,22 @@ class MapStore:
             if nid not in graph.nodes:
                 graph.add_node(Node(id=nid))
             node = graph.nodes[nid]
+            text_attrs = _text_attributes()
+            raw_fields = ndata.get("fields", {})
+            if not isinstance(raw_fields, dict):
+                # LLR-R03.5: a malformed field never denies the map.  A non-dict
+                # `fields` is a hand-edited shape `_build_sidecar` cannot produce.
+                graph.load_warnings.append(f"campo ilegible: {nid}.fields")
+                raw_fields = {}
             node.ficha = Ficha(
-                title=ndata.get("title", ""),
-                state=ndata.get("state", ""),
-                meta=ndata.get("meta", ""),
-                notes=ndata.get("notes", ""),
-                fields=ndata.get("fields", {}),
+                **{
+                    attr: _coerce_field(graph, nid, attr, ndata.get(attr, ""))
+                    for attr in text_attrs
+                },
+                fields={
+                    key: _coerce_field(graph, nid, key, value)
+                    for key, value in raw_fields.items()
+                },
                 attachments=[
                     Attachment(kind=a["kind"], path=a["path"], caption=a.get("caption", ""))
                     for a in ndata.get("attachments", [])
@@ -203,8 +253,32 @@ class MapStore:
             raise MapStoreError(f"Map not found: {mmd_path}")
         mmd_text = mmd_path.read_text(encoding="utf-8")
         yml_text = yml_path.read_text(encoding="utf-8") if yml_path.exists() else "{}"
-        sidecar = yaml.safe_load(yml_text) or {}
-        graph = self._graph_from_sidecar(mmd_text, sidecar)
+        try:
+            sidecar = yaml.safe_load(yml_text) or {}
+        except (yaml.YAMLError, ValueError) as exc:
+            # `ValueError` is not redundant beside `YAMLError`: PyYAML's own int
+            # constructor calls `int(token)`, and CPython caps integer parsing at
+            # `sys.get_int_max_str_digits()` (4300).  A sidecar field with more
+            # digits than that raises a BARE ValueError from inside the parser —
+            # before any field-level code runs — so the coercion ladder never
+            # sees it and cannot defend against it.
+            #
+            # This is REFUSAL, not repair: the map is still denied, which is
+            # `F-M5`'s shape and out of this batch's fence.  What changes is that
+            # the refusal is typed, Spanish, and names the file, so it reaches the
+            # operator through the same sink as every other load failure instead
+            # of escaping as an untyped ValueError.
+            raise MapStoreError(
+                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible"
+            ) from exc
+        from .mermaid import CYCLE_ARROW, MermaidError
+
+        try:
+            graph = self._graph_from_sidecar(mmd_text, sidecar)
+        except MermaidError as exc:
+            raise MapStoreError(
+                f"el mapa tiene un ciclo: {CYCLE_ARROW.join(exc.cycle)}"
+            ) from exc
         self._reindex(map_id, mmd_text, yml_text, graph)
         return graph
 
@@ -217,7 +291,17 @@ class MapStore:
     def save(self, map_id: str, graph: Graph) -> None:
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
-        from .mermaid import dump
+        from .mermaid import CYCLE_ARROW, dump
+
+        # LLR-R01.5 (A-2): never write what this store's own read side refuses.
+        # Increment 1 made `load` reject a cycle; without the symmetric refusal
+        # here, `action_save` persists a cyclic preview graph and the very next
+        # load — the one `action_save` itself triggers — raises, leaving a file
+        # listed with 0 nodes and no in-app route to repair it.  On `master` that
+        # file at least loaded, so the asymmetry was worse than the defect.
+        cycle = graph.find_cycle()
+        if cycle is not None:
+            raise MapStoreError(f"el mapa tiene un ciclo: {CYCLE_ARROW.join(cycle)}")
 
         mmd_text = dump(graph)
         sidecar = self._build_sidecar(graph)

@@ -439,6 +439,31 @@ class HomeScreen(Screen):
     def on_mount(self) -> None:
         store: MapStore = self.app.store  # type: ignore[attr-defined]
 
+        # The sala loads every map in the workspace, so one refusable map must
+        # cost a notice rather than the screen.  Scoped to the sink: any
+        # exception from a load, not only the types this batch knows about.
+        broken: list[str] = []
+
+        def load_or_notice(name: str) -> Graph | None:
+            try:
+                graph = store.load(name)
+            except Exception as exc:
+                if name not in broken:
+                    broken.append(name)
+                    self.notify(
+                        f"no se pudo cargar {darkside.plain(name)}: {darkside.plain(str(exc))}",
+                        severity="error",
+                        markup=False,
+                    )
+                return None
+            if graph.load_warnings:
+                self.notify(
+                    f"{darkside.plain(name)}: {darkside.plain('; '.join(graph.load_warnings))}",
+                    severity="warning",
+                    markup=False,
+                )
+            return graph
+
         # Identity row
         identity = self.query_one("#home-identity", Static)
         glyph, _ = darkside.moon(date.today())
@@ -455,18 +480,17 @@ class HomeScreen(Screen):
         # Prefer the last session map for the hero; fall back to most recent mmd.
         last_map, _ = store.last_session()
         if last_map:
-            try:
-                graph = store.load(last_map)
+            graph = load_or_notice(last_map)
+            if graph is not None:
                 hero_map = last_map
                 hero_metrics = self._map_metrics(graph)
-            except Exception:
-                pass
 
         if hero_map is None and mmd_files:
             hero_map = mmd_files[0].stem
-            try:
-                hero_metrics = self._map_metrics(store.load(hero_map))
-            except Exception:
+            graph = load_or_notice(hero_map)
+            if graph is not None:
+                hero_metrics = self._map_metrics(graph)
+            else:
                 hero_metrics = {"total": 0, "con_acta": 0, "sin_acta": 0, "vencen": 0, "coverage": 0}
 
         hero_box = self.query_one("#home-hero-box", GroupBox)
@@ -490,12 +514,9 @@ class HomeScreen(Screen):
         resume = self.query_one("#home-resume", Static)
         map_id, node_id = store.last_session()
         if map_id and node_id:
-            try:
-                graph = store.load(map_id)
-                node = graph.nodes.get(node_id)
-                node_name = node.ficha.title if node else node_id
-            except Exception:
-                node_name = node_id
+            graph = load_or_notice(map_id)
+            node = graph.nodes.get(node_id) if graph is not None else None
+            node_name = node.ficha.title if node else node_id
             resume.update(
                 Text.assemble(
                     (" ↩ retomar ", f"bold {darkside.GROUND} on {darkside.ACCENT}"),
@@ -536,12 +557,12 @@ class HomeScreen(Screen):
 
         for mmd in mmd_files:
             map_name = mmd.stem
-            try:
-                graph = store.load(map_name)
+            graph = load_or_notice(map_name)
+            if graph is not None:
                 kind = "legacy" if graph.schema else "concept"
                 nodos = str(len(graph.nodes))
                 docs = str(len(graph.documents))
-            except Exception:
+            else:
                 kind, nodos, docs = "concept", "0", "0"
             table.add_row(
                 escape(map_name),
@@ -623,7 +644,7 @@ class HomeScreen(Screen):
                 store.create_seed(name)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(f"no se pudo crear el mapa: {e}", severity="error")
+                self.notify(f"no se pudo crear el mapa: {e}", severity="error", markup=False)
 
         self.app.push_screen(ConstructScreen(), callback=on_name)
 
@@ -637,7 +658,7 @@ class HomeScreen(Screen):
                 store.create_from_template(name, template_id)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(f"no se pudo crear el mapa: {e}", severity="error")
+                self.notify(f"no se pudo crear el mapa: {e}", severity="error", markup=False)
 
         def on_template(template_id: str | None) -> None:
             if template_id is None:
@@ -658,12 +679,12 @@ class HomeScreen(Screen):
                 return
             path = Path(path_str).expanduser()
             if not path.exists():
-                self.notify(f"archivo no encontrado: {path}", severity="error")
+                self.notify(f"archivo no encontrado: {path}", severity="error", markup=False)
                 return
             try:
                 preview = preview_csv(path)
             except Exception as e:
-                self.notify(f"no se pudo leer CSV: {e}", severity="error")
+                self.notify(f"no se pudo leer CSV: {e}", severity="error", markup=False)
                 return
             self.app.push_screen(_ImportPreviewScreen(preview, path))
 
@@ -708,12 +729,22 @@ class _ImportPreviewScreen(Screen):
         canvas = self.query_one("#import-preview-canvas", Static)
         renderer = LayeredRenderer()
         size = self.size or self.app.size
-        text = renderer.render(
-            self.preview_graph,
-            selected_id=self.preview_graph.root_id,
-            w=max(20, size.width),
-            h=max(5, size.height - 10),
-        )
+        # Same sink class as MapScreen.refresh_canvas, and a live second door:
+        # a CSV whose `parent` column is circular builds a cyclic graph without
+        # ever passing through `mermaid.parse`, so the parser's refusal cannot
+        # reach it.  Measured — see increment-001 §1.
+        try:
+            text = renderer.render(
+                self.preview_graph,
+                selected_id=self.preview_graph.root_id,
+                w=max(20, size.width),
+                h=max(5, size.height - 10),
+            )
+        except Exception as exc:
+            text = darkside.Text.assemble(
+                (" no se pudo dibujar la vista previa\n\n", f"bold {darkside.INK}"),
+                (f" {darkside.plain(str(exc))}", darkside.MUT),
+            )
         canvas.update(text)
         pulse_cursor(canvas)
 
@@ -726,7 +757,7 @@ class _ImportPreviewScreen(Screen):
                 store.save(name, self.preview_graph)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(f"no se pudo guardar: {e}", severity="error")
+                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
 
         self.app.push_screen(
             _PromptScreen("guardar como", self.source_path.stem),
@@ -1019,12 +1050,12 @@ class RepoScreen(Screen):
         try:
             worker = self.fetch_graph()
             self.graph = await worker.wait()
-            self.notify(f"conectado: {len(self.graph.nodes)} nodos")
+            self.notify(f"conectado: {len(self.graph.nodes)} nodos", markup=False)
         except GitHubError as exc:
-            self.notify(str(exc), severity="error")
+            self.notify(str(exc), severity="error", markup=False)
             self.graph = Graph()
         except Exception as exc:
-            self.notify(f"error inesperado: {exc}", severity="error")
+            self.notify(f"error inesperado: {exc}", severity="error", markup=False)
             self.graph = Graph()
         self.loading = False
         self.nav = NavigationModel(self.graph)
@@ -1112,6 +1143,21 @@ class MapScreen(Screen):
         # cannot advertise a key the screen does not bind (US-N03).
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
+    def _notice_load_warnings(self, graph: Graph) -> None:
+        """Tell the operator which node and which field were unreadable.
+
+        LLR-R03.4.  The map still loaded (LLR-R03.5), so this is a notice and not
+        an error path; `darkside.plain` because the node id and the key both come
+        out of a file.
+        """
+        if not graph.load_warnings:
+            return
+        self.notify(
+            darkside.plain("; ".join(graph.load_warnings)),
+            severity="warning",
+            markup=False,
+        )
+
     def on_mount(self) -> None:
         self.store = self.app.store  # type: ignore[attr-defined]
         search = self.query_one("#search-input", Input)
@@ -1129,6 +1175,7 @@ class MapScreen(Screen):
             try:
                 self.base_graph = self.store.load(self.map_id)
                 self.graph = self.base_graph
+                self._notice_load_warnings(self.base_graph)
             except Exception as e:
                 self.notify(
                     f"error cargando mapa: {darkside.plain(str(e))}",
@@ -1298,14 +1345,23 @@ class MapScreen(Screen):
         # column beside it, so render to what is actually left.
         w = max(20, size.width - self._chrome_width())
         h = max(5, size.height - 8)
-        text = renderer.render(
-            self.graph,
-            selected_id=self.nav.cursor,
-            w=w,
-            h=h,
-            query=self.query_text,
-            diff=self.diff if self.diff_active else None,
-        )
+        # Any renderer failure is a drawing problem, not an application problem:
+        # this method runs inside the message pump, so an escape here kills the
+        # app.  Scoped to the sink, not to the exception types known today.
+        try:
+            text = renderer.render(
+                self.graph,
+                selected_id=self.nav.cursor,
+                w=w,
+                h=h,
+                query=self.query_text,
+                diff=self.diff if self.diff_active else None,
+            )
+        except Exception as exc:
+            text = darkside.Text.assemble(
+                (" no se pudo dibujar el mapa\n\n", f"bold {darkside.INK}"),
+                (f" {darkside.plain(str(exc))}", darkside.MUT),
+            )
         canvas.update(text)
         pulse_cursor(canvas)
 
@@ -1587,7 +1643,7 @@ class MapScreen(Screen):
         added = len(diff.added)
         removed = len(diff.removed)
         changed = len(diff.changed)
-        self.notify(f"diff: +{added} -{removed} ~{changed}")
+        self.notify(f"diff: +{added} -{removed} ~{changed}", markup=False)
 
     def action_coverage(self) -> None:
         def on_select(node_id: str | None) -> None:
@@ -1679,7 +1735,7 @@ class MapScreen(Screen):
             save_svg(text, path)
             self._event_toast("exportado", str(path))
         except Exception as e:
-            self.notify(f"exportación fallida: {e}", severity="error")
+            self.notify(f"exportación fallida: {e}", severity="error", markup=False)
 
     def _guard_focus_mutation(self) -> bool:
         """Return True if a structural mutation should proceed."""
@@ -1887,6 +1943,13 @@ class MapperApp(App):
     /* Variant A «taller»: canvas + inspector side by side.  Depth comes from the
        background step, never from a border — borders are reserved for modals. */
     #map-body { height: 1fr; }
+    /* S-07 (LLR-R04.1): without this rule the rail defaults to the full width of
+       #map-body, so the canvas collapses to 1 column and the inspector is laid
+       out entirely off-screen (measured at 140x45: rail x=0 w=140, inspector
+       x=141..177).  The 24 is a LITERAL and not an interpolation of
+       rail.RAIL_WIDTH on purpose: TC-R22 asserts the two agree, and a value the
+       stylesheet derived from the constant could never disagree with it. */
+    #map-rail { width: 24; height: 100%; }
     #map-canvas { width: 1fr; height: 100%; }
     #map-inspector {
         width: 36;
