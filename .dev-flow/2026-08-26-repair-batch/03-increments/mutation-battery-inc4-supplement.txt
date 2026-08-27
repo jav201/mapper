@@ -1,0 +1,76 @@
+==============================================================================
+INCREMENT 4 MUTATION BATTERY - SUPPLEMENT (L4/L5 re-aimed)
+repo    : C:\Users\jjgh8\Github\mapper
+harness : C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery4b.py   (OUTSIDE the repo it mutates)
+started : 2026-08-27 08:24:14
+==============================================================================
+
+--- BASELINE ---
+resolved : 425 nodes   (exit=0, 82.6s)
+tail     : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-19664' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-19664' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+OK: 425/425 resolved, all PASSED.
+
+------------------------------------------------------------------------------
+ARM L4b  [plausible-weaker]  help.py
+  proves: swap the scrolling container for a plain Vertical while KEEPING the explicit overflow-y rule. Expected GREEN: the #help-bindings rule overrides Vertical's `overflow: hidden hidden`, so the pane still scrolls. A green here PROVES the CSS rule is a real second guard rather than the redundancy L4 made it look like
+  mutation applied (hash moved off pristine): True
+  resolved: 425 (expected 425)   exit=0   96.5s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 0
+  *** INERT: arm L4b reddened NOTHING ***
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM L4c  [deletion]  help.py
+  proves: remove BOTH sources of scrolling at once — plain Vertical AND no overflow rule. This is S-08 itself restored, and it must redden
+  mutation applied (hash moved off pristine): True
+  resolved: 425 (expected 425)   exit=1   95.9s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-20350' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-20350' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 3
+    RED  tests/test_repair_layout.py::test_at_r12_pressing_help_presents_every_map_binding[size0]  -> FAILED
+    RED  tests/test_repair_layout.py::test_at_r12_pressing_help_presents_every_map_binding[size1]  -> FAILED
+    RED  tests/test_repair_layout.py::test_at_r12_pressing_help_presents_every_map_binding[size2]  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM L5b  [plausible-weaker]  help.py
+  proves: make today's 27 bindings FIT, so nothing ever needs to scroll — requirements section 4's declared arm, aimed this time at the declaration that actually sizes the dialog. Green now and silently re-broken by the next binding added; TC-R24's vacuity guard is the node that must catch it
+  mutation applied (hash moved off pristine): True
+  resolved: 425 (expected 425)   exit=1   83.6s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_layout.py::test_tc_r24_the_bindings_region_is_scrollable  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+==============================================================================
+SUMMARY
+==============================================================================
+arm   kind               file          RED  proves
+L4b   plausible-weaker   help.py         0  swap the scrolling container for a plain Vertical while KEEPING the ex
+L4c   deletion           help.py         3  remove BOTH sources of scrolling at once — plain Vertical AND no overf
+L5b   plausible-weaker   help.py         1  make today's 27 bindings FIT, so nothing ever needs to scroll — requir
+
+ARMS RUN        : 3
+INERT ARMS      : ['L4b']
+FAILED RESTORES : none
+TOTAL RED VERDICTS: 4
+
+--- POST-BATTERY SUITE ---
+resolved : 425   exit=0
+tail     : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+not passed: none
+
+--- FINAL FILE HASHES (pre-mutation vs on disk) ---
+  OK  help.py      832f6922cc76f317...50a89fde
+
+finished: 2026-08-27 08:31:39

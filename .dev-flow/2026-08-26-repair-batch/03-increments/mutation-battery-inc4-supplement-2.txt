@@ -1,0 +1,107 @@
+==============================================================================
+INCREMENT 4 MUTATION BATTERY - SUPPLEMENT 2 (F1 split clip, F2 re-run)
+repo    : C:\Users\jjgh8\Github\mapper
+harness : C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery4c.py   (OUTSIDE the repo it mutates)
+started : 2026-08-27 08:57:06
+==============================================================================
+
+--- BASELINE ---
+resolved : 427 nodes   (exit=0, 102.2s)
+tail     : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+OK: 427/427 resolved, all PASSED.
+
+------------------------------------------------------------------------------
+ARM L8a  [deletion]  test_repair_layout.py
+  proves: THE COLUMN CLIP ALONE — keep the row band, drop the x slice. The conjunct that matters: `cobertura` sits INSIDE the dialog's row band at y=11 and escapes only via the column slice, so an oracle clipped in y alone passes a fix that still hides a binding
+  mutation applied (hash moved off pristine): True
+  resolved: 427 (expected 427)   exit=1   93.5s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_layout.py::test_at_r14_the_oracle_is_clipped_to_the_help_dialog  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM L8b  [deletion]  test_repair_layout.py
+  proves: THE ROW CLIP ALONE — keep the x slice, drop the row band. This is the conjunct the original single arm was actually measuring
+  mutation applied (hash moved off pristine): True
+  resolved: 427 (expected 427)   exit=1   90.3s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_layout.py::test_at_r14_the_oracle_is_clipped_to_the_help_dialog  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM L5r  [plausible-weaker]  help.py
+  proves: L5 RE-RUN against TC-R36. The identical mutation that measured 0 RED in the first battery: raise max-height until today's 27 bindings fit. It grows the dialog 28 -> 40 rows at 140x45 and collapses the scrollable surplus 14 -> 2, and nothing asserted that until now
+  mutation applied (hash moved off pristine): True
+  resolved: 427 (expected 427)   exit=1   97.0s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-20077' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-20077' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 1
+    RED  tests/test_repair_layout.py::test_tc_r36_the_dialog_height_is_governed_by_a_named_declaration[cap-governs]  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+==============================================================================
+SUMMARY
+==============================================================================
+arm   kind               file          RED  proves
+L8a   deletion           test_repair_layout.py    1  THE COLUMN CLIP ALONE — keep the row band, drop the x slice. The conju
+L8b   deletion           test_repair_layout.py    1  THE ROW CLIP ALONE — keep the x slice, drop the row band. This is the 
+L5r   plausible-weaker   help.py         1  L5 RE-RUN against TC-R36. The identical mutation that measured 0 RED i
+
+ARMS RUN        : 3
+INERT ARMS      : none
+FAILED RESTORES : none
+TOTAL RED VERDICTS: 3
+
+--- POST-BATTERY SUITE ---
+resolved : 427   exit=1
+tail     : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-19806' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-19806' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+not passed: {'tests/test_repair_depth.py::test_at_r16b_the_factory_screen_survives_a_depth_5000_map_composed': 'FAILED'}
+
+--- FINAL FILE HASHES (pre-mutation vs on disk) ---
+  OK  test_repair_layout.py 7873847387709f51...6904b4c4
+  OK  help.py      832f6922cc76f317...50a89fde
+
+finished: 2026-08-27 09:05:24
+
+##############################################################################
+## ANNOTATION added at the batch close (merge-gate finding L-2).
+##
+## The POST-BATTERY SUITE above closes exit=1 with
+##   test_at_r16b_the_factory_screen_survives_a_depth_5000_map_composed FAILED
+## and the run does NOT apply the bounded solo re-run this harness applies to
+## exactly that node elsewhere (see mutation-battery-inc3.txt, arm M12).  As
+## written, C-46's 'the proof of a clean battery is a green suite immediately
+## after it' is therefore UNMET for this transcript.
+##
+## What was established afterwards, and by whom:
+##   - the node passes in isolation            1 passed, 20.4s
+##   - the node passes in clean full runs      429 passed, twice (orchestrator)
+##   - the slow lane passes 3/3                38.8s / 39.4s / 41.2s (merge gate)
+##   - 15/15 green under a 4-process CPU load  (merge gate, could not reproduce)
+##   - the RESTORE is independently proven: the merge gate's own 429-green run
+##     was executed against these exact bytes.
+##
+## AT-R16b asserts a wall-clock bound (FACTORY_TREE_BOUND_SECONDS = 8.0) and is
+## load-sensitive; the test file's own comment records an earlier flake at a
+## 2.0s bound.  The failure is therefore attributed to load, not to the arms.
+##
+## Checked per process carry P-05 (a flaky test poisons every counterfactual it
+## touches): no arm's verdict rests on this node.  In the increment-3 battery
+## arm M10 reddens FIVE nodes of which this is one, and arm M11 does not touch
+## it at all.
+##
+## The finding is the MISSING ANNOTATION, not the code.  A transcript that
+## closes non-green and says nothing about it is an evidence artifact asserting
+## something it did not establish -- which is this batch's own subject.
+##############################################################################

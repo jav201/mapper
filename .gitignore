@@ -21,3 +21,18 @@ maps/.mapper/
 # OS
 .DS_Store
 Thumbs.db
+
+# Batch scratch — the surface of two mutation-left-on-disk incidents.
+# Neither exists in the tree today; the entry is preventive.
+scratch/
+out.txt
+
+# Credentials — none exist today, and there is to be no first time.
+.env
+.env.*
+
+# Throwaway UI prototypes. Kept on disk deliberately (batch 2 and 3 build from
+# them) and NEVER committed: they are a different technology from the shipping
+# target, and decision D13's ruff metric of 29 is only valid while they stay
+# untracked -- a bare `ruff check .` reads 57, and the other 28 are all here.
+prototypes/

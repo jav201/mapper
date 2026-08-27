@@ -1,0 +1,417 @@
+==============================================================================
+INCREMENT 3 MUTATION BATTERY
+repo    : C:\Users\jjgh8\Github\mapper
+harness : C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery3.py   (OUTSIDE the repo it mutates)
+started : 2026-08-27 05:57:11
+==============================================================================
+
+--- BASELINE ---
+resolved : 410 nodes   (exit=0, 75.2s)
+tail     : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+OK: 410/410 resolved, all PASSED.
+
+------------------------------------------------------------------------------
+ARM M1  [deletion]  store.py
+  proves: the coercion itself — values reach the ficha untouched
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   73.2s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 28
+    RED  tests/test_repair_fields.py::test_at_r06_a_scalar_field_loads_and_every_consumer_survives  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r07_a_container_field_loads_and_coverage_calls_it_missing  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r07b_a_non_string_title_loads_and_search_hits_survives[12345]  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r07b_a_non_string_title_loads_and_search_hits_survives[None]  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r07c_a_non_string_state_also_survives_every_consumer  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r08_the_operator_is_told_which_node_and_which_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_is_unreachable_by_a_non_string_after_load  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[0-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[20260826-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[None-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw3-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw4-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw5-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw6-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[0-0]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[20260826-20260826]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[3.5-3.5]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[False-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[None-]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[True-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16b_a_date_coerces_to_an_iso_string  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw0]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw1]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw2]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw3]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r19_each_malformed_field_gets_one_spanish_warning  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20c_the_home_screen_tells_the_operator_too  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M2  [plausible-weaker]  store.py
+  proves: str(v) for EVERY value including containers: str({}) is truthy, so the miscount survives its own fix (requirements §4)
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   73.8s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17686' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17686' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 13
+    RED  tests/test_repair_fields.py::test_at_r07_a_container_field_loads_and_coverage_calls_it_missing  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r08_the_operator_is_told_which_node_and_which_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw3-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw4-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw5-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw6-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw0]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw1]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw2]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw3]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r19_each_malformed_field_gets_one_spanish_warning  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20c_the_home_screen_tells_the_operator_too  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M3  [plausible-weaker]  store.py
+  proves: str(v) if v else "" — the falsy trap: 0 and False are real values
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.9s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17819' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17819' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 3
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[0-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[0-0]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r16_a_scalar_field_coerces_deterministically[False-False]  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M4  [plausible-weaker]  store.py
+  proves: the A-7 derived set hand-listed as the attributes that break TODAY (state omitted) — the discriminating negative
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.6s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 10
+    RED  tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[0-ok]  -> FAILED
+    RED  tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[1-risk]  -> FAILED
+    RED  tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[2-late]  -> FAILED
+    RED  tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[3-blocked]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-140-45]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-140-8]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-300-120]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-80-24]  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r07c_a_non_string_state_also_survives_every_consumer  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r15_the_text_attribute_set_is_derived_from_ficha_not_hand_listed  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M5  [deletion]  store.py
+  proves: the malformed-field warning is recorded at all
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.3s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17751' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17751' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 8
+    RED  tests/test_repair_fields.py::test_at_r08_the_operator_is_told_which_node_and_which_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw0]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw1]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw2]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw3]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r19_each_malformed_field_gets_one_spanish_warning  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20c_the_home_screen_tells_the_operator_too  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M6  [deletion]  store.py
+  proves: LLR-R03.5's non-dict `fields` guard — without it the map is denied
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.1s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r18_a_non_dict_fields_block_does_not_deny_the_map  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M7  [plausible-weaker]  store.py
+  proves: the warning names BOTH coordinates, not just that something broke
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   77.3s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 8
+    RED  tests/test_repair_fields.py::test_at_r08_the_operator_is_told_which_node_and_which_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw0]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw1]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw2]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r17_a_container_field_becomes_empty_and_is_recorded[raw3]  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r19_each_malformed_field_gets_one_spanish_warning  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r20c_the_home_screen_tells_the_operator_too  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M8  [plausible-weaker]  model.py
+  proves: A-9 reverted: coverage re-derives 'missing' with a bare truthiness test, so it disagrees with missing_required on a whitespace-only value
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   77.1s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[   -False]  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M9  [plausible-weaker]  model.py
+  proves: count every required field as missing — passes AT-R07 and destroys the figure (requirements §4)
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   76.7s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17722' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17722' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 29
+    RED  tests/test_coverage.py::test_coverage_incomplete_nodes_ordered_by_subtree  -> FAILED
+    RED  tests/test_model.py::test_graph_coverage  -> FAILED
+    RED  tests/test_model.py::test_node_required_coverage  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-140-45]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-140-8]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-300-120]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[layered-LayeredRenderer-80-24]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size0]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size1]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size2]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed0]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed1]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed2]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed3]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_renders_legacy_identically_to_master[collapsed4]  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r06_a_scalar_field_loads_and_every_consumer_survives  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r07_a_container_field_loads_and_coverage_calls_it_missing  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r09_a_well_formed_maps_coverage_is_unchanged  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[   -False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[0-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[20260826-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[None-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[doc-True]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw3-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw4-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw5-False]  -> FAILED
+    RED  tests/test_repair_fields.py::test_coverage_never_counts_an_unreadable_field_as_documented[raw6-False]  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n04d_complete_map_coverage_report_is_not_a_selectable_row  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M10  [deletion]  model.py
+  proves: A-3 reverted to the shipped recursion
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   76.4s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17688' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17688' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 5
+    RED  tests/test_repair_depth.py::test_at_r16b_the_factory_screen_survives_a_depth_5000_map_composed  -> FAILED
+    RED  tests/test_repair_depth.py::test_tc_r29_no_recursive_graph_traversal_anywhere_in_mapper  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r17_resolve_document_survives_a_depth_5000_chain  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r34_a_cyclic_parent_chain_is_still_answered  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r35_resolve_document_does_not_walk_the_parent_chain  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M11  [plausible-weaker]  model.py
+  proves: RAISE THE RECURSION LIMIT instead of removing recursion — the arm that moves the crash rather than fixing it (requirements §4)
+  mutation applied (hash moved off pristine): True
+  resolved: 408 (expected 408)   exit=1   64.1s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17661' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17661' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 3
+    RED  tests/test_repair_depth.py::test_tc_r29_no_recursive_graph_traversal_anywhere_in_mapper  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r34_a_cyclic_parent_chain_is_still_answered  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r35_resolve_document_does_not_walk_the_parent_chain  -> FAILED
+    GREEN (solo, bounded) tests/test_repair_fields.py::test_at_r17_resolve_document_survives_a_depth_5000_chain  -> PASSED   <- the arm does NOT redden this node
+    GREEN (solo, bounded) tests/test_repair_depth.py::test_at_r16b_the_factory_screen_survives_a_depth_5000_map_composed  -> PASSED   <- the arm does NOT redden this node
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M12  [plausible-weaker]  model.py
+  proves: reintroduce the dead parent-chain fold F1 removed — behaviour-preserving, so ONLY the walk-count gate can see it
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   77.7s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r35_resolve_document_does_not_walk_the_parent_chain  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M13  [deletion]  app.py
+  proves: the MapScreen notice — the gap this increment's own battery found
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   75.7s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M14  [deletion]  app.py
+  proves: the HomeScreen notice — the sala loads every map on mount
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   76.9s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r20c_the_home_screen_tells_the_operator_too  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M15  [plausible-weaker]  app.py
+  proves: the notice fires but names nothing — 'algo falló' through the surface
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   76.1s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M16  [deletion]  store.py
+  proves: the save refusal itself
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.7s
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-17734' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-17734' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+  RED node-verdicts: 2
+    RED  tests/test_repair_fields.py::test_tc_r27_save_refuses_a_cyclic_graph_with_the_load_message  -> FAILED
+    RED  tests/test_repair_fields.py::test_tc_r28_the_refused_save_leaves_no_file_behind  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M17  [plausible-weaker]  store.py
+  proves: REFUSE AFTER WRITING — TC-R27 stays green and the poison pill is created anyway; only the discriminating negative catches it
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.9s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r28_the_refused_save_leaves_no_file_behind  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M18  [plausible-weaker]  store.py
+  proves: a FALSE refusal (C-53): refuse any graph with a re-visited node, which flags a legitimate diamond — priced as high as passing wrong work
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   68.9s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 20
+    RED  tests/test_app.py::test_focus_active_blocks_structural_edits  -> FAILED
+    RED  tests/test_rail.py::test_at_n06a_rail_selection_marks_focus_and_the_hint_names_the_region  -> FAILED
+    RED  tests/test_rail.py::test_at_n06d_regions_collapse_by_key_and_by_width  -> FAILED
+    RED  tests/test_rail.py::test_at_n06e_narrow_terminal_auto_collapses_the_rail  -> FAILED
+    RED  tests/test_rail.py::test_rail_collapses_a_branch  -> FAILED
+    RED  tests/test_rail.py::test_rail_lists_the_tree_and_counts_missing_per_branch  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size0]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size1]  -> FAILED
+    RED  tests/test_repair_depth.py::test_c53_the_rail_is_byte_identical_at_every_terminal_size[size2]  -> FAILED
+    RED  tests/test_repair_fields.py::test_at_r15_a_well_formed_graph_still_saves_and_reloads  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n04a_enter_on_a_coverage_row_jumps_and_focuses_the_gap  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n04b_next_gap_advances_across_nodes_and_wraps  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n04c_a_complete_map_reports_exhaustion_and_does_not_cycle  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n04d_complete_map_coverage_report_is_not_a_selectable_row  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n05a_archiving_a_subtree_asks_first_and_a_refusal_preserves_it  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n05b_accepting_removes_exactly_that_subtree  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n05c_undo_survives_leaving_and_re_entering_the_map  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n05d_undo_on_an_empty_stack_reports_and_does_not_raise  -> FAILED
+    RED  tests/test_worklist_safety.py::test_at_n05e_archiving_the_whole_map_is_refused  -> FAILED
+    RED  tests/test_worklist_safety.py::test_llr_n05_6_an_edit_is_undoable_and_undo_is_per_map  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M19  [deletion]  app.py
+  proves: markup=False at the MAP-SCREEN sink — the C-17 markup defense
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   74.4s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+------------------------------------------------------------------------------
+ARM M20  [deletion]  app.py
+  proves: markup=False at the SALA sink — the same defense, separate call site
+  mutation applied (hash moved off pristine): True
+  resolved: 410 (expected 410)   exit=1   73.5s
+  tail    : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+  RED node-verdicts: 1
+    RED  tests/test_repair_fields.py::test_tc_r20c_the_home_screen_tells_the_operator_too  -> FAILED
+  restore: all files sha256-verified back to pre-mutation bytes
+
+==============================================================================
+SUMMARY
+==============================================================================
+arm   kind               file          RED  proves
+M1    deletion           store.py       28  the coercion itself — values reach the ficha untouched
+M2    plausible-weaker   store.py       13  str(v) for EVERY value including containers: str({}) is truthy, so the
+M3    plausible-weaker   store.py        3  str(v) if v else "" — the falsy trap: 0 and False are real values
+M4    plausible-weaker   store.py       10  the A-7 derived set hand-listed as the attributes that break TODAY (st
+M5    deletion           store.py        8  the malformed-field warning is recorded at all
+M6    deletion           store.py        1  LLR-R03.5's non-dict `fields` guard — without it the map is denied
+M7    plausible-weaker   store.py        8  the warning names BOTH coordinates, not just that something broke
+M8    plausible-weaker   model.py        1  A-9 reverted: coverage re-derives 'missing' with a bare truthiness tes
+M9    plausible-weaker   model.py       29  count every required field as missing — passes AT-R07 and destroys the
+M10   deletion           model.py        5  A-3 reverted to the shipped recursion
+M11   plausible-weaker   model.py        3  RAISE THE RECURSION LIMIT instead of removing recursion — the arm that
+M12   plausible-weaker   model.py        1  reintroduce the dead parent-chain fold F1 removed — behaviour-preservi
+M13   deletion           app.py          1  the MapScreen notice — the gap this increment's own battery found
+M14   deletion           app.py          1  the HomeScreen notice — the sala loads every map on mount
+M15   plausible-weaker   app.py          1  the notice fires but names nothing — 'algo falló' through the surface
+M16   deletion           store.py        2  the save refusal itself
+M17   plausible-weaker   store.py        1  REFUSE AFTER WRITING — TC-R27 stays green and the poison pill is creat
+M18   plausible-weaker   store.py       20  a FALSE refusal (C-53): refuse any graph with a re-visited node, which
+M19   deletion           app.py          1  markup=False at the MAP-SCREEN sink — the C-17 markup defense
+M20   deletion           app.py          1  markup=False at the SALA sink — the same defense, separate call site
+
+ARMS RUN        : 20
+INERT ARMS      : none
+FAILED RESTORES : none
+TOTAL RED VERDICTS: 138
+
+--- POST-BATTERY SUITE ---
+resolved : 410   exit=0
+tail     : The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+not passed: none
+
+--- FINAL FILE HASHES (pre-mutation vs on disk) ---
+  OK  store.py     1b1b9e2b8976f552...c4e84707
+  OK  model.py     3d39a861a44f3abe...c4468688
+  OK  app.py       fae8e89df917c324...592af7bf
+
+finished: 2026-08-27 06:24:44

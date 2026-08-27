@@ -10,6 +10,22 @@ class ParseError(Exception):
     pass
 
 
+# U+2192 RIGHTWARDS ARROW: the separator the cycle path is reported with.
+CYCLE_ARROW = chr(0x2192)
+
+
+class MermaidError(ParseError):
+    """A mermaid source whose edge set contains a directed cycle.
+
+    Carries the cycle itself, not only prose about it, so `MapStore.load` can
+    restate the path in Spanish without re-parsing this exception's text.
+    """
+
+    def __init__(self, cycle: list[str]):
+        super().__init__(f"the map has a cycle: {CYCLE_ARROW.join(cycle)}")
+        self.cycle = cycle
+
+
 _MERMAID_EDGE = re.compile(
     r"([\w-]+)(?:\[([^\]]*)\])?\s*-->(?:\|([^|]*)\|)?\s*([\w-]+)(?:\[([^\]]*)\])?"
 )
@@ -89,14 +105,6 @@ def parse(src: str) -> Graph:
     if root_id is None:
         return Graph()
 
-    # Pick a real root: a node with no parent, preferring the first declared root.
-    candidates = [nid for nid in nodes if nid not in child_to_parent]
-    if candidates:
-        root_id = candidates[0]
-    else:
-        # Cycle or single self-edge; fall back to first node.
-        root_id = next(iter(nodes))
-
     # Build edges
     edges: list[Edge] = []
     for pid, cids in children_by_parent.items():
@@ -104,7 +112,14 @@ def parse(src: str) -> Graph:
             label = edge_labels.get((pid, cid), "")
             edges.append(Edge(parent_id=pid, child_id=cid, label=label))
 
-    graph = Graph(nodes=nodes, edges=edges, root_id=root_id)
+    graph = Graph(nodes=nodes, edges=edges)
+    cycle = graph.find_cycle()
+    if cycle is not None:
+        raise MermaidError(cycle)
+
+    # Pick a real root: a node with no parent, preferring the first declared root.
+    # Acyclic and non-empty, so at least one parentless node exists.
+    graph.root_id = [nid for nid in nodes if nid not in child_to_parent][0]
     return graph
 
 

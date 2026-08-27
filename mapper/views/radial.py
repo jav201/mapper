@@ -20,11 +20,85 @@ _GREYS = (
 )
 
 
+# Declared rendering bound, chosen from measurement, not taste.  At 12000 nodes
+# the worst render measured 0.29 s; at 24000 it measured 1.01 s, which is past
+# the point a redraw still feels immediate.  Above the bound the radial layout
+# is not drawn at all — see MAX_RENDER_NODES in layered.py and outline.py, which
+# a test keeps in step with this one.
+MAX_RENDER_NODES = 12000
+
+
+def _child_index(graph: Graph) -> dict[str, list[str]]:
+    """Adjacency built once. Graph.children_of rescans every edge per call."""
+    index: dict[str, list[str]] = {}
+    for edge in graph.edges:
+        index.setdefault(edge.parent_id, []).append(edge.child_id)
+    return index
+
+
+def _parent_index(graph: Graph) -> dict[str, str]:
+    """First parent per child, matching Graph.parent_of's first-edge-wins rule."""
+    parents: dict[str, str] = {}
+    for edge in graph.edges:
+        parents.setdefault(edge.child_id, edge.parent_id)
+    return parents
+
+
+def _leaf_counts(index: dict[str, list[str]], seeds: list[str]) -> dict[str, int]:
+    """Leaves under every node reachable from seeds, iterative post-order.
+
+    Memoised: a node reached down two branches is summed once, which is what
+    the recursive original computed the slow way.
+
+    Bounded on the active path.  Recursion answered a cyclic graph with a
+    RecursionError, which the screens catch; a plain loop would answer it by
+    never returning, and a hang is worse than a crash.  Cycles are refused at
+    load (HLR-R01), but the CSV import preview builds a graph without going
+    near the parser, so the traversal states its own bound.
+    """
+    counts: dict[str, int] = {}
+    for seed in seeds:
+        visiting: set[str] = set()
+        stack: list[tuple[str, bool]] = [(seed, False)]
+        while stack:
+            nid, expanded = stack.pop()
+            if expanded:
+                visiting.discard(nid)
+                counts[nid] = sum(counts[c] for c in index[nid])
+                continue
+            if nid in counts:
+                continue
+            if nid in visiting:
+                raise ValueError(f"cycle through {nid}: the graph is not a tree")
+            children = index.get(nid)
+            if not children:
+                counts[nid] = 1
+                continue
+            visiting.add(nid)
+            stack.append((nid, True))
+            stack.extend((c, False) for c in children if c not in counts)
+    return counts
+
+
 def _leaves(graph: Graph, nid: str) -> int:
-    children = graph.children_of(nid)
-    if not children:
-        return 1
-    return sum(_leaves(graph, c) for c in children)
+    """Leaves under nid. Iterative and memoised; the recursive original died at
+    CPython's C-recursion ceiling, which no recursion limit can lift."""
+    return _leaf_counts(_child_index(graph), [nid])[nid]
+
+
+def _degraded(n: int) -> Text:
+    """Declared degradation: naming what was dropped beats raising."""
+    out = Text()
+    out.append("◆ ", style=darkside.INK)
+    out.append("mapper", style=darkside.WORDMARK)
+    out.append(" · mapa mental", style=darkside.MUT)
+    out.append(chr(10) * 2)
+    out.append(
+        f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
+        "Se omitió el dibujo radial completo (nodos, aristas y etiquetas).",
+        style=darkside.WARN,
+    )
+    return out
 
 
 class RadialRenderer:
@@ -40,6 +114,8 @@ class RadialRenderer:
     ) -> Text:
         if graph.root_id is None:
             return Text("(no map loaded)")
+        if len(graph.nodes) > MAX_RENDER_NODES:
+            return _degraded(len(graph.nodes))
 
         inner = w - 2
         body_h = h - 4
@@ -50,32 +126,42 @@ class RadialRenderer:
         cx0, cy0 = max(10, inner // 5), body_h // 2
         pos: dict[str, tuple[int, int]] = {}
         branch_of: dict[str, str] = {}
+        index = _child_index(graph)
+        parents = _parent_index(graph)
+        # Runs before place and tag, so those two never meet a cyclic graph.
+        leaves = _leaf_counts(index, [graph.root_id, *graph.nodes, *index])
 
         def place(nid: str, level: int, a0: float, a1: float) -> None:
-            a = (a0 + a1) / 2
-            r = level * max(10, inner // 4)
-            squash = min(0.55, max(0.3, cy0 / max(1, r)))
-            x = max(0, min(inner - 1, int(cx0 + r * math.cos(a))))
-            y = max(0, min(body_h - 1, int(cy0 + r * math.sin(a) * squash)))
-            pos[nid] = (x, y)
-            children = graph.children_of(nid)
-            if not children:
-                return
-            total = sum(_leaves(graph, c) for c in children) or 1
-            acc = a0
-            for c in children:
-                frac = _leaves(graph, c) / total
-                place(c, level + 1, acc, acc + frac * (a1 - a0))
-                acc += frac * (a1 - a0)
+            stack = [(nid, level, a0, a1)]
+            while stack:
+                cur, lv, lo, hi = stack.pop()
+                a = (lo + hi) / 2
+                r = lv * max(10, inner // 4)
+                squash = min(0.55, max(0.3, cy0 / max(1, r)))
+                x = max(0, min(inner - 1, int(cx0 + r * math.cos(a))))
+                y = max(0, min(body_h - 1, int(cy0 + r * math.sin(a) * squash)))
+                pos[cur] = (x, y)
+                kids = index.get(cur)
+                if not kids:
+                    continue
+                total = sum(leaves[c] for c in kids) or 1
+                acc = lo
+                spans = []
+                for c in kids:
+                    frac = leaves[c] / total
+                    spans.append((c, lv + 1, acc, acc + frac * (hi - lo)))
+                    acc += frac * (hi - lo)
+                # Reversed, so the LIFO stack still visits children left to right.
+                stack.extend(reversed(spans))
 
         # Place root
         pos[graph.root_id] = (cx0, cy0)
-        children = graph.children_of(graph.root_id)
-        total = sum(_leaves(graph, c) for c in children) or 1
+        children = index.get(graph.root_id, [])
+        total = sum(leaves[c] for c in children) or 1
         span = 1.75
         acc = -span / 2
         for i, ch in enumerate(children):
-            frac = _leaves(graph, ch) / total
+            frac = leaves[ch] / total
             branch_of[ch] = _GREYS[i % len(_GREYS)]
             place(ch, 1, acc, acc + frac * span)
             acc += frac * span
@@ -86,16 +172,18 @@ class RadialRenderer:
             current = selected_id
             while current is not None:
                 on_path.add(current)
-                current = graph.parent_of(current)
+                current = parents.get(current)
 
         # Assign an achromatic grey tint to each top-level branch.
         for i, ch in enumerate(children):
             branch_of[ch] = _GREYS[i % len(_GREYS)]
 
         def tag(nid: str, grey: str) -> None:
-            branch_of[nid] = grey
-            for c in graph.children_of(nid):
-                tag(c, grey)
+            stack = [nid]
+            while stack:
+                cur = stack.pop()
+                branch_of[cur] = grey
+                stack.extend(index.get(cur, ()))
 
         for i, ch in enumerate(children):
             tag(ch, _GREYS[i % len(_GREYS)])
@@ -103,7 +191,7 @@ class RadialRenderer:
 
         # Draw edges as simple lines in dot space.
         for nid in graph.nodes:
-            parent = graph.parent_of(nid)
+            parent = parents.get(nid)
             if parent is None or parent not in pos or nid not in pos:
                 continue
             x0, y0 = pos[parent]
