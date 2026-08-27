@@ -132,6 +132,12 @@
       "date": "2026-08-27",
       "decision": "close batch",
       "notes": "Four defects repaired, 245 -> 429 tests. Post-mortem records eight orchestrator process defects alongside the code findings, including four instances of one pattern - the work was done and the record was not landed (unlanded v2 transcript, A-9, A-10, the registry). Sharpest finding: backlog B-07/B-10 already named the notify sink class at the batch-01 close, and that gate closed CONDITIONALLY on a census never written; the class then cost six rediscoveries. A gate that closes conditionally has not closed."
+    },
+    {
+      "station": "P6",
+      "date": "2026-08-27",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-08-26-repair-batch/ — 01-requirements, 04-validation, 04b-security-signoff, 05-postmortem, PLAN + README. 03-increments deliberately NOT synced (declared home is the repo); the five packets, four reviews and six battery transcripts stay beside the diff they describe."
     }
   ],
   "standing_authorization": {
@@ -147,6 +153,6 @@
     "merge_commit": "e359148195789298118cd1faf992093000b5926e",
     "closed_at": "d6b60e6b4f18b10123fffc76bbb36891473df653"
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-08-26T00:00:00"
 }
