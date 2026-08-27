@@ -1,158 +1,117 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-08-26-repair-batch",
-  "batch_objective": "PR A — repair the four shipped defects found at the ui-next-batch-02 PDR gate, before any feature work lands on top of them: S-01 (a cycle in a .mmd crashes the app; renderers die on pathological depth), S-02 (a non-string ficha field loads clean then breaks every consumer, and coverage() silently counts it as documented), S-07 (canvas and inspector laid out off-screen whenever the rail is visible), S-08 (the help overlay paints 16 of 27 bindings, dropping the whole view group).",
+  "batch_id": "2026-08-26-ui-next-batch-02",
+  "batch_objective": "Variant B «atlas» canvas mechanics (pan · fold · declared overflow · braille edges) plus the round-10 capabilities approved for batch 2: search hit-count and navigation, home 2.0 «sala», the field-query «lente», the per-view «leyenda», and the palette-v2 tokens. Closes carry B-05 and the Canvas.rows() layer-drop defect.",
   "mode": "full",
   "mode_history": [
-    {
-      "batch_id": "2026-08-25-ui-next-batch-01",
-      "mode": "full",
-      "closed_at": "2026-08-26"
-    },
-    {
-      "batch_id": "2026-08-26-ui-next-batch-02",
-      "mode": "full",
-      "opened_at": "2026-08-26",
-      "status": "PARKED at the PDR gate pending this repair batch; all artifacts retained",
-      "parked_state": ".dev-flow/2026-08-26-ui-next-batch-02/state-parked.json"
-    },
-    {
-      "batch_id": "2026-08-26-repair-batch",
-      "mode": "full",
-      "opened_at": "2026-08-26",
-      "reason": "Operator chose option 2 (defect-repair batch first) at the ui-next-batch-02 PDR gate. Full gate protocol requested explicitly: security sign-off plus adversarial QA with weakening mutations, then commit/push/PR/merge."
-    }
+    {"batch_id": "2026-08-18-batch-01", "mode": "full", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-24-fix-batch", "mode": "core", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-24-medlow-batch", "mode": "core", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-24-components-batch", "mode": "core", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-25-ui-next-batch-01", "mode": "full", "closed_at": "2026-08-26"},
+    {"batch_id": "2026-08-26-ui-next-batch-02", "mode": "full", "opened_at": "2026-08-26",
+     "status": "PARKED at the PDR gate 2026-08-26; UN-PARKED 2026-08-27",
+     "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."},
+    {"batch_id": "2026-08-26-repair-batch", "mode": "full", "opened_at": "2026-08-26", "closed_at": "2026-08-27",
+     "merge_commit": "e164a28",
+     "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."}
   ],
-  "current_station": "P6",
-  "phase_status": "approved",
-  "stations_active": [
-    "P0",
-    "P1",
-    "P2",
-    "P3",
-    "P4",
-    "P5",
-    "P6"
-  ],
-  "iterations_per_station": {
-    "P0": 1,
-    "P1": 1,
-    "P2": 1,
-    "P3": 5,
-    "P4": 1,
-    "P5": 1,
-    "P6": 1
-  },
+  "current_station": "PDR",
+  "phase_status": "awaiting-gate",
+  "stations_active": ["P0", "ARQ", "P1", "PDR", "P2", "P3", "DDR", "P4", "P5", "P6"],
+  "iterations_per_station": {"P0": 2, "ARQ": 1, "P1": 1, "PDR": 2, "P2": 0, "P3": 0, "DDR": 0, "P4": 0, "P5": 0, "P6": 0},
   "triggers": {
-    "evaluated_at": "2026-08-26T00:00:00",
-    "fired": [
-      "B1",
-      "B4",
-      "C",
-      "D1",
-      "E1"
-    ],
-    "not_fired": [
-      "A1",
-      "A3",
-      "A4",
-      "B2",
-      "B3",
-      "F"
-    ],
-    "notes": "A3 does NOT fire: this batch changes no frozen interface. IRenderer.render and Canvas stay exactly as they are on master - the ViewState migration belongs to the parked feature batch. B1 fires (renderers and store are asserted by tests owned by other requirements). B4 fires (store.load output is consumed by every screen). C fires (a new refusal path over file-derived text, and a new error message rendering file-derived content). D1 fires (S-07 and S-08 are both visible surfaces).",
-    "record": ".dev-flow/2026-08-26-repair-batch/PLAN.md#triggers"
+    "evaluated_at": "2026-08-27T00:00:00",
+    "fired": ["A2", "A3", "B1", "B3", "B4", "C", "D1", "D2", "E1"],
+    "not_fired": ["F"],
+    "pending_at_arq": ["A1", "A4", "B2"],
+    "record": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md#5--trigger-evaluation",
+    "corrections": [
+      {"id": "B3", "was": "not_fired", "now": "FIRED", "date": "2026-08-27",
+       "reason": "The non-activation record was FALSE. The probe `ls tests/goldens` returned no-such-directory: correct as executed, but the INPUT SET was wrong (C-31). The byte-identity goldens live in tests/test_repair_depth.py::MASTER_LEGACY_DIGESTS -- 12 pins, 3 renderers x 4 sizes, derived not typed. RadialRenderer is pinned at all four sizes and Inc-1 reddens 4 of them by construction. B3 firing turns on C-24 (golden drift named in the census)."}
+    ]
   },
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-08-26-repair-batch/01-requirements.md",
-    "traceability": "repo:.dev-flow/2026-08-26-repair-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "traceability": "repo:.dev-flow/2026-08-26-ui-next-batch-02/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-08-26-repair-batch/03-increments/",
+    "increments": "repo:.dev-flow/2026-08-26-ui-next-batch-02/03-increments/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-repair-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-08-26-repair-batch/README.md"
+    "design_pdr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/PDR-2026-08-26-ui-next-batch-02.md",
+    "design_ddr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/DDR-2026-08-26-ui-next-batch-02.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/README.md"
   },
   "artifacts": {
-    "plan": ".dev-flow/2026-08-26-repair-batch/PLAN.md",
-    "P1": ".dev-flow/2026-08-26-repair-batch/01-requirements.md",
-    "P3": ".dev-flow/2026-08-26-repair-batch/03-increments/",
-    "P4": ".dev-flow/2026-08-26-repair-batch/04-validation.md",
-    "P4_security": ".dev-flow/2026-08-26-repair-batch/04-security-signoff.md",
-    "P5": ".dev-flow/2026-08-26-repair-batch/05-postmortem.md"
+    "plan": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md",
+    "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "PDR_qa": ".dev-flow/2026-08-26-ui-next-batch-02/02a-qa-acceptance-review.md",
+    "PDR_security": ".dev-flow/2026-08-26-ui-next-batch-02/02b-security-review.md"
   },
   "baseline": {
-    "base_ref": "d6b60e6b4f18b10123fffc76bbb36891473df653",
+    "base_ref": "d8777840313145fec341687f0081afd7230c755b",
     "base_ref_name": "origin/master",
-    "tests_collected": 245,
-    "measured_by": "pytest -q --collect-only",
-    "flow_revision": "rev46",
-    "tests_at_close": 429
+    "tests_collected": 429,
+    "measured_by": "pytest -q --collect-only -p no:randomly -o addopts=",
+    "superseded_base_ref": "d6b60e6b4f18b10123fffc76bbb36891473df653",
+    "superseded_tests_collected": 245,
+    "flow_revision": "rev46"
   },
   "decisions_log": [
     {
       "station": "P0",
       "date": "2026-08-26",
       "decision": "approved",
-      "notes": "Batch opened by operator decision at the ui-next-batch-02 PDR gate. Four defects, each with an executed reproduction already on record. Scope rule accepted for the successor batch: it repairs exactly what its own stories make newly reachable, and nothing more."
+      "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
     },
     {
       "station": "P0",
       "date": "2026-08-26",
-      "decision": "scope fenced",
-      "notes": "This batch changes NO frozen interface. The ViewState/IRenderer migration and the Canvas dots/bgs work stay in the parked feature batch. Rationale: a repair PR whose diff also moves two frozen interfaces is not a sharper gate, which was the whole argument for splitting."
+      "decision": "scope-add ratified",
+      "notes": "S-7 (off-screen canvas) folded as a precondition of US-N06. SUPERSEDED at un-park: shipped by the repair batch."
     },
     {
-      "station": "P3",
-      "date": "2026-08-27",
-      "decision": "iterate-to-fix then approved",
-      "notes": "Increment 3 BLOCKED on F1 (HIGH, dead computation in resolve_document). Fixed via option A (walk deleted, not de-recursed), battery re-run 20 arms, re-gated PASS with 0 HIGH. At the re-gate the v2 transcript was found never landed in 03-increments/ - the packet cited a superseded 18-arm run over a tree that no longer existed. Caught by hash comparison, not by reading."
+      "station": "PDR",
+      "date": "2026-08-26",
+      "decision": "BLOCKED - iterate to P1",
+      "notes": "architect approved-with-conditions (20 sealed decisions, cut 7 -> 9). qa BLOCKED: 10 blockers / 14 majors / 11 minors. security BLOCKED: 3 blockers / 6 majors / 5 minors. Batch PARKED by operator decision so a repair batch could ship S-01/S-02/S-07/S-08 first."
     },
     {
-      "station": "P3",
+      "station": "P0",
       "date": "2026-08-27",
-      "decision": "iterate-to-fix then approved",
-      "notes": "Increment 4 BLOCKED on F1 (HIGH): AT-R14's limb (b) intersected rstripped rows with width-padded rows - 0 of 28 eligible to match - and one arm mutated both clip conjuncts at once, leaving the column clip unguarded. Fixed to four limbs; L8 split into L8a/L8b, each reddening AT-R14. F2 taken as C-40 prescribes (new predicate TC-R36, not a re-argument)."
+      "decision": "un-parked",
+      "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
     },
     {
-      "station": "P4",
+      "station": "PDR",
       "date": "2026-08-27",
-      "decision": "approved",
-      "notes": "Security CLEAR TO MERGE, 0 HIGH. M1/M3 closed as a CLASS by TC-R38 (AST census, derived set, no exemption list, own vacuity guard) rather than sink-by-sink - the same defect had been found six times across three reviews. M2's attribution was WRONG: the proposed _coerce_field guard was written, executed and measured unreachable; the real raise is inside yaml.safe_load. Fix narrowed to a typed Spanish refusal, because treating the sidecar as absent would blank every ficha and save would write that back."
+      "decision": "REJECTED - iterate-to-refine to P1 (amendment set 3)",
+      "notes": "Second pass, four lenses in parallel over the 41-amendment fold. architect REJECTED (6 blockers); security BLOCKED (S-16 S-17 S-18); qa approved-with-conditions (8, and 2 of its own source findings were DROPPED by the fold); ux approved-with-conditions (10, two blocker-class). A rejection returns to design: no increment opens. PDR is now at iteration 2 of the soft cap 3. Flags ruled: (a) LLR-N06.2.5 gets a cross-cutting home, sealed #D21, on an EXECUTABLE criterion -- the 15 uncoerced notify sites are app.py(11)+screens/factory.py(4) while Inc-3's set is 4-of-4 without factory.py, so the mis-parenting is an undeclared source-budget breach, not a smell. (b) the map-canvas braille promise is deferred AND the prose amended, sealed #D22, but mis-located by the flag: section 3.4 never mentions braille; the live promise is at :107, :113, :3343. Resume re-verification: fast 413 passed/16 deselected, slow 16 passed/413 deselected, 429 collected, both exit 0; ruff 29; git status byte-identical before and after the battery."
     },
     {
-      "station": "P4",
+      "station": "PDR",
       "date": "2026-08-27",
-      "decision": "approved",
-      "notes": "Whole-branch QA CLEAR TO MERGE, 0 HIGH, conditional on PM-1 (prototypes/ not gitignored - git add -A staged 5 files) and PM-2 (the traceability registry claimed 18 AT / 38 TC against 22 / 48 on disk). Both applied. Every remaining finding touching mapper/ or tests/ was CARRIED, not fixed: the gate had cleared on that tree and the session had just been recorded (P-1) for editing a tree mid-gate."
-    },
-    {
-      "station": "P5",
-      "date": "2026-08-27",
-      "decision": "close batch",
-      "notes": "Four defects repaired, 245 -> 429 tests. Post-mortem records eight orchestrator process defects alongside the code findings, including four instances of one pattern - the work was done and the record was not landed (unlanded v2 transcript, A-9, A-10, the registry). Sharpest finding: backlog B-07/B-10 already named the notify sink class at the batch-01 close, and that gate closed CONDITIONALLY on a census never written; the class then cost six rediscoveries. A gate that closes conditionally has not closed."
-    },
-    {
-      "station": "P6",
-      "date": "2026-08-27",
-      "decision": "synced-to-obsidian",
-      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-08-26-repair-batch/ — 01-requirements, 04-validation, 04b-security-signoff, 05-postmortem, PLAN + README. 03-increments deliberately NOT synced (declared home is the repo); the five packets, four reviews and six battery transcripts stay beside the diff they describe."
+      "decision": "orchestrator verifications of lens blockers",
+      "notes": "S-16 INDEPENDENTLY REPRODUCED on a third harness with a positive control: _coerce_field covers 2 of 5 file-derived families; attachment path, schema key/label and the node id are raw; an int attachment path loads with warnings=0 then raises TypeError in search_hits, an int node id yields a phantom duplicate node. Therefore S-02 is LIVE and un-park decision D18's SATISFIED-EXTERNALLY strike is WRONG. S-17 CONFIRMED by grep: LLR-STO.1.1 has 24 occurrences, all prose, zero headings. ARQ-1 CONFIRMED: docs/ARCHITECTURE.md was never amended -- :58 and :136 still declare the old frozen render signature and R-010 still says it stays frozen -- so PLAN section 7's 'map amended' is false against disk (C-44, work that never landed). GOLD-1 CORRECTED: 12 pinned digests derived, not the 18 reported; RadialRenderer pinned at all four sizes, so Inc-1 reddens 4 by construction."
     }
   ],
   "standing_authorization": {
-    "date": "2026-08-26",
-    "autonomy_and_merge": "Autonomous end-to-end WITH merge authority, re-granted per batch. Operator's words for this batch: 'Full gate protocol as batch 1: security sign-off + adversarial QA (weakening mutations, not just deletion), then commit -> push -> PR -> merge per your standing authorization.'",
-    "merge_gate_retained": "Security sign-off AND an adversarial PR-level qa-reviewer pass over the whole diff vs master must both come back clean before merge. A HIGH finding blocks and returns to the operator.",
-    "decision_recording": "Every autonomous decision recorded in PLAN.md, this decisions_log, the postmortem, and carried to the vault at sync.",
-    "postmortem_obligation": "Operator instruction: the orchestrator's OWN artifact errors (the A3 census being 6 files short, the S-08 oracle reading another widget's pixels, the P-19 arithmetic, the malformed S-02 fixture) are recorded in the postmortem as findings, held to the same standard as batch 1's.",
-    "merge_gate_result": "Both gates clean, 0 HIGH. Security CLEAR TO MERGE; QA CLEAR TO MERGE conditional on PM-1/PM-2, both applied and verified. Merging under the kickoff grant."
+    "date": "2026-08-25/26, re-granted for the un-park 2026-08-27",
+    "autonomy_and_merge": "Autonomous end-to-end run WITH merge authority. Operator's words for the un-park: 'Proceed autonomously through gates with documented evidence; commit (explicit paths only), push, PR via gh, and merge when your independent gates pass.'",
+    "pre_authorized_A3": "Extending the frozen IRenderer.render contract with viewport/fold state (kwargs or a ViewState object): run ARQ/PDR, record the new frozen signature in docs/ARCHITECTURE.md, migrate ALL renderers and call sites in one increment.",
+    "merge_gate_retained": "Independent code review per increment; security sign-off AND an adversarial PR-level qa-reviewer pass over the whole branch must both come back clean before merge. A HIGH finding blocks and returns to the operator.",
+    "decision_recording": "Every autonomous decision recorded in PLAN.md section 9, in this decisions_log, in the postmortem, and carried to the vault at sync.",
+    "stop_conditions": "Scope beyond the brief, or un-mitigable data loss."
   },
   "previous_batch": {
-    "batch_id": "2026-08-25-ui-next-batch-01",
-    "merge_commit": "e359148195789298118cd1faf992093000b5926e",
-    "closed_at": "d6b60e6b4f18b10123fffc76bbb36891473df653"
+    "batch_id": "2026-08-26-repair-batch",
+    "merge_commit": "e164a28",
+    "pr": "https://github.com/jav201/mapper/pull/2",
+    "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+    "obsidian_synced": true
   },
-  "obsidian_synced": true,
+  "obsidian_synced": false,
   "created_at": "2026-08-26T00:00:00"
 }
