@@ -10,6 +10,11 @@ from mapper.diff import DiffResult
 from mapper.model import Graph, Node
 
 
+# Declared rendering bound, chosen from measurement, not taste.  See the note on
+# MAX_RENDER_NODES in radial.py; a test keeps the three values in step.
+MAX_RENDER_NODES = 12000
+
+
 STATE_STYLE = {
     "ok": darkside.INK,
     "risk": darkside.WARN,
@@ -35,6 +40,37 @@ def _fit(s: str, width: int) -> str:
     return s + " " * (width - _vis_width(s))
 
 
+def _child_index(graph: Graph) -> dict[str, list[str]]:
+    """Adjacency built once. Graph.children_of rescans every edge per call."""
+    index: dict[str, list[str]] = {}
+    for edge in graph.edges:
+        index.setdefault(edge.parent_id, []).append(edge.child_id)
+    return index
+
+
+def _parent_index(graph: Graph) -> dict[str, str]:
+    """First parent per child, matching Graph.parent_of's first-edge-wins rule."""
+    parents: dict[str, str] = {}
+    for edge in graph.edges:
+        parents.setdefault(edge.child_id, edge.parent_id)
+    return parents
+
+
+def _degraded(n: int, legacy: bool) -> Text:
+    """Declared degradation: naming what was dropped beats raising."""
+    out = Text()
+    out.append("◆ ", style=darkside.INK)
+    out.append("mapper", style=darkside.WORDMARK)
+    out.append(" · árbol legacy" if legacy else " · mapa de conceptos", style=darkside.MUT)
+    out.append(chr(10) * 2)
+    out.append(
+        f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
+        "Se omitió el dibujo del árbol completo (fichas, aristas y cobertura).",
+        style=darkside.WARN,
+    )
+    return out
+
+
 def _tree_layout(graph: Graph, card_w: int, gap: int = 3) -> dict[str, tuple[int, int]]:
     """In-order leaf slots; internal nodes centred over their children.
     Handles forests (disconnected trees) by laying out each root tree side-by-side.
@@ -42,19 +78,36 @@ def _tree_layout(graph: Graph, card_w: int, gap: int = 3) -> dict[str, tuple[int
     """
     pos: dict[str, tuple[float, int]] = {}
     slot = [0]
+    index = _child_index(graph)
+    has_parent = {edge.child_id for edge in graph.edges}
 
     def walk(nid: str, depth: int) -> None:
-        children = graph.children_of(nid)
-        if not children:
-            pos[nid] = (slot[0], depth)
-            slot[0] += 1
-            return
-        for cid in children:
-            walk(cid, depth + 1)
-        xs = [pos[cid][0] for cid in children]
-        pos[nid] = ((xs[0] + xs[-1]) / 2, depth)
+        # visiting is the active path.  Recursion answered a cyclic graph with a
+        # RecursionError, which the screens catch; a plain loop would answer it
+        # by never returning, and a hang is worse than a crash.
+        visiting: set[str] = set()
+        stack: list[tuple[str, int, bool]] = [(nid, depth, False)]
+        while stack:
+            cur, lv, expanded = stack.pop()
+            children = index.get(cur)
+            if not children:
+                pos[cur] = (slot[0], lv)
+                slot[0] += 1
+                continue
+            if expanded:
+                visiting.discard(cur)
+                xs = [pos[cid][0] for cid in children]
+                pos[cur] = ((xs[0] + xs[-1]) / 2, lv)
+                continue
+            if cur in visiting:
+                raise ValueError(f"cycle through {cur}: the graph is not a tree")
+            visiting.add(cur)
+            stack.append((cur, lv, True))
+            # Reversed, so the LIFO stack still visits children left to right
+            # and the in-order slot numbering is the one the recursion produced.
+            stack.extend((cid, lv + 1, False) for cid in reversed(children))
 
-    roots = [nid for nid in graph.nodes if graph.parent_of(nid) is None]
+    roots = [nid for nid in graph.nodes if nid not in has_parent]
     if not roots:
         # Fallback to the declared root if the graph has no obvious roots.
         roots = [graph.root_id] if graph.root_id in graph.nodes else []
@@ -87,6 +140,11 @@ class LayeredRenderer:
     ) -> Text:
         if graph.root_id is None or not graph.nodes:
             return Text("(no map loaded)")
+        if len(graph.nodes) > MAX_RENDER_NODES:
+            return _degraded(len(graph.nodes), bool(graph.schema))
+
+        index = _child_index(graph)
+        parents = _parent_index(graph)
 
         added_ids = diff.added if diff else set()
         removed_ids = diff.removed if diff else set()
@@ -94,7 +152,7 @@ class LayeredRenderer:
         removed_titles = diff.removed_titles if diff else {}
 
         all_ids = list(graph.nodes)
-        n_leaves = sum(1 for nid in all_ids if not graph.children_of(nid))
+        n_leaves = sum(1 for nid in all_ids if not index.get(nid))
         gap = 3
         widest = max(
             max(_vis_width(graph.nodes[nid].ficha.title) + 3,
@@ -113,7 +171,9 @@ class LayeredRenderer:
         depth_max = max(lv for _, lv in pos.values()) if pos else 0
         tree_bottom = (depth_max + 1) * card_h + depth_max * edge_h
         removed_h = (card_h + 2) if removed_ids else 0
-        body_h = max(tree_bottom + removed_h, h - 5)
+        # Rows past h are dropped by the lines[:h] slice below, so painting them
+        # is pure cost — and on a deep map it is the cost that dominates.
+        body_h = min(max(tree_bottom + removed_h, h - 5), max(h, 1))
 
         have_total, req_total = graph.coverage()
         pct = round(100 * have_total / req_total) if req_total else 100
@@ -187,7 +247,7 @@ class LayeredRenderer:
                 for j, ch in enumerate(_fit(node.ficha.meta, card_w - 2)):
                     cv.put(cx + 1 + j, y + 1, ch, darkside.MUT)
 
-            parent = graph.parent_of(nid)
+            parent = parents.get(nid)
             if parent is not None and parent in pos:
                 px, plv = pos[parent]
                 px = max(0, px - card_w // 2)
