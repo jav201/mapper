@@ -15,8 +15,20 @@
 
 | Field | Value |
 |---|---|
-| Last amended by | `2026-08-25-ui-next-batch-01` |
-| Date | `2026-08-25` |
+| Last amended by | `2026-08-27-repair-batch-02` |
+| Date | `2026-08-27` |
+
+> **Amendment `2026-08-27-repair-batch-02` (`HLR-MAP.1`).** The `2026-08-26-ui-next-batch-02` ARQ was
+> approved with this map amended, and **the amendment was never landed** — its `PLAN.md` §7 recorded
+> as done work that did not exist on disk (C-44). This batch lands it, and in doing so found the map
+> asserting **six** provably-false things about the tree, not the four the ARQ named.
+>
+> **Two rules were applied, and they pull in opposite directions.** Every *present-tense* claim here
+> is now executed against disk. Every *forward-looking* commitment is marked as a commitment and is
+> **not** written in the present tense — because the ARQ proposal declared `mapper/views/state.py`
+> "new this batch" for a file that does not exist, and landing that verbatim would have traded a
+> C-44 defect for a **false map**. This file is the oracle the A-family triggers read; a map that
+> lies is worse than a map that is merely stale.
 
 ---
 
@@ -53,15 +65,15 @@ file is classified by path prefix, so the A-family triggers can be evaluated by 
 |---|---|---|---|---|
 | `package` | `mapper/__init__.py` | Package identity only. | `__version__`. | **Everything else.** Any import or logic added here is a defect: it would make the package root a hidden dependency of every module. |
 | `model` | `mapper/model.py` | The domain graph: nodes, edges, fichas, required-field schemas, attachments. | `Node`, `Edge`, `Graph`, `Ficha`, `Document`, `Attachment`, `SchemaField`; immutable-ish value objects. | UI, persistence details, network calls. |
-| `canvas` | `mapper/canvas.py` | Cell buffer, box-drawing wire merging, braille free-angle edges, pill backgrounds. | `Canvas(w, h)` with `put`, `wire`, `edge`, `elbow_down`, `text`, `dline`, `rows`. | Layout algorithms; diagram semantics. |
-| `store` | `mapper/store.py` | Two-layer persistence: text files as truth, SQLite as rebuildable index. | `MapStore(path)` with `load(map_id)`, `save(map_id, graph, sidecar)`, `reindex()`; `TEMPLATES`. | Rendering, network, app lifecycle. |
+| `canvas` | `mapper/canvas.py` | Cell buffer, box-drawing wire merging, braille free-angle edges, pill backgrounds. | `Canvas(w, h)` with `put`, `wire`, `edge`, `elbow_down`, `text`, `rows`. *(Corrected `2026-08-27-repair-batch-02`: the previous row also listed `dline`. Executed — `hasattr(Canvas, "dline")` is `False` and `grep -rn "dline" mapper/` returns nothing. It does not exist.)* | Layout algorithms; diagram semantics. |
+| `store` | `mapper/store.py` | Two-layer persistence: text files as truth, SQLite as rebuildable index. | `MapStore(path)` with `load(map_id) -> Graph`, `save(map_id, graph)`, `create_seed`, `create_from_template`, `record_session`, `last_session`; `TEMPLATES`. *(Corrected `2026-08-27-repair-batch-02`: the previous row named a three-argument `save(map_id, graph, sidecar)` and a **public `reindex()`**. Executed — `store.py:452` is `save(self, map_id, graph)`, the sidecar is built inside `save` rather than passed in, and reindexing is **private** at `store.py:533`. The row also omitted four real public methods.)* | Rendering, network, app lifecycle. |
 | `views` | `mapper/views/*.py` | Diagram-family renderers over one `Graph` + `Canvas`. **Headless: produce `rich.Text`, import no Textual.** | `IRenderer.render(graph, selected_id, w, h, **kwargs) -> Text`; `LayeredRenderer`, `LaneRenderer`, `HybridLaneRenderer`, `RailTimelineRenderer`, `RadialRenderer`, `OutlineRenderer`. | Persistence, network, app screens; **any Textual import**; any interactive/stateful tree — a renderer returns a picture, not a widget model. |
 | `mermaid` | `mapper/mermaid.py` | Mermaid `graph TD` round-trip. | `parse(src: str) -> Graph`, `dump(graph: Graph) -> str`, `slugify(s) -> str`. | UI, network. |
 | `import_csv` | `mapper/import_csv.py` | CSV/TSV row-set → `Graph` preview; orphan rows parked at root rather than dropped. | `preview_csv(path: Path) -> Graph`. | UI, persistence writes — it returns a `Graph`, the caller decides whether to save it. |
 | `office` | `mapper/office.py` | OOXML (`.docx`/`.pptx`/`.xlsx`) `{{keyword}}` ingestion and substitution over `zipfile` + `re`. | `keywords(path)`, `resolve(path, values, out)` (template fill). | Domain semantics, UI, `model` — it deals in placeholder strings, not fichas. |
 | `diff` | `mapper/diff.py` | Node-level diff of the working tree against `HEAD` via the local `git` CLI. | `DiffResult` (`added`, `removed`, `changed`, `removed_titles`), `git_diff(map_id, store) -> DiffResult \| None`. | Rendering decisions — it reports *what* changed; `views` decides how to tint it. |
 | `github` | `mapper/github.py` | Read-only GitHub repo-to-map adapter over the `gh` CLI. | `GitHubConnector(repo: str) -> Graph`; raises `GitHubError`. | UI, persistence writes. |
-| `search` | `mapper/search.py` | Inverted index over node titles + ficha content. | `SearchIndex(store)` with `query(q: str) -> list[str]` (node ids). | Rendering. |
+| `search` | `mapper/search.py` | Inverted index over node titles + ficha content. | `SearchIndex(graph)` with `query(q: str) -> list[str]` (node ids). *(Corrected `2026-08-27-repair-batch-02`: the previous row gave the constructor's parameter as the store rather than the graph; executed, `search.py:7` takes a `Graph`. **And the module is dead code as found** — an AST walk of `mapper/app.py` shows it imports no `search` module, and `grep -rn "SearchIndex" mapper/ tests/` matches only its own definition. It is described here as what it is, not as what a consumer would need it to be.)* | Rendering. |
 | `export` | `mapper/export.py` | SVG/PNG export of a rendered `rich.Text` snapshot. | `save_svg(text: Text, path)`, `save_png(text: Text, path)`. | Network; mounting screens. |
 | `osopen` | `mapper/osopen.py` | **The OS-handler boundary.** Validates an attachment target and hands it to the platform opener. | `open_external(kind: str, target: str, *, workspace: Path, launcher=None) -> str`; returns a status word, never raises for input reachable from `yaml.safe_load`. | **Strict.** No `model`, no `store`, no `app`, no Textual, no Rich, no reading of `_nodos.yml`, no attachment *discovery*, no UI feedback, and no `shell=True`. It receives one already-extracted string plus the workspace root, validates it, opens it or raises. Deciding *which* attachment to open is `app`'s job; deciding *how to report the failure* is `app`'s job. |
 | `keymap` | `mapper/keymap.py` | **The single seat for key chords.** One table, read by three consumers. | `KeyBinding(key, action, group)`, `KEYMAP: list[KeyBinding]`, `groups_for_keybar(...)`, `palette_items(query)`. | **Zero dependencies — not even Rich or Textual.** No styling, no widget, no `Binding` objects, no dispatch. It is data; the readers (keybar, palette, help, screen `BINDINGS`) do the shaping. |
@@ -131,10 +143,10 @@ deliberately — see R-011.
 | Interface | Owner module | Consumers | Shape | Frozen? |
 |---|---|---|---|---|
 | `Graph` value object | `model` | `store`, `views`, `search`, `mermaid`, `github`, `app` | `nodes: dict[str, Node]`; `edges: list[Edge]`; `root_id: str`; `focus(node_id) -> Graph` | yes for MVP |
-| `Canvas` drawing buffer | `canvas` | `views` | `put(x,y,ch,tone)`, `wire(x,y,mask,tone)`, `elbow_down(...)`, `rows() -> list[str]` | yes for MVP |
-| `MapStore` persistence | `store` | `app` | `load(map_id) -> (Graph, Sidecar)`, `save(map_id, graph, sidecar)`, `reindex()` | yes for MVP |
-| `IRenderer.render` | `views` | `app` | `render(graph, selected_id, w, h, **kwargs) -> Text` | **yes — and explicitly NOT extended in `2026-08-25-ui-next-batch-01`** |
-| `SearchIndex.query` | `search` | `app` | `query(q) -> list[str]` (node ids) | yes for MVP |
+| `Canvas` drawing buffer | `canvas` | `views` | `put(x,y,ch,tone)`, `wire(x,y,mask,tone)`, `edge(...)`, `elbow_down(...)`, `text(...)`, `rows() -> list[Text]` *(corrected `2026-08-27-repair-batch-02`: the previous row said `list[str]`; executed, `Canvas.rows` is annotated and returns `list[Text]`)* | yes for MVP |
+| `MapStore` persistence | `store` | `app` | `load(map_id) -> Graph`, `save(map_id, graph)`, and the private `_reindex(...)` *(corrected `2026-08-27-repair-batch-02`: the previous row declared `load` returning a `(Graph, Sidecar)` tuple and a public `reindex()`; neither exists)* | yes for MVP |
+| `IRenderer.render` | `views` | `app` | `render(graph, selected_id, w, h, **kwargs) -> Text` — **prose, not a Python type.** `grep -rn "IRenderer" mapper/` finds two mentions in comments and **no class and no `Protocol`**: the contract is enforced by convention among the renderer modules, not by the interpreter. | **yes.** *Not extended in `2026-08-25-ui-next-batch-01`, and still frozen here.* See the commitment row below. |
+| `SearchIndex.query` | `search` | — **none** | `query(q) -> list[str]` (node ids) *(corrected `2026-08-27-repair-batch-02`: the consumer column said `app`. Executed, `app` does not import `search`; the module has zero consumers in the tree.)* | yes for MVP |
 | `MermaidImporter/Exporter` | `mermaid` | `app` | `parse(src) -> Graph`, `dump(graph) -> str` | yes for MVP |
 | `GitHubConnector.fetch` | `github` | `app` | `fetch(repo_slug) -> Graph` | yes for MVP |
 | `save_svg` / `save_png` | `export` | `app` | `save_svg(text, path)`, `save_png(text, path)` | yes for MVP |
@@ -144,6 +156,7 @@ deliberately — see R-011.
 | `Ds*` interaction components | `widgets` | `screens`, `widgets` (inspector) | Nine `Static`-based components, three states each, changes emitted as `Message` | **yes for this batch.** Inc-2 builds the inspector *from* them; it must not change their signatures. |
 | `KeyBar` / `HintLine` / `TabStrip` chrome | `widgets` | `screens`, `app` | `set_groups(...)`, `set_crumb(...)`, (new) `HintLine` setter | **NO — Inc-2 owns it.** HintLine gains a setter and the keybar gains visible truncation. No other lane edits `widgets/chrome.py`. |
 | `KEYMAP` seat | `keymap` | `screens`, `widgets`, `app` | `KEYMAP: list[KeyBinding]`, `groups_for_keybar(...)`, `palette_items(q)` | **NO — Inc-1 owns it.** It becomes the single source from which screens generate `BINDINGS`. No other lane edits `mapper/keymap.py`. |
+| **`ViewState` parameter object** · **COMMITTED, NOT PRESENT** | `views` | `app` | Frozen dataclass carrying the renderer's whole parameter surface; `IRenderer` promoted to a real `typing.Protocol` with `render(self, graph: Graph, state: ViewState) -> Text` | **⚠ NOT YET IN THE TREE.** Committed at the `2026-08-26-ui-next-batch-02` PDR (pre-authorised trigger A3), **lands in that batch's Inc-2**. `mapper/views/state.py` **does not exist today** — verified by path check. Recorded here as a commitment so the map states a plan without asserting a falsehood; the row becomes present-tense only when the file lands. |
 | `open_external` | `osopen` | `app` **only** | `open_external(kind, target, *, workspace, launcher=None) -> str`; returns a status word | **NO — new, Inc-4 owns it.** Security-reviewed before Inc-4 signs off. |
 
 - **Changing one of these is trigger A3** — it fires ARQ, PDR *and* DDR, and it is never done inside a lane.

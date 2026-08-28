@@ -1,0 +1,81 @@
+{
+  "project": "mapper",
+  "language": "en",
+  "batch_id": "2026-08-26-ui-next-batch-02",
+  "batch_objective": "Variant B «atlas» canvas mechanics (pan · fold · declared overflow · braille edges) plus the round-10 capabilities approved for batch 2: search hit-count and navigation, home 2.0 «sala», the field-query «lente», the per-view «leyenda», and the palette-v2 tokens. Closes carry B-05 and the Canvas.rows() layer-drop defect.",
+  "mode": "full",
+  "mode_history": [
+    {"batch_id": "2026-08-18-batch-01", "mode": "full", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-24-fix-batch", "mode": "core", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-24-medlow-batch", "mode": "core", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-24-components-batch", "mode": "core", "closed_at": "2026-08-24"},
+    {"batch_id": "2026-08-25-ui-next-batch-01", "mode": "full", "closed_at": "2026-08-26"},
+    {"batch_id": "2026-08-26-ui-next-batch-02", "mode": "full", "opened_at": "2026-08-26",
+     "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."}
+  ],
+  "current_station": "P0",
+  "phase_status": "approved",
+  "stations_active": ["P0", "ARQ", "P1", "PDR", "P2", "P3", "DDR", "P4", "P5", "P6"],
+  "iterations_per_station": {"P0": 1, "ARQ": 0, "P1": 0, "PDR": 0, "P2": 0, "P3": 0, "DDR": 0, "P4": 0, "P5": 0, "P6": 0},
+  "triggers": {
+    "evaluated_at": "2026-08-26T00:00:00",
+    "fired": ["A2", "A3", "B1", "B4", "C", "D1", "D2", "E1"],
+    "not_fired": ["B3", "F"],
+    "pending_at_arq": ["A1", "A4", "B2"],
+    "record": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md#5--trigger-evaluation"
+  },
+  "artifact_homes": {
+    "requirements": "repo:.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "traceability": "repo:.dev-flow/2026-08-26-ui-next-batch-02/06-docs/traceability-matrix.md",
+    "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-08-26-ui-next-batch-02/03-increments/",
+    "backlog": "repo:.dev-flow/BACKLOG.md",
+    "design_pdr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/PDR-2026-08-26-ui-next-batch-02.md",
+    "design_ddr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/DDR-2026-08-26-ui-next-batch-02.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/README.md"
+  },
+  "artifacts": {
+    "plan": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md",
+    "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md"
+  },
+  "baseline": {
+    "base_ref": "d6b60e6b4f18b10123fffc76bbb36891473df653",
+    "base_ref_name": "origin/master",
+    "tests_collected": 245,
+    "measured_by": "pytest -q --collect-only",
+    "flow_revision": "rev46",
+    "flow_aggregate": "9c1449ed815d267c"
+  },
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-08-26",
+      "decision": "approved",
+      "notes": "RC-1 clean at d6b60e6 (HEAD == origin/master == merge-base). Toolchain entry gate PASS: python 3.12.7, textual 8.2.8, ruff 0.8.4, mypy 1.13.0. Validator: 0 blocks, 20 notices. 20 premises executed; 17 TRUE, 3 FALSE (P-10, P-13, P-20), all three dispositioned in writing and none left open. Seven stories intake-classified: six READY, one REFINE (US-N13 repo marker, pending Q-5). Six blocking questions carried to ARQ/PDR."
+    },
+    {
+      "station": "P0",
+      "date": "2026-08-26",
+      "decision": "scope-add ratified",
+      "notes": "S-7 folded into the batch: the shipped rail|canvas|inspector layout puts the canvas and inspector entirely off-screen at any terminal wide enough to show the rail (measured under Pilot at 140x45 and 120x40 via post-layout widget.region and compositor strips). Root cause: #map-rail has no CSS width rule while _chrome_width() assumes 24. Remedy executed and verified. Folded as a precondition of US-N06 rather than carried, because pan/fold on an off-screen canvas is not a deliverable. Owes an escaped-bug counterfactual RED against master."
+    }
+  ],
+  "standing_authorization": {
+    "date": "2026-08-25/26",
+    "autonomy_and_merge": "Autonomous end-to-end run WITH merge authority. Operator's words: 'delega a un opus5 la implementacion con /dev-flow... hace push y merge' and 'todo entra'. Direction and batch order approved after two prototype rounds.",
+    "merge_gate_retained": "The grant does not waive the gate. An independent security sign-off AND an adversarial PR-level qa-reviewer pass over the whole diff vs master must both come back clean before merge; a HIGH finding blocks and returns to the operator. Batch 1's precedent: both found real data-loss defects.",
+    "decision_recording": "Every autonomous decision recorded in PLAN.md section 9, in this decisions_log, in the postmortem, and carried to the vault at sync.",
+    "stop_conditions": "Scope outside the brief, or un-mitigable data-loss risk."
+  },
+  "previous_batch": {
+    "batch_id": "2026-08-25-ui-next-batch-01",
+    "merge_commit": "e359148195789298118cd1faf992093000b5926e",
+    "pr": "https://github.com/jav201/mapper/pull/1",
+    "closed_at": "d6b60e6b4f18b10123fffc76bbb36891473df653",
+    "obsidian_synced": true
+  },
+  "obsidian_synced": false,
+  "created_at": "2026-08-26T00:00:00"
+}
