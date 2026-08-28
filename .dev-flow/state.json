@@ -165,6 +165,12 @@
       "date": "2026-08-27",
       "decision": "state.json replaced",
       "notes": "P-CARRY-1 discharged. The branch carried the parked feature batch's state as the canonical record with tests_collected 429; merging it would have made master assert a false premise the next batch reads at intake. The parked record is preserved whole under parked_batch."
+    },
+    {
+      "station": "P6",
+      "date": "2026-08-27",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-08-27-repair-batch-02/ -- six artifacts + the generated README. 03-increments/ deliberately NOT synced (artifact_homes declares its home as the repo; one home per artifact, the link crosses by id). The .dev-flow root 01/02/04/05 and 06-docs belong to 2026-08-18-batch-01 and were NOT copied under this batch's id: syncing another batch's artifacts here would be the exact false-record defect this batch spent six gate rounds closing. This batch produced no 02/04-validation/05-postmortem/06-docs of its own -- its validation record is the five gate rounds in 04-qa-adversarial.md, and the README states that absence as a real gap."
     }
   ],
   "standing_authorization": {
@@ -273,6 +279,6 @@
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
     "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed."
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-08-27T00:00:00"
 }
