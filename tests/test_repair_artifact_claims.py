@@ -84,7 +84,7 @@ def _source() -> list[Path]:
     "extends any round-tripped dataclass"), and the two rules below decide
     `path:line` and `test_*` citations ONLY -- so the widening catches **none of
     them**, including the over-claim an earlier draft of this very docstring made.
-    What it does buy is real and small: `mapper/` carries 3 checkable citations
+    What it does buy is real and small: `mapper/` carries 4 checkable citations
     across 2 of its 33 files, and those are now checked instead of unread.  Saying
     it buys more would be the same over-claim this file exists to catch.
 

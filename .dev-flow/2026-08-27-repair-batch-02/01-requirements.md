@@ -315,5 +315,7 @@ instead of vanishing. Its class set is **derived from the module**, not listed: 
 four classes while the module defines seven, and a `str` field landed on `Node` — census position 1 —
 went unseen by all 643 arms (re-confirmation review, MEDIUM-1). `test_at_p02j` now pins the class set
 itself. **What it does not catch, said so it is not miscited:** a new `dict[str, str]` on another
-dataclass *classifies*, so this guard passes; routing such a field is still a hand step. That guard protects a **conclusion** (the census is complete), not a behaviour — C-55
-limb 1, and its docstring says so, so a later reader does not file it as an implementation detail.
+dataclass *classifies*, so this guard passes; routing such a field is still a hand step.
+
+`test_at_p02i` protects a **conclusion** (the census is complete), not a behaviour — C-55 limb 1,
+and its docstring says so, so a later reader does not file it as an implementation detail.

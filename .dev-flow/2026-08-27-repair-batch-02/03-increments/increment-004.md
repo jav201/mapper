@@ -148,7 +148,7 @@ empty it. The two decidable rules are unchanged; only the corpus widened.
 
 **Verified non-false-failing before landing** (C-53 — run a new rule over a corpus you believe is
 *correct*): the four citations `mapper/` carries today all resolve, and both basenames are
-unambiguous. `_live_nodes()` is now cached — the widened corpus made it 40 arms, and an uncached
+unambiguous. `_live_nodes()` is now cached — the widened corpus made it 41 arms, and an uncached
 collection subprocess per arm added minutes for an answer that cannot change within a run.
 
 **And the honest boundary, written into the checker's docstring:** HIGH-A's false record is
@@ -241,7 +241,7 @@ python -m pytest -q -p no:randomly -o addopts= tests/test_repair_store_boundary.
 | **post** | **647** | 548 + 99; boundary file 84 → **100** |
 
 **The checker's corpus includes this packet**, so writing it adds two arms to the count it reports —
-a reflexive property worth naming rather than discovering. The 643 above is the count **with** this
+a reflexive property worth naming rather than discovering. The 647 above is the count **with** this
 file present.
 
 ### 4.1 · Mutation counterfactual — per resolved arm, never the exit code
@@ -322,5 +322,5 @@ increment.
 | New checker rule run over a corpus believed correct | ✓ | §1.6 — 4 citations resolve, basenames unambiguous (C-53) |
 | False records corrected in place, not edited away | ✓ | §1.4 — correction marked and dated |
 | Source-file budget | ✓ | 1 of 4 |
-| Both lanes green, ledger reconciles | ✓ | §4 — 626 + 17 = 643 |
+| Both lanes green, ledger reconciles | ✓ | §4 — 630 + 17 = 647 |
 | Secrets | ✓ | none touched; no credential, path or token in any diff |

@@ -131,13 +131,13 @@ control untestable. The guard raises **without** `from` and every net arm raises
 
 ## Post-fix state
 
-| Measure | At `01d7578` | **After Inc-4 (HIGH-A)** |
-|---|---|---|
-| fast lane | 531 passed, 17 deselected, exit 0 | **626 passed, 17 deselected**, exit 0 |
-| slow lane | 17 passed, 531 deselected, exit 0 | **17 passed, 626 deselected**, exit 0 |
-| collected | 548 = 429 base + 119 | **643** = 548 + 12 boundary arms + 83 artifact-claims arms |
-| ruff | 29 whole-tree (= base) | **29** whole-tree (= base); clean on all touched files |
-| mutation battery | 24 mutants, every one reddening a named arm | **+4** (`MX1`, `MX2`, `MX11`, `MX3`): **0 → 6 / 6 / 6 / 2** RED arms |
+| Measure | At `01d7578` | Inc-4, HIGH-A (`d75f0fd`) | **Final — conditions discharged (`a5db8df`)** |
+|---|---|---|---|
+| fast lane | 531 passed, 17 desel, exit 0 | 626 passed, 17 desel, exit 0 | **630 passed, 17 deselected**, exit 0 |
+| slow lane | 17 passed, 531 desel, exit 0 | 17 passed, 626 desel, exit 0 | **17 passed, 630 deselected**, exit 0 |
+| collected | 548 = 429 base + 119 | 643 = 548 + 12 + 83 | **647** = 548 + 16 boundary arms + 83 artifact-claims arms |
+| ruff | 29 whole-tree (= base) | 29 (= base) | **29** whole-tree (= base); clean on all touched files |
+| mutation battery | 24 mutants, every one reddening a named arm | **+4** (`MX1`, `MX2`, `MX11`, `MX3`): **0 → 6 / 6 / 6 / 2** | **+4 more** on the derived class set: **2 / 1 / 1** RED, and one deliberate **0** carried as an open gap |
 
 **The merge was held at `01d7578`,** correctly: a HIGH had been raised, and under the standing
 authorization a HIGH returns to the operator rather than being self-cleared. The operator then
@@ -145,5 +145,17 @@ directed the close-out to verify the new HIGH independently, fix it with real ar
 before merging. **Inc-4 is that work** (`03-increments/increment-004.md`): the HIGH was reproduced
 first — four mutants, 0 RED arms of 548 each — then fixed, then re-measured at 6 / 6 / 6 / 2.
 
-**A conditional verdict is not an authorisation**, so the merge remains gated on an independent
-re-confirmation over the post-fix tree, scoped to HIGH-A and its arms.
+**A conditional verdict is not an authorisation.** Two further independent passes followed, and each
+is recorded in `04-qa-adversarial.md`:
+
+| Pass | Target | Verdict |
+|---|---|---|
+| re-confirmation | `d75f0fd` | **PASS WITH CONDITIONS** — no HIGH; 2 MEDIUM (a docstring naming a gate it is not; a carry with a count stale at its own tip) |
+| condition-discharge | `a5db8df` | **DISCHARGED WITH NEW CONDITIONS** — no HIGH; 3 record-truth findings, all one-token counts |
+
+Each round's findings were **reproduced before being fixed**, never accepted on report. The
+final round's conditions are discharged in `a5db8df`'s successor, together with a **mechanical sweep
+of every live numeric claim** across the batch's authored artifacts — which caught a fifth stale
+figure (this very table) that no reviewer had flagged. Four consecutive rounds produced *a false
+figure inside the correction of a false figure*; the sweep exists because vigilance demonstrably did
+not converge.
