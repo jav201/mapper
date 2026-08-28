@@ -148,7 +148,9 @@ def test_the_checker_can_see_its_corpus():
     artifacts = _authored()
     assert len(artifacts) >= 5, f"only {len(artifacts)} authored artifacts found"
     text = "\n".join(a.read_text(encoding="utf-8") for a in artifacts)
-    # MEASURED, not guessed: the authored set carries 8 such citations today.
+    # MEASURED, not guessed: the authored set carries 10 such citations today.
+    # (It read 8, correct at `01d7578` and stale from the next commit on -- this
+    # comment is itself the decay it warns about.)
     # The floor exists to catch the regex silently ceasing to match, not to
     # mandate a citation count -- a predicted threshold false-fails correct work
     # (C-39), and the first draft of this line said 10 and did exactly that.

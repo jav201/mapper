@@ -84,8 +84,11 @@ rather than re-reads. The sweep is cheap and repeatable, and the next session sh
 trusting any figure below:
 
 ```
-# every live figure, every authored artifact, printed with its line, judged one by one
-LIVE = {647, 630, 643, 626, 548, 531, 429, 100, 96, 83, 41, 40, 16, 12}
+# the count figures most at risk of decay, printed with their line, judged one by one.
+# NOT total -- and saying so matters, because a totality claim that is not total is the
+# very defect this table enumerates.  Scope it to the artifacts AND the source: 6 of the
+# 13 rows above live in `mapper/` or `tests/`, which an artifact-only sweep cannot see.
+LIVE = {647, 630, 643, 626, 548, 531, 429, 100, 96, 84, 83, 41, 33, 21, 17, 16, 12}
 ```
 
 | # | Shape | Where | Found by |
@@ -102,12 +105,18 @@ LIVE = {647, 630, 643, 626, 548, 531, 429, 100, 96, 83, 41, 40, 16, 12}
 | 10 | *"3 checkable citations"* where disk says 4 — **inside the paragraph headed HONEST SCOPE** | `tests/test_repair_artifact_claims.py` | condition-discharge review (NEW-1) |
 | 11 | two restatements of a superseded count left behind by the correction of that count | `increment-004.md` | condition-discharge review (NEW-2) |
 | 12 | this table's own post-fix figures, stale one commit after being written | `04-gate-findings-disposition.md` | **the numeric sweep** (no reviewer flagged it) |
-| 13 | this very row's line citation, stale after the docstring it points at grew | `05-carries.md` | **the numeric sweep** |
+| 13 | **row 5's** line citation, stale after the docstring it points at grew | `05-carries.md` | **the numeric sweep** |
 
-**Note where they live: 3 of the 6 are COMMENTS in `mapper/`, not lines in `.dev-flow/`.** The
-checker as landed read only the artifacts, so it was structurally unable to see half the corpus.
-**Fixed at close-out: the corpus now includes `mapper/**/*.py`**, with its own non-degeneracy floor
-so a rename cannot silently empty it.
+**Note where they live — re-derived against the table above, not carried:** of the 13 rows,
+**4 are comments or docstrings in `mapper/`** (1, 2, 5, 7), **2 are in `tests/`** (8, 10), and
+**7 are `.dev-flow/` lines**. The checker as landed read only the artifacts, so it could not see the
+`mapper/` half at all. **Partly fixed at close-out: the corpus now includes `mapper/**/*.py`**, with
+its own non-degeneracy floor so a rename cannot silently empty it.
+
+**`tests/` is still OUTSIDE the corpus, and that is where rows 8 and 10 live** — so the checker
+remains blind to 2 of the 13 recorded instances. Widening it there is the honest next rung and is
+**deliberately not done here**: `tests/` is dense with test names and citations, so it is a real
+false-positive risk that needs its own verification pass (C-53), not a merge-gate edit. Carried.
 
 **And #6 is NOT mechanisable by this checker, which is the honest boundary.** *"X is gated"* is a
 claim about what a **mutation** does; settling it requires **running** the mutation, which no text
