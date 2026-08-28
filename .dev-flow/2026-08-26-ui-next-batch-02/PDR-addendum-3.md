@@ -89,8 +89,19 @@ But the alarm was not baseless: **no obligation was attached to `Inc-3`'s seat r
 
 - **C-D25a — every increment that changes a seat row declares its OWN row diff in its packet**
   (rows added / removed / rebound, by seat key), and pins it the way `#D5b` pins `Inc-4`'s.
-  Applies to `Inc-3` (4 rows), `Inc-4` (3 rows), `Inc-6`, `Inc-9`. **A pin per diff, no global cap** —
-  a global cap would price a well-cut increment against an unrelated one's spending.
+  **A pin per diff, no global cap** — a global cap would price a well-cut increment against an
+  unrelated one's spending.
+  > **CORRECTED 2026-08-27 at PDR-3, on two independent lens findings.**
+  > **(a) The increment set was wrong.** It named the **vacated** `Inc-6` (`01-requirements.md:5586`)
+  > and omitted `Inc-8`, which `:4539-4540` puts in the collision set. The set was stated **four ways
+  > across the batch and no two agreed**. **Derived, not transcribed — the true set is `Inc-3`,
+  > `Inc-4`, `Inc-8`, `Inc-9`.** `keymap.py` must be added to `Inc-8`'s §5.4 budget row, which omits
+  > it (→ 4 of 4 source files, no breach).
+  > **(b) It had no oracle — C-40 limb 1.** A declared diff joined to nothing is not a pin: rebind a
+  > fifth seat row and declare four, and `duplicate_chords()` still returns `[]` because no duplicate
+  > is created. **The declared diff shall be asserted EQUAL to the entry/exit difference of
+  > `bindings_for(scope)`** — which `C-D25b`'s whole-seat pin already computes, so this binds two
+  > existing artifacts rather than building a third.
 - **C-D25b — `duplicate_chords()` and the whole-seat pin run on ENTRY and EXIT of each of the four**,
   as `#D5b` already requires. Unchanged, restated because it is now the *only* cross-increment control
   on `keymap.py`.
@@ -234,9 +245,48 @@ batch with `UX2-C-11` (`B-31`/`B-32`) — they share one confirmation-affordance
 durable-data-loss defect on `master`**, not a design gap: one keystroke, no confirmation, no explicit
 edit gesture, permanent overwrite of a tracked file. Deferring the *affordance design* is
 defensible; leaving the *data loss* live for a whole batch is a separate decision, and the lenses are
-asked to rule on it explicitly rather than to inherit it. **If any lens refuses, the minimal
+asked to rule on it explicitly rather than to inherit it. ~~**If any lens refuses, the minimal
 alternative is stated:** gate `_commit` on a non-empty delta, which also closes `UX2-C-11` and is one
-predicate, no new surface, no design ruling.
+predicate, no new surface, no design ruling.~~
+
+> ### ✗ STRUCK 2026-08-27 — THE STATED MINIMAL ALTERNATIVE IS FALSE, AND IT WAS THE DANGEROUS KIND
+>
+> **The remedy above does not close `UX2-C-01`.** It was written by the orchestrator and never
+> executed — a remedy is a hypothesis, and this one is false. **Three lenses caught it independently
+> and two of them ran it:**
+>
+> - **security executed it:** the non-empty-delta gate is **already implemented at
+>   `mapper/app.py:1393-1395`**, and the overwrite reproduces **with it in place** —
+>   `erp[Sistema ERP Legacy]` → `erp[n]`, one keystroke, both `.mmd` and `.yml` rewritten, 84 of 86
+>   sidecar lines. Positive control that the guard is live at all: focus + blur with no keystroke
+>   writes **0 of 8**.
+> - **ux executed it** on a fresh app per target: **7 of 8** focusables overwrite. It also ran the
+>   obvious second candidate — clearing Textual's `select_on_focus` — which **converts destruction
+>   into corruption**, still 7 of 7 written to disk.
+> - **architect derived it statically:** pressing `n` *types into the focused `Input`*, so
+>   `'ACTA-2011-034' → 'n'` is a **genuinely non-empty delta**. The predicate is **invariant under
+>   the defect it was offered to fix** (C-40 limb 1).
+>
+> **Why this was worse than offering nothing.** A lens that refused the deferral and routed through
+> this remedy would have implemented it, found it **already present**, and recorded `UX2-C-01` as
+> closed — with the data loss untouched. **The escape hatch launders a refusal into a silent pass**,
+> inside the very artifact that exists to keep the deferral honest.
+>
+> **What the remedy actually closes:** `UX2-C-11` / `B-31` only — and even that is now in doubt,
+> since security could not reproduce `UX2-C-11`'s stated empty-delta mechanism (`insp-title` *did*
+> change; the empty-delta control is 0 of 8). `B-31` inherits an **unverified observation**, not a
+> diagnosed mechanism.
+>
+> **Both cheap fixes fail, and that STRENGTHENS the deferral rather than weakening it:** this is a
+> design ruling with no cheap fix, not a cheap fix postponed. Candidate real remedies, none of them
+> one-line and all needing the confirmation-affordance ruling: a **dirty-since-focus flag**
+> (`Input.Changed`), or dropping `on_input_blurred` (`inspector.py:277-278`) and keeping the shipped
+> `on_input_submitted` (`:275`).
+>
+> **Standing record, required by every lens that ruled:** `UX2-C-01` is carried as a **KNOWN LIVE
+> DURABLE-DATA-LOSS DEFECT ON `master`**, with its reproduction and its two failed remedies written
+> down — so the follow-on batch inherits a defect, not a discovery. `mapper/widgets/inspector.py` is
+> in **no** live increment's source budget, so this batch does not touch or worsen it.
 
 ---
 

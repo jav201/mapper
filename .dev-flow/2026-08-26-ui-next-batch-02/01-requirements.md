@@ -1670,15 +1670,23 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   that pin, so `Inc-3` **shall** re-run `duplicate_chords()` and the whole-seat set equality, exactly
   as `Inc-4` and `Inc-9` must — this is the third participant in `keymap.py`'s three-way collision
   (§5.4), and it is the one that had no declared rows until now.
-- **⚠ ROUTED — `#D10`'s SEAT-DIFF CAP IS NOW ARITHMETICALLY BREACHED, AND THE CAP IS NOT THIS LANE'S
-  TO AMEND (`C-44`).** `#D10` caps a seat diff at **three rows**, reviewed row-by-row at DDR. This
-  requirement adds **four** (`H` `J` `K` `L`) in `Inc-3`. Separately, `UX2-C-02` proposes a fourth
-  row in the legend increment. **Neither breach is resolvable inside a requirements document** —
-  `#D10` is a sealed PDR decision. **The orchestrator shall route to the PDR lane** the question of
-  whether the cap is per-increment (in which case `Inc-3` needs it raised to four and `UX2-C-02`'s
-  increment separately to four) or per-batch (in which case it needs a larger revision). **This
-  requirement does not assume the answer**, and `Inc-3` shall not open until the cap is ruled —
-  otherwise the increment breaches a sealed decision on its first commit.
+- ~~**⚠ ROUTED — `#D10`'s SEAT-DIFF CAP IS NOW ARITHMETICALLY BREACHED …** `Inc-3` shall not open
+  until the cap is ruled.~~ — **STRUCK 2026-08-27 by `PDR-addendum-3#D25`. THERE IS NO BREACH AND
+  `Inc-3` IS UNBLOCKED.** The premise executed FALSE: the "three-row seat-diff cap" is a
+  **regression PIN on `Inc-4`'s own diff**, not a per-increment budget. `PLAN.md:244`, the pin's
+  carrier, reads *"the seat-spec diff is **exactly one changed row plus two added rows**, reviewed
+  row-by-row at DDR"* — an **equality on `D10`'s own diff**, not a bound on anyone else's. The
+  sealed `#D5b` enumerates those same three rows and its **very next sentence** names `Inc-3` as a
+  `keymap.py` toucher while imposing only `duplicate_chords()` + the whole-seat pin on it — **no row
+  budget.** Ratified independently by all four PDR-3 lenses; the architect located the carrier
+  clause the ruling itself had missed.
+- **⚠ The bare id `#D10` is AMBIGUOUS and is not used normatively here.** `PLAN.md:244` `D10` is the
+  Q-3 seat rebind; the sealed `PDR-…#D10` is the Q-10 **hue** dispositions. Two registries, one id
+  grammar. Carried as `B-34`. Cite `#D5b` for the pin and `PDR-addendum-3#D25` for its scope.
+- **`Inc-3` owes instead (`C-D25a`, `C-D25b`):** its **own** four-row seat diff, declared in its
+  packet and asserted **equal to the entry/exit difference of `bindings_for("map")`** — a pin per
+  diff, never a global cap. Executed basis: all four chords arrive as their own `event.key`, all
+  four free in map scope, `H` inert on the shipped screen, `duplicate_chords()` → `[]`.
 
 ##### LLR-N06.1.1 — pan offsets travel in the view state
 
@@ -4537,8 +4545,12 @@ be gated.
 - **Acceptance:** `AT-053`
 - **Owning increment:** **`Inc-8`** (§5.4), which owns `screens/help.py` and is where the vocabulary
   lands. It adds seat rows, so `Inc-8` joins `keymap.py`'s collision set and shall re-run
-  `duplicate_chords()` and the whole-seat pin — **and its rows count against `#D10`'s cap**, which
-  §3.4 already routes to the PDR lane as arithmetically breached.
+  `duplicate_chords()` and the whole-seat pin — ~~**and its rows count against `#D10`'s cap**, which
+  §3.4 already routes to the PDR lane as arithmetically breached.~~ **STRUCK 2026-08-27 by
+  `PDR-addendum-3#D25`: there is no cap for `Inc-8`'s rows to count against.** `Inc-8` owes
+  `C-D25a` — its **own** declared seat diff, asserted equal to the entry/exit difference of
+  `bindings_for(scope)` — and nothing else. Do not cite the bare `#D10` here; it resolves to two
+  different decisions (`B-34`).
 - **⚠ ROUTED — a design question this requirement deliberately does not answer.** Whether a flat
   scrolling panel of roughly forty-four rows is the right information design for the legend, versus
   a two-pane or tabbed layout, is a **ux ruling**, not a requirements edit. `01b` §3.8 already
@@ -7372,9 +7384,12 @@ defers its bound and does not repair it.
   requirement was unfalsifiable for want of a keystroke.
 - **Executed:** all four arrive as their own `event.key`, all four free in map scope, `H` changes
   nothing on the shipped screen, `duplicate_chords()` returns `[]`.
-- **OPEN — routed.** Four rows breaches `#D10`'s three-row seat-diff cap, and `#D10` is a **sealed
-  PDR decision this lane may not amend**. Routed with the per-increment/per-batch question stated;
-  **`Inc-3` shall not open until the cap is ruled.**
+- ~~**OPEN — routed.** Four rows breaches `#D10`'s three-row seat-diff cap … **`Inc-3` shall not
+  open until the cap is ruled.**~~ — **CLOSED 2026-08-27 by `PDR-addendum-3#D25`: NO BREACH,
+  `Inc-3` UNBLOCKED.** The figure is a **pin on `Inc-4`'s own diff**, not a per-increment budget;
+  its carrier `PLAN.md:244` states an **equality** on that diff. `Inc-3` owes `C-D25a` instead — its
+  own four-row diff, asserted equal to the entry/exit difference of `bindings_for("map")`. The bare
+  `#D10` cited above is **ambiguous** and superseded by `#D5b` + `#D25` (`B-34`).
 
 #### A-66 · `LLR-N06.2.4`'s oracle is replaced — it false-failed correct work at every width *(`UX2-C-04`)*
 
