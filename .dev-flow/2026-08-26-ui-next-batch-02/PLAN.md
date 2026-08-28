@@ -782,3 +782,71 @@ question before stating the number.
 | **D23** | **Validator pinned to committed `4fdefdd`** for every measurement in this batch | The canon file is being rewritten by a concurrent session; an unpinned tool makes every figure unreproducible |
 | **D24** | `~/.claude` left **untouched** — not committed, not reverted, not stashed | C-44: committing another session's work in progress is its own defect |
 | **D25** | **No tree edits while any lens ran** | The corpus records a phantom gate-blocking finding produced by exactly one concurrent read of an artifact mid-write |
+
+---
+
+## 16 · RE-SCOPE — 2026-08-27, operator decision (option A)
+
+### 16.1 — Why the batch was re-scoped rather than folded as briefed
+
+The resumed session's briefing named **six** remaining items for amendment set 3. The RIDER-1
+reconciliation (`02g-lens-reconciliation.md`) executed all four lenses' own condition ledgers
+against the tree and measured the live set at **≈39 of 51 union items**, of which **≈11 require
+design rulings**, plus **4 newly raised findings** and **2 live security defects on `master`**.
+
+**This is C-43 at batch level: the authorization to spend the final PDR iteration rested on a
+premise about remaining scope that executes FALSE.** Three of the briefed six were also wrong in
+detail — the orphan ATs are **six** not three; the legend census is **23**, and striking the
+byte-identical `V4` duplicate takes it to **22**, so "correct 21 to 23" would be wrong twice; and
+`S-17`, `UX-3` and `S-18` sit in this PLAN's own §15.4 twelve-blocker table while appearing in the
+briefed list not at all.
+
+The structural cause is mechanical: `git log --oneline -- .../01-requirements.md` returns **one
+commit** (`8675151`). The requirements document has not been edited since the lenses wrote their
+verdicts, so every requirement-side finding is frozen exactly where its lens left it. Only code
+moved, and the repair batch touched only `mapper/store.py`, `docs/ARCHITECTURE.md` and five test
+files. **All 11 discharges are that shipped code**; no lens condition was closed by a document fold.
+
+Rather than spend the final iteration (soft cap 3) on a set five times the briefed size, the batch
+was stopped and referred. **The operator chose option A — re-scope.**
+
+### 16.2 — The cut
+
+| Cut to the follow-on design batch | Why |
+|---|---|
+| **US-N14 «lente»** (§3.7) | Its two blocker-class UX conditions are design rulings, not document edits: `HLR-N14.3`'s two threshold clauses cannot both be satisfied, and the near-miss **destroys operator data**; and the story has **no declared entry chord**, so no acceptance can drive its real gesture |
+| **`S-18` render work-budget, PAIRED with `S-19`** | `S-19` is `S-18`'s **PRECONDITION**, not its sibling. Measured on the 51-node/410-edge shape: Layered **1283 ms**, Outline **337 ms**, **Radial 142 ms — UNDER the 250 ms budget**. So `k = 0` on Radial and threshold 4 cannot distinguish a correct implementation from a missing one. **The follow-on batch's fixture must NAME ITS RENDERER**, or S-18 is untestable by construction |
+
+The cut removes ≈7 of the ≈11 design rulings (`UX2-C-01`, `UX2-C-02`, `S-18`, `S-19`, `P2-C8`,
+security `C-3`, and part of `UX2-C-06`), leaving iteration 3 to target **US-N06 · US-N07 · US-N13 ·
+US-N16 · palette v2**.
+
+**Nothing is deleted.** The deferred text stays in place, marked, so the follow-on batch inherits
+the work rather than re-deriving it.
+
+### 16.3 — Decisions taken in this pass (recorded, not asked)
+
+| # | Decision | Why |
+|---|---|---|
+| **D26** | **The strict rule is adopted: a code fix never discharges a missing requirement** | It is what keeps `S-17` visible. `mapper/store.py` cites `LLR-STO.1.1` normatively in **five docstrings**, and that identifier has no statement, threshold, `TC`, `AT` or traceability row anywhere. The shipped fix made the hole *harder* to notice, because the tree now looks like the requirement is being obeyed. Under this rule the architect lens is **14 of 14 LIVE**, not 12 |
+| **D27** | **`B-29` and `B-30` ride INSIDE this batch** as one small repair increment, with requirement stubs in amendment set 3 | Operator rider 1, orchestrator's call. Measured: `B-30` is one line with **zero** tests asserting the message text; `B-29` is ~3 lines and **only one** test asserts `load_warnings == []`, while the real fixture yields 0 warnings and no phantom. Both are shipped defects with mechanical fixes, not design rulings, so they do not burden the PDR. **Both are newly reachable with zero operator action** — US-N13's sala loads every map on mount |
+| **D28** | **`B-29`'s guard ships with a SYNTHETIC fixture** | The guard is a **no-op on the current tree**: no fixture carries a sidecar id absent from its `.mmd`, so a mutation of the guard changes nothing today and the suite stays green either way. C-55 limb 2 — the case the tree lacks must be constructed, or the guard is untested however green the suite |
+| **D29** | **The A3 census is settled by AST and stated as question + instrument + SHA** | Four generations of this number were wrong because *"blast radius"* names three different sets. **Generation five was produced during the reconciliation itself, by the orchestrator**: a grep returned 24 sites, the 24th being `renderer.render(...)` inside a **docstring** at `mapper/widgets/rail.py:180`. Settled: **23 arg-ful sites / 10 files / 6 definitions** at `3fe0e4b`. A grep cannot tell a call from a mention of a call |
+| **D30** | **Amendment set 3 is authored in TWO SEQUENTIAL passes on `01-requirements.md`, never in parallel lanes** | C-52 condition 2: two lanes may not edit the same file, not even different regions. `PLAN.md` and `state.json` are disjoint and were taken concurrently |
+| **D31** | **PR #7 (the reconciliation ledger) merged docs-only before the fold** | Landed evidence, no gated verdict involved. An unmerged evidence branch is the un-landed-record defect (C-44) this project keeps naming |
+
+### 16.4 — The fixture-corruption incident, recorded as a live demonstration
+
+During the UX lens audit, a probe pointed `MapperApp` at the real `fixtures/` directory. The
+inspector's commit-on-blur **wrote through**: `fixtures/legacy.mmd` and `fixtures/legacy_nodos.yml`
+were modified on disk, turning `erp[Sistema ERP Legacy]` into `erp[n]`.
+
+Restored read-only via `git show HEAD:<path>` (a mutating `git checkout` was correctly refused under
+the audit's no-mutating-git instruction) and **verified by sha256 against HEAD — both MATCH**. The
+first probe's output was discarded; every later probe ran in a temp directory.
+
+**A single keystroke, with no confirmation and no explicit edit gesture, permanently replaced an
+acta reference in a tracked file.** This is the strongest available evidence for `UX2-C-01`,
+obtained by accident, on the real store. **It travels with US-N14 to the follow-on design batch**,
+which is where the confirmation-affordance ruling lives. Carried as a batch risk, not merely as an
+incident log.

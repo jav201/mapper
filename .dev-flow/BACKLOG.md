@@ -6,8 +6,8 @@
 
 | Field | Value |
 |---|---|
-| Last refresh | **2026-08-27** (`2026-08-26-repair-batch` close) |
-| Base ref at refresh | `origin/master` = `d6b60e6` (the batch's own commits land on top) |
+| Last refresh | **2026-08-27** (`2026-08-26-ui-next-batch-02` — PDR iteration-3 lens reconciliation) |
+| Base ref at refresh | `origin/master` = `20f86de` (the batch's own commits land on top) |
 
 ---
 
@@ -136,3 +136,28 @@ frozen tree.
 | P-18 | **A hand-maintained census is a defect, including in a requirements table.** §6's AT/TC counts were wrong, corrected once at the re-gate (`G5`), and wrong again one increment later (`M-1`). Fourth instance in one batch of *the work was done and the record was not landed*. The count is now stated as the output of a walk over `tests/test_repair_*.py`, not maintained by hand | gate `M-1` |
 | P-19 | **A hand-count in a carry is the same defect as a hand-count in a census.** `PLAN.md` said "three screens push `HelpScreen()` with no scope"; disk has five | gate `L-3` |
 | P-20 | **A transcript that closes non-green must say why, in the transcript.** `mutation-battery-inc4-supplement-2.txt` closed `exit=1` and said nothing; C-46's restore proof was unmet as written until it was annotated at the close | gate `L-2` |
+
+---
+
+## New carries from `2026-08-26-ui-next-batch-02` (PDR iteration-3 reconciliation)
+
+Raised by the four parallel lens audits recorded in
+`.dev-flow/2026-08-26-ui-next-batch-02/02g-lens-reconciliation.md`. **None of these appears in any
+earlier ledger** — they were found by re-executing the lenses' own conditions against the tree.
+
+### Correctness
+
+| # | Item | Routing |
+|---|---|---|
+| B-29 | **A phantom sidecar node inflates `coverage()`'s denominator with `warnings=[]`.** A sidecar id matching no parsed `.mmd` node is still added (`mapper/store.py:400-401`), so the denominator moves silently, `load_or_notice`'s warning arm (`mapper/app.py:459`) never fires and `LLR-N13.1.5`'s per-map containment **never engages**. Measured `coverage()=(2,3)`, `warnings=[]`. The type half is fixed; the phantom half is not. Minimal fix: record a load warning, so containment engages — **not** a change to `coverage()` semantics. **The guard is a no-op on the current tree** (no fixture carries a phantom), so it ships with a synthetic fixture carrying exactly that case (C-55 limb 2) | **OWNED BY THIS BATCH** — requirement stub in amendment set 3 + repair increment. Newly reachable: US-N13's sala loads every map on mount |
+| B-30 | **`MapStore.load` leaks the operator's absolute path — username included — into a toast.** `mapper/store.py:456` interpolates `mmd_path`; both callers render `str(exc)` into a notification (`mapper/app.py:453`, `:1181`). It sits **four lines above** a comment asserting threshold 3 closed exactly this class — the `except` arm was fixed, the pre-check was not. One-line fix: interpolate `map_id`, matching every other message in the function | **OWNED BY THIS BATCH** — requirement stub + repair increment. Zero tests assert the message text |
+| B-31 | **`_commit` rewrites the sidecar on blur even when the delta is EMPTY.** `insp-title` and `insp-notes` both show `SIDECAR REWRITTEN=True` with no value change — a durable disk write for a no-op edit | Follow-on **design** batch, with US-N14 «lente» — same confirmation-affordance ruling as the data-loss family |
+| B-32 | **A damaged-map load fires the toast twice, both with an EMPTY title.** Observed `[('', 'no se pudo cargar roto: …'), ('', '…')]` — two notifications, neither titled | Follow-on design batch (US-N13 card-state copy is in this batch, but the double-fire is inspector-adjacent) |
+
+### Process
+
+| # | Item | Origin |
+|---|---|---|
+| P-21 | **A grep cannot tell a call from a MENTION of a call, and this cost four generations of one number.** The A3 `.render` census was wrong four times because *"blast radius"* names three different sets. Generation five was produced during the reconciliation itself: a grep returned 24 sites, the 24th being `renderer.render(...)` **inside a docstring** at `mapper/widgets/rail.py:180`. Settled by AST at **23 arg-ful sites / 10 files / 6 definitions**. **Rule: a census over source states its QUESTION, its INSTRUMENT and its measured-at SHA, and uses a language-aware parse — never a substring search** | `02g` §3 |
+
+
