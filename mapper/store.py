@@ -7,7 +7,7 @@ import sqlite3
 from dataclasses import MISSING
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, get_type_hints
 
 import yaml
 
@@ -102,14 +102,26 @@ def _str_map_fields(cls: type) -> tuple[str, ...]:
     positions per entry, not zero.  `Ficha.fields` is the same shape and has always
     been coerced; excluding `Document.tags`/`inherited` was a HAND EXCLUSION on a
     reason that did not distinguish them from `fields` (whole-branch QA, HIGH-1).
-    Derived here so the exclusion cannot return: adding another `dict[str, str]`
-    field to any round-tripped dataclass extends the coercion automatically.
+
+    The annotation is RESOLVED, not spelled-matched.  Under `from __future__ import
+    annotations` every annotation is a string, and a textual match reads
+    `Dict[str, str]`, `Mapping[str, str]`, a type alias and a quoted annotation as
+    non-matches: such a field would fall out of the coercion AND out of the census
+    that guards it, simultaneously and silently.  That is HIGH-1's own mechanism one
+    level down (confirmation review, MEDIUM-C).
+
+    Scope, stated exactly rather than generally -- the previous wording here claimed
+    "any round-tripped dataclass" and was FALSE against disk, which is the same
+    defect F2 fixed in this commit.  This function's only caller is
+    `_graph_from_sidecar`'s `Document` branch, so it extends `Document`'s coercion
+    automatically.  `Ficha.fields` is coerced at its own site, whose record
+    coordinates differ (`{nid}.{key}` against `document[i].{field}.{key}`) and are
+    pinned by shipped arms, so routing it through here would be a behaviour change,
+    not a cleanup.  No other round-tripped dataclass declares a `dict[str, str]`
+    today, and `test_at_p02i` fails loudly if one appears.
     """
-    return tuple(
-        name
-        for name, spec in cls.__dataclass_fields__.items()
-        if spec.type in ("dict[str, str]", "dict[str,str]")
-    )
+    hints = get_type_hints(cls)
+    return tuple(n for n in cls.__dataclass_fields__ if hints[n] == dict[str, str])
 
 
 def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str, str]:

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import fields as dc_fields
+from typing import get_type_hints
 
 import pytest
 import yaml
@@ -84,12 +85,17 @@ def _text_field_names(cls) -> tuple[str, ...]:
 
 
 def _str_map_field_names(cls) -> tuple[str, ...]:
-    """The `dict[str, str]` fields -- text on BOTH sides, two positions each."""
-    return tuple(
-        f.name
-        for f in dc_fields(cls)
-        if f.type in ("dict[str, str]", "dict[str,str]")
-    )
+    """The `dict[str, str]` fields -- text on BOTH sides, two positions each.
+
+    RESOLVED, not spelled-matched.  Under `from __future__ import annotations` every
+    annotation is a string, and a textual match reads `Dict[str, str]`,
+    `Mapping[str, str]`, a type alias and a quoted annotation as non-matches -- so
+    such a field would fall out of the product's coercion AND out of this census
+    together, which is HIGH-1's mechanism one level down (confirmation review,
+    MEDIUM-C).  `test_at_p02i` is the totality guard that makes the residue loud.
+    """
+    hints = get_type_hints(cls)
+    return tuple(n for n in cls.__dataclass_fields__ if hints[n] == dict[str, str])
 
 
 def _derived_positions() -> list[str]:
@@ -574,6 +580,120 @@ def test_at_p02f_a_well_formed_map_records_no_collision(tmp_path):
     graph = _write(tmp_path, BASE_SIDECAR).load("m")
     assert [w for w in graph.load_warnings if "duplicado" in w] == [], (
         f"a clean map reported a collision: {graph.load_warnings!r}"
+    )
+
+
+# --- HIGH-A: the str-map's OTHER TWO LIMBS, which had no arm in 548 ------------
+#
+# `_coerce_str_map` has three limbs; until these arms landed only the scalar ladder
+# had one.  The census poisons POSITIONS (`document.tags.key` / `.value`) and
+# `_poison` always writes a DICT into the field, so no arm anywhere made `tags` or
+# `inherited` stop being a mapping, and no arm ever put two colliding keys in one.
+# Measured on the pre-fix tree: four mutants -- delete the non-mapping guard,
+# silence its record, return the value's repr instead of refusing, drop the
+# collision record -- each left ALL 548 arms green.  The sibling `Ficha.fields`,
+# which the whole HIGH-1 argument rests on, has an arm per limb; this family had
+# one of three.  That asymmetry IS the finding: the census grew, the implementation
+# grew with it, and the gate did not (confirmation review, HIGH-A).
+#
+# Parametrized over `_str_map_field_names(Document)` so a third `dict[str, str]`
+# field extends these arms with it, rather than needing to be remembered.
+
+_BAD_STR_MAPS = {"scalar-str": "junk", "int": 7, "list": [1, 2]}
+
+
+@pytest.mark.parametrize("field_name", _str_map_field_names(Document))
+@pytest.mark.parametrize("case", sorted(_BAD_STR_MAPS))
+def test_at_p02g_a_non_mapping_str_map_is_refused_and_recorded(
+    tmp_path, field_name, case
+):
+    """A non-mapping `dict[str, str]` is refused, RECORDED, and never denies the map.
+
+    Three thresholds, and each is a different mutant's death:
+      * the map still LOADS -- without the guard a hand-edited `tags: junk` makes
+        the whole map unloadable, the `AttributeError` masked behind a typed error;
+      * the field is `{}`, NOT a repr -- this is `M-STO-b` ("let containers coerce
+        via `str(value)`", `01-requirements.md`) applied to the map-valued field,
+        and the requirement names it a MUST-GO-RED variant;
+      * the refusal is RECORDED -- silent discard destroys the operator's field on
+        the next save, which is this batch's own F1 standard: loud denial is a
+        report, silent discard is not.
+    """
+    sidecar = copy.deepcopy(BASE_SIDECAR)
+    sidecar["documents"][0][field_name] = _BAD_STR_MAPS[case]
+    graph = _write(tmp_path, sidecar).load("m")
+    doc = next(iter(graph.documents.values()))
+    assert getattr(doc, field_name) == {}, (
+        f"{field_name}/{case}: a non-mapping must be REFUSED, not coerced to a "
+        f"repr; got {getattr(doc, field_name)!r}"
+    )
+    assert f"campo ilegible: document[0].{field_name}" in graph.load_warnings, (
+        f"{field_name}/{case}: the refusal was SILENT; got {graph.load_warnings!r}"
+    )
+
+
+@pytest.mark.parametrize("field_name", _str_map_field_names(Document))
+def test_at_p02h_a_str_map_key_collision_is_recorded(tmp_path, field_name):
+    """Two raw keys that coerce to one string must be recorded, not silently merged.
+
+    Keeping the last deletes the first from disk on the next save -- the exact loss
+    `_coerce_str_map`'s own comment says it prevents, and the loss `test_at_p02d`
+    already pins for `Ficha.fields` and the node ids.  The expected record was
+    EXECUTED against the implementation, not read off the format string.
+    """
+    sidecar = copy.deepcopy(BASE_SIDECAR)
+    sidecar["documents"][0][field_name] = {1: "from-int", "1": "from-str"}
+    graph = _write(tmp_path, sidecar).load("m")
+    expected = f"campo duplicado: document[0].{field_name}.'1' <- '1'"
+    assert expected in graph.load_warnings, (
+        f"{field_name}: expected the exact record {expected!r}; "
+        f"got {graph.load_warnings!r}"
+    )
+
+
+# Every field of a round-tripped dataclass is text, a str-map, or EXPLICITLY
+# declared non-text.  Declared here rather than derived BECAUSE it is the exception
+# list: it is small, and the guard's whole value is that reality diverging from it
+# fails loudly.
+_EXPECTED_NON_TEXT = {
+    Ficha: ("attachments",),
+    Attachment: (),
+    SchemaField: ("required",),
+    Document: ("template",),
+}
+
+
+@pytest.mark.parametrize(
+    "cls", sorted(_EXPECTED_NON_TEXT, key=lambda c: c.__name__), ids=lambda c: c.__name__
+)
+def test_at_p02i_every_model_field_is_classified(cls):
+    """A field spelled a new way must fail LOUDLY instead of vanishing from both sides.
+
+    THIS GUARD PROTECTS A CONCLUSION, NOT A BEHAVIOUR (C-55 limb 1) -- do not
+    "simplify" it into an implementation detail.  HIGH-1 existed because
+    `Document.tags`/`inherited` were round-tripped as text while sitting outside the
+    census; the derivations resolve annotations now, but `Mapping[str, str]`,
+    `dict[str, str] | None` and a type alias still classify as NEITHER text nor
+    str-map.  Such a field would fall out of the coercion and out of the census
+    simultaneously, and no other arm would redden -- because the census derives the
+    very set that omitted it.  This is `_EXPECTED_REFUSAL`'s totality assertion one
+    level up, over model FIELDS rather than positions.
+    """
+    every = {f.name for f in dc_fields(cls)}
+    classified = set(_text_field_names(cls)) | set(_str_map_field_names(cls))
+    declared = set(_EXPECTED_NON_TEXT[cls])
+    assert declared <= every, (
+        f"{cls.__name__}: non-text names declared that are not fields: "
+        f"{sorted(declared - every)}"
+    )
+    assert not (classified & declared), (
+        f"{cls.__name__}: field(s) both classified as text and declared non-text: "
+        f"{sorted(classified & declared)}"
+    )
+    assert every == classified | declared, (
+        f"{cls.__name__}: unclassified field(s) {sorted(every - classified - declared)}"
+        " -- a round-tripped field that is neither text, nor a str-map, nor declared"
+        " non-text is exactly how HIGH-1 happened; classify it or declare it"
     )
 
 

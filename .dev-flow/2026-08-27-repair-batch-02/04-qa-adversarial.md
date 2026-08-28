@@ -567,3 +567,458 @@ an asserted count of exactly 1.
 | Every finding carries `file:line` or pasted output | ✓ | §1 |
 | Clean categories reported as clean, not padded | ✓ | §3 — 12 categories |
 | No repo file edited; no PII, secrets or real credentials | ✓ | §3.12; all fixtures synthetic (`Alpha`/`Beta`, `d1`, `p.png`) |
+
+---
+
+# Confirmation review — HIGH-1 fix (post-fix tree)
+
+**Reviewer:** `code-reviewer`, independent confirmation pass. Not the author; not the QA reviewer who
+raised HIGH-1.
+**Target:** branch `fix/repair-batch-02`, commit **`01d7578`**, PR #3. **This gates the merge.**
+**Date:** 2026-08-27 · **Posture:** the author's evidence is a claim, not a result. Every figure below
+was executed in this session against a `git archive 01d7578` copy under `scratchpad/lab/`.
+
+## Verdict — **BLOCKED**. One **NEW HIGH**.
+
+**HIGH-1's product defect is genuinely closed.** Every text position of a loaded `Document` is `str`,
+refusals are recorded, and the reproduced `factory.py:339` consumer crash no longer occurs. The census
+is **21** and I proved it exact from the serialiser's own output, not from the model. `Q-high1` is not
+vacuous — it reproduces at **exactly 8 arms**. The four secondary gate fixes are each gated by a real
+arm.
+
+**But the fix's own refusal sink and collision record have ZERO arms in 548.** Four mutants that
+break `dict[str, str]` coercion — including the requirement's own named MUST-GO-RED variant applied to
+the map-valued field — leave the entire tree green. The disposition records these limbs as gated. That
+is HIGH-1's defect class one level down: a new family given its covered sibling's *implementation* but
+not its sibling's *gate*.
+
+**No repo file was edited by this pass.** All mutation work ran on a detached copy with
+`PYTHONDONTWRITEBYTECODE=1`, every substitution guarded by an asserted count of exactly 1 and every
+restore verified by sha256. `mapper/store.py` and `tests/test_repair_store_boundary.py` in the lab copy
+are byte-identical to `01d7578` at the end of the pass (measured, EOL-normalised).
+
+---
+
+## 1 · The new finding
+
+### HIGH-A — the `dict[str, str]` refusal sink and collision record are gated by nothing; four mutants that break them leave all 548 arms green
+
+`_coerce_str_map` (`mapper/store.py:115-133`) has three limbs. Only one of them has an arm.
+
+| Limb | `mapper/store.py` | Mutant | RED arms, **whole tree (548)** |
+|---|---|---|---|
+| the scalar ladder on keys and values | `:127`, `:132` | `Q-high1` (author's), `MX4`, `MX5` | **8**, 4, 4 — gated |
+| **the non-mapping refusal sink** | `:122-124` | **`MX1`** drop the guard entirely | **0** |
+| **…its record** | `:123` | **`MX2`** refusal becomes silent | **0** |
+| **…its refusal** | `:124` | **`MX11`** return `{"": str(value)}` | **0** |
+| **the collision record** | `:128-131` | **`MX3`** drop the record | **0** |
+
+```
+=== MX1-drop-nondict-guard  [tests/] ===     RED ARMS: 0    548 passed in 123.17s
+=== MX2-nondict-silent      [tests/] ===     RED ARMS: 0    548 passed in 128.69s
+=== MX3-drop-collision-record [tests/] ===   RED ARMS: 0    548 passed in 135.92s
+=== MX11-nondict-returns-raw [tests/] ===    RED ARMS: 0    548 passed in 126.87s
+```
+
+**Each mutant is a real behaviour change, not a cosmetic one.**
+
+- **`MX1`** converts *"the map loads, with the malformed field refused and recorded"* into ***"the whole
+  map is DENIED"***. Executed under `MX1`, on the same probe shapes QA's HIGH-1 evidence used:
+  ```
+  tags = scalar str   -> MapStoreError: no se pudo leer la ficha de m: m_nodos.yml ilegible (AttributeError)
+  tags = int          -> MapStoreError: no se pudo leer la ficha de m: m_nodos.yml ilegible (AttributeError)
+  tags = list         -> MapStoreError: no se pudo leer la ficha de m: m_nodos.yml ilegible (AttributeError)
+  inherited = list    -> MapStoreError: no se pudo leer la ficha de m: m_nodos.yml ilegible (AttributeError)
+  ```
+  A hand-edited `tags: junk` makes the map unloadable, and no arm anywhere notices.
+- **`MX2`** is `LLR-STO.1.1` threshold 2 verbatim — *"appends a `campo ilegible:` record"* — deleted.
+  It is also the batch's own F1 standard, quoted at `mapper/store.py:154`: *"Loud denial is already a
+  report; silent discard is not."*
+- **`MX11`** is the requirement's **named weaker variant `M-STO-b`** (`01-requirements.md:134-135`,
+  *"let containers coerce via `str(value)`… must go RED"*) applied to the map-valued field. It goes
+  **green**.
+- **`MX3`** silently drops one of two colliding tag keys; on the next `save` the operator's tag is gone
+  from disk. That is the exact loss `_coerce_str_map`'s own comment (`:118-120`) says it prevents.
+
+**The asymmetry is the finding.** `Ficha.fields` is the sibling the whole HIGH-1 argument rests on, and
+its three analogous limbs each redden — I built them to make the comparison rather than assume it:
+
+| Analogue mutant on `Ficha.fields` | RED arms (548) | The arm that catches it |
+|---|---|---|
+| `MY1` — non-dict guard's record deleted (`store.py:388`) | **1** | `tests/test_repair_fields.py::test_tc_r18_a_non_dict_fields_block_does_not_deny_the_map` |
+| `MY3` — non-dict block coerced to its repr | **1** | same node |
+| `MY2` — collision record deleted (`store.py:405-407`) | **1** | `test_repair_store_boundary.py::test_at_p02d[field-keys-coerce-together]` |
+
+So the covered sibling has an arm per limb; the new family has an arm for one limb of three. **This is
+structurally HIGH-1**: the census grew, the implementation grew with it, and the *gate* did not.
+
+**Why the existing arms cannot see it.** The census poisons *positions*
+(`document.tags.key` / `.value`), and `_poison` (`tests/test_repair_store_boundary.py:229-235`) always
+writes a **dict** into the field — `{value: "t"}` or `{"t": value}`. No arm in the file ever makes
+`tags` or `inherited` stop being a mapping, and no arm ever puts two colliding keys in one. Both shapes
+are named in HIGH-1's own evidence (`04-qa-adversarial.md:54-55`, *"`tags`/`inherited` themselves can
+stop being mappings entirely"*) and neither was carried into the fix's test set.
+
+**The record that is false against disk.** `04-gate-findings-disposition.md:29-33`:
+
+> `_coerce_str_map` runs the same ladder, **same sink and same collision handling** on both sides. …
+> Gated by `Q-high1`: **8 arms**.
+
+`Q-high1` reverts the whole construction to raw pass-through, so it reddens on the *ladder* limb and
+cannot distinguish the other two. Reproduced exactly, per-arm:
+
+```
+=== Q-high1-replica  [tests/test_repair_store_boundary.py] ===
+RED ARMS: 8      8 failed, 76 passed in 3.57s
+  test_at_p01[document.tags.key]        test_at_p01[document.tags.value]
+  test_at_p01[document.inherited.key]   test_at_p01[document.inherited.value]
+  test_at_p02[document.tags.value]      test_at_p02[document.inherited.value]
+  test_at_p02c[document.tags.key]       test_at_p02c[document.inherited.key]
+```
+
+All eight are ladder arms. The sink and the collision handling are described as gated and are gated by
+nothing — which is the C-55 limb-2 / F1 / G2 standard this batch applied to itself three times.
+
+**Severity.** HIGH under the *false-confidence* limb, not the crash limb. The shipped behaviour is
+**correct**; there is no live product defect here. What is defective is the evidence: a control the
+disposition presents as gated, whose deletion 548 arms cannot see, in the exact place a HIGH was just
+raised for the same reason. It is the same category the batch assigned its own HIGH-1 — *"a
+scope-and-evidence HIGH, not a crash-on-mount HIGH"*.
+
+**Suggested fix — three arms, derived over `_str_map_field_names(Document)` so a future field extends
+them. I wrote and executed them; on the shipped tree 8 pass, and each surviving mutant dies:**
+
+```python
+_BAD_STR_MAPS = {"scalar-str": "junk", "int": 7, "list": [1, 2]}
+
+@pytest.mark.parametrize("field_name", _str_map_field_names(Document))
+@pytest.mark.parametrize("case", sorted(_BAD_STR_MAPS))
+def test_at_p02g_a_non_mapping_str_map_is_refused_and_recorded(tmp_path, field_name, case):
+    s = copy.deepcopy(BASE_SIDECAR)
+    s["documents"][0][field_name] = _BAD_STR_MAPS[case]
+    graph = _write(tmp_path, s).load("m")            # must NOT deny the map
+    doc = next(iter(graph.documents.values()))
+    assert getattr(doc, field_name) == {}            # refused, not coerced to a repr
+    assert f"campo ilegible: document[0].{field_name}" in graph.load_warnings
+
+@pytest.mark.parametrize("field_name", _str_map_field_names(Document))
+def test_at_p02h_a_str_map_key_collision_is_recorded(tmp_path, field_name):
+    s = copy.deepcopy(BASE_SIDECAR)
+    s["documents"][0][field_name] = {1: "from-int", "1": "from-str"}
+    graph = _write(tmp_path, s).load("m")
+    assert f"campo duplicado: document[0].{field_name}.'1' <- '1'" in graph.load_warnings
+```
+
+```
+shipped tree                  -> 8 passed in 0.52s
+MX1  (drop non-dict guard)    -> 6 failed, 2 passed
+MX2  (refusal silent)         -> 6 failed, 2 passed
+MX3  (collision silent)       -> 2 failed, 6 passed
+MX11 (map coerced to repr)    -> 6 failed, 2 passed
+```
+
+(The `campo duplicado` string is the one the implementation actually emits at `store.py:129-131`;
+I executed it rather than reading it off the format string.)
+
+---
+
+## 2 · MEDIUM
+
+### MEDIUM-A — the requirement still says the census is **17**; the code, the test and the disposition all say **21**
+
+`01-requirements.md` is authoritative for `HLR-STO.1` / `LLR-STO.1.1` and was never amended:
+
+```
+:122  count was wrong twice already (5 families → 6; 17 positions).
+:123- **Threshold 1 (coercion):** for each of the **17** derived positions, poisoning it with a
+:124  coercible scalar and loading yields **0** non-`str` positions. Measured pre-fix: **12 of 17 leak**.
+```
+
+against `mapper/store.py` (the commit message: *"The census is 21, not 17"*),
+`tests/test_repair_store_boundary.py:20` (*"The census is **21**"*) and
+`04-gate-findings-disposition.md:27`. HIGH-1's stated remedy offered two routes — extend the census
+**or** *"record the exclusion … with the requirement's threshold reworded to match"*
+(`04-qa-adversarial.md:518-522`). The census was extended and the threshold was not reworded, so the
+requirement now understates its own gate by four positions. In a batch whose third defect is a record
+that is false against disk, in the requirement the census is measured against.
+
+**Suggested fix:** `17` → `21` at `:123-124`, and amend `:122`'s history line to
+`(5 families → 6; 17 positions → 21)`, which is the correction the test docstring already carries.
+
+### MEDIUM-B — `store.py:105-106` claims a generality the code does not have (fourth instance of the F2 class)
+
+```python
+# mapper/store.py:105-106
+Derived here so the exclusion cannot return: adding another `dict[str, str]`
+field to any round-tripped dataclass extends the coercion automatically.
+```
+
+**`_coerce_str_map` has exactly one call site, and it is `Document`-only** (`store.py:338-341`;
+repo-wide grep confirms no other). Executed against the shipped tree:
+
+- `Ficha.fields` is still hand-wired at `store.py:384-408` — it does **not** go through `_coerce_str_map`.
+- `SchemaField` (`:323-328`) and `Attachment` (`:424`) are built from `_coerce_text_fields` plus explicit
+  kwargs, so a `dict[str, str]` added to either would be neither coerced nor read — silently dropped.
+
+`_str_map_fields` genuinely returns `('fields',)` for `Ficha` — the derivation is right, and nothing
+calls it. This is the same *"a false premise in a comment I wrote"* defect F2 fixed in this very commit,
+and by the disposition's own count (`04-gate-findings-disposition.md:60`) it would be the fourth
+instance in this batch.
+
+**Suggested fix:** narrow the sentence to what is true — *"…extends `Document`'s coercion
+automatically; `Ficha.fields` is coerced by its own site in `_graph_from_sidecar`, and no other
+round-tripped dataclass declares one"* — or route `Ficha.fields` through `_coerce_str_map` and make the
+claim true. The second is a behaviour change (the two sites emit different record coordinates, which
+18 arms pin), so the comment correction is the surgical option.
+
+### MEDIUM-C — the derivation is a **textual** annotation match, and the test shares the identical predicate, so both would go blind together
+
+`store.py:111` and `tests/test_repair_store_boundary.py:91` are byte-identical predicates. Executed on
+a probe dataclass under `from __future__ import annotations`:
+
+```
+annotation written as       spec.type                 CAUGHT by _str_map_fields?
+  dict[str, str]            'dict[str, str]'          True
+  dict[str,str]             'dict[str, str]'          True     <- compiler normalises
+  dict[str,  str]           'dict[str, str]'          True     <- compiler normalises
+  Dict[str, str]            'Dict[str, str]'          False
+  StrMap  (type alias)      'StrMap'                  False
+  Mapping[str, str]         'Mapping[str, str]'       False
+  dict[str, str] | None     'dict[str, str] | None'   False
+  "dict[str, str]" (quoted) "'dict[str, str]'"        False
+```
+
+`_text_fields` has the same shape: `str | None` is not caught. **Not a present-tense defect** — I
+verified every field of all four round-tripped dataclasses uses the exact spellings, and the
+serialised-census cross-check in §3.2 comes back exact. The finding is that the *test's* census is
+derived by the *same rule as the product*, so a future field spelled any of the four "False" ways would
+fall out of the coercion **and** out of the census simultaneously, and no arm would redden. That is
+HIGH-1's precise mechanism, latent.
+
+**Suggested fix** — a drop-in that produces an identical result today (executed):
+
+```python
+import typing
+def _str_map_fields(cls: type) -> tuple[str, ...]:
+    hints = typing.get_type_hints(cls)
+    return tuple(n for n in cls.__dataclass_fields__ if hints[n] == dict[str, str])
+```
+```
+  SchemaField  text=['key','label','kind']            strmap=[]                     other=['required']
+  Attachment   text=['kind','path','caption']         strmap=[]                     other=[]
+  Ficha        text=['title','state','meta','notes']  strmap=['fields']             other=['attachments']
+  Document     text=['name','source','path','kind']   strmap=['tags','inherited']   other=['template']
+```
+
+Plus one **totality** arm: every field of `(Ficha, Attachment, SchemaField, Document)` must be
+classified as text, as a str-map, or by an explicitly declared non-text set — so a field spelled a new
+way fails loudly instead of vanishing. The file already asserts totality for `_EXPECTED_REFUSAL` over
+positions (`:304`); this is the same guard one level up, over model *fields*, and it is the guard whose
+absence is what let HIGH-1 exist.
+
+---
+
+## 3 · Clean — what was attacked, and what came back clean
+
+### 3.1 · HIGH-1's product defect is CLOSED — QA's own probe shapes, re-run
+
+Fifteen shapes, executed against `01d7578`. **Every text position of a loaded `Document` is `str`, and
+every refusal is RECORDED:**
+
+```
+tags value = int         -> tags={'owner': '12345'}    NONSTR=NONE  warnings=[]
+tags key = int           -> tags={'7': 'seven'}        NONSTR=NONE  warnings=[]
+tags value = dict        -> tags={'owner': ''}         NONSTR=NONE  warnings=['campo ilegible: document[0].tags.owner']
+tags value = list        -> tags={'owner': ''}         NONSTR=NONE  warnings=['campo ilegible: document[0].tags.owner']
+tags key = bytes         -> tags={'': 'x'}             NONSTR=NONE  warnings=["campo ilegible: document[0].tags[b'hi']"]
+inherited value = int    -> inherited={'a': '99'}      NONSTR=NONE  warnings=[]
+inherited key = int      -> inherited={'5': 'five'}    NONSTR=NONE  warnings=[]
+tags = scalar str        -> tags={}                    NONSTR=NONE  warnings=['campo ilegible: document[0].tags']
+tags = int               -> tags={}                    NONSTR=NONE  warnings=['campo ilegible: document[0].tags']
+tags = list              -> tags={}                    NONSTR=NONE  warnings=['campo ilegible: document[0].tags']
+tags = None              -> tags={}                    NONSTR=NONE  warnings=['campo ilegible: document[0].tags']
+inherited = scalar str   -> inherited={}               NONSTR=NONE  warnings=['campo ilegible: document[0].inherited']
+inherited = list         -> inherited={}               NONSTR=NONE  warnings=['campo ilegible: document[0].inherited']
+tags = nested dict val   -> tags={'owner': ''}         NONSTR=NONE  warnings=['campo ilegible: document[0].tags.owner']
+```
+
+**The reproduced consumer crash is gone.** `factory.py:339-343` driven directly with a loaded graph:
+
+```
+int tag key     OK  keys=['7', 'x']       warnings=[]
+int tag value   OK  keys=['owner', 'x']   warnings=[]
+```
+
+Pre-fix this was `TypeError: '<' not supported between instances of 'int' and 'str'`.
+
+*Recorded as a LOW, not padded:* a YAML-null `tags:` produces `campo ilegible: document[0].tags` where
+the scalar ladder maps `None` → `""` silently (`store.py:62-63`). Asymmetric, but loud and
+non-destructive, and `_build_sidecar` never emits null — so it only reaches a hand-edited file.
+
+### 3.2 · The census is **21** and EXACT — proved from the serialiser's output, not from the model
+
+I built a fully-populated `Graph`, ran `MapStore._build_sidecar` on it, and enumerated every leaf of
+the real serialised structure independently of `_derived_positions()`:
+
+```
+SERIALISED text leaves (21):
+  attachment.caption  attachment.kind  attachment.path
+  document.inherited.key  document.inherited.value  document.kind  document.name
+  document.path  document.source  document.tags.key  document.tags.value
+  fields.key  fields.value  node.id  node.meta  node.notes  node.state  node.title
+  schema.key  schema.kind  schema.label
+
+NON-text leaves (correctly out of the census): [('document.template','bool'), ('schema.required','bool')]
+
+derived census (21) == serialised text leaves (21)?  True
+in census but not serialised: []      serialised but not in census: []
+```
+
+**There is no third hand exclusion.** The only two leaves outside the census are `bool`. I also checked
+for container-typed fields carrying text that round-trip: there are none — `Ficha.attachments`
+(`list[Attachment]`) and `Graph.schema` (`list[SchemaField]`) decompose into covered scalar positions,
+`Graph.documents` is keyed by the already-covered `document.name`, and `Edge.label` / `Graph.root_id`
+live in the `.mmd`, not the sidecar. `Graph.load_warnings` (`list[str]`) is not serialised.
+
+*Residual, recorded not padded:* `_derived_positions()` still opens with three **hand-written**
+structural entries (`:102`), including `fields.key`/`fields.value` where `_str_map_field_names(Ficha)`
+would derive them. It produces the right answer today and is coupled to a hand-written `_build_sidecar`
+rather than silently diverging from it, so it is a LOW, not the third exclusion — but it is the one
+place the file's "derived, not hand-listed" claim is still literally untrue.
+
+### 3.3 · `_KEY_POSITIONS`' new derivation is CORRECT, and it is itself gated
+
+The predicate at `:136` selects exactly `('node.id', 'fields.key', 'document.tags.key',
+'document.inherited.key')` — 4 of 21, leaving 17 container-poisonable. Checked directly:
+
+- **`schema.key` is correctly NOT excluded.** It is a `str` field named `key`, not a mapping key; it
+  does not start with `"document."`, so the predicate leaves it in `_container_poisonable()`, where
+  `test_at_p02[schema.key]` and `test_at_p03[schema.key]` exercise it. Confirmed in the resolved list.
+- The `or`/`and` precedence reads as intended: `A or B or (C and D)`.
+- **The predicate is gated both ways:**
+
+```
+=== MX9-keypos-also-excl-value (drop the .key suffix test) ===   RED ARMS: 1
+    test_tc_p01c_the_container_exclusion_is_justified_not_merely_declared
+=== MX10-keypos-hand-list-old (revert to ("node.id","fields.key")) ===  RED ARMS: 5
+    test_tc_p01c · test_at_p02[document.tags.key] · test_at_p02[document.inherited.key]
+    test_at_p03[document.tags.key] · test_at_p03[document.inherited.key]
+```
+
+The claim at `04-gate-findings-disposition.md:31-33` that hand-listing *"would have silently omitted
+the new pair"* is right, and `test_tc_p01c` is the arm that would have caught it.
+
+*Latent, LOW:* a future `str` field on `Document` literally named `key` would produce the position
+`document.key`, which `startswith("document.") and endswith(".key")` would wrongly exclude. Same
+textual-predicate family as MEDIUM-C.
+
+### 3.4 · `Q-high1` is NOT vacuous — reproduced at exactly 8 arms
+
+Built from scratch (revert `tags`/`inherited` to `d.get(name, {})` raw pass-through), substitution count
+asserted 1: **8 failed, 76 passed**, arm names listed in §1. The author's figure is exact.
+
+I also decomposed it, which the author did not: `MX4` (value not coerced) → 4 arms, `MX5` (key not
+coerced) → 4 arms, `MX6` (drop `inherited` from the derivation) → 2 arms, `MX7` (`_str_map_fields`
+returns empty) → 4 arms, `MX8` (owner coordinate corrupted to `XXXX`) → 4 arms. Every ladder limb is
+independently gated, and the record's **owner coordinate** is gated too — the C2 defect is not
+re-introduced for the new family.
+
+### 3.5 · Blast radius of the two shared-fixture changes — clean
+
+- **`_KEY_POSITIONS` and `BASE_SIDECAR` are module-private.** Repo-wide grep: every reference is inside
+  `tests/test_repair_store_boundary.py`. No other file imports either.
+- **Populating `BASE_SIDECAR`'s `tags`/`inherited` weakened nothing.** Structurally it cannot: every
+  assertion in the file is position-keyed (`(position, "") in live`, `_EXPECTED_REFUSAL[position]`), and
+  the new observations carry positions that did not exist before this commit; `offenders == []` is
+  strictly strengthened by more observations. Empirically, the batch's own named mutants are **not**
+  weaker on the post-fix tree — `M-STO-a` reddens **21** whole-tree (QA measured 21), `M-STO-b` reddens
+  **27** whole-tree (QA measured 16 on the boundary file alone).
+- *Recorded as an observation, not a finding:* the population is **inert**. Emptying `tags`/`inherited`
+  back to `{}` reddens **0 of 84**. Contrast the `B` node entry at `:62-68`, which the file documents as
+  load-bearing *after measuring it* (review G1). The `tags`/`inherited` population carries no comment
+  and no weight — harmless, but it is not doing the work the `B` precedent set the standard for.
+
+### 3.6 · The four other gate fixes in the same commit — each gated, none regressed
+
+| Fix | Mutant I built | RED arms | Arm |
+|---|---|---|---|
+| security F1 — reads pulled inside a net | `Q-f1a` drop `UnicodeDecodeError` from the except | **2** | `test_at_p03e[mmd-invalid-utf8]`, `[sidecar-invalid-utf8]` |
+| security F1 — `RecursionError` | `Q-f1b` drop it from the parser net | **1** | `test_at_p03e[parser-recursion]` |
+| MEDIUM-4 — indexed node-id label | `Q-med4` revert `:373` to the bare `"id"` | **1** | `test_at_p02c[node.id]` |
+| F7 — `__cause__ is None` guard | `Q-f7` delete the `isinstance(sidecar, dict)` guard | **1** | `test_at_p03f_the_top_level_type_guard_is_distinguishable_from_the_net` |
+
+**F2's corrected comment is TRUE against disk.** `grep -rn "except MapStoreError" mapper/` outside
+`store.py` returns nothing (exit 1). Both `load` callers are at `mapper/app.py:449` and `:1176`, and the
+comment's citations `app.py:450` / `app.py:1179` point at their `except Exception` lines — the correct
+coordinates for what the sentence claims. `_EXPECTED_REFUSAL["node.id"]` was updated in step with the
+MEDIUM-4 fix (`tests/…:175` → `"campo ilegible: node.id[b'hi']"`).
+
+### 3.7 · Numbers reconcile
+
+| Figure | Disposition claims | **Measured here** |
+|---|---|---|
+| collected | 548 | **548** |
+| fast lane | 531 passed / 17 deselected | **531 passed, 17 deselected**, 99.12s, exit 0 |
+| slow lane | 17 passed / 531 deselected | **17 passed, 531 deselected**, 43.90s, exit 0 |
+| `test_repair_store_boundary.py` | — | **84 passed** |
+| `ruff check mapper/ tests/` | 29 (= base) | **29** |
+| ruff on the five touched files | clean | **All checks passed!** |
+| derived census | 21 | **21**, set-exact vs the serialiser (§3.2) |
+| `Q-high1` | 8 arms | **8 arms**, arm names matched |
+
+---
+
+## 4 · What blocks, and what does not
+
+**Blocks:**
+
+1. **HIGH-A** — add the three arms in §1 (verified: 8 pass on the shipped tree; MX1/MX2/MX11 → 6 red,
+   MX3 → 2 red). *Or*, if the operator judges the sink and collision limbs out of the fix's declared
+   scope, correct `04-gate-findings-disposition.md:29-33` to say what `Q-high1` actually gates — the
+   ladder — and carry the two ungated limbs explicitly. What is not acceptable is the present state: a
+   HIGH raised *because* a control's coverage was asserted and absent, closed by a fix whose own
+   controls are asserted gated and are not.
+
+**Should be fixed before merge, do not block alone:** MEDIUM-A (`17` → `21` in the requirement — one
+line, and it is the batch's own defect class), MEDIUM-B (one comment sentence), MEDIUM-C (the
+`get_type_hints` swap plus a totality arm; this is the durable fix for the class that produced HIGH-1
+twice).
+
+**Carry:** the LOWs in §3.1, §3.2, §3.3 and §3.5.
+
+## 5 · What I could not verify
+
+- **The working tree moved under me, and it is not what I reviewed.** `git status --porcelain` in
+  `C:\Users\jjgh8\Github\mapper` was **empty** when this pass began and now reports
+  ` M .dev-flow/…/03-increments/increment-001.md`, `?? .dev-flow/…/05-carries.md`, and
+  `?? tests/test_repair_artifact_claims.py` (mtimes 17:47–17:51, during this pass). **I created none of
+  them** — I ran only read-only `git show` / `git status` / `grep` in the main tree, and every
+  experiment ran on a detached `git archive 01d7578` copy. **This verdict covers commit `01d7578` and
+  nothing else**; a new test file and an edited increment packet are outside it and un-reviewed.
+- I did **not** re-run the author's full 24-mutant battery. I built **22 mutants of my own** and
+  reproduced six of the author's by name (`Q-high1`, `Q-f1a`, `Q-f1b`, `Q-med4`, `Q-f7`, plus `M-STO-a`
+  and `M-STO-b`); the rest are taken on report and are so marked.
+- MEDIUM-C is a **latent** defect. I proved the predicate is blind to five annotation spellings and that
+  the test shares the predicate; I did **not** land a field spelled one of those ways in `mapper/model.py`
+  to observe the silent miss end-to-end, because that requires editing the repo.
+- QA's MEDIUM-1/2/3/5 and the six LOWs are dispositioned as carries and were **out of scope for this
+  pass**; I re-checked none of them.
+
+## 6 · Evidence checklist
+
+| Item | ✓/✗ | Evidence |
+|---|---|---|
+| Diff read in full | ✓ | `mapper/store.py:1-657`, `tests/test_repair_store_boundary.py:1-713`, `mapper/model.py:1-240` |
+| HIGH-1's probe shapes independently re-run | ✓ | §3.1 — 15 shapes, all `str`, all refusals recorded |
+| Census re-derived from the serialiser, not the model | ✓ | §3.2 — set-exact 21 vs 21, 0 in either difference |
+| Derivation predicate attacked | ✓ | §MEDIUM-C — 8 annotation spellings executed, 5 fall out |
+| `_KEY_POSITIONS` predicate checked both directions | ✓ | §3.3 — `MX9` 1 arm, `MX10` 5 arms; `schema.key` correctly retained |
+| `Q-high1` reproduced, not taken on report | ✓ | §3.4 — 8 arms, arm names matched |
+| A green-surviving mutation was hunted for, per the brief | ✗ **FOUND — 4** | `MX1`, `MX2`, `MX3`, `MX11` — 0 red of **548** each |
+| Sibling comparison built rather than assumed | ✓ | `MY1`/`MY2`/`MY3` — 1 arm each on `Ficha.fields` |
+| Every HIGH carries a recommended fix, executed | ✓ | §1 — 8 pass shipped; 6/6/2/6 red under the four mutants |
+| Blast radius reverse-grepped | ✓ | §3.5 — module-private; `FX` fixture-empty mutant 0 red |
+| Four secondary gate fixes checked | ✓ | §3.6 — 2/1/1/1 arms; F2 comment verified against disk |
+| Every figure executed, none copied | ✓ | §3.7 |
+| Clean categories reported as clean, not padded | ✓ | §3 — 7 categories |
+| No repo file edited; no git mutation in the main tree | ✓ | detached `git archive` copy; lab `store.py` + boundary file byte-identical to `01d7578` (EOL-normalised) at close |
