@@ -30,7 +30,31 @@ with `tags={'owner': 12345}` and `load_warnings=[]`, reaching `factory.py:339`
 `_coerce_str_map` runs the same ladder, same sink and same collision handling on both sides. The
 test census derives the four new positions the same way, and **`_KEY_POSITIONS` is now derived too**
 — hand-listing it was survivable at two entries; at four it would have silently omitted the new pair,
-which is HIGH-1 one level down. Gated by `Q-high1`: **8 arms**.
+which is HIGH-1 one level down.
+
+> **CORRECTED 2026-08-27 (close-out) — this row was FALSE against disk, and it is the FOURTH
+> instance of that class in this batch.** The sentence above is accurate about the *implementation*
+> and was false about the *gate*. `Q-high1` reverts the construction to raw pass-through, so it
+> reddens on the **scalar ladder only** — its 8 arms are all ladder arms. The **non-mapping refusal
+> sink**, **its record**, and the **collision record** were gated by NOTHING: four mutants that
+> break them left all 548 arms green. Raised as HIGH-A by the independent confirmation review and
+> **reproduced in this session** before being fixed (Inc-4, `03-increments/increment-004.md`).
+>
+> **What each limb is actually gated by, now:**
+>
+> | Limb | Gated by | RED arms, measured |
+> |---|---|---|
+> | the scalar ladder on keys and values | `Q-high1` | **8** (all ladder arms) |
+> | the non-mapping refusal sink | `test_at_p02g` | `MX1` **6** |
+> | …its record | `test_at_p02g` | `MX2` **6** |
+> | …its refusal (repr instead of `{}`) | `test_at_p02g` | `MX11` **6** |
+> | the collision record | `test_at_p02h` | `MX3` **2** |
+>
+> The claim "same sink and same collision handling" described the code and was read as describing
+> the coverage. **That is the batch's own HIGH-1 defect class one level down** — a new family given
+> its covered sibling's implementation but not its sibling's gate — and it is recorded here rather
+> than edited away, because the record of a false record is the only thing that makes the pattern
+> countable.
 
 ## F1 / F3 — threshold 3 was unmet, with a fully green suite *(FIXED)*
 
@@ -107,14 +131,19 @@ control untestable. The guard raises **without** `from` and every net arm raises
 
 ## Post-fix state
 
-| Measure | Value |
-|---|---|
-| fast lane | **531 passed, 17 deselected**, exit 0 |
-| slow lane | **17 passed, 531 deselected**, exit 0 |
-| collected | **548** = 429 base + 119 |
-| ruff | **29** whole-tree (= base); clean on all five touched files |
-| mutation battery | **24 mutants, every one reddening a named arm** |
+| Measure | At `01d7578` | **After Inc-4 (HIGH-A)** |
+|---|---|---|
+| fast lane | 531 passed, 17 deselected, exit 0 | **626 passed, 17 deselected**, exit 0 |
+| slow lane | 17 passed, 531 deselected, exit 0 | **17 passed, 626 deselected**, exit 0 |
+| collected | 548 = 429 base + 119 | **643** = 548 + 12 boundary arms + 83 artifact-claims arms |
+| ruff | 29 whole-tree (= base) | **29** whole-tree (= base); clean on all touched files |
+| mutation battery | 24 mutants, every one reddening a named arm | **+4** (`MX1`, `MX2`, `MX11`, `MX3`): **0 → 6 / 6 / 6 / 2** RED arms |
 
-**The merge is held.** A HIGH was raised; under the standing authorization that returns to the
-operator rather than being self-cleared, even though the HIGH is fixed and gated. Neither reviewer
-has seen the post-fix tree.
+**The merge was held at `01d7578`,** correctly: a HIGH had been raised, and under the standing
+authorization a HIGH returns to the operator rather than being self-cleared. The operator then
+directed the close-out to verify the new HIGH independently, fix it with real arms, and re-confirm
+before merging. **Inc-4 is that work** (`03-increments/increment-004.md`): the HIGH was reproduced
+first — four mutants, 0 RED arms of 548 each — then fixed, then re-measured at 6 / 6 / 6 / 2.
+
+**A conditional verdict is not an authorisation**, so the merge remains gated on an independent
+re-confirmation over the post-fix tree, scoped to HIGH-A and its arms.

@@ -94,7 +94,7 @@ after recording a warning: **139 store-facing arms and all 57 of this file's arm
 | F1 | **HIGH** | containment half ungated; `isinstance(a, dict)` silently destroyed a malformed attachment | **fixed** — `_mappings` refuses-and-records; `test_at_p02` pins presence; `test_at_p02b` added |
 | F2 | MEDIUM | `_coerce_text_fields` hard-coded `""`, so a `kind`-less sidecar's `"text"` became `""` **and was written back to disk** | **fixed** — the dataclass's own default is used; `test_at_p01b` poisons by omission |
 | F3 | MEDIUM | two raw field keys coerce to one string; the first was destroyed silently | **fixed** — `campo duplicado:` record; `test_at_p02d` |
-| F4 | MEDIUM | the node-id comment claimed a repair the code does not perform | **fixed** — comment corrected; `nodo duplicado:` record; `test_at_p02e` |
+| F4 | MEDIUM | the node-id comment claimed a repair the code does not perform | **fixed** — comment corrected; `nodo duplicado:` record; `test_at_p02d[node-ids-both-refused-collapse-onto-empty]` |
 | F5 | MEDIUM | `_KEY_POSITIONS`' justification (containers) was narrower than the exclusion it granted (the whole refusal branch) | **fixed** — exclusion narrowed in prose; `test_at_p02c` drives `b"hi"` into both key positions |
 | F6 | MEDIUM | `assert graph.load_warnings` was truthiness-only | **fixed** — content asserted per position; hardened again at C2 to the full record |
 | F7 | LOW | the field-key warning label was a literal, so every bad key reported the same position | **fixed** — `key[{key!r}]`, owners indexed |

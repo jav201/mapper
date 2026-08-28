@@ -119,9 +119,12 @@ what makes it a gate rather than a coincidence.
 - **Traceability:** `HLR-STO.1`; security conditions `C-2`, `C-12`; finding `S-11`.
 - **Position set — DERIVED, never hand-listed (C-31):** the set is computed by walking
   `_build_sidecar`'s output shape. A test that hand-lists positions is rejected: the hand-listed
-  count was wrong twice already (5 families → 6; 17 positions).
-- **Threshold 1 (coercion):** for each of the **17** derived positions, poisoning it with a
-  coercible scalar and loading yields **0** non-`str` positions. Measured pre-fix: **12 of 17 leak**.
+  count was wrong twice already (5 families → 6; 17 positions → **21**, see §6.5 AMD-1).
+- **Threshold 1 (coercion):** for each of the **21** derived positions, poisoning it with a
+  coercible scalar and loading yields **0** non-`str` positions. Measured pre-fix against the
+  17 then-known positions: **12 of 17 leak**. The four positions added by AMD-1
+  (`document.tags.key`/`.value`, `document.inherited.key`/`.value`) were not merely leaking — they
+  raised an untyped `TypeError` out of a live consumer, which is what made the omission a HIGH.
 - **Threshold 2 (containers are refused, never coerced):** a container in any position leaves that
   position `""` **and appends a `campo ilegible:` record to `graph.load_warnings`**. A container
   must not coerce — `str({})` is `"{}"`, a truthy string, so `coverage()` would keep counting the
@@ -132,7 +135,16 @@ what makes it a gate rather than a coincidence.
   poison. This is the defect being repaired — a control implemented to the edge of the noun that was
   named — so the derived-set arm must redden it.
 - **Named weaker variant `M-STO-b` (must go RED):** let containers coerce via `str(value)`. Passes
-  threshold 1, fails threshold 2, and re-introduces the silent miscount.
+  threshold 1, fails threshold 2, and re-introduces the silent miscount. **Applies to the
+  map-valued fields too** — a non-mapping `tags`/`inherited` returned as its repr is this same
+  variant, and it went GREEN across all 548 arms until `test_at_p02g` landed (AMD-1, HIGH-A).
+- **Threshold 4 (the map-valued positions carry threshold 2's obligations in full):** a
+  `dict[str, str]` field that is not a mapping leaves the field `{}`, records `campo ilegible:`,
+  and **does not deny the map**; two raw keys that coerce to one string record `campo duplicado:`.
+  Stated separately because the position census reaches these fields' *contents* only: it poisons
+  `document.tags.key`/`.value`, and every such poison still writes a mapping into the field — so
+  the container-refusal and collision limbs of the map-valued path have no arm under thresholds
+  1–3, which is exactly the gap HIGH-A measured (`test_at_p02g`, `test_at_p02h`).
 - **Executed verification:** `tests/test_repair_store_boundary.py`; thresholds above.
 
 ### 3.2 · `HLR-MAP.1` — the module map is true against the tree
@@ -247,3 +259,57 @@ what makes it a gate rather than a coincidence.
 | **3** | `HLR-GOLD.1` + `LLR-PERF.1` — derived pin census, `B3` correction, 51-node fixture | **0** source (tests + records only) |
 
 Serial. Inc-1 owns the only source change in the batch.
+
+---
+
+## 7 · Requirement amendments (the §6.5 convention)
+
+### AMD-1 — the census is **21**, not 17 *(2026-08-27, close-out)*
+
+**Why.** The whole-branch QA gate raised HIGH-1: `Document.tags` and `Document.inherited` are
+`dict[str, str]`, round-tripped verbatim by `_build_sidecar`, and were hand-excluded from an
+otherwise-derived census. HIGH-1 offered two routes — extend the census, or record the exclusion and
+reword the threshold to match. **The census was extended and the threshold was not reworded**, so
+between the fix commit and this amendment the requirement understated its own gate by four
+positions, in the document the census is measured against. Raised as MEDIUM-A by the independent
+confirmation review; it is the batch's own false-record class, in the requirement itself.
+
+| | Before | After |
+|---|---|---|
+| §3.1 `LLR-STO.1.1` history line | `(5 families → 6; 17 positions)` | `(5 families → 6; 17 positions → **21**, see §6.5 AMD-1)` |
+| Threshold 1 count | `each of the **17** derived positions` | `each of the **21** derived positions` |
+| Threshold 1 pre-fix measure | `12 of 17 leak` | unchanged as a **historical** figure, now explicitly scoped to *"the 17 then-known positions"*, with the four added positions' distinct symptom named (untyped `TypeError` out of a live consumer) |
+| `M-STO-b` scope | containers coerce via `str(value)` | **+ applies to the map-valued fields**: a non-mapping `tags`/`inherited` returned as its repr is the same variant |
+| Thresholds | 1, 2, 3 | **+ Threshold 4** — the map-valued positions carry threshold 2's obligations in full |
+
+**Deleted tokens:** none. **New tokens:** Threshold 4; the nodes `test_at_p02g`, `test_at_p02h`,
+`test_at_p02i`. **Parent HLR re-read:** `HLR-STO.1` ("the store boundary returns text where text is
+promised") is unchanged and was already violated by the 17-position reading — the amendment makes
+the LLR say what the HLR always required, which is C-43's constructive disposition: the requirement
+comes out **larger**, never smaller.
+
+**Why Threshold 4 is a separate threshold and not a clause folded into Threshold 2.** Folding it in
+would have re-created the defect it closes. Threshold 2 is stated over *positions*, and every
+position poison writes a mapping into the field — so a threshold-2 clause about the map-valued
+fields would still have had no arm that makes `tags` stop being a mapping. A two-subject acceptance
+is where this project has lost a threshold before; the fourth threshold is the C-43 remedy.
+
+### AMD-2 — the derivation predicate resolves annotations *(2026-08-27, close-out)*
+
+**Why.** `_str_map_fields` matched the annotation's **spelling**. Under `from __future__ import
+annotations` that reads `Dict[str, str]`, `Mapping[str, str]`, `dict[str, str] | None`, a type alias
+and a quoted annotation as non-matches — and the test's census predicate was byte-identical, so a
+field spelled any of those ways would have fallen out of the coercion **and** out of the census
+together, with no arm reddening. HIGH-1's exact mechanism, latent (confirmation review, MEDIUM-C).
+
+**Before → After:** `spec.type in ("dict[str, str]", "dict[str,str]")` → `get_type_hints(cls)[name]
+== dict[str, str]`, in both `mapper/store.py` and `tests/test_repair_store_boundary.py`.
+**Executed:** the classification of all four round-tripped dataclasses is **identical** before and
+after — this is a blindness fix, not a behaviour change, and the ledger shows no arm moving because
+of it.
+
+**And a resolved predicate is still not total**, which is the point: `Mapping[str, str]` remains
+neither text nor str-map. `test_at_p02i` asserts that every field of every round-tripped dataclass
+is text, a str-map, or **explicitly declared** non-text, so the residue fails loudly instead of
+vanishing. That guard protects a **conclusion** (the census is complete), not a behaviour — C-55
+limb 1, and its docstring says so, so a later reader does not file it as an implementation detail.
