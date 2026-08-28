@@ -7711,3 +7711,260 @@ defers its bound and does not repair it.
   not performed, for the reasons pass 1 recorded and pass 2 does not revisit.
 - **`S-15` and `S-20`'s cost remain live, measured defects on `master`.** `#D24` defers their bound.
   Carried as `B-33`.
+
+---
+
+## Amendment set 4 — INC-1 IMPLEMENTATION. 2026-08-28. Base `5d8ee0d` (`feat/ui-next-batch-02`).
+
+> **These are Phase-3 amendments, recorded per the §6.5 Before/After rule rather than edited
+> silently into the body.** Every one was forced by an *executed* result during Inc-1, not by
+> preference. Byte hygiene: every code point below is written as a `U+XXXX` name, and every mutation
+> is described by **position and operation** — this document is corpus an id-scanner reads, so a
+> mangled token pasted here is not reverted merely because the source file was (`C-56`).
+
+### A-77 — `#D10`'s busy-token disposition contradicted itself; the NEW-TOKEN reading governs
+
+**The document forked inside one LLR.** `LLR-S06.3.2`'s `#D10` table row says the busy job goes to
+*"one of the three tokens Inc-1 is already adding (`SAGE`/`TEAL`/`VIOLET`)"*; **fourteen lines
+below**, the same LLR's `Touched symbols` line says *"the promoted grey token **and the busy
+token** — both `NEW`"*, and `LLR-S06.3.5` consequence 4 says *"The busy job goes to a new token"*.
+`PDR-addendum-3` §4 — sealed last — says *"all three new tokens are already spent … There is no
+unspent colour token."*
+
+**Ruled: NEW token.** Three grounds, in ascending weight. (i) Majority and latest: three sites plus
+the last-sealed document. (ii) The rival reading is **not executable** — `HLR-S06.1`'s Statement is
+a `shall` that fixes all three jobs, and `LLR-S06.1.1` declares the one-job rule, so handing the
+busy job to any of the three creates a two-job token *in the increment that declares the rule*, and
+`LLR-S06.3.5`'s census then has no oracle — `QA-B-08`'s finding, re-created. (iii) `Touched symbols`
+is the machine-checkable field Phase 3 is gated against; prose can be loose, a build contract cannot.
+
+**Before:** `LLR-S06.3.2` `#D10` row — *"Assign the busy/in-progress job to one of the three tokens
+Inc-1 is already adding (`SAGE`/`TEAL`/`VIOLET`) and retone the site."*
+**After:** *"Assign the busy/in-progress job to a NEW token and retone the site. The three v2 tokens
+are spent by `HLR-S06.1`'s `shall` and may not take a second job."*
+
+**New tokens (both `NEW — created in Phase 3`, as `:994` already declared):**
+
+| Token | Value | Slot | Job |
+|---|---|---|---|
+| `ASH` | `#a3a3a3` | 247 | *segundo escalón legible* — the middle rung of the text ramp, one step below `INK`, where `STEP` and `WORDMARK` are too dark to read as text |
+| `PULSE` | `#ff9ecb` | 218 | *trabajo en curso* — this item is being worked on right now, and nothing is pending, overdue, at risk, or failed |
+
+**Both lenses were run and they disagreed; the disagreement is recorded rather than averaged.**
+`02i-inc1-busy-token-architect.md` ruled the new token; `02i-inc1-busy-token-ux.md` ruled *no* new
+hue, carrying the busy meaning on the glyph and re-ranking the ladder on the neutral ramp. The ux
+reading was **not** adopted, for two reasons stated so a later reader can re-open it knowingly:
+it declines `#D10`'s *"assign … the job"* clause, which is an **A3 re-open** and not a Phase-3
+discharge; and its `PENDING` rung is `MUT` on `PANEL` at a measured **3.95:1**, which sealed `#D28`
+forbids for readable text. Its ladder findings are carried, not discarded — see A-83.
+
+Executed, `rich 15.0.0`, a fresh `Color` per call (`HLR-S06.2`'s LRU caching hazard honoured):
+slot 218 is free; `PULSE`'s minimum CIEDE2000 to any declared token is **24.74** (nearest `INK`, a
+neutral); `ASH` measures 18.35 from `MUT` and 20.14 from `INK`. **Neither moves the floor**, which
+stays 13.99 at `ACCENT`/`VIOLET`.
+
+### A-78 — `WARN`'s declared job loses *"or in flight"*, and this was a GATE BLOCKER
+
+**Both lenses derived this independently, from opposite directions.** `LLR-S06.3.5` declares `WARN`
+as *"pending, due, at risk, **or in flight**"*. Once `PULSE` owns *in progress*, `mapper/app.py:879`
+classifies under **both** — and that same LLR's threshold is *"sites classifying as **both** `== 0`"*.
+**The census cannot be satisfied by any implementation while the clause stands.**
+
+**Before:** `WARN #ffd230` — *outstanding attention*: work is pending, due, at risk, **or in
+flight**, and nothing has failed.
+**After:** `WARN #ffd230` — *outstanding attention*: work is pending, due, **or at risk**, and
+nothing has failed.
+
+Dropping three words **narrows** `WARN`, so the one-job constraint is strengthened rather than bent.
+`:1127-1130` already saw this from the other side and answered by retoning; nobody struck the clause.
+
+**Censused cost: exactly two sites**, and the second was previously unfiled — see A-79.
+
+### A-79 — the exception register is **2** after Inc-1, not 1, and the second entry is a new finding
+
+`LLR-S06.3.2`'s threshold reads *"After Inc-1: **1** registered entry (`factory.py:104`)"*. Executed
+over the derived severity set, narrowing `WARN` makes a **second** site unclassifiable:
+
+```
+mapper/views/lane.py:67   return Text.assemble(("<U+25D0>", darkside.WARN), (" run", darkside.WARN))
+```
+
+A **running** step painted in the severity hue — `#D10`'s defect exactly, one file over, adjacent in
+the same view to `risk` and `late` which are also `WARN` (`lane.py:16-17`). An operator in the lane
+view cannot tell *machine busy* from *you are late* by colour.
+
+`mapper/views/lane.py` is **not** in Inc-1's declared file set, so it takes the mechanism `#D10`
+itself established for `factory.py:104`: **registered as known-open, closed by the increment that
+owns the file** — `Inc-5`, which owns `views/lane.py` at 3 of 4 source files. The stale-exception
+guard reddens if `Inc-5` forgets.
+
+**Before:** *"After Inc-1: **1** registered entry … After Inc-9: **0**."*
+**After:** *"After Inc-1: **2** registered entries (`factory.py`'s tag, `lane.py`'s running step).
+After Inc-5: **1**. After Inc-9: **0**."*
+
+### A-80 — `COERCION_RANGES`' C0 row was INCOMPLETE, and adopting it verbatim NARROWED shipped coverage
+
+**§3.0's range table is wrong, and the shipped suite caught it.** The row is labelled *"C0 except TAB
+and LF"* and enumerates `U+0000`–`U+0008`, `U+000B`–`U+000C`, `U+000E`–`U+001F` — which also omits
+**`U+000D CARRIAGE RETURN`**. Its own count gives it away: **29** points, where C0 minus TAB and LF
+is **30**.
+
+The shipped `_CONTROL_MAP` covered CR. Deriving the map from the declared ranges as written therefore
+**removed** that coverage, and a CR in a ficha title would have reached the terminal, where it
+returns the cursor to column 0 and overprints the row already painted.
+`tests/test_darkside.py::test_plain_replaces_every_c0_control_except_tab_and_newline` went RED.
+
+**Recorded because it is the more useful half:** the Phase-0 probe reported this group as `29 / 29
+covered` — it agreed because it was fed **the spec's own ranges**, validating the list against
+itself. The independent oracle was the shipped test, not the measurement.
+
+**Before:** `(0x0000, 0x0008), (0x000B, 0x000C), (0x000E, 0x001F)` — 29 points; TOTAL **84**.
+**After:** `(0x0000, 0x0008), (0x000B, 0x001F)` — 30 points; TOTAL **85**.
+**Uncovered-at-pre-state is unchanged at 22**, because CR was already covered by the shipped map.
+Verified as a strict widening: 85 declared points, **0** survivors through `plain()`, **0** shipped
+points lost, **22** newly covered, `U+0009` and `U+000A` still preserved.
+
+### A-81 — `LLR-CNV.1.4`'s tone set is INJECTED, not imported, because the module map forbids the import
+
+`LLR-CNV.1.4` requires `rows()` to validate a layer value against *"the design module's declared
+token set"*. **`docs/ARCHITECTURE.md:120` declares `canvas` with `Depends on: —`** — *"Canvas is the
+lowest-level drawing primitive"* — so `canvas → design` is not an allowed edge.
+
+**Resolution, which changes no requirement's meaning:** `Canvas.__init__` takes `tones` and
+`fallback`, and `views/radial.py` — which already imports `darkside` on an allowed edge — supplies
+`darkside.tone_set()`. **The guard still lives in `rows()`**, which is what the LLR actually requires
+and what defeats `M-V1` (a write-time setter misses `radial.py`'s direct `cv.dots[...] = hue`
+assignment). Left unset the parameter applies no policy, so every Canvas built elsewhere keeps
+today's behaviour byte-for-byte.
+
+Chosen over amending the map because `docs/ARCHITECTURE.md` already owes the un-landed `ARQ-1`
+amendment (`PLAN.md` §7), and a second concurrent edit to the same row is how a cross-artifact
+contradiction is created to remove an intra-document one.
+
+### A-82 — *"semantic token pairs"* is now DECIDABLE, which `HLR-S06.2`'s addendum required and did not supply
+
+The addendum's floor quantifies over *"all semantic token pairs"* and never defines the class.
+Executed: over **all** declared tokens the minimum is **3.20** (`GROUND`/`PANEL`) — below the stated
+floor of 10 — while over `{INK, MUT, ACCENT, WARN, ALERT, SAGE, TEAL, VIOLET}` it is **13.99**
+(`ACCENT`/`VIOLET`) and `ACCENT`/`TEAL` is **20.18**, both reproducing the addendum's own figures
+exactly. **The surfaces were never in the set**; the addendum simply never said so.
+
+**Added:** `darkside.SURFACES = frozenset({GROUND, PANEL, STEP, WORDMARK})`, with the semantic set
+derived as `tokens() - SURFACES`. **The pairs stay derived** (`C-31`); only the four-name class
+boundary is written down, and it carries a measured guard — surfaces top out at `WORDMARK` 0.0423,
+semantics start at `MUT` 0.1714, a 4× luminance gap with nothing in it — so a mis-filed future token
+reddens rather than silently moving the floor.
+
+### A-83 — carries opened by Inc-1
+
+| id | Carry | Owner |
+|---|---|---|
+| `B-38` | `views/lane.py:67` paints a running step in `WARN` — registered exception, retone to `PULSE` | `Inc-5` |
+| `B-39` | `screens/factory.py`'s `.factory-tag` blue — the pre-existing `#D10` entry | `Inc-9` |
+| `B-40` | The loading ladder's `PENDING` rung is `WORDMARK` on `PANEL` = **1.65:1**, below the 3:1 non-text threshold: a three-state indicator ships as a two-state one. Found by the ux lens, out of `#D10`'s scope | design batch |
+| `B-41` | `MUT` and `WORDMARK` collapse to slot 8, and `ASH` and `PULSE` to slot 7, at the 16-colour rung — a third and fourth declared collision pair beside `ACCENT`/`VIOLET` and `SAGE`/`TEAL`. Not auto-reachable; `ASH` and `PULSE` never co-occur in a view | declared limit |
+| `B-42` | `PULSE` sits 25.06 from `ALERT`, closer than `WARN` does at 45.36. Judged sufficient on a lightness separation of 0.50 vs 0.27; owed a read at 118 × 34 before the batch closes | PR-level ux |
+
+**Test-path reconciliation (rule V-5).** The census landed in
+`tests/test_darkside_census.py` rather than in `tests/test_darkside.py` as the *(provisional)*
+`Executed verification` lines say; the register plus the CIEDE2000 derivation is ~300 lines and does
+not belong inside a 16-test primitives file. `AT-007` and `AT-008` landed in the new
+`tests/test_canvas.py`, `AT-007b` in `tests/test_radial.py`, `AT-009` in `tests/test_export.py`, all
+as specced.
+
+---
+
+## Amendment set 4, PASS 2 — the Inc-1 GATE REVIEW response. 2026-08-28.
+
+> Forced by two independent gate reviews. `code-reviewer` returned **BLOCK** on one HIGH;
+> `security-reviewer` signed off Inc-1 with one MEDIUM gated pre-merge and raised two HIGHs outside
+> this increment's change set. One of these amendments **retracts A-79**, which the code review
+> proved wrong.
+
+### A-84 — `COERCION_RANGES` is the Unicode CLASSES, not a hand-picked list
+
+**This is `A-80` recurring one layer up.** `A-80` fixed one omission (`U+000D`) in one row. The
+security lens then swept the whole table against Unicode's own properties and found the
+*"Zero-width and invisible"* row **stops one code point short** of `U+2061` through `U+2064` — the
+same *"stops short"* shape, in the adjacent row. Executed: **19 invisible code points reached the
+exported SVG** while the suite was green, including `U+00AD`, six deprecated format controls and
+points of the `U+E0000` TAG block.
+
+**The TAG block is why this is not cosmetic.** Those 96 code points render as nothing in every
+browser, editor and terminal, and each maps 1:1 onto an ASCII character. A ficha title can carry an
+arbitrary hidden ASCII string into a client-delivered SVG — invisible to the operator who exports
+it and to the client who opens it, and trivially recoverable by anything reading the file as text.
+
+**Before:** 12 hand-picked ranges, 85 code points, chosen row by row from a threat list.
+**After:** exactly `Cc ∪ Cf ∪ Zl ∪ Zp` minus `PRESERVED_CODE_POINTS = {U+0009, U+000A}` — 24
+ranges, **235** code points. The literal-range form is kept for reviewability, and a test re-derives
+the set from `unicodedata` and asserts equality **in both directions**, so a range that is short and
+a range that over-reaches both redden.
+
+**Why the class rather than a longer hand-list:** hand-picking produced two measured near-misses in
+one increment. *"This code point is a format or control character"* is not this project's property
+to define, and taking it from `unicodedata` removes the defect class rather than its two known
+instances.
+
+### A-85 — `darkside.time_row` coerces its own inputs
+
+**The widest input surface in the product.** `time_row` assembled `name` and `note` into a painted
+`Text` with no coercion. For repo-derived graphs those come from `git` — `mapper/github.py`
+populates them from a branch name and a commit subject and author. **The input author is anyone who
+has landed a commit in a repository the operator opens**, where every other uncoerced sink in this
+tree is fed by a file the operator owns.
+
+**Before:** `time_row` painted its arguments as given.
+**After:** `name` and `note` are coerced **inside** `time_row`, not at the call site, so the next
+caller cannot forget — the shape `hint_line` and `fit` already use.
+
+### A-86 — `A-79` IS RETRACTED: the register is 4 after Inc-1, and `lane.py:67` was never an exception
+
+**`A-79` was wrong.** It registered `mapper/views/lane.py:67` as busy-painted-as-severity on the
+strength of its label, `" run"`. **The branch is `if state == "pending"` (`lane.py:66`)** — the CI
+state is literally *pending*, which is `WARN`'s declared job verbatim. The site conforms. What is
+actually wrong is that its label and its half-filled glyph both say *running* for a state that is
+*pending*.
+
+**This is reader-as-oracle inside a human judgement:** the site was classified by the string it
+prints rather than by the condition that selects it, and a register whose rows are judged from
+labels is a register that certifies labels.
+
+**Before (`A-79`):** *"After Inc-1: **2** registered entries… After Inc-5: 1. After Inc-9: 0."*
+**After:** **4** after Inc-1, and `lane.py:67` is not among them:
+
+| Site | Why it does not classify | Closes in |
+|---|---|---|
+| `screens/factory.py` `.factory-tag` | `#D10`'s original entry — `ACCENT` on a label, not an affordance | `Inc-9` |
+| `views/lane.py` `_progress_bar`'s behind arm | *behind* is neither failure nor blockage; the same file paints `"late": WARN` for the same concept | `Inc-5` |
+| `views/lane.py` `_behind_chip` | same concept, same file | `Inc-5` |
+| `views/layered.py` removed-node ghost | a removed node is **absent information**, which the palette assigns to `MUT` | `Inc-3` |
+
+After `Inc-3`: 3. After `Inc-5`: 1. After `Inc-9`: 0. Every row names its owning increment and the
+stale-exception guard asserts it, so the handoff is mechanical rather than a promise.
+
+**`B-38` is restated:** `lane.py:67` is a **copy and glyph** defect, not a hue defect. Retoning it to
+`PULSE`, as `A-79` prescribed, would have been wrong.
+
+### A-87 — `AT-009`'s oracle no longer validates the list against itself
+
+`AT-009` derived its banned set from `COERCION_RANGES` — the same constant `_CONTROL_MAP` is derived
+from. `leaked == []` was therefore true **for any value of that constant**, provided the coercion ran
+at all: a routing test wearing an acceptance test's name. Demonstrated: green while 19 invisible code
+points reached the artifact it was asserting on.
+
+**Before:** the banned set is expanded from `darkside.COERCION_RANGES`.
+**After:** the oracle is `unicodedata.category(c) in ("Cc","Cf","Zl","Zp")` minus the declared
+preservations — a property this project does not define — plus a positive control proving the same
+unmodified oracle can report a non-absence. Executed: clipping a declared range now reddens
+`AT-009`, which was impossible before.
+
+### A-88 — carries added by the review response
+
+| id | Carry | Owner |
+|---|---|---|
+| `B-43` | `LLR-S06.3.3` quantifies over the 8 blue **literal** sites and says so, but *"blue stays interactivity-only"* is a claim about all ~50 sites, including 42 symbolic `darkside.ACCENT` references. A requirement gap, not an implementation gap | design batch |
+| `B-44` | `tests/test_repair_map_truth.py` pins the `canvas` row of the module map as **prose** and imports nothing, so it cannot observe `Canvas.__init__` and did not notice the signature change. Pin against `inspect.signature` | `Inc-2` |
+| `B-45` | The two truncators disagree on a second axis: `darkside.fit` measures display **cells**, `radial.py` slices **code points**, so a CJK or emoji title mis-sizes its pill background | design batch |
+| **`B-46`** | **`_ConfirmScreen` renders a ficha title through a markup-parsing `Static` on the archive confirmation.** A stray closing tag raises `MarkupError` while composing the dialog that gates subtree archival; `[@click=…]` injects a live action span. Not in `S-09`'s site list. **BATCH-CLOSE BLOCKER** | unassigned |
+| **`B-47`** | **`views/outline.py` and `views/lane.py` are uncoerced, and `outline` feeds `save_svg`.** `LLR-COERCE.2` is scoped verbatim to `views/layered.py::_fit`, so these belong to **no increment**. Measured: a hostile title through outline or layered writes an SVG that is **not well-formed XML** — and layered is the **default** renderer, so `AT-009`'s guarantee holds only in radial view. **BATCH-CLOSE BLOCKER** | unassigned |

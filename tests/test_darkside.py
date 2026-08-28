@@ -123,6 +123,33 @@ def test_plain_leaves_ordinary_text_and_markup_untouched():
     assert darkside.plain("") == ""
 
 
+def test_time_row_coerces_its_remote_derived_text():
+    """`time_row`'s name and note are REMOTE-derived, not merely file-derived.
+
+    The repo screen feeds it a git branch name and a commit subject/author, so
+    the input author is anyone who has landed a commit in a repository the
+    operator opens -- the widest input surface in the product.  A commit subject
+    carrying an OSC-52 sequence is a clipboard write into the operator's
+    terminal; a right-to-left override in a branch name reorders the row that
+    reports it.
+
+    Coercion lives INSIDE `time_row` rather than at its call site, so the next
+    caller cannot forget it -- the same shape as `hint_line` and `fit`.
+    """
+    hostile_name = "rama" + chr(0x1B) + "]52;c;aGk=" + chr(0x07)
+    hostile_note = "fix" + chr(0x202E) + "gpj.exe" + chr(0x00AD)
+    row = darkside.time_row(hostile_name, 3, "●", darkside.INK, hostile_note)
+
+    banned = {cp for lo, hi in darkside.COERCION_RANGES for cp in range(lo, hi + 1)}
+    leaked = sorted({ord(c) for c in row.plain if ord(c) in banned})
+    assert leaked == [], f"uncoerced code points painted: {[f'U+{c:04X}' for c in leaked]}"
+
+    # Positive control: the same oracle over the UNCOERCED input reports 4, so
+    # the empty result above is a measurement rather than an accident.
+    raw = hostile_name + hostile_note
+    assert len({ord(c) for c in raw if ord(c) in banned}) == 4
+
+
 def test_plain_coerces_non_strings_without_raising():
     """A sidecar is YAML: a bare `path:` parses to None, `path: 12345` to an int."""
     assert darkside.plain(None) == ""
