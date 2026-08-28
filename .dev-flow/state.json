@@ -170,7 +170,7 @@
       "station": "P6",
       "date": "2026-08-27",
       "decision": "synced-to-obsidian",
-      "notes": "G:\\My Drive\\ConsultIA\\Obsidian_Vaults\\AI-Consulting-Brain\u0001 - Proyectos\\mapper\\dev-flow-batches6-08-27-repair-batch-02\\ -- six artifacts + README. 03-increments/ deliberately NOT synced (artifact_homes: repo; one home per artifact). The repo's .dev-flow root 01/02/04/05 and 06-docs belong to 2026-08-18-batch-01 and were NOT copied under this batch's id: syncing another batch's artifacts here would be the exact false-record defect this batch spent six gate rounds closing."
+      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-08-27-repair-batch-02/ -- six artifacts + the generated README. 03-increments/ deliberately NOT synced (artifact_homes declares its home as the repo; one home per artifact, the link crosses by id). The .dev-flow root 01/02/04/05 and 06-docs belong to 2026-08-18-batch-01 and were NOT copied under this batch's id: syncing another batch's artifacts here would be the exact false-record defect this batch spent six gate rounds closing. This batch produced no 02/04-validation/05-postmortem/06-docs of its own -- its validation record is the five gate rounds in 04-qa-adversarial.md, and the README states that absence as a real gap."
     }
   ],
   "standing_authorization": {
