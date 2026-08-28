@@ -8,6 +8,7 @@ from rich.text import Text
 from mapper import darkside
 from mapper.canvas import Canvas
 from mapper.model import Graph
+from mapper.views.state import ViewState
 
 
 # Achromatic branch tints — KMBlue is reserved for the active path.
@@ -104,14 +105,8 @@ def _degraded(n: int) -> Text:
 class RadialRenderer:
     """Render a Graph as a radial mind map."""
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 80,
-        h: int = 24,
-        **kwargs,
-    ) -> Text:
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        selected_id, w, h = state.selected_id, state.w, state.h
         if graph.root_id is None:
             return Text("(no map loaded)")
         if len(graph.nodes) > MAX_RENDER_NODES:

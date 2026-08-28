@@ -140,14 +140,39 @@ def test_at_p05b_a_forward_commitment_is_never_written_present_tense():
     that does not exist.  Landing that verbatim would have traded a C-44 defect
     (work recorded as done that never landed) for a false map -- and the map is
     the oracle the triggers read.
+
+    DISCHARGED 2026-08-28 in `2026-08-26-ui-next-batch-02` Inc-2: the file
+    landed, so the commitment became a fact and the map says so.  The guard is
+    kept and INVERTED rather than deleted -- it now asserts the row is NOT still
+    marked as a forward commitment, which is the direction that can go wrong
+    from here.  A guard whose condition has been satisfied is not spent; it is
+    the thing that stops the row regressing into a promise again.
+
+    ANCHORED ON THE ROW, and the first attempt was not.  That version split the
+    whole document on the first occurrence of the filename and read 400
+    characters after it -- but the first occurrence is in this file's prose
+    preamble, 131 lines above the row, so the window never reached the thing it
+    claimed to check.  Executed against the BASELINE document, in which the row
+    still read COMMITTED: the guard PASSED.  It had replaced a live assertion
+    with one that could not fail, which is worse than having deleted it.
     """
     text = MAP.read_text(encoding="utf-8")
-    if "mapper/views/state.py" in text:
-        assert not (REPO / "mapper" / "views" / "state.py").exists(), (
-            "state.py now exists -- promote its row to present tense and delete "
-            "this guard's else-branch rather than leaving a stale commitment"
-        )
-        assert "COMMITTED, NOT PRESENT" in text, (
-            "`mapper/views/state.py` is named in the map but does not exist on "
-            "disk, and its row is not marked as a forward commitment"
-        )
+    assert (REPO / "mapper" / "views" / "state.py").exists(), (
+        "mapper/views/state.py landed in Inc-2 and must not vanish"
+    )
+    row = next(
+        (line for line in text.splitlines()
+         if line.startswith("| **`ViewState` parameter object**")),
+        None,
+    )
+    assert row is not None, "the ViewState row is gone from the module map"
+    # Match the CONCEPT, not one phrasing.  Pinning the exact string
+    # "COMMITTED, NOT PRESENT" let the identical regression through under the
+    # shorter "NOT PRESENT" -- and the backstop below was satisfied by the
+    # PRESENT *inside* NOT PRESENT, which made it near-vacuous.
+    assert "NOT PRESENT" not in row and "NOT YET IN THE TREE" not in row, (
+        "`mapper/views/state.py` exists on disk, so its row must be present "
+        "tense; leaving it marked as a forward commitment makes the map -- the "
+        "oracle the A-family triggers read -- assert something false"
+    )
+    assert "· **PRESENT**" in row

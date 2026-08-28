@@ -37,6 +37,7 @@ from mapper import darkside
 from mapper.app import MapperApp, MapScreen
 from mapper.mermaid import parse
 from mapper.model import Document, Edge, Ficha, Graph, Node
+from mapper.views.state import ViewState
 from mapper.screens.factory import FactoryScreen
 from mapper.store import MapStore
 from mapper.views import LayeredRenderer, OutlineRenderer, RadialRenderer
@@ -591,7 +592,7 @@ def test_at_r04_a_deep_acyclic_chain_renders_through_the_shipped_surface(name, r
     assert len(graph.nodes) == DEEP + 1
 
     started = time.perf_counter()
-    text = renderer().render(graph, selected_id="n0", w=80, h=24)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=80, h=24))
     elapsed = time.perf_counter() - started
 
     assert text.plain.strip(), f"{name} produced nothing"
@@ -612,7 +613,7 @@ def test_at_r04_depth_safety_does_not_depend_on_the_recursion_limit(name, render
     previous = sys.getrecursionlimit()
     sys.setrecursionlimit(_stack_depth() + headroom)
     try:
-        text = renderer().render(graph, selected_id="n0", w=80, h=24)
+        text = renderer().render(graph, ViewState(selected_id="n0", w=80, h=24))
     finally:
         sys.setrecursionlimit(previous)
     assert text.plain.strip(), f"{name} produced nothing under a pinned limit"
@@ -639,7 +640,7 @@ def test_at_r04_a_render_never_nests_deeper_than_the_declared_call_depth(
     """
     graph = _chain(DEEP)
     text, peak = _peak_call_depth(
-        lambda: renderer().render(graph, selected_id="n0", w=80, h=24)
+        lambda: renderer().render(graph, ViewState(selected_id="n0", w=80, h=24))
     )
     assert text.plain.strip(), f"{name} produced nothing"
     assert peak <= MAX_CALL_DEPTH, f"{name} nested {peak} frames deep"
@@ -705,7 +706,7 @@ def test_tc_r12_a_cyclic_graph_raises_the_guard_and_names_it(name, renderer, sha
 
     started = time.perf_counter()
     with pytest.raises(ValueError) as excinfo:
-        renderer().render(graph, selected_id=root, w=80, h=24)
+        renderer().render(graph, ViewState(selected_id=root, w=80, h=24))
     elapsed = time.perf_counter() - started
 
     assert not isinstance(excinfo.value, RecursionError)
@@ -730,7 +731,7 @@ def test_tc_r12_a_cycle_the_renderer_never_visits_is_asserted_not_absorbed(
 
     started = time.perf_counter()
     try:
-        text = renderer().render(graph, selected_id=root, w=80, h=24)
+        text = renderer().render(graph, ViewState(selected_id=root, w=80, h=24))
         outcome = "rendered"
     except Exception as exc:  # noqa: BLE001 - the identity is the assertion
         assert not isinstance(exc, RecursionError), f"{name} recursed on a cycle"
@@ -757,7 +758,7 @@ def test_at_r05_a_3000_node_tree_renders_within_the_declared_bound(name, rendere
     assert len(graph.nodes) == 3000
 
     started = time.perf_counter()
-    text = renderer().render(graph, selected_id="n0", w=140, h=45)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=140, h=45))
     elapsed = time.perf_counter() - started
 
     assert text.plain.strip(), f"{name} produced nothing"
@@ -787,7 +788,7 @@ def test_tc_r14_a_map_past_the_bound_degrades_in_spanish_and_does_not_raise(
     bound = radial_mod.MAX_RENDER_NODES
     graph = _balanced(bound + 1)
 
-    text = renderer().render(graph, selected_id="n0", w=140, h=45)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=140, h=45))
 
     assert str(bound + 1) in text.plain
     assert str(bound) in text.plain
@@ -800,7 +801,7 @@ def test_tc_r14_a_map_at_the_bound_still_draws(name, renderer):
     """The discriminating negative: a bound that degrades everything is not a fix."""
     graph = _balanced(radial_mod.MAX_RENDER_NODES)
 
-    text = renderer().render(graph, selected_id="n0", w=140, h=45)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=140, h=45))
 
     assert OMITTED not in text.plain
     assert text.plain.strip()
@@ -822,7 +823,7 @@ def test_c53_legacy_fixture_renders_identically_to_master(name, renderer, w, h, 
     function of `h`.  One pinned size cannot see it move.
     """
     graph = _legacy_graph(tmp_path)
-    text = renderer().render(graph, selected_id="fin", w=w, h=h)
+    text = renderer().render(graph, ViewState(selected_id="fin", w=w, h=h))
     assert _fingerprint(text) == MASTER_LEGACY_DIGESTS[(renderer.__name__, w, h)]
 
 

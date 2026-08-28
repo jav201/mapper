@@ -5650,19 +5650,26 @@ that cannot be a prefix or a suffix of another increment id is the whole reason 
 |---|---|---|---|---:|
 | **Inc-1** | S-6 paleta v2 tokens · **Canvas A3** (`HLR-CNV.1`) · **`LLR-COERCE.1`** | live | `darkside.py`, `canvas.py`, `app.py`, `views/radial.py` | 4 |
 | **Inc-2** | `ViewState` + `IRenderer` A3 — signature only, behaviour-neutral | live | `views/state.py` *(new)*, `views/layered.py`, `views/lane.py`, `views/outline.py`, `views/radial.py`, `app.py` | **6 — DECLARED BREACH**, unchanged from `#D5` |
-| **Inc-3** | US-N06 escala — pan, fold, overflow · **`LLR-COERCE.2`** | live | `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py` | 4 |
+| **Inc-3** | US-N06 escala — pan, fold, overflow · **`LLR-COERCE.2`, widened to every renderer feeding an operator-visible sink (`A-89`, `B-47`)** | live | `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py`, **`views/outline.py`** — and `views/lane.py` only if the derivation shows it reaching a sink | **5 — DECLARED BREACH (`A-89`)** |
 | **Inc-4** | US-N07 búsqueda + the seat rebind (`#D5b`) | live | `search.py`, `app.py`, `views/layered.py`, `keymap.py` | 4 |
 | **Inc-5** | hit painting in the three remaining renderers (`LLR-N07.2.2b`) | live — **belongs to US-N07, not to US-N14** | `views/outline.py`, `views/radial.py`, `views/lane.py` | 3 |
 | ~~**Inc-6**~~ | ~~US-N14 lente~~ | **VACATED** — deferred whole by `#D23` (§3.7). The id is retired, not reassigned | — | — |
 | **Inc-REPAIR** | `B-29` phantom sidecar warning · `B-30` path disclosure (§3.9) | **new** | `store.py` | **1** |
+| **Inc-CONFIRM** | `B-46` — the archive-confirmation markup sink (`A-90`) | **new** | the module owning `_ConfirmScreen` | **1** |
 | **Inc-7** | US-N13 sala | live | `app.py`, `darkside.py`, `store.py` | 3 |
 | **Inc-8** | S-8 truncation + the glyph vocabulary (the legend panel) · adds seat rows for `HLR-N16.4` | live | `screens/help.py`, `darkside.py`, `app.py`, **`keymap.py`** | **4** ⚠ |
 | **Inc-9** | help scope routing + `KEY_SCOPE` declarations + seat migration · **`LLR-N06.2.5`** re-parented in by `#D21` | live | `keymap.py`, `screens/factory.py`, `screens/settings.py`, `app.py` | 4 |
 
-**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → `Inc-4` → `Inc-5` → `Inc-REPAIR` → `Inc-7` →
-`Inc-8` → `Inc-9`. **Parallelism is not re-derived** and the chain stays serial: ARQ measured 0 of
-21 pairs parallelisable, `modules(A) ∩ modules(B) ⊇ {app}` without exception. Budget **≤ 4 SOURCE
-files**; tests uncapped.
+**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → `Inc-4` → `Inc-5` → `Inc-REPAIR` →
+**`Inc-CONFIRM`** → `Inc-7` → `Inc-8` → `Inc-9`. **Parallelism is not re-derived** and the chain
+stays serial: ARQ measured 0 of 21 pairs parallelisable, `modules(A) ∩ modules(B) ⊇ {app}` without
+exception. Budget **≤ 4 SOURCE files**; tests uncapped.
+
+**Amended 2026-08-28 by coordinator ruling (`A-89`, `A-90`).** `Inc-3` absorbs `B-47` and declares a
+5-file breach; `Inc-CONFIRM` is inserted alongside `Inc-REPAIR` for `B-46`, before `Inc-7`, because
+`Inc-7`'s sala loads every map on mount and is what makes both paths newly reachable. **This section
+remains the sole statement of the cut** — the amendments record the reasoning, this table records
+the commitment, and a second cut appearing anywhere is a defect, not a variant.
 
 **Three orderings are HARD, not preference:**
 1. **`Inc-8` before `Inc-9`** — carried unchanged from `#D5`. `Inc-9`'s acceptance reads the painted
@@ -7966,5 +7973,196 @@ unmodified oracle can report a non-absence. Executed: clipping a declared range 
 | `B-43` | `LLR-S06.3.3` quantifies over the 8 blue **literal** sites and says so, but *"blue stays interactivity-only"* is a claim about all ~50 sites, including 42 symbolic `darkside.ACCENT` references. A requirement gap, not an implementation gap | design batch |
 | `B-44` | `tests/test_repair_map_truth.py` pins the `canvas` row of the module map as **prose** and imports nothing, so it cannot observe `Canvas.__init__` and did not notice the signature change. Pin against `inspect.signature` | `Inc-2` |
 | `B-45` | The two truncators disagree on a second axis: `darkside.fit` measures display **cells**, `radial.py` slices **code points**, so a CJK or emoji title mis-sizes its pill background | design batch |
-| **`B-46`** | **`_ConfirmScreen` renders a ficha title through a markup-parsing `Static` on the archive confirmation.** A stray closing tag raises `MarkupError` while composing the dialog that gates subtree archival; `[@click=…]` injects a live action span. Not in `S-09`'s site list. **BATCH-CLOSE BLOCKER** | unassigned |
-| **`B-47`** | **`views/outline.py` and `views/lane.py` are uncoerced, and `outline` feeds `save_svg`.** `LLR-COERCE.2` is scoped verbatim to `views/layered.py::_fit`, so these belong to **no increment**. Measured: a hostile title through outline or layered writes an SVG that is **not well-formed XML** — and layered is the **default** renderer, so `AT-009`'s guarantee holds only in radial view. **BATCH-CLOSE BLOCKER** | unassigned |
+| **`B-46`** | **`_ConfirmScreen` renders a ficha title through a markup-parsing `Static` on the archive confirmation.** A stray closing tag raises `MarkupError` while composing the dialog that gates subtree archival; `[@click=…]` injects a live action span. Not in `S-09`'s site list. **BATCH-CLOSE BLOCKER** | **→ `Inc-CONFIRM` (A-90)** |
+| **`B-47`** | **`views/outline.py` and `views/lane.py` are uncoerced, and `outline` feeds `save_svg`.** `LLR-COERCE.2` is scoped verbatim to `views/layered.py::_fit`, so these belong to **no increment**. Measured: a hostile title through outline or layered writes an SVG that is **not well-formed XML** — and layered is the **default** renderer, so `AT-009`'s guarantee holds only in radial view. **BATCH-CLOSE BLOCKER** | **→ `Inc-3` (A-89)** |
+
+---
+
+## Amendment set 6 — INC-2 GATE REVIEW response. 2026-08-28.
+
+### A-94 — `LLR-CNV.3.1`'s recorded pre-state `M-10` DOES NOT REPRODUCE (`B-51`)
+
+**The requirement's numeric threshold is unmeetable on this tree, and the acceptance test was
+passing because of the defect rather than in spite of it.**
+
+`LLR-CNV.3.1` states: *"after 1 real `tab` press from the canvas, the field reads `"rail"`; after 2,
+`"inspector"`. Pre-state measured (`M-10`): press 1 focuses `OutlineRail#map-rail`, press 2 focuses
+`FieldInput#insp-title`."*
+
+Executed on this tree, deterministically over three runs:
+
+```
+owners = ['rail', '', '', '', '', '', '']
+ids    = ['map-rail', None, None, None, None, None, None]
+```
+
+**The real `tab` key does not move focus on `MapScreen`; it drops it.** The first sample is taken
+before any press, so all four presses in the original acceptance contributed **no positive
+evidence** — and its assertion (*"the owner changed"*) was satisfied by the transition
+`rail → nothing focused`. A test passing because of the defect it should catch.
+
+**Before:** the acceptance asserts the owner changed across four real presses.
+**After:** the acceptance asserts the **derivation** — that `_focus_owner()` equals an independent
+recomputation from `app.focused` — which holds whether or not anything has focus; and the
+requirement's real threshold is pinned separately as a **strict xfail**, so it fails loudly the day
+traversal is fixed rather than being quietly forgotten.
+
+**Related measurement:** under parallel load `app.focused` is still `None` after **5 seconds** —
+`MapScreen` sometimes focuses nothing at all. Any test requiring initial focus is flaky by
+construction, which is why the arm no longer waits for it.
+
+**Carried as `B-51`, routed to `qa-reviewer`.** It is a shipped interaction defect, not an Inc-2
+regression: it predates the branch and `HLR-CNV.3`'s substance (the canvas dims when another region
+owns the keyboard) holds independently of it.
+
+### A-95 — carries added by the Inc-2 review
+
+| id | Carry | Owner |
+|---|---|---|
+| ~~`B-51`~~ | ~~The real `tab` key drops focus on `MapScreen`~~ — **RETRACTED IN FULL BY `A-96`. Not a defect.** It was an artifact of the default 80 x 24 Pilot size, at which the rail and inspector are correctly auto-hidden. At 118 x 34 the chain is populated and `M-10` reproduces verbatim | **withdrawn** |
+| `B-52` | With a modal pushed, `MapScreen._focus_owner()` returns `""` and the canvas paints the FOCUSED tone while not holding the keyboard. Contradicts `HLR-CNV.3`'s statement; no visible harm (the canvas is occluded), and the `""`-paints-focused conflation is the declared price of byte identity | design batch |
+| `B-53` | `#map-canvas` is `can_focus=False`, so the declared owner `"canvas"` is unreachable through the real wiring and the focused tone is arrived at via `""`. `B-05`'s three-region framing implies the canvas should be focusable | design batch |
+| **`B-54`** | **Every Pilot-driven interaction assertion must DECLARE its terminal size.** Two of this app's three regions are size-conditional (`_apply_region_visibility`), so an interaction test at `run_test()`'s default 80 x 24 is testing a two-region app. `A-96` records what that cost. Sweep the suite for interaction arms that do not set `size=` | `qa-reviewer` |
+
+---
+
+## A-96 — **`A-94` IS RETRACTED IN FULL. `B-51` IS NOT A DEFECT.**
+
+**It was an artifact of the default Pilot terminal size, and `LLR-CNV.3.1`'s threshold reproduces
+exactly as written at the batch's declared context of use.**
+
+Executed across three sizes — same graph, same real `tab` key:
+
+```
+size        focus_chain                                          owners after 4 real tabs
+80 x 24     []                                                   ['', '', '', '', '']
+118 x 34    ['map-rail','insp-title','insp-state','insp-notes']   ['', 'rail', 'inspector', 'inspector', 'inspector']
+140 x 45    ['map-rail','insp-title','insp-state','insp-notes']   ['', 'rail', 'inspector', 'inspector', 'inspector']
+```
+
+**Index 0 is the SETTLED pre-state, and the first published version of this table was not.**
+`MapScreen.on_mount` schedules `call_after_refresh(self._park_focus)`, which sets focus to `None`,
+while Textual's `AUTO_FOCUS` has already focused `#map-rail`. Sampled a single `pilot.pause()` after
+`push_screen`, the screen is usually still in the `AUTO_FOCUS` state — **23 runs in 25** — so this
+table first published `['rail','rail','inspector',…]`, which reads as though the first `tab` did
+nothing.
+
+**The conclusion is unaffected, and the correction is the point: this is the very class the
+amendment exists to name, appearing inside the amendment.** Fourth instance. The acceptance arm now
+settles twice and asserts `app.focused is None` before measuring, so the published pre-state and the
+asserted one are the same state.
+
+At **118 x 34** — `C-D27c`'s declared context of use — press 1 gives `rail` and press 2 gives
+`inspector`, which is **`M-10` verbatim**. The empty chain at 80 x 24 is `_apply_region_visibility`
+**working**: below `MIN_CANVAS_WIDTH` it auto-hides the rail and the inspector so the canvas keeps
+the terminal, and a hidden widget is correctly absent from the focus chain. There was nothing to
+traverse because there was nothing displayed.
+
+**How a phantom reached a requirement amendment, stated plainly, because the mechanism matters more
+than the mistake.** Every measurement behind `A-94` was taken at `run_test()`'s default 80 x 24 and
+**none of them said so**. Three passes compounded it rather than catching it: the original
+acceptance passed at that size for the wrong reason; the gate review correctly showed the assertion
+was vacuous, and I concluded from that the *behaviour* was broken; the confirmation pass correctly
+identified `focus_chain == []` as the mechanism — **also measured only at the default size** — and I
+wrote it down as a root cause. **Nobody varied the one parameter that decided the answer.** Three
+independent passes agreeing is not evidence when they share an unstated premise.
+
+**This is `P-20` inverted, inside the batch that recorded `P-20`.** There, the suite ran only at
+sizes where a real defect was absent; here it ran at a size that manufactured one. Same rule, two
+instances, now carried as **`B-54`**.
+
+**Retracted:** `A-94` in full · the `B-51` row of `A-95` · the "drops it, deterministically" claim
+in `mapper/app.py::_focus_owner`'s docstring · the strict xfail, replaced by an arm that asserts the
+declared threshold at 118 x 34 and **passes**.
+
+**Kept, independently true:** `B-53` (`#map-canvas` is `can_focus=False`).
+
+---
+
+## Amendment set 5 — COORDINATOR RULINGS, 2026-08-28
+
+> **Provenance, stated precisely.** These three rulings came from the **coordinating agent** on
+> 2026-08-28, in response to the Inc-1 close report, and they extend a scope sealed at the PDR. They
+> are recorded as **coordinator rulings, not operator approval** — a different thing, and one the
+> merge gate still requires: the independent security sign-off and the adversarial PR-level
+> `qa-reviewer` pass over the whole diff both stand unchanged, and a HIGH still blocks the merge and
+> returns to the operator.
+
+### A-89 — `LLR-COERCE.2` widens from ONE named truncator to EVERY renderer feeding an operator-visible sink (`B-47` → `Inc-3`)
+
+**What this closes is that the batch's security story was conditional on which view the operator
+happened to be in.** `AT-009` asserts the exported SVG carries no coerced code point, and it does —
+through `RadialRenderer`. But `LayeredRenderer` is the **default** renderer and `OutlineRenderer`
+also reaches `export.save_svg`; measured, a hostile title through either writes an SVG that is **not
+well-formed XML**. A guarantee holding in one of three views is not the guarantee the requirement
+states.
+
+**The narrowing was never in the Statement — it was in the `Touched symbols` line**, and that is the
+transferable lesson: the requirement read *"Every function that truncates a string destined for a
+painted surface…"*, which is already general and already correct. The scoping line beneath it named
+`views/layered.py::_fit` and its six call sites, and the scoping line is what an increment builds to.
+
+**Before — `Touched symbols`:** `mapper/views/layered.py::_fit` (`layered.py:38`) and its call sites
+at `:217`, `:227`, `:237`, `:247`, `:266`, `:280`. `mapper/darkside.py::fit` unchanged.
+
+**After — `Touched symbols`, and the threshold with it:**
+
+> Every renderer that emits file-derived text to a surface an operator can see — the terminal **or**
+> an artifact `export.save_svg` writes — shall route that text through the design module's coercion
+> before it is truncated or painted. **The set of such renderers shall be DERIVED** from the tracked
+> product sources, by finding every module that reads a `Ficha` field and returns a `rich.Text`
+> reached by a renderer call site — never named by hand.
+
+**Owning increment: `Inc-3`**, which already owns `views/layered.py` and `LLR-COERCE.2`. Its budget
+absorbs `views/outline.py`. **`views/lane.py` enters only if the derivation shows it reaching a
+sink** — which the increment shall establish rather than assume.
+
+**The threshold is the derived renderer set, not three names.** A hand-listed set of renderers is
+the same defect class as a hand-listed code-point list, and this batch has now paid for that twice
+(`A-80`, `A-84`). A fourth renderer added later must enter the census automatically or the guarantee
+decays the same way again.
+
+### A-90 — `B-46` gets its own increment, `Inc-CONFIRM`, sequenced with `Inc-REPAIR`
+
+`_ConfirmScreen` renders a ficha title through a **markup-parsing** sink while composing the dialog
+that **gates subtree archival**. Same newly-reachable-destructive-action class as `Inc-REPAIR`'s two
+defects, and the fix is the `darkside.plain` the same function already applies seven lines above.
+
+**Named `Inc-CONFIRM`, not a number**, for the reason §5.4 gives for `Inc-REPAIR`: a numeric id
+collides under a substring scan (`grep "Inc-1"` matches `Inc-10`), and this document is corpus an
+id-scanner reads.
+
+| Inc | Scope | Source files | n |
+|---|---|---|---:|
+| **`Inc-CONFIRM`** | `B-46` — the archive-confirmation markup sink | the module owning `_ConfirmScreen`, established by the increment | **1** |
+
+**Two acceptance arms, one per failure mode**, because they fail independently and one arm would let
+the other ship:
+1. **the crash arm** — a title carrying an unbalanced closing tag does **not raise** while the
+   confirmation dialog is composed;
+2. **the injection arm** — a title carrying an action directive paints **literally**, with no live
+   action span in the rendered output.
+
+**Ordering:** with `Inc-REPAIR`, before `Inc-7`. `Inc-7`'s sala loads every map on mount, which is
+what makes these paths newly reachable with zero operator action.
+
+### A-91 — PACE CALIBRATION, recorded so the post-mortem can judge it
+
+**Full protocol** — independent review **plus** a confirmation pass on any post-fix tree, plus a
+mutation battery — is retained wherever the increment touches a data path, a destructive action, the
+A3 contract, or a security sink: **`Inc-2`, `Inc-3`, `Inc-REPAIR`, `Inc-CONFIRM`, `Inc-7`.**
+
+**Lighter protocol** — a single independent review, no confirmation pass — is permitted for a
+genuinely presentational increment, **and only while both conditions hold**: the review returns
+**zero HIGH**, and the increment touches **no data path**. **Any HIGH restores the full protocol for
+that increment.** Candidates: `Inc-8`, `Inc-9`, and `Inc-5` if its hit-painting proves purely
+presentational.
+
+**Batteries are sized to the predicates that exist and are never skipped.** The calibration trades
+review passes, not evidence.
+
+**Recorded as a decision rather than applied silently**, so the post-mortem can measure what the
+lighter lane cost: the honest test is whether any defect found later would have been caught by the
+confirmation pass that lane skipped. Inc-1 is the control — its confirmation pass found **7 MEDIUM
+and 6 LOW**, including a fabricated measurement in production source and a "fix" that repaired
+nothing, so the pass is not ceremonial and the calibration is a real trade.

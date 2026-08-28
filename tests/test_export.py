@@ -5,6 +5,7 @@ from pathlib import Path
 from mapper import darkside
 from mapper.export import save_svg
 from mapper.model import Edge, Ficha, Graph, Node
+from mapper.views.state import ViewState
 from mapper.views.layered import LayeredRenderer
 from mapper.views.radial import RadialRenderer
 
@@ -42,7 +43,7 @@ def _radial_graph() -> Graph:
 def test_save_svg(tmp_path):
     g = Graph()
     g.add_node(Node(id="a", ficha=Ficha(title="A ◆ unicode")))
-    text = LayeredRenderer().render(g, selected_id="a", w=40, h=12)
+    text = LayeredRenderer().render(g, ViewState(selected_id="a", w=40, h=12))
     out = tmp_path / "out.svg"
     save_svg(text, out)
     assert out.exists()
@@ -62,7 +63,7 @@ def test_at_009_the_exported_file_carries_the_canvas_layers(tmp_path):
     argued -- so the threshold is an on-disk code-point count compared against
     the on-screen count, both computed at run time.
     """
-    text = RadialRenderer().render(_radial_graph(), selected_id=None, w=80, h=24)
+    text = RadialRenderer().render(_radial_graph(), ViewState(selected_id=None, w=80, h=24))
     out = tmp_path / "radial.svg"
     save_svg(text, out)
 
@@ -79,7 +80,7 @@ def test_at_009_the_negative_control_shows_size_alone_proves_nothing(tmp_path):
     number that happens to agree (C-55): the oracle can produce a non-absence,
     and it can produce an absence, and they differ.
     """
-    text = LayeredRenderer().render(_radial_graph(), selected_id=None, w=80, h=24)
+    text = LayeredRenderer().render(_radial_graph(), ViewState(selected_id=None, w=80, h=24))
     out = tmp_path / "layered.svg"
     save_svg(text, out)
 
@@ -104,7 +105,7 @@ def test_at_009_the_exported_svg_carries_no_coerced_code_point(tmp_path):
     g.add_node(Node(id="b", ficha=Ficha(title="hijo" + chr(0x2028) + "x")))
     g.add_edge(Edge("root", "b"))
 
-    text = RadialRenderer().render(g, selected_id=None, w=80, h=24)
+    text = RadialRenderer().render(g, ViewState(selected_id=None, w=80, h=24))
     out = tmp_path / "hostile.svg"
     save_svg(text, out)
     raw = out.read_text(encoding="utf-8")
