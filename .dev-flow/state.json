@@ -85,7 +85,8 @@
       },
       {
         "inc": "Inc-3",
-        "commit": "PENDING",
+        "commit": "bdc4b6a",
+        "post_commit_verification": "The artifact code-point scan's non-vacuity clause used to be keyed on git TRACKING STATE, so it would have reddened on the very commit that landed this increment (measured: 91 artifacts, 84 tracked, 7 untracked). Re-asserted structurally with a probe file. VERIFIED ON THE COMMITTED TREE at bdc4b6a: 0 untracked artifacts, fast lane 801 passed exit 0, zero FAILED lines.",
         "date": "2026-08-28",
         "source_files": 6,
         "source_files_note": "DECLARED breach, widened from A-89's five to six by A-97: views/state.py was owed by two PDR-sealed LLRs (pan_x/pan_y at LLR-N06.1.1, folded at LLR-N06.2.1, all three 'NEW -- created in Phase 3') and named by no cut. Arithmetically true when A-89 was written; only the declaration was missing. NOT an A3 -- all three fields carry defaults, the additive case state.py's own docstring exempts.",
