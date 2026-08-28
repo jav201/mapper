@@ -72,7 +72,7 @@ an increment whose own acceptance criterion is knowingly false.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd <repo root>
 set PYTHONUTF8=1
 python -m pytest -q
 python -m pytest -q -m slow

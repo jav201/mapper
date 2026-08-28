@@ -64,7 +64,12 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("import", "escape"): ("home", "volver", "esc", "import", False),
     ("import", "s"): ("save", "guardar mapa", "s", "import", False),
     ("map", "A"): ("add_attachment", "agregar adjunto", "A", "node", False),
+    # Inc-3 / US-N06: the four pan chords.  `⇧hjkl` pans what `hjkl` navigates.
+    ("map", "H"): ("pan_left", "desplazar izquierda", "H", "view", False),
     ("map", "I"): ("toggle_inspector", "mostrar/ocultar ficha", "I", "view", False),
+    ("map", "J"): ("pan_down", "desplazar abajo", "J", "view", False),
+    ("map", "K"): ("pan_up", "desplazar arriba", "K", "view", False),
+    ("map", "L"): ("pan_right", "desplazar derecha", "L", "view", False),
     ("map", "R"): ("toggle_rail", "mostrar/ocultar rail", "R", "view", False),
     ("map", "X"): ("remove_attachment", "quitar adjunto", "X", "node", False),
     ("map", "a"): ("add_child", "agregar hijo", "a", "node", False),

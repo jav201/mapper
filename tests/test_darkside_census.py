@@ -199,6 +199,17 @@ CONFORMING_SEVERITY = {
     ("mapper/views/layered.py", "style=darkside.WARN,"),
     ("mapper/views/layered.py", 'cv.put(chip_x + j, y, ch, f"{darkside.GROUND} on {darkside.WARN}")'),
     ("mapper/views/layered.py", "doc_style = darkside.INK if doc else darkside.ALERT"),
+    # Inc-3 / HLR-N06.2 — the fold pill's left bar and its hit count.  Judged by
+    # reading the lines: `LLR-S06.3.5` gives WARN the single job "outstanding
+    # attention -- work pending, due, at risk or in flight, and nothing has
+    # failed", and a folded branch is a branch whose contents the operator still
+    # has to come back to; the numeral beside it counts query matches sealed
+    # inside it, which is pending work with a quantity.  Nothing has failed, so
+    # ALERT would be the wrong token, and the requirement's own corrected reason
+    # (§6.5 A-10, which struck "WARN is correct because it means a hit") is the
+    # one applied here.
+    ("mapper/views/layered.py", 'cv.put(cx, y + card_h, "▐", darkside.WARN)'),
+    ("mapper/views/layered.py", "cv.text(cx + 2 + len(core), y + card_h, tail, darkside.WARN)"),
     ("mapper/views/outline.py", "style=darkside.WARN,"),
     ("mapper/views/outline.py", "style = darkside.WARN if missing else darkside.MUT"),
     ("mapper/views/radial.py", "style=darkside.WARN,"),
@@ -276,7 +287,9 @@ def test_hue_census_no_undeclared_hue_ships():
 def test_hue_census_every_severity_and_busy_site_is_classified():
     """TOTALITY: a derived site with no register row is a failure, not a skip."""
     sites = _sites(tracked_sources(), ADJUDICATED)
-    assert len(sites) == 36, f"derived {len(sites)} severity/busy lines, expected 36"
+    # 36 -> 38 in Inc-3: the fold pill's WARN bar and its WARN hit count, both
+    # judged and registered in CONFORMING_SEVERITY above.
+    assert len(sites) == 38, f"derived {len(sites)} severity/busy lines, expected 38"
 
     unclassified = [
         (path, line) for path, line, _ in sites

@@ -63,18 +63,24 @@ async def test_rail_lists_the_tree_and_counts_missing_per_branch(tmp_path):
 
 
 async def test_rail_collapses_a_branch(tmp_path):
-    """Collapsing hides descendants but keeps the branch's count visible."""
+    """Collapsing hides descendants but keeps the branch's count visible.
+
+    LLR-N06.2.1 moved the fold set off this widget, so the rail is HANDED a
+    folded set through `show` instead of mutating one of its own.  The behaviour
+    asserted is unchanged, which is the point: the rail still renders fold, it
+    just no longer owns it.
+    """
     app = MapperApp(tmp_path)
     async with app.run_test() as pilot:
         await pilot.pause()
         screen = await _open(app, pilot, _tree(app))
         rail = screen.query_one("#map-rail", OutlineRail)
 
-        rail.toggle("fin")
+        rail.show(rail.graph, rail.cursor, frozenset({"fin"}))
         assert [nid for nid, _ in rail.visible_rows()] == ["root", "fin", "rrhh"]
         # The hidden child's gap is still counted on the collapsed parent.
         assert rail.subtree_missing("fin") == 1
-        rail.toggle("fin")
+        rail.show(rail.graph, rail.cursor, frozenset())
         assert [nid for nid, _ in rail.visible_rows()] == ["root", "fin", "cont", "rrhh"]
 
 

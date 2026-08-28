@@ -15,7 +15,13 @@ dependencies = [
 
 [project.optional-dependencies]
 export = ["cairosvg>=2.7.0"]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+# `pytest-timeout` is DEV-ONLY AND PINNED, and it is here for one reason: the
+# cycle-guard regression arms fail by HANGING.  `TC-R11` / `TC-R12` wrap the
+# render in `pytest.raises` and check the elapsed time AFTERWARDS, so deleting a
+# guard does not redden them -- it makes them never return, which in CI is a
+# stuck run rather than a failing report, and a stuck run is the one outcome
+# nobody reads as a defect.  A timeout converts that back into a red arm.
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "pytest-timeout==2.3.1"]
 
 [project.scripts]
 mapper = "mapper.app:main"
@@ -31,3 +37,11 @@ addopts = "-m 'not slow'"
 markers = [
     "slow: depth-5000 acceptance; deselected by default, run with -m slow",
 ]
+# A HANG IS NOT A RESULT.  The per-test ceiling is deliberately far above every
+# arm's real cost -- the slowest measured arm in either lane is under 20 s, and
+# the whole default lane is ~105 s -- because this is not a performance budget.
+# It exists so a non-terminating arm reports RED instead of wedging the run.
+# `thread`, not the default `signal`: signal-based timeouts need SIGALRM, which
+# Windows does not have, and this suite's development platform is Windows.
+timeout = 120
+timeout_method = "thread"

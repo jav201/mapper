@@ -123,6 +123,15 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("I", "I", "toggle_inspector", "mostrar/ocultar ficha", "view"),
     KeyBinding("g", "g", "focus_rail", "ir al rail", "view"),
     KeyBinding("z", "z", "collapse_branch", "plegar rama", "view"),
+    # US-N06 pan.  `hjkl` already navigates the tree in this scope and `⇧hjkl`
+    # moves the window over it — the shifted-pair precedent is already in the
+    # seat (`A`/`X` beside `a`/`x`).  Executed at `ea1fbf9` and re-derived at
+    # `954f8f3`: all four arrive as their own `event.key`, and of the uppercase
+    # letters only `A`, `I`, `R` and `X` were taken.
+    KeyBinding("H", "H", "pan_left", "desplazar izquierda", "view"),
+    KeyBinding("J", "J", "pan_down", "desplazar abajo", "view"),
+    KeyBinding("K", "K", "pan_up", "desplazar arriba", "view"),
+    KeyBinding("L", "L", "pan_right", "desplazar derecha", "view"),
     # -- map · leaving ------------------------------------------------------
     KeyBinding("q", "q", "home", "inicio", "salir"),
     KeyBinding("escape", "esc", "back_or_home", "volver", "salir"),

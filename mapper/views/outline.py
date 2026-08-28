@@ -114,13 +114,19 @@ class OutlineRenderer:
                 node = graph.nodes[cur]
                 prefix = _indent(lv) + ("- " if lv else "")
                 line = Text()
+                # B-47 / A-89: this renderer reaches `export.save_svg` through
+                # `MapScreen.action_export_svg` exactly as the layered one does,
+                # and it coerced nothing -- measured, a hostile title through it
+                # writes an SVG that is not well-formed XML.  The guarantee
+                # `AT-009` asserts held only in radial view.
+                title = darkside.plain(node.ficha.title)
                 if cur == selected_id:
                     block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
                     line.append(prefix, style=block)
-                    line.append(node.ficha.title, style=block)
+                    line.append(title, style=block)
                 else:
                     line.append(prefix, style=darkside.MUT)
-                    line.append(node.ficha.title, style="bold")
+                    line.append(title, style="bold")
                 # Collapsed branches still answer: declare counts inline.
                 children = index.get(cur)
                 if children:
@@ -133,7 +139,7 @@ class OutlineRenderer:
                         style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
                     line.append(note, style=style)
                 elif node.ficha.meta:
-                    line.append(f"  {node.ficha.meta}", style=darkside.MUT)
+                    line.append(f"  {darkside.plain(node.ficha.meta)}", style=darkside.MUT)
                 lines.append(line)
                 if children:
                     # Reversed, so the LIFO stack still emits pre-order,

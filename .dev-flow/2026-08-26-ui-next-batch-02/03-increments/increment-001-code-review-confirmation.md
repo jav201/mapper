@@ -216,7 +216,7 @@ Verified by mutation `M-E` (add `0x202E` to the preserved set **and** clip `(0x2
 `0x202D`, so the two move together): **2 arms RED**. The escape hatch does not exist.
 
 **Does widening to 235 break anything legitimate? — No, nothing new.** The one genuinely load-bearing
-pair in the set is `U+200C` ZWNJ and `U+200D` ZWJ: ZWJ builds emoji sequences (`👨‍👩‍👧` becomes
+pair in the set is `U+200C` ZWNJ and `U+200D` ZWJ: ZWJ builds emoji sequences (`👨<U+200D>👩<U+200D>👧` becomes
 `👨�👩�👧` after `plain()`) and ZWNJ/ZWJ are orthographically required in Persian and Indic scripts.
 **Both were already coerced by the pre-review 85-point list** (`0x200B–0x200D`), so the post-review
 widening does not introduce them; they entered with Inc-1 relative to `5d8ee0d`'s 63 points. Of the
@@ -436,7 +436,7 @@ Below, N-1 … N-13. Three MEDIUMs are direct consequences of the fixes; the res
   3.12); a Unicode upgrade reddens this deliberately — re-derive the ranges, do not widen the oracle."*
 
 ### N-13 — ZWJ / ZWNJ are coerced, which corrupts emoji sequences and Persian-Indic text  ·  [LOW]
-- **What / where.** `mapper/darkside.py:373` — `(0x200B, 0x200F)`. A ficha title containing `👨‍👩‍👧`
+- **What / where.** `mapper/darkside.py:373` — `(0x200B, 0x200F)`. A ficha title containing `👨<U+200D>👩<U+200D>👧`
   renders as `👨�👩�👧`; `U+200C`/`U+200D` are orthographically required in Persian and Indic scripts.
 - **Why it matters — and why it is not an objection to A-84.** These were already in the pre-review
   85-point list, so the widening to 235 did **not** introduce them; they entered with Inc-1 relative
