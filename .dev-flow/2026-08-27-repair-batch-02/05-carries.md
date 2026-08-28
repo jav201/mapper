@@ -69,7 +69,24 @@ the coverage — the batch's own HIGH-1 defect class one level down: a new famil
 sibling's implementation but not its sibling's gate.
 
 **The enumeration, not a total** — three registers in this batch count this class differently and a
-single number would be wrong the moment the corpus grows:
+single number would be wrong the moment the corpus grows.
+
+**Read rows 7 through 13 before drawing the lesson.** Four consecutive review rounds each found *a
+false figure inside the correction of a false figure* — rows 7, 10 and 11 sit literally inside the
+text that fixed the row above them, and row 10 is in a paragraph headed *HONEST SCOPE*. Rows 12 and
+13 were found by **neither a human nor a reviewer**: they came from a mechanical sweep of every live
+number across these artifacts, run because vigilance had demonstrably failed to converge four times
+running. Row 13 is this table's own citation, stale because the docstring it points at grew.
+
+**The honest conclusion is not "be more careful."** It is that prose counts about a moving tree decay
+on every commit, and the only instrument that caught them at the tail was one that **re-derives**
+rather than re-reads. The sweep is cheap and repeatable, and the next session should run it before
+trusting any figure below:
+
+```
+# every live figure, every authored artifact, printed with its line, judged one by one
+LIVE = {647, 630, 643, 626, 548, 531, 429, 100, 96, 83, 41, 40, 16, 12}
+```
 
 | # | Shape | Where | Found by |
 |---|---|---|---|
@@ -77,8 +94,15 @@ single number would be wrong the moment the corpus grows:
 | 2 | the node-id coercion removes the phantom node | `mapper/store.py` comment | Inc-1 review (F4) |
 | 3 | a map correction note quoting its own falsehood verbatim | artifact | C-56 pin |
 | 4 | three node citations naming tests that do not exist | artifacts | whole-branch QA |
-| 5 | *"adding a `dict[str, str]` to ANY round-tripped dataclass extends the coercion"* | `mapper/store.py:98-119` docstring | confirmation review (MEDIUM-B) |
+| 5 | *"adding a `dict[str, str]` to ANY round-tripped dataclass extends the coercion"* | `mapper/store.py:98-130` docstring | confirmation review (MEDIUM-B) |
 | 6 | *"same sink and same collision handling … gated by `Q-high1`"* | disposition row | confirmation review (HIGH-A) |
+| 7 | *"`test_at_p02i` fails loudly if one appears"* — **inside the rewrite that fixed #5** | `mapper/store.py` docstring | re-confirmation review (MEDIUM-1) |
+| 8 | the guard's own CLASS set: 4 classes named, 7 defined | `tests/test_repair_store_boundary.py` | re-confirmation review (MEDIUM-1b) |
+| 9 | a carry stating a count stale at the tip it names | `05-carries.md` | re-confirmation review (MEDIUM-2) |
+| 10 | *"3 checkable citations"* where disk says 4 — **inside the paragraph headed HONEST SCOPE** | `tests/test_repair_artifact_claims.py` | condition-discharge review (NEW-1) |
+| 11 | two restatements of a superseded count left behind by the correction of that count | `increment-004.md` | condition-discharge review (NEW-2) |
+| 12 | this table's own post-fix figures, stale one commit after being written | `04-gate-findings-disposition.md` | **the numeric sweep** (no reviewer flagged it) |
+| 13 | this very row's line citation, stale after the docstring it points at grew | `05-carries.md` | **the numeric sweep** |
 
 **Note where they live: 3 of the 6 are COMMENTS in `mapper/`, not lines in `.dev-flow/`.** The
 checker as landed read only the artifacts, so it was structurally unable to see half the corpus.
@@ -144,9 +168,9 @@ reviewer-authored files and are **left untouched**, noted rather than edited.
 | `load_warnings` is unbounded | A million malformed entries produce a million strings. The fix changes a record format **18 tests pin**, so it wants its own increment. |
 | `_text_attributes()` shim | One-line delegation kept because shipped tests use the name; collapse when those tests are next touched. |
 | `create_from_template` | Still hand-constructs `SchemaField` with the old `f.get("kind","text")` shape — out of this batch's fence. |
-| **`_build_sidecar` is hand-enumerated — the last hand list in the chain** | **Measured, not argued: a plain `str` field landed on `Node` reddens 0 of 647.** It classifies as text, so the totality guard passes by design; it goes unseen because `_derived_positions()` enumerates the text fields of `Ficha`/`Attachment`/`SchemaField`/`Document` while `Node` contributes only the structural `node.id`, and the serialiser would never write it. The census, the coercion and the guard's class set are all derived now; **the SAVE shape is not.** Closing it means deriving `_build_sidecar` from the model — a behaviour change to the save path, so it wants its own increment. |
+| **`_build_sidecar` is hand-enumerated — the last hand list in the chain** | **Measured, not argued: a plain `str` field landed on `Node` reddens 0 of 647.** It classifies as text, so the totality guard passes by design; it goes unseen because `_derived_positions()` enumerates the text fields of `Ficha`/`Attachment`/`SchemaField`/`Document` while `Node` contributes only the structural `node.id`, and the serialiser would never write it. The coercion and the guard's class set are derived now, and the census is derived **within** the classes it walks — but **which classes it walks is itself a hand list** (`_derived_positions()`), and **the SAVE shape is not derived at all.** Those are the two rungs still standing, and they are the direct cause of the 0 above. Closing them means deriving `_build_sidecar` from the model — a behaviour change to the save path, so it wants its own increment. |
 | A new `dict[str, str]` on another dataclass | Classifies, so `test_at_p02i` passes; the coercion call site is `Document`-only and the serialiser would not write it. Routing one is a **hand step** — now stated at every site that cites the guard, rather than implied to be automatic (re-confirmation review, MEDIUM-1). |
-| The resolved predicate is ~430x more expensive per call | `0.8 µs → 348.5 µs`, uncached, called once per document (`~35 ms` at 100 documents). **Zero impact today** — no shipped sidecar carries a document and no perf arm covers that path — so it is carried rather than pre-optimised. One-line `lru_cache` if the document path ever carries load. |
-| The str-map collision does not pin WHICH key survives | Keep-last vs keep-first reddens 0 of 647 — **and the covered sibling `Ficha.fields` is identical**, so this is symmetric and pre-existing, not a gap this batch opened. If it is ever pinned, pin both sites together. |
+| The resolved predicate is ~430x more expensive per call | `0.8 µs → 348.5 µs` **(reviewer-measured; not re-derived here)**, uncached, called once per document (`~35 ms` at 100 documents). **Zero impact today** — no shipped sidecar carries a document and no perf arm covers that path — so it is carried rather than pre-optimised. One-line `lru_cache` if the document path ever carries load. |
+| The str-map collision does not pin WHICH key survives | Keep-last vs keep-first reddens 0 of 647 **(reviewer-measured; not re-derived here)** — **and the covered sibling `Ficha.fields` is identical**, so this is symmetric and pre-existing, not a gap this batch opened. If it is ever pinned, pin both sites together. |
 | no logging facility | `grep -rn "logging\." mapper/` → zero hits, so a masked programming error is unrecoverable. Mitigated, not fixed, by carrying `type(exc).__name__` in the message. |
 | `TC-P02`/`P03`/`P04` are nominal | The `AT-` chain is complete with one distinct driving node each; the `TC-` layer exists as comment banners only. |

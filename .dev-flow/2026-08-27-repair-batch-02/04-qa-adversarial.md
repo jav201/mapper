@@ -1362,3 +1362,331 @@ survivor — if it is ever pinned, pin it on both sites together).
 | Every MEDIUM carries a recommended fix | OK | §3 — replacement sentence given for MEDIUM-1; one token for MEDIUM-2 |
 | Clean categories reported as clean, not padded | OK | §5 — 11 categories; LOW-3 explicitly declined as a finding |
 | No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive d75f0fd`: **no differences** in any tracked file; `git status --porcelain` empty |
+
+---
+
+# Condition-discharge review (a5db8df)
+
+**Reviewer:** `code-reviewer`, independent condition-discharge pass. Not the author; not the QA
+reviewer who raised HIGH-1; not the confirmation reviewer who raised HIGH-A; not the re-confirmation
+reviewer who raised MEDIUM-1/MEDIUM-2.
+**Target:** branch `fix/repair-batch-02`, commit **`a5db8df`**, PR #3, diff `d75f0fd..a5db8df`.
+**Scope, deliberately narrow:** are the two conditions actually discharged, and did the discharge
+break or newly over-claim anything. HIGH-A was **not** re-reviewed from scratch; the prior pass
+cleared it.
+**Date:** 2026-08-27
+**Posture:** every figure below was executed in this session against a `git archive a5db8df` copy in
+my own scratchpad, `PYTHONDONTWRITEBYTECODE=1`, every substitution guarded by an asserted hit count
+of exactly 1, every restore proven by sha256, every verdict taken **per resolved arm** and never from
+a process exit code. Mutations are described by position and operation, never spelled verbatim.
+
+## Verdict — **DISCHARGED WITH NEW CONDITIONS.** No HIGH. Three new findings, all record-truth.
+
+**Both conditions are genuinely discharged, and MEDIUM-1's second half is discharged HARDER than the
+condition asked for.** The re-confirmation asked the author to *soften* the docs to the four classes
+the guard covered. The author instead **derived** the class set from `mapper.model` and pinned it
+with a new node — and the derivation is real, not decorative: I re-narrowed it in the lab and it
+reddens; I landed a brand-new dataclass in the model and it reddens; I removed the census-position-1
+class from the declared map and it reddens on two arms. `test_at_p02j` is killable in **both**
+directions of its own assertion.
+
+**The author's explicit NON-claim is honest in both directions, and I proved it with a control rather
+than reading it.** A plain `str` field on the census-position-1 class still reddens **0 of 647** — the
+author says so and carries it rather than claiming it fixed. The stated *reason* is also the true one:
+I read `_derived_positions()` (it hard-codes `node.id` and derives text fields from `Ficha`,
+`Attachment`, `SchemaField`, `Document` only) and `_build_sidecar` (`mapper/store.py:289-322`, fully
+hand-enumerated), then **built the control the author did not**: the same text field landed on a
+census-derived class instead reddens **2** arms. The asymmetry is caused by exactly the mechanism the
+author names, and by nothing else he left out.
+
+**I hunted for a third false claim inside the fix for a false claim, as the brief instructed and as
+the two passes before me each found. There is one — and there are two more of the same family.** All
+three are record-truth in prose; none gates behaviour, none gives false confidence about code that
+exists, and every one is a one-token or one-sentence fix. The sharpest sits inside the claims-checker's
+own docstring: the sentence rewritten to be honest about scope states a figure that **its own next
+sentence contradicts and disk refutes**.
+
+**No repo file was edited by this pass except this one.** At close, the lab tree is byte-identical to
+a fresh `git archive a5db8df` (`diff -r`: no differences in any tracked file) and `git status
+--porcelain` in the main repo is **empty**.
+
+---
+
+## 1 · Numbers — re-derived, not copied
+
+| Figure | Packet claims | **Measured here** |
+|---|---|---|
+| collected | 647 | **647** |
+| fast lane | 630 passed / 17 deselected | **630 passed, 17 deselected**, 55.8s, exit 0 |
+| slow lane | 17 passed / 630 deselected | **17 passed, 630 deselected**, 22.9s, exit 0 |
+| `ruff check mapper/ tests/` | 29 | **29** |
+| ruff on the three touched files | clean | **All checks passed!** |
+| boundary file | 84 to 100 | **100** |
+| artifact-claims file | 83 | **83** |
+| ledger `647 = 548 + 16 + 83` | asserted | **exact** — `test_at_p02i` **7** arms + `test_at_p02j` **1** |
+| pristine pre-red arms | 0 | **0 of 647** |
+
+---
+
+## 2 · MEDIUM-1, first half — the `_str_map_fields` docstring. **DISCHARGED, and TRUE against disk.**
+
+`mapper/store.py:120-127`. Every clause of the replacement was checked separately:
+
+| Clause | Verified how | Result |
+|---|---|---|
+| "No other round-tripped dataclass declares a `dict[str, str]` today" | enumerated every field of all 7 model dataclasses | **TRUE** — only `Ficha.fields`, `Document.tags`, `Document.inherited`, and both classes are named in the paragraph above it |
+| "NO TEST CATCHES ONE THAT APPEARS" | a str-map field landed on an uncovered class, whole tree | **TRUE — 0 RED of 647** |
+| "a str-map CLASSIFIES, so the totality guard passes" | read the predicate; confirmed by the run above | **TRUE** |
+| "what that guard catches is a field that is neither text nor a str-map" | a neither-text-nor-str-map field landed on the census-position-1 class | **TRUE — 1 RED**, `test_at_p02i[Node]` |
+| "must be routed to a coercion site BY HAND and `_build_sidecar` extended" | read the `Document`-only call site and the hand-enumerated serialiser | **TRUE** |
+| "0 RED of 643 (re-confirmation review, MEDIUM-1)" | attributed to that review; I re-ran one of the three at the new tip | **still 0, now of 647** |
+
+**The over-claim is gone at all three sites the condition named.** `03-increments/increment-004.md`
+§1.2 and `01-requirements.md` §7 AMD-2 both now say "every dataclass **`mapper.model` defines**" and
+both carry the explicit "what it does not catch" sentence. The `test_at_p02i` docstring carries it
+too — a fourth site the condition did not ask for.
+
+## 3 · MEDIUM-1, second half — the class set. **DISCHARGED, and the derivation is real.**
+
+Executed, whole tree, arm count asserted before every verdict:
+
+| Mutation (by position/operation) | Arms | RED | The arms |
+|---|---|---|---|
+| the declared non-text map loses its entry for the census-position-1 class | 647 | **2** | `test_at_p02i[Node]`, `test_at_p02j` |
+| the class derivation re-narrowed to exclude that class | **646** | **1** | `test_at_p02j` (and the `[Node]` arm vanishes — which is the point) |
+| a brand-new dataclass appears in `mapper.model` | **648** | **1** | `test_at_p02j` |
+| a neither-text-nor-str-map field on that class | 647 | **1** | `test_at_p02i[Node]` |
+
+**`test_at_p02j` is killable in both directions of its own assertion** — the "missing" branch by
+removing a declared entry or by adding a class to the module, the "stale" branch by narrowing the
+walk. It is not a one-sided guard. The `assert derived` non-vacuity floor is covered by the same
+evidence: narrowing the walk changes the collected arm count, so the walk is demonstrably live.
+
+**`_EXPECTED_NON_TEXT`'s field sets are correct for all three newly-added classes.** Checked against
+`mapper/model.py:58-98` field by field:
+
+- `Node` — `id: str` classifies as text; `ficha: Ficha` is the only declaration. **Correct.**
+- `Edge` — `parent_id`, `child_id`, `label` are all `str`; the empty tuple is **correct**.
+- `Graph` — all six of `nodes`, `edges`, `root_id`, `schema`, `documents`, `load_warnings` are
+  non-text, and `root_id: str | None` in particular does **not** classify under the spelled text
+  predicate, so declaring it is right, not padding. **Correct, and complete** — `Graph` has exactly
+  six fields.
+
+Had any of the three been wrong, the class would have reddened on the pristine tree; it did not, and
+the third assertion (`every == classified | declared`) is what would have caught it.
+
+## 4 · MEDIUM-2 — the carried count. **DISCHARGED.**
+
+`05-carries.md:40-44` no longer hands over a bare stale number. Measured: `548` is gone; the line now
+reads "It is **643** at `d75f0fd`; at any later tip, measure it rather than trusting this sentence."
+**That is TRUE as written** — it names the commit whose count it states, and instructs re-measurement
+rather than copying. I considered whether stating 643 in a commit that collects 647 re-commits the
+original sin and concluded it does not: the number is explicitly scoped to a named commit, which is
+precisely what the original line failed to do. **Not a finding.**
+
+The two new `05-carries.md` rows were re-measured at the new denominator rather than re-labelled:
+
+| Carry row's claim | **Measured here** |
+|---|---|
+| a plain `str` field on `Node` reddens **0 of 647** | **0 RED of 647** — TRUE |
+| the str-map collision keep-last vs keep-first reddens **0 of 647** | **0 RED of 647** — TRUE |
+
+The author changed a denominator and the figure still holds under it. That is a re-run, not a
+find-and-replace.
+
+## 5 · The author's explicit NON-claim. **HONEST IN BOTH DIRECTIONS.**
+
+The claim under test: a plain `str` field on `Node` still reddens nothing; the reason is that a `str`
+field classifies as text so the guard passes *by design*, and it goes unseen one layer down because
+`_derived_positions()` does not enumerate `Node` and `_build_sidecar` is hand-enumerated.
+
+| Probe | Arms | RED | Reading |
+|---|---|---|---|
+| a plain text field on the census-position-1 class | 647 | **0** | the non-claim is TRUE — it still reddens nothing |
+| **control:** the same field on a census-derived class | 650 | **2** | the new census position's `test_at_p02` arm and `test_tc_p01c` |
+
+**The control is what makes this honest rather than a rationalisation.** If the reason were anything
+other than the census's class enumeration, the control would have gone green too. It did not: the
+identical field on a class the census *does* derive grows the census by three positions and reddens
+two arms loudly. Read against source, the mechanism is exactly as stated —
+`tests/test_repair_store_boundary.py:110-114` hard-codes `node.id` and then derives text fields
+from `Ficha`, `Attachment`, `SchemaField` and `Document` only, and `mapper/store.py:289-322` writes a
+fixed literal set of keys. Nothing is omitted from the author's account, and the gap is carried in
+`05-carries.md` with the right owner (a save-path behaviour change, its own increment).
+
+**Carrying this instead of claiming it fixed is the correct disposition**, and stating it inside the
+very guard that does not catch it is better than stating it only in the packet.
+
+---
+
+## 6 · NEW findings — the third false claim, and two of its family
+
+### NEW-1 — the claims-checker's own "HONEST SCOPE" rewrite states a figure disk refutes and its own next sentence contradicts. **[MEDIUM]**
+
+`tests/test_repair_artifact_claims.py:78-88`, in the `_source()` docstring rewritten *in this commit
+to discharge the framing nit*:
+
+> What it does buy is real and small: `mapper/` carries **3** checkable citations across 2 of its 33
+> files, and those are now checked instead of unread.
+
+**Measured with the file's own two regexes over its own source corpus:**
+
+```
+source files                     : 33
+keymap.py : path:line=[]                             ids=[test_keymap]
+store.py  : path:line=[app.py:450, app.py:1179]      ids=[test_at_p02i]
+TOTAL path:line citations        : 2
+TOTAL distinct test identifiers  : 2
+TOTAL checkable claims           : 4   across 2 of 33 files
+```
+
+**It is 4, not 3** — and three lines below, the *same docstring* says "the **four** citations
+`mapper/` carries today all resolve" and then **enumerates all four by name**. So the file contradicts
+itself within one docstring, and the false half is the half authored in this commit.
+
+**Why this is the finding the brief predicted.** It is a false figure introduced by the correction of
+a false figure, sitting in the file whose entire purpose is to catch false figures, inside a paragraph
+whose first two words are "HONEST SCOPE". That is the third iteration of the pattern.
+
+**Why it is a MEDIUM and not a HIGH, stated so it is not read as worse than it is.** It **under**-states
+what the widening buys; it does not inflate it. No test is weakened, no conclusion depends on it, and
+the honest half of the sentence ("the widening catches **none of** them") is TRUE and is the
+load-bearing half. **Why not a LOW:** a self-contradicting count inside the claims checker leaves a
+reader unable to decide which of two numbers in one docstring to believe, and the batch has already
+graded this class at MEDIUM twice.
+
+**Suggested fix — one token:** `3` to `4`. (Or, to remove the ambiguity the word "citations" is doing
+in two senses here: "carries **4** checkable claims — 2 `path:line` citations and 2 `test_*`
+identifiers — across 2 of its 33 files".)
+
+### NEW-2 — `increment-004.md` §4 corrected its ledger to 647 and left two restatements of the old count behind. **[MEDIUM]**
+
+Two lines in the file whose §4 table this commit corrected:
+
+| Line | Says | The section it points at now says |
+|---|---|---|
+| `increment-004.md:244` | "The **643** above is the count **with** this file present." | the ledger three lines above reads **647** — there is no 643 above it any more |
+| `increment-004.md:325` | evidence checklist: "Both lanes green, ledger reconciles — §4 — **626 + 17 = 643**" | §4 reads **630 passed**, **17 slow**, collected **647** |
+
+Both are **internal contradictions within one file at one commit**, and both are the exact MEDIUM-2
+shape — a count edited in one place, its restatement left standing — reproduced inside the commit
+that discharges MEDIUM-2. Neither is marked historical; `:244` literally points upward at a number
+that is no longer there, and `:325` cites a section that now disagrees with it.
+
+**Suggested fix:** `643` to `647` at `:244`; `626 + 17 = 643` to `630 + 17 = 647` at `:325`.
+
+**Explicitly NOT findings, and I checked each rather than assuming:** §4.1's table header "(of 643)",
+`:256`'s "(548 / 643, matched)", and `:312`/`:314` all describe the HIGH-A mutation battery that
+genuinely ran at `d75f0fd` against 643 arms. They are historical and **correct**. I decline to inflate
+them.
+
+### NEW-3 — the "40 arms" nit was fixed in the code and left standing in the packet. **[LOW]**
+
+The re-confirmation's LOW-1 nit said the `_live_nodes` docstring's "40 arms" measured 41. The author
+corrected it in `tests/test_repair_artifact_claims.py:129` (40 to 41) — and left the identical figure
+at `increment-004.md:151` reading **40**. The two now disagree with each other.
+
+**Measured:** `_live_nodes()` is consumed by `test_every_cited_test_identifier_exists` (**41** arms)
+and by `test_the_checker_can_see_its_corpus` (1 arm) — 41 by the reviewer's own framing, 42 counting
+the non-degeneracy arm. **40 is wrong on either reading.**
+
+**Suggested fix:** `40` to `41` at `increment-004.md:151`.
+
+### NEW-4 — the AMD-2 insertion left a run-on on an unwrapped line. **[LOW]**
+
+`01-requirements.md:317`. The inserted sentence ends "...routing such a field is still a hand step."
+and the pre-existing sentence resumes on the same physical line: "That guard protects a
+**conclusion**...". The result is a ~180-character line in a file that otherwise wraps at ~100, and
+"That guard" now reads as referring to the sentence just inserted rather than to `test_at_p02i`.
+Readability and convention only; the content is correct. **Suggested fix:** break the line before
+"That guard" and re-wrap.
+
+---
+
+## 7 · Clean — what I attacked that came back clean
+
+1. **All three replacement docstrings are TRUE against disk**, clause by clause (§2) — including the
+   one clause I expected to be loose ("no other round-tripped dataclass"), which is exact.
+2. **The class derivation is genuinely derived** — it filters on `__module__`, so an imported
+   dataclass cannot inflate it, and a newly-defined one cannot escape it (§3, 1 RED).
+3. **`test_at_p02j` is killable in both branches of its assertion** (§3). Not a one-sided guard.
+4. **`_EXPECTED_NON_TEXT`'s field sets are correct and complete for `Node`, `Edge` and `Graph`** (§3),
+   checked field by field against `mapper/model.py`, not inferred from the green run.
+5. **`test_at_p02i` grew from 4 to 7 arms and the three new ones are load-bearing** — the
+   `[Node]` arm reddens on two independent mutations, and it **could not have reddened at all**
+   before this fix, which is the concrete thing the discharge buys.
+6. **The non-claim is honest, proven by a control the author did not build** (§5).
+7. **Both `05-carries.md` figures were re-measured at the new denominator, not re-labelled** (§4).
+8. **No regression.** Both lanes exit 0 at the expected counts; the pristine tree has **0** pre-red
+   arms of 647; ruff is at the 29-error whole-tree baseline and clean on all three touched files.
+9. **The ledger reconciles exactly** — `647 = 548 + 16 + 83`, boundary file measured at **100**,
+   claims file at **83**, `test_at_p02i` at **7** and `test_at_p02j` at **1**.
+10. **`05-carries.md:44` is not a repeat of MEDIUM-2** — I checked it specifically and it is true as
+    written, because it names the commit its number belongs to. Declined as a finding.
+
+## 8 · What I could not verify
+
+- **I did not re-review HIGH-A.** The brief scoped it out and the prior pass cleared it; I re-ran the
+  lanes and the pristine tree only to confirm nothing regressed.
+- **I did not re-measure LOW-2's timing figures** (`0.8 µs` / `348.5 µs` / `~430x`) now carried into
+  `05-carries.md:149`. They are the previous reviewer's own numbers, restated; taken on report.
+- **I did not exercise the save side of a new `dict[str, str]` field**, for the same reason the prior
+  pass could not: `_build_sidecar` is hand-enumerated. My MEDIUM-1 evidence is read-side.
+- **I did not mutate the class walk to return empty**, so the `assert derived` floor is not directly
+  killed. Narrowing the walk (§3) demonstrates it is live, which I judge sufficient; a reviewer
+  wanting the floor itself pinned should say so.
+- **`state.json`, the security review, and QA's other MEDIUM/LOW carries remain out of scope.** I
+  re-checked none of them.
+- **I did not re-verify `_source()`'s enumerated four citations resolve** beyond counting them; the
+  suite's own 83 arms assert that and they are green.
+
+## 9 · What blocks, and what does not
+
+**Nothing blocks on correctness.** Both conditions are discharged, the second more strongly than
+asked; the two new guards are real and killable; the non-claim is honest and carried with the right
+owner; no shipped behaviour changed and no arm regressed.
+
+**Conditions before merge — four edited lines, no code change:**
+
+1. **NEW-1** — `3` to `4` in `tests/test_repair_artifact_claims.py`'s `_source()` docstring, so it
+   stops contradicting its own next sentence.
+2. **NEW-2** — `643` to `647` at `increment-004.md:244`; `626 + 17 = 643` to `630 + 17 = 647` at
+   `increment-004.md:325`.
+
+**Carry:** NEW-3 (`40` to `41` at `increment-004.md:151`), NEW-4 (re-wrap `01-requirements.md:317`),
+and the prior pass's LOW-2 and LOW-3, which this commit correctly recorded rather than fixed.
+
+**One observation, recorded and deliberately NOT inflated into a finding.** `05-carries.md:147` says
+"The census, the coercion and the guard's class set are all derived now; **the SAVE shape is not.**"
+The census is derived *within* the four classes it feeds on, but *which four classes* feed it is
+itself a hand list (`tests/test_repair_store_boundary.py:110-114`) — and that hand list is the direct
+cause of the 0-RED result the same table cell reports. The cell **discloses the mechanism explicitly
+in its own next clause**, so no reader is misled, and the structure is pre-existing rather than
+introduced by this diff. It is the natural next rung if anyone closes the save-shape carry.
+
+## 10 · Evidence checklist
+
+| Item | Mark | Executed evidence |
+|---|---|---|
+| Prior re-confirmation verdict read in full first | OK | `04-qa-adversarial.md:1028-1210`, both conditions and all three LOWs |
+| Diff read in full | OK | `d75f0fd..a5db8df`: 7 files, +490/-36; `mapper/store.py` +12/-4, both test files, four records |
+| Expected arm count asserted before any verdict | OK | pristine **647**, 0 pre-red; every mutation reports its own resolved count, deltas explained |
+| Both lanes and ruff re-derived, not copied | OK | 630/17 in 55.8s · 17/630 in 22.9s · ruff 29 whole-tree, clean on the three touched files |
+| Ledger re-derived | OK | `647 = 548 + 16 + 83`; boundary **100**, claims **83**, p02i **7**, p02j **1** |
+| MEDIUM-1 first half checked clause by clause against disk | OK | §2 — six clauses, each separately verified; str-map probe **0 RED of 647** |
+| The other two over-claim sites checked | OK | §2 — `increment-004.md` §1.2 and `01-requirements.md` §7 AMD-2 both corrected; a fourth site added |
+| MEDIUM-1 second half: derivation proven REAL | OK | §3 — re-narrowed **1 RED**, new dataclass **1 RED**, declared entry removed **2 RED** |
+| `test_at_p02j` shown killable in BOTH assertion branches | OK | §3 — "missing" branch 2 ways, "stale" branch 1 way |
+| `_EXPECTED_NON_TEXT` field sets checked for the 3 new classes | OK | §3 — field by field against `mapper/model.py:58-98`; `Graph` complete at 6 |
+| MEDIUM-2 checked against disk | OK | §4 — `548` gone; the replacement is true and commit-scoped; both new carry rows re-measured at 647 |
+| The NON-claim verified in BOTH directions | OK | §5 — **0 RED of 647**, plus a CONTROL at **2 RED of 650** proving the stated reason is the real one |
+| The author's stated reason read in source, not inferred | OK | §5 — `test_repair_store_boundary.py:110-114` and `mapper/store.py:289-322` |
+| A third fresh false claim hunted for, per the brief | **FOUND — 3, one MEDIUM in the claims checker itself** | §6 NEW-1 (3 vs measured 4), NEW-2 (two stale restatements), NEW-3 (half-fixed nit) |
+| Historical figures checked before being called stale | OK | §6 — §4.1, `:256`, `:312`, `:314` and `05-carries.md:44` all verified CORRECT and declined |
+| Every new finding carries a recommended fix | OK | §6 — one token each for NEW-1/2/3, a re-wrap for NEW-4 |
+| Clean categories reported as clean, not padded | OK | §7 — 10 categories; §9's census observation explicitly declined as a finding |
+| Every substitution asserted exactly 1 hit | OK | harness asserts a hit count of exactly 1 and raises otherwise; 8 mutations, 8 assertions |
+| Bytecode cache neutralised | OK | `PYTHONDONTWRITEBYTECODE=1` on every mutation run |
+| Every mutation restored, proven by sha256 | OK | 4 files back to `3d39a861…` / `637d537e…` / `87402d1d…` / `a30deb52…`, matching the pre-mutation baseline |
+| Mutations described by position, not spelled | OK | §2-§5 name position and operation only |
+| No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive a5db8df`: **no differences** in any tracked file; `git status --porcelain` empty |
