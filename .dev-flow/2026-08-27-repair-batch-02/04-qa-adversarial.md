@@ -1690,3 +1690,330 @@ introduced by this diff. It is the natural next rung if anyone closes the save-s
 | Every mutation restored, proven by sha256 | OK | 4 files back to `3d39a861…` / `637d537e…` / `87402d1d…` / `a30deb52…`, matching the pre-mutation baseline |
 | Mutations described by position, not spelled | OK | §2-§5 name position and operation only |
 | No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive a5db8df`: **no differences** in any tracked file; `git status --porcelain` empty |
+
+---
+
+# Final verification (bef1d69)
+
+**Reviewer:** `code-reviewer`, independent final pass. Not the author; not the QA reviewer who raised
+HIGH-1; not the confirmation reviewer who raised HIGH-A; not the re-confirmation reviewer who raised
+MEDIUM-1/MEDIUM-2; not the condition-discharge reviewer who raised NEW-1..NEW-4.
+**Target:** branch `fix/repair-batch-02`, commit **`bef1d69`**, PR #3, diff `a5db8df..bef1d69`.
+**Scope, deliberately narrow:** are NEW-1..NEW-4 discharged, did the sweep's own edits introduce
+anything false, and does an independently-run numeric sweep find any live false figure. HIGH-A, the
+arms and the class-set derivation were **not** re-reviewed; three passes cleared them.
+**Date:** 2026-08-27
+**Posture:** every figure below was executed in this session. Historical columns were re-derived from
+detached `git archive` copies of `01d7578`, `d75f0fd` and `a5db8df` in my own scratchpad,
+`PYTHONDONTWRITEBYTECODE=1`; the tip was measured in the worktree read-only. **No mutation work was
+needed and none was done** — this diff changes no logic. No repo file was edited but this one;
+`git status --porcelain` is empty at close.
+
+## Verdict — **CLEAR TO MERGE.** No HIGH. All four conditions discharged and true against disk.
+
+The sweep's own edits are the cleanest correction this batch has produced: **the streak of a false
+figure inside the correction of a false figure is broken on the numbers.** Every cell of the rewritten
+three-column post-fix table is true for the commit its column names — I re-derived all twelve measured
+cells from archive copies rather than reading them. Rows 1–13 of the false-record enumeration are
+accurate, the `mapper/store.py:98-130` citation is exact to the line, and both "reviewer-measured"
+attributions are correct.
+
+**Four new record-truth items remain, all prose, all one line, none blocking.** The streak is broken
+on figures but not entirely on *restatements*: growing the enumeration from 6 rows to 13 left the
+sentence beneath it still saying "3 of the 6" (FV-1) — the identical shape as NEW-2, one level up.
+None of the four touches behaviour, weakens a test, or inflates any claim.
+
+---
+
+## 1 · Numbers — re-derived, not copied
+
+| Figure | Packet claims | **Measured here (tip `bef1d69`)** |
+|---|---|---|
+| collected | 647 | **647** |
+| fast lane | 630 passed / 17 deselected | **630 passed, 17 deselected**, 57.2s, exit 0 |
+| slow lane | 17 passed / 630 deselected | **17 passed, 630 deselected**, 23.8s, exit 0 |
+| `ruff check mapper/ tests/` | 29 | **Found 29 errors** |
+| ruff on the touched file | clean | **All checks passed!** |
+| boundary file | 100 | **100** |
+| artifact-claims file | 83 | **83** |
+| ledger `647 = 548 + 16 + 83` | asserted | **exact** — `p02g` **6** · `p02h` **2** · `p02i` **7** · `p02j` **1** = 16; new arms alone **16 passed** |
+| corpus | 8 authored + 33 source = 41 | **8 / 33 / 41** |
+| census positions | 21 | **21** (`_derived_positions()` evaluated) |
+| dataclasses in `mapper.model` | 7 | **7** |
+
+## 2 · The four conditions — each verified against disk
+
+### NEW-1 — **DISCHARGED, and the new figure is the measured one.**
+
+`tests/test_repair_artifact_claims.py:87` now reads "`mapper/` carries **4** checkable citations
+across 2 of its 33 files". Re-derived with the file's **own two regexes** over its **own** `_source()`
+corpus, not copied from the prior review:
+
+```
+source files                     : 33
+keymap.py : path:line=[]                            ids=['test_keymap']
+store.py  : path:line=['app.py:450','app.py:1179']  ids=['test_at_p02i']
+TOTAL path:line citations        : 2
+TOTAL distinct test identifiers  : 2
+TOTAL checkable claims           : 4   across 2 of 33 files
+```
+
+**4 is correct**, and the docstring now agrees with its own next sentence ("the four citations
+`mapper/` carries today all resolve"), which enumerates the same four. The self-contradiction is gone.
+
+### NEW-2 — **DISCHARGED at both sites.**
+
+| Line | Now reads | Verified |
+|---|---|---|
+| `increment-004.md:244` | "The **647** above is the count **with** this file present." | the ledger three lines above reads **647** — the pointer resolves |
+| `increment-004.md:325` | "Both lanes green, ledger reconciles — §4 — **630 + 17 = 647**" | §4 reads 630 fast / 17 slow / 647 collected; `630 + 17 = 647` is arithmetically and empirically exact |
+
+I re-checked the figures the prior pass **declined** to change, and it was right to decline: §4.1's
+"(of 643)", `:256`'s "(548 / 643, matched)" and `:312`/`:314` all describe the HIGH-A battery that ran
+at `d75f0fd`, where the tree genuinely collected **643** (archive-verified below). Historical and
+correct. They were left alone. Same for `01-requirements.md:316` ("all 643 arms", attributed to the
+re-confirmation review) and `05-carries.md:42-44` (explicitly commit-scoped to `d75f0fd`).
+
+### NEW-3 — **DISCHARGED, and 41 is the right number.**
+
+`increment-004.md:151` now reads **41 arms**, matching `tests/test_repair_artifact_claims.py:129`.
+Re-derived: `_corpus()` = 8 authored artifacts + 33 `mapper/` source files = **41**, so
+`test_every_cited_test_identifier_exists` has **41** arms. The two figures now agree and both are true.
+
+### NEW-4 — **DISCHARGED, and better than the condition asked.**
+
+`01-requirements.md:317-321`. The run-on is broken into its own paragraph, and the author went past
+the readability fix: the ambiguous **"That guard"** is replaced by the explicit **"`test_at_p02i`"**,
+which removes the mis-binding the finding described rather than only re-wrapping it. Measured: the
+region now wraps at 88–105 chars (the ~180-char line is gone). *(The file's 431-char maximum is a
+pre-existing table row at `:51`, outside this diff.)*
+
+## 3 · The sweep's own edits — the part that mattered
+
+### 3.1 · The three-column post-fix table (`04-gate-findings-disposition.md:134-138`). **EVERY CELL TRUE.**
+
+I re-derived each column from a detached `git archive` of the commit that column names — not from the
+packet, and not from the prior reviewers:
+
+| Cell | Column claims | **Archive-measured** |
+|---|---|---|
+| `01d7578` fast / slow / collected | 531/17 · 17/531 · 548 | **531/17 · 17/531 · 548** |
+| `01d7578` ledger `548 = 429 + 119` | asserted | **exact** (429 base from `01-requirements.md:12`, 413+16) |
+| `d75f0fd` fast / slow / collected | 626/17 · 17/626 · 643 | **626/17 · 17/626 · 643** |
+| `d75f0fd` ledger `643 = 548 + 12 + 83` | asserted | **exact** — boundary file **96** (84+12), claims file **83** |
+| `a5db8df` fast / slow / collected | 630/17 · 17/630 · 647 | **630/17 · 17/630 · 647** |
+| `a5db8df` ledger `647 = 548 + 16 + 83` | asserted | **exact** — boundary file **100**, claims file **83** |
+| ruff, all three columns | 29 / 29 / 29 | **Found 29 errors** at each of the three commits, and **29** at the tip |
+
+**The two mutation cells check out against the records they summarise.** `d75f0fd`'s "+4 (`MX1`,
+`MX2`, `MX11`, `MX3`): 0 → 6 / 6 / 6 / 2" reproduces `increment-004.md:248-252` exactly, and the arm
+counts it names are live today (`p02g` **6** arms, `p02h` **2**). `a5db8df`'s "+4 more on the derived
+class set: 2 / 1 / 1 RED, and one deliberate 0 carried as an open gap" is an exact summary of the
+author's own §1.7 counterfactual — four mutations at **2 / 1 / 1 / 0**, the 0 being the plain `str`
+field on `Node`, and the cell **labels that 0 as a carried gap rather than folding it into the RED
+tally**. That is the honest rendering.
+
+**The "Final" column names `a5db8df`, not the tip.** Deliberate and correct — it names the commit its
+numbers belong to, which is exactly the discipline MEDIUM-2 demanded. I verified the figures also hold
+at `bef1d69` (§1), so nothing is stale; the label is precise, not evasive.
+
+### 3.2 · The rows 1–13 enumeration (`05-carries.md:92-106`). **ACCURATE, and the citation is exact.**
+
+- **Row 5's `mapper/store.py:98-130`** — verified to the line: `_str_map_fields` is defined at `:97`,
+  its docstring opens at **`:98`** and its closing `"""` is at **`:130`**. The old `98-119` was
+  genuinely stale (the docstring grew when MEDIUM-1's rewrite landed) and the replacement is exact.
+  `mapper/store.py` is untouched between `a5db8df` and `bef1d69`, so the citation was stale at
+  `a5db8df` and is correct now.
+- **Rows 1–6** unchanged and still true. **Row 7** (`test_at_p02i` named as a gate it is not) sits in
+  the `mapper/store.py` docstring — correct. **Row 8** (4 classes named, 7 defined) — `mapper.model`
+  defines exactly **7** dataclasses, verified. **Rows 9, 11, 12, 13** name the right files.
+- **Row 10** — "*3 checkable citations* where disk says 4" in `tests/test_repair_artifact_claims.py`:
+  correct, and independently re-derived in §2.
+- **Row 12** — "this table's own post-fix figures, stale one commit after being written": **TRUE**. The
+  two-column table was written at `d75f0fd` carrying 643/626 and the very next commit collected 647.
+
+**Both "reviewer-measured" attributions are accurate.** `05-carries.md:174` (`0.8 µs → 348.5 µs`) is
+the re-confirmation reviewer's LOW-2 figure, explicitly *not* re-derived by the condition-discharge
+pass (§8 of that review says so) — the tag states exactly that provenance. `05-carries.md:175`
+(keep-last vs keep-first, **0 of 647**) was measured by the condition-discharge reviewer (§4 of that
+review: "Measured here: 0 RED of 647 — TRUE"), so "reviewer-measured" is the correct attribution.
+Note the discrimination: the adjacent `_build_sidecar` row's **0 of 647** carries **no** such tag,
+because the author measured that one himself (`increment-004.md` §1.7). The tags are applied where
+they belong and withheld where they do not.
+
+### 3.3 · Everything else numeric in the diff
+
+The `_build_sidecar` carry's rewrite is a **strengthening**, not a claim: it retracts "the census …
+is derived now" in favour of "the census is derived **within** the classes it walks — but which
+classes it walks is itself a hand list". I read `_derived_positions()`
+(`tests/test_repair_store_boundary.py:103-124`): it hard-codes `node.id`, `fields.key`, `fields.value`
+and then walks `Ficha`/`Attachment`/`SchemaField`/`Document` by name. **The retraction is true and the
+previous wording was the looser one.** This is the condition-discharge review's §9 observation —
+recorded there and explicitly *declined* as a finding — closed anyway. Correct disposition.
+
+## 4 · My own sweep — every live figure in the authored artifacts
+
+Run independently over `.dev-flow/2026-08-27-repair-batch-02/**.md` with the reviewer-authored files
+excluded by the same rule the checker uses (`0*-review` / `0*-qa-*` / `0*-security-*` / `*code-review*`).
+Every occurrence of every count was printed with its line and judged one by one.
+
+**No false live figure found in the authored artifacts.** Specifically re-derived and confirmed:
+647 · 630 · 17 · 29 · 100 · 96 · 84 · 83 · 41 · 33 · 21 · 16 · 12 · 8 · 7 · 6 · 2, plus the ledger
+identities `429+119=548`, `548+12+83=643`, `548+16+83=647`, `548+99=647`, `6+2+7+1=16`, `1+41×2=83`,
+`630+17=647`. Historical figures (548, 643, 626, 531, 429, `12 of 17`, `17→21`) are each attributed to
+the commit or review that measured them; I checked the attributions rather than the numbers alone.
+Source-level spot checks also hold: `model.py:82-83` is `Document.tags`/`inherited`;
+`grep -rn "logging\." mapper/` returns **zero hits**.
+
+## 5 · NEW findings — four, all record-truth, none blocking
+
+### FV-1 — growing the enumeration from 6 rows to 13 left "3 of the 6" standing beneath it. **[MEDIUM]**
+
+`05-carries.md:108`, the sentence immediately under the table this commit extended:
+
+> **Note where they live: 3 of the 6 are COMMENTS in `mapper/`, not lines in `.dev-flow/`.**
+
+The table above it now has **13** rows. "The 6" no longer points at anything on the page — the
+paragraph three lines earlier explicitly speaks of "rows 7 through 13". **Measured against the table
+as it now stands:** 4 of the 13 are `mapper/` comments or docstrings (rows 1, 2, 5, 7), 7 are
+`.dev-flow/` lines (3, 4, 6, 9, 11, 12, 13), and **2 live in `tests/` (rows 8 and 10)**.
+
+**This is exactly NEW-2's shape one level up** — a count edited in one place with its restatement left
+standing — reproduced inside the commit that discharges NEW-2. It is *arithmetically* still true of
+rows 1–6, which is why it reads as harmless; but the referent is dangling and the note now under-counts
+the enumeration it annotates.
+
+**The second-order point is the more useful one.** The note's argument is that the checker "was
+structurally unable to see half the corpus" and that this was "**Fixed at close-out**: the corpus now
+includes `mapper/**/*.py`". Under the 13-row table that repair is **incomplete**: rows 8 and 10 live in
+`tests/`, and `_source()` returns `sorted((REPO / "mapper").rglob("*.py"))` — `tests/` is **not** in the
+corpus. Two of the thirteen recorded false records sit in a directory the widened checker still cannot
+read.
+
+**Suggested fix — one sentence:** "**Note where they live: 4 of the 13 are comments or docstrings in
+`mapper/`, 2 are in `tests/`, and 7 are `.dev-flow/` lines.**" and append to the "Fixed at close-out"
+clause: "— `tests/` is still outside the corpus, which is where rows 8 and 10 live."
+
+### FV-2 — a live stale figure in the claims checker itself, which the sweep's scope cannot see. **[LOW]**
+
+`tests/test_repair_artifact_claims.py:151`:
+
+> `# MEASURED, not guessed: the authored set carries 8 such citations today.`
+
+**Re-derived with the file's own `_CITATION` regex over its own `_authored()` set: 10, not 8.** Traced
+through history: **8 at `01d7578`** (correct when written), **10 at `d75f0fd`**, and 10 ever since —
+`increment-004.md` and `05-carries.md` each added one when they landed. Stale for three commits.
+
+Nothing breaks: the assertion beneath it is a floor (`>= 5`) and it holds. Two adjacent measured
+comments in the same function are **correct** — "Measured today: 2 of each" for the source half is
+exactly right (2 `path:line`, 2 `test_*`).
+
+**Why it is worth a line rather than silence.** The sweep as recorded in `05-carries.md:87-88` scans
+"every live figure, **every authored artifact**". Six of the thirteen enumerated false records live in
+source files, not artifacts — which is the batch's own central lesson (FV-1) — so the instrument
+proposed as the remedy reproduces the blind spot the batch spent four rounds identifying, and this is
+the figure that proves it.
+
+**Suggested fix:** `8` to `10`, and add `tests/**/*.py` and `mapper/**/*.py` to the sweep's stated
+scope in `05-carries.md`.
+
+### FV-3 — the sweep recipe is labelled "every live figure" and is not total. **[LOW]**
+
+`05-carries.md:87-88`. `LIVE = {647, 630, 643, 626, 548, 531, 429, 100, 96, 83, 41, 40, 16, 12}` under
+the comment "every live figure, every authored artifact". It omits live figures that are checkable and
+decay the same way — **84** (`increment-004.md:241`, boundary at base), **21** (the census, in two
+files), **17**, **33** — and it retains **40**, which this very commit corrected to 41 and which is no
+longer live anywhere.
+
+**No present falsehood follows from it**: I measured 84, 21, 17 and 33 and all four are currently
+correct. The cost is forward-looking — a next session that runs the set as written performs a sweep
+narrower than the totality its own comment claims. A totality claim that is not total is this batch's
+signature defect, and it should not be the closing instrument of the artifact that names it.
+
+**Suggested fix:** add `84, 21, 17, 33`, drop `40`, or re-label the comment "the count figures most at
+risk" instead of "every live figure".
+
+### FV-4 — row 13 describes itself as carrying the citation that row 5 carries. **[LOW]**
+
+`05-carries.md:106`: "*this very row's line citation, stale after the docstring it points at grew*".
+Row 13 carries no line citation; the stale `mapper/store.py:98-119` was **row 5's**. The prose above
+the table gets it right ("Row 13 is this table's own citation"), and the `Where` column (`05-carries.md`)
+is correct, so no reader is misled about *what* was stale — only about which row held it.
+
+**Suggested fix:** "row 5's line citation, stale after the docstring it points at grew".
+
+## 6 · Clean — what I attacked that came back clean
+
+1. **All four conditions are genuinely discharged**, each verified against disk rather than read (§2);
+   NEW-4 was discharged past what the condition asked.
+2. **Every measured cell of the three-column post-fix table is true for the commit its column names**,
+   re-derived from three archive copies (§3.1). Twelve cells, twelve matches.
+3. **The `mapper/store.py:98-130` citation is exact to the line** (§3.2), and its staleness at
+   `a5db8df` was real.
+4. **Rows 1–13 are each accurate** in shape, location and attribution (§3.2).
+5. **Both "reviewer-measured" tags are correct**, and — the discriminating check — the adjacent
+   author-measured figure correctly does **not** carry one (§3.2).
+6. **No false live figure anywhere in the authored artifacts** (§4). Seventeen distinct figures and
+   seven ledger identities re-derived.
+7. **Historical figures are attributed, not laundered.** Every 643/548/626/531 I found names the commit
+   or review that measured it. The prior pass's declined items were declined correctly.
+8. **The `_build_sidecar` carry's rewrite is a retraction toward the truth**, verified against
+   `_derived_positions()` in source (§3.3) — it closes the observation the prior review explicitly
+   declined to file.
+9. **No regression.** 630/17 and 17/630 both exit 0; ruff at the 29-error baseline whole-tree and clean
+   on the touched file; the sole code change in the diff is one docstring token (`3` to `4`).
+10. **The streak is broken on numbers.** Four prior rounds each produced a false *figure* inside a
+    correction; this one produced none. FV-1 is a stale *restatement*, not a stale measurement.
+
+## 7 · What I could not verify
+
+- **I did not re-review HIGH-A, the arms, or the class-set derivation.** The brief scoped them out and
+  three passes cleared them; I re-ran both lanes only to confirm nothing regressed.
+- **I ran no mutations.** This diff changes no logic, so a counterfactual battery would measure the
+  previous commit, not this one. The `a5db8df` mutation figures in §3.1 are checked for *fidelity to
+  the records they summarise*, not re-executed.
+- **I did not re-measure the timing figures** (`0.8 µs` / `348.5 µs` / `~430x`). They are correctly
+  tagged as taken on report, which is the honest disposition.
+- **`state.json`, `04-security-review.md`, and the reviewer-authored artifacts remain out of scope**,
+  as the checker's own exclusion rule requires.
+- **The 24-mutant figure in the `01d7578` column** is an aggregate from earlier increments; I checked
+  its consistency with the packet, not by re-running 24 mutants.
+
+## 8 · What blocks, and what does not
+
+**Nothing blocks.** No HIGH. All four conditions are discharged and true against disk; the sweep's own
+edits introduced no false figure — the first round in five of which that can be said; no behaviour
+changed, no arm regressed, no test was weakened, and the only code edit in the diff is a single
+docstring token that made a self-contradicting docstring consistent.
+
+**CLEAR TO MERGE.** FV-1 through FV-4 are prose corrections totalling four edited lines. **My
+recommendation is to land them before merge if a fifth round is cheap, and to merge regardless if it is
+not** — this batch has paid for four rounds, and holding a documentation-only diff on a dangling
+definite article would cost more than it buys. If they are deferred, FV-1 and FV-2 should be carried in
+`05-carries.md` rather than dropped, because both point at the same live structural gap: **`tests/` is
+still outside the claims checker's corpus, and 2 of the 13 recorded false records live there.** That is
+the honest next rung, and it is a bigger prize than any of the four lines.
+
+## 9 · Evidence checklist
+
+| Item | Mark | Executed evidence |
+|---|---|---|
+| Prior condition-discharge verdict read in full first | OK | `04-qa-adversarial.md:1368-1692`, all four NEW findings and §8's non-verifications |
+| Diff read in full | OK | `a5db8df..bef1d69`: 6 files, +386/-20; every hunk of all six read |
+| NEW-1 re-derived with the file's OWN two regexes | OK | §2 — 33 source files, 2 `path:line` + 2 `test_*` = **4 across 2 files**; docstring now says 4 |
+| NEW-2 verified at both named lines | OK | §2 — `:244` **647** resolves upward; `:325` **630 + 17 = 647** exact |
+| NEW-3 re-derived, not copied | OK | §2 — `_corpus()` = 8 + 33 = **41** arms; packet and docstring now agree |
+| NEW-4 verified by measurement | OK | §2 — region wraps 88–105 chars; "That guard" replaced by explicit `test_at_p02i` |
+| Post-fix table checked cell by cell against the commit each column names | OK | §3.1 — three `git archive` copies; 531/548, 626/643, 630/647, ruff 29×3, all matched |
+| Rows 1–13 checked individually | OK | §3.2 — locations, attributions, and row 12's staleness claim all verified |
+| `mapper/store.py:98-130` citation verified to the line | OK | §3.2 — docstring opens `:98`, closes `:130`; exact |
+| Both "reviewer-measured" attributions traced to their source | OK | §3.2 — LOW-2 and condition-discharge §4; the untagged adjacent figure correctly untagged |
+| Independent numeric sweep run over the authored artifacts | OK | §4 — 17 figures + 7 ledger identities re-derived; **no false live figure found** |
+| Historical figures checked before being called stale | OK | §2, §4 — §4.1, `:256`, `:312`, `:314`, `01-requirements.md:316`, `05-carries.md:42-44` all correct, declined |
+| Fresh false claims hunted for inside the correction | **FOUND — 4, one MEDIUM, all prose** | §5 — FV-1 (stale restatement), FV-2 (stale figure in source), FV-3 (non-total totality), FV-4 (self-reference) |
+| Every new finding carries a recommended fix | OK | §5 — one sentence or one token each |
+| Both lanes and ruff re-derived at the tip | OK | §1 — 630/17 in 57.2s · 17/630 in 23.8s · ruff **29**, clean on the touched file |
+| Ledger re-derived | OK | §1 — `647 = 548 + 16 + 83`; boundary **100**, claims **83**, `p02g` 6 · `p02h` 2 · `p02i` 7 · `p02j` 1 |
+| Clean categories reported as clean, not padded | OK | §6 — 10 categories; §7 states five things I did not verify |
+| No mutation work performed on a docs-only diff | OK | §7 — none needed; archive copies read-only, tip read-only |
+| No repo file edited but this one; no git mutation | OK | `git status --porcelain` **empty** at open and at close; HEAD still `bef1d69` |
