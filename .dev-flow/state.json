@@ -84,7 +84,7 @@
     ]
   },
   "current_station": "P6",
-  "phase_status": "awaiting-sync",
+  "phase_status": "approved",
   "stations_active": [
     "P0",
     "P1",
@@ -171,6 +171,12 @@
       "date": "2026-08-27",
       "decision": "synced-to-obsidian",
       "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-08-27-repair-batch-02/ -- six artifacts + the generated README. 03-increments/ deliberately NOT synced (artifact_homes declares its home as the repo; one home per artifact, the link crosses by id). The .dev-flow root 01/02/04/05 and 06-docs belong to 2026-08-18-batch-01 and were NOT copied under this batch's id: syncing another batch's artifacts here would be the exact false-record defect this batch spent six gate rounds closing. This batch produced no 02/04-validation/05-postmortem/06-docs of its own -- its validation record is the five gate rounds in 04-qa-adversarial.md, and the README states that absence as a real gap."
+    },
+    {
+      "station": "P6",
+      "date": "2026-08-27",
+      "decision": "close batch",
+      "notes": "Merged 2b59071 (PR #3) after six independent gate rounds; the authorising verdict landed via a1b9e9d (PR #4) and the sync record via f52150e (PR #5). phase_status moved off awaiting-sync, which contradicted obsidian_synced: true -- a two-field false record in the file the next batch reads at intake."
     }
   ],
   "standing_authorization": {
@@ -280,5 +286,8 @@
     "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed."
   },
   "obsidian_synced": true,
-  "created_at": "2026-08-27T00:00:00"
+  "created_at": "2026-08-27T00:00:00",
+  "closed_at": "2026-08-27",
+  "merge_commit": "2b59071",
+  "pr": "https://github.com/jav201/mapper/pull/3"
 }
