@@ -83,7 +83,12 @@ state. Scope-add, therefore a decision, not an implementation detail.
 
 ---
 
-### S-4 · US-N14 «lente» — ask the map a question about its fields
+### S-4 · US-N14 «lente» — ask the map a question about its fields — **DEFERRED (`#D23`)**
+
+> **DEFERRED — follow-on design batch (amendment set 3 · A-42).** The operator re-scoped this batch.
+> The intake below is **retained unchanged**, because the follow-on batch inherits it as its input;
+> §3.7 carries the full deferral record and the enumerated id set. The `READY` verdict below is a
+> record of what Phase 1 found, **not** a live claim that the story ships here.
 
 > **As** an operator auditing a legacy map,
 > **I want** to write `E:riesgo C:alta` and see only the nodes that answer, with the rest fallen
@@ -299,8 +304,12 @@ other requirement.
 
 **Disposition, in writing.** The walk requirement (HLR-N14.3) specifies the **behaviour** and leaves
 the **chord** as a PDR decision, exactly as Q-3 leaves `n`. Whatever chord is chosen carries a
-standing invariant: the eight measured focus transitions do not decrease. This is a blocking
-question for Inc-5, not for derivation.
+standing invariant: the eight measured focus transitions do not decrease. This was a blocking
+question for the increment that would have shipped US-N14, not for derivation.
+*(~~Inc-5~~: `Inc-5` under §5.4 is hit painting. US-N14 and its increment are **DEFERRED** by
+`#D23`, and **Q-7 travels with them** — it is the follow-on design batch's blocking question now,
+which is part of why the story is deferred rather than carried. §2.8.4 records it in full and is
+retained unchanged as that batch's input.)*
 
 **Reconciled with `01b-ux-decisions.md` DECISION 6 row 7, which measured the other half.** The ux
 lens drove `tab` under Pilot and recorded **0 walk fires in 4 plain presses, but 3 in 3 with
@@ -373,12 +382,70 @@ widening of HLR-N13.1. Recorded per `PLAN.md` §6 and the ARQ worksheet's own no
 
 ---
 
-### 3.0 · THE COERCION RANGE LIST — one normative definition, referenced by every coercion threshold
+### 3.0 · `HLR-COERCE` — the coercion class, and the range list it is defined over
 
-*(Added by amendment; security condition **C-4** (`02b` S-04, S-05). §6.5 amendment **A-13**.)*
+*(Added by amendment; security condition **C-4** (`02b` S-04, S-05). §6.5 amendment **A-13**.
+**Promoted from a definitions block to a requirement by `PDR-2026-08-26-ui-next-batch-02#D21`,
+amendment set 3 · A-47** — see `P2-B5`.)*
 
-Four coercion thresholds in this document — `LLR-N06.2.3`, `LLR-N13.2.1`, `LLR-N14.2.3` and
-`LLR-N16.2.3` — read *"**0** control bytes in the painted text"*. **That phrase is superseded
+#### HLR-COERCE — file-derived text is coerced before it reaches any painted surface
+
+- **Traceability:** security conditions **C-4**, **C-5**, **C-7**, **C-8** (`02b` S-04, S-05, S-06,
+  S-09); risk **A-7**. **This HLR has no parent story, by design.** It is a product-wide control
+  whose subject survives the descoping of every story in the batch — which `#D23`'s deferral of
+  US-N14 has now demonstrated rather than merely asserted: `LLR-N14.2.3` left with its story and the
+  class did not move. **That property is stated here so a later reader does not "fix" it by
+  re-parenting it under a story.**
+- **Statement:** The system shall declare one list of code points that may not reach a painted
+  surface, shall coerce every file-derived string against that list before it is painted, and shall
+  derive the set of coercion sites from the tracked product sources at run time rather than from a
+  list maintained by hand.
+- **Rationale (informative):** `P2-B5`, executed. §3.0's own text was already normative — *"it shall
+  be declared once in `mapper/darkside.py`"*, *"`_CONTROL_MAP` shall be widened"* — and it measured
+  its own gap at **22 of 84** declared code points uncovered, including every bidi range the hostile
+  fixtures drive. But it carried **no requirement id, no `Acceptance:` line, no `Touched symbols:`
+  line, no validation method and no owning increment**, while four LLRs in four different increments
+  each *asserted against* a list none of them *created*. Under a serial cut the de facto owner is
+  whichever increment lands first, and that increment's declared file set does not contain
+  `darkside.py`. **A control asserted by four requirements and created by none is a control nobody
+  ships.** `grep -rn COERCION_RANGES mapper/` returns nothing; it is a Phase-3 obligation with, until
+  now, no Phase-3 owner.
+- **Validation:** `test (unit)`
+- **Executed verification:** `pytest tests/test_darkside.py -k "coercion_ranges"` *(provisional)* —
+  see the two owned LLRs, each of which carries its own threshold.
+- **Numeric pass threshold:** the conjunction of `LLR-COERCE.1` and `LLR-COERCE.2`. This HLR states
+  no threshold of its own, because a class-level threshold over two mechanically different
+  obligations would be satisfiable by either half.
+- **Owned LLRs:** `LLR-COERCE.1` (the `COERCION_RANGES` declaration and the `_CONTROL_MAP` widening
+  — the uncovered code points measured below); `LLR-COERCE.2` (the ordering clause, scoped to
+  `mapper/views/layered.py::_fit`, which §6.5 A-14 executed as the truncator that coerces nothing);
+  and **`LLR-N06.2.5`, re-parented here by `#D21`** — see §3.4, where its block remains for
+  line-stability, and `P2-B6` below.
+- **Owning increments:** `LLR-COERCE.1` → **Inc-1** (`darkside.py` is already in Inc-1's declared
+  set for the S-6 tokens). `LLR-COERCE.2` → **Inc-3** (which owns `views/layered.py` and is the
+  increment that first asserts against the list). `LLR-N06.2.5` → **Inc-9**. All three per §5.4.
+- **Acceptance:** none of its own, and that is a ruling rather than an omission (`#D21`). The
+  batch's coercion `AT` ids stay on their **surface-specific** LLRs, where the observable outcome
+  actually is — a painted row on a named screen. An `AT` on this HLR would have to observe "text was
+  coerced" with no surface, which is a white-box claim wearing an acceptance test's clothes. This
+  HLR owns `TC-080`, `TC-081` and, through the re-parent, `TC-073`.
+- **THE ORDERING THIS CREATES IS REAL, NOT ADMINISTRATIVE.** `LLR-COERCE.1` widens `plain()` at
+  Inc-1; `LLR-N06.2.5`'s census asserts routing *through* `plain()`; every surface threshold measures
+  the painted row **after** that widening. So Inc-1 precedes all of them by dependency, not by
+  convenience. **Cost of the `#D21` ruling, stated rather than hidden:** the coercion half of `S-09`
+  stays live on `master` for the length of the batch. Accepted — the defect is pre-existing, `C-8` is
+  a condition and not a blocker, and the alternative (forcing `screens/factory.py` into Inc-3)
+  creates the two-owner collision `#D5` exists to prevent.
+- **What would reverse the no-parent-story ruling:** evidence of a `notify` or paint site inside
+  `mapper/views/` or `mapper/widgets/`, which would put the class inside a renderer's boundary and
+  make the `views` dependency ban — not the story tree — the governing constraint. Executed at
+  `20f86de`: the census returns **0** such sites.
+
+---
+
+**The range list this HLR is defined over.** Four coercion thresholds in this document —
+`LLR-N06.2.3`, `LLR-N13.2.1`, `LLR-N16.2.3`, and `LLR-N14.2.3` until `#D23` deferred it with its
+story — read *"**0** control bytes in the painted text"*. **That phrase is superseded
 wherever it appears.** It is not a threshold: `U+202E RIGHT-TO-LEFT OVERRIDE` is not a control byte
 under `darkside.plain`'s declared contract, and all three of those LLRs drive a right-to-left
 override as their hostile input. The requirement asserted nothing about the thing it was testing.
@@ -466,6 +533,75 @@ threshold's *"every file-derived string on the surface"* scoping is what reddens
 
 **Byte hygiene.** Every code point above is written as a `U+XXXX` **name** in this document and
 constructed with `chr(0x...)` at test time. **No control byte is written into this file.**
+
+##### LLR-COERCE.1 — the range list is declared once, and the coercion map covers it
+
+- **Traceability:** HLR-COERCE, security condition **C-4** (`02b` S-04, S-05)
+- **Statement:** The design module shall declare `COERCION_RANGES` as the single source of the code
+  points that may not reach a painted surface, `_CONTROL_MAP` shall cover every code point that list
+  declares, and every threshold and every test shall read the list from that declaration rather than
+  restating it.
+- **Touched symbols:** `mapper/darkside.py::COERCION_RANGES` — `NEW — created in Phase 3`;
+  `mapper/darkside.py::_CONTROL_MAP` (`darkside.py:272-273`) — **widened**;
+  `mapper/darkside.py::plain` (`darkside.py:276`) — unchanged in signature, widened in effect.
+- **Validation:** `test (unit)` + `inspection`
+- **Executed verification:** `pytest tests/test_darkside.py -k "coercion_ranges_are_covered"`
+  *(provisional)* — expand `COERCION_RANGES` to its code points, pass each through `plain()`, and
+  assert none survives; plus a grep asserting no test file re-types a range.
+- **Numeric pass threshold — DERIVED, no literal count:**
+
+  > **QUESTION.** How many of the code points `COERCION_RANGES` declares survive `plain()`?
+  >
+  > **INSTRUMENT.** Expand the declared ranges at run time, apply `plain()` to each code point, count
+  > the survivors. The declaration is the input set; the test does not carry its own list.
+  >
+  > **MEASURED AT.** `d877784` for the pre-state transcribed in the table above; re-derived at gate
+  > time against whatever the declaration then says.
+
+  **After:** survivors `== 0`. **Pre-state, from the table above:** the C0 and DEL/C1 groups are
+  fully covered and every bidi, zero-width, separator and interlinear group is covered at zero — so
+  the census's own input set is provably non-empty before it is evaluated, as `LLR-S06.3.1` requires.
+  **Also asserted: the number of distinct declarations of the list in the tracked sources `== 1`.**
+- **Named weaker variant (`M-COERCE.1-a`):** declare `COERCION_RANGES` and leave `_CONTROL_MAP`
+  as shipped. The constant exists, every reference resolves, `grep` finds it — and **22 code points
+  still pass through `plain()` untouched**, including every bidi range the hostile fixtures drive.
+  Reddened by the survivors clause, which is why the threshold is over `plain()`'s behaviour and not
+  over the constant's existence.
+- **Named weaker variant (`M-COERCE.1-b`):** widen `_CONTROL_MAP` with a literal list and declare
+  `COERCION_RANGES` separately from it. Both green on the day; they drift the first time one is
+  edited. Reddened by the single-declaration clause.
+- **Acceptance criteria:** this is the load-bearing half of `C-4` (§6.5 A-14 established that the
+  *ordering* half was already satisfied for `darkside.fit`). Four surface LLRs assert against this
+  list; **exactly one requirement may create it**, or the batch ships the two-definitions defect
+  `#D6` removed for *"hit"* and `#D14` for *"coverage"*.
+
+##### LLR-COERCE.2 — the second truncator coerces before it truncates
+
+- **Traceability:** HLR-COERCE, security condition **C-4** (`02b` S-04, S-05)
+- **Statement:** Every function that truncates a string destined for a painted surface shall apply
+  the design module's plain-text coercion before truncating, and the set of such functions shall be
+  derived from the tracked product sources rather than named by hand.
+- **Touched symbols:** `mapper/views/layered.py::_fit` (`layered.py:38`) — the executed truncator
+  that coerces nothing; its call sites at `layered.py:217`, `:227`, `:237`, `:247`, `:266`, `:280`.
+  `mapper/darkside.py::fit` (`darkside.py:290-297`) is **unchanged** — executed, its first statement
+  is already `s = plain(s)`.
+- **Validation:** `test (unit)`
+- **Executed verification:** `pytest tests/test_darkside.py -k "truncators_coerce_first"`
+  *(provisional)* — for every derived truncator `t`, assert `t(plain(s), n) == plain(t(s, n))` over
+  hostile inputs constructed with `chr(0x...)`; and drive the split-at-width fixture through each.
+- **Numeric pass threshold:** for every derived truncator, the coerce-then-truncate and
+  truncate-then-coerce images are **equal** over the hostile input set; and the **split-at-width
+  arm** passes — a source **balanced** at `U+202E` … `U+202C`, truncated at width, leaves **0**
+  unterminated overrides in the painted row. Executed pre-state:
+  `layered._fit('a' + chr(1) + 'b', 8)` returns the control byte intact.
+- **Named weaker variant (`M-COERCE.2-a`, the same variant §3.0 names as `M-COERCE-b`):** coerce in
+  `darkside.fit` only. Green on every path that routes through it, **silently unchanged on the six
+  `layered._fit` sites above**. Reddened by the derived truncator set, which is why the set is
+  derived and not the two names an author happened to think of.
+- **Acceptance criteria:** widening the map is necessary and **not sufficient** — truncation
+  manufactures the defect out of a balanced source, so the ordering clause is not vacuous even
+  though A-14 executed one of the two truncators as already correct. **Two truncators ship; one
+  coerces and one does not**, and the requirement is scoped so that difference is visible.
 
 ---
 
@@ -990,9 +1126,44 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   and inspect the style of the background cell.
 - **Numeric pass threshold:** braille-block character count `> 0` where the pre-state is exactly
   **0**; the background cell's style names the written tone.
-- **Priority:** high — Inc-3's fold pills and Inc-5's figure-ground both depend on `bgs` reaching the
-  screen.
+- **Priority:** high — Inc-3's fold pills depend on `bgs` reaching the screen.
+  *(~~"and Inc-5's figure-ground"~~ is superseded: the figure-ground consumer was US-N14, **DEFERRED**
+  by `#D23`. The dependency is real and travels with the story; it is not a live dependency of this
+  batch. Inc-5 under §5.4 is hit painting, which consumes the same layers for a different reason and
+  keeps the priority where it was.)*
 - **Acceptance:** `AT-007`, `AT-008`
+
+- **PREDICTED-RED CLAUSE — four legacy digest pins, red BY CONSTRUCTION (`P2-B4`, `C-24`, §6.5
+  A-46).** Trigger **B3** is FIRED: this HLR's entire content is making bytes reach `rows()` that a
+  shipped sha256 guard has pinned. `C-24` therefore requires the predicted-red set be named **by
+  derivation** rather than discovered at the gate:
+
+  > **QUESTION.** Which shipped byte-identity pins does the increment owning this HLR turn red?
+  >
+  > **INSTRUMENT.** Take the key set of `MASTER_LEGACY_DIGESTS` (`tests/test_repair_depth.py:93`),
+  > which is keyed `(renderer name, w, h)` over `GOLDEN_SIZES` (`:91`) and asserted at `:815`.
+  > A key is predicted **red** if and only if this HLR changes that renderer's `rows()` output at
+  > that size; predicted **green** otherwise. Evaluate the condition from the executed occupancy
+  > probe, not by eye.
+  >
+  > **MEASURED AT.** `20f86de`. **Cardinality deliberately not transcribed** — the dictionary is the
+  > authority and the test reads its keys.
+
+  **Derived, and the derivation is short:** `RadialRenderer` is pinned at **every** `GOLDEN_SIZES`
+  entry, and §3.3's executed occupancy probe measures it writing dots and bgs **at exactly those
+  sizes**, all currently discarded by `Canvas.rows()`. So **every `RadialRenderer` key reddens, by
+  construction, and that is CORRECT behaviour** — an expected re-baseline, not a regression. Every
+  `LayeredRenderer` and `OutlineRenderer` key is predicted **green**: `LayeredRenderer`'s dots are
+  **0** and `OutlineRenderer` builds no `Canvas`, so neither renderer's output changes.
+- **THE HAZARD IS THE REPAIR, NOT THE RED.** An implementer facing red digests re-captures the
+  dictionary wholesale, and the `LayeredRenderer` and `OutlineRenderer` pins — which must **not**
+  move — silently lose their guard. **Re-capturing a predicted-green digest is a gate failure**, and
+  each predicted-red re-capture is done one at a time with its own recorded reason. This is the same
+  rule `LLR-N06.2.1` states for `MASTER_RAIL_DIGESTS`; it is stated in both places because the two
+  increments meet it independently and neither reads the other's requirement.
+- **`MASTER_FACTORY_TREE_DIGEST` (`:121`, asserted at `:1077`) is predicted GREEN here** and is
+  named so the third dictionary is not the one nobody thought about. Its subject is
+  `FactoryScreen._tree_lines`, which this HLR does not reach.
 - **Executed pre-state (M-1):** a 6-node graph through `RadialRenderer` at 80 x 24 yields **0**
   glyphs in `U+2800`–`U+28FF`; distinct painted non-space characters are
   `['A','F','H','I','N','R', …, '·','◆','●']`. `LayeredRenderer` on the same graph also yields **0**.
@@ -1245,6 +1416,16 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   list. **An SVG leaves the machine; the terminal's own escaping does not travel with it** — the
   file is opened later by a browser or an editor with entirely different rules, which is why this is
   not covered by the on-screen coercion thresholds.
+- **Acceptance:** `AT-009`
+- **`AT-009`'S OWNERSHIP IS LANDED HERE, NOT MERELY ANNOUNCED (`P2-B2`, `QA2-C-01`, §6.5 A-44).**
+  §6.5 A-29 recorded that `AT-009` *"is **promoted** under `LLR-CNV.2.1`, whose threshold A-23
+  rewrote"* — but **the `Acceptance:` line that would have carried the promotion was never written**,
+  so `AT-009` stayed catalog-only through two more PDR passes while an amendment said it had moved.
+  **A promotion recorded in an amendment and not written into the requirement is not a promotion**;
+  it is the amendment-table failure mode this batch has now hit three times. The line above is the
+  promotion. `AT-009` is the export-artifact arm of the HLR-canvas boundary catalog (`:972`) and this
+  is the only requirement in the document that asserts on the written file, so the ownership was
+  never in doubt — only unwritten.
 - **Acceptance criteria:** **the exported bytes change, and that change is asserted on the bytes.**
   Not against a stored golden — the repo has no byte-identity goldens (P-8, executed: no
   `tests/goldens/` directory), so a golden would be new infrastructure this batch has not budgeted.
@@ -1310,7 +1491,15 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   painted pill of the form `▸ <rama> +N` for each folded branch; and a painted overflow indicator
   declaring a total. All three observed as substrings and counts in the rendered text of the shipped
   widgets, never by reading a renderer's return value directly.
-- **Acceptance tests:** `AT-011`, `AT-012`, `AT-013`, `AT-014`, `AT-015`, `AT-016`, `AT-017`.
+- **Acceptance tests:** `AT-011`, `AT-012`, `AT-013`, `AT-014`, `AT-015`, `AT-016`, `AT-017`,
+  `AT-046`, `AT-047`.
+- **`AT-046` and `AT-047` JOIN THIS LIST (`QA2-C-01`, §6.5 A-44).** Both were added at reconciliation
+  for `LLR-N06.2.4` (the fold auto-open), reached `LLR-N06.2.4`'s `Acceptance:` line and §5.2's
+  behavioral row — **and never reached this story list**, so the three-way intersection §5.2 defines
+  as the batch's `AT` count silently excluded them. **The intersection is the count; an id missing
+  one leg is not counted, however real its predicate is**, which is why this omission was a defect
+  and not a formatting slip. `AT-046` and `AT-047` are the arms that stop `AT-022` passing on a
+  screen where the operator cannot see the selection.
 - **Boundary catalog (QC-3):**
   - ☑ **boundary** — `AT-012` drives pan at both edges: panning left at column 0 and right at the
     last column that leaves any content visible.
@@ -1462,16 +1651,70 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 - **Validation:** `test (unit)` + `inspection`
 - **Executed verification:** `pytest tests/test_rail.py -k "rail_renders_fold_it_does_not_own"`
   *(provisional)*; plus a grep asserting `collapsed` and `toggle` no longer appear on `OutlineRail`.
-- **Numeric pass threshold:** **0** remaining references to the removed attribute and method in
-  `mapper/` and `tests/`; the rail's rendered text reflects a folded set it was handed and never
-  stored.
-- **THE SUPERSESSION SET IS ENUMERATED, NOT ASSERTED AS A ZERO (`QA-N-07`, §6.5 A-41).** *"0
-  remaining references"* names no reference, so nobody can check the census found them all — the
-  batch's own §2.2 lesson. Re-executed at `d877784`, `OutlineRail.toggle` has **2** call sites, both
-  in `tests/test_rail.py` (`:73`, `:77`), and both are **predicted red** for this increment. They
-  are named here at Phase 1 rather than discovered at the gate. `mapper/search.py` is separately
-  confirmed **dead** — `grep` for any import of it across `mapper/` and `tests/` returns **0** — so
-  every `search` LLR is **new-module work** in the ledger, not modification (`QA-N-11`).
+- **Numeric pass threshold:** the derived supersession set (below) is **non-empty** before it is
+  evaluated, and is **empty after the increment**; the rail's rendered text reflects a folded set it
+  was handed and never stored.
+
+- **THE SUPERSESSION SET IS DERIVED, NOT ENUMERATED AND NOT ASSERTED AS A ZERO (`P2-B4`, §6.5 A-46,
+  superseding A-41's `QA-N-07` half).**
+
+  > **QUESTION.** Which call and attribute-access expressions in the tracked sources reference
+  > `OutlineRail.collapsed` or `OutlineRail.toggle`, and must therefore move or die when this LLR
+  > deletes them?
+  >
+  > **INSTRUMENT.** A walk over the tracked `mapper/**/*.py` **and** `tests/**/*.py` for the
+  > attribute and the method, asserting the derived set is **non-empty before it is evaluated** —
+  > exactly as `LLR-N06.2.5` and `LLR-S06.3.1` already do. Both trees, not `mapper/` alone.
+  >
+  > **MEASURED AT.** `20f86de`. **Cardinality deliberately not transcribed.**
+
+  **`~~0 remaining references~~` was replaced by an enumeration that was itself short — the same
+  defect with a number attached.** A-41 answered *"a zero that names no reference"* with *"`toggle`
+  has 2 call sites, both in `tests/test_rail.py`"*. Re-derived over **both** trees, that enumeration
+  is a **strict subset** of the real set, and two of the members it misses are the ones that matter
+  most:
+  - **a PRODUCTION call site** — `mapper/app.py:1259`, in `action_collapse_branch`. A supersession
+    census that reports only test call sites, on an attribute the product itself calls, is a census
+    scoped to the wrong tree. `C-18`: a premise counted at one file scope is under-counted tree-wide.
+  - **the rail byte-identity guard itself** — `tests/test_repair_depth.py:1055`, inside
+    `test_c53_the_rail_renders_legacy_identically_to_master`, parametrized over five fold
+    configurations. **Deleting the attribute reddens the guard that exists to prove the rail did not
+    change.** That is the predicted-red clause below, and it was invisible while the census stopped
+    at `tests/test_rail.py`.
+
+  The enumeration is retained **as evidence that the class is non-empty**, never as the
+  specification — the same rule `LLR-N06.2.5` states for its 15 addresses. **The gate is the
+  derivation.** `mapper/search.py` is separately confirmed **dead** — no import of it across
+  `mapper/` or `tests/` — so every `search` LLR is **new-module work** in the ledger, not
+  modification (`QA-N-11`).
+
+- **PREDICTED-RED CLAUSE — the rail digest pins (`P2-B4`, `C-24`, §6.5 A-46).** Trigger **B3** is
+  FIRED for this increment: it deletes a shipped attribute that a shipped byte-identity guard
+  reaches. `C-24` therefore applies and the predicted-red set is named **by derivation**, before the
+  gate:
+
+  > **QUESTION.** Which shipped sha256 byte-identity pins does this increment turn red?
+  >
+  > **INSTRUMENT.** For each digest dictionary in `tests/test_repair_depth.py`, take the keys whose
+  > subject this increment's touched symbols reach. A pin is predicted **red** if and only if the
+  > increment changes the output of the renderer or widget that key names; every other pin is
+  > predicted **green**.
+  >
+  > **MEASURED AT.** `20f86de`. **Cardinality deliberately not transcribed** — the pin dictionaries
+  > are the authority and the test reads them.
+
+  **`MASTER_RAIL_DIGESTS` (`tests/test_repair_depth.py:113`) is the subject here**, asserted at
+  `:1056` and `:1071` and parametrized on `collapsed` — **the very attribute this LLR deletes**.
+  Recorded loudly for one reason: **`MASTER_RAIL_DIGESTS` is named in NO artifact of this batch** —
+  not in this document before this amendment, not in `PLAN.md`, not in the PDR. A shipped guard that
+  no requirement names is a guard an implementer meets for the first time as a red test, at the
+  gate, with no ruling in hand.
+- **THE RE-CAPTURE RULE, AND IT IS A GATE FAILURE TO BREAK IT.** Only a digest whose subject's
+  output this increment **actually changes** may be re-captured; each re-capture is done **one at a
+  time, with its own recorded reason**. Re-capturing the dictionary wholesale is a **gate failure**,
+  not a repair — it converts the repair batch's `C-53` false-failure arm into a rubber stamp, which
+  is the one thing that guard exists to prevent. **A red pin is evidence; a re-captured pin is a
+  claim.**
 - **Acceptance criteria:** the deletion is **asserted**, not assumed — two owners of one truth is how
   the rail and the canvas start disagreeing about what is folded (Q-2's stated reason).
 - **Regime note:** the ownership move is justified by lifetime, not style. `_apply_region_visibility`
@@ -1505,7 +1748,47 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 
 ##### LLR-N06.2.5 — every toast that interpolates a value is coerced, gated by a derived census
 
-- **Traceability:** HLR-N06.2, risk A-7, security condition **C-8** (`02b` S-09)
+> **RE-PARENTED to `HLR-COERCE` (§3.0) by `PDR-2026-08-26-ui-next-batch-02#D21` — `P2-B6`,
+> §6.5 A-48.** The id, the statement and the thresholds are unchanged; only the parent and the
+> owning increment move. **Owning increment: Inc-9** (§5.4).
+>
+> **Why the parent was wrong, on the two-limb criterion `#D21` seals — both limbs executed:**
+> - **Limb 1** (descope test): descope US-N06 and **every** site in the census survives. Not one is
+>   a fold toast; the census is `mapper/app.py` on paths unrelated to the canvas, plus a screen
+>   US-N06 never touches. The child's subject is not deleted with its parent.
+> - **Limb 2** (source-budget test): `HLR-N06.2` → US-N06 → **Inc-3**, whose declared source set is
+>   `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py` — **four of four, at budget**.
+>   Satisfying this LLR requires editing `mapper/screens/factory.py`, which is a **fifth,
+>   undeclared** source file in Inc-3 and a **collision with Inc-9**, which owns that file. **This is
+>   an undeclared source-budget breach, not a stylistic smell** — the batch's only declared breach is
+>   Inc-2's, and validator rule `V9` exists to catch undeclared ones.
+>
+> **The criterion discriminates rather than condemning — control executed.** Applied to a sibling
+> under the same parent, `LLR-N06.2.3` (a branch name reaching the fold pill is coerced): descope
+> US-N06 and there is no fold pill, so limb 1 passes; its touched symbols are `darkside.plain` and
+> the pill construction in `views/layered.py`, both inside Inc-3's set, so limb 2 passes.
+> **Correctly parented, and it stays.** A criterion that moved both would be a verdict.
+>
+> **`#D21` REMOVES a breach rather than creating one**, which is the strongest argument for the
+> ruling: Inc-3 goes from an undeclared 5 to a declared 4, and Inc-9 gains the census at **zero**
+> added files — its declared set already contains both `app.py` and `screens/factory.py`.
+>
+> **`LLR-N06.2.2`'s cross-reference at the end of the block above — *"Its coercion is governed by
+> `LLR-N06.2.5`"* — STAYS, and is now a cross-section reference.** That is correct and it is the
+> point: the fold toast is governed by the class, and **the class is not owned by the toast**.
+>
+> **Recorded honestly — one clause of `#D21`'s edit a-2 is NOT performed in pass 1.** Edit a-2 also
+> asks that this block be **physically moved** out of §3.4 into §3.0. It is not moved. The parent,
+> the increment and the ownership — the whole substance of the ruling — are applied here and in
+> §3.0's `Owned LLRs` line, and the id is deliberately **not** renumbered to an `LLR-COERCE.*` form,
+> because `LLR-N06.2.5` is cited by §5.2 (`TC-073`), by `02c`, and by `PLAN.md`, none of which this
+> lane may edit. Relocating ~60 lines of a 5 000-line document to satisfy a presentational clause,
+> in a fold whose two predecessors dropped conditions, is a risk with no requirement-side payoff.
+> **This is a deliberate, recorded deviation, not an omission**; §6.5 A-48 carries it as an open
+> ledger line so pass 2 can close or ratify it.
+
+- **Traceability:** `HLR-COERCE` (§3.0), risk A-7, security condition **C-8** (`02b` S-09)
+  *(~~`HLR-N06.2`~~ — superseded by `#D21`, above.)*
 - **Statement:** Every `notify` call site in the product whose message argument is not a literal
   shall disable markup parsing and shall route every interpolated value through the design module's
   plain-text coercion; and the verification shall obtain the set of such call sites **by derivation
@@ -2113,12 +2396,16 @@ be gated.
   | `#D5b` (Q-3) | `map/n -> next_hit`, label `siguiente coincidencia` | `nav` | Inc-4 |
   | `#D5b` (Q-3) | `map/N -> prev_hit`, label `coincidencia anterior` | `nav` | Inc-4 |
   | `#D5b` (Q-3) | `map/M -> next_gap`, label `siguiente faltante` | `view` | Inc-4 |
-  | `#D6` (Q-7) | `⇥` **rejected**; `n`/`N` walk the single active *coincidencias* set | — | Inc-5 |
+  | `#D6` (Q-7) | `⇥` **rejected**; `n`/`N` walk the single active *coincidencias* set | — | ~~Inc-5~~ — **the lens half is DEFERRED (`#D23`)**; the search half rides Inc-4 |
 
   **`AT-022` and `AT-023` shall press the real `n` and `N`.** Three seat rows change in Inc-4 and
-  are reviewed **row-by-row at DDR** (D10's three-row seat-diff cap). `keymap.py` is a **four-way
-  collision** across Inc-3, Inc-4, Inc-6 and Inc-9, resolved by serial ordering and not by
+  are reviewed **row-by-row at DDR** (D10's three-row seat-diff cap). `keymap.py` is a **three-way
+  collision** across Inc-3, Inc-4 and Inc-9 (§5.4), resolved by serial ordering and not by
   ownership: each shall re-run `duplicate_chords()` and the whole-seat pin.
+  *(~~"four-way … Inc-3, Inc-4, Inc-6 and Inc-9"~~ is superseded: the fourth participant was `Inc-6`,
+  US-N14's increment, **vacated** by `#D23`. `#D6`'s ruling itself survives the deferral unchanged —
+  `⇥` stays rejected and `n`/`N` stay the walk — because it was a ruling about the **seat**, and the
+  seat is not deferred. Only its lens-side consumer is.)*
 - **Why the unification is not the state-dependent chord `#D10` rejected.** `#D10` rejected that
   option because `map/n` would have had **no constant `label`**, breaking the whole-seat pin's
   static set equality. Here the label `siguiente coincidencia` is **true in both cases**, so the
@@ -2209,7 +2496,11 @@ be gated.
 
 ---
 
-### 3.6 · US-N13 «sala» — home shows each map's own shape *(Inc-6)*
+### 3.6 · US-N13 «sala» — home shows each map's own shape *(Inc-7 — §5.4)*
+
+> **Header corrected (`P2-B1`, `QA2-C-06`, §6.5 A-49).** ~~*(Inc-6)*~~ was the **stale ARQ 7-cut**
+> number, left live in this header while the ratified cut put US-N13 at `Inc-7`. Under §5.4 `Inc-6`
+> is a **vacated** id. The cut is stated once, in §5.4, and this header points there.
 
 > **What is new and what is not.** Executed (**M-12**): `HomeScreen.on_mount` already calls
 > `store.load(map_name)` once per map (`mapper/app.py:539`) and keeps only `kind`, `nodos`, `docs`.
@@ -2232,13 +2523,14 @@ be gated.
   acta count, a fixed-width coverage bar, a node count equal to the graph's, a due badge when a node
   is due today, and a `⇄ n` marker when `n` nodes carry a map link; observed as substrings and
   character counts in the rendered text.
-- **Acceptance tests:** `AT-025`, `AT-025b`, `AT-026`, `AT-029`, `AT-030`, `AT-031`, `AT-048`.
+- **Acceptance tests:** `AT-025`, `AT-025b`, `AT-026`, `AT-029`, `AT-030`, `AT-031`.
 - **`AT-027` and `AT-028` are DELETED (`QA-B-03`, §6.5 A-07).** They were pure padding: each
   appeared in exactly two places — this list and the §5.2 table — and nowhere else in the document.
   No requirement claimed either on an `Acceptance:` line and no predicate was written for either.
-  The story claimed 7 and defined 5. It now enumerates 6, of which `AT-048` is **new and real**
-  (the `HLR-N13.3` mount-budget arm, which `QA-M-12` correctly says cannot share `AT-025`'s
-  on-disk node because it needs a different workspace and a generated fixture).
+- **`AT-048` is DEFERRED (`#D24`, §6.5 A-43), not deleted.** It was `HLR-N13.3`'s mount-budget arm
+  and its whole subject is the deferred threshold 1. It leaves with the budget mechanism and is
+  enumerated in `HLR-N13.3`'s deferral record. **The distinction from `AT-027` / `AT-028` matters:
+  those two never had a predicate; this one has a good predicate whose mechanism moved.**
 - **Boundary catalog (QC-3):**
   - ☑ **empty** — `AT-030` drives a workspace with zero maps; `AT-025` includes a map with zero
     documented nodes (`nomina` from `create_seed`, executed: 0 of 3 — **M-12**).
@@ -2544,6 +2836,15 @@ be gated.
   **Still out of scope:** legacy `escape()` sites on surfaces this batch does not touch (carry
   B-03) — the inspector block at `app.py:242-293`, the palette table at `:205`, the layered ghost at
   `layered.py:266`.
+- **Acceptance:** `AT-031`
+- **`AT-031`'S OWNERSHIP IS LANDED HERE (`P2-B2`, `QA2-C-01`, §6.5 A-44).** §6.5 A-29 dispositioned
+  `AT-031` as *"remains catalog-only and is **recorded here as such** rather than counted as
+  specified"* — an honest record, but it left a live `AT` on a live story with no requirement above
+  it, which §3.6's own boundary catalog (`:2247`) describes as *"a map whose title carries Rich
+  markup, a constructed control byte and a right-to-left override"*. **That is this LLR's statement,
+  word for word.** The id was never homeless; it was unclaimed. Claiming it here converts a coverage
+  clause into a predicate with a fixture, a threshold and a named weaker variant, which is exactly
+  what A-29 said a catalog clause is not.
 - **Named weaker variant (`M-N13.2.1-a`):** coerce the new card fields, leave `escape(map_name)` at
   `app.py:568` as it is. Every new field is clean and the map-name column on the same row carries
   the override, which then governs the columns painted after it. Reddened by the derived census.
@@ -2555,17 +2856,63 @@ be gated.
 - **Traceability:** US-N13, security condition **C-3** (`02b` S-03, `[blocker]` — the one security
   blocker still live after the repair batch; `PLAN.md` §12.5 D18 discharges C-1 and C-2 and
   **explicitly does not discharge C-3**)
-- **Statement:** While the workspace holds maps, the system shall complete the home-screen mount
-  within a declared wall-clock budget for a workspace of a declared size, and a map that cannot be
-  summarised within the declared per-map budget shall be declared as such on its own card rather
-  than delaying or preventing the screen.
+- **Statement:** While the workspace holds maps, a map that cannot be summarised shall be declared as
+  such on its own card, and every other map in the workspace shall still paint its own card with its
+  own true values.
+
+> ### THE WORK-BUDGET HALF IS CUT — `S-18` and `S-19` go together to the follow-on design batch (`#D24`, §6.5 A-43)
+>
+> **The pairing is the ruling, and it is not a sibling pairing: `S-19` is `S-18`'s PRECONDITION.**
+> `S-18` asks for a render work budget; `S-19` is the measurement that would calibrate it. Executed
+> on the 51-node / 410-edge shape, `02g` §4.3:
+>
+> ```
+> LayeredRenderer  1283 ms      over the 250 ms budget
+> OutlineRenderer   337 ms      over the 250 ms budget
+> RadialRenderer    142 ms      UNDER the 250 ms budget
+> ```
+>
+> **`RadialRenderer` is under budget on the acceptance fixture, so on that renderer `k = 0`.** With
+> `k = 0`, threshold 4's containment arm quantifies over an empty set and threshold 2 asserts nothing:
+> a correct implementation and a **missing** one paint the identical screen. The budget mechanism is
+> therefore **unfalsifiable on one of the three renderers the fixture may be run against**, and the
+> fixture as written does not say which renderer it runs. That is C-55 limb 1 — an absence admitted
+> as evidence without a positive control proving the oracle can produce a non-absence.
+>
+> **The obligation the follow-on batch inherits, stated as a gate and not as advice:** its budget
+> fixture **shall name its renderer**, and shall carry a renderer for which `k > 0` on the declared
+> shape, with the `k = 0` renderer retained as the negative control. A budget fixture that does not
+> name its renderer is not a fixture; it is three different experiments sharing a name.
+>
+> **What this disposes, said explicitly rather than left to be inferred:**
+> - **`P2-C8`** — *"`< 1000 ms` for 200 maps is an absolute wall-clock assertion with no stated
+>   headroom"*. **DISPOSED by the cut**: threshold 1 leaves with the budget mechanism, so there is no
+>   longer an un-headroomed wall-clock assertion in this document. It is not answered; its subject is
+>   gone. The follow-on batch inherits the headroom question with the budget.
+> - **Security `C-3`** — threshold 2 *"measured as elapsed time"*, and the missing threshold 5.
+>   **DISPOSED by the cut on the same ground**: `C-3`'s subject is threshold 2, which is deferred.
+>   **What is NOT disposed and must not be read as disposed:** the *defect* `S-15` / `M-H3` is real,
+>   measured twice, and stays on `master` — a 73-node map costs 72.5 s and `MAX_RENDER_NODES` waves
+>   it through. **Deferring the bound does not repair the defect.** It is carried, named, to the
+>   follow-on batch, and `.dev-flow/BACKLOG.md`'s lane owns that carry. Recording a live app-killing
+>   defect as "disposed" would be the exact false record §3.0's own byte-hygiene note exists to stop.
+>
+> **What survives in this HLR, and why it survives the cut:** thresholds 3 and 4 below need **no**
+> budget mechanism. Threshold 3 consumes `MAX_RENDER_NODES`, which is shipped and enforced.
+> Threshold 4's containment is re-scoped from *"exceeds the per-map budget"* to *"fails to load"* —
+> a condition `LLR-N13.1.5` already owns, `AT-025b` already drives on a real poisoned fixture, and
+> which is observable with no timing at all.
 - **Rationale (informative):** US-N13 is what turns *"the operator opened a hostile map"* into
   *"the operator started the application"* — the sala loads and summarises **every** map in the
   workspace before any card paints. Without a bound, one file decides whether the product starts.
 - **Validation:** `test (pilot)` + `test (unit)`
-- **Executed verification:** `pytest tests/test_home.py -k "mount_budget"` *(provisional)* — mount
-  `App.run_test(size=(140, 45))` against (a) a workspace of 200 generated maps of `<= 128` nodes,
-  and (b) a workspace of one loadable map plus one map that exceeds the per-map work budget.
+- **Executed verification:** `pytest tests/test_home.py -k "unsummarisable_map_is_contained"`
+  *(provisional)* — mount `App.run_test(size=(140, 45))` against a workspace of one loadable map plus
+  one map whose load fails, and read the painted card count and the two card states.
+  *(~~"a workspace of 200 generated maps of `<= 128` nodes"~~ and ~~"one map that exceeds the per-map
+  work budget"~~ are **DEFERRED (`#D24`)** with thresholds 1 and 2. The `-k` selector is renamed off
+  `mount_budget` in the same breath, because a selector naming a mechanism this requirement no longer
+  contains is how a deferred half gets re-implemented by accident.)*
 
 - **THE BUDGET, EXPRESSED RELATIVE TO THE SHIPPED BOUND (D19).** `MAX_RENDER_NODES = 12000` is
   adopted as a given, not re-litigated: it is declared and enforced in all three renderers —
@@ -2576,15 +2923,24 @@ be gated.
   definition and it is `MAX_RENDER_NODES`.
 
 - **Numeric pass threshold:**
-  1. **Workspace budget.** Mount completes in `< 1000 ms` for **200** maps of `<= 128` nodes each.
-  2. **Per-map work budget.** `WORKSPACE_CARD_BUDGET_MS = 250` per map — a **work** bound measured
-     as elapsed time of that map's summarise-and-render step, **not** a node count.
-  3. **Count ceiling, inherited not invented.** A map of `> MAX_RENDER_NODES` nodes is over budget
-     by definition and needs no timing; the renderers already refuse it and this requirement
-     consumes that refusal rather than restating it.
-  4. **Containment.** For a workspace of `N` maps of which `k` exceed the per-map budget, painted
-     card count `== N`, the `k` over-budget maps carry the declared over-budget card state, and the
-     remaining `N - k` cards carry their true values.
+  1. ~~**Workspace budget.** Mount completes in `< 1000 ms` for **200** maps of `<= 128` nodes
+     each.~~ **DEFERRED (`#D24`)** — leaves with the budget mechanism; disposes `P2-C8`.
+  2. ~~**Per-map work budget.** `WORKSPACE_CARD_BUDGET_MS = 250` per map — a **work** bound measured
+     as elapsed time of that map's summarise-and-render step, **not** a node count.~~
+     **DEFERRED (`#D24`)** — this is the stall-bounding half, and it is the half `S-19` shows cannot
+     be distinguished from its own absence on `RadialRenderer`. Disposes security `C-3`'s subject;
+     **does not** repair `S-15`.
+  3. **Count ceiling, inherited not invented — LIVE.** A map of `> MAX_RENDER_NODES` nodes is
+     refused by definition and needs no timing; the renderers already refuse it and this requirement
+     consumes that refusal rather than restating it. **Testable with no budget mechanism**, which is
+     why it survives the cut.
+  4. **Containment — LIVE, re-scoped from "over budget" to "fails to load" (`#D24`).** For a
+     workspace of `N` maps of which `k` fail to load, painted card count `== N`, the `k` failing maps
+     carry the declared damaged-card state, and the remaining `N - k` cards carry their true values.
+     The `k` maps are identified by the **load path raising or recording a load warning**, never by a
+     clock. `AT-025b` drives `N = 2`, `k = 1` on a `.mmd` carrying a directed cycle, so `k > 0`
+     holds by construction and the arm is not vacuous — the property `S-19` shows the *budget*
+     version could not guarantee.
 
 - **THIS IS SHIPPED DEFECT `S-15`, NOT A PRECAUTION (`PLAN.md` §14.2, §6.5 A-25).** `M-H3` is
   promoted from a named hypothetical mutant to a **measured app-killing defect on `master`**, and it
@@ -2625,38 +2981,95 @@ be gated.
   the numbers do not**: the cost did not go away, it moved into a shape nobody had measured.
   Quoting the old figures would understate the live defect while appearing to cite evidence.
 
-- **Named weaker variants, each stated at authoring time:**
+- **Named weaker variants, each stated at authoring time. Four of the five were reddened by
+  threshold 2 alone and therefore leave with it (`#D24`) — recorded, not dropped:**
 
-  | Mutant | Plausible because | Reddened by | Executed basis |
+  | Mutant | Plausible because | Reddened by | Status after `#D24` |
   |---|---|---|---|
-  | **M-H1** one `try/except Exception` around the whole card loop | smallest edit that stops the crash | threshold 4 — painted card count `== N` | `02b` A5.4: 6 maps in, 0 cards out |
-  | **M-H2** cap the **number** of maps | a cap looks like a bound | threshold 2 — one over-budget map is under any map-count cap | the 73-node / 72.5 s shape above is 1 map |
-  | **M-H3** compute the budget from `len(graph.nodes)` | node count is the obvious size proxy | threshold 2 — the fixture is 51 nodes and 1 935 ms | the DAG table above |
-  | **M-H5** reuse `MAX_RENDER_NODES` as the *whole* budget | it is the shipped bound and D19 says adopt it | threshold 2 — every row of the table above is `allowed by MAX_RENDER_NODES: True` | the `allowed` column |
-  | **M-H6** measure the budget over the **hero** map only | the hero is the expensive one on the happy path | threshold 4 — the fixture's over-budget map is not the hero | the two-map fixture of `LLR-N13.1.5` |
+  | **M-H1** one `try/except Exception` around the whole card loop | smallest edit that stops the crash | threshold 4 — painted card count `== N` | **LIVE.** Threshold 4 survives the cut, re-scoped to load failure, and this mutant is a load-failure mutant. `02b` A5.4: 6 maps in, 0 cards out |
+  | **M-H2** cap the **number** of maps | a cap looks like a bound | ~~threshold 2~~ | **DEFERRED (`#D24`)** — carried to the follow-on batch with the bound it reddens |
+  | **M-H3** compute the budget from `len(graph.nodes)` | node count is the obvious size proxy | ~~threshold 2~~ | **DEFERRED (`#D24`)** — and it is the mutant `S-15` proves is a live defect, so it is carried **named**, not discarded |
+  | **M-H5** reuse `MAX_RENDER_NODES` as the *whole* budget | it is the shipped bound and D19 says adopt it | ~~threshold 2~~ | **DEFERRED (`#D24`)** |
+  | **M-H6** measure the budget over the **hero** map only | the hero is the expensive one on the happy path | threshold 4 — the fixture's failing map is not the hero | **LIVE**, re-scoped: the two-map fixture of `LLR-N13.1.5` puts the failure on the non-hero map |
 
-- **Priority:** high — it is a security blocker and it gates Inc-6.
-- **Acceptance:** `AT-025b`, `AT-048`
+  **The four deferred mutants are the readable proof that threshold 2 carried real discriminating
+  power.** Cutting it is a scope decision, not a claim that it was worthless, and writing that down
+  is what stops the follow-on batch re-deriving them from nothing.
+
+- **Priority:** high — it gates **Inc-7** (§5.4), the increment that rewrites the recents loop.
+  *(~~"it is a security blocker and it gates Inc-6"~~ is superseded twice over: `C-3`'s subject is
+  deferred by `#D24`, and `Inc-6` is a **vacated** id under §5.4 — the US-N13 increment is `Inc-7`.)*
+- **Acceptance:** `AT-025b`
+  *(~~`AT-048`~~ — **DEFERRED (`#D24`)**. `AT-048` was created solely as the mount-budget arm
+  (`QA-M-12`, §6.5 A-37) and needed a generated 200-map workspace. Its whole subject is threshold 1.
+  It leaves with the mechanism rather than being retargeted at a predicate it was not written for.)*
 - **Owned LLRs:** `LLR-N13.1.5` (per-map failure containment, threshold = painted card count **and**
   card-state distinguishability) and `LLR-N13.1.6` (at most one load per map per mount).
+- **`LLR-N13.1.5`'s containment DOES NOT ENGAGE on the current tree, and `LLR-REPAIR.1` (§3.9) is
+  what makes it engage.** Recorded here because a requirement whose guard is a no-op is the defect
+  this batch has already shipped twice: measured on a phantom sidecar id, `coverage() = (2, 3)` with
+  `warnings = []`, so `load_or_notice`'s warning arm at `mapper/app.py:459` never fires and no card
+  ever enters the damaged state. **`Inc-REPAIR` shall land before `Inc-7`** (§5.4), or `AT-025b`
+  passes over a `k` that is structurally zero.
 - **`AT-025` is promoted out of the boundary catalog.** `02b` S-03's structural complaint was that
   the only error statement in 2 707 lines was a boundary-catalog line with *"no HLR and no LLR
   behind it — an acceptance test with no requirement above it is a test the next refactor deletes
   without reddening anything."* `AT-025`'s error arm now sits under `LLR-N13.1.5`, and the new
-  `AT-048` carries the budget arm, which `QA-M-12` correctly says cannot be the same on-disk node
-  as the happy path: it needs a different workspace and a generated fixture.
-- **Flagged `assumed — verify in Phase 3`:** the two millisecond figures. `1000 ms / 200 maps` and
-  `250 ms / map` are chosen against the measurements above and against `02b`'s workspace timings
-  (200 maps, cold load-all 1 064 ms at the parked base); they are **wall-clock figures on one
-  machine** and Phase 3 shall re-measure them on the CI runner before pinning. What is **not**
-  provisional is that the budget is a work bound rather than a count bound — that is settled by the
-  executed table above.
+  `AT-048` carried the budget arm, which `QA-M-12` correctly says cannot be the same on-disk node
+  as the happy path: it needs a different workspace and a generated fixture. *(The `AT-025`
+  promotion **stands** — its error arm still sits under `LLR-N13.1.5`, which survives `#D24` whole.
+  The `AT-048` half is **DEFERRED (`#D24`)** with the generated workspace it required. `QA-M-12`'s
+  finding — that one on-disk node cannot carry both — is unaffected and is the reason the two ids
+  can be dispositioned separately at all.)*
+- ~~**Flagged `assumed — verify in Phase 3`:** the two millisecond figures.~~ **DEFERRED (`#D24`)
+  with the figures themselves.** Both millisecond figures leave with thresholds 1 and 2, so **this
+  requirement now carries no `assumed` figure at all** and `P2-C8`'s subject is gone. The reasoning
+  travels to the follow-on batch intact: they were wall-clock figures on one machine, they needed
+  re-measurement on the CI runner before pinning, and `S-19` has since shown they also needed a
+  named renderer. What is **not** provisional, and is the finding the follow-on batch starts from, is
+  that the budget must bound **work** rather than node count — settled by the executed table above,
+  which is retained here for that reason.
 
 ---
 
-### 3.7 · US-N14 «lente» — ask the map a question about its fields *(Inc-5)*
+### 3.7 · US-N14 «lente» — ask the map a question about its fields — **DEFERRED**
 
-#### Acceptance (black-box) — US-N14
+> ## DEFERRED — follow-on design batch (`#D23`, amendment set 3 · A-42)
+>
+> **Reason:** the operator re-scoped this batch. US-N14's figure-ground half is a renderer change
+> riding the same A3 contract as US-N06 (§2.6 S-4 records the coupling), and its walk half is still
+> waiting on Q-7, which §2.8.4 records as **NEW and blocking**. It is design work, not
+> implementation work, and it is moved whole to a follow-on **design** batch rather than carried
+> half-specified through a third PDR iteration.
+>
+> **Pointer:** the follow-on batch inherits §3.7 verbatim, together with `01b-ux-decisions.md`
+> DECISION 2, DECISION 3 §3.3 (the lens vocabulary rows), and Q-6 / Q-7 in §6.1. **No text below is
+> deleted** — the work is good and the successor reads it as its own input. Where it lands is
+> recorded in `.dev-flow/BACKLOG.md`, whose lane owns that record; this document does not name a
+> batch id it cannot verify.
+>
+> **What leaves with this section, enumerated so nothing is dropped silently (C-56):**
+> - **HLR:** `HLR-N14.1`, `HLR-N14.2`, `HLR-N14.3`.
+> - **LLR:** `LLR-N14.1.1`, `LLR-N14.1.2`, `LLR-N14.1.3`, `LLR-N14.1.4`, `LLR-N14.2.1`,
+>   `LLR-N14.2.2`, `LLR-N14.2.3`, `LLR-N14.3.1`, `LLR-N14.3.2`, `LLR-N14.3.3`.
+> - **AT:** `AT-032`, `AT-033`, `AT-034`, `AT-034b`, `AT-035`, `AT-036`, `AT-037`, `AT-038`,
+>   `AT-039`, `AT-040`. Two of these — `AT-034b` and `AT-040` — are among the six ids `QA2-C-01`'s
+>   three-way rule fails on. **They are dispositioned by leaving with the story, not by being
+>   struck**, and §6.5 A-43 records that disposition against the ledger row rather than letting the
+>   cut absorb it.
+> - **TC:** `TC-051`, `TC-052`, `TC-053`, `TC-054`, `TC-055`, `TC-056`, `TC-057`, `TC-058`,
+>   `TC-059`, `TC-060`, `TC-061`, `TC-062`, `TC-078`.
+>
+> **Every heading below carries `— DEFERRED (#D23)`**, so the §5.2 count derivations exclude them
+> mechanically rather than by a reader remembering. The `#D23` marker is machine-readable and is the
+> only thing a census needs to read.
+>
+> **What does NOT leave:** `LLR-N07.2.2b` (hit painting in the three remaining renderers) belongs to
+> **US-N07**, not to this story, and stays in the batch with `AT-024`. `LLR-N14.2.3`'s coercion
+> clause leaves with the story, but the *class* it belongs to does not — `HLR-COERCE` (§3.0) owns
+> the class and is unaffected.
+
+#### Acceptance (black-box) — US-N14 — **DEFERRED (`#D23`)**
 
 - **Observable outcome:** the operator writes a field query and the map answers by shape — the
   matching nodes stay lit, everything else falls back to ground, and a line declares how many nodes
@@ -2679,7 +3092,7 @@ be gated.
   - ☑ **error** — `AT-034` covers the malformed-term class: a token with no colon, and a token with
     an empty key.
 
-#### HLR-N14.1 — the lens parser is a pure function with three declared outcome classes *(the Q-6 answer)*
+#### HLR-N14.1 — the lens parser is a pure function with three declared outcome classes *(the Q-6 answer)* — **DEFERRED (`#D23`)**
 
 - **Traceability:** US-N14
 - **Statement:** The search module shall provide a parse function that turns a query string into a
@@ -2709,7 +3122,7 @@ be gated.
   Both criteria for a Layer-0 unit are met, and `mapper/search.py` imports only `.model`
   (`docs/ARCHITECTURE.md` §3, executed), so the unit test needs no event loop and no filesystem.
 
-##### LLR-N14.1.1 — an undefined field key is declared, not silently empty
+##### LLR-N14.1.1 — an undefined field key is declared, not silently empty — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.1
 - **Statement:** If a lens term names a key that is neither a key of the loaded graph's schema nor a
@@ -2762,7 +3175,7 @@ be gated.
   C-31's family. The four pairs above are the **legacy fixture's** schema, shown as the worked
   example, not as the value to type.
 
-##### LLR-N14.1.4 — the match predicate, the case rule and the bounds are declared
+##### LLR-N14.1.4 — the match predicate, the case rule and the bounds are declared — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.1, security condition **C-6** (`02b` S-07)
 - **Statement:** A lens term shall match a node when the coerced string form of the addressed value
@@ -2818,7 +3231,7 @@ be gated.
   declare, not to buy time back.
 - **Acceptance:** `AT-034b`
 
-##### LLR-N14.1.2 — the two "estado" namespaces are kept apart
+##### LLR-N14.1.2 — the two "estado" namespaces are kept apart — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.1
 - **Statement:** When a lens term names the reserved pseudo-field for node state, the system shall
@@ -2836,7 +3249,7 @@ be gated.
   (`ok/risk/late/blocked` versus `obsoleto/estable/riesgo/atrasado/bloqueado`). The inequality
   assertion is what makes the routing provable rather than plausible.
 
-##### LLR-N14.1.3 — malformed terms are specified
+##### LLR-N14.1.3 — malformed terms are specified — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.1
 - **Statement:** If a query token contains no key separator or has an empty key, then the parse
@@ -2891,7 +3304,7 @@ be gated.
   does not address the bare word, so Q-8 stays open rather than being quietly resolved by a sibling
   artifact.**
 
-#### HLR-N14.2 — the answer is visible as a shape, and its size is declared
+#### HLR-N14.2 — the answer is visible as a shape, and its size is declared — **DEFERRED (`#D23`)**
 
 - **Traceability:** US-N14
 - **Statement:** While a lens query with resolvable keys is active, the system shall paint every
@@ -2918,7 +3331,7 @@ be gated.
   that definition, executed (**M-8**): `C:alta` -> 5 nodes in 3 ramas; `state:risk` -> 3 nodes in
   2 ramas.
 
-##### LLR-N14.2.1 — the renderer paints a set, it does not evaluate a query
+##### LLR-N14.2.1 — the renderer paints a set, it does not evaluate a query — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.2
 - **Statement:** The renderer shall receive the lens result as a set of node ids in the view state
@@ -2941,7 +3354,7 @@ be gated.
   claims to forbid. The control runs at the same package depth as `mapper/views/` and is removed
   afterwards.
 
-##### LLR-N14.2.2 — the three-state distinction survives to the canvas
+##### LLR-N14.2.2 — the three-state distinction survives to the canvas — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.2, HLR-N14.1
 - **Statement:** While no lens is active, the renderer shall paint every node with its ordinary
@@ -2959,7 +3372,7 @@ be gated.
   nothing" is exactly the distinction HLR-N14.1 makes at the parse layer, carried one layer down. If
   it collapses here, the Q-6 answer is undone in the renderer.
 
-##### LLR-N14.2.3 — a field value reaching the canvas is coerced
+##### LLR-N14.2.3 — a field value reaching the canvas is coerced — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.2, risk A-7
 - **Statement:** The system shall coerce **every file-derived string placed on a lens result
@@ -2991,7 +3404,7 @@ be gated.
   (`_nodos.yml`) reaching a new rendered surface — risk A-7's family, scoped to the derived sink
   census of `LLR-N06.2.3` rather than to a file.
 
-#### HLR-N14.3 — the operator walks the answer and can recall it
+#### HLR-N14.3 — the operator walks the answer and can recall it — **DEFERRED (`#D23`)**
 
 - **Traceability:** US-N14
 - **Statement:** When the operator presses the walk chord while a lens is active, the system shall
@@ -3025,7 +3438,7 @@ be gated.
 - **Disposition:** this requirement is written **chord-agnostic**. PDR settles the chord, as it
   settles Q-3. Whatever is chosen carries LLR-N14.3.2 as a standing invariant.
 
-##### LLR-N14.3.1 — the walk uses one ordering, shared with search
+##### LLR-N14.3.1 — the walk uses one ordering, shared with search — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.3
 - **Statement:** The lens walk shall order its matches by the same pre-order tree walk the search
@@ -3042,7 +3455,7 @@ be gated.
   lens cursor start disagreeing about what "next" means, which is the same failure shape as the two
   definitions of "hit".
 
-##### LLR-N14.3.2 — the walk chord does not cost the inspector its keyboard path
+##### LLR-N14.3.2 — the walk chord does not cost the inspector its keyboard path — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.3, Q-7
 - **Statement:** After the walk chord is added, pressing the focus-traversal key nine times from the
@@ -3079,7 +3492,7 @@ be gated.
   being deliberately retired **with a replacement keyboard route to the inspector shipped in the
   same increment**. Nothing in this batch proposes that.
 
-##### LLR-N14.3.3 — a saved lens stores a query, not a result
+##### LLR-N14.3.3 — a saved lens stores a query, not a result — **DEFERRED (`#D23`)**
 
 - **Traceability:** HLR-N14.3
 - **Statement:** The system shall store against a saved-lens chord the query text, and shall
@@ -3100,7 +3513,14 @@ be gated.
 
 ---
 
-### 3.8 · US-N16 «leyenda» — `?` explains the view you are in *(Inc-7)*
+### 3.8 · US-N16 «leyenda» — `?` explains the view you are in *(Inc-8 and Inc-9 — §5.4)*
+
+> **Header corrected (`P2-B1`, `QA2-C-06`, §6.5 A-49).** ~~*(Inc-7)*~~ was the **stale ARQ 7-cut**
+> number. The ratified cut **splits this story across two increments** — `Inc-8` (the legend panel:
+> truncation and the glyph vocabulary) and `Inc-9` (help scope routing and the `KEY_SCOPE`
+> declarations) — with `Inc-8` before `Inc-9` as a hard ordering. A single-increment header did not
+> merely name the wrong number; **it hid the split, and the split is what makes the acceptance
+> passable.** The cut is stated once, in §5.4.
 
 > **Written quantified over a derived screen set, never over the known offenders.** Batch 1's §2.1b
 > lesson is that a requirement scoped to a file gets satisfied at that file's boundary while the
@@ -3349,11 +3769,11 @@ be gated.
   style spans against the styles the corresponding renderer produces.
 - **Numeric pass threshold — the floor is DERIVED from the declared vocabulary, and the subject
   includes the screens the defect is on (`QA-M-09`, `QA-M-10`, §6.5 A-36):**
-  - **Vocabulary.** For **every** glyph in the declared vocabulary, the legend's style string equals
-    the renderer's style string for that glyph. The count is `len(declared_vocabulary)`, read from
-    the single declaration `LLR-N16.2.1` creates — **not** a floor. `01b` DECISION 3 enumerates
-    **21 vocabulary rows (V1–V21) plus 5 colour rows**; the count is read from the declaration so
-    that a 22nd row joins the check without anyone remembering.
+  - **Vocabulary.** For **every** member of the declared vocabulary, the legend's style string equals
+    the renderer's style string for that member. The count is `len(declared_vocabulary)`, read from
+    the single declaration `LLR-N16.2.1` creates — **not** a floor, and **not a literal written
+    anywhere in this document**. The membership predicate is `LLR-N16.2.1`'s and is derived; see
+    there.
   - **Title.** The title contains the view's name for each of the three map views **and for each
     non-map screen in the derived screen set** of `LLR-N16.1.1`.
 - **~~"over at least 5 glyphs" and "declared glyph count `> 0`"~~ are superseded (`QA-M-09`).**
@@ -3391,17 +3811,83 @@ be gated.
 - **Executed verification:** `pytest tests/test_help_scope.py -k "vocabulary_has_one_source"`
   *(provisional)* — for each declared glyph, compare the style the renderer emits against the style
   the legend emits.
-- **Numeric pass threshold (`QA-M-09`, §6.5 A-36):** style equality over **every** declared glyph;
-  and the declared vocabulary **equals** `01b` DECISION 3's enumeration — **21 rows `V1` through
-  `V21`, plus 5 colour rows** — asserted as a set against the single declaration, not as
-  `count > 0`. The section headers are, in order, `teclas de esta vista` · `vocabulario de esta
-  vista` · `colores con empleo`.
+- **Numeric pass threshold — DERIVED, WITH NO LITERAL COUNT (`QA-M-09`, `P2-B3`, §6.5 A-36 as
+  amended by A-45):** style equality over **every** member of the declared vocabulary; and the
+  declared vocabulary **equals** the derived set below, asserted as **set equality** against the
+  single declaration, never as `count > 0` and never against a transcribed total. The section
+  headers are, in order, `teclas de esta vista` · `vocabulario de esta vista` · `colores con empleo`.
+
+- **THE VOCABULARY CENSUS — question, instrument, SHA. The number is not written; the derivation is.**
+
+  > **QUESTION.** Which distinct glyph rows must the legend paint for this batch, and with which
+  > style each?
+  >
+  > **INSTRUMENT.** Read the vocabulary tables of `01b-ux-decisions.md` DECISION 3 §3.1 through §3.4.
+  > Project every row onto the triple `(glyph, label, painted-in style)`. Take the **set of distinct
+  > triples**. Remove every triple whose row carries the `DEFERRED(#D7)` marker. The result is
+  > `declared_vocabulary`. The colour-with-a-job rows of DECISION 3 §3.5 are a **second, separately
+  > derived set** over the same instrument, and are not members of this one.
+  >
+  > **MEASURED AT.** `20f86de` (`master`, tree clean), the SHA this amendment executes against.
+  >
+  > **CARDINALITY.** Deliberately **not transcribed**, here or anywhere else in this document. The
+  > test reads `len(declared_vocabulary)` from the declaration at run time.
+
+- **WHY THE COUNT IS A DERIVATION AND NOT A CORRECTED LITERAL — this is the trap, and it is real.**
+  ~~*"21 rows `V1` through `V21`"*~~ is superseded. The obvious repair — *"correct 21 to 23"* —
+  **is wrong twice**, which is why the fix is structural:
+  1. **The literal 21 was already stale.** DECISION 3 §3.1 adds `V4a` and `V4b` beneath its main
+     table, and §3.1 through §3.4 together carry more labelled rows than the `V1`-through-`V21`
+     numbering suggests. A reader counting the `V`-numbers gets one answer; a reader counting the
+     table rows gets another.
+  2. **And the larger literal would also be wrong**, because `V4` and `V4a` are **byte-identical in
+     glyph, label and style** — both `∙ ∙ ∙` / `territorio sin explorar` / `WORDMARK`
+     (`01b:277`, `01b:287`). A row-id census counts them twice; the **triple** census counts them
+     once, which is what the legend actually paints. Set equality over the triple is not a
+     convenience — it is the only projection under which "what the legend paints" and "what the
+     declaration says" are the same kind of object.
+  3. **And `#D7` removes another.** `V18` (`◍ github` / `◍ del repo`, `01b:315`) is the `◍`
+     repo-provenance marker, which `PDR-2026-08-26-ui-next-batch-02#D7` rules **out of this batch**
+     — *"not deferred, not ambiguous: out"*. It carries the `DEFERRED(#D7)` marker and the
+     derivation removes it. A legend painting `◍ del repo` in this batch would explain a glyph the
+     batch does not paint.
+
+  **Four generations of one number in this document have been wrong** (§5.2, §6.5 A-07). A fifth
+  literal — even a correct one — would be the fifth generation, correct only until the next row
+  moves. `01b`'s DECISION 3 is the declaration's *source*; the declaration is the *authority*; the
+  test reads the authority.
+
+- **THE `+ 5 COLOUR ROWS` HALF IS CORRECT AND IS KEPT.** Executed at `20f86de`,
+  `01b-ux-decisions.md:325-329` carries exactly five colour-with-a-job rows — `ACCENT`, `WARN`,
+  `SAGE`, `TEAL`, `VIOLET` — and `01b:332-333` records that `ALERT` is deliberately absent and gains
+  a row only if it gains a second job, which `LLR-S06.3.5` says it does not. **That half of the
+  parked threshold was never the defect** and is retained verbatim rather than being swept into the
+  correction, because striking a correct clause alongside an incorrect one is how a fold loses work.
+
+- **A CROSS-ARTIFACT EDIT THIS DOCUMENT CANNOT MAKE — routed, not assumed (`P2-B3`, `C-44`).** The
+  stale literal is live at **four** sites. Three are in this file and are amended above and at
+  §6.5 A-45. **The fourth was `01b-ux-decisions.md:373`**, which read *"The vocabulary specified
+  above is **21 rows** (V1–V21)"*. That file belongs to the **ux lane** and was not this document's
+  to edit, so the edit was **routed** rather than assumed.
+
+  **DISCHARGED 2026-08-27 — the routed edit LANDED.** The orchestrator applied it: the literal is
+  replaced by a pointer to this threshold's derivation, carrying a `⚠` note that records *why the
+  obvious repair was wrong* — the table holds **23** labels, but `V4` and `V4a` are byte-identical in
+  glyph, label and style, so striking the duplicate yields **22**, and *"correct 21 to 23"* would
+  have been wrong **twice**. The two artifacts no longer disagree. **This row is closed by
+  re-reading the amended `01b`, not by trusting that the routing happened** — a conditional
+  discharge is not an authorisation (C-44).
 - **Acceptance criteria:** the legend is otherwise a **second** declaration of the visual language,
   and a second declaration drifts. This is the same one-owner argument as R-014 for matching and
   R-013 for fold, applied to the glyph vocabulary.
-- **Ordering constraint, recorded:** `PLAN.md` §6 sequences Inc-7 last **because** its vocabulary
-  half must render what Inc-3 and Inc-5 actually paint. A legend written before the vocabulary exists
-  documents an intention.
+- **Ordering constraint, recorded (restated against §5.4, `P2-B1`):** the vocabulary half lands in
+  **`Inc-8`**, late in the serial order, **because** it must render what `Inc-3` and `Inc-5` actually
+  paint. A legend written before the vocabulary exists documents an intention.
+  *(~~"`PLAN.md` §6 sequences Inc-7 last"~~ is superseded twice: `Inc-7` is US-N13 under the ratified
+  cut, and the legend is not last — `Inc-9` is, and `Inc-8` before `Inc-9` is a hard ordering. The
+  constraint itself is unchanged and is now stated against §5.4, the document's single cut.
+  `Inc-5`'s contribution survives the US-N14 deferral: it is hit painting, which the legend's
+  vocabulary rows describe.)*
 
 ##### LLR-N16.2.2 — an empty vocabulary omits the section
 
@@ -3449,9 +3935,9 @@ be gated.
   panel's geometry is what `HLR-N16.1`'s oracle clips to. An unbounded row here would make the
   oracle's `x` clip drop real content and read as a missing binding.
 - **Named weaker variant (`M-N16.2.3-a`):** coerce the binding label, leave the vocabulary caption.
-  Green today, because the vocabulary section does not exist yet, and red the moment Inc-7 lands the
-  half that carries file-derived branch names. The widened statement is what makes it red at
-  authoring time rather than at the gate.
+  Green today, because the vocabulary section does not exist yet, and red the moment **`Inc-8`**
+  (§5.4) lands the half that carries file-derived branch names. The widened statement is what makes
+  it red at authoring time rather than at the gate. *(~~Inc-7~~ — stale 7-cut number; `P2-B1`.)*
 - **Acceptance criteria:** binding labels are Spanish UI strings from the seat today and are not
   file-derived, so **that half** is the lowest-risk member of the A-7 family. The vocabulary half is
   not: it describes glyphs painted from file-derived branch names, and the sink is the same one.
@@ -3496,6 +3982,154 @@ be gated.
 - **Recorded honestly:** the pre-state of `AT-044` is green on `master`. Its non-trivial arm is the
   mutation that removes `SCOPE_HELP` from `MODAL_SCOPES` and must turn it red — a plausible-wrong
   implementation, not a deletion (risk R-2, verbatim).
+
+---
+
+### 3.9 · Two shipped defects repaired inside this batch *(Inc-REPAIR)*
+
+> **Why these ride here and not in a follow-on batch (operator ruling, amendment set 3).** Both are
+> **mechanical fixes on a shipped defect**, not design rulings: each has one measured cause, one
+> observable consequence and a fix of one or two lines. Neither needs a PDR decision. They are
+> `02g` §5's `S-22` and `S-23`, renamed to the batch's own defect series as **`B-29`** and **`B-30`**
+> so the repair series and the security-lens series do not share a numbering space.
+>
+> **`B-29` is not merely adjacent to this batch — it is inside it.** `LLR-N13.1.5`'s containment
+> arm, which `AT-025b` drives and which `HLR-N13.3` now leans on entirely after `#D24`, **does not
+> engage on the current tree**. Shipping US-N13 without `B-29` ships a green containment test over a
+> structurally empty set.
+
+#### Acceptance (black-box) — the repair pair
+
+- **Observable outcome:** a workspace holding a map whose sidecar names a node the `.mmd` does not
+  define produces a card that **says so**, instead of a card that silently reports a coverage
+  denominator larger than the map; and a map that cannot be found produces a message naming the map,
+  not the operator's home directory.
+- **Shipped surface:** `HomeScreen`'s recents rows and the toast raised through
+  `MapperApp.load_or_notice` (`mapper/app.py:450-462`), observed through the rendered text of
+  `#home-recents` and through the notification body.
+- **Deliverable + observation:** a painted card in the declared damaged state for the phantom-bearing
+  map and true values on every other card; and a painted toast body containing the map id and
+  containing **no** path separator and **no** component of the workspace path.
+- **Acceptance tests:** `AT-049`, `AT-050`.
+- **Boundary catalog (QC-3):**
+  - ☑ **error** — `AT-049` drives a workspace whose sidecar carries a node id matching no parsed
+    `.mmd` node, and asserts the warning arm fires and the card enters the damaged state.
+  - ☑ **empty** — `AT-049`'s negative arm drives the same workspace with the phantom removed and
+    asserts **no** warning and a healthy card, so the positive arm is not passing on a constant.
+  - ☑ **invalid** — `AT-050` requests a map id that does not exist and reads the painted toast.
+  - ☑ **boundary** — `AT-050` requests a map id that is itself a path-like string, and asserts the
+    message still names only the id.
+
+#### HLR-REPAIR.1 — a map the store cannot fully parse is declared, and no message discloses the filesystem
+
+- **Traceability:** `02g` §5 `S-22` and `S-23`; risk **A-7**; and `LLR-N13.1.5`, whose containment
+  arm this HLR is the precondition for
+- **Statement:** When the store cannot fully reconcile a map's sidecar against its parsed graph, the
+  load shall record a warning that reaches the operator-facing surface; and no operator-facing
+  message raised by the store shall contain a filesystem path.
+- **Rationale (informative):** the two halves share one owner — `mapper/store.py`'s load path — one
+  increment and one review. Splitting them into two HLRs would put one source file under two owners,
+  which is the collision `#D5` exists to prevent. They are two LLRs under one HLR for that reason,
+  not because they are one defect.
+- **Validation:** `test (pilot)` + `test (unit)`
+- **Executed verification:** `pytest tests/test_store.py -k "repair_pair"` *(provisional)* — see the
+  two owned LLRs.
+- **Numeric pass threshold:** the conjunction of `LLR-REPAIR.1` and `LLR-REPAIR.2`.
+- **Priority:** high — `LLR-REPAIR.1` gates `Inc-7` (§5.4), because without it `AT-025b` is vacuous.
+- **Owned LLRs:** `LLR-REPAIR.1` (`B-29`, which owns `AT-049`) and `LLR-REPAIR.2` (`B-30`, which
+  owns `AT-050`). **This HLR deliberately carries no `Acceptance:` line of its own.** Each `AT` here
+  observes one defect through one surface with one fixture, so claiming both at HLR level *and* at
+  LLR level would put one id on two chains — the defect `QA-M-12` raised against `AT-025` and
+  `AT-007`. One id, one owner.
+- **Owning increment:** **`Inc-REPAIR`** (§5.4), sequenced **before `Inc-7`**.
+
+##### LLR-REPAIR.1 — a phantom sidecar id records a load warning *(`B-29`)*
+
+- **Traceability:** HLR-REPAIR.1
+- **Statement:** When the sidecar declares a node id that the parsed `.mmd` does not define, the
+  store shall append a load warning naming that id, and shall not change the meaning of the coverage
+  values it returns.
+- **Touched symbols:** `mapper/store.py` — the sidecar node-ingest branch at `store.py:400-401`,
+  which today reads *"if the id is not in `graph.nodes`, add a node"*;
+  `mapper/model.py::Graph.load_warnings` — **existing**, the same channel the duplicate-id and
+  malformed-field records already use (`store.py:398`, `:407`).
+- **Validation:** `test (unit)` + `test (pilot)`
+- **Executed verification:** `pytest tests/test_store.py -k "phantom_sidecar_id_warns"`
+  *(provisional)* — load a synthetic workspace whose sidecar names an id absent from the `.mmd`,
+  assert `graph.load_warnings` is non-empty and names the id; then mount `HomeScreen` and assert the
+  card enters the damaged state through `load_or_notice`'s warning arm.
+- **Numeric pass threshold:** on the synthetic fixture, `len(graph.load_warnings) >= 1` and the
+  offending id appears in one of them; `HomeScreen` paints the declared damaged card state for that
+  map and true values for every other map in the workspace. **Executed pre-state, `20f86de`:**
+  `coverage() = (2, 3)` with `warnings = []` — the denominator already carries the phantom and
+  nothing anywhere says so.
+- **THE FIX IS THE WARNING, NOT `coverage()`.** Changing `coverage()`'s semantics is **explicitly
+  out of scope**: three call sites agree on its current meaning and `LLR-N13.1.3` pins one of them
+  at 100. **The defect is silence, not arithmetic.** A repair that "corrects" the denominator would
+  be a behaviour change riding inside a defect fix, and would redden `LLR-N13.1.3` for no stated
+  reason. Recorded because *"while I was in there"* is how a one-line repair becomes a regression.
+- **THE GUARD IS A NO-OP ON THE CURRENT TREE, SO THE FIXTURE IS MANDATORY, NOT OPTIONAL (`C-55`
+  limb 2).** This is the load-bearing clause of the whole LLR. **No fixture in the repository carries
+  a phantom sidecar id** — executed: the sidecar ingest branch at `store.py:400-401` is reachable,
+  but nothing on disk reaches it. Therefore `LLR-N13.1.5`'s containment arm, `AT-025b`, and this
+  requirement's own threshold are **all green over an empty set** unless a fixture is built.
+  **This LLR mandates a synthetic fixture carrying exactly that case** — a `.mmd` and a
+  `_nodos.yml` where the sidecar declares one id the `.mmd` does not — constructed in a
+  `tempfile.mkdtemp` workspace, **never** by writing into `fixtures/`. *(The `fixtures/` prohibition
+  is not stylistic: `02g` §6 records that a probe pointed at the real `fixtures/` directory
+  permanently rewrote `fixtures/legacy.mmd` and `fixtures/legacy_nodos.yml` through the inspector's
+  commit-on-blur.)* **Without the fixture the guard is untested however green the suite**, which is
+  precisely the shape of defect this batch has shipped twice.
+- **Named weaker variant (`M-REPAIR.1-a`):** append the warning, and validate it against the existing
+  `legacy` fixture. Green — because `legacy` has no phantom, the warning list is empty, and an
+  assertion that the list "contains no unexpected entries" passes. **The absence is admitted as
+  evidence with no positive control proving the oracle can produce a non-absence.** Reddened by the
+  mandated synthetic fixture and by the negative arm that removes the phantom and asserts the warning
+  disappears.
+- **Named weaker variant (`M-REPAIR.1-b`):** drop the phantom node instead of warning about it. The
+  denominator becomes correct and the card looks healthy — and the operator is never told their
+  sidecar and their map disagree, which is the datum US-N13's whole story exists to surface.
+  Reddened by the damaged-card-state clause.
+- **Acceptance:** `AT-049`
+- **Value reconciliation (C-36):** `store.py:384-388` already **states this defect in a comment**,
+  honestly and in full — *"a sidecar id matching no parsed node is still added alongside the parsed
+  ones and still moves `coverage()`'s denominator. That is outside this batch's fence."* It was
+  outside the **repair batch's** fence. It is inside **this** one, because US-N13 paints that bar.
+  The change is a change, not a description.
+
+##### LLR-REPAIR.2 — a store message names the map, not the path *(`B-30`)*
+
+- **Traceability:** HLR-REPAIR.1, risk **A-7**
+- **Statement:** Every exception message the store raises to an operator-facing surface shall
+  identify the map by its id and shall contain no filesystem path.
+- **Touched symbols:** `mapper/store.py::MapStore.load` (`store.py:456`) — the not-found raise, which
+  today interpolates the constructed absolute path; rendered through `str(exc)` at
+  `mapper/app.py:453` and `mapper/app.py:1181`.
+- **Validation:** `test (unit)`
+- **Executed verification:** `pytest tests/test_store.py -k "not_found_names_the_map"`
+  *(provisional)* — request an absent map id from a store rooted at a `tempfile.mkdtemp` workspace
+  whose path contains a recognisable sentinel component, and assert the sentinel does not appear in
+  `str(exc)`.
+- **Numeric pass threshold:** **0** occurrences of the workspace path, of any of its components, and
+  of the platform path separator in the raised message; the map id appears exactly once. **The
+  assertion is on the sentinel, not on the literal word "path"** — a message can disclose a home
+  directory without containing any word a keyword check would look for.
+- **Named weaker variant (`M-REPAIR.2-a`):** interpolate the file's **basename** instead of the full
+  path. It removes the username and looks like the fix — and it still emits `<id>.mmd`, so the
+  message now discloses the store's on-disk naming convention while reading as repaired. Reddened by
+  the path-separator clause only if the basename carries one; **it does not**, so this variant is
+  reddened instead by the *"the map id appears exactly once"* clause, which `<id>.mmd` fails on the
+  id-plus-extension form. Named because it is the fix an implementer reaches for first.
+- **Acceptance:** `AT-050`
+- **Value reconciliation (C-36):** the raise sits **four lines above** a comment recording that this
+  exact class — *"an `OSError` carried its full absolute path — username included"* — was closed by
+  the repair batch's threshold 3 (`store.py:458-460`). **The comment is true about the reads it
+  describes and false about the line above it.** That is the sharpest available argument for why a
+  defect class needs a derived census rather than a fixed set of addresses, and it is the same
+  argument `LLR-N06.2.5` makes for `notify`. Recorded here rather than in a review note, because a
+  comment asserting a class is closed is more dangerous than no comment at all.
+- **Byte-hygiene note:** the sentinel path component is constructed at test time and no real user
+  path is written into a test file or an evidence artifact.
 
 ---
 
@@ -3969,9 +4603,10 @@ range (control C-56).
 | HLR-canvas | the declared layers reach `rows()`; braille reaches `RadialRenderer`'s output **(`AT-007b` is a `PIN (radial)`, not a map-canvas gate)**; the export artifact is read back from disk; selection tone follows focus | `Canvas.rows()`, `RadialRenderer`, `export.save_svg` **on disk** | `AT-007`, `AT-007b`, `AT-008`, `AT-009`, `AT-010` | pending Phase 4 |
 | US-N06 | the window moves, branches fold, and what is hidden is declared and reconciles | `#map-canvas`, `#map-pagination`, `#map-rail` | `AT-011`, `AT-012`, `AT-013`, `AT-014`, `AT-015`, `AT-016`, `AT-017`, `AT-046`, `AT-047` | pending Phase 4 |
 | US-N07 | the count covers the whole map and the walk follows the tree with the real `n` / `N`; nothing found looks like nothing | `#search-input` and the count region | `AT-018`, `AT-019`, `AT-020`, `AT-021`, `AT-022`, `AT-023`, `AT-024` | pending Phase 4 |
-| US-N13 | each map shows its own shape; an empty workspace shows the door; the sala paints within a budget and a damaged map says so on its own card | `#home-recents`, `#home-empty` | `AT-025`, `AT-025b`, `AT-026`, `AT-029`, `AT-030`, `AT-031`, `AT-048` | pending Phase 4 |
-| US-N14 | the answer is visible as a shape and its size is declared; a meaningless query says so and redirects to `/` | `#map-canvas` and the lens count line | `AT-032`, `AT-033`, `AT-034`, `AT-034b`, `AT-035`, `AT-036`, `AT-037`, `AT-038`, `AT-039`, `AT-040` | pending Phase 4 |
+| US-N13 | each map shows its own shape; an empty workspace shows the door; a damaged map says so on its own card and the others still paint theirs | `#home-recents`, `#home-empty` | `AT-025`, `AT-025b`, `AT-026`, `AT-029`, `AT-030`, `AT-031` | pending Phase 4 |
+| ~~US-N14~~ | **DEFERRED — follow-on design batch** (§3.7, `#D23`, §6.5 A-42) | — | none live here — `AT-032`, `AT-033`, `AT-034`, `AT-034b`, `AT-035`, `AT-036`, `AT-037`, `AT-038`, `AT-039`, `AT-040` leave with the story and are enumerated in §3.7's deferral block | n/a |
 | US-N16 | `?` explains **this** view, with its real keys and its real glyphs, on every screen in the derived set | `HelpScreen` via the real `question_mark` chord, read through `_painted_bindings` | `AT-041`, `AT-042`, `AT-043`, `AT-044` | pending Phase 4 |
+| repair pair (`B-29`, `B-30`) | a map the store cannot fully parse says so on its own card; a not-found message names the map, not the filesystem | `#home-recents` and the `load_or_notice` toast | `AT-049`, `AT-050` | pending Phase 4 |
 | S-3b `◍` | **not derived** — `REFINE` pending Q-5 | — | none | n/a |
 
 **THE `AT` COUNT IS DERIVED, NEVER TYPED (`QA-B-03`, §6.5 A-07).** The parked figure —
@@ -3991,8 +4626,25 @@ this document deliberately does not carry a competing number. `V2` corroborates 
 it reports one block per declared `AT` with no node on disk, which before implementation is exactly
 the declared count.
 
-**Deleted this amendment:** `AT-027`, `AT-028`, `AT-045` — each appeared exactly twice and was
-claimed by no requirement. **New this amendment:** `AT-048`, the `HLR-N13.3` mount-budget arm, which
+**AMENDMENT SET 3 CHANGES THE LIVE `AT` SET, AND EVERY MOVE IS ENUMERATED (§6.5 A-42 through A-44).**
+- **Deferred with US-N14 (`#D23`), not deleted:** `AT-032`, `AT-033`, `AT-034`, `AT-034b`, `AT-035`,
+  `AT-036`, `AT-037`, `AT-038`, `AT-039`, `AT-040`. Two of these — `AT-034b` and `AT-040` — were
+  among `QA2-C-01`'s six three-way failures; **they are dispositioned by the cut, and saying so is
+  the point**, because a cut that quietly absorbs an open condition is the failure mode `02g` was
+  written to detect.
+- **Deferred with `HLR-N13.3`'s work budget (`#D24`), not deleted:** `AT-048`.
+- **Given the `Acceptance:` owner they never had:** `AT-009` (now `LLR-CNV.2.1`), `AT-031` (now
+  `LLR-N13.2.1`) — the last two of `P2-B2`'s three unowned ids; the third, `AT-040`, leaves with
+  US-N14.
+- **Given the story-list leg they never had:** `AT-046`, `AT-047` (US-N06's Acceptance block).
+- **New and real:** `AT-049`, `AT-050`, the repair pair (§3.9).
+
+**The three-way intersection is now satisfiable for every live id**, which is what `QA2-C-01` asks
+and what `P2-C3`'s `AT`↔`TC` crossing is blocked on. No count is stated; the intersection is
+computed.
+
+**Deleted at amendment set 1:** `AT-027`, `AT-028`, `AT-045` — each appeared exactly twice and was
+claimed by no requirement. **New at set 1:** `AT-048`, the `HLR-N13.3` mount-budget arm, which
 `QA-M-12` correctly says cannot share `AT-025`'s on-disk node because it needs a different workspace
 and a generated fixture. **Struck this amendment:** `AT-001` and `AT-002`, with §3.1 (D16).
 `AT-046` and `AT-047` were added at reconciliation for `LLR-N06.2.4` — the fold auto-open, which
@@ -4030,10 +4682,11 @@ individually; no dotted range appears anywhere (control C-56).
 | LLR-N06.1.1 | test (unit) | `TC-024` | offsets travel in the state |
 | LLR-N06.1.2 | test (unit) | `TC-025` | clamp over 6 inputs |
 | HLR-N06.2 | test (pilot) | `TC-026` | pill numeral equals descendant count; hit count when a query is live |
-| LLR-N06.2.1 | test (unit) + inspection | `TC-027` | rail attributes deleted; supersession set enumerated — `test_rail.py:73`, `:77` |
+| LLR-N06.2.1 | test (unit) + inspection | `TC-027` | rail attributes deleted; supersession set **DERIVED** over `mapper/` **and** `tests/`, non-empty before evaluation (~~enumerated~~ — `P2-B4`); predicted-red clause names `MASTER_RAIL_DIGESTS` |
 | LLR-N06.2.2 | test (pilot) | `TC-028` | folding a leaf paints no pill |
 | LLR-N06.2.3 | test (unit) | `TC-029` | hostile branch titles; `COERCION_RANGES` on the **painted row**; split-at-width arm |
-| LLR-N06.2.5 | test (unit) | `TC-073` | AST-derived `notify` census; markup half green, coercion half 15 sites |
+| LLR-N06.2.5 | test (unit) | `TC-073` | AST-derived `notify` census; markup half green, coercion half 15 sites. **Parent is `HLR-COERCE` (§3.0), not `HLR-N06.2` — re-parented by `#D21`; owning increment `Inc-9`.** The row stays in this position for line-stability; the row's *position* is not its parent |
+| HLR-CNV.1 *(predicted-red arm)* | test (unit) | `TC-014` | four `RadialRenderer` keys of `MASTER_LEGACY_DIGESTS` predicted **red**; every `LayeredRenderer` and `OutlineRenderer` key predicted **green** — re-capturing a green one is a gate failure |
 | LLR-N06.2.4 | test (pilot) | `TC-071` | walk opens a folded hit and announces it; no re-close |
 | HLR-N06.3 | test (pilot) | `TC-030` | **three** predicates (reconcile · declared ⊆ traced · traced ⊆ declared); `legacy` named, four `(w,h,folded)` triples pinned |
 | LLR-N06.3.1 | test (unit) | `TC-031` | set difference, overlap case |
@@ -4057,22 +4710,28 @@ individually; no dotted range appears anywhere (control C-56).
 | LLR-N13.1.4 | test (unit) | `TC-048` | due and link, with their negative arms |
 | LLR-N13.1.5 | test (pilot) | `TC-074` | painted card count `== N` **and** card-state distinguishability |
 | LLR-N13.1.6 | test (unit) | `TC-075` | `<= 1` load per map; `<= 2` workspace globs, pre-state 14 |
-| HLR-N13.3 | test (pilot) + test (unit) | `TC-076` | mount budget; per-map **work** bound, not a node bound |
+| HLR-N13.3 | test (pilot) | `TC-076` | containment on **load failure**, not on a clock; thresholds 1 and 2 **DEFERRED (`#D24`)** with `AT-048` |
 | HLR-N13.2 | test (pilot) | `TC-049` | 6 door labels; mutation arm |
 | LLR-N13.2.1 | test (pilot) | `TC-050` | hostile map titles |
-| HLR-N14.1 | test (unit) | `TC-051` | 9 queries, 4 / 3 / 2 classes |
-| LLR-N14.1.1 | test (unit) + test (pilot) | `TC-052` | `Z:algo` versus `C:zzz`; normative strings complete, no ellipsis |
-| LLR-N14.1.4 | test (unit) | `TC-078` | equality under case folding; `C:alt` -> 0; empty/whitespace bind `search_hits` too |
-| LLR-N14.1.2 | test (unit) | `TC-053` | `state:risk` 3 versus `E:riesgo` 2 |
-| LLR-N14.1.3 | test (unit) | `TC-054` | 5 malformed inputs, 0 exceptions; bare word malformed **with redirect** (`#D8`) |
-| HLR-N14.2 | test (pilot) | `TC-055` | `C:alta` -> 5 nodes in 3 ramas |
-| LLR-N14.2.1 | test (unit) + inspection | `TC-056` | no `views -> search` edge, with control |
-| LLR-N14.2.2 | test (unit) | `TC-057` | no-lens output byte-identical |
-| LLR-N14.2.3 | test (unit) | `TC-058` | hostile field values |
-| HLR-N14.3 | test (pilot) | `TC-059` | walk with inspector focused |
-| LLR-N14.3.1 | test (unit) | `TC-060` | one ordering shared with search |
-| LLR-N14.3.2 | test (pilot) | `TC-061` | 9 targets, 8 transitions, **and `escape` leaves the query box** (`C-D6b`: re-run after Inc-4, Inc-6, Inc-9) |
-| LLR-N14.3.3 | test (pilot) | `TC-062` | saved lens re-evaluates |
+| ~~HLR-N14.1~~ | — | ~~`TC-051`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.1.1~~ | — | ~~`TC-052`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.1.4~~ | — | ~~`TC-078`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.1.2~~ | — | ~~`TC-053`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.1.3~~ | — | ~~`TC-054`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~HLR-N14.2~~ | — | ~~`TC-055`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.2.1~~ | — | ~~`TC-056`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.2.2~~ | — | ~~`TC-057`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.2.3~~ | — | ~~`TC-058`~~ | **DEFERRED (`#D23`)** — §3.7. The coercion **class** stays: `HLR-COERCE` (§3.0) owns it |
+| ~~HLR-N14.3~~ | — | ~~`TC-059`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.3.1~~ | — | ~~`TC-060`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| ~~LLR-N14.3.2~~ | — | ~~`TC-061`~~ | **DEFERRED (`#D23`)** — §3.7. `C-D6b`'s standing re-run obligation leaves with it |
+| ~~LLR-N14.3.3~~ | — | ~~`TC-062`~~ | **DEFERRED (`#D23`)** — §3.7 |
+| HLR-COERCE | test (unit) | `TC-080`, `TC-081` | the declared list and the two truncators; §3.0 |
+| LLR-COERCE.1 | test (unit) | `TC-080` | `COERCION_RANGES` declared once; `_CONTROL_MAP` covers it — derived, no literal |
+| LLR-COERCE.2 | test (unit) | `TC-081` | `views/layered.py::_fit` coerces before truncating; split-at-width arm |
+| HLR-REPAIR.1 | test (pilot) + test (unit) | `TC-082`, `TC-083` | two shipped defects, `B-29` and `B-30`; §3.9 |
+| LLR-REPAIR.1 | test (unit) + test (pilot) | `TC-082` | phantom sidecar id records a load warning; **synthetic fixture mandated** |
+| LLR-REPAIR.2 | test (unit) | `TC-083` | the not-found message carries `map_id` and no path component |
 | HLR-N16.1 | test (pilot) | `TC-063` | oracle = `_painted_bindings` over `_rows_in`; every AT declares its Pilot size; negative control is `AT-R14` |
 | LLR-N16.1.1 | test (unit) | `TC-064` | emptied-set mutation arm |
 | LLR-N16.1.2 | test (unit) | `TC-065` | 0 undeclared scopes; pre-state 2; **migrate both** (`#D9`) with `C-D9a` / `C-D9b` / `C-D9c` |
@@ -4088,10 +4747,18 @@ own headings and id tokens at close of draft."* The derivation was real; the **t
 literal was not durable**, and `QA-B-03` measured it wrong three ids later. Each count is therefore
 restated as its derivation:
 
-- **HLR count** = number of `#### HLR-` headings not marked `SUPERSEDED`.
-- **LLR count** = number of `##### LLR-` headings not marked `SUPERSEDED`.
-- **`AT` count** = the three-way intersection defined above.
-- **`TC` count** = number of distinct `TC-NNN` tokens in the functional table.
+- **HLR count** = number of `#### HLR-` headings marked neither `SUPERSEDED` nor `DEFERRED`.
+- **LLR count** = number of `##### LLR-` headings marked neither `SUPERSEDED` nor `DEFERRED`.
+- **`AT` count** = the three-way intersection defined above, taken over stories whose §5.2 behavioral
+  row is neither struck nor marked `DEFERRED`.
+- **`TC` count** = number of distinct `TC-NNN` tokens in the functional table whose row is neither
+  struck nor marked `DEFERRED`.
+
+**`DEFERRED` joins `SUPERSEDED` as a disqualifying marker (amendment set 3, `#D23`).** Both are
+written into the **heading**, not into a banner paragraph, precisely so a heading grep answers the
+question without a reader remembering which sections are live. A section-level banner is not
+machine-readable; a heading suffix is. Every deferred heading carries the literal token `#D23`, so
+the deferral's *reason* is recoverable from the same grep that finds it.
 
 This amendment **struck** `HLR-S07.1`, `LLR-S07.1.1`, `LLR-S07.1.2`, `LLR-S07.1.3`, and with them
 `TC-001`, `TC-002`, `TC-003`, `TC-004`, `TC-005`; **added** `LLR-S06.3.5`, `LLR-N06.2.5`,
@@ -4127,14 +4794,91 @@ HLR; every story with a `READY` verdict except S-3b and the superseded S-7 carri
      clip;
    - `AT-044` RED with `SCOPE_HELP` removed from `MODAL_SCOPES` — the doubled-chord reservation is
      real;
-   - `AT-048` RED with the mount budget computed from `len(graph.nodes)` — `M-H3`, the 51-node /
-     1 935 ms fixture;
+   - ~~`AT-048` RED with the mount budget computed from `len(graph.nodes)` — `M-H3`, the 51-node /
+     1 935 ms fixture~~ — **DEFERRED (`#D24`)** with `HLR-N13.3`'s thresholds 1 and 2;
    - `AT-025` RED with today's `else` arm left in place — `M-H1b`, the card-state distinguishability
-     arm.
+     arm;
+   - `AT-049` RED with the phantom-node warning omitted — `M-REPAIR.1-a` (§3.9). **This one is the
+     positive control for `LLR-N13.1.5`'s whole containment arm**, which is a no-op on the current
+     tree, so it is listed here rather than left to the increment;
+   - `AT-050` RED with the workspace path interpolated instead of `map_id` — `M-REPAIR.2-a` (§3.9).
 6. The A3 reverse census is **derived from the code, never taken by eye**: after Inc-2,
    `grep -rn "def render" mapper/views/` returns 6 definitions and **0** of them declare `**kwargs`;
    `grep -rn "\.render(" mapper/ tests/` resolves every call site to the new signature. Absence of
    the old shape is **asserted**, not assumed (risk A-1).
+
+---
+
+### 5.4 The increment cut — stated ONCE, here, authority `#D5`
+
+> **`PDR-2026-08-26-ui-next-batch-02#D5` is the SOLE authority for the increment cut.** This section
+> is `#D5`'s cut **re-derived for the operator's re-scope** (amendment set 3 · A-49); it does not
+> compete with `#D5` and it does not replace it. **No other place in this document states a cut.**
+> Every `*(Inc-N)*` parenthetical in §3 and every increment reference in a body paragraph now points
+> here, and a second cut appearing anywhere in this document is a defect, not a variant.
+>
+> **This section exists because `P2-B1` and `QA2-C-06` found TWO cuts live simultaneously** — the
+> stale ARQ 7-cut surviving in §3.6's and §3.8's section headers (`US-N13` as `Inc-6`, `US-N16` as
+> `Inc-7`) alongside the ratified 9-cut in which `US-N13` is `Inc-7` and `US-N16` is `Inc-8` plus
+> `Inc-9`. The headers are restated below. **The root cause was that the cut was never stated in
+> this document at all**, only referenced — so each reference drifted independently.
+
+**What the re-scope changes, and what it deliberately does not.** US-N14 «lente» is deferred
+(`#D23`), so `#D5`'s **Inc-6 has no scope left**.
+
+**`Inc-6` IS VACATED, NOT REUSED AND NOT RENUMBERED.** Two alternatives were considered and both
+rejected on executed grounds:
+- **Renumbering `Inc-7` through `Inc-9` down by one** would move three ids that `PLAN.md`, `02c`,
+  `02d` and `03-increments/` already carry — **four artifacts this lane may not edit**. It would
+  create a cross-artifact contradiction to remove an intra-document one, which is a strictly worse
+  trade and is exactly how the current two-cut defect began.
+- **Reusing `Inc-6` for the repair increment** would give one id two meanings across the batch's
+  history, which is the `#D6`/`#D14` two-definitions defect applied to an increment id.
+
+The repair increment is therefore named **`Inc-REPAIR`** and not `Inc-10`. That is deliberate: any
+numeric id would collide under a substring scan — `grep "Inc-1"` matches `Inc-10`, and a suffixed
+form like `Inc-6r` matches `Inc-6` — and this document is corpus that an id-scanner reads. **A name
+that cannot be a prefix or a suffix of another increment id is the whole reason for the choice.**
+
+| Inc | Scope | Status under the re-scope | Source files | n |
+|---|---|---|---|---:|
+| **Inc-1** | S-6 paleta v2 tokens · **Canvas A3** (`HLR-CNV.1`) · **`LLR-COERCE.1`** | live | `darkside.py`, `canvas.py`, `app.py`, `views/radial.py` | 4 |
+| **Inc-2** | `ViewState` + `IRenderer` A3 — signature only, behaviour-neutral | live | `views/state.py` *(new)*, `views/layered.py`, `views/lane.py`, `views/outline.py`, `views/radial.py`, `app.py` | **6 — DECLARED BREACH**, unchanged from `#D5` |
+| **Inc-3** | US-N06 escala — pan, fold, overflow · **`LLR-COERCE.2`** | live | `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py` | 4 |
+| **Inc-4** | US-N07 búsqueda + the seat rebind (`#D5b`) | live | `search.py`, `app.py`, `views/layered.py`, `keymap.py` | 4 |
+| **Inc-5** | hit painting in the three remaining renderers (`LLR-N07.2.2b`) | live — **belongs to US-N07, not to US-N14** | `views/outline.py`, `views/radial.py`, `views/lane.py` | 3 |
+| ~~**Inc-6**~~ | ~~US-N14 lente~~ | **VACATED** — deferred whole by `#D23` (§3.7). The id is retired, not reassigned | — | — |
+| **Inc-REPAIR** | `B-29` phantom sidecar warning · `B-30` path disclosure (§3.9) | **new** | `store.py` | **1** |
+| **Inc-7** | US-N13 sala | live | `app.py`, `darkside.py`, `store.py` | 3 |
+| **Inc-8** | S-8 truncation + the glyph vocabulary (the legend panel) | live | `screens/help.py`, `darkside.py`, `app.py` | 3 |
+| **Inc-9** | help scope routing + `KEY_SCOPE` declarations + seat migration · **`LLR-N06.2.5`** re-parented in by `#D21` | live | `keymap.py`, `screens/factory.py`, `screens/settings.py`, `app.py` | 4 |
+
+**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → `Inc-4` → `Inc-5` → `Inc-REPAIR` → `Inc-7` →
+`Inc-8` → `Inc-9`. **Parallelism is not re-derived** and the chain stays serial: ARQ measured 0 of
+21 pairs parallelisable, `modules(A) ∩ modules(B) ⊇ {app}` without exception. Budget **≤ 4 SOURCE
+files**; tests uncapped.
+
+**Three orderings are HARD, not preference:**
+1. **`Inc-8` before `Inc-9`** — carried unchanged from `#D5`. `Inc-9`'s acceptance reads the painted
+   panel; `Inc-8` is what makes the panel able to paint every row. Reversed, `Inc-9` fails through
+   no fault of its own and the likely repair is to weaken the oracle back to `_render_keymap()`'s
+   return value, which passes today on a truncated panel. That is the exact failure `C-32` exists to
+   prevent.
+2. **`Inc-REPAIR` before `Inc-7`** — **new, and it is the reason `Inc-REPAIR` sits in the vacated
+   slot rather than at the end.** `Inc-7` ships `LLR-N13.1.5`'s containment and `AT-025b`; both are
+   vacuous until `B-29` makes `load_or_notice`'s warning arm reachable. Reversed, `Inc-7` passes a
+   containment test over a structurally empty set.
+3. **`Inc-1` before `Inc-9`** — `LLR-COERCE.1` widens `plain()`; `LLR-N06.2.5`'s census asserts
+   routing *through* `plain()`. A dependency, not a convenience.
+
+**`keymap.py` is a THREE-way collision, not four (`#D5b` as amended).** `Inc-3`, `Inc-4` and `Inc-9`
+touch it; `#D5`'s fourth participant was `Inc-6`, which is vacated. Resolved by serial ordering and
+not by ownership: each shall re-run `duplicate_chords()` and the whole-seat pin.
+
+**Budgets after the re-scope, checked rather than asserted:** every live increment is at or under 4
+source files except `Inc-2`, whose breach is **declared** and unchanged from `#D5`. `Inc-REPAIR` is
+the smallest increment in the batch at one source file. **`#D21` removes a breach**: `Inc-3` returns
+to 4-of-4 by moving `LLR-N06.2.5` to `Inc-9`, which absorbs it at zero added files.
 
 ---
 
@@ -4209,7 +4953,7 @@ Three at draft; **one is now discharged and two are added by this amendment set.
 | # | Risk | Why Phase 1 raised it |
 |---|---|---|
 | R-7 | **~~US-N14's walk chord may be unbuildable as briefed.~~ CLOSED by `#D6`** — `⇥` rejected, `n`/`N` walk the single active *coincidencias* set, the two `tab` guards stay green and `TAB_BINDING_EXCEPTIONS` gains nothing. **Residual risk retained:** `C-D6a`'s "only one result set is live" invariant is now load-bearing for two stories at once, and it is new mechanism. | The decision was made; the premise it rests on is a thing the batch must build and test, not a thing it inherits. |
-| R-8 | **`FactoryScreen` and `SettingsScreen` sit at the intersection of three fences** — `UNMIGRATED_SCREENS`, `TAB_BINDING_EXCEPTIONS`, and the help-scope defect. Touching one fence moves the others. **`#D9` rules MIGRATE BOTH, which raises rather than lowers this risk**, and gates the riskiest part (`C-D9a`, the `tab` drop) behind a probe that must first prove it can fail. | Q-9. Discovered at draft (**M-11**), not at the Inc-7 gate. The gate is now explicit: **if the positive control cannot be built, the `tab` drop does not ship.** |
+| R-8 | **`FactoryScreen` and `SettingsScreen` sit at the intersection of three fences** — `UNMIGRATED_SCREENS`, `TAB_BINDING_EXCEPTIONS`, and the help-scope defect. Touching one fence moves the others. **`#D9` rules MIGRATE BOTH, which raises rather than lowers this risk**, and gates the riskiest part (`C-D9a`, the `tab` drop) behind a probe that must first prove it can fail. | Q-9. Discovered at draft (**M-11**), not at the **`Inc-9`** gate (§5.4; ~~Inc-7~~ was the stale 7-cut number — `P2-B1`). The gate is now explicit: **if the positive control cannot be built, the `tab` drop does not ship.** |
 | R-10 | **`S-15` — `MAX_RENDER_NODES` bounds the count, not the work.** A 73-node map renders in 70 s; a 12 000-node chain in 180 ms. Shipped defect on `master`, reproduced independently twice. | Found after the PDR that produced the blocker list. `HLR-N13.3` fixes what the budget must be a bound **on**; the defect itself is recorded so the budget is not read as precautionary. |
 | R-11 | **The `AT` id space moved during amendment.** Three ids deleted, two struck, five added or split (`AT-007b`, `AT-025b`, `AT-034b`, `AT-048`). Any consumer holding the parked list is stale. | `QA-B-03` plus the splits `QA-M-12` / `QA-M-13` required. §5.2 now states the count as a derivation precisely so this class of drift is detectable rather than transcribed. |
 | R-9 | **P-13 was under-counted because its own census was file-scoped.** The same shape may sit under other premises this batch inherits. | §2.8.3. The correction is recorded; the generalisation is a watch-item for DDR's C-18 sweep. |
@@ -4695,11 +5439,24 @@ against citations this draft made from an offset read of `mapper/app.py`.
   satisfied: `leaf_fold_notice` is now an output of `COMPONENT: map_screen`. A text sink that no
   contract row names is a sink the reverse census does not see.
 - **Parent-HLR re-read:** `HLR-N06.2` re-read in full. It is about fold declaration, and the toast is
-  its `LLR-N06.2.2` outcome — so the toast belongs here, but the **class** does not: `LLR-N06.2.5`
-  quantifies over the whole product and is parented here only because this is where the batch's new
-  toast lands. Recorded as a known imperfection in the traceability tree rather than left implicit;
-  a cross-cutting LLR under a story-scoped HLR is a smell, and the alternative — inventing an HLR for
-  it — would have been worse.
+  its `LLR-N06.2.2` outcome — so the toast belongs there, but the **class** does not: `LLR-N06.2.5`
+  quantifies over the whole product.
+- **~~"a cross-cutting LLR under a story-scoped HLR is a smell, and the alternative — inventing an
+  HLR for it — would have been worse."~~ SUPERSEDED by `#D21` (`P2-B6`, §6.5 A-48; edit a-3).** The
+  executed reason it was **not** worse: the notify class spans `mapper/screens/factory.py`, which
+  `Inc-3` does not own, so satisfying `LLR-N06.2.5` inside `HLR-N06.2`'s increment is an
+  **undeclared source-budget breach**, not a stylistic cost. **Inventing the HLR was the cheaper
+  option all along, and recording the imperfection instead is what let it survive two PDR passes.**
+  The criterion is now written down so the next cross-cutting LLR is **tested rather than argued**:
+  > **Limb 1.** If the parent story were descoped, would the child's subject be deleted with it? If
+  > no, the parent is wrong.
+  > **Limb 2.** Does satisfying the child require editing source files outside the parent
+  > increment's declared file set? If yes, the mis-parenting makes the owning increment
+  > unsatisfiable within its declared budget.
+
+  Limb 2 is what converts a smell into something a reviewer can execute and a gate can fail on.
+  Both limbs, and the discriminating control that keeps `LLR-N06.2.3` where it is, are recorded at
+  `LLR-N06.2.5`'s block in §3.4.
 
 #### A-19 · IFC Part B is balanced; `V12` goes 12 → 0 *(validator, `PLAN.md` §12.2 F-14)*
 
@@ -5079,9 +5836,16 @@ A-18.
 - **Before:** *"over at least 5 glyphs"*, *"declared glyph count `> 0`"*, and *"the title contains
   the view's name **for each of the three map views**"*.
 - **After:** style equality over **every** declared glyph; the vocabulary asserted as a **set** equal
-  to `01b` DECISION 3's enumeration (**21 rows `V1` through `V21` plus 5 colour rows**); and the
-  title checked for the three map views **and every non-map screen in `LLR-N16.1.1`'s derived set**.
+  to `01b` DECISION 3's enumeration; and the title checked for the three map views **and every
+  non-map screen in `LLR-N16.1.1`'s derived set**.
 - **Deleted tokens:** none. **New tokens:** mutant `M-N16.2-a`.
+- **THE PARENTHETICAL THIS ROW CARRIED IS STRUCK BY AMENDMENT SET 3 (`P2-B3`, A-45 below).** A-36
+  restated the vocabulary as a set — correctly — and then **transcribed a literal count into the
+  same sentence**, which is the identical defect A-07 had already fixed for the `AT` total two
+  amendments earlier. A set assertion whose membership is given by a hand-copied number is a
+  hand-copied number. The literal is removed here and replaced by `LLR-N16.2.1`'s derivation, which
+  carries its question, its instrument and its SHA. **The rest of A-36 stands unchanged** — the
+  widened screen set was correct and is untouched.
 - **A legend shipping ONE glyph passed both parked floors.** And the title threshold **excluded the
   subject of the change** — the defect is on `FactoryScreen`, `SettingsScreen` and the three other
   un-scoped routes, so the predicate could be fully green while every screen the story is about still
@@ -5190,10 +5954,374 @@ A-18.
 
 ---
 
-**What amendment set 2 does NOT do.** `QA-N-01` (a `PLAN.md` §P-19 figure) is not this document's.
+**What amendment set 2 did NOT do.** `QA-N-01` (a `PLAN.md` §P-19 figure) is not this document's.
 The **`AT` census figure itself** is deliberately still a derivation rather than a literal — set 2
 added `AT-007b`, `AT-025b`, `AT-034b` and `AT-048`, struck `AT-001` and `AT-002`, and deleted
 `AT-027`, `AT-028` and `AT-045`, so any transcribed total would already be the fourth wrong number in
 this batch's history. **No requirement was added outside batch scope**: recorrido/guía,
 cronoscopio/relieve, the repo-screen redesign and the blueprint language remain out, and `#D7` puts
 `◍` out with them.
+
+---
+
+## Amendment set 3 — the third PDR fold, PASS 1. 2026-08-27. Base `20f86de` (`master`, tree clean).
+
+> **METHOD, AND IT DIFFERS FROM SETS 1 AND 2 IN THE ONE WAY THAT CAUSED THE REJECTION.**
+>
+> **The instrument is `02g-lens-reconciliation.md`'s union ledger, item by item — NOT an amendment
+> table.** `RIDER-1`, carried out of `2026-08-27-repair-batch-02`, is explicit: audit the fold
+> against the **lenses' own condition lists**, never the amendment table, because *"that instrument
+> dropped conditions twice."* This set is written to be **audited against `02g` §4 and §5**, not to
+> certify itself. §6.5's own Before/After · Deleted/New convention is retained as the *container*;
+> the **ledger below is the check**, and a container is not a check.
+>
+> **Two consequences follow, and both are deliberate.**
+> 1. **Every `02g` item this pass touched has a ledger row, and every item it did NOT close has a
+>    row saying so and why.** An item with no row is a defect in this amendment, not a silence.
+> 2. **This is PASS 1 of the set, and it says so.** Pass 1 takes the operator's re-scope, the six
+>    architect blockers, and the two shipped defects. Pass 2 takes the remainder. **The set is not
+>    claimed closed** — claiming closure on a subset is precisely `C-43` at the batch level, which
+>    `02g` §7 raised against the previous briefing.
+>
+> **Base moved `d877784` → `20f86de`.** `01-requirements.md` had not been edited since the lenses
+> wrote their verdicts (`02g` §0, one commit), so every requirement-side line citation in
+> `02c`/`02d`/`02e`/`02f` still resolved when this pass began. Code-side claims re-executed here are
+> stated at `20f86de`.
+>
+> **New decisions this set records:** `#D23` (US-N14 deferred whole), `#D24` (the render work budget
+> deferred, paired with `S-19`). Both are **operator re-scope rulings**, recorded here because they
+> change what this document specifies; the PDR lane owns sealing them.
+
+#### A-42 · US-N14 «lente» is DEFERRED whole to a follow-on design batch *(`#D23`, operator re-scope)*
+
+- **Before:** §3.7 was live work in `#D5`'s `Inc-6`, carrying 3 HLR, 10 LLR, 10 `AT` and 13 `TC`.
+- **After:** §3.7 carries a `DEFERRED — follow-on design batch` banner; **every heading in it carries
+  `— DEFERRED (#D23)`**; §2.6 S-4 carries a deferral note with its intake retained; §5.2's US-N14
+  behavioral row and all thirteen US-N14 functional rows are struck in place.
+- **Deleted tokens: NONE. Nothing is deleted — the text is retained whole and the follow-on batch
+  inherits it.** Deferred tokens, enumerated (C-56): `HLR-N14.1`, `HLR-N14.2`, `HLR-N14.3`;
+  `LLR-N14.1.1`, `LLR-N14.1.2`, `LLR-N14.1.3`, `LLR-N14.1.4`, `LLR-N14.2.1`, `LLR-N14.2.2`,
+  `LLR-N14.2.3`, `LLR-N14.3.1`, `LLR-N14.3.2`, `LLR-N14.3.3`; `AT-032`, `AT-033`, `AT-034`,
+  `AT-034b`, `AT-035`, `AT-036`, `AT-037`, `AT-038`, `AT-039`, `AT-040`; `TC-051`, `TC-052`,
+  `TC-053`, `TC-054`, `TC-055`, `TC-056`, `TC-057`, `TC-058`, `TC-059`, `TC-060`, `TC-061`,
+  `TC-062`, `TC-078`. **New tokens:** the marker `#D23`.
+- **`DEFERRED` is written into HEADINGS, not into a banner.** §5.2's count derivations now disqualify
+  on `SUPERSEDED` **or** `DEFERRED`, and both are heading-level so a heading grep answers the
+  question. A banner paragraph is not machine-readable; that is the whole reason for the choice.
+- **Where the deferred ids went, said rather than implied.** `AT-034b` and `AT-040` are two of
+  `QA2-C-01`'s **six** three-way failures. They are dispositioned **by leaving with the story**, and
+  that disposition is written at three sites — §3.7's deferral block, §5.2's `AT`-movement list, and
+  the ledger row below. **A cut that quietly absorbs an open condition is the exact failure `02g`
+  exists to detect**, so the absorption is named in every place a reader might check.
+- **Parent-story re-read:** US-N06, US-N07 and US-N16 re-read for dependencies on US-N14.
+  **Three found, all handled:** `HLR-CNV.1`'s priority cited *"Inc-5's figure-ground"* (corrected —
+  the live consumer is hit painting); `LLR-N16.2.1`'s ordering constraint cited what `Inc-5` paints
+  (corrected, and it still holds); `keymap.py`'s collision was four-way and is now three-way.
+  **`LLR-N07.2.2b` does NOT leave** — it is US-N07's, not US-N14's, and it keeps `AT-024`.
+
+#### A-43 · The render work budget is DEFERRED, PAIRED WITH `S-19` *(`#D24`, operator re-scope)*
+
+- **Before:** `HLR-N13.3` stated a mount budget and a per-map work budget, with thresholds 1
+  (`< 1000 ms` for 200 maps) and 2 (`WORKSPACE_CARD_BUDGET_MS = 250`), four named mutants reddened by
+  threshold 2, `AT-048`, and two figures flagged `assumed`.
+- **After:** thresholds 1 and 2 struck `DEFERRED (#D24)`; the Statement reduced to the containment
+  half; threshold 4 re-scoped from *"exceeds the per-map budget"* to *"fails to load"*; thresholds 3
+  and 4 retained as the half testable **without** the budget mechanism; the `-k` selector renamed off
+  `mount_budget`.
+- **Deleted tokens:** none. **Deferred tokens:** `AT-048`, `TC-076`'s budget arm, mutants `M-H2`,
+  `M-H3`, `M-H5`. **New tokens:** the marker `#D24`.
+- **THE PAIRING IS THE RULING, AND `S-19` IS `S-18`'S PRECONDITION — NOT ITS SIBLING.** Measured on
+  the 51-node / 410-edge shape: Layered **1283 ms**, Outline **337 ms**, **Radial 142 ms — under the
+  250 ms budget**. So `k = 0` on Radial, threshold 4's containment quantifies over an empty set, and
+  **threshold 2 cannot distinguish a correct implementation from a missing one**. The fixture as
+  written never says which renderer it runs. **The follow-on batch's fixture SHALL name its
+  renderer** and carry one for which `k > 0`, keeping the `k = 0` renderer as the negative control.
+- **`P2-C8` is DISPOSED, not answered.** Its subject — threshold 1's un-headroomed wall-clock
+  assertion — leaves with the mechanism. After this amendment `HLR-N13.3` carries **no `assumed`
+  figure at all**.
+- **Security `C-3` is DISPOSED on the same ground** — its subject is threshold 2. **And the limit of
+  that disposal is stated in the requirement itself:** the *defect* `S-15` / `M-H3` is real, measured
+  twice, and **stays on `master`** — 73 nodes cost 72.5 s and `MAX_RENDER_NODES` waves it through.
+  **Deferring a bound does not repair a defect.** `M-H3` is carried **named** into the follow-on
+  batch precisely so it is not rediscovered.
+- **Parent-story re-read:** US-N13 re-read in full. Its outcome — *"home shows each map's own
+  shape"* — survives the budget deferral intact; the budget was a bound on **how the screen is
+  reached**, not on what it shows. `LLR-N13.1.5` and `LLR-N13.1.6` are untouched and still owned.
+
+#### A-44 · Every live `AT` reaches all three legs of §5.2's intersection *(`P2-B2`, `QA2-C-01`)*
+
+- **Before:** re-derived, **3 unowned** ids (`AT-009`, `AT-031`, `AT-040`) and **6** failing the
+  three-way rule (`AT-009`, `AT-031`, `AT-034b`, `AT-040`, `AT-046`, `AT-047`).
+- **After, each disposed individually:**
+
+  | id | The missing leg | Disposition | Landed at |
+  |---|---|---|---|
+  | `AT-009` | no `Acceptance:` line | **owner written** — `LLR-CNV.2.1` | `LLR-CNV.2.1` `Acceptance:` |
+  | `AT-031` | no `Acceptance:` line | **owner written** — `LLR-N13.2.1` | `LLR-N13.2.1` `Acceptance:` |
+  | `AT-040` | no `Acceptance:` line | **leaves with US-N14** (`#D23`) | §3.7 deferral block |
+  | `AT-034b` | not on the story list | **leaves with US-N14** (`#D23`) | §3.7 deferral block |
+  | `AT-046` | not on the story list | **story list amended** | US-N06 Acceptance block |
+  | `AT-047` | not on the story list | **story list amended** | US-N06 Acceptance block |
+
+- **Deleted tokens:** none. **New tokens:** none — **every id already existed; what was missing was a
+  leg, not an id.** That is why none of the six is struck: each has a real predicate.
+- **THE `AT-009` CASE IS THE ONE WORTH READING TWICE.** §6.5 A-29 recorded that `AT-009` *"is
+  **promoted** under `LLR-CNV.2.1`"* — and **the `Acceptance:` line was never written**, so the id
+  stayed catalog-only through two further PDR passes while an amendment said it had moved.
+  **A promotion recorded in an amendment and not written into the requirement is not a promotion.**
+  This is the amendment-table failure mode in its purest form, found on the amendment table's own
+  output, and it is the strongest available argument for `RIDER-1`'s instrument rule.
+- **`AT-031` was honestly recorded and still wrong.** A-29 dispositioned it as *"remains catalog-only
+  and is recorded here as such rather than counted as specified"*. Honest — and it left a live `AT`
+  on a live story with no requirement above it, while §3.6's boundary catalog described `LLR-N13.2.1`'s
+  statement word for word. **Recording a gap is not closing it.**
+- **Parent-HLR re-read:** `HLR-CNV.2`, `HLR-N13.1`/`HLR-N13.2` and `HLR-N06.2` all re-read before
+  each claim. **None needed its statement changed** — every claim lands on an `Acceptance:` line or a
+  story list, which is the shape an ownership fix should have.
+
+#### A-45 · The legend census becomes a derivation; the literal is removed, not corrected *(`P2-B3`)*
+
+- **Before:** `LLR-N16.2.1` asserted set equality against *"21 rows `V1` through `V21`, plus 5 colour
+  rows"*; `HLR-N16.2` repeated the literal; §6.5 A-36 transcribed it a third time.
+- **After:** a derivation carrying its **QUESTION**, its **INSTRUMENT** and its **measured-at SHA**,
+  over the **set of distinct `(glyph, label, style)` triples** in `01b` DECISION 3 §3.1–§3.4, minus
+  every triple carrying a `DEFERRED(#D7)` marker. **No literal count is written anywhere.**
+- **Deleted tokens:** none. **New tokens:** the marker `DEFERRED(#D7)` on `01b`'s `V18` row.
+- **"CORRECT 21 TO 23" WOULD HAVE BEEN WRONG TWICE, WHICH IS WHY THE FIX IS STRUCTURAL:**
+  1. the literal was already stale — DECISION 3 carries more labelled rows than its `V`-numbering
+     suggests, because §3.1 adds rows beneath its own table;
+  2. **`V4` and `V4a` are byte-identical in glyph, label and style** (`01b:277`, `01b:287`), so a
+     row-id census double-counts what the legend paints once. The **triple** projection is the only
+     one under which *what the legend paints* and *what the declaration says* are the same kind of
+     object;
+  3. **`#D7` removes `V18`** (`◍`), ruled *"not deferred, not ambiguous: out"* of this batch.
+- **The `+ 5 colour rows` half IS CORRECT and is KEPT verbatim.** Executed at `20f86de`,
+  `01b:325-329` carries exactly those five, and `01b:332-333` records why `ALERT` is absent.
+  **Striking a correct clause alongside an incorrect one is how a fold loses work**, so it is
+  retained explicitly rather than swept into the correction.
+- **OPEN — A CROSS-ARTIFACT EDIT THIS LANE CANNOT MAKE.** The stale literal is live at **four**
+  sites. Three are in this file and are amended. **The fourth is `01b-ux-decisions.md:373`**, which
+  belongs to the **ux lane**. **The orchestrator shall route that single-line edit to the ux lane.**
+  Until it lands, `01b:373` and `LLR-N16.2.1` disagree and **`LLR-N16.2.1` governs**. Recorded as an
+  **open** ledger line, not a closed one (`C-44` — found, reported, not swept up).
+- **Parent-HLR re-read:** `HLR-N16.2` re-read in full. Its statement is about **style equality per
+  glyph**, which is unchanged; only the membership predicate moves from a literal to a derivation.
+
+#### A-46 · The predicted-red set is DERIVED, and the supersession census covers both trees *(`P2-B4`)*
+
+- **Before:** `LLR-N06.2.1` read *"**0** remaining references"*, amended by A-41 to an **enumeration
+  of 2** call sites, both in `tests/test_rail.py`. No artifact in the batch named any digest pin.
+- **After:** `LLR-N06.2.1`'s threshold is a **derivation** over `mapper/` **and** `tests/`, asserting
+  its input set non-empty before evaluating it; and **both** `LLR-N06.2.1` and `HLR-CNV.1` carry a
+  **predicted-red clause** naming its digest dictionary by derivation, with the re-capture rule.
+- **Deleted tokens:** none. **New tokens:** none.
+- **THE ENUMERATION WAS THE SAME DEFECT WITH A NUMBER ATTACHED.** A-41 answered *"a zero that names
+  no reference"* with an enumeration that is a **strict subset** of the real set, and two of its
+  misses are the two that matter: **a PRODUCTION site, `mapper/app.py:1259`**, and
+  **`tests/test_repair_depth.py:1055` — the rail byte-identity guard itself**, parametrized over
+  five fold configurations. `C-18` fires on the amendment: a premise counted at one file scope is
+  under-counted tree-wide.
+- **The pins, derived rather than transcribed:** `MASTER_LEGACY_DIGESTS`
+  (`tests/test_repair_depth.py:93`, asserted `:815`), `MASTER_RAIL_DIGESTS` (`:113`, asserted `:1056`
+  and `:1071`), `MASTER_FACTORY_TREE_DIGEST` (`:121`, asserted `:1077`). **Trigger B3 is FIRED, so
+  `C-24` applies** and the set is named before the gate rather than met at it.
+- **`RadialRenderer` is pinned at every `GOLDEN_SIZES` entry, so `Inc-1` reddens four keys BY
+  CONSTRUCTION — an expected RE-BASELINE, not a regression.** Every `LayeredRenderer` and
+  `OutlineRenderer` key is predicted **green** (`LayeredRenderer` dots `= 0`; `OutlineRenderer`
+  builds no `Canvas`). **Re-capturing a predicted-green digest is a GATE FAILURE**, and each
+  predicted-red re-capture is one at a time with its own recorded reason — otherwise the repair
+  batch's `C-53` false-failure arm becomes a rubber stamp.
+- **`MASTER_RAIL_DIGESTS` IS NAMED IN NO ARTIFACT OF THIS BATCH** — not here before this amendment,
+  not in `PLAN.md`, not in the PDR. Recorded loudly: a shipped guard that no requirement names is a
+  guard an implementer meets for the first time as a red test, at the gate, with no ruling in hand.
+  It is parametrized on `collapsed` — **the attribute `LLR-N06.2.1` deletes**.
+- **Parent-HLR re-read:** `HLR-N06.2` and `HLR-canvas` re-read. **Neither statement changed** — both
+  amendments land in thresholds and in a new predicted-red clause.
+
+#### A-47 · §3.0 is promoted to `HLR-COERCE` and gains two LLRs and an owner *(`P2-B5`, `#D21` edits a-1, a-4)*
+
+- **Before:** §3.0 declared `COERCION_RANGES` and the `_CONTROL_MAP` widening in **normative
+  language** — *"shall be declared once"*, *"shall be widened"* — with **no id, no `Acceptance:`, no
+  `Touched symbols:`, no validation method, no `TC` and no increment**, while four LLRs in four
+  increments asserted against it. `grep -rn COERCION_RANGES mapper/` returns nothing.
+- **After:** `#### HLR-COERCE` with a full requirement block; `##### LLR-COERCE.1` (the declaration
+  and the map widening); `##### LLR-COERCE.2` (the ordering clause, scoped to
+  `mapper/views/layered.py::_fit`); owning increments assigned — `LLR-COERCE.1` → `Inc-1`,
+  `LLR-COERCE.2` → `Inc-3`, `LLR-N06.2.5` → `Inc-9` (§5.4).
+- **Deleted tokens:** none. **New tokens:** `HLR-COERCE`, `LLR-COERCE.1`, `LLR-COERCE.2`, `TC-080`,
+  `TC-081`, mutants `M-COERCE.1-a`, `M-COERCE.1-b`, `M-COERCE.2-a`.
+- **`HLR-COERCE` HAS NO PARENT STORY, AND THAT IS A RULING RATHER THAN AN OVERSIGHT** (`#D21`). It is
+  a product-wide control whose subject survives the descoping of every story in the batch — which
+  `#D23` has now **demonstrated rather than asserted**: `LLR-N14.2.3` left with US-N14 and the class
+  did not move. Stated in the requirement so a later reader does not "fix" it by re-parenting.
+- **It owns no `AT`, also by ruling.** The batch's coercion `AT` ids stay on their **surface-specific**
+  LLRs, where the observable outcome is a painted row on a named screen. An `AT` here would observe
+  *"text was coerced"* with no surface — a white-box claim in an acceptance test's clothes.
+- **Why `Inc-1` and `Inc-3` and not one increment:** `darkside.py` is already in `Inc-1`'s declared
+  set for the S-6 tokens; `views/layered.py` is **not**, and `Inc-3` owns it and is the increment
+  that first asserts against the list. **Splitting by file ownership rather than by topic is what
+  keeps both increments at budget.**
+- **Parent-HLR re-read:** not applicable — this amendment *creates* the parent. The four asserting
+  LLRs (`LLR-N06.2.3`, `LLR-N13.2.1`, `LLR-N16.2.3`, and the deferred `LLR-N14.2.3`) were each
+  re-read: **none needs its statement changed**, because each already references §3.0's list, and
+  §3.0 now has an id behind it.
+
+#### A-48 · `LLR-N06.2.5` is re-parented to `HLR-COERCE` *(`P2-B6`, `#D21` edits a-2, a-3)*
+
+- **Before:** `- **Traceability:** HLR-N06.2, risk A-7, security condition **C-8**` — parenting a
+  product-wide class to a story about fold declaration; A-18 recorded this as *"a known imperfection
+  … a smell, and the alternative — inventing an HLR for it — would have been worse."*
+- **After:** `- **Traceability:** HLR-COERCE (§3.0), risk A-7, security condition **C-8**`, owning
+  increment **`Inc-9`**; A-18's *"would have been worse"* sentence struck and replaced with the
+  executed reason it was not; the two-limb criterion written into the document.
+- **Deleted tokens:** none. **New tokens:** none.
+- **IT IS AN UNDECLARED SOURCE-BUDGET BREACH, NOT A STYLISTIC SMELL — both limbs executed.**
+  **Limb 1:** descope US-N06 and every census site survives — 11 in `mapper/app.py` on paths
+  unrelated to the canvas, 4 in `mapper/screens/factory.py`, a screen US-N06 never touches.
+  **Limb 2:** `HLR-N06.2` → US-N06 → `Inc-3`, at **4 of 4** files; satisfying the child requires
+  `screens/factory.py` — a **fifth, undeclared** file and a collision with `Inc-9`, which owns it.
+  Validator rule `V9` exists to catch exactly that. **`#D21` REMOVES a breach rather than creating
+  one**, and `Inc-9` absorbs the census at **zero** added files.
+- **The criterion discriminates — control executed.** `LLR-N06.2.3`, same parent: descope US-N06 and
+  there is no fold pill (limb 1 passes); its symbols are inside `Inc-3`'s set (limb 2 passes).
+  **Correctly parented, and it stays.** A criterion that moved both would be a verdict.
+- **OPEN — one clause of edit a-2 is deliberately NOT performed in pass 1.** Edit a-2 also asks that
+  the block be **physically moved** out of §3.4 into §3.0. **It is not moved**, and the id is
+  deliberately **not** renumbered to an `LLR-COERCE.*` form. Reasons, stated rather than assumed:
+  `LLR-N06.2.5` is cited by §5.2 (`TC-073`), by `02c` and by `PLAN.md`, **none of which this lane may
+  edit**, so a renumber would trade an intra-document inconsistency for a cross-artifact one; and
+  relocating ~60 lines of a 5 000-line document, in a fold whose two predecessors dropped conditions,
+  is risk with no requirement-side payoff. **The substance of the ruling — parent, increment,
+  ownership — is fully applied.** Recorded as an **open** ledger line for pass 2 to close or ratify.
+- **Parent-HLR re-read:** `HLR-N06.2` re-read in full. **Its statement does not change** — it loses a
+  child it never governed. `LLR-N06.2.2`'s cross-reference *"Its coercion is governed by
+  `LLR-N06.2.5`"* **stays**, and is now a cross-section reference. That is correct and it is the
+  point: the fold toast is governed by the class, and **the class is not owned by the toast**.
+
+#### A-49 · The increment cut is stated ONCE, in §5.4, with `#D5` as its sole authority *(`P2-B1`, `QA2-C-06`)*
+
+- **Before:** **two cuts live simultaneously.** §3.6's header said `Inc-6` (the stale ARQ 7-cut) while
+  the ratified cut puts US-N13 at `Inc-7`; §3.8's header said `Inc-7` while the ratified cut splits
+  US-N16 across `Inc-8` and `Inc-9`; `Inc-9` appeared throughout — an id that exists only in the
+  9-cut. **The document never stated a cut at all**, only referenced one, so each reference drifted
+  independently. That is the root cause, and §5.4 is the fix.
+- **After:** **§5.4 states the cut once.** `#D5` is named as its **sole authority**; §5.4 is `#D5`
+  re-derived for the operator's re-scope and does not compete with it. Both story headers are
+  restated with their old numbers struck and the correction explained. **A second cut appearing
+  anywhere in this document is now a defect, not a variant.**
+- **Deleted tokens:** none. **New tokens:** `Inc-REPAIR`; the vacated marker on `Inc-6`.
+- **`Inc-6` IS VACATED, NOT RENUMBERED — and the reason is executed, not aesthetic.** Renumbering
+  `Inc-7`–`Inc-9` down by one would move three ids that `PLAN.md`, `02c`, `02d` and `03-increments/`
+  already carry — **four artifacts this lane may not edit**. It would create a cross-artifact
+  contradiction to remove an intra-document one. Reusing `Inc-6` for the repair increment would give
+  one id two meanings across the batch's history — the two-definitions defect `#D6` removed for
+  *"hit"*.
+- **The repair increment is `Inc-REPAIR`, not `Inc-10`, and not `Inc-6r`.** Both numeric forms
+  collide under a substring scan: `grep "Inc-1"` matches `Inc-10`, and a suffixed `Inc-6r` matches
+  `Inc-6`. **This document is corpus an id-scanner reads**, so an id that cannot be a prefix or a
+  suffix of another increment id is the only safe choice.
+- **Body references restated against §5.4 — the brief named five; SIX were found and all six are
+  fixed.** The five: the `#D6` seat-ruling row (`Inc-5` → the lens half deferred, and the `keymap.py`
+  collision corrected from four-way to three-way); `HLR-N13.3`'s priority (`Inc-6` → `Inc-7`);
+  `LLR-N16.2.1`'s ordering constraint (`Inc-7 last` → `Inc-8`, and the claim *"last"* was also
+  false); `LLR-N16.2.3`'s mutant (`Inc-7` → `Inc-8`); risk `R-8`'s gate (`Inc-7` → `Inc-9`). **The
+  sixth, found here and not in the brief:** §2.8.4's Q-7 disposition, *"a blocking question for
+  Inc-5"*, where `Inc-5` meant US-N14's increment and now means hit painting — corrected, with Q-7
+  recorded as travelling to the follow-on batch. A seventh, `HLR-CNV.1`'s *"Inc-5's figure-ground"*,
+  is corrected under A-42.
+- **Three references are LEFT AS THEY STAND, deliberately, and are named so they are not read as
+  missed:** the `Inc-5` / `Inc-6` mentions inside `LLR-N14.1.3` and `LLR-N14.3.2` sit **inside
+  headings already marked `DEFERRED (#D23)`** and travel with them; and §6.5 A-26's `#D6` row is a
+  **historical record of a sealed ruling**, which is not restated because amending a record of what
+  was decided would falsify the record.
+
+#### A-50 · Two shipped defects get requirement stubs and an owning increment *(`B-29`, `B-30`; `02g` §5 `S-22`, `S-23`)*
+
+- **Before:** both were `02g` §5 findings — *"newly raised, not in ANY prior ledger"* — with no
+  requirement, no `AT`, no `TC` and no increment.
+- **After:** §3.9 carries a first-class Acceptance block, `HLR-REPAIR.1`, `LLR-REPAIR.1` (`B-29`) and
+  `LLR-REPAIR.2` (`B-30`), owned by **`Inc-REPAIR`** (§5.4), sequenced **before `Inc-7`**.
+- **Deleted tokens:** none. **New tokens:** `HLR-REPAIR.1`, `LLR-REPAIR.1`, `LLR-REPAIR.2`,
+  `AT-049`, `AT-050`, `TC-082`, `TC-083`, mutants `M-REPAIR.1-a`, `M-REPAIR.1-b`, `M-REPAIR.2-a`.
+- **`B-29` IS INSIDE THIS BATCH'S FENCE, NOT ADJACENT TO IT.** Measured: a phantom sidecar id gives
+  `coverage() = (2, 3)` with `warnings = []`, so `load_or_notice`'s warning arm (`mapper/app.py:459`)
+  never fires and **`LLR-N13.1.5`'s containment NEVER ENGAGES**. US-N13 paints that bar. Shipping
+  `Inc-7` without `Inc-REPAIR` ships a green containment test over a structurally empty set — which
+  is why the ordering is declared hard in §5.4.
+- **THE FIX IS THE WARNING, NOT `coverage()`.** Three call sites agree on `coverage()`'s current
+  meaning and `LLR-N13.1.3` pins one at 100. **The defect is silence, not arithmetic**, and a
+  repair that "corrected" the denominator would be a behaviour change riding inside a defect fix.
+- **THE SYNTHETIC FIXTURE IS MANDATED, BECAUSE THE GUARD IS A NO-OP ON THE CURRENT TREE (`C-55`
+  limb 2).** No fixture in the repository carries a phantom sidecar id, so the guard, `AT-025b` and
+  `LLR-N13.1.5`'s containment are **all green over an empty set** until one is built. The fixture is
+  built in a `tempfile.mkdtemp` workspace and **never** by writing into `fixtures/` — `02g` §6
+  records a probe that permanently rewrote two tracked fixtures through the inspector's
+  commit-on-blur. **Without the fixture the guard is untested however green the suite.**
+- **`B-30` is one line, and its position is the finding.** `mapper/store.py:456` interpolates the
+  full absolute path, username included, rendered through `str(exc)` at `mapper/app.py:453` and
+  `:1181` — and it sits **four lines above a comment asserting that class was closed by threshold
+  3**. The comment is true about the reads it describes and false about the line above it. **A
+  comment asserting a class is closed is more dangerous than no comment**, and it is the sharpest
+  available argument for a derived census over a fixed set of addresses.
+- **Parent-story re-read:** US-N13 re-read in full. `HLR-REPAIR.1` is deliberately **not** parented
+  under it: `B-30` has no US-N13 subject, and putting one source file under two story owners is the
+  collision `#D5` exists to prevent. `LLR-N13.1.5`'s dependency on `LLR-REPAIR.1` is recorded at
+  `HLR-N13.3` instead, where the containment arm lives.
+
+---
+
+### THE PASS-1 LEDGER — auditable against `02g` §4 and §5, row by row
+
+> **Read this against `02g`, not against this document.** Every id below is an `02g` ledger id. A row
+> marked **OPEN** is a deliberate non-closure with its reason; a row marked **CLOSED** claims only
+> what its `Landed at` column can be checked against. **No row is self-certifying** — pass 2 and the
+> lenses re-execute.
+
+**`02g` §4.1 — architect (14 items), the six blockers this pass owns:**
+
+| `02g` id | Before | After | Status | Landed at |
+|---|---|---|---|---|
+| `P2-B1` | two cuts live; `Inc-9` an id from only one of them | one cut, stated once, `#D5` sole authority; 3 headers + 6 body refs restated | **CLOSED** | §5.4; A-49 |
+| `P2-B2` | 3 unowned `AT`; 6 failing the three-way rule | 2 owners written, 2 story-list legs added, 2 leave with `#D23` | **CLOSED** | A-44 table |
+| `P2-B3` | literal `21` live at 4 sites | derivation over distinct `(glyph, label, style)` triples; no literal anywhere | **CLOSED for the 3 sites this lane owns · OPEN for `01b:373`** | A-45 |
+| `P2-B4` | *"0 remaining references"* → enumeration short of the real set; 18 pins named nowhere | supersession set derived over both trees; predicted-red clause by derivation in two requirements | **CLOSED** | A-46 |
+| `P2-B5` | `COERCION_RANGES` normative, orphaned | `HLR-COERCE` + `LLR-COERCE.1` + `LLR-COERCE.2`, with increments | **CLOSED** | §3.0; A-47 |
+| `P2-B6` | `LLR-N06.2.5` under `HLR-N06.2` | re-parented to `HLR-COERCE`, `Inc-9` | **CLOSED for parent/increment · OPEN for a-2's physical move** | A-48 |
+| `P2-C8` | un-headroomed wall-clock threshold | **subject deferred** by `#D24` | **DISPOSED, not answered** | A-43 |
+
+**`02g` §4.2 — qa:** `QA2-C-06` **CLOSED** (same root as `P2-B1`; §5.4). `QA2-C-01` **CLOSED** for
+all six ids (A-44). `QA2-C-02`, `QA2-C-03`, `QA2-C-04`, `QA2-C-05`, `QA2-C-07`, `QA2-C-08`
+**NOT TOUCHED — pass 2.**
+
+**`02g` §4.3 — security:** `C-3` **DISPOSED** with its subject (A-43), *and the underlying defect
+`S-15` explicitly NOT repaired*. `S-18` **DEFERRED** (`#D24`). `S-19` **DEFERRED as `S-18`'s
+precondition**, with the name-your-renderer obligation written into the deferral. `C-2b`, `S-11`,
+`S-17`, `S-20`, `S-21` **NOT TOUCHED — pass 2.**
+
+**`02g` §4.4 — ux:** `UX2-C-01` through `UX2-C-10` **NOT TOUCHED — pass 2**, except that
+`UX2-C-02`'s subject is unaffected by the re-scope and its `#D10` three-row cap still needs
+amending to four.
+
+**`02g` §5 — newly raised:** `S-22` → **`B-29`, CLOSED as a requirement** (A-50). `S-23` →
+**`B-30`, CLOSED as a requirement** (A-50). `UX2-C-11`, `UX2-C-12` **NOT TOUCHED — pass 2.**
+
+**`02g` §2 — corrections the audits made to the lenses themselves:** row 2 (the rail supersession
+count) is **absorbed correctly** — A-46 derives the set rather than adopting either figure. Rows 1,
+3, 4 and 5 are not this document's; row 3 (`P2-C6`) is **pass 2**.
+
+**`02g` §3 — the A3 census:** **NOT TOUCHED — pass 2** (`P2-C6`, `QA2-C-02`). `R-1`'s
+question → number → instrument → measured-at-SHA form is **adopted as the house form** by this
+set — every census A-45, A-46 and A-47 introduce is written in it — but `R-1` itself is not
+rewritten here.
+
+---
+
+**WHAT AMENDMENT SET 3 PASS 1 DOES NOT DO — stated because a subset claimed as a set is `C-43`.**
+
+Pass 2 owns, and **none of these is closed by anything above**: `P2-C1` through `P2-C7`;
+`QA2-C-01`'s siblings `QA2-C-02` through `QA2-C-05`, `QA2-C-07`, `QA2-C-08`; security `C-2b`,
+`S-11`, `S-17`, `S-20`, `S-21`; ux `UX2-C-01` through `UX2-C-10` and the newly raised `UX2-C-11`,
+`UX2-C-12`. Two rows above are **OPEN inside items this pass otherwise closed** — `01b:373` (A-45,
+routed to the ux lane) and edit a-2's physical move (A-48) — and they are listed as open rather than
+folded into a closure. **`S-15` remains a live, measured, app-killing defect on `master`**; `#D24`
+defers its bound and does not repair it.
