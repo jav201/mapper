@@ -99,10 +99,21 @@ MASTER_LEGACY_DIGESTS = {
     ("OutlineRenderer", 80, 24): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
     ("OutlineRenderer", 140, 8): "5ec6a1051d11fbbb213efadc4f7efafa5487512cbd9fd597b971b4b0b24a022f",
     ("OutlineRenderer", 300, 120): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
-    ("RadialRenderer", 140, 45): "b44357e5a057041da634de33ccda30b3e982fc9e55619ac7d09bb582dc26f857",
-    ("RadialRenderer", 80, 24): "6238cb3ccb0c60a9c2679c144808ad35fa8ac614f3c2f7ea2412df16cad36b79",
-    ("RadialRenderer", 140, 8): "25a768627fe7e656c3cb2932b04cc6a318c33822118ecaa391869ae78840171d",
-    ("RadialRenderer", 300, 120): "ad716cb2c7ab764cc0f3d794705379fb24e9b4dc07bd97242433706411e07b6d",
+    # The four RadialRenderer keys below were RE-BASELINED in
+    # 2026-08-26-ui-next-batch-02 Inc-1, and the move is CORRECT behaviour, not
+    # a regression: `Canvas.rows()` now composes the `dots` and `bgs` layers it
+    # used to discard, and RadialRenderer is the only renderer in the tree that
+    # writes them (measured: exactly two `.dots` sites, both in radial.py;
+    # LayeredRenderer's dots are 0 and OutlineRenderer builds no Canvas).  The
+    # predicted-red set was derived BEFORE the change and matched exactly: all
+    # four Radial keys moved, all eight Layered/Outline keys held byte-identical
+    # and were NOT recaptured.  Re-capturing a predicted-green digest is a gate
+    # failure, because it silently drops the guard on a renderer that must not
+    # move -- which is what a wholesale re-capture of this dictionary does.
+    ("RadialRenderer", 140, 45): "398b922562e3b3b7809296b0afb7b5ba3785371b7f11e6992e6a5b6e78d13d99",
+    ("RadialRenderer", 80, 24): "3f174032180edeab8e3a362a19608eaa060680e623912f46834a73921c46e5df",
+    ("RadialRenderer", 140, 8): "4dee6c1c4fcd527b32b508bbb22f171b5026de09a0bf2b39729bf2a0794f08d0",
+    ("RadialRenderer", 300, 120): "3f8dac90f262d9cba30138c43a15d30f48b0218049cdb43834128a77073f5337",
 }
 
 # The same arm for this increment's two files.  `OutlineRail.render` takes no

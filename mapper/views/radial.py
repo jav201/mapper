@@ -15,7 +15,7 @@ from mapper.model import Graph
 # nearly invisible as text on the black canvas.
 _GREYS = (
     darkside.INK,
-    "#a3a3a3",
+    darkside.ASH,
     darkside.MUT,
 )
 
@@ -119,9 +119,10 @@ class RadialRenderer:
 
         inner = w - 2
         body_h = h - 4
-        cv = Canvas(inner, body_h)
-        cv.dots = {}
-        cv.bgs = {}
+        cv = Canvas(
+            inner, body_h,
+            tones=darkside.tone_set(), fallback=darkside.MUT,
+        )
 
         cx0, cy0 = max(10, inner // 5), body_h // 2
         pos: dict[str, tuple[int, int]] = {}
@@ -215,7 +216,11 @@ class RadialRenderer:
             x, y = pos[nid]
             node = graph.nodes[nid]
             sel = nid == selected_id
-            title = node.ficha.title[:18]
+            # Coerce BEFORE slicing.  The title is file-derived and this is the
+            # only place it enters the canvas; `save_svg` then snapshots those
+            # bytes to a file that leaves the machine, where the terminal's own
+            # escaping does not travel with it.
+            title = darkside.plain(node.ficha.title)[:18]
             cw = len(title) + 3
             x = max(0, min(inner - cw, x - cw // 2))
             y = max(0, min(body_h - 1, y))

@@ -876,7 +876,7 @@ class RepoScreen(Screen):
                 text.append(f"● {stage}", darkside.INK)
             elif i == current:
                 marker = "◐" if self.loading else "●"
-                text.append(f"{marker} {stage}", darkside.WARN if self.loading else darkside.INK)
+                text.append(f"{marker} {stage}", darkside.PULSE if self.loading else darkside.INK)
             else:
                 text.append(f"○ {stage}", darkside.WORDMARK)
         return text
