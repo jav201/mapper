@@ -51,8 +51,8 @@
       "closed_at": "2026-08-27"
     }
   ],
-  "current_station": "PDR",
-  "phase_status": "iterating",
+  "current_station": "P3",
+  "phase_status": "not-started",
   "stations_active": [
     "P0",
     "ARQ",
@@ -69,7 +69,7 @@
     "P0": 2,
     "ARQ": 1,
     "P1": 1,
-    "PDR": 2,
+    "PDR": 3,
     "P2": 0,
     "P3": 0,
     "DDR": 0,
@@ -224,6 +224,12 @@
       "date": "2026-08-27",
       "decision": "D26-D31 recorded",
       "notes": "D26 strict rule (a code fix never discharges a missing requirement) -- architect lens is 14/14 LIVE under it. D27 B-29/B-30 ride inside this batch as one repair increment. D28 B-29's guard ships with a synthetic fixture because it is a no-op on the current tree (C-55 limb 2). D29 A3 census settled by AST -- the orchestrator produced generation five by grep during the reconciliation itself. D30 amendment set 3 authored in two SEQUENTIAL passes (C-52: no two lanes on one file). D31 PR #7 merged docs-only before the fold."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "approved — SEALED",
+      "notes": "PDR iteration 3 (final) PASSED. All four lenses `approved with conditions`; security lifted its pass-2 block; architect moved 14/14 from LIVE to DISCHARGED. All 12 fold conditions discharged and verified by re-reading the artifact. Decisions issued: #D25 (the three-row seat-diff figure is a regression PIN on Inc-4's diff, not a per-increment budget -- no breach, Inc-3 unblocked), #D26 (the legend scrolls; tabbed redesign deferred B-35), #D27 (the damaged sala card takes a declared glyph; ALERT is not spent -- C-55 limb 2), #D28 (operator-ruled: the 4.5:1 contrast floor STANDS and the token changes; V7/V8 and the card glyph take INK; MUT is legal for readable text only on GROUND; decorative marks exempt). Corrections landed against the orchestrator's own rulings: the abolished cap survived at three sites (the batch's fourth false oracle, and the first created by the fix for a previous one); C-D25a named a vacated increment and had no oracle; and section 5's 'minimal alternative' was FALSE -- already implemented at app.py:1393-1395 and invariant under the defect, proven by two lenses executing it. CARRIED BY DECISION: B-36, UX2-C-01, a known live durable-data-loss defect on master, first scope item of the follow-on batch ahead of lente. Baseline 630+17=647, ruff 29, fixtures clean. Sealed at PDR-addendum-3.md section 8. Implementation NOT started -- commissioned as a fresh session."
     }
   ],
   "standing_authorization": {

@@ -160,7 +160,16 @@ vocabulary well past the prototype's 6 rows, so the shortfall is **larger** than
 - **C-D26b — the scroll keys are asserted by real keystrokes, not by `scroll_to(...)`.** `A-72`
   already records why: `tests/test_repair_layout.py` scrolls by **method call**, which proves the
   container scrolls and says nothing about whether an operator can make it. C-16 verbatim.
-- **C-D26c — deferral is recorded as a carry, not dropped.** Backlog `B-35`.
+  > **SCOPED 2026-08-27 to `HLR-N16.4` / `AT-053` ONLY**, on the qa lens's finding — unscoped it
+  > **manufactures a false-fail** (C-53). `scroll_to(...)` remains **legal as a HARVESTING
+  > mechanism**: `tests/test_repair_layout.py:118` uses it to union painted rows across scroll
+  > positions, which is precisely how `C-D26a` observes *content* rather than visible rows. It is
+  > forbidden **only as the assertion that an operator can scroll**. Applied literally to every arm
+  > it would rewrite the content oracle into keystrokes and couple `AT-053`'s subject into `AT-041`,
+  > `AT-042`, `AT-043`, `AT-044` and the negative control `AT-R14`.
+- **C-D26c — deferral is recorded as a carry, not dropped.** Backlog `B-35`. **Landed 2026-08-27**
+  (it was cited four times before it existed — a condition of this ruling dropped at the moment of
+  approval, caught by the architect lens).
 
 ---
 
@@ -288,15 +297,58 @@ predicate, no new surface, no design ruling.~~
 > down — so the follow-on batch inherits a defect, not a discovery. `mapper/widgets/inspector.py` is
 > in **no** live increment's source budget, so this batch does not touch or worsen it.
 
+**OPERATOR RULING 2026-08-27 — the deferral is ACCEPTED AS RECORDED, with two riders:**
+1. **It is named in the batch's final packet risks VERBATIM** — *"one keystroke, no confirmation,
+   permanent overwrite, already fired on this repo's own fixtures."* Not paraphrased, not softened.
+2. **It is the FIRST scope item of the follow-on design batch, ahead of «lente».** A live data-loss
+   defect outranks a new feature in any queue. Recorded on `B-36`.
+
+⚠ **`UX2-C-11`'s stated mechanism is WITHDRAWN, not inherited.** Security could not reproduce it:
+`insp-title`'s value *did* change, `insp-notes` did *not* rewrite, and the empty-delta control is
+**0 of 8**. Four writes against one value change over eight focusables means *something* writes
+without a ficha delta, but it is **not** the empty-delta path and it was not isolated. `B-31`
+carries it as an **unverified observation**, never as a diagnosed mechanism — a follow-on batch that
+inherits the stated mechanism as fact would build a fix for a defect nobody has demonstrated.
+
+---
+
+## 5b · `#D28` — the contrast floor stands; the token changes *(`UX3-C-A`, operator-ruled)*
+
+**Re-opens:** nothing sealed. **Answers:** the ux lens's blocker, which gated `Inc-1`.
+
+`PRED-4` sets a **`4.5 : 1`** floor; its own DISCHARGE clause moved `V7`/`V8` to **`MUT`**, measured
+**`4.00 : 1`** at the guaranteed rung — **a number printed four lines above the predicate that
+rejects it.** Separately `#D27`'s `MUT on PANEL` measures **`3.57 : 1`**. The batch set a floor and
+then picked `MUT` twice.
+
+**Ruling — the floor stands and the token changes.**
+
+1. **The `4.5 : 1` floor is RETAINED for readable, load-bearing text.** It is an accessibility floor;
+   restating it downward to rescue a token choice is **the floor-bends-to-the-implementation defect
+   this batch keeps catching**. Text at `3.57 : 1` is text fading into space.
+2. **Both cited sites take `INK`** — the only free candidate clearing the floor. `ACCENT`, `ALERT`
+   and `WARN` keep their single declared jobs (`LLR-S06.3.3`, `LLR-S06.3.5`).
+3. **The general rule, so it is not re-derived per seat:** **`MUT` is legal for readable,
+   load-bearing text only on `GROUND`** (`4.43 : 1`); **any `MUT`-on-`PANEL` readable-text seat
+   escalates to `INK`** (`3.57 : 1`).
+   **EXEMPT — stated explicitly so the rule cannot be over-applied and kill the dim tier:** purely
+   **decorative / non-load-bearing** marks — rules, lattice dots, ground texture — carry no floor.
+   `V4` (`territorio sin explorar`) stays on `WORDMARK` under this exemption.
+4. **Carried to the follow-on design batch (`B-37`):** evaluate recalibrating `MUT`'s hex to clear
+   `4.5 : 1` on `PANEL`, so `INK`-escalation does not erode the hierarchy ladder if more such seats
+   appear. **Cost stated honestly: a `MUT` change reddens byte-identity pins tree-wide**, which is
+   exactly why it is **not** done mid-batch.
+
 ---
 
 ## 6 · Forward applicability (C-49) — every output has a named consumer
 
 | Output | Consumed by | Where |
 |---|---|---|
-| `#D25` + C-D25a/b/c | `Inc-3`, `Inc-4`, `Inc-6`, `Inc-9` packets; DDR | seat-diff declaration per packet |
+| `#D25` + C-D25a/b/c | **`Inc-3`, `Inc-4`, `Inc-8`, `Inc-9`** packets; DDR *(set corrected — `Inc-6` is vacated)* | seat-diff declaration per packet, pinned to `bindings_for(scope)` |
 | `#D26` + C-D26a/b/c | `Inc-8` (`HLR-N16.4`, `AT-053`, `TC-086`) | the scroll container and its keystroke assertions |
-| `#D27` + C-D27a/b/c/d | `Inc-7` (`HLR-N13.3`, `PRED-VIS`); `Inc-1` (token set unchanged) | the sala card's painted limb |
+| `#D27` + C-D27a–e | `Inc-7` (`HLR-N13.3`, `PRED-VIS`); `Inc-1` (token set unchanged) | the sala card's painted limb |
+| `#D28` + the `MUT`/`INK` rule | `Inc-1` (`PRED-4`, `V7`/`V8` → `INK`); `Inc-7` (card glyph → `INK`) | every readable-text token seat |
 | §1's registry-collision finding | every artifact citing a bare `Dn`; backlog `B-34` | id disambiguation |
 | §5's disposition | PDR iteration 3, all four lenses | accept / refuse the deferral |
 
@@ -304,9 +356,61 @@ predicate, no new surface, no design ruling.~~
 
 | Field | Value |
 |---|---|
-| Decisions issued | `#D25` `#D26` `#D27` |
+| Decisions issued | `#D25` `#D26` `#D27` `#D28` |
 | Sealed decisions edited in place | **none** |
 | Sealed decisions re-opened | `#D5b` (by `#D25`, scope stated; figure re-labelled a pin) |
-| Open, referred | `UX2-C-01`, `UX2-C-02` → PDR iteration 3 |
-| New backlog carries | `B-34` (bare-`Dn` ambiguity), `B-35` (tabbed legend) |
-| Base | `master` `20f86de`; batch branch `docs/amendment-set-3` |
+| Open, referred | **none** — `UX2-C-01`/`UX2-C-02` ruled; deferral accepted with riders (`B-36`) |
+| New backlog carries | `B-34` `B-35` `B-36` `B-37`; `B-31` mechanism withdrawn |
+| Base | `master` `20f86de` |
+
+---
+
+## 8 · PDR ITERATION 3 — THE SEAL
+
+**VERDICT: PASSED with conditions, all conditions DISCHARGED. The PDR is SEALED.**
+
+| Lens | Pass-2 | Iteration 3 | Own-ledger result |
+|---|---|---|---|
+| architect | **REJECTED** (14/14 LIVE) | `approved with conditions` | **14 DISCHARGED, 0 LIVE** |
+| qa | approved w/ conditions | `approved with conditions` | **7 DISCHARGED, 1 PARTIAL** (`PLAN.md` risk-register limb; no gate reads it) |
+| security | **BLOCKED** (8 LIVE) | `approved with conditions` | **14 DISCHARGED, 4 cut w/ record, 1 carried, 0 LIVE-unaddressed** |
+| ux | approved w/ conditions (10 LIVE) | `approved with conditions` | **8 DISCHARGED, 1 PARTIAL → `UX3-C-A`, 1 LIVE (`UX2-C-01`)** |
+
+**Each lens audited its OWN condition ledger against disk (RIDER-1), never the amendment table.**
+
+**Independently re-derived rather than inherited:** A3 blast radius **23 arg-ful sites / 10 files /
+3 production** (AST); three-way AT rule **40 live, 0 failing**; `#D15` AT↔TC join **0 gaps**, with
+`A-55`'s documented false gap reproduced and correctly *not* reported; supersession pins **18**;
+`rows()` consumers **4 sites / 3 files, 0 outside `views/`**.
+
+### Condition discharge — verified by RE-READING the artifact, never by trusting the pass ran (C-44)
+
+| # | Condition | Source | Discharge |
+|---|---|---|---|
+| 1 | `UX3-C-A` — the `4.5:1` floor's own discharge clause measured `4.00:1` | ux | **`#D28`**: floor stands, `V7`/`V8` → `INK`; general `MUT`-on-`GROUND`-only rule + decorative exemption |
+| 2 | The abolished cap survived at **3** sites | qa, architect, ux | all struck in place with `#D25` named (`:1673`, `:4549`, `:7387`) |
+| 3 | `C-D25a`'s increment set wrong (named vacated `Inc-6`, omitted `Inc-8`) | qa, architect | derived set `Inc-3`/`Inc-4`/`Inc-8`/`Inc-9`; `keymap.py` added to `Inc-8`'s budget (→ 4, ⚠ declared) |
+| 4 | `C-D25a` had no oracle (C-40 limb 1) | qa | declared diff bound to `bindings_for(scope)` entry/exit difference |
+| 5 | §5's minimal alternative is FALSE | security, ux, architect | **struck**, with all three executions recorded |
+| 6 | `C-D26b` unscoped manufactures a false-fail | qa | scoped to `HLR-N16.4`/`AT-053`; `scroll_to` legal as a harvesting mechanism |
+| 7 | `PRED-VIS` glyph unbound to `declared_vocabulary` | qa | membership clause added, `C-D27b` left intact |
+| 8 | `LLR-REPAIR.1` threshold written for a one-phantom fixture | security (`S-24`) | restated as **set equality over N phantoms**; `M-REPAIR.1-c` named |
+| 9 | `C-D27e` legibility arm missing | ux | added at 118 × 34, against the background actually painted |
+| 10 | `B-34`/`B-35` cited but non-existent | architect | landed, with `B-36`, `B-37` |
+| 11 | `UX2-C-11`'s mechanism unreproduced | security | **withdrawn** on `B-31`; carried as an unverified observation |
+| 12 | §5.3 criterion 8 cited its own rejected mutant | qa (`QA3-C-06`) | census restated as an **AST** walk; the missing criterion 6 recorded as known |
+
+**Carried, NOT discharged, by decision:** `B-36` (`UX2-C-01`) — a **known live durable-data-loss
+defect on `master`**, deferral accepted with the operator's two riders. `B-33` (`S-15`/`S-20` cost).
+`QA2-C-02`'s `PLAN.md` limb (R-1 sizing; no gate reads it).
+
+| Seal field | Value |
+|---|---|
+| Sealed | 2026-08-27 |
+| Verdict | **PASS — proceed to implementation** |
+| Participants | architect · qa-reviewer · security-reviewer · ux-reviewer (fresh, parallel) · orchestrator |
+| Approved ids | `#D25` `#D26` `#D27` `#D28` + all decisions sealed at the original PDR |
+| Lens artifacts | `02h-pdr3-{architect,qa,security,ux}.md` |
+| Baseline at seal | **630 + 17 = 647 pass**, ruff 29, `fixtures/` clean |
+| Live requirement census | **21 HLR / 52 LLR**, 40 live `AT`, 0 failing the three-way rule |
+| Next station | **P3 — implementation.** Nine increments, not started. |
