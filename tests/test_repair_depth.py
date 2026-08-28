@@ -94,7 +94,23 @@ GOLDEN_SIZES = ((140, 45), (80, 24), (140, 8), (300, 120))
 MASTER_LEGACY_DIGESTS = {
     ("LayeredRenderer", 140, 45): "a76157aa1fe1c5da5cfc6dfc1ede7bf32b0a06b41245476840664cea7ee09ca9",
     ("LayeredRenderer", 80, 24): "5a519c0c42a831f2d23ba4074932787a413db2c0d3648d3f9cae6c9d432c0aec",
-    ("LayeredRenderer", 140, 8): "8383658991105a00895d489bfcc3aa709bc66f444d00a34e1b605e0114e0c976",
+    # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-3.  REASON: this
+    # is the only one of the four `LayeredRenderer` sizes at which `legacy` has
+    # an unpainted node (4 of 8; the other three paint 8 of 8), so it is the only
+    # one at which `HLR-N06.3`'s overflow declaration is painted at all.  The
+    # move is the requirement landing, not a regression.
+    #
+    # BOUNDED, and the bound was measured BEFORE the re-capture rather than
+    # asserted after it: diffed row by row against `git show HEAD:` of the
+    # renderer, ONE row differs -- row 0, the header -- its old text is a prefix
+    # of its new text, the added suffix is exactly `  ▽ 4 fuera de vista`, and
+    # the span delta is one new INK span over that suffix plus the offset shift
+    # it forces on the spans after it.  The other three Layered keys, all four
+    # Outline keys, all four Radial keys and all five rail digests were
+    # predicted GREEN, verified GREEN and NOT re-captured.  Re-capturing a
+    # predicted-green digest is a gate failure: a red pin is evidence, a
+    # re-captured pin is a claim.
+    ("LayeredRenderer", 140, 8): "de4d768749d9282f3747ab14b8cd0356d690cc31a921733938b89a231c66bf96",
     ("LayeredRenderer", 300, 120): "e133509b464d85d5d34256468c9832abc014699ab581283ae91ee939779bd320",
     ("OutlineRenderer", 140, 45): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
     ("OutlineRenderer", 80, 24): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
@@ -684,6 +700,18 @@ DISCONNECTED_COMPONENT_OUTCOMES = {
 }
 
 
+# THE ARM'S OWN REGRESSION MODE IS A HANG, so it is given a timeout.  The
+# elapsed-time clause below is checked AFTER the render returns, which means it
+# cannot see the failure it was written for: delete the cycle guard and the
+# traversal never returns, `pytest.raises` never exits, and the assertion is
+# never reached.  In CI that is a wedged run rather than a red report.  The
+# ceiling is `RENDER_BOUND_SECONDS * 15` -- not a second budget, just far enough
+# above the 2 s bound that a loaded machine cannot trip it while an unbounded
+# loop certainly does.
+CYCLE_GUARD_TIMEOUT_SECONDS = RENDER_BOUND_SECONDS * 15
+
+
+@pytest.mark.timeout(CYCLE_GUARD_TIMEOUT_SECONDS)
 @pytest.mark.parametrize("shape", sorted(REACHABLE_CYCLE_SHAPES))
 @pytest.mark.parametrize("name,renderer", RENDERERS)
 def test_tc_r12_a_cyclic_graph_raises_the_guard_and_names_it(name, renderer, shape):
@@ -716,6 +744,7 @@ def test_tc_r12_a_cyclic_graph_raises_the_guard_and_names_it(name, renderer, sha
     assert elapsed < RENDER_BOUND_SECONDS, f"{name} took {elapsed:.3f}s to give up"
 
 
+@pytest.mark.timeout(CYCLE_GUARD_TIMEOUT_SECONDS)
 @pytest.mark.parametrize("name,renderer", RENDERERS)
 def test_tc_r12_a_cycle_the_renderer_never_visits_is_asserted_not_absorbed(
     name, renderer
@@ -850,7 +879,7 @@ def _shipped_visible_rows(rail: OutlineRail) -> list[tuple[str, int]]:
 
     def walk(nid: str, depth: int) -> None:
         rows.append((nid, depth))
-        if nid in rail.collapsed:
+        if nid in rail.folded:
             return
         for child in rail.graph.children_of(nid):
             walk(child, depth + 1)
@@ -958,7 +987,7 @@ def test_tc_r30_visible_rows_agrees_with_the_shipped_recursive_implementation(tm
         rail = OutlineRail()
         rail.graph = graph
         for collapsed in _collapsed_configurations(graph):
-            rail.collapsed = set(collapsed)
+            rail.folded = frozenset(collapsed)
             compared += 1
             assert rail.visible_rows() == _shipped_visible_rows(rail), (
                 f"{label}: the iterative visible_rows disagrees with the "
@@ -1064,7 +1093,7 @@ def test_c53_the_rail_renders_legacy_identically_to_master(collapsed, tmp_path):
     rail = OutlineRail()
     rail.graph = _legacy_graph(tmp_path)
     rail.cursor = "fin"
-    rail.collapsed = set(collapsed)
+    rail.folded = frozenset(collapsed)
     assert _fingerprint(rail.render()) == MASTER_RAIL_DIGESTS[collapsed]
 
 
@@ -1167,7 +1196,7 @@ def test_tc_r30_the_indent_cap_cannot_change_a_rendered_row(tmp_path):
     """
     graph = _chain(40)
     rail = OutlineRail()
-    rail.show(graph, graph.root_id)
+    rail.show(graph, graph.root_id, frozenset())
     rendered = rail.render().plain.split("\n")
 
     rows = rail.visible_rows()

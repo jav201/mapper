@@ -343,14 +343,29 @@ async def test_an_export_never_encodes_where_the_keyboard_was(tmp_path, monkeypa
         # (measured: `app.focused` still None after 5s under load -- carry
         # `B-51`).
         screen.query_one("#map-rail").focus()
-        await pilot.pause()
 
-        # Positive control: the live owner is genuinely non-default, so the
-        # assertion below discriminates rather than being accidentally true.
-        assert screen._focus_owner() not in ("", "canvas"), (
-            f"live owner is {screen._focus_owner()!r}; this arm cannot tell the "
-            "two states apart and would pass for the wrong reason"
-        )
+        # THE PRECONDITION IS WAITED FOR, ON A BOUND, not assumed to land in one
+        # pump.  `focus()` posts a message; one `pilot.pause()` is one turn of
+        # the pump and is usually -- not always -- enough.  Measured on this
+        # tree, the positive control below failed 1 run in 11 with
+        # `_focus_owner()` still `""`, which is a verdict about scheduling and
+        # not about exports.  Waiting is not the same as assuming: the loop
+        # fails LOUDLY and names what never happened, so a focus mechanism that
+        # genuinely broke still reddens this arm instead of hanging or passing.
+        #
+        # It also doubles as the positive control it replaces: the live owner is
+        # genuinely non-default before the export runs, so the assertion at the
+        # end discriminates rather than being accidentally true.
+        for _ in range(50):
+            if screen._focus_owner() not in ("", "canvas"):
+                break
+            await pilot.pause()
+        else:
+            raise AssertionError(
+                f"focus never left {screen._focus_owner()!r} in 50 pumps after "
+                f"`#map-rail`.focus(); the precondition this arm needs was never "
+                f"established, so it could not tell the two focus states apart"
+            )
 
         # The REAL key, not the action method.  Export is promised as a
         # keystroke -- `keymap.py` binds `e` -> `export_svg` in the `view`

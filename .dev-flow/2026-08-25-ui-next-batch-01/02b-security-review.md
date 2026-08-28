@@ -89,7 +89,7 @@ target                                               urlsplit.scheme    verdict
 'https://example.com@evil.example.com/'              'https'            launched  <== LAUNCHED
 'https://аpple.com/'                                 'https'            launched  <== LAUNCHED   (cyrillic а)
 'http://127.0.0.1:8080/admin/delete'                 'http'             launched  <== LAUNCHED
-'https://example.com/‮exe.acta'                      'https'            launched  <== LAUNCHED   (U+202E)
+'https://example.com/<U+202E>exe.acta'                      'https'            launched  <== LAUNCHED   (U+202E)
 ```
 
 **The allowlist refuses the right things, and it refuses them for the right reason.** This is worth
@@ -484,7 +484,7 @@ new render site, and neither the markup sentence nor the fixture mentions it.
 - **Where.** `PDR-design-proposal.md:92-93`; `01-requirements.md:109` (LLR-N02.5).
 - **Evidence.** §2.2 — `https://user:pass@evil.example.com/`,
   `https://example.com@evil.example.com/`, `https://аpple.com/` (Cyrillic `а`) and
-  `https://example.com/‮exe.acta` (U+202E) all launched.
+  `https://example.com/<U+202E>exe.acta` (U+202E) all launched.
 - **Why it matters.** The operator reads `Attachment.caption`; the launcher opens `Attachment.path`;
   a hostile map controls both independently. Credential-bearing URLs are also handed to the browser
   and land in its history. Not a blocker — the browser is the thing that opens, and the operator can

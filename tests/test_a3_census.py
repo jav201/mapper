@@ -125,13 +125,40 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     whole argument for pinning a count rather than narrating it.
     """
     sites = render_call_sites()
-    assert len(sites["argful"]) == 35, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 35; "
+    # 35 -> 50 in Inc-3: its four new test modules drive the renderer directly
+    # at the AT configurations.  Updated deliberately, with the module map.  It
+    # moved twice inside the increment -- 49, then 50 when the battery's two
+    # surviving mutants forced two more arms -- which is the pin working.
+    #
+    # 50 -> 51 -> 49 in the Inc-3 FIX round, both directions in one edit and
+    # both deliberate.  The pan-fixture arm and the short-region sweep each add
+    # a site; the `HEADER_ROWS` pin loses two, because parametrising it over
+    # node count as well as width folded its two inline renders into one
+    # `_header_rows` helper.  A fourth catch for this pin, and the first in the
+    # direction a floor could never have seen.
+    #
+    # 49 -> 52 in the SECOND fix round, and the three are itemised because a
+    # bumped pin with an unitemised reason is a pin that has stopped working:
+    #   +1  `mapper/app.py` `_declare_after_layout` now RENDERS.  This is the
+    #       priced cost of closing `B-60` rather than re-recording it: the
+    #       canvas header's own numeral is written by `render`, so recomputing
+    #       only the strip left the two declaring surfaces contradicting each
+    #       other on the first frame at ordinary sizes.  The alternative,
+    #       `call_after_refresh(refresh_canvas)`, reddens the `LLR-CNV.3.1`
+    #       focus arm; this one costs exactly this pin.
+    #   +2  `tests/test_inc3_census.py`'s A-89 arm renders the fixture with and
+    #       without a `DiffResult` to prove the diff state changes what is
+    #       painted -- the non-vacuity guard on the two diff-only coercion
+    #       sinks (`layered.py:449` and `:520`) whose mutants used to survive.
+    assert len(sites["argful"]) == 52, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 52; "
         "update the pin AND the module map together, or one of them is stale"
     )
-    assert len(sites["zeroarg"]) == 25, (
+    # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
+    # a zero-arg Textual widget site that must NOT be swept into the A3.
+    assert len(sites["zeroarg"]) == 26, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "25; a DROP means widget sites were wrongly swept into the A3"
+        "26; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -235,8 +262,9 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     floor-based gate could not tell the difference.
     """
     zeroarg = render_call_sites()["zeroarg"]
-    assert len(zeroarg) == 25, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 25. A floor was "
+    # 25 -> 26 in Inc-3, the same site the cardinality pin above names.
+    assert len(zeroarg) == 26, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 26. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )

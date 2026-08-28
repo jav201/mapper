@@ -5650,7 +5650,7 @@ that cannot be a prefix or a suffix of another increment id is the whole reason 
 |---|---|---|---|---:|
 | **Inc-1** | S-6 paleta v2 tokens · **Canvas A3** (`HLR-CNV.1`) · **`LLR-COERCE.1`** | live | `darkside.py`, `canvas.py`, `app.py`, `views/radial.py` | 4 |
 | **Inc-2** | `ViewState` + `IRenderer` A3 — signature only, behaviour-neutral | live | `views/state.py` *(new)*, `views/layered.py`, `views/lane.py`, `views/outline.py`, `views/radial.py`, `app.py` | **6 — DECLARED BREACH**, unchanged from `#D5` |
-| **Inc-3** | US-N06 escala — pan, fold, overflow · **`LLR-COERCE.2`, widened to every renderer feeding an operator-visible sink (`A-89`, `B-47`)** | live | `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py`, **`views/outline.py`** — and `views/lane.py` only if the derivation shows it reaching a sink | **5 — DECLARED BREACH (`A-89`)** |
+| **Inc-3** | US-N06 escala — pan, fold, overflow · **`LLR-COERCE.2`, widened to every renderer feeding an operator-visible sink (`A-89`, `B-47`)** | live | `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py`, **`views/outline.py`**, **`views/state.py` (`A-97`)** — and `views/lane.py` only if the derivation shows it reaching a sink | **6 — DECLARED BREACH (`A-89`, widened by `A-97`)** |
 | **Inc-4** | US-N07 búsqueda + the seat rebind (`#D5b`) | live | `search.py`, `app.py`, `views/layered.py`, `keymap.py` | 4 |
 | **Inc-5** | hit painting in the three remaining renderers (`LLR-N07.2.2b`) | live — **belongs to US-N07, not to US-N14** | `views/outline.py`, `views/radial.py`, `views/lane.py` | 3 |
 | ~~**Inc-6**~~ | ~~US-N14 lente~~ | **VACATED** — deferred whole by `#D23` (§3.7). The id is retired, not reassigned | — | — |
@@ -8121,6 +8121,91 @@ sink** — which the increment shall establish rather than assume.
 the same defect class as a hand-listed code-point list, and this batch has now paid for that twice
 (`A-80`, `A-84`). A fourth renderer added later must enter the census automatically or the guarantee
 decays the same way again.
+
+### A-97 — `Inc-3`'s breach widens from FIVE files to SIX: `views/state.py` was owed by two sealed LLRs and named by no cut
+
+**The breach was already arithmetically true when `A-89` was written; only the declaration was
+missing.** `A-89` widened `Inc-3` to five files for the `B-47` coercion fold. It did not notice that
+**three `ViewState` fields the increment cannot ship without** were already assigned to `Inc-3` by
+LLRs sealed at the PDR:
+
+- `LLR-N06.1.1:1696` — `ViewState.pan_x`, `ViewState.pan_y`, both `NEW — created in Phase 3`, and
+  the Statement is explicit that the offsets travel *"as fields of the view state"*;
+- `LLR-N06.2.1:1782` — `ViewState.folded`, likewise `NEW — created in Phase 3`.
+
+**This is `#D5` §4.1(a)'s defect class exactly** — the undeclared breach that section caught on
+`Inc-7` — and it is recorded here rather than discovered at the gate as a sixth file in the diff.
+**An undeclared breach is what `V9` exists to catch; a declared one is a decision.**
+
+**It is NOT an A3 and does not re-open the sealed PDR.** `mapper/views/state.py:17-20` states the
+governing rule in the module's own docstring: *"ADDING A DEFAULTED FIELD BELOW IS ADDITIVE AND NEVER
+RE-OPENS THE A3 … the roster is pinned here, once, and grows by default-carrying addition
+thereafter. Only the first migration is an A3."* All three fields carry defaults
+(`pan_x: int = 0`, `pan_y: int = 0`, `folded: frozenset[str] = frozenset()`), so `ViewState()` still
+constructs with no arguments and every existing construction is untouched. `IRenderer.render`'s
+signature, member set and return type are unchanged.
+
+**Provenance:** raised as escalation 1 by the `Inc-3` architect ruling
+(`02j-inc3-painted-set-architect.md`), which measured it while ruling a different question.
+Recorded as an orchestrator ruling under the batch's standing autonomy grant, not as operator
+approval.
+
+### A-98 — how the renderer declares its painted set (`02j`), and the hole that ruling measured
+
+**`HLR-N06.3` and `LLR-N06.3.1` are keyed on a `declared_painted_set` that NO requirement gave a
+mechanism.** Grep at `954f8f3`: the phrase occurs only inside the predicate statements themselves
+(`:2108-2114`, `:2279`). Ruled, because the mechanism decides whether trigger **A3** re-fires:
+
+> **A module-level pure function `painted_ids(graph, state) -> frozenset[str]` in
+> `mapper/views/layered.py`**, sharing one private `_geometry(graph, state)` pass with
+> `LayeredRenderer.render` so the two cannot drift. `IRenderer` gains **nothing**; `MapScreen`
+> imports it by name behind an explicit, greppable branch — **never** a
+> `getattr(renderer, "painted_ids", None)` probe, which is a silent-skip generator.
+
+**`LLR-N06.3.1`'s `Touched symbols` ambiguity is resolved with it:** *"consumes `MapScreen.folded`"*
+means the screen puts `MapScreen.folded` into the `ViewState` it hands to `painted_ids` — **not**
+that the helper takes a second set and differences it. The screen computes
+`frozenset(graph.nodes) - painted` and subtracts **no fold count anywhere**, which is
+`LLR-N06.3.1`'s Statement read literally.
+
+**The three rejected candidates were rejected on executed measurements, not preference:**
+
+| Candidate | Verdict | The measurement that killed it |
+|---|---|---|
+| a second **Protocol member** | **IS an A3** | `IRenderer` is `runtime_checkable` (`state.py:74`), which checks **member presence**: adding one flips **all six** shipped renderers to `isinstance -> False`, reddening `test_a3_census.py:316` over a derived class set. A defaulted member does not rescue them — the default reaches only classes that *explicitly inherit*, and all six are structural |
+| a **mutable attribute** set by `render` | **measured wrong** | `MapScreen` holds one long-lived renderer (`app.py:1116`) and calls `render` from two sites at different sizes. Executed: after the canvas repaint at `30x6` the attribute holds 1 id; after one `e` export at `140x45` it holds 8 — so **one `e` press makes the indicator declare `0 hidden` on a canvas hiding 7.** It also breaks `LLR-N06.1.1`'s purity acceptance |
+| the screen **re-deriving from geometry** | **is `M-N06.3-b`** | `_tree_layout` returns *placed* positions; `lines[:h]` (`:302`), `body_h` (`:173`) and `avail` (`:160`) each discard placed nodes afterwards. Executed on `legacy` at `(30,6)`: layout keys 8, visible 1 — **wrong by 7 of 8**, at `HLR-N06.3`'s own "hidden by viewport" configuration |
+
+**MEASURED HOLE, carried under `B-55` — `outline` and `radial` hide nodes and declare nothing.**
+Executed full-title traces at `30x6` on `legacy`: **outline 5/8** (3 hidden, undeclared),
+**radial 2/8** (4 hidden, undeclared). `HLR-N06.3`'s promise is therefore kept in the **default**
+view and silently unkept in the other two. `Inc-3` does not close it — it **declares** it and ships a
+**pinned participation census** (derive the modules under `mapper/views/` exporting `painted_ids`,
+assert the set non-empty *before* evaluating, assert equality with `{layered}`) so the day a second
+renderer joins, the pin goes red rather than the guarantee quietly widening or quietly not. Closing
+it is routed to **`Inc-5`**, the only increment that already owns all three of those files
+(`#D5` row 5) and can pay for it with no budget.
+
+**`AT-015`/`AT-016` MUST enforce all four configurations as a CARDINALITY ASSERTION, not as four
+tests an implementer is trusted to run.** Executed at `(50, 12, ())` — the "nothing hidden"
+configuration, and the first row of the table — **two of the three mutants are GREEN on all three
+predicates**:
+
+```
+    config mutation   |declared|  |traced|  PRED-1  PRED-2  PRED-3
+50x12     CORRECT             8         8   True   True   True
+50x12     MUT-1               0         8   True   True   False
+50x12     MUT-A               8         8   True   True   True     <- placed-not-painted SURVIVES
+50x12     MUT-B               8         8   True   True   True     <- dropped column restriction SURVIVES
+30x6      CORRECT             1         1   True   True   True
+30x6      MUT-1               0         1   True   True   False
+30x6      MUT-A               8         1   True   False  True
+30x6      MUT-B               0         1   True   True   False
+```
+
+Only `(30, 6)` discriminates `MUT-A` and `MUT-B`. **The four-configuration table at `:2196-2199` is
+not belt-and-braces — an `AT` that runs only its first row cannot fail on two of the three named
+mutants**, so the test asserts it drove four configurations and fails if it drove fewer.
 
 ### A-90 — `B-46` gets its own increment, `Inc-CONFIRM`, sequenced with `Inc-REPAIR`
 

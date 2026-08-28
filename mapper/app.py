@@ -9,10 +9,11 @@ from pathlib import Path
 
 from rich.markup import escape
 from rich.text import Text
-from textual import work
+from textual import events, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
+from textual.geometry import Region
 from textual.reactive import reactive
 from textual.screen import ModalScreen, Screen
 from textual.widgets import DataTable, Input, Label, Static
@@ -39,7 +40,13 @@ from .motion import pulse_cursor
 from .osopen import OK as OSOPEN_OK, open_external
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .store import MapStore, TEMPLATES
-from .views.layered import LayeredRenderer
+from .views.layered import (
+    OVERFLOW_TOKEN,
+    LayeredRenderer,
+    header_rows,
+    pan_extent,
+    painted_ids,
+)
 from .views.state import ViewState
 from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
@@ -1125,6 +1132,15 @@ class MapScreen(Screen):
         self.rail_hidden = False
         self.inspector_hidden = False
         self._regions_pinned = False
+        # US-N06.  The screen owns fold and pan; the rail and the renderer are
+        # readers.  `folded` lived on `OutlineRail` until Inc-3, where a region
+        # the layout auto-hides below 118 columns owned state the canvas needed.
+        self.folded: frozenset[str] = frozenset()
+        self.pan_x = 0
+        self.pan_y = 0
+        # The canvas region `_declare_after_layout` last painted a numeral for.
+        # `None` means "never", which is why the first pass always re-schedules.
+        self._declared_for: Region | None = None
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
@@ -1206,6 +1222,14 @@ class MapScreen(Screen):
         # operator blurred it by hand.  Scheduled after the refresh because the
         # rail and the inspector's fields are focusable and mount after this runs.
         self.call_after_refresh(self._park_focus)
+        # `B-56` AND `B-60`, both CLOSED rather than carried.  The carry they
+        # replace was recorded on measurements that were wrong twice over: the
+        # declaration was ABSENT at ordinary sizes rather than merely stale, and
+        # ordinary navigation did not clear it.  See `_declare_after_layout`,
+        # which repaints the two surfaces that DECLARE -- the canvas and the
+        # strip -- and nothing that focuses, so `LLR-CNV.3.1` and `B-50` are
+        # untouched.
+        self.call_after_refresh(self._declare_after_layout)
 
     # -- region layout (LLR-N06.6) -----------------------------------------
     # Below this width the canvas cannot show a card's coverage row without
@@ -1260,11 +1284,324 @@ class MapScreen(Screen):
         self.refresh_canvas()
 
     def action_collapse_branch(self) -> None:
-        self.query_one("#map-rail", OutlineRail).toggle(self.nav.cursor)
+        """Fold or unfold the branch under the cursor — LLR-N06.2.1, LLR-N06.2.2.
+
+        The rail used to own this and mutate its own `collapsed` set, so the
+        canvas never learned about a fold at all.
+        """
+        nid = self.nav.cursor
+        if nid is None:
+            return
+        if nid not in self.folded and not self.graph.children_of(nid):
+            # LLR-N06.2.2.  The natural implementation paints a pill reading
+            # `+0`, which declares a hidden count of zero and is worse than
+            # nothing; the product already answers "nothing to do" out loud
+            # elsewhere (`next_gap` toasts `cobertura completa`).
+            self.notify(
+                "este nodo no tiene descendientes",
+                title="nada que plegar",
+                severity="information",
+                markup=False,
+            )
+            return
+        self.folded = (
+            self.folded - {nid} if nid in self.folded else self.folded | {nid}
+        )
+        self.refresh_canvas()
+
+    # -- pan (HLR-N06.1) ---------------------------------------------------
+    # One press moves the window by this many cells.  A single cell makes the
+    # chord feel dead on a map that overflows by 60 columns; a whole viewport
+    # loses the operator's place.  Vertical is smaller because a card row is
+    # 4-5 cells tall and a page-sized jump skips whole levels.
+    PAN_STEP_X = 8
+    PAN_STEP_Y = 4
+
+    @staticmethod
+    def _clamp_pan(offset: int, extent: int, span: int) -> int:
+        """LLR-N06.1.2 — the legal range is `[0, max(0, E - W)]`, always.
+
+        The `E < W` case is why the outer `max(0, ...)` is there rather than a
+        bare `extent - span`: a map smaller than the canvas has a legal pan
+        range of exactly one position, and a negative upper bound would let
+        `min` return it and slide the map off screen on a small graph.
+        """
+        return max(0, min(offset, max(0, extent - span)))
+
+    # `HEADER_ROWS = 2` USED TO LIVE HERE, AND IT WAS FALSE.  The note argued
+    # the header's length is always `avail + 5` or `2 * avail - 43`, hence
+    # always between `avail` and `2 * avail`, hence exactly two physical rows.
+    # Both of its paddings are CLAMPED AT 0, so below `avail = 48` neither
+    # formula applies: the line is a fixed core plus the `▽ N fuera de vista`
+    # declaration, and on `legacy` that is 55 cells at EVERY narrow width.
+    # Measured, it wraps to THREE physical rows at canvas width 21..34 and FOUR
+    # at 20 -- and `_canvas_size` floors `w` at 20, so the band is one resize
+    # away.  Charging 2 there left the screen believing one or two more body
+    # rows survived than the region could show, and `painted_ids` declared nodes
+    # that leave no trace: at terminal (28,17) it declared `erp` on a frame with
+    # zero card marks while the strip read 7 against a truth of 8.  That is
+    # `CR-F1`'s defect verbatim, one width band over (`B-61`).
+    #
+    # The number is now MEASURED per call by `layered.header_rows`, off the same
+    # `_header_line` helper `render` paints from, so there is no second copy of
+    # the header's shape to drift.
+
+    def _header_rows(self, wrap_w: int) -> int:
+        """The header's measured physical height for the frame about to be sized.
+
+        WRAPPED AT THE WIDGET'S CONTENT WIDTH, WHICH IS NOT `w - 2`.  An earlier
+        revision wrapped at `w - 2` and justified it as "the canvas widget's
+        content width".  Measured across a 943-configuration terminal sweep on
+        `legacy`, it is not: `#map-canvas` is `width: 1fr; height: 100%` with no
+        padding and no border, so its content width equals its REGION width, and
+        that region is `_canvas_width()` at 724 of the 943 and `_canvas_width()
+        - 2` at the other 219.  At terminal (28,17) the content width is 28, not
+        26, and the frame shows three rows because Rich WORD-WRAPS a 55-cell
+        line at 28 -- not because of a two-column inset.  The old reading reached
+        the right row count through the wrong mechanism, which is why it was
+        compensating rather than causing.  So the measured width is passed in.
+
+        `wrap_w` comes from the same `content_size` read `_canvas_size` uses to
+        price the body, so the guard and the subtraction cannot disagree about
+        which frame they are describing.
+        """
+        return header_rows(self.graph, self._canvas_width(), wrap_w)
+
+    def _canvas_width(self) -> int:
+        """Columns the canvas renderer is given.  Floors at 20 (`B-61`'s band)."""
+        size = self.size or self.app.size
+        # The canvas no longer owns the full width: the inspector takes a fixed
+        # column beside it, so render to what is actually left.
+        return max(20, size.width - self._chrome_width())
+
+    def _canvas_size(self) -> tuple[int, int]:
+        """The `(w, h)` the canvas renderer is given, in ONE place.
+
+        `refresh_canvas`, the pan clamp and the overflow helper must all price
+        the same frame; three inline copies of this arithmetic is how they start
+        disagreeing about which nodes were on screen.
+
+        `h` COMES FROM THE WIDGET'S REGION, not from `size.height - 8`, and that
+        is a defect fix US-N06 forced into the open.  Measured on `legacy`: at a
+        50x20 terminal the shipped arithmetic asked for 12 rows into a region
+        that holds 8, so four nodes were drawn into a void -- hidden, with
+        nothing declaring them, which is the story's promise inverted.  Across a
+        nine-size sweep the shipped `h` made the declared painted set disagree
+        with the composited frame at five sizes; the region-derived `h` agrees at
+        all nine.
+
+        THE THREE BRANCHES ARE THREE DIFFERENT FRAMES, and an earlier revision
+        collapsed the middle one into the last.  `region.height == 0` is the
+        genuinely pre-layout case, and only there is `size.height - 8` an honest
+        guess.  A region that is REAL but no taller than the header is not
+        pre-layout at all -- it is a short terminal, and the header has eaten the
+        whole region.  Returning `region.height` there left `row_limit = h - 1`
+        believing canvas row 0 survived, so `painted_ids` declared a node painted
+        that leaves no trace: measured on `legacy` at (31,18), (50,14) and
+        (100,10), all 8 nodes hidden and the indicator declaring 7.  Returning 1
+        makes `row_limit` 0, which is the truth -- no body row is paintable.
+
+        BOTH USES OF THE HEADER'S HEIGHT TAKE THE MEASURED VALUE, and they have
+        to move together: the guard asks "has the header eaten the whole
+        region", the subtraction asks "how many body rows are left".  Charging a
+        constant 2 in either place is `B-61`.  `render` emits `1 + (h - 1)`
+        LOGICAL lines and the widget spends `rows` PHYSICAL rows on the first of
+        them, so the frame shows `region.height - rows` body rows and the
+        renderer must be told `h - 1 = region.height - rows`.
+        """
+        w = self._canvas_width()
+        canvas = self.query_one("#map-canvas", Static)
+        region = canvas.region
+        if not region.height:                    # genuinely pre-layout
+            size = self.size or self.app.size
+            return w, max(5, size.height - 8)
+        # The header is priced AFTER the region is known to be real, because the
+        # width it wraps at is that region's content width -- there is no honest
+        # value for it above this line.
+        rows = self._header_rows(canvas.content_size.width or region.width)
+        if region.height <= rows:                # real, but the header fills it
+            return w, 1                          # row_limit == 0 -> nothing painted
+        return w, region.height - (rows - 1)
+
+    def _reclamp_pan(self, w: int, h: int) -> None:
+        """Pull both offsets back into range for the frame about to be drawn.
+
+        A resize or a fold shrinks the extent under a pan that was legal a
+        moment ago, and `LLR-N06.1.2` says the system shall not ACCEPT an offset
+        outside the range -- not merely that it shall not produce one.
+        """
+        (extent_x, span_x), (extent_y, span_y) = pan_extent(
+            self.graph, self._view_state(w, h)
+        )
+        self.pan_x = self._clamp_pan(self.pan_x, extent_x, span_x)
+        self.pan_y = self._clamp_pan(self.pan_y, extent_y, span_y)
+
+    def _pan(self, dx: int, dy: int) -> None:
+        w, h = self._canvas_size()
+        try:
+            (extent_x, span_x), (extent_y, span_y) = pan_extent(
+                self.graph, self._view_state(w, h)
+            )
+        except Exception:
+            # Same argument as `refresh_canvas`'s guard, and the same sink-scoped
+            # shape: this runs inside the message pump, `_tree_layout` raises by
+            # design on a graph that is not a tree, and an escape here kills the
+            # app with the operator's unsaved edits in it.  Measured on a cyclic
+            # graph before this guard: one `L` press and `app.is_running` went
+            # False.  A frame that cannot be laid out cannot be panned, so the
+            # answer is the one the edge already has a declaration for.
+            self.query_one(HintLine).set_hint("borde del territorio")
+            return
+        nx = self._clamp_pan(self.pan_x + dx * self.PAN_STEP_X, extent_x, span_x)
+        ny = self._clamp_pan(self.pan_y + dy * self.PAN_STEP_Y, extent_y, span_y)
+        if (nx, ny) == (self.pan_x, self.pan_y):
+            # HLR-N06.1's unwanted-behaviour clause.  A silent no-op at the edge
+            # is indistinguishable from a keyboard that stopped working, and
+            # blank space past the content is indistinguishable from "the map
+            # has nothing there" -- the exact confusion US-N06 exists to remove.
+            self.query_one(HintLine).set_hint("borde del territorio")
+            return
+        self.pan_x, self.pan_y = nx, ny
+        # CLEARED ON SUCCESS, and the omission was a real misdescription rather
+        # than untidiness: the hint is set on a no-op and nothing ever unset it,
+        # so on the shipped maps -- where `H`/`L` are no-ops at every width but
+        # one -- it latched on the first sideways press and then sat there
+        # describing every LIVE `J`/`K` as an edge the operator had not reached.
+        self.query_one(HintLine).set_hint("")
+        self.refresh_canvas()
+
+    def action_pan_left(self) -> None:
+        self._pan(-1, 0)
+
+    def action_pan_right(self) -> None:
+        self._pan(1, 0)
+
+    def action_pan_up(self) -> None:
+        self._pan(0, -1)
+
+    def action_pan_down(self) -> None:
+        self._pan(0, 1)
+
+    def _unpainted_ids(self) -> frozenset[str] | None:
+        """The graph's nodes minus the ones the current render actually painted.
+
+        LLR-N06.3.1 read literally: ONE set difference, and no fold count is
+        added to a viewport count anywhere.  Summing the two double-counts every
+        node that is both folded and off-screen, and the indicator then declares
+        more hidden nodes than the graph contains.
+
+        `None` -- not an empty set -- when the operator is in a view that
+        declares nothing.  `painted_ids` lives on `views/layered.py` only, and
+        `outline` and `radial` also hide nodes without declaring them (measured
+        at 30x6 on `legacy`: 5 of 8 and 2 of 8 traced).  That hole is carried as
+        `B-55` to Inc-5; answering it here with a `getattr` probe would convert
+        a declared gap into a silent skip.
+
+        `None` ALSO when the layout itself failed.  `painted_ids` shares
+        `_geometry` with `render`, so it raises on exactly the frames the canvas
+        cannot draw -- and this helper is called from `refresh_canvas`, inside
+        the message pump.  Letting that escape turns a contained, declared
+        degradation ("no se pudo dibujar el mapa") into a dead app.  `None` is
+        the value this helper already has for "this view declares nothing",
+        which is the truthful answer for a frame that was never laid out.
+        """
+        if self._current_renderer() is not self.renderer:
+            return None
+        w, h = self._canvas_size()
+        try:
+            painted = painted_ids(self.graph, self._view_state(w, h))
+        except Exception:
+            return None
+        return frozenset(self.graph.nodes) - painted
 
     def _park_focus(self) -> None:
         """Hand the keyboard back to the map itself."""
         self.set_focus(None)
+
+    def _declare_after_layout(self) -> None:
+        """Repaint BOTH declaring surfaces once layout is real — B-56 and B-60.
+
+        `on_mount` paints before the compositor has given the canvas its region,
+        so the declaration computed there describes a frame that does not exist.
+        Measured on `legacy`, that is not a stale numeral but an ABSENT one: at
+        50x20 and 60x20 -- ordinary sizes -- half the map was off screen and the
+        strip said nothing at all, which `LLR-N06.3.3` makes mean "nothing is
+        hidden".
+
+        AND ORDINARY NAVIGATION DOES NOT HEAL IT.  Measured over nine keys, only
+        `l` and `o` reconcile the surfaces; `j`, `k`, `h`, the arrow keys and
+        `tab` do not -- at the root `j` is a no-op, so nothing repaints.  A
+        reader who only LOOKS at the map, which is US-N06's whole use case,
+        would otherwise keep two contradicting indicators indefinitely.  An
+        earlier revision recomputed only the STRIP and carried the canvas
+        header's own numeral as `B-60` on the claim that "any repaint at all
+        reconciles them"; that claim was measured and is false, so the residual
+        is closed here instead of narrated.
+
+        A full `refresh_canvas` would also close it and would also re-`show` the
+        rail and the inspector, moving the keyboard after `LLR-CNV.3.1` and
+        `B-50` placed it -- measured, `call_after_refresh(refresh_canvas)`
+        reddens the focus arm with `assert 'rail' == 'inspector'`.  So this
+        repaints exactly the two surfaces that DECLARE and nothing that focuses.
+        No `pulse_cursor`: this is a declaration repaint, not a cursor move, and
+        a second breath on mount is motion the operator did not cause.
+        """
+        canvas = self.query_one("#map-canvas", Static)
+        region = canvas.region
+        w, h = self._canvas_size()
+        try:
+            text = self._current_renderer().render(self.graph, self._view_state(w, h))
+        except Exception:
+            # `refresh_canvas` has already painted its declared "no se pudo
+            # dibujar el mapa" for this frame; overwriting it from here would
+            # replace a stated degradation with a second copy of itself.
+            pass
+        else:
+            canvas.update(text)
+        self.query_one("#map-pagination", Static).update(self._pagination_text())
+        # ONE PASS IS NOT ENOUGH, AND THAT WAS `B-60`'s RESIDUAL.  This runs on
+        # the first `call_after_refresh`, and at narrow terminals the region is
+        # still reflowing then: instrumented at (31,16) the three passes saw
+        # 31x1, then 29x2, and the region SETTLED at 31x3 afterwards, so both
+        # declaring surfaces kept a numeral computed for a frame that no longer
+        # existed -- the strip read 8 against a truth of 7.  So the declaration
+        # follows the region until it stops moving, which is the condition it
+        # actually needs and one a one-shot callback cannot express.  It
+        # terminates because it re-schedules only while the region CHANGED, so
+        # a settled layout costs exactly one extra no-op pass.
+        if region != self._declared_for:
+            self._declared_for = region
+            self.call_after_refresh(self._declare_after_layout)
+
+    def on_resize(self, event: events.Resize) -> None:
+        """Re-declare when the layout actually settles — `B-60`, closed properly.
+
+        `on_mount` schedules `_declare_after_layout` on the FIRST
+        `call_after_refresh`, and at narrow terminals that callback runs while
+        `_apply_region_visibility`'s show/hide is still reflowing the row.
+        Instrumented at (31,16): the callback saw a 29x2 canvas region, so
+        `_canvas_size` took the short-region branch, returned `h = 1` and
+        declared nothing painted; the region then settled to 31x3.  With no
+        resize handler nothing recomputed, so BOTH declaring surfaces kept a
+        numeral computed for a frame that no longer existed -- the strip said 8
+        while 7 were hidden.  Reproduced at (31,16), (32,16), (34,15), (35,14)
+        on `legacy` and independently on `anidado`, so it is not a fixture
+        quirk.
+
+        A one-shot post-mount callback cannot see the settle; the resize can.
+        This repaints the same two surfaces `_declare_after_layout` does and
+        nothing that focuses, so `LLR-CNV.3.1` and `B-50` stay where they are.
+
+        THIS HANDLER ALONE DOES NOT CLOSE IT, and the measurement says why: a
+        SCREEN resize is not a CANVAS resize.  Traced at (31,16), this fires
+        once with the terminal's own 31x16 -- BEFORE the row reflows -- and the
+        canvas region moves twice more afterwards without any further screen
+        resize.  So this covers the case that had no handler at all, an operator
+        resizing the terminal after mount, and `_declare_after_layout` chases
+        the region to its settle from wherever it is entered.
+        """
+        self._declared_for = None
+        self._declare_after_layout()
 
     def _current_renderer(self):
         if self.outline_mode:
@@ -1280,12 +1617,26 @@ class MapScreen(Screen):
         return prefix
 
     def _branch_coverage_glyph(self, branch_root: str) -> tuple[str, str]:
-        """Return (glyph, style) for a top-level branch's coverage minimap."""
+        """Return (glyph, style) for a top-level branch's coverage minimap.
+
+        THE `seen` SET IS NOT DEFENSIVE PADDING; without it this walk does not
+        terminate.  It had no visited check at all, so on a graph with a cycle
+        it re-expanded the same nodes forever -- an unbounded HANG reached from
+        `refresh_canvas`, outside every guard, which is worse than the crash the
+        sibling guards catch and is the one failure mode this tree's own rule
+        singles out.  It also double-counted on a multi-parent DAG, where a node
+        reachable by two paths landed in `nodes` twice and skewed the coverage
+        percentage this glyph exists to report.
+        """
         nodes = [branch_root]
+        seen = {branch_root}
         stack = [branch_root]
         while stack:
             parent = stack.pop()
             for cid in self.graph.children_of(parent):
+                if cid in seen:
+                    continue
+                seen.add(cid)
                 nodes.append(cid)
                 stack.append(cid)
         total = len(nodes)
@@ -1305,7 +1656,14 @@ class MapScreen(Screen):
         parts: list[tuple[str, str]] = [("  cobertura   ", darkside.MUT)]
         for cid in self.graph.children_of(self.graph.root_id):
             glyph, style = self._branch_coverage_glyph(cid)
-            name = self.graph.nodes[cid].ficha.title or cid
+            # Both halves are file-derived, and this widget's whole job is
+            # telling the operator WHICH branch is at risk -- a `U+202E` here
+            # displays one branch's coverage under a neighbour's name, so an
+            # uncoerced title deceives the operator on exactly the judgement the
+            # minimap exists to support.  `refresh_canvas` repaints it, which is
+            # what puts it inside `LLR-N06.2.3`'s "every file-derived string
+            # painted on a surface this batch touches".
+            name = darkside.plain(self.graph.nodes[cid].ficha.title or cid)
             parts.append((f"{name} ", darkside.MUT))
             parts.append((glyph, style))
             parts.append(("   ", ""))
@@ -1322,11 +1680,20 @@ class MapScreen(Screen):
         page = 1
         per_page = max(1, total)
         # For now the tree is not paginated; this reserves the affordance.
-        return darkside.Text.assemble(
+        text = darkside.Text.assemble(
             (" ", ""),
             darkside.step_meter(min(page, per_page), per_page),
             (f"   {page}/{per_page}  ", darkside.MUT),
         )
+        # HLR-N06.3 on the strip beside the canvas, from the SAME `painted_ids`
+        # pass the renderer used, so the two surfaces cannot declare different
+        # totals.  `None` means a view that declares nothing, and the strip then
+        # keeps only its reserved-affordance content.
+        hidden = self._unpainted_ids()
+        if hidden:
+            text.append(f"{OVERFLOW_TOKEN} {len(hidden)} fuera de vista ",
+                        style=darkside.INK)
+        return text
 
     def _event_toast(self, label: str, detail: str = "") -> None:
         """Bottom strip for events only — status words, not glyphs."""
@@ -1401,20 +1768,23 @@ class MapScreen(Screen):
             focus_owner=self._focus_owner(),
             query=self.query_text,
             diff=self.diff if self.diff_active else None,
+            pan_x=self.pan_x,
+            pan_y=self.pan_y,
+            folded=self.folded,
         )
 
     def refresh_canvas(self) -> None:
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
-        size = self.size or self.app.size
-        # The canvas no longer owns the full width: the inspector takes a fixed
-        # column beside it, so render to what is actually left.
-        w = max(20, size.width - self._chrome_width())
-        h = max(5, size.height - 8)
+        w, h = self._canvas_size()
         # Any renderer failure is a drawing problem, not an application problem:
         # this method runs inside the message pump, so an escape here kills the
-        # app.  Scoped to the sink, not to the exception types known today.
+        # app.  Scoped to the sink, not to the exception types known today --
+        # which is why `_reclamp_pan` is INSIDE it rather than beside it: it
+        # reaches the same `_tree_layout` the render does, and Inc-3 had moved it
+        # out where the guard could not see it.
         try:
+            self._reclamp_pan(w, h)
             text = renderer.render(self.graph, self._view_state(w, h))
         except Exception as exc:
             text = darkside.Text.assemble(
@@ -1427,11 +1797,48 @@ class MapScreen(Screen):
         tab = self.query_one(TabStrip)
         node = self.graph.nodes.get(self.nav.cursor or "")
         node_title = node.ficha.title if node else ""
-        tab.set_crumb(self._current_crumb() + [node_title])
+        # EVERY crumb segment, not just the title: `_current_crumb` also carries
+        # `map_id` and the link chain, which are file-derived too.  Found by the
+        # frame-level half of `LLR-N06.2.3`'s census rather than by the
+        # region-by-region half -- `TabStrip` is queried BY TYPE here, so it has
+        # no id for a region sweep to enumerate, and a hostile ficha title was
+        # reaching the composited frame through the breadcrumb with the same
+        # `U+202E` the minimap leaked.
+        tab.set_crumb([
+            darkside.plain(part) for part in self._current_crumb() + [node_title]
+        ])
 
         self.query_one("#map-inspector", FichaInspector).show(node, self.graph)
-        self.query_one("#map-rail", OutlineRail).show(self.graph, self.nav.cursor)
-        self.query_one("#map-minimap", Static).update(self._minimap_text())
+        self.query_one("#map-rail", OutlineRail).show(
+            self.graph, self.nav.cursor, self.folded
+        )
+        # GUARDED LIKE ITS SIBLING, and the asymmetry was the finding: this call
+        # sits past the `try` above, `_branch_coverage_glyph` and `_minimap_text`
+        # both index `self.graph.nodes[...]` unchecked, and a dangling edge
+        # raises `KeyError` from inside the message pump -- which kills the app,
+        # exactly the shape the cycle guard was added for.  `_unpainted_ids` has
+        # its own try/except; the minimap had none.  A coverage strip that
+        # cannot be drawn is a drawing problem, so it degrades to empty.
+        #
+        # THIS GUARD DOES NOT SAVE THE APP ON A DANGLING EDGE, and the comment
+        # above says only that this method stops leaking one.  Measured, the
+        # composited paint of the same graph still dies: `OutlineRail.render`
+        # indexes `graph.nodes[...]` unchecked too and raises at compositor
+        # paint time, one sink over and on a different path.  That sink is
+        # CARRIED, not closed -- see the arm in `tests/test_pan.py` that states
+        # in terms what it asserts (the exception does not escape this method)
+        # and what it does not (that the frame survives).
+        try:
+            minimap = self._minimap_text()
+        except Exception:
+            minimap = darkside.Text("")
+        self.query_one("#map-minimap", Static).update(minimap)
+        # LAST, and the position is load-bearing rather than incidental: the
+        # declaration is computed from `painted_ids` over the state that was
+        # just rendered, and `_focus_owner` -- which `_view_state` reads -- is
+        # only settled once the side regions have been shown.  Moved ahead of
+        # them during development and 6 arms went red on focus and on the rail's
+        # byte identity.
         self.query_one("#map-pagination", Static).update(self._pagination_text())
 
     def on_ficha_inspector_field_committed(

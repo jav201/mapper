@@ -47,7 +47,9 @@ SCOPE_OWNER = {
 # must now be a deliberate edit here.
 EXPECTED_PER_SCOPE = {
     keymap.SCOPE_HOME: 11,
-    keymap.SCOPE_MAP: 25,
+    # 25 -> 29: Inc-3 adds the four US-N06 pan chords `H` `J` `K` `L` to the
+    # `view` group.  Updated deliberately, in the same edit as the seat rows.
+    keymap.SCOPE_MAP: 29,
     keymap.SCOPE_REPO: 3,
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,

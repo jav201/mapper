@@ -69,6 +69,16 @@ class ViewState:
     # `hits` set in the increment that gives that question a single owner.
     query: str = ""
     diff: DiffResult | None = None
+    # Where the drawing origin sits, in canvas cells.  The renderer translates
+    # by these; it holds no pan state of its own, per the ARQ rule that
+    # `ViewState` is a message and not a store (LLR-N06.1.1).
+    pan_x: int = 0
+    pan_y: int = 0
+    # The node ids whose subtrees are folded away.  `MapScreen` owns this set
+    # and the renderer is one of its two readers (LLR-N06.2.1); a `frozenset`
+    # rather than a `set` because this object is frozen and a mutable default
+    # would let a renderer edit the caller's fold state while drawing.
+    folded: frozenset[str] = frozenset()
 
 
 @runtime_checkable

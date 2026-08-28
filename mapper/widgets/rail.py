@@ -32,21 +32,19 @@ class OutlineRail(Static):
         super().__init__(**kwargs)
         self.graph = Graph()
         self.cursor: str | None = None
-        self.collapsed: set[str] = set()
+        # RENDERED, NOT OWNED (LLR-N06.2.1).  The rail used to hold a
+        # `collapsed` set and a `toggle` that mutated it, which made fold state
+        # live inside a widget `_apply_region_visibility` auto-hides below 118
+        # columns -- so the canvas could not read it and the two surfaces could
+        # disagree about what was folded.  `MapScreen` owns the set now; this
+        # attribute is only the last value it was handed.
+        self.folded: frozenset[str] = frozenset()
 
-    def show(self, graph: Graph, cursor: str | None) -> None:
+    def show(self, graph: Graph, cursor: str | None,
+             folded: frozenset[str]) -> None:
         self.graph = graph
         self.cursor = cursor
-        self.refresh()
-
-    def toggle(self, node_id: str | None) -> None:
-        """Collapse or expand a branch."""
-        if node_id is None:
-            return
-        if node_id in self.collapsed:
-            self.collapsed.discard(node_id)
-        else:
-            self.collapsed.add(node_id)
+        self.folded = folded
         self.refresh()
 
     # -- structure ---------------------------------------------------------
@@ -82,7 +80,7 @@ class OutlineRail(Static):
             if nid in visiting:
                 raise ValueError(f"cycle through {nid}: the graph is not a tree")
             rows.append((nid, depth))
-            if nid in self.collapsed:
+            if nid in self.folded:
                 continue
             children = index.get(nid)
             if not children:
@@ -224,7 +222,7 @@ class OutlineRail(Static):
             has_children = bool(index.get(nid))
             if not has_children:
                 marker = "  "
-            elif nid in self.collapsed:
+            elif nid in self.folded:
                 marker = "▸ "
             else:
                 marker = "▾ "
