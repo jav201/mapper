@@ -67,7 +67,7 @@
         "battery": "6 rounds, 154 arms asserted green before any verdict, sha256 restore on 8 files after every mutant",
         "amendments": "A-77..A-88",
         "unplanned_defects": "WARN's job made LLR-S06.3.5's own threshold unsatisfiable (A-78); the sealed C0 range row omitted U+000D so adopting it NARROWED shipped coverage (A-80); radial sliced titles raw into the exported SVG; AT-009 derived its oracle from the constant under test and was green while 19 invisible code points reached the artifact (A-87). Confirmation pass also caught a fabricated measurement in production source (a probe that constructed the theme it observed) and a fix of mine that repaired nothing."
-      }
+      },
       {
         "inc": "Inc-2",
         "commit": "fe50799",
