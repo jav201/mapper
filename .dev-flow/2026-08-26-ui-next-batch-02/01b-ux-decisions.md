@@ -370,11 +370,21 @@ This constrains DECISION 3's deliverable directly, so it is stated here as well 
   VERDICT: DOES NOT FIT — short by 20 rows
 ```
 
-The vocabulary specified above is **21 rows** (V1–V21), not the prototype's 6, which makes the
-shortfall larger than the number above, not smaller. **US-N16 cannot paint one flat panel.** It needs
+The vocabulary specified above is **substantially larger than the prototype's 6** — the exact row
+count is DERIVED from the table above by `LLR-N16.2.1`, never written as a literal here (amendment
+`A-45`; see the note below) — which makes the shortfall larger than the number above, not smaller.
+**US-N16 cannot paint one flat panel.** It needs
 a scrolling container or a two-pane/tabbed legend, and whichever is chosen, the set-equality
 criterion must assert over the panel's **content**, not over what happens to be visible — otherwise
 the assertion passes on a clipped panel, which is what ships today (§5, step 6).
+
+> **⚠ Why no literal count appears here (amendment `A-45`, routed from the RIDER-1 reconciliation).**
+> This line previously read *"**21 rows** (V1–V21)"*. It was the **fourth** live site of a stale
+> literal, and the correction is not the obvious one: the table above carries **23** labels, but `V4`
+> and `V4a` are byte-identical in glyph, label and style, so striking the duplicate takes it to
+> **22**. *"Correct 21 to 23"* would therefore have been wrong **twice**. The count is now derived by
+> `LLR-N16.2.1` over distinct `(glyph, label, style)` triples, and no literal is maintained by hand
+> anywhere — a hand-maintained census is a defect, including in a requirements table (`P-18`).
 
 ---
 
