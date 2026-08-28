@@ -231,7 +231,9 @@ Both executed, both are arguments *from evidence* rather than from taste:
    `app.py:1671` passes `query=` **only** — so an SVG exported while a diff is active silently loses the
    diff tinting. Nothing catches it, because the parameter list is positional-plus-kwargs with no shared
    declaration.
-2. **`**kwargs` silently swallows.** `LayeredRenderer.render` (`layered.py:78-87`) declares
+2. **`**kwargs` silently swallows.** `LayeredRenderer.render` (`layered.py:131-140` — *address
+   corrected 2026-08-27; the row previously said `:78-87`, which no longer resolves. The claim
+   itself re-executes TRUE*) declares
    `query`, `with_header`, `diff` by name; `outline.py:17` and `radial.py:33` and all three of
    `lane.py`'s renderers declare `**kwargs` and **drop `query` on the floor**. US-N07 requires a hit
    count and navigation **in every view**. That requirement is *unbuildable* while the swallow survives:
@@ -272,7 +274,10 @@ class ViewState:
     lens_matches: frozenset[str] | None = None     # None = no lens active
     # -- provenance & chrome --------------------------------------------
     diff: DiffResult | None = None
-    with_header: bool = True
+    # `with_header` was STRUCK by `PDR-2026-08-26-ui-next-batch-02#D2` (0 requirement
+    # hits, 0 call sites).  The strike landed in `01-requirements.md` at pass 1 and is
+    # landed HERE 2026-08-27, closing `P2-C4` / amendment `A-56`.  Do not reinstate it:
+    # `LLR-N07.2.3`'s signature clause cannot catch a stray FIELD, only a parameter.
 
 
 @runtime_checkable
