@@ -2137,12 +2137,27 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   1.85 : 1 and at 8 : 1, and equally true when the glyph is painted in the background colour.
   `PRED-1` through `PRED-3` are all satisfiable on a frame in which the operator sees nothing.
   **Every one of the four predicates can be green while the story fails**, unless `PRED-4` is there.
-- **DISCHARGE — `V7` and `V8` move off `WORDMARK` to `MUT`; `WORDMARK` keeps `V4`.** `MUT` clears the
-  floor at the guaranteed rung and is already the declaration register elsewhere in the product. It
-  is one token change in `mapper/darkside.py`'s usage, and **`Inc-1` owns that file**, so it costs no
-  file budget. **`V4` (`territorio sin explorar`) stays on `WORDMARK` deliberately** — barely-there
-  is the *point* for unexplored territory, and moving it would make dust compete with content.
-- **Named weaker variant (`M-N06.3-legibility`):** move `V7` to `MUT` and leave `V8`. Green on
+- ~~**DISCHARGE — `V7` and `V8` move off `WORDMARK` to `MUT`.** `MUT` clears the floor at the
+  guaranteed rung…~~ **STRUCK 2026-08-27 — `MUT` DOES NOT CLEAR THE FLOOR, AND THE MEASUREMENT
+  SAYING SO WAS FOUR LINES ABOVE THE CLAUSE (`UX3-C-A`, ruled `PDR-addendum-3#D28`).**
+  `:2127` prints `MUT` **`EIGHT_BIT (slot 242) 4.00 : 1`** at the guaranteed rung, against a floor of
+  `>= 4.5 : 1`. **The discharge clause of `PRED-4` failed `PRED-4`.**
+- **DISCHARGE (ruled) — `V7` and `V8` move off `WORDMARK` to **`INK`**; `WORDMARK` keeps `V4`.**
+  **The floor stands and the token changes** — restating an accessibility floor downward to rescue a
+  token choice is the floor-bends-to-the-implementation defect this batch keeps catching. Derived,
+  not picked: of the tokens clearing `4.5 : 1` at the guaranteed rung, `ACCENT`, `ALERT` and `WARN`
+  each hold a single declared job (`LLR-S06.3.3`, `LLR-S06.3.5`), leaving **`INK` the only free
+  candidate**. It is one token change in `mapper/darkside.py`'s usage and **`Inc-1` owns that file**,
+  so it costs no file budget.
+- **THE GENERAL RULE THE MEASUREMENTS IMPLY (`#D28`), stated so this is not re-derived per seat:**
+  **`MUT` is legal for READABLE, load-bearing text only on `GROUND`**, where it clears the floor
+  (`4.43 : 1` truecolor). **Any `MUT`-on-`PANEL` readable-text seat escalates to `INK`** — `MUT` on
+  `PANEL` measures **`3.57 : 1`**.
+  **EXEMPT, explicitly, so the rule cannot be over-applied and kill the dim tier:** purely
+  **decorative / non-load-bearing** marks — rules, lattice dots, ground texture — carry no floor.
+  **`V4` (`territorio sin explorar`) stays on `WORDMARK` under this exemption**: barely-there is the
+  *point* for unexplored territory, and moving it would make dust compete with content.
+- **Named weaker variant (`M-N06.3-legibility`):** move `V7` to `INK` and leave `V8`. Green on
   `PRED-4` as quantified over the overflow declaration alone, and the minimap caption — the other
   half of "how much is not on screen" — stays at 1.85 : 1. Reddened by quantifying `PRED-4` over
   **every** token carrying a declaration role, derived from `01b` DECISION 3 rather than named here.
@@ -3104,6 +3119,29 @@ be gated.
   **transient toast** while the card is **permanent** — after the toast clears there is no trace at
   all. The parked inequality threshold passes on this frame the moment the string lands, so the
   clause needs the visual limb or it certifies the defect.
+- **`PRED-VIS` RESOLVED (`PDR-addendum-3#D27` + `#D28`): a DECLARED GLYPH, painted `INK on PANEL`.**
+  **No colour token is spent** — executed, there is no unspent one: `SAGE`, `TEAL` and `VIOLET` are
+  each already jobbed in `01b` §3.4/§3.5, and `ALERT` is free only because the malformed-query chip
+  travels with the **cut** lens, which is **C-55 limb 2** — an emptiness that is an accident of this
+  batch's scope. Spending it hands the follow-on batch a two-job token and an unadjudicable
+  `LLR-S06.3.5` census.
+  - **`INK`, not `MUT on PANEL`.** `MUT on PANEL` measures **`3.57 : 1`** against this batch's own
+    `4.5 : 1` floor, and the damaged card's copy invites an action (`mapa dañado — ↵ ver por qué`),
+    so it is **readable, load-bearing text**, not a passive status. `#D28`'s rule applies:
+    `MUT`-on-`PANEL` readable text escalates to `INK`.
+  - **`PRED-VIS` MEMBERSHIP CLAUSE — the glyph shall be a member of `declared_vocabulary`, asserted
+    at run time.** Without it the derived-set test cannot see this: `LLR-N16.2.1` asserts what the
+    **legend** paints, not what the **card** paints, so `Inc-7` could paint a bare `!` and **every
+    arm stays green**. The clause closes that with one predicate and leaves `C-D27b` intact — the
+    codepoint is still not fixed here, it is drawn from the declared vocabulary by the increment
+    that paints it.
+  - **`C-D27e` — a legibility arm measured against the background it actually paints on**, at the
+    declared context of use **118 × 34**. `PRED-4`'s floor was breached by a clause four lines under
+    its own measurement; this arm is what stops the same shape recurring on the card.
+  - **`C-D27d` is a THRESHOLD, not a note:** assert `roto`'s painted non-name cells differ from
+    `sano_vacio`'s, keeping `sano_vacio` as the known-healthy control. **For the `S-22` class there
+    is no toast at all**, so the glyph is the *only* signal — which is why the `Inc-REPAIR` → `Inc-7`
+    sequencing is load-bearing rather than tidy.
 - **⚠ THE TOKEN THIS WANTS IS `ALERT`, AND TAKING IT HAS A DECLARED COST.** `LLR-S06.3.5` gives
   `ALERT` the job *failure or blockage — this item cannot proceed as it stands*, which fits exactly.
   **But `01b` §3.5 records the rule that if `ALERT` acquires a second job it must acquire a row in
@@ -4665,6 +4703,15 @@ be gated.
 - **Statement:** When the sidecar declares a node id that the parsed `.mmd` does not define, the
   store shall append a load warning naming that id, and shall not change the meaning of the coverage
   values it returns.
+- **⚠ THE THRESHOLD IS QUANTIFIED OVER **EVERY** PHANTOM ID, NOT OVER THE FIXTURE'S ONE
+  (`S-24`, security lens, 2026-08-27).** The statement above already quantifies correctly — *"a node
+  id"*, per id — but the **numeric threshold was written for the one-phantom fixture**, so a
+  **warn-once-then-silent** implementation passes it. Measured: **10 phantoms inflate the denominator
+  by 10.** Threshold, restated: for a sidecar declaring **N** phantom ids, `len(load_warnings)`
+  attributable to this cause **shall equal N**, and the **set of named ids shall equal the set of
+  phantoms** — set equality, not a count, so a warning naming the same id twice cannot satisfy it.
+  Reddened by `M-REPAIR.1-c`: warn on the first phantom only, which is green under the old threshold
+  and RED under this one.
 - **Touched symbols:** `mapper/store.py` — the sidecar node-ingest branch at `store.py:400-401`,
   which today reads *"if the id is not in `graph.nodes`, add a node"*;
   `mapper/model.py::Graph.load_warnings` — **existing**, the same channel the duplicate-id and
@@ -5550,10 +5597,21 @@ HLR; every story with a `READY` verdict except S-3b and the superseded S-7 carri
    naming `Inc-1` as where it lands. This is a *commitment* row landing now; the *present-tense*
    correction of `:70` and `:146` is the Phase-6 amendment above, and the two are deliberately not
    the same edit.
-8. The A3 reverse census is **derived from the code, never taken by eye**: after Inc-2,
-   `grep -rn "def render" mapper/views/` returns 6 definitions and **0** of them declare `**kwargs`;
-   `grep -rn "\.render(" mapper/ tests/` resolves every call site to the new signature. Absence of
-   the old shape is **asserted**, not assumed (risk A-1).
+8. The A3 reverse census is **derived from the code, never taken by eye**: after Inc-2, an **AST
+   walk** returns 6 `render` definitions under `mapper/views/` with **0** declaring `**kwargs`, and
+   resolves **23 arg-ful call sites across 10 files (3 production: `app.py:737`, `:1352`, `:1727`)**
+   to the new signature. Absence of the old shape is **asserted**, not assumed (risk A-1).
+   > **CORRECTED 2026-08-27 (qa lens `QA3-C-06`).** This criterion previously specified the census as
+   > `grep -rn "\.render(" mapper/ tests/` — **which is `M-N07.2.2a-b`, the named weaker variant this
+   > document already states can never equal the migrated set** (`:2572-2575`). An exit criterion
+   > citing its own rejected mutant. A substring search cannot tell a call from a **mention**: it
+   > sweeps in **25 zero-arg Textual `Widget.render()` sites** — a different protocol — and a
+   > docstring mention at `mapper/widgets/rail.py:180`. That grep produced **five wrong generations**
+   > of this number; only an AST separates the two protocols. `P-21` in the backlog is the standing
+   > rule.
+   > **⚠ There is NO criterion 6.** It existed at `ea1fbf9` and its subject was absorbed; the numbering
+   > is left as `1,2,3,4,5,7,8` **deliberately**, because renumbering would break every citation of
+   > criteria 7 and 8 across the batch. Recorded so the gap reads as known rather than as a drop.
 
 ---
 
@@ -5598,7 +5656,7 @@ that cannot be a prefix or a suffix of another increment id is the whole reason 
 | ~~**Inc-6**~~ | ~~US-N14 lente~~ | **VACATED** — deferred whole by `#D23` (§3.7). The id is retired, not reassigned | — | — |
 | **Inc-REPAIR** | `B-29` phantom sidecar warning · `B-30` path disclosure (§3.9) | **new** | `store.py` | **1** |
 | **Inc-7** | US-N13 sala | live | `app.py`, `darkside.py`, `store.py` | 3 |
-| **Inc-8** | S-8 truncation + the glyph vocabulary (the legend panel) | live | `screens/help.py`, `darkside.py`, `app.py` | 3 |
+| **Inc-8** | S-8 truncation + the glyph vocabulary (the legend panel) · adds seat rows for `HLR-N16.4` | live | `screens/help.py`, `darkside.py`, `app.py`, **`keymap.py`** | **4** ⚠ |
 | **Inc-9** | help scope routing + `KEY_SCOPE` declarations + seat migration · **`LLR-N06.2.5`** re-parented in by `#D21` | live | `keymap.py`, `screens/factory.py`, `screens/settings.py`, `app.py` | 4 |
 
 **Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → `Inc-4` → `Inc-5` → `Inc-REPAIR` → `Inc-7` →
