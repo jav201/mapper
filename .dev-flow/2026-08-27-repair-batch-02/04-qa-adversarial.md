@@ -1022,3 +1022,343 @@ twice).
 | Every figure executed, none copied | ✓ | §3.7 |
 | Clean categories reported as clean, not padded | ✓ | §3 — 7 categories |
 | No repo file edited; no git mutation in the main tree | ✓ | detached `git archive` copy; lab `store.py` + boundary file byte-identical to `01d7578` (EOL-normalised) at close |
+
+---
+
+# Re-confirmation review — HIGH-A fix (post-fix tree, d75f0fd)
+
+**Reviewer:** `code-reviewer`, independent re-confirmation pass. Not the author; not the QA reviewer
+who raised HIGH-1; not the confirmation reviewer who raised HIGH-A.
+**Target:** branch `fix/repair-batch-02`, commit **`d75f0fd`**, PR #3, diff `01d7578..d75f0fd`.
+**This gates the merge.** **Date:** 2026-08-27
+**Posture:** the author's evidence is a claim, not a result. Every figure below was executed in this
+session against a `git archive d75f0fd` copy in my own scratchpad, `PYTHONDONTWRITEBYTECODE=1`, every
+substitution guarded by an asserted hit count of exactly 1, every restore proven by sha256, every
+verdict taken **per resolved arm** and never from a process exit code. Mutations are described by
+position and operation, never spelled verbatim.
+
+## Verdict — **PASS WITH CONDITIONS**. No HIGH. Two MEDIUM, three LOW.
+
+**HIGH-A is genuinely closed, and closed with real arms rather than theatre.** I rebuilt all four
+surviving mutants from the finding's own description rather than taking the author's figures: each
+now reddens, at **6 / 6 / 6 / 2** RED arms, exactly the numbers `04-gate-findings-disposition.md`
+claims. I then attacked the three new arms from four further directions and each is independently
+killable. **MEDIUM-C's end-to-end proof, which the previous reviewer explicitly could not perform
+because it required editing the tree, succeeds here**: I landed the offending annotation spellings in
+`mapper/model.py` in the lab and `test_at_p02i` reddens on both.
+
+**I hunted hard for a fifth surviving mutation, as the two passes before me each found one.** I found
+one green survivor in shipped behaviour — and then **built the sibling comparison instead of
+assuming the asymmetry, and it defused the finding**: the covered sibling does not gate that limb
+either. It is symmetric and pre-existing, not the HIGH-A shape. I report it as a LOW and explicitly
+decline to inflate it.
+
+**What holds the conditions is record-truth, not correctness.** The rewritten `_str_map_fields`
+docstring — the one rewritten to *fix* MEDIUM-B — closes by naming `test_at_p02i` as the gate for a
+change that node does not gate. Executed: **0 RED of 643**. And `05-carries.md` hands the next
+session a collected-count that is stale at the very tip it names, inside the carry whose whole
+purpose is to stop a stale count propagating.
+
+**No repo file was edited by this pass except this one.** At close, the lab tree is byte-identical to
+pristine `d75f0fd` for every tracked file (`diff -r` against a fresh archive: no differences), and
+`git status --porcelain` in the main repo is **empty** — the working-tree drift the previous pass had
+to disclaim did not recur.
+
+---
+
+## 1 · Numbers — re-derived, not copied
+
+| Figure | Disposition claims | **Measured here** |
+|---|---|---|
+| collected | 643 | **643** |
+| fast lane | 626 passed / 17 deselected | **626 passed, 17 deselected**, 55.3s, exit 0 |
+| slow lane | 17 passed / 626 deselected | **17 passed, 626 deselected**, 23.5s, exit 0 |
+| `ruff check mapper/ tests/` | 29 (= base) | **29** |
+| ruff on the three touched files | clean | **All checks passed!** |
+| arm arithmetic `643 = 548 + 12 + 83` | asserted | **exact** — boundary file 84 to **96** (+12); claims file **83** = 1 + 2x41 corpus files |
+| the four HIGH-A mutants | 6 / 6 / 6 / 2 | **6 / 6 / 6 / 2**, arm names matched |
+
+---
+
+## 2 · HIGH-A — closed. Rebuilt from scratch, per limb.
+
+Every limb the previous pass measured at **0 RED of 548** now reddens. Whole-tree runs assert **643
+resolved arms** before any verdict is read.
+
+| Limb | Mutation (by position/operation) | RED arms | The arms |
+|---|---|---|---|
+| non-mapping refusal sink | guard predicate forced never to fire | **6** | all six `test_at_p02g` arms |
+| ...its record | the record append replaced by a no-op, refusal kept | **6** | all six `test_at_p02g` arms |
+| ...its refusal | sink returns a one-entry map of the value's repr | **6** | all six `test_at_p02g` arms |
+| collision record | collision predicate forced never to fire | **2** | both `test_at_p02h` arms |
+| sink record's **owner** coordinate | owner replaced by a literal | **6** | all six `test_at_p02g` arms |
+| collision record's **field** coordinate | field replaced by a literal | **2** | both `test_at_p02h` arms |
+| product str-map predicate matches nothing | value type in the comparison altered | **12** | 2x`test_at_p02`, 2x`test_at_p02c`, 6x`test_at_p02g`, 2x`test_at_p02h` |
+
+The last two rows are mine, not the author's: **the record coordinates are gated too**, so the C2
+defect class is not re-introduced for the new family.
+
+**`test_at_p02g`'s three thresholds are separately gated, not one masking two.** Each threshold has
+its own killing mutant above: removing the guard denies the map (the arm errors on load), returning a
+repr fails the `== {}` assertion, silencing the record fails the containment assertion. Assertion
+order does mask *within* a single arm — a repr-returning mutant never reaches the record assertion —
+but that costs nothing, because the record assertion has its own mutant that reaches it.
+
+**`test_at_p02i` is a real gate, killed from three independent directions:**
+
+| Mutation | RED arms |
+|---|---|
+| a class's declared non-text tuple emptied | **1** — `test_at_p02i[Document]` |
+| a declared name that is not a field of the class | **1** — `test_at_p02i[Ficha]` |
+| a name both classified as text and declared non-text | **1** — `test_at_p02i[Attachment]` |
+
+**MEDIUM-C, proved end-to-end — the step the previous pass could not take.** I landed the annotation
+spellings the resolved predicate is still blind to, in `mapper/model.py` in the lab:
+
+| Field landed on `Document` | RED arms |
+|---|---|
+| a `Mapping[str, str]` field | **1** — `test_at_p02i[Document]` |
+| a `str \| None` field | **1** — `test_at_p02i[Document]` |
+
+Both are caught. The latent mechanism MEDIUM-C described is genuinely covered by the totality guard.
+
+**AMD-2's neutrality claim is TRUE, and I extended it past what the packet checked.** The packet
+compares the spelled and resolved predicates over four dataclasses; I ran all **seven** in
+`mapper/model.py`, and the classification is identical for every one (`SchemaField ()`,
+`Attachment ()`, `Ficha ('fields',)`, `Node ()`, `Edge ()`, `Document ('tags','inherited')`,
+`Graph ()`). Reverting either predicate — product or census — to the old spelled match reddens **0**
+arms, in both directions. It is a blindness fix, not a behaviour change.
+
+**The census derivation stays honest under extension.** Landing a plain `str` field on `Ficha`
+reddens **2** arms (the new position's `test_at_p02` arm and `test_tc_p01c`) — the census grows and
+the hand-written serialiser's failure to round-trip it is caught loudly, exactly as designed.
+
+---
+
+## 3 · MEDIUM
+
+### MEDIUM-1 — the rewritten `_str_map_fields` docstring names a gate for a change that node does not gate; **0 RED of 643**
+
+`mapper/store.py:120-121`, the closing sentence of the docstring rewritten in this commit *to fix
+MEDIUM-B*:
+
+> No other round-tripped dataclass declares a `dict[str, str]` today, and `test_at_p02i` fails
+> loudly if one appears.
+
+**Executed, whole tree, 643 resolved arms each:**
+
+| Field landed in `mapper/model.py` | RED arms of 643 |
+|---|---|
+| a `dict[str, str]` field on `Attachment` | **0** |
+| a `dict[str, str]` field on `SchemaField` | **0** |
+| a second `dict[str, str]` field on `Ficha` | **0** |
+
+`test_at_p02i` asserts `every == classified | declared`. A `dict[str, str]` field **is** classified —
+`_str_map_field_names` returns it — so the guard passes, silently. The guard fires on fields that are
+*neither* text nor str-map (which is what its own docstring correctly claims, and what I proved in
+§2); it does not fire on a new str-map on a class the coercion does not reach. Such a field would be
+neither coerced (the call site is `Document`-only) nor written (`_build_sidecar` is hand-enumerated),
+so it would be silently dropped — the precise outcome MEDIUM-B was raised about.
+
+**Why this is a MEDIUM and not a HIGH.** No shipped behaviour is left ungated by it; the cost is a
+future maintainer's false reassurance, not a live defect, and no test gives false confidence about
+code that exists today. **Why it is not a LOW.** It is the same sentence, the same function and the
+same file as MEDIUM-B, and the correction fixed the *coercion* half while introducing a fresh false
+claim in the *gate* half — and naming a specific node as the gate for something it does not gate is
+structurally the "gated by `Q-high1`: 8 arms" shape that made HIGH-A a HIGH.
+
+**Suggested fix** — say what the guard does, which is already true and already valuable:
+
+> No other round-tripped dataclass declares a `dict[str, str]` today. `test_at_p02i` does **not**
+> catch one that appears — a str-map classifies, so the guard passes; what it catches is a field that
+> is neither text nor a str-map. A `dict[str, str]` on another dataclass must be routed here (or to
+> its own coercion site) by hand, and `_build_sidecar` extended to write it.
+
+**Same class, same fix, two more places.** `03-increments/increment-004.md` §1.2 and
+`01-requirements.md` §7 AMD-2 both say the guard covers "every field of **every** round-tripped
+dataclass". Measured: it covers **4 of the 7** dataclasses in `mapper/model.py` — `Node`, `Edge` and
+`Graph` are absent from its class set, and `Node` **is** round-tripped (`node.id` is census position
+1, written by `_build_sidecar`). Landing a `str` field on `Node` reddens **0 of 96** boundary arms.
+The class set is the residual hand list one level above the field sets — which are properly guarded.
+
+### MEDIUM-2 — `05-carries.md:40` propagates a stale collected-count, inside the carry that exists to stop exactly that
+
+> 2. Re-measure `baseline.tests_collected` rather than carrying `429`; it is **548** at this batch's tip.
+
+The tip is `d75f0fd`. **Measured: 643.** The line was authored in this commit, and the commit that
+authored it is the one that took the count from 548 to 643. P-CARRY-1's entire argument is that the
+next session will read a stale number and inherit a false premise; the instruction it gives hands
+over a number stale by 95 arms. `04-gate-findings-disposition.md`'s own post-fix table has 643 right,
+so the two artifacts in this commit disagree.
+
+(`05-carries.md:62`'s "all 548 arms green" is **correct** — that one is explicitly historical,
+describing the pre-fix measurement. Only `:40` is false against disk.)
+
+**Suggested fix:** `548` to `643` at `:40`.
+
+---
+
+## 4 · LOW
+
+### LOW-1 — the widened claims corpus buys 3 checked claims across 2 of 33 source files, and catches **0 of the 4** recorded instances it cites as its motivation
+
+`tests/test_repair_artifact_claims.py` widened the corpus to `mapper/`. Measured:
+
+```
+authored=8  source=33  corpus=41   ->  arms = 1 + 2*41 = 83
+corpus files with ZERO path:line citations : 35/41
+corpus files with ZERO test identifiers    : 31/41
+corpus files VACUOUS on BOTH arms          : 31/41    (62 of 83 arms assert nothing)
+SOURCE files carrying any claim            : store.py (2 citations, 1 node), keymap.py (1 node)
+```
+
+**Both halves of the corpus are live** — I proved it rather than assuming (§5), so the vacuity is
+aggregate, not total, and the file's own non-degeneracy arm guards it. The finding is narrower: the
+`_source()` docstring motivates the widening with *"THIS IS WHERE THE FALSE CLAIMS ACTUALLY LIVED ...
+the half that was missing"*, and all three of the `mapper/` instances it names were **prose** claims
+("every caller catches X", "the coercion removes the phantom node", "extends any round-tripped
+dataclass"). The file's two rules decide `path:line` and `test_*` only. So the widening catches **0
+of the 4** recorded instances — including, pointedly, MEDIUM-1 above, which is a prose over-claim
+sitting in the very file the corpus was widened to cover.
+
+The file is **not** dishonest — it states "Prose claims are NOT checked" and argues that a checker
+appearing to cover a class it cannot decide is worse than one whose limits are written down. That
+argument is right, and it is why this is a LOW. What is off is only the motivating framing, which
+reads as though the widening addresses the three instances. One sentence.
+
+Nit in the same file: the `_live_nodes` docstring says the widened corpus "made this 40 arms";
+measured **41** (42 counting the non-degeneracy arm).
+
+### LOW-2 — the resolved predicate is ~430x more expensive per call, uncached, on a per-document path
+
+Measured on the lab tree:
+
+```
+spelled  predicate: 0.8 us per call
+resolved predicate: 348.5 us per call
+```
+
+`_str_map_fields(Document)` is called **once per document** inside `_graph_from_sidecar`'s loop, and
+`get_type_hints` is uncached. Cost scales with the document count (~35 ms at 100 documents).
+**Impact today is zero** — no sidecar in `maps/` or `fixtures/` carries a single document, and no
+perf arm covers the document path — which is why this is a LOW and not a MEDIUM. One-line fix:
+`functools.lru_cache` on `_str_map_fields`, the same instrument the author already applied to
+`_live_nodes()` in this commit for the same reason.
+
+### LOW-3 — `test_at_p02h` pins the collision RECORD but not which colliding key survives — and the covered sibling does not either
+
+Changing the str-map's collision assignment from keep-last to keep-first reddens **0 of 643**. This
+is the one green survivor in shipped behaviour I found, and it is the shape HIGH-A was built from —
+so **I built the sibling comparison rather than assume the asymmetry**:
+
+| Mutation | RED arms of 643 |
+|---|---|
+| the str-map collision keeps first, not last | **0** |
+| the `Ficha.fields` collision keeps first, not last (the covered sibling) | **0** |
+
+**Symmetric.** The new family matches its covered sibling exactly on this limb; both record the
+collision, neither pins the survivor. This is therefore **not** the HIGH-A shape and **not** a
+regression introduced by this commit — it is a pre-existing, shared, unpinned detail, and both
+behaviours are loud. Recorded so it is countable, deliberately **not** inflated into a finding.
+
+---
+
+## 5 · Clean — what I attacked that came back clean
+
+1. **The four HIGH-A mutants** — rebuilt from the finding's description, not copied: 6 / 6 / 6 / 2.
+2. **The record coordinates of both new limbs** — corrupting the sink's owner (6 arms) and the
+   collision's field (2 arms) each redden. C2 is not re-introduced.
+3. **`test_at_p02i` killed three ways** — 1 arm each, and each names the right class.
+4. **MEDIUM-C end-to-end** — `Mapping[str, str]` and `str | None` landed on `Document`: 1 arm each.
+5. **AMD-2 behaviour-neutrality** — identical classification across **all seven** dataclasses;
+   reverting either predicate reddens 0 arms in both directions.
+6. **The claims checker is live on BOTH halves**, and its floors are live:
+
+   | Mutation | RED arms | Arm |
+   |---|---|---|
+   | an authored artifact's citation pushed past EOF | **1** | the `increment-004.md` citation arm |
+   | a `mapper/store.py` comment citation pushed past EOF | **1** | the `store.py` citation arm |
+   | a `mapper/store.py` cited node made phantom | **1** | the `store.py` identifier arm |
+   | a `mapper/keymap.py` cited node made phantom | **1** | the `keymap.py` identifier arm |
+   | the **source** half of the corpus emptied | **1** | `test_the_checker_can_see_its_corpus` (arms collapse 83 to 17) |
+   | the **authored** half of the corpus emptied | **1** | `test_the_checker_can_see_its_corpus` (arms collapse 83 to 67) |
+
+   The two collapse figures matter: the non-degeneracy arm reddens **because** it asserts floors, not
+   as a side effect — a corpus that looked nowhere would otherwise take 62 vacuous arms green with it.
+7. **The `functools.lru_cache` on `_live_nodes()` is sound.** No arguments, `maxsize=1`, so exactly
+   one collection subprocess per pytest process; `addopts` carries no xdist, so there is no
+   per-worker multiplication. Measured: the whole 83-arm file runs in **1.32s** against a collection
+   that alone costs 0.70s — one subprocess, not 42. No recursion hazard: the subprocess collects, and
+   collection never calls `_live_nodes()`.
+8. **`_EXPECTED_NON_TEXT`'s *field* sets are not a C-31 defect** — all three ways of corrupting them
+   redden (§2). Only its *class* set is a live hand list (MEDIUM-1's second half).
+9. **No regression across the rest of the tree.** Both lanes exit 0 at the expected counts; ruff is
+   at the 29-error baseline whole-tree and clean on all three touched files.
+10. **The disposition's corrected record is TRUE against disk.** Its per-limb table, its arm
+    arithmetic (`643 = 548 + 12 + 83`) and both lane figures all reproduce exactly. The correction is
+    marked in place rather than edited away, which is the right disposition.
+11. **`01-requirements.md` §7 AMD-1 is TRUE against disk** — threshold 1 now reads 21, the `12 of 17`
+    figure is explicitly scoped as historical, `M-STO-b` is extended to the map-valued fields, and
+    Threshold 4 is stated. MEDIUM-A is discharged.
+
+---
+
+## 6 · What I could not verify
+
+- **I did not re-run the author's full mutation battery.** I built my own (23 mutants: 10 product,
+  8 test/model, 6 claims-checker, 1 sibling) and reproduced the four HIGH-A mutants by construction
+  from the finding's prose. The author's other figures are taken on report and are so marked.
+- **I did not test every blind spelling end-to-end.** I landed `Mapping[str, str]` and `str | None`;
+  the `typing.Dict` spelling, a type alias and a quoted annotation are the same class and were
+  **not** individually landed.
+- **P-CARRY-1's `state.json` claims are out of scope** and I re-checked none of them except the 548
+  figure at `:40` (MEDIUM-2).
+- **The security review, and QA's MEDIUM/LOW carries, were out of scope for this pass.** I re-checked
+  none of them.
+- **I could not exercise the save side of a new `dict[str, str]` field**, because `_build_sidecar` is
+  hand-enumerated and adding one requires editing the serialiser; the read-side measurements in
+  MEDIUM-1 are what I executed.
+
+---
+
+## 7 · What blocks, and what does not
+
+**Nothing blocks.** HIGH-A's product limbs are gated, its arms are real, MEDIUM-A/B/C are discharged,
+and no shipped-behaviour mutation survived green that the covered sibling does not also leave green.
+
+**Conditions before merge — three edited lines, no code change:**
+
+1. **MEDIUM-1** — correct `mapper/store.py:120-121` to say what `test_at_p02i` actually gates, and
+   soften "every round-tripped dataclass" in `increment-004.md` §1.2 and `01-requirements.md` §7
+   AMD-2 to the four classes the guard covers.
+2. **MEDIUM-2** — `548` to `643` at `05-carries.md:40`.
+
+**Carry:** LOW-1 (one sentence of framing in the claims checker, plus the 40/41 nit), LOW-2 (cache
+the resolved predicate if the document path ever carries load), LOW-3 (the shared unpinned collision
+survivor — if it is ever pinned, pin it on both sites together).
+
+---
+
+## 8 · Evidence checklist
+
+| Item | Mark | Executed evidence |
+|---|---|---|
+| Diff read in full | OK | `01d7578..d75f0fd`: `mapper/store.py` (+28/-16), both test files, all four records |
+| Expected arm count asserted before any verdict | OK | 643 collected; whole-tree trials report **643 resolved arms** each; boundary file 96, claims file 83 |
+| Both lanes and ruff re-derived, not copied | OK | 626/17 in 55.3s; 17/626 in 23.5s; ruff 29 whole-tree, clean on the three touched files |
+| The four HIGH-A mutants rebuilt, not taken on report | OK | §2 — 6 / 6 / 6 / 2, arm names matched |
+| `test_at_p02g`'s three thresholds shown separately gated | OK | §2 — a distinct mutant kills each; assertion-order masking costs nothing |
+| `test_at_p02i` shown killable | OK | §2 — three mutations, 1 arm each, correct class id |
+| MEDIUM-C proved END-TO-END (the step the prior pass could not take) | OK | §2 — `Mapping[str, str]` and `str \| None` landed in `model.py`: 1 arm each |
+| `get_type_hints` swap shown behaviour-neutral | OK | §2 — identical classification across all **seven** dataclasses; both reverts 0 red |
+| Record coordinates of the new limbs attacked | OK | §2 — owner 6 arms, field 2 arms |
+| A green-surviving mutation hunted for, per the brief | **FOUND 4; 3 stand as MEDIUM-1, 1 defused** | §3 MEDIUM-1 (0/643 x3); §4 LOW-3 (0/643) |
+| Sibling comparison BUILT rather than assumed | OK | §4 LOW-3 — the covered sibling is 0/643 too, so LOW-3 is symmetric, not HIGH-A |
+| `_EXPECTED_NON_TEXT` checked as a C-31 input set | OK | §5.8 — field sets gated 3 ways; class set is the live hand list (MEDIUM-1) |
+| Claims-checker corpus checked for vacuous arms | OK | §4 LOW-1 — 31/41 files vacuous on both arms; 2/33 source files carry a claim |
+| Claims-checker shown non-vacuous on BOTH halves | OK | §5.6 — six mutants, 1 arm each; floors collapse 83 to 17 / 67 |
+| `lru_cache` on `_live_nodes()` audited | OK | §5.7 — 83 arms in 1.32s, one subprocess, no xdist, no recursion |
+| Records re-checked against disk | Mixed | disposition OK, AMD-1 OK, AMD-2 OK; store.py docstring FALSE (MEDIUM-1); carries `:40` FALSE (MEDIUM-2) |
+| Every MEDIUM carries a recommended fix | OK | §3 — replacement sentence given for MEDIUM-1; one token for MEDIUM-2 |
+| Clean categories reported as clean, not padded | OK | §5 — 11 categories; LOW-3 explicitly declined as a finding |
+| No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive d75f0fd`: **no differences** in any tracked file; `git status --porcelain` empty |
