@@ -2,6 +2,7 @@
 import mapper.views.radial as radial_mod
 from mapper.canvas import Canvas
 from mapper.model import Edge, Ficha, Graph, Node
+from mapper.views.state import ViewState
 from mapper.views.radial import RadialRenderer
 
 BRAILLE = range(0x2800, 0x2900)
@@ -44,7 +45,7 @@ def _render_capturing_canvas(monkeypatch, graph, **kw):
         return cv
 
     monkeypatch.setattr(radial_mod, "Canvas", spy)
-    text = RadialRenderer().render(graph, **kw)
+    text = RadialRenderer().render(graph, ViewState(**kw))
     return text, built[-1]
 
 
@@ -120,7 +121,7 @@ def test_radial_renderer():
     g.add_edge(Edge("root", "b"))
 
     renderer = RadialRenderer()
-    text = renderer.render(g, selected_id="a", w=60, h=20)
+    text = renderer.render(g, ViewState(selected_id="a", w=60, h=20))
     assert "Root" in text.plain
     assert "A" in text.plain
     assert "B" in text.plain

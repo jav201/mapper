@@ -9,6 +9,7 @@ from rich.text import Text
 from mapper import darkside
 from mapper.canvas import Canvas
 from mapper.model import Graph
+from mapper.views.state import ViewState
 
 
 _STATE_STYLE = {
@@ -105,14 +106,8 @@ def _header(graph: Graph) -> Text:
 class LaneRenderer:
     """Render a repo Graph as horizontal branch lanes (simple list)."""
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 80,
-        h: int = 24,
-        **kwargs,
-    ) -> Text:
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        selected_id, w, h = state.selected_id, state.w, state.h
         lines: list[Text] = []
         lines.append(_header(graph))
 
@@ -168,14 +163,8 @@ class RailTimelineRenderer:
     and carry ahead/behind chips, CI state, and a time scale across the top.
     """
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 118,
-        h: int = 28,
-        **kwargs,
-    ) -> Text:
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        selected_id, w, h = state.selected_id, state.w, state.h
         if graph.root_id is None or not graph.nodes:
             body = Text()
             body.append(_header(graph))
@@ -308,14 +297,8 @@ class RailTimelineRenderer:
 class HybridLaneRenderer:
     """Hybrid repo view: list rows with a mini timeline per branch."""
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 80,
-        h: int = 24,
-        **kwargs,
-    ) -> Text:
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        selected_id, h = state.selected_id, state.h
         lines: list[Text] = []
         lines.append(_header(graph))
 

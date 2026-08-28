@@ -6,8 +6,8 @@ from rich.text import Text
 
 from mapper import darkside
 from mapper.canvas import Canvas
-from mapper.diff import DiffResult
 from mapper.model import Graph, Node
+from mapper.views.state import ViewState
 
 
 # Declared rendering bound, chosen from measurement, not taste.  See the note on
@@ -128,16 +128,13 @@ def _tree_layout(graph: Graph, card_w: int, gap: int = 3) -> dict[str, tuple[int
 class LayeredRenderer:
     """Render a Graph as a layered tree of ficha cards."""
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 80,
-        h: int = 24,
-        query: str = "",
-        with_header: bool = True,
-        diff: DiffResult | None = None,
-    ) -> Text:
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        selected_id, w, h = state.selected_id, state.w, state.h
+        query, diff = state.query, state.diff
+        # `with_header` was a parameter no caller ever passed.  Executed across
+        # the tracked tree: one declaration, one use, zero call sites supplying
+        # it -- so the header was unconditional in fact and is unconditional in
+        # code now.  It is deliberately NOT a `ViewState` field.
         if graph.root_id is None or not graph.nodes:
             return Text("(no map loaded)")
         if len(graph.nodes) > MAX_RENDER_NODES:
@@ -179,19 +176,18 @@ class LayeredRenderer:
         pct = round(100 * have_total / req_total) if req_total else 100
 
         lines: list[Text] = []
-        if with_header:
-            header = Text()
-            header.append("◆ ", style=darkside.INK)
-            header.append("mapper", style=darkside.WORDMARK)
-            title_suffix = " · árbol legacy" if legacy else " · mapa de conceptos"
-            header.append(title_suffix, style=darkside.MUT)
-            if legacy:
-                filled = min(5, max(0, round(pct / 20)))
-                header.append(" " * max(0, avail - 48))
-                header.append(darkside.step_meter(filled, 5))
-            header.append(" " * max(0, avail - 30))
-            header.append(f"{len(all_ids)} nodos", style=darkside.MUT)
-            lines.append(header)
+        header = Text()
+        header.append("◆ ", style=darkside.INK)
+        header.append("mapper", style=darkside.WORDMARK)
+        title_suffix = " · árbol legacy" if legacy else " · mapa de conceptos"
+        header.append(title_suffix, style=darkside.MUT)
+        if legacy:
+            filled = min(5, max(0, round(pct / 20)))
+            header.append(" " * max(0, avail - 48))
+            header.append(darkside.step_meter(filled, 5))
+        header.append(" " * max(0, avail - 30))
+        header.append(f"{len(all_ids)} nodos", style=darkside.MUT)
+        lines.append(header)
 
         cv = Canvas(avail, body_h)
         for nid in all_ids:
@@ -276,7 +272,21 @@ class LayeredRenderer:
             cx, lv = pos[selected_id]
             cx = cx - card_w // 2
             y = lv * level_h
-            block_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+            # Carry B-05: the canvas painted a full-strength selection block
+            # regardless of where the keyboard actually was, so the rail, the
+            # canvas and the inspector each claimed the selection at once and
+            # none of them told the operator which one would answer a key.
+            # While another region owns the focus the selection is still SHOWN
+            # -- losing your place is worse than a soft highlight -- but it
+            # stops claiming to be active.
+            #
+            # `""` means the owner is unknown, and it paints what the tree
+            # painted before this field existed.  That is what keeps the
+            # signature migration byte-identical.
+            if state.focus_owner in ("", "canvas"):
+                block_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+            else:
+                block_style = f"{darkside.INK} on {darkside.STEP}"
             for j, ch in enumerate("▐ " + _fit(node.ficha.title, card_w - 3)):
                 cv.put(cx + j, y, ch, block_style)
 

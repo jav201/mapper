@@ -28,6 +28,7 @@ import time
 import pytest
 
 from mapper.model import Edge, Ficha, Graph, Node
+from mapper.views.state import ViewState
 from mapper.views.layered import LayeredRenderer
 
 LAYERS = 5
@@ -85,7 +86,7 @@ def test_tc_p08b_the_51_node_shape_renders_and_its_cost_is_recorded():
     assert len(graph.nodes) == EXPECTED_NODES
 
     started = time.perf_counter()
-    text = LayeredRenderer().render(graph, selected_id="root", w=140, h=45)
+    text = LayeredRenderer().render(graph, ViewState(selected_id="root", w=140, h=45))
     elapsed = time.perf_counter() - started
 
     assert text.plain.strip(), "the 51-node shape rendered nothing"

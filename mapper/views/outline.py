@@ -5,6 +5,7 @@ from rich.text import Text
 
 from mapper import darkside
 from mapper.model import Graph
+from mapper.views.state import ViewState
 
 
 # Declared rendering bound, chosen from measurement, not taste.  This renderer
@@ -44,14 +45,8 @@ def _degraded(n: int) -> Text:
 class OutlineRenderer:
     """Render a Graph as an editable-looking indented outline."""
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 80,
-        h: int = 24,
-        **kwargs,
-    ) -> Text:
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        selected_id, h = state.selected_id, state.h
         lines: list[Text] = []
         header = Text()
         header.append("◆ ", style=darkside.INK)

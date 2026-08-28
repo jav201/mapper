@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+from dataclasses import replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -39,6 +40,7 @@ from .osopen import OK as OSOPEN_OK, open_external
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .store import MapStore, TEMPLATES
 from .views.layered import LayeredRenderer
+from .views.state import ViewState
 from .views.outline import OutlineRenderer
 from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
@@ -736,9 +738,11 @@ class _ImportPreviewScreen(Screen):
         try:
             text = renderer.render(
                 self.preview_graph,
-                selected_id=self.preview_graph.root_id,
-                w=max(20, size.width),
-                h=max(5, size.height - 10),
+                ViewState(
+                    selected_id=self.preview_graph.root_id,
+                    w=max(20, size.width),
+                    h=max(5, size.height - 10),
+                ),
             )
         except Exception as exc:
             text = darkside.Text.assemble(
@@ -1337,6 +1341,68 @@ class MapScreen(Screen):
         toast.styles.background = darkside.PANEL
         toast.update(text)
 
+    # Widget id -> the `FOCUS_OWNERS` name that id stands for.  Bare ids, not
+    # `#`-prefixed strings: nothing here is a CSS selector, and synthesising one
+    # to compare against another string that merely looks like one silently
+    # compares "#None" for every unnamed widget.
+    _FOCUS_REGIONS = (
+        ("map-rail", "rail"),
+        ("map-inspector", "inspector"),
+        ("map-canvas", "canvas"),
+    )
+
+    def _focus_owner(self) -> str:
+        """Which region holds the keyboard, as one of `FOCUS_OWNERS`.
+
+        Derived from the app's real focused widget rather than tracked
+        separately: a second copy of "where the focus is" is a copy that goes
+        stale, and the stale copy is the one the canvas would paint from.
+        Returns `""` when nothing is focused, or when the focused widget belongs
+        to no declared region -- the value that paints what the tree painted
+        before this field existed.
+
+        MEASURED: `#map-canvas` is `can_focus=False`, so `"canvas"` is not
+        reachable through the real wiring today and the focused tone is arrived
+        at via the `""` fallback.  The entry is kept because it is correct the
+        moment the canvas becomes focusable, but a reader should not assume it
+        is live (`B-53`).
+
+        `""` IS ALSO THE HONEST ANSWER ON A NARROW TERMINAL, and that is not a
+        defect: below `MIN_CANVAS_WIDTH`, `_apply_region_visibility` auto-hides
+        the rail and the inspector, so nothing focusable remains and the focus
+        chain is legitimately empty.  An earlier revision read that as "tab
+        drops focus on this screen" and carried it as a defect -- measured only
+        at the 80x24 default test size.  At 118x34 the chain is
+        `[map-rail, insp-title, insp-state, insp-notes]` and tab traverses
+        normally.  Retracted in `A-96`.
+        """
+        node = getattr(self.app, "focused", None)
+        while node is not None:
+            node_id = getattr(node, "id", None)
+            for region_id, owner in self._FOCUS_REGIONS:
+                if node_id == region_id:
+                    return owner
+            node = getattr(node, "parent", None)
+        return ""
+
+    def _view_state(self, w: int, h: int) -> ViewState:
+        """The renderer's whole parameter surface, built in ONE place.
+
+        Built once and reused by every call site, which is what closes the
+        measured defect that motivated the parameter object: the export site
+        passed `query` without `diff`, so an SVG exported during a diff silently
+        lost its tinting while the on-screen canvas kept it.  With one
+        constructor there is no second argument list to forget.
+        """
+        return ViewState(
+            selected_id=self.nav.cursor,
+            w=w,
+            h=h,
+            focus_owner=self._focus_owner(),
+            query=self.query_text,
+            diff=self.diff if self.diff_active else None,
+        )
+
     def refresh_canvas(self) -> None:
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
@@ -1349,14 +1415,7 @@ class MapScreen(Screen):
         # this method runs inside the message pump, so an escape here kills the
         # app.  Scoped to the sink, not to the exception types known today.
         try:
-            text = renderer.render(
-                self.graph,
-                selected_id=self.nav.cursor,
-                w=w,
-                h=h,
-                query=self.query_text,
-                diff=self.diff if self.diff_active else None,
-            )
+            text = renderer.render(self.graph, self._view_state(w, h))
         except Exception as exc:
             text = darkside.Text.assemble(
                 (" no se pudo dibujar el mapa\n\n", f"bold {darkside.INK}"),
@@ -1724,12 +1783,26 @@ class MapScreen(Screen):
         try:
             size = self.size or self.app.size
             renderer = self._current_renderer()
+            # The same state the canvas draws from, EXCEPT the focus owner.
+            #
+            # Sharing the state is what closes the measured defect that decided
+            # the renderer contract: this site passed `query` and omitted
+            # `diff`, so an SVG exported during a diff silently lost its
+            # tinting.  One constructor leaves no second argument list to
+            # under-fill.
+            #
+            # But an export is a STANDALONE ARTIFACT, and "which screen region
+            # owns the keyboard" is meaningless inside it.  Measured on a plain
+            # operator sequence -- `tab` (or `g`, which focuses the rail), then
+            # `e` to export -- passing the live owner through painted the
+            # selected node in the INACTIVE tone.  An export always renders as
+            # though the canvas were focused.
             text = renderer.render(
                 self.graph,
-                selected_id=self.nav.cursor,
-                w=max(20, size.width),
-                h=max(5, size.height - 10),
-                query=self.query_text,
+                replace(
+                    self._view_state(max(20, size.width), max(5, size.height - 10)),
+                    focus_owner="",
+                ),
             )
             path = self.store.workspace / f"{self.map_id}.svg"
             save_svg(text, path)

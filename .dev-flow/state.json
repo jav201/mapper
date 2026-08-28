@@ -52,7 +52,25 @@
     }
   ],
   "current_station": "P3",
-  "phase_status": "not-started",
+  "phase_status": "in-progress",
+  "p3_progress": {
+    "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4 -> Inc-5 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
+    "closed": [
+      {
+        "inc": "Inc-1",
+        "commit": "4eaba35",
+        "date": "2026-08-28",
+        "source_files": 4,
+        "gates": "code-reviewer BLOCK on 1 HIGH -> fixed -> confirmation pass 'the HIGH is discharged, no HIGH survives' (0 HIGH); security-reviewer signed off",
+        "suite": "fast 694 passed / 17 deselected; slow 17 passed; ruff 28 (baseline 29, zero new)",
+        "ledger": "694 = 630 - 0 + 64",
+        "battery": "6 rounds, 154 arms asserted green before any verdict, sha256 restore on 8 files after every mutant",
+        "amendments": "A-77..A-88",
+        "unplanned_defects": "WARN's job made LLR-S06.3.5's own threshold unsatisfiable (A-78); the sealed C0 range row omitted U+000D so adopting it NARROWED shipped coverage (A-80); radial sliced titles raw into the exported SVG; AT-009 derived its oracle from the constant under test and was green while 19 invisible code points reached the artifact (A-87). Confirmation pass also caught a fabricated measurement in production source (a probe that constructed the theme it observed) and a fix of mine that repaired nothing."
+      }
+    ],
+    "next": "Inc-2 -- ViewState + the IRenderer A3, the declared 6-source-file breach, carrying HLR-CNV.3/B-05 and Inc-1's standing re-run obligation on AT-007 and AT-009"
+  },
   "stations_active": [
     "P0",
     "ARQ",
@@ -230,6 +248,32 @@
       "date": "2026-08-27",
       "decision": "approved — SEALED",
       "notes": "PDR iteration 3 (final) PASSED. All four lenses `approved with conditions`; security lifted its pass-2 block; architect moved 14/14 from LIVE to DISCHARGED. All 12 fold conditions discharged and verified by re-reading the artifact. Decisions issued: #D25 (the three-row seat-diff figure is a regression PIN on Inc-4's diff, not a per-increment budget -- no breach, Inc-3 unblocked), #D26 (the legend scrolls; tabbed redesign deferred B-35), #D27 (the damaged sala card takes a declared glyph; ALERT is not spent -- C-55 limb 2), #D28 (operator-ruled: the 4.5:1 contrast floor STANDS and the token changes; V7/V8 and the card glyph take INK; MUT is legal for readable text only on GROUND; decorative marks exempt). Corrections landed against the orchestrator's own rulings: the abolished cap survived at three sites (the batch's fourth false oracle, and the first created by the fix for a previous one); C-D25a named a vacated increment and had no oracle; and section 5's 'minimal alternative' was FALSE -- already implemented at app.py:1393-1395 and invariant under the defect, proven by two lenses executing it. CARRIED BY DECISION: B-36, UX2-C-01, a known live durable-data-loss defect on master, first scope item of the follow-on batch ahead of lente. Baseline 630+17=647, ruff 29, fixtures clean. Sealed at PDR-addendum-3.md section 8. Implementation NOT started -- commissioned as a fresh session."
+    }
+  ],
+  "coordinator_rulings": [
+    {
+      "date": "2026-08-28",
+      "provenance": "COORDINATING AGENT, not the operator. Recorded as a task direction that extends a PDR-sealed scope. It does NOT substitute for operator approval and does NOT relax the merge gate: the independent security sign-off and the adversarial PR-level qa-reviewer pass over the whole diff both stand, and a HIGH still blocks the merge and returns to the operator.",
+      "rulings": [
+        {
+          "id": "D33",
+          "decision": "B-47 folded into Inc-3; LLR-COERCE.2 widened from one named truncator to every renderer feeding an operator-visible sink",
+          "amendment": "A-89",
+          "note": "The batch's coercion guarantee held only in radial view while LayeredRenderer is the default. The narrowing lived in the Touched-symbols line, not in the Statement. The renderer set must be DERIVED, never hand-listed. Inc-3 declares a 5-source-file breach."
+        },
+        {
+          "id": "D34",
+          "decision": "B-46 gets its own increment, Inc-CONFIRM, sequenced with Inc-REPAIR before Inc-7",
+          "amendment": "A-90",
+          "note": "Markup-parsing sink composing the dialog that GATES subtree archival. Two acceptance arms, one per failure mode (crash, action-span injection), because they fail independently."
+        },
+        {
+          "id": "D35",
+          "decision": "Pace calibrated: full protocol on data-path/destructive/A3/security increments (Inc-2, Inc-3, Inc-REPAIR, Inc-CONFIRM, Inc-7); lighter single-review protocol permitted for presentational increments only while the review returns zero HIGH and no data path is touched; any HIGH restores the full protocol. Batteries never skipped, only sized.",
+          "amendment": "A-91",
+          "note": "Recorded so the post-mortem can judge the trade. Inc-1 is the control: its confirmation pass returned 7 MEDIUM + 6 LOW, so the pass is not ceremonial."
+        }
+      ]
     }
   ],
   "standing_authorization": {
