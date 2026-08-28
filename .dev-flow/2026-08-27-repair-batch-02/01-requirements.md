@@ -309,7 +309,11 @@ after — this is a blindness fix, not a behaviour change, and the ledger shows 
 of it.
 
 **And a resolved predicate is still not total**, which is the point: `Mapping[str, str]` remains
-neither text nor str-map. `test_at_p02i` asserts that every field of every round-tripped dataclass
-is text, a str-map, or **explicitly declared** non-text, so the residue fails loudly instead of
-vanishing. That guard protects a **conclusion** (the census is complete), not a behaviour — C-55
+neither text nor str-map. `test_at_p02i` asserts that every field of every dataclass **`mapper.model`
+defines** is text, a str-map, or **explicitly declared** non-text, so the residue fails loudly
+instead of vanishing. Its class set is **derived from the module**, not listed: the first draft named
+four classes while the module defines seven, and a `str` field landed on `Node` — census position 1 —
+went unseen by all 643 arms (re-confirmation review, MEDIUM-1). `test_at_p02j` now pins the class set
+itself. **What it does not catch, said so it is not miscited:** a new `dict[str, str]` on another
+dataclass *classifies*, so this guard passes; routing such a field is still a hand step. That guard protects a **conclusion** (the census is complete), not a behaviour — C-55
 limb 1, and its docstring says so, so a later reader does not file it as an implementation detail.

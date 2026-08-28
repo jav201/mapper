@@ -67,8 +67,18 @@ the implementation grew with it, and the gate did not.
 - `test_at_p02h` — two raw keys that coerce to one string are **recorded**. → **2 arms**.
   The expected record string was **executed against the implementation**, not read off the format
   string (C-42).
-- `test_at_p02i` — **the totality guard**, and the durable one. Every field of every round-tripped
-  dataclass must be text, a str-map, or **explicitly declared** non-text. → **4 arms**.
+- `test_at_p02i` — **the totality guard**, and the durable one. Every field of every dataclass
+  **`mapper.model` defines** must be text, a str-map, or **explicitly declared** non-text.
+  → **7 arms**, one per class, over a class set **derived from the module**.
+- `test_at_p02j` — the class set itself is the model's, not a remembered subset. → **1 arm**.
+
+  > **Corrected at the re-confirmation gate (MEDIUM-1).** As first written this guard hand-listed
+  > **four** classes while the module defines **seven**, so a `str` field landed on `Node` — census
+  > position 1, written by `_build_sidecar` — reddened **0 of 643**. The hand list had simply moved
+  > up one level, from the field sets to the class set. The class set is now derived, and
+  > `test_at_p02j` pins it. **And what this guard does NOT catch is now stated wherever it is
+  > cited:** a new `dict[str, str]` on another dataclass *classifies*, so the guard passes — three
+  > such fields measured at **0 RED of 643**.
 
 ### 1.3 · MEDIUM-C — the derivation was a textual annotation match, in BOTH the product and its census
 
@@ -147,6 +157,36 @@ requires **running** the mutation. The mechanical guard for that class is at the
 `test_at_p02g`, `test_at_p02h`, `test_at_p02i`. A checker that appeared to cover a class it cannot
 decide would be worse than one whose limits are stated.
 
+### 1.7 · Re-confirmation gate — conditions discharged, and one claim I could NOT make
+
+The independent re-confirmation of `d75f0fd` returned **PASS WITH CONDITIONS, no HIGH**. Both
+conditions are discharged below. **Both findings were reproduced here before being fixed.**
+
+| Condition | Reproduced | Discharge |
+|---|---|---|
+| **MEDIUM-1** — the docstring rewritten *to fix* MEDIUM-B named `test_at_p02i` as the gate for a case it does not gate | a `dict[str, str]` landed on `Attachment`: **0 RED of 643** | the sentence now says what the guard does **and does not** catch, at all three sites that cited it (`mapper/store.py`, this packet §1.2, `01-requirements.md` AMD-2) |
+| **MEDIUM-1, second half** — the guard's **class set** was a hand list: 4 classes, module defines 7 | a `str` field landed on `Node`: **0 RED of 643** | the class set is **derived from the module**; `test_at_p02j` pins it |
+| **MEDIUM-2** — `05-carries.md` carried a count stale at the tip it names | read against disk: said `548`, tip collects `643` | corrected, and the line now says *re-measure*, not a number to copy |
+
+**Counterfactual for the two new guards — per resolved arm, whole tree, 647 asserted:**
+
+| Mutation | RED arms | The arms |
+|---|---|---|
+| `Node` dropped from the declared non-text map | **2** | `test_at_p02i[Node]`, `test_at_p02j` |
+| the class derivation re-narrowed to exclude `Node` | **1** | `test_at_p02j` — the class set is genuinely pinned |
+| a `dict[str, int]` field landed on `Node` | **1** | `test_at_p02i[Node]` — a field that is neither text nor str-map now reddens; before the class-set fix it could not, because `Node` was not in the set |
+| **a plain `str` field landed on `Node`** | **0** | **nothing. See below.** |
+
+> **What I did NOT close, stated because the whole finding was an over-claim.** The reviewer's
+> measured case — a `str` field on `Node` — **still reddens nothing**, and deriving the class set did
+> not change that. A `str` field *classifies as text*, so the totality guard passes by design. It
+> goes unseen for a different reason one layer down: `_derived_positions()` enumerates the text
+> fields of `Ficha`, `Attachment`, `SchemaField` and `Document`, while `Node` contributes only the
+> structural `node.id` — and `_build_sidecar` is hand-enumerated, so such a field would never be
+> written at all. **That is a real remaining gap and it is carried, not fixed here**: closing it means
+> deriving the serialiser's shape from the model, which is a behaviour change to the save path and
+> belongs in its own increment. What the class-set fix genuinely buys is the two rows above it.
+
 ---
 
 ## 2 · Files modified
@@ -181,14 +221,14 @@ python -m pytest -q -p no:randomly -o addopts= tests/test_repair_store_boundary.
 
 ## 4 · Test results — executed, read from each run's own output
 
-| Measure | Value |
-|---|---|
-| collected | **643** |
-| fast lane | **626 passed, 17 deselected**, exit 0 |
-| slow lane | **17 passed, 626 deselected**, exit 0 |
-| the three new arms alone | **12 passed** |
-| `ruff check mapper/ tests/` | **29** — unchanged from base |
-| ruff on the three touched files | **All checks passed!** |
+| Measure | At `d75f0fd` (pre-condition) | **Final (conditions discharged)** |
+|---|---|---|
+| collected | 643 | **647** |
+| fast lane | 626 passed, 17 deselected, exit 0 | **630 passed, 17 deselected**, exit 0 |
+| slow lane | 17 passed, 626 deselected, exit 0 | **17 passed, 630 deselected**, exit 0 |
+| the new arms alone | 12 passed | **16 passed** |
+| `ruff check mapper/ tests/` | 29 | **29** — unchanged from base |
+| ruff on the three touched files | clean | **All checks passed!** |
 
 **Ledger — `post = base − D + A`, derived and then measured:**
 
@@ -196,9 +236,9 @@ python -m pytest -q -p no:randomly -o addopts= tests/test_repair_store_boundary.
 |---|---|---|
 | base (`01d7578`) | 548 | measured |
 | D (deletions) | 0 | no test removed |
-| A — boundary arms | +12 | `test_at_p02g` 6 · `test_at_p02h` 2 · `test_at_p02i` 4 |
+| A — boundary arms | +16 | `test_at_p02g` 6 · `test_at_p02h` 2 · `test_at_p02i` **7** (one per model dataclass) · `test_at_p02j` 1 |
 | A — artifact-claims file | +83 | 1 corpus arm + 41 × 2, where 41 = 8 authored artifacts + 33 `mapper/` source files |
-| **post** | **643** | 548 + 95 |
+| **post** | **647** | 548 + 99; boundary file 84 → **100** |
 
 **The checker's corpus includes this packet**, so writing it adds two arms to the count it reports —
 a reflexive property worth naming rather than discovering. The 643 above is the count **with** this

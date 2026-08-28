@@ -27,13 +27,15 @@ non-`str`, and a container poison raised four UNTYPED exceptions out of `load`.
 from __future__ import annotations
 
 import copy
+import dataclasses
 from dataclasses import fields as dc_fields
 from typing import get_type_hints
 
 import pytest
 import yaml
 
-from mapper.model import Attachment, Document, Ficha, SchemaField
+from mapper import model as model_module
+from mapper.model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
 from mapper.store import MapStore, MapStoreError
 
 MMD = "graph TD\n    A[Alpha] --> B[Beta]\n"
@@ -651,20 +653,62 @@ def test_at_p02h_a_str_map_key_collision_is_recorded(tmp_path, field_name):
     )
 
 
-# Every field of a round-tripped dataclass is text, a str-map, or EXPLICITLY
-# declared non-text.  Declared here rather than derived BECAUSE it is the exception
-# list: it is small, and the guard's whole value is that reality diverging from it
-# fails loudly.
+def _model_dataclasses() -> tuple[type, ...]:
+    """Every dataclass `mapper.model` defines -- DERIVED, never hand-listed.
+
+    The FIELD sets below are guarded three ways, but the CLASS set was itself a hand
+    list one level above them: it named FOUR classes while the module defines SEVEN,
+    and `Node` -- whose `id` is census position 1, written by `_build_sidecar` -- was
+    absent.  Measured on the pre-fix tree: a `str` field landed on `Node` reddened
+    **0 of 643**.  That is the same C-31 defect the census itself carried, one level
+    up (re-confirmation review, MEDIUM-1), and it gets the same remedy: the DOMAIN
+    comes from the rule ("every dataclass the model defines"), never from whichever
+    classes someone remembered to type.
+    """
+    return tuple(
+        obj
+        for _, obj in sorted(vars(model_module).items())
+        if isinstance(obj, type)
+        and dataclasses.is_dataclass(obj)
+        and obj.__module__ == model_module.__name__
+    )
+
+
+# The NON-TEXT half stays declared per class, because it is the EXCEPTION list: it is
+# small, and the guard's whole value is that reality diverging from it fails loudly.
+# The CLASS set is derived above, and `test_at_p02j` asserts the two agree exactly --
+# so a new dataclass cannot slip past simply by not being mentioned here.
 _EXPECTED_NON_TEXT = {
-    Ficha: ("attachments",),
-    Attachment: (),
     SchemaField: ("required",),
+    Attachment: (),
+    Ficha: ("attachments",),
+    Node: ("ficha",),
+    Edge: (),
     Document: ("template",),
+    Graph: ("nodes", "edges", "root_id", "schema", "documents", "load_warnings"),
 }
 
 
+def test_at_p02j_the_totality_guard_covers_every_model_dataclass():
+    """The guard's CLASS set must be the model's own, not a remembered subset.
+
+    Without this, `test_at_p02i` silently narrows to whatever was listed: it covered
+    4 of 7 classes, and a `str` field on `Node` reddened nothing anywhere in 643
+    arms.  A guard whose DOMAIN is hand-listed certifies a completeness it does not
+    have -- which is the defect this batch has now produced at three levels.
+    """
+    derived = set(_model_dataclasses())
+    declared = set(_EXPECTED_NON_TEXT)
+    assert derived, "no dataclasses derived from mapper.model -- the walk broke"
+    assert declared == derived, (
+        "the totality guard's class set drifted from the model: missing "
+        f"{sorted(c.__name__ for c in derived - declared)}, stale "
+        f"{sorted(c.__name__ for c in declared - derived)}"
+    )
+
+
 @pytest.mark.parametrize(
-    "cls", sorted(_EXPECTED_NON_TEXT, key=lambda c: c.__name__), ids=lambda c: c.__name__
+    "cls", sorted(_model_dataclasses(), key=lambda c: c.__name__), ids=lambda c: c.__name__
 )
 def test_at_p02i_every_model_field_is_classified(cls):
     """A field spelled a new way must fail LOUDLY instead of vanishing from both sides.
@@ -678,10 +722,17 @@ def test_at_p02i_every_model_field_is_classified(cls):
     simultaneously, and no other arm would redden -- because the census derives the
     very set that omitted it.  This is `_EXPECTED_REFUSAL`'s totality assertion one
     level up, over model FIELDS rather than positions.
+
+    WHAT IT DOES NOT CATCH, stated so nobody cites it for the wrong thing: a NEW
+    `dict[str, str]` on another dataclass.  That field CLASSIFIES -- so this guard
+    passes -- while `_coerce_str_map`'s call site is `Document`-only and
+    `_build_sidecar` is hand-enumerated, so it would be neither coerced nor written.
+    Routing such a field is a HAND step, and this arm will not remind anyone of it
+    (re-confirmation review, MEDIUM-1: measured 0 RED of 643 on three such fields).
     """
     every = {f.name for f in dc_fields(cls)}
     classified = set(_text_field_names(cls)) | set(_str_map_field_names(cls))
-    declared = set(_EXPECTED_NON_TEXT[cls])
+    declared = set(_EXPECTED_NON_TEXT.get(cls, ()))
     assert declared <= every, (
         f"{cls.__name__}: non-text names declared that are not fields: "
         f"{sorted(declared - every)}"

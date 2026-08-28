@@ -117,8 +117,16 @@ def _str_map_fields(cls: type) -> tuple[str, ...]:
     automatically.  `Ficha.fields` is coerced at its own site, whose record
     coordinates differ (`{nid}.{key}` against `document[i].{field}.{key}`) and are
     pinned by shipped arms, so routing it through here would be a behaviour change,
-    not a cleanup.  No other round-tripped dataclass declares a `dict[str, str]`
-    today, and `test_at_p02i` fails loudly if one appears.
+    not a cleanup.
+
+    No other round-tripped dataclass declares a `dict[str, str]` today, and NO TEST
+    CATCHES ONE THAT APPEARS -- stated plainly, because the previous wording here
+    named `test_at_p02i` as that gate and it is not one: a str-map CLASSIFIES, so the
+    totality guard passes.  What that guard catches is a field that is neither text
+    nor a str-map.  A `dict[str, str]` added to another dataclass must be routed to a
+    coercion site BY HAND and `_build_sidecar` extended to write it, or it is
+    silently neither coerced nor saved.  Measured: three such fields, 0 RED of 643
+    (re-confirmation review, MEDIUM-1).
     """
     hints = get_type_hints(cls)
     return tuple(n for n in cls.__dataclass_fields__ if hints[n] == dict[str, str])

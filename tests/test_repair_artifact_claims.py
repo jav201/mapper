@@ -76,14 +76,17 @@ def _authored() -> list[Path]:
 
 
 def _source() -> list[Path]:
-    """Product source -- because THIS IS WHERE THE FALSE CLAIMS ACTUALLY LIVED.
+    """Product source -- because `mapper/` carries claims and was not being read.
 
-    Three of the four recorded instances of the class were comments in `mapper/`,
-    not lines in `.dev-flow/`: the `MapStoreError` caller claim, the node-id repair
-    claim, and a `_str_map_fields` docstring asserting a generality its single
-    `Document`-only call site does not have.  A checker scoped to the artifacts
-    could not see any of them.  The two decidable rules below are unchanged; only
-    the corpus widens, which is the cheap half and the half that was missing.
+    HONEST SCOPE, corrected after the re-confirmation review MEASURED what this
+    widening buys.  The three `mapper/` instances that motivated it were all PROSE
+    claims ("every caller catches X", "the coercion removes the phantom node",
+    "extends any round-tripped dataclass"), and the two rules below decide
+    `path:line` and `test_*` citations ONLY -- so the widening catches **none of
+    them**, including the over-claim an earlier draft of this very docstring made.
+    What it does buy is real and small: `mapper/` carries 3 checkable citations
+    across 2 of its 33 files, and those are now checked instead of unread.  Saying
+    it buys more would be the same over-claim this file exists to catch.
 
     Verified non-false-failing before landing (C-53: run a new rule over a corpus
     you believe is CORRECT): the four citations `mapper/` carries today all resolve
@@ -123,7 +126,7 @@ def _resolve(cited: str, citing: Path) -> Path | None:
 
 @functools.lru_cache(maxsize=1)
 def _live_nodes() -> set[str]:
-    """Collected node names.  CACHED: the widened corpus made this 40 arms,
+    """Collected node names.  CACHED: the widened corpus made this 41 arms,
     and an uncached collection subprocess per arm added minutes to the suite
     for an answer that cannot change within a run.
     """

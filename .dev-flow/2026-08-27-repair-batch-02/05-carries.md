@@ -37,7 +37,11 @@ The correct owner is the **batch close**, which is where `state.json` is rewritt
 **What the next session must do**, in order:
 1. Rewrite `.dev-flow/state.json` to describe the batch actually in flight — do not append to the
    parked record, replace it, and keep `previous_batch` pointing at this one with its merge SHA.
-2. Re-measure `baseline.tests_collected` rather than carrying `429`; it is **548** at this batch's tip.
+2. Re-measure `baseline.tests_collected` rather than carrying `429`. **Re-measure it — do not copy
+   this line either.** It first read `548`, the count at `01d7578`, and was already stale when
+   written: the very commit that authored it took the count to **643**. A carry whose whole purpose
+   is to stop a stale number propagating shipped a stale number (re-confirmation review, MEDIUM-2).
+   It is **643** at `d75f0fd`; at any later tip, measure it rather than trusting this sentence.
 3. Record `8675151`'s provenance in the feature batch's own PLAN, so its artifacts are not
    re-derived on the assumption they never landed.
 
@@ -140,5 +144,9 @@ reviewer-authored files and are **left untouched**, noted rather than edited.
 | `load_warnings` is unbounded | A million malformed entries produce a million strings. The fix changes a record format **18 tests pin**, so it wants its own increment. |
 | `_text_attributes()` shim | One-line delegation kept because shipped tests use the name; collapse when those tests are next touched. |
 | `create_from_template` | Still hand-constructs `SchemaField` with the old `f.get("kind","text")` shape — out of this batch's fence. |
+| **`_build_sidecar` is hand-enumerated — the last hand list in the chain** | **Measured, not argued: a plain `str` field landed on `Node` reddens 0 of 647.** It classifies as text, so the totality guard passes by design; it goes unseen because `_derived_positions()` enumerates the text fields of `Ficha`/`Attachment`/`SchemaField`/`Document` while `Node` contributes only the structural `node.id`, and the serialiser would never write it. The census, the coercion and the guard's class set are all derived now; **the SAVE shape is not.** Closing it means deriving `_build_sidecar` from the model — a behaviour change to the save path, so it wants its own increment. |
+| A new `dict[str, str]` on another dataclass | Classifies, so `test_at_p02i` passes; the coercion call site is `Document`-only and the serialiser would not write it. Routing one is a **hand step** — now stated at every site that cites the guard, rather than implied to be automatic (re-confirmation review, MEDIUM-1). |
+| The resolved predicate is ~430x more expensive per call | `0.8 µs → 348.5 µs`, uncached, called once per document (`~35 ms` at 100 documents). **Zero impact today** — no shipped sidecar carries a document and no perf arm covers that path — so it is carried rather than pre-optimised. One-line `lru_cache` if the document path ever carries load. |
+| The str-map collision does not pin WHICH key survives | Keep-last vs keep-first reddens 0 of 647 — **and the covered sibling `Ficha.fields` is identical**, so this is symmetric and pre-existing, not a gap this batch opened. If it is ever pinned, pin both sites together. |
 | no logging facility | `grep -rn "logging\." mapper/` → zero hits, so a masked programming error is unrecoverable. Mitigated, not fixed, by carrying `type(exc).__name__` in the message. |
 | `TC-P02`/`P03`/`P04` are nominal | The `AT-` chain is complete with one distinct driving node each; the `TC-` layer exists as comment banners only. |
