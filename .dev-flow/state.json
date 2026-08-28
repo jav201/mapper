@@ -1,8 +1,8 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-08-27-repair-batch-02",
-  "batch_objective": "Repair exactly the four shipped defects the ui-next-batch-02 PDR second pass found -- the store text boundary, the module map, the derived pin census with trigger B3's correction, and an honest 51-node perf fixture -- and nothing more.",
+  "batch_id": "2026-08-26-ui-next-batch-02",
+  "batch_objective": "Variant B «atlas» canvas mechanics (pan · fold · declared overflow · braille edges) plus the round-10 capabilities approved for batch 2: search hit-count and navigation, home 2.0 «sala», the field-query «lente», the per-view «leyenda», and the palette-v2 tokens. Closes carry B-05 and the Canvas.rows() layer-drop defect.",
   "mode": "full",
   "mode_history": [
     {
@@ -51,6 +51,32 @@
       "closed_at": "2026-08-27"
     }
   ],
+  "current_station": "PDR",
+  "phase_status": "iterating",
+  "stations_active": [
+    "P0",
+    "ARQ",
+    "P1",
+    "PDR",
+    "P2",
+    "P3",
+    "DDR",
+    "P4",
+    "P5",
+    "P6"
+  ],
+  "iterations_per_station": {
+    "P0": 2,
+    "ARQ": 1,
+    "P1": 1,
+    "PDR": 2,
+    "P2": 0,
+    "P3": 0,
+    "DDR": 0,
+    "P4": 0,
+    "P5": 0,
+    "P6": 0
+  },
   "triggers": {
     "evaluated_at": "2026-08-27T00:00:00",
     "fired": [
@@ -83,100 +109,121 @@
       }
     ]
   },
-  "current_station": "P6",
-  "phase_status": "approved",
-  "stations_active": [
-    "P0",
-    "P1",
-    "P3",
-    "P4",
-    "P5",
-    "P6"
-  ],
-  "iterations_per_station": {
-    "P0": 1,
-    "P1": 2,
-    "P3": 4,
-    "P4": 2,
-    "P5": 1,
-    "P6": 1
+  "scope": {
+    "in": [
+      "US-N06 escala (pan/fold/overflow)",
+      "US-N07 busqueda n/N",
+      "canvas dots/bgs + braille edges + carry B-05",
+      "US-N13 sala (per-map load-error card states)",
+      "US-N16 leyenda por vista",
+      "palette v2 tokens in darkside.py",
+      "repair increment: B-29 phantom-node warning, B-30 path leak"
+    ],
+    "cut_2026_08_27": {
+      "decision": "operator option A -- re-scope, taken at the PDR stop",
+      "items": [
+        "US-N14 «lente» -- two blocker-class UX design rulings",
+        "S-18 render work-budget, PAIRED with S-19 as its PRECONDITION"
+      ],
+      "why": "The briefed remaining scope executed FALSE: 6 items briefed, ~39 of 51 union items measured LIVE, ~11 of them design rulings. C-43 at batch level.",
+      "s19_pairing": "S-19 is S-18's precondition, not its sibling. Measured on the 51-node/410-edge shape: Layered 1283ms, Outline 337ms, Radial 142ms -- UNDER the 250ms budget, so k=0 and threshold 4 cannot distinguish a correct implementation from a missing one. The follow-on batch's fixture MUST name its renderer.",
+      "nothing_deleted": "Deferred text stays in place, marked, so the follow-on batch inherits the work rather than re-deriving it."
+    },
+    "out": [
+      "recorrido/guia (batch 3)",
+      "cronoscopio/relieve (batch 4)",
+      "repo redesign"
+    ]
   },
-  "pdr_not_applicable": "This batch moves no boundary; it LANDS the boundary the feature batch's ARQ already approved. Recorded rather than left silent.",
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-08-27-repair-batch-02/01-requirements.md",
-    "increments": "repo:.dev-flow/2026-08-27-repair-batch-02/03-increments/",
-    "module_map": "repo:docs/ARCHITECTURE.md",
+    "requirements": "repo:.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "traceability": "repo:.dev-flow/2026-08-26-ui-next-batch-02/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-08-26-ui-next-batch-02/03-increments/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-08-27-repair-batch-02/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-08-27-repair-batch-02/README.md"
+    "design_pdr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/PDR-2026-08-26-ui-next-batch-02.md",
+    "design_ddr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/DDR-2026-08-26-ui-next-batch-02.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/README.md"
   },
   "artifacts": {
-    "plan": ".dev-flow/2026-08-27-repair-batch-02/PLAN.md",
-    "P1": ".dev-flow/2026-08-27-repair-batch-02/01-requirements.md",
-    "increments": [
-      ".dev-flow/2026-08-27-repair-batch-02/03-increments/increment-001.md",
-      ".dev-flow/2026-08-27-repair-batch-02/03-increments/increment-002.md",
-      ".dev-flow/2026-08-27-repair-batch-02/03-increments/increment-003.md",
-      ".dev-flow/2026-08-27-repair-batch-02/03-increments/increment-004.md"
-    ],
-    "gate_security": ".dev-flow/2026-08-27-repair-batch-02/04-security-review.md",
-    "gate_qa_adversarial": ".dev-flow/2026-08-27-repair-batch-02/04-qa-adversarial.md",
-    "gate_disposition": ".dev-flow/2026-08-27-repair-batch-02/04-gate-findings-disposition.md",
-    "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
+    "plan": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md",
+    "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "PDR_qa": ".dev-flow/2026-08-26-ui-next-batch-02/02a-qa-acceptance-review.md",
+    "PDR_security": ".dev-flow/2026-08-26-ui-next-batch-02/02b-security-review.md",
+    "PDR_architect_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02c-pdr-architect-pass2.md",
+    "PDR_qa_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02d-pdr-qa-pass2.md",
+    "PDR_security_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02e-pdr-security-pass2.md",
+    "PDR_ux_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02f-pdr-ux-pass2.md",
+    "lens_reconciliation": ".dev-flow/2026-08-26-ui-next-batch-02/02g-lens-reconciliation.md"
   },
   "baseline": {
-    "base_ref": "d8777840313145fec341687f0081afd7230c755b",
-    "base_ref_name": "origin/master",
+    "base_ref": "3fe0e4b71ef4d35d99e8605d6e3dfef0d2ef62b3",
+    "base_ref_name": "origin/master at re-verification",
+    "current_tip": "20f86de",
+    "current_tip_note": "20f86de merges PR #7, which adds only .dev-flow/02g-lens-reconciliation.md (docs). Test counts are unaffected by a docs-only merge; re-measure at any later tip rather than trusting this line.",
     "tests_collected": 647,
-    "tests_collected_at_base": 429,
-    "measured_by": "pytest -q --collect-only -p no:randomly -o addopts=",
-    "lanes": "fast -m 'not slow' + slow -m slow; both exit 0",
-    "ruff": "29 whole-tree, unchanged from base",
-    "flow_revision": "rev46"
+    "lanes": "fast 630 passed / 17 deselected exit 0; slow 17 passed / 630 deselected exit 0; 630+17=647",
+    "ruff": "29 errors, exit 1 (pre-existing, unchanged)",
+    "measured_by": "pytest -q --collect-only -p no:randomly -o addopts=; then each lane",
+    "flow_revision": "rev46+ (~/.claude and ~/.claude/skills both 0 behind upstream)",
+    "a3_census": "SETTLED BY AST at 3fe0e4b. Question: which call expressions invoke the MAP-RENDERER protocol and must migrate when IRenderer.render gains ViewState? 23 arg-ful call sites / 10 files / 6 definitions in mapper/views/. 25 zero-arg .render() sites are Textual's WIDGET protocol and are NOT in the A3. grep over-counts by 1: mapper/widgets/rail.py:180 is a docstring MENTION."
   },
   "decisions_log": [
     {
-      "station": "P4",
-      "date": "2026-08-27",
-      "decision": "gate held",
-      "notes": "Two whole-branch gates ran. security-reviewer CLEARED TO MERGE (0 HIGH). Adversarial qa-reviewer BLOCKED with HIGH-1: the derived census carried a hand exclusion; Document.tags/inherited omitted. Fixed and gated; merge held for the operator because a HIGH was raised."
+      "station": "P0",
+      "date": "2026-08-26",
+      "decision": "approved",
+      "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
     },
     {
-      "station": "P4",
-      "date": "2026-08-27",
-      "decision": "iterate-to-fix",
-      "notes": "Independent confirmation review of 01d7578 raised a NEW HIGH (HIGH-A): the dict[str,str] refusal sink and collision record were recorded as gated and were gated by nothing -- four mutants left all 548 arms green. Reproduced independently before fixing, not accepted on report."
+      "station": "P0",
+      "date": "2026-08-26",
+      "decision": "scope-add ratified",
+      "notes": "S-7 (off-screen canvas) folded as a precondition of US-N06. SUPERSEDED at un-park: shipped by the repair batch."
     },
     {
-      "station": "P3",
-      "date": "2026-08-27",
-      "decision": "Inc-4 landed",
-      "notes": "One arm per limb (6/2 arms) plus a totality guard (4 arms) over model fields. Predicate swapped from a textual annotation match to a resolved one in BOTH product and census -- classification identical, a blindness fix. Same four mutants now redden 6/6/6/2. Requirement amended: census 17 -> 21 plus a fourth threshold (AMD-1, AMD-2)."
+      "station": "PDR",
+      "date": "2026-08-26",
+      "decision": "BLOCKED - iterate to P1",
+      "notes": "architect approved-with-conditions (20 sealed decisions, cut 7 -> 9). qa BLOCKED: 10 blockers / 14 majors / 11 minors. security BLOCKED: 3 blockers / 6 majors / 5 minors. Batch PARKED by operator decision so a repair batch could ship S-01/S-02/S-07/S-08 first."
     },
     {
-      "station": "P3",
+      "station": "P0",
       "date": "2026-08-27",
-      "decision": "records corrected",
-      "notes": "Sixth instance of this batch's false-record class. The disposition row claiming the sink and collision limbs were gated by Q-high1 was corrected IN PLACE with the correction marked, not edited away, because the record of a false record is what makes the pattern countable. The enumeration is in 05-carries.md. A seventh was avoided at drafting: the correction first cited increment-002.md, which already exists as a different increment."
+      "decision": "un-parked",
+      "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
     },
     {
-      "station": "P6",
+      "station": "PDR",
       "date": "2026-08-27",
-      "decision": "state.json replaced",
-      "notes": "P-CARRY-1 discharged. The branch carried the parked feature batch's state as the canonical record with tests_collected 429; merging it would have made master assert a false premise the next batch reads at intake. The parked record is preserved whole under parked_batch."
+      "decision": "REJECTED - iterate-to-refine to P1 (amendment set 3)",
+      "notes": "Second pass, four lenses in parallel over the 41-amendment fold. architect REJECTED (6 blockers); security BLOCKED (S-16 S-17 S-18); qa approved-with-conditions (8, and 2 of its own source findings were DROPPED by the fold); ux approved-with-conditions (10, two blocker-class). A rejection returns to design: no increment opens. PDR is now at iteration 2 of the soft cap 3. Flags ruled: (a) LLR-N06.2.5 gets a cross-cutting home, sealed #D21, on an EXECUTABLE criterion -- the 15 uncoerced notify sites are app.py(11)+screens/factory.py(4) while Inc-3's set is 4-of-4 without factory.py, so the mis-parenting is an undeclared source-budget breach, not a smell. (b) the map-canvas braille promise is deferred AND the prose amended, sealed #D22, but mis-located by the flag: section 3.4 never mentions braille; the live promise is at :107, :113, :3343. Resume re-verification: fast 413 passed/16 deselected, slow 16 passed/413 deselected, 429 collected, both exit 0; ruff 29; git status byte-identical before and after the battery."
     },
     {
-      "station": "P6",
+      "station": "PDR",
       "date": "2026-08-27",
-      "decision": "synced-to-obsidian",
-      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-08-27-repair-batch-02/ -- six artifacts + the generated README. 03-increments/ deliberately NOT synced (artifact_homes declares its home as the repo; one home per artifact, the link crosses by id). The .dev-flow root 01/02/04/05 and 06-docs belong to 2026-08-18-batch-01 and were NOT copied under this batch's id: syncing another batch's artifacts here would be the exact false-record defect this batch spent six gate rounds closing. This batch produced no 02/04-validation/05-postmortem/06-docs of its own -- its validation record is the five gate rounds in 04-qa-adversarial.md, and the README states that absence as a real gap."
+      "decision": "orchestrator verifications of lens blockers",
+      "notes": "S-16 INDEPENDENTLY REPRODUCED on a third harness with a positive control: _coerce_field covers 2 of 5 file-derived families; attachment path, schema key/label and the node id are raw; an int attachment path loads with warnings=0 then raises TypeError in search_hits, an int node id yields a phantom duplicate node. Therefore S-02 is LIVE and un-park decision D18's SATISFIED-EXTERNALLY strike is WRONG. S-17 CONFIRMED by grep: LLR-STO.1.1 has 24 occurrences, all prose, zero headings. ARQ-1 CONFIRMED: docs/ARCHITECTURE.md was never amended -- :58 and :136 still declare the old frozen render signature and R-010 still says it stays frozen -- so PLAN section 7's 'map amended' is false against disk (C-44, work that never landed). GOLD-1 CORRECTED: 12 pinned digests derived, not the 18 reported; RadialRenderer pinned at all four sizes, so Inc-1 reddens 4 by construction."
     },
     {
-      "station": "P6",
+      "station": "PDR",
       "date": "2026-08-27",
-      "decision": "close batch",
-      "notes": "Merged 2b59071 (PR #3) after six independent gate rounds; the authorising verdict landed via a1b9e9d (PR #4) and the sync record via f52150e (PR #5). phase_status moved off awaiting-sync, which contradicted obsidian_synced: true -- a two-field false record in the file the next batch reads at intake."
+      "decision": "RIDER-1 reconciliation executed; batch STOPPED before iteration 3",
+      "notes": "Four parallel read-only lens audits against the lenses' OWN condition ledgers, never the amendment table. 51 union items: ~39 LIVE, 11 discharged -- all 11 by the repair batch's shipped code, none by a document fold. 01-requirements.md has ONE commit (8675151) and has not been edited since the verdicts. Briefed scope executed FALSE (6 named vs ~39 live), so the batch was referred to the operator rather than spending the final iteration. Artifact: 02g-lens-reconciliation.md, merged as PR #7."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "operator option A -- RE-SCOPE",
+      "notes": "US-N14 «lente» and the S-18 work-budget (paired with S-19 as its precondition) cut to a follow-on design batch. Removes ~7 of ~11 design rulings. Iteration 3 targets US-N06/N07/N13/N16 + palette v2. Nothing deleted -- deferred text stays marked in place. See PLAN.md section 16."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "D26-D31 recorded",
+      "notes": "D26 strict rule (a code fix never discharges a missing requirement) -- architect lens is 14/14 LIVE under it. D27 B-29/B-30 ride inside this batch as one repair increment. D28 B-29's guard ships with a synthetic fixture because it is a no-op on the current tree (C-55 limb 2). D29 A3 census settled by AST -- the orchestrator produced generation five by grep during the reconciliation itself. D30 amendment set 3 authored in two SEQUENTIAL passes (C-52: no two lanes on one file). D31 PR #7 merged docs-only before the fold."
     }
   ],
   "standing_authorization": {
@@ -188,106 +235,27 @@
     "stop_conditions": "Scope beyond the brief, or un-mitigable data loss."
   },
   "previous_batch": {
-    "batch_id": "2026-08-26-repair-batch",
-    "merge_commit": "e164a28",
-    "pr": "https://github.com/jav201/mapper/pull/2",
-    "closed_at": "d8777840313145fec341687f0081afd7230c755b",
-    "obsidian_synced": true
+    "batch_id": "2026-08-27-repair-batch-02",
+    "merge_commit": "2b59071",
+    "pr": "https://github.com/jav201/mapper/pull/3",
+    "closed_at": "2026-08-27",
+    "close_commit": "3fe0e4b",
+    "obsidian_synced": true,
+    "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
   },
-  "parked_batch": {
-    "batch_id": "2026-08-26-ui-next-batch-02",
-    "batch_objective": "Variant B «atlas» canvas mechanics (pan · fold · declared overflow · braille edges) plus the round-10 capabilities approved for batch 2: search hit-count and navigation, home 2.0 «sala», the field-query «lente», the per-view «leyenda», and the palette-v2 tokens. Closes carry B-05 and the Canvas.rows() layer-drop defect.",
-    "mode": "full",
-    "current_station": "PDR",
-    "phase_status": "awaiting-gate",
-    "stations_active": [
-      "P0",
-      "ARQ",
-      "P1",
-      "PDR",
-      "P2",
-      "P3",
-      "DDR",
-      "P4",
-      "P5",
-      "P6"
-    ],
-    "iterations_per_station": {
-      "P0": 2,
-      "ARQ": 1,
-      "P1": 1,
-      "PDR": 2,
-      "P2": 0,
-      "P3": 0,
-      "DDR": 0,
-      "P4": 0,
-      "P5": 0,
-      "P6": 0
+  "batch_history": {
+    "2026-08-26-repair-batch": {
+      "batch_id": "2026-08-26-repair-batch",
+      "merge_commit": "e164a28",
+      "pr": "https://github.com/jav201/mapper/pull/2",
+      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "obsidian_synced": true
     },
-    "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
-    "artifact_homes": {
-      "requirements": "repo:.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
-      "traceability": "repo:.dev-flow/2026-08-26-ui-next-batch-02/06-docs/traceability-matrix.md",
-      "tests": "repo:tests/",
-      "module_map": "repo:docs/ARCHITECTURE.md",
-      "increments": "repo:.dev-flow/2026-08-26-ui-next-batch-02/03-increments/",
-      "backlog": "repo:.dev-flow/BACKLOG.md",
-      "design_pdr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/PDR-2026-08-26-ui-next-batch-02.md",
-      "design_ddr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/DDR-2026-08-26-ui-next-batch-02.md",
-      "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/",
-      "metrics": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/README.md"
-    },
-    "artifacts": {
-      "plan": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md",
-      "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
-      "PDR_qa": ".dev-flow/2026-08-26-ui-next-batch-02/02a-qa-acceptance-review.md",
-      "PDR_security": ".dev-flow/2026-08-26-ui-next-batch-02/02b-security-review.md"
-    },
-    "decisions_log": [
-      {
-        "station": "P0",
-        "date": "2026-08-26",
-        "decision": "approved",
-        "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
-      },
-      {
-        "station": "P0",
-        "date": "2026-08-26",
-        "decision": "scope-add ratified",
-        "notes": "S-7 (off-screen canvas) folded as a precondition of US-N06. SUPERSEDED at un-park: shipped by the repair batch."
-      },
-      {
-        "station": "PDR",
-        "date": "2026-08-26",
-        "decision": "BLOCKED - iterate to P1",
-        "notes": "architect approved-with-conditions (20 sealed decisions, cut 7 -> 9). qa BLOCKED: 10 blockers / 14 majors / 11 minors. security BLOCKED: 3 blockers / 6 majors / 5 minors. Batch PARKED by operator decision so a repair batch could ship S-01/S-02/S-07/S-08 first."
-      },
-      {
-        "station": "P0",
-        "date": "2026-08-27",
-        "decision": "un-parked",
-        "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
-      },
-      {
-        "station": "PDR",
-        "date": "2026-08-27",
-        "decision": "REJECTED - iterate-to-refine to P1 (amendment set 3)",
-        "notes": "Second pass, four lenses in parallel over the 41-amendment fold. architect REJECTED (6 blockers); security BLOCKED (S-16 S-17 S-18); qa approved-with-conditions (8, and 2 of its own source findings were DROPPED by the fold); ux approved-with-conditions (10, two blocker-class). A rejection returns to design: no increment opens. PDR is now at iteration 2 of the soft cap 3. Flags ruled: (a) LLR-N06.2.5 gets a cross-cutting home, sealed #D21, on an EXECUTABLE criterion -- the 15 uncoerced notify sites are app.py(11)+screens/factory.py(4) while Inc-3's set is 4-of-4 without factory.py, so the mis-parenting is an undeclared source-budget breach, not a smell. (b) the map-canvas braille promise is deferred AND the prose amended, sealed #D22, but mis-located by the flag: section 3.4 never mentions braille; the live promise is at :107, :113, :3343. Resume re-verification: fast 413 passed/16 deselected, slow 16 passed/413 deselected, 429 collected, both exit 0; ruff 29; git status byte-identical before and after the battery."
-      },
-      {
-        "station": "PDR",
-        "date": "2026-08-27",
-        "decision": "orchestrator verifications of lens blockers",
-        "notes": "S-16 INDEPENDENTLY REPRODUCED on a third harness with a positive control: _coerce_field covers 2 of 5 file-derived families; attachment path, schema key/label and the node id are raw; an int attachment path loads with warnings=0 then raises TypeError in search_hits, an int node id yields a phantom duplicate node. Therefore S-02 is LIVE and un-park decision D18's SATISFIED-EXTERNALLY strike is WRONG. S-17 CONFIRMED by grep: LLR-STO.1.1 has 24 occurrences, all prose, zero headings. ARQ-1 CONFIRMED: docs/ARCHITECTURE.md was never amended -- :58 and :136 still declare the old frozen render signature and R-010 still says it stays frozen -- so PLAN section 7's 'map amended' is false against disk (C-44, work that never landed). GOLD-1 CORRECTED: 12 pinned digests derived, not the 18 reported; RadialRenderer pinned at all four sizes, so Inc-1 reddens 4 by construction."
-      }
-    ],
-    "created_at": "2026-08-26T00:00:00",
+    "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed."
+    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record."
   },
-  "obsidian_synced": true,
-  "created_at": "2026-08-27T00:00:00",
-  "closed_at": "2026-08-27",
-  "merge_commit": "2b59071",
-  "pr": "https://github.com/jav201/mapper/pull/3"
+  "obsidian_synced": false,
+  "created_at": "2026-08-26T00:00:00"
 }
