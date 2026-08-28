@@ -68,8 +68,23 @@
         "amendments": "A-77..A-88",
         "unplanned_defects": "WARN's job made LLR-S06.3.5's own threshold unsatisfiable (A-78); the sealed C0 range row omitted U+000D so adopting it NARROWED shipped coverage (A-80); radial sliced titles raw into the exported SVG; AT-009 derived its oracle from the constant under test and was green while 19 invisible code points reached the artifact (A-87). Confirmation pass also caught a fabricated measurement in production source (a probe that constructed the theme it observed) and a fix of mine that repaired nothing."
       }
+      {
+        "inc": "Inc-2",
+        "commit": "fe50799",
+        "date": "2026-08-28",
+        "source_files": 6,
+        "source_files_note": "the breach #D5 declared and re-ratified at the re-scope; the gate is 'zero call sites of the old shape survive', so a partial migration leaves two contracts live at once",
+        "gates": "code-reviewer BLOCK on 3 HIGH -> fixed -> confirmation pass discharged all three and raised 1 new HIGH -> fixed by RETRACTING a false premise -> narrow third pass: RETRACTION CORRECT, no HIGH, gate PASSES. No HIGH was ever self-cleared.",
+        "suite": "fast 719 passed / 17 deselected; slow 17 passed; ruff 28 (exactly the 4eaba35 baseline, zero new)",
+        "ledger": "736 = 711 - 0 + 25, node ids enumerated against a detached worktree",
+        "census": "AST not grep: 7 definitions, 35 arg-ful call sites, 25 zero-arg Textual sites, **kwargs 0, zero old-shape survivors incl. */** splat and positional. Cardinalities PINNED in the suite, narrated nowhere.",
+        "battery": "rounds 7-11; round 7 208 arms, round 11 55 arms; per-arm verdicts; sha256 restore on up to 10 files after every mutant",
+        "amendments": "A-92..A-96",
+        "headline_correction": "A-96 RETRACTS A-94 and carry B-51 in full. 'The real tab key drops focus on MapScreen' was an artifact of run_test()'s default 80x24, at which _apply_region_visibility correctly auto-hides the rail and inspector. At 118x34 -- the declared context of use -- tab traverses and LLR-CNV.3.1's threshold reproduces verbatim. THREE passes agreed on the false reading because all three shared an unstated premise: nobody varied the terminal size. Verified by an independent third pass with three mutants the author had not run. Lesson carried as B-54.",
+        "other_findings": "HLR-CNV.3 was assigned to no increment (orphan class, same as AT-009) and landed here (A-92); with_header was a dead parameter, removed not migrated (A-93); the export leaked live keyboard focus into exported SVGs, reachable by tab-then-e; the increment's one declared behaviour change (B-50) claimed coverage the suite did not have."
+      }
     ],
-    "next": "Inc-2 -- ViewState + the IRenderer A3, the declared 6-source-file breach, carrying HLR-CNV.3/B-05 and Inc-1's standing re-run obligation on AT-007 and AT-009"
+    "next": "Inc-3 -- US-N06 escala (pan, fold, overflow) plus LLR-COERCE.2 as widened by A-89 (the B-47 fold). Declared 5-source-file breach; the coercion guarantee must quantify over every renderer feeding an operator-visible sink, DERIVED and never named by hand."
   },
   "stations_active": [
     "P0",
