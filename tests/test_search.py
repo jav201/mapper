@@ -991,6 +991,24 @@ _PASS_FREE_READERS = {
     "action_pan_up": "wrapper over `_pan`",
     "action_pan_down": "wrapper over `_pan`",
     "action_export_svg": "consumes the memo of the frame currently painted, which is what it depicts",
+    # Inc-4b's keypress-bound consumer, which this arm was written to force into
+    # declaring itself.  It DECLINES to open a pass, and the reason is the same
+    # shape as `_pan`'s rather than a shrug: the walk moves the selection AMONG
+    # the matches the operator is currently looking at, so the resolution of the
+    # frame on screen is the correct input and not a stale one -- and it cannot
+    # BE stale, because the memo is keyed on the graph object and the query text
+    # and a walk changes neither.  The repaint it ends with opens its own pass.
+    "_walk_hits": "moves the selection inside the matches of the frame ON SCREEN, then repaints",
+    "action_next_hit": "wrapper over `_walk_hits`",
+    "action_prev_hit": "wrapper over `_walk_hits`",
+    "on_input_submitted": "reads the order of the frame `refresh_canvas` painted on the line above",
+    # Round 2.  `esc` and the hint line were written with different guards and
+    # disagreed above the renderer's bound, so they now share one predicate --
+    # which puts BOTH of them in the derived set.  That is this arm working as
+    # designed, not an obstacle to routing around: the consolidation is exactly
+    # the kind of edit that grows the reader set, and it has to declare itself.
+    "_search_is_live": "asks whether the frame ON SCREEN is showing an answer, which is the previous pass's",
+    "action_back_or_home": "wrapper over `_search_is_live`; clears and repaints, or leaves",
 }
 
 
@@ -1190,3 +1208,679 @@ def test_the_hit_tone_is_read_from_darkside(tmp_path):
     """
     assert darkside.INK and darkside.STEP
     assert darkside.INK != darkside.STEP
+
+
+# ==========================================================================
+# Inc-4b — the `#D5b` walk, its two empty-state toasts, the one-time rebind
+# declaration, state-dependent `esc`, and the seat-derived hint line.
+#
+# EVERY predicate below presses a REAL chord and reads a PAINTED surface.  The
+# one deliberate exception is documented where it occurs: a query containing a
+# right-to-left override cannot be typed through `pilot.press`, so that arm sets
+# the Input's value and still submits with the real `enter`.
+
+
+def toast_text(screen) -> str:
+    """The event strip, region-clipped and JOINED — never `_event_toast`'s args.
+
+    Reading the arguments would assert what the application MEANT to say.  The
+    two empty-state toasts are required to be distinguishable to an OPERATOR,
+    which is a claim about the frame.
+    """
+    return " ".join(rows_in(screen, screen.query_one("#map-toast").region)).strip()
+
+
+def hint_text(screen) -> str:
+    from mapper.widgets.chrome import HintLine
+
+    return screen.query_one(HintLine).text
+
+
+def hint_rows(screen) -> str:
+    from mapper.widgets.chrome import HintLine
+
+    return " ".join(rows_in(screen, screen.query_one(HintLine).region))
+
+
+async def test_at_022_the_walk_follows_tree_order_and_wraps(tmp_path):
+    """AT-022 — `n` walks the matches in TREE order, and wraps in both directions.
+
+    THE SELF-GUARD IS THE FIRST ASSERTION AND IT IS NOT A FORMALITY (`C-55` limb
+    2).  On the shipped `legacy` fixture BOTH of this batch's working queries
+    give `tree_order == dict_order`, so this node written against it would have
+    passed while asserting nothing at all -- on the very requirement whose own
+    acceptance criteria name that failure.  The guard is evaluated on the live
+    fixture at run time, before any ordering claim is read.
+
+    THE EXPECTATION IS THE TEST'S OWN PRE-ORDER DFS (`inc4_support`), never
+    `mapper.search.tree_order`: an ordering assertion that asks the ordering
+    helper for its expectation asserts that the helper agrees with itself.
+
+    AND THE SELECTION IS ASSERTED VISIBLE WHERE IT LANDS, at every step
+    (`LLR-N06.2.4` PRED-A + PRED-B).  Without that limb "the selection moved to
+    the next match" passes on a screen where the operator cannot see the
+    selection, which is the silent state change US-N06 forbids.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        found = set(SearchIndex(screen.graph).query(QUERY))
+        dict_ordered = [nid for nid in screen.graph.nodes if nid in found]
+        tree_ordered = [nid for nid in expected_tree_order(screen.graph) if nid in found]
+        assert tree_ordered != dict_ordered, (
+            "SELF-GUARD: the two orders coincide on this fixture, so the walk "
+            "assertion below cannot fail and must not be trusted"
+        )
+        assert len(tree_ordered) >= 3, (
+            "a wrap needs a list long enough to walk off the end of; `carlos` on "
+            "`legacy` returns ONE hit and cannot demonstrate one"
+        )
+
+        await submit(pilot, QUERY)
+        start = screen.nav.cursor
+
+        def painted() -> frozenset[str]:
+            return painted_ids(screen.graph, screen._view_state(*screen._canvas_size()))
+
+        def traced() -> frozenset[str]:
+            w, _h = screen._canvas_size()
+            return oracle_traced(
+                screen.graph, screen.folded, w, canvas_rows(screen), screen.pan_x
+            )
+
+        # P-022.1 — the recorded sequence, one press at a time.  The press count
+        # is DERIVED (`len(hits) + 1`), never the literal, and the last press is
+        # the one that has to wrap.
+        first = (tree_ordered.index(start) + 1) % len(tree_ordered)
+        expected = [
+            tree_ordered[(first + i) % len(tree_ordered)]
+            for i in range(len(tree_ordered) + 1)
+        ]
+        recorded = []
+        for _ in range(len(tree_ordered) + 1):
+            await pilot.press("n")
+            await pilot.pause()
+            recorded.append(screen.nav.cursor)
+            # P-022.5 — visible where it landed, on both channels, every step.
+            assert screen.nav.cursor in painted(), (screen.nav.cursor, sorted(painted()))
+            assert screen.nav.cursor in traced(), (screen.nav.cursor, sorted(traced()))
+        assert recorded == expected, (recorded, expected)
+
+        # P-022.3 — the forward wrap, asserted as its own statement rather than
+        # left implicit inside the sequence equality: after exactly `len(hits)`
+        # presses the cursor is back where it started.
+        assert recorded[len(tree_ordered) - 1] == start
+
+        # P-022.4 — the backward wrap.  Walk forward until the cursor sits on the
+        # FIRST hit in tree order (asserted reached, never assumed), then one real
+        # `N` must land on the LAST.
+        for _ in range(len(tree_ordered) + 1):
+            if screen.nav.cursor == tree_ordered[0]:
+                break
+            await pilot.press("n")
+            await pilot.pause()
+        assert screen.nav.cursor == tree_ordered[0], "never reached the first hit"
+        await pilot.press("N")
+        await pilot.pause()
+        assert screen.nav.cursor == tree_ordered[-1]
+
+
+async def test_at_022b_the_walk_enters_from_outside_the_hit_set(tmp_path):
+    """AT-022b — the FIRST press when the cursor is not itself a match.
+
+    THIS IS THE WALK'S PRIMARY ENTRY, and until round 2 it was executed by NO
+    test in the suite: replacing the `else` limb's body with a raise left the
+    whole lane green.  Nothing in `on_input_submitted` moves the cursor onto a
+    hit, so an operator who searches for something away from where they are
+    standing takes this limb on their very first `n`.  `AT-022` misses it for a
+    fixture reason and not a design one -- the resting cursor on `adjuntos`
+    (`riesgo-root`) happens to BE a match, so every press there resolves
+    through `hits.index(cursor)` instead.
+
+    THE PRECONDITION IS ENFORCED BY CONSTRUCTION, AND THEN PINNED TO PRODUCTION.
+    The cursor node is SELECTED as one the index does not match, so a fixture in
+    which everything matched raises `StopIteration` at the selection rather than
+    passing while testing nothing.  What construction cannot see is the seam the
+    self-guard covers: this arm resolves the hit set through `SearchIndex`, while
+    the walk reads `_search_order`.  A SECOND, DIVERGENT RESOLUTION -- the shape
+    of `M-N07.3-a`, and the exact defect `US-N07` exists to close -- would put
+    this node INSIDE production's hits while the arm still believed it outside,
+    silently returning the press to the `in hits` limb.  So the guard is taken
+    after `submit`, against the order the walk itself reads, and it is that
+    divergence and not the fixture that it can fail on.
+
+    THE `N` LIMB IS THE HALF THAT MATTERS.  Swapping the two endpoints is the
+    natural typo in `0 if step > 0 else len(hits) - 1`, and a forward-only arm
+    cannot see it: with the endpoints exchanged, `n` from outside still lands
+    somewhere plausible and only `N` reads the wrong end.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        found = set(SearchIndex(screen.graph).query(QUERY))
+        order = [nid for nid in expected_tree_order(screen.graph) if nid in found]
+        assert len(order) >= 3, (order, "the two endpoints must be distinguishable")
+        assert order[0] != order[-1]
+
+        # Construction, not assertion: a fixture in which every node matched
+        # raises `StopIteration` right here, loudly.
+        outsider = next(nid for nid in screen.graph.nodes if nid not in found)
+
+        await submit(pilot, QUERY)
+        assert outsider not in (screen._search_order() or ()), (
+            "SELF-GUARD: the cursor must start OUTSIDE the resolution the WALK "
+            "reads, or this node resolves through the `in hits` limb and asserts "
+            "nothing new"
+        )
+
+        # Forward from outside -> the FIRST hit in tree order.
+        screen.nav.cursor = outsider
+        screen.refresh_canvas()
+        await pilot.pause()
+        assert screen.nav.cursor == outsider, "the repaint moved the cursor"
+        await pilot.press("n")
+        await pilot.pause()
+        assert screen.nav.cursor == order[0], (screen.nav.cursor, order)
+
+        # Backward from outside -> the LAST.  Re-entered from outside, because
+        # the press above left the cursor inside the set.
+        screen.nav.cursor = outsider
+        screen.refresh_canvas()
+        await pilot.pause()
+        await pilot.press("N")
+        await pilot.pause()
+        assert screen.nav.cursor == order[-1], (screen.nav.cursor, order)
+
+
+async def test_at_023_e1b_and_e1c_are_painted_differently(tmp_path):
+    """AT-023 / P-023.4 — two empty states, two toasts, on BOTH channels.
+
+    `M-N07.3-b` is implementing them as ONE toast: green on any test that asserts
+    "a toast appears", and it tells an operator who has never searched to go and
+    look for a query they never typed.  The titles AND the bodies are asserted
+    pairwise distinct, and both are read off the painted `#map-toast` region
+    rather than off `_event_toast`'s arguments.
+
+    THE FIRST `n` PRESS IS CONSUMED DELIBERATELY.  It paints the one-time rebind
+    declaration (`AT-051b`), which outranks both of these on press one; `E1b` is
+    what the SECOND press paints.  Asserted here rather than worked around, so
+    the interaction between the two requirements is pinned instead of discovered.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        # E1b — nothing was ever submitted.
+        assert screen.query_text == ""
+        await pilot.press("n")
+        await pilot.pause()
+        declaration = toast_text(screen)
+        await pilot.press("n")
+        await pilot.pause()
+        e1b = toast_text(screen)
+        assert e1b != declaration
+
+        # E1c — submitted, and it came back empty.
+        await submit(pilot, ABSENT_QUERY)
+        assert SearchIndex(screen.graph).query(ABSENT_QUERY) == [], (
+            "the pinned absent query matches something; E1c is unreachable"
+        )
+        await pilot.press("n")
+        await pilot.pause()
+        e1c = toast_text(screen)
+
+        # The declared strings, spelled here ON PURPOSE.  This table is the
+        # specification (`UX-Q3-b`, `E1b`, `E1c`) and its whole value is that it
+        # is not derived from the code it checks.
+        e1b_title, e1b_body = "sin búsqueda activa", "no hay coincidencias que recorrer"
+        e1c_title = "0 coincidencias"
+        e1c_body = "«" + ABSENT_QUERY + "» no aparece en este mapa"
+
+        assert e1b_title in e1b and e1b_body in e1b, e1b
+        assert e1c_title in e1c and e1c_body in e1c, e1c
+
+        # PAIRWISE, on both channels, from the frame.  One shared toast fails all
+        # four of these.
+        assert e1b_title not in e1c
+        assert e1b_body not in e1c
+        assert e1c_title not in e1b
+        assert e1c_body not in e1b
+        assert e1b != e1c
+
+
+async def test_at_023_e1c_routes_the_operators_query_through_plain(tmp_path):
+    """`E1c`'s body interpolates the query, so the toast is a COERCION SINK.
+
+    Measured: `darkside.plain` strips a right-to-left override where
+    `Text.assemble` leaves it alive -- and `Text.assemble` is what paints this
+    toast.  An override inside the guillemets reverses the toast's own sentence
+    on the operator's screen.
+
+    THE HOSTILE CODE POINT IS BUILT FROM ITS NUMBER, never spelled into this
+    file: the same rule `tests/test_inc3_census.py::hostile` follows, and the
+    one the coercion census over tracked files enforces.
+
+    ONE DELIBERATE DEPARTURE FROM "PRESS THE REAL CHORD", stated rather than
+    hidden: an override has no Textual key name, so it cannot be typed through
+    `pilot.press`.  The value is placed on the real `Input` and submitted with
+    the real `enter`, so the whole shipped submit path still runs -- only the
+    keystrokes that would produce the string are bypassed.
+    """
+    from textual.widgets import Input
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        hostile = ABSENT_QUERY + chr(0x202E) + "zz"
+        # The control that makes this arm mean something: the constructor the
+        # toast is actually built with does NOT strip the override, so a body
+        # that reached the frame unrouted would carry it.
+        assert chr(0x202E) in darkside.Text.assemble((hostile, "")).plain
+        assert chr(0x202E) not in darkside.plain(hostile)
+        assert SearchIndex(screen.graph).query(hostile) == []
+
+        await pilot.press("slash")
+        await pilot.pause()
+        screen.query_one("#search-input", Input).value = hostile
+        await pilot.press("enter")
+        await pilot.pause()
+        assert screen.query_text == hostile
+
+        await pilot.press("n")   # consumes the one-time declaration
+        await pilot.pause()
+        await pilot.press("n")
+        await pilot.pause()
+        painted = toast_text(screen)
+        assert "0 coincidencias" in painted, painted
+        assert chr(0x202E) not in painted, "the override reached the painted toast"
+        assert "«" + darkside.plain(hostile) + "»" in painted, painted
+
+
+async def test_at_051_the_real_M_reaches_next_gap(tmp_path):
+    """AT-051 — the RELOCATED chord is pressed, not merely declared.
+
+    The whole-seat pin and `duplicate_chords()` are DECLARATION checks: they
+    prove the seat says `M` is `next_gap`, and neither presses it.  A seat row
+    can be correct while the action it names is unreachable.  The mutation this
+    arm exists for is renaming the row while `MapScreen` still dispatches
+    `next_gap` from `n`: the pins stay green and this fails.
+
+    Scoped deliberately to DISPATCH.  `action_next_gap`'s own correctness is
+    `AT-N04b`'s, already shipped, so the expectation here is computed from
+    `_incomplete_order()` -- the same list the action consumes.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        order = screen._incomplete_order()
+        assert order, "nothing is missing a required field; the arm is vacuous"
+        before = screen.nav.cursor
+        if before in order:
+            expected = order[(order.index(before) + 1) % len(order)]
+        else:
+            expected = order[0]
+        assert expected != before, "the target equals the start; nothing to observe"
+
+        await pilot.press("M")
+        await pilot.pause()
+        assert screen.nav.cursor == expected, (before, screen.nav.cursor, order)
+
+
+async def test_at_051_M_on_a_complete_map_says_so(tmp_path):
+    """The other half of the relocated chord: it still reports full coverage."""
+    from mapper.model import Edge, Ficha, Graph, Node
+
+    graph = Graph()
+    graph.add_node(Node(id="root", ficha=Ficha(title="raiz")))
+    graph.add_node(Node(id="a", ficha=Ficha(title="alfa")))
+    graph.add_edge(Edge("root", "a"))
+    assert graph.schema == [], "a required field would make this map incomplete"
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save("complete", graph)
+        screen = await open_map(app, pilot, "complete")
+        assert screen._incomplete_order() == []
+        await pilot.press("M")
+        await pilot.pause()
+        assert "cobertura completa" in toast_text(screen)
+
+
+async def test_at_051b_the_rebind_is_declared_exactly_once(tmp_path):
+    """AT-051b — the first `n` says the key changed hands; the second does not.
+
+    `#D5b` took `n` from `next_gap`, and between this increment and Inc-8 the
+    relocated chord is undiscoverable through `?` -- its `view` group sits below
+    the legend's fold at the declared size.  An operator who presses `n`
+    expecting the old behaviour has no painted route to the new one, and this
+    toast is it.
+
+    EVERY STRING IS READ FROM THE SEAT, never typed here: the declaration's only
+    job is to name what is actually bound, and a typed expectation would keep
+    passing after the next rebind moved it.
+
+    "ONE-TIME" IS HALF THE CLAIM, and it is read from the FRAME TWICE.  A
+    persistence store is not consulted: that would assert what the application
+    believes rather than what it painted.
+    """
+    from mapper.keymap import bindings_for
+
+    seat = {b.action: b for b in bindings_for("map")}
+    assert {"next_hit", "next_gap"} <= set(seat), sorted(seat)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        await pilot.press("n")
+        await pilot.pause()
+        first = toast_text(screen)
+        # Names the new duty of `n` AND the new home of `next_gap`.
+        assert seat["next_hit"].glyph in first, first
+        assert darkside.plain(seat["next_hit"].label) in first, first
+        assert darkside.plain(seat["next_gap"].label) in first, first
+        assert seat["next_gap"].glyph in first, first
+
+        await pilot.press("n")
+        await pilot.pause()
+        second = toast_text(screen)
+        assert darkside.plain(seat["next_hit"].label) not in second, second
+        assert second != first
+
+
+async def test_at_053_esc_clears_a_live_search_and_stays_on_the_map(tmp_path):
+    """AT-053 / `#D38` — `esc limpiar` is a promise the handler now keeps.
+
+    Before this branch existed `action_back_or_home` popped the screen
+    UNCONDITIONALLY while the hint line advertised `esc limpiar`, so an operator
+    who followed the hint left the map.  Two arms that fail independently, and
+    the second is the regression limb: without it the repair can break
+    `back_or_home` altogether and stay green.
+    """
+    def hit_image(screen) -> str:
+        style = f"{darkside.INK} on {darkside.STEP}"
+        text = screen._current_renderer().render(
+            screen.graph, screen._view_state(*screen._canvas_size())
+        )
+        return "".join(text.plain[s.start:s.end] for s in text.spans if s.style == style)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        # ARM 1 -- a live search: `esc` clears it and the map STAYS.
+        await submit(pilot, QUERY)
+        assert COUNT_RE.search(count_region_text(screen)), "no count line to clear"
+        assert hit_image(screen) != "", "nothing carries the hit style to begin with"
+        assert "limpiar" in hint_text(screen), hint_text(screen)
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.screen is screen, "esc popped the map out from under a live search"
+        assert screen.query_text == ""
+        assert COUNT_RE.search(count_region_text(screen)) is None, count_region_text(screen)
+        assert hit_image(screen) == "", "a node still carries the hit style"
+
+        # ARM 2 -- the REGRESSION limb.  With no search live, `esc` still leaves.
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.screen is not screen, "esc no longer leaves the map"
+
+
+async def test_p052_2_the_hint_line_reads_its_glyphs_from_the_seat(tmp_path):
+    """`UX-Q3-b` — two limbs, and a hard-coded hint passes (a) and fails (b).
+
+    Limb (a) is the declared string, verbatim, with the shipped seat.  Limb (b)
+    moves the seat's glyph for `next_hit` and requires the repainted hint to
+    follow it.  This increment is itself the proof the hazard is real: `n` meant
+    `next_gap` one commit ago, and a hint that spelled it would still say so.
+    """
+    import dataclasses
+
+    from mapper import keymap
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        app.store.save(MAP_ID, build_adjuntos(tmp_path))
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        # (a) the shipped seat, the declared string.
+        await submit(pilot, QUERY)
+        assert hint_text(screen) == "n siguiente · N anterior · esc limpiar"
+        assert "n siguiente" in hint_rows(screen), hint_rows(screen)
+
+        # ... and the empty-result variant, on the same surface.
+        await submit(pilot, ABSENT_QUERY)
+        assert hint_text(screen) == "sin coincidencias · esc limpiar"
+        assert "sin coincidencias" in hint_rows(screen), hint_rows(screen)
+
+        # (b) move the SEAT, and the painted hint must move with it.
+        moved = [
+            dataclasses.replace(b, glyph="»") if b.action == "next_hit" else b
+            for b in keymap.KEYMAP
+        ]
+        assert [b.glyph for b in moved] != [b.glyph for b in keymap.KEYMAP], (
+            "the monkeypatch changed nothing; limb (b) would pass on anything"
+        )
+        original = keymap.KEYMAP
+        keymap.KEYMAP = moved
+        try:
+            await submit(pilot, QUERY)
+            assert hint_text(screen).startswith("» siguiente · "), hint_text(screen)
+        finally:
+            keymap.KEYMAP = original
+
+        await submit(pilot, QUERY)
+        assert hint_text(screen) == "n siguiente · N anterior · esc limpiar"
+
+
+def test_cd6a_the_walk_reads_exactly_one_resolution():
+    """`C-D6a`, closed STRUCTURALLY (`#D37`) rather than asserted vacuously.
+
+    The sealed invariant is "submitting a search clears the lens matches, and
+    submitting a lens clears the search hits".  THERE IS NO LENS IN THIS BATCH
+    (`#D23` defers US-N14 whole), so the only form that invariant can take here
+    is "a field nothing ever writes is still empty" -- GREEN BEFORE ANY CODE IS
+    WRITTEN, which is the vacuous check this batch exists to stop, landing on the
+    very invariant that was meant to close a gap.
+
+    So the mutant is made STRUCTURALLY UNAVAILABLE instead of undetected.
+    `M-N07.3-a` is the walk written over two result sets joined by `or` with
+    neither ever cleared; it passes `AT-022` whenever only one is populated,
+    which is every single-feature test.  This arm reads the walk handler's AST
+    and requires exactly ONE resolution source and NO boolean fallback.
+
+    WHAT IS ACTUALLY ENFORCED, stated exactly, because the earlier wording
+    ("cannot be expressed in the handler at all") claimed more than the code
+    checks.  The teeth are `used == {"_search_order"}`: a second resolution
+    named anywhere in this class's result-set vocabulary reddens it.  The
+    `BoolOp` check is a COARSE SECOND BELT, not the rule -- a second set whose
+    name misses the vocabulary regex and which is combined without `and`/`or`
+    (tuple concatenation, `dict.fromkeys`, `itertools.chain`) satisfies both
+    assertions.  So: the two NAMED shapes of `M-N07.3-a` are unavailable here,
+    and an unnamed second set combined non-boolean-ly is not caught by this arm.
+    The rule is not weakened for that -- it already caught a real `title or nid`
+    fallback on its first run, and the fix was to lift the fallback into
+    `_branch_name` rather than to allow it.
+
+    THE VOCABULARY IS DERIVED FROM THE CLASS, not hand-listed: a hand-listed
+    vocabulary of one member would make "exactly one" trivially true.
+    """
+    import ast
+    import re
+
+    cls = next(
+        node
+        for node in ast.walk(_app_tree())
+        if isinstance(node, ast.ClassDef) and node.name == "MapScreen"
+    )
+    methods = {
+        item.name: item
+        for item in cls.body
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+    assert "_walk_hits" in methods, sorted(methods)
+
+    def self_reads(node) -> set[str]:
+        return {
+            sub.attr
+            for sub in ast.walk(node)
+            if isinstance(sub, ast.Attribute)
+            and isinstance(sub.value, ast.Name)
+            and sub.value.id == "self"
+        }
+
+    # Every name on this class that could hold or produce a RESULT SET.  Note
+    # `query_text` does not match, and must not: a query is not a result set, and
+    # the walk legitimately reads it to tell "never asked" from "asked and empty".
+    pattern = re.compile(r"hits|matches|search_order|search_memo|lens")
+    vocabulary = {name for name in self_reads(cls) if pattern.search(name)}
+    vocabulary |= {name for name in methods if pattern.search(name)}
+    assert len(vocabulary) >= 3, (
+        f"only {sorted(vocabulary)} could be a resolution source, so 'exactly "
+        "one' is not a choice this class offers"
+    )
+
+    used = self_reads(methods["_walk_hits"]) & vocabulary
+    assert used == {"_search_order"}, (
+        f"the walk reads {sorted(used)}; it must read exactly one resolution, "
+        "and `M-N07.3-a` is what a second one becomes"
+    )
+
+    fallbacks = [n for n in ast.walk(methods["_walk_hits"]) if isinstance(n, ast.BoolOp)]
+    assert not fallbacks, (
+        "the walk handler contains a boolean expression; `search_hits or "
+        "lens_matches` is exactly the shape this forbids"
+    )
+
+
+async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence(
+    tmp_path, monkeypatch
+):
+    """The THIRD empty-ish state, which the sealed text never names.
+
+    `_search_order` returns `None` above `MAX_RENDER_NODES` — Inc-4a's own
+    distinction, and it was measured rather than imagined: with an empty order
+    returned instead, the strip painted `0 coincidencias en el mapa` over a graph
+    holding thousands of real matches.  The walk inherits that hazard the moment
+    it grows an empty-result toast, because `E1c` says «q» NO APARECE EN ESTE
+    MAPA — a claim about the graph that nobody evaluated.
+
+    So the walk has a third branch, and this is its arm.  The bound is moved
+    rather than a twelve-thousand-node fixture built: the branch is selected by
+    `len(graph.nodes) > MAX_RENDER_NODES`, and moving either side of that
+    comparison reaches the same code.  Building the graph would cost minutes per
+    run to exercise one `if`.
+
+    ALSO PINS THE HINT LINE, which is where the same conflation would land next:
+    above the bound the hint must NOT read `sin coincidencias`.
+    """
+    import mapper.app as app_module
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        graph = build_adjuntos(tmp_path)
+        app.store.save(MAP_ID, graph)
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        assert screen._search_order() is None, "the bound was not reached"
+        # And the query DOES match on this graph, so "nothing was found" would be
+        # false rather than merely unhelpful.
+        assert SearchIndex(graph).query(QUERY), "the query matches nothing anyway"
+
+        await submit(pilot, QUERY)
+        assert hint_text(screen) != "sin coincidencias · esc limpiar", hint_text(screen)
+
+        await pilot.press("n")   # consumes the one-time declaration
+        await pilot.pause()
+        await pilot.press("n")
+        await pilot.pause()
+        painted = toast_text(screen)
+        assert "0 coincidencias" not in painted, painted
+        assert "no aparece en este mapa" not in painted, painted
+        assert "sin búsqueda activa" not in painted, painted
+        assert str(len(graph.nodes) - 1) in painted, painted
+
+
+async def test_esc_and_the_hint_line_agree_about_what_a_live_search_is(
+    tmp_path, monkeypatch
+):
+    """`esc` may only act where the hint line advertised it (`#D38`, round 2).
+
+    The two guards were written independently -- the hint asked for
+    `query_text.strip() and order is not None`, `esc` asked for
+    `query_text.strip()` alone -- and above the renderer's bound they disagreed.
+    Measured there: the hint promises nothing, and yet the first `escape`
+    cleared a query that was never painted, changed no pixel and did not leave
+    the map.  A keypress silently swallowed is the INVERSE of the defect `#D38`
+    exists to fix, and it is worse than the original in one way: `#D38`'s
+    operator at least got a screen change.
+
+    BOTH LIMBS ARE ASSERTED AND THEY FAIL SEPARATELY.  Below the bound the hint
+    promises and `esc` must clear WITHOUT leaving; above it the hint promises
+    nothing and `esc` must leave on the FIRST press.  A predicate that only
+    checked the second limb is green on an `esc` that never clears at all.
+    """
+    import mapper.app as app_module
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        graph = build_adjuntos(tmp_path)
+        app.store.save(MAP_ID, graph)
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+
+        # LIMB 1 — below the bound.  The hint promises, so `esc` keeps the map.
+        await submit(pilot, QUERY)
+        assert "limpiar" in hint_text(screen), hint_text(screen)
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.screen is screen, "esc popped the map out from under a live search"
+        assert screen.query_text == ""
+
+        # LIMB 2 — above the bound, reached the way `§1.6 C`'s own arm reaches
+        # it.  The hint promises nothing, so `esc` must NOT act on the query.
+        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        await submit(pilot, QUERY)
+        assert screen._search_order() is None, "the bound was not reached"
+        assert "limpiar" not in hint_text(screen), hint_text(screen)
+        assert screen.query_text.strip(), "the query is gone; the limb is vacuous"
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.screen is not screen, (
+            "esc swallowed a keypress where the hint promised nothing: it "
+            "cleared an unpainted query instead of leaving the map"
+        )

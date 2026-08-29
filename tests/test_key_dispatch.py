@@ -41,7 +41,9 @@ MAP_BINDINGS = [b for b in keymap.KEYMAP if b.scope == keymap.SCOPE_MAP]
 #   3. Pinning only the map scope left 23 of 48 bindings unpinned. A home-scope
 #      `r`/`q` action swap stayed green, so "retomar último" quit the application.
 #
-# So the specification is the full tuple for all 48 entries, compared by SET
+# So the specification is the full tuple for EVERY entry (48 when this was
+# written; the seat has grown twice since, and a count in this sentence would be
+# stale rather than wrong-making), compared by SET
 # EQUALITY. C-31 warns that a hand-listed set is usually a weak oracle; here it is
 # the specification, and its whole value is that it is not derived from the thing
 # it checks. A deliberate rebinding is a two-line change: the seat, and this table.
@@ -70,6 +72,10 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("map", "J"): ("pan_down", "desplazar abajo", "J", "view", False),
     ("map", "K"): ("pan_up", "desplazar arriba", "K", "view", False),
     ("map", "L"): ("pan_right", "desplazar derecha", "L", "view", False),
+    # Inc-4b / US-N07 `#D5b`: `n` walks the live matches, `N` walks them
+    # backwards, and `next_gap` moves off `n` to `M`.
+    ("map", "M"): ("next_gap", "siguiente faltante", "M", "view", False),
+    ("map", "N"): ("prev_hit", "coincidencia anterior", "N", "nav", False),
     ("map", "R"): ("toggle_rail", "mostrar/ocultar rail", "R", "view", False),
     ("map", "X"): ("remove_attachment", "quitar adjunto", "X", "node", False),
     ("map", "a"): ("add_child", "agregar hijo", "a", "node", False),
@@ -85,7 +91,7 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("map", "k"): ("prev_sibling", "anterior", "k", "nav", False),
     ("map", "l"): ("child", "hijo", "l", "nav", False),
     ("map", "m"): ("coverage", "cobertura", "m", "view", False),
-    ("map", "n"): ("next_gap", "siguiente faltante", "n", "view", False),
+    ("map", "n"): ("next_hit", "siguiente coincidencia", "n", "nav", False),
     ("map", "o"): ("toggle_outline", "alternar outline", "o", "view", False),
     ("map", "q"): ("home", "inicio", "q", "salir", False),
     ("map", "r"): ("toggle_radial", "alternar radial", "r", "view", False),

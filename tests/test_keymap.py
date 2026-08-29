@@ -49,7 +49,12 @@ EXPECTED_PER_SCOPE = {
     keymap.SCOPE_HOME: 11,
     # 25 -> 29: Inc-3 adds the four US-N06 pan chords `H` `J` `K` `L` to the
     # `view` group.  Updated deliberately, in the same edit as the seat rows.
-    keymap.SCOPE_MAP: 29,
+    # 29 -> 31: Inc-4b's `#D5b` adds `N` (`prev_hit`, `nav`) and `M`
+    # (`next_gap`, relocated off `n`, `view`).  `n` itself is REBOUND, not
+    # added, so it moves the count by nothing -- which is exactly why a size
+    # fence cannot be the whole seat pin, and `test_key_dispatch.py`'s full-tuple
+    # table plus `test_inc4_census.py`'s row diff are.
+    keymap.SCOPE_MAP: 31,
     keymap.SCOPE_REPO: 3,
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,

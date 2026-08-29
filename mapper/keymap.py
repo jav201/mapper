@@ -104,6 +104,15 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("l", "l", "child", "hijo", "nav"),
     KeyBinding("enter", "↵", "open_ficha", "abrir ficha", "nav"),
     KeyBinding("slash", "/", "search", "buscar", "nav"),
+    # US-N07 `#D5b`.  `n` walks the live *coincidencias* set and `N` walks it
+    # backwards, in `nav` beside the `/` that produces the set.  `n` used to be
+    # `next_gap`, which moves to `M` in the `view` block below: the walk is the
+    # chord an operator reaches for several times per search, the coverage
+    # worklist is reached for once, and only one of the two can own the letter
+    # its Spanish label starts with.  Both labels are true in EVERY state, so the
+    # seat stays a static set and the whole-seat pin stays set equality (`#D10`).
+    KeyBinding("n", "n", "next_hit", "siguiente coincidencia", "nav"),
+    KeyBinding("N", "N", "prev_hit", "coincidencia anterior", "nav"),
     # -- map · node ---------------------------------------------------------
     KeyBinding("a", "a", "add_child", "agregar hijo", "node"),
     KeyBinding("d", "d", "open_documents", "documentos", "node"),
@@ -118,7 +127,11 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("e", "e", "export_svg", "exportar svg", "view"),
     KeyBinding("equals_sign", "=", "toggle_diff", "alternar diff", "view"),
     KeyBinding("m", "m", "coverage", "cobertura", "view"),
-    KeyBinding("n", "n", "next_gap", "siguiente faltante", "view"),
+    # Relocated from `n` by `#D5b`.  Uppercase because the shifted-pair
+    # precedent is already in this seat (`A`/`X` beside `a`/`x`, `HJKL` beside
+    # `hjkl`) and `M` was free: of the uppercase letters only `A`, `H`, `I`,
+    # `J`, `K`, `L`, `R` and `X` were taken before this row.
+    KeyBinding("M", "M", "next_gap", "siguiente faltante", "view"),
     KeyBinding("R", "R", "toggle_rail", "mostrar/ocultar rail", "view"),
     KeyBinding("I", "I", "toggle_inspector", "mostrar/ocultar ficha", "view"),
     KeyBinding("g", "g", "focus_rail", "ir al rail", "view"),

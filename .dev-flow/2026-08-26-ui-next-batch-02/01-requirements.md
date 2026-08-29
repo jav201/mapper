@@ -2041,9 +2041,40 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   2. **`PRED-B` — the operator can see it, observed as pixels.** The selected node's **title**, under
      the clipped-and-visible `_clip` image at that width, has a trace in the painted frame — the
      truncation-tolerant predicate `A-21` settled and `HLR-N06.3` already uses.
-  3. **`PRED-C` — the branch stays open, observed on the SURFACE.** After 1 further walk press, the
+  3. **`PRED-C` — the branch stays open, observed on the SURFACE.** ~~After 1 further walk press~~
+     **once the walk has moved OUT of the opened branch — asserted, not counted in presses** — the
      previously opened branch paints **no fold pill**. Read from the painted frame.
-  4. The hint line names the opened branch.
+  4. The hint line names the opened branch, **subject to the width proviso below**.
+
+- **~~"After 1 further walk press"~~ WAS MEASURED INSUFFICIENT AND IS REPLACED (`#D36` fold,
+  2026-08-29, `NEW-2` of `increment-004b-code-review-confirmation.md`).** The press count is not the
+  property; *leaving the branch* is. On the shipped fixture the one further press lands on the **next
+  hit inside the same branch**, so a re-close implementation re-opens it on that very press and the
+  predicate never sees the defect. Measured, both forms under the identical re-close mutant, in one
+  process:
+
+  ```
+  under the re-close mutant     118x34    80x24
+    single-press form (parked)  PASSED    PASSED     <- cannot fail on the defect it names
+    walk-out form (shipped)     FAILED    FAILED     <- fails at "b's fold pill is painted again"
+  ```
+
+  **This threshold was known-defective with the evidence already in hand**, and it is amended here
+  rather than left for the next increment to read: `Inc-5` building an arm from the parked wording
+  would have built the weak one, and it would have been green. The Statement is unchanged — only the
+  predicate that observes it.
+
+- **WIDTH PROVISO on clause 4 — the announcement degrades, and that is declared rather than
+  discovered (`NEW-3`).** `HintLine` **wraps** rather than clips, so a name painted onto a row that
+  has left the frame is not painted at all; insisting on it costs the operator `esc limpiar`, the
+  recovery route `#D38` newly promises. The shipped budget therefore drops the branch announcement
+  below a floor. **Executed sweep, 25 widths from 40 to 200:** `esc limpiar` is present in the frame
+  at **every** width; the announcement is painted at **69 columns and dropped at 68**. The narrowest
+  **declared** regime is **80** — eleven columns above the threshold — so within every size this
+  document declares, clause 4 is satisfied, and satisfied by a **gated** mechanism: suppressing the
+  announcement unconditionally reddens its arm. **A `shall` the code knowingly does not satisfy at
+  some inputs, recorded only as a risk note, is how an undeclared exception becomes an undiscovered
+  one** — hence this proviso, with its measured threshold, in the requirement itself.
 
 - **~~"the selected node's id appears in the painted canvas text"~~ IS FALSE AT EVERY WIDTH, AND IT
   WOULD HAVE FALSE-FAILED CORRECT WORK.** The canvas paints **titles**, never ids. Re-executed over

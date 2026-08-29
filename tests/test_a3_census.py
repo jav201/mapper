@@ -166,8 +166,20 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       with an injected hit set and again with an empty one, which is the
     #       pair that proves the pill's tail is query-driven rather than a
     #       constant.
-    assert len(sites["argful"]) == 57, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 57; "
+    #
+    # 57 -> 58 in Inc-4b, AND THIS PIN CAUGHT IT.  The increment's reverse census
+    # swept the seat's readers -- `test_key_dispatch.py`, `test_keymap.py`,
+    # `test_inc3_census.py` -- and did not name this one, because the new site has
+    # nothing to do with the seat.  Itemised, because a bumped pin with an
+    # unitemised reason is a pin that has stopped working:
+    #   +1  `tests/test_search.py`'s `AT-053` arm renders the screen's own view
+    #       state to read the HIT STYLE off the returned `Text`'s spans, before
+    #       and after the real `escape`.  "`esc` clears the search" has to mean
+    #       no node is still painted as a match, and a substring probe cannot tell
+    #       "this node is a hit" from "some node's title contains those letters" --
+    #       the spans are the only channel that carries the claim.
+    assert len(sites["argful"]) == 58, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 58; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
