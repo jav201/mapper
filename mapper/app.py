@@ -39,8 +39,10 @@ from .model import Attachment, Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
 from .osopen import OK as OSOPEN_OK, open_external
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
+from .search import SearchIndex
 from .store import MapStore, TEMPLATES
 from .views.layered import (
+    MAX_RENDER_NODES,
     OVERFLOW_TOKEN,
     LayeredRenderer,
     header_rows,
@@ -53,6 +55,25 @@ from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
 from .widgets.rail import RAIL_WIDTH, OutlineRail
+
+
+# The strip the search count is painted on (`#D37`), declared ONCE.  It was
+# named nowhere in the sealed text, which made a requirement that the empty
+# count paint "at the same position a non-zero count occupies" a positional
+# claim about an unnamed surface.  `#map-pagination` is the natural home: it
+# already carries the overflow declaration, so the count joins a strip that
+# exists to declare counts.  New predicates read this name rather than re-typing
+# it -- `test_overflow.py` still spells the literal at 7 sites, which predate the
+# constant and are recorded rather than swept into this increment's diff.
+COUNT_REGION_ID = "map-pagination"
+
+# WHAT the count line counts, in the operator's words, spelled ONCE.  The strip
+# also paints a page numeral (`1/8`) and an off-canvas numeral, so a bare
+# `5/5 coincidencias` would leave two count-shaped surfaces distinguishable only
+# by an implementer's wording choice.  Naming the subject is the requirement
+# (`AT-052`), and a single declaration is what makes the test a DERIVATION of
+# the shipped string rather than a second copy of it that drifts.
+SEARCH_COUNT_SUBJECT = "coincidencias en el mapa"
 
 
 def screen_bindings(scope: str) -> list[Binding]:
@@ -1141,6 +1162,9 @@ class MapScreen(Screen):
         # The canvas region `_declare_after_layout` last painted a numeral for.
         # `None` means "never", which is why the first pass always re-schedules.
         self._declared_for: Region | None = None
+        # ONE FRAME'S resolution, held only for the duration of that frame.
+        # See `_search_order`; `_open_paint_pass` is what bounds its lifetime.
+        self._search_memo: tuple[Graph, str, tuple[str, ...]] | None = None
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
@@ -1156,7 +1180,7 @@ class MapScreen(Screen):
             id="map-body",
         )
         yield Input(placeholder="/buscar", id="search-input")
-        yield Static("", id="map-pagination")
+        yield Static("", id=COUNT_REGION_ID)
         yield Static("", id="map-toast")
         yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
         # The keybar reads the same seat the bindings are generated from, so it
@@ -1546,6 +1570,7 @@ class MapScreen(Screen):
         No `pulse_cursor`: this is a declaration repaint, not a cursor move, and
         a second breath on mount is motion the operator did not cause.
         """
+        self._open_paint_pass()
         canvas = self.query_one("#map-canvas", Static)
         region = canvas.region
         w, h = self._canvas_size()
@@ -1558,7 +1583,7 @@ class MapScreen(Screen):
             pass
         else:
             canvas.update(text)
-        self.query_one("#map-pagination", Static).update(self._pagination_text())
+        self.query_one(f"#{COUNT_REGION_ID}", Static).update(self._pagination_text())
         # ONE PASS IS NOT ENOUGH, AND THAT WAS `B-60`'s RESIDUAL.  This runs on
         # the first `call_after_refresh`, and at narrow terminals the region is
         # still reflowing then: instrumented at (31,16) the three passes saw
@@ -1675,6 +1700,66 @@ class MapScreen(Screen):
         ])
         return darkside.Text.assemble(*parts)
 
+    def _count_line(self) -> Text:
+        """`n/N coincidencias en el mapa` — HLR-N07.2, on the `#D37` strip.
+
+        `N` is the WHOLE-GRAPH match count and comes from the search owner, not
+        from `painted_ids` and not from anything that has seen `folded` or the
+        pan offsets.  `n` is where the SELECTION sits inside that list, which is
+        the only honest reading available: the walk that moves the selection
+        between matches lands in the next increment, so `n` is `0` whenever the
+        cursor is not itself a match, and it says so rather than reserving a
+        placeholder numeral that would be a lie until the walk arrives.
+
+        A query with no non-whitespace character paints NO LINE AT ALL
+        (`LLR-N07.3.3`), which is also the state of a screen nobody has searched
+        on yet -- and the two are the same state, so they paint the same way.
+        `0 coincidencias en el mapa` means something different and is reserved
+        for it: a question that was asked and came back empty.
+
+        ABOVE THE RENDERER'S BOUND THE QUESTION IS NOT ANSWERED AT ALL, and that
+        is a THIRD state, painted like the first rather than like the second.
+        `_search_order` returns `None` there -- not an empty order -- because the
+        two are different facts and `0 coincidencias` on a graph that genuinely
+        holds 241 matches is the lying affordance US-N07 exists to remove,
+        reintroduced at smaller scale by the bound itself.  Measured at 12002
+        nodes before this branch existed: the strip read `0 coincidencias en el
+        mapa` on a graph holding 6001 real matches.
+
+        WHAT TELLS THE OPERATOR WHY IS THE CANVAS, NOT THIS STRIP -- corrected
+        after review measured the claim this docstring used to make (`NEW-5`).
+        The strip's own `N fuera de vista` is in its `Text`, but it is painted
+        at row 42 of a 34-row terminal and is therefore OFF-VIEWPORT: the
+        reserved pagination meter prices one glyph per node (`per_page =
+        max(1, total)`), so at this size the declaration the silence was
+        justified on cannot be read.  That meter is unbounded at `HEAD` and is
+        pre-existing, carried to `Inc-REPAIR`, not repaired here.  The operator
+        IS informed, by the canvas: `mapa de 12002 nodos: supera el limite de
+        12000 nodos...`.  The silence is correct; the reason first written under
+        it was not, and a justification that names the wrong mechanism is how a
+        later reader deletes the right one.  Because
+        everything painted before this point on the strip has a fixed width for
+        a given graph, the count begins at the SAME offset whether it reads `0`
+        or `3/5`, which is what `LLR-N07.3.2` asks for positionally.
+
+        The tone is deliberately uniform.  `LLR-N07.3.2`'s empty-state TONE ships
+        with the query chip, the hint line and the two toasts in the increment
+        that owns them; painting a tone split here that nothing observes would
+        be shipping an unobserved behaviour on a green suite, which is the exact
+        failure this batch is spending its budget to stop.
+        """
+        if not self.query_text.strip():
+            return darkside.Text("")
+        hits = self._search_order()
+        if hits is None:                     # above the bound: nothing was asked
+            return darkside.Text("")
+        if not hits:
+            return darkside.Text(f"0 {SEARCH_COUNT_SUBJECT}  ", style=darkside.INK)
+        at = hits.index(self.nav.cursor) + 1 if self.nav.cursor in hits else 0
+        return darkside.Text(
+            f"{at}/{len(hits)} {SEARCH_COUNT_SUBJECT}  ", style=darkside.INK
+        )
+
     def _pagination_text(self) -> Text:
         total = len(self.graph.nodes)
         page = 1
@@ -1685,6 +1770,7 @@ class MapScreen(Screen):
             darkside.step_meter(min(page, per_page), per_page),
             (f"   {page}/{per_page}  ", darkside.MUT),
         )
+        text.append(self._count_line())
         # HLR-N06.3 on the strip beside the canvas, from the SAME `painted_ids`
         # pass the renderer used, so the two surfaces cannot declare different
         # totals.  `None` means a view that declares nothing, and the strip then
@@ -1752,6 +1838,87 @@ class MapScreen(Screen):
             node = getattr(node, "parent", None)
         return ""
 
+    def _search_order(self) -> tuple[str, ...] | None:
+        """The live hits, over the WHOLE graph, in tree order.  `None` above the
+        renderer's bound, where the question is not answered at all.
+
+        THE SINGLE RESOLUTION ON THIS SCREEN.  The count line and the hit set
+        the renderer paints from both come from here, and `_search_hits` is
+        derived from it rather than resolved beside it -- deliberately, and the
+        cost of the alternative was measured rather than imagined.  An earlier
+        revision of this increment let the count line call the owner itself
+        while `_view_state` called it separately; the two agreed, but nothing
+        made them, and a mutation that scoped ONE of them to the visible set
+        left the other correct and the acceptance green.  Two paths to "what
+        matches" is the exact defect US-N07 exists to close, reproduced inside
+        the screen that closes it.
+
+        `MapScreen.folded` and `pan_x`/`pan_y` are not consulted and must never
+        be: a count taken over what is on screen is risk A-6, and US-N06 ships
+        fold in this same batch, so a viewport-scoped count would ACTIVELY
+        CREATE the defect this story exists to close.
+
+        THE BOUND IS THE RENDERER'S OWN, AND OBEYING IT IS THE POINT.  Above
+        `MAX_RENDER_NODES` the renderer returns its overflow declaration without
+        evaluating anything, so at 12002 nodes the frame's render cost is
+        0.000 s -- and the search's was seconds, several times over, resolving an
+        order for a tree the app has already declared it will not draw.  Search
+        now stops where drawing stops: no tree is painted, so the count declares
+        nothing.  `S-15` observed that this bound limits the render COUNT and
+        not the WORK; this closes the instance, not the underlying observation.
+
+        AND "DECLARES NOTHING" IS RETURNED AS `None`, NEVER AS AN EMPTY ORDER.
+        The first revision of this bound returned an empty order, which
+        `_count_line` cannot tell from a question that came back empty -- so at
+        12002 nodes it painted `0 coincidencias en el mapa` over a graph holding
+        241 real matches.  An unanswered question and an answer of zero are
+        different facts, they are gated by different arms, and the type is what
+        keeps them apart.
+
+        THE ORDER HANDED OUT IS IMMUTABLE.  It was the memo's own list, so a
+        consumer that sorted or trimmed what it received corrupted every later
+        read in the same pass.  No shipped consumer does; `Inc-4b`'s next-match
+        walk is the plausible first, and `ViewState.hits` is a `frozenset` one
+        layer up for exactly this reason, so the two decisions now agree.
+
+        THE MEMO IS SCOPED TO ONE PAINT PASS AND CANNOT GO STALE.  Three to four
+        consumers reach this helper per repaint (`_view_state` from the render
+        and again from `_unpainted_ids`, plus `_count_line`), and each used to
+        resolve from scratch.  `_open_paint_pass` drops the memo at the START of
+        every repaint, so the only way to read a stale order is to have already
+        painted a stale screen -- and the memo is keyed on the graph OBJECT and
+        the query text, so switching maps mid-pass cannot alias either.
+        """
+        if len(self.graph.nodes) > MAX_RENDER_NODES:
+            return None
+        memo = self._search_memo
+        if memo is not None and memo[0] is self.graph and memo[1] == self.query_text:
+            return memo[2]
+        order = tuple(SearchIndex(self.graph).query(self.query_text))
+        self._search_memo = (self.graph, self.query_text, order)
+        return order
+
+    def _open_paint_pass(self) -> None:
+        """Drop the frame-scoped search memo; called at the top of every repaint.
+
+        Deliberately a named seam rather than an inline assignment: the memo's
+        correctness argument is "it lives for exactly one paint pass", and that
+        claim is only checkable if every pass opens the same way.
+        """
+        self._search_memo = None
+
+    def _search_hits(self) -> frozenset[str]:
+        """The same resolution, in the shape a renderer receives.
+
+        The bound's `None` and an empty order collapse to the same empty set
+        HERE and only here, which is correct for this consumer and is not a
+        reintroduction of the conflation `_count_line` had to unpick: above the
+        bound the renderer paints no tree at all, so a hit set that highlights
+        nothing is the truthful parameter.  The distinction matters only where
+        something is DECLARED about the answer, which is the count line.
+        """
+        return frozenset(self._search_order() or ())
+
     def _view_state(self, w: int, h: int) -> ViewState:
         """The renderer's whole parameter surface, built in ONE place.
 
@@ -1766,7 +1933,7 @@ class MapScreen(Screen):
             w=w,
             h=h,
             focus_owner=self._focus_owner(),
-            query=self.query_text,
+            hits=self._search_hits(),
             diff=self.diff if self.diff_active else None,
             pan_x=self.pan_x,
             pan_y=self.pan_y,
@@ -1774,6 +1941,7 @@ class MapScreen(Screen):
         )
 
     def refresh_canvas(self) -> None:
+        self._open_paint_pass()
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
         w, h = self._canvas_size()
@@ -1839,7 +2007,7 @@ class MapScreen(Screen):
         # only settled once the side regions have been shown.  Moved ahead of
         # them during development and 6 arms went red on focus and on the rail's
         # byte identity.
-        self.query_one("#map-pagination", Static).update(self._pagination_text())
+        self.query_one(f"#{COUNT_REGION_ID}", Static).update(self._pagination_text())
 
     def on_ficha_inspector_field_committed(
         self, event: FichaInspector.FieldCommitted

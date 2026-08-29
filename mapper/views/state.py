@@ -19,6 +19,24 @@ is what keeps four later increments out of A3 territory: the roster is pinned
 here, once, and grows by default-carrying addition thereafter.  Only the first
 migration is an A3.
 
+REMOVING A FIELD IS NOT THE SYMMETRIC CASE AND IS NOT EXEMPT BY CATEGORY.  The
+rule above is stated for additions and it does not extend to removals by
+symmetry: adding a defaulted field cannot break a reader, while removing one
+breaks every reader it had.  A field may be removed without re-opening the A3
+only when its product readers are ENUMERATED AND MIGRATED IN THE SAME INCREMENT.
+What makes that sufficient is what the A3's subject actually is -- the signature
+of `IRenderer.render`, which a roster change does not touch -- and it is
+mechanically enforced by `tests/test_a3_census.py`, which pins that every field
+carries a default and never which fields exist.  A census that green-lights a
+removal is therefore not evidence that removals are safe; it is evidence that
+this census does not look.
+
+`query` was removed in Inc-4a under exactly that condition, and the condition was
+measured rather than assumed: ONE product reader (the layered renderer), ONE
+writer (`MapScreen._view_state`), ONE test reader, all three rewritten by the
+increment that removed it.  A field with a fourth reader is a different question
+and this paragraph is not a licence to skip asking it.
+
 THIS MODULE IMPORTS NO TEXTUAL, AND MUST NOT.  `views` is the headless boundary:
 a state model that reached for a Textual concept would put the app's state
 inside it and make `export` untestable without an event loop.  `focus_owner` is
@@ -63,11 +81,13 @@ class ViewState:
     # stop claiming a selection the operator's focus has left.  One of
     # FOCUS_OWNERS.
     focus_owner: str = ""
-    # TRANSITIONAL.  The renderer should receive resolved id sets, never a
-    # predicate it has to interpret -- there are two live definitions of "what
-    # matches" in this tree today and they disagree.  Replaced by a resolved
-    # `hits` set in the increment that gives that question a single owner.
-    query: str = ""
+    # The RESOLVED matching ids, decided by `mapper.search` and never by a
+    # renderer.  This replaced a `query: str` the renderer had to interpret for
+    # itself, which is how two definitions of "hit" came to ship at once and
+    # disagree by `{id, meta, attachments}`.  A `frozenset` rather than a `set`
+    # for the same reason `folded` is one: this object is frozen, and a mutable
+    # default would let a renderer edit the caller's hit set while drawing.
+    hits: frozenset[str] = frozenset()
     diff: DiffResult | None = None
     # Where the drawing origin sits, in canvas cells.  The renderer translates
     # by these; it holds no pan state of its own, per the ARQ rule that

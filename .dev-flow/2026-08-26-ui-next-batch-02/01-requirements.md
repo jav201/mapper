@@ -2362,7 +2362,14 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 
 ---
 
-### 3.5 · US-N07 «búsqueda» — a search that says how much it found *(Inc-4)*
+### 3.5 · US-N07 «búsqueda» — a search that says how much it found *(**Inc-4a** search core + **Inc-4b** seat and walk — §5.4, split by `#D36`)*
+
+> **Header re-pointed 2026-08-29.** ~~*(Inc-4)*~~ is a **retired** id. §5.4 remains the sole authority
+> for the cut; this header points there and states no cut of its own. Within this section:
+> **`Inc-4a`** owns `HLR-N07.1` (the single owner, the deletion, `LLR-N07.1.3`'s pill tail),
+> `HLR-N07.2`'s count, and `AT-018` `AT-019` `AT-020` `AT-021` `AT-052`. **`Inc-4b`** owns
+> `HLR-N07.3`'s walk, the seat rebind, the toasts, `esc`, and `AT-022` `AT-023` `AT-046` `AT-047`
+> `AT-051` `AT-051b` `AT-053`. **`AT-024` is `Inc-5`'s** and is struck from this story's Inc-4 scope.
 
 #### Acceptance (black-box) — US-N07
 
@@ -2377,8 +2384,33 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 - **Deliverable + observation:** a painted line of the form `n/N coincidencias` where `N` is the
   whole-graph match count; a selection that lands on successive matching nodes; and a painted
   empty-result state distinct in **both** text and tone from any non-empty state.
-- **Acceptance tests:** `AT-018`, `AT-019`, `AT-020`, `AT-021`, `AT-022`, `AT-023`, `AT-024`,
-  `AT-051`, `AT-052`.
+- **Acceptance tests:** `AT-018`, `AT-019`, `AT-020`, `AT-021` *(Inc-4a)* · `AT-022`, `AT-023`,
+  `AT-051`, **`AT-051b`**, **`AT-053`** *(Inc-4b)* · `AT-052` *(Inc-4a)* · ~~`AT-024`~~ — **moved to
+  `Inc-5`**.
+- **`AT-024` LEAVES THIS INCREMENT (`#D36` fold, 2026-08-29).** Its owner is `LLR-N07.2.2b`, which
+  §5.4 — the sole authority — places in **`Inc-5`** (`outline.py`, `radial.py`, `lane.py`: three files
+  neither `Inc-4a` nor `Inc-4b` touches). Executed over the **derived** renderer set at `5f4816c`,
+  driving `state.query="ana"` against `""`:
+
+  ```
+  lane.LaneRenderer          text_differs=False  spans_differ=False
+  lane.RailTimelineRenderer  text_differs=False  spans_differ=False
+  lane.HybridLaneRenderer    text_differs=False  spans_differ=False
+  layered.LayeredRenderer    text_differs=False  spans_differ=True
+  outline.OutlineRenderer    text_differs=False  spans_differ=False
+  radial.RadialRenderer      text_differs=False  spans_differ=False
+  ```
+
+  **Five of six renderers are query-insensitive today**, and nothing in Inc-4's budget can change
+  that. Realising `AT-024` here would mean pulling `LLR-N07.2.2b` in, taking the increment to **7
+  source files**. Recorded so the omission reads as **known**, not as an oversight.
+- **Two `Inc-5` defects found while measuring, recorded now rather than re-discovered there.**
+  **(i)** `LLR-N07.2.2b`'s threshold says the rendered **text** differs; executed on the one compliant
+  renderer, `text_differs=False` and `spans_differ=True` — **the threshold is false on a correct
+  implementation**, the `AT-046` shape one LLR over. Restate as *"the hit node's style spans differ"*.
+  **(ii)** The naive derivation of "every renderer" sweeps in `state.IRenderer`, a `Protocol` that
+  raises on instantiation — `Inc-5`'s derived set must exclude `Protocol` subclasses or it **crashes
+  rather than being wrong**.
 - **`AT-051` and `AT-052` are NEW at amendment set 3 pass 2** (`UX2-C-07`, `UX2-C-06`; §6.5 A-70,
   A-71). `AT-051` presses the real `M`, the relocated chord no acceptance pressed; `AT-052` asserts
   the painted count line names which question it answers. Both are on `HLR-N07.3`'s `Acceptance:`
@@ -2425,9 +2457,31 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 - **Traceability:** HLR-N07.1
 - **Statement:** The layered renderer shall paint a node as a hit if and only if that node's id is a
   member of the hit set carried in the view state.
-- **Touched symbols:** `mapper/views/layered.py::LayeredRenderer.render` — the `qlower` binding at
-  `layered.py:144`, the `hit` expression at `:145-148` and the `query` parameter at `:83` are
-  **deleted**; `mapper/views/state.py::ViewState.hits` — `NEW — created in Phase 3`.
+- **Touched symbols — RE-EXECUTED AND CORRECTED 2026-08-29 (`#D36` fold); the parked addresses are
+  Inc-2/Inc-3-stale and the consumer list was INCOMPLETE:**
+  `mapper/views/layered.py` — the module-level predicate **`_matches` at `:113-119`** (not an inline
+  expression), its **three** call sites at `:530`, `:535` and **`:600`**, and the `query` field are
+  **deleted**; `mapper/views/state.py::ViewState.hits` — `NEW — created in Phase 3`;
+  `mapper/views/state.py::ViewState.query` — **DELETED** (`#D39`);
+  `mapper/app.py:1769` — the export-site writer, migrated from `query=` to `hits=`;
+  `tests/test_app.py:448` — the **only causal break in the suite**, found by the architect lens after
+  the orchestrator's own census missed it by sweeping `mapper/` and stopping there.
+
+  > **~~"the `qlower` binding at `:144`, the `hit` expression at `:145-148`, the `query` parameter at
+  > `:83`"~~ IS DECAYED AT EVERY ADDRESS.** Executed at `5f4816c`: `grep -rn "qlower" mapper/views/`
+  > returns **9** occurrences, all in `layered.py` — `:113 :116 :117 :118 :119` (the predicate body),
+  > `:530` (`qlower = query.lower()`), `:535` (the card hit), `:600` and `:601` (**the fold pill's hit
+  > tail**). Per-file: `lane.py` 0, `outline.py` 0, `radial.py` 0, `state.py` 0, `__init__.py` 0.
+  > Lines `:144-160` are now `_tree_layout`'s body. **A census asserting "4 → 0" measures a number
+  > that no longer exists**; the restated threshold is **9 → 0**, and the predicate is an **AST walk**
+  > (zero `FunctionDef` named `_matches`, zero `Name` nodes binding or loading `qlower`), never a
+  > grep — a grep cannot separate a call from a mention, and an absence-only assertion is satisfied by
+  > a rename.
+  >
+  > **THE THIRD CALL SITE IS THE FINDING.** `:600` powers the **fold pill's hidden-hit count** —
+  > `HLR-N06.2`, shipped in Inc-3, *after* this LLR was sealed. Deleting `_matches` therefore either
+  > breaks a painted surface or leaves the threshold at 9. It gets its own requirement:
+  > **`LLR-N07.1.3`** below.
 - **Validation:** `test (unit)` + `inspection`
 - **Executed verification:** `pytest tests/test_layered.py -k "hits_come_from_the_state"`
   *(provisional)* — render with a hit set the renderer could not have computed itself (an id whose
@@ -2438,13 +2492,58 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   surviving inline predicate fails the test rather than coincidentally agreeing with it. **A
   deletion asserted only by absence can be satisfied by a rename; this arm cannot.**
 
+##### LLR-N07.1.3 — the fold pill's hit count is RE-ROUTED, not deleted *(NEW — `#D36` fold, 2026-08-29)*
+
+- **Traceability:** HLR-N07.1, HLR-N06.2
+- **Statement:** The layered renderer shall compute a folded branch's declared hit count as the size
+  of the intersection between that branch's descendants and the hit set carried in the view state,
+  and shall continue to paint that count in the fold pill.
+- **Why this LLR exists.** `LLR-N07.1.1` deletes `_matches`, whose **third** call site
+  (`layered.py:600`) is the pill's hit tail — a surface `HLR-N06.2` shipped in **Inc-3**, after
+  `LLR-N07.1.1` was sealed. Without this requirement the increment has only two exits and both are
+  defects: break a painted surface, or leave `HLR-N07.1`'s threshold at 9.
+- **Touched symbols:** `mapper/views/layered.py` — the pill's `hits` term, and
+  `tests/test_darkside_census.py`'s `CONFORMING_SEVERITY` row for
+  `cv.text(cx + 2 + len(core), y + card_h, tail, darkside.WARN)`.
+- **Validation:** `test (pilot)`
+- **Executed verification:** fold a branch containing known hits with the real `z`, submit a query,
+  and read the pill's tail **off the painted frame**.
+- **Numeric pass threshold:** the painted tail equals `len(descendants(branch) ∩ hits)`, with the
+  descendant set re-derived by the test's own walk over `graph.edges` and never obtained from the
+  renderer. Asserted **non-zero** in at least one arm, or the predicate cannot fail.
+- **THIS IS A DECLARED, MEASURED BEHAVIOUR CHANGE — it is not a refactor.** `LLR-N07.1.2` widens the
+  hit definition, so the pill's number moves for existing fixtures. Executed on one fixture with the
+  descendant count held constant so the tail is isolated: **`+4 1` → `+4 4`**. An empty hit set paints
+  no tail, proving the value is query-driven.
+- **AND NOTHING IN THE SUITE PINS IT — which is why the change is dangerous rather than merely
+  visible.** Executed: both `_PILL` regexes (`test_fold.py:37`, `test_overflow.py:80`) stop at
+  `+(\d+)`; zero `ViewState(query=…)` constructions exist; `query_text` is set in exactly one test,
+  the export test, whose file contains **zero** folds. Root cause found and recorded:
+  **`grep -rn "TC-026" tests/` returns no hit** — `TC-026`'s *"hit count when a query is live"* clause
+  exists only as a row in the §5 matrix and was **never implemented**. That is an inherited Inc-3 gap,
+  not one this increment creates; `Inc-4a` is where it becomes dangerous, because the number changes
+  on a fully green suite.
+- **`TC-026b` is therefore NON-NEGOTIABLE for this increment** (architect lens `02k`): it is the node
+  that makes the pill's count falsifiable at all.
+- **C-26 reverse census — one hit, outside this story.** `tests/test_darkside_census.py:212` pins the
+  **literal source text** of the pill's tail line inside Inc-1's hue census, whose sibling arm asserts
+  `len(sites) == 38` (a figure its own comment records moving 36 → 38 in Inc-3 for exactly these two
+  `WARN` sites). A behaviour-preserving restructure still moves it. The drift is legitimate and
+  expected; it shall be **named in the packet in advance**, never discovered as a surprise red.
+- **Named weaker variant (`M-N07.1.3-a`):** let the `hits` term fall to `0` when `_matches` is
+  deleted. The pill then paints `+2` with no tail on a suite that stays green, because nothing pins
+  the tail. Reddened only by `TC-026b`.
+- **Acceptance:** `TC-026b`
+
 ##### LLR-N07.1.2 — the widened hit definition is a declared user-visible change
 
 - **Traceability:** HLR-N07.1, risk A-3
 - **Statement:** When a query matches a node's id, its ficha subtitle, or an attachment's caption or
   path, the system shall paint that node as a hit.
 - **Touched symbols:** `mapper/search.py::SearchIndex.query` (`search.py:13`) delegating to
-  `mapper/model.py::Graph.search_hits` (`model.py:169-184`, executed — it joins `node.id`,
+  `mapper/model.py::Graph.search_hits` (**`model.py:224`** — ~~`169-184`~~ re-executed and corrected
+  2026-08-29, `#D36` fold; a stale address is what turns an assertable citation into a judgement call
+  at the reverse census — it joins `node.id`,
   `ficha.title`, `ficha.meta`, `ficha.notes`, the field values, and each attachment's caption or
   path).
 - **Validation:** `test (unit)`
@@ -2478,7 +2577,23 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   is off screen; both. The count is **identical** across all four.
 - **Priority:** high
 - **Acceptance:** `AT-018`, `AT-019`
-- **Value reconciliation (C-36):** the string `coincidencias` is `NEW — created in Phase 3`.
+- **THE COUNT REGION IS NAMED — `#D37`, 2026-08-29. It was named NOWHERE in the sealed text.**
+  §5.2 addressed this story as *"`#search-input` and the count region beside it"*, and **"the count
+  region" is not a widget id anywhere in this document** — while `LLR-N07.3.2` simultaneously requires
+  `0 coincidencias` to paint *"at the same position a non-zero count occupies"*, a **positional claim
+  about an unnamed surface**. That is unbuildable as written.
+
+  **Ruling: the count region is `#map-pagination`**, declared once as `COUNT_REGION_ID` and read by
+  every predicate rather than re-typed. It is the natural home and the choice is executed, not
+  preferred: it already carries Inc-3's overflow declaration, whose painted content measures
+  `' ▰▱▱▱▱▱▱▱   1/8  ▽ 2 fuera de vista'`, so the count line joins a strip that already exists to
+  declare counts. One declaration, four readers — the same rule `UX-Q3-b` and `LLR-N14.1.1` invoke.
+
+  **Two riders, both from executed measurement.** (a) **Any predicate parsing a numeral shall JOIN the
+  region-clipped rows before parsing.** Measured, `#map-pagination` is height 1 at 118x34, 100x30 and
+  80x24 on `legacy` — but `test_overflow.py:91-99` records a wrap at a 30-column strip, and the
+  region's height is not a constant any predicate may assume. (b) **Position is asserted as a measured
+  offset on the same screen, never as a literal column number** — a literal breaks at every width.
   Executed: `grep -rn "coincidencia" mapper/` returns no output. Search today is a bare `Input` with
   no count and no cursor (P-6, executed: `app.py:1107`, `:1524`, `:1531`, `:1539`).
 
@@ -2761,10 +2876,30 @@ be gated.
   reads title `sin búsqueda activa`, body `pulsa / para buscar` — written under Q-3, **before** Q-7
   unified the walk. Under `#D6`, `n` walks *coincidencias* from **either** owner, so the toast sends
   the operator to `/` even when the surface they wanted was the other one. **This is `02f`'s root
-  cause in one line: a consequence that was not re-derived after a decision changed.** `Inc-4` shall
-  restate `E1b`'s body against the unified walk. `E1c` (`0 coincidencias` / `«nóm» no aparece en
-  este mapa`) is **unaffected** — it describes a completed search with an empty answer, which is true
-  under either ruling, and it is retained verbatim.
+  cause in one line: a consequence that was not re-derived after a decision changed.** **`Inc-4b`**
+  shall restate `E1b`'s body against the unified walk.
+
+  **RE-DERIVED AND RULED 2026-08-29 (`#D36` fold): `E1b`'s body becomes
+  `no hay coincidencias que recorrer`.** The parked `pulsa / para buscar` prescribes a **route**, and
+  `#D6` made the route conditional. Today `/` is the only producer, so the parked body is
+  *accidentally* true — **worse than plainly false**, because it becomes misdirection the increment
+  the lens lands, and nothing will re-derive it then either. The new body describes the **state** the
+  toast reports (there is no live result set to walk), which is true under any number of owners; it
+  uses the one noun the surface already declares four times over (seat label
+  `siguiente coincidencia`, the count line, `E1c`'s title); and it stays distinct from `E1c` on both
+  channels. **The operator is not left routeless, and that is executed, not assumed:** `map/slash` is
+  seated with glyph `/` in group **`nav`**, which the keybar paints, and the default hint line already
+  reads `navega con j/k/h/l · ↵ ficha · / buscar`. The route is painted **persistently**; carrying it
+  in the toast is exactly what would make the toast go stale.
+
+  `E1c` (`0 coincidencias` / `«nóm» no aparece en este mapa`) is **retained verbatim** — it describes a
+  completed search with an empty answer, true under either ruling. **One rider, from an executed
+  measurement:** its body interpolates the operator's query, making the toast a **coercion sink**.
+  Executed on `"riesgo" + U+0008 + U+202E + "[bold]x[/]"` — `darkside.plain` strips the control byte
+  and the right-to-left override; `Text.assemble(...).plain` **leaves the RLO alive**. `Text.assemble`
+  does not parse markup, so `[bold]` is inert, but an RLO reverses the toast's own sentence.
+  **`E1c`'s body shall route the query through `darkside.plain`**, and `AT-023` asserts it with a
+  hostile query.
 - **~~Flagged `assumed — verify in target framework`: the walk chord. Q-3 is live and unsettled.
   This requirement is written chord-agnostic.~~ SUPERSEDED — Q-3 AND Q-7 ARE RULED, AND THE CHORDS
   ARE NAMED HERE (`QA-B-10`, §6.5 A-26).** A chord-agnostic *requirement* was legitimate; a
@@ -2773,15 +2908,19 @@ be gated.
 
   | Ruling | Seat row | Group | Increment |
   |---|---|---|---|
-  | `#D5b` (Q-3) | `map/n -> next_hit`, label `siguiente coincidencia` | `nav` | Inc-4 |
-  | `#D5b` (Q-3) | `map/N -> prev_hit`, label `coincidencia anterior` | `nav` | Inc-4 |
-  | `#D5b` (Q-3) | `map/M -> next_gap`, label `siguiente faltante` | `view` | Inc-4 |
-  | `#D6` (Q-7) | `⇥` **rejected**; `n`/`N` walk the single active *coincidencias* set | — | ~~Inc-5~~ — **the lens half is DEFERRED (`#D23`)**; the search half rides Inc-4 |
+  | `#D5b` (Q-3) | `map/n -> next_hit`, label `siguiente coincidencia` | `nav` | **Inc-4b** |
+  | `#D5b` (Q-3) | `map/N -> prev_hit`, label `coincidencia anterior` | `nav` | **Inc-4b** |
+  | `#D5b` (Q-3) | `map/M -> next_gap`, label `siguiente faltante` | `view` | **Inc-4b** |
+  | `#D6` (Q-7) | `⇥` **rejected**; `n`/`N` walk the single active *coincidencias* set | — | ~~Inc-5~~ — **the lens half is DEFERRED (`#D23`)**; the search half rides **Inc-4b** |
 
   **`AT-022`, `AT-023` and `AT-051` shall press the real `n`, `N` and `M`.** Three seat rows change
-  in Inc-4 and are reviewed **row-by-row at DDR** (D10's three-row seat-diff cap). `keymap.py` is a
-  **three-way collision** across Inc-3, Inc-4 and Inc-9 (§5.4), resolved by serial ordering and not
-  by ownership: each shall re-run `duplicate_chords()` and the whole-seat pin.
+  in **Inc-4b** and are reviewed **row-by-row at DDR** — and per `PDR-addendum-3` `#D25` that
+  three-row figure is a **regression PIN on this increment's own diff, not a per-increment budget**.
+  `keymap.py`'s collision set is **FOUR** — `Inc-3`, **`Inc-4b`**, `Inc-8`, `Inc-9` — as §5.4 now
+  re-derives; the "three-way" reading was stale from the moment `#D25` corrected it. Resolved by
+  serial ordering and not by ownership: each shall re-run `duplicate_chords()` and the whole-seat pin
+  on entry **and** exit, and assert its declared diff **equal** to `bindings_for(scope)`'s entry/exit
+  difference (`C-D25a`).
 - **`AT-051` IS NEW: THE RELOCATED CHORD IS THE ONLY ONE NO ACCEPTANCE PRESSES (`UX2-C-07`,
   §6.5 A-70).** `#D5b` moves `next_gap` from `n` to **`M`** — and the parked clause named only `n`
   and `N`, so **the relocation was guarded solely by the whole-seat set-equality pin and
@@ -2795,9 +2934,19 @@ be gated.
   **undiscoverable through `?`**. Measured: at **118 x 34** the label `siguiente faltante` is one of
   the eleven rows **below the fold** in the legend, behind `down` / `pagedown` / `end` — **none of
   which the legend declares** (`UX2-C-05`). So an operator who presses `n` expecting the old
-  behaviour has no painted route to the new one. **`Inc-4` shall paint a one-time declaration on the
+  behaviour has no painted route to the new one. **`Inc-4b` shall paint a one-time declaration on the
   first `n` press after the rebind**, in the toast register the product already uses — the precedent
   is executed: `next_gap` with nothing missing already toasts `cobertura completa`.
+
+  **THIS CLAUSE NOW HAS AN ID: `AT-051b` / `TC-084b` (`#D36` fold, 2026-08-29).** It was a sealed
+  `shall` that **no acceptance covered**, found at the `Inc-4b` pre-gate. It cannot ride `AT-051`'s
+  node under `C-18`: `AT-051` presses **`M`** and this declaration fires on **`n`** — different chord,
+  different chain. Two predicates, because "one-time" is half the claim: **(1)** on a fresh
+  `MapScreen`, one real `n` paints a toast naming both the new duty of `n` and the new home of
+  `next_gap`, every string read from the **seat** rather than typed; **(2)** a **second** real `n`
+  paints a toast that does **not** carry it. Persistence is read from the **frame twice**, never from
+  a store. Executed pre-state: after `enter`, a real `n` press paints a **blank** toast row at 118x34
+  and 100x30 — so predicate (1) is a genuine gate today.
 - **Named weaker variant (`M-N07.3-rebind`):** ship the seat rows and the whole-seat pin, no `AT-051`
   and no declaration. **Green on every existing test**, because every existing test reads the seat.
   The operator's `n` does something new, `M` is undiscoverable for four increments, and *"we moved a
@@ -5651,7 +5800,9 @@ that cannot be a prefix or a suffix of another increment id is the whole reason 
 | **Inc-1** | S-6 paleta v2 tokens · **Canvas A3** (`HLR-CNV.1`) · **`LLR-COERCE.1`** | live | `darkside.py`, `canvas.py`, `app.py`, `views/radial.py` | 4 |
 | **Inc-2** | `ViewState` + `IRenderer` A3 — signature only, behaviour-neutral | live | `views/state.py` *(new)*, `views/layered.py`, `views/lane.py`, `views/outline.py`, `views/radial.py`, `app.py` | **6 — DECLARED BREACH**, unchanged from `#D5` |
 | **Inc-3** | US-N06 escala — pan, fold, overflow · **`LLR-COERCE.2`, widened to every renderer feeding an operator-visible sink (`A-89`, `B-47`)** | live | `app.py`, `widgets/rail.py`, `views/layered.py`, `keymap.py`, **`views/outline.py`**, **`views/state.py` (`A-97`)** — and `views/lane.py` only if the derivation shows it reaching a sink | **6 — DECLARED BREACH (`A-89`, widened by `A-97`)** |
-| **Inc-4** | US-N07 búsqueda + the seat rebind (`#D5b`) | live | `search.py`, `app.py`, `views/layered.py`, `keymap.py` | 4 |
+| ~~**Inc-4**~~ | ~~US-N07 búsqueda + the seat rebind (`#D5b`)~~ | **STRUCK 2026-08-29 — SPLIT by `#D36` under `C-21`.** Replaced by the two rows below. Struck, not shadowed; the id `Inc-4` is retired and never reassigned, per the same rule that vacated `Inc-6` | — | — |
+| **Inc-4a** | US-N07 «búsqueda» **search core** — the single owner of "what matches", the resolved `hits` set on `ViewState`, the inline-predicate deletion, the fold-pill hit tail (**`LLR-N07.1.3`**, new) and the count line on the named count region (`#D37`) | live | `search.py`, `views/state.py`, `views/layered.py`, `app.py` | 4 |
+| **Inc-4b** | US-N07 **seat + walk** — the `#D5b` rebind, the `n`/`N` walk, `LLR-N06.2.4` fold auto-open, the `E1b`/`E1c` toasts, state-dependent `esc` (`#D38`), the `test_cd25a` seat repair and the settle-chase counter carry | live | `keymap.py`, `app.py` | 2 |
 | **Inc-5** | hit painting in the three remaining renderers (`LLR-N07.2.2b`) | live — **belongs to US-N07, not to US-N14** | `views/outline.py`, `views/radial.py`, `views/lane.py` | 3 |
 | ~~**Inc-6**~~ | ~~US-N14 lente~~ | **VACATED** — deferred whole by `#D23` (§3.7). The id is retired, not reassigned | — | — |
 | **Inc-REPAIR** | `B-29` phantom sidecar warning · `B-30` path disclosure (§3.9) | **new** | `store.py` | **1** |
@@ -5660,10 +5811,33 @@ that cannot be a prefix or a suffix of another increment id is the whole reason 
 | **Inc-8** | S-8 truncation + the glyph vocabulary (the legend panel) · adds seat rows for `HLR-N16.4` | live | `screens/help.py`, `darkside.py`, `app.py`, **`keymap.py`** | **4** ⚠ |
 | **Inc-9** | help scope routing + `KEY_SCOPE` declarations + seat migration · **`LLR-N06.2.5`** re-parented in by `#D21` | live | `keymap.py`, `screens/factory.py`, `screens/settings.py`, `app.py` | 4 |
 
-**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → `Inc-4` → `Inc-5` → `Inc-REPAIR` →
+**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → **`Inc-4a`** → **`Inc-4b`** → `Inc-5` → `Inc-REPAIR` →
 **`Inc-CONFIRM`** → `Inc-7` → `Inc-8` → `Inc-9`. **Parallelism is not re-derived** and the chain
 stays serial: ARQ measured 0 of 21 pairs parallelisable, `modules(A) ∩ modules(B) ⊇ {app}` without
-exception. Budget **≤ 4 SOURCE files**; tests uncapped.
+exception. **`Inc-4a` before `Inc-4b` is HARD** — see ordering 4 below. Budget **≤ 4 SOURCE files**;
+tests uncapped.
+
+**Amended 2026-08-29 by coordinator ruling `#D36`, under `C-21`.** The trigger evidence, recorded
+because `C-21` requires the cut to be re-derived rather than patched:
+
+> `C-21` fires when a gate amendment **adds, splits or redefines** an `AT-NNN` after the increment cut
+> has been set. Both happened at the `Inc-4` pre-gate. **Removed:** `AT-024`, whose owner
+> `LLR-N07.2.2b` this very section places in `Inc-5` — executed over the derived renderer set, **five
+> of six renderers are query-insensitive today** (`text_differs=False, spans_differ=False`), so
+> `AT-024` executes RED in `Inc-4` for reasons no file in its budget can change. **Owed an id:** three
+> sealed `shall` clauses that carried none — the one-time rebind declaration (§3.5), `esc limpiar`
+> (`LLR-N07.3.2` / `UX-Q3-b`), and `C-D6a`. A fourth, `UX-Q3-a`, is **deferred** with a recorded carry
+> because no LLR ever stated it.
+>
+> **Deferring the three owed ids was considered and REJECTED** (`#D36`): it would ship sealed `shall`
+> clauses with no acceptance, which is the conditional-close defect `C-44` names, wearing a
+> scheduling excuse. The split pays for them instead.
+
+**A fourth HARD ordering, from the split:**
+4. **`Inc-4a` before `Inc-4b`** — `Inc-4b`'s walk, its fold auto-open and its `E1b`/`E1c` toasts all
+   consume the resolved hit set and the tree-ordered hit list that `Inc-4a` creates. Reversed, every
+   `Inc-4b` acceptance would have to construct its own hit definition, which is the two-definitions
+   defect `HLR-N07.1` exists to close.
 
 **Amended 2026-08-28 by coordinator ruling (`A-89`, `A-90`).** `Inc-3` absorbs `B-47` and declares a
 5-file breach; `Inc-CONFIRM` is inserted alongside `Inc-REPAIR` for `B-46`, before `Inc-7`, because
@@ -5684,9 +5858,19 @@ the commitment, and a second cut appearing anywhere is a defect, not a variant.
 3. **`Inc-1` before `Inc-9`** — `LLR-COERCE.1` widens `plain()`; `LLR-N06.2.5`'s census asserts
    routing *through* `plain()`. A dependency, not a convenience.
 
-**`keymap.py` is a THREE-way collision, not four (`#D5b` as amended).** `Inc-3`, `Inc-4` and `Inc-9`
-touch it; `#D5`'s fourth participant was `Inc-6`, which is vacated. Resolved by serial ordering and
-not by ownership: each shall re-run `duplicate_chords()` and the whole-seat pin.
+**`keymap.py`'s collision set — RE-DERIVED 2026-08-29, and it is FOUR, not three.** `#D5b`'s
+"three-way" reading named `Inc-3`, `Inc-4` and `Inc-9`, dropping `Inc-6` as vacated. But
+`PDR-addendum-3` `#D25`'s own correction had **already** derived the true set as `Inc-3`, `Inc-4`,
+`Inc-8`, `Inc-9` — `Inc-8` adds seat rows for `HLR-N16.4` and this table's `Inc-8` row names
+`keymap.py` explicitly. The "three-way" sentence was stale the moment `#D25` landed and is corrected
+here rather than left to be re-discovered a third time.
+
+**The set is now:** `Inc-3` (shipped) · **`Inc-4b`** (the `#D5b` rebind — `Inc-4a` does **not** touch
+`keymap.py`) · `Inc-8` · `Inc-9`. Resolved by serial ordering and not by ownership: **each shall
+re-run `duplicate_chords()` and the whole-seat pin on ENTRY and EXIT** (`C-D25b`), and **each shall
+declare its own row diff and assert it EQUAL to the entry/exit difference of `bindings_for(scope)`**
+(`C-D25a` as corrected) — a declared diff joined to no oracle is not a pin, because rebinding a fifth
+row and declaring four leaves `duplicate_chords()` returning `[]`.
 
 **Budgets after the re-scope, checked rather than asserted:** every live increment is at or under 4
 source files except `Inc-2`, whose breach is **declared** and unchanged from `#D5`. `Inc-REPAIR` is
@@ -5707,7 +5891,8 @@ exists, and nothing said so.
 | **Inc-1** | none — the census derives its input from the tracked tree | `LLR-S06.3.1` |
 | **Inc-2** | none — byte-identity against the shipped pins | `LLR-N07.2.2a` |
 | **Inc-3** | **`anidado`** — nested folds; `TC-032`'s normative naive-6-vs-painted-4 case | `LLR-N06.3.2` |
-| **Inc-4** | **a synthetic graph carrying attachments and distinguishing `meta`** (`QA-N-08`) | `LLR-N07.1.2` |
+| **Inc-4a** | **a synthetic graph carrying attachments and distinguishing `meta`** (`QA-N-08`) — built by a **generator function** in `tests/inc4_support.py` into a `tmp_path` workspace, never a file under `fixtures/`. Executed on the shipped `legacy` at `5f4816c`: **0 attachments**, 4 of 8 nodes carrying no `meta` — so `LLR-N07.1.2`'s widening arm is undrivable on any fixture that exists | `LLR-N07.1.2` |
+| **Inc-4b** | none — it drives `Inc-4a`'s fixture. **But the fixture is load-bearing for `LLR-N07.3.1`'s self-guard:** executed, `legacy` gives `tree_order == dict_order` under **both** of the batch's working queries (`carlos` and `riesgo`), so the self-guard would be vacuous there — `C-55` limb 2 landing on the very LLR that names it | `LLR-N07.3.1` |
 | **Inc-5** | none — drives the derived renderer set over existing graphs | `LLR-N07.2.2b` |
 | **Inc-REPAIR** | **a phantom-sidecar workspace** (`LLR-REPAIR.1`) · **an alias-bombed `nodes:` sidecar and its un-aliased control** (`LLR-N13.1.7`) | §3.9, `LLR-N13.1.7` |
 | **Inc-7** | **a two-map workspace, one map carrying a directed cycle** (`AT-025b`) | `LLR-N13.1.5` |

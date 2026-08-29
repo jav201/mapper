@@ -150,8 +150,24 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       without a `DiffResult` to prove the diff state changes what is
     #       painted -- the non-vacuity guard on the two diff-only coercion
     #       sinks (`layered.py:449` and `:520`) whose mutants used to survive.
-    assert len(sites["argful"]) == 52, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 52; "
+    #
+    # 52 -> 57 in Inc-4a, and this pin CAUGHT A REVERSE-CENSUS HIT THE PRE-GATE
+    # DID NOT DECLARE.  Inc-4a's own C-26 sweep named one downstream test
+    # (`test_darkside_census.py`'s hue census, which pins the pill tail line's
+    # literal source text); it did not name this one, and this arm is where the
+    # second hit surfaced.  Itemised, because a bumped pin with an unitemised
+    # reason is a pin that has stopped working:
+    #   +3  `tests/test_layered.py`'s `AT-021` arm renders the SAME graph three
+    #       times -- an empty hit set, an injected id, and a second injected id
+    #       -- because "the renderer paints what it was handed" is unfalsifiable
+    #       from one render: a single frame cannot distinguish the hit style
+    #       landing on the named node from it landing on any node.
+    #   +2  `tests/test_fold.py`'s `TC-026b` rename arm renders a folded branch
+    #       with an injected hit set and again with an empty one, which is the
+    #       pair that proves the pill's tail is query-driven rather than a
+    #       constant.
+    assert len(sites["argful"]) == 57, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 57; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,

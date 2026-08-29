@@ -1,7 +1,12 @@
 """Unit tests for mapper.views.layered."""
+import ast
+import pathlib
+
+from mapper import darkside
 from mapper.model import Edge, Ficha, Graph, Node
 from mapper.views.state import ViewState
 from mapper.views.layered import LayeredRenderer
+from tests.inc4_support import QUERY, build_adjuntos, narrow_hits
 
 
 def test_layered_renderer_produces_text():
@@ -104,3 +109,107 @@ def test_at_010_every_declared_focus_owner_is_accepted():
     assert len(set(tones.values())) == 2, (
         f"expected exactly two tones -- active and inactive -- got {tones}"
     )
+
+
+# --------------------------------------------------------------------------
+# LLR-N07.1.1 / AT-021 — the renderer's own hit predicate is DELETED
+
+
+def _hit_style() -> str:
+    """The hit tone, read from `darkside` at run time.
+
+    Never a hex literal: the palette moves, and a test that pins `#f5f5f5 on
+    #262626` goes stale the first time it does while still looking like it
+    asserts the hit style.
+    """
+    return f"{darkside.INK} on {darkside.STEP}"
+
+
+def _hit_image(text) -> str:
+    """The characters the renderer painted with the hit style, in order.
+
+    Read off the returned `Text`'s SPANS, never by substring search: the canvas
+    paints titles and a substring probe cannot tell "this node is a hit" from
+    "some node whose title contains these letters is".
+    """
+    style = _hit_style()
+    return "".join(text.plain[s.start:s.end] for s in text.spans if s.style == style)
+
+
+def test_at_021_hits_come_from_the_state(tmp_path):
+    """AT-021 — the renderer paints the hit set it was HANDED.
+
+    P-021.1, the arm a RENAME cannot satisfy.  The injected id is `f`
+    (`Hallazgos`), which neither definition of "hit" would ever return for this
+    query -- asserted here for BOTH definitions rather than assumed -- so a
+    renderer still deciding for itself paints nothing and the arm fails.  A
+    deletion asserted only by absence is satisfied by a rename; this is not.
+    """
+    graph = build_adjuntos(tmp_path)
+    injected = "f"
+
+    # The counterfactual, executed: no predicate in this tree would elect `f`.
+    assert injected not in graph.search_hits(QUERY)
+    assert injected not in narrow_hits(graph, QUERY)
+    title = graph.nodes[injected].ficha.title
+
+    renderer = LayeredRenderer()
+    state = ViewState(selected_id=graph.root_id, w=58, h=26)
+
+    # The negative control FIRST: with an empty hit set nothing carries the hit
+    # style at all, so the positive arm below is about the set and not about the
+    # style existing somewhere on every frame.
+    assert _hit_image(renderer.render(graph, state)) == ""
+
+    painted = _hit_image(
+        renderer.render(graph, ViewState(
+            selected_id=graph.root_id, w=58, h=26,
+            hits=frozenset({injected}),
+        ))
+    )
+    assert title[:6] in painted, (title, painted)
+
+    # And it is EXACTLY that node: a second render naming a different id paints
+    # a different card, which is what stops "the hit style appears somewhere"
+    # from passing as "the injected id was painted".
+    other = _hit_image(
+        renderer.render(graph, ViewState(
+            selected_id=graph.root_id, w=58, h=26,
+            hits=frozenset({"c"}),
+        ))
+    )
+    assert graph.nodes["c"].ficha.title[:6] in other
+    assert title[:6] not in other
+
+    # P-021.2 — the deletion census, in the SAME node.  `C-18` asks one
+    # acceptance id to drive its whole named chain from one place, and this
+    # chain has two ends: the renderer paints what it is handed (above) AND the
+    # thing that used to decide is gone (below).  Split across two nodes, the id
+    # maps to two and the traceability edge stops being an edge.
+    #
+    # DERIVED BY AST, NEVER BY GREP.  A grep cannot separate a call from a
+    # MENTION -- this tree has already been bitten by a docstring that made a
+    # census read one site too many -- and an absence-only assertion is
+    # satisfied by a RENAME, which is why the arm above exists beside this one.
+    #
+    # Executed pre-state at the increment's entry commit: 1 `FunctionDef` named
+    # `_matches` and 9 `qlower` bindings/loads, all in `layered.py`
+    # (`lane.py` 0, `outline.py` 0, `radial.py` 0, `state.py` 0, `__init__.py` 0).
+    views = pathlib.Path(__file__).resolve().parents[1] / "mapper" / "views"
+    modules = sorted(views.rglob("*.py"))
+    assert len(modules) >= 5, f"the derived module set collapsed: {modules}"
+
+    predicates = 0
+    parameter_uses = 0
+    for module in modules:
+        tree = ast.parse(module.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "_matches":
+                predicates += 1
+            if isinstance(node, ast.Name) and node.id == "qlower":
+                parameter_uses += 1
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                parameter_uses += sum(1 for a in node.args.args if a.arg == "qlower")
+
+    assert predicates == 0
+    assert parameter_uses == 0

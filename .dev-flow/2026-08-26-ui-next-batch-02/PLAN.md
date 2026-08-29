@@ -854,3 +854,74 @@ acta reference in a tracked file.** This is the strongest available evidence for
 obtained by accident, on the real store. **It travels with US-N14 to the follow-on design batch**,
 which is where the confirmation-affordance ruling lives. Carried as a batch risk, not merely as an
 incident log.
+
+---
+
+## 17 · Inc-4 PRE-gate and the C-21 SPLIT — 2026-08-29
+
+### 17.1 — Where we are
+
+Inc-1/2/3 closed and committed (`4eaba35`, `fe50799`, `bdc4b6a`, recorded at `5f4816c`). The Inc-4
+pre-gate ran two independent lenses before a line of code was written, and **both changed the plan**.
+`Inc-4` is **struck and split** into `Inc-4a` (search core) and `Inc-4b` (seat and walk). `Inc-4a` is
+in implementation.
+
+### 17.2 — Why the cut moved (C-21, not preference)
+
+`C-21` fires when a gate amendment **adds, splits or redefines** an `AT-NNN` after the cut is set.
+Both happened here:
+
+- **`AT-024` REMOVED** from Inc-4. Its owner `LLR-N07.2.2b` is `Inc-5`'s. Executed over the derived
+  renderer set, **five of six renderers are query-insensitive today**, so `AT-024` executes RED in
+  Inc-4 for reasons no file in its budget can change.
+- **Three sealed `shall` clauses carried NO acceptance id** — the one-time rebind declaration,
+  `esc limpiar`, and `C-D6a`. A fourth, `UX-Q3-a`, never reached any LLR and is **deferred with a
+  carry**.
+
+Deferring the three owed ids was considered and **rejected** (`#D36`): shipping a sealed `shall` with
+no acceptance is the conditional-close defect wearing a scheduling excuse. The split pays for them.
+
+### 17.3 — The five findings that drove it
+
+| # | Finding | Verdict |
+|---|---|---|
+| 1 | `views/state.py` owed by `LLR-N07.1.1` and named by no cut | **A-97's exact recurrence**, one increment later, same file |
+| 2 | `qlower` pre-state is **9**, not the sealed 4; addresses all decayed | threshold restated 9 → 0, predicate is an **AST walk**, not a grep |
+| 3 | A **third** call site at `layered.py:600` — the fold pill's hit tail, Inc-3's surface, written after this spec sealed | new **`LLR-N07.1.3`**; `TC-026b` non-negotiable |
+| 4 | `TC-026`'s second clause **implemented nowhere** — the pill's count is unpinned | inherited Inc-3 gap; Inc-4a is where it turns dangerous |
+| 5 | `AT-052`'s observation surface **named nowhere** in the sealed text | `#D37` — `#map-pagination`, declared once |
+
+### 17.4 — Decisions taken in this pass (recorded, not asked)
+
+`#D36` split · `#D37` count region + C-D6a closed **structurally** (a single `active_hits` attribute
+with no `or` fallback, asserted by AST — refusing a green-before-code invariant, which is the
+vacuous-check defect) · `#D38` `esc` implements the behaviour rather than changing the string ·
+`#D39` `ViewState.query` removed, and **the A3 pre-authorization is UNSPENT and stays unspent** so no
+later increment inherits it.
+
+### 17.5 — Two errors of my own, recorded rather than folded in quietly
+
+1. **My `state.query` census was incomplete.** I swept `mapper/` and stopped; the architect found a
+   fourth reader at `tests/test_app.py:448`, the sole causal break. Verified and adopted.
+2. **I nearly inherited an obligation that is not this batch's.** `docs/ARCHITECTURE.md:159`'s
+   neighbouring row reads *"`open_external` … new, **Inc-4** owns it. Security-reviewed before Inc-4
+   signs off."* It is already shipped at `mapper/osopen.py:57` and owned by the **previous** batch.
+   A bare `Inc-N` does not resolve without a batch — `#D25` §1's ambiguity finding, generalised from
+   `Dn` ids to increment ids. Backlog `B-34` extended.
+
+### 17.6 — Carried, not fixed here
+
+- ⚠ **`AT-005` / `AT-006` have no node on disk**, while closed Inc-1's packet claims them "all
+  passed". Their substance is probably in the `test_hue_census_*` nodes, but those carry the
+  **functional** ids only, so the behavioural id → node edge does not exist and `C-18` is
+  unverifiable for both. **Routed to the whole-branch adversarial QA pass**, whose remit is exactly
+  "dual traceability intact". Not repaired inside Inc-4 — `#D26` says a code fix never discharges a
+  missing requirement, and re-opening a committed increment is scope creep.
+- `V16`: `~/.claude` and `~/.claude/skills` carry **uncommitted changes**. Reported as found; C-44
+  forbids sweeping up another session's work in a shared config repo.
+- A one-row Inc-CONFIRM table inside amendment `A-90` duplicates §5.4's row. They agree today.
+  Pre-existing; Inc-CONFIRM's to reconcile.
+- `UX-Q3-a` (committed vs editing tone) — deferred, no LLR ever stated it.
+- Two `Inc-5` defects found while measuring: `LLR-N07.2.2b`'s threshold is **false on a correct
+  implementation** (`text_differs=False, spans_differ=True`), and its derived renderer set sweeps in
+  a `Protocol` that raises on instantiation.
