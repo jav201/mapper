@@ -21,6 +21,7 @@ from mapper.views.state import ViewState
 from mapper.widgets.rail import OutlineRail
 from tests.inc3_support import (
     canvas_rows,
+    oracle_traced,
     frame_rows,
     hidden_under,
     install,
@@ -904,3 +905,343 @@ def test_tc_026b_the_tail_reads_the_state_and_could_not_have_computed_it(tmp_pat
         folded=frozenset({"c"}),
     )).plain.splitlines()
     assert _pill_tails(rows_quiet) == [(1, None)], rows_quiet
+
+
+# ==========================================================================
+# LLR-N06.2.4 / AT-046 / AT-047 (Inc-4b) — walking onto a hidden match opens
+# its fold, says so, and does not re-close it.
+#
+# THREE SETTLED PREDICATES, AND A FOURTH IS NOT INVENTED HERE:
+#   PRED-A  the selected id is in the painted id set the RENDERER RETURNS,
+#           obtained the way `HLR-N06.3`'s PRED-2/PRED-3 obtain it.  The canvas
+#           paints TITLES, never ids (raw-id trace 0/8 at three widths), so no
+#           predicate below searches painted text for an id.
+#   PRED-B  the selected node's TITLE has a trace in the painted frame under the
+#           clipped-and-visible image at that width (`oracle_traced`, `A-21`).
+#   PRED-C  once the walk has moved OUT of the opened branch -- asserted, not
+#           counted in presses -- that branch paints NO fold pill, READ FROM THE
+#           FRAME.  "Out of", not "one more press": the next hit can be inside
+#           the same branch, and there a re-closing implementation re-opens on
+#           the same press and cannot be told apart (round 2, `F2`).
+#           `MapScreen.folded` is a model attribute:
+#           reading it would assert what the application believes, and the arm
+#           would pass green while the branch painted closed.
+#
+# BOTH SIZES ARE RUN, and the second is not decoration: `PRED-B` is the
+# TRUNCATION-TOLERANT predicate, so truncation has to actually happen for the
+# tolerance to be exercised.  Executed, the pill title is clipped at both.
+
+_INC4B_BRANCHES = ("b", "c")
+
+
+def _pill_titles(rows: list[str]) -> list[str]:
+    """Every fold-pill title painted in the frame, in row order."""
+    return [m.group(1) for row in rows for m in _PILL.finditer(row)]
+
+
+def _pill_stem(title: str) -> str:
+    """A prefix short enough to survive the clip at every width tested here."""
+    return title[:6]
+
+
+async def _fold_two_branches_and_search(app, pilot, tmp_path):
+    """Fold `b` and `c` with the REAL `z`, then submit the pinned query.
+
+    `c` is the POSITIVE CONTROL and it is load-bearing: without a second folded
+    branch, "b paints no pill" is also true of an implementation whose pill layer
+    stopped painting at all.
+    """
+    from tests.inc4_support import MAP_ID, QUERY, build_adjuntos
+
+    app.store.save(MAP_ID, build_adjuntos(tmp_path))
+    screen = await open_map(app, pilot, MAP_ID)
+    for branch in _INC4B_BRANCHES:
+        screen.nav.cursor = branch
+        screen.refresh_canvas()
+        await pilot.pause()
+        await pilot.press("z")
+        await pilot.pause()
+    assert screen.folded == frozenset(_INC4B_BRANCHES), sorted(screen.folded)
+
+    # Both pills are painted BEFORE anything is walked, or PRED-C below would be
+    # measuring the absence of something that was never there.
+    stems = [_pill_stem(screen.graph.nodes[b].ficha.title) for b in _INC4B_BRANCHES]
+    assert stems[0][:3] != stems[1][:3], "the two branch titles are not distinguishable"
+    painted = _pill_titles(canvas_rows(screen))
+    for stem in stems:
+        assert any(t.startswith(stem) for t in painted), (stem, painted)
+
+    await pilot.press("slash")
+    await pilot.pause()
+    for ch in QUERY:
+        await pilot.press(ch)
+    await pilot.press("enter")
+    await pilot.pause()
+    return screen
+
+
+async def _walk_until_hidden(pilot, screen, hidden):
+    """Press the real `n` until the cursor lands on a hit inside a fold.
+
+    The target is NOT named: the loop runs until the condition holds and the test
+    FAILS if it never does, rather than skipping.
+    """
+    from mapper.search import SearchIndex
+
+    hits = SearchIndex(screen.graph).query(screen.query_text)
+    assert set(hits) & hidden, "no hit is inside a folded branch; the arm is vacuous"
+    for _ in range(len(hits) + 2):
+        await pilot.press("n")
+        await pilot.pause()
+        if screen.nav.cursor in hidden:
+            return screen.nav.cursor
+    raise AssertionError("the walk never reached a hit inside a folded branch")
+
+
+@pytest.mark.parametrize(
+    "size,rail,inspector",
+    [(CONTEXT_OF_USE, True, True), (RAIL_HIDDEN_SIZE, False, False)],
+)
+async def test_at_046_the_walk_opens_a_folded_hit_and_says_so(
+    tmp_path, size, rail, inspector
+):
+    """AT-046 — the walk lands on the match AND the operator can see it.
+
+    A size argument is a request, not a guarantee, so the configuration is
+    asserted before anything is read: at 80x24 `_apply_region_visibility`
+    auto-hides both the rail and the inspector, which is the configuration that
+    produced a false three-pass reading earlier in this batch.
+
+    `M-N06.2.4-a` is keeping PRED-A and dropping PRED-B: both green on a renderer
+    that opens the fold and paints the node OFF-CANVAS, because the id set says
+    painted and the pill is gone.  The clipped-and-visible trace is what reddens
+    it, and it is why this node runs at a width where the title truncates.
+    """
+    from mapper.widgets.chrome import HintLine
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        screen = await _fold_two_branches_and_search(app, pilot, tmp_path)
+        assert screen.query_one("#map-rail").display is rail
+        assert screen.query_one("#map-inspector").display is inspector
+
+        # The oracle's OWN descendant walk over the folded set, taken BEFORE the
+        # walk opens anything.
+        hidden = hidden_under(screen.graph, frozenset(_INC4B_BRANCHES))
+        cursor = await _walk_until_hidden(pilot, screen, hidden)
+
+        w, h = screen._canvas_size()
+        # PRED-A — observed as DATA, from the set the renderer returns.
+        declared = painted_ids(screen.graph, screen._view_state(w, h))
+        assert cursor in declared, (cursor, sorted(declared))
+        # PRED-B — observed as PIXELS, through the clipped-and-visible trace.
+        traced = oracle_traced(
+            screen.graph, screen.folded, w, canvas_rows(screen), screen.pan_x
+        )
+        assert cursor in traced, (cursor, sorted(traced))
+
+        # The hint NAMES the branch it opened, derived from the graph rather than
+        # spelled, and routed through `plain()` because the title is file-derived.
+        opened = [b for b in _INC4B_BRANCHES if b not in screen.folded]
+        assert opened, "nothing was unfolded, so nothing can be named"
+        for branch in opened:
+            name = darkside.plain(screen.graph.nodes[branch].ficha.title)
+            assert name in screen.query_one(HintLine).text, (
+                name, screen.query_one(HintLine).text
+            )
+        hint_region = rows_in(screen, screen.query_one(HintLine).region)
+        assert any("abrió" in row for row in hint_region), hint_region
+
+
+@pytest.mark.parametrize(
+    "size,rail,inspector",
+    [(CONTEXT_OF_USE, True, True), (RAIL_HIDDEN_SIZE, False, False)],
+)
+async def test_at_047_the_opened_branch_stays_open(tmp_path, size, rail, inspector):
+    """AT-047 — the walk moves OUT of the branch it opened, and it stays open.
+
+    PRED-C is read from the FRAME.  `MapScreen.folded` is deliberately not
+    consulted: `M-N06.2.4-b` is asserting this against the model attribute, which
+    passes on an implementation that mutates the set and never repaints — the
+    silent state change US-N06 forbids.
+
+    P-047.2 is the positive control and it is the half that makes P-047.1 mean
+    anything: branch `c` was folded too and was never walked into, so its pill
+    must STILL be painted.  Without it, "no pill for `b`" is green on an
+    implementation whose pill layer stopped painting entirely.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        screen = await _fold_two_branches_and_search(app, pilot, tmp_path)
+        assert screen.query_one("#map-rail").display is rail
+        assert screen.query_one("#map-inspector").display is inspector
+
+        hidden = hidden_under(screen.graph, frozenset(_INC4B_BRANCHES))
+        cursor = await _walk_until_hidden(pilot, screen, hidden)
+        opened = [b for b in _INC4B_BRANCHES if b not in screen.folded]
+        untouched = [b for b in _INC4B_BRANCHES if b in screen.folded]
+        assert opened and untouched, (opened, untouched)
+
+        # WALK OUT OF THE BRANCH, ASSERTED REACHED — one press is not enough.
+        #
+        # Round 2 measured why.  On this fixture the walk lands on `d`, opening
+        # `b`; the NEXT hit is `e`, which is still hidden under `b`.  So a single
+        # further press does not move PAST the branch at all, and the defect the
+        # docstring disclaims -- re-close the opened set whenever the walk
+        # advances -- re-opens `b` on that very press and is indistinguishable
+        # from the shipped behaviour: the arm read 4 passed under it.  `M4` (the
+        # opened set re-added AFTER the repaint) is a real mutant but a
+        # degenerate one, because it corrupts the frame it just painted and ANY
+        # frame-reading assertion catches it.  The realistic defect needs the
+        # cursor to be OUTSIDE the branch when the frame is read.
+        from mapper.search import SearchIndex
+
+        hits = SearchIndex(screen.graph).query(screen.query_text)
+        for _ in range(len(hits) + 2):
+            if screen.nav.cursor not in hidden:
+                break
+            await pilot.press("n")
+            await pilot.pause()
+        assert screen.nav.cursor not in hidden, (
+            f"never walked out of the opened branch (cursor {screen.nav.cursor}); "
+            "a re-closing implementation is indistinguishable from here"
+        )
+        assert screen.nav.cursor != cursor, "the walk did not move on"
+
+        painted = _pill_titles(canvas_rows(screen))
+        for branch in opened:
+            stem = _pill_stem(screen.graph.nodes[branch].ficha.title)
+            assert not any(t.startswith(stem) for t in painted), (
+                f"{branch}'s fold pill is painted again: {painted}"
+            )
+        # P-047.2 — the control.  Something is still painting pills.
+        for branch in untouched:
+            stem = _pill_stem(screen.graph.nodes[branch].ficha.title)
+            assert any(t.startswith(stem) for t in painted), (
+                f"{branch} was never walked into and its pill vanished: {painted}"
+            )
+
+
+# Ten times the widest budget the strip will grant a name, and deliberately NOT
+# larger.  Measured: at ~2000 characters the CANVAS Static itself overflows an
+# 80x24 terminal and carries the whole chrome off the bottom of the frame --
+# hint region at y=59 of a 24-row frame, with nothing searched and nothing
+# walked.  That is a pre-existing unbounded-content defect in the map body, it
+# reproduces with no walk code involved, and an arm driven at that length would
+# be reading it instead of this one.
+_HOSTILE_TITLE_LEN = 400
+_HOSTILE_CHAR = "Z"
+# Half of the narrower declared row: a branch NAME may not take more of the
+# strip than the affordances do.  Spelled here rather than imported, so the
+# ceiling does not move when the code it constrains moves.
+_HINT_NAME_BUDGET = 40
+
+
+@pytest.mark.parametrize("size", [CONTEXT_OF_USE, RAIL_HIDDEN_SIZE])
+async def test_the_opened_branch_name_cannot_push_esc_limpiar_off_the_frame(
+    tmp_path, size
+):
+    """A branch TITLE is file-derived and unbounded; the hint line is not.
+
+    MEASURED BEFORE THE FIX, at the declared 118x34, one real `n`: a ~2000
+    character title took the hint region to 18 rows and the canvas to ONE, and
+    `esc limpiar` left the painted frame entirely.  `HintLine` wraps rather than
+    clips, so an unbounded prefix does not overflow -- it EATS THE MAP.  The
+    affordance it displaced is the one `#D38` newly promises, so the increment
+    that introduced the recovery route also introduced the way to lose it.
+
+    BOTH DECLARED SIZES, and the second is not decoration -- it is where the
+    FIRST attempt at this fix was caught.  A fixed 40-cell cap holds at 118
+    columns and wraps at 80, and at 80 the wrapped strip's region read back
+    EMPTY: `limpiar` was gone again, by a different mechanism, on a build that
+    passed at 118.  A narrower terminal is exactly the condition the security
+    review recorded as undetermined.
+
+    THE ASSERTION IS ON THE FRAME, not on the widget's text.  `HintLine.text`
+    holds the whole string whatever the layout does; only the composited rows
+    can say whether the operator can still read it.
+
+    TWO NEGATIVE CONTROLS, because "the affordance is painted" is also true of a
+    build where the walk never opened anything: the branch is asserted unfolded,
+    and the hint is asserted to still NAME it.  So this cannot pass by the fold
+    feature having quietly stopped working.
+
+    THE CANVAS HEIGHT IS DELIBERATELY NOT ASSERTED, and the reason was measured
+    rather than assumed.  At 118x34 with a ~2000-character title: while the
+    branch is FOLDED the canvas is already 1 row, because the fold PILL carries
+    the same unbounded title -- pre-existing, in the pill layer, with no walk
+    code involved.  After the walk opens the branch the canvas paints the long
+    title as a node label and reads 9.  Neither is this finding, and asserting a
+    canvas height here would pass or fail on those instead.  The claim this arm
+    makes is the strip's alone: the hint does not wrap, so it takes no row that
+    was not already the map's to lose.  `_HOSTILE_TITLE_LEN` is chosen to keep
+    those two out of the reading; see its note.
+    """
+    from mapper.widgets.chrome import HintLine
+    from tests.inc4_support import MAP_ID, QUERY, build_adjuntos
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = build_adjuntos(tmp_path)
+        # The hit stays INSIDE the branch: `d` matches on a field value, so the
+        # walk still has a reason to open `b` after `b`'s own title stops
+        # matching.  Built from a repeated character, never spelled long.
+        graph.nodes["b"].ficha.title = _HOSTILE_CHAR * _HOSTILE_TITLE_LEN
+        app.store.save(MAP_ID, graph)
+        screen = await open_map(app, pilot, MAP_ID)
+
+        screen.nav.cursor = "b"
+        screen.refresh_canvas()
+        await pilot.pause()
+        await pilot.press("z")
+        await pilot.pause()
+        assert screen.folded == frozenset({"b"}), sorted(screen.folded)
+        # SELF-GUARD on the precondition.  If a future title length pushes the
+        # chrome off the bottom of the frame before the walk even runs, every
+        # frame read below is measuring the canvas overflow instead of the hint
+        # -- and `limpiar` would be missing for a reason this arm does not own.
+        assert screen.query_one(HintLine).region.y < size[1], (
+            "the chrome is already off-frame before the walk; this arm would be "
+            "measuring the map body's unbounded content, not the hint line"
+        )
+
+        await pilot.press("slash")
+        await pilot.pause()
+        for ch in QUERY:
+            await pilot.press(ch)
+        await pilot.press("enter")
+        await pilot.pause()
+
+        hidden = hidden_under(screen.graph, frozenset({"b"}))
+        hits = [nid for nid in screen._search_order() or () if nid in hidden]
+        assert hits, "no hit is hidden under the long-titled branch; the arm is vacuous"
+        for _ in range(len(screen._search_order() or ()) + 2):
+            await pilot.press("n")
+            await pilot.pause()
+            if screen.nav.cursor in hidden:
+                break
+        assert screen.nav.cursor in hidden, "the walk never entered the folded branch"
+
+        # The controls: the branch really was opened, and the hint really does
+        # name it, so the affordance check below is not green by inaction.
+        assert "b" not in screen.folded, "nothing was opened; the hint has no prefix"
+        assert "abrió" in screen.query_one(HintLine).text
+
+        hint_region = screen.query_one(HintLine).region
+        frame = " ".join(rows_in(screen, hint_region))
+        assert "limpiar" in frame, (hint_region.height, frame[:120])
+        assert hint_region.height == 1, (
+            f"the hint line wrapped to {hint_region.height} rows on a "
+            f"{_HOSTILE_TITLE_LEN}-character branch title, and every row it "
+            "takes comes out of the canvas"
+        )
+        # The bound itself, read from the FRAME.  The literal is the TEST'S own
+        # budget, not the product's constant imported back: a ceiling read out
+        # of the code it checks moves whenever that code does.
+        assert frame.count(_HOSTILE_CHAR) <= _HINT_NAME_BUDGET, (
+            frame.count(_HOSTILE_CHAR),
+            "the branch name is taking more of the strip than a name may",
+        )

@@ -31,6 +31,8 @@ from .keymap import (
     SCOPE_MAP,
     SCOPE_PLUG,
     SCOPE_REPO,
+    KeyBinding,
+    bindings_for,
     groups_for_keybar,
     textual_bindings,
 )
@@ -74,6 +76,29 @@ COUNT_REGION_ID = "map-pagination"
 # (`AT-052`), and a single declaration is what makes the test a DERIVATION of
 # the shipped string rather than a second copy of it that drifts.
 SEARCH_COUNT_SUBJECT = "coincidencias en el mapa"
+
+# The map's resting hint, spelled ONCE.  Three sites restore it now that `esc`
+# clears a live search instead of leaving the map (`#D38`): `compose`, the field
+# editor's exit, and the clear itself.  Three copies of a sentence are three
+# chances for two of them to drift.
+DEFAULT_MAP_HINT = "navega con j/k/h/l · ↵ ficha · / buscar"
+
+# The ceiling on the fold-auto-open segment of the walk's hint line.  Branch
+# TITLES are file-derived: unbounded in length, and one walk can open several
+# nested folds at once, so both the count and the width need a bound or the
+# strip grows and `HintLine` wraps the canvas out of the frame.
+#
+# THE CELL BUDGET IS THE ROW'S REMAINDER, not a constant, and that was measured:
+# a fixed 40 cells fits at 118 columns and WRAPS at 80, where the whole strip
+# then left the painted frame -- affordances included.  `_HINT_NAME_OVERHEAD` is
+# the chrome around the name: `darkside.hint_line`'s own 12-cell prefix, the
+# 10-cell separator, and the closing guillemet.  Below `_HINT_NAME_MIN_CELLS`
+# there is no room to say anything useful, so the announcement is DROPPED rather
+# than allowed to take a row from the map: the affordances outrank it.
+_HINT_BRANCHES = 3
+_HINT_BRANCH_CELLS = 40
+_HINT_NAME_OVERHEAD = 23
+_HINT_NAME_MIN_CELLS = 8
 
 
 def screen_bindings(scope: str) -> list[Binding]:
@@ -1165,6 +1190,13 @@ class MapScreen(Screen):
         # ONE FRAME'S resolution, held only for the duration of that frame.
         # See `_search_order`; `_open_paint_pass` is what bounds its lifetime.
         self._search_memo: tuple[Graph, str, tuple[str, ...]] | None = None
+        # `#D5b` took `n` from `next_gap` and gave it to the walk, and the
+        # relocated chord is undiscoverable through `?` until Inc-8.  The first
+        # `n` press on this screen says so.  Per SCREEN and not per process:
+        # a process-wide flag is class state shared by every map the operator
+        # opens and by every test in a run, and the acceptance reads the frame
+        # twice rather than reading this field.
+        self._rebind_declared = False
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
@@ -1182,7 +1214,7 @@ class MapScreen(Screen):
         yield Input(placeholder="/buscar", id="search-input")
         yield Static("", id=COUNT_REGION_ID)
         yield Static("", id="map-toast")
-        yield HintLine("navega con j/k/h/l · ↵ ficha · / buscar")
+        yield HintLine(DEFAULT_MAP_HINT)
         # The keybar reads the same seat the bindings are generated from, so it
         # cannot advertise a key the screen does not bind (US-N03).
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
@@ -2055,7 +2087,7 @@ class MapScreen(Screen):
         """`escape` inside a field returns focus to the map, keeping the value."""
         event.stop()
         self.set_focus(None)
-        self.query_one(HintLine).set_hint("navega con j/k/h/l · ↵ ficha · / buscar")
+        self.query_one(HintLine).set_hint(DEFAULT_MAP_HINT)
 
     # -- attachments (US-N02) ----------------------------------------------
     def on_ficha_inspector_attachment_activated(
@@ -2224,12 +2256,288 @@ class MapScreen(Screen):
             event.input.disabled = True
             self.focus()
             self.refresh_canvas()
+            # AFTER the repaint, deliberately: the hint then describes the
+            # frame the operator is now looking at, and the order it reads is
+            # the one `refresh_canvas` just resolved rather than a second
+            # resolution beside it.
+            #
+            # `None` is excluded ALONG WITH the blank query, and that is not
+            # tidiness.  Above the renderer's bound the question was never
+            # answered, and `sin coincidencias` there is the same lying
+            # affordance `_search_order`'s `None` return exists to prevent, one
+            # surface over: it would declare an empty answer over a graph that
+            # may hold thousands of matches.
+            order = self._search_order()
+            if self._search_is_live():
+                self.query_one(HintLine).set_hint(self._search_hint(order))
+            else:
+                self.query_one(HintLine).set_hint(DEFAULT_MAP_HINT)
 
     def on_input_blurred(self, event: Input.Blurred) -> None:
         if event.input.id == "search-input":
             event.input.display = False
             event.input.disabled = True
             self.focus()
+
+    # -- US-N07 · the walk over the live matches (`#D5b`, `HLR-N07.3`) ------
+    def _seat_row(self, action: str) -> KeyBinding | None:
+        """The seat's row for *action* in this screen's scope, at CALL time.
+
+        Never captured at import.  Everything the surfaces below paint about a
+        chord -- the glyph in the hint line, the glyph and the label in the
+        rebind declaration -- is read through here, so a later rebind reaches
+        the painted string without a second edit.  This increment is itself the
+        proof that the hazard is real: `n` meant `next_gap` one commit ago.
+        """
+        for binding in bindings_for(self.KEY_SCOPE):
+            if binding.action == action:
+                return binding
+        return None
+
+    def _seat_glyph(self, action: str) -> str:
+        row = self._seat_row(action)
+        return row.glyph if row else ""
+
+    def _seat_label(self, action: str) -> str:
+        row = self._seat_row(action)
+        return row.label if row else ""
+
+    def _search_hint(self, hits: tuple[str, ...] | None) -> str:
+        """`UX-Q3-b`'s hint for a live search, glyphs READ FROM THE SEAT.
+
+        Takes the resolved order as an ARGUMENT rather than resolving again, so
+        the hint cannot describe a different answer from the one its caller
+        acted on -- the same "one resolution per frame" rule `_search_order`'s
+        memo exists to enforce, applied one surface up.
+        """
+        clear = f"{self._seat_glyph('back_or_home')} limpiar"
+        if not hits:
+            return f"sin coincidencias · {clear}"
+        return (
+            f"{self._seat_glyph('next_hit')} siguiente · "
+            f"{self._seat_glyph('prev_hit')} anterior · {clear}"
+        )
+
+    def _search_is_live(self) -> bool:
+        """What BOTH `esc` and the hint line mean by "a search is live".
+
+        The two surfaces were written independently and disagreed above the
+        renderer's bound: the hint asked for `query_text.strip() and order is
+        not None`, `esc` asked for `query_text.strip()` alone.  Above the bound
+        the question was never ANSWERED, so nothing is painted to clear and the
+        hint promises nothing -- yet `esc` cleared anyway, changing no pixel and
+        not leaving the map.  That is a keypress silently swallowed, which is
+        the inverse of the defect `#D38` exists to fix: there the hint promised
+        `esc limpiar` and the handler did not keep the promise, here the handler
+        acts where no affordance was advertised.  One predicate, both callers.
+
+        It reads the previous frame's memo without opening a pass, for the same
+        reason `_pan` does: it is a question ABOUT the frame on screen.
+        """
+        return bool(self.query_text.strip()) and self._search_order() is not None
+
+    def _declare_rebind(self) -> None:
+        """Say ONCE that `n` changed hands (`AT-051b`).
+
+        Every string comes from the SEAT.  A typed copy would go on announcing a
+        rebind that a later increment moved again, which is the failure the
+        declaration exists to prevent, reproduced inside the declaration.
+        Between this increment and Inc-8 the relocated `next_gap` is
+        undiscoverable through `?` -- its `view` group sits below the legend's
+        fold at the declared size -- so this toast is the only painted route to
+        its new home.
+        """
+        self._event_toast(
+            f"{self._seat_glyph('next_hit')} · {self._seat_label('next_hit')}",
+            f"{self._seat_label('next_gap')} ahora en {self._seat_glyph('next_gap')}",
+        )
+
+    def _walk_toast(self, declaring: bool, label: str, detail: str) -> None:
+        """One toast slot, and the one-time declaration outranks it on press 1.
+
+        `E1b` and `E1c` are painted on every later press; on the very first they
+        would hide the fact that the KEY changed meaning, which is the more
+        urgent of the two things to say and the only one that is ever said.
+        """
+        if declaring:
+            self._declare_rebind()
+            return
+        self._event_toast(label, detail)
+
+    def _unfold_onto(self, nid: str) -> list[str]:
+        """Open every folded branch that hides *nid*; return what was opened.
+
+        `LLR-N06.2.4`.  Landing the selection inside a fold moves it somewhere
+        the operator cannot see, which is the silent state change US-N06
+        forbids.  The branch is NOT re-closed when the walk moves past it: that
+        would undo, unasked, the only thing that made the previous step legible.
+        The child index is built once for the same reason `search.tree_order`
+        builds one -- `Graph.children_of` is a full scan of `graph.edges`.
+        """
+        if not self.folded:
+            return []
+        kids: dict[str, list[str]] = {}
+        for edge in self.graph.edges:
+            kids.setdefault(edge.parent_id, []).append(edge.child_id)
+        opened: list[str] = []
+        for start in sorted(self.folded):
+            seen: set[str] = set()
+            stack = list(kids.get(start, ()))
+            while stack:
+                cid = stack.pop()
+                if cid in seen:
+                    continue
+                seen.add(cid)
+                stack.extend(kids.get(cid, ()))
+            if nid in seen:
+                opened.append(start)
+        self.folded = self.folded - set(opened)
+        return opened
+
+    def _branch_name(self, nid: str) -> str:
+        """What the hint line calls a branch: its title, or its id if it has none.
+
+        Lifted out of `_walk_hits` rather than written inline, and the reason is
+        mechanical: the acceptance asserts BY AST that the walk handler contains
+        no boolean expression, because `search_hits or lens_matches` is the shape
+        `M-N07.3-a` takes.  A `title or nid` fallback is harmless and is the same
+        shape, so it lives here instead of weakening the rule to allow it.
+
+        Through `plain()`: the title is file-derived and the hint line is a
+        surface this batch touches (`HLR-COERCE`).
+
+        The `.get` is not defensive padding: a folded id that is an edge parent
+        with no `Node` entry raises `KeyError` on the keypress, and while the
+        shipped loader synthesises a node for every `.mmd` edge endpoint (so no
+        FILE reaches it), the fold set is keyed on ids, not on nodes.  Falling
+        through to the id arm costs one call and removes a crash from a path
+        that has no other error handling.
+        """
+        node = self.graph.nodes.get(nid)
+        title = node.ficha.title if node else ""
+        if title:
+            return darkside.plain(title)
+        return darkside.plain(nid)
+
+    def _hint_with_opened(self, hint: str, opened: list[str], width: int) -> str:
+        """Append `abrió «…»` to *hint*, BOUNDED, and BEHIND the affordances.
+
+        Branch titles are file-derived: unbounded in length, and one walk can
+        open several nested folds at once.  `HintLine` WRAPS rather than clips,
+        so an unbounded segment does not overflow the strip -- it grows the
+        strip and takes the rows from the canvas.  Measured at the declared
+        118x34 with a ~2000-character title and one real `n`: the strip went to
+        18 rows, the map to ONE, and `n siguiente · N anterior · esc limpiar`
+        left the painted frame -- including `esc limpiar`, the affordance `#D38`
+        newly promises.  So the increment that introduced the recovery route
+        also introduced the way to lose it.
+
+        TWO INDEPENDENT GUARDS, because either alone is insufficient.  Order:
+        the names go AFTER the affordances, so a wrap that still happened could
+        only push the ANNOUNCEMENT off, never the keys.  Budget: the name gets
+        the row's remainder, capped, so no wrap happens at all -- a FIXED cap
+        was tried first and measured wrapping at 80 columns, where the whole
+        strip then left the frame.  With no room to say anything the
+        announcement is dropped: the operator can see the branch opened, and
+        losing `esc` is the worse of the two failures.
+        """
+        if not opened:
+            return hint
+        names = ", ".join(self._branch_name(nid) for nid in opened[:_HINT_BRANCHES])
+        if len(opened) > _HINT_BRANCHES:
+            names += f" +{len(opened) - _HINT_BRANCHES}"
+        room = min(_HINT_BRANCH_CELLS, width - len(hint) - _HINT_NAME_OVERHEAD)
+        if room < _HINT_NAME_MIN_CELLS:
+            return hint
+        # `fit` truncates to display CELLS and re-coerces; its padding is
+        # stripped because this sits inside quotes, not in a column.
+        return f"{hint} · abrió «{darkside.fit(names, room).rstrip()}»"
+
+    def _walk_hits(self, step: int) -> None:
+        """Move the selection to the next (or previous) match, wrapping both ways.
+
+        ONE SOURCE OF "WHAT MATCHES", AND NO FALLBACK (`C-D6a`).  The order comes
+        from `_search_order` and from nowhere else.  The named weaker variant
+        `M-N07.3-a` is this walk written over two result sets joined by `or`
+        with neither ever cleared: it passes `AT-022` whenever only one of them
+        is populated -- which is every single-feature test -- and the two diverge
+        silently the first time an operator uses both.  There is no second set in
+        this batch (`#D23` defers the lens), so the invariant "submitting a
+        search clears the lens matches" would be GREEN BEFORE ANY CODE WAS
+        WRITTEN, which is the vacuous check this batch exists to stop.  It is
+        closed STRUCTURALLY instead: this method reads exactly one resolution and
+        contains no boolean fallback, and `test_search.py` asserts both BY AST.
+        What that buys, stated exactly: the two NAMED shapes of `M-N07.3-a` are
+        structurally unavailable here rather than merely undetected.  It is not
+        a proof that no second result set can exist -- one named outside the
+        arm's vocabulary and joined by concatenation would satisfy both
+        assertions.
+
+        THE ORDER IS THE ONE THE FRAME ON SCREEN WAS PAINTED FROM.  `_search_order`
+        is memoised per paint pass and keyed on the graph object and the query
+        text, and a walk changes neither, so the memo of the last frame is the
+        same value a fresh resolution would return.  The repaint that follows
+        opens its own pass; this method is registered in the acceptance's
+        exemption table with that reason rather than opening one of its own.
+        """
+        hits = self._search_order()
+        declaring = not self._rebind_declared
+        self._rebind_declared = True
+        if not self.query_text.strip():
+            # `E1b` -- nothing was ever asked.  A blank or whitespace-only query
+            # is the SAME state (`LLR-N07.3.3`) and the count line already paints
+            # the two identically.  The body reports the STATE rather than
+            # prescribing the `/` route: `#D6` made the route conditional, so a
+            # body naming it is accidentally true today and misdirection the
+            # increment a second producer lands.
+            self._walk_toast(
+                declaring,
+                "sin búsqueda activa",
+                "no hay coincidencias que recorrer",
+            )
+            return
+        if hits is None:
+            # Above the renderer's bound the question was not ANSWERED, which is
+            # a different fact from an answer of zero -- `_search_order` returns
+            # `None` there precisely so the two cannot be confused.  `E1c`'s body
+            # here would declare "no aparece en este mapa" over a graph that may
+            # hold thousands of matches.
+            self._walk_toast(
+                declaring,
+                "búsqueda sin evaluar",
+                f"el mapa supera el límite de {MAX_RENDER_NODES} nodos",
+            )
+            return
+        if not hits:
+            # `E1c` -- asked, and answered empty.  The body interpolates the
+            # OPERATOR'S query, which makes this toast a coercion sink: measured,
+            # `darkside.plain` strips a control byte and a right-to-left
+            # override where `Text.assemble` leaves the override alive, and an
+            # override reverses the toast's own sentence.
+            self._walk_toast(
+                declaring,
+                "0 coincidencias",
+                f"«{darkside.plain(self.query_text)}» no aparece en este mapa",
+            )
+            return
+        if self.nav.cursor in hits:
+            index = (hits.index(self.nav.cursor) + step) % len(hits)
+        else:
+            index = 0 if step > 0 else len(hits) - 1
+        target = hits[index]
+        opened = self._unfold_onto(target)
+        self.nav.cursor = target
+        self.refresh_canvas()
+        line = self.query_one(HintLine)
+        line.set_hint(self._hint_with_opened(self._search_hint(hits), opened, line.size.width))
+        if declaring:
+            self._declare_rebind()
+
+    def action_next_hit(self) -> None:
+        self._walk_hits(1)
+
+    def action_prev_hit(self) -> None:
+        self._walk_hits(-1)
 
     def action_toggle_focus(self) -> None:
         if self.focus_active:
@@ -2520,11 +2828,34 @@ class MapScreen(Screen):
         self.app.pop_screen()
 
     def action_back_or_home(self) -> None:
-        """Pop one screen when coming from a linked map, otherwise go home."""
-        if self.source_crumb:
-            self.app.pop_screen()
-        else:
-            self.app.pop_screen()
+        """`esc` clears a live search; with none live it leaves the map (`#D38`).
+
+        The hint line promises `esc limpiar` the moment a search is submitted,
+        and before this branch existed `escape` popped the screen
+        UNCONDITIONALLY -- so an operator who followed the hint left the map.
+        Painting a hint for behaviour nobody implemented is the defect `AT-052`
+        exists for, one surface over.
+
+        The seat's label stays `volver` and the branch lives here, which `#D10`
+        requires: a chord whose LABEL changes with state breaks the whole-seat
+        pin's static set equality, and the pin is what makes "help shows exactly
+        the keys that work here" checkable at all.
+
+        The two identical arms this replaced -- `if self.source_crumb: pop else:
+        pop` -- are gone.  A branch whose sides are the same statement reads as a
+        distinction the code does not make.
+
+        The guard is `_search_is_live`, shared with the hint line.  Written
+        independently the two disagreed above the renderer's bound, where the
+        hint promises nothing and this handler cleared anyway -- see that
+        method.
+        """
+        if self._search_is_live():
+            self.query_text = ""
+            self.refresh_canvas()
+            self.query_one(HintLine).set_hint(DEFAULT_MAP_HINT)
+            return
+        self.app.pop_screen()
 
     def action_palette(self) -> None:
         self.app.action_palette()

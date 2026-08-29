@@ -22,7 +22,7 @@ import pytest
 
 from mapper import darkside
 from mapper.diff import DiffResult
-from mapper.keymap import KEYMAP, bindings_for, duplicate_chords
+from mapper.keymap import KEYMAP, duplicate_chords
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from mapper.views.layered import LayeredRenderer
 from mapper.views.state import ViewState
@@ -448,15 +448,51 @@ DECLARED_DIFF = frozenset({
 })
 
 
+# Inc-3's EXIT seat, FROZEN as a literal by Inc-4b on 2026-08-29.
+#
+# WHY IT HAD TO BE FROZEN -- a repair with a stated reason, not a test edited
+# until it went green.  This node used to read the LIVE seat and assert
+# `len(bindings_for("map")) == 31` with nothing removed.  Both were true of
+# Inc-3's exit, and both are claims about a MOMENT, so the first later increment
+# to touch the seat made them false without making anything wrong: `#D5b`
+# (Inc-4b) rebinds `map/n` from `next_gap` to `next_hit` and adds `map/N` and
+# `map/M`, taking the live map seat to 33 and REMOVING `("n", "next_gap")` --
+# all three assertions fail at once.  A pin on a PAST diff written against the
+# PRESENT is a pin every future increment has to edit, and an increment that
+# edits a pin it does not understand deletes it.
+#
+# Spelled as a literal rather than derived as `ENTRY_MAP_SEAT | DECLARED_DIFF`:
+# derived, the assertion below would be a tautology true of any two sets.
+# Inc-4b's own three-row diff and its own `duplicate_chords()` run live in
+# `tests/test_inc4_census.py`, against the seat that is live TODAY.
+EXIT_MAP_SEAT = frozenset({
+    ("j", "next_sibling"), ("k", "prev_sibling"), ("h", "parent"), ("l", "child"),
+    ("enter", "open_ficha"), ("slash", "search"),
+    ("a", "add_child"), ("d", "open_documents"), ("x", "archive"), ("u", "undo"),
+    ("A", "add_attachment"), ("X", "remove_attachment"),
+    ("f", "toggle_focus"), ("o", "toggle_outline"), ("r", "toggle_radial"),
+    ("e", "export_svg"), ("equals_sign", "toggle_diff"), ("m", "coverage"),
+    ("n", "next_gap"), ("R", "toggle_rail"), ("I", "toggle_inspector"),
+    ("g", "focus_rail"), ("z", "collapse_branch"),
+    ("q", "home"), ("escape", "back_or_home"),
+    ("ctrl+p", "palette"), ("question_mark", "help"),
+    ("H", "pan_left"), ("J", "pan_down"), ("K", "pan_up"), ("L", "pan_right"),
+})
+
+
 def test_cd25a_the_seat_diff_is_exactly_the_four_rows_inc3_declares():
-    """The declared diff EQUALS the entry/exit difference of `bindings_for('map')`."""
-    exit_seat = frozenset((b.key, b.action) for b in bindings_for("map"))
+    """The declared diff EQUALS Inc-3's OWN entry/exit difference.
+
+    A statement about Inc-3's history, and therefore permanently true: both
+    sides are snapshots, so no later seat change can turn this node red or green
+    for a reason that has nothing to do with Inc-3.
+    """
     assert len(ENTRY_MAP_SEAT) == 27, len(ENTRY_MAP_SEAT)
-    assert exit_seat - ENTRY_MAP_SEAT == DECLARED_DIFF
-    assert ENTRY_MAP_SEAT - exit_seat == frozenset(), (
-        "a row LEFT the map seat; this increment declared no removal"
+    assert len(EXIT_MAP_SEAT) == 31, len(EXIT_MAP_SEAT)
+    assert EXIT_MAP_SEAT - ENTRY_MAP_SEAT == DECLARED_DIFF
+    assert ENTRY_MAP_SEAT - EXIT_MAP_SEAT == frozenset(), (
+        "a row LEFT the map seat in Inc-3; that increment declared no removal"
     )
-    assert len(exit_seat) == 31
 
 
 def test_cd25a_no_chord_collides_on_entry_or_on_exit():
@@ -465,6 +501,13 @@ def test_cd25a_no_chord_collides_on_entry_or_on_exit():
     The entry side is reconstructed by removing this increment's own four rows
     from the live seat rather than by quoting a transcript: a transcript records
     what someone ran, and this records what the shipped detector says.
+
+    NOTE, added by Inc-4b: the live seat has moved on, so what this arm now
+    reconstructs is "today's seat minus Inc-3's four rows", which was Inc-3's
+    entry only on the day it was written.  It is retained as a live collision
+    check -- still true, still useful -- and Inc-3's entry/exit diff is pinned
+    against SNAPSHOTS in the node above.  The claim is stated rather than
+    silently left to read as more than it is.
     """
     assert duplicate_chords() == []
 
