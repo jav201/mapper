@@ -54,7 +54,7 @@
   "current_station": "P3",
   "phase_status": "in-progress",
   "p3_progress": {
-    "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4 -> Inc-5 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
+    "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-5 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
     "closed": [
       {
         "inc": "Inc-1",
@@ -99,9 +99,22 @@
         "dependency": "pytest-timeout==2.3.1 added dev-only, pinned, coordinator-authorised. The cycle-guard regression arms failed BY HANGING, which in CI is a stuck run rather than a red report. timeout_method='thread' because Windows has no SIGALRM (verified, not assumed). Mutant N9 now yields exit 1 in 33s instead of wedging.",
         "carries_opened": "B-55 outline/radial hide nodes and declare nothing (5/8 and 2/8 at 30x6) -- routed to Inc-5, pinned by a participation census. B-56/B-60 CLOSED, not re-recorded. F-A/F-B/F-C routed to Inc-REPAIR. OutlineRail.render unguarded at compositor paint time (part-closes F-G). F-H MapStore.save->load not total. pass4 F1: the settle-chase's termination is MEASURED (max 5 passes over 943 configurations; storms and a forced oscillation both terminate) rather than asserted, over a live height:auto feedback path -- named fix is a 3-line pass counter, deliberately NOT taken post-gate because an unreviewed change after a passing gate is the self-clearing pattern this batch forbids.",
         "process_notes": "Two ORCHESTRATOR errors caught by the independent gates and recorded rather than quietly fixed: (a) the ruff gate was checked as an AGGREGATE, and an aggregate cannot see a swap -- one new F401 was exactly masked by one removal; (b) even set-wise the comparison had UNEQUAL SCOPE, because the base worktree carries prototypes/ which the work tree's .gitignore hides from ruff. Also: piping pytest through `tail` reports TAIL's exit status, which is how a run WITH a failure displayed 'exited with code 0'. A flaky arm was found by the orchestrator (1 failure in 11 runs on this tree, 0 in 6 at base -- attribution NOT claimed, since 6 runs cannot exclude the same rate) and fixed deterministically."
+      },
+      {
+        "inc": "Inc-4a",
+        "commit": "PENDING",
+        "date": "2026-08-29",
+        "source_files": 4,
+        "scope": "US-N07 search core -- one owner of 'what matches', ViewState.hits, the inline-predicate deletion, LLR-N07.1.3's pill tail, the count line on #map-pagination (#D37)",
+        "gates": "FULL protocol, 4 implementation rounds. R1: code-reviewer BLOCK 2 HIGH + security-reviewer BLOCK 1 HIGH family (F1/F1a/F1b). R2 fixes -> BOTH confirmation passes clean: code PASS (both HIGH discharged, verified by EXECUTED mutation in an isolated mirror, not accepted on trust), security SIGN-OFF. R3 discharged their 5 mitigations. Confirmation-2 SIGN-OFF on all four items with 2 further MEDIUM mitigations. R4 (orchestrator-applied, declared) discharged both. No HIGH was ever self-cleared.",
+        "suite": "fast 822 passed / 17 deselected / 3 xfailed exit 0, zero FAILED; ruff SET identical to entry (zero NEW, zero GONE)",
+        "ledger": "825 = 804 - 0 + 21 default lane; 842 all markers",
+        "headline_defects": "(a) The count was resolved TWICE -- author caught it himself: a mutation scoping one path to the visible set left AT-018 AND AT-019 green. Risk A-6, the defect US-N07 exists to close, nearly shipping inside the increment that closes it. (b) The gate on that invariant then did not gate it: the arm was positive-membership only, and the code lens CONSTRUCTED the defect through the unbanned _search_hits -- count N=5 against 4 painted highlights on a green 818-test suite. (c) A quadratic in the repaint path, found INDEPENDENTLY by both lenses: 25.8s of a 30.6s frame at N=12002, 4 resolutions per repaint, and above MAX_RENDER_NODES the renderer cost zero while the search cost seconds. A clean regression -- at entry nothing called SearchIndex. (d) The FIX for (c) then painted '0 coincidencias' over a graph holding 241 real matches -- a lying affordance reintroduced by the repair. (e) The open-pass pin was a hand-written two-tuple, already false; C-31 demonstrated on this file rather than quoted at it.",
+        "process_notes": "The implementer REFUSED a reviewer's suggested fix and was proven right: applying that predicate verbatim to unmutated source came back RED -- it would have false-failed correct code, since _view_state legitimately reads the viewport. C-53 in practice. He also declined to adopt the orchestrator's ruff pair count (19) because he measured 21 and could not reproduce mine; both agree on 27 findings and on SET identity, so the gate holds -- the lesson is that a pair COUNT is instrument-dependent and the SET is the gate. He retracted his own round-1 LF/CRLF finding as wrong, and the code lens then corrected BOTH rounds: the conversion ran the other way (app.py and layered.py LF->CRLF; search.py never moved). TWO ORCHESTRATOR ERRORS: (1) my state.query census swept mapper/ and stopped, missing the fourth reader at tests/test_app.py:448 -- the sole causal break, found by the architect lens. (2) My own QA-lens brief produced an artifact containing two literal U+202E characters, which reddened the tree's coercion census and cost the implementer his green baseline. C-56 generalised: documenting a character must not mean containing it. Both confirmation lenses caught their OWN instruments: the code lens's mirror read 1 failed until it found the A3 census reads the git index and the new files were staged-but-untracked in a clone; the security lens found its previous keypath gap was its own probe's fault (j is next_sibling, a no-op at the root where its cursor sat).",
+        "carries_opened": "NEW-4 residue: three pass-free readers (_pan, action_export_svg, _reclamp_pan) are EXEMPTED WITH STATED REASONS, not eliminated -- Inc-4b must open a pass or add a reasoned entry; the arm forces the choice. The unbounded pagination meter (per_page = max(1, total)) puts the strip's overflow declaration off-viewport at 34 rows -- pre-existing, routed to Inc-REPAIR. Export-toast username path leak now at app.py:2373 (address has moved twice; the durable anchor is the _event_toast('exportado', ...) call). tree_order/_incomplete_order duplication: PINNED not deduped, because dedup changes a shipped US-N04 path this acceptance does not cover. .gitattributes pass should name app.py and layered.py, not search.py. OPERATOR USERNAME in 13 places across 10 batch artifacts, 7 of them already committed -- deliberately NOT scrubbed (they are absolute paths inside executed evidence; rewriting committed records would make them stop saying what was measured). Routed to the operator as a decision at /dev-flow-sync."
       }
     ],
-    "next": "Inc-4 -- US-N07 busqueda n/N plus the seat rebind (#D5b). 4 source files: search.py, app.py, views/layered.py, keymap.py. Owes LLR-N06.2.4 (walk opens a folded hit) and AT-046/AT-047, which are Inc-4's and were deliberately NOT built in Inc-3. mapper/search.py is confirmed DEAD (no import across mapper/ or tests/), so every search LLR is new-module work in the ledger, not modification."
+    "next": "Inc-4b -- keymap.py + app.py. The #D5b seat rebind (map/n->next_hit, map/N->prev_hit, map/M->next_gap), the n/N walk over the tree-ordered list, LLR-N06.2.4 fold auto-open, E1b/E1c toasts (E1b body re-derived to 'no hay coincidencias que recorrer'; E1c routes through darkside.plain -- RLO survives Text.assemble), state-dependent esc (#D38), AT-022 AT-023 AT-046 AT-047 AT-051 AT-051b AT-053, the test_cd25a seat repair (map seat 31->33, RED by construction), C-D6a closed structurally (#D37), and the settle-chase counter carry. ENTRY OBLIGATION: Inc-4b's keypress-bound consumer must open a paint pass or add a reasoned exemption -- the R4-1 exact-set arm forces it."
   },
   "stations_active": [
     "P0",
@@ -280,6 +293,12 @@
       "date": "2026-08-27",
       "decision": "approved — SEALED",
       "notes": "PDR iteration 3 (final) PASSED. All four lenses `approved with conditions`; security lifted its pass-2 block; architect moved 14/14 from LIVE to DISCHARGED. All 12 fold conditions discharged and verified by re-reading the artifact. Decisions issued: #D25 (the three-row seat-diff figure is a regression PIN on Inc-4's diff, not a per-increment budget -- no breach, Inc-3 unblocked), #D26 (the legend scrolls; tabbed redesign deferred B-35), #D27 (the damaged sala card takes a declared glyph; ALERT is not spent -- C-55 limb 2), #D28 (operator-ruled: the 4.5:1 contrast floor STANDS and the token changes; V7/V8 and the card glyph take INK; MUT is legal for readable text only on GROUND; decorative marks exempt). Corrections landed against the orchestrator's own rulings: the abolished cap survived at three sites (the batch's fourth false oracle, and the first created by the fix for a previous one); C-D25a named a vacated increment and had no oracle; and section 5's 'minimal alternative' was FALSE -- already implemented at app.py:1393-1395 and invariant under the defect, proven by two lenses executing it. CARRIED BY DECISION: B-36, UX2-C-01, a known live durable-data-loss defect on master, first scope item of the follow-on batch ahead of lente. Baseline 630+17=647, ruff 29, fixtures clean. Sealed at PDR-addendum-3.md section 8. Implementation NOT started -- commissioned as a fresh session."
+    },
+    {
+      "station": "P3",
+      "date": "2026-08-29",
+      "decision": "Inc-4 PRE-gate: two independent lenses returned; C-21 FIRES, cut is stale",
+      "notes": "architect 02k: trigger A3 does NOT fire (a3_census 15/15 green on the removed tree; render's signature byte-identical; the standing pre-authorization is UNSPENT because it authorises EXTENDING render). Remove ViewState.query in Inc-4. It FALSIFIED the orchestrator's own census: a 4th reader at tests/test_app.py:448, the sole causal break. Pill formula len(_descendants & state.hits) correct but an UNOBSERVED behaviour change (+4 1 -> +4 4); nothing pins it; TC-026's 2nd clause implemented NOWHERE. Requires new LLR-N07.1.3 + TC-026b. qa 02l: 9 of 11 ATs buildable. AT-024 UNBUILDABLE in Inc-4 (owner LLR-N07.2.2b is Inc-5; executed 5/6 renderers query-insensitive). AT-052's observation surface is NAMED NOWHERE in the sealed text. FOUR sealed `shall` clauses carry NO acceptance id: the one-time rebind declaration, `esc limpiar`, C-D6a, UX-Q3-a. C-D6a is STRUCTURALLY VACUOUS in Inc-4 (no lens exists -> M-N07.3-a is reddened by nothing). `esc limpiar` paints a hint for behaviour that does not exist: action_back_or_home pops the screen unconditionally. LLR-N07.3.1's self-guard would be VACUOUS on legacy under BOTH working queries (carlos and riesgo each give tree_order == dict_order). AT-022's wrap arm undrivable on carlos (1 hit). E1c's body is a coercion sink: RLO survives Text.assemble. test_inc3_census::test_cd25a goes RED BY CONSTRUCTION (map seat 31 -> 33). C-21: the AT set changed (one removed, three owed) AFTER the cut was set, so the cut is STALE and must be re-derived BEFORE Phase 3 proceeds. Split of Inc-4 referred to the operator -- it would amend the SOLE-authority cut in 01-requirements.md 5.4, which is beyond a recorded autonomous decision."
     }
   ],
   "coordinator_rulings": [
@@ -304,6 +323,32 @@
           "decision": "Pace calibrated: full protocol on data-path/destructive/A3/security increments (Inc-2, Inc-3, Inc-REPAIR, Inc-CONFIRM, Inc-7); lighter single-review protocol permitted for presentational increments only while the review returns zero HIGH and no data path is touched; any HIGH restores the full protocol. Batteries never skipped, only sized.",
           "amendment": "A-91",
           "note": "Recorded so the post-mortem can judge the trade. Inc-1 is the control: its confirmation pass returned 7 MEDIUM + 6 LOW, so the pass is not ceremonial."
+        }
+      ]
+    },
+    {
+      "date": "2026-08-29",
+      "provenance": "COORDINATING AGENT, not the operator. Recorded as a task direction that amends a sealed cut under C-21. It does NOT substitute for operator approval and does NOT relax the merge gate: the independent security sign-off and the adversarial PR-level qa-reviewer pass over the whole diff both stand, and a HIGH still blocks the merge and returns to the operator.",
+      "rulings": [
+        {
+          "id": "D36",
+          "decision": "Inc-4 SPLIT into Inc-4a (search core) and Inc-4b (seat + walk); option (a), not (c)",
+          "note": "C-21 fired: the AT set changed after the cut was set (AT-024 out, three shall-clauses owed an id). Deferring the newly-owed ids was REJECTED as 'the conditional-close defect wearing a scheduling excuse' -- it would ship sealed `shall` clauses with no acceptance. Section 5.4 is amended as the SOLE authority: one cut, re-derived, with the C-21 trigger evidence recorded. The old Inc-4 row is STRUCK, not shadowed."
+        },
+        {
+          "id": "D37",
+          "decision": "#map-pagination is the named count region; C-D6a closed STRUCTURALLY; UX-Q3-a deferred",
+          "note": "AT-052's observation surface was named nowhere in the sealed text. C-D6a is closed by a single `active_hits` attribute with NO `or` fallback, asserted by AST -- refusing a green-before-code invariant, which is the vacuous-check defect this batch exists to stop. UX-Q3-a deferred with a recorded carry because no LLR ever stated it."
+        },
+        {
+          "id": "D38",
+          "decision": "`esc limpiar`: implement the BEHAVIOUR, do not change the string",
+          "note": "State-dependent esc -- search active: clear the search and STAY on the map; search clear: pop the screen. That is what the hint promises. The alternative, an operator following a painted hint and losing their place, is the lying-affordance class this project exists to remove. Lands in Inc-4b with its own arm: search-active esc must NOT pop, search-clear esc MUST."
+        },
+        {
+          "id": "D39",
+          "decision": "ViewState.query removed in Inc-4a; the A3 pre-authorization is UNSPENT and STAYS unspent",
+          "note": "Recorded explicitly so no later increment 'inherits' it. Removal is safe HERE on a contingent measured fact -- query has exactly one product reader, being rewritten by this increment -- and NOT as a category. Adding a defaulted field cannot break a reader; removing one breaks every reader. The two are not symmetric."
         }
       ]
     }

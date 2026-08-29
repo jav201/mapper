@@ -445,7 +445,15 @@ async def test_b50_the_export_carries_the_diff_the_canvas_is_showing(tmp_path, m
         "the export dropped the active diff -- the exact under-fill the parameter "
         "object exists to prevent"
     )
-    assert seen["state"].query == "hij", "the export dropped the active query"
+    # MIGRATED in Inc-4a: `ViewState.query` was removed and the renderer now
+    # receives RESOLVED ids.  The claim is unchanged -- the export must carry the
+    # live search -- but it is now asserted on the set the renderer actually
+    # consumes.  Non-emptiness is asserted first, or an export that dropped the
+    # search entirely would satisfy an equality against an empty set.
+    assert seen["state"].hits, "the export dropped the active query"
+    assert seen["state"].hits == frozenset({"hijo"}), (
+        "the export carried a hit set that is not the live query's"
+    )
     assert seen["state"].focus_owner == "", "the export must not carry live focus"
 
 

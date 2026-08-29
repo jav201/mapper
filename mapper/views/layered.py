@@ -9,7 +9,7 @@ from rich.text import Text
 
 from mapper import darkside
 from mapper.canvas import Canvas
-from mapper.model import Graph, Node
+from mapper.model import Graph
 from mapper.views.state import ViewState
 
 
@@ -108,16 +108,6 @@ def _hidden_ids(index: dict[str, list[str]], folded: frozenset[str]) -> frozense
     for nid in folded:
         hidden |= _descendants(index, nid)
     return frozenset(hidden)
-
-
-def _matches(node: Node, qlower: str) -> bool:
-    """The renderer's own hit predicate, in one place so the card highlight and
-    the fold pill's hit count cannot disagree about what a match is."""
-    return bool(qlower) and (
-        qlower in node.ficha.title.lower()
-        or qlower in node.ficha.notes.lower()
-        or any(qlower in v.lower() for v in node.ficha.fields.values())
-    )
 
 
 def _degraded(n: int, legacy: bool) -> Text:
@@ -488,7 +478,11 @@ class LayeredRenderer:
 
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, h = state.selected_id, state.h
-        query, diff = state.query, state.diff
+        # RESOLVED ids, decided by `mapper.search`.  The renderer evaluates no
+        # query predicate of its own (HLR-N07.1): it used to carry one, and the
+        # count taken from the other owner disagreed with the highlight painted
+        # from this one.
+        hit_ids, diff = state.hits, state.diff
         # `with_header` was a parameter no caller ever passed.  Executed across
         # the tracked tree: one declaration, one use, zero call sites supplying
         # it -- so the header was unconditional in fact and is unconditional in
@@ -527,12 +521,11 @@ class LayeredRenderer:
         ]
 
         cv = Canvas(avail, body_h)
-        qlower = query.lower()
         for nid in all_ids:
             cx, y = geo.place(nid)
             node = graph.nodes[nid]
             tone = STATE_STYLE.get(node.ficha.state, "default")
-            hit = _matches(node, qlower)
+            hit = nid in hit_ids
             is_added = nid in added_ids
             changed_keys = changed.get(nid, [])
 
@@ -595,11 +588,15 @@ class LayeredRenderer:
         for nid in geo.pill_ids:
             cx, y = geo.place(nid)
             n_hidden = len(_descendants(index, nid))
-            hits = sum(
-                1 for cid in _descendants(index, nid)
-                if _matches(graph.nodes[cid], qlower)
-            ) if qlower else 0
-            tail = f" {hits}" if hits else ""
+            # LLR-N07.1.3.  The tail is the branch's own share of the RESOLVED
+            # hit set, not a predicate re-evaluated here.  It is a declared
+            # behaviour change and not a refactor: the hit definition widened by
+            # `{id, meta, attachments}`, so the number moves for existing maps --
+            # measured on one fixture, a `+2` branch's tail goes 1 -> 2.  An
+            # empty hit set paints no tail, which is what keeps the value
+            # query-driven rather than a constant.
+            n_hits = len(_descendants(index, nid) & hit_ids)
+            tail = f" {n_hits}" if n_hits else ""
             name_w = max(1, card_w - 5 - len(str(n_hidden)) - len(tail))
             core = f"{FOLD_PILL_TOKEN} {_clip(graph.nodes[nid].ficha.title, name_w)} +{n_hidden}"
             # The left bar and the hit count in WARN: LLR-S06.3.5 gives WARN the

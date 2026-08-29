@@ -770,3 +770,137 @@ async def test_at_017_fold_works_while_the_rail_is_auto_hidden(tmp_path):
         assert pill_counts(canvas_rows(screen)) == [2], (
             "fold stopped working once its old owner was off screen"
         )
+
+
+# --------------------------------------------------------------------------
+# LLR-N07.1.3 / TC-026b — the fold pill's hit tail is the RESOLVED hit set
+
+
+def _pill_tails(rows: list[str]) -> list[tuple[int, int | None]]:
+    """Every painted pill as `(hidden_count, hit_tail_or_None)`.
+
+    `pill_counts` above reads only the `+N` hidden count, and BOTH shipped
+    `_PILL` regexes stop there.  That is exactly why this file needed a second
+    reader: `TC-026`'s second clause -- "hit count when a query is live" --
+    existed only as a row in the traceability matrix and was implemented
+    NOWHERE, so the tail was unreachable by the whole suite and its value could
+    change for every fixture on a fully green run.
+    """
+    pattern = re.compile(
+        re.escape(FOLD_PILL_TOKEN) + r"\s*(?:.*?)\s*\+(\d+)(?:\s+(\d+))?"
+    )
+    return [
+        (int(m.group(1)), int(m.group(2)) if m.group(2) else None)
+        for m in pattern.finditer(" ".join(rows))
+    ]
+
+
+@pytest.mark.asyncio
+async def test_tc_026b_the_fold_pill_hit_tail_counts_the_resolved_hits(tmp_path):
+    """TC-026b — the pill's tail is `|descendants ∩ hits|`, read from the FRAME.
+
+    THIS IS A DECLARED BEHAVIOUR CHANGE AND NOT A REFACTOR.  `LLR-N07.1.2`
+    widens the hit definition by `{id, meta, attachments}`, so the pill's number
+    MOVES for existing maps.  Measured on this fixture with the descendant count
+    held constant so the tail is isolated: branch `b` goes `+2 1` -> `+2 2` and
+    the root goes `+5 2` -> `+5 4`.  The delta is asserted below rather than
+    described, so a re-narrowing of the definition reddens here.
+
+    The descendant set is re-derived by the test's OWN walk over `graph.edges`
+    and never obtained from the renderer, and the pill is read off the composited
+    frame rather than from `MapScreen.folded` -- a model attribute asserts what
+    the application believes, and this arm has to fail when the branch paints
+    something else.
+    """
+    from tests.inc4_support import (
+        MAP_ID,
+        QUERY,
+        build_adjuntos,
+        descendants_of,
+        narrow_hits,
+    )
+    from tests.test_search import submit
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        build_adjuntos(tmp_path)
+        screen = await open_map(app, pilot, MAP_ID)
+        assert screen.query_one("#map-rail").display is True
+
+        graph = screen.graph
+        wide = set(graph.search_hits(QUERY))
+        narrow = set(narrow_hits(graph, QUERY))
+
+        # WITH NO QUERY LIVE the tail is absent — the counterfactual that proves
+        # the value is query-driven and not a constant the pill always paints.
+        screen.nav.cursor = "b"
+        screen.refresh_canvas()
+        await pilot.pause()
+        await pilot.press("z")
+        await pilot.pause()
+        assert screen.folded == frozenset({"b"})
+        quiet = _pill_tails(canvas_rows(screen))
+        assert quiet == [(2, None)], quiet
+
+        await submit(pilot, QUERY)
+
+        for branch in ("b", "riesgo-root"):
+            screen.nav.cursor = branch
+            screen.refresh_canvas()
+            await pilot.pause()
+            if branch not in screen.folded:
+                await pilot.press("z")
+                await pilot.pause()
+            assert branch in screen.folded
+
+            kids = descendants_of(graph, branch)
+            expected = len(kids & wide)
+            was = len(kids & narrow)
+            assert expected > 0, (
+                f"{branch} hides no hit; a zero tail cannot demonstrate the count"
+            )
+            assert expected != was, (
+                f"{branch}'s tail does not MOVE under the widening "
+                f"({was} -> {expected}); this arm cannot see the change it gates"
+            )
+
+            tails = _pill_tails(canvas_rows(screen))
+            assert len(tails) == 1, (branch, tails)
+            hidden, tail = tails[0]
+            assert hidden == len(kids), (branch, hidden, sorted(kids))
+            assert tail == expected, (branch, tail, expected, sorted(kids & wide))
+
+            await pilot.press("z")
+            await pilot.pause()
+            assert branch not in screen.folded
+
+
+def test_tc_026b_the_tail_reads_the_state_and_could_not_have_computed_it(tmp_path):
+    """TC-026b's rename arm — the tail counts ids no predicate would elect.
+
+    `LLR-N07.1.1`'s deletion is satisfied by a rename as far as any absence
+    census can tell.  This hands the renderer a hit set containing `f`, which
+    BOTH the old and the new definition reject for this query, and asserts the
+    pill counts it: a renderer still deciding for itself paints no tail at all.
+    """
+    from tests.inc4_support import QUERY, build_adjuntos, descendants_of, narrow_hits
+
+    graph = build_adjuntos(tmp_path)
+    assert "f" not in graph.search_hits(QUERY)
+    assert "f" not in narrow_hits(graph, QUERY)
+    assert "f" in descendants_of(graph, "c")
+
+    renderer = LayeredRenderer()
+    rows = renderer.render(graph, ViewState(
+        selected_id=graph.root_id, w=58, h=26,
+        folded=frozenset({"c"}), hits=frozenset({"f"}),
+    )).plain.splitlines()
+    assert _pill_tails(rows) == [(1, 1)], rows
+
+    # And with the same fold and an EMPTY hit set, no tail.
+    rows_quiet = renderer.render(graph, ViewState(
+        selected_id=graph.root_id, w=58, h=26,
+        folded=frozenset({"c"}),
+    )).plain.splitlines()
+    assert _pill_tails(rows_quiet) == [(1, None)], rows_quiet
