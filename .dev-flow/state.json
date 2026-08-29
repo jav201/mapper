@@ -351,6 +351,22 @@
           "note": "Recorded explicitly so no later increment 'inherits' it. Removal is safe HERE on a contingent measured fact -- query has exactly one product reader, being rewritten by this increment -- and NOT as a category. Adding a defaulted field cannot break a reader; removing one breaks every reader. The two are not symmetric."
         }
       ]
+    },
+    {
+      "date": "2026-08-29",
+      "provenance": "COORDINATING AGENT, not the operator. Does NOT substitute for operator approval and does NOT relax the merge gate.",
+      "rulings": [
+        {
+          "id": "D40",
+          "decision": "Operator-path redaction: originals stay intact, the SYNC redacts its copies",
+          "note": "Repo transcripts are evidence and are NOT rewritten -- a rewritten record stops saying what was measured. Vault copies get the username path prefix redacted to C:\\Users\\<operator>\\ plus a one-line 'paths redacted at sync; originals in repo' note. Redacting a copy does not falsify the original, and the vault is the artifact more likely to be shared. The transform is recorded in the sync record. Procedure written to SYNC-NOTES.md. STANDING CARRY NOT CLOSED: username strings in committed repo history remain a declared blocker for any PUBLIC push -- redacting vault copies does nothing for git history. C-45 PUSH obligation recorded and NOT discharged: the control is portable and belongs in the global dev-flow-sync procedure, but ~/.claude carries uncommitted changes pre-dating this session (validator V16) and C-44 forbids committing over them. An unpushed control is indistinguishable from one never written -- live carry."
+        },
+        {
+          "id": "D41",
+          "decision": "Round-4 orchestrator-applied fixes accepted; the pattern is EXCEPTIONAL, not habitual",
+          "note": "Accepted because it was declared with its cost named (nobody independent re-derived those two edits) and the orchestrator ran its own C-40 counterfactual with a sha256 restore. Not to be repeated as routine: the default stays implementer applies, independent lens confirms."
+        }
+      ]
     }
   ],
   "standing_authorization": {
