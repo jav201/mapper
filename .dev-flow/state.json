@@ -115,7 +115,7 @@
       },
       {
         "inc": "Inc-4b",
-        "commit": "PENDING",
+        "commit": "fcff836",
         "date": "2026-08-29",
         "source_files": 2,
         "scope": "US-N07 seat + walk: the #D5b rebind (map/n->next_hit, map/N->prev_hit, map/M->next_gap), the n/N walk over the tree-ordered list, LLR-N06.2.4 fold auto-open, E1b/E1c toasts, the one-time rebind declaration, state-dependent esc (#D38), the seat-derived hint line, and the test_cd25a seat repair.",
