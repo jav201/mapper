@@ -47,6 +47,9 @@ class OutlineRenderer:
 
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, h = state.selected_id, state.h
+        # RESOLVED ids, decided by `mapper.search` (HLR-N07.1).  This renderer
+        # evaluates no query predicate of its own -- it never sees the query.
+        hits = state.hits
         lines: list[Text] = []
         header = Text()
         header.append("◆ ", style=darkside.INK)
@@ -124,6 +127,13 @@ class OutlineRenderer:
                     block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
                     line.append(prefix, style=block)
                     line.append(title, style=block)
+                elif cur in hits:
+                    # Selection is painted ON TOP of a hit, exactly as the
+                    # layered renderer orders them: losing your place is worse
+                    # than losing one highlight, and a selected node is already
+                    # the one the operator is looking at.
+                    line.append(prefix, style=darkside.MUT)
+                    line.append(title, style=f"{darkside.INK} on {darkside.STEP}")
                 else:
                     line.append(prefix, style=darkside.MUT)
                     line.append(title, style="bold")

@@ -178,8 +178,18 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       no node is still painted as a match, and a substring probe cannot tell
     #       "this node is a hit" from "some node's title contains those letters" --
     #       the spans are the only channel that carries the claim.
-    assert len(sites["argful"]) == 58, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 58; "
+    #
+    # 58 -> 59 in Inc-5, AND THIS PIN CAUGHT IT TOO -- twice in two increments,
+    # which is the argument for keeping it rather than for softening it to a
+    # floor.  Itemised on the same terms:
+    #   +1  `tests/test_views_hits.py::_spans_at` renders each member of the
+    #       DERIVED renderer set to read `AT-024`'s observable off the returned
+    #       `Text`'s spans.  ONE call site, not six: the arms parametrise over
+    #       the derived class set and share this single helper, so this count
+    #       does NOT move when a seventh renderer joins -- which is the whole
+    #       point of deriving the set instead of listing it.
+    assert len(sites["argful"]) == 59, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 59; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,

@@ -108,6 +108,9 @@ class LaneRenderer:
 
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, w, h = state.selected_id, state.w, state.h
+        # RESOLVED ids, decided by `mapper.search` (HLR-N07.1).  This renderer
+        # evaluates no query predicate of its own -- it never sees the query.
+        hits = state.hits
         lines: list[Text] = []
         lines.append(_header(graph))
 
@@ -126,6 +129,13 @@ class LaneRenderer:
                 line.append(
                     escape(node.ficha.title),
                     style=f"bold {darkside.GROUND} on {darkside.ACCENT}",
+                )
+            elif bid in hits:
+                # Selection is painted ON TOP of a hit, as in the layered
+                # renderer.
+                line.append(
+                    escape(node.ficha.title),
+                    style=f"{darkside.INK} on {darkside.STEP}",
                 )
             else:
                 line.append(escape(node.ficha.title), style="bold")
@@ -165,6 +175,9 @@ class RailTimelineRenderer:
 
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, w, h = state.selected_id, state.w, state.h
+        # RESOLVED ids, decided by `mapper.search` (HLR-N07.1).  This renderer
+        # evaluates no query predicate of its own -- it never sees the query.
+        hits = state.hits
         if graph.root_id is None or not graph.nodes:
             body = Text()
             body.append(_header(graph))
@@ -210,11 +223,13 @@ class RailTimelineRenderer:
         main_node = graph.nodes[main_branch]
         main_selected = main_branch == selected_id
         main_label = f"◆ {escape(main_node.ficha.title)}"
-        main_style = (
-            f"bold {darkside.GROUND} on {darkside.ACCENT}"
-            if main_selected
-            else f"bold {darkside.INK}"
-        )
+        if main_selected:
+            main_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+        elif main_branch in hits:
+            # Selection is painted ON TOP of a hit, as in the layered renderer.
+            main_style = f"{darkside.INK} on {darkside.STEP}"
+        else:
+            main_style = f"bold {darkside.INK}"
         cv.text(main_x0, main_y - 1, main_label, main_style)
 
         next_fork_x = main_x0 + len(main_label) + 4
@@ -271,11 +286,14 @@ class RailTimelineRenderer:
             max_label = max(0, inner - (end_x + 3) - 1)
             if len(label) > max_label:
                 label = label[: max(0, max_label - 1)] + "…"
-            label_style = (
-                f"bold {darkside.GROUND} on {darkside.ACCENT}"
-                if selected
-                else darkside.INK
-            )
+            if selected:
+                label_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+            elif bid in hits:
+                # Selection is painted ON TOP of a hit, as in the layered
+                # renderer.
+                label_style = f"{darkside.INK} on {darkside.STEP}"
+            else:
+                label_style = darkside.INK
             cv.text(end_x + 3, lane_y, label, label_style)
 
             next_fork_x = end_x + 3 + len(label) + 4
@@ -299,6 +317,9 @@ class HybridLaneRenderer:
 
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, h = state.selected_id, state.h
+        # RESOLVED ids, decided by `mapper.search` (HLR-N07.1).  This renderer
+        # evaluates no query predicate of its own -- it never sees the query.
+        hits = state.hits
         lines: list[Text] = []
         lines.append(_header(graph))
 
@@ -330,6 +351,10 @@ class HybridLaneRenderer:
             row.append(f"{rail} ", style=darkside.STEP)
             if selected:
                 row.append(name, style=f"bold {darkside.GROUND} on {darkside.ACCENT}")
+            elif bid in hits:
+                # Selection is painted ON TOP of a hit, as in the layered
+                # renderer.
+                row.append(name, style=f"{darkside.INK} on {darkside.STEP}")
             else:
                 row.append(name, style=f"bold {darkside.INK}")
             row.append("   ", style="")

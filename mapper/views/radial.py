@@ -107,6 +107,9 @@ class RadialRenderer:
 
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, w, h = state.selected_id, state.w, state.h
+        # RESOLVED ids, decided by `mapper.search` (HLR-N07.1).  This renderer
+        # evaluates no query predicate of its own -- it never sees the query.
+        hits = state.hits
         if graph.root_id is None:
             return Text("(no map loaded)")
         if len(graph.nodes) > MAX_RENDER_NODES:
@@ -226,6 +229,20 @@ class RadialRenderer:
             for j, ch in enumerate(" " + title):
                 if sel:
                     style = block
+                elif nid in hits:
+                    # Selection is painted ON TOP of a hit, as in the layered
+                    # renderer -- which paints the hit style for EVERY cell of
+                    # the title, and so does this.
+                    #
+                    # An earlier revision guarded this with `and j`, to "keep the
+                    # leading pad cell out of the highlight".  That conjunct was
+                    # DEAD and the claim was false: cell `j == 0` is `(x, y)`,
+                    # and the marker `put` below overwrites it unconditionally
+                    # for every node, hit or not.  Measured over 225
+                    # configurations, dropping the conjunct leaves the emitted
+                    # spans byte-identical -- so it guarded nothing and diverged
+                    # from `layered` for no reason.
+                    style = f"{darkside.INK} on {darkside.STEP}"
                 elif j == 0:
                     style = ""
                 elif nid in on_path:
