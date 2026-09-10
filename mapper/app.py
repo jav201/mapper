@@ -92,6 +92,14 @@ SEARCH_ACTIVE_LABEL = "búsqueda"
 SEARCH_SUSPENDED_NOTICE = "resaltado y recorrido suspendidos"
 
 # THE ECHOED QUERY IS OPERATOR TEXT: unbounded in length, and the count region
+# SUPERSEDED BY `Inc-STRIPS`: `#map-pagination` now carries `max-height: 3;
+# overflow: hidden`, so it CLIPS rather than wraps and an over-long echo is
+# dropped instead of growing the strip.  `_QUERY_ECHO_CELLS` therefore protects
+# the strip's CONTENT from the clip, not `#map-body` from the strip -- a reader
+# who trusts the superseded reasoning below would relax the cap and get F1's
+# silent-omission failure on a second surface.
+#
+# HISTORICAL, from the pre-bound tree:
 # WRAPS rather than clips (`#map-pagination` has no height rule, so it is
 # `height: auto`).  An unbounded echo therefore does not overflow the strip -- it
 # GROWS the strip and takes the rows from `#map-body`, which is `height: 1fr`.
@@ -1731,11 +1739,79 @@ class MapScreen(Screen):
             return ("▒", darkside.MUT)
         return ("░", darkside.WARN)
 
-    def _minimap_text(self) -> Text:
+    # The coverage strip's budget: A COUNT CEILING AND A CELL BUDGET, and the
+    # second exists because the first alone shipped broken.
+    #
+    # A count cap bounds ENTRIES; it does not bound CELLS, and titles are
+    # file-derived.  The first revision capped 24 entries and appended the
+    # declaration and the legend LAST, so at 80 columns those 24 entries wanted
+    # about five rows and the clip ate entries 20-23, the declaration, and the
+    # whole legend -- leaving the operator four coverage glyphs with no key, on
+    # a strip still reporting its full three rows.  Measured: with short titles
+    # the legend is lost from TWENTY branches up at 80 columns, and on a large
+    # graph 118 was the ONLY width in {60, 70, 80, 100, 118} where the
+    # declaration survived at all.
+    #
+    # `_HINT_BRANCH_CELLS` above records this same lesson in its own words -- a
+    # fixed cell count fits at 118 and WRAPS at 80 -- and this is the second
+    # surface to learn it.  So the entries take the ROW'S REMAINDER: the
+    # caption, the legend and the declaration are reserved FIRST and the entries
+    # fill what is left.  The affordances outrank the entries, exactly as they
+    # do on the hint line.
+    # THERE IS NO SEPARATE COUNT CEILING, and its absence is a finding rather
+    # than a simplification.  A `MINIMAP_BRANCHES = 24` sat here beside the cell
+    # budget, and a mutant setting it to `10**9` left the whole suite GREEN --
+    # measured first by both independent reviews, then reproduced here after the
+    # budget landed.  The reason is not a missing oracle: `min(24, budget //
+    # per_entry)` is decided by the BUDGET at every width below roughly 162
+    # columns, so the ceiling had no work left to do.  Two bounds where one does
+    # the work is the duplication this batch keeps paying for; the redundant one
+    # is gone, and the arm tests the bound that actually binds.
+    #
+    # Must equal the stylesheet's `max-height` for `#map-minimap`.  Two
+    # spellings of one number is how they drift, so an arm asserts the two agree
+    # rather than trusting this comment to be read.
+    MINIMAP_ROWS = 3
+    _MINIMAP_CAPTION_CELLS = 14
+    _MINIMAP_LEGEND_CELLS = 37
+    _MINIMAP_DECL_CELLS = 26
+    _MINIMAP_NAME_CELLS = 12
+    # a name, a space, the glyph, and the three-cell gap after it
+    _MINIMAP_ENTRY_OVERHEAD = 5
+
+    def _minimap_entry_limit(self, width: int, branches: int) -> int:
+        """How many branches fit once the affordances have been paid for.
+
+        THE DECLARATION'S CELLS ARE RESERVED ONLY IF THERE WILL BE A
+        DECLARATION, and the conditional is the whole point of this method
+        rather than a refinement of it.  Reserving unconditionally MANUFACTURES
+        the omission it announces: measured on the shipped `legacy` map at
+        35x14, an unconditional reserve drew ONE of three branches and declared
+        `+2 ramas sin mostrar`, where the plain strip had drawn all three -- and
+        the strip's height and the canvas's height were IDENTICAL either way, so
+        the two dropped branches bought nothing at all.
+
+        That is this increment's own `height: 3` mistake in a second costume:
+        taxing the ordinary map to bound the pathological one.  The order below
+        resolves the apparent circularity -- the limit decides whether there is
+        a remainder, and the remainder decides the reserve -- by asking the
+        cheaper question first: if everything fits WITHOUT a declaration, no
+        declaration is needed and none is charged for.
+        """
+        per_entry = self._MINIMAP_NAME_CELLS + self._MINIMAP_ENTRY_OVERHEAD
+        base = self.MINIMAP_ROWS * max(1, width) - self._MINIMAP_CAPTION_CELLS \
+            - self._MINIMAP_LEGEND_CELLS
+        if max(0, base) // per_entry >= branches:
+            return branches
+        return max(0, base - self._MINIMAP_DECL_CELLS) // per_entry
+
+    def _minimap_text(self, width: int) -> Text:
         if self.graph.root_id is None:
             return Text("")
         parts: list[tuple[str, str]] = [("  cobertura   ", darkside.MUT)]
-        for cid in self.graph.children_of(self.graph.root_id):
+        children = self.graph.children_of(self.graph.root_id)
+        limit = self._minimap_entry_limit(width, len(children))
+        for cid in children[:limit]:
             glyph, style = self._branch_coverage_glyph(cid)
             # Both halves are file-derived, and this widget's whole job is
             # telling the operator WHICH branch is at risk -- a `U+202E` here
@@ -1744,10 +1820,25 @@ class MapScreen(Screen):
             # minimap exists to support.  `refresh_canvas` repaints it, which is
             # what puts it inside `LLR-N06.2.3`'s "every file-derived string
             # painted on a surface this batch touches".
-            name = darkside.plain(self.graph.nodes[cid].ficha.title or cid)
+            #
+            # BOUNDED IN CELLS TOO, and `fit` rather than a slice: it coerces
+            # (it calls `plain` itself) and it truncates VISIBLY.  A silent
+            # row-drop is what the previous revision did, and an operator cannot
+            # tell a truncated branch name from a short one.
+            name = darkside.fit(self.graph.nodes[cid].ficha.title or cid,
+                                self._MINIMAP_NAME_CELLS)
             parts.append((f"{name} ", darkside.MUT))
             parts.append((glyph, style))
             parts.append(("   ", ""))
+        undrawn = len(children) - limit
+        if undrawn > 0:
+            # INK, not MUT, and `#D28` is why: this is a DECLARATION of how much
+            # is not on screen -- the same load-bearing role the rule escalates,
+            # and the role it names the minimap caption under.  `#map-minimap`
+            # inherits `Screen`'s ground today, where `MUT` would clear the
+            # floor; `INK` clears on either ground, so the token stays legible
+            # if this strip is ever given a `PANEL` background.
+            parts.append((f"+{undrawn} ramas sin mostrar   ", darkside.INK))
         parts.extend([
             ("█", darkside.INK), (" completa ", darkside.MUT),
             ("▒", darkside.MUT), (" media ", darkside.MUT),
@@ -1989,12 +2080,27 @@ class MapScreen(Screen):
             f"{at}/{len(hits)} {SEARCH_COUNT_SUBJECT}  ", style=darkside.INK
         )
 
+    # The meter's step ceiling.  24 was measured during `Inc-4c`'s F-2 work as
+    # the value that takes this region to two rows on a 12002-node graph; with
+    # the minimap and this strip now both bounded in the stylesheet it is one
+    # row at 118 columns and fits inside the strip's 3 at 80.
+    METER_STEPS = 24
+
     def _pagination_text(self) -> Text:
         total = len(self.graph.nodes)
         page = 1
         per_page = max(1, total)
         # For now the tree is not paginated; this reserves the affordance.
         #
+        # SUPERSEDED BY `Inc-STRIPS` -- THE METER IS BOUNDED NOW, and the block
+        # below is kept because it records how the bound was arrived at.  Read
+        # it as history: every sentence in it was true of the tree it was
+        # written against and the first two are false of this one.  An earlier
+        # revision of THIS increment claimed to have corrected it in place and
+        # had not; the confirmation pass caught the packet asserting a byte
+        # -identical block had changed, which is the same defect one register up.
+        #
+        # HISTORICAL, from the pre-bound tree:
         # THE METER IS STILL UNBOUNDED HERE, DELIBERATELY, AND BOUNDING IT IS
         # NECESSARY BUT NOT SUFFICIENT.  An earlier revision of this comment said
         # a cap "would not have helped"; that was wrong and is corrected here
@@ -2015,9 +2121,18 @@ class MapScreen(Screen):
         # three unbounded strips, not a defect of the count line, and it is
         # reported for its own increment rather than half-fixed from inside this
         # one.  See `increment-004c.md`, finding F-2 and its round-2 section.
+        # THE METER IS BOUNDED HERE, and the numerals beside it carry the truth
+        # the bar can no longer carry.  Priced one glyph per node it rendered
+        # 12002 cells on a real large graph; capped at `METER_STEPS` it is one
+        # row at every declared width.  Past the cap the bar stops being a
+        # one-to-one scale and becomes a compressed one -- which is why
+        # `page/per_page` is printed next to it and is NOT capped: the reader
+        # who needs the exact figure reads the numerals, not the blocks.
+        steps = min(per_page, self.METER_STEPS)
+        filled = min(page, steps)
         text = darkside.Text.assemble(
             (" ", ""),
-            darkside.step_meter(min(page, per_page), per_page),
+            darkside.step_meter(filled, steps),
             (f"   {page}/{per_page}  ", darkside.MUT),
         )
         text.append(self._count_line())
@@ -2265,11 +2380,18 @@ class MapScreen(Screen):
         # CARRIED, not closed -- see the arm in `tests/test_pan.py` that states
         # in terms what it asserts (the exception does not escape this method)
         # and what it does not (that the frame survives).
+        strip = self.query_one("#map-minimap", Static)
+        # The strip's OWN width, not the screen's: it is docked full-width today
+        # but reading the screen would make this budget wrong the moment it is
+        # not.  `size.width` is 0 before the first layout, and the fallback is
+        # the screen rather than a constant so the pre-layout frame budgets from
+        # something real.
+        strip_width = strip.size.width or self.size.width
         try:
-            minimap = self._minimap_text()
+            minimap = self._minimap_text(strip_width)
         except Exception:
             minimap = darkside.Text("")
-        self.query_one("#map-minimap", Static).update(minimap)
+        strip.update(minimap)
         # LAST, and the position is load-bearing rather than incidental: the
         # declaration is computed from `painted_ids` over the state that was
         # just rendered, and `_focus_owner` -- which `_view_state` reads -- is
@@ -3205,6 +3327,28 @@ class MapperApp(App):
        stylesheet derived from the constant could never disagree with it. */
     #map-rail { width: 24; height: 100%; }
     #map-canvas { width: 1fr; height: 100%; }
+    /* THE TWO STRIPS ARE BOUNDED IN THE STYLESHEET, and that is the half of the
+       fix the Python cannot do.  Both defaulted to auto height and WRAPPED, so
+       their content decided the layout: on a real 12002-node graph #map-minimap
+       rendered 471 rows at 118x34 and 712 at 80x24, crushing #map-canvas to a
+       single row and laying #map-pagination out at y=715 of a 24-row frame --
+       the count region off-viewport entirely.  Capping the meter and the branch
+       list is NECESSARY AND NOT SUFFICIENT: a strip whose height is its content
+       is one long title away from doing it again.  A fixed height plus a clip
+       makes the collapse unreachable by construction rather than by budget.
+       3 each: the minimap holds 24 branch entries and its legend at 118
+       columns, and the pagination strip holds the meter, the page numerals, the
+       search count and the overflow token at 80.
+
+       MAX-HEIGHT, NOT HEIGHT, and the difference is not stylistic -- a fixed
+       height is a FLOOR as well as a ceiling.  Written as `height: 3` this rule
+       fixed the collapse and then taxed every small map two rows it never
+       needed: `legacy` has eight branches and its minimap wants ONE row, so at
+       a 35x14 terminal the canvas went to a single row and the coverage
+       declaration degraded -- three arms in `test_overflow.py` caught it.  A
+       ceiling bounds the pathological case without charging the ordinary one. */
+    #map-minimap { max-height: 3; overflow: hidden; }
+    #map-pagination { max-height: 3; overflow: hidden; }
     #map-inspector {
         width: 36;
         height: 100%;
