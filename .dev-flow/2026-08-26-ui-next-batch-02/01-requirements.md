@@ -3159,6 +3159,39 @@ be gated.
 - **Numeric pass threshold — three predicates, all required:**
   1. **Above the bound with a live query**, the count region names the query, carries the whole-graph
      count `== len(SearchIndex(graph).query(q))`, and carries the suspension notice.
+     > ⚠ **PARTIALLY CLOSED BY `Inc-STRIPS` (2026-09-10) — AGAINST THE FANOUT VECTOR ONLY. THIS
+     > REQUIREMENT REMAINS OPEN.** `#map-minimap` and `#map-pagination` are bounded, and the count is
+     > readable **in its own region** at both declared sizes on a genuine 12002-node graph with a
+     > 4001-way root fanout, driven at the **shipped** bound rather than a moved one. Counterfactual
+     > executed: both acceptance arms RED on the pre-fix tree.
+     >
+     > **THE TITLE-LENGTH VECTOR IS OPEN.** `TabStrip`'s crumb is a **fourth** unbounded strip on the
+     > same screen and it takes a raw ficha title: measured, **one 4000-character title reproduces this
+     > collapse verbatim** at 80x24 — canvas one row off-viewport, count region off-viewport. Routed to
+     > `Inc-CRUMB`; the `open_blocks` entry flips only when **both** vectors are closed.
+     >
+     > ⚠ **A first version of this amendment marked the predicate `✅ CLOSED` with no qualifier**,
+     > contradicting `state.json` in the same commit and reproducing — one file over — exactly the
+     > premature-closure marking the security review had just blocked. Corrected here rather than
+     > quietly: the artifact of record is the one that has to carry the qualifier.
+     >
+     > **"The three unbounded strips" is corrected too: there are FIVE** content strips outside
+     > `#map-body`. This increment bounds two; `HintLine` and `KeyBar` were already bounded in Python;
+     > `TabStrip` and `#map-toast` are `Inc-CRUMB`'s. See `increment-007-strips.md`.
+     >
+     > ⚠ **AMENDED 2026-09-10 — the stated measurement below described the wrong quantity at one of
+     > its two sizes, and the correction is recorded here rather than separately.** Re-measured on a
+     > genuine 12002-node graph: at **80x24** `rows_in` over `#map-pagination` returns **0 rows**,
+     > exactly as written. At **118x34** it returns **10 rows** — the region is partially on-viewport
+     > and **the count inside it is not**, because `_pagination_text` appends the count AFTER the meter
+     > and only the meter's first rows are on the frame. **The sealed conclusion stands** (the count was
+     > unreadable at both sizes; predicate 1 was satisfied only under a moved bound); what was wrong is
+     > the quantity the note measured. **A region's visibility is not its content's visibility**, and
+     > the acceptance predicate this increment ships asserts the count is readable in the composited
+     > frame rather than that its region is on-viewport — the same trap, closed.
+     >
+     > **The superseded text follows, unedited, because a note that quietly becomes right teaches nobody:**
+     >
      > ⚠ **SATISFIED UNDER A MOVED BOUND, NOT AT THE SHIPPED BOUND — and `Inc-STRIPS` is a BLOCKER on
      > closing this requirement, not a follow-up.** Both reviewers independently measured that at a
      > genuine 12002-node graph `rows_in` returns **0 rows** at 118x34 **and** 80x24: `#map-minimap`

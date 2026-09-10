@@ -233,7 +233,12 @@ async def test_a_dangling_edge_does_not_escape_refresh_canvas(tmp_path):
         # THE FIXTURE IS ASSERTED AT THE SINK: without this the arm below is
         # `refresh_canvas` on an ordinary graph, which never needed a guard.
         with pytest.raises(KeyError):
-            screen._minimap_text()  # noqa: SLF001
+            # `Inc-STRIPS` gave this a width: the strip budgets its entries
+            # against the row it actually has, so the caller supplies it. The
+            # value is immaterial to this arm -- what is asserted is that the
+            # dangling edge still raises AT THIS SINK, which is what makes the
+            # guard below a guard rather than a no-op.
+            screen._minimap_text(118)  # noqa: SLF001
         with pytest.raises(KeyError):
             screen._branch_coverage_glyph("root")  # noqa: SLF001
 
