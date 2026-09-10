@@ -54,7 +54,7 @@
  "current_station": "P3",
  "phase_status": "in-progress",
  "p3_progress": {
-  "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-4c -> Inc-5 -> Inc-W1 -> Inc-STRIPS -> Inc-B55 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
+  "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-4c -> Inc-5 -> Inc-W1 -> Inc-STRIPS -> Inc-CRUMB -> Inc-B55 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
   "cut_amendments": [
    {
     "date": "2026-09-10",
@@ -73,6 +73,14 @@
     "pre_verified": "By the final pass that found it: precondition 24/24 on the shipped tree (4 members x 6 renderers, zero mismatches); baseline green at 50 resolved / 0 red; both W1 survivors -> KILLED; Q1's kill preserved. It also subsumes the floor asymmetry (a four-member renderer dropping one member no longer slips past on len(hittable)==3).",
     "open_design_call": "TITLES is a second spelling of the fixture's titles. Deriving it from _graph() is a design decision left to the implementer -- and given this increment's history, a second hand-maintained map is the shape worth a second look before it lands.",
     "ordering": "Before Inc-STRIPS because it is tests-only, zero source files, and closes a live oracle gap on an operator-reachable renderer; leaving it behind a source increment would book a known-blind oracle across that increment's gates."
+   },
+   {
+    "date": "2026-09-10",
+    "amendment": "Inc-CRUMB INSERTED after Inc-STRIPS, before Inc-B55.",
+    "authority": "Coordinator ruling 2026-09-10, on the Inc-STRIPS security review's measured F2.",
+    "reason": "SAME COLLAPSE CLASS, DIFFERENT VECTOR. Inc-STRIPS bounds the minimap and the pagination strip and closes LLR-N07.3.4 against the FANOUT vector. TabStrip's crumb is a FOURTH unbounded strip on the same screen and it takes a raw ficha title: measured, ONE 4000-character title reproduces the pre-gate collapse verbatim at 80x24 -- canvas one row off-viewport, count region off-viewport. Degradation starts early: 500 characters already costs a third of the canvas at 80x24. #map-toast is the same shape with a smaller blast radius (needs an operator action, self-clearing) and rides along.",
+    "scope": "Bound the crumb where it is BUILT (darkside.tab_strip, the visible truncation keybar already performs), and bound TabStrip and #map-toast in the stylesheet. LAND THE PYTHON BOUND FIRST OR IN THE SAME PASS: adding overflow:hidden to a strip whose content is not cell-bounded is exactly how Inc-STRIPS' own F1 came to exist.",
+    "blocks": "LLR-N07.3.4's open_blocks entry does NOT flip until BOTH vectors are closed. Inc-STRIPS closes the fanout vector only."
    }
   ],
   "closed": [
@@ -190,9 +198,23 @@
     "headline_evidence": "THE TWO-ORACLE CONTROL, and it is the strongest instrument this batch produced: a reviewer fired the SAME mutant against BOTH oracles -- WIDE drop first and WIDE drop hit at radial.py:232 are SURVIVED against the pre-increment tree and KILLED against this one, each by exactly one node id. That proves the arm NEWLY GAINED the ability to see the defect, which is a stronger claim than 'it is killed now'. Worth carrying as a control in its own right.",
     "headline_defects": "Both blocks were declarations outrunning code. R1: the TITLES were derived and the DOMAIN was left spelled, seven lines under a comment reading 'spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked for that property -- a rename would be loud (KeyError) but an ADDITION is silent, so a fifth node would sit outside the domain, the boundary and the unions: W1's own failure mode reinstated inside the increment written to end it. R2: the two-direction split's `if` branch said 'shorten the fixture title, do not blame the renderer', but TWO conditions reach it and one IS the renderer's fault -- one renderer-side mutant fired that assertion AND the clip precondition in the same run, blaming opposite parties for one cause, and the advice was actionable in the wrong direction (shortening the titles greens both arms while the defect ships). Four further declarations corrected: 'the SHORTEST title' (false), 'SEVEN of seven renderers' (the derived set is six; seven is the SITE count), a :190 citation for an assertion at :192, and a title claiming more than the fix took.",
     "carries_opened": "O1 duplicated render call (simplicity nit). O2 the co-drop gap -- already routed to qa-reviewer as F3; the reviewer adds that F3 and the R2 HIGH SHARE A ROOT: three of four members have no independent pin on `drawn`. O3 an instrument failure in the REVIEWER's own harness -- a CRLF-blind anchor matched zero times and printed a clean '50 passed', caught only by the match-count assert; third time in this batch that a control which MUST FIRE was the only thing between a reviewer and a false all-green."
+   },
+   {
+    "inc": "Inc-STRIPS",
+    "commit": "89be440",
+    "date": "2026-09-10",
+    "source_files": 1,
+    "scope": "The 12002-node screen collapse. #map-minimap was height:auto over the root's 4001 children (471 rows at 118x34, 712 at 80x24), the pagination meter priced one glyph per node, and both strips WRAPPED rather than clipping -- so the search count region was off-viewport at both declared sizes. Bounded: the minimap's entries take the ROW'S REMAINDER after caption/legend/declaration are reserved, each name cell-bounded by darkside.fit; METER_STEPS caps the meter; both strips carry max-height:3 + overflow:hidden. The remainder is DECLARED in INK per #D28.",
+    "gates": "FULL protocol, FOUR rounds. R1: code-reviewer BLOCK 3 HIGH and security-reviewer BLOCK 3 HIGH, dispatched IN PARALLEL (an orchestrator process failure, see below). R2 fixes -> confirmation BLOCK 2 HIGH (both new). R3 fixes -> final confirmation PASS, 0 HIGH. Soft cap of 3 blocks reached and respected; the residue was CARRIED rather than fixed in a fourth round.",
+    "suite": "default lane 913 passed / 19 deselected / 3 xfailed exit 0; all markers 932 passed / 3 xfailed exit 0; ruff SET 27 = 27, zero NEW / zero GONE. Ledger 913 = 908 + 5; all-markers 932 = 927 + 5.",
+    "battery": "Round 3: H1, MUT-A, MUT-C, MUT-Q -- 4 fired, 4 KILLED. The H1 mutant reddens the new small-map arm AND NOTHING ELSE, which is the measured explanation for how the regression shipped through round 2.",
+    "headline_finding": "THE CODE WAS NOT THE PROBLEM AFTER ROUND 1; EVERY BLOCK WAS AN ORACLE OR A DECLARATION. (1) The acceptance predicate searched the WHOLE FRAME and was unsound BOTH ways -- a false GREEN where HintLine carried the same words, a false RED where a raw join glued a wrapped phrase; rebuilt on rows_in over the count region with the numeric and query clauses it had omitted. (2) MINIMAP_BRANCHES had no oracle and then turned out to have no JOB -- after the cell budget landed a 10**9 mutant STILL survived, so it was removed rather than given a test it could only pass vacuously. (3) max-height not height: a fixed height is a FLOOR as well as a ceiling and taxed every small map two rows. (4) The declaration's cells were reserved UNCONDITIONALLY, so legacy at 35x14 drew ONE of three branches and declared a remainder of two AT IDENTICAL STRIP AND CANVAS HEIGHTS -- the reserve manufactured the omission it announced, the height:3 mistake in a second costume. (5) MUT-A was recorded SURVIVED and explained away as equivalent-by-contract; that survival WAS the coverage gap that let (4) ship, and the caveat naming the unpinned axis was written two lines below the verdict.",
+    "process_failure": "MINE. The code and security reviews were dispatched IN PARALLEL onto ONE SHARED TREE, each briefed as sole writer, one instructed to mutate. The code reviewer's own disclosure is the lesson: 'I was briefed as sole writer and did not check for a parallel gate' -- it did not check BECAUSE THE BRIEF SAID THERE WAS NOTHING TO CHECK FOR. A mutant with a disabled cap sat committable for about four minutes. Reviews are SERIAL BY DEFAULT from here; parallel requires one isolated digest-verified mirror per reviewer. CREDIT ON THE RECORD: the security review's evidence survived because IT logged the swap timestamps, recognised the harness signature, DISCARDED its contaminated first pass and re-measured under a structural guard.",
+    "carries_opened": "LLR-N07.3.4 CLOSES AGAINST THE FANOUT VECTOR ONLY. The title-length vector is open and measured: TabStrip's crumb is a fourth unbounded strip taking a raw ficha title, and ONE 4000-character title reproduces this collapse verbatim at 80x24. open_blocks does NOT flip. R1/R2/R3 documentary residue routed to Inc-CRUMB with reproductions -- four stale comments asserting the pre-bound layout (including _query_echo's LIVE docstring, which is the very reasoning the corrected comment warns a reader must not trust), a corrected strip count of FIVE refuted by the SIX its own next sentence enumerates, and state.json still saying 'fourth unbounded strip'. SEC-F4 (#map-toast unbounded, same class, smaller blast radius) rides with Inc-CRUMB.",
+    "controls_earned": "A survivor explained away is a survivor; a closure marking lives in ONE artifact of record; reviews are serial by default. All three recorded in controls_for_engineering_rules."
    }
   ],
-  "next": "Inc-STRIPS -- the 12002-node screen collapse. #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, so the canvas is crushed to 1 row and the count region lands off-viewport. A BLOCKER on closing LLR-N07.3.4 (#D43), evidenced by Inc-4c's F-2. 1 source file: app.py (+ its CSS block). THEN Inc-B55, THEN Inc-REPAIR.",
+  "next": "Inc-CRUMB -- the TITLE-LENGTH vector of the same collapse class. Bound TabStrip's crumb where it is BUILT (darkside.tab_strip, the visible truncation keybar already performs) and #map-toast's detail at the _event_toast seam, THEN bound both in the stylesheet. LAND THE PYTHON BOUND FIRST OR IN THE SAME PASS: adding overflow:hidden to a strip whose content is not cell-bounded is exactly how Inc-STRIPS' own F1 came to exist. Carries R1/R2/R3 and SEC-F4. Only when this lands does LLR-N07.3.4's open_blocks entry flip. THEN Inc-B55, THEN Inc-REPAIR.",
   "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
   "controls_for_engineering_rules": [
    {
@@ -210,16 +232,18 @@
     "date": "2026-09-10",
     "origin": "Inc-5, measured across FOUR independent review rounds, each of which blocked on the same defect one quantifier further out.",
     "rule": "ANYTHING SPELLED TWICE WILL DRIFT. DERIVE IT -- AND AUDIT THE DECLARATION OF DERIVATION AGAINST THE CODE THAT DOES IT, BECAUSE THE COMMENT SAYING \"DERIVED\" IS ITSELF A SPELLING.",
-    "statement": "An oracle's blind spots migrate outward one quantifier at a time. Fixing the instance a reviewer named is necessary and never sufficient: each correct fix relocates the blind spot to the next enclosing quantifier, so a review that checks only the assertion keeps passing an oracle whose guarantee is exactly as wide as whatever its author last remembered to name. AND THE LAST RUNG IS THE DECLARATION ITSELF -- a comment, a docstring or a gate checkbox asserting 'derived' is a second spelling of the claim, and it drifts from the code exactly like any other duplicate.",
+    "statement": "An oracle's blind spots migrate outward one quantifier at a time. Fixing the instance a reviewer named is necessary and never sufficient: each correct fix relocates the blind spot to the next enclosing quantifier, so a review that checks only the assertion keeps passing an oracle whose guarantee is exactly as wide as whatever its author last remembered to name. AND THE LAST RUNG IS THE DECLARATION ITSELF -- a comment, a docstring or a gate checkbox asserting 'derived' is a second spelling of the claim, and it drifts from the code exactly like any other duplicate. AND DIAGNOSTIC MESSAGES ARE DECLARATIONS TOO. A failure message asserts a diagnosis; if its reaching condition does not entail that diagnosis, it is a false declaration placed directly in the operator's hands -- and one whose remedy can be actionable in the wrong direction, greening the arm with the defect still shipping. A message must not pick a culprit its condition cannot identify.",
     "measured": "Six generations across two increments and six independent review rounds. ZERO defects in shipped behaviour were found in any round; every block was the oracle or its declaration.",
-    "discharge": "Derive the thing from the artifact that owns it rather than naming it, and ASSERT the boundary that justifies any exclusion -- a bare derivation silently ABSORBS the defect, since anything the code stops producing simply leaves the derived set. Then audit the DECLARATION against the code: read every comment, docstring and checked gate box that claims a property, and confirm the code has it. On the sixth exhibit the false declaration sat seven lines from the true one and no test could see it -- only a reader comparing the two.",
+    "discharge": "Derive the thing from the artifact that owns it rather than naming it, and ASSERT the boundary that justifies any exclusion -- a bare derivation silently ABSORBS the defect, since anything the code stops producing simply leaves the derived set. Then audit the DECLARATION against the code: read every comment, docstring and checked gate box that claims a property, and confirm the code has it. On the sixth exhibit the false declaration sat seven lines from the true one and no test could see it -- only a reader comparing the two. Audit failure MESSAGES on the same terms as comments: for each, enumerate the conditions that reach it and confirm the message is true of every one. Where two causes need opposite fixes, the message names both rather than choosing. And audit BRIEFS on the same terms as comments: a brief asserting an environment property ('you are sole writer', 'the tree is frozen') is a declaration whose reader cannot verify it independently, so it must be true when written.",
     "exhibits": [
      "1 MEMBER -- the assertion named `min`; its mirror `max` survived at 7 of 7 renderers.",
      "2 LIST -- the assertion named its members while the BATTERY fired per CLASS; a per-class mutant reported a KILL over a live survivor at a sibling site.",
      "3 CARDINALITY -- the assertion drove one pair of size 2; MINMAX/SORTED2 (drop a MIDDLE member) survived 7/7, and no hit set of size >= 3 existed anywhere in the repository.",
      "4 DOMAIN -- the assertion quantified correctly over a hand-named domain; a drop-root mutant survived all 50 arms AND the entire 904-arm default lane at 3 of 7 sites, with root operator-reachable via SearchIndex.hits('raiz').",
      "5 WIDTH -- the domain was correctly derived, but derived at ONE width (120) while the siblings backstopping two of its four members run at 80; a width-conditioned drop of either was absorbed by the derivation and unseen by the backstops.",
-     "6 MEMBERSHIP, AND IT IS THE DECLARATION EXHIBIT -- the titles were derived and the DOMAIN's own membership was left spelled, seven lines under a comment reading 'THE DOMAIN AND THE TITLES BOTH COME FROM THE FIXTURE, spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked [x] for that property. A RENAME in the fixture is loud (KeyError); an ADDITION is SILENT -- a fifth node stays outside the domain, the boundary and the unions."
+     "6 MEMBERSHIP, AND IT IS THE DECLARATION EXHIBIT -- the titles were derived and the DOMAIN's own membership was left spelled, seven lines under a comment reading 'THE DOMAIN AND THE TITLES BOTH COME FROM THE FIXTURE, spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked [x] for that property. A RENAME in the fixture is loud (KeyError); an ADDITION is SILENT -- a fifth node stays outside the domain, the boundary and the unions.",
+     "7 DIAGNOSTIC MESSAGE -- and it is the exhibit that reaches the OPERATOR rather than the next reader. An assertion message read 'shorten the fixture title, do not blame the renderer'. TWO conditions reach that branch and one IS the renderer's fault, so the message exculpated the code unconditionally -- and its advice was ACTIONABLE BACKWARDS: shortening the fixture titles greens the arm while the defect ships. One renderer-side mutant fired that assertion AND the neighbouring clip precondition in the same run, the two blaming opposite parties for a single cause.",
+     "8 THE BRIEF -- and it is the exhibit whose reader is another AGENT. Two reviews were dispatched IN PARALLEL and each was told it was sole writer; one was instructed to build mutants while the other read the same tree. The code reviewer's disclosure is the whole lesson: 'I was briefed as sole writer and did not check for a parallel gate.' IT DID NOT CHECK BECAUSE THE BRIEF SAID THERE WAS NOTHING TO CHECK FOR. A brief is a declaration, and a false one constructs its reader's blind spot."
     ]
    },
    {
@@ -230,17 +254,57 @@
     "statement": "Filing a live gap under an existing carry closes it to review: the carry is already known, already accepted and already owned, so nobody re-examines whether it actually covers the case filed under it. A mis-route is more dangerous than an unfiled gap, because an unfiled gap still looks open.",
     "measured": "Inc-5's oracle excluded the map root from its domain and justified the exclusion by citing carry B-55 ('a clipped hit is an undeclared hit'). B-55 is TRUE of the three lane renderers, which iterate branches and never draw the root. It is INAPPLICABLE to outline, radial and layered, which draw the root AND paint it as a hit (measured 1, 13 and 20 hit-styled spans) -- and those three are the operator-reachable renderers. A drop-root defect there was invisible to the whole suite while appearing, in the artifact, to be an accepted carry. The root is reachable from an ordinary search: SearchIndex.hits('raiz') returns it.",
     "discharge": "Before routing a gap to an existing carry, check the carry's scope against the SPECIFIC case being routed, per member of the affected population rather than per family. Where the justification is a property of the artifact ('this renderer does not draw that node'), assert it FROM the artifact rather than citing the carry."
+   },
+   {
+    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+    "date": "2026-09-10",
+    "origin": "An instrument built by the Inc-W1 reviewer, not by the implementer. ADOPTED AS A BATCH STANDARD by coordinator ruling 2026-09-10, and to be minted NEXT TO the per-site battery rule with that credit attached.",
+    "rule": "WHEN AN INCREMENT CLAIMS AN ORACLE GAINED SIGHT, FIRE THE SAME MUTANT AGAINST BOTH THE PRE- AND POST-INCREMENT ORACLES.",
+    "statement": "'The mutant is killed' is a statement about today's tree and is satisfied by an arm that was already killing it. 'The mutant SURVIVED the old oracle and is KILLED by the new one' is a statement about the INCREMENT -- it proves the arm newly gained the ability to see the defect, which is the thing a widened or added arm actually claims. Applies wherever an increment says a new or widened arm closes a gap.",
+    "measured": "Inc-W1. WIDE drop first and WIDE drop hit at radial.py:232, fired against both oracles: SURVIVED against the pre-increment tree, KILLED against Inc-W1, each by exactly one node id. The implementer had only shown the second half, which would have been equally true of an arm that changed nothing.",
+    "discharge": "In the close evidence, per claimed-new sight: the mutant, its verdict against the PRE-increment oracle, its verdict against the POST-increment oracle, and the node id that reddens. A pair of verdicts, never one."
+   },
+   {
+    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+    "date": "2026-09-10",
+    "origin": "Inc-STRIPS. The failure was the orchestrator's; the standard was set by the security reviewer's response to it.",
+    "rule": "REVIEWS ARE SERIAL BY DEFAULT. PARALLEL REVIEW REQUIRES ONE ISOLATED, DIGEST-VERIFIED MIRROR PER REVIEWER.",
+    "statement": "The one-writer invariant is PER TREE. Per-reviewer trees satisfy it; a shared tree never does, however the briefs are worded. A reviewer instructed to mutate is a writer, so any concurrent reader of the same tree is reading a moving target and cannot know it.",
+    "measured": "Two reviews dispatched in parallel on one tree. The mutating reviewer swapped mapper/app.py at least six times; a mutant with the cap disabled sat committable for about four minutes, and a `git commit -a` in that window would have shipped a neutered bound whose diff summary was identical to the reviewed code. The reading reviewer's first probe pass ran inside a swap window.",
+    "discharge": "Serialise, or give each reviewer a mirror created with autocrlf disabled and digest-verified against the source tree. AND, from the reading side: a reviewer should assert the hash-stability of what it measures across its own run rather than trusting the brief -- which is what saved this one's evidence."
+   },
+   {
+    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+    "date": "2026-09-10",
+    "origin": "Inc-STRIPS round 2 -> round 3. The implementer wrote the caveat that was the finding, and filed it as a footnote.",
+    "rule": "A SURVIVOR EXPLAINED AWAY IS A SURVIVOR.",
+    "statement": "When a mutant survives and the verdict is recorded as EQUIVALENT BY CONTRACT, one question is MANDATORY before that verdict stands: does the contract cover the axis the mutant moves? If it does not, the honest reading is THE CONTRACT IS UNDER-SPECIFIED -- not that the mutant is harmless. An explanation is not a kill, and a verdict of equivalence is a claim about the requirement, not about the code.",
+    "measured": "MUT-A (the minimap's per-entry cost, 5 -> 40) survived round 2 and was recorded as equivalent-by-contract: every stated invariant -- bounded, declares its remainder, conserves -- still held. That reasoning was literally correct and practically wrong. The unpinned axis was USEFULNESS, and the increment had already regressed a shipped map along it: at 35x14 `legacy` drew ONE of three branches and declared a remainder of two, where the pre-increment strip drew all three and the canvas height was identical either way. The implementer's own caveat in the same section read 'no predicate pins the usefulness of the tuning'. With the missing arm added, MUT-A is KILLED.",
+    "discharge": "Name the axis the mutant moves. Then find the contract clause covering that axis and cite it. If no clause covers it, the finding is the missing clause -- record it as a gap in the requirement, not as an equivalence in the battery. A caveat written beside an equivalence verdict is the finding wearing a footnote's clothes."
+   },
+   {
+    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+    "date": "2026-09-10",
+    "origin": "Inc-STRIPS H2, found by the round-2 confirmation pass.",
+    "rule": "A CLOSURE MARKING LIVES IN ONE ARTIFACT OF RECORD; EVERY OTHER DOCUMENT REFERENCES IT.",
+    "statement": "A requirement's open/closed state is a single fact. Written independently into two documents it becomes two registries diverging at birth, and the divergence is invisible because each document is internally consistent. Pairs with the two-live-definitions rule: this is that rule applied to STATE rather than to behaviour.",
+    "measured": "In one commit, 01-requirements.md marked LLR-N07.3.4 predicate 1 with an unqualified green CLOSED while state.json recorded the same requirement OPEN with both vectors named and a successor increment routed. The re-scope had been written honestly in the increment fold and in state.json and never reached the artifact of record -- reproducing, one file over, exactly the premature-closure marking a security review had blocked two days earlier in the same increment.",
+    "discharge": "Pick the artifact of record (here state.json.open_blocks) and let every other document cite it rather than restate it. Where a requirements document must carry a status for readability, it carries the QUALIFIER and the pointer -- 'PARTIALLY CLOSED against vector X, see open_blocks' -- never a bare mark. At close, diff the two: a status word in a requirements file with no matching entry in the record is the defect."
    }
   ],
   "open_blocks": [
    {
     "requirement": "LLR-N07.3.4",
-    "status": "OPEN -- blocked on Inc-STRIPS",
+    "status": "OPEN -- fanout vector CLOSED by Inc-STRIPS; TITLE-LENGTH vector open, blocked on Inc-CRUMB",
     "since": "2026-09-10",
     "authority": "Coordinator ruling 2026-09-10: the sealed cut (Inc-5 before Inc-STRIPS) STANDS, and this LLR stays explicitly OPEN across Inc-5. Nothing may mark it closed or conditionally-closed before Inc-STRIPS lands.",
     "evidence": "Inc-4c finding F-2, executed: at 12002 nodes the entire MapScreen collapses -- #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, so the canvas is crushed to 1 row and the count region lands off-viewport. Predicate 1 of LLR-N07.3.4 is therefore not observable at the SHIPPED bound, and that is not closable in app.py alone.",
     "carried_in": "Recorded here and restated in Inc-5's packet, so the block travels in the ledger rather than in a relay's memory. Inc-5 does not close it and does not touch it.",
-    "recheck_at": "Inc-STRIPS close, then a fresh observation of LLR-N07.3.4 predicate 1 at the shipped bound."
+    "recheck_at": "Inc-CRUMB close. The entry flips only when BOTH vectors are closed.",
+    "vectors": {
+     "fanout": "CLOSED by Inc-STRIPS (2026-09-10). The count is readable in ITS OWN REGION at both declared sizes on a genuine 12002-node graph with a 4001-way root fanout, driven at the SHIPPED bound. Counterfactual: both acceptance arms RED on the pre-fix tree.",
+     "title_length": "OPEN. TabStrip's crumb is a fourth unbounded strip taking a raw ficha title; one 4000-character title reproduces the collapse verbatim at 80x24. Routed to Inc-CRUMB."
+    }
    }
   ],
   "routed_findings": [
@@ -260,6 +324,15 @@
     "date": "2026-09-10",
     "finding": "A selected node that is ALSO a hit is indistinguishable from a selected non-hit, in all five renderers changed by Inc-5 AND in shipped `layered`. Read strictly against 'distinguishably from non-hit nodes', that node is not painted distinguishably.",
     "why_not_fixed": "Pre-existing shipped behaviour: layered's unfocused selection style is byte-identical to its hit style, and its focused selection block overwrites a hit entirely. The five renderers changed in Inc-5 deliberately INHERIT that precedence rather than diverging from it, because diverging would have been a silent, unrequested UX change. Wants a UX ruling, not a code fix chosen by the implementer."
+   },
+   {
+    "id": "R1/R2/R3 (Inc-STRIPS)",
+    "routed_to": "Inc-CRUMB -- it already edits these strips and their comments",
+    "pickup": "Inc-CRUMB, which bounds TabStrip and #map-toast and therefore rewrites this same layout reasoning.",
+    "date": "2026-09-10",
+    "finding": "DOCUMENTARY RESIDUE, recorded with reproductions rather than fixed, because Inc-STRIPS reached its soft cap and every 'one more small fix' in this increment introduced a new defect (height:3, the unconditional reserve, two false packet claims). R1: FOUR stale comments assert the pre-bound layout -- app.py:1899 (_query_echo's LIVE docstring, saying the region WRAPS when it now clips), tests/test_search.py:2337-2340 (same premise), app.py:3339 ('the minimap holds 24 branch entries', measured 16, citing a constant this increment DELETED), app.py:3346 ('legacy has eight branches', measured: 8 NODES, root fanout 3), and app.py:3336 still ships 'NECESSARY AND NOT SUFFICIENT' which section 8.1 declares refuted. R2: 01-requirements.md:3178 says FIVE content strips outside #map-body and its own next sentence enumerates SIX -- a correction mandated because a number was wrong replaced it with another wrong number. R3: state.json still calls TabStrip 'a FOURTH unbounded strip', consistent with the framing 01-requirements.md just replaced.",
+    "sharpest_form": "The corrected comment at app.py:99 warns that 'a reader who trusts the superseded reasoning below would relax the cap' -- and the METHOD THE CAP LIVES ON still carries that reasoning as live text. That is the declaration family pointing at itself.",
+    "why_not_blocking": "No shipped behaviour, no assertion, no oracle. tests/test_search.py:2340 is a docstring, not a predicate. The confirmation pass verified all three and returned PASS with 0 HIGH."
    }
   ]
  },
