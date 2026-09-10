@@ -180,7 +180,7 @@ def test_llr_n07_2_2b_a_hit_outside_the_first_branch_is_painted_too(cls):
     third branch again at 120, the precondition reddens with a message that says
     so, instead of the style assertion failing and reading as a paint defect.
     """
-    title = "Cronograma"
+    title = _graph().nodes["other"].ficha.title
     plain, _ = _spans_at(cls, 120, set())
     # AN ASSERT, NOT A SKIP.  This clause read `pytest.skip` in the first draft,
     # while this docstring and the packet both claimed it "reddens with a message
@@ -243,12 +243,13 @@ def test_llr_n07_2_2b_EVERY_member_of_the_hit_set_is_painted(cls):
     its MIRROR standing: it compared the two-member picture against `{"first"}`
     alone, so a renderer dropping the FIRST member and painting the last was
     still green.  Executed by the confirmation pass, that shape survived on
-    SEVEN of seven renderers and across a 199-arm run.  Two rounds in a row this
+    SEVEN of seven mutant SITES (six renderers; the rail carries two) and across a 199-arm run.  Two rounds in a row this
     increment produced a correct fix to the exact mutant named, so the rule is
     now stated over the whole class instead of over one representative.
 
     THE ASSERTION IS AN EQUALITY OVER DERIVED SETS, QUANTIFIED OVER EVERY
-    SUBSET the fixture can express.  For each subset of size 2 and 3, the
+    SUBSET the fixture can express -- sizes 2..len(hittable), which is 2-4 on
+    the renderers that draw the root and 2-3 on the lane family.  For each, the
     hit-styled spans of that render must equal the UNION of the hit-styled spans
     of its members' single-member renders.  Dropping any member loses spans;
     painting a non-member gains them; both directions close at every cardinality
@@ -279,7 +280,15 @@ def test_llr_n07_2_2b_EVERY_member_of_the_hit_set_is_painted(cls):
     #
     # A domain that names its members is the same defect as an assertion that
     # names its inputs, one level down.
-    ALL = ("root", "first", "hit", "other")
+    # THE DOMAIN AND THE TITLES BOTH COME FROM THE FIXTURE, spelled nowhere.
+    # Inc-5 took five review rounds and every one of its four blocks was a
+    # hand-named thing drifting from a derived truth -- a named member, a named
+    # member list, a named cardinality, a named domain.  A second spelling of
+    # the fixture's titles is that same shape at generation six, so there isn't
+    # one.
+    fixture = _graph()
+    ALL = tuple(fixture.nodes)
+    TITLES = {m: fixture.nodes[m].ficha.title for m in ALL}
     singles = {m: hit_spans(_spans_at(cls, 120, {m})[1]) for m in ALL}
     hittable = tuple(m for m in ALL if singles[m])
 
@@ -293,18 +302,59 @@ def test_llr_n07_2_2b_EVERY_member_of_the_hit_set_is_painted(cls):
 
     # THE `B-55` BOUNDARY IS ASSERTED, NOT ASSUMED, and it is the load-bearing
     # half: a bare derivation would silently ABSORB the defect, because a
-    # renderer that stopped painting root hits would simply drop `root` out of
-    # `hittable` and the unions would pass.  A node this renderer DRAWS and the
-    # state DECLARES as a hit must be painted.  The three lane renderers iterate
-    # branches and never draw the root, so a root hit is declared-but-unpaintable
-    # there (`B-55`) -- and that is read off the RENDERED TEXT rather than off a
-    # list of class names, so it stays true if a renderer changes family.
+    # renderer that stopped painting a member's hits would simply drop that
+    # member out of `hittable` and the unions would pass.  Proven rather than
+    # argued -- defeating this predicate takes three killed drop-member mutants
+    # straight back to SURVIVED.
+    #
+    # EVERY MEMBER, not just the root.  Scoped to `root` alone, this boundary
+    # left `first` and `hit` guarded only by sibling arms that run at w=80,
+    # while the derivation above runs at 120 -- so a drop that bit only at
+    # w >= 100 was absorbed here and invisible there.  Measured at
+    # `radial.py:232`: two such shapes survived all 50 arms AND the whole
+    # 904-arm default lane.
+    #
+    # WHERE THE INSTRUMENT BOUNDARY LIES, because this reads the fixture:
+    # deriving the DOMAIN from the fixture is legal -- the fixture is this
+    # test's own input, authored here, and is not the artifact under
+    # verification.  What must stay an INDEPENDENT instrument is the ASSERTION
+    # about what got painted: `HIT_STYLE` is pinned in this module and never
+    # imported from a renderer, and the spans are read out of the rendered
+    # output.  A test may say what it asked for; it may not let the thing under
+    # test tell it what the answer was.
+    # THE TWO DIRECTIONS CARRY DIFFERENT MESSAGES, because one of them has TWO
+    # possible causes that need OPPOSITE fixes.  `TITLES[m] in drawn` is a
+    # SUBSTRING test, and generalising this boundary from `root` alone to EVERY
+    # member moved the binding case from `root`'s 13-cell title to the fixture's
+    # LONGEST, 18 -- which consumed the whole clip margin.  Measured at w=120:
+    # `RadialRenderer` slices titles to 18 cells and the longest fixture title
+    # is 18, so the margin is ZERO.
+    #
+    # AND THE MESSAGE MUST NOT PICK A CULPRIT, because the condition does not
+    # identify one.  An earlier revision said "shorten the fixture title, do not
+    # blame the renderer" -- which is right when a FIXTURE title grew and WRONG
+    # when a RENDERER's clip tightened, and the second case is a real `B-55`
+    # violation.  Measured: one renderer-side mutant fires this assertion AND
+    # the one at the clip precondition below, and the two blamed opposite
+    # parties for a single cause.  Worse, the advice was actionable: shortening
+    # the fixture titles greens BOTH arms while the defect ships.
     drawn, _ = _spans_at(cls, 120, set())
-    assert ("root" in hittable) == ("Raiz del mapa" in drawn), (
-        f"{cls.__name__} draws the root ({'Raiz del mapa' in drawn}) but paints "
-        f"a root hit ({'root' in hittable}); a DRAWN node that is a declared hit "
-        "must be painted -- see B-55"
-    )
+    for m in ALL:
+        if m in hittable:
+            assert TITLES[m] in drawn, (
+                f"{cls.__name__} paints a {m} hit but the fixture's title "
+                f"{TITLES[m]!r} does not survive this renderer's clip whole; "
+                "this arm has stopped measuring the paint and is measuring the "
+                "clip. TWO CAUSES, needing OPPOSITE fixes: if the FIXTURE title "
+                "grew, shorten it -- if this RENDERER's clip tightened, that is "
+                "a B-55 violation (a clipped hit is an UNDECLARED hit) and "
+                "shortening the title would HIDE it"
+            )
+        else:
+            assert TITLES[m] not in drawn, (
+                f"{cls.__name__} draws {m} but paints no {m} hit; a DRAWN node "
+                "that is a declared hit must be painted -- see B-55"
+            )
 
     _, none = _spans_at(cls, 120, set())
     for k in range(2, len(hittable) + 1):
