@@ -2757,8 +2757,33 @@ be gated.
 - **Executed verification:** `pytest tests/test_views_hits.py -k "every_renderer_paints_hits"`
   *(provisional)* — the renderer set is **derived** by iterating the classes that satisfy the
   `IRenderer` protocol, never hand-listed.
-- **Numeric pass threshold:** for each derived renderer, the rendered text with a non-empty hit set
-  differs from the text with an empty hit set.
+- **Numeric pass threshold — CORRECTED 2026-08-29 (`#D42`); the parked wording is FALSE ON A CORRECT
+  IMPLEMENTATION:** for each derived renderer, the hit node's **style spans** with a non-empty hit set
+  differ from its spans with an empty hit set.
+- **~~"the rendered TEXT … differs from the text with an empty hit set"~~ WAS THE WRONG INSTRUMENT.**
+  Executed during Inc-4a over the **derived** renderer set, driving `state.query="ana"` against `""`:
+
+  ```
+  lane.LaneRenderer          text_differs=False  spans_differ=False
+  lane.RailTimelineRenderer  text_differs=False  spans_differ=False
+  lane.HybridLaneRenderer    text_differs=False  spans_differ=False
+  layered.LayeredRenderer    text_differs=False  spans_differ=True   <- the ONE compliant renderer
+  outline.OutlineRenderer    text_differs=False  spans_differ=False
+  radial.RadialRenderer      text_differs=False  spans_differ=False
+  state.IRenderer            cannot construct: Protocols cannot be instantiated
+  ```
+
+  **A hit is painted by STYLE, never by adding characters** — so on the one renderer that already
+  honours the query, `text_differs` is `False`. The parked threshold would have **false-failed a
+  correct implementation**, which `C-53` prices exactly as high as passing a wrong one. This is the
+  `AT-046` shape one LLR over: an oracle written from the requirement's *wording* rather than from the
+  producer's *output*.
+- **THE DERIVED SET SHALL EXCLUDE `Protocol` SUBCLASSES (`#D42`).** `state.IRenderer` is a **census
+  artifact, not a participant** — it is the contract the renderers satisfy, and it raises on
+  instantiation. A naive "every class with a `render` method" sweep pulls it in and **crashes rather
+  than being wrong**, a failure mode that reads as a defect in the code under test. The set stays
+  **derived, never hand-listed** (`C-31`); the exclusion is a property of the rule, not a carve-out for
+  one name, so a second Protocol added later is excluded for the same reason.
 - **This is what finally gives `AT-024` an owner.** `AT-024` was the orphan that observes exactly
   the `**kwargs` swallow and which no HLR claimed — one of the five `QA-B-03` catalog-only ids
   (§6.5 A-29). It is now claimed on an `Acceptance:` line.
@@ -3073,6 +3098,95 @@ be gated.
   (**M-15**): `search_hits("")` returns **all 6** ids of a 6-node graph, and `search_hits("   ")`
   returns all 6 as well. **A blank query lighting the whole map is the current behaviour**, and this
   LLR is what stops the count line inheriting it.
+
+##### LLR-N07.3.4 — one regime, not two: an active search is declared and clearable at every graph size *(NEW — `#D43`, 2026-08-29 · Inc-4c)*
+
+- **Traceability:** HLR-N07.2, HLR-N07.3, US-N06 (the no-hidden-state through-line), `#D38`
+- **Statement:** While a submitted query is active, the system shall declare it **at every graph size,
+  including sizes at which the renderer declines to paint highlights**, as follows:
+  1. **Where highlights and the walk are live** — the count region shall paint the whole-graph match
+     count, and the hint line shall name the chords that traverse the matches. These are the shipped
+     `HLR-N07.2` and `UX-Q3-b` surfaces and this requirement changes **neither**.
+  2. **Where they are suspended** — the count region shall additionally name **the query itself** and
+     shall name **what is suspended**.
+  3. Pressing `esc` while a query is active shall clear that query and remain on the map,
+     **identically at every graph size**.
+- **RE-SCOPED 2026-08-29 AT THE GATE — the orchestrator's own amendment OVER-CORRECTED and contradicted
+  this requirement's own predicate 3 (`CR-F3`).** The previous wording required the declaration to name
+  the query and the chord *at every graph size*. Below the bound the region paints
+  `{at}/{len(hits)} coincidencias en el mapa`, which names **neither** — and predicate 3 requires
+  exactly those shipped strings to stay unchanged. **The clause instructed a future implementer to do
+  what its own threshold forbids.** Two errors on one Statement in two days, in opposite directions:
+  first requiring a *false* painting above the bound, then requiring a *changed* painting below it.
+  Both were caught by a reader who executed the clause against the tree instead of reading it for
+  sense, which is the only method that finds this class.
+- **AMENDED 2026-08-29, AT THE GATE — the first draft of this Statement would have FORCED A FALSE
+  PAINTING, and the implementer refused it (`F-1`).** The parked wording required the region to
+  declare *"that the walk chord traverses it"* **unconditionally**. Above `MAX_RENDER_NODES` that is
+  **false**: `_search_order` returns `None` there — Inc-4a's own deliberate separation of *unanswered*
+  from *answered zero* — so `_walk_hits` has nothing to walk and `n` does **not** traverse. Painting
+  `n recorre` above the bound would be a lying affordance: **the exact defect `#D43` was issued to
+  remove, reintroduced by the requirement written to remove it.**
+  **This is the orchestrator's error, recorded rather than absorbed.** The clause was written as a
+  universal without checking whether the walk survives above the bound — it does not, by an earlier
+  increment's design. The honest declaration names **both** suspensions, and that is what ships.
+  Refusing to implement a requirement that would make the product lie is the correct response to a
+  bad requirement, not a shortfall against it.
+- **Why this requirement exists — it CORRECTS a behaviour `Inc-4b` shipped and its gate approved.**
+  Above `MAX_RENDER_NODES` the count line went silent (correctly — `0 coincidencias` over a graph
+  holding real matches is a lying affordance) and `esc` therefore popped the screen on the first
+  press, because the unified `_search_is_live()` predicate reads the resolution rather than the query.
+  Both gates ruled that resolution correct **on the premise that nothing was painted to clear**.
+  `#D43` rejects the premise instead of the conclusion: the fix is to **paint it**, not to make the
+  chord inconsistent.
+- **The two defects this closes, stated as the operator experiences them:**
+  1. **Hidden state.** The query survives in `query_text` and still changes what `n` does — `n` toasts
+     `búsqueda sin evaluar` rather than `sin búsqueda activa` — while **no surface advertises it**.
+     *Live enough to change a keypress, invisible enough to have no affordance* is precisely the
+     hidden-state class US-N06 exists to remove.
+  2. **A chord that varies with graph size.** `esc` clearing below the bound and popping above it is
+     **a lying affordance with extra steps**: the operator learns a rule that silently stops holding
+     on a large map, and learns it by losing their place.
+- **Declared painted string (Spanish), shape not verbatim wording:** the region names the query, the
+  whole-graph count, that `n` traverses it, and — when highlights are suspended — that they are, e.g.
+  `búsqueda: «riesgo» · 241 coincidencias · n recorre · resaltado suspendido`. The chord glyph is read
+  **from the seat**, per `UX-Q3-b`'s one-declaration-four-readers rule; the count is the whole-graph
+  figure `HLR-N07.2` already owns.
+- **The suspension notice is the load-bearing half.** Without it the operator sees a live count and an
+  unlit canvas and has no way to learn why. Declaring the count without declaring the suspension
+  trades one hidden state for another.
+- **Validation:** `test (pilot)`
+- **Numeric pass threshold — three predicates, all required:**
+  1. **Above the bound with a live query**, the count region names the query, carries the whole-graph
+     count `== len(SearchIndex(graph).query(q))`, and carries the suspension notice.
+     > ⚠ **SATISFIED UNDER A MOVED BOUND, NOT AT THE SHIPPED BOUND — and `Inc-STRIPS` is a BLOCKER on
+     > closing this requirement, not a follow-up.** Both reviewers independently measured that at a
+     > genuine 12002-node graph `rows_in` returns **0 rows** at 118x34 **and** 80x24: `#map-minimap`
+     > renders ~668 rows over the root's 4001 children, crushing `#map-canvas` to one row and putting
+     > the count region off-viewport. Every above-bound arm therefore reaches the branch by **lowering
+     > the constant**, which drives the handler honestly but cannot observe the field frame.
+     > **The two halves of this requirement close differently and must not be reported together:** the
+     > `esc` half (predicate 2) is real and size-independent by construction; the **paint** half lands
+     > where no operator can read it until the collapse is fixed. Recording predicate 1 as simply
+     > "met" would be the `C-18` "covered in parts" defect wearing a measurement.
+  2. **`esc` parity, asserted as one fact across two regimes.** With a query active, one real `esc`
+     leaves `query_text == ""` **and** `app.screen is still the MapScreen` — asserted **both** below
+     and above the bound, in the same node, so the two cannot drift apart. A second `esc` pops, in
+     both regimes.
+  3. **Below the bound the shipped strings do not regress** — `n/N coincidencias`, `0 coincidencias`
+     and the empty-state hint are unchanged, and no suspension notice is painted.
+- **Named weaker variant (`M-N07.3.4-a`):** declare the query above the bound but leave `esc` reading
+  the resolution. Green on any test that only reads the painted region, and the chord still varies
+  with graph size — predicate 2 is what reddens it, and only because it asserts both regimes in one
+  node rather than in two that can be fixed independently.
+- **Named weaker variant (`M-N07.3.4-b`):** paint the count above the bound without the suspension
+  notice. Green on predicate 1's first two clauses; the operator still cannot learn why nothing is
+  lit.
+- **THIS CLAUSE OWNS COPY THAT PREVIOUSLY OWNED NOTHING.** `Inc-4b` shipped `búsqueda sin evaluar` /
+  `el mapa supera el límite de <N> nodos` and the `abrió «…»` hint prefix as **new copy no `shall`
+  clause owned** — declared as a risk at its gate rather than absorbed silently. `#D43` folds that
+  risk: this requirement is the owner, and the strings are reconciled against it in `Inc-4c`.
+- **Acceptance:** `AT-054`, `AT-055`
 
 ---
 
@@ -5834,15 +5948,17 @@ that cannot be a prefix or a suffix of another increment id is the whole reason 
 | ~~**Inc-4**~~ | ~~US-N07 búsqueda + the seat rebind (`#D5b`)~~ | **STRUCK 2026-08-29 — SPLIT by `#D36` under `C-21`.** Replaced by the two rows below. Struck, not shadowed; the id `Inc-4` is retired and never reassigned, per the same rule that vacated `Inc-6` | — | — |
 | **Inc-4a** | US-N07 «búsqueda» **search core** — the single owner of "what matches", the resolved `hits` set on `ViewState`, the inline-predicate deletion, the fold-pill hit tail (**`LLR-N07.1.3`**, new) and the count line on the named count region (`#D37`) | live | `search.py`, `views/state.py`, `views/layered.py`, `app.py` | 4 |
 | **Inc-4b** | US-N07 **seat + walk** — the `#D5b` rebind, the `n`/`N` walk, `LLR-N06.2.4` fold auto-open, the `E1b`/`E1c` toasts, state-dependent `esc` (`#D38`), the `test_cd25a` seat repair and the settle-chase counter carry | live | `keymap.py`, `app.py` | 2 |
-| **Inc-5** | hit painting in the three remaining renderers (`LLR-N07.2.2b`) | live — **belongs to US-N07, not to US-N14** | `views/outline.py`, `views/radial.py`, `views/lane.py` | 3 |
+| **Inc-4c** | **`LLR-N07.3.4`** — one regime, not two: the count region declares an active search at **every** graph size with a suspension notice, and `esc` clears identically at every size (`#D43`) | **new 2026-08-29** | `app.py` | **1** |
+| **Inc-5** | hit painting in the three remaining renderers (`LLR-N07.2.2b`, threshold corrected by `#D42`) | live — **belongs to US-N07, not to US-N14** | `views/outline.py`, `views/radial.py`, `views/lane.py` | 3 |
 | ~~**Inc-6**~~ | ~~US-N14 lente~~ | **VACATED** — deferred whole by `#D23` (§3.7). The id is retired, not reassigned | — | — |
+| **Inc-STRIPS** | **the 12002-node screen collapse** — `#map-minimap` renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, so the canvas is crushed to 1 row and the count region lands off-viewport. **BLOCKER on closing `LLR-N07.3.4`**, not a follow-up | **new 2026-08-29** | `app.py` (+ its CSS block) | **1** |
 | **Inc-REPAIR** | `B-29` phantom sidecar warning · `B-30` path disclosure (§3.9) | **new** | `store.py` | **1** |
 | **Inc-CONFIRM** | `B-46` — the archive-confirmation markup sink (`A-90`) | **new** | the module owning `_ConfirmScreen` | **1** |
 | **Inc-7** | US-N13 sala | live | `app.py`, `darkside.py`, `store.py` | 3 |
 | **Inc-8** | S-8 truncation + the glyph vocabulary (the legend panel) · adds seat rows for `HLR-N16.4` | live | `screens/help.py`, `darkside.py`, `app.py`, **`keymap.py`** | **4** ⚠ |
 | **Inc-9** | help scope routing + `KEY_SCOPE` declarations + seat migration · **`LLR-N06.2.5`** re-parented in by `#D21` | live | `keymap.py`, `screens/factory.py`, `screens/settings.py`, `app.py` | 4 |
 
-**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → **`Inc-4a`** → **`Inc-4b`** → `Inc-5` → `Inc-REPAIR` →
+**Serial order:** `Inc-1` → `Inc-2` → `Inc-3` → **`Inc-4a`** → **`Inc-4b`** → **`Inc-4c`** → `Inc-5` → **`Inc-STRIPS`** → `Inc-REPAIR` →
 **`Inc-CONFIRM`** → `Inc-7` → `Inc-8` → `Inc-9`. **Parallelism is not re-derived** and the chain
 stays serial: ARQ measured 0 of 21 pairs parallelisable, `modules(A) ∩ modules(B) ⊇ {app}` without
 exception. **`Inc-4a` before `Inc-4b` is HARD** — see ordering 4 below. Budget **≤ 4 SOURCE files**;

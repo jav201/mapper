@@ -558,6 +558,164 @@ def _app_tree():
     return ast.parse(src)
 
 
+def _app_source() -> str:
+    """`mapper/app.py`'s source text, so the closure below can also run on a
+    SYNTHETIC module -- see `test_the_count_chain_closure_crosses_the_class_boundary`."""
+    import inspect
+    import pathlib
+
+    from mapper.app import MapScreen
+
+    return pathlib.Path(inspect.getfile(MapScreen)).read_text(encoding="utf-8")
+
+
+def _count_chain(src: str, seeds: set[str]) -> tuple[set[str], dict[str, set[str]]]:
+    """Close the count chain over BOTH planes of *src*; return (reached, reads).
+
+    WHY TWO PLANES AND NOT ONE.  Confirmation review walked straight through the
+    DERIVED `self.X` closure using a MODULE-LEVEL helper that takes the screen as
+    a parameter: it contains no `self.` and it is not a method, so a map keyed on
+    `MapScreen` methods and valued by `self.X` reads is blind to it on BOTH axes
+    at once.  Routed through `_whole_graph_tally`, that helper painted 4501 over
+    a graph holding 6001 with the whole default lane green -- risk `A-6`, fifth
+    instance, and the fourth different shape to evade this ban.
+
+    So the map spans both planes:
+      * `reads[name]` is what *name* reads off an object it holds -- `self.X` for
+        a method, EVERY attribute read for a module-level helper, because there
+        the screen arrives as a parameter and has no privileged spelling;
+      * the chain advances on an attribute read AND on a bare-name call, which is
+        the edge by which a helper is reached at all.
+
+    WHAT THIS QUANTIFIES OVER, AND WHAT IT STILL CANNOT SEE.  Stated plainly,
+    because this ban has now been evaded four times and an honest boundary is
+    worth more than a claimed closure -- the next escape should be hunted where
+    this sentence says the derivation is blind, not re-litigated where it is not.
+
+    IT SEES: `MapScreen` methods; module-level functions in `mapper/app.py`; and
+    the edges between them in either direction (method to helper, helper back to
+    method).
+
+    IT DOES NOT SEE: a helper defined in ANOTHER module; an attribute reached by
+    `getattr` or a subscript rather than a dotted read; a call dispatched through
+    a variable or a dict of callables; a method resolved on a different class; or
+    a viewport value passed in as a plain ARGUMENT rather than read off an
+    object.  Each is a live fifth escape and none is guarded here.
+
+    EVERY CLAUSE ABOVE WAS CONSTRUCTED AND MEASURED, NOT REASONED -- three held,
+    and a fourth was REMOVED because it was FALSE: a bound-method reference IS
+    seen, being a dotted read, which is the very edge kind this closure walks.  A
+    blind-spot list that overstates its own blindness is not the safe error it
+    looks like: it sends the next reader hunting where the guard already works.
+
+    AND TWO SURVIVING CLAUSES ARE THIS FILE'S EXISTING IDIOM, which is what makes
+    them the ones to watch rather than exotica.  `app.py` already passes viewport
+    values as plain arguments (`self._clamp_pan(self.pan_x, ...)`), and the count
+    chain ALREADY crosses a module boundary today -- `_query_echo`, inside this
+    closure, calls `darkside.fit`.  Ranked by likelihood, a sixth instance
+    arrives as: another module, then a plain argument, then another class (11 in
+    this module go unwalked), then `getattr`.
+    """
+    import ast
+
+    tree = ast.parse(src)
+    cls = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef) and node.name == "MapScreen"
+    )
+    fndef = (ast.FunctionDef, ast.AsyncFunctionDef)
+    methods = {i.name: i for i in cls.body if isinstance(i, fndef)}
+    helpers = {i.name: i for i in tree.body if isinstance(i, fndef)}
+
+    # A name meaning two things would make every verdict below ambiguous.
+    collide = set(methods) & set(helpers)
+    assert not collide, f"name defined on both planes: {sorted(collide)}"
+
+    def _attrs(node, only_self: bool) -> set[str]:
+        return {
+            s.attr
+            for s in ast.walk(node)
+            if isinstance(s, ast.Attribute)
+            and (not only_self or (isinstance(s.value, ast.Name) and s.value.id == "self"))
+        }
+
+    def _calls(node) -> set[str]:
+        return {
+            s.func.id
+            for s in ast.walk(node)
+            if isinstance(s, ast.Call) and isinstance(s.func, ast.Name)
+        }
+
+    reads: dict[str, set[str]] = {}
+    edges: dict[str, set[str]] = {}
+    for plane, only_self in ((methods, True), (helpers, False)):
+        for name, node in plane.items():
+            reads[name] = _attrs(node, only_self=only_self)
+            edges[name] = reads[name] | _calls(node)
+
+    reached = {s for s in seeds if s in edges}
+    while True:
+        grown = {
+            n
+            for n in edges
+            if n not in reached and any(n in edges[x] for x in reached)
+        }
+        if not grown:
+            break
+        reached |= grown
+    return reached, reads
+
+
+def test_the_count_chain_closure_crosses_the_class_boundary():
+    """The crossing is a NO-OP on today's tree, so it is discharged SYNTHETICALLY.
+
+    `C-55` limb 2: a guard that changes nothing on the current tree is untested
+    however green the suite, and `mapper/app.py` today contains no module-level
+    helper inside the count chain.  That absence is exactly why the ban was
+    evadable, so it cannot also be the reason not to test the fix.  Both controls
+    are constructed here: the shape that MUST be reported, and a sibling that must
+    NOT be.
+
+    WHAT THE PAIR ACTUALLY DISCRIMINATES, CORRECTED.  An earlier revision of this
+    docstring claimed the pair proves the derivation does not simply flag every
+    helper.  IT DOES NOT, and pass-3 review measured it: both controls assert
+    membership POSITIVELY, so they separate a leaking read from a benign one -- the
+    READ axis -- while a derivation that reported EVERY helper as reached would
+    still pass both.  The REACH axis is unguarded here.  Closing it wants an
+    unreachable orphan helper asserted absent from the closure; that is carried in
+    the backlog rather than smuggled in, and the claim is corrected meanwhile so
+    nobody reads this arm as proving more than it does.
+    """
+    leaking = '''
+class MapScreen:
+    def _count_line(self):
+        return self._whole_graph_tally()
+
+    def _whole_graph_tally(self):
+        return _visible_matches(self, self._search_index())
+
+    def _search_index(self):
+        return set()
+
+
+def _visible_matches(screen, ids):
+    return {i for i in ids if i not in screen.folded}
+'''
+    # POSITIVE CONTROL -- the reviewer's mutant, in miniature.
+    reached, reads = _count_chain(leaking, {"_count_line"})
+    assert "_visible_matches" in reached, sorted(reached)
+    assert "folded" in reads["_visible_matches"], reads["_visible_matches"]
+
+    # NEGATIVE CONTROL -- same topology, same edge, benign read.  Without this
+    # the arm above would pass on a derivation that flagged every helper.
+    benign = leaking.replace("i not in screen.folded", "i in screen.graph")
+    assert benign != leaking, "the negative control did not apply"
+    reached_b, reads_b = _count_chain(benign, {"_count_line"})
+    assert "_visible_matches" in reached_b, sorted(reached_b)
+    assert "folded" not in reads_b["_visible_matches"], reads_b["_visible_matches"]
+
+
 def test_the_count_and_the_paint_share_one_resolution(tmp_path):
     """`HLR-N07.1`'s promise, asserted structurally rather than by coincidence.
 
@@ -583,17 +741,20 @@ def test_the_count_and_the_paint_share_one_resolution(tmp_path):
     new-consumer shapes:
 
       (1) the helper reads no viewport state -- the whole-graph clause;
-      (2) `LLR-N07.2.1` governs "the count computation", which is
-          `_search_order`, `_search_hits` and `_count_line`, so the viewport ban
-          covers the whole chain from the resolution to the pinned argument.
-          `_search_hits` was the one link left out of an earlier revision, and
-          review CONSTRUCTED the defect through exactly that gap: narrowing the
-          derivation inside it left every named surface untouched, kept `hits=`
-          a bare call, and passed the entire fast lane while making the count
-          and the paint disagree on the shipped `adjuntos` fixture -- count 5
-          against 4 painted highlights, for each of the three hits that are
-          foldable branches.  The ban is free there because `_search_hits`
-          reads no viewport state and has no reason to.
+      (2) `LLR-N07.2.1` governs "the count computation", so the viewport ban
+          covers the whole chain from the resolution to the pinned argument --
+          and the chain is DERIVED by closure from `_count_line`, not listed.
+          It was listed for three revisions and a link escaped it every time:
+          `_search_hits` in `Inc-4b`, the tally chain in `Inc-4c` round 1, and a
+          brand-new helper in round 2 that was green on all 850 arms while
+          painting 4501 over a graph holding 6001.  Review constructed the first
+          of those through exactly that gap: narrowing the derivation inside
+          `_search_hits` left every named surface untouched, kept `hits=` a bare
+          call, and passed the entire fast lane while making the count and the
+          paint disagree on the shipped `adjuntos` fixture -- count 5 against 4
+          painted highlights, for each of the three hits that are foldable
+          branches.  The ban is free everywhere it lands because none of these
+          methods reads viewport state or has a reason to.
           `_view_state` is deliberately NOT under this ban:
           it reads `folded`/`pan_x`/`pan_y` legitimately, because passing the
           viewport to the RENDERER is its job.  What must not vary is the hit
@@ -615,20 +776,98 @@ def test_the_count_and_the_paint_share_one_resolution(tmp_path):
     assert resolves, "the derivation found no attribute reads at all"
     assert "graph" in resolves and "query_text" in resolves, resolves
 
-    # (1) + (2) -- the whole count computation, per `LLR-N07.2.1`'s own wording.
-    for method in (
-        MapScreen._search_order,
-        MapScreen._search_hits,
-        MapScreen._count_line,
-    ):
-        reads = _self_reads(method)
-        leaked = [name for name in VIEWPORT if name in reads]
-        assert not leaked, (method.__name__, leaked, reads)
+    # (1) + (2) -- the whole count computation, per `LLR-N07.2.1`'s own wording,
+    # AND THE SET IS NOW DERIVED RATHER THAN LISTED.
+    #
+    # THE HAND-LIST FAILED FOUR TIMES AND THE FOURTH IS WHY IT IS GONE.  Round 1
+    # of `Inc-4c` grew the tuple by three names, because `LLR-N07.3.4` gave the
+    # region a second question -- the whole-graph tally it paints above the
+    # renderer's bound -- and that put a new chain beside the old one.  Review
+    # then walked straight through the extended list: a NEW private helper that
+    # narrows the tally by the fold state, with the suspended region's tail
+    # pointed at it, is green on all 850 arms, because the tuple bans SIX NAMES
+    # and not the CHAIN.  It is not an AST smell either -- measured at 12002
+    # nodes with 1500 matching nodes folded, that mutant paints 4501 over a graph
+    # holding 6001, which is the lying affordance `US-N07` and `#D43` exist to
+    # remove, on the surface this increment added to remove it.
+    #
+    # `C-31`: a hand-listed set survives every mutation of the code it claims to
+    # govern.  So the set is CLOSED over the read map instead, seeded from
+    # `_count_line` -- the region's entry point -- and grown transitively over
+    # `self.X` reads, which is the same algorithm
+    # `test_every_reader_of_the_resolution_is_inside_a_paint_pass` runs 500 lines
+    # below and the same one that arm's own docstring adopted for the same
+    # reason.  On the shipped tree it reaches EIGHT methods and reports zero
+    # leaks -- three more than the hand-list named (`_query_echo`, `_seat_glyph`,
+    # `_seat_row`) -- and against the constructed mutant it names the offending
+    # method and the viewport attribute it read.
+    #
+    # `_search_hits` is NOT in this closure: the count line does not reach it,
+    # `_view_state` does.  It stays banned separately below, where the reason for
+    # banning it is its own.
+    # `VIEWPORT` IS ITSELF A HAND-LIST, AND IT GETS AN ANCHOR.  Without this the
+    # three names could be renamed in `app.py` and every leak assertion below
+    # would pass on every method forever -- a `C-31` vacuous INPUT SET, which no
+    # mutation of the code can reveal.  `_view_state` is the right anchor: it is
+    # the one method that legitimately reads all three, because it hands them to
+    # the renderer.
+    reads_by_method = _map_screen_self_reads()
+    assert set(VIEWPORT) <= reads_by_method["_view_state"], (
+        f"VIEWPORT {VIEWPORT} is stale against `_view_state`, which reads "
+        f"{sorted(reads_by_method['_view_state'])}: the ban below is vacuous"
+    )
+
+    # BOTH OWNERS SEED ONE CLOSURE.  `_search_hits` previously carried a
+    # SEPARATE one-method ban -- weaker than the hand-list this arm deleted, and
+    # confirmation review said so.  It derives the hit set `_view_state` hands
+    # the renderer, and review CONSTRUCTED the defect through exactly that gap
+    # one increment ago (count 5 against 4 painted highlights on the shipped
+    # `adjuntos` fixture).  Seeding it into the same closure costs nothing and
+    # covers its chain instead of only its body.
+    SEEDS = {"_count_line", "_search_hits"}
+    reached, reads = _count_chain(_app_source(), SEEDS)
+
+    # Non-vacuity, before any verdict is read from the derivation.  A broken
+    # parse or a renamed seed would excuse the whole class silently.
+    assert len(reads) >= 60, f"the module parsed to {len(reads)} callables"
+    assert SEEDS <= set(reads), sorted(SEEDS - set(reads))
+
+    # The map SPANS BOTH PLANES.  If the helper plane were empty the crossing
+    # would be inert and this arm would be back to the derivation that was
+    # walked through -- green, and blind in exactly the same place.
+    helper_plane = {n for n in reads if n not in reads_by_method}
+    assert len(helper_plane) >= 3, (
+        f"only {len(helper_plane)} module-level callables parsed; the crossing "
+        f"is inert and the ban is back to `self.X`-only"
+    )
+
+    # The closure RAN, and it ran further than the seeds' own reads.  The anchor
+    # is `_search_index` deliberately: it is the OWNER every count path has to
+    # reach, it is two hops away, and it survives a mutation that RE-ROUTES the
+    # tally -- so a re-routing mutant trips the leak assertion below rather than
+    # this one.  Stated honestly, and this is a correction of round 2's record:
+    # the transitive receipt on the last line IS derived; the two names and the
+    # floor above it are a PIN, which is correct practice for an anchor but is
+    # not itself a derivation, and round 2 overstated it as one.
+    assert len(reached) >= 6, sorted(reached)
+    assert {"_search_index", "_suspended_count_line"} <= reached, sorted(reached)
+    assert reached - SEEDS - reads["_count_line"], sorted(reached)
+
+    for name in sorted(reached):
+        leaked = [v for v in VIEWPORT if v in reads[name]]
+        assert not leaked, (
+            f"`{name}` is in the count chain and reads {leaked}: the number the "
+            f"region paints would be narrowed by the viewport, which is risk A-6"
+        )
 
     # Every consumer goes THROUGH the helper.
     assert "_search_order" in _self_reads(MapScreen._search_hits)
     assert "_search_order" in _self_reads(MapScreen._count_line)
     assert "_search_hits" in _self_reads(MapScreen._view_state)
+    # ... and so does the tally the suspended region paints, which is what keeps
+    # it one owner's answer rather than a second opinion about the same graph.
+    assert "_search_index" in _self_reads(MapScreen._whole_graph_tally)
+    assert "_search_index" in _self_reads(MapScreen._search_order)
 
     # (2b) `_view_state` may read the viewport -- it hands it to the renderer --
     # but the hit set it carries must be the helper's answer UNNARROWED.  A
@@ -771,43 +1010,252 @@ def _count_line_text(screen) -> str:
     return screen._count_line().plain
 
 
-def test_above_the_bound_the_count_line_does_not_claim_zero_matches(tmp_path):
-    """The bound must not paint a FALSE statement about the operator's data.
+def test_above_the_bound_the_count_line_declares_the_search(tmp_path):
+    """AT-054 / `LLR-N07.3.4` predicate 1 — and it REVERSES what `Inc-4b` shipped.
 
-    `AT-052` reserves `0 <subject>` for a question that was asked and came back
-    empty.  Above `MAX_RENDER_NODES` no question is answered at all -- the
-    resolution is skipped precisely because nothing will be drawn -- so painting
-    `0` there declares that a graph FULL of matches contains none.  Measured at
-    12002 nodes on the first revision of the bound: the strip read
-    `0 coincidencias en el mapa` beside its own `12002 fuera de vista`, on a
-    graph the search owner still resolves matches in.  That is the defect class
-    US-N07 exists to close, reintroduced at smaller scale by the fix for it.
+    THE ARM THIS REPLACES ASSERTED THE OPPOSITE, and said so in its own name:
+    `..._does_not_claim_zero_matches` required `painted.strip() == ""` above the
+    bound.  Its reasoning had two halves.  The half that STANDS: `0
+    coincidencias en el mapa` over a graph holding 6001 real matches is a lying
+    affordance, so `0` is still not what gets painted.  The half `#D43`
+    REJECTED: that the only alternative to a false count was silence.  A silent
+    region left the operator with a query that still changed what `n` did while
+    no surface advertised it -- live enough to change a keypress, invisible
+    enough to have no affordance, which is the hidden-state class US-N06 exists
+    to remove.  So the region declares the search instead of going quiet.
 
-    NON-VACUOUS BY CONSTRUCTION, AND THE GUARD IS THE WHOLE POINT.  The owner is
-    asked independently and must find matches, so `0` would be a lie rather than
-    a coincidence; without that assert this arm would pass on a graph that
-    genuinely has none and gate nothing.
+    THE THREE CLAUSES OF PREDICATE 1, EACH ASSERTED SEPARATELY:
+      (1) the region NAMES THE QUERY;
+      (2) it carries the WHOLE-GRAPH count, `== len(SearchIndex(graph).query(q))`
+          -- the figure `HLR-N07.2` owns, compared against the owner's ORDERED
+          form so the cheap `hits` path the product takes is checked against the
+          expensive one rather than against itself;
+      (3) it carries the SUSPENSION NOTICE.
 
-    THIS FAILS INDEPENDENTLY of its sibling
-    (`..._still_says_zero_when_the_answer_is_empty`), and that separation is
-    deliberate: they assert different facts, and one predicate covering both
-    would let the empty-state wording vanish behind the bound's silence.
+    (3) IS WHAT KILLS `M-N07.3.4-b`, and it is not a formality.  That mutant
+    paints the query and the count and drops the notice; it is green on (1) and
+    (2), and the operator it produces reads a live count beside a canvas with no
+    highlight and no stated reason -- one hidden state traded for another.
+
+    NON-VACUOUS BY CONSTRUCTION.  The owner is asked independently and must find
+    matches, and the count asserted is REQUIRED TO BE NON-ZERO: without that,
+    every clause here is satisfiable on a graph that genuinely matches nothing,
+    where `0` would be true and the region would be declaring nothing at all.
     """
-    from mapper.app import MapScreen
+    from mapper.app import MapScreen, SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
     from mapper.views.layered import MAX_RENDER_NODES
 
     screen = MapScreen("unbounded")
     screen.query_text = "zeta"
     screen.graph = _titled_graph(MAX_RENDER_NODES + 2)
     assert len(screen.graph.nodes) > MAX_RENDER_NODES
+    assert screen._search_order() is None, "the bound was not reached"
 
-    real = SearchIndex(screen.graph).hits("zeta")
-    assert real, "the graph holds no match; `0` would be TRUE and the arm vacuous"
+    expected = len(SearchIndex(screen.graph).query("zeta"))
+    assert expected, "the graph holds no match; every clause below is vacuous"
 
     painted = _count_line_text(screen)
-    assert COUNT_RE.search(painted) is None, (len(real), painted)
-    assert SEARCH_COUNT_SUBJECT not in painted, painted
-    assert painted.strip() == "", painted
+
+    # (1) the query is NAMED -- both the text and what that text IS.  The label
+    # is asserted because a mutation dropping it SURVIVED the first battery:
+    # `«zeta» · 6001 coincidencias` leaves the quoted string to be identified by
+    # position on a region that also carries a page numeral and an off-canvas
+    # numeral.  That is the same ambiguity `SEARCH_COUNT_SUBJECT` was introduced
+    # to remove one field over, so it is read from the shipped constant for the
+    # same reason: a DERIVATION of the product's declaration, not a copy of it.
+    assert SEARCH_ACTIVE_LABEL in painted, painted
+    assert "zeta" in painted, painted
+
+    # (2) the whole-graph count, and it is NOT the `0` the old branch forbade.
+    found = COUNT_RE.search(painted)
+    assert found is not None, painted
+    assert found.group(2) is None, ("a walk position above the bound", painted)
+    assert int(found.group(1)) == expected, (found.group(1), expected, painted)
+    assert int(found.group(1)) > 0, painted
+
+    # (3) the suspension notice -- `M-N07.3.4-b` is exactly its absence.
+    assert SEARCH_SUSPENDED_NOTICE in painted, painted
+
+    # (4) AND THE DECLARATION IS NOT CONDITIONAL ON THE QUERY'S LENGTH.  Round 2
+    # fired a mutant that declined to declare for queries of three characters or
+    # fewer and it was GREEN ON ALL 853 ARMS -- every query fixture in this file
+    # is longer than three, so the whole suite agreed to a region that goes
+    # silent on short input.  A one-character query above the bound is EXACTLY
+    # the silence `#D43` rejected: live enough to change what `n` does, invisible
+    # enough to have no affordance.  `LLR-N07.3.4` says "at every graph size" and
+    # `LLR-N07.3.3` draws the only line that matters -- blank, not short -- so the
+    # shortest non-blank queries are asserted rather than assumed.
+    for short in ("z", "ze", "zet"):
+        screen.query_text = short
+        short_expected = len(SearchIndex(screen.graph).query(short))
+        assert short_expected, f"`{short}` matches nothing; this clause is vacuous"
+        short_painted = _count_line_text(screen)
+        assert SEARCH_ACTIVE_LABEL in short_painted, (short, short_painted)
+        assert SEARCH_SUSPENDED_NOTICE in short_painted, (short, short_painted)
+        short_found = COUNT_RE.search(short_painted)
+        assert short_found is not None, (short, short_painted)
+        assert int(short_found.group(1)) == short_expected, (short, short_painted)
+
+
+# The five control classes the echo is measured against, BUILT FROM THEIR
+# NUMBERS and never spelled -- the rule `tests/test_inc3_census.py::hostile`
+# follows and the one the coercion census over tracked files enforces.  Two
+# reasons for these five in particular: `darkside`'s own docstring records that
+# an override left alive REVERSES the sentence it sits in, and the review that
+# opened this arm measured all five surviving a raw slice of the same length.
+_ECHO_HOSTILE_POINTS = (0x202E, 0x202D, 0x200B, 0x2066, 0x001B)
+
+
+def test_the_query_echo_coerces_the_operators_text(tmp_path):
+    """`HLR-COERCE` on the sink `Inc-4c` INTRODUCED, which nothing gated.
+
+    THE GAP THIS CLOSES WAS DEMONSTRATED, NOT SUSPECTED.  `_query_echo` routes
+    operator text through `darkside.fit` and its docstring makes the coercion
+    claim load-bearing.  Review replaced `fit` with a raw slice of the same
+    length and the entire suite -- all 850 arms -- stayed green.  The sibling
+    arm `A-echo-unbounded` removes the CAP while keeping `fit`; nothing tested
+    the complement, so the one property the docstring argues hardest for was the
+    one property no predicate held.  A later reader who simplifies the echo to a
+    slice ships a bidi-override sink and the suite congratulates them.
+
+    THE CONTROL IS WHAT GIVES IT TEETH.  Asserting only that the five points are
+    absent from the painted region is satisfiable by an echo that paints nothing
+    at all, and satisfiable by a graph whose query never reached the sink.  So
+    the arm first shows the SLICE WOULD HAVE CARRIED ALL FIVE THROUGH -- that is
+    the mutant, constructed here rather than described -- then shows the ordinary
+    token survives, so the coercion is not achieved by silence.
+
+    WHY THE UNIT FORM IS ENOUGH HERE.  `_count_line_text` asserts structurally
+    that the strip appends this string bare, and the composited-frame reading of
+    the same region is `test_the_suspended_declaration_is_actually_in_the_frame`.
+    Splitting them is deliberate: this arm has to run against a graph ABOVE the
+    renderer's bound, which is the only regime where the echo exists at all.
+    """
+    from mapper.app import SEARCH_ACTIVE_LABEL, MapScreen, _QUERY_ECHO_CELLS
+    from mapper.views.layered import MAX_RENDER_NODES
+
+    screen = MapScreen("unbounded")
+    screen.graph = _titled_graph(MAX_RENDER_NODES + 2)
+    screen.query_text = "zeta" + "".join(chr(cp) for cp in _ECHO_HOSTILE_POINTS) + "abc"
+    assert screen._search_order() is None, "the bound was not reached"
+
+    # THE MUTANT, CONSTRUCTED.  `fit` replaced by an equivalent-length raw slice
+    # is the exact edit that survived the suite; every one of the five points is
+    # inside the budget, so the slice preserves all five.
+    sliced = screen.query_text[:_QUERY_ECHO_CELLS]
+    for cp in _ECHO_HOSTILE_POINTS:
+        assert chr(cp) in sliced, f"U+{cp:04X} is outside the budget; the control is void"
+
+    painted = _count_line_text(screen)
+    for cp in _ECHO_HOSTILE_POINTS:
+        assert chr(cp) not in painted, f"U+{cp:04X} reached the painted count region"
+
+    # ... and the region is still DECLARING the search rather than going quiet,
+    # which is what makes the five absences mean coercion and not deletion.
+    assert SEARCH_ACTIVE_LABEL in painted, painted
+    assert "zeta" in painted, painted
+
+    # ... AND THE TAIL SURVIVES, which is a SEPARATE property from the head and
+    # the reason this arm now has two.  Confirmation review's mutant cut the echo
+    # at the first coerced point: all five absences held, the label held, `zeta`
+    # held -- the PREFIX is precisely what truncation preserves -- and the arm was
+    # green while the region echoed `zeta`, a query nobody typed.  U+200B is
+    # reachable through the real paste path, which strips only line breaks.  Same
+    # lying-affordance class as the merged-token mutant one sink over.
+    #
+    # WHAT THE TWO ANCHORS BUY, SCOPED HONESTLY: they separate coercion from
+    # truncation AT THE ECHO'S BOUNDARIES, not in general.  Measured -- cutting at
+    # the first coerced point reddens, and dropping the tail's last character
+    # reddens, but eliding a span strictly BETWEEN the two anchors does not.  On
+    # this fixture the only interior span is the hostile run itself, whose removal
+    # IS the coercion being asserted, so that is this arm's honest limit rather
+    # than a hole: a third anchor here would assert the absence it exists to allow.
+    assert "abc" in painted, painted
+
+
+def test_the_query_echo_bounds_rows_and_not_only_cells(tmp_path):
+    """The echo's cap is in CELLS; the dimension that collapses the screen is ROWS.
+
+    THE DEFECT THIS PINS WAS MEASURED ON THE SHIPPED SURFACE.  `darkside.plain`
+    deliberately preserves U+0009 and U+000A (`PRESERVED_CODE_POINTS` -- layout
+    elsewhere depends on them), so `fit(..., 32)` bounds 32 CELLS and 32 cells
+    can be 32 ROWS.  With a line-break-bearing query at 118x34, before the
+    flattening this arm gates: count region height 32, `#map-canvas` crushed to
+    1, and `esc limpiar` ABSENT from the painted frame.  That is the `Inc-4b`
+    collapse shape reproduced one surface over, which is the specific regression
+    this increment was asked not to commit.
+
+    THIS ARM PINS OUR BEHAVIOUR, NOT TEXTUAL'S, AND THAT IS THE POINT.  No
+    operator path on Textual 8.2.8 delivers a line break into the `Input`:
+    `enter` submits, and `Input._on_paste` takes `event.text.splitlines()[0]`.
+    `pyproject.toml` pins that version exactly, so the defect is not reachable
+    today -- but the guard is a third-party implementation detail with no
+    documented guarantee, this repo's `Input` declares neither `max_length` nor
+    `restrict`, and no arm asserted it.  A defence nothing here asserts is a
+    defence a version bump removes in silence.  So the property asserted is the
+    ECHO's, at the sink, where this repo owns it.
+
+    NON-VACUOUS BY CONSTRUCTION.  The coercion helper is shown to KEEP both code
+    points, so the absence downstream is this sink's flattening and not
+    something inherited; and every flood is shown to be a flood -- the raw query
+    carries more rows or more cells than the budget -- before any absence is read
+    out of the echo.
+    """
+    from mapper.app import MapScreen, _QUERY_ECHO_CELLS
+    from mapper.views.layered import MAX_RENDER_NODES
+
+    # THE SET IS DERIVED FROM ITS OWNER, NOT RE-LISTED HERE.  `C-31`: this used
+    # to hand-list {U+000A, U+0009} and assert it as a SUBSET of
+    # `PRESERVED_CODE_POINTS`, which let the owner grow a third code point that
+    # `plain` keeps and nothing here flattens -- the row bound reopens with every
+    # arm green, and no mutation of the code reveals it because the defect is in
+    # the INPUT SET.  Iterating the owner closes that by construction; the floor
+    # and the membership check keep an emptied or renamed frozenset from
+    # excusing the whole arm silently.
+    PRESERVED = sorted(darkside.PRESERVED_CODE_POINTS)
+    LF, TAB = 0x0A, 0x09
+    assert len(PRESERVED) >= 2, PRESERVED
+    assert {LF, TAB} <= set(PRESERVED), PRESERVED
+
+    # The control: `plain` is not what bounds the rows, and must not become it.
+    for cp in PRESERVED:
+        assert chr(cp) in darkside.plain("z" + chr(cp) + "z"), hex(cp)
+
+    screen = MapScreen("unbounded")
+    screen.graph = _titled_graph(MAX_RENDER_NODES + 2)
+
+    floods = {f"preserved U+{cp:04X}": ("z" + chr(cp)) * 60 for cp in PRESERVED}
+    floods["ascii"] = "z" * 2000
+    floods["wide"] = chr(0x4E2D) * 500   # a two-cell ideograph, built from its number
+    for label, query in floods.items():
+        screen.query_text = query
+        # It is genuinely a flood, before the bound is read.
+        assert darkside.Text(query).cell_len > _QUERY_ECHO_CELLS, label
+
+        echo = screen._query_echo()
+        for cp in PRESERVED:
+            assert chr(cp) not in echo, f"{label}: the echo carries U+{cp:04X}"
+        assert len(echo.splitlines()) <= 1, (label, len(echo.splitlines()))
+        assert darkside.Text(echo).cell_len <= _QUERY_ECHO_CELLS, (
+            label, darkside.Text(echo).cell_len
+        )
+
+        # And the region the strip appends inherits both bounds.
+        painted = _count_line_text(screen)
+        for cp in PRESERVED:
+            assert chr(cp) not in painted, (label, hex(cp))
+
+    # THE BREAK IS REPLACED, NOT DELETED -- a SEPARATE property from the row
+    # bound, and the battery is why it is asserted.  A mutant that mapped both
+    # code points to nothing instead of to a space kept rows bounded, kept cells
+    # bounded, and was GREEN on all 853 arms while silently MERGING the
+    # operator's tokens: `alfa<break>beta` echoes as one word nobody typed.  A
+    # region that misreports the query it is declaring is the lying-affordance
+    # class this increment exists to close, so the separator is pinned -- over
+    # the owner's whole set, so a new preserved code point is pinned too.
+    for cp in PRESERVED:
+        screen.query_text = "alfa" + chr(cp) + "beta"
+        assert "alfa beta" in screen._query_echo(), (hex(cp), screen._query_echo())
 
 
 def test_below_the_bound_the_count_line_still_says_zero_when_empty(tmp_path):
@@ -844,6 +1292,46 @@ def test_below_the_bound_the_count_line_still_says_zero_when_empty(tmp_path):
     empty = COUNT_RE.search(painted)
     assert empty is not None, painted
     assert empty.group(1) == "0" and empty.group(2) is None, painted
+
+
+def test_below_the_bound_no_suspension_notice_is_painted(tmp_path):
+    """`LLR-N07.3.4` predicate 3 — the declaration stays ABOVE the bound.
+
+    The clause adds a region that names the query, the count and what is
+    suspended.  The cheapest way to make its own arm green is to paint that
+    everywhere, which would put `resaltado y recorrido suspendidos` on a map
+    whose highlights are lit and whose walk works -- a false statement on the
+    normal case, shipped to close an edge case.  Nothing else in the file would
+    see it: `AT-052`'s arms match a numeral and a noun and do not care what
+    follows.
+
+    ALL THREE BELOW-THE-BOUND SHAPES ARE SWEPT, not just one, because the branch
+    that could leak the notice is per-shape: a hit-bearing query (`n/N`), a query
+    that matches nothing (`0`), and the blank query that paints NO LINE AT ALL
+    (`LLR-N07.3.3`).  The last is the state of a screen nobody has searched on
+    yet, so a notice leaking there would be on screen before the operator did
+    anything.
+    """
+    from mapper.app import MapScreen, SEARCH_SUSPENDED_NOTICE
+    from mapper.views.layered import MAX_RENDER_NODES
+
+    screen = MapScreen("bounded-quiet")
+    screen.graph = _titled_graph(40)
+    assert len(screen.graph.nodes) <= MAX_RENDER_NODES
+
+    # The regime is asserted, not assumed: above the bound the notice is
+    # REQUIRED, so an arm that silently drifted above it would pass vacuously.
+    screen.query_text = "zeta"
+    assert screen._search_order() is not None, "this is not the below-bound regime"
+
+    for query, expect_line in (("zeta", True), (ABSENT_QUERY, True), ("   ", False)):
+        screen._open_paint_pass()
+        screen.query_text = query
+        painted = _count_line_text(screen)
+        assert SEARCH_SUSPENDED_NOTICE not in painted, (query, painted)
+        # And the shipped shape for this query is still there, so "no notice" is
+        # not being satisfied by painting nothing at all.
+        assert (COUNT_RE.search(painted) is not None) is expect_line, (query, painted)
 
 
 def test_a_query_that_matches_nothing_does_not_walk_the_tree(monkeypatch):
@@ -1002,13 +1490,16 @@ _PASS_FREE_READERS = {
     "action_next_hit": "wrapper over `_walk_hits`",
     "action_prev_hit": "wrapper over `_walk_hits`",
     "on_input_submitted": "reads the order of the frame `refresh_canvas` painted on the line above",
-    # Round 2.  `esc` and the hint line were written with different guards and
-    # disagreed above the renderer's bound, so they now share one predicate --
-    # which puts BOTH of them in the derived set.  That is this arm working as
-    # designed, not an obstacle to routing around: the consolidation is exactly
-    # the kind of edit that grows the reader set, and it has to declare itself.
-    "_search_is_live": "asks whether the frame ON SCREEN is showing an answer, which is the previous pass's",
-    "action_back_or_home": "wrapper over `_search_is_live`; clears and repaints, or leaves",
+    # ROUND 3 (`Inc-4c`) REMOVED TWO ROWS FROM HERE, and the removal is the
+    # receipt that this arm is pinned in BOTH directions rather than only
+    # against growth.  Round 2 added `_search_is_live` and `action_back_or_home`
+    # because the consolidated `esc`/hint predicate read `_search_order`.
+    # `LLR-N07.3.4` makes that predicate read the QUERY instead -- the whole
+    # point of `#D43` is that `esc` must not vary with the renderer's bound -- so
+    # neither method reaches the resolution any more.  Left here they would fail
+    # the `stale` assertion below, which is the arm refusing to carry an
+    # exemption for a reader that no longer exists.  `_walk_hits` and its two
+    # wrappers stay: the walk still reads the order.
 }
 
 
@@ -1831,28 +2322,271 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
         assert "no aparece en este mapa" not in painted, painted
         assert "sin búsqueda activa" not in painted, painted
         assert str(len(graph.nodes) - 1) in painted, painted
+        # `LLR-N07.3.4` OWNS THIS COPY NOW, and it reconciled the label.  The
+        # toast used to say `búsqueda sin evaluar`, which the count region above
+        # it now contradicts in the same frame: the search IS evaluated at every
+        # graph size and the region paints the whole-graph figure.  What is
+        # suspended is the thing the key asked for.
+        assert "sin evaluar" not in painted, painted
+        assert "recorrido suspendido" in painted, painted
 
 
-async def test_esc_and_the_hint_line_agree_about_what_a_live_search_is(
-    tmp_path, monkeypatch
-):
-    """`esc` may only act where the hint line advertised it (`#D38`, round 2).
+async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monkeypatch):
+    """`LLR-N07.3.4` predicate 1, read from the COMPOSITED FRAME across a width band.
 
-    The two guards were written independently -- the hint asked for
-    `query_text.strip() and order is not None`, `esc` asked for
-    `query_text.strip()` alone -- and above the renderer's bound they disagreed.
-    Measured there: the hint promises nothing, and yet the first `escape`
-    cleared a query that was never painted, changed no pixel and did not leave
-    the map.  A keypress silently swallowed is the INVERSE of the defect `#D38`
-    exists to fix, and it is worse than the original in one way: `#D38`'s
-    operator at least got a screen change.
+    THE DISTINCTION THIS ARM EXISTS FOR ALREADY COST THIS BATCH A WRONG
+    DOCSTRING.  A string in the region's `Text` is not a string the operator can
+    read: `#map-pagination` has no height rule, so it is `height: auto` and it
+    WRAPS -- and everything ahead of the count line on that row is chrome whose
+    width scales with the graph.  So this reads `rows_in`, the screen-level clip,
+    and requires the row count to be non-empty before believing anything in it.
 
-    BOTH LIMBS ARE ASSERTED AND THEY FAIL SEPARATELY.  Below the bound the hint
-    promises and `esc` must clear WITHOUT leaving; above it the hint promises
-    nothing and `esc` must leave on the FIRST press.  A predicate that only
-    checked the second limb is green on an `esc` that never clears at all.
+    A BAND, NOT TWO POINTS.  The last fixed-cap fix in `app.py` was wrong across
+    a 60-column band while looking correct at the two sizes it was first checked
+    at, and that is recorded in `_HINT_BRANCH_CELLS`.  The declared 118x34 and
+    `run_test`'s own 80x24 default are both inside the sweep rather than being
+    the sweep.
+
+    THE HOSTILE QUERY IS THE POINT OF THE SECOND MEASUREMENT.  The echo is
+    operator text on a wrapping region: unbounded, it grows the strip and takes
+    the rows from `#map-body`, which is `height: 1fr` -- measured at 118x34 with
+    a 2000-character query and no budget, the region went to 20 rows.  So the
+    arm compares a 2000-character query against an ordinary one AT THE SAME
+    WIDTH and bounds the difference, rather than checking either against a
+    constant: a constant would pass on an implementation that always wrapped.
     """
     import mapper.app as app_module
+    from mapper.app import SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
+
+    long_query = QUERY + "z" * 2000
+
+    async def region_at(width: int, query: str):
+        app = MapperApp(tmp_path / f"w{width}{len(query)}")
+        async with app.run_test(size=(width, 34)) as pilot:
+            await pilot.pause()
+            graph = build_adjuntos(tmp_path / f"w{width}{len(query)}")
+            app.store.save(MAP_ID, graph)
+            screen = await open_map(app, pilot, MAP_ID)
+            monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+            screen.query_text = query
+            assert screen._search_order() is None, "the bound was not reached"
+            screen.refresh_canvas()
+            await pilot.pause()
+            region = screen.query_one(f"#{COUNT_REGION_ID}").region
+            rows = rows_in(screen, region)
+            tally = len(SearchIndex(graph).query(query))
+            return rows, region.height, tally
+
+    for width in range(60, 165, 5):
+        rows, height, tally = await region_at(width, QUERY)
+        long_rows, long_height, _ = await region_at(width, long_query)
+
+        # IN THE FRAME AT ALL, before a single claim is read out of it.
+        assert rows, f"the count region is off-viewport at {width} columns"
+        # WHITESPACE IS COLLAPSED AFTER THE JOIN, and this was measured rather
+        # than anticipated: at 95 columns the notice wraps mid-phrase and the
+        # region-clipped rows carry the right-pad of row 0 between its two
+        # halves, so a raw join reads `resaltado y      recorrido suspendidos`.
+        # The claim being asserted is that the operator can READ these words on
+        # this region; a wrap is not a word.
+        joined = " ".join(" ".join(rows).split())
+
+        # Predicate 1's three clauses, on the composited frame this time.
+        assert SEARCH_ACTIVE_LABEL in joined, (width, joined)
+        assert QUERY in joined, (width, joined)
+        assert str(tally) in joined, (width, tally, joined)
+        assert SEARCH_SUSPENDED_NOTICE in joined, (width, joined)
+        # ... and the chord that still works is on the row with them.
+        assert "limpiar" in joined, (width, joined)
+
+        # THE HOSTILE QUERY COSTS AT MOST ONE EXTRA ROW, and the bound is `+1`
+        # rather than `0` because that is what was MEASURED, not because a
+        # tighter one failed to be worth writing.  WHICH WIDTHS PAY IT IS NOT A
+        # STABLE FIGURE and no predicate here depends on one: the claim was first
+        # written as "60 only", review's sweep of the same band found five
+        # widths, and a third sweep on the shipped tree found nine (length 1 vs
+        # 2000) or eight (this fixture vs itself plus 2000).  `_query_echo`
+        # carries all three and the reason they differ.  What every sweep agrees
+        # on is the `+1`, which is exactly what is asserted below.
+        #
+        # THE RELATIVE FORM IS WHERE THE TEETH ARE.  Deleting the cap entirely
+        # takes the region to 20 rows at 118 columns, measured, so this reddens
+        # by 18; a constant ceiling written here instead would pass on an
+        # implementation that simply always wrapped.
+        assert long_height <= height + 1, (width, height, long_height)
+        assert long_rows, f"a long query pushed the region off-viewport at {width}"
+
+
+async def test_a_line_bearing_query_does_not_take_the_frame(tmp_path, monkeypatch):
+    """The row dimension of the echo's bound, read from the COMPOSITED FRAME.
+
+    THE SIBLING SWEEP ABOVE VARIED LENGTH ONLY, WHICH IS WHY IT MISSED THIS.  A
+    2000-character ASCII query costs at most one row; a 120-character query
+    carrying line breaks cost THIRTY-TWO, because `darkside.plain` preserves
+    U+000A and `fit` bounds display CELLS.  Measured at 118x34 before the fix:
+    count region height 32, `#map-canvas` crushed to 1, `esc limpiar` and the
+    suspension notice both ABSENT from the painted frame.  Predicate 1 and
+    predicate 2 of `LLR-N07.3.4` were simultaneously false on a green suite --
+    the `Inc-4b` collapse shape, one surface over.
+
+    THE UNIT ARM IS NOT ENOUGH ON ITS OWN.  `test_the_query_echo_bounds_rows_...`
+    asserts the flattening at the sink; this asserts what the flattening BUYS,
+    which is the only claim the operator can check: the affordance stays on the
+    painted frame and the canvas keeps its rows.  A string property and a frame
+    property have already come apart once in this batch, which is what
+    `test_the_suspended_declaration_is_actually_in_the_frame` exists for.
+
+    ASSERTED RELATIVELY, AGAINST THE ORDINARY QUERY AT THE SAME SIZE.  A
+    constant ceiling would pass on an implementation that always wrapped, and the
+    ordinary run is also the receipt that the fixture reaches the suspended
+    branch at all.
+    """
+    import mapper.app as app_module
+    from mapper.app import SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
+
+    # 60 line breaks in 120 characters: a flood in ROWS while staying SHORTER
+    # than the 2000-character query the sweep above already bounds, so a pass
+    # here cannot be inherited from the length case.
+    hostile = ("z" + chr(0x0A)) * 60
+    assert len(hostile.splitlines()) > 1, "the fixture carries no line break"
+    assert len(hostile) < 200, "this is the row case, not the length case"
+    assert hostile.strip(), "a blank query paints no line at all"
+
+    async def frame_at(query: str, tag: str):
+        app = MapperApp(tmp_path / tag)
+        async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+            await pilot.pause()
+            graph = build_adjuntos(tmp_path / tag)
+            app.store.save(MAP_ID, graph)
+            screen = await open_map(app, pilot, MAP_ID)
+            assert_declared_layout(screen, rail=True, inspector=True)
+            monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+            screen.query_text = query
+            assert screen._search_order() is None, "the bound was not reached"
+            screen.refresh_canvas()
+            await pilot.pause()
+            region = screen.query_one(f"#{COUNT_REGION_ID}").region
+            rows = rows_in(screen, region)
+            canvas = screen.query_one("#map-canvas").region.height
+            return region.height, canvas, rows
+
+    height, canvas, rows = await frame_at(QUERY, "ordinary")
+    bad_height, bad_canvas, bad_rows = await frame_at(hostile, "line-bearing")
+
+    # The ordinary run is the control: without a readable region here there is
+    # nothing for the hostile run to be compared against.
+    assert rows, "the count region is off-viewport for an ordinary query"
+    assert canvas > 1, canvas
+
+    # The same `+1` price the length case pays, and no more.  MEASURED ON BOTH
+    # TREES AT 118x34 with this fixture: flattened, region 1 -> 2 rows and canvas
+    # 27 -> 26, so the canvas gives up exactly the row the region takes and the
+    # bound is `-1` rather than `0`.  Unflattened, region 32 rows and canvas 1 --
+    # so these two redden by 30 and by 25.
+    assert bad_height <= height + 1, (height, bad_height)
+    assert bad_canvas >= canvas - 1, (canvas, bad_canvas)
+    assert bad_rows, "a line-bearing query pushed the count region off-viewport"
+
+    joined = " ".join(" ".join(bad_rows).split())
+    assert SEARCH_ACTIVE_LABEL in joined, joined
+    assert SEARCH_SUSPENDED_NOTICE in joined, joined
+    # The recovery affordance is the one that must survive: this is the exact
+    # string that left the frame in the measurement above.
+    assert "limpiar" in joined, joined
+
+
+async def test_at_055_esc_means_one_thing_at_every_graph_size(tmp_path, monkeypatch):
+    """AT-055 / `LLR-N07.3.4` predicate 2 — ONE FACT, ASSERTED ACROSS TWO REGIMES.
+
+    THIS REVERSES `Inc-4b`, WHOSE OWN ARM ASSERTED THE OPPOSITE.  That arm
+    (`..._esc_and_the_hint_line_agree_...`) required `esc` to LEAVE THE MAP on
+    the first press above the renderer's bound, on the premise that nothing was
+    painted there to clear, and both gates approved it.  `#D43` rejects the
+    premise rather than the conclusion: the count region declares the query at
+    every graph size now, so there is something to clear at every graph size,
+    and the chord means one thing.
+
+    WHY IT IS ONE NODE AND NOT TWO, WHICH IS THE SHAPE OF THE THRESHOLD AND NOT
+    A STYLE CHOICE.  `M-N07.3.4-a` is the mutant that teaches the region to
+    declare the query above the bound and leaves `_search_is_live` reading the
+    resolution.  It is GREEN on every arm that only reads the painted region --
+    including `AT-054` next door, which is exactly such an arm.  Two nodes
+    asserting the two regimes separately can be repaired separately and drift
+    apart, and the drift is invisible because each stays green on its own half.
+    So the SAME closure runs against both regimes, and a `_search_is_live` that
+    consults the graph's size cannot satisfy it twice.
+
+    THE SECOND `esc` IS THE REGRESSION LIMB, in both regimes.  Without it the
+    repair can break `back_or_home` altogether -- an `esc` that never leaves the
+    map at all -- and stay green on the clearing half.
+    """
+    import mapper.app as app_module
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        graph = build_adjuntos(tmp_path)
+        app.store.save(MAP_ID, graph)
+
+        async def esc_parity(regime: str, screen) -> None:
+            """The one fact, applied to whichever regime the caller set up."""
+            await submit(pilot, QUERY)
+            assert screen.query_text.strip(), f"{regime}: no query; arm is vacuous"
+
+            # ONE real `esc`: the query goes, and the MAP STAYS.
+            await pilot.press("escape")
+            await pilot.pause()
+            assert screen.query_text == "", f"{regime}: esc did not clear the query"
+            assert app.screen is screen, (
+                f"{regime}: esc popped the map out from under a live search"
+            )
+
+            # A SECOND `esc`, with nothing live: it leaves.
+            await pilot.press("escape")
+            await pilot.pause()
+            assert app.screen is not screen, f"{regime}: esc no longer leaves the map"
+
+        # REGIME 1 — BELOW the bound.  The resolution exists.
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+        screen.query_text = QUERY
+        assert screen._search_order() is not None, "regime 1 is not below the bound"
+        screen.query_text = ""
+        await esc_parity("below the bound", screen)
+
+        # REGIME 2 — ABOVE the bound, reached by moving it, which is how every
+        # above-the-bound arm in this file reaches the same `if`.  The screen is
+        # re-opened because regime 1 ended by leaving the map, deliberately: the
+        # second `esc` is asserted in BOTH regimes and it pops in both.
+        screen = await open_map(app, pilot, MAP_ID)
+        assert_declared_layout(screen, rail=True, inspector=True)
+        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        screen.query_text = QUERY
+        assert screen._search_order() is None, "regime 2 is not above the bound"
+        # The regimes really are different, and the query really does match --
+        # so `esc` clearing above the bound is the CHORD's doing and not the
+        # bound quietly failing to be reached.
+        assert SearchIndex(graph).query(QUERY), "the query matches nothing anyway"
+        screen.query_text = ""
+        await esc_parity("above the bound", screen)
+
+
+async def test_the_hint_line_promises_esc_at_every_graph_size(tmp_path, monkeypatch):
+    """`LLR-N07.3.4` — and `#D38`'s original rule, which the reversal must keep.
+
+    `#D38` is "the hint line and the handler say the same thing".  `Inc-4b` kept
+    that by SILENCING BOTH above the bound; `#D43` keeps it by making both
+    SPEAK there.  Either satisfies `#D38`, which is why `AT-055` alone cannot
+    gate this: it drives the handler and never reads the hint, so an
+    implementation that clears on `esc` while the hint still advertises nothing
+    passes it and reintroduces the unadvertised keypress.
+
+    AND THE HINT MUST NOT SAY `sin coincidencias` THERE, which is the same lying
+    affordance `_count_line` refuses to paint, one surface over: an empty answer
+    declared over a graph that holds thousands of matches.
+    """
+    import mapper.app as app_module
+    from mapper.app import SEARCH_SUSPENDED_NOTICE
 
     app = MapperApp(tmp_path)
     async with app.run_test(size=CONTEXT_OF_USE) as pilot:
@@ -1862,25 +2596,17 @@ async def test_esc_and_the_hint_line_agree_about_what_a_live_search_is(
         screen = await open_map(app, pilot, MAP_ID)
         assert_declared_layout(screen, rail=True, inspector=True)
 
-        # LIMB 1 — below the bound.  The hint promises, so `esc` keeps the map.
+        # Below the bound, unchanged from `Inc-4b`.
         await submit(pilot, QUERY)
-        assert "limpiar" in hint_text(screen), hint_text(screen)
-        await pilot.press("escape")
-        await pilot.pause()
-        assert app.screen is screen, "esc popped the map out from under a live search"
-        assert screen.query_text == ""
+        assert hint_text(screen) == "n siguiente · N anterior · esc limpiar"
 
-        # LIMB 2 — above the bound, reached the way `§1.6 C`'s own arm reaches
-        # it.  The hint promises nothing, so `esc` must NOT act on the query.
+        # Above it, the affordance is still promised and the state is named.
         monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         await submit(pilot, QUERY)
         assert screen._search_order() is None, "the bound was not reached"
-        assert "limpiar" not in hint_text(screen), hint_text(screen)
-        assert screen.query_text.strip(), "the query is gone; the limb is vacuous"
-
-        await pilot.press("escape")
-        await pilot.pause()
-        assert app.screen is not screen, (
-            "esc swallowed a keypress where the hint promised nothing: it "
-            "cleared an unpainted query instead of leaving the map"
-        )
+        promised = hint_text(screen)
+        assert "limpiar" in promised, promised
+        assert SEARCH_SUSPENDED_NOTICE in promised, promised
+        assert "sin coincidencias" not in promised, promised
+        # It is PAINTED, not merely set: the strip is the surface `#D38` is about.
+        assert "limpiar" in hint_rows(screen), hint_rows(screen)
