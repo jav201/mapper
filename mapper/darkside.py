@@ -164,15 +164,102 @@ def tab_strip(active: str, crumb: list[str] | None = None, width: int = 0) -> Te
     line = Text.assemble(*pieces)
 
     if crumb:
-        rendered: list[tuple[str, str]] = []
-        for i, part in enumerate(crumb):
-            if i > 0:
-                rendered.append((" / ", MUT))
-            style = INK if i == len(crumb) - 1 else MUT
-            rendered.append((escape(part), style))
-        return Text.assemble(line, "\n", Text.assemble(*rendered))
+        # THE TERMINAL'S WIDTH, NOT `target_width`.  `target_width` is the TAB
+        # ROW's natural width -- `max(width, tabs + wordmark)`, floor 62 -- so
+        # handing it to the crumb gives the crumb a budget LARGER THAN THE
+        # FRAME below 62 columns.  The line was then cell-correct against 62 and
+        # wrapped anyway: measured at 30 columns it wanted six rows and the lid
+        # ate it entirely, and between 35 and 60 the visible line ended
+        # mid-title with neither ellipsis nor `+N`, because `fit`'s ellipsis sat
+        # in the clipped row.  That is the "lie by omission" the declaration
+        # below exists to prevent, reintroduced by passing the wrong variable.
+        return Text.assemble(line, "\n", _crumb_line(crumb, width))
 
     return line
+
+
+# The crumb's chrome: the ` / ` between parts, and the ` +N … ` that declares how
+# many ancestors were dropped.  Reserved so the budget can never be spent so
+# completely that the declaration itself has nowhere to go.
+_CRUMB_SEP_CELLS = 3
+_CRUMB_DROP_CELLS = 8
+# Below this there is no room to say anything useful about WHERE YOU ARE, so the
+# tail is shown alone and the ancestors are declared.  `keybar` makes the same
+# call in the same words: the affordance outranks the context.
+_CRUMB_TAIL_MIN_CELLS = 12
+
+
+def _cells(s: str) -> int:
+    """Display cells, not characters -- the unit the layout is actually in.
+
+    A `len()` here would under-count every wide glyph and over-count every
+    combining mark, which is how a cell budget written in characters stops
+    bounding anything.  The same measure `fit` truncates against.
+    """
+    return Text(s).cell_len
+
+
+def _crumb_line(crumb: list[str], width: int) -> Text:
+    """The breadcrumb, BOUNDED IN CELLS and truncated VISIBLY.
+
+    THE PARTS ARE FILE-DERIVED AND WERE UNBOUNDED, which made this a fourth
+    unbounded strip on the map screen.  `tab_strip`'s `width` reached only the
+    wordmark spacer above and never this line, so one long ficha title decided
+    the whole layout: measured at 4000 characters, `TabStrip` rendered 54 rows at
+    80x24 and pushed both `#map-canvas` and the search count region OFF-VIEWPORT
+    -- the same collapse `Inc-STRIPS` bounded on two other strips, reached
+    through a different vector.  Degradation starts long before the extreme: 500
+    characters already costs a third of the canvas at 80x24.
+
+    THE TAIL IS THE PART WORTH KEEPING.  It is the node the cursor is on and it
+    is painted `INK`; the ancestors are context in `MUT`.  So the budget is spent
+    from the RIGHT -- the tail first, then as many ancestors as still fit -- and
+    whatever is dropped is DECLARED rather than elided.  `keybar` states the
+    reason in its own docstring: a bare ellipsis "is a lie by omission: it says
+    something was cut but not that anything is missing, let alone how much".
+    """
+    if not crumb:
+        return Text("")
+    budget = width if width > 0 else 118
+
+    tail = crumb[-1]
+    tail_budget = max(_CRUMB_TAIL_MIN_CELLS, budget - _CRUMB_DROP_CELLS)
+    tail_text = fit(tail, min(tail_budget, _cells(tail))).rstrip()
+
+    kept: list[str] = []
+    used = _cells(tail_text)
+    for part in reversed(crumb[:-1]):
+        shown = fit(part, min(budget, _cells(part))).rstrip()
+        cost = _cells(shown) + _CRUMB_SEP_CELLS
+        if used + cost + _CRUMB_DROP_CELLS > budget:
+            break
+        kept.append(shown)
+        used += cost
+    kept.reverse()
+
+    dropped = len(crumb) - 1 - len(kept)
+    rendered: list[tuple[str, str]] = []
+    if dropped > 0:
+        # DECLARED, not elided: the count says how much of the path is missing.
+        rendered.append((f"+{dropped} ", INK))
+        rendered.append(("… / ", MUT))
+    # NOT `escape(...)`, and this is a correction rather than a simplification.
+    # `escape` adds a cell per markup-shaped bracket run AFTER the budget has
+    # been spent, so the rendered line could exceed a budget that was measured
+    # honestly: a `[b]`-bearing title breached the lid at SEVENTY of seventy
+    # widths from 20 to 89 -- including both widths this module's closing arm
+    # drives, which pass only because their fixture titles are letter runs.
+    #
+    # It was also wrong on its own terms.  `Text.assemble` with `(str, style)`
+    # tuples appends LITERAL text and parses no markup, so the backslash was
+    # painted on screen rather than protecting anything.  NO COERCION IS LOST:
+    # `MapScreen` applies `plain` to every part before it arrives here, and
+    # `fit` applies it again above.
+    for part in kept:
+        rendered.append((part, MUT))
+        rendered.append((" / ", MUT))
+    rendered.append((tail_text, INK))
+    return Text.assemble(*rendered)
 
 
 # Group box ----------------------------------------------------------------

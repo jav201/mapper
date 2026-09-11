@@ -564,14 +564,26 @@ async def test_the_factory_tree_coerces_the_titles_it_paints(tmp_path):
         leaked = sorted({hex(ord(c)) for row in rows for c in row
                          if ord(c) in banned and c not in "\t\n"})
         assert leaked == [], leaked
-        # THE F-C RESIDUAL, MEASURED HERE RATHER THAN LEFT TO BE REDISCOVERED.
-        # This is not an assertion that the leak is acceptable; it is the
-        # increment recording where the boundary of its own claim is.
+        # `F-C` IS CLOSED, AND THIS ARM IS RE-SCOPED TO THE WHOLE FRAME --
+        # which is exactly what the clause that used to stand here told the next
+        # reader to do on the day the leak stopped.
+        #
+        # CLOSED BY ACCIDENT, BOOKED DELIBERATELY (`Inc-CRUMB`).  Bounding the
+        # toast's detail at the `_event_toast` seam routed it through
+        # `darkside.fit`, which COERCES as well as truncates, so the chrome sink
+        # `F-C` named stopped leaking as a side effect of a LAYOUT bound.  A
+        # defect closed by accident still gets a deliberate record: `F-C`'s
+        # carry is marked closed-by-`Inc-CRUMB` and dropped from `Inc-REPAIR`'s
+        # scope, with the cross-reference in both.
+        #
+        # TWO-ORACLE EVIDENCE, per the batch standard: this assertion is RED on
+        # the pre-`Inc-CRUMB` tree and GREEN after.  That PAIR is what shows the
+        # increment closed it, rather than that it happens to be closed today.
         frame_leak = sorted({hex(ord(c)) for row in frame_rows(factory) for c in row
                              if ord(c) in banned and c not in "\t\n"})
-        assert frame_leak, (
-            "the FactoryScreen chrome no longer leaks -- F-C looks closed. "
-            "Re-scope this arm to the whole frame and delete this clause."
+        assert frame_leak == [], (
+            f"the FactoryScreen chrome leaks coerced code points: {frame_leak}. "
+            "F-C was closed by Inc-CRUMB's toast bound; this is a regression"
         )
 
 
