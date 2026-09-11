@@ -2475,6 +2475,29 @@ class MapScreen(Screen):
         # them during development and 6 arms went red on focus and on the rail's
         # byte identity.
         self.query_one(f"#{COUNT_REGION_ID}", Static).update(self._pagination_text())
+        # ...AND THE LINE ABOVE CAN MOVE THE CANVAS THAT WAS PAINTED ABOVE IT.
+        # `P1`, and the mechanism was measured rather than reasoned.  The strip
+        # is content-height (`#map-pagination` carries `max-height` and no
+        # `height`) while `#map-body` is `1fr`, so the strip's own row count
+        # decides how many rows the canvas gets.  In `outline` the declaration is
+        # absent, so this line renders 17 cells instead of layered's 36, stops
+        # wrapping at terminal widths <= 34, and hands the canvas back a row --
+        # AFTER `canvas.update` ran.  Nothing re-rendered, because this method
+        # never armed the settle loop.  Measured on `legacy`: the canvas held 3
+        # lines where the settled geometry asks for 4 at (30,16) and (32,16), 5
+        # where it asks 6 at (24,20), 1 where it asks 2 at (34,14).  The return
+        # trip is worse -- layered content written at outline's larger `h` into a
+        # region that then SHRINKS overflows by a physical row, CLIPPING content
+        # rather than leaving a blank one.
+        #
+        # `_declare_after_layout` already does the right thing: it re-renders at
+        # the CURRENT geometry and chases the region until it stops moving.  It
+        # was simply never armed from here.  Clearing `_declared_for` stops its
+        # first pass mistaking this frame for one it already reconciled, and it
+        # terminates on its own -- it re-schedules only while the region CHANGED,
+        # so a settled layout costs exactly one no-op pass.
+        self._declared_for = None
+        self.call_after_refresh(self._declare_after_layout)
 
     def on_ficha_inspector_field_committed(
         self, event: FichaInspector.FieldCommitted

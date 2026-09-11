@@ -1308,3 +1308,84 @@ async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_
         )
         assert declaring != absent and declaring != broken
         assert len({declaring, absent, broken}) == 3
+
+
+# ---------------------------------------------------------------------------
+# P1 -- the invariant behind LLR-N06.3.4's stale-write mechanism.
+#
+# 02o's law, generalized from the KeyBar mirror: AT REST, EVERY REGION AND ITS
+# CONTENT WERE PRODUCED FROM THE SAME GEOMETRY.
+#
+# WHY AN INVARIANT AND NOT A GAP ASSERTION. 02o measured that closing B-55 --
+# giving outline a painted_ids -- INCIDENTALLY closes this defect's trigger: the
+# strip keeps its overflow token, never unwraps from two rows to one, and the
+# region never moves. So an arm that presses `o` and asserts "nothing was lost"
+# would pass after B-55 lands WITHOUT this defect being fixed. P1 does not
+# depend on the trigger: it compares what the widget HOLDS against what the
+# CURRENT geometry would produce, in any view, at any size.
+#
+# THE MECHANISM, for the reader who finds this arm red: refresh_canvas paints
+# the canvas (app.py :2370) and updates the strip LAST (:2425). In outline the
+# strip loses its overflow token, its line goes 36 cells -> 17, it unwraps 2
+# rows -> 1 at terminal width <= 34, #map-pagination is content-height and
+# #map-body is 1fr -- so the canvas region GAINS a row after the canvas was
+# already painted, and nothing re-renders.
+
+# (terminal, presses) -- `o` once is layered->outline, twice is the RETURN trip.
+# 02o measured the return trip is WORSE: layered content written at outline's
+# larger `h` into a region that then SHRINKS, overflowing by one physical row --
+# clipped content, not blank rows. Same invariant, both directions (P4).
+P1_CASES = [
+    ((24, 20), 1), ((30, 16), 1), ((32, 16), 1), ((34, 14), 1),
+    ((24, 20), 2), ((30, 16), 2), ((32, 16), 2), ((34, 14), 2),
+    # HONEST negative controls (02o §6). NOT the seven zero-gap sizes: (28,14)
+    # reflows exactly like the loss sizes and is masked by the
+    # `region.height <= rows` clamp, and (60,20)/(80,24)/(118,34) are saturated
+    # by an 8-node fixture and cannot tell a fixed system from a broken one.
+    ((35, 14), 1), ((40, 16), 1), ((50, 16), 1),
+]
+
+
+@pytest.mark.parametrize("size,presses", P1_CASES,
+                         ids=lambda v: f"{v[0]}x{v[1]}" if isinstance(v, tuple) else f"o{v}")
+@pytest.mark.asyncio
+async def test_p1_at_rest_region_and_content_share_one_geometry(tmp_path, size, presses):
+    """What the canvas HOLDS must equal what its CURRENT geometry produces.
+
+    This is the general form of the law `Inc-CRUMB` found from the other end.
+    There, a widget kept an auto-height computed from a render it had already
+    replaced. Here, a widget keeps content rendered against a layout it has
+    since outgrown. An arm on the painted text alone passes the first; an arm on
+    the geometry alone passes the second. P1 catches both.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, "legacy")
+        app.store.save("legacy", graph)
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+        for _ in range(presses):
+            await pilot.press("o")
+            await pilot.pause()
+
+        canvas = screen.query_one("#map-canvas")
+        held = canvas.render()
+        held_txt = held.plain if hasattr(held, "plain") else str(held)
+        w, h = screen._canvas_size()  # noqa: SLF001
+        expected = screen._current_renderer().render(  # noqa: SLF001
+            screen.graph, screen._view_state(w, h)).plain  # noqa: SLF001
+
+        # NON-DEGENERACY FIRST: a view that rendered nothing would satisfy the
+        # equality with two empty strings.
+        assert expected.strip(), (
+            f"at {size} after {presses} press(es) the renderer produces nothing; "
+            "the equality below would compare two empty frames"
+        )
+        assert held_txt == expected, (
+            f"at {size} after {presses} press(es) the canvas holds content "
+            f"rendered against a geometry that is no longer current: holds "
+            f"{len(held_txt.splitlines())} line(s), the region now asks for "
+            f"{len(expected.splitlines())}. The region moved after the canvas "
+            "was painted and nothing re-rendered."
+        )

@@ -188,15 +188,29 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       the derived class set and share this single helper, so this count
     #       does NOT move when a seventh renderer joins -- which is the whole
     #       point of deriving the set instead of listing it.
-    assert len(sites["argful"]) == 59, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 59; "
+    #
+    # 59 -> 60 in Inc-B55a, AND THE PIN CAUGHT IT A FOURTH TIME.  Itemised:
+    #   +1  `tests/test_overflow.py::test_p1_at_rest_region_and_content_share_
+    #       one_geometry` renders the CURRENT renderer at the CURRENT
+    #       `_canvas_size()` to compare against what the canvas widget holds.
+    #       That comparison IS the arm -- `P1`, the invariant that a region and
+    #       its content were produced from the same geometry -- so the site
+    #       cannot be shared with an existing helper without the helper
+    #       deciding the geometry the arm exists to check.
+    assert len(sites["argful"]) == 60, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 60; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
     # a zero-arg Textual widget site that must NOT be swept into the A3.
-    assert len(sites["zeroarg"]) == 26, (
+    #
+    # 26 -> 27 in Inc-B55a: the same `P1` arm calls `canvas.render()` to read
+    # what the widget HOLDS.  A zero-arg Textual widget site, correctly outside
+    # the A3 -- it is not a renderer invocation, it is the widget being asked
+    # what it is currently painting.
+    assert len(sites["zeroarg"]) == 27, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "26; a DROP means widget sites were wrongly swept into the A3"
+        "27; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -300,9 +314,10 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     floor-based gate could not tell the difference.
     """
     zeroarg = render_call_sites()["zeroarg"]
-    # 25 -> 26 in Inc-3, the same site the cardinality pin above names.
-    assert len(zeroarg) == 26, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 26. A floor was "
+    # 25 -> 26 in Inc-3, and 26 -> 27 in Inc-B55a -- the same sites the
+    # cardinality pin above names and itemises.
+    assert len(zeroarg) == 27, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 27. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
