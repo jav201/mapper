@@ -488,9 +488,30 @@
         "carries_opened": "SEC-F1 (TabStrip.__init__ renders at _crumb_line 118 fallback; NOT live -- content superseded before paint, height clamped by max-height:3, so THE LID IS LOAD-BEARING for the init path) and DECL-118-TWICE (118 hardcoded in chrome.py and darkside.py:223). Both -> Inc-REPAIR. Five security LOW carried incl. the export toast still painting the username, exposure UNCHANGED by this increment. Inc-REPAIR DROPS F-C, closed by accident here and BOOKED deliberately with two-oracle evidence.",
         "controls_earned": "Measure what the operator reads AND the geometry it stands in; either alone can lie. Pairs with Inc-STRIPS composited-frame rule as two halves of one law.",
         "docs_commit": "315f8c9"
+      },
+      {
+        "inc": "Inc-B55a",
+        "commits": [
+          "3920e06",
+          "7a973df",
+          "ff55ab6",
+          "f355499",
+          "45663b6",
+          "a4862bf",
+          "1ab87d8"
+        ],
+        "date": "2026-09-10",
+        "source_files": 2,
+        "shape_disclosure": "SEVEN source commits, not the two-commit shape Inc-CRUMB used. The work was committed at each acknowledged stage rather than held to the gate. Stated, not dressed up.",
+        "scope": "B-55's OUTLINE vector. outline now declares the nodes it hides on BOTH surfaces, with render and painted_ids consuming one row pass and cutting with the same _fit, so the declaration and the cut cannot disagree about what 'painted' means. Underneath: a stale-write defect (canvas painted, then the strip's reflow grew the region, nothing re-rendered) and a seam that answered 'nothing to declare', 'not this view' and 'the declaration broke' with one value.",
+        "gates": "FULL protocol, serial. Code review BLOCK/2 HIGH -> folded. Security review SIGN-OFF/0 HIGH, one MEDIUM fixed. Soft cap: 1 block used.",
+        "suite": "default 968 passed / 19 deselected / 3 xfailed; all markers 987 passed / 3 xfailed; ruff SET-IDENTICAL 19 pairs / 27 both sides with asserted parse counts and a firing positive control.",
+        "headline_finding": "THE MEASUREMENTS SURVIVED AND THE EXPLANATIONS DID NOT -- five times in one increment. A hypothesis structurally incapable of explaining its own metric (a header constant cancels in a difference of two terms priced the same way); a seam named that the code already implemented; a cost fixture two nodes past the view's cap that priced its refusal; an invariant arm built trigger-independent and mistaken for one that discriminates, so deleting the entire fix left the suite green; and a guard claimed to BE its invariant while reading two of its ten inputs. Every one was caught by an independent lane firing the claim rather than reading it.",
+        "controls_earned": "Trigger-independence is not discriminating power. A cost fixture must exercise the path it prices. The worked exception to the second-mechanism prohibition, AND its projection trap. H1 refined: a declaration must not spend content and inform nothing. A bless computed by a different method than the pin uses. The asymmetry principle's misapplication mode.",
+        "carries_opened": "AGREE-1 OPEN at the empty-frame floor (11 sizes, in open_blocks). radial declares nothing -> Inc-B55b. Defect 2, the ~150 ms painted_ids walk + its 2x amplification, F2's unbounded per-row physical cost, and F7's triplicated declaration sentence -> Inc-REPAIR. UI-AT058's Spanish string -> ux-reviewer."
       }
     ],
-    "next": "Inc-B55",
+    "next": "Inc-B55b",
     "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
     "controls_for_engineering_rules": [
       {
