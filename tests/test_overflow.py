@@ -1150,3 +1150,161 @@ async def test_at_016_the_declared_set_equals_the_traced_set(tmp_path):
     assert len(set(outcomes)) >= 3, outcomes
     assert any(hidden == 0 for _painted, hidden in outcomes), outcomes
     assert any(hidden > 0 for _painted, hidden in outcomes), outcomes
+
+
+# ---------------------------------------------------------------------------
+# AT-058 / TC-091 -- LLR-N06.3.6: a declaration that BROKE is not a view that
+# declares nothing.
+#
+# `02n` named this and declined to place it; the coordinator placed it. It is
+# sequenced FIRST inside Inc-B55a because `Inc-B55` is what makes the seam
+# reachable by more than one renderer, and a seam that swallows "declaration
+# broken" into "declares nothing" would swallow AT-056 and AT-057 themselves --
+# both arms would go green over a broken feature.
+
+
+class _UnregisteredRenderer:
+    """A renderer the screen has no declaration entry for.
+
+    Deliberately NOT one of the three the screen builds: the defect under test
+    is what happens to a renderer nobody remembered to register, which is the
+    state every future renderer starts in.
+    """
+
+    def render(self, graph, state):  # pragma: no cover - never reached
+        raise AssertionError("render must not be reached by this arm")
+
+
+@pytest.mark.asyncio
+async def test_at058_an_unregistered_renderer_raises_rather_than_declaring_nothing(tmp_path):
+    """The resolution is OUTSIDE the guard, and this is what that buys.
+
+    Pre-fix, `_unpainted_ids` answered `None` for every view that was not
+    `layered` -- measured at four sizes, including one hiding 7 of 8 nodes. So
+    "this view declares nothing", "this is not the declaring view" and "the
+    declaration is broken" were ONE value, and `LLR-N06.3.3` makes that value
+    mean *nothing is hidden*.
+
+    `frozenset()` is a LEGITIMATE return for the caller -- both degraded render
+    paths produce one -- so an unregistered renderer must not be able to answer
+    with it either. It raises.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+
+        with pytest.raises(LookupError) as caught:
+            screen._painted_ids_for(_UnregisteredRenderer())  # noqa: SLF001
+        assert "_UnregisteredRenderer" in str(caught.value), (
+            "the diagnostic must NAME the renderer that has no entry; a bare "
+            "LookupError sends the next reader hunting"
+        )
+
+        # The three the screen actually builds all resolve, and two of them
+        # resolve to the EXPLICIT `None` that means "declares nothing by
+        # design". That is the B-55 hole, stated rather than omitted.
+        assert screen._painted_ids_for(screen.renderer) is painted_ids  # noqa: SLF001
+        assert screen._painted_ids_for(screen.outline_renderer) is None  # noqa: SLF001
+        assert screen._painted_ids_for(screen.radial_renderer) is None  # noqa: SLF001
+
+
+@pytest.mark.asyncio
+async def test_at058_a_layout_failure_still_degrades_to_absent(tmp_path):
+    """The other half, and the reason the guard still exists at all.
+
+    `painted_ids` shares `_geometry` with `render`, so it raises on exactly the
+    frames the canvas cannot draw -- and `_unpainted_ids` is called from
+    `refresh_canvas`, inside the message pump. Letting that escape turns a
+    contained, declared degradation into a dead app.
+
+    A layout failure is DATA-dependent and `None` is honest for it. A missing
+    declaration is a CODE defect, deterministic on every frame. The two must not
+    share an observable, which is what the arm above pins.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+
+        def _boom(graph, state):
+            raise RuntimeError("the frame was never laid out")
+
+        original = screen._painted_ids_for  # noqa: SLF001
+        screen._painted_ids_for = lambda renderer: _boom  # noqa: SLF001
+        try:
+            assert screen._unpainted_ids() is None, (  # noqa: SLF001
+                "a layout failure must degrade to `None`, not escape the "
+                "message pump"
+            )
+            # And the app is still alive: a repaint through the same seam does
+            # not raise.
+            screen.refresh_canvas()
+            await pilot.pause()
+        finally:
+            screen._painted_ids_for = original  # noqa: SLF001
+
+        # Restored, the declaring view still declares -- the arm above must not
+        # leave the screen in a state where AT-056/AT-057 would pass vacuously.
+        assert screen._unpainted_ids() is not None  # noqa: SLF001
+
+
+@pytest.mark.asyncio
+async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_path):
+    """The threshold's real clause: the paths produce DIFFERENT painted frames.
+
+    Three states, and pre-fix TWO of them were the same strip:
+
+      declaring  layered with nodes hidden   -> the overflow token and a count
+      absent     a view that declares nothing -> no token, by design
+      broken     no declaration registered    -> pre-fix, ALSO no token
+
+    `LLR-N06.3.3` makes "no token" mean *nothing is hidden*, so `broken` was
+    indistinguishable from `absent` AND read as a positive claim. This asserts
+    all three strips differ.
+
+    The raise is caught at this seam rather than allowed out: `_pagination_text`
+    runs inside the message pump and `TC-R08` requires `refresh_canvas` to
+    survive any renderer exception. Loud-and-dead is not the trade; loud-and-
+    DISTINCT is.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(30, 16)) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+
+        declaring = screen._pagination_text().plain  # noqa: SLF001
+
+        screen.outline_mode = True
+        absent = screen._pagination_text().plain  # noqa: SLF001
+        screen.outline_mode = False
+
+        original = screen._painted_ids_for  # noqa: SLF001
+        screen._painted_ids_for = lambda r: (_ for _ in ()).throw(  # noqa: SLF001
+            LookupError("no painted_ids declared for Forgotten"))
+        try:
+            broken = screen._pagination_text().plain  # noqa: SLF001
+            # And the pump survives it -- TC-R08's property, at this seam.
+            screen.refresh_canvas()
+            await pilot.pause()
+        finally:
+            screen._painted_ids_for = original  # noqa: SLF001
+
+        assert OVERFLOW_TOKEN in declaring, (
+            "the fixture must actually hide something at 30x16 or this arm "
+            f"compares three copies of silence. Got: {declaring!r}"
+        )
+        assert OVERFLOW_TOKEN not in absent
+        assert OVERFLOW_TOKEN not in broken
+        assert broken != absent, (
+            "a BROKEN declaration paints the same strip as a view that declares "
+            "nothing -- the collision AT-058 exists to break"
+        )
+        assert declaring != absent and declaring != broken
+        assert len({declaring, absent, broken}) == 3

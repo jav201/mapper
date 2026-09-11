@@ -1592,15 +1592,53 @@ class MapScreen(Screen):
         degradation ("no se pudo dibujar el mapa") into a dead app.  `None` is
         the value this helper already has for "this view declares nothing",
         which is the truthful answer for a frame that was never laid out.
+
+        RESOLUTION HAPPENS OUTSIDE THE GUARD, AND THAT IS LOAD-BEARING
+        (`AT-058`).  The `except` below is TOTAL, so a renderer with no entry in
+        `_painted_ids_for` would be caught here and answered `None` -- and
+        `None` means "this view declares nothing", which `LLR-N06.3.3` makes
+        mean "nothing is hidden".  A BROKEN declaration would present as an
+        ABSENT one.  `Inc-B55` is what makes this seam reachable by more than
+        one renderer, so the two are separated BEFORE anything is wired through
+        it: an unregistered renderer RAISES, and only a layout failure degrades
+        to `None`.
         """
-        if self._current_renderer() is not self.renderer:
+        declare = self._painted_ids_for(self._current_renderer())
+        if declare is None:
             return None
         w, h = self._canvas_size()
         try:
-            painted = painted_ids(self.graph, self._view_state(w, h))
+            painted = declare(self.graph, self._view_state(w, h))
         except Exception:
             return None
         return frozenset(self.graph.nodes) - painted
+
+    def _painted_ids_for(self, renderer):
+        """The function this renderer declares its painted set through.
+
+        IDENTITY, NEVER `getattr` (`A-98`, ruling `02j`): a probe answers "this
+        view declares nothing" and "this view's declaration is broken" with the
+        same `None`, which is the silent skip this batch keeps catching.
+
+        `None` here means DECLARES NOTHING BY DESIGN, and it is an EXPLICIT
+        entry rather than an absence -- `outline` and `radial` are the `B-55`
+        hole, stated rather than omitted.  A renderer ABSENT from this mapping
+        is a CODE DEFECT and raises, because `frozenset()` is a LEGITIMATE
+        return for this helper's caller -- both degraded render paths produce
+        one -- so an unregistered renderer answering with it would be a lie the
+        strip paints as "nothing hidden".
+        """
+        if renderer is self.renderer:
+            return painted_ids
+        if renderer is self.outline_renderer:
+            return None
+        if renderer is self.radial_renderer:
+            return None
+        raise LookupError(
+            f"no painted_ids declared for {type(renderer).__name__}; add an "
+            "explicit entry -- absence is a code defect, not a view with "
+            "nothing to say"
+        )
 
     def _park_focus(self) -> None:
         """Hand the keyboard back to the map itself."""
@@ -2140,7 +2178,21 @@ class MapScreen(Screen):
         # pass the renderer used, so the two surfaces cannot declare different
         # totals.  `None` means a view that declares nothing, and the strip then
         # keeps only its reserved-affordance content.
-        hidden = self._unpainted_ids()
+        #
+        # A BROKEN DECLARATION GETS ITS OWN WORDS, NOT SILENCE (`AT-058`).
+        # `_painted_ids_for` RAISES for a renderer with no entry, and that raise
+        # must not escape: this runs inside the message pump, and `TC-R08`
+        # requires `refresh_canvas` to survive ANY renderer exception -- tests
+        # and future code substitute renderers at runtime, and identity dispatch
+        # cannot tell a substituted renderer from a forgotten one.  So the raise
+        # is CAUGHT HERE and turned into a DIFFERENT OBSERVABLE.  Falling back to
+        # silence instead would be the exact collision `AT-058` exists to break:
+        # `LLR-N06.3.3` makes silence mean "nothing is hidden".
+        try:
+            hidden = self._unpainted_ids()
+        except LookupError:
+            text.append("declaración no disponible ", style=darkside.INK)
+            return text
         if hidden:
             text.append(f"{OVERFLOW_TOKEN} {len(hidden)} fuera de vista ",
                         style=darkside.INK)
