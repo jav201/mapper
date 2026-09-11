@@ -370,6 +370,17 @@
           "arms": "test_at059_radial_truncates_its_title_image_at_eighteen_cells -- pins BOTH halves: the frame carries the truncated image and does NOT carry the full one, and the declaration agrees with the frame oracle on that fixture.",
           "mutants": "M6 (renderer [:18] -> [:60]) KILLED. M5 (oracle drops [:18]) SURVIVED at first -- the arm read the frame and the declaration directly and never called `_frame_hidden_for`, so the ORACLE's truncation stayed unexercised. Adding that assertion killed it. Both halves of the predicate now have a witness; without it, the 16-of-16 agreement elsewhere was agreement between two copies of the same mistake.",
           "cut": "tests + fixtures, ZERO source files. Recorded as part of this increment's cut."
+        },
+        "b55b_security_review": {
+          "verdict": "SIGN-OFF. 0 HIGH, 1 MEDIUM, 1 LOW, 7 verified-OK. No source mutation was needed -- every finding was fired read-only.",
+          "coercion_delta": "NO LOSS, and a net gain in declaration honesty. The content coercion site count is 1 before and 1 after -- the same expression, moved only by the dedent. Fired: OSC-52 clipboard payload, U+E0020..U+E0024 TAG block, and U+202E bidi override through the frame AND the exported SVG. Residual control/format code points: NONE in either.",
+          "S1_MEDIUM_carried": "A WIDE-CHARACTER TITLE FALSIFIES THE NEW DECLARATION. `darkside.plain` coerces CONTENT, not WIDTH, and radial sizes its pill with `len(title) + 3` -- a CODE-POINT count. An 18-code-point CJK title needs 36 display columns while the pill reserves 21; the ledger is keyed on grid coordinates, sees no collision, and declares the node painted. Fired on the composited screen at 30x20: the title wrapped onto a second physical row and the canvas declared NOTHING hidden. Worse than one unreadable label -- #map-canvas wraps, so an overflowing row consumes an extra physical row and can push the bottom row out of the region. That is B-61 through a content channel rather than an arithmetic one. Measured across renderers at 40x24 against inner=38: layered 38 (correct, it routes through darkside.fit which truncates on cell_len), outline 42, radial 41. Radial is the only renderer sizing with raw len().",
+          "S1_is_NOT_a_regression": "At 10fd573 `_painted_ids_for` returned None for radial, and LLR-N06.3.3 makes that silence mean 'nothing is hidden' -- THE SAME FALSE CLAIM, at every size, for every input. This increment narrows a universally-false declaration to one false only for wide-character titles at narrow terminals. The posture strictly improves, which is why it is a carry and not a block.",
+          "S2_LOW_carried": "`overflow_phrase` is a new cross-module sink with an annotation-only int contract. No live defect -- all three call sites pass set cardinalities, and the result lands in Text.append which parses no markup. Hardening: `int(hidden)` in the helper, so the contract is the function's own property rather than a promise three seams must keep.",
+          "verified_OK": "Export path byte-identical and still coerced (painted_ids is not on it at all). Nothing file-derived escapes the new return path or the new dicts -- owners values and title_cells keys are node IDS, and no node id reaches a painted surface; an integer does. _paint is pure, no global/nonlocal, so the export call site cannot cross-contaminate -- the docstring's stated reason is now verified rather than asserted. The None-on-layout-failure invariant is TRUE for radial: on a cyclic graph painted_ids AND render both raise, so the silent strip sits beside a visibly failed canvas rather than a plausible-looking wrong one. The new fixture is plain ASCII, a strict subset of the existing corpus, and unreachable from the shipped app. The ledger is LINEAR -- O(21N), no pairwise term, owners bounded by the TERMINAL not the graph, and MAX_RENDER_NODES sits inside _paint so painted_ids short-circuits exactly as render does. No DoS.",
+          "spot_checks": "THREE of my corrected numbers checked, ALL THREE HOLD: the 8-of-8 over-declaration at 30x6, the 50x16/30x16 body_h figures, and all three callers applying INK. The reviewer also re-verified the code review's HIGH as genuinely closed at 20x30 -- `erp` now correctly declared hidden where it had been declared painted with its last character shorn off.",
+          "handed_to_qa": "A WIDE-CHARACTER TITLE HAS NO FIXTURE AND NO ARM -- the suite cannot currently fail on S1. `fixtures/truncado` is the natural home for one.",
+          "could_not_determine": "The wrap threshold -- how many overflow columns push a body row out of the region at each size, i.e. the density at which S1 escalates from one unreadable label to a whole row declared painted and invisible. Measure before Inc-REPAIR picks a fix. Also whether ficha.title can be empty in production (inherited unresolved), and whether outline's 42-cell overflow is live or benign (outside this cut)."
         }
       }
     ],
@@ -544,9 +555,26 @@
         "headline_finding": "THE MEASUREMENTS SURVIVED AND THE EXPLANATIONS DID NOT -- five times in one increment. A hypothesis structurally incapable of explaining its own metric (a header constant cancels in a difference of two terms priced the same way); a seam named that the code already implemented; a cost fixture two nodes past the view's cap that priced its refusal; an invariant arm built trigger-independent and mistaken for one that discriminates, so deleting the entire fix left the suite green; and a guard claimed to BE its invariant while reading two of its ten inputs. Every one was caught by an independent lane firing the claim rather than reading it.",
         "controls_earned": "Trigger-independence is not discriminating power. A cost fixture must exercise the path it prices. The worked exception to the second-mechanism prohibition, AND its projection trap. H1 refined: a declaration must not spend content and inform nothing. A bless computed by a different method than the pin uses. The asymmetry principle's misapplication mode.",
         "carries_opened": "AGREE-1 OPEN at the empty-frame floor (11 sizes, in open_blocks). radial declares nothing -> Inc-B55b. Defect 2, the ~150 ms painted_ids walk + its 2x amplification, F2's unbounded per-row physical cost, and F7's triplicated declaration sentence -> Inc-REPAIR. UI-AT058's Spanish string -> ux-reviewer."
+      },
+      {
+        "inc": "Inc-B55b",
+        "commits": [
+          "f828d7b",
+          "540123c",
+          "4bb63bf"
+        ],
+        "date": "2026-09-11",
+        "source_files": 3,
+        "shape": "Stage-committed per the amended close shape, plus this close record.",
+        "scope": "B-55's RADIAL vector, which closes B-55 across all three views. The painted set is a cell-ownership replay over a last-write-wins canvas that records no owner; render and painted_ids consume one pass. The declaration sentence is single-sourced as layered.overflow_phrase, so radial never became a fourth spelling.",
+        "gates": "FULL protocol, serial. Code review BLOCK/1 HIGH -> folded. Security review SIGN-OFF/0 HIGH. Soft cap: 1 block used.",
+        "suite": "default 984 passed / 19 deselected / 3 xfailed; all markers 1003 passed / 3 xfailed; ruff SET-IDENTICAL with asserted parse counts and a firing positive control. WEAKER GREEN: FLAKE-1 is present in the lane.",
+        "headline_finding": "THE GATE WAS EXACT ABOUT WHAT LANDED AND WRONG ABOUT WHAT THAT SHOULD MEAN. The ownership gate was raised one line too high, so a title cell clipped by the CANVAS EDGE never entered the requirement set -- the node was not failed, its requirement was quietly reduced to the cells that fit, and it was declared painted with its last character shorn off. It reached the gate green because every driven size sampled pill-on-pill overlap, which the ledger always caught. Five comments were also wrong on checkable numbers.",
+        "controls_earned": "A parametrization that samples one failure mode tests one failure mode. Plus the BAD-mutant discipline reinforced: pytest exit 2+ is a collection error, not a kill.",
+        "carries_opened": "S1 (wide-character titles falsify the declaration -- radial sizes pills in code points, not display cells; NOT a regression, it narrows a universally-false claim) and S2 (int() hardening in overflow_phrase) -> Inc-REPAIR. A wide-character fixture and arm are OWED, routed to qa-reviewer. The LLR-N06.3.3 question of whether silence should have its own words is carried, not answered."
       }
     ],
-    "next": "Inc-B55b",
+    "next": "Inc-REPAIR",
     "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
     "controls_for_engineering_rules": [
       {
