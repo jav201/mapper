@@ -10,6 +10,7 @@ import re
 
 import pytest
 from rich.color import EIGHT_BIT_PALETTE, Color, ColorSystem
+from rich.console import Console
 
 from tests.inc3_support import (
     rows_in,
@@ -1517,13 +1518,26 @@ async def test_at056_outline_declares_what_the_cut_hid(tmp_path, fixture, size):
         # the last row -- measured at (30,16) and (32,16).  A blanket bound
         # would have been a false-fail on ratified behaviour (`C-53`).
         #
-        # Replaced by the CONDITIONAL that actually separates the legitimate
-        # frame from the mutant it was guarding, which is a STRENGTHENING and so
-        # needs no independent pass (control 13): painting nothing is allowed
-        # ONLY while the canvas is visibly saying so.  A `_fit` that returns an
-        # empty list drops the header too, declares everything hidden, and
-        # paints NO token -- and fails here, which is the `lines[:0]` shape
-        # PHYS-4 existed to catch.
+        # IT IS A TRADE, NOT A STRENGTHENING, AND CALLING IT ONE WAS WRONG.  The
+        # code review measured what the trade costs: a one-row OVER-CUT (`_fit`'s
+        # budget test `>` becoming `>=`) is caught by the old `< total` bound at
+        # `anidado (32,16)` -- a size this arm drives -- and is GREEN under the
+        # conditional below, because an over-cut moves the declaration and the
+        # frame TOGETHER and `PHYS-3` cannot see it.  Control 13 lets an author
+        # strengthen his own acceptance unreviewed; it does not cover a trade,
+        # and this was a trade.
+        #
+        # THE COST IS PAID RATHER THAN ARGUED AWAY:
+        # `test_outline_cuts_at_the_rows_the_canvas_shows` -- the `PHYS-1`/
+        # `PHYS-2` pilot arm `LLR-N06.3.4` ratified and which had never been
+        # written -- catches that over-cut RED, and the under-cut too, which
+        # previously only a golden hash caught.
+        #
+        # What the conditional below still does is separate the legitimate
+        # all-hidden frame from the `lines[:0]` mutant: painting nothing is
+        # allowed ONLY while the canvas is visibly saying so.  A `_fit` returning
+        # an empty list drops the header too, declares everything hidden, paints
+        # NO token, and fails here.
         if len(declared) == total:
             assert OVERFLOW_TOKEN in " ".join(canvas_rows(screen)), (
                 f"{fixture} at {size} paints no node and declares all {total} "
@@ -1654,3 +1668,141 @@ async def test_at057_both_surfaces_declare_when_a_view_hides(tmp_path, module, s
             f"{module} at {size}: both surfaces say {on_canvas}, the frame hides "
             f"{len(frame_hidden)}"
         )
+
+
+@pytest.mark.parametrize("size", [(24, 20), (30, 16), (32, 16), (34, 14)],
+                         ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_p1_survives_a_strip_reflow_after_the_canvas_is_painted(tmp_path, size):
+    """`P1` WITH THE TRIGGER SUPPLIED -- the arm the parametrised one is not.
+
+    THE ARM ABOVE IS TRUE AND CANNOT FAIL, and the code review proved it:
+    deleting the settle arming from `refresh_canvas` entirely leaves the whole
+    suite green, all eleven of its cases included. Instrumented, the region
+    never moves after `refresh_canvas` paints at any of the four loss sizes --
+    because `outline` now DECLARES, so the strip keeps its token, never unwraps
+    from two rows to one, and never hands the canvas a row back. Closing `B-55`
+    closed this defect's own trigger.
+
+    That was foreseen -- the other arm's header says "closing B-55 incidentally
+    closes this defect's trigger" -- and then the wrong conclusion was drawn
+    from it. Trigger-independence made the arm SURVIVE `B-55`; it did not make
+    it DISCRIMINATE. An invariant that holds for an unrelated reason has no
+    power. So this arm supplies the trigger instead of hoping for it.
+
+    The stub restores the pre-`B-55` condition exactly: a one-row strip, which
+    is what `#map-pagination` rendered when outline declared nothing (17 cells
+    against layered's 36). `#map-pagination` is content-height and `#map-body`
+    is `1fr`, so the strip shrinking hands the canvas a row -- AFTER
+    `refresh_canvas` has already painted it.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, "legacy")
+        app.store.save("legacy", graph)
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+        await pilot.press("o")
+        await pilot.pause()
+
+        canvas = screen.query_one("#map-canvas")
+        before = canvas.region.height
+        # THE TRIGGER. A one-row strip, the shape outline produced before it
+        # declared. Patched on the instance, so the production seam is untouched.
+        screen._pagination_text = lambda: darkside.Text("z")  # noqa: SLF001
+        screen.refresh_canvas()
+        await pilot.pause()
+
+        assert canvas.region.height != before, (
+            f"at {size} the strip stub did not move the canvas region "
+            f"({before} -> {canvas.region.height}); this arm would then be "
+            "asserting P1 on a frame whose geometry never changed, which is "
+            "exactly the vacuity it exists to repair"
+        )
+
+        held = canvas.render()
+        held_txt = held.plain if hasattr(held, "plain") else str(held)
+        w, h = screen._canvas_size()  # noqa: SLF001
+        expected = screen._current_renderer().render(  # noqa: SLF001
+            screen.graph, screen._view_state(w, h)).plain  # noqa: SLF001
+        assert expected.strip(), "the renderer produces nothing; degenerate"
+        assert held_txt == expected, (
+            f"at {size} the canvas holds content rendered against a geometry "
+            f"that is no longer current: holds {len(held_txt.splitlines())} "
+            f"line(s), the region now asks for {len(expected.splitlines())}. "
+            "The region moved after the canvas was painted and nothing "
+            "re-rendered."
+        )
+
+
+@pytest.mark.parametrize("fixture", AT056_FIXTURES)
+@pytest.mark.parametrize("size", AT056_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_outline_cuts_at_the_rows_the_canvas_shows(tmp_path, fixture, size):
+    """`PHYS-1` and `PHYS-2` -- the PINNED PILOT ARM, not acceptance.
+
+    `LLR-N06.3.4` demotes these from `AT-056` because they press a claim the
+    operator cannot state ("outline priced its cut in physical rows"), and pins
+    them HERE so the demotion does not become a deletion. **It had become one:**
+    the row said the arm existed and no such arm was on disk, which the code
+    review found. A ratified clause with no node is `AT-005`/`AT-006`'s shape.
+
+    These are the clauses that catch a MIS-SIZED cut, and the acceptance cannot:
+      * over-cut (`_fit` budget `>` -> `>=`) leaves declaration and frame moving
+        TOGETHER, so `PHYS-3` stays green while a row is silently lost.
+      * under-cut (emitting more than fits) was caught only by a golden hash --
+        content painted into a void, which is `B-55`'s own original shape.
+    """
+    from mapper.views import outline as _outline
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, fixture)
+        app.store.save(fixture, graph)
+        screen = await open_map(app, pilot, fixture)
+        await pilot.pause()
+        await pilot.press("o")
+        await pilot.pause()
+
+        region = screen.query_one("#map-canvas").region
+        w, h = screen._canvas_size()  # noqa: SLF001
+        state = screen._view_state(w, h)  # noqa: SLF001
+        rows, short_circuit = _outline._rows(graph, state)  # noqa: SLF001
+        assert short_circuit is None, "fixture past the render bound; degenerate"
+        kept = _outline._fit_declared(rows, w, h)  # noqa: SLF001
+        assert kept, "the fit kept nothing at all; PHYS-2 would be vacuous"
+
+        # PHYS-1 -- nothing emitted that the canvas cannot show. Read off the
+        # composited frame, joined across wrapped rows, because outline wraps.
+        painted = " ".join(" ".join(canvas_rows(screen)).split())
+        for _nid, line in kept:
+            trace = " ".join(line.plain.split())
+            assert trace in painted, (
+                f"{fixture} at {size}: outline emitted a line the frame does "
+                f"not show: {trace[:60]!r}"
+            )
+
+        # PHYS-2 -- the cut is MAXIMAL, not merely safe, measured against the
+        # budget the renderer was GIVEN. The gap between that budget and
+        # `region.height` is layered's header charge levied in outline -- a
+        # separate defect, measured and routed to Inc-REPAIR, not this arm's.
+        console = Console(width=max(1, w), no_color=True)
+
+        def phys(seq):
+            return sum(max(1, len(console.render_lines(t, pad=False)))
+                       for _n, t in seq)
+
+        assert phys(kept) <= h, (
+            f"{fixture} at {size}: the cut emits {phys(kept)} physical rows "
+            f"into a budget of {h} -- content painted into a void"
+        )
+        if len(kept) < len(rows):
+            one_more = [*kept, rows[len(kept)]]
+            assert phys(one_more) > h, (
+                f"{fixture} at {size}: one MORE line would still have fitted "
+                f"({phys(one_more)} rows into {h}); the cut is short of maximal "
+                "and a node was hidden that the canvas had room for"
+            )
+        assert region.height >= 1
