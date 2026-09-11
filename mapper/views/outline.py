@@ -6,6 +6,7 @@ from rich.text import Text
 
 from mapper import darkside
 from mapper.model import Graph
+from mapper.views.layered import OVERFLOW_TOKEN
 from mapper.views.state import ViewState
 
 
@@ -204,6 +205,79 @@ def _fit(
     return kept
 
 
+def _declared(rows, kept) -> int:
+    """How many NODES the fit dropped.  Rows without a node id do not count."""
+    return (sum(1 for nid, _t in rows if nid)
+            - sum(1 for nid, _t in kept if nid))
+
+
+def _fit_declared(
+    rows: list[tuple[str | None, Text]], w: int, h: int
+) -> list[tuple[str | None, Text]]:
+    """Fit, DECLARE what the fit hid, and re-fit -- because the declaration is
+    painted in the header and can itself cost a row.
+
+    `LLR-N06.3.5`: bounded is not enough, what is dropped has to be SAID, on the
+    renderer's own surface as well as the strip.  `LLR-N06.3.3` makes silence
+    mean *nothing is hidden*, so a canvas that hides seven nodes and says nothing
+    is not merely unhelpful -- it makes a false positive claim.
+
+    THE LOOP IS NOT DECORATION.  Appending the token widens the header, which can
+    wrap it onto another physical row, which evicts a body line, which changes
+    the number the token states.  A single pass would paint a declaration that
+    its own painting falsified.  It iterates to a FIXED POINT and is bounded: at
+    most three passes, and it returns the last fit either way, so a pathological
+    frame degrades to a slightly stale numeral rather than looping.
+
+    `render` and `painted_ids` both come through here, so the canvas header, the
+    strip and the declaration are one computation -- `B-60`'s lesson.
+    """
+    kept = _fit(rows, w, h)
+    if not rows:
+        return kept
+    hidden = _declared(rows, kept)
+    for _ in range(3):
+        if hidden <= 0:
+            return kept
+        header = rows[0][1].copy()
+        header.append(f"  {OVERFLOW_TOKEN} {hidden} fuera de vista",
+                      style=darkside.INK)
+        widened = [(rows[0][0], header), *rows[1:]]
+        candidate = _fit(widened, w, h)
+        # `H1`, REFINED RATHER THAN CONTRADICTED (coordinator ruling
+        # 2026-09-10).  `Inc-STRIPS` recorded H1 as "a declaration must not
+        # manufacture the omission it announces", but its own evidence says
+        # something narrower: the unconditional reserve dropped 2 of 3 branches
+        # and declared "+2" AT IDENTICAL STRIP AND CANVAS HEIGHTS EITHER WAY --
+        # the dropped branches bought NOTHING.  The law is therefore "a
+        # declaration must not spend content and INFORM NOTHING".
+        #
+        # Here it informs.  Measured at (30,16) on `legacy`: suppressing the
+        # declaration paints ONE of eight nodes and says nothing, which
+        # `LLR-N06.3.3` makes into the assertion that this is a one-node map --
+        # the worst lie available in a tool whose whole story is that nothing is
+        # hidden silently.  Declaring spends that node and tells the operator
+        # eight are out of view, which is actionable.  So the declaration wins,
+        # and the loop below settles the count against the POST-declaration
+        # frame: a canvas that declared 7 after its own header took the row
+        # would be lying about its own cost.
+        # THE ONE FLOOR THE RULING STILL LEAVES: never return an EMPTY frame.
+        # If the widened header does not fit at all, `_fit` drops it too and the
+        # canvas paints NOTHING -- not the nodes, not the declaration. Measured
+        # at (34,14) on `legacy`, where the budget is one row and the declaring
+        # header needs two. That is `H1`-refined's forbidden case in its purest
+        # form: it spends everything and informs nothing. Fall back to the
+        # header the frame CAN hold; the strip still declares.
+        if not candidate and kept:
+            return kept
+        kept = candidate
+        settled = _declared(rows, kept)
+        if settled == hidden:
+            return kept
+        hidden = settled
+    return kept
+
+
 def painted_ids(graph: Graph, state: ViewState) -> frozenset[str]:
     """The ids this renderer's own geometry says reached the canvas.
 
@@ -221,7 +295,8 @@ def painted_ids(graph: Graph, state: ViewState) -> frozenset[str]:
     if short_circuit is not None:
         return frozenset()
     return frozenset(
-        nid for nid, _line in _fit(rows, state.w, state.h) if nid is not None
+        nid for nid, _line in _fit_declared(rows, state.w, state.h)
+        if nid is not None
     )
 
 
@@ -233,7 +308,7 @@ class OutlineRenderer:
         if short_circuit is not None:
             return short_circuit
         result = Text()
-        for i, (_nid, row) in enumerate(_fit(rows, state.w, state.h)):
+        for i, (_nid, row) in enumerate(_fit_declared(rows, state.w, state.h)):
             if i:
                 result.append("\n")
             result.append(row)
