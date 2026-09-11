@@ -502,8 +502,18 @@ coerces and one does not. **Every threshold below is scoped to the painted row, 
 that difference visible.**
 
 **THE SPLIT-AT-WIDTH ARM — mandatory in all four thresholds.** Widening `_CONTROL_MAP` is necessary
-and not sufficient, because truncation can manufacture the defect out of a **balanced** source.
+and not sufficient, ~~because truncation can manufacture the defect out of a **balanced** source~~.
 Executed at `d877784`:
+
+> **THE STRUCK REASON IS REFUTED; THE ARM IS RETAINED AND RE-POINTED** (measured at `S-B(+C)`,
+> confirmed at its second confirmation pass). `darkside.plain` **replaces** each of the 235 banned
+> points with one `U+FFFD` rather than deleting it, so it is length- and index-preserving and
+> truncation cannot strand an override: a mutant running the **forbidden** order left the derived
+> census arm **green**. Widening `_CONTROL_MAP` is still not sufficient — but the reason is that
+> **two truncators ship and only one coerces**, which is observable, not the ordering, which is not.
+> The arm now asserts that every derived truncator's output is **indistinguishable from its own
+> coercion** (`tests/test_inc3_census.py`), which is the property that separates a banned point
+> mapped to `U+FFFD` from one mapped to a different banned point.
 
 ```
 source:  'acta' U+202E 'gpj.evil' U+202C 'x'      (override and terminator both present)
@@ -610,10 +620,17 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   `darkside.fit` only. Green on every path that routes through it, **silently unchanged on the six
   `layered._fit` sites above**. Reddened by the derived truncator set, which is why the set is
   derived and not the two names an author happened to think of.
-- **Acceptance criteria:** widening the map is necessary and **not sufficient** — truncation
-  manufactures the defect out of a balanced source, so the ordering clause is not vacuous even
+- **Acceptance criteria:** widening the map is necessary and **not sufficient** — ~~truncation
+  manufactures the defect out of a balanced source, so the ordering clause is not vacuous~~ — even
   though A-14 executed one of the two truncators as already correct. **Two truncators ship; one
   coerces and one does not**, and the requirement is scoped so that difference is visible.
+  > **THE STRUCK CLAUSE IS THE REFUTED MECHANISM** (measured at `S-B(+C)`, confirmed at its second
+  > confirmation pass). Truncation cannot manufacture an unterminated override, because
+  > `darkside.plain` **replaces** each banned point with one `U+FFFD` rather than deleting it, so it
+  > is index-preserving and the override is gone by coercion whichever order runs. **The non-vacuity
+  > of this requirement rests on the surviving half of the same sentence** — two truncators ship and
+  > only one coerces — which is a real, observable difference and is what the derived census arm
+  > pins. It does **not** rest on the ordering.
 
 ---
 
@@ -2543,12 +2560,20 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
     > all**, which is now pinned rather than asserted.
   - **What `tests/test_outline_caps.py` actually pins, stated precisely because the first version of
     this sentence overclaimed and `S-B(+C)`'s code review fired both halves:**
-    - *"derived, never a constant"* is pinned by driving **three geometries** — `(118,34)`, `(40,20)`,
-      `(24,10)` — and asserting the **indent run** against `w // 2` at each. Fired: with one geometry
-      driven, replacing both derivations with constants equal to their 118-wide values left the
-      **entire default lane green at 1051 passed**, while `chain(200)` under that mutant built a
-      **96-cell row into a 24-cell canvas**. That is this batch's own **control 20**, which the
-      sibling module quotes verbatim and this one had not inherited.
+    - *"derived, never a constant"* is pinned **for both caps** by driving **three geometries** —
+      `(118,34)`, `(40,20)`, `(24,10)` — and asserting the **indent run** against `w // 2` **and the
+      widest row against `w * h`** at each. Fired: with one geometry driven, replacing both
+      derivations with constants equal to their 118-wide values left the **entire default lane green
+      at 1051 passed**, while `chain(200)` under that mutant built a **96-cell row into a 24-cell
+      canvas**. That is this batch's own **control 20**, which the sibling module quotes verbatim and
+      this one had not inherited.
+      > **AND THE FIRST FIX APPLIED IT TO ONE SIBLING ONLY**, which the confirmation pass caught: the
+      > sweep went to the indent arm and the row-cap arm stayed at one frame, so `row_cap = 4012`
+      > **survived the entire default lane at 1059 passed** while building a **4,016-cell row into a
+      > 240-cell canvas** — a **16.7×** overrun at `(24,10)`. Applying a control to one of two
+      > siblings has applied it to neither. Re-fired after the fix, each derivation replaced by its
+      > 118×34 constant reddens **its own arms and only its own** — row-cap **4 arms** (4 failed /
+      > 1059 passed in the full lane), indent **6 arms** — so neither pin masks the other.
     - *"carries the true depth"* is pinned by asserting the level **adjacent to its glyph**
       (`f"{DEPTH_MARK}{level}"`) over fixtures whose titles **cannot contain the level**. Fired: with
       the old oracle (`str(depth-1) in leaf`) over titles reading `nodo {i}`, a marker reporting

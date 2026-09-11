@@ -146,11 +146,30 @@ def test_llr_coerce_2_no_truncator_emits_a_coerced_code_point(width):
 
 
 def test_llr_coerce_2_the_split_at_width_arm(tmp_path):
-    """A source BALANCED at U+202E … U+202C, cut at width, leaves 0 overrides.
+    """Every DERIVED truncator, cut at width, returns a COERCED string.
 
-    The clause that makes the ordering non-vacuous: truncation MANUFACTURES the
-    defect out of a source that was well-formed, so coercing afterwards cannot
-    put the terminator back.
+    RE-POINTED at `S-B(+C)`'s second confirmation pass, and this is the arm that
+    mattered most: `test_fold.py` carries one truncator at one width, this one
+    runs the DERIVED set at four, so it is the canonical statement of the clause.
+
+    ITS DOCSTRING USED TO READ: "The clause that makes the ordering non-vacuous:
+    truncation MANUFACTURES the defect out of a source that was well-formed, so
+    coercing afterwards cannot put the terminator back." REFUTED, and then FIRED:
+    `_CONTROL_MAP` maps all 235 banned code points to exactly one `U+FFFD` each,
+    so `darkside.plain` is length- and index-preserving; with `_clip` rewritten to
+    run the FORBIDDEN order -- truncate, then coerce -- this arm stayed GREEN.
+    The `U+202E` count was zero because the COERCION replaced the override, never
+    because of the order, so the assertion could not see the ordering reversed.
+
+    An arm whose stated intent a mutant proves it cannot verify is worse than no
+    arm, because it reads as coverage. The property that IS load-bearing is that
+    the output is coerced, so that is what is asserted -- and unlike the count,
+    it fails when a banned point is mapped to a DIFFERENT banned point rather
+    than to `U+FFFD`, which is the mutant that separates the two assertions.
+
+    The count assertions are kept BELOW the new one, no longer carrying the
+    ordering claim: they still pin that this specific pair does not survive, and
+    they are now the weaker half rather than the whole arm.
     """
     derived = truncators()
     assert derived
@@ -161,6 +180,12 @@ def test_llr_coerce_2_the_split_at_width_arm(tmp_path):
     for name, function in derived.items():
         for width in (5, 6, 10, 20):
             out = function(source, width)
+            assert out == darkside.plain(out), (
+                name, width,
+                "the cut output is not coerced -- it must be indistinguishable "
+                "from its own coercion, which is the property the ordering "
+                "clause was reaching for",
+            )
             assert out.count(chr(0x202E)) == 0, (name, width)
             assert out.count(chr(0x202C)) == 0, (name, width)
 
