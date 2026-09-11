@@ -178,6 +178,26 @@ def tab_strip(active: str, crumb: list[str] | None = None, width: int = 0) -> Te
     return line
 
 
+# The ONE place the fallback BUDGET is written -- the batch's declared context
+# of use, in cells.
+#
+# It was spelled THREE times: `_crumb_line`'s zero-width fallback below,
+# `keybar`'s default parameter, and `chrome._KEYBAR_FALLBACK_CELLS`. The carry
+# that named the defect recorded TWO of the three; the third surfaced only when
+# the arm pinning it was written.
+#
+# NARROWLY CLAIMED, because "the one place 118 is written" would be false: the
+# suite spells the declared terminal SIZE `(118, 34)` in a dozen places, and
+# `app.py`/`rail.py` document a 118-column auto-hide threshold that is
+# `MIN_CANVAS_WIDTH + RAIL_WIDTH + INSPECTOR_WIDTH` -- a DERIVED number that
+# collides with this one by arithmetic accident. Folding those together would be
+# drift, not tidiness.
+#
+# It is a FALLBACK. Reaching it means neither the widget nor the app could be
+# measured, which inside a running app is a defect rather than a condition.
+DECLARED_CONTEXT_CELLS = 118
+
+
 # The crumb's chrome: the ` / ` between parts, and the ` +N … ` that declares how
 # many ancestors were dropped.  Reserved so the budget can never be spent so
 # completely that the declaration itself has nowhere to go.
@@ -271,20 +291,6 @@ def group_box(renderable, pad_x: int = 1) -> Panel:
         style=f"on {PANEL}",
         padding=(0, pad_x),
     )
-
-
-# The batch's DECLARED CONTEXT OF USE, and the ONE place it is written.
-#
-# It was spelled THREE times -- `_crumb_line`'s zero-width fallback, `keybar`'s
-# default parameter, and `chrome._KEYBAR_FALLBACK_CELLS` -- in two modules, with
-# nothing making them agree. The carry that named this recorded TWO of the three;
-# the third surfaced only when the arm that pins it was written.
-#
-# It is a FALLBACK. Reaching it means no widget and no app could be measured yet,
-# which for a widget inside a running app is a defect rather than a condition --
-# `KeyBar` and `TabStrip` both resolve a real width instead, and this is what
-# they fall back to when there is genuinely nothing to measure.
-DECLARED_CONTEXT_CELLS = 118
 
 
 # Keybar -------------------------------------------------------------------

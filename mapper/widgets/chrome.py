@@ -10,18 +10,56 @@ from textual.widgets import Static
 from mapper import darkside
 
 
-# Last-resort width when neither the widget nor the app can be measured yet.
-#
-# DE-DUPLICATED AT `Inc-REPAIR` S-A. This was a third independent spelling of the
-# batch's declared context -- `darkside._crumb_line`'s zero-width fallback and
-# `darkside.keybar`'s default parameter were the other two, and the carry that
-# named the defect recorded only two of the three. The number now has ONE home,
-# in the module both consumers already import.
-_KEYBAR_FALLBACK_CELLS = darkside.DECLARED_CONTEXT_CELLS
+def _resolved_width(widget) -> int:
+    """The widget's own width, then the app's, then the declared context.
+
+    ONE LADDER, because it is a POLICY and a policy spelled twice drifts exactly
+    as a number does. `TabStrip` and `KeyBar` carried verbatim copies until
+    `Inc-REPAIR` S-A, and the cost was the next rung: add a fourth step to one
+    and the other silently keeps three. The alias `_KEYBAR_FALLBACK_CELLS` went
+    with them -- it named the wrong widget once `TabStrip` became half its use
+    sites, and nothing referenced it but prose.
+
+    THE APP RUNG IS THE USEFUL ONE. During `compose` a widget has no size yet but
+    the terminal does, so the first render can be RIGHT rather than merely
+    correctable -- which matters because a later `update()` replaces the CONTENT
+    and does not re-run the height the layout already latched.
+    """
+    if widget.size.width:
+        return widget.size.width
+    try:
+        return widget.app.size.width or darkside.DECLARED_CONTEXT_CELLS
+    except NoActiveAppError:
+        # THE ONLY EXPECTED FAILURE, named rather than swallowed: `widget.app`
+        # raises this when the widget is constructed outside a running app. A
+        # bare `except Exception` would silently restore the fallback render
+        # this function exists to stop producing, for ANY reason at all.
+        return darkside.DECLARED_CONTEXT_CELLS
 
 
 class TabStrip(Static):
-    """Top tab strip with optional breadcrumb."""
+    """Top tab strip with optional breadcrumb, rendered at its MEASURED width.
+
+    THE SAME LADDER `KeyBar` GOT AT `Inc-CRUMB`, and this widget is why that one
+    was found: bounding the crumb shortened `TabStrip` and removed the reflow
+    that had been correcting `KeyBar` by accident. The sibling was fixed then and
+    this one was carried as `SEC-F1` until `Inc-REPAIR` S-A.
+
+    Without it, `__init__` called `tab_strip` with no width, `tab_strip` passed
+    that to `_crumb_line`, and `_crumb_line` took its own fallback. Measured
+    before the fix: the constructor passed NO WIDTH AT ALL, so `_crumb_line`
+    rendered 97 cells regardless of the terminal -- identical at 30, 40 and 60
+    because the terminal was never consulted. The number is right and the first
+    framing of it was not: three equal readings of one width-independent value
+    is a tautology of the call site, not three measurements converging, and
+    reading it as evidence points at `_crumb_line` when the defect was at the
+    call site. Post-fix the three widths genuinely differ: 29 / 35 / 35.
+
+    NOT LIVE, and the reason is the point: the content was superseded before
+    paint and the height clamped by `max-height: 3`. THE CSS LID WAS
+    LOAD-BEARING -- a lid over content not bounded in Python, the exact shape
+    `Inc-CRUMB` was opened to stop shipping.
+    """
 
     def __init__(self, active: str, crumb: list[str] | None = None, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -30,33 +68,7 @@ class TabStrip(Static):
         self.update(darkside.tab_strip(active, crumb, width=self._width()))
 
     def _width(self) -> int:
-        """The widget's own width, then the app's, then the declared context.
-
-        THE SAME LADDER `KeyBar` GOT AT `Inc-CRUMB`, and this widget is why that
-        one was found: bounding the crumb shortened `TabStrip` and removed the
-        reflow that had been correcting `KeyBar` by accident. The sibling was
-        fixed then and this one was carried as `SEC-F1`.
-
-        Without it, `__init__` called `tab_strip` with no width, `tab_strip`
-        passed that to `_crumb_line`, and `_crumb_line` took its own fallback --
-        so a crumb at a 30-column terminal was budgeted against 118 cells.
-        Measured before the fix: 97 cells of crumb at 30, 40 AND 60 columns,
-        identical at all three, which is what a budget ignoring the terminal
-        looks like.
-
-        NOT LIVE, and the reason is the point: the content is superseded before
-        paint and the height is clamped by `max-height: 3`. THE CSS LID WAS
-        LOAD-BEARING -- a lid over content that was not bounded in Python, which
-        is the exact shape `Inc-CRUMB` was opened to stop shipping.
-        """
-        if self.size.width:
-            return self.size.width
-        try:
-            return self.app.size.width or _KEYBAR_FALLBACK_CELLS
-        except NoActiveAppError:
-            # THE ONLY EXPECTED FAILURE, named rather than swallowed: `self.app`
-            # raises this when the widget is constructed outside a running app.
-            return _KEYBAR_FALLBACK_CELLS
+        return _resolved_width(self)
 
     def on_mount(self) -> None:
         # Belt to `on_resize`'s braces, as `KeyBar` carries: by mount the widget
@@ -109,23 +121,7 @@ class KeyBar(Static):
         self.update(darkside.keybar(self.groups, width=self._width()))
 
     def _width(self) -> int:
-        """The widget's own width, then the app's, then the declared context.
-
-        The app's width is the useful middle rung: during `compose` this widget
-        has no size yet but the terminal does, so the first render can be RIGHT
-        rather than merely correctable.
-        """
-        if self.size.width:
-            return self.size.width
-        try:
-            return self.app.size.width or _KEYBAR_FALLBACK_CELLS
-        except NoActiveAppError:
-            # THE ONLY EXPECTED FAILURE, named rather than swallowed: `self.app`
-            # raises this when the widget is constructed outside a running app.
-            # A bare `except Exception` would silently restore the 118-cell
-            # render this class exists to stop producing, for ANY reason at all
-            # -- including one introduced later by something unrelated.
-            return _KEYBAR_FALLBACK_CELLS
+        return _resolved_width(self)
 
     def set_groups(self, groups: Sequence[tuple[str, Sequence[tuple[str, str]]]]) -> None:
         self.groups = list(groups)
