@@ -284,6 +284,41 @@
           "arm": "tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master[outline-OutlineRenderer-140-8]",
           "why": "A master-digest pin over outline's rendered output. Outline's header now carries the overflow declaration, so the digest legitimately changed -- the same shape as the A-98 tripwire and the A3 census pins.",
           "not_updated_yet": "DELIBERATELY. Re-blessing a golden digest before the behaviour it pins is settled would bless a frame the open tension above may still change. It is re-blessed with the ruling, not before."
+        },
+        "code_review_round1": {
+          "verdict": "BLOCK, 2 HIGH, 2 MEDIUM, 4 LOW.",
+          "F1_HIGH_FIXED": {
+            "finding": "The increment's core defect fix had ZERO regression coverage. Deleting the settle arming from refresh_canvas entirely left the whole suite at 954 passed -- all 11 P1 arms included.",
+            "why": "Closing B-55 closed this defect's own trigger: outline now declares, so the strip keeps its token, never unwraps 2 rows to 1, and never hands the canvas a row back. The region never moves after refresh_canvas paints, so the settle never re-renders, so arming it changes nothing observable.",
+            "my_error_one_level_up": "I correctly identified that P1 had to be TRIGGER-INDEPENDENT, built an arm that is, and then treated trigger-independence as if it implied DISCRIMINATING POWER. It does not. The arm's own header comment contains the refutation -- 'closing B-55 incidentally closes this defect's trigger' -- and the next line should have been 'so the arm needs the trigger supplied'.",
+            "fix": "test_p1_survives_a_strip_reflow_after_the_canvas_is_painted -- supplies the trigger by stubbing _pagination_text to a one-row strip, the exact shape outline produced before it declared. Asserts the region actually moved BEFORE asserting P1, so it cannot itself go vacuous.",
+            "verified": "M0 (settle arming deleted, byte-level, CRLF-aware, match-count asserted, sha256 restore verified): new arm 4 passed pristine -> 4 FAILED under M0. Old arms 11 passed BOTH ways, reproducing the review's finding independently."
+          },
+          "F3_MEDIUM_FIXED": {
+            "finding": "PHYS-4's change from `1 <= declared < total` to a conditional was a TRADE, not a strengthening. I invoked control 13 to make it without an independent pass, and control 13 does not cover a trade.",
+            "measured_cost": "A one-row over-cut (_fit budget `>` -> `>=`) is caught by the old bound at anidado (32,16) -- a size AT-056 drives -- and is GREEN under the conditional, because an over-cut moves declaration and frame TOGETHER so PHYS-3 cannot see it.",
+            "fix": "Comment corrected to state the trade. The cost is PAID by F4's arm rather than argued away."
+          },
+          "F4_MEDIUM_FIXED": {
+            "finding": "The PHYS-1/PHYS-2 pilot arm was ratified in LLR-N06.3.4 and DID NOT EXIST ON DISK. A ratified clause with no node is exactly the AT-005/AT-006 shape this batch already carries.",
+            "fix": "test_outline_cuts_at_the_rows_the_canvas_shows written, 10 arms over both fixtures.",
+            "verified": "Byte-level mutants with sha256 restore: over-cut RED on the pilot / GREEN on AT-056 (reproducing F3 independently); under-cut RED on the pilot, where previously only a golden hash caught it."
+          },
+          "LOW_carried": "F5 the third loop pass is unreachable (200k trials, max 2 passes) so its documented degradation is unreachable too; F6 AT-058 hardcodes three renderers rather than deriving from A-89's pinned set; F7 the declaration SENTENCE is triplicated and unpinned across layered.py:395, outline.py:243 and app.py:2224 -- sharing the token was the easy half; F8 the cost note says 11999 is the largest graph outline renders and the bound is `>`, so 12000 renders.",
+          "reviewer_verified_for_me": "The _rows move is faithful line-by-line against 57fb403; the golden bless comment is exact to the character; _fit's Console is 87 microseconds per frame against ~150 ms of walks, so DO NOT cache it; _rendered_for has exactly two writers and they are the only two writers of #map-canvas; the A-98 tripwire was honoured rather than spent; tc_038 was strengthened."
+        },
+        "F2_OPEN_FOR_COORDINATOR": {
+          "finding": "At 8 reachable terminal sizes outline hides EVERY node and the canvas declares nothing, while the strip does. AT-056 and AT-057 drive none of them.",
+          "sizes": "legacy (34,14) (33,14) (28,14) (20,16) (16,14) (14,12); anidado (28,14) (33,14) (16,14) (20,16) (14,12). Measured: declared = all, canvas_token = False.",
+          "not_a_regression": "Pre-increment BOTH surfaces were silent at those sizes; now the strip speaks. The increment strictly improves them.",
+          "cause": "The empty-frame floor. Where the widened header does not fit at all, _fit drops it too and the canvas would paint NOTHING -- not the nodes, not the declaration -- so the floor falls back to the header the frame can hold, which carries no token. (34,14) is named by measurement in outline.py's own comment, so the shape was known.",
+          "the_tension": "AGREE-1 says both surfaces declare whenever the frame hides a node. At these sizes the canvas cannot afford the declaration without painting literally nothing.",
+          "why_I_did_not_pin_it": "Pinning the silent-canvas fallback as expected behaviour DOCUMENTS AN EXCEPTION TO AGREE-1, which is a weakening, and control 13 says weakening needs the independent pass. So it is recorded as a carry, not absorbed.",
+          "options": [
+            "A. Carry to Inc-REPAIR with this measurement -- the increment ships strictly better than it found those sizes.",
+            "B. Route to qa-reviewer to amend AGREE-1 with a stated floor exception, then pin it.",
+            "C. Make the canvas declaration affordable at tiny widths (a shorter form), which collides with F7's triplicated sentence and 02m section 7.3 -- would need the sentence shared first."
+          ]
         }
       }
     ],

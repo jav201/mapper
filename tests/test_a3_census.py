@@ -197,8 +197,15 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       its content were produced from the same geometry -- so the site
     #       cannot be shared with an existing helper without the helper
     #       deciding the geometry the arm exists to check.
-    assert len(sites["argful"]) == 60, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 60; "
+    #
+    # 60 -> 61 in Inc-B55a's code-review round: the forced-trigger `P1` arm
+    # (`test_p1_survives_a_strip_reflow_after_the_canvas_is_painted`) renders
+    # the current renderer at the current `_canvas_size()` AFTER stubbing the
+    # strip to force a region reflow.  It cannot share the other `P1` arm's site:
+    # that arm is the one the code review proved CANNOT FAIL, and this one exists
+    # precisely because it supplies the trigger the other one waits for.
+    assert len(sites["argful"]) == 61, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 61; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
@@ -208,9 +215,13 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     # what the widget HOLDS.  A zero-arg Textual widget site, correctly outside
     # the A3 -- it is not a renderer invocation, it is the widget being asked
     # what it is currently painting.
-    assert len(sites["zeroarg"]) == 27, (
+    #
+    # 27 -> 28 in Inc-B55a's code-review round: the same forced-trigger arm asks
+    # `canvas.render()` what the widget HOLDS after the reflow.  A zero-arg
+    # Textual widget site, correctly outside the A3.
+    assert len(sites["zeroarg"]) == 28, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "27; a DROP means widget sites were wrongly swept into the A3"
+        "28; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -316,8 +327,8 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     zeroarg = render_call_sites()["zeroarg"]
     # 25 -> 26 in Inc-3, and 26 -> 27 in Inc-B55a -- the same sites the
     # cardinality pin above names and itemises.
-    assert len(zeroarg) == 27, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 27. A floor was "
+    assert len(zeroarg) == 28, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 28. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
