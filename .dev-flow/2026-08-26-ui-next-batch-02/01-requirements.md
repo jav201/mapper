@@ -2393,6 +2393,54 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 
 ---
 
+##### LLR-N06.3.4 — outline's row cut is priced in PHYSICAL rows, and its declaration follows the cut
+
+- **Traceability:** HLR-N06.3
+- **Origin:** `02m` §7.1, **re-measured through `_canvas_size()`** per coordinator ruling 2026-09-10.
+  `02m`'s own numbers were renderer-argument widths and it flagged that itself, citing `02j`: the
+  unit is the terminal, not the renderer.
+- **Statement:** While `OutlineRenderer` renders into a canvas of `h` rows, the system shall cut its
+  content at the number of rows the canvas will actually display, and shall declare as hidden every
+  node whose title is not painted as a result.
+- **Touched symbols:** the `lines[:h]` cut at `mapper/views/outline.py:161`, and the new module-level
+  `painted_ids` in `mapper/views/outline.py` — `NEW — created in Phase 3`.
+- **Validation:** `test (pilot)`
+- **Executed verification:** drive a **35x14** terminal, where `_canvas_size()` hands the renderer
+  `35x2`, and assert through the composited frame.
+- **Numeric pass threshold:** the rendered content occupies **≤ h** physical rows at the width
+  `_canvas_size()` returns, and the declared hidden count equals the number of graph nodes whose
+  full title is absent from the painted frame.
+- **Measured pre-fix:** at `35x14`, outline emits **2 logical lines occupying 3 physical rows into a
+  2-row canvas**. `outline.py:161` counts logical rows; the widget shows physical ones. Reachable at
+  **1 of 8** driven terminal sizes — rare, and `35x14` is a size this batch already drives elsewhere.
+  The gap is large because `_canvas_size()` subtracts chrome: a 100-column terminal hands the
+  renderer **64**, and a 118-column terminal hands it **58**.
+- **Acceptance criteria:** a declaration derived from the logical row model asserts rows that are not
+  painted. An affordance that lies about what it hid is worse than no affordance, because the
+  operator has no reason to doubt it.
+- **Acceptance:** `AT-056`
+
+##### LLR-N06.3.5 — both declaring surfaces agree, in every view that declares
+
+- **Traceability:** HLR-N06.3
+- **Origin:** `02m` §7.2.
+- **Statement:** While a renderer hides nodes, the system shall declare the hidden count on **both**
+  declaring surfaces — the renderer's own header token and the screen's strip — and the two shall
+  report the same number.
+- **Touched symbols:** the header token construction in `mapper/views/outline.py` and
+  `mapper/views/radial.py` — `NEW — created in Phase 3` — reconciled by `_declare_after_layout`
+  (`mapper/app.py:1609`), which exists because the two surfaces must agree (`B-56`, `B-60`).
+- **Validation:** `test (pilot)`
+- **Executed verification:** assert both surfaces at `80x24` and at `35x14`.
+- **Numeric pass threshold:** the count painted in the renderer's header **equals** the count painted
+  in the strip, for every view that declares. **Zero** disagreements.
+- **Acceptance criteria:** `LLR-N06.3.3` makes silence mean *nothing is hidden*. A strip that declares
+  while the canvas header beside it stays silent is `B-60` reintroduced one view over — the operator
+  reads two surfaces and believes the quieter one.
+- **Acceptance:** `AT-057`
+
+---
+
 ### 3.5 · US-N07 «búsqueda» — a search that says how much it found *(**Inc-4a** search core + **Inc-4b** seat and walk — §5.4, split by `#D36`)*
 
 > **Header re-pointed 2026-08-29.** ~~*(Inc-4)*~~ is a **retired** id. §5.4 remains the sole authority

@@ -165,7 +165,15 @@
         },
         "ruling_4_traceability_first": "The section 7.1 and 7.2 requirement rows (AT ids, US->AT chains) land BEFORE Inc-B55a opens, per 02m own checklist. No increment opens against asserted-but-unchained defects.",
         "radial_construction": "CELL-OWNERSHIP REPLAY, never pos-derivation. Deriving from place() is M-N06.3-b verbatim: measured wrong by 6 of 8 at 30x6, because canvas put() is last-write-wins (mapper/canvas.py:103-105) and records no owner.",
-        "both_surfaces": "Each render paints its own header token as layered does (layered.py:520, _header_line :360-396). Strip-only declaration reintroduces B-60 in two views; _declare_after_layout (app.py:1609) exists because the two surfaces must agree."
+        "both_surfaces": "Each render paints its own header token as layered does (layered.py:520, _header_line :360-396). Strip-only declaration reintroduces B-60 in two views; _declare_after_layout (app.py:1609) exists because the two surfaces must agree.",
+        "ruling_4_traceability_LANDED": {
+          "rows": "LLR-N06.3.4 (outline cuts in PHYSICAL rows; declaration follows the cut) -> AT-056. LLR-N06.3.5 (both declaring surfaces agree) -> AT-057.",
+          "where": "01-requirements.md, under HLR-N06.3, after LLR-N06.3.3, in the document's existing LLR block format.",
+          "chain": "US-N06 -> HLR-N06.3 -> LLR-N06.3.4/-.5 -> AT-056/AT-057. The second layer is the test node: the arms must be NAMED test_at056_* and test_at057_* so the AT id -> node edge exists, which is the edge C-18 needs and the one AT-005/AT-006 are missing.",
+          "ids": "AT-056 and AT-057 allocated; highest previously in use was AT-055.",
+          "status": "Rows land BEFORE Inc-B55a opens, per 02m checklist and coordinator ruling 4. The ARMS do not exist yet -- they are Inc-B55a's deliverable, and the numeric thresholds above are what they must assert.",
+          "review_owed": "Acceptance criteria are qa-reviewer's domain by this batch's routing. These two rows are DRAFTED by the implementer from measurement and are owed a qa pass before or with Inc-B55a's gate."
+        }
       }
     ],
     "closed": [
