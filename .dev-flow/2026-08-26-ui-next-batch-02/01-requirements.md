@@ -2510,6 +2510,30 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   report the same number, and that number shall be correct. **Silence on both surfaces is not
   agreement:** `LLR-N06.3.3` makes silence mean *nothing is hidden*, so two silent surfaces over a
   frame that hides nodes are two surfaces agreeing on a falsehood.
+- **THE EMPTY-FRAME FLOOR EXCEPTION** (amended `S-B(+C)`, coordinator ruling 2026-09-11; **wording
+  ratified at this increment's own full-protocol gate**, per the spirit of `C-13` — the ruling set
+  the direction, the gate ratifies the text): **when the declaring header cannot fit without evicting
+  the last content row**, the renderer's header surface may be silent, **provided the strip is
+  present in the same composited frame and declares the correct count.** That proviso is the
+  exception's load-bearing condition, not a description of it: if the strip is ever absent or wrong
+  at such a frame, the exception **lapses** and the clause above applies unamended.
+  - **Why this is not the falsehood the clause forbids.** Agreement's purpose is that the operator
+    learns the truth from *either* surface. At the floor, forcing the canvas to declare would spend
+    the last content row to inform something **already informed one row below** — the shape
+    `H1`-refined forbids (*spend content and inform nothing new*). This amends `LLR-N06.3.5`; it does
+    not reopen `H1`.
+  - **The trigger is DERIVED, never a list of sizes:** it is the geometric condition above. A
+    hand-enumerated size list would silently stop matching the day a layout changed.
+  - **Measured before amending**, on the tree with defect 2 fixed
+    (`C:\Users\jjgh8\clde\agree_sweep.py`): **9 of 90 sizes on `legacy` and 9 of 90 on `anidado` —
+    eighteen in all**, every one the same shape, canvas silent and **strip correct**. Confined to
+    widths 24–34 at heights 10 and 12, plus `(24,14)`. The prior frame-side figures (14/135, 15/135)
+    were taken against a row budget defect 2 replaced, and are superseded.
+  - **The code already stated this case**, and the amendment follows it rather than leading it:
+    `outline.py::_fit_declared` — *"never return an EMPTY frame… Fall back to the header the frame
+    CAN hold; the strip still declares."*
+  - **Armed:** `tests/test_agree_floor.py` derives the floor sizes and asserts the proviso at each,
+    with a non-vacuity guard so the arm cannot pass by never reaching the floor.
 - **Touched symbols:** the header token construction in `mapper/views/outline.py` and
   `mapper/views/radial.py` — `NEW — created in Phase 3` — reconciled by `_declare_after_layout`
   (`mapper/app.py:1609`), which exists because the two surfaces must agree (`B-56`, `B-60`).
