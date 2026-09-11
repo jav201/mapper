@@ -90,6 +90,16 @@
         "why_widened_not_split": "Same collapse class -- a fifth strip stealing canvas rows -- and splitting would have held finished work uncommitted behind a dependency, which is the un-landed-record failure this batch already paid for with twelve days of Inc-4c limbo.",
         "acceptance": "The four arms that failed became the widened cut's acceptance: test_a_small_map_at_a_small_terminal_keeps_its_canvas plus two test_overflow settle arms flip RED->GREEN, and a new arm pins the 35x14 case against HEAD's own numbers (KeyBar h=1).",
         "not_introduced_carried": "TabStrip's TAB ROW still wraps below about 60 columns -- tab_strip sizes itself to max(width, tabs + wordmark). Pre-existing, carried, and the reason the CSS ceiling is 3 rather than 2: a 2-row lid clipped the crumb away entirely, reproducing Inc-STRIPS' F1 with this increment's own remedy."
+      },
+      {
+        "date": "2026-09-10",
+        "amendment": "Inc-B55 CUT AT FOUR source files: mapper/app.py declared as the fourth alongside the view renderers.",
+        "authority": "Coordinator ruling 2026-09-10: pre-approved IN SHAPE, same as Inc-CRUMB's widening -- record the 4th source file and NAME the gated behaviour change before implementing.",
+        "reason": "B-55 is a MEASURED hole, not a suspected one: at 30x6 on `legacy`, outline paints 5 of 8 nodes (3 hidden, undeclared) and radial paints 2 of 8 (4 hidden, undeclared). HLR-N06.3's painted-node promise is therefore kept in the DEFAULT view and silently unkept in the other two. Declaring the unpainted remainder is a seam the renderers cannot reach alone -- the declaration is chrome, and chrome is owned by app.py. Inc-3 declared this hole and shipped the pinned participation census; Inc-B55 closes it.",
+        "behaviour_change": "HLR-N06.3 -- GATED. outline and radial will paint a declaration of the nodes they do NOT show. This changes what the operator sees under overflow, which is why the coordinator required full protocol rather than the lighter lane.",
+        "protocol": "FULL protocol, serial reviews, soft cap 3, terminal-boundary pattern available at the cap.",
+        "seat_touching": "TBD at the pre-gate -- if a key or seat is involved, the whole-seat keymap spec + pinned row diff per seat is owed.",
+        "ordering": "After Inc-CRUMB (closed 9a773e4), before Inc-REPAIR."
       }
     ],
     "closed": [
@@ -321,7 +331,8 @@
         "measured": "In one commit, 01-requirements.md marked LLR-N07.3.4 predicate 1 with an unqualified green CLOSED while state.json recorded the same requirement OPEN with both vectors named and a successor increment routed. The re-scope had been written honestly in the increment fold and in state.json and never reached the artifact of record -- reproducing, one file over, exactly the premature-closure marking a security review had blocked two days earlier in the same increment.",
         "discharge": "Pick the artifact of record (here state.json.open_blocks) and let every other document cite it rather than restate it. Where a requirements document must carry a status for readability, it carries the QUALIFIER and the pointer -- 'PARTIALLY CLOSED against vector X, see open_blocks' -- never a bare mark. At close, diff the two: a status word in a requirements file with no matching entry in the record is the defect."
       },
-      "MEASURE WHAT THE OPERATOR READS AND THE GEOMETRY IT STANDS IN; EITHER ALONE CAN LIE. A widget must never be laid out from a render it is about to replace. When a defect leaves the painted output identical, assert the geometry -- an arm on the text cannot fail. (Pairs with Inc-STRIPS's composited-frame rule as the two halves of one law.)"
+      "MEASURE WHAT THE OPERATOR READS AND THE GEOMETRY IT STANDS IN; EITHER ALONE CAN LIE. A widget must never be laid out from a render it is about to replace. When a defect leaves the painted output identical, assert the geometry -- an arm on the text cannot fail. (Pairs with Inc-STRIPS's composited-frame rule as the two halves of one law.)",
+      "LABELS ON EVIDENCE ARE DECLARATIONS TOO. AN ORACLE'S BASELINE IS FETCHED FROM THE RECORD (`git show <commit>:<path>`), NEVER FROM A WORKING DIRECTORY'S NAME. Exhibit: a comparison arm was pointed at a directory called `_confirm/head/` that was in fact a MID-INCREMENT working snapshot -- it carried `_width` but neither `on_mount`, `NoActiveAppError` nor `_KEYBAR_FALLBACK_CELLS`. Had the label been trusted, the gate would have compared against a tree that never existed as a gate."
     ],
     "open_blocks": [
       {
