@@ -215,10 +215,14 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
     # THE CELL-OWNERSHIP LEDGER. `Canvas.put` is LAST-WRITE-WINS and records
     # no owner, so a later pill silently overwrites an earlier one's cells.
     # Deriving the painted set from `pos` -- which nodes were PLACED -- is
-    # therefore `M-N06.3-b`: measured, it over-declares by 6 of 8 at 30x6,
-    # because placement says where a pill was WRITTEN and not whether it
-    # SURVIVED. These two dicts replay the writes so the question can be
-    # answered from what is still on the canvas.
+    # therefore `M-N06.3-b`: measured at 30x6 on `legacy`, the canvas region is
+    # ZERO rows, the replay paints 0 of 8 and placement claims all 8 -- it
+    # over-declares by EIGHT of eight, because placement says where a pill was
+    # WRITTEN and not whether it SURVIVED. (The "6 of 8" that stood here was a
+    # stale carry of a DIFFERENT quantity under a different predicate -- the
+    # architect's partly-overwritten pill count, not the over-declaration.)
+    # These two dicts replay the writes so the question can be answered from
+    # what is still on the canvas.
     owners: dict[tuple[int, int], str] = {}
     title_cells: dict[str, list[tuple[int, int]]] = {}
     # Draw nodes as pills.
@@ -265,9 +269,11 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
                 style = branch_of.get(nid, darkside.MUT)
             cv.put(x + j, y, ch, style)
             # ONLY IF THE PUT LANDED. `Canvas.put` refuses a cell outside its
-            # bounds, and `body_h` can be ZERO -- at a 30x16 terminal
-            # `_canvas_size` hands this renderer h=4, so `h - 4` is 0 and the
-            # canvas holds no rows at all. Recording ownership unconditionally
+            # bounds, and `body_h` can be ZERO OR NEGATIVE. Measured: at a
+            # 50x16 terminal `_canvas_size` hands this renderer h=4, so `h - 4`
+            # is 0; at 30x16 it hands h=3 and `body_h` is -1. Either way the
+            # canvas holds no rows at all. (The 30x16/h=4 pairing that stood
+            # here was wrong -- right defect, wrong size.) Recording ownership unconditionally
             # credited nodes with cells the canvas never accepted, and the frame
             # then showed none of them: measured, `alm` declared painted at five
             # sizes on `legacy` while the region was blank below the header.
@@ -277,14 +283,27 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
             # the only refusal, and an out-of-bounds cell cannot have been stored
             # by any earlier node either. Re-spelling the condition is the thing
             # that would drift.
+            if j:
+                # THE DEMAND IS RECORDED UNCONDITIONALLY, AND THE ORDER HERE IS
+                # THE WHOLE POINT. Gating this append too -- as the first version
+                # did -- meant a title cell clipped by the CANVAS EDGE never
+                # entered the requirement set at all, so `all(...)` never
+                # examined it. The node was not failed; its requirement was
+                # quietly REDUCED to the cells that happened to fit, and it was
+                # then declared painted with its last character shorn off.
+                #
+                # Measured at `legacy` 20x30, where `inner` is 18 and the root
+                # pill needs 21: the frame showed `◆Sistema ERP Legac` and `erp`
+                # was declared PAINTED. Over-declaration in the dangerous
+                # direction -- `LLR-N06.3.3` makes that absence from the hidden
+                # set a positive claim the operator can read it.
+                #
+                # The ledger caught PILL-ON-PILL clipping all along; it was
+                # CANVAS-EDGE clipping it excused.
+                title_cells.setdefault(nid, []).append((x + j, y))
             if (x + j, y) not in cv.cells:
                 continue
             owners[(x + j, y)] = nid
-            if j:
-                # `j == 0` is the leading pad, which this node's own marker
-                # overwrites below. The TITLE cells are what the operator reads,
-                # so they are what ownership is judged on.
-                title_cells.setdefault(nid, []).append((x + j, y))
         marker = "◆" if nid == graph.root_id else "●"
         if sel:
             marker_style = block
@@ -308,11 +327,13 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
     # columns radial has no equivalent of.
     #
     # A cell outside the canvas is dropped by `put`, so it never enters
-    # `owners` and the node fails this test -- but ONLY because the recording
-    # above is gated on the put having landed. An earlier draft of this comment
-    # asserted that property while the code recorded unconditionally, which made
-    # it false: the sentence described `put`'s behaviour and the ledger was not
-    # `put`. The gate is what makes it true.
+    # `owners` and the node fails this test. That sentence has been false TWICE
+    # and is now true, and both corrections are worth keeping: first the ledger
+    # recorded unconditionally while the comment described `put`'s behaviour;
+    # then the gate was raised one line too high, so a clipped cell never entered
+    # the REQUIREMENT set either and the node's demand was quietly reduced to the
+    # cells that fit. The demand is now recorded unconditionally and only
+    # OWNERSHIP is gated, which is what makes the sentence hold.
     painted = frozenset(
         nid for nid, cells in title_cells.items()
         if cells and all(owners.get(c) == nid for c in cells)
@@ -331,11 +352,17 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
     # The SENTENCE is consumed from `layered.overflow_phrase`, never re-spelled
     # (`F7`).  Radial is the renderer that would have made it a FOURTH copy.
     #
-    # No fixed-point loop is needed here, and the difference from `outline` is
-    # structural rather than lucky: `render` emits `1 + body_h` rows against a
-    # budget of `h = body_h + 4`, so the header can never evict a body row and
-    # the count cannot change by being declared.  `outline` fits its body INTO
-    # the same budget the header spends from, which is why it has to settle.
+    # No fixed-point loop is needed here, and the REASON matters because the one
+    # that stood here was false. It claimed "the header can never evict a body
+    # row" -- but the header renders into a wrapping `Static` and MEASURED
+    # occupies two physical rows at 24x20 and 30x16. That is `B-61` again, the
+    # same formula-for-a-measurement `app.py` already records failing once.
+    #
+    # The conclusion survives on a STRONGER ground: `painted` is computed ABOVE,
+    # before this header exists, and takes NO INPUT from it. There is no feedback
+    # edge, so no fixed point is possible in principle -- not merely unreached in
+    # practice. `outline` needs its loop because its declaration is spent from
+    # the same budget its body is fitted into; this one is not.
     unpainted = len(graph.nodes) - len(painted)
     if unpainted:
         header.append(f"  {overflow_phrase(unpainted)}", style=darkside.INK)

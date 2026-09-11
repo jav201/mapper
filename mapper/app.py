@@ -1602,11 +1602,22 @@ class MapScreen(Screen):
         more hidden nodes than the graph contains.
 
         `None` -- not an empty set -- when the operator is in a view that
-        declares nothing.  `painted_ids` lives on `views/layered.py` only, and
-        `outline` and `radial` also hide nodes without declaring them (measured
-        at 30x6 on `legacy`: 5 of 8 and 2 of 8 traced).  That hole is carried as
-        `B-55` to Inc-5; answering it here with a `getattr` probe would convert
-        a declared gap into a silent skip.
+        declares nothing.
+
+        THAT STATE NOW HAS NO OCCUPANT, and this docstring described the old one
+        long after it was gone: it said `painted_ids` lived on `views/layered.py`
+        ONLY, that `outline` and `radial` hide nodes without declaring them, and
+        that the hole was carried as `B-55`.  All three were true when written
+        and all three are false now -- `B-55` closed across `layered` (Inc-3),
+        `outline` (`Inc-B55a`) and `radial` (`Inc-B55b`), so every view the
+        screen builds declares.
+
+        The `None` branch is kept rather than deleted because it is the CONTRACT,
+        not a description of today's view set: a future view that declares
+        nothing by design gets an explicit `None` entry in `_painted_ids_for`,
+        exactly as `outline` and `radial` had.  Answering that with a `getattr`
+        probe would still convert a declared gap into a silent skip, which is why
+        the dispatch is by identity.
 
         `None` ALSO when the layout itself failed.  `painted_ids` shares
         `_geometry` with `render`, so it raises on exactly the frames the canvas
@@ -1659,9 +1670,13 @@ class MapScreen(Screen):
             # DECLARES SINCE `Inc-B55b`, through a cell-ownership replay rather
             # than a filter over `place()`: the canvas is last-write-wins and
             # records no owner, so deriving from placement over-declares
-            # (`M-N06.3-b`).  Verified against the composited frame at 16
-            # size/fixture combinations -- the declared set equals the frame's
-            # at every one.
+            # (`M-N06.3-b`).  The declared set was checked against the
+            # composited frame and equalled it at every combination driven -- by
+            # a SCRATCH PROBE at 16, and by the suite's own arms, which are 13
+            # (10 `AT-059` plus 3 `AT-057`, the latter on `legacy` only). The
+            # "16" belongs to the probe and is not reproducible from the tree,
+            # which is why both numbers are given rather than the flattering
+            # one.
             return radial_painted_ids
         raise LookupError(
             f"no painted_ids declared for {type(renderer).__name__}; add an "

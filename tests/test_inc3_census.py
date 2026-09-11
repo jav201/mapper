@@ -396,8 +396,9 @@ def test_a98_the_declaring_renderers_are_pinned_as_an_equality():
       * `radial` joined at `Inc-B55b`, through a CELL-OWNERSHIP REPLAY rather
         than a filter over `place()`: the canvas is last-write-wins and records
         no owner, so placement says where a pill was WRITTEN and not whether it
-        SURVIVED (`M-N06.3-b`).  Verified against the composited frame at 16
-        size/fixture combinations -- declared set equals frame set at every one.
+        SURVIVED (`M-N06.3-b`).  Declared set equals the frame's at every
+        combination driven: 13 arms in this suite (10 `AT-059` plus 3 `AT-057`),
+        and 16 in a scratch probe that is not part of the tree.
       * `lane` is absent for a DIFFERENT reason and is not owed here at all: its
         three renderer classes are constructed nowhere -- `app.py` builds only
         Layered, Outline and Radial -- so they reach no operator-visible sink and
