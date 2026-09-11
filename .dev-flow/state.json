@@ -224,7 +224,7 @@
       },
       {
         "inc": "Inc-CRUMB",
-        "commit": "PENDING",
+        "commit": "9a773e4",
         "date": "2026-09-10",
         "source_files": 3,
         "scope": "The TITLE-LENGTH vector of the collapse Inc-STRIPS half-closed. TabStrip's crumb was a fourth unbounded strip taking a raw ficha title: ONE 4000-char title rendered TabStrip at 54 rows and put #map-canvas and the count region off a 24-row frame. Bounded where it is BUILT (darkside.tab_strip -> _crumb_line, cell-measured, spent from the RIGHT so the cursor's node survives, remainder DECLARED as `+N …`), #map-toast's detail bounded at the _event_toast seam, stylesheet lids second. A FIFTH strip surfaced mid-increment: KeyBar rendered its first frame at a hard-coded 118 cells.",
@@ -240,7 +240,8 @@
           "Three successive false fails in my own proof harness, all from MY declarations: a mid-increment snapshot labelled 'HEAD'; an expectation that _width was NEW when it exists at HEAD; a blank unparse line flagged as an undeclared change. C-53 each time."
         ],
         "carries_opened": "SEC-F1 (TabStrip.__init__ renders at _crumb_line 118 fallback; NOT live -- content superseded before paint, height clamped by max-height:3, so THE LID IS LOAD-BEARING for the init path) and DECL-118-TWICE (118 hardcoded in chrome.py and darkside.py:223). Both -> Inc-REPAIR. Five security LOW carried incl. the export toast still painting the username, exposure UNCHANGED by this increment. Inc-REPAIR DROPS F-C, closed by accident here and BOOKED deliberately with two-oracle evidence.",
-        "controls_earned": "Measure what the operator reads AND the geometry it stands in; either alone can lie. Pairs with Inc-STRIPS composited-frame rule as two halves of one law."
+        "controls_earned": "Measure what the operator reads AND the geometry it stands in; either alone can lie. Pairs with Inc-STRIPS composited-frame rule as two halves of one law.",
+        "docs_commit": "315f8c9"
       }
     ],
     "next": "Inc-B55",
