@@ -20,9 +20,13 @@ which is the state this increment exists to end.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
+from rich.text import Text
 
 from mapper.app import COUNT_REGION_ID, MapperApp, SEARCH_COUNT_SUBJECT
+from mapper.widgets.chrome import TabStrip
 from mapper.model import Edge, Ficha, Graph, Node
 from tests.inc3_support import open_map, rows_in
 
@@ -263,3 +267,89 @@ async def test_the_crumb_is_bounded_BELOW_the_tab_rows_natural_width(tmp_path, w
             f"at {width} columns the crumb is not on the frame at all; the lid "
             f"ate it. Painted: {painted[:70]!r}"
         )
+
+
+# ---------------------------------------------------------------------------
+# SEC-F1 + DECL-118-TWICE -- ONE defect carried in halves since Inc-CRUMB.
+#
+# `TabStrip.__init__` renders the crumb with NO width, so `darkside._crumb_line`
+# takes its own hardcoded 118-cell fallback. That fallback is the batch's
+# declared context spelled a SECOND time -- `chrome._KEYBAR_FALLBACK_CELLS` is
+# the first -- and nothing makes the two agree.
+#
+# It was recorded as not-live, and the reason matters: the content is superseded
+# before paint and the height is clamped by `TabStrip`'s `max-height: 3` lid. So
+# THE CSS LID IS LOAD-BEARING for the init path, which is the shape the batch
+# named at Inc-CRUMB's birth -- never a CSS lid over unbounded content.
+
+
+def _long_crumb() -> list[str]:
+    """Ancestors long enough that a 118-cell budget and a 40-cell one differ."""
+    return [f"nivel-{i}-" + "x" * 20 for i in range(6)]
+
+
+@pytest.mark.parametrize("width", [30, 40, 60])
+@pytest.mark.asyncio
+async def test_sec_f1_the_first_crumb_render_is_budgeted_to_the_REAL_width(tmp_path, width):
+    """The init render, before any resize can rescue it.
+
+    Measured on the composited frame would prove nothing here: `on_resize` fires
+    and supersedes the content, so the frame is right either way. The defect is
+    in what the widget HOLDS at construction, and that is what a later render
+    replaces -- the `KeyBar` lesson from `Inc-CRUMB`, one widget over.
+
+    So this reads the renderable the constructor produced, with no resize
+    allowed to intervene.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(width, 20)) as pilot:
+        await pilot.pause()
+        strip = TabStrip("c", crumb=_long_crumb())
+        held = strip.render()
+        text = held.plain if hasattr(held, "plain") else str(held)
+        crumb_row = text.split("\n")[1] if "\n" in text else ""
+        cells = Text(crumb_row).cell_len
+
+        assert crumb_row, "the fixture produced no crumb row; the arm is vacuous"
+        assert cells <= width, (
+            f"the constructor budgeted the crumb against {cells} cells at a "
+            f"{width}-column terminal -- it took `_crumb_line`'s hardcoded 118 "
+            "fallback instead of the width the app already knows. The CSS lid "
+            "is what hides this, which is the one thing a lid must never be."
+        )
+
+
+def test_decl_118_is_spelled_ONCE():
+    """The declared context has ONE home, and this is what pins it.
+
+    `chrome._KEYBAR_FALLBACK_CELLS`, `darkside._crumb_line`'s inline fallback and
+    `darkside.keybar`'s default parameter were the same number in three places
+    with nothing making them agree -- the batch's own control: anything spelled
+    twice will drift. THREE, not two: the carry record said two, and the third
+    was found only when this arm was written. That is the ledger control proving
+    itself on its first outing.
+
+    COUNTED FROM THE AST, not by grepping the text. A regex over source lines
+    counts the number inside docstrings and comments -- five of the eight hits
+    the first version of this arm reported were PROSE describing the defect,
+    including this module's own history. Only a real numeric literal can drift.
+    """
+    import ast
+
+    from mapper import darkside as _d
+    from mapper.widgets import chrome as _c
+
+    spellings = {}
+    for name, mod in (("darkside.py", _d), ("chrome.py", _c)):
+        tree = ast.parse(Path(mod.__file__).read_text(encoding="utf-8"))
+        spellings[name] = [
+            node.lineno for node in ast.walk(tree)
+            if isinstance(node, ast.Constant) and node.value == 118
+            and not isinstance(node.value, bool)
+        ]
+    total = sum(len(v) for v in spellings.values())
+    assert total <= 1, (
+        f"the declared context is spelled {total} times as a literal: "
+        f"{spellings}. One home, or they drift -- and they cannot be kept in "
+        "step by being equal today."
+    )

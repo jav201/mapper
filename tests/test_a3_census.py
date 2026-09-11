@@ -219,9 +219,14 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     # 27 -> 28 in Inc-B55a's code-review round: the same forced-trigger arm asks
     # `canvas.render()` what the widget HOLDS after the reflow.  A zero-arg
     # Textual widget site, correctly outside the A3.
-    assert len(sites["zeroarg"]) == 28, (
+    #
+    # 28 -> 29 at `Inc-REPAIR` S-A: `SEC-F1`'s arm asks a freshly constructed
+    # `TabStrip` what it HOLDS, because the defect is in the constructor's render
+    # and the composited frame cannot see it -- `on_resize` supersedes the
+    # content before paint. Same shape as the site above, one widget over.
+    assert len(sites["zeroarg"]) == 29, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "28; a DROP means widget sites were wrongly swept into the A3"
+        "29; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -325,10 +330,10 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     floor-based gate could not tell the difference.
     """
     zeroarg = render_call_sites()["zeroarg"]
-    # 25 -> 26 in Inc-3, and 26 -> 27 in Inc-B55a -- the same sites the
-    # cardinality pin above names and itemises.
-    assert len(zeroarg) == 28, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 28. A floor was "
+    # 25 -> 26 in Inc-3, 26 -> 27 and 27 -> 28 in Inc-B55a, 28 -> 29 at
+    # Inc-REPAIR S-A -- the same sites the cardinality pin above itemises.
+    assert len(zeroarg) == 29, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 29. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
