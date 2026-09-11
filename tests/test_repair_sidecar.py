@@ -6,8 +6,24 @@ the `screens/coverage.py` coercion sink.
 
 **`AT-049` AND `AT-050` HAD NO NODES ON DISK.** They were ratified in
 `01-requirements.md` §3.9 and never written — the `AT-005`/`AT-006` shape this
-batch already carries, found at the pre-gate before any fix. This module is their
-home.
+batch already carries, found at the pre-gate before any fix.
+
+**AND THIS MODULE IS NOT ALL OF `AT-049`.** It is `AT-050`'s whole home and only
+the STORE half of `AT-049`. §3.9's boundary catalog asks the positive arm for
+*"the card enters the damaged state"* and the negative arm for *"no warning **and
+a healthy card**"*; neither card assertion is here, and neither can be written
+here, because there is no damaged card state in the code — `HomeScreen` reports a
+damaged load as a TOAST (`app.py:546-551`, `app.py:1277-1290`) and the recents
+table has no damaged column or style.
+
+That is a hand-off, not an omission. §5.4 says `LLR-REPAIR.1` gates `Inc-7`
+*"because without it `AT-025b` is vacuous"*, and `LLR-N13.1.5` identifies the
+damaged maps *"by the load path raising or **recording a load warning**, never by
+a clock"* — so the warning these arms pin is precisely what the card will be
+painted from. `AT-025b` has no node on disk either; the card clause and the
+containment arm that consumes it land together at `Inc-7`.
+
+So: do not read a green run of this module as `AT-049` discharged.
 """
 from __future__ import annotations
 
@@ -176,7 +192,7 @@ def test_at050_a_not_found_message_names_the_map_not_the_filesystem(tmp_path):
 def test_at050_the_message_discloses_no_workspace_component(tmp_path):
     """`AT-050`'s boundary arm: a SENTINEL, not a separator.
 
-    The arm above asserts no `/` or `\` appears, and that proxy does not
+    The arm above asserts no `/` or `` appears, and that proxy does not
     generalise -- a map id the operator typed as `sub/dir/mapa` puts a separator
     in the message legitimately, and the arm would call the store guilty for
     echoing what it was asked for. The requirement's oracle is whether a
@@ -265,11 +281,28 @@ def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
 
     THE ORACLE IS THE MESSAGE'S SIZE, NOT THE CLOCK. That is what makes this arm
     deterministic and cheap: warning length grows 10x per amplification level
-    while wall time barely moves at shallow depths. Measured on the shipped
-    tree -- benign 31 chars; 5 levels 522,311 chars in 0.025 s. Five levels is
-    driven here precisely because it is RED by four orders of magnitude while
-    costing 25 ms, so the default lane carries no wall-clock assert (`FLAKE-1`
-    is what that discipline is for).
+    while wall time barely moves at shallow depths, so the default lane carries
+    no wall-clock assert (`FLAKE-1` is what that discipline is for).
+
+    THE NUMBERS, EACH ATTACHED TO THE TREE IT WAS MEASURED ON. On the SHIPPED
+    tree the benign fixture is 31 chars and five levels is 107 -- 19x UNDER the
+    2,000 bound, which is what a green arm should look like. With the defect
+    REINTRODUCED, five levels emits 522,311 chars: red by 261x for the price of
+    a cheap fixture, which is why five is the level driven.
+
+    That 522,311 decomposes, and I checked it rather than inheriting it: the
+    materialised duplicate record is 522,247 chars and the two `campo ilegible:
+    document[i].name` records are 32 each. Only the SECOND half of the duplicate
+    record was ever raw -- `doc.name` is the value the per-key coercion already
+    replaced with `''` -- so interpolating both halves raw reproduces a defect
+    that never shipped and doubles the figure to 1,044,465.
+
+    The first version of this docstring put "measured on the shipped tree" in
+    front of the 522,311 -- a pre-fix figure. The first CORRECTION added the
+    distinction at the top and left the old conclusion standing at the bottom,
+    so the text asserted both "19x under its bound" and "RED by four orders of
+    magnitude" four lines apart. A docstring that contradicts itself is not a
+    corrected one.
     """
     graph = _write(tmp_path, amplified(levels=5)).load("m")
     total = sum(len(w) for w in graph.load_warnings)
@@ -357,8 +390,161 @@ def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
 # that runs less often is how a suite acquires arms nobody trusts.
 
 
+def attachment_amplified(id_len: int = 1_000, aliases: int = 400) -> str:
+    """A long node id reused across many aliased attachment entries.
+
+    THE STAGE'S OWN FIX INTRODUCED THIS LINE. `adjunto sin campos:
+    {owner}.{key}[{i}]` reads like a coordinate and carries a VALUE -- `owner` is
+    the node id, read from the sidecar. The security review measured the
+    unbounded form at 2.0 GB of records in 0.84 s, 9,092x amplification: 26x
+    larger than the alias bomb this stage was repairing and 60x CHEAPER, so
+    nothing times out.
+
+    THE ID IS 1,000 CHARS, NOT THE REVIEW'S 100,000, AND THE REASON IS A LIMIT
+    I MEASURED RATHER THAN A CHOICE: PyYAML's scanner refuses a mapping key much
+    past 1 KB -- `mapping values are not allowed here` -- quoted or not, at
+    20,000 and at 100,000. So a node id cannot reach `owner` at that length
+    through a mapping key, and I could not reproduce the review's id length by
+    this route. The AMPLIFICATION does not depend on it: record COUNT is the
+    other free variable and it is file-linear, so the fixture buys its size in
+    aliases instead.
+    """
+    big = "z" * id_len
+    lines = ["_anchors:", "  bad: &bad", "    z: 1", "schema: []", "nodes:",
+             f'  "{big}":', "    title: benigno", "    attachments:"]
+    lines += ["      - *bad"] * aliases
+    lines.append("")
+    return "\n".join(lines)
+
+
+def test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too(tmp_path):
+    """A coordinate is not automatically short.
+
+    Every other record in `store.py` names a position and is short by
+    construction. This one interpolates `owner`, a sidecar-supplied node id, so
+    it reads like a coordinate and behaves like a value -- which is how the fix
+    for a materialisation defect shipped a worse one.
+
+    Both free variables are bounded now: per-record length and record COUNT,
+    because 5 bytes of sidecar buys another record and the list is joined into
+    an operator toast before anything else sees it.
+    """
+    graph = _write(tmp_path, attachment_amplified()).load("m")
+
+    assert any("adjunto sin campos" in w for w in graph.load_warnings), (
+        f"the refusal record is missing entirely: {graph.load_warnings[:2]}"
+    )
+    total = sum(len(w) for w in graph.load_warnings)
+    assert total < 200_000, (
+        f"this sidecar produced {total:,} characters of records. The security "
+        "review measured the unbounded form at 20,107,707 characters on a "
+        "101 KB file, of which 99.5% came from this one line."
+    )
+    assert len(graph.load_warnings) <= 210, (
+        f"{len(graph.load_warnings)} records; the count is file-linear and must "
+        "be capped before the join, not at it"
+    )
+
+
 # ---------------------------------------------------------------------------
 # The coercion sink beside it
+
+
+@pytest.mark.asyncio
+async def test_the_coverage_cell_does_not_parse_markup_from_a_ficha_title(tmp_path):
+    """THE ARM THE `Text(...)` FIX SHIPPED WITHOUT -- reading the REAL cell.
+
+    The code review's condition was the wrap AND an arm; only the wrap landed.
+    The security review then fired the wrap's removal against the whole suite:
+    997 passed, NOT ONE ARM MOVED, while the same mutant emits an OSC-8
+    hyperlink to the terminal and crashes the app on `[/]`.
+
+    MY FIRST VERSION OF THIS ARM ALSO SURVIVED THAT MUTANT, and the reason is
+    worth the space: it built the cell itself -- `Text(darkside.plain(hostile))`
+    -- so it asserted a property of an expression it had written, not of the one
+    `coverage.py` passes. A parallel fiction, which is the same failure this
+    batch named for the `AT-058` absent-state arm. An arm that constructs its own
+    subject cannot see the call site change.
+
+    So this drives the real `CoverageScreen`, pulls what the table was actually
+    handed, and asserts the property there.
+    """
+    from textual.app import App
+    from textual.widgets import DataTable
+
+    from mapper.model import Edge, Ficha, Graph, Node, SchemaField
+    from mapper.screens.coverage import CoverageScreen
+
+    hostile = "[red]rojo[/red] [link=file:///etc/passwd]click[/link]"
+    graph = Graph()
+    graph.schema = [SchemaField(key="D", label="documento", required=True)]
+    graph.add_node(Node(id="root", ficha=Ficha(title="Raiz", fields={"D": "x"})))
+    graph.add_node(Node(id="malo", ficha=Ficha(title=hostile)))
+    graph.add_edge(Edge("root", "malo"))
+
+    class _Host(App):
+        def on_mount(self) -> None:
+            self.push_screen(CoverageScreen(graph, "m"))
+
+    async with _Host().run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        table = pilot.app.screen.query_one(DataTable)
+        row = table.get_row_at(0)
+
+    cell = next(
+        (c for c in row if hasattr(c, "plain") and "rojo" in c.plain), None
+    )
+    assert cell is not None, f"the hostile title is not in the row: {row}"
+    assert cell.spans == [], (
+        f"the cell carries {len(cell.spans)} style span(s) from a ficha title: "
+        f"{cell.spans}. A sidecar is choosing the styling, and a `link` span "
+        "reaches the terminal as OSC-8."
+    )
+    assert "[red]" in cell.plain, (
+        "the markup must survive as LITERAL TEXT, not be interpreted away"
+    )
+
+
+@pytest.mark.asyncio
+async def test_an_unbalanced_closing_tag_in_a_title_does_not_kill_the_screen():
+    """A SEPARATE arm, because `[/]` is a separate FAILURE MODE.
+
+    The arm above catches a leaked style span -- an integrity defect. This one
+    catches a crash: an unbalanced closing tag in a sidecar title raises
+    `MarkupError` from inside `DataTable._on_idle`, which is **not** on a path
+    the screen can guard; it is the compositor's own reflow. `escape` prevented
+    it before the swap, `plain` alone did not, and `Text(...)` does -- which is
+    what makes the shipped fix an AVAILABILITY fix as well as an integrity one.
+
+    Asserting `spans == []` cannot see this: a crashing render never reaches the
+    assert. So the two arms are not redundant, and neither subsumes the other.
+    """
+    from textual.app import App
+    from textual.widgets import DataTable
+
+    from mapper.model import Edge, Ficha, Graph, Node, SchemaField
+    from mapper.screens.coverage import CoverageScreen
+
+    graph = Graph()
+    graph.schema = [SchemaField(key="D", label="documento", required=True)]
+    graph.add_node(Node(id="root", ficha=Ficha(title="Raiz", fields={"D": "x"})))
+    graph.add_node(Node(id="malo", ficha=Ficha(title="acta firmada[/]")))
+    graph.add_edge(Edge("root", "malo"))
+
+    class _Host(App):
+        def on_mount(self) -> None:
+            self.push_screen(CoverageScreen(graph, "m"))
+
+    async with _Host().run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        table = pilot.app.screen.query_one(DataTable)
+        row = table.get_row_at(0)
+
+    cell = next((c for c in row if hasattr(c, "plain") and "acta" in c.plain), None)
+    assert cell is not None, f"the title is not in the row: {row}"
+    assert cell.plain == "acta firmada[/]", (
+        f"the closing tag did not survive as literal text: {cell.plain!r}"
+    )
 
 
 def test_coverage_screen_coerces_file_derived_text_with_plain():

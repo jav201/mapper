@@ -65,7 +65,7 @@ def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
         return str(value)
     if isinstance(value, (date, datetime)):
         return value.isoformat()
-    graph.load_warnings.append(f"campo ilegible: {node_id}.{key}")
+    _warn(graph, f"campo ilegible: {node_id}.{key}")
     return ""
 
 
@@ -140,13 +140,14 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
     produced HIGH-1.
     """
     if not isinstance(value, dict):
-        graph.load_warnings.append(f"campo ilegible: {owner}.{key}")
+        _warn(graph, f"campo ilegible: {owner}.{key}")
         return {}
     out: dict[str, str] = {}
     for raw_key, raw_value in value.items():
         ckey = _coerce_field(graph, owner, f"{key}[{raw_key!r}]", raw_key)
         if ckey in out:
-            graph.load_warnings.append(
+            _warn(
+                graph,
                 f"campo duplicado: {owner}.{key}.{ckey!r} <- {raw_key!r}"
             )
         out[ckey] = _coerce_field(graph, owner, f"{key}.{raw_key}", raw_value)
@@ -157,6 +158,43 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
 # spelled -- a fourth field added to `Attachment` must not silently start being
 # refused here (`B-48`).
 _ATTACHMENT_KEYS = {f.name for f in fields(Attachment)}
+
+
+# A load record is a DIAGNOSTIC, not a transcript. Two bounds, because the
+# amplification has two free variables and bounding either alone leaves the
+# other unbounded.
+#
+# PER RECORD, because a coordinate is not automatically short: `owner` is a node
+# id read from the sidecar, so `adjunto sin campos: {owner}.{key}[{i}]` carries
+# a value even though it reads like a position. MEASURED, and this is the defect
+# `Inc-REPAIR` S-E's own security review found the stage INTRODUCING: a 100k
+# character node id with 20,000 aliased attachment entries produced 2.0 GB of
+# warnings in 0.84 s -- 9,092x amplification, 26x larger than the alias bomb
+# this stage was repairing and 60x CHEAPER, so nothing times out.
+#
+# PER LIST, because record COUNT is the other free variable and it is
+# file-linear: 5 bytes of sidecar buys another record. The list is joined and
+# coerced into an operator toast, so the ceiling has to exist before the join,
+# not at it.
+_RECORD_CHARS = 200
+_MAX_RECORDS = 200
+
+
+def _warn(graph: Graph, record: str) -> None:
+    """Append a bounded load record, and stop appending once the list is full.
+
+    Every producer in this module routes through here, so a twelfth cannot
+    reintroduce the class by spelling its own `append`.
+    """
+    if len(graph.load_warnings) >= _MAX_RECORDS:
+        if len(graph.load_warnings) == _MAX_RECORDS:
+            graph.load_warnings.append(
+                f"… y más registros omitidos (límite {_MAX_RECORDS})"
+            )
+        return
+    if len(record) > _RECORD_CHARS:
+        record = f"{record[:_RECORD_CHARS]}…"
+    graph.load_warnings.append(record)
 
 
 # The longest raw origin a diagnostic may show before it names a coordinate
@@ -230,7 +268,7 @@ def _mappings(
     field does not silently start being refused.
     """
     if not isinstance(entries, list):
-        graph.load_warnings.append(f"campo ilegible: {owner}.{key}")
+        _warn(graph, f"campo ilegible: {owner}.{key}")
         return []
     out = []
     for i, entry in enumerate(entries):
@@ -243,12 +281,12 @@ def _mappings(
             # lost and a PHANTOM WAS INVENTED, which is the silent-loss class
             # this function exists to end, inverted.  The docstring below still
             # claimed the class was closed; it was closed for scalars only.
-            graph.load_warnings.append(f"adjunto sin campos: {owner}.{key}[{i}]")
+            _warn(graph, f"adjunto sin campos: {owner}.{key}[{i}]")
         else:
             # The index is part of the record.  Without it n malformed entries
             # emit n byte-identical lines that cannot be told apart -- the same
             # diagnostic defect F7 fixed for field keys (review G4).
-            graph.load_warnings.append(f"campo ilegible: {owner}.{key}[{i}]")
+            _warn(graph, f"campo ilegible: {owner}.{key}[{i}]")
     return out
 
 
@@ -454,7 +492,8 @@ class MapStore:
                 # measured twice the payload. Being an Attribute rather than a
                 # Call, no AST arm shaped around `{call()!r}` could see it.
                 coordinate = f"document[{i}].name"
-                graph.load_warnings.append(
+                _warn(
+                    graph,
                     f"documento duplicado: {_raw_origin(doc.name, coordinate)} "
                     f"<- {_raw_origin(d.get('name'), coordinate)}"
                 )
@@ -476,7 +515,7 @@ class MapStore:
                 # Two raw ids coerced to one string; without this the second node's
                 # ficha silently overwrites the first's.  The raw origin is carried
                 # for the same reason as the field-key record above (review G2).
-                graph.load_warnings.append(f"nodo duplicado: {nid!r} <- {raw_nid!r}")
+                _warn(graph, f"nodo duplicado: {nid!r} <- {raw_nid!r}")
             seen_ids.add(nid)
             if nid not in graph.nodes:
                 # A SIDECAR ID THE `.mmd` NEVER DEFINED (`B-29`, `AT-049`).  It
@@ -488,7 +527,7 @@ class MapStore:
                 # silence mattered because `LLR-N13.1.5`'s containment arm, which
                 # `AT-025b` drives, cannot see a damaged sidecar the store does
                 # not report.
-                graph.load_warnings.append(f"nodo fantasma: {nid!r}")
+                _warn(graph, f"nodo fantasma: {nid!r}")
                 graph.add_node(Node(id=nid))
             node = graph.nodes[nid]
             text_attrs = _text_attributes()
@@ -496,7 +535,7 @@ class MapStore:
             if not isinstance(raw_fields, dict):
                 # LLR-R03.5: a malformed field never denies the map.  A non-dict
                 # `fields` is a hand-edited shape `_build_sidecar` cannot produce.
-                graph.load_warnings.append(f"campo ilegible: {nid}.fields")
+                _warn(graph, f"campo ilegible: {nid}.fields")
                 raw_fields = {}
             # The KEY is a text position too, and it was raw: only the value went
             # through the ladder.  Built as a loop rather than a comprehension so a
@@ -513,7 +552,8 @@ class MapStore:
                     # Both coordinates AND the raw origin: a refused key coerces to
                     # `""`, so `{nid}.{ckey}` alone renders as `A.` and cannot say
                     # WHICH keys collided (review G2).
-                    graph.load_warnings.append(
+                    _warn(
+                        graph,
                         f"campo duplicado: {nid}.{ckey!r} <- {key!r}"
                     )
                 coerced_fields[ckey] = _coerce_field(graph, nid, str(key), value)
