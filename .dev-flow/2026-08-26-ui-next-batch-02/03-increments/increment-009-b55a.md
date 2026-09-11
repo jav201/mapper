@@ -116,12 +116,50 @@ asserts row completeness, and the section's own note derives only the **count**,
 with its observable outcome extended. Had it been generated, regenerating would have been the only
 legal move: hand-editing a generated table is the two-registries defect.
 
-## 6 · Pre-gate captures — on the PRE-FIX tree, before any code
+## 6 · Pre-gate captures — taken on the PRE-FIX tree, before any code
 
-- [ ] `A-98` tripwire two-oracle **RED** (`test_a98_exactly_one_renderer_declares_its_painted_set`)
-- [ ] the four-size stale-geometry reproduction (§2's table)
-- [ ] `AGREE-1`'s pre-state: both surfaces silent at `(35,14)` while 7 of 8 are hidden
-- [ ] `AT-058`'s pre-state: an unregistered renderer resolving to `None` rather than raising
+All four are the "before" half of this increment's two-oracle evidence. Captured 2026-09-10 at
+`258e83c`, one fixture (`legacy`), through the live screen.
+
+- [x] **`C1` — `A-98` tripwire, pre-fix.** `painted_ids_exporters() == {'mapper.views.layered'}` —
+  the pinned equality holds today. It must go **RED** the moment `outline` declares; repairing it
+  means widening the pinned set **and amending its docstring**, never a `-k` exclusion.
+- [x] **`C2` — the stale-geometry reproduction, and the negative controls it defines.**
+
+  ```
+    terminal region_h  cs_h  held   re  gap
+    (24, 20)        8     6     5    6    1
+    (30, 16)        5     4     3    4    1
+    (32, 16)        5     4     3    4    1
+    (34, 14)        3     2     1    2    1
+    (28, 14)        3     1     1    1    0
+    (35, 14)        3     2     2    2    0
+    (40, 16)        5     4     4    4    0
+    (50, 16)        5     4     4    4    0
+    (60, 20)       11    10     9    9    0
+    (80, 24)       16    15     9    9    0
+   (118, 34)       27    26     9    9    0
+  ```
+
+  **LOSS (4):** `(24,20)` `(30,16)` `(32,16)` `(34,14)`.
+  **ZERO-GAP negative controls (7):** `(28,14)` `(35,14)` `(40,16)` `(50,16)` `(60,20)` `(80,24)`
+  `(118,34)` — these are the frames that must be **byte-identical pre/post** across outline, layered
+  and radial.
+- [x] **`C3` — `AGREE-1`'s pre-state, confirming `02n` independently.**
+
+  ```
+    outline  (35,14)  hidden=7/8  canvas_token=False  _unpainted_ids=None
+    outline  (30,16)  hidden=6/8  canvas_token=False  _unpainted_ids=None
+    outline  (32,16)  hidden=6/8  canvas_token=False  _unpainted_ids=None
+    outline  (80,24)  hidden=0/8  canvas_token=False  _unpainted_ids=None
+  ```
+
+  Both surfaces silent at every size, including one hiding **7 of 8** nodes. This is why the first
+  draft of `AT-057` was green on the shipped build.
+- [x] **`C4` — `AT-058`'s pre-state.** `_unpainted_ids()` returns `None` for outline at `(80,24)`,
+  where **nothing is hidden**, and the identical `None` at `(35,14)`, where **7 of 8 are**. The seam
+  answers *"nothing to declare"*, *"not this view"* and *"the declaration broke"* with **one value**.
+  That is the collision `AT-058` exists to break.
 
 ## 7 · Gate checklist
 
