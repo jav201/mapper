@@ -1219,13 +1219,29 @@ class MapScreen(Screen):
         # The canvas region `_declare_after_layout` last painted a numeral for.
         # `None` means "never", which is why the first pass always re-schedules.
         self._declared_for: Region | None = None
-        # The `(w, h)` the canvas's CURRENT content was rendered at.  `P1` says
-        # content and geometry agree at rest; this is that invariant held as a
-        # value, so the settle pass can SKIP a re-render it knows would be
-        # byte-identical.  Measured: without it, one settle pass on an
+        # EVERYTHING the canvas's current content was produced FROM: the
+        # renderer and the whole `ViewState`.  `P1` says content and geometry
+        # agree at rest, and the settle pass may skip a re-render it knows would
+        # be byte-identical.  Measured: without that skip, one settle pass on an
         # 11999-node graph in outline costs 0.33 s at 118x34 -- a full re-render
         # -- and doubles a repaint that already costs 0.36 s.
-        self._rendered_for: tuple[int, int] | None = None
+        #
+        # THIS HELD ONLY `(w, h)` AND THAT WAS A DEFECT THE SECURITY REVIEW
+        # FIRED.  Content is a function of the renderer plus NINE `ViewState`
+        # fields; geometry is two of them.  A guard keyed on two inputs is a
+        # PROJECTION of `P1`, not `P1`, so any other input changing without an
+        # intervening `refresh_canvas` let the settle declare the frame
+        # reconciled and skip -- while the strip repainted from the new state
+        # against a canvas holding the old one.  Demonstrated: the canvas header
+        # declaring 7 in layered beside a strip declaring 5 in outline, at one
+        # unchanged geometry.  That is `B-60` reintroduced through the mechanism
+        # built to prevent it.
+        #
+        # `ViewState` is a frozen dataclass, so `==` is total over its fields and
+        # costs O(fields) -- it cannot give back the 0.33 s the skip exists to
+        # save.  Now the predicate really is the invariant rather than a shadow
+        # of it, which is what the comment below already claimed.
+        self._rendered_for: tuple[object, ViewState] | None = None
         # ONE FRAME'S resolution, held only for the duration of that frame.
         # See `_search_order`; `_open_paint_pass` is what bounds its lifetime.
         self._search_memo: tuple[Graph, str, tuple[str, ...]] | None = None
@@ -1690,20 +1706,27 @@ class MapScreen(Screen):
         w, h = self._canvas_size()
         # THE GUARD IS `P1` ITSELF, not a second mechanism.  `P1` says content
         # and geometry agree at rest; if they ALREADY agree, this re-render is
-        # byte-identical and there is nothing to reconcile.  That is why this is
+        # byte-identical and there is nothing to reconcile.  That is why it is
         # safe in a way "re-render only when the strip changed" would not be:
-        # the predicate skipped on is the same one the invariant asserts, so the
-        # guard cannot drift from the property it protects.
+        # the predicate skipped on is the property the invariant asserts, so the
+        # guard cannot drift from what it protects.
+        #
+        # AND IT IS THE WHOLE INPUT, NOT A PROJECTION OF IT.  Keyed on `(w, h)`
+        # alone this sentence was FALSE and the security review fired it: content
+        # depends on the renderer and every `ViewState` field, so a view switch
+        # at one unchanged geometry let this skip while the strip repainted --
+        # canvas declaring 7 in layered beside a strip declaring 5 in outline.
         #
         # It is not an optimisation looking for a problem.  MEASURED on an
         # 11999-node graph -- the largest `outline` will render -- one unguarded
         # settle pass costs 0.33 s at 118x34 and 0.28 s at 80x24, roughly
         # DOUBLING a repaint that already costs 0.36 s.  Arming the settle from
         # `refresh_canvas` without this would have shipped that.
-        if (w, h) != self._rendered_for:
+        state = self._view_state(w, h)
+        renderer = self._current_renderer()
+        if (renderer, state) != self._rendered_for:
             try:
-                text = self._current_renderer().render(
-                    self.graph, self._view_state(w, h))
+                text = renderer.render(self.graph, state)
             except Exception:
                 # `refresh_canvas` has already painted its declared "no se pudo
                 # dibujar el mapa" for this frame; overwriting it from here would
@@ -1711,7 +1734,7 @@ class MapScreen(Screen):
                 pass
             else:
                 canvas.update(text)
-                self._rendered_for = (w, h)
+                self._rendered_for = (renderer, state)
         self.query_one(f"#{COUNT_REGION_ID}", Static).update(self._pagination_text())
         # ONE PASS IS NOT ENOUGH, AND THAT WAS `B-60`'s RESIDUAL.  This runs on
         # the first `call_after_refresh`, and at narrow terminals the region is
@@ -2440,19 +2463,26 @@ class MapScreen(Screen):
         # out where the guard could not see it.
         try:
             self._reclamp_pan(w, h)
-            text = renderer.render(self.graph, self._view_state(w, h))
+            # CAPTURED, not recomputed afterwards: `_reclamp_pan` can move
+            # `pan_x`/`pan_y`, so a second `_view_state` call is not necessarily
+            # the state this content was produced from -- and recording a state
+            # the render did not use is exactly the desync the guard exists to
+            # prevent.
+            state = self._view_state(w, h)
+            text = renderer.render(self.graph, state)
         except Exception as exc:
+            state = self._view_state(w, h)
             text = darkside.Text.assemble(
                 (" no se pudo dibujar el mapa\n\n", f"bold {darkside.INK}"),
                 (f" {darkside.plain(str(exc))}", darkside.MUT),
             )
         canvas.update(text)
-        # The geometry this content was produced from, recorded so the settle
-        # pass below can tell "already reconciled" from "needs a re-render"
-        # (`P1`).  Set even on the degraded path: the failure text is what the
-        # canvas now HOLDS for this geometry, and re-rendering it would only
-        # replace a stated degradation with a copy of itself.
-        self._rendered_for = (w, h)
+        # EVERYTHING this content was produced from, recorded so the settle pass
+        # can tell "already reconciled" from "needs a re-render" (`P1`).  Set
+        # even on the degraded path: the failure text is what the canvas now
+        # HOLDS for this state, and re-rendering would only replace a stated
+        # degradation with a copy of itself.
+        self._rendered_for = (renderer, state)
         pulse_cursor(canvas)
 
         tab = self.query_one(TabStrip)
