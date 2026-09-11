@@ -388,9 +388,12 @@ def test_tc_033_the_fold_pill_coerces_a_hostile_branch_title(tmp_path):
     # security review measured why: `_CONTROL_MAP` maps all 235 banned code
     # points to exactly ONE `U+FFFD` each, so `darkside.plain` is length- and
     # index-preserving and `truncate(plain(s)) == plain(truncate(s))`
-    # IDENTICALLY -- 20,000 fuzzed hostile pairs, zero differences, and a mutant
-    # running the FORBIDDEN order stayed green on all 1058 arms, this arm among
-    # them.  The `U+202E` count is zero because the COERCION replaced it, never
+    # IDENTICALLY **FOR THIS TRUNCATOR** -- 20,000 fuzzed hostile pairs, zero
+    # differences, and a forbidden-order mutant on `_clip` left this arm green.
+    # SCOPE: `plain` is index-preserving in CODE POINTS, not DISPLAY CELLS, so
+    # the equivalence holds for the two length-based truncators and NOT for
+    # `darkside.fit`, where the reversal overruns the budget by up to 11x and
+    # turns the default lane RED.  The ordering clause is normative.  The `U+202E` count is zero because the COERCION replaced it, never
     # because of the order, so the assertion could not tell the two apart.
     #
     # Re-pointed at the property that IS load-bearing: the output is coerced.

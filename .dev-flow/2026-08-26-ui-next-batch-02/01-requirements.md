@@ -588,12 +588,23 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 ##### LLR-COERCE.2 — the second truncator coerces before it truncates
 
 - **Traceability:** HLR-COERCE, security condition **C-4** (`02b` S-04, S-05)
-- **Statement (AMENDED at `S-B(+C)`; coordinator ruling 2026-09-11 set the direction, this
-  increment's confirmation pass 3 ratifies the wording):** Every function that truncates a string
-  destined for a painted surface shall emit text that is **both fully coerced and within budget** —
-  formally, `out == darkside.plain(out)` **and** the declared length bound holds — and the set of
-  such functions shall be **derived from the tracked product sources** rather than named by hand.
-  > # ⚠ THIS AMENDMENT IS UNDER REVISION — ITS PREMISE WAS REFUTED AT CONFIRMATION PASS 3
+- **Statement — THE ORDERING CLAUSE STANDS** (re-ruled 2026-09-11 on the corrected record; see the
+  three-step history below): Every function that truncates a string destined for a painted surface
+  shall apply the design module's plain-text coercion **before** truncating, and the set of such
+  functions shall be **derived from the tracked product sources** rather than named by hand.
+- **Acceptance-level invariant — ADDED, NOT SUBSTITUTED** (same re-ruling): every derived truncator's
+  output shall satisfy **both** conjuncts — `out == darkside.plain(out)` **and the emitted width
+  shall be within the requested budget.** **The budget is the load-bearing conjunct and is named as
+  such:** the fixed-point half is *structurally incapable* of detecting a reversed order, because any
+  truncate-then-coerce output ends in a coercion and `plain` is idempotent, so it is a fixed point by
+  construction. The pairing is deliberate — a **mechanism clause** (the order) plus an **armed
+  observable** (the budget) — so that a future change to `plain` which breaks the order-equivalence
+  assumption *anywhere* is caught by the budget arm even on a surface where the ordering clause is
+  not being watched.
+  - **Armed:** `tests/test_darkside_budget.py`, driven over the **derived** truncator set and
+    including the two-character minimal witness as a named case — `U+200B` + `"A"` at width **1**,
+    which emits **1** cell in the specified order and **2** in the forbidden one.
+  > ## THE FULL HISTORY, BECAUSE THIS CLAUSE WAS RULED, REVERSED AND RE-RULED
   >
   > **THE ORDERING CLAUSE IS LOAD-BEARING TODAY, AND THE MEASUREMENT THAT SAID OTHERWISE WAS MINE
   > AND WAS WRONG.** Recorded here immediately, ahead of any re-ruling, because a requirement must
@@ -632,10 +643,28 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   >   **real** is a replacement whose **cell width differs from the source's**, which is `U+FFFD`
   >   **today**.
   >
-  > **Status:** the invariant's *direction* may still be right — pass 3 says it would ratify it on a
-  > corrected record — but the clause's fate now needs re-ruling on the corrected measurement, and
-  > **an implementer must not settle that.** Until then the **original ordering requirement stands
-  > as the operative clause.** `F9`/`F10`/`F11` in `increment-013-sbc-confirmation-3.md`.
+  > ### The three steps, each cited
+  >
+  > 1. **RULING (coordinator, 2026-09-11)** — replace the ordering clause with an order-independent
+  >    invariant, on the grounds that the two orders were *"measurably the same function"*.
+  > 2. **REVERSAL (confirmation pass 3, `increment-013-sbc-confirmation-3.md`, `F9`/`F10`)** — the
+  >    grounds were false. **133,176 differing outputs of 493,845** across the derived set; the
+  >    forbidden order **overruns its own budget** at up to **11×**; the full default lane goes
+  >    **RED, 5 failed / 1058 passed**, under a `darkside.fit` forbidden-order mutant.
+  > 3. **RE-RULING (coordinator, 2026-09-11, on the corrected record)** — **the ordering clause
+  >    stands as normative**, and the invariant is **added at acceptance level** with the budget named
+  >    as its load-bearing conjunct, and **armed**.
+  >
+  > **Accountability, recorded rather than smoothed.** The implementer's probe measured a
+  > **hand-built model of `_clip`** and generalised it over a clause quantifying across three
+  > truncators — parallel fiction at the instrument level, and it reached a ratified requirement,
+  > which is the worst class in this batch's instrument ledger. The coordinator's own line:
+  > **a direction ruling cites driven evidence or says it does not have it** — this one ruled
+  > direction on an undriven measurement.
+  >
+  > **And the chain caught it.** Not by luck: the implementer **refused to self-clear** a declination
+  > he believed correct, and the pass-3 reviewer **drove the derived set** instead of a model. Both
+  > halves were necessary.
 - **Touched symbols:** `mapper/views/layered.py::_fit` (`layered.py:38`) — the executed truncator
   that coerces nothing; its call sites at `layered.py:217`, `:227`, `:237`, `:247`, `:266`, `:280`.
   `mapper/darkside.py::fit` (`darkside.py:290-297`) is **unchanged** — executed, its first statement

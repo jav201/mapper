@@ -90,9 +90,17 @@ def _clip(s: str, width: int) -> str:
     security review: it cannot.  `_CONTROL_MAP` maps all 235 banned code points
     to exactly ONE `U+FFFD` each, so `darkside.plain` is length- and
     index-preserving and `truncate(plain(s)) == plain(truncate(s))` IDENTICALLY
-    -- 20,000 fuzzed hostile pairs, zero differences, and a mutant running the
-    FORBIDDEN order stayed green on all 1058 arms.  There is never an override
-    left to strand, because `plain` replaced it.
+    -- 20,000 fuzzed hostile pairs, zero differences for THIS truncator.
+
+    SCOPE, AND THE SCOPE IS THE WHOLE CORRECTION.  That equivalence holds for the
+    two LENGTH-BASED truncators (`_clip`, `_fit`) and NOT for the family.
+    `plain` is index-preserving in CODE POINTS, not in DISPLAY CELLS: 221 of the
+    235 banned points have cell width 0 and `U+FFFD` has cell width 1, so
+    coercion INFLATES width.  `darkside.fit` truncates by `Text.cell_len`, so
+    reversing the order there overruns the budget -- measured at up to 11x, and
+    the full default lane goes RED under that mutant.  THE ORDERING CLAUSE IS
+    NORMATIVE AND LOAD-BEARING; an earlier retraction here generalised a
+    measurement of this function over a requirement that quantifies across three.
 
     THE CODE IS UNCHANGED AND THE ORDER IS STILL RIGHT.  It costs nothing, and it
     is the order that stays correct if `plain` ever DELETES rather than replaces
