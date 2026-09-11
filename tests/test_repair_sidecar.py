@@ -12,7 +12,6 @@ home.
 from __future__ import annotations
 
 import ast
-import time
 from pathlib import Path
 
 import pytest
@@ -47,7 +46,7 @@ def amplified(levels: int, fanout: int = 10) -> str:
         f"  - name: {deep}",
         "    path: b.pdf",
         "nodes:",
-        "  n:",
+        "  raiz:",
         "    title: benigno",
         "",
     ])
@@ -81,11 +80,18 @@ def test_at049_a_phantom_sidecar_id_records_a_load_warning(tmp_path):
     ]))
     graph = store.load("m")
 
-    for phantom in ("fantasma", "segundo_fantasma"):
-        assert any(phantom in w for w in graph.load_warnings), (
-            f"the sidecar declares {phantom!r}, which the .mmd does not define, "
-            f"and no load warning names it. Warnings: {graph.load_warnings}"
-        )
+    # SET EQUALITY, not per-phantom membership. `LLR-REPAIR.1`'s restated
+    # threshold says "the set of named ids shall equal the set of phantoms --
+    # set equality, not a count", and the first version of this arm used `any()`
+    # per phantom, which cannot see an implementation that names EVERY id.
+    named = {
+        w.split("'")[1] for w in graph.load_warnings
+        if w.startswith("nodo fantasma:")
+    }
+    assert named == {"fantasma", "segundo_fantasma"}, (
+        f"the named phantoms are {named}; the sidecar's phantoms are "
+        f"{{'fantasma', 'segundo_fantasma'}}. Warnings: {graph.load_warnings}"
+    )
     # AND THE WARNING MUST NOT CHANGE WHAT THE MAP IS. `LLR-REPAIR.1` says the
     # store shall warn "and shall not change the meaning of the coverage values
     # it returns", so the phantom is REPORTED, not REMOVED -- dropping it would
@@ -99,6 +105,38 @@ def test_at049_a_phantom_sidecar_id_records_a_load_warning(tmp_path):
     # a second defect wearing the first one's fix.
     assert "fantasma" in graph.nodes
     assert set(graph.nodes) == {"raiz", "hijo", "fantasma", "segundo_fantasma"}
+
+
+def test_at049_a_clean_sidecar_records_no_phantom(tmp_path):
+    """`AT-049`'s NEGATIVE arm, mandated verbatim by the boundary catalog.
+
+    §3.9 requires it: "drives the same workspace with the phantom removed and
+    asserts NO warning and a healthy card, so the positive arm is not passing on
+    a constant." It was not written, and the code review fired what that costs:
+    moving the `append` out of its `if nid not in graph.nodes:` guard -- one
+    indentation level, and the shape an implementer reaches for -- makes the
+    store warn for EVERY sidecar id, so every healthy map raises a toast naming
+    each node. All seven arms stayed green.
+
+    A positive arm alone cannot tell "names the phantoms" from "names
+    everything".
+    """
+    store = _write(tmp_path, "\n".join([
+        "schema: []",
+        "nodes:",
+        "  raiz:",
+        "    title: Raiz",
+        "  hijo:",
+        "    title: Hijo",
+        "",
+    ]))
+    graph = store.load("m")
+
+    assert [w for w in graph.load_warnings if "fantasma" in w] == [], (
+        "a sidecar whose ids all exist in the .mmd raised a phantom warning: "
+        f"{graph.load_warnings}"
+    )
+    assert set(graph.nodes) == {"raiz", "hijo"}
 
 
 # ---------------------------------------------------------------------------
@@ -123,10 +161,41 @@ def test_at050_a_not_found_message_names_the_map_not_the_filesystem(tmp_path):
     assert str(tmp_path) not in message, (
         f"the message discloses the workspace path: {message!r}"
     )
+    # `LLR-REPAIR.2`'s second numeric clause, which was not asserted: the id
+    # appears EXACTLY ONCE. A message that named it twice, or that appended a
+    # workspace component, would pass a mere containment check.
+    assert message.count("no_such_map") == 1, (
+        f"the map id appears {message.count('no_such_map')} times: {message!r}"
+    )
     for marker in ("\\", "/", ".mmd"):
         assert marker not in message, (
             f"the message carries a filesystem detail {marker!r}: {message!r}"
         )
+
+
+def test_at050_the_message_discloses_no_workspace_component(tmp_path):
+    """`AT-050`'s boundary arm: a SENTINEL, not a separator.
+
+    The arm above asserts no `/` or `\` appears, and that proxy does not
+    generalise -- a map id the operator typed as `sub/dir/mapa` puts a separator
+    in the message legitimately, and the arm would call the store guilty for
+    echoing what it was asked for. The requirement's oracle is whether a
+    WORKSPACE COMPONENT leaks, so the workspace is given a component that cannot
+    appear by coincidence.
+    """
+    marker = "zzsentinelzz"
+    workspace = tmp_path / marker
+    workspace.mkdir()
+    store = MapStore(workspace)
+
+    with pytest.raises(MapStoreError) as caught:
+        store.load("no_such_map")
+    message = str(caught.value)
+
+    assert marker not in message, (
+        f"the message discloses a workspace path component: {message!r}"
+    )
+    assert "no_such_map" in message
 
 
 # ---------------------------------------------------------------------------
@@ -141,8 +210,17 @@ def test_b48_a_mapping_without_attachment_keys_is_refused_not_invented(tmp_path)
     kind, path and caption -- so nothing is lost and a phantom is INVENTED.
 
     `store.py`'s own comment records that malformed attachments used to be
-    discarded silently and that this was fixed. The fix covers scalars and not
+    discarded silently and that this was fixed. The fix covered scalars and not
     mappings, which is a declaration outrunning the code.
+
+    THE REFUSAL IS KEY-BASED, AND THIS ARM'S FIRST CLAIM WAS CONTENT-BASED.
+    A hand-written `kind: null / path: null / caption: null` still yields an
+    Attachment with three empty strings -- the reviewer fired it -- and that is
+    CORRECT: those keys are an operator's deliberately-empty attachment, and
+    refusing on emptiness would destroy it on the next save. What is refused is
+    a mapping sharing NONE of the attachment keys. The arm's fixture happens to
+    use an unknown key, so the original wording ("no empty attachment survives")
+    was true of the fixture and false of the rule.
     """
     store = _write(tmp_path, "\n".join([
         "schema: []",
@@ -163,11 +241,13 @@ def test_b48_a_mapping_without_attachment_keys_is_refused_not_invented(tmp_path)
         "the scalar entry should already be refused with a coordinate; if this "
         f"fails the fixture no longer exercises the asymmetry. {graph.load_warnings}"
     )
-    empty = [a for a in attachments if not a.kind and not a.path and not a.caption]
-    assert not empty, (
-        f"{len(empty)} attachment(s) were INVENTED from a mapping with no "
-        "attachment keys -- empty kind, path and caption, and no warning. "
-        f"Warnings: {graph.load_warnings}"
+    assert attachments == [], (
+        f"{len(attachments)} attachment(s) were INVENTED from a mapping sharing "
+        "none of the attachment keys. Neither entry in this fixture names kind, "
+        f"path or caption. Warnings: {graph.load_warnings}"
+    )
+    assert any("adjunto sin campos" in w for w in graph.load_warnings), (
+        f"the mapping was dropped without a record: {graph.load_warnings}"
     )
 
 
@@ -194,6 +274,12 @@ def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
     graph = _write(tmp_path, amplified(levels=5)).load("m")
     total = sum(len(w) for w in graph.load_warnings)
 
+    # POSITIVE CONTROL FIRST. This arm is a pure UPPER bound, so deleting the
+    # diagnostic entirely is a green way to pass it -- fired and confirmed by
+    # the code review. The record must exist before its size is judged.
+    assert any(w.startswith("documento duplicado:") for w in graph.load_warnings), (
+        f"the duplicate record is missing entirely: {graph.load_warnings}"
+    )
     assert total < 2_000, (
         f"the load warnings total {total:,} characters. A diagnostic that "
         "embeds the refused VALUE materialises the structure the refusal "
@@ -201,54 +287,74 @@ def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
     )
 
 
-def test_llr_n13_1_7_no_warning_interpolates_a_raw_sidecar_value():
-    """The CLASS, not the site -- so the defect cannot be rewritten elsewhere.
+# THE AST "CLASS" ARM WAS DELETED (`Inc-REPAIR` S-E review, MEDIUM-1).
+#
+# It forbade `!r` applied to a `Call`, and its docstring claimed "the defect
+# cannot be rewritten elsewhere". The reviewer rewrote it TWICE and the arm
+# stayed green: `d['name']!r` is a Subscript, a name bound to raw data is a
+# Name, and `doc.name!r` -- WHICH WAS LIVE ON THE SAME LINE -- is an Attribute.
+# `ast.Call` is one spelling of four, and `f"{repr(x)}"` uses no conversion at
+# all.
+#
+# It was shape-based where the property is semantic, so it passed the fix and
+# the reintroduced defect for the same reason. The structural arm below killed
+# both rewrites at 261x in 0.02 s. An arm that names a class it does not cover
+# is worse than no arm: it reads as coverage.
 
-    Every diagnostic in `store.py` names a coordinate: `{owner}.{key}`,
-    `{owner}.{key}[{i}]`, `{nid}.fields`. The `!r` conversions are applied to
-    KEYS and IDS, which are short by construction.
 
-    A `!r` applied to a CALL -- `d.get('name')!r` -- reads raw sidecar data of
-    unknown size and shape. That is the one site the defect lived at, and this
-    forbids the shape rather than the instance.
+def scalar_amplified(payload: int = 50_000, dups: int = 200) -> str:
+    """ONE anchor reused across many duplicate names -- no alias DEPTH at all.
+
+    The code review fired this and it is worse than the bomb it replaced: a
+    57 KB sidecar produced 19.9 MB of warnings in 0.081 SECONDS -- 348x
+    amplification and CHEAP, so nothing times out. A type bound let it through
+    because a huge `str` is an allowed type.
     """
-    import mapper.store as store_mod
+    lines = ["_anchors:", f"  big: &big {'x' * payload}", "schema: []", "documents:"]
+    for _ in range(dups):
+        lines += ["  - name: *big", "    path: p.pdf"]
+    lines += ["nodes:", "  raiz:", "    title: benigno", ""]
+    return "\n".join(lines)
 
-    tree = ast.parse(Path(store_mod.__file__).read_text(encoding="utf-8"))
-    offenders = [
-        node.lineno
-        for node in ast.walk(tree)
-        if isinstance(node, ast.FormattedValue)
-        and node.conversion == ord("r")
-        and isinstance(node.value, ast.Call)
-    ]
-    assert not offenders, (
-        f"store.py interpolates a CALL with !r at line(s) {offenders}. That "
-        "reads raw sidecar data of unbounded size into a diagnostic -- name the "
-        "coordinate instead, as every other warning here does."
+
+def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
+    """A TYPE bound is not a LENGTH bound.
+
+    `_raw_origin` first admitted any scalar, and `AT-P02d` needs the origin
+    shown so a coercion collision is distinguishable -- so the answer is
+    truncation, not removal. Both halves of the record are bounded: `doc.name!r`
+    was unbounded too, and being an Attribute rather than a Call, no AST arm
+    shaped around `{call()!r}` could see it.
+    """
+    graph = _write(tmp_path, scalar_amplified()).load("m")
+
+    assert any(w.startswith("documento duplicado:") for w in graph.load_warnings), (
+        f"the duplicate record is missing entirely: {graph.load_warnings[:2]}"
+    )
+    total = sum(len(w) for w in graph.load_warnings)
+    assert total < 200_000, (
+        f"a 57 KB sidecar produced {total:,} characters of warnings. These are "
+        "joined and coerced into an operator toast, so a megabyte of them is a "
+        "per-character translate on the way to the screen."
     )
 
 
-@pytest.mark.slow
-def test_llr_n13_1_7_an_amplified_sidecar_loads_in_bounded_time(tmp_path):
-    """The end-to-end number, where wall-clock asserts belong.
-
-    EIGHT levels, not nine: nine measures 54 s and `pyproject.toml` declares
-    that the slowest arm in either lane is under 20 s. An arm that falsifies the
-    declaration it runs under is the defect this batch keeps cataloguing, so the
-    depth was chosen by measurement -- 8 levels is 5.3 s on the shipped tree,
-    which is unambiguous and keeps the declaration true.
-    """
-    start = time.perf_counter()
-    graph = _write(tmp_path, amplified(levels=8)).load("m")
-    elapsed = time.perf_counter() - start
-
-    assert elapsed < 5.0, (
-        f"an alias-amplified sidecar took {elapsed:.1f} s to load. Measured on "
-        "the shipped tree: 5.3 s at this depth, 54 s one level deeper, against "
-        "0.02 s for the benign equivalent."
-    )
-    assert sum(len(w) for w in graph.load_warnings) < 2_000
+# THE SLOW TIMING ARM WAS DELETED (`Inc-REPAIR` S-E review, LOW-1).
+#
+# It asserted `elapsed < 5.0` on an 8-level sidecar. Fired, the mutants that
+# reintroduce the defect reddened it at 5.0 s and 5.2 s -- a 0-4% margin, which
+# on a faster machine or a warm cache goes GREEN against the defect it exists
+# for. My own note called it "marginally red"; the measurement says that
+# understated it.
+#
+# Neither alternative works: 9 levels is 54 s and falsifies `pyproject.toml`'s
+# own declaration that no arm in either lane exceeds 20 s, and this defect's
+# cost curve offers no point in between. A wall-clock arm should be reddened by
+# an order of magnitude, not by 0.4%.
+#
+# The structural arm above kills the same mutants at 261x in 0.02 s,
+# deterministically, in the DEFAULT lane. Keeping a weaker duplicate in a lane
+# that runs less often is how a suite acquires arms nobody trusts.
 
 
 # ---------------------------------------------------------------------------

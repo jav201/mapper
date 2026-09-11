@@ -159,6 +159,11 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
 _ATTACHMENT_KEYS = {f.name for f in fields(Attachment)}
 
 
+# The longest raw origin a diagnostic may show before it names a coordinate
+# instead.  Generous enough for any id an operator would recognise.
+_ORIGIN_CHARS = 120
+
+
 def _raw_origin(value: Any, coordinate: str) -> str:
     """The raw value when it is SAFE to show, the coordinate when it is not.
 
@@ -171,11 +176,26 @@ def _raw_origin(value: Any, coordinate: str) -> str:
 
     So a scalar is shown and anything else names its position instead. Measured
     on the shipped tree, the unbounded form loaded two alias-amplified document
-    names in 54 SECONDS and emitted a 522-megabyte warning -- the message
-    reporting the refusal performing the materialisation the refusal prevented.
+    names in 54 SECONDS at nine levels -- the message reporting the refusal
+    performing the materialisation the refusal prevented.
+    A TYPE BOUND IS NOT A LENGTH BOUND, and the first version of this helper
+    had only the type. Fired by the code review: a 57 KB sidecar reusing ONE
+    anchor across 200 duplicate document names produced 19.9 MB of warnings in
+    0.081 SECONDS -- 348x amplification, and CHEAPER than the alias bomb it was
+    written to stop, so nothing times out. `load_warnings` are not inert: they
+    are joined and coerced into an operator toast (`app.py:548`), so a megabyte
+    of them is a per-character `translate` on the way to the screen.
+
+    A megabyte `str` is the same materialisation defect wearing an allowed type.
     """
     if isinstance(value, (str, bytes, int, float, bool)) or value is None:
-        return repr(value)
+        shown = repr(value)
+        if len(shown) <= _ORIGIN_CHARS:
+            return shown
+        # TRUNCATED, NOT DROPPED: `AT-P02d` needs the origin distinguishable
+        # (`"1"` against `1`), and its two document cases are far under this
+        # bound, so the distinction and the pin both survive.
+        return f"{shown[:_ORIGIN_CHARS]}… ({coordinate})"
     return coordinate
 
 
@@ -417,8 +437,11 @@ class MapStore:
                 # sidecar value -- and that is the one diagnostic in this module
                 # that read data of unbounded size.  Measured: two `documents`
                 # sharing a 9-level alias-amplified `name` loaded in 54 SECONDS
-                # and emitted a 522-megabyte warning; the same sidecar at 5
-                # levels emitted 522,311 characters in 25 ms.
+                # and emitted a 5.2-GIGABYTE warning; the same sidecar at 5
+                # levels emitted 522,311 characters in 25 ms, and at 8 levels
+                # 522 MB in 5.2 s. (The first version of this comment paired the
+                # 9-level TIME with the 8-level SIZE -- two true numbers from
+                # different rows.)
                 #
                 # THE MESSAGE REPORTING THE REFUSAL WAS PERFORMING THE
                 # MATERIALISATION THE REFUSAL PREVENTED.  The per-key coercion
@@ -426,9 +449,14 @@ class MapStore:
                 # lines up and `doc.name` is already `''` -- and then this line
                 # reached past it to the raw value.  A defence is only as good as
                 # the diagnostic that announces it.
+                # BOTH HALVES BOUNDED. `doc.name!r` was unbounded too: for a
+                # `str` the coerced name IS the same string, so each warning
+                # measured twice the payload. Being an Attribute rather than a
+                # Call, no AST arm shaped around `{call()!r}` could see it.
+                coordinate = f"document[{i}].name"
                 graph.load_warnings.append(
-                    f"documento duplicado: {doc.name!r} <- "
-                    f"{_raw_origin(d.get('name'), f'document[{i}].name')}"
+                    f"documento duplicado: {_raw_origin(doc.name, coordinate)} "
+                    f"<- {_raw_origin(d.get('name'), coordinate)}"
                 )
             documents[doc.name] = doc
         graph.documents = documents
@@ -439,11 +467,6 @@ class MapStore:
             # passed through the field ladder.  Coercing it normalises the key TYPE
             # so `graph.nodes`, which is keyed by `str`, cannot be handed an int.
             #
-            # It does NOT remove a phantom node: a sidecar id matching no parsed
-            # node is still added alongside the parsed ones and still moves
-            # `coverage()`'s denominator.  That is outside this batch's fence, and
-            # saying otherwise here would be a false record in the evidence
-            # (Inc-1 review, F4 -- the previous comment claimed the repair).
             # The raw id is in the label: two distinct refused ids both coerce to
             # `""` and previously emitted two byte-identical records, which is the
             # defect F7/G4 fixed everywhere EXCEPT here -- limb 2 of that fix never
