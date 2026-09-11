@@ -245,9 +245,18 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     # removed. It cannot share the site above -- that one measures a constructor
     # with the resize still available, and this one measures what survives
     # without it.
-    assert len(sites["zeroarg"]) == 30, (
+    #
+    # 30 -> 32 in `S-B(+C)`, TWO sites and both itemised:
+    #   +2  `tests/test_agree_floor.py::_frame` reads BOTH declaring surfaces off
+    #       the composited frame -- `canvas.render()` and `strip.render()`.  Two
+    #       sites rather than one because `LLR-N06.3.5` is a statement ABOUT
+    #       those two surfaces differing, so an arm reading them through a shared
+    #       helper would have to decide which one it was reading and would stop
+    #       being able to see them disagree.  Both are zero-arg WIDGET renders
+    #       and must stay out of the A3 -- which is what this pin protects.
+    assert len(sites["zeroarg"]) == 32, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "30; a DROP means widget sites were wrongly swept into the A3"
+        "32; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -352,9 +361,12 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     """
     zeroarg = render_call_sites()["zeroarg"]
     # 25 -> 26 in Inc-3, 26 -> 27 and 27 -> 28 in Inc-B55a, 28 -> 29 at
-    # Inc-REPAIR S-A -- the same sites the cardinality pin above itemises.
-    assert len(zeroarg) == 30, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 30. A floor was "
+    # Inc-REPAIR S-A, 30 -> 32 at S-B(+C) -- the same sites the cardinality pin
+    # above itemises.  The two pins move TOGETHER by construction: they read the
+    # same derivation, so a change that updated one and not the other is a red
+    # arm rather than a quiet divergence.
+    assert len(zeroarg) == 32, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 32. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
