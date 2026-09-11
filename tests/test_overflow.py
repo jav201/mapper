@@ -1939,3 +1939,88 @@ async def test_at059_radial_declares_what_the_canvas_lost(tmp_path, fixture, siz
             f"  painted nowhere but DECLARED VISIBLE: "
             f"{sorted(frame_hidden - declared)}"
         )
+
+
+# ---------------------------------------------------------------------------
+# AT-059, the TRUNCATION arm -- on its own fixture, because neither normative
+# fixture exercises it.
+#
+# `LLR-N06.3.7` states radial's predicate as the node's image `plain(title)[:18]`.
+# The code review found that claim RIGHT and UNTESTED: no title in `legacy` or
+# `anidado` exceeds 18 characters (the longest is exactly 18), so the truncated
+# and full-title oracles agree everywhere and a mutant dropping the `[:18]` from
+# either the renderer or the oracle SURVIVES the whole suite.
+#
+# `fixtures/truncado` exists only for this. A DEDICATED fixture rather than a
+# longer title in `legacy`: moving an existing fixture's world would ripple
+# through the golden digests, the census pins and every arm that drives it, to
+# test one predicate. Nothing else reads this map.
+TRUNCATION_FIXTURE = "truncado"
+# Long enough that `[:18]` bites: 46 characters.
+LONG_TITLE = "Plataforma de Integracion Continua Corporativa"
+
+
+@pytest.mark.asyncio
+async def test_at059_radial_truncates_its_title_image_at_eighteen_cells(tmp_path):
+    """The `[:18]` in radial's predicate, exercised rather than asserted.
+
+    Drives a title of 46 characters at a width wide enough that nothing is
+    clipped by the canvas edge, so the ONLY reason the full title is absent from
+    the frame is the renderer's own truncation.
+
+    Both halves are pinned: the frame must carry the truncated image and must NOT
+    carry the full one. Asserting only the first would pass on a renderer that
+    stopped truncating, which is exactly the mutant that survived before.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, TRUNCATION_FIXTURE)
+        app.store.save(TRUNCATION_FIXTURE, graph)
+        screen = await open_map(app, pilot, TRUNCATION_FIXTURE)
+        await pilot.pause()
+        await pilot.press("r")
+        await pilot.pause()
+        assert screen.radial_mode
+
+        painted = " ".join(" ".join(canvas_rows(screen)).split())
+        image = LONG_TITLE[:18]
+        assert len(LONG_TITLE) > 18, "the fixture stopped exercising truncation"
+
+        assert image in painted, (
+            f"radial did not paint the truncated image {image!r}; the frame "
+            f"carries {painted[:80]!r}"
+        )
+        assert LONG_TITLE not in painted, (
+            "radial painted the FULL title on a frame with room for it -- the "
+            "renderer is no longer truncating, and the predicate's `[:18]` is "
+            "now a lie about what it emits"
+        )
+
+        # And the declaration agrees with the frame under that image. The node
+        # IS painted here, so this also pins that truncation alone does not make
+        # a node count as hidden.
+        declared = screen._unpainted_ids()  # noqa: SLF001
+        assert declared is not None
+        assert "raiz" not in declared, (
+            "the root's title is truncated but VISIBLE; declaring it hidden "
+            "would confuse `truncated` with `not painted`"
+        )
+
+        # AND THE ORACLE'S OWN `[:18]`, which the assertions above do not reach.
+        # Fired: a mutant dropping the truncation from `_frame_hidden_for`
+        # SURVIVED everything above, because those read the frame directly. On
+        # this fixture the un-truncated oracle hunts a 46-character title that
+        # the renderer never emits, calls the root hidden, and disagrees with the
+        # declaration -- so this line is what kills it.
+        #
+        # Both halves of the predicate now have a witness: the renderer's
+        # truncation and the oracle's must agree about what radial EMITS, or the
+        # 16-of-16 agreement elsewhere is agreement between two copies of the
+        # same mistake.
+        assert screen._unpainted_ids() == frozenset(  # noqa: SLF001
+            _frame_hidden_for("mapper.views.radial", screen)
+        ), (
+            "on a truncating fixture the declaration and the frame oracle "
+            "disagree; one of them is not using radial's emitted image"
+        )
