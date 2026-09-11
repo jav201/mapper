@@ -594,6 +594,18 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   arm** passes — a source **balanced** at `U+202E` … `U+202C`, truncated at width, leaves **0**
   unterminated overrides in the painted row. Executed pre-state:
   `layered._fit('a' + chr(1) + 'b', 8)` returns the control byte intact.
+  > **THE FIRST CLAUSE IS THE TRUE ONE, AND THE SECOND CANNOT DISCRIMINATE** — measured at
+  > `S-B(+C)` (security review, confirmed at its confirmation pass). `_CONTROL_MAP` maps all 235
+  > banned code points to exactly one `U+FFFD` each, so `darkside.plain` is length- and
+  > index-preserving and the two images above are equal **identically**, for every input — 20,000
+  > fuzzed hostile pairs, zero differences. The split-at-width arm therefore reports **0 unterminated
+  > overrides because the coercion REPLACED the override**, never because of the ordering: a mutant
+  > running the forbidden order stayed green on all 1058 arms, that arm among them. The arm has been
+  > **re-pointed** at the property that is load-bearing — the cut output is indistinguishable from its
+  > own coercion (`tests/test_fold.py`). The ordering clause is retained because it is the order that
+  > stays correct if `plain` ever **deletes** rather than replaces; it is no longer offered as
+  > independently verifiable. **Whether `LLR-COERCE.2`'s ordering clause should survive at all now
+  > that its mechanism is refuted is a requirements question, flagged and not decided by the gate.**
 - **Named weaker variant (`M-COERCE.2-a`, the same variant §3.0 names as `M-COERCE-b`):** coerce in
   `darkside.fit` only. Green on every path that routes through it, **silently unchanged on the six
   `layered._fit` sites above**. Reddened by the derived truncator set, which is why the set is
@@ -1996,6 +2008,11 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   truncated at `card_w` leaves **0** unterminated overrides in the painted row.
   *(~~"0 control bytes in the output"~~ is superseded: `U+202E` is not a control byte, and it is the
   input this LLR drives.)*
+  > **THE SPLIT-AT-WIDTH CLAUSE CANNOT DISCRIMINATE**, for the reason recorded at `LLR-COERCE.2`:
+  > `darkside.plain` replaces rather than deletes, so it is index-preserving and the override is gone
+  > by coercion regardless of the order. The **0** is real; it is not evidence about ordering.
+  > Measured at `S-B(+C)`. The first clause of this same threshold — 0 occurrences of any
+  > `COERCION_RANGES` point at the sink — is the one that carries the weight, and it is armed.
 - **Acceptance criteria — the sink class is DERIVED and includes PRE-EXISTING sinks (C-7,
   §6.5 A-15).** ~~"every new text sink **this batch creates**"~~ is superseded. That wording
   re-encodes batch 1's own §2.1b failure into the requirement — a scope that stops at the new code's

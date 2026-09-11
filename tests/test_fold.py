@@ -382,13 +382,30 @@ def test_tc_033_the_fold_pill_coerces_a_hostile_branch_title(tmp_path):
     ).plain
     assert "[bold red]x[/]" in shown
 
-    # The SPLIT-AT-WIDTH arm.  Truncation MANUFACTURES the defect out of a
-    # source that was balanced, so the ordering clause is not vacuous.
+    # THE SPLIT-AT-WIDTH ARM, RE-POINTED.  It used to say "truncation
+    # MANUFACTURES the defect out of a source that was balanced, so the ordering
+    # clause is not vacuous" -- and it could not verify that.  `S-B(+C)`'s
+    # security review measured why: `_CONTROL_MAP` maps all 235 banned code
+    # points to exactly ONE `U+FFFD` each, so `darkside.plain` is length- and
+    # index-preserving and `truncate(plain(s)) == plain(truncate(s))`
+    # IDENTICALLY -- 20,000 fuzzed hostile pairs, zero differences, and a mutant
+    # running the FORBIDDEN order stayed green on all 1058 arms, this arm among
+    # them.  The `U+202E` count is zero because the COERCION replaced it, never
+    # because of the order, so the assertion could not tell the two apart.
+    #
+    # Re-pointed at the property that IS load-bearing: the output is coerced.
+    # `S-B(+C)` confirmation pass, `F5` item 2 -- a test whose stated intent it
+    # cannot verify is worse than no test, because it reads as coverage.
     from mapper.views.layered import _fit
     source = "a" * 4 + chr(0x202E) + "b" * 20 + chr(0x202C)
     assert source.count(chr(0x202E)) == source.count(chr(0x202C)) == 1
     cut = _fit(source, 10)
     assert len(cut) == 10
+    assert cut == darkside.plain(cut), (
+        "the cut output is not coerced -- `_fit`'s result must be indistinguish"
+        "able from its own coercion, which is the property the ordering clause "
+        "was reaching for"
+    )
     assert cut.count(chr(0x202E)) == 0, "an unterminated override survived the cut"
 
 
