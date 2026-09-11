@@ -300,13 +300,55 @@ defect 2, so the two outline-geometry costs are priced together rather than one 
 the terminal I/O a real session adds. `branchy_graph` at these two sizes; `_fit`'s per-line cost is
 wrap-dependent, so a differently shaped graph prices differently.
 
-## 7 · Gate checklist
+## 7 · Gate checklist — CLOSED
 
-- [ ] Pre-gate captures landed on the pre-fix tree
-- [ ] `AT-058` first, then settle, then `painted_ids`, then both surfaces
-- [ ] Seven zero-gap sizes byte-identical pre/post, three views
-- [ ] `held == resettled` at all eleven sizes
-- [ ] `outline.py:161` re-measured; cut change ships or is dropped **with the measurement recorded**
-- [ ] `A-98` tripwire RED→GREEN, pinned set widened **and its docstring amended** (not a `-k` exclusion)
-- [ ] Independent code review — serial
-- [ ] Security review — serial
+- [x] Pre-gate captures landed on the pre-fix tree (`C1`-`C4`, §6)
+- [x] `AT-058` first, then the mechanism fix, then `painted_ids`, then both surfaces
+- [x] Negative controls: `(35,14)`, `(40,16)`, `(50,16)` — the honest three, not the seven
+- [x] `outline.py:161` re-measured post-settle; the cut change **ships**, measured not assumed
+- [x] `A-98` tripwire RED→GREEN, pinned set widened **and its docstring amended**
+- [x] Independent code review — **BLOCK, 2 HIGH**, folded
+- [x] Security review — **SIGN-OFF, 0 HIGH**, its MEDIUM fixed
+
+## 8 · Close
+
+**Commits.** Source landed across seven commits as each stage was acknowledged —
+`3920e06` (`AT-058`), `7a973df` (settle), `ff55ab6` (`painted_ids`), `f355499` (the P1 guard),
+`45663b6` (canvas declaration), `a4862bf` (code-review fixes), `1ab87d8` (security fix) — plus this
+close record. **That is not the two-commit shape** `Inc-CRUMB` used, where the work stayed
+uncommitted until the gate. Stated rather than dressed up: the staged shape came from reporting at
+each boundary, and it left every stage independently revertible, but it is a different shape and the
+record should say which one it is.
+
+**Evidence at close:**
+
+```
+default lane : 968 passed, 19 deselected, 3 xfailed   exit 0
+all markers  : 987 passed, 3 xfailed                  exit 0
+ruff SET     : 19 (file,rule) pairs / 27 both sides — SET-IDENTICAL, zero NEW/GONE,
+               parse counts asserted, positive control fires
+arms added   : AT-056 x10 · AT-057 x6 · AT-058 x3 · P1 x11 + x4 forced-trigger · pilot x10
+mutants      : M0, M9, M10 byte-level with sha256 restores; M1, M2 in-process — all caught
+```
+
+**What this increment actually closed.** `B-55`'s outline vector: the view now declares what it
+hides, on both surfaces, with the declaration and the cut sharing one pass so they cannot disagree.
+Underneath it, a stale-write defect nobody had named, and a seam that answered "nothing to declare",
+"not this view" and "the declaration broke" with one value.
+
+**What it did not close, recorded rather than absorbed.** `AGREE-1` is OPEN at the empty-frame floor
+(11 sizes enumerated in `state.json`). `radial` still declares nothing — `Inc-B55b`. Defect 2, the
+`painted_ids` walk, `F2`'s per-row ceiling and `F7`'s triplicated sentence ride `Inc-REPAIR`.
+
+### 8.1 · The ledger, honestly
+
+Four of five comment claims the security review fired held up. The fifth did not, and it was the one
+I was proudest of: the settle guard's `P1`-is-the-predicate claim was a **projection** of the
+invariant onto two of its ten inputs, and the reviewer demonstrated `B-60` reintroduced through the
+mechanism built to prevent it. The code review before it found that **deleting the entire settle fix
+left the suite green** — an arm built trigger-independent and mistaken for one that discriminates.
+
+Both were caught by the process built to catch them. That is the system working, not the system
+being lucky — but the pattern holds across this increment as it has across the batch: **the
+measurements survived; the explanations attached to them did not.**
+
