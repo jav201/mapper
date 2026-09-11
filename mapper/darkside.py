@@ -220,7 +220,7 @@ def _crumb_line(crumb: list[str], width: int) -> Text:
     """
     if not crumb:
         return Text("")
-    budget = width if width > 0 else 118
+    budget = width if width > 0 else DECLARED_CONTEXT_CELLS
 
     tail = crumb[-1]
     tail_budget = max(_CRUMB_TAIL_MIN_CELLS, budget - _CRUMB_DROP_CELLS)
@@ -273,10 +273,24 @@ def group_box(renderable, pad_x: int = 1) -> Panel:
     )
 
 
+# The batch's DECLARED CONTEXT OF USE, and the ONE place it is written.
+#
+# It was spelled THREE times -- `_crumb_line`'s zero-width fallback, `keybar`'s
+# default parameter, and `chrome._KEYBAR_FALLBACK_CELLS` -- in two modules, with
+# nothing making them agree. The carry that named this recorded TWO of the three;
+# the third surfaced only when the arm that pins it was written.
+#
+# It is a FALLBACK. Reaching it means no widget and no app could be measured yet,
+# which for a widget inside a running app is a defect rather than a condition --
+# `KeyBar` and `TabStrip` both resolve a real width instead, and this is what
+# they fall back to when there is genuinely nothing to measure.
+DECLARED_CONTEXT_CELLS = 118
+
+
 # Keybar -------------------------------------------------------------------
 def keybar(
     groups: Sequence[tuple[str, Sequence[tuple[str, str]]]],
-    width: int = 118,
+    width: int = DECLARED_CONTEXT_CELLS,
     help_key: str = "?",
 ) -> Text:
     """Render grouped key hints for the footer, truncating VISIBLY.

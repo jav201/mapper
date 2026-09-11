@@ -10,6 +10,16 @@ from textual.widgets import Static
 from mapper import darkside
 
 
+# Last-resort width when neither the widget nor the app can be measured yet.
+#
+# DE-DUPLICATED AT `Inc-REPAIR` S-A. This was a third independent spelling of the
+# batch's declared context -- `darkside._crumb_line`'s zero-width fallback and
+# `darkside.keybar`'s default parameter were the other two, and the carry that
+# named the defect recorded only two of the three. The number now has ONE home,
+# in the module both consumers already import.
+_KEYBAR_FALLBACK_CELLS = darkside.DECLARED_CONTEXT_CELLS
+
+
 class TabStrip(Static):
     """Top tab strip with optional breadcrumb."""
 
@@ -17,25 +27,49 @@ class TabStrip(Static):
         super().__init__(**kwargs)
         self.active = active
         self.crumb = crumb
-        self.update(darkside.tab_strip(active, crumb))
+        self.update(darkside.tab_strip(active, crumb, width=self._width()))
+
+    def _width(self) -> int:
+        """The widget's own width, then the app's, then the declared context.
+
+        THE SAME LADDER `KeyBar` GOT AT `Inc-CRUMB`, and this widget is why that
+        one was found: bounding the crumb shortened `TabStrip` and removed the
+        reflow that had been correcting `KeyBar` by accident. The sibling was
+        fixed then and this one was carried as `SEC-F1`.
+
+        Without it, `__init__` called `tab_strip` with no width, `tab_strip`
+        passed that to `_crumb_line`, and `_crumb_line` took its own fallback --
+        so a crumb at a 30-column terminal was budgeted against 118 cells.
+        Measured before the fix: 97 cells of crumb at 30, 40 AND 60 columns,
+        identical at all three, which is what a budget ignoring the terminal
+        looks like.
+
+        NOT LIVE, and the reason is the point: the content is superseded before
+        paint and the height is clamped by `max-height: 3`. THE CSS LID WAS
+        LOAD-BEARING -- a lid over content that was not bounded in Python, which
+        is the exact shape `Inc-CRUMB` was opened to stop shipping.
+        """
+        if self.size.width:
+            return self.size.width
+        try:
+            return self.app.size.width or _KEYBAR_FALLBACK_CELLS
+        except NoActiveAppError:
+            # THE ONLY EXPECTED FAILURE, named rather than swallowed: `self.app`
+            # raises this when the widget is constructed outside a running app.
+            return _KEYBAR_FALLBACK_CELLS
+
+    def on_mount(self) -> None:
+        # Belt to `on_resize`'s braces, as `KeyBar` carries: by mount the widget
+        # usually has its real size, and this render does not depend on a size
+        # CHANGE ever happening.
+        self.update(darkside.tab_strip(self.active, self.crumb, width=self._width()))
 
     def on_resize(self) -> None:
-        self.update(darkside.tab_strip(self.active, self.crumb, width=self.size.width))
+        self.update(darkside.tab_strip(self.active, self.crumb, width=self._width()))
 
     def set_crumb(self, crumb: list[str] | None) -> None:
         self.crumb = crumb
-        self.update(darkside.tab_strip(self.active, crumb, width=self.size.width))
-
-
-# Last-resort width when neither the widget nor the app can be measured yet.
-# It is the batch's declared context of use, and it is a FALLBACK -- reaching it
-# used to be the NORMAL case, which is the defect described below.
-#
-# SPELLED TWICE: `darkside._crumb_line` hardcodes the same 118 as its own
-# zero-width fallback.  Two modules now carry the declared context independently
-# and nothing makes them agree.  De-duplicating it is a structural change and is
-# carried to `Inc-REPAIR`, not smuggled in here.
-_KEYBAR_FALLBACK_CELLS = 118
+        self.update(darkside.tab_strip(self.active, crumb, width=self._width()))
 
 
 class KeyBar(Static):
