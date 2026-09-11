@@ -320,36 +320,86 @@ async def test_sec_f1_the_first_crumb_render_is_budgeted_to_the_REAL_width(tmp_p
 
 
 def test_decl_118_is_spelled_ONCE():
-    """The declared context has ONE home, and this is what pins it.
+    """The declared context has ONE home, across the WHOLE package.
 
-    `chrome._KEYBAR_FALLBACK_CELLS`, `darkside._crumb_line`'s inline fallback and
-    `darkside.keybar`'s default parameter were the same number in three places
-    with nothing making them agree -- the batch's own control: anything spelled
-    twice will drift. THREE, not two: the carry record said two, and the third
-    was found only when this arm was written. That is the ledger control proving
-    itself on its first outing.
+    SCOPED TO `mapper/` ENTIRE, not to the two modules this stage edited -- and
+    that correction is the finding. The carry recorded TWO spellings when there
+    were three; an arm scoped to "the files I was touching" repeats exactly that
+    miss, and a planted literal in `app.py` walked straight past the first
+    version of this arm.
 
-    COUNTED FROM THE AST, not by grepping the text. A regex over source lines
-    counts the number inside docstrings and comments -- five of the eight hits
-    the first version of this arm reported were PROSE describing the defect,
-    including this module's own history. Only a real numeric literal can drift.
+    COUNTED FROM THE AST. A regex over source lines counts the number inside
+    docstrings and comments: repo-wide, a raw text grep returns 25 hits of which
+    24 are PROSE describing this very defect. Only a real literal can drift.
+
+    NOT EVERY 118 IS THIS ONE. `app.py` and `rail.py` document that the layout
+    auto-hides below 118 columns, but that is
+    `MIN_CANVAS_WIDTH + RAIL_WIDTH + INSPECTOR_WIDTH` = 58 + 24 + 36 -- a DERIVED
+    threshold that collides with the declared context by arithmetic accident.
+    Those are prose today. If one ever becomes a literal, it is a different
+    number that happens to be equal, and folding the two would be the drift this
+    arm exists to prevent, not a tidy-up.
     """
     import ast
 
-    from mapper import darkside as _d
-    from mapper.widgets import chrome as _c
+    import mapper
 
+    root = Path(mapper.__file__).parent
     spellings = {}
-    for name, mod in (("darkside.py", _d), ("chrome.py", _c)):
-        tree = ast.parse(Path(mod.__file__).read_text(encoding="utf-8"))
-        spellings[name] = [
+    for path in sorted(root.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        hits = [
             node.lineno for node in ast.walk(tree)
-            if isinstance(node, ast.Constant) and node.value == 118
+            if isinstance(node, ast.Constant)
+            and isinstance(node.value, int)
             and not isinstance(node.value, bool)
+            and node.value == 118
         ]
+        if hits:
+            spellings[path.relative_to(root).as_posix()] = hits
     total = sum(len(v) for v in spellings.values())
-    assert total <= 1, (
-        f"the declared context is spelled {total} times as a literal: "
-        f"{spellings}. One home, or they drift -- and they cannot be kept in "
-        "step by being equal today."
+    assert total == 1, (
+        f"the declared context is spelled {total} times as a literal across "
+        f"mapper/: {spellings}. One home, or they drift -- and two constants "
+        "that happen to be equal today is the state this forbids."
     )
+
+
+@pytest.mark.asyncio
+async def test_tabstrip_is_bounded_even_if_no_resize_ever_fires(tmp_path):
+    """`on_mount` is the belt; this is the arm that makes it load-bearing.
+
+    The belt was shipped unpinned twice -- `KeyBar` at `Inc-CRUMB`, `TabStrip`
+    here -- and a mutant neutering it to `pass` passed the whole suite, because
+    under `run_test` the corrective resize ALWAYS fires and no arm entered a
+    world where it does not. Control 18: an arm must supply the condition it
+    claims to protect against.
+
+    So this removes the resize and asserts the strip is still bounded. If the
+    belt is redundant in every reachable world the arm is cheap; if it is not,
+    this is the only thing standing between the constructor's render and the
+    frame.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(40, 20)) as pilot:
+        await pilot.pause()
+        app.store.save("deep", deep_graph(60, depth=4))
+        screen = await open_map(app, pilot, "deep")
+        await pilot.pause()
+
+        strip = screen.query_one(TabStrip)
+        # THE TRIGGER REMOVED: no resize may rescue the render from here on.
+        strip.on_resize = lambda *a, **k: None
+        strip.set_crumb([f"nivel-{i}-" + "y" * 18 for i in range(6)])
+        strip.on_mount()
+        await pilot.pause()
+
+        held = strip.render()
+        text = held.plain if hasattr(held, "plain") else str(held)
+        rows = text.splitlines()
+        assert len(rows) > 1, "no crumb row; the arm would be vacuous"
+        cells = Text(rows[1]).cell_len
+        assert cells <= 40, (
+            f"with no resize available the crumb is {cells} cells at a 40-column "
+            "terminal -- the belt is not holding and only the CSS lid is"
+        )
