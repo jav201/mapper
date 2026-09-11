@@ -308,6 +308,45 @@ def _declared(rows, kept) -> int:
             - sum(1 for nid, _t in kept if nid))
 
 
+def _widen(
+    rows: list[tuple[str | None, Text]], hidden: int
+) -> list[tuple[str | None, Text]]:
+    """`rows` with the declaration appended to the header, built in ONE place."""
+    header = rows[0][1].copy()
+    header.append(f"  {OVERFLOW_TOKEN} {hidden} fuera de vista", style=darkside.INK)
+    return [(rows[0][0], header), *rows[1:]]
+
+
+def floor_reached(rows: list[tuple[str | None, Text]], w: int, h: int) -> bool:
+    """Is this frame at `LLR-N06.3.5`'s EMPTY-FRAME FLOOR?
+
+    The floor is the geometric condition the requirement's exception names: the
+    declaring header CANNOT FIT WITHOUT EVICTING THE LAST CONTENT ROW -- here,
+    the widened header fits nothing at all while the unwidened one still fits
+    something.
+
+    PUBLIC, AND EXTRACTED FOR THE ARM, BECAUSE THE ARM WAS SELECTING ON THE
+    CONSEQUENCE.  `tests/test_agree_floor.py` used to pick its frames by "the
+    canvas said nothing", which is what the floor CAUSES rather than what the
+    floor IS.  The code review fired the difference: widening `_fit_declared`'s
+    fallback BEYOND the floor left the arm green at 4 passed while the exempted
+    set grew from 9 to 17 on `legacy` and 9 to 14 on `anidado` -- so the
+    exception could not lapse in the one direction that matters.
+
+    Single-sourced rather than transcribed into the test: a second spelling of
+    this predicate would be a second definition of the floor, which is `F7_3`'s
+    failure ("three predicates behind one operator-facing numeral") one clause
+    over.
+    """
+    if not rows:
+        return False
+    kept = _fit(rows, w, h)
+    hidden = _declared(rows, kept)
+    if hidden <= 0 or not kept:
+        return False
+    return not _fit(_widen(rows, hidden), w, h)
+
+
 def _fit_declared(
     rows: list[tuple[str | None, Text]], w: int, h: int
 ) -> list[tuple[str | None, Text]]:
@@ -336,11 +375,7 @@ def _fit_declared(
     for _ in range(3):
         if hidden <= 0:
             return kept
-        header = rows[0][1].copy()
-        header.append(f"  {OVERFLOW_TOKEN} {hidden} fuera de vista",
-                      style=darkside.INK)
-        widened = [(rows[0][0], header), *rows[1:]]
-        candidate = _fit(widened, w, h)
+        candidate = _fit(_widen(rows, hidden), w, h)
         # `H1`, REFINED RATHER THAN CONTRADICTED (coordinator ruling
         # 2026-09-10).  `Inc-STRIPS` recorded H1 as "a declaration must not
         # manufacture the omission it announces", but its own evidence says

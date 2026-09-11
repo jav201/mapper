@@ -63,12 +63,16 @@ async def _frame(map_id: str, size):
         canvas = screen.query_one("#map-canvas", Static)
         strip = screen.query_one(f"#{COUNT_REGION_ID}", Static)
         w, h = screen._canvas_size()
-        painted = outline.painted_ids(screen.graph, screen._view_state(w, h))
+        state = screen._view_state(w, h)
+        painted = outline.painted_ids(screen.graph, state)
+        rows, _sc = outline._rows(screen.graph, state)
         return {
             "canvas": _declared(canvas.render().plain),
             "strip": _declared(strip.render().plain),
             "strip_on_frame": strip.region.height > 0,
             "truth": len(screen.graph.nodes) - len(painted),
+            # THE GEOMETRIC TRIGGER, from the renderer's own predicate.
+            "at_floor": outline.floor_reached(rows, w, h),
         }
 
 
@@ -84,7 +88,15 @@ async def test_at057_floor_the_strip_carries_the_declaration_the_canvas_drops(ma
     floors = []
     for size in SIZES:
         f = await _frame(map_id, size)
-        if f["truth"] <= 0 or f["canvas"] is not None:
+        # SELECTED ON THE TRIGGER, NOT ON THE CONSEQUENCE. This used to skip on
+        # `canvas is not None`, i.e. on ANY canvas silence -- which is what the
+        # floor CAUSES, not what the floor IS. The code review fired the gap:
+        # widening `_fit_declared`'s fallback BEYOND the empty-frame floor left
+        # this arm green at 4 passed while the exempted set grew from 9 to 17 on
+        # `legacy` and 9 to 14 on `anidado`. Selected that way, the exception
+        # could not lapse in the one direction that matters -- silently becoming
+        # broader than the requirement licensed.
+        if f["truth"] <= 0 or not f["at_floor"]:
             continue                      # not a floor frame; the clause proper applies
         floors.append(size)
         assert f["strip_on_frame"], (
@@ -121,9 +133,17 @@ async def test_at057_above_the_floor_the_canvas_still_declares(map_id):
     ordinary = []
     for size in SIZES:
         f = await _frame(map_id, size)
-        if f["truth"] <= 0 or f["canvas"] is None:
+        # ALSO SELECTED ON THE TRIGGER. Skipping `canvas is None` here was the
+        # other half of the same hole: it skipped exactly the frames a widened
+        # fallback creates, so the pair could not see the exception spread.
+        if f["truth"] <= 0 or f["at_floor"]:
             continue
         ordinary.append(size)
+        assert f["canvas"] is not None, (
+            f"{map_id} at {size}: the canvas is silent on a frame that is NOT at "
+            f"the floor and hides {f['truth']} node(s). The exception has spread "
+            "beyond what LLR-N06.3.5 licensed"
+        )
         assert f["canvas"] == f["truth"] == f["strip"], (
             f"{map_id} at {size}: canvas={f['canvas']} strip={f['strip']} "
             f"truth={f['truth']} -- above the floor all three must match"
