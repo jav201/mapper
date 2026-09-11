@@ -204,8 +204,23 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     # strip to force a region reflow.  It cannot share the other `P1` arm's site:
     # that arm is the one the code review proved CANNOT FAIL, and this one exists
     # precisely because it supplies the trigger the other one waits for.
-    assert len(sites["argful"]) == 61, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 61; "
+    #
+    # 61 -> 62 in `S-B(+C)`, ONE site and it is itemised, because this pin's own
+    # docstring says a bumped pin with an unitemised reason is a pin that has
+    # stopped working:
+    #   +1  `tests/test_canvas_header_charge.py::_first_line_rows` renders each
+    #       renderer to measure the PHYSICAL rows its own first line occupies.
+    #       That measurement is the arm: defect 2 is `_canvas_size` charging
+    #       layered's header in every view, and the only honest comparand for a
+    #       charge is the line the renderer actually paints.  It cannot share an
+    #       existing site -- every other arg-ful site renders to check CONTENT,
+    #       while this one renders to price GEOMETRY, and a helper that returned
+    #       a finished picture would have already spent the width this arm is
+    #       measuring at.
+    #       Derived mechanically, not counted by eye: exactly one `.render(`
+    #       appears in that module.
+    assert len(sites["argful"]) == 62, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 62; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,

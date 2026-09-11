@@ -44,6 +44,52 @@ def _degraded(n: int) -> Text:
     return out
 
 
+def _header_line() -> Text:
+    """This renderer's header, built in ONE place -- `_rows` and `header_rows`.
+
+    Extracted for the reason `layered` records at its own header: the charge and
+    the paint must come off the same helper, or there are two copies of the
+    header's shape and they drift.  `_degraded` builds its own banner and is
+    deliberately NOT routed through here: it is a different line on a frame that
+    has no rows to fit, and folding them would make this helper answer for two
+    shapes at once.
+    """
+    out = Text()
+    out.append("◆ ", style=darkside.INK)
+    out.append("mapper", style=darkside.WORDMARK)
+    out.append(" · outline", style=darkside.MUT)
+    return out
+
+
+def header_rows(graph: Graph, w: int, wrap_w: int) -> int:
+    """PHYSICAL rows THIS renderer's first line occupies at `wrap_w`.
+
+    `MapScreen._canvas_size` used to charge `layered.header_rows` in every view,
+    including this one, and the two headers are not the same line: layered's is a
+    wordmark plus a coverage meter plus an overflow declaration, this one is
+    `◆ mapper · outline`.  MEASURED over a ten-width sweep from 20 to 118,
+    layered's charge exceeds this renderer's own first line by TWO rows at
+    widths 20..28 and by ONE at 34 and above -- at EVERY width in the sweep.
+    Each overcharged row is a body row the region could have shown and the
+    renderer was never told about.
+
+    The signature matches `layered.header_rows` exactly so `_canvas_size` can
+    dispatch on the renderer without special-casing either shape.  `graph` and
+    `w` are unused HERE because this header is a fixed string rather than a
+    graph-derived meter -- they are not dropped from the signature, because the
+    caller must be able to treat every view's charge identically and a narrower
+    signature would put that branch back at the call site.
+
+    RENDERED, NOT DIVIDED (`B-61`).  The same `Console.render_lines` instrument
+    `_fit` uses, because Rich WORD-WRAPS and a `ceil(cells / w)` formula prices a
+    line short of the wrap the widget actually performs.  A long-enough header
+    would take two rows here too, which is why this measures rather than
+    returning the 1 the sweep happens to show.
+    """
+    console = Console(width=max(1, wrap_w))
+    return max(1, len(console.render_lines(_header_line(), pad=False)))
+
+
 def _rows(
     graph: Graph, state: ViewState
 ) -> tuple[list[tuple[str | None, Text]], Text | None]:
@@ -62,11 +108,7 @@ def _rows(
     # evaluates no query predicate of its own -- it never sees the query.
     hits = state.hits
     rows: list[tuple[str | None, Text]] = []
-    header = Text()
-    header.append("◆ ", style=darkside.INK)
-    header.append("mapper", style=darkside.WORDMARK)
-    header.append(" · outline", style=darkside.MUT)
-    rows.append((None, header))
+    rows.append((None, _header_line()))
 
     if graph.root_id is None:
         rows.append((None, Text("(no map loaded)")))
