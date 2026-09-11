@@ -2393,52 +2393,149 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 
 ---
 
-##### LLR-N06.3.4 — outline's row cut is priced in PHYSICAL rows, and its declaration follows the cut
+##### LLR-N06.3.4 — outline emits nothing the canvas cannot show, and declares what the cut hid
+
+> **CORRECTED BY `02n` (qa-reviewer, 2026-09-10). RATIFIED WITH CORRECTIONS.** The thresholds below
+> are the reviewer's wording, transcribed. The implementer drafted the original row AND would have
+> written the code satisfying it; that row was reviewed before the increment opened precisely so the
+> criteria and the work would not be argued by one voice at one table.
 
 - **Traceability:** HLR-N06.3
-- **Origin:** `02m` §7.1, **re-measured through `_canvas_size()`** per coordinator ruling 2026-09-10.
-  `02m`'s own numbers were renderer-argument widths and it flagged that itself, citing `02j`: the
-  unit is the terminal, not the renderer.
-- **Statement:** While `OutlineRenderer` renders into a canvas of `h` rows, the system shall cut its
-  content at the number of rows the canvas will actually display, and shall declare as hidden every
-  node whose title is not painted as a result.
+- **Origin:** `02m` §7.1, re-measured through the live screen by `02n`.
+- **Statement:** While `OutlineRenderer` renders into `#map-canvas`, the system shall emit no line the
+  canvas region cannot display, shall emit as many lines as it can display, and shall declare as
+  hidden every node whose title is not painted as a result. **The unit of "can display" is
+  `canvas.region.height` physical rows at `canvas.region.width` — not `_canvas_size()`'s `h`, which is
+  the renderer's row BUDGET and is smaller** (measured at a `35x14` terminal: `region = 35x3`, `h = 2`).
 - **Touched symbols:** the `lines[:h]` cut at `mapper/views/outline.py:161`, and the new module-level
   `painted_ids` in `mapper/views/outline.py` — `NEW — created in Phase 3`.
 - **Validation:** `test (pilot)`
-- **Executed verification:** drive a **35x14** terminal, where `_canvas_size()` hands the renderer
-  `35x2`, and assert through the composited frame.
-- **Numeric pass threshold:** the rendered content occupies **≤ h** physical rows at the width
-  `_canvas_size()` returns, and the declared hidden count equals the number of graph nodes whose
-  full title is absent from the painted frame.
-- **Measured pre-fix:** at `35x14`, outline emits **2 logical lines occupying 3 physical rows into a
-  2-row canvas**. `outline.py:161` counts logical rows; the widget shows physical ones. Reachable at
-  **1 of 8** driven terminal sizes — rare, and `35x14` is a size this batch already drives elsewhere.
-  The gap is large because `_canvas_size()` subtracts chrome: a 100-column terminal hands the
-  renderer **64**, and a 118-column terminal hands it **58**.
-- **Acceptance criteria:** a declaration derived from the logical row model asserts rows that are not
-  painted. An affordance that lies about what it hid is worse than no affordance, because the
-  operator has no reason to doubt it.
+- **Executed verification:** `pytest tests/test_overflow.py -k "at056"` — two arms, **named
+  normatively**: `test_at056_outline_cuts_at_the_rows_the_canvas_shows` (`PHYS-1`, `PHYS-2`) and
+  `test_at056_outline_declares_what_the_cut_hid` (`PHYS-3`, `PHYS-4`), each parametrised over the
+  driven table below. **The node names are part of this requirement, not a style preference:** `C-18`
+  needs the `AT id → node` edge, and this batch already carries `AT-005` and `AT-006` with no node on
+  disk and therefore no way to verify them. An arm asserting these clauses under a different name
+  **does not discharge `AT-056`**. Both arms drive `App.run_test(size=...)`, push `MapScreen("legacy")`,
+  press the real `o` chord, and read the **composited frame** clipped to the widget region with
+  `_rows_in` — never `render().plain`, never `painted_ids(...)`.
+- **Numeric pass threshold — FOUR clauses, all required, all read from the composited frame:**
+  1. **`PHYS-1` — nothing is emitted that the canvas cannot show.** Every logical line
+     `OutlineRenderer.render` returns is present in the region-clipped frame, compared on
+     whitespace-collapsed text **joined across wrapped rows**. **Zero** emitted-but-unpainted lines at
+     every driven clipping size.
+  2. **`PHYS-2` — the cut is MAXIMAL, not merely safe.** The number of logical lines emitted is the
+     largest `k` such that those `k` lines, wrapped at the **measured** `canvas.region.width`, occupy
+     `<= canvas.region.height` physical rows; asserted by re-wrapping `k` and `k + 1` and showing `k`
+     fits and `k + 1` does not — or that `k` is the whole outline. Widths and heights are read from the
+     region at run time and **never typed**. **This clause exists because `lines[:0]` passes every
+     other clause in this row** — a renderer painting nothing satisfies `PHYS-1` trivially and `PHYS-3`
+     by declaring all `N` hidden against a frame where all `N` are absent. That is `MUT-1` of
+     `HLR-N06.3`'s own mutation table, one renderer over. `PHYS-2` is the only clause it fails.
+  3. **`PHYS-3` — the declaration follows the cut, against a frame-derived oracle.**
+     `declared_hidden == |{ n in graph.nodes : n's painted trace is absent from the region-clipped
+     frame }|`. **Outline's painted trace, stated here and not inherited (`02m` §7.3):** the node's
+     title as `render` emits it, whitespace-collapsed, sought in the whitespace-collapsed join of the
+     region rows. Outline paints titles **unclipped and word-wraps** rather than truncating, so a title
+     survives a wrap whole — measured on `legacy` over 8 widths (`w = 20 … 32`), the per-row read and
+     the joined read agree **8 of 8**. `HLR-N06.3`'s `_clip(title, card_w - 3)` predicate is
+     **`layered`'s card geometry and does not apply here**: outline has no `card_w`. The hidden set
+     shall be derived from the frame and **never** from `painted_ids(...)` nor from
+     `len(graph.nodes) - len(painted)` (`C-31`).
+  4. **`PHYS-4` — the fixture is non-degenerate, asserted BEFORE the equality.** At each driven
+     clipping size, `1 <= declared_hidden < len(graph.nodes)` is asserted first, so `PHYS-3` cannot be
+     satisfied by `0 == 0` (`C-55`) or by `N == N`. At the zero control the assertion is inverted and
+     explicit: `declared_hidden == 0` **and** no overflow token, per `LLR-N06.3.3`.
+- **Driven size set — `fixtures/legacy`, outline mode, TERMINAL sizes. The fixture is normative: an
+  arm on another map neither passes nor fails `AT-056`.**
+
+  | terminal | region | `_canvas_size()` | role | measured 2026-09-10, pre-fix |
+  |---|---|---|---|---|
+  | `(30, 16)` | `30x5` | `30x4` | clipping | `    - Contabilidad` emitted, **absent from the frame**, region row 4 blank; 6 of 8 hidden |
+  | `(32, 16)` | `32x5` | `32x4` | clipping | same loss; **already driven by this batch** (`tests/test_overflow.py:567`) |
+  | `(24, 20)` | `24x8` | `24x6` | clipping | `  - RRHH  2 nodos` emitted, **absent from the frame** — a different logical index, so an off-by-one repair cannot pass all three |
+  | `(50, 16)` | `50x5` | `50x4` | **negative control** | nothing lost; **5 of 8 still hidden** — a fix that clips everywhere fails here |
+  | `(80, 24)` | `80x16` | `80x15` | **negative control** | nothing lost; **0 hidden** — `LLR-N06.3.3`'s zero form |
+
+- **`35x14` IS STRUCK AS THE DRIVEN SIZE (`02n`, 2026-09-10).** Re-measured through the live screen:
+  `region = 35x3`, `_canvas_size()` `35x2`, outline emits 2 logical lines occupying 3 physical rows,
+  and **the frame shows all three**. **Nothing is lost at `35x14`.** The original `CLIPPED: 3 rows
+  into 2` verdict compared physical rows against `_canvas_size()`'s `h` — the renderer's row BUDGET —
+  rather than `region.height = 3`, the rows the canvas DISPLAYS. **That is `02j`'s unit rule one level
+  in, committed inside the correction of `02m`'s version of the same error.** Reachability re-measured
+  frame-side over a 135-size sweep: **14 of 135 on `legacy`, 15 of 135 on `anidado`**, every one at
+  `w` in `{24, 28, 30, 32, 34}` — narrower than the size the original row drove.
+- **Named weaker variant this reddens (`M-N06.3.4-a`):** keep the current mechanism and only add the
+  declaration. Green on a frame-side `PHYS-1` at `35x14` and **red at `(30,16)`, `(32,16)`, `(24,20)`**.
+- **Second named weaker variant (`M-N06.3.4-b`):** cut conservatively — `lines[:h-1]` or `lines[:0]`.
+  Green on `PHYS-1` and `PHYS-3` at every size, **red on `PHYS-2` everywhere**, and red at `(50,16)`.
+- **Open question carried into `Inc-B55a`'s pre-gate (`02n` §7.1):** at `(30,16)` outline emits 4
+  logical lines needing 5 physical rows, `region.height` is 5, and the arithmetic FITS — yet the 4th
+  line is absent and region row 4 is blank. **A second mechanism is in play beyond the `lines[:h]`
+  cut.** A correct cut may therefore still leave `PHYS-1` red. This must be diagnosed before the fix
+  is designed, not after.
 - **Acceptance:** `AT-056`
 
-##### LLR-N06.3.5 — both declaring surfaces agree, in every view that declares
+##### LLR-N06.3.5 — both declaring surfaces speak, agree, and are right
+
+> **REJECTED AS FIRST DRAFTED, REPLACED BY `02n` (qa-reviewer, 2026-09-10).** The original threshold
+> — *"equal counts · zero disagreements"* — was **GREEN on the shipped pre-state**: measured at
+> `(35,14)` on `legacy` in outline, 7 of 8 nodes hidden and **both surfaces silent**, so it was
+> satisfied by universal silence before a line of code existed (`C-55`).
 
 - **Traceability:** HLR-N06.3
 - **Origin:** `02m` §7.2.
 - **Statement:** While a renderer hides nodes, the system shall declare the hidden count on **both**
   declaring surfaces — the renderer's own header token and the screen's strip — and the two shall
-  report the same number.
+  report the same number, and that number shall be correct. **Silence on both surfaces is not
+  agreement:** `LLR-N06.3.3` makes silence mean *nothing is hidden*, so two silent surfaces over a
+  frame that hides nodes are two surfaces agreeing on a falsehood.
 - **Touched symbols:** the header token construction in `mapper/views/outline.py` and
   `mapper/views/radial.py` — `NEW — created in Phase 3` — reconciled by `_declare_after_layout`
   (`mapper/app.py:1609`), which exists because the two surfaces must agree (`B-56`, `B-60`).
 - **Validation:** `test (pilot)`
-- **Executed verification:** assert both surfaces at `80x24` and at `35x14`.
-- **Numeric pass threshold:** the count painted in the renderer's header **equals** the count painted
-  in the strip, for every view that declares. **Zero** disagreements.
-- **Acceptance criteria:** `LLR-N06.3.3` makes silence mean *nothing is hidden*. A strip that declares
-  while the canvas header beside it stays silent is `B-60` reintroduced one view over — the operator
-  reads two surfaces and believes the quieter one.
-- **Acceptance:** `AT-057`
+- **Executed verification:** `pytest tests/test_overflow.py -k "at057"` — two arms, **named
+  normatively** (`C-18`, and the `AT-005` / `AT-006` precedent):
+  `test_at057_both_surfaces_declare_when_a_view_hides` (`AGREE-1`) and
+  `test_at057_both_surfaces_report_the_same_correct_number` (`AGREE-2`, `AGREE-3`). Both read the
+  composited frame with `_rows_in`, over `#map-canvas`'s region for the header surface and the search
+  count region for the strip.
+- **Numeric pass threshold — THREE clauses, all required:**
+  1. **`AGREE-1` — both surfaces SPEAK when something is hidden.** At every driven size whose
+     frame-derived hidden count is `>= 1`, the overflow token is **present in the canvas-header rows
+     AND in the strip rows**. **This is the clause the shipped pre-state fails, and without it the row
+     is green today.** Measured 2026-09-10 on `legacy` in outline at `(35,14)`, `(30,16)`, `(32,16)`,
+     `(80,24)`: token absent from **both** surfaces at all four, `_unpainted_ids()` returning `None` at
+     all four (`app.py:1596` short-circuits every view that is not `layered`) — while `(35,14)` hides
+     **7 of 8**.
+  2. **`AGREE-2` — the two numerals are equal.** The integer parsed after the token in the canvas
+     header equals the integer parsed after the token in the strip. **Rows are joined before parsing** —
+     the header wraps, and a per-row regex either misses the numeral or binds it to the wrong label
+     (`QA-N-06`).
+  3. **`AGREE-3` — both numerals are RIGHT, not merely equal.** Each equals
+     `len(graph.nodes) - |painted set read from the frame|` under the view's own stated painted
+     predicate (`LLR-N06.3.4`'s `PHYS-3` for outline; radial's is owed in its own row at `Inc-B55b`).
+     Two surfaces fed from one `_declare_after_layout` computation agree **by construction**; equality
+     alone is green when both are equally wrong.
+- **Quantifier, stated so it cannot drift:** *"every view that declares"* is, at `Inc-B55a`'s gate,
+  `{layered, outline}`; `radial` joins at `Inc-B55b`. The arm's parametrisation shall be **derived at
+  run time** from `painted_ids_exporters()` rather than hand-listed, so a view gaining a declaration
+  without gaining an arm goes red — the tripwire idiom `test_a98_*` already uses.
+- **Driven size set — `fixtures/legacy`, per declaring view, TERMINAL sizes:**
 
+  | terminal | role | measured 2026-09-10, outline, pre-fix |
+  |---|---|---|
+  | `(35, 14)` | hidden — live | **7 of 8 hidden; both surfaces silent** |
+  | `(30, 16)` | hidden — live | 6 of 8 hidden; both surfaces silent |
+  | `(80, 24)` | **negative control** | **0 hidden**; both surfaces correctly silent (`LLR-N06.3.3`) |
+
+  **`(80,24)` is RETAINED BUT RELABELLED.** On `legacy` in outline it hides nothing, so as a positive
+  arm it measures nothing. It earns its place only as the zero control, and only because `AGREE-1` is
+  conditioned on the frame-derived hidden count rather than asserted unconditionally.
+- **Named weaker variant this reddens (`M-N06.3.5-a`):** wire the **strip** through `_unpainted_ids`
+  for outline and leave the canvas header alone. Green on `AGREE-2` only if absence is read as zero —
+  exactly the `B-60` misreading — and **red on `AGREE-1`**.
+- **Acceptance:** `AT-057`
 ---
 
 ### 3.5 · US-N07 «búsqueda» — a search that says how much it found *(**Inc-4a** search core + **Inc-4b** seat and walk — §5.4, split by `#D36`)*
