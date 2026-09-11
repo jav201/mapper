@@ -1,7 +1,6 @@
 """Coverage report screen for incomplete required fields."""
 from __future__ import annotations
 
-from rich.markup import escape
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.containers import Vertical
@@ -84,8 +83,18 @@ class CoverageScreen(ModalScreen[str | None]):
             missing = self._missing_keys(node.ficha, self.graph.schema)
             table.add_row(
                 Text.assemble(("▐", darkside.MUT)),
-                escape(node.ficha.title or node.id),
-                Text.assemble((escape(",".join(missing)), darkside.ALERT)),
+                # `darkside.plain`, NOT `escape` (`Inc-REPAIR` S-E).  `escape`
+                # guards Rich MARKUP and coerces nothing else: this batch
+                # measured at `Inc-CRUMB` that four producers reached the frame
+                # under `escape` alone, passing control characters, bidi
+                # overrides and zero-width joiners untouched.  Both values here
+                # are file-derived -- the title from the sidecar, the missing
+                # keys from its schema -- and this table is a sink they reach
+                # directly.
+                darkside.plain(node.ficha.title or node.id),
+                Text.assemble(
+                    (darkside.plain(",".join(missing)), darkside.ALERT)
+                ),
                 darkside.step_meter(have, req),
                 key=node.id,
             )
