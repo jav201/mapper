@@ -172,8 +172,11 @@ def test_the_clip_uses_the_existing_ellipsis_idiom():
     as the bound", which is the verbatim claim retracted at `outline.py` and in
     `AT-056`. `plain` maps all 235 banned points to one `U+FFFD` each and is
     therefore index-preserving, so the ordering buys nothing here; a mutant
-    running the forbidden order stays green. Retracting a claim in one file while
-    it stands in the same file's neighbour is how it comes back.
+    running the forbidden order stays green -- FOR `_clip`, which is the
+    truncator this call site uses. SCOPE: `plain` is index-preserving in CODE
+    POINTS, not DISPLAY CELLS, so `darkside.fit` IS order-sensitive; the ordering
+    clause is normative. Retracting a claim in one file while it stands in the
+    same file's neighbour is how it comes back.
 
     What this arm actually asserts is narrow and stated as such: the clip uses
     the ELLIPSIS idiom rather than a second truncator's grammar. The coercion is
@@ -284,8 +287,12 @@ def test_outlines_title_path_is_coerced_not_merely_clipped():
     THE PROPERTY IS "COERCED AT ALL", AND THAT IS DELIBERATE. The same review
     refuted the ordering rationale this line once carried: `plain` maps every
     banned code point to exactly one `U+FFFD`, so it is length- and
-    index-preserving and the coerce/truncate order cannot matter. What matters is
-    that the path is coerced, so that is what is asserted.
+    index-preserving IN CODE POINTS, so for the length-based truncator this call
+    site uses the coerce/truncate order does not change the output. THAT IS NOT A
+    GENERAL PROPERTY OF `plain` AND AN EARLIER VERSION OF THIS SENTENCE SAID IT
+    WAS: `plain` is NOT cell-preserving, and `darkside.fit` truncates by cells,
+    so reversing the order there overruns the budget. What this arm asserts is
+    that the path is coerced, which is true either way.
 
     WHAT IT COSTS WHEN IT IS NOT: with the coercion removed, `U+001B`, `U+202E`
     and `U+E0041` reach the painted row AND the exported SVG, and the SVG stops

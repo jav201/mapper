@@ -118,7 +118,11 @@ def test_llr_coerce_2_every_truncator_coerces_before_it_truncates(width):
     kept because it is the requirement's stated threshold and because it is NOT
     vacuous for a truncator measuring in display cells (`darkside.fit` uses
     `Text.cell_len`, and a control character's cell width is not its length).
-    The arms below are the ones that discriminate.
+    THIS DOCSTRING CALLED THIS ARM WEAK AND IT IS THE OPPOSITE -- measured at
+    `S-B(+C)`'s confirmation pass 3. A forbidden-order mutant on `darkside.fit`
+    reddens THIS commutation arm at five widths and nothing else in the census:
+    it is the only arm here that discriminates the ORDER. The arms below pin
+    coercion, which the reversal preserves.
     """
     derived = truncators()
     assert derived

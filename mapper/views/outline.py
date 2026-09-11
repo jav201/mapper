@@ -237,8 +237,11 @@ def _rows(
             # one `U+FFFD` each, so `plain` is length- and index-preserving and
             # `truncate(plain(s)) == plain(truncate(s))` IDENTICALLY -- 20,000
             # fuzzed hostile pairs, zero differences, and a mutant running the
-            # forbidden order stayed green on all 1058 arms.  There is never an
-            # override left to strand, because `plain` replaced it.
+            # forbidden order stayed green on all 1058 arms -- FOR `_clip`.
+            # SCOPE: that holds for the two LENGTH-BASED truncators only.
+            # `plain` is index-preserving in CODE POINTS, not DISPLAY CELLS, so
+            # `darkside.fit` IS order-sensitive and reversing it overruns the
+            # budget by up to 11x.  The ordering clause is normative.
             #
             # The ordering still costs nothing and the code is unchanged; what
             # changed is the reason given for it.  A true outcome resting on a
