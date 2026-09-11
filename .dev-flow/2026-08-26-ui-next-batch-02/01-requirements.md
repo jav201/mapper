@@ -2511,10 +2511,19 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
     and **3,390 physical rows** before `_fit` dropped it. After: **102 cells** and **4,016 cells**.
   - **The licence carries a condition, and the condition is armed.** A capped form must **declare its
     capping in the frame**: a clipped title uses the existing ellipsis idiom (`layered._clip` — one
-    grammar, and the module where `LLR-COERCE.2`'s coerce-then-truncate ordering already lives), and
+    grammar, and the helper that also **coerces** the file-derived title), and
     a compressed indent **carries the true depth** beside its marker, so a deep chain reads as deep
     and not as shallow. **What the operator sees may compress; what it asserts stays true** —
     `PHYS-3`'s spirit.
+    > **A CLAIM RETRACTED HERE.** This sentence first read *"the module where `LLR-COERCE.2`'s
+    > coerce-then-truncate ordering already lives, so routing through it fixes the ordering as well as
+    > the bound."* `S-B(+C)`'s **security review refuted the mechanism**: `_CONTROL_MAP` maps all 235
+    > banned code points to exactly one `U+FFFD` each, so `plain` is length- and index-preserving and
+    > `truncate(plain(s)) == plain(truncate(s))` **identically** — 20,000 fuzzed hostile pairs, zero
+    > differences, and a mutant running the forbidden order stayed green on all 1058 arms. There is
+    > never an override left to strand, because `plain` replaced it. The outcome was right and the
+    > reason was wrong; the load-bearing property is simply that **outline's title path is coerced at
+    > all**, which is now pinned rather than asserted.
   - **What `tests/test_outline_caps.py` actually pins, stated precisely because the first version of
     this sentence overclaimed and `S-B(+C)`'s code review fired both halves:**
     - *"derived, never a constant"* is pinned by driving **three geometries** — `(118,34)`, `(40,20)`,

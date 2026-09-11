@@ -231,3 +231,51 @@ def test_the_caps_licence_holds_outline_still_reads_no_pan():
         "that premise is gone and `_indent`'s budget must be revisited "
         "(`PAN-1`, routed to S-D)"
     )
+
+
+# ------------------------------------------------- the coercion the cap rides
+
+
+def test_outlines_title_path_is_coerced_not_merely_clipped():
+    """`LLR-COERCE.2` AT OUTLINE'S CALL SITE -- the arm this increment shipped without.
+
+    `S-B(+C)`'s security review fired the gap: removing the COERCION and removing
+    the CAP fail the identical three tests, all of them cap tests, so the
+    coercion contributed **zero signal**. `TC-081`, the node `01-requirements.md`
+    designates for `LLR-COERCE.2`, does not exist. `_clip`'s own coercion is
+    pinned elsewhere (`test_fold.py`'s fold-pill arms), so a refactor of `_clip`
+    would be caught -- but a change to THIS call site would not have been.
+
+    THE PROPERTY IS "COERCED AT ALL", AND THAT IS DELIBERATE. The same review
+    refuted the ordering rationale this line once carried: `plain` maps every
+    banned code point to exactly one `U+FFFD`, so it is length- and
+    index-preserving and the coerce/truncate order cannot matter. What matters is
+    that the path is coerced, so that is what is asserted.
+
+    WHAT IT COSTS WHEN IT IS NOT: with the coercion removed, `U+001B`, `U+202E`
+    and `U+E0041` reach the painted row AND the exported SVG, and the SVG stops
+    parsing as XML -- which is `B-47`/`A-89`, the defect this renderer's own
+    comment says it closed.
+
+    Code points are NAMED, never pasted (`C-56`).
+    """
+    hostile = "acta" + chr(0x1B) + chr(0x202E) + chr(0xE0041) + chr(0x200D) + "firmada"
+    g = Graph()
+    g.add_node(Node(id="raiz", ficha=Ficha(title="raiz")))
+    g.add_node(Node(id="malo", ficha=Ficha(title=hostile)))
+    g.add_edge(Edge("raiz", "malo"))
+    g.root_id = "raiz"
+
+    body = "".join(t.plain for _n, t in _rows_of(g))
+    for cp, name in ((0x1B, "U+001B"), (0x202E, "U+202E"),
+                     (0xE0041, "U+E0041"), (0x200D, "U+200D")):
+        assert chr(cp) not in body, (
+            f"{name} reached the painted row from a ficha title. Outline's title "
+            "path is no longer coerced -- it reaches the SVG export too, where it "
+            "stops the document parsing as XML (B-47 / A-89)"
+        )
+    # NON-VACUITY: the row must still carry the benign text, or the assertions
+    # above are satisfied by a renderer that painted nothing at all.
+    assert "acta" in body and "firmada" in body, (
+        f"the hostile title vanished entirely rather than being coerced: {body!r}"
+    )
