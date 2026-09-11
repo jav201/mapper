@@ -739,15 +739,16 @@
         }
       },
       {
-        "id": "SEC-M2-a",
+        "id": "B-49",
+        "was": "SEC-M2-a (Inc-REPAIR S-E, SEC-M2's census)",
         "date": "2026-09-11",
         "severity": "MEDIUM",
-        "opened_by": "Inc-REPAIR S-E, SEC-M2's census",
-        "what": "38 `rich.markup.escape` calls at NON-parsing sinks (`Text.append` / `Text.assemble`), across app.py 14, factory.py 12, lane.py 7, editor.py 4, darkside.py 1.",
-        "why_it_matters": "Two costs. (1) Cosmetic-but-measured: `escape` adds a cell per markup-shaped bracket run AFTER the budget was spent, and paints a literal backslash, since `Text` parses no markup -- `darkside.py:266` already states this and measured it at 70 of 70 widths from 20 to 89. (2) Security-shaped: `escape` performs NO control-byte or bidi coercion, so at these sinks sidecar-controlled control bytes and RTL overrides reach the screen unsanitised.",
-        "why_not_fixed_in_S-E": "Pre-existing, repo-wide, outside S-E's scope, and 5 SOURCE FILES -- over cap on its own.",
-        "notes": "One site is PINNED in tests/test_darkside_census.py (factory.py `parts.append((escape(f\"{{{{{key}}}}}\"), darkside.ALERT))`), so a fix re-pins it. Sites reached through `darkside.fit` are already coerced (`fit` calls `plain`), which lowers real exposure below the raw 38 -- layered.py:649 is that case and is NOT in the 38.",
-        "needs": "A coordinator ruling on where it lands."
+        "ruling": "DEFERRED PAST MERGE as a named carry (coordinator, 2026-09-11), candidate first item of the post-merge cleanup alongside the design batch. Rider 1: the whole-branch security pass VERIFIES the coercion claim at all 38 sites; any site where escape is load-bearing against a PARSING sink is fixed pre-merge as its own finding. Rider 2: the carry travels with its measurements.",
+        "what": "38 `rich.markup.escape` calls at NON-parsing sinks (`Text.append` / `Text.assemble`): app.py 14, factory.py 12, lane.py 7, editor.py 4, darkside.py 1. `darkside.py:266` states the rule correctly and `darkside.py:393` breaks it.",
+        "measurements": "70 of 70 widths from 20 to 89 breached by a `[b]`-bearing title (darkside.py's own measurement); literal backslash painted at every site, since `Text` parses no markup.",
+        "THE RULING'S GROUNDS ARE REFUTED BY MEASUREMENT, AND THE DECISION IS LEFT TO STAND UNTIL RE-RULED": "The ruling's grounds read 'no control-byte or bidi coercion loss'. That inverts the census finding, which said `escape` performs NO coercion where `darkside.plain` maps COERCION_RANGES to U+FFFD. Neither statement had been driven, so it was driven. MEASURED (C:\\Users\\jjgh8\\clde\\b49_probe.py), a title carrying U+202E and U+200D through the three `lane.py` renderers: BOTH CODE POINTS REACH THE FRAME RAW, U+FFFD absent, in HybridLaneRenderer, LaneRenderer and RailTimelineRenderer. CONTROL, same title through OutlineRenderer which uses `darkside.plain`: zero survivors, U+FFFD present -- so the probe discriminates and the difference is the idiom, not the fixture. U+0007 did NOT survive any renderer, so the loss is BIDI-AND-JOINER, not 'every control byte'. So this is not cosmetic-only: a sidecar title can reorder its own rendered text in the lane views, which is the hazard COERCION_RANGES exists to stop and which this repo has already ratified as must-coerce.",
+        "BOUNDARY": "Only `lane.py`'s three renderers were driven end to end. The other four files -- app.py's ficha modal, factory.py, editor.py, darkside.py:393 -- are syntactically the same idiom but were NOT driven, so their reachability is UNMEASURED. Rider 1's census is the right instrument and now starts from a measured NO rather than an assumed yes.",
+        "needs": "A coordinator re-ruling, or an explicit confirmation that the deferral stands on the corrected grounds."
       }
     ],
     "routed_findings": [
