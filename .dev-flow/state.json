@@ -1,645 +1,722 @@
 {
- "project": "mapper",
- "language": "en",
- "batch_id": "2026-08-26-ui-next-batch-02",
- "batch_objective": "Variant B «atlas» canvas mechanics (pan · fold · declared overflow · braille edges) plus the round-10 capabilities approved for batch 2: search hit-count and navigation, home 2.0 «sala», the field-query «lente», the per-view «leyenda», and the palette-v2 tokens. Closes carry B-05 and the Canvas.rows() layer-drop defect.",
- "mode": "full",
- "mode_history": [
-  {
-   "batch_id": "2026-08-18-batch-01",
-   "mode": "full",
-   "closed_at": "2026-08-24"
-  },
-  {
-   "batch_id": "2026-08-24-fix-batch",
-   "mode": "core",
-   "closed_at": "2026-08-24"
-  },
-  {
-   "batch_id": "2026-08-24-medlow-batch",
-   "mode": "core",
-   "closed_at": "2026-08-24"
-  },
-  {
-   "batch_id": "2026-08-24-components-batch",
-   "mode": "core",
-   "closed_at": "2026-08-24"
-  },
-  {
-   "batch_id": "2026-08-25-ui-next-batch-01",
-   "mode": "full",
-   "closed_at": "2026-08-26"
-  },
-  {
-   "batch_id": "2026-08-26-ui-next-batch-02",
-   "mode": "full",
-   "opened_at": "2026-08-26",
-   "status": "PARKED at the PDR gate 2026-08-26; UN-PARKED 2026-08-27",
-   "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."
-  },
-  {
-   "batch_id": "2026-08-26-repair-batch",
-   "mode": "full",
-   "opened_at": "2026-08-26",
-   "closed_at": "2026-08-27",
-   "merge_commit": "e164a28",
-   "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
-  },
-  {
-   "batch_id": "2026-08-27-repair-batch-02",
-   "mode": "full",
-   "closed_at": "2026-08-27"
-  }
- ],
- "current_station": "P3",
- "phase_status": "in-progress",
- "p3_progress": {
-  "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-4c -> Inc-5 -> Inc-W1 -> Inc-STRIPS -> Inc-CRUMB -> Inc-B55 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
-  "cut_amendments": [
-   {
-    "date": "2026-09-10",
-    "amendment": "Inc-B55 INSERTED after Inc-STRIPS, before Inc-REPAIR",
-    "authority": "Coordinator ruling 2026-09-10, on Inc-5's measured evidence.",
-    "reason": "B-55 was routed to Inc-5 by 01-requirements.md on the premise that Inc-5 'already owns all three of those files and can pay for it with no budget'. MEASURED IN INC-5's PRE-GATE, that premise is FALSE: closing B-55 also requires app.py -- app.py:52 imports painted_ids BY NAME from views.layered and app.py:1588 hard-gates on `self._current_renderer() is not self.renderer` -- which makes it a 4TH SOURCE FILE past Inc-5's sealed 3-file cut, AND a change to the shipped HLR-N06.3 hidden-count declaration in two views that currently declare nothing. A gated behaviour change would also have revoked Inc-5's A-91 lighter lane. By this batch's own budget rules that is a different increment, not a rider.",
-    "ordering": "Placed AFTER Inc-STRIPS and BEFORE Inc-REPAIR. No dependency on Inc-REPAIR was found; the order is the coordinator's default. Inc-STRIPS first because its subject -- the 12002-node screen collapse -- is the same painted-vs-declared surface B-55 measures, and B-55's census would otherwise be taken against a screen Inc-STRIPS is about to change.",
-    "evidence": "Inc-5 packet section 6, plus the relay's executed pre-gate: painted_ids exporters == {layered} on today's tree."
-   },
-   {
-    "date": "2026-09-10",
-    "amendment": "Inc-W1 INSERTED after Inc-5, before Inc-STRIPS. TESTS ONLY -- zero source files.",
-    "authority": "Coordinator ruling 2026-09-10 (terminal boundary): if the final pass raised ANYTHING outside Q1's axis, do not fix -- commit the renderer changes and split the remaining oracle work into a recorded tests-only micro-increment. The final pass returned PASS on Q1's axis and raised W1 outside it.",
-    "reason": "W1: the arm derives its domain at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, so a drop of either that bites only at w >= 100 is ABSORBED by the derivation and UNSEEN by the backstops. Executed at radial.py:232 -- the one site whose enclosing closure has the width in scope -- both shapes survive all 50 arms AND the entire 904-arm default lane, exit 0, and both are proven non-equivalent by output digest. `other` and `root` at the same site are KILLED, because they are the only members with a w=120 observation outside the absorbing arm.",
-    "charter": "Generalise the B-55 boundary from `root` to every member of ALL -- assert (m in hittable) == (TITLES[m] in drawn) for all four -- then re-fire the drop-a-member family width-conditioned as well as flat, per site. Arm count stays 50; census pin stays 59; SOURCE FILE COUNT 0.",
-    "pre_verified": "By the final pass that found it: precondition 24/24 on the shipped tree (4 members x 6 renderers, zero mismatches); baseline green at 50 resolved / 0 red; both W1 survivors -> KILLED; Q1's kill preserved. It also subsumes the floor asymmetry (a four-member renderer dropping one member no longer slips past on len(hittable)==3).",
-    "open_design_call": "TITLES is a second spelling of the fixture's titles. Deriving it from _graph() is a design decision left to the implementer -- and given this increment's history, a second hand-maintained map is the shape worth a second look before it lands.",
-    "ordering": "Before Inc-STRIPS because it is tests-only, zero source files, and closes a live oracle gap on an operator-reachable renderer; leaving it behind a source increment would book a known-blind oracle across that increment's gates."
-   },
-   {
-    "date": "2026-09-10",
-    "amendment": "Inc-CRUMB INSERTED after Inc-STRIPS, before Inc-B55.",
-    "authority": "Coordinator ruling 2026-09-10, on the Inc-STRIPS security review's measured F2.",
-    "reason": "SAME COLLAPSE CLASS, DIFFERENT VECTOR. Inc-STRIPS bounds the minimap and the pagination strip and closes LLR-N07.3.4 against the FANOUT vector. TabStrip's crumb is a FOURTH unbounded strip on the same screen and it takes a raw ficha title: measured, ONE 4000-character title reproduces the pre-gate collapse verbatim at 80x24 -- canvas one row off-viewport, count region off-viewport. Degradation starts early: 500 characters already costs a third of the canvas at 80x24. #map-toast is the same shape with a smaller blast radius (needs an operator action, self-clearing) and rides along.",
-    "scope": "Bound the crumb where it is BUILT (darkside.tab_strip, the visible truncation keybar already performs), and bound TabStrip and #map-toast in the stylesheet. LAND THE PYTHON BOUND FIRST OR IN THE SAME PASS: adding overflow:hidden to a strip whose content is not cell-bounded is exactly how Inc-STRIPS' own F1 came to exist.",
-    "blocks": "LLR-N07.3.4's open_blocks entry does NOT flip until BOTH vectors are closed. Inc-STRIPS closes the fanout vector only."
-   }
+  "project": "mapper",
+  "language": "en",
+  "batch_id": "2026-08-26-ui-next-batch-02",
+  "batch_objective": "Variant B «atlas» canvas mechanics (pan · fold · declared overflow · braille edges) plus the round-10 capabilities approved for batch 2: search hit-count and navigation, home 2.0 «sala», the field-query «lente», the per-view «leyenda», and the palette-v2 tokens. Closes carry B-05 and the Canvas.rows() layer-drop defect.",
+  "mode": "full",
+  "mode_history": [
+    {
+      "batch_id": "2026-08-18-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-fix-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-medlow-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-components-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-25-ui-next-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-26"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "status": "PARKED at the PDR gate 2026-08-26; UN-PARKED 2026-08-27",
+      "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."
+    },
+    {
+      "batch_id": "2026-08-26-repair-batch",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "closed_at": "2026-08-27",
+      "merge_commit": "e164a28",
+      "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
+    },
+    {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "mode": "full",
+      "closed_at": "2026-08-27"
+    }
   ],
-  "closed": [
-   {
-    "inc": "Inc-1",
-    "commit": "4eaba35",
-    "date": "2026-08-28",
-    "source_files": 4,
-    "gates": "code-reviewer BLOCK on 1 HIGH -> fixed -> confirmation pass 'the HIGH is discharged, no HIGH survives' (0 HIGH); security-reviewer signed off",
-    "suite": "fast 694 passed / 17 deselected; slow 17 passed; ruff 28 (baseline 29, zero new)",
-    "ledger": "694 = 630 - 0 + 64",
-    "battery": "6 rounds, 154 arms asserted green before any verdict, sha256 restore on 8 files after every mutant",
-    "amendments": "A-77..A-88",
-    "unplanned_defects": "WARN's job made LLR-S06.3.5's own threshold unsatisfiable (A-78); the sealed C0 range row omitted U+000D so adopting it NARROWED shipped coverage (A-80); radial sliced titles raw into the exported SVG; AT-009 derived its oracle from the constant under test and was green while 19 invisible code points reached the artifact (A-87). Confirmation pass also caught a fabricated measurement in production source (a probe that constructed the theme it observed) and a fix of mine that repaired nothing."
-   },
-   {
-    "inc": "Inc-2",
-    "commit": "fe50799",
-    "date": "2026-08-28",
-    "source_files": 6,
-    "source_files_note": "the breach #D5 declared and re-ratified at the re-scope; the gate is 'zero call sites of the old shape survive', so a partial migration leaves two contracts live at once",
-    "gates": "code-reviewer BLOCK on 3 HIGH -> fixed -> confirmation pass discharged all three and raised 1 new HIGH -> fixed by RETRACTING a false premise -> narrow third pass: RETRACTION CORRECT, no HIGH, gate PASSES. No HIGH was ever self-cleared.",
-    "suite": "fast 719 passed / 17 deselected; slow 17 passed; ruff 28 (exactly the 4eaba35 baseline, zero new)",
-    "ledger": "736 = 711 - 0 + 25, node ids enumerated against a detached worktree",
-    "census": "AST not grep: 7 definitions, 35 arg-ful call sites, 25 zero-arg Textual sites, **kwargs 0, zero old-shape survivors incl. */** splat and positional. Cardinalities PINNED in the suite, narrated nowhere.",
-    "battery": "rounds 7-11; round 7 208 arms, round 11 55 arms; per-arm verdicts; sha256 restore on up to 10 files after every mutant",
-    "amendments": "A-92..A-96",
-    "headline_correction": "A-96 RETRACTS A-94 and carry B-51 in full. 'The real tab key drops focus on MapScreen' was an artifact of run_test()'s default 80x24, at which _apply_region_visibility correctly auto-hides the rail and inspector. At 118x34 -- the declared context of use -- tab traverses and LLR-CNV.3.1's threshold reproduces verbatim. THREE passes agreed on the false reading because all three shared an unstated premise: nobody varied the terminal size. Verified by an independent third pass with three mutants the author had not run. Lesson carried as B-54.",
-    "other_findings": "HLR-CNV.3 was assigned to no increment (orphan class, same as AT-009) and landed here (A-92); with_header was a dead parameter, removed not migrated (A-93); the export leaked live keyboard focus into exported SVGs, reachable by tab-then-e; the increment's one declared behaviour change (B-50) claimed coverage the suite did not have."
-   },
-   {
-    "inc": "Inc-3",
-    "commit": "bdc4b6a",
-    "post_commit_verification": "The artifact code-point scan's non-vacuity clause used to be keyed on git TRACKING STATE, so it would have reddened on the very commit that landed this increment (measured: 91 artifacts, 84 tracked, 7 untracked). Re-asserted structurally with a probe file. VERIFIED ON THE COMMITTED TREE at bdc4b6a: 0 untracked artifacts, fast lane 801 passed exit 0, zero FAILED lines.",
-    "date": "2026-08-28",
-    "source_files": 6,
-    "source_files_note": "DECLARED breach, widened from A-89's five to six by A-97: views/state.py was owed by two PDR-sealed LLRs (pan_x/pan_y at LLR-N06.1.1, folded at LLR-N06.2.1, all three 'NEW -- created in Phase 3') and named by no cut. Arithmetically true when A-89 was written; only the declaration was missing. NOT an A3 -- all three fields carry defaults, the additive case state.py's own docstring exempts.",
-    "gates": "FOUR rounds. R1: code-reviewer BLOCK 3 HIGH + security-reviewer BLOCK 2 HIGH. R2 fixes -> both confirmation passes: code BLOCK 2 new HIGH, security DISCHARGED both + 1 new HIGH (F-A). R3 fixes -> code pass3 BLOCK 3 HIGH, security pass3 SIGN-OFF 0 HIGH. R4 fixes (coordinator-authorised, scoped to 3 items) -> code pass4 PASS 0 HIGH. No HIGH was ever self-cleared; every fixed tree went to a fresh independent pass.",
-    "suite": "fast 801 passed / 17 deselected / 3 xfailed exit 0; slow 17 passed exit 0; ruff set-wise scope-matched NEW=none, GONE=1 (layered.py F401)",
-    "ledger": "821 = 737 - 0 + 84 all markers; 804 = 720 - 0 + 84 default lane. Deletions measured at zero against a detached git archive, not asserted.",
-    "architect_ruling": "02j: HLR-N06.3 and LLR-N06.3.1 were keyed on a 'declared painted set' that NO requirement gave a mechanism. Ruled a module-level pure painted_ids(graph, state) in views/layered.py sharing one _geometry with render. IRenderer gains nothing, so trigger A3 does NOT re-fire and the sealed PDR stays sealed. The three rejected candidates each died on an executed measurement, not preference (A-98).",
-    "headline_defect": "The recurring root cause was ONE number: the header's physical row count. HEADER_ROWS=2 rested on arithmetic that stops holding below avail=48 because BOTH header paddings clamp at 0. Fix 1 replaced it with ceil(len/(w-2)) -- pinned by a test that RE-TYPED the same formula, so the pin could not fail on a wrong divisor, on word-wrap, or on a wide character. Fix 2 measures by actually rendering (Console.render_lines at a measured wrap width) and pins against the COMPOSITED FRAME. Under-charge band 23 of 943 -> 0 on both fixtures, reproduced pre-fix on an independent instrument.",
-    "security": "SEC-F1 SchemaField.key reached the exported SVG uncoerced through the DEFAULT renderer (B-47 verbatim), missed by the increment's own census because its fixture set no graph.schema and legacy mode is selected by bool(graph.schema). SEC-F2 _minimap_text leaked a ficha title. Both DISCHARGED. F-A (HIGH) is PRE-EXISTING at 954f8f3: SchemaField.key is interpolated into a Textual widget id and kills the app on map open -- for hostile code points AND for benign Spanish keys. Confirmed to SUBSUME SEC-F1's attack (the session dies before any SVG is written). Routed to Inc-REPAIR with the obligation landed as an xfail(strict=True) arm whose XPASS(strict)->FAILED mechanism was reproduced.",
-    "dependency": "pytest-timeout==2.3.1 added dev-only, pinned, coordinator-authorised. The cycle-guard regression arms failed BY HANGING, which in CI is a stuck run rather than a red report. timeout_method='thread' because Windows has no SIGALRM (verified, not assumed). Mutant N9 now yields exit 1 in 33s instead of wedging.",
-    "carries_opened": "B-55 outline/radial hide nodes and declare nothing (5/8 and 2/8 at 30x6) -- routed to Inc-5, pinned by a participation census. B-56/B-60 CLOSED, not re-recorded. F-A/F-B/F-C routed to Inc-REPAIR. OutlineRail.render unguarded at compositor paint time (part-closes F-G). F-H MapStore.save->load not total. pass4 F1: the settle-chase's termination is MEASURED (max 5 passes over 943 configurations; storms and a forced oscillation both terminate) rather than asserted, over a live height:auto feedback path -- named fix is a 3-line pass counter, deliberately NOT taken post-gate because an unreviewed change after a passing gate is the self-clearing pattern this batch forbids.",
-    "process_notes": "Two ORCHESTRATOR errors caught by the independent gates and recorded rather than quietly fixed: (a) the ruff gate was checked as an AGGREGATE, and an aggregate cannot see a swap -- one new F401 was exactly masked by one removal; (b) even set-wise the comparison had UNEQUAL SCOPE, because the base worktree carries prototypes/ which the work tree's .gitignore hides from ruff. Also: piping pytest through `tail` reports TAIL's exit status, which is how a run WITH a failure displayed 'exited with code 0'. A flaky arm was found by the orchestrator (1 failure in 11 runs on this tree, 0 in 6 at base -- attribution NOT claimed, since 6 runs cannot exclude the same rate) and fixed deterministically."
-   },
-   {
-    "inc": "Inc-4a",
-    "commit": "68b1c09",
-    "date": "2026-08-29",
-    "source_files": 4,
-    "scope": "US-N07 search core -- one owner of 'what matches', ViewState.hits, the inline-predicate deletion, LLR-N07.1.3's pill tail, the count line on #map-pagination (#D37)",
-    "gates": "FULL protocol, 4 implementation rounds. R1: code-reviewer BLOCK 2 HIGH + security-reviewer BLOCK 1 HIGH family (F1/F1a/F1b). R2 fixes -> BOTH confirmation passes clean: code PASS (both HIGH discharged, verified by EXECUTED mutation in an isolated mirror, not accepted on trust), security SIGN-OFF. R3 discharged their 5 mitigations. Confirmation-2 SIGN-OFF on all four items with 2 further MEDIUM mitigations. R4 (orchestrator-applied, declared) discharged both. No HIGH was ever self-cleared.",
-    "suite": "fast 822 passed / 17 deselected / 3 xfailed exit 0, zero FAILED; ruff SET identical to entry (zero NEW, zero GONE)",
-    "ledger": "825 = 804 - 0 + 21 default lane; 842 all markers",
-    "headline_defects": "(a) The count was resolved TWICE -- author caught it himself: a mutation scoping one path to the visible set left AT-018 AND AT-019 green. Risk A-6, the defect US-N07 exists to close, nearly shipping inside the increment that closes it. (b) The gate on that invariant then did not gate it: the arm was positive-membership only, and the code lens CONSTRUCTED the defect through the unbanned _search_hits -- count N=5 against 4 painted highlights on a green 818-test suite. (c) A quadratic in the repaint path, found INDEPENDENTLY by both lenses: 25.8s of a 30.6s frame at N=12002, 4 resolutions per repaint, and above MAX_RENDER_NODES the renderer cost zero while the search cost seconds. A clean regression -- at entry nothing called SearchIndex. (d) The FIX for (c) then painted '0 coincidencias' over a graph holding 241 real matches -- a lying affordance reintroduced by the repair. (e) The open-pass pin was a hand-written two-tuple, already false; C-31 demonstrated on this file rather than quoted at it.",
-    "process_notes": "The implementer REFUSED a reviewer's suggested fix and was proven right: applying that predicate verbatim to unmutated source came back RED -- it would have false-failed correct code, since _view_state legitimately reads the viewport. C-53 in practice. He also declined to adopt the orchestrator's ruff pair count (19) because he measured 21 and could not reproduce mine; both agree on 27 findings and on SET identity, so the gate holds -- the lesson is that a pair COUNT is instrument-dependent and the SET is the gate. He retracted his own round-1 LF/CRLF finding as wrong, and the code lens then corrected BOTH rounds: the conversion ran the other way (app.py and layered.py LF->CRLF; search.py never moved). TWO ORCHESTRATOR ERRORS: (1) my state.query census swept mapper/ and stopped, missing the fourth reader at tests/test_app.py:448 -- the sole causal break, found by the architect lens. (2) My own QA-lens brief produced an artifact containing two literal U+202E characters, which reddened the tree's coercion census and cost the implementer his green baseline. C-56 generalised: documenting a character must not mean containing it. Both confirmation lenses caught their OWN instruments: the code lens's mirror read 1 failed until it found the A3 census reads the git index and the new files were staged-but-untracked in a clone; the security lens found its previous keypath gap was its own probe's fault (j is next_sibling, a no-op at the root where its cursor sat).",
-    "carries_opened": "NEW-4 residue: three pass-free readers (_pan, action_export_svg, _reclamp_pan) are EXEMPTED WITH STATED REASONS, not eliminated -- Inc-4b must open a pass or add a reasoned entry; the arm forces the choice. The unbounded pagination meter (per_page = max(1, total)) puts the strip's overflow declaration off-viewport at 34 rows -- pre-existing, routed to Inc-REPAIR. Export-toast username path leak now at app.py:2373 (address has moved twice; the durable anchor is the _event_toast('exportado', ...) call). tree_order/_incomplete_order duplication: PINNED not deduped, because dedup changes a shipped US-N04 path this acceptance does not cover. .gitattributes pass should name app.py and layered.py, not search.py. OPERATOR USERNAME in 13 places across 10 batch artifacts, 7 of them already committed -- deliberately NOT scrubbed (they are absolute paths inside executed evidence; rewriting committed records would make them stop saying what was measured). Routed to the operator as a decision at /dev-flow-sync."
-   },
-   {
-    "inc": "Inc-4b",
-    "commit": "fcff836",
-    "date": "2026-08-29",
-    "source_files": 2,
-    "scope": "US-N07 seat + walk: the #D5b rebind (map/n->next_hit, map/N->prev_hit, map/M->next_gap), the n/N walk over the tree-ordered list, LLR-N06.2.4 fold auto-open, E1b/E1c toasts, the one-time rebind declaration, state-dependent esc (#D38), the seat-derived hint line, and the test_cd25a seat repair.",
-    "gates": "FULL protocol. R1: code-reviewer BLOCK on 2 HIGH; security-reviewer SIGN-OFF with 2 MEDIUM. R2 fixes -> code-reviewer CONFIRMATION PASS, both HIGH DISCHARGED on the reviewer's OWN re-run mutations rather than the author's table. R2b closed the confirmation's NEW-1. No HIGH self-cleared.",
-    "suite": "fast 847 passed / 17 deselected / 3 xfailed exit 0, zero FAILED; ruff SET identical to entry",
-    "ledger": "850 = 825 - 0 + 25 default lane; 867 all markers. Collection re-derived, not asserted.",
-    "seat": "C-D25a/C-D25b discharged: ENTRY len(KEYMAP)=52, bindings_for(map)=31, dupes=[]; EXIT 54, 33, []. Declared diff +{(n,next_hit),(N,prev_hit),(M,next_gap)} -{(n,next_gap)} asserted EQUAL to the live entry/exit difference BOTH ways. Inc-3's test_cd25a was RED BY CONSTRUCTION and was repaired by freezing Inc-3's exit as a literal EXIT_MAP_SEAT (not derived as ENTRY|DECLARED_DIFF, which would be a tautology).",
-    "headline_defects": "(a) HIGH -- the walk's PRIMARY entry path was DEAD to the entire suite: replacing the else-limb body with a raise left 847 passed. Unreached, not under-asserted. Nothing moves the cursor onto a hit on submit, so an operator searching away from where they stand takes that branch on their first n. AT-022 missed it because the ORCHESTRATOR's pinned fixture happens to rest the cursor on a hit -- a fixture built to make the walk observable made its commonest entry unobservable. (b) HIGH -- AT-047 could not fail on the re-close defect it exists to catch: its single further press lands on the next hit INSIDE the opened branch, so a re-close mutant re-opens on that very press. Measured both forms under the identical mutant: single-press PASSED at both sizes, walk-out FAILED at both. The author's own M4 was genuine but degenerate -- it corrupts the frame it just painted, which any frame-reading assertion catches. (c) MEDIUM -- esc and the hint line used different predicates for 'a live search', so above the render bound the first escape cleared an invisible query, changed no pixel and did not leave: a keypress silently swallowed, the inverse of the defect #D38 fixed. (d) MEDIUM -- the fold-auto-open hint prepended unbounded file-derived text AHEAD of the affordances and HintLine wraps rather than clips, so a long title collapsed the canvas to one row and pushed `esc limpiar` -- the recovery route #D38 had just promised -- off the frame.",
-    "process_notes": "A REVIEWER'S REMEDY FAILED FOR THE THIRD TIME THIS BATCH, and running it is what revealed it. The security lens recommended darkside.fit + reorder for the unbounded hint; implemented verbatim it holds at 118x34 and WRAPS at 80x24, where the strip reads back empty and `esc limpiar` is lost again by a different mechanism -- precisely what that lens had filed as `could not determine`. The confirmation pass then swept 25 widths: the recommended fixed-cap form wraps from 100 columns DOWNWARD, so it was not marginal at 80, it was wrong across a 60-column band. Shipped fix is a width-aware budget; the announcement drop threshold was located exactly at 69->68 columns against a narrowest declared regime of 80. MUTATION-ADEQUACY CALIBRATION, earned by the code lens and carried forward: 'I ran four mutations of my own choosing; TWO SURVIVED. The 16-mutations-16-RED line is evidence about the sixteen mutants chosen, not a mutation-adequacy claim.' The round-1 ledger was honest, 16/16, and still missed both HIGHs. Round 2 answered it -- four mutants aimed at arms the author believed STRONG (all RED) and two he believed would SURVIVE (both did, both declared as uncovered shipped lines rather than papered over). THREE ORCHESTRATOR ERRORS: (1) my brief's seat figures used the wrong instrument -- I quoted scope=='map' (29->31) where C-D25a and the Inc-3 census both use bindings_for('map') (31->33); (2) my whole-seat sha256 was a bespoke serialisation only my own throwaway script could reproduce, and the implementer correctly declined to adopt it and declared his own canonical form; (3) I mis-attributed the darkside.fit recommendation to the code review when it was the security review's finding. LEDGER ARITHMETIC corrected at the gate: round-2 prose read '10 run' against 9 RED + 2 surviving; the table always carried ELEVEN rows, R1b being a distinct mutant with its own base, verdict and target arm.",
-    "spec_corrections": "FIVE declared by the implementer, all accepted by review. The two that change observable behaviour: (A) AT-051b's one-time declaration and E1b BOTH fire on the first n -- one toast slot, two mandated occupants, and the sealed text does not say which wins; resolved as declaration on press one, E1b on press two, and PINNED rather than left to be rediscovered. (C) A THIRD empty-ish state the sealed text never names: above MAX_RENDER_NODES Inc-4a's _search_order returns None, and treating that as 'empty' paints E1c -- a claim about a graph nobody evaluated. That is the lying affordance Inc-4a's None was introduced to prevent, reappearing one increment downstream on a different surface. New toast, gated. NEW COPY NO `shall` CLAUSE OWNS -- flagged. (D) C-D6a closed structurally but NOT with 02l's proposed active_hits attribute, because adding it would create a SECOND owner of 'what matches' on the screen Inc-4a spent an entire increment giving one owner. The no-BoolOp rule caught real code on its first run (a `title or nid` fallback), lifted into a helper rather than the rule being weakened.",
-    "requirements_amended": "LLR-N06.2.4 PRED-C: 'After 1 further walk press' REPLACED by 'once the walk has moved OUT of the opened branch -- asserted, not counted in presses'. The parked threshold was MEASURED insufficient with the evidence in hand, and Inc-5 reading it would have built the weak arm GREEN. Statement unchanged; only the predicate that observes it. Clause 4 gains a WIDTH PROVISO carrying its measured threshold (announcement painted at 69 columns, dropped at 68, narrowest declared regime 80), because a `shall` the code knowingly does not satisfy at some inputs -- recorded only as a risk note -- is how an undeclared exception becomes an undiscovered one.",
-    "carries_opened": "UX RULING OWED (not a code change): above the render bound the query survives in query_text and still changes what n does, while no surface advertises it and esc declines to clear it. No lock-in -- escape pops and the query dies with it -- but 'live enough to change a keypress, invisible enough to have no affordance' deserves a deliberate ruling. TWO DECLARED SURVIVORS, adequate as declared per the confirmation pass: R7 (_branch_name .get guard) would pin a state the load path cannot produce; R8 (branch count cap) would need a four-nested-fold fixture and is pinned operator-visibly by the width budget anyway. PRE-EXISTING, found and NOT fixed: at 80x24 a ~2000-char node title carries the entire chrome to y=59 of a 24-row frame with nothing searched and nothing walked -- a separate instance of the unbounded-text class. The new arm drives 400 chars with a self-guard that FAILS LOUDLY if it ever starts measuring that defect instead of this one; the confirmation pass verified that guard fires (assert 59 < 24). Carried unchanged: F-A, S-15, the unbounded pagination meter, the export-toast username path leak, UX-Q3-a, AT-024 (Inc-5's), the tree_order/_incomplete_order duplication pinned not deduped, and the .gitattributes pass (names app.py and layered.py, not search.py)."
-   },
-   {
-    "inc": "Inc-4c",
-    "commit": "0b3d130",
-    "date": "2026-08-29 gated; 2026-09-10 committed",
-    "source_files": 1,
-    "scope": "LLR-N07.3.4 (#D43) -- one regime, not two. _count_line's above-the-bound arm returned an empty Text; it now returns _suspended_count_line(), painting the query (through darkside.fit, a coercion sink and a cell budget in one call), the whole-graph count from _whole_graph_tally, the working chord read from the seat via _seat_glyph('back_or_home'), and the suspension notice itself. esc clears identically at every graph size. Owns AT-054/AT-055 and takes ownership of the copy Inc-4b shipped with no owning shall clause. FULL protocol (#D44).",
-    "gates": "FULL protocol, THREE code-review rounds. R1 BLOCK -> R2 fixes -> confirmation pass BLOCK -> R3 fixes -> pass 3 PASS, no HIGH surviving. security-reviewer SIGN-OFF. No HIGH ever self-cleared; every fixed tree went to a fresh independent pass. 12 mutations fired, 12 KILLED, 12 sha256-verified restores, after a first round that killed only 10 -- both survivors reported as findings and closed.",
-    "suite": "default lane 854 passed / 17 deselected / 3 xfailed exit 0; all markers 871 passed / 3 xfailed exit 0; ruff SET over mapper/ tests/ 27 = 27 against a digest-verified clean 9ba2f26 export, 19 (file,rule) pairs, zero NEW / zero GONE. RE-MEASURED 2026-09-10 by the relay on the exact committed bytes -- not inherited from the 2026-08-29 verdict -- from a tree sha256-pinned before and after both lanes, caches purged (C-46). Lane arithmetic holds independently: 854 + 17 deselected = 871.",
-    "ledger": "Entry baseline 847 (executed at round 1, before a line was written) -> exit 854 default lane; 871 all markers. Round progression 850 -> 853 -> 854, one arm added per review round. Whole-increment net vs HEAD is +5/-1 test FUNCTIONS (P3.5); the +7 COLLECTED-node delta is larger because parametrised functions resolve to several nodes each. The two counts are different units and are recorded as such, not reconciled into one number.",
-    "headline_defects": "(F-1) `n recorre` is NOT painted above the bound -- the Statement's third clause is not satisfiable without breaking a shipped, gated AST arm, and the numeric threshold does not require it. Declared, not silently dropped. (F-2) Predicate 1 is NOT observable at the SHIPPED bound: measured, at 12002 nodes the entire MapScreen collapses -- #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, crushing the canvas to 1 row and putting the count region off-viewport. That is Inc-STRIPS' subject and is not closable in one file. (F-3) Inc-4a's cost justification for the bound was stale by TWO ORDERS OF MAGNITUDE; re-measured and corrected in place. A fourth: _whole_graph_tally was briefly a SECOND SearchIndex construction site and the one-site census arm reddened on it -- the count and the paint now share one resolution.",
-    "process_notes": "THREE DISCLOSURES BY THE IMPLEMENTER, none buried (R3F.5): (1) the first ruff comparator ran a broken sed, produced two EMPTY sets, and diff duly called them identical -- the third `0 == 0` shape in this batch, visible only because entry counts were printed beside the verdict; (2) the first mutation harness used read_text/write_text, which round-trips CRLF to LF on this checkout, leaving a restore semantically right and BYTE-WRONG -- the sha256 restore assert caught it, which is the entire reason that assert exists; (3) the implementer EDITED A .dev-flow FILE WHILE THE ALL-MARKERS LANE WAS READING THE TREE, and that run was DISCARDED rather than explained. Also a C-56 finding against the confirmation review's own artifact, which spelled a hostile code point verbatim and was caught by the repo's own tracked-file sweep. RELAY, 2026-09-10: two further instrument defects found in the RELAY'S OWN ruff comparator before any verdict was believed -- the clean baseline export, materialised under a temp path, resolved a DIFFERENT ruff config by upward discovery (I001 enabled, reporting 70 against the repo's 27, so the two sides were never comparable; closed with --isolated on both), and ANSI colour survives redirection so the rule-code parse returned SILENTLY EMPTY on both sides (the same 0 == 0 shape as disclosure 1, on a different instrument). The comparator now asserts parsed == declared on each side before it is allowed to compare, and carries a positive control that must report a planted synthetic entry as NEW.",
-    "digest_reconciliation": "app.py is byte-identical to the pass-3 pin (c0709eab...). tests/test_search.py DIFFERS from its pass-3 pin: the delta is P3.6's three post-verdict corrections, all three in that file, all three prose (docstring, comment, docstring), applied before commit and recorded there. STATED LIMIT: the pass-3 bytes are NOT recoverable -- the file was never committed, the stash list is empty, and none of the dangling blobs hashes to the pinned digest -- so the prose-only property rests on P3.6's contemporaneous record plus the relay's executed byte census (both files uniformly CRLF, zero bare LF, non-ASCII confined to Spanish UI text and em-dashes), and is NOT re-derived from the two sides. Landed in the packet at P3.8.1 rather than left in a relay's head.",
-    "carries_opened": "Inc-STRIPS is a BLOCKER on closing LLR-N07.3.4, not a follow-up -- F-2 is its executed evidence. The packet's own BLUF reports round-1 figures (850/867) and was never updated as rounds 2 and 3 landed; deliberately NOT edited post-verdict, and corrected by a named note at P3.8.3 instead. Carried unchanged: F-A (schema key reaching a Textual widget id kills the app on map open), F-B, F-C, coverage.py:88 uncoerced label, the phantom-sidecar coverage inflation and the username path leak in the load toast, B-46, UX-Q3-a, AT-024 (Inc-5's), the unbounded pagination meter, the tree_order/_incomplete_order duplication pinned not deduped, and the .gitattributes pass. Also observed by the relay and NOT acted on: an empty untracked directory literally named `--help` sits in the repo root (git does not track empty directories, so it is absent from status); removal not attempted without approval."
-   },
-   {
-    "inc": "Inc-5",
-    "commit": "81165a6",
-    "date": "2026-09-10",
-    "source_files": 3,
-    "scope": "LLR-N07.2.2b / AT-024 -- five renderer classes across three files paint state.hits distinguishably by STYLE, in the style layered already used, selection painted on top of a hit per layered.py:628. Derived set 1 of 6 -> 6 of 6 compliant; OPERATOR-REACHABLE movement 1 of 3 -> 3 of 3, since the three lane renderers have no production consumer.",
-    "gates": "FIVE independent review rounds. R1 BLOCK (F1 HIGH + F2-F7) -> R2 BLOCK (N1 HIGH + N2/N3) -> R3 BLOCK (P1/P2 HIGH + P3-P7) -> R4 BLOCK (Q1 HIGH) -> R5 PASS, 0 HIGH on Q1's axis. No HIGH was ever self-cleared; every fixed tree went to a fresh independent reviewer. The A-91 lighter lane was REVOKED at R1 and the full protocol ran thereafter. Soft cap of 3 blocks was surfaced to the coordinator at R3 rather than worked around; R4 and R5 each ran under an explicit coordinator ruling with a terminal boundary.",
-    "suite": "default lane 904 passed / 17 deselected / 3 xfailed exit 0; all markers 921 passed / 3 xfailed exit 0; ruff SET over mapper/ tests/ 27 = 27, zero NEW / zero GONE. Tree sha256-pinned before and after both lanes, caches purged (C-46). Lane arithmetic holds independently: 904 + 17 = 921.",
-    "ledger": "904 = 854 - 0 + 50 default lane; 921 all markers, same +50. The 50 is exactly the arm count of the one new test file. A3 census pin 58 -> 59 with an itemised reason: ONE new arg-ful render(...) site, not six, because the arms parametrise over the derived set and share one helper.",
-    "battery": "R1 9/9 - R2 7/7 - R3 18/18 - R4 35/32 - R5 42 fired PER SITE, 35 KILLED, 7 proven EQUIVALENT by output digest over 864 renders with positive controls that fire. Every restore asserted byte-identical by sha256 before the next mutant fired; PYTHONDONTWRITEBYTECODE=1 throughout.",
-    "headline_finding": "ZERO DEFECTS IN SHIPPED BEHAVIOUR ACROSS ALL FIVE ROUNDS. The renderers were correct from round 1. Every BLOCK was the ORACLE, and the same defect migrated outward one quantifier at a time: the assertion named min (its mirror max survived 7/7) -> the assertion named its members while the BATTERY fired per class (a per-class mutant reported a KILL over a live survivor at a sibling site) -> the assertion named a CARDINALITY (no hit set of size >= 3 existed anywhere in the repository) -> the assertion quantified correctly over a HAND-NAMED DOMAIN (a drop-root mutant survived all 50 arms AND the entire 904-arm lane at 3 of 7 sites, with root operator-reachable via SearchIndex.hits('raiz')). The fix derives the domain per renderer and ASSERTS the B-55 boundary rather than assuming it -- the load-bearing half, since a bare derivation ABSORBS the defect. The final pass proved that by DEFEATING the boundary and watching all three kills revert to survivals.",
-    "mis_route": "Routing the root exclusion to carry B-55 was a MIS-ROUTE and is its own recorded control: B-55 ('a clipped hit is an undeclared hit') covers the three lane renderers, which never draw the root, and NOT outline/radial/layered, which draw it and paint it. Filing a live gap under an accepted carry put it behind a closed door.",
-    "carries_opened": "Inc-W1 (tests only, zero source files) SPLIT OUT under the coordinator's terminal boundary: the final pass returned PASS on Q1's axis and found W1 outside it -- the domain is derived at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, so a width-conditioned drop of either is absorbed by the derivation and unseen by the backstops (executed at radial.py:232: both survive all 50 arms and the whole 904-arm lane, both proven non-equivalent). B-55 remains open as Inc-B55. F7 (a selected node that is also a hit is indistinguishable from a selected non-hit, in all five renderers AND in shipped layered) routed to ux-reviewer, declared not fixed. N3 fixture-ordering note. A hit on the map ROOT is declared-but-unpaintable in the three lane renderers -- B-55 in another guise, pre-existing.",
-    "controls_earned": "Three, recorded in controls_for_engineering_rules for phase 6: (1) a mutation battery fires PER SITE, never per symbol-owner, and a KILLED tally names its denominator's unit; (2) an oracle's blind spots migrate outward one quantifier at a time -- review the domain, and the conditions under which the domain is derived, not just the assertion; (3) a gap routed to the wrong owner is a gap behind a closed door."
-   },
-   {
-    "inc": "Inc-W1",
-    "commit": "961d017",
-    "date": "2026-09-10",
-    "source_files": 0,
-    "scope": "TESTS ONLY. Closes W1 -- the oracle derived its domain at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, and the B-55 boundary covered `root` alone, so a drop of either member that bit only at w >= 100 was absorbed by the derivation and unseen by the backstops. The boundary now asserts over EVERY member; ALL and TITLES are both DERIVED from _graph().",
-    "gates": "THREE rounds. R1 lighter lane + one confirmation -> BLOCK on 1 HIGH. R2 fixes -> declaration audit -> BLOCK on 1 HIGH. R3 fixes -> CLOSED under the coordinator's terminal boundary, no further cycle. Both blocks were DECLARATIONS, not mechanism.",
-    "suite": "default lane 904 passed / 17 deselected / 3 xfailed exit 0; all markers 921 passed / 3 xfailed exit 0; ruff SET 27 = 27, zero NEW / zero GONE. Arm count, ledger and the A3 census pin all UNCHANGED -- an arm body, no new arm.",
-    "battery": "56 fired PER SITE and in BOTH kinds (2 kinds x 4 members x 7 sites), 42 KILLED, 14 proven EQUIVALENT by output digest over 864 renders each with positive controls that fire.",
-    "headline_evidence": "THE TWO-ORACLE CONTROL, and it is the strongest instrument this batch produced: a reviewer fired the SAME mutant against BOTH oracles -- WIDE drop first and WIDE drop hit at radial.py:232 are SURVIVED against the pre-increment tree and KILLED against this one, each by exactly one node id. That proves the arm NEWLY GAINED the ability to see the defect, which is a stronger claim than 'it is killed now'. Worth carrying as a control in its own right.",
-    "headline_defects": "Both blocks were declarations outrunning code. R1: the TITLES were derived and the DOMAIN was left spelled, seven lines under a comment reading 'spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked for that property -- a rename would be loud (KeyError) but an ADDITION is silent, so a fifth node would sit outside the domain, the boundary and the unions: W1's own failure mode reinstated inside the increment written to end it. R2: the two-direction split's `if` branch said 'shorten the fixture title, do not blame the renderer', but TWO conditions reach it and one IS the renderer's fault -- one renderer-side mutant fired that assertion AND the clip precondition in the same run, blaming opposite parties for one cause, and the advice was actionable in the wrong direction (shortening the titles greens both arms while the defect ships). Four further declarations corrected: 'the SHORTEST title' (false), 'SEVEN of seven renderers' (the derived set is six; seven is the SITE count), a :190 citation for an assertion at :192, and a title claiming more than the fix took.",
-    "carries_opened": "O1 duplicated render call (simplicity nit). O2 the co-drop gap -- already routed to qa-reviewer as F3; the reviewer adds that F3 and the R2 HIGH SHARE A ROOT: three of four members have no independent pin on `drawn`. O3 an instrument failure in the REVIEWER's own harness -- a CRLF-blind anchor matched zero times and printed a clean '50 passed', caught only by the match-count assert; third time in this batch that a control which MUST FIRE was the only thing between a reviewer and a false all-green."
-   },
-   {
-    "inc": "Inc-STRIPS",
-    "commit": "89be440",
-    "date": "2026-09-10",
-    "source_files": 1,
-    "scope": "The 12002-node screen collapse. #map-minimap was height:auto over the root's 4001 children (471 rows at 118x34, 712 at 80x24), the pagination meter priced one glyph per node, and both strips WRAPPED rather than clipping -- so the search count region was off-viewport at both declared sizes. Bounded: the minimap's entries take the ROW'S REMAINDER after caption/legend/declaration are reserved, each name cell-bounded by darkside.fit; METER_STEPS caps the meter; both strips carry max-height:3 + overflow:hidden. The remainder is DECLARED in INK per #D28.",
-    "gates": "FULL protocol, FOUR rounds. R1: code-reviewer BLOCK 3 HIGH and security-reviewer BLOCK 3 HIGH, dispatched IN PARALLEL (an orchestrator process failure, see below). R2 fixes -> confirmation BLOCK 2 HIGH (both new). R3 fixes -> final confirmation PASS, 0 HIGH. Soft cap of 3 blocks reached and respected; the residue was CARRIED rather than fixed in a fourth round.",
-    "suite": "default lane 913 passed / 19 deselected / 3 xfailed exit 0; all markers 932 passed / 3 xfailed exit 0; ruff SET 27 = 27, zero NEW / zero GONE. Ledger 913 = 908 + 5; all-markers 932 = 927 + 5.",
-    "battery": "Round 3: H1, MUT-A, MUT-C, MUT-Q -- 4 fired, 4 KILLED. The H1 mutant reddens the new small-map arm AND NOTHING ELSE, which is the measured explanation for how the regression shipped through round 2.",
-    "headline_finding": "THE CODE WAS NOT THE PROBLEM AFTER ROUND 1; EVERY BLOCK WAS AN ORACLE OR A DECLARATION. (1) The acceptance predicate searched the WHOLE FRAME and was unsound BOTH ways -- a false GREEN where HintLine carried the same words, a false RED where a raw join glued a wrapped phrase; rebuilt on rows_in over the count region with the numeric and query clauses it had omitted. (2) MINIMAP_BRANCHES had no oracle and then turned out to have no JOB -- after the cell budget landed a 10**9 mutant STILL survived, so it was removed rather than given a test it could only pass vacuously. (3) max-height not height: a fixed height is a FLOOR as well as a ceiling and taxed every small map two rows. (4) The declaration's cells were reserved UNCONDITIONALLY, so legacy at 35x14 drew ONE of three branches and declared a remainder of two AT IDENTICAL STRIP AND CANVAS HEIGHTS -- the reserve manufactured the omission it announced, the height:3 mistake in a second costume. (5) MUT-A was recorded SURVIVED and explained away as equivalent-by-contract; that survival WAS the coverage gap that let (4) ship, and the caveat naming the unpinned axis was written two lines below the verdict.",
-    "process_failure": "MINE. The code and security reviews were dispatched IN PARALLEL onto ONE SHARED TREE, each briefed as sole writer, one instructed to mutate. The code reviewer's own disclosure is the lesson: 'I was briefed as sole writer and did not check for a parallel gate' -- it did not check BECAUSE THE BRIEF SAID THERE WAS NOTHING TO CHECK FOR. A mutant with a disabled cap sat committable for about four minutes. Reviews are SERIAL BY DEFAULT from here; parallel requires one isolated digest-verified mirror per reviewer. CREDIT ON THE RECORD: the security review's evidence survived because IT logged the swap timestamps, recognised the harness signature, DISCARDED its contaminated first pass and re-measured under a structural guard.",
-    "carries_opened": "LLR-N07.3.4 CLOSES AGAINST THE FANOUT VECTOR ONLY. The title-length vector is open and measured: TabStrip's crumb is a fourth unbounded strip taking a raw ficha title, and ONE 4000-character title reproduces this collapse verbatim at 80x24. open_blocks does NOT flip. R1/R2/R3 documentary residue routed to Inc-CRUMB with reproductions -- four stale comments asserting the pre-bound layout (including _query_echo's LIVE docstring, which is the very reasoning the corrected comment warns a reader must not trust), a corrected strip count of FIVE refuted by the SIX its own next sentence enumerates, and state.json still saying 'fourth unbounded strip'. SEC-F4 (#map-toast unbounded, same class, smaller blast radius) rides with Inc-CRUMB.",
-    "controls_earned": "A survivor explained away is a survivor; a closure marking lives in ONE artifact of record; reviews are serial by default. All three recorded in controls_for_engineering_rules."
-   }
+  "current_station": "P3",
+  "phase_status": "in-progress",
+  "p3_progress": {
+    "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-4c -> Inc-5 -> Inc-W1 -> Inc-STRIPS -> Inc-CRUMB -> Inc-B55 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
+    "cut_amendments": [
+      {
+        "date": "2026-09-10",
+        "amendment": "Inc-B55 INSERTED after Inc-STRIPS, before Inc-REPAIR",
+        "authority": "Coordinator ruling 2026-09-10, on Inc-5's measured evidence.",
+        "reason": "B-55 was routed to Inc-5 by 01-requirements.md on the premise that Inc-5 'already owns all three of those files and can pay for it with no budget'. MEASURED IN INC-5's PRE-GATE, that premise is FALSE: closing B-55 also requires app.py -- app.py:52 imports painted_ids BY NAME from views.layered and app.py:1588 hard-gates on `self._current_renderer() is not self.renderer` -- which makes it a 4TH SOURCE FILE past Inc-5's sealed 3-file cut, AND a change to the shipped HLR-N06.3 hidden-count declaration in two views that currently declare nothing. A gated behaviour change would also have revoked Inc-5's A-91 lighter lane. By this batch's own budget rules that is a different increment, not a rider.",
+        "ordering": "Placed AFTER Inc-STRIPS and BEFORE Inc-REPAIR. No dependency on Inc-REPAIR was found; the order is the coordinator's default. Inc-STRIPS first because its subject -- the 12002-node screen collapse -- is the same painted-vs-declared surface B-55 measures, and B-55's census would otherwise be taken against a screen Inc-STRIPS is about to change.",
+        "evidence": "Inc-5 packet section 6, plus the relay's executed pre-gate: painted_ids exporters == {layered} on today's tree."
+      },
+      {
+        "date": "2026-09-10",
+        "amendment": "Inc-W1 INSERTED after Inc-5, before Inc-STRIPS. TESTS ONLY -- zero source files.",
+        "authority": "Coordinator ruling 2026-09-10 (terminal boundary): if the final pass raised ANYTHING outside Q1's axis, do not fix -- commit the renderer changes and split the remaining oracle work into a recorded tests-only micro-increment. The final pass returned PASS on Q1's axis and raised W1 outside it.",
+        "reason": "W1: the arm derives its domain at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, so a drop of either that bites only at w >= 100 is ABSORBED by the derivation and UNSEEN by the backstops. Executed at radial.py:232 -- the one site whose enclosing closure has the width in scope -- both shapes survive all 50 arms AND the entire 904-arm default lane, exit 0, and both are proven non-equivalent by output digest. `other` and `root` at the same site are KILLED, because they are the only members with a w=120 observation outside the absorbing arm.",
+        "charter": "Generalise the B-55 boundary from `root` to every member of ALL -- assert (m in hittable) == (TITLES[m] in drawn) for all four -- then re-fire the drop-a-member family width-conditioned as well as flat, per site. Arm count stays 50; census pin stays 59; SOURCE FILE COUNT 0.",
+        "pre_verified": "By the final pass that found it: precondition 24/24 on the shipped tree (4 members x 6 renderers, zero mismatches); baseline green at 50 resolved / 0 red; both W1 survivors -> KILLED; Q1's kill preserved. It also subsumes the floor asymmetry (a four-member renderer dropping one member no longer slips past on len(hittable)==3).",
+        "open_design_call": "TITLES is a second spelling of the fixture's titles. Deriving it from _graph() is a design decision left to the implementer -- and given this increment's history, a second hand-maintained map is the shape worth a second look before it lands.",
+        "ordering": "Before Inc-STRIPS because it is tests-only, zero source files, and closes a live oracle gap on an operator-reachable renderer; leaving it behind a source increment would book a known-blind oracle across that increment's gates."
+      },
+      {
+        "date": "2026-09-10",
+        "amendment": "Inc-CRUMB INSERTED after Inc-STRIPS, before Inc-B55.",
+        "authority": "Coordinator ruling 2026-09-10, on the Inc-STRIPS security review's measured F2.",
+        "reason": "SAME COLLAPSE CLASS, DIFFERENT VECTOR. Inc-STRIPS bounds the minimap and the pagination strip and closes LLR-N07.3.4 against the FANOUT vector. TabStrip's crumb is a FOURTH unbounded strip on the same screen and it takes a raw ficha title: measured, ONE 4000-character title reproduces the pre-gate collapse verbatim at 80x24 -- canvas one row off-viewport, count region off-viewport. Degradation starts early: 500 characters already costs a third of the canvas at 80x24. #map-toast is the same shape with a smaller blast radius (needs an operator action, self-clearing) and rides along.",
+        "scope": "Bound the crumb where it is BUILT (darkside.tab_strip, the visible truncation keybar already performs), and bound TabStrip and #map-toast in the stylesheet. LAND THE PYTHON BOUND FIRST OR IN THE SAME PASS: adding overflow:hidden to a strip whose content is not cell-bounded is exactly how Inc-STRIPS' own F1 came to exist.",
+        "blocks": "LLR-N07.3.4's open_blocks entry does NOT flip until BOTH vectors are closed. Inc-STRIPS closes the fanout vector only."
+      },
+      {
+        "date": "2026-09-10",
+        "amendment": "Inc-CRUMB WIDENED from 2 source files to 3: mapper/widgets/chrome.py added, KeyBar declared.",
+        "authority": "Coordinator ruling 2026-09-10, option (a), after the implementer stopped at the pre-gate boundary and surfaced it.",
+        "discovery": "THE CRUMB BOUND REMOVED A MASK. Bounding the crumb correctly shortened TabStrip from three rows to two -- and that reflow had been firing KeyBar's corrective on_resize BY ACCIDENT. KeyBar.__init__ rendered at a hard-coded 118 cells and relied on a resize to fix it; a resize fires when the size CHANGES, so a layout that hands the widget its final width immediately never fires one. Measured at 35 columns: the 118-cell render is 75 cells and wraps to FOUR rows against ONE at the true width -- three rows taken from a fourteen-row frame. The defect PREDATES Inc-CRUMB; only the mask was new. Its own class docstring had claimed 'renders at its MEASURED width' since the hard-code was supposedly removed, which is the declaration family again.",
+        "why_widened_not_split": "Same collapse class -- a fifth strip stealing canvas rows -- and splitting would have held finished work uncommitted behind a dependency, which is the un-landed-record failure this batch already paid for with twelve days of Inc-4c limbo.",
+        "acceptance": "The four arms that failed became the widened cut's acceptance: test_a_small_map_at_a_small_terminal_keeps_its_canvas plus two test_overflow settle arms flip RED->GREEN, and a new arm pins the 35x14 case against HEAD's own numbers (KeyBar h=1).",
+        "not_introduced_carried": "TabStrip's TAB ROW still wraps below about 60 columns -- tab_strip sizes itself to max(width, tabs + wordmark). Pre-existing, carried, and the reason the CSS ceiling is 3 rather than 2: a 2-row lid clipped the crumb away entirely, reproducing Inc-STRIPS' F1 with this increment's own remedy."
+      }
+    ],
+    "closed": [
+      {
+        "inc": "Inc-1",
+        "commit": "4eaba35",
+        "date": "2026-08-28",
+        "source_files": 4,
+        "gates": "code-reviewer BLOCK on 1 HIGH -> fixed -> confirmation pass 'the HIGH is discharged, no HIGH survives' (0 HIGH); security-reviewer signed off",
+        "suite": "fast 694 passed / 17 deselected; slow 17 passed; ruff 28 (baseline 29, zero new)",
+        "ledger": "694 = 630 - 0 + 64",
+        "battery": "6 rounds, 154 arms asserted green before any verdict, sha256 restore on 8 files after every mutant",
+        "amendments": "A-77..A-88",
+        "unplanned_defects": "WARN's job made LLR-S06.3.5's own threshold unsatisfiable (A-78); the sealed C0 range row omitted U+000D so adopting it NARROWED shipped coverage (A-80); radial sliced titles raw into the exported SVG; AT-009 derived its oracle from the constant under test and was green while 19 invisible code points reached the artifact (A-87). Confirmation pass also caught a fabricated measurement in production source (a probe that constructed the theme it observed) and a fix of mine that repaired nothing."
+      },
+      {
+        "inc": "Inc-2",
+        "commit": "fe50799",
+        "date": "2026-08-28",
+        "source_files": 6,
+        "source_files_note": "the breach #D5 declared and re-ratified at the re-scope; the gate is 'zero call sites of the old shape survive', so a partial migration leaves two contracts live at once",
+        "gates": "code-reviewer BLOCK on 3 HIGH -> fixed -> confirmation pass discharged all three and raised 1 new HIGH -> fixed by RETRACTING a false premise -> narrow third pass: RETRACTION CORRECT, no HIGH, gate PASSES. No HIGH was ever self-cleared.",
+        "suite": "fast 719 passed / 17 deselected; slow 17 passed; ruff 28 (exactly the 4eaba35 baseline, zero new)",
+        "ledger": "736 = 711 - 0 + 25, node ids enumerated against a detached worktree",
+        "census": "AST not grep: 7 definitions, 35 arg-ful call sites, 25 zero-arg Textual sites, **kwargs 0, zero old-shape survivors incl. */** splat and positional. Cardinalities PINNED in the suite, narrated nowhere.",
+        "battery": "rounds 7-11; round 7 208 arms, round 11 55 arms; per-arm verdicts; sha256 restore on up to 10 files after every mutant",
+        "amendments": "A-92..A-96",
+        "headline_correction": "A-96 RETRACTS A-94 and carry B-51 in full. 'The real tab key drops focus on MapScreen' was an artifact of run_test()'s default 80x24, at which _apply_region_visibility correctly auto-hides the rail and inspector. At 118x34 -- the declared context of use -- tab traverses and LLR-CNV.3.1's threshold reproduces verbatim. THREE passes agreed on the false reading because all three shared an unstated premise: nobody varied the terminal size. Verified by an independent third pass with three mutants the author had not run. Lesson carried as B-54.",
+        "other_findings": "HLR-CNV.3 was assigned to no increment (orphan class, same as AT-009) and landed here (A-92); with_header was a dead parameter, removed not migrated (A-93); the export leaked live keyboard focus into exported SVGs, reachable by tab-then-e; the increment's one declared behaviour change (B-50) claimed coverage the suite did not have."
+      },
+      {
+        "inc": "Inc-3",
+        "commit": "bdc4b6a",
+        "post_commit_verification": "The artifact code-point scan's non-vacuity clause used to be keyed on git TRACKING STATE, so it would have reddened on the very commit that landed this increment (measured: 91 artifacts, 84 tracked, 7 untracked). Re-asserted structurally with a probe file. VERIFIED ON THE COMMITTED TREE at bdc4b6a: 0 untracked artifacts, fast lane 801 passed exit 0, zero FAILED lines.",
+        "date": "2026-08-28",
+        "source_files": 6,
+        "source_files_note": "DECLARED breach, widened from A-89's five to six by A-97: views/state.py was owed by two PDR-sealed LLRs (pan_x/pan_y at LLR-N06.1.1, folded at LLR-N06.2.1, all three 'NEW -- created in Phase 3') and named by no cut. Arithmetically true when A-89 was written; only the declaration was missing. NOT an A3 -- all three fields carry defaults, the additive case state.py's own docstring exempts.",
+        "gates": "FOUR rounds. R1: code-reviewer BLOCK 3 HIGH + security-reviewer BLOCK 2 HIGH. R2 fixes -> both confirmation passes: code BLOCK 2 new HIGH, security DISCHARGED both + 1 new HIGH (F-A). R3 fixes -> code pass3 BLOCK 3 HIGH, security pass3 SIGN-OFF 0 HIGH. R4 fixes (coordinator-authorised, scoped to 3 items) -> code pass4 PASS 0 HIGH. No HIGH was ever self-cleared; every fixed tree went to a fresh independent pass.",
+        "suite": "fast 801 passed / 17 deselected / 3 xfailed exit 0; slow 17 passed exit 0; ruff set-wise scope-matched NEW=none, GONE=1 (layered.py F401)",
+        "ledger": "821 = 737 - 0 + 84 all markers; 804 = 720 - 0 + 84 default lane. Deletions measured at zero against a detached git archive, not asserted.",
+        "architect_ruling": "02j: HLR-N06.3 and LLR-N06.3.1 were keyed on a 'declared painted set' that NO requirement gave a mechanism. Ruled a module-level pure painted_ids(graph, state) in views/layered.py sharing one _geometry with render. IRenderer gains nothing, so trigger A3 does NOT re-fire and the sealed PDR stays sealed. The three rejected candidates each died on an executed measurement, not preference (A-98).",
+        "headline_defect": "The recurring root cause was ONE number: the header's physical row count. HEADER_ROWS=2 rested on arithmetic that stops holding below avail=48 because BOTH header paddings clamp at 0. Fix 1 replaced it with ceil(len/(w-2)) -- pinned by a test that RE-TYPED the same formula, so the pin could not fail on a wrong divisor, on word-wrap, or on a wide character. Fix 2 measures by actually rendering (Console.render_lines at a measured wrap width) and pins against the COMPOSITED FRAME. Under-charge band 23 of 943 -> 0 on both fixtures, reproduced pre-fix on an independent instrument.",
+        "security": "SEC-F1 SchemaField.key reached the exported SVG uncoerced through the DEFAULT renderer (B-47 verbatim), missed by the increment's own census because its fixture set no graph.schema and legacy mode is selected by bool(graph.schema). SEC-F2 _minimap_text leaked a ficha title. Both DISCHARGED. F-A (HIGH) is PRE-EXISTING at 954f8f3: SchemaField.key is interpolated into a Textual widget id and kills the app on map open -- for hostile code points AND for benign Spanish keys. Confirmed to SUBSUME SEC-F1's attack (the session dies before any SVG is written). Routed to Inc-REPAIR with the obligation landed as an xfail(strict=True) arm whose XPASS(strict)->FAILED mechanism was reproduced.",
+        "dependency": "pytest-timeout==2.3.1 added dev-only, pinned, coordinator-authorised. The cycle-guard regression arms failed BY HANGING, which in CI is a stuck run rather than a red report. timeout_method='thread' because Windows has no SIGALRM (verified, not assumed). Mutant N9 now yields exit 1 in 33s instead of wedging.",
+        "carries_opened": "B-55 outline/radial hide nodes and declare nothing (5/8 and 2/8 at 30x6) -- routed to Inc-5, pinned by a participation census. B-56/B-60 CLOSED, not re-recorded. F-A/F-B/F-C routed to Inc-REPAIR. OutlineRail.render unguarded at compositor paint time (part-closes F-G). F-H MapStore.save->load not total. pass4 F1: the settle-chase's termination is MEASURED (max 5 passes over 943 configurations; storms and a forced oscillation both terminate) rather than asserted, over a live height:auto feedback path -- named fix is a 3-line pass counter, deliberately NOT taken post-gate because an unreviewed change after a passing gate is the self-clearing pattern this batch forbids.",
+        "process_notes": "Two ORCHESTRATOR errors caught by the independent gates and recorded rather than quietly fixed: (a) the ruff gate was checked as an AGGREGATE, and an aggregate cannot see a swap -- one new F401 was exactly masked by one removal; (b) even set-wise the comparison had UNEQUAL SCOPE, because the base worktree carries prototypes/ which the work tree's .gitignore hides from ruff. Also: piping pytest through `tail` reports TAIL's exit status, which is how a run WITH a failure displayed 'exited with code 0'. A flaky arm was found by the orchestrator (1 failure in 11 runs on this tree, 0 in 6 at base -- attribution NOT claimed, since 6 runs cannot exclude the same rate) and fixed deterministically."
+      },
+      {
+        "inc": "Inc-4a",
+        "commit": "68b1c09",
+        "date": "2026-08-29",
+        "source_files": 4,
+        "scope": "US-N07 search core -- one owner of 'what matches', ViewState.hits, the inline-predicate deletion, LLR-N07.1.3's pill tail, the count line on #map-pagination (#D37)",
+        "gates": "FULL protocol, 4 implementation rounds. R1: code-reviewer BLOCK 2 HIGH + security-reviewer BLOCK 1 HIGH family (F1/F1a/F1b). R2 fixes -> BOTH confirmation passes clean: code PASS (both HIGH discharged, verified by EXECUTED mutation in an isolated mirror, not accepted on trust), security SIGN-OFF. R3 discharged their 5 mitigations. Confirmation-2 SIGN-OFF on all four items with 2 further MEDIUM mitigations. R4 (orchestrator-applied, declared) discharged both. No HIGH was ever self-cleared.",
+        "suite": "fast 822 passed / 17 deselected / 3 xfailed exit 0, zero FAILED; ruff SET identical to entry (zero NEW, zero GONE)",
+        "ledger": "825 = 804 - 0 + 21 default lane; 842 all markers",
+        "headline_defects": "(a) The count was resolved TWICE -- author caught it himself: a mutation scoping one path to the visible set left AT-018 AND AT-019 green. Risk A-6, the defect US-N07 exists to close, nearly shipping inside the increment that closes it. (b) The gate on that invariant then did not gate it: the arm was positive-membership only, and the code lens CONSTRUCTED the defect through the unbanned _search_hits -- count N=5 against 4 painted highlights on a green 818-test suite. (c) A quadratic in the repaint path, found INDEPENDENTLY by both lenses: 25.8s of a 30.6s frame at N=12002, 4 resolutions per repaint, and above MAX_RENDER_NODES the renderer cost zero while the search cost seconds. A clean regression -- at entry nothing called SearchIndex. (d) The FIX for (c) then painted '0 coincidencias' over a graph holding 241 real matches -- a lying affordance reintroduced by the repair. (e) The open-pass pin was a hand-written two-tuple, already false; C-31 demonstrated on this file rather than quoted at it.",
+        "process_notes": "The implementer REFUSED a reviewer's suggested fix and was proven right: applying that predicate verbatim to unmutated source came back RED -- it would have false-failed correct code, since _view_state legitimately reads the viewport. C-53 in practice. He also declined to adopt the orchestrator's ruff pair count (19) because he measured 21 and could not reproduce mine; both agree on 27 findings and on SET identity, so the gate holds -- the lesson is that a pair COUNT is instrument-dependent and the SET is the gate. He retracted his own round-1 LF/CRLF finding as wrong, and the code lens then corrected BOTH rounds: the conversion ran the other way (app.py and layered.py LF->CRLF; search.py never moved). TWO ORCHESTRATOR ERRORS: (1) my state.query census swept mapper/ and stopped, missing the fourth reader at tests/test_app.py:448 -- the sole causal break, found by the architect lens. (2) My own QA-lens brief produced an artifact containing two literal U+202E characters, which reddened the tree's coercion census and cost the implementer his green baseline. C-56 generalised: documenting a character must not mean containing it. Both confirmation lenses caught their OWN instruments: the code lens's mirror read 1 failed until it found the A3 census reads the git index and the new files were staged-but-untracked in a clone; the security lens found its previous keypath gap was its own probe's fault (j is next_sibling, a no-op at the root where its cursor sat).",
+        "carries_opened": "NEW-4 residue: three pass-free readers (_pan, action_export_svg, _reclamp_pan) are EXEMPTED WITH STATED REASONS, not eliminated -- Inc-4b must open a pass or add a reasoned entry; the arm forces the choice. The unbounded pagination meter (per_page = max(1, total)) puts the strip's overflow declaration off-viewport at 34 rows -- pre-existing, routed to Inc-REPAIR. Export-toast username path leak now at app.py:2373 (address has moved twice; the durable anchor is the _event_toast('exportado', ...) call). tree_order/_incomplete_order duplication: PINNED not deduped, because dedup changes a shipped US-N04 path this acceptance does not cover. .gitattributes pass should name app.py and layered.py, not search.py. OPERATOR USERNAME in 13 places across 10 batch artifacts, 7 of them already committed -- deliberately NOT scrubbed (they are absolute paths inside executed evidence; rewriting committed records would make them stop saying what was measured). Routed to the operator as a decision at /dev-flow-sync."
+      },
+      {
+        "inc": "Inc-4b",
+        "commit": "fcff836",
+        "date": "2026-08-29",
+        "source_files": 2,
+        "scope": "US-N07 seat + walk: the #D5b rebind (map/n->next_hit, map/N->prev_hit, map/M->next_gap), the n/N walk over the tree-ordered list, LLR-N06.2.4 fold auto-open, E1b/E1c toasts, the one-time rebind declaration, state-dependent esc (#D38), the seat-derived hint line, and the test_cd25a seat repair.",
+        "gates": "FULL protocol. R1: code-reviewer BLOCK on 2 HIGH; security-reviewer SIGN-OFF with 2 MEDIUM. R2 fixes -> code-reviewer CONFIRMATION PASS, both HIGH DISCHARGED on the reviewer's OWN re-run mutations rather than the author's table. R2b closed the confirmation's NEW-1. No HIGH self-cleared.",
+        "suite": "fast 847 passed / 17 deselected / 3 xfailed exit 0, zero FAILED; ruff SET identical to entry",
+        "ledger": "850 = 825 - 0 + 25 default lane; 867 all markers. Collection re-derived, not asserted.",
+        "seat": "C-D25a/C-D25b discharged: ENTRY len(KEYMAP)=52, bindings_for(map)=31, dupes=[]; EXIT 54, 33, []. Declared diff +{(n,next_hit),(N,prev_hit),(M,next_gap)} -{(n,next_gap)} asserted EQUAL to the live entry/exit difference BOTH ways. Inc-3's test_cd25a was RED BY CONSTRUCTION and was repaired by freezing Inc-3's exit as a literal EXIT_MAP_SEAT (not derived as ENTRY|DECLARED_DIFF, which would be a tautology).",
+        "headline_defects": "(a) HIGH -- the walk's PRIMARY entry path was DEAD to the entire suite: replacing the else-limb body with a raise left 847 passed. Unreached, not under-asserted. Nothing moves the cursor onto a hit on submit, so an operator searching away from where they stand takes that branch on their first n. AT-022 missed it because the ORCHESTRATOR's pinned fixture happens to rest the cursor on a hit -- a fixture built to make the walk observable made its commonest entry unobservable. (b) HIGH -- AT-047 could not fail on the re-close defect it exists to catch: its single further press lands on the next hit INSIDE the opened branch, so a re-close mutant re-opens on that very press. Measured both forms under the identical mutant: single-press PASSED at both sizes, walk-out FAILED at both. The author's own M4 was genuine but degenerate -- it corrupts the frame it just painted, which any frame-reading assertion catches. (c) MEDIUM -- esc and the hint line used different predicates for 'a live search', so above the render bound the first escape cleared an invisible query, changed no pixel and did not leave: a keypress silently swallowed, the inverse of the defect #D38 fixed. (d) MEDIUM -- the fold-auto-open hint prepended unbounded file-derived text AHEAD of the affordances and HintLine wraps rather than clips, so a long title collapsed the canvas to one row and pushed `esc limpiar` -- the recovery route #D38 had just promised -- off the frame.",
+        "process_notes": "A REVIEWER'S REMEDY FAILED FOR THE THIRD TIME THIS BATCH, and running it is what revealed it. The security lens recommended darkside.fit + reorder for the unbounded hint; implemented verbatim it holds at 118x34 and WRAPS at 80x24, where the strip reads back empty and `esc limpiar` is lost again by a different mechanism -- precisely what that lens had filed as `could not determine`. The confirmation pass then swept 25 widths: the recommended fixed-cap form wraps from 100 columns DOWNWARD, so it was not marginal at 80, it was wrong across a 60-column band. Shipped fix is a width-aware budget; the announcement drop threshold was located exactly at 69->68 columns against a narrowest declared regime of 80. MUTATION-ADEQUACY CALIBRATION, earned by the code lens and carried forward: 'I ran four mutations of my own choosing; TWO SURVIVED. The 16-mutations-16-RED line is evidence about the sixteen mutants chosen, not a mutation-adequacy claim.' The round-1 ledger was honest, 16/16, and still missed both HIGHs. Round 2 answered it -- four mutants aimed at arms the author believed STRONG (all RED) and two he believed would SURVIVE (both did, both declared as uncovered shipped lines rather than papered over). THREE ORCHESTRATOR ERRORS: (1) my brief's seat figures used the wrong instrument -- I quoted scope=='map' (29->31) where C-D25a and the Inc-3 census both use bindings_for('map') (31->33); (2) my whole-seat sha256 was a bespoke serialisation only my own throwaway script could reproduce, and the implementer correctly declined to adopt it and declared his own canonical form; (3) I mis-attributed the darkside.fit recommendation to the code review when it was the security review's finding. LEDGER ARITHMETIC corrected at the gate: round-2 prose read '10 run' against 9 RED + 2 surviving; the table always carried ELEVEN rows, R1b being a distinct mutant with its own base, verdict and target arm.",
+        "spec_corrections": "FIVE declared by the implementer, all accepted by review. The two that change observable behaviour: (A) AT-051b's one-time declaration and E1b BOTH fire on the first n -- one toast slot, two mandated occupants, and the sealed text does not say which wins; resolved as declaration on press one, E1b on press two, and PINNED rather than left to be rediscovered. (C) A THIRD empty-ish state the sealed text never names: above MAX_RENDER_NODES Inc-4a's _search_order returns None, and treating that as 'empty' paints E1c -- a claim about a graph nobody evaluated. That is the lying affordance Inc-4a's None was introduced to prevent, reappearing one increment downstream on a different surface. New toast, gated. NEW COPY NO `shall` CLAUSE OWNS -- flagged. (D) C-D6a closed structurally but NOT with 02l's proposed active_hits attribute, because adding it would create a SECOND owner of 'what matches' on the screen Inc-4a spent an entire increment giving one owner. The no-BoolOp rule caught real code on its first run (a `title or nid` fallback), lifted into a helper rather than the rule being weakened.",
+        "requirements_amended": "LLR-N06.2.4 PRED-C: 'After 1 further walk press' REPLACED by 'once the walk has moved OUT of the opened branch -- asserted, not counted in presses'. The parked threshold was MEASURED insufficient with the evidence in hand, and Inc-5 reading it would have built the weak arm GREEN. Statement unchanged; only the predicate that observes it. Clause 4 gains a WIDTH PROVISO carrying its measured threshold (announcement painted at 69 columns, dropped at 68, narrowest declared regime 80), because a `shall` the code knowingly does not satisfy at some inputs -- recorded only as a risk note -- is how an undeclared exception becomes an undiscovered one.",
+        "carries_opened": "UX RULING OWED (not a code change): above the render bound the query survives in query_text and still changes what n does, while no surface advertises it and esc declines to clear it. No lock-in -- escape pops and the query dies with it -- but 'live enough to change a keypress, invisible enough to have no affordance' deserves a deliberate ruling. TWO DECLARED SURVIVORS, adequate as declared per the confirmation pass: R7 (_branch_name .get guard) would pin a state the load path cannot produce; R8 (branch count cap) would need a four-nested-fold fixture and is pinned operator-visibly by the width budget anyway. PRE-EXISTING, found and NOT fixed: at 80x24 a ~2000-char node title carries the entire chrome to y=59 of a 24-row frame with nothing searched and nothing walked -- a separate instance of the unbounded-text class. The new arm drives 400 chars with a self-guard that FAILS LOUDLY if it ever starts measuring that defect instead of this one; the confirmation pass verified that guard fires (assert 59 < 24). Carried unchanged: F-A, S-15, the unbounded pagination meter, the export-toast username path leak, UX-Q3-a, AT-024 (Inc-5's), the tree_order/_incomplete_order duplication pinned not deduped, and the .gitattributes pass (names app.py and layered.py, not search.py)."
+      },
+      {
+        "inc": "Inc-4c",
+        "commit": "0b3d130",
+        "date": "2026-08-29 gated; 2026-09-10 committed",
+        "source_files": 1,
+        "scope": "LLR-N07.3.4 (#D43) -- one regime, not two. _count_line's above-the-bound arm returned an empty Text; it now returns _suspended_count_line(), painting the query (through darkside.fit, a coercion sink and a cell budget in one call), the whole-graph count from _whole_graph_tally, the working chord read from the seat via _seat_glyph('back_or_home'), and the suspension notice itself. esc clears identically at every graph size. Owns AT-054/AT-055 and takes ownership of the copy Inc-4b shipped with no owning shall clause. FULL protocol (#D44).",
+        "gates": "FULL protocol, THREE code-review rounds. R1 BLOCK -> R2 fixes -> confirmation pass BLOCK -> R3 fixes -> pass 3 PASS, no HIGH surviving. security-reviewer SIGN-OFF. No HIGH ever self-cleared; every fixed tree went to a fresh independent pass. 12 mutations fired, 12 KILLED, 12 sha256-verified restores, after a first round that killed only 10 -- both survivors reported as findings and closed.",
+        "suite": "default lane 854 passed / 17 deselected / 3 xfailed exit 0; all markers 871 passed / 3 xfailed exit 0; ruff SET over mapper/ tests/ 27 = 27 against a digest-verified clean 9ba2f26 export, 19 (file,rule) pairs, zero NEW / zero GONE. RE-MEASURED 2026-09-10 by the relay on the exact committed bytes -- not inherited from the 2026-08-29 verdict -- from a tree sha256-pinned before and after both lanes, caches purged (C-46). Lane arithmetic holds independently: 854 + 17 deselected = 871.",
+        "ledger": "Entry baseline 847 (executed at round 1, before a line was written) -> exit 854 default lane; 871 all markers. Round progression 850 -> 853 -> 854, one arm added per review round. Whole-increment net vs HEAD is +5/-1 test FUNCTIONS (P3.5); the +7 COLLECTED-node delta is larger because parametrised functions resolve to several nodes each. The two counts are different units and are recorded as such, not reconciled into one number.",
+        "headline_defects": "(F-1) `n recorre` is NOT painted above the bound -- the Statement's third clause is not satisfiable without breaking a shipped, gated AST arm, and the numeric threshold does not require it. Declared, not silently dropped. (F-2) Predicate 1 is NOT observable at the SHIPPED bound: measured, at 12002 nodes the entire MapScreen collapses -- #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, crushing the canvas to 1 row and putting the count region off-viewport. That is Inc-STRIPS' subject and is not closable in one file. (F-3) Inc-4a's cost justification for the bound was stale by TWO ORDERS OF MAGNITUDE; re-measured and corrected in place. A fourth: _whole_graph_tally was briefly a SECOND SearchIndex construction site and the one-site census arm reddened on it -- the count and the paint now share one resolution.",
+        "process_notes": "THREE DISCLOSURES BY THE IMPLEMENTER, none buried (R3F.5): (1) the first ruff comparator ran a broken sed, produced two EMPTY sets, and diff duly called them identical -- the third `0 == 0` shape in this batch, visible only because entry counts were printed beside the verdict; (2) the first mutation harness used read_text/write_text, which round-trips CRLF to LF on this checkout, leaving a restore semantically right and BYTE-WRONG -- the sha256 restore assert caught it, which is the entire reason that assert exists; (3) the implementer EDITED A .dev-flow FILE WHILE THE ALL-MARKERS LANE WAS READING THE TREE, and that run was DISCARDED rather than explained. Also a C-56 finding against the confirmation review's own artifact, which spelled a hostile code point verbatim and was caught by the repo's own tracked-file sweep. RELAY, 2026-09-10: two further instrument defects found in the RELAY'S OWN ruff comparator before any verdict was believed -- the clean baseline export, materialised under a temp path, resolved a DIFFERENT ruff config by upward discovery (I001 enabled, reporting 70 against the repo's 27, so the two sides were never comparable; closed with --isolated on both), and ANSI colour survives redirection so the rule-code parse returned SILENTLY EMPTY on both sides (the same 0 == 0 shape as disclosure 1, on a different instrument). The comparator now asserts parsed == declared on each side before it is allowed to compare, and carries a positive control that must report a planted synthetic entry as NEW.",
+        "digest_reconciliation": "app.py is byte-identical to the pass-3 pin (c0709eab...). tests/test_search.py DIFFERS from its pass-3 pin: the delta is P3.6's three post-verdict corrections, all three in that file, all three prose (docstring, comment, docstring), applied before commit and recorded there. STATED LIMIT: the pass-3 bytes are NOT recoverable -- the file was never committed, the stash list is empty, and none of the dangling blobs hashes to the pinned digest -- so the prose-only property rests on P3.6's contemporaneous record plus the relay's executed byte census (both files uniformly CRLF, zero bare LF, non-ASCII confined to Spanish UI text and em-dashes), and is NOT re-derived from the two sides. Landed in the packet at P3.8.1 rather than left in a relay's head.",
+        "carries_opened": "Inc-STRIPS is a BLOCKER on closing LLR-N07.3.4, not a follow-up -- F-2 is its executed evidence. The packet's own BLUF reports round-1 figures (850/867) and was never updated as rounds 2 and 3 landed; deliberately NOT edited post-verdict, and corrected by a named note at P3.8.3 instead. Carried unchanged: F-A (schema key reaching a Textual widget id kills the app on map open), F-B, F-C, coverage.py:88 uncoerced label, the phantom-sidecar coverage inflation and the username path leak in the load toast, B-46, UX-Q3-a, AT-024 (Inc-5's), the unbounded pagination meter, the tree_order/_incomplete_order duplication pinned not deduped, and the .gitattributes pass. Also observed by the relay and NOT acted on: an empty untracked directory literally named `--help` sits in the repo root (git does not track empty directories, so it is absent from status); removal not attempted without approval."
+      },
+      {
+        "inc": "Inc-5",
+        "commit": "81165a6",
+        "date": "2026-09-10",
+        "source_files": 3,
+        "scope": "LLR-N07.2.2b / AT-024 -- five renderer classes across three files paint state.hits distinguishably by STYLE, in the style layered already used, selection painted on top of a hit per layered.py:628. Derived set 1 of 6 -> 6 of 6 compliant; OPERATOR-REACHABLE movement 1 of 3 -> 3 of 3, since the three lane renderers have no production consumer.",
+        "gates": "FIVE independent review rounds. R1 BLOCK (F1 HIGH + F2-F7) -> R2 BLOCK (N1 HIGH + N2/N3) -> R3 BLOCK (P1/P2 HIGH + P3-P7) -> R4 BLOCK (Q1 HIGH) -> R5 PASS, 0 HIGH on Q1's axis. No HIGH was ever self-cleared; every fixed tree went to a fresh independent reviewer. The A-91 lighter lane was REVOKED at R1 and the full protocol ran thereafter. Soft cap of 3 blocks was surfaced to the coordinator at R3 rather than worked around; R4 and R5 each ran under an explicit coordinator ruling with a terminal boundary.",
+        "suite": "default lane 904 passed / 17 deselected / 3 xfailed exit 0; all markers 921 passed / 3 xfailed exit 0; ruff SET over mapper/ tests/ 27 = 27, zero NEW / zero GONE. Tree sha256-pinned before and after both lanes, caches purged (C-46). Lane arithmetic holds independently: 904 + 17 = 921.",
+        "ledger": "904 = 854 - 0 + 50 default lane; 921 all markers, same +50. The 50 is exactly the arm count of the one new test file. A3 census pin 58 -> 59 with an itemised reason: ONE new arg-ful render(...) site, not six, because the arms parametrise over the derived set and share one helper.",
+        "battery": "R1 9/9 - R2 7/7 - R3 18/18 - R4 35/32 - R5 42 fired PER SITE, 35 KILLED, 7 proven EQUIVALENT by output digest over 864 renders with positive controls that fire. Every restore asserted byte-identical by sha256 before the next mutant fired; PYTHONDONTWRITEBYTECODE=1 throughout.",
+        "headline_finding": "ZERO DEFECTS IN SHIPPED BEHAVIOUR ACROSS ALL FIVE ROUNDS. The renderers were correct from round 1. Every BLOCK was the ORACLE, and the same defect migrated outward one quantifier at a time: the assertion named min (its mirror max survived 7/7) -> the assertion named its members while the BATTERY fired per class (a per-class mutant reported a KILL over a live survivor at a sibling site) -> the assertion named a CARDINALITY (no hit set of size >= 3 existed anywhere in the repository) -> the assertion quantified correctly over a HAND-NAMED DOMAIN (a drop-root mutant survived all 50 arms AND the entire 904-arm lane at 3 of 7 sites, with root operator-reachable via SearchIndex.hits('raiz')). The fix derives the domain per renderer and ASSERTS the B-55 boundary rather than assuming it -- the load-bearing half, since a bare derivation ABSORBS the defect. The final pass proved that by DEFEATING the boundary and watching all three kills revert to survivals.",
+        "mis_route": "Routing the root exclusion to carry B-55 was a MIS-ROUTE and is its own recorded control: B-55 ('a clipped hit is an undeclared hit') covers the three lane renderers, which never draw the root, and NOT outline/radial/layered, which draw it and paint it. Filing a live gap under an accepted carry put it behind a closed door.",
+        "carries_opened": "Inc-W1 (tests only, zero source files) SPLIT OUT under the coordinator's terminal boundary: the final pass returned PASS on Q1's axis and found W1 outside it -- the domain is derived at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, so a width-conditioned drop of either is absorbed by the derivation and unseen by the backstops (executed at radial.py:232: both survive all 50 arms and the whole 904-arm lane, both proven non-equivalent). B-55 remains open as Inc-B55. F7 (a selected node that is also a hit is indistinguishable from a selected non-hit, in all five renderers AND in shipped layered) routed to ux-reviewer, declared not fixed. N3 fixture-ordering note. A hit on the map ROOT is declared-but-unpaintable in the three lane renderers -- B-55 in another guise, pre-existing.",
+        "controls_earned": "Three, recorded in controls_for_engineering_rules for phase 6: (1) a mutation battery fires PER SITE, never per symbol-owner, and a KILLED tally names its denominator's unit; (2) an oracle's blind spots migrate outward one quantifier at a time -- review the domain, and the conditions under which the domain is derived, not just the assertion; (3) a gap routed to the wrong owner is a gap behind a closed door."
+      },
+      {
+        "inc": "Inc-W1",
+        "commit": "961d017",
+        "date": "2026-09-10",
+        "source_files": 0,
+        "scope": "TESTS ONLY. Closes W1 -- the oracle derived its domain at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, and the B-55 boundary covered `root` alone, so a drop of either member that bit only at w >= 100 was absorbed by the derivation and unseen by the backstops. The boundary now asserts over EVERY member; ALL and TITLES are both DERIVED from _graph().",
+        "gates": "THREE rounds. R1 lighter lane + one confirmation -> BLOCK on 1 HIGH. R2 fixes -> declaration audit -> BLOCK on 1 HIGH. R3 fixes -> CLOSED under the coordinator's terminal boundary, no further cycle. Both blocks were DECLARATIONS, not mechanism.",
+        "suite": "default lane 904 passed / 17 deselected / 3 xfailed exit 0; all markers 921 passed / 3 xfailed exit 0; ruff SET 27 = 27, zero NEW / zero GONE. Arm count, ledger and the A3 census pin all UNCHANGED -- an arm body, no new arm.",
+        "battery": "56 fired PER SITE and in BOTH kinds (2 kinds x 4 members x 7 sites), 42 KILLED, 14 proven EQUIVALENT by output digest over 864 renders each with positive controls that fire.",
+        "headline_evidence": "THE TWO-ORACLE CONTROL, and it is the strongest instrument this batch produced: a reviewer fired the SAME mutant against BOTH oracles -- WIDE drop first and WIDE drop hit at radial.py:232 are SURVIVED against the pre-increment tree and KILLED against this one, each by exactly one node id. That proves the arm NEWLY GAINED the ability to see the defect, which is a stronger claim than 'it is killed now'. Worth carrying as a control in its own right.",
+        "headline_defects": "Both blocks were declarations outrunning code. R1: the TITLES were derived and the DOMAIN was left spelled, seven lines under a comment reading 'spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked for that property -- a rename would be loud (KeyError) but an ADDITION is silent, so a fifth node would sit outside the domain, the boundary and the unions: W1's own failure mode reinstated inside the increment written to end it. R2: the two-direction split's `if` branch said 'shorten the fixture title, do not blame the renderer', but TWO conditions reach it and one IS the renderer's fault -- one renderer-side mutant fired that assertion AND the clip precondition in the same run, blaming opposite parties for one cause, and the advice was actionable in the wrong direction (shortening the titles greens both arms while the defect ships). Four further declarations corrected: 'the SHORTEST title' (false), 'SEVEN of seven renderers' (the derived set is six; seven is the SITE count), a :190 citation for an assertion at :192, and a title claiming more than the fix took.",
+        "carries_opened": "O1 duplicated render call (simplicity nit). O2 the co-drop gap -- already routed to qa-reviewer as F3; the reviewer adds that F3 and the R2 HIGH SHARE A ROOT: three of four members have no independent pin on `drawn`. O3 an instrument failure in the REVIEWER's own harness -- a CRLF-blind anchor matched zero times and printed a clean '50 passed', caught only by the match-count assert; third time in this batch that a control which MUST FIRE was the only thing between a reviewer and a false all-green."
+      },
+      {
+        "inc": "Inc-STRIPS",
+        "commit": "89be440",
+        "date": "2026-09-10",
+        "source_files": 1,
+        "scope": "The 12002-node screen collapse. #map-minimap was height:auto over the root's 4001 children (471 rows at 118x34, 712 at 80x24), the pagination meter priced one glyph per node, and both strips WRAPPED rather than clipping -- so the search count region was off-viewport at both declared sizes. Bounded: the minimap's entries take the ROW'S REMAINDER after caption/legend/declaration are reserved, each name cell-bounded by darkside.fit; METER_STEPS caps the meter; both strips carry max-height:3 + overflow:hidden. The remainder is DECLARED in INK per #D28.",
+        "gates": "FULL protocol, FOUR rounds. R1: code-reviewer BLOCK 3 HIGH and security-reviewer BLOCK 3 HIGH, dispatched IN PARALLEL (an orchestrator process failure, see below). R2 fixes -> confirmation BLOCK 2 HIGH (both new). R3 fixes -> final confirmation PASS, 0 HIGH. Soft cap of 3 blocks reached and respected; the residue was CARRIED rather than fixed in a fourth round.",
+        "suite": "default lane 913 passed / 19 deselected / 3 xfailed exit 0; all markers 932 passed / 3 xfailed exit 0; ruff SET 27 = 27, zero NEW / zero GONE. Ledger 913 = 908 + 5; all-markers 932 = 927 + 5.",
+        "battery": "Round 3: H1, MUT-A, MUT-C, MUT-Q -- 4 fired, 4 KILLED. The H1 mutant reddens the new small-map arm AND NOTHING ELSE, which is the measured explanation for how the regression shipped through round 2.",
+        "headline_finding": "THE CODE WAS NOT THE PROBLEM AFTER ROUND 1; EVERY BLOCK WAS AN ORACLE OR A DECLARATION. (1) The acceptance predicate searched the WHOLE FRAME and was unsound BOTH ways -- a false GREEN where HintLine carried the same words, a false RED where a raw join glued a wrapped phrase; rebuilt on rows_in over the count region with the numeric and query clauses it had omitted. (2) MINIMAP_BRANCHES had no oracle and then turned out to have no JOB -- after the cell budget landed a 10**9 mutant STILL survived, so it was removed rather than given a test it could only pass vacuously. (3) max-height not height: a fixed height is a FLOOR as well as a ceiling and taxed every small map two rows. (4) The declaration's cells were reserved UNCONDITIONALLY, so legacy at 35x14 drew ONE of three branches and declared a remainder of two AT IDENTICAL STRIP AND CANVAS HEIGHTS -- the reserve manufactured the omission it announced, the height:3 mistake in a second costume. (5) MUT-A was recorded SURVIVED and explained away as equivalent-by-contract; that survival WAS the coverage gap that let (4) ship, and the caveat naming the unpinned axis was written two lines below the verdict.",
+        "process_failure": "MINE. The code and security reviews were dispatched IN PARALLEL onto ONE SHARED TREE, each briefed as sole writer, one instructed to mutate. The code reviewer's own disclosure is the lesson: 'I was briefed as sole writer and did not check for a parallel gate' -- it did not check BECAUSE THE BRIEF SAID THERE WAS NOTHING TO CHECK FOR. A mutant with a disabled cap sat committable for about four minutes. Reviews are SERIAL BY DEFAULT from here; parallel requires one isolated digest-verified mirror per reviewer. CREDIT ON THE RECORD: the security review's evidence survived because IT logged the swap timestamps, recognised the harness signature, DISCARDED its contaminated first pass and re-measured under a structural guard.",
+        "carries_opened": "LLR-N07.3.4 CLOSES AGAINST THE FANOUT VECTOR ONLY. The title-length vector is open and measured: TabStrip's crumb is a fourth unbounded strip taking a raw ficha title, and ONE 4000-character title reproduces this collapse verbatim at 80x24. open_blocks does NOT flip. R1/R2/R3 documentary residue routed to Inc-CRUMB with reproductions -- four stale comments asserting the pre-bound layout (including _query_echo's LIVE docstring, which is the very reasoning the corrected comment warns a reader must not trust), a corrected strip count of FIVE refuted by the SIX its own next sentence enumerates, and state.json still saying 'fourth unbounded strip'. SEC-F4 (#map-toast unbounded, same class, smaller blast radius) rides with Inc-CRUMB.",
+        "controls_earned": "A survivor explained away is a survivor; a closure marking lives in ONE artifact of record; reviews are serial by default. All three recorded in controls_for_engineering_rules."
+      },
+      {
+        "inc": "Inc-CRUMB",
+        "commit": "PENDING",
+        "date": "2026-09-10",
+        "source_files": 3,
+        "scope": "The TITLE-LENGTH vector of the collapse Inc-STRIPS half-closed. TabStrip's crumb was a fourth unbounded strip taking a raw ficha title: ONE 4000-char title rendered TabStrip at 54 rows and put #map-canvas and the count region off a 24-row frame. Bounded where it is BUILT (darkside.tab_strip -> _crumb_line, cell-measured, spent from the RIGHT so the cursor's node survives, remainder DECLARED as `+N …`), #map-toast's detail bounded at the _event_toast seam, stylesheet lids second. A FIFTH strip surfaced mid-increment: KeyBar rendered its first frame at a hard-coded 118 cells.",
+        "gates": "FULL protocol, SERIAL reviews, FOUR rounds. R1 cut+implement. R2 code review -> BLOCK, 2 HIGH (budget measured against target_width not the terminal; budget measured unescaped then rendered escaped) -> fixed, +2 arms. R3 security review -> SIGN-OFF, 0 HIGH, 1 MEDIUM, 5 LOW. R4 a declaration audit I opened UNPROMPTED on the signed tree -> prose-only correction, close held for a ruling, discharged by construction proof.",
+        "suite": "default lane 924 passed / 19 deselected / 3 xfailed exit 0; all markers 943 passed / 3 xfailed exit 0; ruff SET-IDENTICAL 19 (file,rule) pairs / 27 violations both sides at equal scope, parse counts asserted, positive control fires. Re-measured on the post-R4 tree, not inherited.",
+        "closing_evidence": "THE PAIR. title-length 11/11 RED pre -> GREEN post; fanout 11/11 GREEN on BOTH trees; joint run 22 passed. LLR-N07.3.4 flipped to CLOSED on the pair, never on one verdict.",
+        "headline_finding": "THE DEFECT WAS A DECLARATION, AGAIN -- third time this batch. KeyBar's docstring and its test arm both said 'a resize fires when the size CHANGES, so a layout that hands this widget its final width immediately never fires one and the 118-cell render stands.' Measured against a reconstruction of the pre-fix widget: the resize DOES fire, keybar IS called again at the true width, and the pre-fix widget HOLDS the corrected render -- it paints BYTE-IDENTICAL text to the fixed one ('nav j siguiente … +32  ? todas'). What survives is the auto-height computed from the 118-cell render when layout ran; a later update() does not re-run it. Region 4 rows vs 1, three taken from a fourteen-row canvas by a widget whose text was already correct.",
+        "security_gain": "Unclaimed by the increment and found by the reviewer: removing escape() is a net COERCION IMPROVEMENT. Four crumb producers -- app.py:807 filename, app.py:936 repo name, app.py:1235 link chain, factory.py:351 factory title -- previously reached the frame under escape alone, which coerces NOTHING. They are now coerced through fit -> plain.",
+        "sign_off_transfer": "AST-docstrings-stripped byte-identity across the R4 divergence. chrome.py f1dba13b83748e33bc4dd9137b96d9b8e4b4b82359e8e4f79e94b6b2a4501702 both sides; test_crumb.py 1cd89affad3c039813cccd6866015bff6c8612b3ba6aec41b0eb257c81ebf87f both sides. Arm 2 vs commit 57fb403: zero executable delta outside declared scope.",
+        "self_errors": [
+          "Claimed TabStrip 'never touches the 118 fallback' -- refuted by darkside.py:223.",
+          "Claimed the init render was UNBOUNDED off a 27-cell fixture that fits under BOTH hypotheses (C-31); at 400 cells/part width=0 yields 117 cells -- bounded, as the reviewer wrote.",
+          "Three successive false fails in my own proof harness, all from MY declarations: a mid-increment snapshot labelled 'HEAD'; an expectation that _width was NEW when it exists at HEAD; a blank unparse line flagged as an undeclared change. C-53 each time."
+        ],
+        "carries_opened": "SEC-F1 (TabStrip.__init__ renders at _crumb_line 118 fallback; NOT live -- content superseded before paint, height clamped by max-height:3, so THE LID IS LOAD-BEARING for the init path) and DECL-118-TWICE (118 hardcoded in chrome.py and darkside.py:223). Both -> Inc-REPAIR. Five security LOW carried incl. the export toast still painting the username, exposure UNCHANGED by this increment. Inc-REPAIR DROPS F-C, closed by accident here and BOOKED deliberately with two-oracle evidence.",
+        "controls_earned": "Measure what the operator reads AND the geometry it stands in; either alone can lie. Pairs with Inc-STRIPS composited-frame rule as two halves of one law."
+      }
+    ],
+    "next": "Inc-B55",
+    "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
+    "controls_for_engineering_rules": [
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "Inc-5 round 3 -> round 4, measured by the pass-3 reviewer and reproduced by the implementer.",
+        "rule": "A MUTATION BATTERY FIRES PER SITE, NEVER PER SYMBOL-OWNER, AND A KILLED TALLY NAMES ITS DENOMINATOR'S UNIT.",
+        "statement": "When one class, module or function owns MORE THAN ONE instance of the construct under test, a mutant applied per owner is killed by whichever instance the arms happen to observe and says NOTHING about its siblings. The tally is then arithmetically true and false as a coverage claim.",
+        "measured": "Inc-5's round-3 battery fired per renderer CLASS and reported '18 fired / 18 KILLED'. There are SEVEN hit sites across SIX classes: RailTimelineRenderer holds two (lane.py:228 trunk, lane.py:291 label). Demonstrated directly: MAX at the trunk site alone = KILLED; MAX at the label site alone = SURVIVED; MAX at BOTH sites as one per-class mutant = KILLED -- reporting a kill over a live survivor. The round-4 per-site battery found it: 35 fired across 7 sites x 5 shapes, 32 KILLED, 3 proven equivalent by output digest.",
+        "discharge": "State the battery's denominator in its own units ('7 sites', not '6 renderers'), enumerate the sites, and fire one mutant per site. A survivor is a finding unless proven EQUIVALENT by output digest over an enumerated input set, with a positive control that must differ.",
+        "relation": "C-31 one level up: the incomplete input set is the MUTANT population rather than the test's."
+      },
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "Inc-5, measured across FOUR independent review rounds, each of which blocked on the same defect one quantifier further out.",
+        "rule": "ANYTHING SPELLED TWICE WILL DRIFT. DERIVE IT -- AND AUDIT THE DECLARATION OF DERIVATION AGAINST THE CODE THAT DOES IT, BECAUSE THE COMMENT SAYING \"DERIVED\" IS ITSELF A SPELLING.",
+        "statement": "An oracle's blind spots migrate outward one quantifier at a time. Fixing the instance a reviewer named is necessary and never sufficient: each correct fix relocates the blind spot to the next enclosing quantifier, so a review that checks only the assertion keeps passing an oracle whose guarantee is exactly as wide as whatever its author last remembered to name. AND THE LAST RUNG IS THE DECLARATION ITSELF -- a comment, a docstring or a gate checkbox asserting 'derived' is a second spelling of the claim, and it drifts from the code exactly like any other duplicate. AND DIAGNOSTIC MESSAGES ARE DECLARATIONS TOO. A failure message asserts a diagnosis; if its reaching condition does not entail that diagnosis, it is a false declaration placed directly in the operator's hands -- and one whose remedy can be actionable in the wrong direction, greening the arm with the defect still shipping. A message must not pick a culprit its condition cannot identify.",
+        "measured": "Six generations across two increments and six independent review rounds. ZERO defects in shipped behaviour were found in any round; every block was the oracle or its declaration.",
+        "discharge": "Derive the thing from the artifact that owns it rather than naming it, and ASSERT the boundary that justifies any exclusion -- a bare derivation silently ABSORBS the defect, since anything the code stops producing simply leaves the derived set. Then audit the DECLARATION against the code: read every comment, docstring and checked gate box that claims a property, and confirm the code has it. On the sixth exhibit the false declaration sat seven lines from the true one and no test could see it -- only a reader comparing the two. Audit failure MESSAGES on the same terms as comments: for each, enumerate the conditions that reach it and confirm the message is true of every one. Where two causes need opposite fixes, the message names both rather than choosing. And audit BRIEFS on the same terms as comments: a brief asserting an environment property ('you are sole writer', 'the tree is frozen') is a declaration whose reader cannot verify it independently, so it must be true when written.",
+        "exhibits": [
+          "1 MEMBER -- the assertion named `min`; its mirror `max` survived at 7 of 7 renderers.",
+          "2 LIST -- the assertion named its members while the BATTERY fired per CLASS; a per-class mutant reported a KILL over a live survivor at a sibling site.",
+          "3 CARDINALITY -- the assertion drove one pair of size 2; MINMAX/SORTED2 (drop a MIDDLE member) survived 7/7, and no hit set of size >= 3 existed anywhere in the repository.",
+          "4 DOMAIN -- the assertion quantified correctly over a hand-named domain; a drop-root mutant survived all 50 arms AND the entire 904-arm default lane at 3 of 7 sites, with root operator-reachable via SearchIndex.hits('raiz').",
+          "5 WIDTH -- the domain was correctly derived, but derived at ONE width (120) while the siblings backstopping two of its four members run at 80; a width-conditioned drop of either was absorbed by the derivation and unseen by the backstops.",
+          "6 MEMBERSHIP, AND IT IS THE DECLARATION EXHIBIT -- the titles were derived and the DOMAIN's own membership was left spelled, seven lines under a comment reading 'THE DOMAIN AND THE TITLES BOTH COME FROM THE FIXTURE, spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked [x] for that property. A RENAME in the fixture is loud (KeyError); an ADDITION is SILENT -- a fifth node stays outside the domain, the boundary and the unions.",
+          "7 DIAGNOSTIC MESSAGE -- and it is the exhibit that reaches the OPERATOR rather than the next reader. An assertion message read 'shorten the fixture title, do not blame the renderer'. TWO conditions reach that branch and one IS the renderer's fault, so the message exculpated the code unconditionally -- and its advice was ACTIONABLE BACKWARDS: shortening the fixture titles greens the arm while the defect ships. One renderer-side mutant fired that assertion AND the neighbouring clip precondition in the same run, the two blaming opposite parties for a single cause.",
+          "8 THE BRIEF -- and it is the exhibit whose reader is another AGENT. Two reviews were dispatched IN PARALLEL and each was told it was sole writer; one was instructed to build mutants while the other read the same tree. The code reviewer's disclosure is the whole lesson: 'I was briefed as sole writer and did not check for a parallel gate.' IT DID NOT CHECK BECAUSE THE BRIEF SAID THERE WAS NOTHING TO CHECK FOR. A brief is a declaration, and a false one constructs its reader's blind spot."
+        ]
+      },
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "Inc-5 Q1, found by the pass-4 reviewer.",
+        "rule": "A GAP ROUTED TO THE WRONG OWNER IS A GAP BEHIND A CLOSED DOOR.",
+        "statement": "Filing a live gap under an existing carry closes it to review: the carry is already known, already accepted and already owned, so nobody re-examines whether it actually covers the case filed under it. A mis-route is more dangerous than an unfiled gap, because an unfiled gap still looks open.",
+        "measured": "Inc-5's oracle excluded the map root from its domain and justified the exclusion by citing carry B-55 ('a clipped hit is an undeclared hit'). B-55 is TRUE of the three lane renderers, which iterate branches and never draw the root. It is INAPPLICABLE to outline, radial and layered, which draw the root AND paint it as a hit (measured 1, 13 and 20 hit-styled spans) -- and those three are the operator-reachable renderers. A drop-root defect there was invisible to the whole suite while appearing, in the artifact, to be an accepted carry. The root is reachable from an ordinary search: SearchIndex.hits('raiz') returns it.",
+        "discharge": "Before routing a gap to an existing carry, check the carry's scope against the SPECIFIC case being routed, per member of the affected population rather than per family. Where the justification is a property of the artifact ('this renderer does not draw that node'), assert it FROM the artifact rather than citing the carry."
+      },
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "An instrument built by the Inc-W1 reviewer, not by the implementer. ADOPTED AS A BATCH STANDARD by coordinator ruling 2026-09-10, and to be minted NEXT TO the per-site battery rule with that credit attached.",
+        "rule": "WHEN AN INCREMENT CLAIMS AN ORACLE GAINED SIGHT, FIRE THE SAME MUTANT AGAINST BOTH THE PRE- AND POST-INCREMENT ORACLES.",
+        "statement": "'The mutant is killed' is a statement about today's tree and is satisfied by an arm that was already killing it. 'The mutant SURVIVED the old oracle and is KILLED by the new one' is a statement about the INCREMENT -- it proves the arm newly gained the ability to see the defect, which is the thing a widened or added arm actually claims. Applies wherever an increment says a new or widened arm closes a gap.",
+        "measured": "Inc-W1. WIDE drop first and WIDE drop hit at radial.py:232, fired against both oracles: SURVIVED against the pre-increment tree, KILLED against Inc-W1, each by exactly one node id. The implementer had only shown the second half, which would have been equally true of an arm that changed nothing.",
+        "discharge": "In the close evidence, per claimed-new sight: the mutant, its verdict against the PRE-increment oracle, its verdict against the POST-increment oracle, and the node id that reddens. A pair of verdicts, never one."
+      },
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "Inc-STRIPS. The failure was the orchestrator's; the standard was set by the security reviewer's response to it.",
+        "rule": "REVIEWS ARE SERIAL BY DEFAULT. PARALLEL REVIEW REQUIRES ONE ISOLATED, DIGEST-VERIFIED MIRROR PER REVIEWER.",
+        "statement": "The one-writer invariant is PER TREE. Per-reviewer trees satisfy it; a shared tree never does, however the briefs are worded. A reviewer instructed to mutate is a writer, so any concurrent reader of the same tree is reading a moving target and cannot know it.",
+        "measured": "Two reviews dispatched in parallel on one tree. The mutating reviewer swapped mapper/app.py at least six times; a mutant with the cap disabled sat committable for about four minutes, and a `git commit -a` in that window would have shipped a neutered bound whose diff summary was identical to the reviewed code. The reading reviewer's first probe pass ran inside a swap window.",
+        "discharge": "Serialise, or give each reviewer a mirror created with autocrlf disabled and digest-verified against the source tree. AND, from the reading side: a reviewer should assert the hash-stability of what it measures across its own run rather than trusting the brief -- which is what saved this one's evidence."
+      },
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "Inc-STRIPS round 2 -> round 3. The implementer wrote the caveat that was the finding, and filed it as a footnote.",
+        "rule": "A SURVIVOR EXPLAINED AWAY IS A SURVIVOR.",
+        "statement": "When a mutant survives and the verdict is recorded as EQUIVALENT BY CONTRACT, one question is MANDATORY before that verdict stands: does the contract cover the axis the mutant moves? If it does not, the honest reading is THE CONTRACT IS UNDER-SPECIFIED -- not that the mutant is harmless. An explanation is not a kill, and a verdict of equivalence is a claim about the requirement, not about the code.",
+        "measured": "MUT-A (the minimap's per-entry cost, 5 -> 40) survived round 2 and was recorded as equivalent-by-contract: every stated invariant -- bounded, declares its remainder, conserves -- still held. That reasoning was literally correct and practically wrong. The unpinned axis was USEFULNESS, and the increment had already regressed a shipped map along it: at 35x14 `legacy` drew ONE of three branches and declared a remainder of two, where the pre-increment strip drew all three and the canvas height was identical either way. The implementer's own caveat in the same section read 'no predicate pins the usefulness of the tuning'. With the missing arm added, MUT-A is KILLED.",
+        "discharge": "Name the axis the mutant moves. Then find the contract clause covering that axis and cite it. If no clause covers it, the finding is the missing clause -- record it as a gap in the requirement, not as an equivalence in the battery. A caveat written beside an equivalence verdict is the finding wearing a footnote's clothes."
+      },
+      {
+        "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
+        "date": "2026-09-10",
+        "origin": "Inc-STRIPS H2, found by the round-2 confirmation pass.",
+        "rule": "A CLOSURE MARKING LIVES IN ONE ARTIFACT OF RECORD; EVERY OTHER DOCUMENT REFERENCES IT.",
+        "statement": "A requirement's open/closed state is a single fact. Written independently into two documents it becomes two registries diverging at birth, and the divergence is invisible because each document is internally consistent. Pairs with the two-live-definitions rule: this is that rule applied to STATE rather than to behaviour.",
+        "measured": "In one commit, 01-requirements.md marked LLR-N07.3.4 predicate 1 with an unqualified green CLOSED while state.json recorded the same requirement OPEN with both vectors named and a successor increment routed. The re-scope had been written honestly in the increment fold and in state.json and never reached the artifact of record -- reproducing, one file over, exactly the premature-closure marking a security review had blocked two days earlier in the same increment.",
+        "discharge": "Pick the artifact of record (here state.json.open_blocks) and let every other document cite it rather than restate it. Where a requirements document must carry a status for readability, it carries the QUALIFIER and the pointer -- 'PARTIALLY CLOSED against vector X, see open_blocks' -- never a bare mark. At close, diff the two: a status word in a requirements file with no matching entry in the record is the defect."
+      },
+      "MEASURE WHAT THE OPERATOR READS AND THE GEOMETRY IT STANDS IN; EITHER ALONE CAN LIE. A widget must never be laid out from a render it is about to replace. When a defect leaves the painted output identical, assert the geometry -- an arm on the text cannot fail. (Pairs with Inc-STRIPS's composited-frame rule as the two halves of one law.)"
+    ],
+    "open_blocks": [
+      {
+        "requirement": "LLR-N07.3.4",
+        "status": "CLOSED -- BOTH vectors measured closed. Fanout by Inc-STRIPS; title-length by Inc-CRUMB.",
+        "since": "2026-09-10",
+        "authority": "Coordinator ruling 2026-09-10: the sealed cut (Inc-5 before Inc-STRIPS) STANDS, and this LLR stays explicitly OPEN across Inc-5. Nothing may mark it closed or conditionally-closed before Inc-STRIPS lands.",
+        "evidence": "Inc-4c finding F-2, executed: at 12002 nodes the entire MapScreen collapses -- #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, so the canvas is crushed to 1 row and the count region lands off-viewport. Predicate 1 of LLR-N07.3.4 is therefore not observable at the SHIPPED bound, and that is not closable in app.py alone.",
+        "carried_in": "Recorded here and restated in Inc-5's packet, so the block travels in the ledger rather than in a relay's memory. Inc-5 does not close it and does not touch it.",
+        "recheck_at": "Inc-CRUMB close. The entry flips only when BOTH vectors are closed.",
+        "vectors": {
+          "fanout": "CLOSED by Inc-STRIPS (2026-09-10). The count is readable in ITS OWN REGION at both declared sizes on a genuine 12002-node graph with a 4001-way root fanout, driven at the SHIPPED bound. Counterfactual: both acceptance arms RED on the pre-fix tree.",
+          "title_length": "OPEN. TabStrip's crumb is a fourth unbounded strip taking a raw ficha title; one 4000-character title reproduces the collapse verbatim at 80x24. Routed to Inc-CRUMB."
+        },
+        "closed": "2026-09-10",
+        "closing_evidence_is_a_pair": {
+          "title_length": "tests/test_crumb.py 11/11 RED pre-increment -> 11/11 GREEN post",
+          "fanout": "tests/test_strips.py 11/11 GREEN on BOTH trees (untouched)",
+          "joint_run": "22 passed = 11 + 11 on the post-edit tree",
+          "why_a_pair": "Either verdict alone would leave the requirement half-closed again -- the state Inc-CRUMB existed to end."
+        },
+        "closure_authority": "Coordinator ruling 2026-09-10: close under (a) on the construction proof. Security review: \"from the security side there is no remaining objection. The title-length vector is measured closed at every width from 20 to 200 with the hostile fixture.\"",
+        "sign_off_transfer": "Security sign-off transfers by evidence, not by re-review: AST-docstrings-stripped byte-identity across the divergence. chrome.py f1dba13b... == f1dba13b...; test_crumb.py 1cd89aff... == 1cd89aff...; arm 2 confirms zero executable delta outside declared scope vs 57fb403."
+      }
+    ],
+    "routed_findings": [
+      {
+        "id": "F3 (Inc-W1)",
+        "routed_to": "qa-reviewer",
+        "pickup": "Inc-CONFIRM, or the whole-branch QA gate -- whichever comes FIRST. Recorded here so it cannot evaporate between increments.",
+        "date": "2026-09-10",
+        "finding": "The B-55 boundary in test_views_hits.py is an EQUIVALENCE, so `False == False` satisfies it: a mutant that stops DRAWING a member as well as PAINTING it passes rather than reddening. Measured -- a co-drop at radial.py:221 under a w>=100 condition survives the 50-arm file AND the entire 904-arm default lane, and it is NOT equivalent (it makes RadialRenderer draw an empty title).",
+        "structural_statement": "THE BOUNDARY IS ONLY AS STRONG AS THE INDEPENDENT PINNING OF `drawn`, AND EXACTLY ONE OF FOUR MEMBERS HAS ITS DRAWN-NESS PINNED -- `other`, at test_views_hits.py:190. root, first and hit have none.",
+        "why_not_fixed_in_inc_w1": "The class is DRAWING, not hit-painting. LLR-N07.2.2b is about painting hits distinguishably; widening the arm to police what each renderer draws would pull a different requirement into a tests-only micro-increment. A scope judgement, recorded rather than omitted.",
+        "note_2026_09_10": "Unchanged by Inc-CRUMB."
+      },
+      {
+        "id": "F7 (Inc-5)",
+        "routed_to": "ux-reviewer",
+        "pickup": "Inc-CONFIRM, or the whole-branch QA gate -- whichever comes FIRST.",
+        "date": "2026-09-10",
+        "finding": "A selected node that is ALSO a hit is indistinguishable from a selected non-hit, in all five renderers changed by Inc-5 AND in shipped `layered`. Read strictly against 'distinguishably from non-hit nodes', that node is not painted distinguishably.",
+        "why_not_fixed": "Pre-existing shipped behaviour: layered's unfocused selection style is byte-identical to its hit style, and its focused selection block overwrites a hit entirely. The five renderers changed in Inc-5 deliberately INHERIT that precedence rather than diverging from it, because diverging would have been a silent, unrequested UX change. Wants a UX ruling, not a code fix chosen by the implementer."
+      },
+      {
+        "id": "R1/R2/R3 (Inc-STRIPS)",
+        "routed_to": "Inc-CRUMB -- it already edits these strips and their comments",
+        "pickup": "Inc-CRUMB, which bounds TabStrip and #map-toast and therefore rewrites this same layout reasoning.",
+        "date": "2026-09-10",
+        "finding": "DOCUMENTARY RESIDUE, recorded with reproductions rather than fixed, because Inc-STRIPS reached its soft cap and every 'one more small fix' in this increment introduced a new defect (height:3, the unconditional reserve, two false packet claims). R1: FOUR stale comments assert the pre-bound layout -- app.py:1899 (_query_echo's LIVE docstring, saying the region WRAPS when it now clips), tests/test_search.py:2337-2340 (same premise), app.py:3339 ('the minimap holds 24 branch entries', measured 16, citing a constant this increment DELETED), app.py:3346 ('legacy has eight branches', measured: 8 NODES, root fanout 3), and app.py:3336 still ships 'NECESSARY AND NOT SUFFICIENT' which section 8.1 declares refuted. R2: 01-requirements.md:3178 says FIVE content strips outside #map-body and its own next sentence enumerates SIX -- a correction mandated because a number was wrong replaced it with another wrong number. R3: state.json still calls TabStrip 'a FOURTH unbounded strip', consistent with the framing 01-requirements.md just replaced.",
+        "sharpest_form": "The corrected comment at app.py:99 warns that 'a reader who trusts the superseded reasoning below would relax the cap' -- and the METHOD THE CAP LIVES ON still carries that reasoning as live text. That is the declaration family pointing at itself.",
+        "why_not_blocking": "No shipped behaviour, no assertion, no oracle. tests/test_search.py:2340 is a docstring, not a predicate. The confirmation pass verified all three and returned PASS with 0 HIGH."
+      },
+      {
+        "id": "F-C",
+        "status": "CLOSED BY Inc-CRUMB (2026-09-10) -- INCIDENTALLY, AND BOOKED DELIBERATELY.",
+        "date": "2026-09-10",
+        "finding": "FactoryScreen chrome painted file-derived titles without coercion. Pre-existing, previously routed to Inc-REPAIR beside F-A and F-B.",
+        "how_closed": "Bounding the toast's detail at the _event_toast seam routed it through darkside.fit, which COERCES as well as truncates. The chrome sink stopped leaking as a side effect of a LAYOUT bound -- nobody set out to close it.",
+        "evidence": "TWO-ORACLE, per the batch standard: tests/test_fold.py::test_the_factory_tree_coerces_the_titles_it_paints, re-scoped from asserts-OPEN to asserts-CLOSED, is RED on the pre-Inc-CRUMB tree ('the FactoryScreen chrome leaks coerced code points: [...]') and GREEN after. The arm's superseded clause had itself instructed the next reader to re-scope it to the whole frame on the day the leak stopped.",
+        "consequences": "Inc-REPAIR's scope DROPS F-C, recorded there and here. A defect closed by accident still gets a deliberate record -- otherwise the next increment either re-fixes it or reports it open."
+      }
+    ],
+    "inc_repair_scope": [
+      {
+        "id": "SEC-F1 (Inc-CRUMB round 3, MEDIUM)",
+        "finding": "TabStrip.__init__ renders the crumb at darkside._crumb_line's hardcoded 118-cell fallback, not the terminal width.",
+        "live": "NO -- and the reason matters. Round 4 measured that the init CONTENT is superseded before paint, and the HEIGHT is clamped by TabStrip's `max-height: 3` lid. The lid is load-bearing for the init path.",
+        "instruction": "Bound the init path in Python so the CSS lid stops being what saves it. Not 'add a width argument' -- give __init__ the same resolved-width treatment KeyBar._width() got."
+      },
+      {
+        "id": "DECL-118-TWICE (Inc-CRUMB round 4)",
+        "finding": "118 is hardcoded independently in mapper/widgets/chrome.py (_KEYBAR_FALLBACK_CELLS) and mapper/darkside.py:223 (`budget = width if width > 0 else 118`). Two modules carry the batch's declared context and nothing makes them agree.",
+        "control": "ANYTHING SPELLED TWICE WILL DRIFT. DERIVE IT.",
+        "instruction": "De-duplicate to one owner. Structural, so it is NOT smuggled into Inc-CRUMB; a cross-reference comment marks the twin in the meantime."
+      }
+    ],
+    "round4_declaration_audit": {
+      "date": "2026-09-10",
+      "opened_by": "software-dev, unprompted, AFTER the security sign-off",
+      "finding": "The mechanism stated in KeyBar's docstring and test_crumb.py's arm docstring was FALSE and is now corrected in both places.",
+      "false_claim": "'a resize fires when the size CHANGES, so a layout that hands this widget its final width immediately never fires one and the 118-cell render stands'",
+      "measured": "The corrective resize DOES fire (calls [118,35,118,35]); the pre-fix widget HOLDS the corrected 30-cell render and paints byte-identical text to the fixed one. Region 4 rows vs 1. Auto-height was computed from the 118-cell render when layout ran; a later update() does not re-run it.",
+      "rule_minted": "A WIDGET MUST NEVER BE LAID OUT FROM A RENDER IT IS ABOUT TO REPLACE -- and when a defect leaves the painted text identical, the arm must assert the REGION, because the text cannot fail.",
+      "self_errors": [
+        "Claimed TabStrip 'never touches the 118 fallback' -- refuted by darkside.py:223.",
+        "Claimed the init render was unbounded -- refuted at 400 cells/part (width=0 -> 117 cells). The first fixture was 27 cells, which fits under BOTH hypotheses: C-31, the input could not discriminate."
+      ],
+      "evidence": "default 924 passed/19 deselected/3 xfailed; all-markers 943 passed/3 xfailed; ruff SET-IDENTICAL 19 pairs/27 both sides at equal scope with positive control; THE PAIR 22 passed.",
+      "disclosure": "Prose-only edits to a tree the security reviewer had already signed off. Evidence re-measured, not inherited. Close HELD for a coordinator ruling rather than self-cleared."
+    }
+  },
+  "stations_active": [
+    "P0",
+    "ARQ",
+    "P1",
+    "PDR",
+    "P2",
+    "P3",
+    "DDR",
+    "P4",
+    "P5",
+    "P6"
   ],
-  "next": "Inc-CRUMB -- the TITLE-LENGTH vector of the same collapse class. Bound TabStrip's crumb where it is BUILT (darkside.tab_strip, the visible truncation keybar already performs) and #map-toast's detail at the _event_toast seam, THEN bound both in the stylesheet. LAND THE PYTHON BOUND FIRST OR IN THE SAME PASS: adding overflow:hidden to a strip whose content is not cell-bounded is exactly how Inc-STRIPS' own F1 came to exist. Carries R1/R2/R3 and SEC-F4. Only when this lands does LLR-N07.3.4's open_blocks entry flip. THEN Inc-B55, THEN Inc-REPAIR.",
-  "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
-  "controls_for_engineering_rules": [
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "Inc-5 round 3 -> round 4, measured by the pass-3 reviewer and reproduced by the implementer.",
-    "rule": "A MUTATION BATTERY FIRES PER SITE, NEVER PER SYMBOL-OWNER, AND A KILLED TALLY NAMES ITS DENOMINATOR'S UNIT.",
-    "statement": "When one class, module or function owns MORE THAN ONE instance of the construct under test, a mutant applied per owner is killed by whichever instance the arms happen to observe and says NOTHING about its siblings. The tally is then arithmetically true and false as a coverage claim.",
-    "measured": "Inc-5's round-3 battery fired per renderer CLASS and reported '18 fired / 18 KILLED'. There are SEVEN hit sites across SIX classes: RailTimelineRenderer holds two (lane.py:228 trunk, lane.py:291 label). Demonstrated directly: MAX at the trunk site alone = KILLED; MAX at the label site alone = SURVIVED; MAX at BOTH sites as one per-class mutant = KILLED -- reporting a kill over a live survivor. The round-4 per-site battery found it: 35 fired across 7 sites x 5 shapes, 32 KILLED, 3 proven equivalent by output digest.",
-    "discharge": "State the battery's denominator in its own units ('7 sites', not '6 renderers'), enumerate the sites, and fire one mutant per site. A survivor is a finding unless proven EQUIVALENT by output digest over an enumerated input set, with a positive control that must differ.",
-    "relation": "C-31 one level up: the incomplete input set is the MUTANT population rather than the test's."
-   },
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "Inc-5, measured across FOUR independent review rounds, each of which blocked on the same defect one quantifier further out.",
-    "rule": "ANYTHING SPELLED TWICE WILL DRIFT. DERIVE IT -- AND AUDIT THE DECLARATION OF DERIVATION AGAINST THE CODE THAT DOES IT, BECAUSE THE COMMENT SAYING \"DERIVED\" IS ITSELF A SPELLING.",
-    "statement": "An oracle's blind spots migrate outward one quantifier at a time. Fixing the instance a reviewer named is necessary and never sufficient: each correct fix relocates the blind spot to the next enclosing quantifier, so a review that checks only the assertion keeps passing an oracle whose guarantee is exactly as wide as whatever its author last remembered to name. AND THE LAST RUNG IS THE DECLARATION ITSELF -- a comment, a docstring or a gate checkbox asserting 'derived' is a second spelling of the claim, and it drifts from the code exactly like any other duplicate. AND DIAGNOSTIC MESSAGES ARE DECLARATIONS TOO. A failure message asserts a diagnosis; if its reaching condition does not entail that diagnosis, it is a false declaration placed directly in the operator's hands -- and one whose remedy can be actionable in the wrong direction, greening the arm with the defect still shipping. A message must not pick a culprit its condition cannot identify.",
-    "measured": "Six generations across two increments and six independent review rounds. ZERO defects in shipped behaviour were found in any round; every block was the oracle or its declaration.",
-    "discharge": "Derive the thing from the artifact that owns it rather than naming it, and ASSERT the boundary that justifies any exclusion -- a bare derivation silently ABSORBS the defect, since anything the code stops producing simply leaves the derived set. Then audit the DECLARATION against the code: read every comment, docstring and checked gate box that claims a property, and confirm the code has it. On the sixth exhibit the false declaration sat seven lines from the true one and no test could see it -- only a reader comparing the two. Audit failure MESSAGES on the same terms as comments: for each, enumerate the conditions that reach it and confirm the message is true of every one. Where two causes need opposite fixes, the message names both rather than choosing. And audit BRIEFS on the same terms as comments: a brief asserting an environment property ('you are sole writer', 'the tree is frozen') is a declaration whose reader cannot verify it independently, so it must be true when written.",
-    "exhibits": [
-     "1 MEMBER -- the assertion named `min`; its mirror `max` survived at 7 of 7 renderers.",
-     "2 LIST -- the assertion named its members while the BATTERY fired per CLASS; a per-class mutant reported a KILL over a live survivor at a sibling site.",
-     "3 CARDINALITY -- the assertion drove one pair of size 2; MINMAX/SORTED2 (drop a MIDDLE member) survived 7/7, and no hit set of size >= 3 existed anywhere in the repository.",
-     "4 DOMAIN -- the assertion quantified correctly over a hand-named domain; a drop-root mutant survived all 50 arms AND the entire 904-arm default lane at 3 of 7 sites, with root operator-reachable via SearchIndex.hits('raiz').",
-     "5 WIDTH -- the domain was correctly derived, but derived at ONE width (120) while the siblings backstopping two of its four members run at 80; a width-conditioned drop of either was absorbed by the derivation and unseen by the backstops.",
-     "6 MEMBERSHIP, AND IT IS THE DECLARATION EXHIBIT -- the titles were derived and the DOMAIN's own membership was left spelled, seven lines under a comment reading 'THE DOMAIN AND THE TITLES BOTH COME FROM THE FIXTURE, spelled nowhere', in an increment titled 'the last hand-spelled thing removed', under a gate box checked [x] for that property. A RENAME in the fixture is loud (KeyError); an ADDITION is SILENT -- a fifth node stays outside the domain, the boundary and the unions.",
-     "7 DIAGNOSTIC MESSAGE -- and it is the exhibit that reaches the OPERATOR rather than the next reader. An assertion message read 'shorten the fixture title, do not blame the renderer'. TWO conditions reach that branch and one IS the renderer's fault, so the message exculpated the code unconditionally -- and its advice was ACTIONABLE BACKWARDS: shortening the fixture titles greens the arm while the defect ships. One renderer-side mutant fired that assertion AND the neighbouring clip precondition in the same run, the two blaming opposite parties for a single cause.",
-     "8 THE BRIEF -- and it is the exhibit whose reader is another AGENT. Two reviews were dispatched IN PARALLEL and each was told it was sole writer; one was instructed to build mutants while the other read the same tree. The code reviewer's disclosure is the whole lesson: 'I was briefed as sole writer and did not check for a parallel gate.' IT DID NOT CHECK BECAUSE THE BRIEF SAID THERE WAS NOTHING TO CHECK FOR. A brief is a declaration, and a false one constructs its reader's blind spot."
+  "iterations_per_station": {
+    "P0": 2,
+    "ARQ": 1,
+    "P1": 1,
+    "PDR": 3,
+    "P2": 0,
+    "P3": 0,
+    "DDR": 0,
+    "P4": 0,
+    "P5": 0,
+    "P6": 0
+  },
+  "triggers": {
+    "evaluated_at": "2026-08-27T00:00:00",
+    "fired": [
+      "A2",
+      "A3",
+      "B1",
+      "B3",
+      "B4",
+      "C",
+      "D1",
+      "D2",
+      "E1"
+    ],
+    "not_fired": [
+      "F"
+    ],
+    "pending_at_arq": [
+      "A1",
+      "A4",
+      "B2"
+    ],
+    "record": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md#5--trigger-evaluation (evaluation) + .dev-flow/2026-08-27-repair-batch-02/PLAN.md (the B3 correction, made by this batch and pinned by AT-P07)",
+    "corrections": [
+      {
+        "id": "B3",
+        "was": "not_fired",
+        "now": "FIRED",
+        "date": "2026-08-27",
+        "reason": "The non-activation record was FALSE. The probe `ls tests/goldens` returned no-such-directory: correct as executed, but the INPUT SET was wrong (C-31). The byte-identity goldens live in tests/test_repair_depth.py::MASTER_LEGACY_DIGESTS -- 12 pins, 3 renderers x 4 sizes, derived not typed. RadialRenderer is pinned at all four sizes and Inc-1 reddens 4 of them by construction. B3 firing turns on C-24 (golden drift named in the census)."
+      }
     ]
-   },
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "Inc-5 Q1, found by the pass-4 reviewer.",
-    "rule": "A GAP ROUTED TO THE WRONG OWNER IS A GAP BEHIND A CLOSED DOOR.",
-    "statement": "Filing a live gap under an existing carry closes it to review: the carry is already known, already accepted and already owned, so nobody re-examines whether it actually covers the case filed under it. A mis-route is more dangerous than an unfiled gap, because an unfiled gap still looks open.",
-    "measured": "Inc-5's oracle excluded the map root from its domain and justified the exclusion by citing carry B-55 ('a clipped hit is an undeclared hit'). B-55 is TRUE of the three lane renderers, which iterate branches and never draw the root. It is INAPPLICABLE to outline, radial and layered, which draw the root AND paint it as a hit (measured 1, 13 and 20 hit-styled spans) -- and those three are the operator-reachable renderers. A drop-root defect there was invisible to the whole suite while appearing, in the artifact, to be an accepted carry. The root is reachable from an ordinary search: SearchIndex.hits('raiz') returns it.",
-    "discharge": "Before routing a gap to an existing carry, check the carry's scope against the SPECIFIC case being routed, per member of the affected population rather than per family. Where the justification is a property of the artifact ('this renderer does not draw that node'), assert it FROM the artifact rather than citing the carry."
-   },
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "An instrument built by the Inc-W1 reviewer, not by the implementer. ADOPTED AS A BATCH STANDARD by coordinator ruling 2026-09-10, and to be minted NEXT TO the per-site battery rule with that credit attached.",
-    "rule": "WHEN AN INCREMENT CLAIMS AN ORACLE GAINED SIGHT, FIRE THE SAME MUTANT AGAINST BOTH THE PRE- AND POST-INCREMENT ORACLES.",
-    "statement": "'The mutant is killed' is a statement about today's tree and is satisfied by an arm that was already killing it. 'The mutant SURVIVED the old oracle and is KILLED by the new one' is a statement about the INCREMENT -- it proves the arm newly gained the ability to see the defect, which is the thing a widened or added arm actually claims. Applies wherever an increment says a new or widened arm closes a gap.",
-    "measured": "Inc-W1. WIDE drop first and WIDE drop hit at radial.py:232, fired against both oracles: SURVIVED against the pre-increment tree, KILLED against Inc-W1, each by exactly one node id. The implementer had only shown the second half, which would have been equally true of an arm that changed nothing.",
-    "discharge": "In the close evidence, per claimed-new sight: the mutant, its verdict against the PRE-increment oracle, its verdict against the POST-increment oracle, and the node id that reddens. A pair of verdicts, never one."
-   },
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "Inc-STRIPS. The failure was the orchestrator's; the standard was set by the security reviewer's response to it.",
-    "rule": "REVIEWS ARE SERIAL BY DEFAULT. PARALLEL REVIEW REQUIRES ONE ISOLATED, DIGEST-VERIFIED MIRROR PER REVIEWER.",
-    "statement": "The one-writer invariant is PER TREE. Per-reviewer trees satisfy it; a shared tree never does, however the briefs are worded. A reviewer instructed to mutate is a writer, so any concurrent reader of the same tree is reading a moving target and cannot know it.",
-    "measured": "Two reviews dispatched in parallel on one tree. The mutating reviewer swapped mapper/app.py at least six times; a mutant with the cap disabled sat committable for about four minutes, and a `git commit -a` in that window would have shipped a neutered bound whose diff summary was identical to the reviewed code. The reading reviewer's first probe pass ran inside a swap window.",
-    "discharge": "Serialise, or give each reviewer a mirror created with autocrlf disabled and digest-verified against the source tree. AND, from the reading side: a reviewer should assert the hash-stability of what it measures across its own run rather than trusting the brief -- which is what saved this one's evidence."
-   },
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "Inc-STRIPS round 2 -> round 3. The implementer wrote the caveat that was the finding, and filed it as a footnote.",
-    "rule": "A SURVIVOR EXPLAINED AWAY IS A SURVIVOR.",
-    "statement": "When a mutant survives and the verdict is recorded as EQUIVALENT BY CONTRACT, one question is MANDATORY before that verdict stands: does the contract cover the axis the mutant moves? If it does not, the honest reading is THE CONTRACT IS UNDER-SPECIFIED -- not that the mutant is harmless. An explanation is not a kill, and a verdict of equivalence is a claim about the requirement, not about the code.",
-    "measured": "MUT-A (the minimap's per-entry cost, 5 -> 40) survived round 2 and was recorded as equivalent-by-contract: every stated invariant -- bounded, declares its remainder, conserves -- still held. That reasoning was literally correct and practically wrong. The unpinned axis was USEFULNESS, and the increment had already regressed a shipped map along it: at 35x14 `legacy` drew ONE of three branches and declared a remainder of two, where the pre-increment strip drew all three and the canvas height was identical either way. The implementer's own caveat in the same section read 'no predicate pins the usefulness of the tuning'. With the missing arm added, MUT-A is KILLED.",
-    "discharge": "Name the axis the mutant moves. Then find the contract clause covering that axis and cite it. If no clause covers it, the finding is the missing clause -- record it as a gap in the requirement, not as an equivalence in the battery. A caveat written beside an equivalence verdict is the finding wearing a footnote's clothes."
-   },
-   {
-    "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
-    "date": "2026-09-10",
-    "origin": "Inc-STRIPS H2, found by the round-2 confirmation pass.",
-    "rule": "A CLOSURE MARKING LIVES IN ONE ARTIFACT OF RECORD; EVERY OTHER DOCUMENT REFERENCES IT.",
-    "statement": "A requirement's open/closed state is a single fact. Written independently into two documents it becomes two registries diverging at birth, and the divergence is invisible because each document is internally consistent. Pairs with the two-live-definitions rule: this is that rule applied to STATE rather than to behaviour.",
-    "measured": "In one commit, 01-requirements.md marked LLR-N07.3.4 predicate 1 with an unqualified green CLOSED while state.json recorded the same requirement OPEN with both vectors named and a successor increment routed. The re-scope had been written honestly in the increment fold and in state.json and never reached the artifact of record -- reproducing, one file over, exactly the premature-closure marking a security review had blocked two days earlier in the same increment.",
-    "discharge": "Pick the artifact of record (here state.json.open_blocks) and let every other document cite it rather than restate it. Where a requirements document must carry a status for readability, it carries the QUALIFIER and the pointer -- 'PARTIALLY CLOSED against vector X, see open_blocks' -- never a bare mark. At close, diff the two: a status word in a requirements file with no matching entry in the record is the defect."
-   }
-  ],
-  "open_blocks": [
-   {
-    "requirement": "LLR-N07.3.4",
-    "status": "OPEN -- fanout vector CLOSED by Inc-STRIPS; TITLE-LENGTH vector open, blocked on Inc-CRUMB",
-    "since": "2026-09-10",
-    "authority": "Coordinator ruling 2026-09-10: the sealed cut (Inc-5 before Inc-STRIPS) STANDS, and this LLR stays explicitly OPEN across Inc-5. Nothing may mark it closed or conditionally-closed before Inc-STRIPS lands.",
-    "evidence": "Inc-4c finding F-2, executed: at 12002 nodes the entire MapScreen collapses -- #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, so the canvas is crushed to 1 row and the count region lands off-viewport. Predicate 1 of LLR-N07.3.4 is therefore not observable at the SHIPPED bound, and that is not closable in app.py alone.",
-    "carried_in": "Recorded here and restated in Inc-5's packet, so the block travels in the ledger rather than in a relay's memory. Inc-5 does not close it and does not touch it.",
-    "recheck_at": "Inc-CRUMB close. The entry flips only when BOTH vectors are closed.",
-    "vectors": {
-     "fanout": "CLOSED by Inc-STRIPS (2026-09-10). The count is readable in ITS OWN REGION at both declared sizes on a genuine 12002-node graph with a 4001-way root fanout, driven at the SHIPPED bound. Counterfactual: both acceptance arms RED on the pre-fix tree.",
-     "title_length": "OPEN. TabStrip's crumb is a fourth unbounded strip taking a raw ficha title; one 4000-character title reproduces the collapse verbatim at 80x24. Routed to Inc-CRUMB."
+  },
+  "scope": {
+    "in": [
+      "US-N06 escala (pan/fold/overflow)",
+      "US-N07 busqueda n/N",
+      "canvas dots/bgs + braille edges + carry B-05",
+      "US-N13 sala (per-map load-error card states)",
+      "US-N16 leyenda por vista",
+      "palette v2 tokens in darkside.py",
+      "repair increment: B-29 phantom-node warning, B-30 path leak"
+    ],
+    "cut_2026_08_27": {
+      "decision": "operator option A -- re-scope, taken at the PDR stop",
+      "items": [
+        "US-N14 «lente» -- two blocker-class UX design rulings",
+        "S-18 render work-budget, PAIRED with S-19 as its PRECONDITION"
+      ],
+      "why": "The briefed remaining scope executed FALSE: 6 items briefed, ~39 of 51 union items measured LIVE, ~11 of them design rulings. C-43 at batch level.",
+      "s19_pairing": "S-19 is S-18's precondition, not its sibling. Measured on the 51-node/410-edge shape: Layered 1283ms, Outline 337ms, Radial 142ms -- UNDER the 250ms budget, so k=0 and threshold 4 cannot distinguish a correct implementation from a missing one. The follow-on batch's fixture MUST name its renderer.",
+      "nothing_deleted": "Deferred text stays in place, marked, so the follow-on batch inherits the work rather than re-deriving it."
+    },
+    "out": [
+      "recorrido/guia (batch 3)",
+      "cronoscopio/relieve (batch 4)",
+      "repo redesign"
+    ]
+  },
+  "artifact_homes": {
+    "requirements": "repo:.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "traceability": "repo:.dev-flow/2026-08-26-ui-next-batch-02/06-docs/traceability-matrix.md",
+    "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-08-26-ui-next-batch-02/03-increments/",
+    "backlog": "repo:.dev-flow/BACKLOG.md",
+    "design_pdr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/PDR-2026-08-26-ui-next-batch-02.md",
+    "design_ddr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/DDR-2026-08-26-ui-next-batch-02.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/README.md"
+  },
+  "artifacts": {
+    "plan": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md",
+    "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
+    "PDR_qa": ".dev-flow/2026-08-26-ui-next-batch-02/02a-qa-acceptance-review.md",
+    "PDR_security": ".dev-flow/2026-08-26-ui-next-batch-02/02b-security-review.md",
+    "PDR_architect_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02c-pdr-architect-pass2.md",
+    "PDR_qa_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02d-pdr-qa-pass2.md",
+    "PDR_security_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02e-pdr-security-pass2.md",
+    "PDR_ux_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02f-pdr-ux-pass2.md",
+    "lens_reconciliation": ".dev-flow/2026-08-26-ui-next-batch-02/02g-lens-reconciliation.md"
+  },
+  "baseline": {
+    "base_ref": "3fe0e4b71ef4d35d99e8605d6e3dfef0d2ef62b3",
+    "base_ref_name": "origin/master at re-verification",
+    "current_tip": "20f86de",
+    "current_tip_note": "20f86de merges PR #7, which adds only .dev-flow/02g-lens-reconciliation.md (docs). Test counts are unaffected by a docs-only merge; re-measure at any later tip rather than trusting this line.",
+    "tests_collected": 647,
+    "lanes": "fast 630 passed / 17 deselected exit 0; slow 17 passed / 630 deselected exit 0; 630+17=647",
+    "ruff": "29 errors, exit 1 (pre-existing, unchanged)",
+    "measured_by": "pytest -q --collect-only -p no:randomly -o addopts=; then each lane",
+    "flow_revision": "rev46+ (~/.claude and ~/.claude/skills both 0 behind upstream)",
+    "a3_census": "SETTLED BY AST at 3fe0e4b. Question: which call expressions invoke the MAP-RENDERER protocol and must migrate when IRenderer.render gains ViewState? 23 arg-ful call sites / 10 files / 6 definitions in mapper/views/. 25 zero-arg .render() sites are Textual's WIDGET protocol and are NOT in the A3. grep over-counts by 1: mapper/widgets/rail.py:180 is a docstring MENTION."
+  },
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-08-26",
+      "decision": "approved",
+      "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
+    },
+    {
+      "station": "P0",
+      "date": "2026-08-26",
+      "decision": "scope-add ratified",
+      "notes": "S-7 (off-screen canvas) folded as a precondition of US-N06. SUPERSEDED at un-park: shipped by the repair batch."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-26",
+      "decision": "BLOCKED - iterate to P1",
+      "notes": "architect approved-with-conditions (20 sealed decisions, cut 7 -> 9). qa BLOCKED: 10 blockers / 14 majors / 11 minors. security BLOCKED: 3 blockers / 6 majors / 5 minors. Batch PARKED by operator decision so a repair batch could ship S-01/S-02/S-07/S-08 first."
+    },
+    {
+      "station": "P0",
+      "date": "2026-08-27",
+      "decision": "un-parked",
+      "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "REJECTED - iterate-to-refine to P1 (amendment set 3)",
+      "notes": "Second pass, four lenses in parallel over the 41-amendment fold. architect REJECTED (6 blockers); security BLOCKED (S-16 S-17 S-18); qa approved-with-conditions (8, and 2 of its own source findings were DROPPED by the fold); ux approved-with-conditions (10, two blocker-class). A rejection returns to design: no increment opens. PDR is now at iteration 2 of the soft cap 3. Flags ruled: (a) LLR-N06.2.5 gets a cross-cutting home, sealed #D21, on an EXECUTABLE criterion -- the 15 uncoerced notify sites are app.py(11)+screens/factory.py(4) while Inc-3's set is 4-of-4 without factory.py, so the mis-parenting is an undeclared source-budget breach, not a smell. (b) the map-canvas braille promise is deferred AND the prose amended, sealed #D22, but mis-located by the flag: section 3.4 never mentions braille; the live promise is at :107, :113, :3343. Resume re-verification: fast 413 passed/16 deselected, slow 16 passed/413 deselected, 429 collected, both exit 0; ruff 29; git status byte-identical before and after the battery."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "orchestrator verifications of lens blockers",
+      "notes": "S-16 INDEPENDENTLY REPRODUCED on a third harness with a positive control: _coerce_field covers 2 of 5 file-derived families; attachment path, schema key/label and the node id are raw; an int attachment path loads with warnings=0 then raises TypeError in search_hits, an int node id yields a phantom duplicate node. Therefore S-02 is LIVE and un-park decision D18's SATISFIED-EXTERNALLY strike is WRONG. S-17 CONFIRMED by grep: LLR-STO.1.1 has 24 occurrences, all prose, zero headings. ARQ-1 CONFIRMED: docs/ARCHITECTURE.md was never amended -- :58 and :136 still declare the old frozen render signature and R-010 still says it stays frozen -- so PLAN section 7's 'map amended' is false against disk (C-44, work that never landed). GOLD-1 CORRECTED: 12 pinned digests derived, not the 18 reported; RadialRenderer pinned at all four sizes, so Inc-1 reddens 4 by construction."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "RIDER-1 reconciliation executed; batch STOPPED before iteration 3",
+      "notes": "Four parallel read-only lens audits against the lenses' OWN condition ledgers, never the amendment table. 51 union items: ~39 LIVE, 11 discharged -- all 11 by the repair batch's shipped code, none by a document fold. 01-requirements.md has ONE commit (8675151) and has not been edited since the verdicts. Briefed scope executed FALSE (6 named vs ~39 live), so the batch was referred to the operator rather than spending the final iteration. Artifact: 02g-lens-reconciliation.md, merged as PR #7."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "operator option A -- RE-SCOPE",
+      "notes": "US-N14 «lente» and the S-18 work-budget (paired with S-19 as its precondition) cut to a follow-on design batch. Removes ~7 of ~11 design rulings. Iteration 3 targets US-N06/N07/N13/N16 + palette v2. Nothing deleted -- deferred text stays marked in place. See PLAN.md section 16."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "D26-D31 recorded",
+      "notes": "D26 strict rule (a code fix never discharges a missing requirement) -- architect lens is 14/14 LIVE under it. D27 B-29/B-30 ride inside this batch as one repair increment. D28 B-29's guard ships with a synthetic fixture because it is a no-op on the current tree (C-55 limb 2). D29 A3 census settled by AST -- the orchestrator produced generation five by grep during the reconciliation itself. D30 amendment set 3 authored in two SEQUENTIAL passes (C-52: no two lanes on one file). D31 PR #7 merged docs-only before the fold."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-08-27",
+      "decision": "approved — SEALED",
+      "notes": "PDR iteration 3 (final) PASSED. All four lenses `approved with conditions`; security lifted its pass-2 block; architect moved 14/14 from LIVE to DISCHARGED. All 12 fold conditions discharged and verified by re-reading the artifact. Decisions issued: #D25 (the three-row seat-diff figure is a regression PIN on Inc-4's diff, not a per-increment budget -- no breach, Inc-3 unblocked), #D26 (the legend scrolls; tabbed redesign deferred B-35), #D27 (the damaged sala card takes a declared glyph; ALERT is not spent -- C-55 limb 2), #D28 (operator-ruled: the 4.5:1 contrast floor STANDS and the token changes; V7/V8 and the card glyph take INK; MUT is legal for readable text only on GROUND; decorative marks exempt). Corrections landed against the orchestrator's own rulings: the abolished cap survived at three sites (the batch's fourth false oracle, and the first created by the fix for a previous one); C-D25a named a vacated increment and had no oracle; and section 5's 'minimal alternative' was FALSE -- already implemented at app.py:1393-1395 and invariant under the defect, proven by two lenses executing it. CARRIED BY DECISION: B-36, UX2-C-01, a known live durable-data-loss defect on master, first scope item of the follow-on batch ahead of lente. Baseline 630+17=647, ruff 29, fixtures clean. Sealed at PDR-addendum-3.md section 8. Implementation NOT started -- commissioned as a fresh session."
+    },
+    {
+      "station": "P3",
+      "date": "2026-08-29",
+      "decision": "Inc-4 PRE-gate: two independent lenses returned; C-21 FIRES, cut is stale",
+      "notes": "architect 02k: trigger A3 does NOT fire (a3_census 15/15 green on the removed tree; render's signature byte-identical; the standing pre-authorization is UNSPENT because it authorises EXTENDING render). Remove ViewState.query in Inc-4. It FALSIFIED the orchestrator's own census: a 4th reader at tests/test_app.py:448, the sole causal break. Pill formula len(_descendants & state.hits) correct but an UNOBSERVED behaviour change (+4 1 -> +4 4); nothing pins it; TC-026's 2nd clause implemented NOWHERE. Requires new LLR-N07.1.3 + TC-026b. qa 02l: 9 of 11 ATs buildable. AT-024 UNBUILDABLE in Inc-4 (owner LLR-N07.2.2b is Inc-5; executed 5/6 renderers query-insensitive). AT-052's observation surface is NAMED NOWHERE in the sealed text. FOUR sealed `shall` clauses carry NO acceptance id: the one-time rebind declaration, `esc limpiar`, C-D6a, UX-Q3-a. C-D6a is STRUCTURALLY VACUOUS in Inc-4 (no lens exists -> M-N07.3-a is reddened by nothing). `esc limpiar` paints a hint for behaviour that does not exist: action_back_or_home pops the screen unconditionally. LLR-N07.3.1's self-guard would be VACUOUS on legacy under BOTH working queries (carlos and riesgo each give tree_order == dict_order). AT-022's wrap arm undrivable on carlos (1 hit). E1c's body is a coercion sink: RLO survives Text.assemble. test_inc3_census::test_cd25a goes RED BY CONSTRUCTION (map seat 31 -> 33). C-21: the AT set changed (one removed, three owed) AFTER the cut was set, so the cut is STALE and must be re-derived BEFORE Phase 3 proceeds. Split of Inc-4 referred to the operator -- it would amend the SOLE-authority cut in 01-requirements.md 5.4, which is beyond a recorded autonomous decision."
     }
-   }
   ],
-  "routed_findings": [
-   {
-    "id": "F3 (Inc-W1)",
-    "routed_to": "qa-reviewer",
-    "pickup": "Inc-CONFIRM, or the whole-branch QA gate -- whichever comes FIRST. Recorded here so it cannot evaporate between increments.",
-    "date": "2026-09-10",
-    "finding": "The B-55 boundary in test_views_hits.py is an EQUIVALENCE, so `False == False` satisfies it: a mutant that stops DRAWING a member as well as PAINTING it passes rather than reddening. Measured -- a co-drop at radial.py:221 under a w>=100 condition survives the 50-arm file AND the entire 904-arm default lane, and it is NOT equivalent (it makes RadialRenderer draw an empty title).",
-    "structural_statement": "THE BOUNDARY IS ONLY AS STRONG AS THE INDEPENDENT PINNING OF `drawn`, AND EXACTLY ONE OF FOUR MEMBERS HAS ITS DRAWN-NESS PINNED -- `other`, at test_views_hits.py:190. root, first and hit have none.",
-    "why_not_fixed_in_inc_w1": "The class is DRAWING, not hit-painting. LLR-N07.2.2b is about painting hits distinguishably; widening the arm to police what each renderer draws would pull a different requirement into a tests-only micro-increment. A scope judgement, recorded rather than omitted."
-   },
-   {
-    "id": "F7 (Inc-5)",
-    "routed_to": "ux-reviewer",
-    "pickup": "Inc-CONFIRM, or the whole-branch QA gate -- whichever comes FIRST.",
-    "date": "2026-09-10",
-    "finding": "A selected node that is ALSO a hit is indistinguishable from a selected non-hit, in all five renderers changed by Inc-5 AND in shipped `layered`. Read strictly against 'distinguishably from non-hit nodes', that node is not painted distinguishably.",
-    "why_not_fixed": "Pre-existing shipped behaviour: layered's unfocused selection style is byte-identical to its hit style, and its focused selection block overwrites a hit entirely. The five renderers changed in Inc-5 deliberately INHERIT that precedence rather than diverging from it, because diverging would have been a silent, unrequested UX change. Wants a UX ruling, not a code fix chosen by the implementer."
-   },
-   {
-    "id": "R1/R2/R3 (Inc-STRIPS)",
-    "routed_to": "Inc-CRUMB -- it already edits these strips and their comments",
-    "pickup": "Inc-CRUMB, which bounds TabStrip and #map-toast and therefore rewrites this same layout reasoning.",
-    "date": "2026-09-10",
-    "finding": "DOCUMENTARY RESIDUE, recorded with reproductions rather than fixed, because Inc-STRIPS reached its soft cap and every 'one more small fix' in this increment introduced a new defect (height:3, the unconditional reserve, two false packet claims). R1: FOUR stale comments assert the pre-bound layout -- app.py:1899 (_query_echo's LIVE docstring, saying the region WRAPS when it now clips), tests/test_search.py:2337-2340 (same premise), app.py:3339 ('the minimap holds 24 branch entries', measured 16, citing a constant this increment DELETED), app.py:3346 ('legacy has eight branches', measured: 8 NODES, root fanout 3), and app.py:3336 still ships 'NECESSARY AND NOT SUFFICIENT' which section 8.1 declares refuted. R2: 01-requirements.md:3178 says FIVE content strips outside #map-body and its own next sentence enumerates SIX -- a correction mandated because a number was wrong replaced it with another wrong number. R3: state.json still calls TabStrip 'a FOURTH unbounded strip', consistent with the framing 01-requirements.md just replaced.",
-    "sharpest_form": "The corrected comment at app.py:99 warns that 'a reader who trusts the superseded reasoning below would relax the cap' -- and the METHOD THE CAP LIVES ON still carries that reasoning as live text. That is the declaration family pointing at itself.",
-    "why_not_blocking": "No shipped behaviour, no assertion, no oracle. tests/test_search.py:2340 is a docstring, not a predicate. The confirmation pass verified all three and returned PASS with 0 HIGH."
-   }
-  ]
- },
- "stations_active": [
-  "P0",
-  "ARQ",
-  "P1",
-  "PDR",
-  "P2",
-  "P3",
-  "DDR",
-  "P4",
-  "P5",
-  "P6"
- ],
- "iterations_per_station": {
-  "P0": 2,
-  "ARQ": 1,
-  "P1": 1,
-  "PDR": 3,
-  "P2": 0,
-  "P3": 0,
-  "DDR": 0,
-  "P4": 0,
-  "P5": 0,
-  "P6": 0
- },
- "triggers": {
-  "evaluated_at": "2026-08-27T00:00:00",
-  "fired": [
-   "A2",
-   "A3",
-   "B1",
-   "B3",
-   "B4",
-   "C",
-   "D1",
-   "D2",
-   "E1"
-  ],
-  "not_fired": [
-   "F"
-  ],
-  "pending_at_arq": [
-   "A1",
-   "A4",
-   "B2"
-  ],
-  "record": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md#5--trigger-evaluation (evaluation) + .dev-flow/2026-08-27-repair-batch-02/PLAN.md (the B3 correction, made by this batch and pinned by AT-P07)",
-  "corrections": [
-   {
-    "id": "B3",
-    "was": "not_fired",
-    "now": "FIRED",
-    "date": "2026-08-27",
-    "reason": "The non-activation record was FALSE. The probe `ls tests/goldens` returned no-such-directory: correct as executed, but the INPUT SET was wrong (C-31). The byte-identity goldens live in tests/test_repair_depth.py::MASTER_LEGACY_DIGESTS -- 12 pins, 3 renderers x 4 sizes, derived not typed. RadialRenderer is pinned at all four sizes and Inc-1 reddens 4 of them by construction. B3 firing turns on C-24 (golden drift named in the census)."
-   }
-  ]
- },
- "scope": {
-  "in": [
-   "US-N06 escala (pan/fold/overflow)",
-   "US-N07 busqueda n/N",
-   "canvas dots/bgs + braille edges + carry B-05",
-   "US-N13 sala (per-map load-error card states)",
-   "US-N16 leyenda por vista",
-   "palette v2 tokens in darkside.py",
-   "repair increment: B-29 phantom-node warning, B-30 path leak"
-  ],
-  "cut_2026_08_27": {
-   "decision": "operator option A -- re-scope, taken at the PDR stop",
-   "items": [
-    "US-N14 «lente» -- two blocker-class UX design rulings",
-    "S-18 render work-budget, PAIRED with S-19 as its PRECONDITION"
-   ],
-   "why": "The briefed remaining scope executed FALSE: 6 items briefed, ~39 of 51 union items measured LIVE, ~11 of them design rulings. C-43 at batch level.",
-   "s19_pairing": "S-19 is S-18's precondition, not its sibling. Measured on the 51-node/410-edge shape: Layered 1283ms, Outline 337ms, Radial 142ms -- UNDER the 250ms budget, so k=0 and threshold 4 cannot distinguish a correct implementation from a missing one. The follow-on batch's fixture MUST name its renderer.",
-   "nothing_deleted": "Deferred text stays in place, marked, so the follow-on batch inherits the work rather than re-deriving it."
-  },
-  "out": [
-   "recorrido/guia (batch 3)",
-   "cronoscopio/relieve (batch 4)",
-   "repo redesign"
-  ]
- },
- "artifact_homes": {
-  "requirements": "repo:.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
-  "traceability": "repo:.dev-flow/2026-08-26-ui-next-batch-02/06-docs/traceability-matrix.md",
-  "tests": "repo:tests/",
-  "module_map": "repo:docs/ARCHITECTURE.md",
-  "increments": "repo:.dev-flow/2026-08-26-ui-next-batch-02/03-increments/",
-  "backlog": "repo:.dev-flow/BACKLOG.md",
-  "design_pdr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/PDR-2026-08-26-ui-next-batch-02.md",
-  "design_ddr": "repo:.dev-flow/2026-08-26-ui-next-batch-02/DDR-2026-08-26-ui-next-batch-02.md",
-  "postmortem": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/",
-  "metrics": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/README.md"
- },
- "artifacts": {
-  "plan": ".dev-flow/2026-08-26-ui-next-batch-02/PLAN.md",
-  "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md",
-  "PDR_qa": ".dev-flow/2026-08-26-ui-next-batch-02/02a-qa-acceptance-review.md",
-  "PDR_security": ".dev-flow/2026-08-26-ui-next-batch-02/02b-security-review.md",
-  "PDR_architect_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02c-pdr-architect-pass2.md",
-  "PDR_qa_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02d-pdr-qa-pass2.md",
-  "PDR_security_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02e-pdr-security-pass2.md",
-  "PDR_ux_pass2": ".dev-flow/2026-08-26-ui-next-batch-02/02f-pdr-ux-pass2.md",
-  "lens_reconciliation": ".dev-flow/2026-08-26-ui-next-batch-02/02g-lens-reconciliation.md"
- },
- "baseline": {
-  "base_ref": "3fe0e4b71ef4d35d99e8605d6e3dfef0d2ef62b3",
-  "base_ref_name": "origin/master at re-verification",
-  "current_tip": "20f86de",
-  "current_tip_note": "20f86de merges PR #7, which adds only .dev-flow/02g-lens-reconciliation.md (docs). Test counts are unaffected by a docs-only merge; re-measure at any later tip rather than trusting this line.",
-  "tests_collected": 647,
-  "lanes": "fast 630 passed / 17 deselected exit 0; slow 17 passed / 630 deselected exit 0; 630+17=647",
-  "ruff": "29 errors, exit 1 (pre-existing, unchanged)",
-  "measured_by": "pytest -q --collect-only -p no:randomly -o addopts=; then each lane",
-  "flow_revision": "rev46+ (~/.claude and ~/.claude/skills both 0 behind upstream)",
-  "a3_census": "SETTLED BY AST at 3fe0e4b. Question: which call expressions invoke the MAP-RENDERER protocol and must migrate when IRenderer.render gains ViewState? 23 arg-ful call sites / 10 files / 6 definitions in mapper/views/. 25 zero-arg .render() sites are Textual's WIDGET protocol and are NOT in the A3. grep over-counts by 1: mapper/widgets/rail.py:180 is a docstring MENTION."
- },
- "decisions_log": [
-  {
-   "station": "P0",
-   "date": "2026-08-26",
-   "decision": "approved",
-   "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
-  },
-  {
-   "station": "P0",
-   "date": "2026-08-26",
-   "decision": "scope-add ratified",
-   "notes": "S-7 (off-screen canvas) folded as a precondition of US-N06. SUPERSEDED at un-park: shipped by the repair batch."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-26",
-   "decision": "BLOCKED - iterate to P1",
-   "notes": "architect approved-with-conditions (20 sealed decisions, cut 7 -> 9). qa BLOCKED: 10 blockers / 14 majors / 11 minors. security BLOCKED: 3 blockers / 6 majors / 5 minors. Batch PARKED by operator decision so a repair batch could ship S-01/S-02/S-07/S-08 first."
-  },
-  {
-   "station": "P0",
-   "date": "2026-08-27",
-   "decision": "un-parked",
-   "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-27",
-   "decision": "REJECTED - iterate-to-refine to P1 (amendment set 3)",
-   "notes": "Second pass, four lenses in parallel over the 41-amendment fold. architect REJECTED (6 blockers); security BLOCKED (S-16 S-17 S-18); qa approved-with-conditions (8, and 2 of its own source findings were DROPPED by the fold); ux approved-with-conditions (10, two blocker-class). A rejection returns to design: no increment opens. PDR is now at iteration 2 of the soft cap 3. Flags ruled: (a) LLR-N06.2.5 gets a cross-cutting home, sealed #D21, on an EXECUTABLE criterion -- the 15 uncoerced notify sites are app.py(11)+screens/factory.py(4) while Inc-3's set is 4-of-4 without factory.py, so the mis-parenting is an undeclared source-budget breach, not a smell. (b) the map-canvas braille promise is deferred AND the prose amended, sealed #D22, but mis-located by the flag: section 3.4 never mentions braille; the live promise is at :107, :113, :3343. Resume re-verification: fast 413 passed/16 deselected, slow 16 passed/413 deselected, 429 collected, both exit 0; ruff 29; git status byte-identical before and after the battery."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-27",
-   "decision": "orchestrator verifications of lens blockers",
-   "notes": "S-16 INDEPENDENTLY REPRODUCED on a third harness with a positive control: _coerce_field covers 2 of 5 file-derived families; attachment path, schema key/label and the node id are raw; an int attachment path loads with warnings=0 then raises TypeError in search_hits, an int node id yields a phantom duplicate node. Therefore S-02 is LIVE and un-park decision D18's SATISFIED-EXTERNALLY strike is WRONG. S-17 CONFIRMED by grep: LLR-STO.1.1 has 24 occurrences, all prose, zero headings. ARQ-1 CONFIRMED: docs/ARCHITECTURE.md was never amended -- :58 and :136 still declare the old frozen render signature and R-010 still says it stays frozen -- so PLAN section 7's 'map amended' is false against disk (C-44, work that never landed). GOLD-1 CORRECTED: 12 pinned digests derived, not the 18 reported; RadialRenderer pinned at all four sizes, so Inc-1 reddens 4 by construction."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-27",
-   "decision": "RIDER-1 reconciliation executed; batch STOPPED before iteration 3",
-   "notes": "Four parallel read-only lens audits against the lenses' OWN condition ledgers, never the amendment table. 51 union items: ~39 LIVE, 11 discharged -- all 11 by the repair batch's shipped code, none by a document fold. 01-requirements.md has ONE commit (8675151) and has not been edited since the verdicts. Briefed scope executed FALSE (6 named vs ~39 live), so the batch was referred to the operator rather than spending the final iteration. Artifact: 02g-lens-reconciliation.md, merged as PR #7."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-27",
-   "decision": "operator option A -- RE-SCOPE",
-   "notes": "US-N14 «lente» and the S-18 work-budget (paired with S-19 as its precondition) cut to a follow-on design batch. Removes ~7 of ~11 design rulings. Iteration 3 targets US-N06/N07/N13/N16 + palette v2. Nothing deleted -- deferred text stays marked in place. See PLAN.md section 16."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-27",
-   "decision": "D26-D31 recorded",
-   "notes": "D26 strict rule (a code fix never discharges a missing requirement) -- architect lens is 14/14 LIVE under it. D27 B-29/B-30 ride inside this batch as one repair increment. D28 B-29's guard ships with a synthetic fixture because it is a no-op on the current tree (C-55 limb 2). D29 A3 census settled by AST -- the orchestrator produced generation five by grep during the reconciliation itself. D30 amendment set 3 authored in two SEQUENTIAL passes (C-52: no two lanes on one file). D31 PR #7 merged docs-only before the fold."
-  },
-  {
-   "station": "PDR",
-   "date": "2026-08-27",
-   "decision": "approved — SEALED",
-   "notes": "PDR iteration 3 (final) PASSED. All four lenses `approved with conditions`; security lifted its pass-2 block; architect moved 14/14 from LIVE to DISCHARGED. All 12 fold conditions discharged and verified by re-reading the artifact. Decisions issued: #D25 (the three-row seat-diff figure is a regression PIN on Inc-4's diff, not a per-increment budget -- no breach, Inc-3 unblocked), #D26 (the legend scrolls; tabbed redesign deferred B-35), #D27 (the damaged sala card takes a declared glyph; ALERT is not spent -- C-55 limb 2), #D28 (operator-ruled: the 4.5:1 contrast floor STANDS and the token changes; V7/V8 and the card glyph take INK; MUT is legal for readable text only on GROUND; decorative marks exempt). Corrections landed against the orchestrator's own rulings: the abolished cap survived at three sites (the batch's fourth false oracle, and the first created by the fix for a previous one); C-D25a named a vacated increment and had no oracle; and section 5's 'minimal alternative' was FALSE -- already implemented at app.py:1393-1395 and invariant under the defect, proven by two lenses executing it. CARRIED BY DECISION: B-36, UX2-C-01, a known live durable-data-loss defect on master, first scope item of the follow-on batch ahead of lente. Baseline 630+17=647, ruff 29, fixtures clean. Sealed at PDR-addendum-3.md section 8. Implementation NOT started -- commissioned as a fresh session."
-  },
-  {
-   "station": "P3",
-   "date": "2026-08-29",
-   "decision": "Inc-4 PRE-gate: two independent lenses returned; C-21 FIRES, cut is stale",
-   "notes": "architect 02k: trigger A3 does NOT fire (a3_census 15/15 green on the removed tree; render's signature byte-identical; the standing pre-authorization is UNSPENT because it authorises EXTENDING render). Remove ViewState.query in Inc-4. It FALSIFIED the orchestrator's own census: a 4th reader at tests/test_app.py:448, the sole causal break. Pill formula len(_descendants & state.hits) correct but an UNOBSERVED behaviour change (+4 1 -> +4 4); nothing pins it; TC-026's 2nd clause implemented NOWHERE. Requires new LLR-N07.1.3 + TC-026b. qa 02l: 9 of 11 ATs buildable. AT-024 UNBUILDABLE in Inc-4 (owner LLR-N07.2.2b is Inc-5; executed 5/6 renderers query-insensitive). AT-052's observation surface is NAMED NOWHERE in the sealed text. FOUR sealed `shall` clauses carry NO acceptance id: the one-time rebind declaration, `esc limpiar`, C-D6a, UX-Q3-a. C-D6a is STRUCTURALLY VACUOUS in Inc-4 (no lens exists -> M-N07.3-a is reddened by nothing). `esc limpiar` paints a hint for behaviour that does not exist: action_back_or_home pops the screen unconditionally. LLR-N07.3.1's self-guard would be VACUOUS on legacy under BOTH working queries (carlos and riesgo each give tree_order == dict_order). AT-022's wrap arm undrivable on carlos (1 hit). E1c's body is a coercion sink: RLO survives Text.assemble. test_inc3_census::test_cd25a goes RED BY CONSTRUCTION (map seat 31 -> 33). C-21: the AT set changed (one removed, three owed) AFTER the cut was set, so the cut is STALE and must be re-derived BEFORE Phase 3 proceeds. Split of Inc-4 referred to the operator -- it would amend the SOLE-authority cut in 01-requirements.md 5.4, which is beyond a recorded autonomous decision."
-  }
- ],
- "coordinator_rulings": [
-  {
-   "date": "2026-08-28",
-   "provenance": "COORDINATING AGENT, not the operator. Recorded as a task direction that extends a PDR-sealed scope. It does NOT substitute for operator approval and does NOT relax the merge gate: the independent security sign-off and the adversarial PR-level qa-reviewer pass over the whole diff both stand, and a HIGH still blocks the merge and returns to the operator.",
-   "rulings": [
+  "coordinator_rulings": [
     {
-     "id": "D33",
-     "decision": "B-47 folded into Inc-3; LLR-COERCE.2 widened from one named truncator to every renderer feeding an operator-visible sink",
-     "amendment": "A-89",
-     "note": "The batch's coercion guarantee held only in radial view while LayeredRenderer is the default. The narrowing lived in the Touched-symbols line, not in the Statement. The renderer set must be DERIVED, never hand-listed. Inc-3 declares a 5-source-file breach."
+      "date": "2026-08-28",
+      "provenance": "COORDINATING AGENT, not the operator. Recorded as a task direction that extends a PDR-sealed scope. It does NOT substitute for operator approval and does NOT relax the merge gate: the independent security sign-off and the adversarial PR-level qa-reviewer pass over the whole diff both stand, and a HIGH still blocks the merge and returns to the operator.",
+      "rulings": [
+        {
+          "id": "D33",
+          "decision": "B-47 folded into Inc-3; LLR-COERCE.2 widened from one named truncator to every renderer feeding an operator-visible sink",
+          "amendment": "A-89",
+          "note": "The batch's coercion guarantee held only in radial view while LayeredRenderer is the default. The narrowing lived in the Touched-symbols line, not in the Statement. The renderer set must be DERIVED, never hand-listed. Inc-3 declares a 5-source-file breach."
+        },
+        {
+          "id": "D34",
+          "decision": "B-46 gets its own increment, Inc-CONFIRM, sequenced with Inc-REPAIR before Inc-7",
+          "amendment": "A-90",
+          "note": "Markup-parsing sink composing the dialog that GATES subtree archival. Two acceptance arms, one per failure mode (crash, action-span injection), because they fail independently."
+        },
+        {
+          "id": "D35",
+          "decision": "Pace calibrated: full protocol on data-path/destructive/A3/security increments (Inc-2, Inc-3, Inc-REPAIR, Inc-CONFIRM, Inc-7); lighter single-review protocol permitted for presentational increments only while the review returns zero HIGH and no data path is touched; any HIGH restores the full protocol. Batteries never skipped, only sized.",
+          "amendment": "A-91",
+          "note": "Recorded so the post-mortem can judge the trade. Inc-1 is the control: its confirmation pass returned 7 MEDIUM + 6 LOW, so the pass is not ceremonial."
+        }
+      ]
     },
     {
-     "id": "D34",
-     "decision": "B-46 gets its own increment, Inc-CONFIRM, sequenced with Inc-REPAIR before Inc-7",
-     "amendment": "A-90",
-     "note": "Markup-parsing sink composing the dialog that GATES subtree archival. Two acceptance arms, one per failure mode (crash, action-span injection), because they fail independently."
+      "date": "2026-08-29",
+      "provenance": "COORDINATING AGENT, not the operator. Recorded as a task direction that amends a sealed cut under C-21. It does NOT substitute for operator approval and does NOT relax the merge gate: the independent security sign-off and the adversarial PR-level qa-reviewer pass over the whole diff both stand, and a HIGH still blocks the merge and returns to the operator.",
+      "rulings": [
+        {
+          "id": "D36",
+          "decision": "Inc-4 SPLIT into Inc-4a (search core) and Inc-4b (seat + walk); option (a), not (c)",
+          "note": "C-21 fired: the AT set changed after the cut was set (AT-024 out, three shall-clauses owed an id). Deferring the newly-owed ids was REJECTED as 'the conditional-close defect wearing a scheduling excuse' -- it would ship sealed `shall` clauses with no acceptance. Section 5.4 is amended as the SOLE authority: one cut, re-derived, with the C-21 trigger evidence recorded. The old Inc-4 row is STRUCK, not shadowed."
+        },
+        {
+          "id": "D37",
+          "decision": "#map-pagination is the named count region; C-D6a closed STRUCTURALLY; UX-Q3-a deferred",
+          "note": "AT-052's observation surface was named nowhere in the sealed text. C-D6a is closed by a single `active_hits` attribute with NO `or` fallback, asserted by AST -- refusing a green-before-code invariant, which is the vacuous-check defect this batch exists to stop. UX-Q3-a deferred with a recorded carry because no LLR ever stated it."
+        },
+        {
+          "id": "D38",
+          "decision": "`esc limpiar`: implement the BEHAVIOUR, do not change the string",
+          "note": "State-dependent esc -- search active: clear the search and STAY on the map; search clear: pop the screen. That is what the hint promises. The alternative, an operator following a painted hint and losing their place, is the lying-affordance class this project exists to remove. Lands in Inc-4b with its own arm: search-active esc must NOT pop, search-clear esc MUST."
+        },
+        {
+          "id": "D39",
+          "decision": "ViewState.query removed in Inc-4a; the A3 pre-authorization is UNSPENT and STAYS unspent",
+          "note": "Recorded explicitly so no later increment 'inherits' it. Removal is safe HERE on a contingent measured fact -- query has exactly one product reader, being rewritten by this increment -- and NOT as a category. Adding a defaulted field cannot break a reader; removing one breaks every reader. The two are not symmetric."
+        }
+      ]
     },
     {
-     "id": "D35",
-     "decision": "Pace calibrated: full protocol on data-path/destructive/A3/security increments (Inc-2, Inc-3, Inc-REPAIR, Inc-CONFIRM, Inc-7); lighter single-review protocol permitted for presentational increments only while the review returns zero HIGH and no data path is touched; any HIGH restores the full protocol. Batteries never skipped, only sized.",
-     "amendment": "A-91",
-     "note": "Recorded so the post-mortem can judge the trade. Inc-1 is the control: its confirmation pass returned 7 MEDIUM + 6 LOW, so the pass is not ceremonial."
+      "date": "2026-08-29",
+      "provenance": "COORDINATING AGENT, not the operator. Does NOT substitute for operator approval and does NOT relax the merge gate.",
+      "rulings": [
+        {
+          "id": "D40",
+          "decision": "Operator-path redaction: originals stay intact, the SYNC redacts its copies",
+          "note": "Repo transcripts are evidence and are NOT rewritten -- a rewritten record stops saying what was measured. Vault copies get the username path prefix redacted to C:\\Users\\<operator>\\ plus a one-line 'paths redacted at sync; originals in repo' note. Redacting a copy does not falsify the original, and the vault is the artifact more likely to be shared. The transform is recorded in the sync record. Procedure written to SYNC-NOTES.md. STANDING CARRY NOT CLOSED: username strings in committed repo history remain a declared blocker for any PUBLIC push -- redacting vault copies does nothing for git history. C-45 PUSH obligation recorded and NOT discharged: the control is portable and belongs in the global dev-flow-sync procedure, but ~/.claude carries uncommitted changes pre-dating this session (validator V16) and C-44 forbids committing over them. An unpushed control is indistinguishable from one never written -- live carry."
+        },
+        {
+          "id": "D41",
+          "decision": "Round-4 orchestrator-applied fixes accepted; the pattern is EXCEPTIONAL, not habitual",
+          "note": "Accepted because it was declared with its cost named (nobody independent re-derived those two edits) and the orchestrator ran its own C-40 counterfactual with a sha256 restore. Not to be repeated as routine: the default stays implementer applies, independent lens confirms."
+        }
+      ]
+    },
+    {
+      "date": "2026-08-29",
+      "provenance": "COORDINATING AGENT, not the operator. Does NOT substitute for operator approval and does NOT relax the merge gate.",
+      "rulings": [
+        {
+          "id": "D42",
+          "decision": "Inc-5's two inherited items are REQUIREMENT-INSTRUMENT bugs; amend the spec, do not code around them",
+          "note": "(1) LLR-N07.2.2b's threshold said the rendered TEXT differs. Executed on the one compliant renderer: text_differs=False, spans_differ=True -- a hit is painted by STYLE, never by adding characters, so the parked threshold would have FALSE-FAILED a correct implementation. Restated as the hit node's style spans. This is the AT-046 shape one LLR over: an oracle written from the requirement's WORDING rather than from the producer's OUTPUT. (2) The derived renderer set must exclude Protocol subclasses: state.IRenderer is a census ARTIFACT, not a participant, and raises on instantiation, so a naive sweep CRASHES rather than being wrong. The set stays derived (C-31); the exclusion is a property of the rule, not a carve-out for one name. Both amended in 01-requirements.md."
+        },
+        {
+          "id": "D43",
+          "decision": "ONE REGIME, NOT TWO -- and it REVERSES a behaviour Inc-4b shipped with both gates' approval",
+          "note": "Above MAX_RENDER_NODES Inc-4b went silent on the count region and esc therefore popped on the first press. Both gates ruled that correct ON THE PREMISE that nothing was painted to clear. D43 rejects the PREMISE rather than the conclusion: paint it. (1) The count region declares an active query at EVERY graph size -- the query, the whole-graph count, that n traverses it, and WHY highlights are suspended. The suspension notice is the load-bearing half: declaring the count without it trades one hidden state for another. (2) esc clears in ALL regimes. The earlier #D38 ruling was universal, not below-the-bound only. An esc that varies with graph size is a lying affordance with extra steps -- the operator learns a rule that silently stops holding on a large map, and learns it by losing their place. (3) The new copy Inc-4b shipped without an owning clause (busqueda sin evaluar / el mapa supera el limite / the abrio prefix) is folded under the new LLR-N07.3.4, closing that declared risk. Routed to a NEW Inc-4c (1 source file, app.py) rather than to Inc-5: the copy's surface is the count region in app.py, and Inc-5's three files are the renderers. Recorded in 5.4, which stays the sole authority for the cut."
+        },
+        {
+          "id": "D44",
+          "decision": "Inc-4c runs FULL protocol; Inc-5 runs the A-91 lighter lane unless its pre-gate finds a data-path touch",
+          "note": "Inc-4c is orchestrator-classified FULL despite being one presentational file, because it MODIFIES A SHIPPED, ALREADY-GATED BEHAVIOUR on the chord that leaves the screen. Getting esc wrong either strands the operator or ejects them; neither is presentational. A-91 permits the lighter lane for presentational work, and this is a correction to a gated navigation contract. Recorded so the post-mortem can judge the trade."
+        }
+      ]
     }
-   ]
+  ],
+  "standing_authorization": {
+    "date": "2026-08-25/26, re-granted for the un-park 2026-08-27",
+    "autonomy_and_merge": "Autonomous end-to-end run WITH merge authority. Operator's words for the un-park: 'Proceed autonomously through gates with documented evidence; commit (explicit paths only), push, PR via gh, and merge when your independent gates pass.'",
+    "pre_authorized_A3": "Extending the frozen IRenderer.render contract with viewport/fold state (kwargs or a ViewState object): run ARQ/PDR, record the new frozen signature in docs/ARCHITECTURE.md, migrate ALL renderers and call sites in one increment.",
+    "merge_gate_retained": "Independent code review per increment; security sign-off AND an adversarial PR-level qa-reviewer pass over the whole branch must both come back clean before merge. A HIGH finding blocks and returns to the operator.",
+    "decision_recording": "Every autonomous decision recorded in PLAN.md section 9, in this decisions_log, in the postmortem, and carried to the vault at sync.",
+    "stop_conditions": "Scope beyond the brief, or un-mitigable data loss."
   },
-  {
-   "date": "2026-08-29",
-   "provenance": "COORDINATING AGENT, not the operator. Recorded as a task direction that amends a sealed cut under C-21. It does NOT substitute for operator approval and does NOT relax the merge gate: the independent security sign-off and the adversarial PR-level qa-reviewer pass over the whole diff both stand, and a HIGH still blocks the merge and returns to the operator.",
-   "rulings": [
-    {
-     "id": "D36",
-     "decision": "Inc-4 SPLIT into Inc-4a (search core) and Inc-4b (seat + walk); option (a), not (c)",
-     "note": "C-21 fired: the AT set changed after the cut was set (AT-024 out, three shall-clauses owed an id). Deferring the newly-owed ids was REJECTED as 'the conditional-close defect wearing a scheduling excuse' -- it would ship sealed `shall` clauses with no acceptance. Section 5.4 is amended as the SOLE authority: one cut, re-derived, with the C-21 trigger evidence recorded. The old Inc-4 row is STRUCK, not shadowed."
-    },
-    {
-     "id": "D37",
-     "decision": "#map-pagination is the named count region; C-D6a closed STRUCTURALLY; UX-Q3-a deferred",
-     "note": "AT-052's observation surface was named nowhere in the sealed text. C-D6a is closed by a single `active_hits` attribute with NO `or` fallback, asserted by AST -- refusing a green-before-code invariant, which is the vacuous-check defect this batch exists to stop. UX-Q3-a deferred with a recorded carry because no LLR ever stated it."
-    },
-    {
-     "id": "D38",
-     "decision": "`esc limpiar`: implement the BEHAVIOUR, do not change the string",
-     "note": "State-dependent esc -- search active: clear the search and STAY on the map; search clear: pop the screen. That is what the hint promises. The alternative, an operator following a painted hint and losing their place, is the lying-affordance class this project exists to remove. Lands in Inc-4b with its own arm: search-active esc must NOT pop, search-clear esc MUST."
-    },
-    {
-     "id": "D39",
-     "decision": "ViewState.query removed in Inc-4a; the A3 pre-authorization is UNSPENT and STAYS unspent",
-     "note": "Recorded explicitly so no later increment 'inherits' it. Removal is safe HERE on a contingent measured fact -- query has exactly one product reader, being rewritten by this increment -- and NOT as a category. Adding a defaulted field cannot break a reader; removing one breaks every reader. The two are not symmetric."
-    }
-   ]
+  "previous_batch": {
+    "batch_id": "2026-08-27-repair-batch-02",
+    "merge_commit": "2b59071",
+    "pr": "https://github.com/jav201/mapper/pull/3",
+    "closed_at": "2026-08-27",
+    "close_commit": "3fe0e4b",
+    "obsidian_synced": true,
+    "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
   },
-  {
-   "date": "2026-08-29",
-   "provenance": "COORDINATING AGENT, not the operator. Does NOT substitute for operator approval and does NOT relax the merge gate.",
-   "rulings": [
-    {
-     "id": "D40",
-     "decision": "Operator-path redaction: originals stay intact, the SYNC redacts its copies",
-     "note": "Repo transcripts are evidence and are NOT rewritten -- a rewritten record stops saying what was measured. Vault copies get the username path prefix redacted to C:\\Users\\<operator>\\ plus a one-line 'paths redacted at sync; originals in repo' note. Redacting a copy does not falsify the original, and the vault is the artifact more likely to be shared. The transform is recorded in the sync record. Procedure written to SYNC-NOTES.md. STANDING CARRY NOT CLOSED: username strings in committed repo history remain a declared blocker for any PUBLIC push -- redacting vault copies does nothing for git history. C-45 PUSH obligation recorded and NOT discharged: the control is portable and belongs in the global dev-flow-sync procedure, but ~/.claude carries uncommitted changes pre-dating this session (validator V16) and C-44 forbids committing over them. An unpushed control is indistinguishable from one never written -- live carry."
+  "batch_history": {
+    "2026-08-26-repair-batch": {
+      "batch_id": "2026-08-26-repair-batch",
+      "merge_commit": "e164a28",
+      "pr": "https://github.com/jav201/mapper/pull/2",
+      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "obsidian_synced": true
     },
-    {
-     "id": "D41",
-     "decision": "Round-4 orchestrator-applied fixes accepted; the pattern is EXCEPTIONAL, not habitual",
-     "note": "Accepted because it was declared with its cost named (nobody independent re-derived those two edits) and the orchestrator ran its own C-40 counterfactual with a sha256 restore. Not to be repeated as routine: the default stays implementer applies, independent lens confirms."
-    }
-   ]
+    "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
+    "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
+    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record."
   },
-  {
-   "date": "2026-08-29",
-   "provenance": "COORDINATING AGENT, not the operator. Does NOT substitute for operator approval and does NOT relax the merge gate.",
-   "rulings": [
-    {
-     "id": "D42",
-     "decision": "Inc-5's two inherited items are REQUIREMENT-INSTRUMENT bugs; amend the spec, do not code around them",
-     "note": "(1) LLR-N07.2.2b's threshold said the rendered TEXT differs. Executed on the one compliant renderer: text_differs=False, spans_differ=True -- a hit is painted by STYLE, never by adding characters, so the parked threshold would have FALSE-FAILED a correct implementation. Restated as the hit node's style spans. This is the AT-046 shape one LLR over: an oracle written from the requirement's WORDING rather than from the producer's OUTPUT. (2) The derived renderer set must exclude Protocol subclasses: state.IRenderer is a census ARTIFACT, not a participant, and raises on instantiation, so a naive sweep CRASHES rather than being wrong. The set stays derived (C-31); the exclusion is a property of the rule, not a carve-out for one name. Both amended in 01-requirements.md."
-    },
-    {
-     "id": "D43",
-     "decision": "ONE REGIME, NOT TWO -- and it REVERSES a behaviour Inc-4b shipped with both gates' approval",
-     "note": "Above MAX_RENDER_NODES Inc-4b went silent on the count region and esc therefore popped on the first press. Both gates ruled that correct ON THE PREMISE that nothing was painted to clear. D43 rejects the PREMISE rather than the conclusion: paint it. (1) The count region declares an active query at EVERY graph size -- the query, the whole-graph count, that n traverses it, and WHY highlights are suspended. The suspension notice is the load-bearing half: declaring the count without it trades one hidden state for another. (2) esc clears in ALL regimes. The earlier #D38 ruling was universal, not below-the-bound only. An esc that varies with graph size is a lying affordance with extra steps -- the operator learns a rule that silently stops holding on a large map, and learns it by losing their place. (3) The new copy Inc-4b shipped without an owning clause (busqueda sin evaluar / el mapa supera el limite / the abrio prefix) is folded under the new LLR-N07.3.4, closing that declared risk. Routed to a NEW Inc-4c (1 source file, app.py) rather than to Inc-5: the copy's surface is the count region in app.py, and Inc-5's three files are the renderers. Recorded in 5.4, which stays the sole authority for the cut."
-    },
-    {
-     "id": "D44",
-     "decision": "Inc-4c runs FULL protocol; Inc-5 runs the A-91 lighter lane unless its pre-gate finds a data-path touch",
-     "note": "Inc-4c is orchestrator-classified FULL despite being one presentational file, because it MODIFIES A SHIPPED, ALREADY-GATED BEHAVIOUR on the chord that leaves the screen. Getting esc wrong either strands the operator or ejects them; neither is presentational. A-91 permits the lighter lane for presentational work, and this is a correction to a gated navigation contract. Recorded so the post-mortem can judge the trade."
-    }
-   ]
-  }
- ],
- "standing_authorization": {
-  "date": "2026-08-25/26, re-granted for the un-park 2026-08-27",
-  "autonomy_and_merge": "Autonomous end-to-end run WITH merge authority. Operator's words for the un-park: 'Proceed autonomously through gates with documented evidence; commit (explicit paths only), push, PR via gh, and merge when your independent gates pass.'",
-  "pre_authorized_A3": "Extending the frozen IRenderer.render contract with viewport/fold state (kwargs or a ViewState object): run ARQ/PDR, record the new frozen signature in docs/ARCHITECTURE.md, migrate ALL renderers and call sites in one increment.",
-  "merge_gate_retained": "Independent code review per increment; security sign-off AND an adversarial PR-level qa-reviewer pass over the whole branch must both come back clean before merge. A HIGH finding blocks and returns to the operator.",
-  "decision_recording": "Every autonomous decision recorded in PLAN.md section 9, in this decisions_log, in the postmortem, and carried to the vault at sync.",
-  "stop_conditions": "Scope beyond the brief, or un-mitigable data loss."
- },
- "previous_batch": {
-  "batch_id": "2026-08-27-repair-batch-02",
-  "merge_commit": "2b59071",
-  "pr": "https://github.com/jav201/mapper/pull/3",
-  "closed_at": "2026-08-27",
-  "close_commit": "3fe0e4b",
-  "obsidian_synced": true,
-  "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
- },
- "batch_history": {
-  "2026-08-26-repair-batch": {
-   "batch_id": "2026-08-26-repair-batch",
-   "merge_commit": "e164a28",
-   "pr": "https://github.com/jav201/mapper/pull/2",
-   "closed_at": "d8777840313145fec341687f0081afd7230c755b",
-   "obsidian_synced": true
-  },
-  "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
-  "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-  "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
-  "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record."
- },
- "obsidian_synced": false,
- "created_at": "2026-08-26T00:00:00"
+  "obsidian_synced": false,
+  "created_at": "2026-08-26T00:00:00"
 }
