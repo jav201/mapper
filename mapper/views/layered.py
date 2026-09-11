@@ -35,10 +35,16 @@ def overflow_phrase(hidden: int) -> str:
     the same shape `views/state.py` records already shipping once for "hit".
     Sharing the TOKEN was the easy half; the sentence is the half that mattered.
 
-    Returned as a `str` rather than a `Text` because its three callers style it
-    differently at their own seams -- the canvas headers paint `INK` into an
-    existing `Text`, the strip appends to a built line.  Carrying a style here
-    would force one of them to strip it off again.
+    Returned as a `str` rather than a `Text` for the PADDING, not the styling --
+    and the styling reason that stood here was false: all three callers apply
+    `darkside.INK`. What differs is the surround. `outline` and `layered` lead
+    with two spaces inside a header; the strip trails one. That is layout, and it
+    is the WORDING that had to stop drifting.
+
+    The style being identical in all three is itself untidy -- single-sourcing
+    the sentence left the style triplicated -- but a styled return would bind the
+    three seams together more tightly than they are, so it is recorded rather
+    than fixed here.
 
     The caller supplies its own leading and trailing padding: `outline` and
     `layered` lead with two spaces inside a header, the strip trails one.  That

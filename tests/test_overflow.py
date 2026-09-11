@@ -1299,7 +1299,30 @@ async def test_at058_a_layout_failure_still_degrades_to_absent(tmp_path):
 
 @pytest.mark.asyncio
 async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_path):
-    """The threshold's real clause: the paths produce DIFFERENT painted frames.
+    """`broken` must not paint the same strip as SILENCE.
+
+    RELABELLED AFTER THE CODE REVIEW, because the name overstated it. This was
+    written as a three-state arm -- declaring / absent / broken -- and its real
+    content is a TWO-state guard. `_pagination_text` has no `None` branch; it has
+    `if hidden:`, which is equally false for `None` and for an empty
+    `frozenset()`. Fired: a mutant returning `frozenset()` where `_unpainted_ids`
+    returns `None` passes the whole suite. So `absent` and `nothing-hidden` share
+    one strip BY DESIGN, and `len({...}) == 3` below holds because `declaring`
+    hides something -- not because `absent` has an identity of its own.
+
+    The load-bearing distinction is `broken != silence`, and that one is real.
+
+    The simulation is kept and declared. `B-55` is closed across all three views,
+    so no shipped view occupies the absent state; a stub renderer routed through
+    the real `_painted_ids_for` would hit the RAISE, not the `None` branch. What
+    is simulated is the dispatch; what is exercised for real is `_unpainted_ids`'s
+    `is None` path and `_pagination_text`'s `if hidden:`. Deleting the arm would
+    let the seam's contract rot unobserved until some future view declares
+    nothing again.
+
+    Giving `None` its own words would kill that mutant, but that is a change to
+    `LLR-N06.3.3`'s meaning of silence -- a requirements call, carried, not made
+    here.
 
     Three states, and pre-fix TWO of them were the same strip:
 
@@ -1365,6 +1388,9 @@ async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_
             "nothing -- the collision AT-058 exists to break"
         )
         assert declaring != absent and declaring != broken
+        # THREE distinct strings, but only TWO distinct STATES: `absent` differs
+        # from `declaring` because something is hidden, not because silence is
+        # distinguishable from nothing-to-say. See the docstring.
         assert len({declaring, absent, broken}) == 3
 
 
@@ -1619,8 +1645,17 @@ def _frame_hidden_for(module: str, screen) -> set[str]:
         # one -- which is how this line came to be written deliberately rather
         # than by defaulting. Radial paints PILLS and TRUNCATES the title to 18
         # cells (`radial.py`'s pill loop), so the emitted image is
-        # `plain(title)[:18]`, not the full title. Measured: the full-title read
-        # traces 0 of 8 at five sizes where the frame plainly shows pills.
+        # `plain(title)[:18]`, not the full title.
+        #
+        # THE TRUNCATION IS UNTESTED BY THESE FIXTURES. The claim that stood here
+        # -- "the full-title read traces 0 of 8" -- was REFUTED by the code
+        # review: computed both ways at 12 combinations the two oracles agree at
+        # every one, because no fixture title exceeds 18 characters (the longest
+        # is exactly 18). So `[:18]` is the RIGHT predicate and an UNEXERCISED
+        # one, and the 0-of-8 figure is struck -- it was measured under outline's
+        # geometry, not radial's. Carried: a >18-character fixture title would
+        # exercise it, and until one exists a mutant dropping the `[:18]` from
+        # either the renderer or this oracle survives.
         painted = " ".join(" ".join(canvas_rows(screen)).split())
         return {
             nid for nid, node in graph.nodes.items()
@@ -1846,7 +1881,13 @@ async def test_outline_cuts_at_the_rows_the_canvas_shows(tmp_path, fixture, size
 # ---------------------------------------------------------------------------
 # AT-059 / TC-092 -- LLR-N06.3.7: radial declares what the canvas lost.
 
-AT059_SIZES = [(24, 20), (30, 16), (50, 16), (80, 24), (118, 34)]
+# `(20,30)` IS HERE BECAUSE ITS ABSENCE LET A DEFECT REACH THE GATE GREEN.
+# `inner` is 18 there and `legacy`'s root pill needs 21, so the title is clipped
+# by the CANVAS EDGE -- the one clipping mode the ownership ledger excused rather
+# than failed. Every other size in this table samples pill-on-pill overlap, which
+# it always caught. A parametrization that samples one failure mode tests one
+# failure mode.
+AT059_SIZES = [(20, 30), (24, 20), (30, 16), (50, 16), (80, 24), (118, 34)]
 
 
 @pytest.mark.parametrize("fixture", AT056_FIXTURES)
