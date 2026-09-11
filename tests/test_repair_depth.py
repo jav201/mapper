@@ -114,7 +114,32 @@ MASTER_LEGACY_DIGESTS = {
     ("LayeredRenderer", 300, 120): "e133509b464d85d5d34256468c9832abc014699ab581283ae91ee939779bd320",
     ("OutlineRenderer", 140, 45): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
     ("OutlineRenderer", 80, 24): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
-    ("OutlineRenderer", 140, 8): "5ec6a1051d11fbbb213efadc4f7efafa5487512cbd9fd597b971b4b0b24a022f",
+    # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-B55a.  REASON:
+    # `B-55` landed, so `OutlineRenderer` now DECLARES the nodes it hides, and
+    # this is the only Outline key at which `legacy` has an unpainted node -- the
+    # other three paint the whole map, so the declaration has nothing to say.
+    # The move is the requirement landing, not a regression.
+    #
+    # BOUNDED, AND THE BOUND WAS MEASURED BEFORE THE RE-CAPTURE, against
+    # `git show HEAD:mapper/views/outline.py` rather than a working copy: ONE
+    # row differs -- row 0, the header -- the row count is unchanged, the old
+    # row 0 is a PREFIX of the new one, and the added suffix is exactly
+    # `  ▽ 1 fuera de vista`.  The other three Outline keys were predicted GREEN,
+    # verified byte-identical and NOT re-captured: a red pin is evidence, a
+    # re-captured pin is a claim.
+    #
+    # The first attempt at this bless hashed `render().plain` and produced a
+    # digest matching NEITHER side, because this pin fingerprints
+    # `(plain, spans)` and renders with `fin` SELECTED.  A bless computed by a
+    # different method than the pin uses is a number that LOOKS like evidence and
+    # is not.  Recomputed with `_fingerprint`'s own definition, it reproduces the
+    # suite's value independently.
+    #
+    # Blessed under the coordinator ruling of 2026-09-10 that settled the
+    # behaviour this digests (`H1` refined: a declaration must not spend content
+    # and INFORM NOTHING).  Deliberately NOT blessed before that ruling -- pinning
+    # a frame an open question may still change pins the wrong frame.
+    ("OutlineRenderer", 140, 8): "85060bae8a69a793169ae8aeec31ac7535773868acdf810264965f8c739fd51e",
     ("OutlineRenderer", 300, 120): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
     # The four RadialRenderer keys below were RE-BASELINED in
     # 2026-08-26-ui-next-batch-02 Inc-1, and the move is CORRECT behaviour, not

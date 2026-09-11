@@ -1428,3 +1428,229 @@ async def test_p1_at_rest_region_and_content_share_one_geometry(tmp_path, size, 
             f"{len(expected.splitlines())}. The region moved after the canvas "
             "was painted and nothing re-rendered."
         )
+
+
+# ---------------------------------------------------------------------------
+# AT-056 / TC-089 -- LLR-N06.3.4: the number outline shows matches what the
+# operator cannot see.
+#
+# Acceptance is PHYS-3 + PHYS-4 only. PHYS-1/PHYS-2 are the pinned pilot arm
+# below: they are a rendering-correctness property of one module, strong as
+# regression but pressing a claim the operator cannot state. What the operator
+# CAN state is "the number it shows me matches what I cannot see".
+
+# BOTH fixtures are normative. `legacy` alone was blind: with the settle fix in,
+# a 144-combination sweep found nine cases where a node's title is held by the
+# canvas and absent from the composited frame -- every one of them on `anidado`.
+AT056_FIXTURES = ["legacy", "anidado"]
+# Clipping sizes, then the two controls. (50,16) says do not over-cut; (80,24)
+# says do not declare at zero.
+AT056_SIZES = [(30, 16), (32, 16), (24, 20), (50, 16), (80, 24)]
+
+
+def _frame_hidden(screen, graph) -> set[str]:
+    """The hidden set DERIVED FROM THE FRAME, never from `painted_ids`.
+
+    `C-31`: asking the product for the number and then checking it against the
+    same number asserts an identity between a value and itself. This reads the
+    composited canvas region and asks which node titles are absent from it.
+
+    Outline's painted trace, per `LLR-N06.3.4`'s `PHYS-3`: the node's title as
+    `render` emits it -- `darkside.plain` of the ficha title -- whitespace
+    collapsed, sought in the whitespace-collapsed JOIN of the region rows.
+    Joined rather than per-row because outline word-wraps, so a title can be
+    split across two physical rows and is still painted.
+    """
+    painted = " ".join(" ".join(canvas_rows(screen)).split())
+    hidden = set()
+    for nid, node in graph.nodes.items():
+        trace = " ".join(darkside.plain(node.ficha.title).split())
+        if trace and trace not in painted:
+            hidden.add(nid)
+    return hidden
+
+
+@pytest.mark.parametrize("fixture", AT056_FIXTURES)
+@pytest.mark.parametrize("size", AT056_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_at056_outline_declares_what_the_cut_hid(tmp_path, fixture, size):
+    """`PHYS-3` and `PHYS-4`, read off the composited frame.
+
+    Pre-`Inc-B55a` this could not even be evaluated: `_unpainted_ids` returned
+    `None` for outline at every size, so the view declared nothing while hiding
+    up to 7 of 8 nodes.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, fixture)
+        app.store.save(fixture, graph)
+        screen = await open_map(app, pilot, fixture)
+        await pilot.pause()
+        await pilot.press("o")
+        await pilot.pause()
+        assert screen.outline_mode
+
+        declared = screen._unpainted_ids()  # noqa: SLF001
+        assert declared is not None, "outline declares since Inc-B55a"
+        frame_hidden = _frame_hidden(screen, screen.graph)
+        total = len(screen.graph.nodes)
+
+        if size == (80, 24):
+            # `LLR-N06.3.3`'s zero form, asserted in the inverted direction so a
+            # renderer that hides everything cannot pass it by accident.
+            assert len(declared) == 0, (
+                f"{fixture} at {size} declares {len(declared)} hidden on a frame "
+                "that shows the whole map"
+            )
+            assert OVERFLOW_TOKEN not in " ".join(canvas_rows(screen))
+            return
+
+        # PHYS-4 FIRST: without it, PHYS-3 is satisfiable by `0 == 0` on a frame
+        # that hides nothing.
+        assert len(declared) >= 1, (
+            f"{fixture} at {size} declares nothing hidden; the equality below "
+            "would be `0 == 0`"
+        )
+        # THE UPPER BOUND WAS `< total` AND RULING A REFUTED IT.  Declaring ALL
+        # nodes hidden is now CORRECT where the header's own declaration takes
+        # the last row -- measured at (30,16) and (32,16).  A blanket bound
+        # would have been a false-fail on ratified behaviour (`C-53`).
+        #
+        # Replaced by the CONDITIONAL that actually separates the legitimate
+        # frame from the mutant it was guarding, which is a STRENGTHENING and so
+        # needs no independent pass (control 13): painting nothing is allowed
+        # ONLY while the canvas is visibly saying so.  A `_fit` that returns an
+        # empty list drops the header too, declares everything hidden, and
+        # paints NO token -- and fails here, which is the `lines[:0]` shape
+        # PHYS-4 existed to catch.
+        if len(declared) == total:
+            assert OVERFLOW_TOKEN in " ".join(canvas_rows(screen)), (
+                f"{fixture} at {size} paints no node and declares all {total} "
+                "hidden WITHOUT saying so on the canvas; a frame that shows "
+                "nothing and states nothing is the lines[:0] shape"
+            )
+        # PHYS-3.
+        assert declared == frozenset(frame_hidden), (
+            f"{fixture} at {size}: the declaration and the frame disagree.\n"
+            f"  declared hidden but PAINTED: {sorted(declared - frame_hidden)}\n"
+            f"  painted nowhere but DECLARED VISIBLE: "
+            f"{sorted(frame_hidden - declared)}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# AT-057 / TC-090 -- LLR-N06.3.5: both declaring surfaces speak, agree, and are
+# right.
+#
+# The FIRST draft of this row was "equal counts, zero disagreements" and `02n`
+# rejected it as GREEN ON THE SHIPPED PRE-STATE: at (35,14) on `legacy` in
+# outline, 7 of 8 nodes were hidden and BOTH surfaces were silent, so the
+# threshold was satisfied by universal silence. AGREE-1 is the clause that
+# fixes that, and it is the clause the pre-state fails.
+
+# The key that reaches each declaring view. DERIVED against
+# `painted_ids_exporters()` below, so a view that gains a declaration without
+# gaining an arm goes red rather than being silently unmeasured.
+_DECLARING_VIEW_KEYS = {
+    "mapper.views.layered": None,   # the default view; no chord
+    "mapper.views.outline": "o",
+}
+AT057_SIZES = [(35, 14), (30, 16), (80, 24)]
+
+
+def _frame_hidden_for(module: str, screen) -> set[str]:
+    """The frame-derived hidden set UNDER THE VIEW'S OWN painted predicate.
+
+    `02m` §7: `B-55` would otherwise ship three different definitions of
+    "painted" behind one operator-facing numeral, which is the failure
+    `views/state.py` records already shipping once for "hit". So the predicate is
+    per view, and an unstated one RAISES rather than borrowing a neighbour's.
+
+    The first draft of this arm used outline's full-title predicate for BOTH
+    views and reddened layered at three sizes -- correctly. Layered TRUNCATES
+    titles into cards, so a full-title trace is 0 of 8 at every width; its
+    normative predicate is the clipped image found AT THE COLUMNS ITS CARD
+    OCCUPIES, which `oracle_traced` already implements. Outline WORD-WRAPS
+    instead of truncating, so a title survives a wrap whole and the joined
+    full-title read is right there and wrong for layered.
+    """
+    graph = screen.graph
+    if module == "mapper.views.outline":
+        return _frame_hidden(screen, graph)
+    if module == "mapper.views.layered":
+        w, _h = screen._canvas_size()  # noqa: SLF001
+        traced = oracle_traced(
+            graph, screen.folded, w, canvas_rows(screen), screen.pan_x
+        )
+        return set(graph.nodes) - set(traced)
+    raise AssertionError(
+        f"no painted predicate stated for {module}; AGREE-3 cannot borrow "
+        "another view's geometry (02m §7.3)"
+    )
+
+
+@pytest.mark.parametrize("module", sorted(_DECLARING_VIEW_KEYS))
+@pytest.mark.parametrize("size", AT057_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_at057_both_surfaces_declare_when_a_view_hides(tmp_path, module, size):
+    """`AGREE-1`, `AGREE-2` and `AGREE-3` over every view that declares.
+
+    Silence on both surfaces is NOT agreement: `LLR-N06.3.3` makes silence mean
+    *nothing is hidden*, so two silent surfaces over a frame that hides nodes are
+    two surfaces agreeing on a falsehood.
+    """
+    from tests.test_inc3_census import painted_ids_exporters
+
+    # The quantifier, stated so it cannot drift.
+    assert painted_ids_exporters() == set(_DECLARING_VIEW_KEYS), (
+        "a view gained or lost a declaration without this arm being updated; "
+        f"exporters={sorted(painted_ids_exporters())} "
+        f"driven={sorted(_DECLARING_VIEW_KEYS)}"
+    )
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, "legacy")
+        app.store.save("legacy", graph)
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+        key = _DECLARING_VIEW_KEYS[module]
+        if key:
+            await pilot.press(key)
+            await pilot.pause()
+
+        canvas = " ".join(canvas_rows(screen))
+        strip = " ".join(rows_in(screen, screen.query_one("#map-pagination").region))
+        frame_hidden = _frame_hidden_for(module, screen)
+
+        if not frame_hidden:
+            # The zero control: both surfaces correctly silent.
+            assert OVERFLOW_TOKEN not in canvas and OVERFLOW_TOKEN not in strip
+            return
+
+        # AGREE-1 -- the clause the shipped pre-state failed.
+        assert OVERFLOW_TOKEN in canvas, (
+            f"{module} at {size} hides {len(frame_hidden)} node(s) and the CANVAS "
+            "header says nothing; LLR-N06.3.3 makes that mean nothing is hidden"
+        )
+        assert OVERFLOW_TOKEN in strip, (
+            f"{module} at {size} hides {len(frame_hidden)} node(s) and the STRIP "
+            "says nothing"
+        )
+        # AGREE-2 -- equal. Rows are JOINED before parsing: the header wraps, and
+        # a per-row regex either misses the numeral or binds it to the wrong
+        # label (QA-N-06).
+        on_canvas = _declared_total(canvas_rows(screen))
+        on_strip = _declared_total([strip])
+        assert on_canvas == on_strip, (
+            f"{module} at {size}: canvas says {on_canvas}, strip says {on_strip}"
+        )
+        # AGREE-3 -- RIGHT, not merely equal. Two surfaces fed from one
+        # computation agree by construction; equality alone is green when both
+        # are equally wrong.
+        assert on_canvas == len(frame_hidden), (
+            f"{module} at {size}: both surfaces say {on_canvas}, the frame hides "
+            f"{len(frame_hidden)}"
+        )
