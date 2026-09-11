@@ -548,6 +548,15 @@
         "how_closed": "Bounding the toast's detail at the _event_toast seam routed it through darkside.fit, which COERCES as well as truncates. The chrome sink stopped leaking as a side effect of a LAYOUT bound -- nobody set out to close it.",
         "evidence": "TWO-ORACLE, per the batch standard: tests/test_fold.py::test_the_factory_tree_coerces_the_titles_it_paints, re-scoped from asserts-OPEN to asserts-CLOSED, is RED on the pre-Inc-CRUMB tree ('the FactoryScreen chrome leaks coerced code points: [...]') and GREEN after. The arm's superseded clause had itself instructed the next reader to re-scope it to the whole frame on the day the leak stopped.",
         "consequences": "Inc-REPAIR's scope DROPS F-C, recorded there and here. A defect closed by accident still gets a deliberate record -- otherwise the next increment either re-fixes it or reports it open."
+      },
+      {
+        "id": "UI-AT058 (Inc-B55a)",
+        "routed_to": "ux-reviewer",
+        "pickup": "Inc-CONFIRM, or the whole-branch gate -- whichever comes FIRST. Recorded here so it cannot evaporate between increments.",
+        "date": "2026-09-10",
+        "finding": "AT-058 introduces a new operator-visible Spanish string on the pagination strip: 'declaración no disponible'. It is painted only when a renderer has no declaration entry -- i.e. reachable only through a code defect, and a census arm is intended to make it unreachable in a shipped build.",
+        "why_routed_not_fixed": "It IS operator-visible Spanish and the register check is cheap at the gate, but it is defect-reachable-only text and does not warrant a fresh review lane now. Coordinator ruling 2026-09-10.",
+        "what_to_check": "Register and tone against the batch's other strip text; whether 'no disponible' reads as a transient condition the operator could wait out, when it is in fact a permanent code defect; and whether it should name WHICH view failed to declare."
       }
     ],
     "inc_repair_scope": [
