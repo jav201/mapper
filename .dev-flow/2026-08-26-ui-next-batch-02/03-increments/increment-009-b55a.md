@@ -84,7 +84,16 @@ subtraction may still be priced for `layered`'s, which wraps at narrow widths. T
 gap: `1` line at `(24,20)`, `(30,16)`, `(32,16)`, `(34,14)` and `0` everywhere else. The docstring at
 `:1495` already names charging a constant in either place as `B-61`.
 
-**Owed before implementation:** confirm or refute that candidate by direct observation, and identify
+> **REFUTED BY `02o` (independent diagnostic lane, 2026-09-10).** The candidate is TRUE AS A FACT —
+> layered's header height IS charged regardless of view — and **structurally incapable** of explaining
+> the gap: `gap = re - held`, both priced at the same `_canvas_size()`, so a wrong constant moves both
+> equally and **cannot appear in their difference**. The gap is by construction a staleness measure.
+> The real mechanism is a **stale final write**: `refresh_canvas` paints the canvas at `:2370`, then
+> updates the strip at `:2425`; in outline the strip loses its `▽` token (36 cells → 17), unwraps from
+> 2 rows to 1 at width ≤ 34, and `#map-body` gains a row **after** the canvas was painted. Nothing
+> repaints. See `02o` §3 and the two-defect split in `state.json`.
+
+**Superseded — owed before implementation:** confirm or refute that candidate by direct observation, and identify
 what the settle loop's terminating pass actually rendered at. Until then the mechanism line in §2's
 table reads `H3/H4 CONFIRMED AS AN OBSERVABLE, MECHANISM OPEN`.
 
