@@ -335,6 +335,21 @@
           "hostile_sweep": "T1: RLO, PDF, ZWSP, ZWJ, NUL, BEL, ESC-CSI, BOM, bidi isolates, TAG block, combining, astral, soft hyphen and TAB through render AND painted_ids at 100 sizes including w=1 and h=0 -- ZERO leaks.",
           "calibration": "The reviewer spot-checked five of my comment claims by firing them. FOUR held -- the physical-row cut, the fixed point settling, the declaration informing rather than manufacturing its own omission, and rows[0] being the renderer's own header. ONE did not: the P1-guard docstring, which is F1.",
           "could_not_determine": "Whether .mmd/.yml titles can contain LF (parsers not read; TAB and raw length carry F2 regardless); whether F1's operator-reachable variant actually lands (audit, not a negative experiment); whether rich has a super-linear grapheme regime not constructed (measured, not proven)."
+        },
+        "inc_b55b_pregate_2026-09-10": {
+          "cut": "mapper/views/radial.py + mapper/app.py -- 2 source files, per A-94. Unchanged.",
+          "vector_confirmed_open": "radial's `_unpainted_ids` returns None at ALL eight driven sizes, so radial declares nothing on either surface. B-55's radial vector is open exactly as recorded.",
+          "P1_HOLDS_AT_EVERY_DRIVEN_SIZE": "Measured, and it NARROWS the increment. 02o's boundary statement named radial unmeasured and PREDICTED the stale-write mechanism would reach it, because _unpainted_ids short-circuits for radial too. It does not, at any of the eight sizes driven: content and geometry agree everywhere. Inc-B55a's settle fix already covers radial, so Inc-B55b is THE DECLARATION ONLY -- one thing, not two.",
+          "prediction_refuted_not_inherited": "That prediction came from a lane whose other findings all held. It was still a prediction, and it was measured rather than carried forward as fact. It did not survive.",
+          "my_probe_oracle_is_WRONG_for_radial_and_says_so": "The traced column above uses the FULL-TITLE predicate, which is outline's. Radial paints PILLS and truncates, so full-title tracing under-counts exactly the way it did for layered -- 0 of 8 traced at five sizes where the frame plainly shows pills. This is 02m section 7.3 arriving on schedule: radial's painted predicate must be STATED IN ITS OWN ROW and cannot borrow outline's. The pre-gate deliberately does not settle it; that is the increment's design question.",
+          "design_constraint_carried_in": "M-N06.3-b: radial's painted set is NOT a filter over place(). mapper/canvas.py put() is last-write-wins and records no owner, so placement OVER-DECLARES -- the architect measured 6 of 8 pills partly overwritten at 30x6. The construction is a CELL-OWNERSHIP REPLAY: extract the pill loop into a module-level pass recording which node last wrote each cell, consumed by both render and painted_ids, so the declaration and the cut share one definition (B-60's lesson, as Inc-B55a built it for outline).",
+          "watches_from_the_standing_record": [
+            "The AT-058 identity-dispatch brittleness: radial gains a painted_ids entry, so `_painted_ids_for` changes and the three-frames arm's 'absent' case moves OFF radial. That line moves DELIBERATELY or the arm goes red -- it says so in its own comment.",
+            "The A-98 tripwire will fire again, widening to {layered, outline, radial}. Widen the set AND amend the docstring; never a -k exclusion.",
+            "The declaration SENTENCE is triplicated and unpinned (F7). Adding a fourth spelling in radial would make it worse; prefer consuming the existing one.",
+            "AGREE-1 is OPEN at the empty-frame floor. Radial's declaration must not silently inherit that exception without measuring whether radial even has the floor."
+          ],
+          "measured_table": "traced/total, declared, canvas_token, strip_token, P1 at (24,20) 2/8 None F F True; (30,16) 0/8 None F F True; (32,16) 0/8 None F F True; (34,14) 0/8 None F F True; (35,14) 0/8 None F F True; (50,16) 0/8 None F F True; (80,24) 8/8 None F F True; (118,34) 8/8 None F F True."
         }
       }
     ],
