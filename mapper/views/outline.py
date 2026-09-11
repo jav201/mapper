@@ -223,13 +223,28 @@ def _rows(
             # and it coerced nothing -- measured, a hostile title through it
             # writes an SVG that is not well-formed XML.  The guarantee
             # `AT-009` asserts held only in radial view.
-            # `_clip`, NOT a second truncator. It is the ellipsis idiom already
-            # in this family AND it fixes the coercion ORDER: `LLR-COERCE.2`
-            # says coerce THEN truncate, because cutting between a U+202E and
-            # its terminator manufactures an unterminated override that no later
-            # coercion can repair. `_clip` calls `darkside.plain` itself, so the
-            # coercion this line used to do explicitly is not lost -- it moved
-            # inside, ahead of the cut, which is where it has to be.
+            # `_clip`, NOT a second truncator: it is the ellipsis idiom already
+            # in this family, and it calls `darkside.plain` itself, so THE
+            # COERCION THIS LINE USED TO DO EXPLICITLY IS NOT LOST.  That -- the
+            # title path being coerced AT ALL -- is the load-bearing property
+            # here, and it is what `test_outline_caps.py` now pins.
+            #
+            # AN EARLIER VERSION OF THIS COMMENT CLAIMED MORE, AND THE SECURITY
+            # REVIEW REFUTED IT.  It said routing through `_clip` "fixes the
+            # coercion ORDER", because cutting between a `U+202E` and its
+            # terminator would strand an unterminated override.  MEASURED: it
+            # cannot.  `_CONTROL_MAP` maps all 235 banned code points to exactly
+            # one `U+FFFD` each, so `plain` is length- and index-preserving and
+            # `truncate(plain(s)) == plain(truncate(s))` IDENTICALLY -- 20,000
+            # fuzzed hostile pairs, zero differences, and a mutant running the
+            # forbidden order stayed green on all 1058 arms.  There is never an
+            # override left to strand, because `plain` replaced it.
+            #
+            # The ordering still costs nothing and the code is unchanged; what
+            # changed is the reason given for it.  A true outcome resting on a
+            # false mechanism is the shape this batch keeps cataloguing, and it
+            # would have become load-bearing the day `plain` deleted rather than
+            # replaced.
             title = _clip(node.ficha.title, row_cap)
             if cur == selected_id:
                 block = f"bold {darkside.GROUND} on {darkside.ACCENT}"

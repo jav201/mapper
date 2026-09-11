@@ -791,6 +791,32 @@
         "outline_half": "NIL TODAY, and that is the evidence the cost caps relied on: because outline reads no pan, cells past the canvas width are unreachable there, which is what made capping the indent safe. If outline ever gains pan, that licence lapses and the caps must be revisited -- recorded here so the dependency is not invisible.",
         "for_S_D_to_measure": "Whether radial's nil is the same nil: does radial WANT pan (a radial map larger than the canvas is the obvious case), and does the layered extent produce a clamp that would be wrong the moment it did? S-D owns radial.py, so the measurement belongs to its pre-gate.",
         "not_fixed_here": "Out of S-B(+C)'s scope and its file cap; no behaviour was changed for it."
+      },
+      {
+        "id": "B-50 (outline's walk has no visited set)",
+        "date": "2026-09-11",
+        "severity": "MEDIUM, LATENT",
+        "found_by": "S-B(+C) security review (gate 2)",
+        "what": "`outline._rows`'s `walk` keeps no visited set, so a DAG expands combinatorially. FIRED: 58 nodes -> 2,097,150 rows in 24 s, doubling per 48 bytes of CSV. `MAX_RENDER_NODES = 12000` gates NODE COUNT, which is the wrong quantity -- the blow-up is in PATHS.",
+        "why_latent_not_live": "`mermaid.parse` refuses multi-parent and every `MapScreen` graph arrives through it; the reviewer fired that end to end. So there is no operator-reachable door TODAY.",
+        "why_it_still_matters": "OUTLINE IS THE ONLY RENDERER LACKING THE GUARD -- layered handles the same fixture in 34 ms and radial in 117 ms. The protection is currently a property of a DIFFERENT module's parser, not of this renderer, so any second ingestion path (import, API, a relaxed parser) opens it.",
+        "NOT_FIXED_HERE": "Out of S-B(+C)'s cut and its file cap. Route to a later increment; the cost caps this increment landed do NOT address it, because they bound row WIDTH and this is row COUNT."
+      },
+      {
+        "id": "B-51 (store.save accepts what store.load refuses)",
+        "date": "2026-09-11",
+        "severity": "MEDIUM, PRE-EXISTING",
+        "found_by": "S-B(+C) security review (gate 2)",
+        "what": "`store.save` accepts a multi-parent graph that `store.load` then refuses. FIRED: the map saves and cannot be reopened -- the operator's work is written and then unreadable.",
+        "shape": "The `LLR-R01.5 (A-2)` write/read asymmetry recurring for a SECOND shape, which is what makes it worth a named carry rather than a line in a report.",
+        "NOT_FIXED_HERE": "It owns `store.py`, not this stage's file, and it predates this increment."
+      },
+      {
+        "id": "B-52 (lone surrogates survive `darkside.plain`)",
+        "date": "2026-09-11",
+        "severity": "LOW",
+        "found_by": "S-B(+C) security review (gate 2)",
+        "what": "A lone surrogate passes `plain` and raises on encode. NO DOOR ESTABLISHED: the reviewer could not determine whether one can reach a `ficha.title` at all, and reported it as an observation rather than a finding. Recorded at that strength deliberately."
       }
     ],
     "routed_findings": [
