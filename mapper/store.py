@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-from dataclasses import MISSING
+from dataclasses import MISSING, fields
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, get_type_hints
@@ -153,6 +153,32 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
     return out
 
 
+# The keys an attachment can carry, DERIVED from the dataclass rather than
+# spelled -- a fourth field added to `Attachment` must not silently start being
+# refused here (`B-48`).
+_ATTACHMENT_KEYS = {f.name for f in fields(Attachment)}
+
+
+def _raw_origin(value: Any, coordinate: str) -> str:
+    """The raw value when it is SAFE to show, the coordinate when it is not.
+
+    `AT-P02d` requires the duplicate record to carry the RAW ORIGIN, so a
+    coercion-induced collision (`"1"` against `1`) can be told from a plain one.
+    `LLR-N13.1.7` requires the record not to MATERIALISE an alias-amplified
+    structure. Both hold, because the diagnostic is only ever meaningful for a
+    SCALAR: the operator can act on `1` or `b'h2'`, and a nested list tells them
+    nothing they could not read from the coordinate.
+
+    So a scalar is shown and anything else names its position instead. Measured
+    on the shipped tree, the unbounded form loaded two alias-amplified document
+    names in 54 SECONDS and emitted a 522-megabyte warning -- the message
+    reporting the refusal performing the materialisation the refusal prevented.
+    """
+    if isinstance(value, (str, bytes, int, float, bool)) or value is None:
+        return repr(value)
+    return coordinate
+
+
 def _mappings(
     graph: Graph, owner: str, key: str, entries: Any
 ) -> list[dict[str, Any]]:
@@ -173,14 +199,31 @@ def _mappings(
     finding asked for -- and would take three arms off the net's counterfactual.
     Measured (review Q1): schema/document item-scalars are denied typed; only
     attachments carried the silent-loss class.
+
+    AND THE CLASS WAS CLOSED FOR SCALARS ONLY, which this docstring did not say
+    until `Inc-REPAIR` S-E (`B-48`).  A MAPPING carrying none of the attachment
+    keys passed the `isinstance(entry, dict)` test above and was materialised
+    into an `Attachment` with empty kind, path and caption -- so nothing was
+    lost and a PHANTOM WAS INVENTED, unwarned, while a scalar beside it was
+    correctly refused with a coordinate.  Type is not content.  The refusal is
+    now keyed on `_ATTACHMENT_KEYS`, derived from the dataclass so a fourth
+    field does not silently start being refused.
     """
     if not isinstance(entries, list):
         graph.load_warnings.append(f"campo ilegible: {owner}.{key}")
         return []
     out = []
     for i, entry in enumerate(entries):
-        if isinstance(entry, dict):
+        if isinstance(entry, dict) and _ATTACHMENT_KEYS & set(entry):
             out.append(entry)
+        elif isinstance(entry, dict):
+            # TYPE IS NOT CONTENT (`B-48`).  A mapping carrying NONE of the
+            # attachment keys used to be accepted here and materialised into an
+            # `Attachment` with empty kind, path and caption -- so nothing was
+            # lost and a PHANTOM WAS INVENTED, which is the silent-loss class
+            # this function exists to end, inverted.  The docstring below still
+            # claimed the class was closed; it was closed for scalars only.
+            graph.load_warnings.append(f"adjunto sin campos: {owner}.{key}[{i}]")
         else:
             # The index is part of the record.  Without it n malformed entries
             # emit n byte-identical lines that cannot be told apart -- the same
@@ -369,8 +412,23 @@ class MapStore:
                 # involved.  That second case was a silent overwrite before this
                 # line and is a STRICT SUPERSET of what the requirement asked for.
                 # Declared rather than left to be discovered (review G3).
+                # THE COORDINATE, NEVER THE VALUE (`LLR-N13.1.7`).  This line
+                # used to interpolate `d.get('name')!r` -- the RAW, UNCOERCED
+                # sidecar value -- and that is the one diagnostic in this module
+                # that read data of unbounded size.  Measured: two `documents`
+                # sharing a 9-level alias-amplified `name` loaded in 54 SECONDS
+                # and emitted a 522-megabyte warning; the same sidecar at 5
+                # levels emitted 522,311 characters in 25 ms.
+                #
+                # THE MESSAGE REPORTING THE REFUSAL WAS PERFORMING THE
+                # MATERIALISATION THE REFUSAL PREVENTED.  The per-key coercion
+                # worked -- `campo ilegible: document[i].name` is emitted two
+                # lines up and `doc.name` is already `''` -- and then this line
+                # reached past it to the raw value.  A defence is only as good as
+                # the diagnostic that announces it.
                 graph.load_warnings.append(
-                    f"documento duplicado: {doc.name!r} <- {d.get('name')!r}"
+                    f"documento duplicado: {doc.name!r} <- "
+                    f"{_raw_origin(d.get('name'), f'document[{i}].name')}"
                 )
             documents[doc.name] = doc
         graph.documents = documents
@@ -398,6 +456,16 @@ class MapStore:
                 graph.load_warnings.append(f"nodo duplicado: {nid!r} <- {raw_nid!r}")
             seen_ids.add(nid)
             if nid not in graph.nodes:
+                # A SIDECAR ID THE `.mmd` NEVER DEFINED (`B-29`, `AT-049`).  It
+                # is still added -- removing it would change the meaning of the
+                # coverage values, which `LLR-REPAIR.1` explicitly forbids -- but
+                # it is no longer SILENT.  The comment above used to say the
+                # phantom "is still added ... That is outside this batch's
+                # fence"; the fence moved when `Inc-REPAIR` opened, and the
+                # silence mattered because `LLR-N13.1.5`'s containment arm, which
+                # `AT-025b` drives, cannot see a damaged sidecar the store does
+                # not report.
+                graph.load_warnings.append(f"nodo fantasma: {nid!r}")
                 graph.add_node(Node(id=nid))
             node = graph.nodes[nid]
             text_attrs = _text_attributes()
@@ -453,7 +521,12 @@ class MapStore:
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
         if not mmd_path.exists():
-            raise MapStoreError(f"Map not found: {mmd_path}")
+            # THE MAP, NOT THE FILESYSTEM (`B-30`, `AT-050`).  This carried
+            # `{mmd_path}` -- an absolute path including the operator's home
+            # directory -- and the string reaches the `load_or_notice` toast, so
+            # it was operator-visible and screenshot-visible.  The map id is what
+            # the operator asked for and the only part they can act on.
+            raise MapStoreError(f"no existe el mapa {map_id!r}")
         try:
             # These reads sat OUTSIDE every net, so invalid UTF-8 in either file
             # raised a bare `UnicodeDecodeError` straight out of `load`, and an

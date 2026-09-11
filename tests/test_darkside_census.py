@@ -180,7 +180,11 @@ CONFORMING_SEVERITY = {
     ("mapper/app.py", 'return Text.assemble(("● ", darkside.WARN), ("riesgo", darkside.WARN))'),
     ("mapper/app.py", 'return ("░", darkside.WARN)'),
     ("mapper/app.py", '("░", darkside.WARN), (" baja ", darkside.MUT),'),
-    ("mapper/screens/coverage.py", 'Text.assemble((escape(",".join(missing)), darkside.ALERT)),'),
+    # `escape` -> `darkside.plain` at `Inc-REPAIR` S-E: `escape` guards Rich
+    # markup and coerces nothing else, and both values at this site are
+    # file-derived. The CLASSIFICATION is unchanged -- this is still the ALERT
+    # hue on a missing-fields list -- only the coercion moved.
+    ("mapper/screens/coverage.py", '(darkside.plain(",".join(missing)), darkside.ALERT)'),
     ("mapper/screens/factory.py", '("no se puede dibujar: el mapa tiene un ciclo", darkside.ALERT)'),
     ("mapper/screens/factory.py", 'return Text.assemble(("archivo de plantilla no encontrado", darkside.ALERT))'),
     ("mapper/screens/factory.py", 'parts.append((escape(f"{{{{{key}}}}}"), darkside.ALERT))'),
