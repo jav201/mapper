@@ -52,7 +52,7 @@ from .views.layered import (
     painted_ids,
 )
 from .views.state import ViewState
-from .views.outline import OutlineRenderer
+from .views.outline import OutlineRenderer, painted_ids as outline_painted_ids
 from .views.radial import RadialRenderer
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
@@ -1631,8 +1631,13 @@ class MapScreen(Screen):
         if renderer is self.renderer:
             return painted_ids
         if renderer is self.outline_renderer:
-            return None
+            return outline_painted_ids
         if renderer is self.radial_renderer:
+            # STILL `None`, and still the `B-55` hole stated rather than
+            # omitted -- `radial` declares at `Inc-B55b`.  Its painted set is a
+            # cell-ownership replay, not a filter over `place()`: the canvas is
+            # last-write-wins and records no owner, so deriving from placement
+            # over-declares by 6 of 8 at 30x6 (`M-N06.3-b`, measured).
             return None
         raise LookupError(
             f"no painted_ids declared for {type(renderer).__name__}; add an "

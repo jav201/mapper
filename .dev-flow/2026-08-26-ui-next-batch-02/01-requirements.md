@@ -2452,8 +2452,22 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
      other clause in this row** — a renderer painting nothing satisfies `PHYS-1` trivially and `PHYS-3`
      by declaring all `N` hidden against a frame where all `N` are absent. That is `MUT-1` of
      `HLR-N06.3`'s own mutation table, one renderer over. `PHYS-2` is the only clause it fails.
-- **Driven size set — `fixtures/legacy`, outline mode, TERMINAL sizes. The fixture is normative: an
-  arm on another map neither passes nor fails `AT-056`.**
+- **Driven size set — `fixtures/legacy` AND `fixtures/anidado`, outline mode, TERMINAL sizes. BOTH
+  fixtures are normative: an arm on another map neither passes nor fails `AT-056`.**
+
+  > **WIDENED from `legacy` alone (coordinator ruling 2026-09-10).** `02n` made `legacy` normative and
+  > **was correct on the evidence it had**. The widening cites evidence `02n` could not have seen: with
+  > the settle fix landed, a 144-combination sweep found **nine** cases where a node's title is held by
+  > the canvas and **absent from the composited frame** — `Logistica` at `(30,16)`, `Flota` at
+  > `(24,20)`, `Finanzas` at `(24,24)`, `(30,20)`, `(32,20)`, `(34,20)`, `(35,20)`, `Compras` at
+  > `(28,20)` and `(30,20)` — **all of them on `anidado`, none on `legacy`**. On that evidence the
+  > single-fixture set was blind to the defect this acceptance exists to forbid. Measured at
+  > `anidado (30,16)`: the widget holds 4 logical lines needing 7 physical rows at region width 30
+  > into a region of 5, and the fourth line reaches no cell of the frame.
+  >
+  > Ratified without a qa round-trip under **control 13**: an author may STRENGTHEN an acceptance
+  > criterion against himself on measured evidence; only weakening it, or drafting criteria he can
+  > satisfy, requires the independent pass. The qa-reviewer's `Inc-CONFIRM` pickup may revisit this.
 
   | terminal | region | `_canvas_size()` | role | measured 2026-09-10, pre-fix |
   |---|---|---|---|---|

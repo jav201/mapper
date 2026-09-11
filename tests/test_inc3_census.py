@@ -373,18 +373,35 @@ def test_a98_the_participation_census_input_is_non_empty():
     )
 
 
-def test_a98_exactly_one_renderer_declares_its_painted_set():
-    """EQUALITY with `{layered}`, and that is the point of it being an equality.
+def test_a98_the_declaring_renderers_are_pinned_as_an_equality():
+    """EQUALITY, and that is the point of it being an equality.
 
-    `outline` and `radial` also hide nodes and declare nothing -- measured at
-    30x6 on `legacy`, 5 of 8 and 2 of 8 traced.  `HLR-N06.3`'s promise is
-    therefore kept in the DEFAULT view and silently unkept in the other two.
-    Inc-3 does not close that; it declares it (carry `B-55`, routed to Inc-5)
-    and pins it here, so the day a second renderer joins, this goes red and
-    forces the decision rather than letting the guarantee quietly widen -- or
-    quietly not.
+    WRITTEN AS `{layered}` BY Inc-3, AND IT DID ITS JOB.  `outline` and `radial`
+    also hid nodes and declared nothing -- measured at 30x6 on `legacy`, 5 of 8
+    and 2 of 8 traced -- so `HLR-N06.3`'s promise was kept in the DEFAULT view
+    and silently unkept in the other two.  Inc-3 could not close that, so it
+    DECLARED it (carry `B-55`) and pinned it here, so that the day a second
+    renderer joined, this arm would go red and force the decision rather than
+    let the guarantee quietly widen -- or quietly not.
+
+    `Inc-B55a` is that day, and this arm went red on schedule.  Repaired the way
+    the pin intends: the SET is widened and this docstring says why.  A `-k`
+    exclusion or a silent edit would SPEND the tripwire rather than honour it.
+
+    THE SET IS NOW `{layered, outline}`:
+      * `outline` declares from `views/outline.py::painted_ids`, which answers
+        from the SAME `_fit` pass `render` cuts with, so the declaration and the
+        cut cannot disagree about what "painted" means -- `B-60`'s lesson built
+        in rather than re-learned.
+      * `radial` is still absent, deliberately, and joins at `Inc-B55b`.
+      * `lane` is absent for a DIFFERENT reason and is not owed here at all: its
+        three renderer classes are constructed nowhere -- `app.py` builds only
+        Layered, Outline and Radial -- so they reach no operator-visible sink and
+        can hide nothing from anyone.  The day one is wired up,
+        `test_a89_the_reached_set_is_pinned_so_wiring_lane_up_pulls_it_in` goes
+        red and THAT increment inherits the obligation.
     """
-    assert painted_ids_exporters() == {"mapper.views.layered"}
+    assert painted_ids_exporters() == {"mapper.views.layered", "mapper.views.outline"}
 
 
 def test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr():
