@@ -37,6 +37,7 @@ from mapper.views.layered import (
     painted_ids,
 )
 from mapper.views.outline import painted_ids as outline_painted_ids
+from mapper.views.radial import painted_ids as radial_painted_ids
 from mapper.views.state import ViewState
 # The balanced builder, imported rather than re-typed: `HEADER_ROWS` now has to
 # be measured over node count, and a second copy of a graph builder is a copy
@@ -1049,20 +1050,27 @@ async def test_tc_038_both_declaring_surfaces_read_one_truth(tmp_path):
         assert _declared_total([strip]) == len(hidden)
         assert strip.strip(), "the strip lost its reserved-affordance content"
 
-        # RADIAL is now the view that declares nothing, and says so with `None`
-        # -- the remaining `B-55` hole, stated rather than omitted.  It closes at
-        # `Inc-B55b`, where its painted set has to be a cell-ownership replay
-        # rather than a filter over `place()`: the canvas is last-write-wins and
-        # records no owner, so placement over-declares by 6 of 8 at 30x6.
+        # RADIAL DECLARES TOO, SINCE `Inc-B55b`, through a cell-ownership replay
+        # rather than a filter over `place()`.  This tail has now moved TWICE --
+        # it asserted outline declared nothing until `Inc-B55a`, then radial
+        # until `Inc-B55b` -- and each move was a deliberate edit rather than a
+        # drift, because the arm goes red the moment the set changes under it.
+        #
+        # NO SHIPPED VIEW DECLARES NOTHING ANY MORE.  `B-55` is closed across all
+        # three, so this arm asserts the property it was really about -- both
+        # surfaces reading one truth -- in every view rather than in two of them
+        # with a silent third.
         await pilot.press("o")
         await pilot.press("r")
         await pilot.pause()
         assert screen.radial_mode
-        assert screen._unpainted_ids() is None  # noqa: SLF001
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        assert hidden is not None, "radial declares since Inc-B55b"
         strip = " ".join(
             rows_in(screen, screen.query_one("#map-pagination").region)
         )
-        assert OVERFLOW_TOKEN not in strip
+        if hidden:
+            assert _declared_total([strip]) == len(hidden)
         assert strip.strip(), "the strip lost its reserved-affordance content"
 
 
@@ -1243,7 +1251,8 @@ async def test_at058_an_unregistered_renderer_raises_rather_than_declaring_nothi
         assert screen._painted_ids_for(screen.renderer) is painted_ids  # noqa: SLF001
         assert screen._painted_ids_for(  # noqa: SLF001
             screen.outline_renderer) is outline_painted_ids
-        assert screen._painted_ids_for(screen.radial_renderer) is None  # noqa: SLF001
+        assert screen._painted_ids_for(  # noqa: SLF001
+            screen.radial_renderer) is radial_painted_ids
 
 
 @pytest.mark.asyncio
@@ -1316,14 +1325,23 @@ async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_
 
         declaring = screen._pagination_text().plain  # noqa: SLF001
 
-        # RADIAL is the "absent" case since `Inc-B55a`. It was `outline` when
-        # this arm was written, one commit earlier, and outline then gained a
-        # declaration -- which is the arm noticing that "a view that declares
-        # nothing" is a MOVING set, not a fixed one. Radial closes at Inc-B55b
-        # and this line moves again, deliberately, or the arm goes red.
-        screen.radial_mode = True
-        absent = screen._pagination_text().plain  # noqa: SLF001
-        screen.radial_mode = False
+        # THE "ABSENT" CASE NO LONGER HAS A SHIPPED OCCUPANT, and that is the
+        # finding rather than an inconvenience. This line was `outline`, then
+        # `radial`, and `Inc-B55b` closed the last of them: every view the
+        # screen builds now declares. "A view that declares nothing" is vacant.
+        #
+        # It is SIMULATED rather than dropped, because the property is about the
+        # SEAM and not about which views happen to occupy its states today. A
+        # future view that declares nothing by design gets an explicit `None`
+        # entry, exactly as outline and radial had, and this is what its strip
+        # must look like -- distinct from both a declaring view's and a broken
+        # one's.
+        original_for = screen._painted_ids_for  # noqa: SLF001
+        screen._painted_ids_for = lambda r: None  # noqa: SLF001
+        try:
+            absent = screen._pagination_text().plain  # noqa: SLF001
+        finally:
+            screen._painted_ids_for = original_for  # noqa: SLF001
 
         original = screen._painted_ids_for  # noqa: SLF001
         screen._painted_ids_for = lambda r: (_ for _ in ()).throw(  # noqa: SLF001
@@ -1569,6 +1587,10 @@ async def test_at056_outline_declares_what_the_cut_hid(tmp_path, fixture, size):
 _DECLARING_VIEW_KEYS = {
     "mapper.views.layered": None,   # the default view; no chord
     "mapper.views.outline": "o",
+    # RADIAL JOINED AT `Inc-B55b`, and the guard below is what made that a
+    # DECISION rather than a drift: it fired the moment `radial` gained a
+    # declaration, naming the view that had gained one without an arm.
+    "mapper.views.radial": "r",
 }
 AT057_SIZES = [(35, 14), (30, 16), (80, 24)]
 
@@ -1592,6 +1614,19 @@ def _frame_hidden_for(module: str, screen) -> set[str]:
     graph = screen.graph
     if module == "mapper.views.outline":
         return _frame_hidden(screen, graph)
+    if module == "mapper.views.radial":
+        # RADIAL'S OWN PREDICATE, and the guard below refused to let it borrow
+        # one -- which is how this line came to be written deliberately rather
+        # than by defaulting. Radial paints PILLS and TRUNCATES the title to 18
+        # cells (`radial.py`'s pill loop), so the emitted image is
+        # `plain(title)[:18]`, not the full title. Measured: the full-title read
+        # traces 0 of 8 at five sizes where the frame plainly shows pills.
+        painted = " ".join(" ".join(canvas_rows(screen)).split())
+        return {
+            nid for nid, node in graph.nodes.items()
+            if (img := " ".join(darkside.plain(node.ficha.title)[:18].split()))
+            and img not in painted
+        }
     if module == "mapper.views.layered":
         w, _h = screen._canvas_size()  # noqa: SLF001
         traced = oracle_traced(
@@ -1806,3 +1841,60 @@ async def test_outline_cuts_at_the_rows_the_canvas_shows(tmp_path, fixture, size
                 "and a node was hidden that the canvas had room for"
             )
         assert region.height >= 1
+
+
+# ---------------------------------------------------------------------------
+# AT-059 / TC-092 -- LLR-N06.3.7: radial declares what the canvas lost.
+
+AT059_SIZES = [(24, 20), (30, 16), (50, 16), (80, 24), (118, 34)]
+
+
+@pytest.mark.parametrize("fixture", AT056_FIXTURES)
+@pytest.mark.parametrize("size", AT059_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_at059_radial_declares_what_the_canvas_lost(tmp_path, fixture, size):
+    """The declared set equals the frame's, under RADIAL's own predicate.
+
+    The construction under test is a CELL-OWNERSHIP REPLAY. `Canvas.put` is
+    last-write-wins and records no owner, so a later pill silently overwrites an
+    earlier one's cells; `pos` says where a pill was WRITTEN, not whether it
+    SURVIVED. Deriving the declaration from placement is `M-N06.3-b`, measured
+    wrong by 6 of 8 at 30x6 -- it names nodes the operator cannot see.
+
+    The oracle is the composited frame, never `painted_ids` (`C-31`), and it uses
+    radial's emitted image `plain(title)[:18]` rather than the full title,
+    because radial TRUNCATES. That distinction is not cosmetic: the full-title
+    read traces 0 of 8 at five sizes where the frame plainly shows pills.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, fixture)
+        app.store.save(fixture, graph)
+        screen = await open_map(app, pilot, fixture)
+        await pilot.pause()
+        await pilot.press("r")
+        await pilot.pause()
+        assert screen.radial_mode
+
+        declared = screen._unpainted_ids()  # noqa: SLF001
+        assert declared is not None, "radial declares since Inc-B55b"
+        frame_hidden = _frame_hidden_for("mapper.views.radial", screen)
+        total = len(screen.graph.nodes)
+
+        # NON-DEGENERACY FIRST, in the direction the size makes true, so the
+        # equality below can never be `0 == 0` by accident.
+        if frame_hidden:
+            assert 1 <= len(frame_hidden) <= total
+        else:
+            assert len(declared) == 0, (
+                f"{fixture} at {size} declares {len(declared)} hidden on a frame "
+                "that shows every pill"
+            )
+
+        assert declared == frozenset(frame_hidden), (
+            f"{fixture} at {size}: declaration and frame disagree.\n"
+            f"  declared hidden but PAINTED: {sorted(declared - frame_hidden)}\n"
+            f"  painted nowhere but DECLARED VISIBLE: "
+            f"{sorted(frame_hidden - declared)}"
+        )

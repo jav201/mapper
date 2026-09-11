@@ -393,7 +393,11 @@ def test_a98_the_declaring_renderers_are_pinned_as_an_equality():
         from the SAME `_fit` pass `render` cuts with, so the declaration and the
         cut cannot disagree about what "painted" means -- `B-60`'s lesson built
         in rather than re-learned.
-      * `radial` is still absent, deliberately, and joins at `Inc-B55b`.
+      * `radial` joined at `Inc-B55b`, through a CELL-OWNERSHIP REPLAY rather
+        than a filter over `place()`: the canvas is last-write-wins and records
+        no owner, so placement says where a pill was WRITTEN and not whether it
+        SURVIVED (`M-N06.3-b`).  Verified against the composited frame at 16
+        size/fixture combinations -- declared set equals frame set at every one.
       * `lane` is absent for a DIFFERENT reason and is not owed here at all: its
         three renderer classes are constructed nowhere -- `app.py` builds only
         Layered, Outline and Radial -- so they reach no operator-visible sink and
@@ -401,7 +405,9 @@ def test_a98_the_declaring_renderers_are_pinned_as_an_equality():
         `test_a89_the_reached_set_is_pinned_so_wiring_lane_up_pulls_it_in` goes
         red and THAT increment inherits the obligation.
     """
-    assert painted_ids_exporters() == {"mapper.views.layered", "mapper.views.outline"}
+    assert painted_ids_exporters() == {
+        "mapper.views.layered", "mapper.views.outline", "mapper.views.radial"
+    }
 
 
 def test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr():

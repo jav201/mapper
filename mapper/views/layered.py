@@ -23,6 +23,28 @@ MAX_RENDER_NODES = 12000
 # drift the first time one is edited, which is the defect `LLR-COERCE.1`
 # removed one file over for a code-point list.
 OVERFLOW_TOKEN = "▽"
+
+
+def overflow_phrase(hidden: int) -> str:
+    """The declaration sentence, ONE spelling, in the same house as its token.
+
+    `F7`: this sentence was spelled THREE times -- here, in `outline`, and in
+    `MapScreen._pagination_text` -- with no pin keeping them in step, and
+    `app.py`'s copy already differed in its padding.  `02m` section 7.3 names the
+    failure that invites: three definitions of one operator-facing declaration,
+    the same shape `views/state.py` records already shipping once for "hit".
+    Sharing the TOKEN was the easy half; the sentence is the half that mattered.
+
+    Returned as a `str` rather than a `Text` because its three callers style it
+    differently at their own seams -- the canvas headers paint `INK` into an
+    existing `Text`, the strip appends to a built line.  Carrying a style here
+    would force one of them to strip it off again.
+
+    The caller supplies its own leading and trailing padding: `outline` and
+    `layered` lead with two spaces inside a header, the strip trails one.  That
+    is layout, not wording, and it is the wording that had to stop drifting.
+    """
+    return f"{OVERFLOW_TOKEN} {hidden} fuera de vista"
 FOLD_PILL_TOKEN = "▸"
 
 # The coverage percentage `header_rows` prices the meter at.  Any value does:
@@ -392,7 +414,7 @@ def _header_line(
     # rung, and this line carries the whole story's promise.
     if unpainted:
         header.append(
-            f"  {OVERFLOW_TOKEN} {unpainted} fuera de vista", style=darkside.INK
+            f"  {overflow_phrase(unpainted)}", style=darkside.INK
         )
     return header
 

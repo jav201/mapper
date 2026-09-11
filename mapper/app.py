@@ -45,7 +45,7 @@ from .search import SearchIndex
 from .store import MapStore, TEMPLATES
 from .views.layered import (
     MAX_RENDER_NODES,
-    OVERFLOW_TOKEN,
+    overflow_phrase,
     LayeredRenderer,
     header_rows,
     pan_extent,
@@ -53,7 +53,7 @@ from .views.layered import (
 )
 from .views.state import ViewState
 from .views.outline import OutlineRenderer, painted_ids as outline_painted_ids
-from .views.radial import RadialRenderer
+from .views.radial import RadialRenderer, painted_ids as radial_painted_ids
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
 from .widgets.rail import RAIL_WIDTH, OutlineRail
@@ -1656,12 +1656,13 @@ class MapScreen(Screen):
         if renderer is self.outline_renderer:
             return outline_painted_ids
         if renderer is self.radial_renderer:
-            # STILL `None`, and still the `B-55` hole stated rather than
-            # omitted -- `radial` declares at `Inc-B55b`.  Its painted set is a
-            # cell-ownership replay, not a filter over `place()`: the canvas is
-            # last-write-wins and records no owner, so deriving from placement
-            # over-declares by 6 of 8 at 30x6 (`M-N06.3-b`, measured).
-            return None
+            # DECLARES SINCE `Inc-B55b`, through a cell-ownership replay rather
+            # than a filter over `place()`: the canvas is last-write-wins and
+            # records no owner, so deriving from placement over-declares
+            # (`M-N06.3-b`).  Verified against the composited frame at 16
+            # size/fixture combinations -- the declared set equals the frame's
+            # at every one.
+            return radial_painted_ids
         raise LookupError(
             f"no painted_ids declared for {type(renderer).__name__}; add an "
             "explicit entry -- absence is a code defect, not a view with "
@@ -2244,8 +2245,10 @@ class MapScreen(Screen):
             text.append("declaración no disponible ", style=darkside.INK)
             return text
         if hidden:
-            text.append(f"{OVERFLOW_TOKEN} {len(hidden)} fuera de vista ",
-                        style=darkside.INK)
+            # ONE SPELLING, consumed rather than repeated (`F7`).  This copy
+            # already differed from the two renderers' -- same words, different
+            # padding -- which is how a triplicated sentence starts drifting.
+            text.append(f"{overflow_phrase(len(hidden))} ", style=darkside.INK)
         return text
 
     # The chrome around a toast's detail: the leading space, the label, and the

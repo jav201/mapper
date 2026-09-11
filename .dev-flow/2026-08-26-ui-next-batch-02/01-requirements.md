@@ -2557,6 +2557,32 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   exactly the `B-60` misreading — and **red on `AGREE-1`**.
 - **Acceptance:** `AT-057` · **Test case:** `TC-090`
 
+##### LLR-N06.3.7 — radial declares what the canvas lost, under its OWN painted predicate
+
+- **Traceability:** HLR-N06.3
+- **Origin:** `B-55`'s radial vector; construction constrained by `M-N06.3-b` and `02m` §7.3.
+- **Statement:** While `RadialRenderer` hides nodes, the system shall declare them on both declaring
+  surfaces, and the declared set shall equal the set the frame does not show under **radial's own**
+  painted predicate.
+- **Radial's painted predicate, STATED HERE AND NOT BORROWED:** a node is painted when it still owns
+  **every cell of its title image** after the canvas's last-write-wins replay. The image is
+  `plain(title)[:18]` — radial **truncates** — so outline's full-title read does not transfer
+  (measured: 0 of 8 traced at five sizes where the frame plainly shows pills), and layered's does not
+  either, because it anchors on card columns radial has no equivalent of.
+- **The construction is a CELL-OWNERSHIP REPLAY, not a filter over placement.** `Canvas.put` is
+  last-write-wins and records no owner, so `pos` says where a pill was **written**, not whether it
+  **survived** — deriving from it is `M-N06.3-b`, measured wrong by 6 of 8 at `30x6`.
+- **Touched symbols:** `mapper/views/radial.py` — `_paint` (the shared pass), `painted_ids`
+  — `NEW — created in Phase 3`; the dispatch arm in `mapper/app.py`.
+- **Validation:** `test (pilot)`
+- **Executed verification:** `pytest tests/test_overflow.py -k "at059"` — arm named normatively
+  `test_at059_radial_declares_what_the_canvas_lost` (`C-18`, and the `AT-005`/`AT-006` precedent).
+- **Numeric pass threshold:** the declared set **equals** the frame-derived hidden set at every driven
+  size on both normative fixtures. Non-degeneracy asserted first, as in `AT-056`'s `PHYS-4`.
+- **Acceptance criteria:** a declaration derived from placement over-declares — it names nodes the
+  operator cannot see. The whole point of the requirement is that the number matches the frame.
+- **Acceptance:** `AT-059` · **Test case:** `TC-092`
+
 ##### LLR-N06.3.6 — a declaration that BROKE is not a view that declares nothing
 
 > **DRAFTED BY `02n` (qa-reviewer), PLACED BY COORDINATOR RULING 2026-09-10.** The reviewer wrote this

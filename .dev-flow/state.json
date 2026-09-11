@@ -665,7 +665,15 @@
         },
         "NOT_a_regression": "Pre-increment BOTH surfaces were silent at these sizes. Inc-B55a leaves them strictly better -- the strip now speaks -- which is why carrying is legitimate rather than a retreat.",
         "why_not_pinned_as_expected": "Pinning the silent-canvas fallback would DOCUMENT AN EXCEPTION to AGREE-1, which is a weakening, and control 13 reserves weakening for the independent pass. Recorded open instead of absorbed.",
-        "closes_where": "Inc-REPAIR, bundled with F7. Once the declaration SENTENCE is single-sourced (it is currently triplicated and unpinned across layered.py:395, outline.py:243 and app.py:2224), a shorter canvas form becomes buildable without grammar divergence -- and that is the likely actual fix."
+        "closes_where": "Inc-REPAIR, bundled with F7. Once the declaration SENTENCE is single-sourced (it is currently triplicated and unpinned across layered.py:395, outline.py:243 and app.py:2224), a shorter canvas form becomes buildable without grammar divergence -- and that is the likely actual fix.",
+        "radial_measured_2026-09-11": {
+          "verdict": "RADIAL HAS THE FLOOR TOO -- but at DIFFERENT sizes and for a DIFFERENT reason, so it was measured rather than inherited (coordinator ruling).",
+          "my_prediction_was_WRONG": "I predicted radial could NOT have the floor, on the structural argument that render emits 1 + body_h rows against a budget of h = body_h + 4, so the header can never evict a body row. That argument is sound for OUTLINE's failure mode and does not cover radial's.",
+          "radial_sizes": "legacy and anidado at (16,14) and (14,12): all nodes hidden, strip declares, canvas silent. AGREE-1 fails.",
+          "radial_holds_where_outline_fails": "At (34,14), (33,14), (28,14) and (20,16) -- four of the six outline sizes driven -- radial declares on BOTH surfaces. The exception is not shared.",
+          "different_cause": "Outline's floor is `_fit` dropping the widened header entirely, so the fallback header carries no token. Radial's is the header WRAPPING at very narrow widths and the token landing in a row that `lines[:h]` then clips. Same symptom, different mechanism -- so a single fix will not close both.",
+          "consequence": "The open entry now names both views with their own sizes and causes. Inc-REPAIR inherits two mechanisms, not one."
+        }
       }
     ],
     "routed_findings": [
@@ -742,6 +750,12 @@
       ],
       "evidence": "default 924 passed/19 deselected/3 xfailed; all-markers 943 passed/3 xfailed; ruff SET-IDENTICAL 19 pairs/27 both sides at equal scope with positive control; THE PAIR 22 passed.",
       "disclosure": "Prose-only edits to a tree the security reviewer had already signed off. Evidence re-measured, not inherited. Close HELD for a coordinator ruling rather than self-cleared."
+    },
+    "close_shape": {
+      "shape": "STAGE-COMMITTED. Source lands at each acknowledged stage, followed by a docs commit recording the close.",
+      "amended": "2026-09-10, coordinator ruling, from the two-commit shape Inc-CRUMB used.",
+      "reason": "Per-stage commits leave every stage independently revertible, and given this project history of session expiry mid-increment, stage-committing is the SAFER shape -- uncommitted work across a long gate is the Inc-CRUMB exposure.",
+      "requirement": "The close record still names the commits and states the shape, so the record says which one was used rather than implying the old one."
     }
   },
   "stations_active": [
