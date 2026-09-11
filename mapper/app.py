@@ -52,7 +52,11 @@ from .views.layered import (
     painted_ids,
 )
 from .views.state import ViewState
-from .views.outline import OutlineRenderer, painted_ids as outline_painted_ids
+from .views.outline import (
+    OutlineRenderer,
+    header_rows as outline_header_rows,
+    painted_ids as outline_painted_ids,
+)
 from .views.radial import RadialRenderer, painted_ids as radial_painted_ids
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
@@ -1475,8 +1479,80 @@ class MapScreen(Screen):
         `wrap_w` comes from the same `content_size` read `_canvas_size` uses to
         price the body, so the guard and the subtraction cannot disagree about
         which frame they are describing.
+
+        THE CHARGE IS PER RENDERER, AND IT USED TO BE LAYERED'S IN EVERY VIEW.
+        `_canvas_size` has no renderer branch while `refresh_canvas` picks the
+        renderer separately, so outline and radial were priced with layered's
+        header.  MEASURED over a ten-width sweep from 20 to 118, with layered's
+        own first line as the positive control -- `layered.header_rows` agrees
+        with it at ALL TEN widths, which is what makes the other two columns a
+        finding rather than instrument error:
+
+            w    charged   layered   outline   radial
+            20      3         3         1        3
+            24      3         3         1        2
+            28      3         3         1        2
+            34      2         2         1        2
+            40      2         2         1        2
+            50+     2         2         1        1
+
+        Outline is overcharged at EVERY width in the sweep; each overcharged row
+        is a body row the region could have shown and the renderer was never
+        told about.
+        THE DISPATCH IS STRICT AND THIS CALL SITE IS NOT, AND THE ASYMMETRY IS
+        DELIBERATE.  `_painted_ids_for` raises for an unregistered renderer and
+        lets that raise escape, because `frozenset()` is a legitimate declaration
+        and a BROKEN one must not present as an ABSENT one.  I copied that shape
+        here and it was wrong: the CONSEQUENCE does not transfer.  A declaration
+        that raises costs a numeral; a CHARGE that raises means the canvas cannot
+        be sized at all, and `_canvas_size` runs BEFORE `refresh_canvas`'s guard,
+        so the raise escaped the one path `LLR-R01.4` ratifies as survive-
+        anything.
+
+        FIRED, AND IT IS WHAT CAUGHT THIS.  `TC-R08` installs a renderer that is
+        not one of the three and asserts the app still paints "no se pudo dibujar
+        el mapa" rather than dying; both of its parameter cases failed against the
+        strict version.  So strictness stays where it can be ACTED on -- the
+        dispatch, pinned by its own arm -- and the drawing path DEGRADES to
+        layered's charge, which is a wrong row budget on a frame that is about to
+        paint a failure notice anyway.
         """
-        return header_rows(self.graph, self._canvas_width(), wrap_w)
+        try:
+            charge = self._header_rows_for(self._current_renderer())
+        except LookupError:
+            charge = header_rows
+        return charge(self.graph, self._canvas_width(), wrap_w)
+
+    def _header_rows_for(self, renderer):
+        """The function this renderer's header charge comes from.
+
+        IDENTITY, NEVER `getattr`, matching `_painted_ids_for` and for the same
+        reason (`A-98`, ruling `02j`): a probe answers "this view has no header"
+        and "this view's charge is broken" with the same silence.
+
+        RADIAL IS AN EXPLICIT FALLBACK, NOT AN ABSENCE, AND `S-D` IS ITS CLOSER.
+        Radial's own first line is measured SHORTER than layered's at widths 24,
+        28 and 50-and-up, so it is overcharged too -- but `views/radial.py` is
+        `S-D`'s file and registering a charge for it here would put this stage
+        over its file cap.  Coordinator ruling 2026-09-11 took the option that
+        states the hole instead of omitting it, which is this batch's own
+        `AT-058` doctrine applied to a CHARGE rather than a declaration: radial
+        keeps layered's number, and the fact that it does is written down here
+        and PINNED BY AN ARM, so `S-D`'s fix reddens that arm rather than closing
+        the residue silently.
+
+        An unregistered renderer RAISES.  A future view that genuinely has no
+        header gets an explicit entry returning a charge of one, exactly as
+        `outline` and `radial` got explicit entries in `_painted_ids_for`.
+        """
+        if renderer is self.renderer:
+            return header_rows
+        if renderer is self.outline_renderer:
+            return outline_header_rows
+        if renderer is self.radial_renderer:
+            # THE DECLARED RESIDUE.  Closed by `S-D`, which owns `radial.py`.
+            return header_rows
+        raise LookupError(f"no header charge registered for {renderer!r}")
 
     def _canvas_width(self) -> int:
         """Columns the canvas renderer is given.  Floors at 20 (`B-61`'s band)."""
