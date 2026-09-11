@@ -593,30 +593,49 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   destined for a painted surface shall emit text that is **both fully coerced and within budget** —
   formally, `out == darkside.plain(out)` **and** the declared length bound holds — and the set of
   such functions shall be **derived from the tracked product sources** rather than named by hand.
-  > **~~"shall apply the design module's plain-text coercion BEFORE truncating"~~ — THE ORDERING
-  > CLAUSE IS REPLACED, NOT DELETED, AND HERE IS WHY.**
+  > # ⚠ THIS AMENDMENT IS UNDER REVISION — ITS PREMISE WAS REFUTED AT CONFIRMATION PASS 3
   >
-  > **The mechanism it rested on is refuted.** It was justified by *"truncation MANUFACTURES the
-  > defect out of a balanced source: cutting between a `U+202E` and its terminator strands an
-  > unterminated override no later coercion can repair."* Measured at `S-B(+C)` (security review,
-  > re-measured at confirmation pass 2): `_CONTROL_MAP` maps all **235** banned code points to
-  > exactly one `U+FFFD` each, so `darkside.plain` is **length- and index-preserving**, and
-  > coerce-then-truncate and truncate-then-coerce are **the same function** — **0 differing outputs
-  > over 5 hostile sources × 60 widths = 300 comparisons**, and a mutant running the forbidden order
-  > left every arm in the suite green. A clause mandating an order between two operations that are
-  > measurably identical asserts a **distinction without a difference**.
+  > **THE ORDERING CLAUSE IS LOAD-BEARING TODAY, AND THE MEASUREMENT THAT SAID OTHERWISE WAS MINE
+  > AND WAS WRONG.** Recorded here immediately, ahead of any re-ruling, because a requirement must
+  > not carry a statement of measured fact that is known false.
   >
-  > **But deleting it would discard what it was PROTECTING.** The invariant above is what the
-  > ordering was always reaching for, stated so it does not depend on the order at all — and it
-  > **survives a future change to `plain`**: a multi-character replacement would make order matter
-  > again, and `out == plain(out)` still holds the line, because a string that is not a fixed point
-  > of its own coercion fails it whichever order produced it.
+  > **What I claimed:** that `_CONTROL_MAP` maps all 235 banned points to exactly one `U+FFFD` each,
+  > so `darkside.plain` is index-preserving and the two orders are **the same function** — *"0
+  > differing outputs over 5 hostile sources × 60 widths = 300 comparisons"*, and *"a mutant running
+  > the forbidden order left every arm in the suite green."*
   >
-  > **It also discriminates where the old threshold did not.** Under a mutant mapping `U+202E` to a
-  > *different banned point* instead of `U+FFFD`, the old split-at-width assertion
-  > (`count(U+202E) == 0`) **holds and survives**; `out == plain(out)` **fails and kills**. Armed in
-  > `tests/test_inc3_census.py::test_llr_coerce_2_the_split_at_width_arm` over the **derived** set at
-  > four widths, and in `tests/test_fold.py` for the fold pill.
+  > **BOTH OF THOSE STATEMENTS OF MEASURED FACT ARE FALSE**, and are struck:
+  > - `plain` is index-preserving in **code points**, **not in display cells**. **221 of the 235**
+  >   banned points have cell width **0**; `U+FFFD` has cell width **1**. So coercion *inflates*
+  >   width. `darkside.fit` truncates by `Text.cell_len`, not by index — so for that truncator the
+  >   orders differ. Measured at pass 3 over **493,845** comparisons (4,015 sources × 41 widths × 3
+  >   derived truncators): **133,176 differing outputs**, all in `darkside.fit`. The two
+  >   length-based truncators (`_clip`, `_fit`) *are* order-equivalent — **which is all my 300
+  >   comparisons ever measured.** I modelled one truncator and generalised to a clause that
+  >   quantifies over three.
+  > - The forbidden order **does not leave the suite green**: fired against `darkside.fit`, the full
+  >   default lane goes **RED — 5 failed / 1058 passed**.
+  >
+  > **And the reversal is not academic:** run in the forbidden order, `darkside.fit` **overruns its
+  > own budget** — 157 of 164 sampled outputs, worst **11×** (budget 2, emitted 22 cells). Minimal
+  > witness, two characters: `U+200B` + `"A"` at width 1 gives 1 cell in the spec order and **2** in
+  > the forbidden one. That is a painted-surface overrun on a `C-4`-traced path.
+  >
+  > **Two further corrections to the reasoning above, both from pass 3:**
+  > - `out == plain(out)` **alone is strictly weaker** than the ordering clause and is *structurally
+  >   incapable* of detecting the reversal: any truncate-then-coerce output is a fixed point by
+  >   construction, because it ends in a coercion and `plain` is idempotent. **The length bound is
+  >   the discriminating conjunct** — and it is currently **unarmed**: no arm under `LLR-COERCE.2`
+  >   asserts the emitted budget over the derived set.
+  > - The "survives if `plain` ever **deletes**" rationale is also wrong — under deletion the output
+  >   is still a fixed point and is *shorter*, so neither conjunct fires. The hypothetical that is
+  >   **real** is a replacement whose **cell width differs from the source's**, which is `U+FFFD`
+  >   **today**.
+  >
+  > **Status:** the invariant's *direction* may still be right — pass 3 says it would ratify it on a
+  > corrected record — but the clause's fate now needs re-ruling on the corrected measurement, and
+  > **an implementer must not settle that.** Until then the **original ordering requirement stands
+  > as the operative clause.** `F9`/`F10`/`F11` in `increment-013-sbc-confirmation-3.md`.
 - **Touched symbols:** `mapper/views/layered.py::_fit` (`layered.py:38`) — the executed truncator
   that coerces nothing; its call sites at `layered.py:217`, `:227`, `:237`, `:247`, `:266`, `:280`.
   `mapper/darkside.py::fit` (`darkside.py:290-297`) is **unchanged** — executed, its first statement
