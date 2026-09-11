@@ -780,6 +780,16 @@
         "BUT_BOTH_CAPS_HAVE_DISPLAY_SEMANTICS_AND_THAT_NEEDS_A_RULING": "Neither cap is cost-only, because `_fit` prices rows PHYSICALLY. Capping shortens a row, which lowers its physical row count, which changes which rows `_fit` KEEPS -- and therefore the declared hidden count. MEASURED shapes: (a) at depth 4000 a leaf row is 69 physical rows at w=118; capped it is ~1, so a deep chain that currently shows almost nothing would show many rows. (b) A 400,000-cell title is 3,390 physical rows and is DROPPED; capped at one frame (w*h = 4,012) it is 34 rows and would be KEPT, filling the frame. So each cap trades a cost defect for a different picture and a different declaration.",
         "THE_QUESTION_FOR_THE_COORDINATOR": "Is the intent (a) COST ONLY, preserving today's picture exactly -- which is not achievable for the indent, since any cap changes the wrap -- or (b) a deliberate improvement, where deep chains and monster titles START BEING VISIBLE and the declaration moves with them? (b) is defensible and probably better for the operator, but it changes AT-056/AT-057 observable behaviour and interacts with the floor exception just amended, so it is not an implementer's call.",
         "ADJACENT_FINDING_NOT_FIXED": "`MapScreen._pan` calls `layered.pan_extent(...)` for EVERY view while outline ignores pan entirely -- the same renderer-independent-helper shape as defect 2, one seam over. NOT measured and NOT fixed here; flagged so it is not discovered twice."
+      },
+      {
+        "id": "PAN-1 (routed to S-D's pre-gate)",
+        "date": "2026-09-11",
+        "opened_by": "S-B(+C), adjacent to defect 2",
+        "shape": "DEFECT 2'S SHAPE ONE SEAM OVER. `MapScreen._pan` calls `layered.pan_extent(...)` for EVERY view, exactly as `_canvas_size` used to charge `layered.header_rows` for every view -- a layered-specific helper applied renderer-independently.",
+        "MEASURED_AND_IT_IS_WORSE_THAN_A_WRONG_EXTENT": "Counted mechanically: `views/outline.py` has ZERO `pan_x`/`pan_y` code references (its single textual match is prose inside a docstring I wrote), and `views/radial.py` has ZERO as well. So TWO OF THE THREE constructed renderers ignore pan entirely, while the screen still computes a layered extent and clamps `self.pan_x`/`self.pan_y` against it. The manifestation is therefore not merely a wrong number: in outline and radial the operator's pan keys move nothing while internal pan state advances, so the app holds a pan the picture never reflects.",
+        "outline_half": "NIL TODAY, and that is the evidence the cost caps relied on: because outline reads no pan, cells past the canvas width are unreachable there, which is what made capping the indent safe. If outline ever gains pan, that licence lapses and the caps must be revisited -- recorded here so the dependency is not invisible.",
+        "for_S_D_to_measure": "Whether radial's nil is the same nil: does radial WANT pan (a radial map larger than the canvas is the obvious case), and does the layered extent produce a clamp that would be wrong the moment it did? S-D owns radial.py, so the measurement belongs to its pre-gate.",
+        "not_fixed_here": "Out of S-B(+C)'s scope and its file cap; no behaviour was changed for it."
       }
     ],
     "routed_findings": [
