@@ -238,6 +238,68 @@ top — for THIS fixture at THESE sizes, and cannot speak for a differently shap
 scheduled callback had not run when `pause()` returned, not that arming was skipped. The robust
 figure is the **per-pass cost**, which is what the bound above is built from.
 
+## 6.6 · The cost re-measured — and §6.5's number was measured in the wrong regime
+
+Re-run on the current tree per ruling. **The first measurement was not wrong, it was BLIND**: the
+`Inc-STRIPS` fixture is **12002 nodes**, above `outline`'s `MAX_RENDER_NODES` of **12000**, so
+`_rows` short-circuits to `_degraded` and outline's whole path never ran. §6.5 priced a fixture the
+expensive view refuses to render. A second regime was added at **11999 nodes** — the largest graph
+`outline` will actually render, and its worst case.
+
+```
+median of 5 repeats, wall seconds                    BEFORE the P1 guard
+regime                                 terminal   refresh    settle     added
+A  12002 nodes, layered (_fit unused)  (118, 34)   0.0156    0.0015   +0.0015
+A  12002 nodes, layered (_fit unused)   (80, 24)   0.0104    0.0012   +0.0012
+B  11999 nodes, OUTLINE (_fit runs)    (118, 34)   0.3554    0.3325   +0.3325
+B  11999 nodes, OUTLINE (_fit runs)    (80, 24)   0.3251    0.2774   +0.2774
+```
+
+**Regime A replaces §6.5's number like-for-like and it holds.** Regime B did not: a settle pass cost
+a **full re-render**, roughly DOUBLING a repaint that already costs 0.36 s. Arming the settle from
+`refresh_canvas` without a guard would have shipped that, and §6.5's "the delta is noise" would have
+been a true sentence about the wrong fixture.
+
+### The guard is `P1` itself, which is why it is not the second mechanism I argued against
+
+`P1` says content and geometry agree at rest. If they **already** agree, the settle's re-render is
+byte-identical and there is nothing to reconcile. So `_declare_after_layout` skips it when
+`_canvas_size()` still equals the geometry the canvas's current content was rendered at
+(`_rendered_for`). **The predicate skipped on is the same one the invariant asserts**, so the guard
+cannot drift from the property it protects — unlike "re-render only when the strip changed", which
+would have been a second rule to keep correct.
+
+```
+                                                     AFTER the P1 guard
+A  12002 nodes, layered                (118, 34)   0.0149    0.0011   +0.0011
+A  12002 nodes, layered                 (80, 24)   0.0100    0.0011   +0.0011
+B  11999 nodes, OUTLINE                (118, 34)   0.3448    0.1527   +0.1527
+B  11999 nodes, OUTLINE                 (80, 24)   0.3310    0.1498   +0.1498
+```
+
+**332 ms → 153 ms.** All 11 `P1` arms stay green, so the guard does not buy the time by weakening the
+invariant.
+
+### The residual 153 ms is the FEATURE's cost, not the settle's — and it is carried, not hidden
+
+The remainder is not the re-render. It is `painted_ids` itself: `_pagination_text` calls
+`_unpainted_ids`, which for outline now runs `_rows` over **every node**. Before `Inc-B55a` that call
+returned `None` immediately, because outline declared nothing — which is precisely the hole `B-55`
+names. **Closing `B-55` for outline costs a second full walk per frame**, ~150 ms on the largest
+graph outline renders.
+
+Not optimised here, deliberately. The obvious fix — memoise `_rows` per `(graph, state)` — is a
+CACHE, and a cache is a second mechanism with its own staleness failure mode, in an increment whose
+entire subject is two things disagreeing about one frame. The honest options are a shared per-frame
+pass (forbidden here: `layered.painted_ids` records why a side-channel attribute set by `render` is
+cross-contaminated by the export call site, which renders the same long-lived renderer at a different
+size) or accepting the cost. **Carried to `Inc-REPAIR` with this measurement attached**, alongside
+defect 2, so the two outline-geometry costs are priced together rather than one at a time.
+
+**Boundary.** Wall time, headless `run_test`, one machine, median of 5, Python-side work only — not
+the terminal I/O a real session adds. `branchy_graph` at these two sizes; `_fit`'s per-line cost is
+wrap-dependent, so a differently shaped graph prices differently.
+
 ## 7 · Gate checklist
 
 - [ ] Pre-gate captures landed on the pre-fix tree
