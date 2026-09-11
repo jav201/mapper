@@ -91,7 +91,26 @@ class CoverageScreen(ModalScreen[str | None]):
                 # are file-derived -- the title from the sidecar, the missing
                 # keys from its schema -- and this table is a sink they reach
                 # directly.
-                darkside.plain(node.ficha.title or node.id),
+                #
+                # WRAPPED IN `Text`, AND THAT IS NOT COSMETIC. `plain` does not
+                # escape markup, and its docstring justifies that by saying the
+                # result is "placed into `Text` objects with explicit styles, and
+                # `Text` does not parse markup". THE PREMISE WAS FALSE AT THIS
+                # LINE: a bare `str` handed to `DataTable.add_row` reaches
+                # Textual's `default_cell_formatter`, which sets
+                # `possible_markup = True` for any `str` and returns
+                # `Text.from_markup(content)`. Measured: a sidecar title of
+                # `[red]rojo[/red] and [link=file:///...]click[/link]` rendered
+                # with the markup INTERPRETED -- arbitrary style and a live link
+                # target -- where `escape` had made it inert.
+                #
+                # So the swap traded a control-character hole for a markup hole
+                # at this cell, and the line below was safe all along because
+                # `Text.assemble` yields a `Text` the formatter returns
+                # untouched. One comment justified two call sites that are not
+                # alike. Passing a `Text` makes the docstring's premise true
+                # here too, and renders identically.
+                Text(darkside.plain(node.ficha.title or node.id)),
                 Text.assemble(
                     (darkside.plain(",".join(missing)), darkside.ALERT)
                 ),
