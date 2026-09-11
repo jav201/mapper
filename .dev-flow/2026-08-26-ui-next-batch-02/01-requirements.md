@@ -588,9 +588,35 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 ##### LLR-COERCE.2 — the second truncator coerces before it truncates
 
 - **Traceability:** HLR-COERCE, security condition **C-4** (`02b` S-04, S-05)
-- **Statement:** Every function that truncates a string destined for a painted surface shall apply
-  the design module's plain-text coercion before truncating, and the set of such functions shall be
-  derived from the tracked product sources rather than named by hand.
+- **Statement (AMENDED at `S-B(+C)`; coordinator ruling 2026-09-11 set the direction, this
+  increment's confirmation pass 3 ratifies the wording):** Every function that truncates a string
+  destined for a painted surface shall emit text that is **both fully coerced and within budget** —
+  formally, `out == darkside.plain(out)` **and** the declared length bound holds — and the set of
+  such functions shall be **derived from the tracked product sources** rather than named by hand.
+  > **~~"shall apply the design module's plain-text coercion BEFORE truncating"~~ — THE ORDERING
+  > CLAUSE IS REPLACED, NOT DELETED, AND HERE IS WHY.**
+  >
+  > **The mechanism it rested on is refuted.** It was justified by *"truncation MANUFACTURES the
+  > defect out of a balanced source: cutting between a `U+202E` and its terminator strands an
+  > unterminated override no later coercion can repair."* Measured at `S-B(+C)` (security review,
+  > re-measured at confirmation pass 2): `_CONTROL_MAP` maps all **235** banned code points to
+  > exactly one `U+FFFD` each, so `darkside.plain` is **length- and index-preserving**, and
+  > coerce-then-truncate and truncate-then-coerce are **the same function** — **0 differing outputs
+  > over 5 hostile sources × 60 widths = 300 comparisons**, and a mutant running the forbidden order
+  > left every arm in the suite green. A clause mandating an order between two operations that are
+  > measurably identical asserts a **distinction without a difference**.
+  >
+  > **But deleting it would discard what it was PROTECTING.** The invariant above is what the
+  > ordering was always reaching for, stated so it does not depend on the order at all — and it
+  > **survives a future change to `plain`**: a multi-character replacement would make order matter
+  > again, and `out == plain(out)` still holds the line, because a string that is not a fixed point
+  > of its own coercion fails it whichever order produced it.
+  >
+  > **It also discriminates where the old threshold did not.** Under a mutant mapping `U+202E` to a
+  > *different banned point* instead of `U+FFFD`, the old split-at-width assertion
+  > (`count(U+202E) == 0`) **holds and survives**; `out == plain(out)` **fails and kills**. Armed in
+  > `tests/test_inc3_census.py::test_llr_coerce_2_the_split_at_width_arm` over the **derived** set at
+  > four widths, and in `tests/test_fold.py` for the fold pill.
 - **Touched symbols:** `mapper/views/layered.py::_fit` (`layered.py:38`) — the executed truncator
   that coerces nothing; its call sites at `layered.py:217`, `:227`, `:237`, `:247`, `:266`, `:280`.
   `mapper/darkside.py::fit` (`darkside.py:290-297`) is **unchanged** — executed, its first statement
