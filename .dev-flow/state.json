@@ -136,7 +136,36 @@
           "F7_3_three_predicates_MEDIUM": "B-55 would ship three different definitions of 'painted' behind one operator-facing numeral. state.py:63-66 records this exact failure already shipping once for 'hit'. Architect recommends NAMING the predicate per module, not forcing one.",
           "traceability_owed": "02m's own checklist declares it: sections 7.1 and 7.2 assert defects with no AT-NNN and no US->AT chain. If section 7 is accepted, requirement rows are owed BEFORE Inc-B55a opens.",
           "control_gap_in_A98": "test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr collects imports only from modules whose name endswith('layered') (tests/test_inc3_census.py:404), so nothing stops reaching outline/radial by getattr. Widen the filter to the views package -- test-side, no source cost."
-        }
+        },
+        "SUPERSEDED_2026-09-10": "Superseded by A-94 below, on architect verdict 02m and coordinator ruling."
+      },
+      {
+        "date": "2026-09-10",
+        "amendment": "A-94 SUPERSEDES A-93. Inc-B55 re-cut: population is {outline, radial}; lane.py DROPPED. Inc-B55a = mapper/views/outline.py + mapper/app.py. Inc-B55b = mapper/views/radial.py + mapper/app.py. Three source files total across the pair, within cap.",
+        "authority": "Coordinator ruling 2026-09-10 on architect verdict 02m, after the implementer verified the reachability refutation independently.",
+        "reason": "A-93's population was WRONG and it was wrong in MY direction. I distrusted the recorded note (correct) and replaced it with a class census that could not see REACHABILITY (incorrect). lane.py's three renderers are constructed nowhere: app.py:1201-1203 builds exactly Layered/Outline/Radial, _current_renderer (app.py:1695-1700) returns one of those three, and no lane renderer is referenced in mapper/ outside mapper/views/. A renderer no operator can reach hides nothing from anyone.",
+        "inheritance_note": "HOW lane.py ENTERED THE CUT, and it is a new exhibit for the declaration family: 01-requirements.md:5985 cuts Inc-5 at outline/radial/lane for HIT PAINTING; B-55 was routed to Inc-5 at :8555 because it 'already owns all three of those files'; B-55 then inherited the FILE LIST rather than the SCOPE. A CUT COPIED FROM A NEIGHBOUR IS A SPELLING TOO -- it drifts from what it was copied for, and nothing makes it agree.",
+        "lane_obligation_pointer": "NOT dropped, PINNED. tests/test_inc3_census.py::test_a89_the_reached_set_is_pinned_so_wiring_lane_up_pulls_it_in (:229-246) holds the reached renderer set as an EQUALITY, so whichever increment ever wires a lane renderer into app.py goes RED and inherits the painted_ids obligation -- including the open question of how ONE module-level function serves THREE geometries. Recorded here so the pointer cannot evaporate between increments.",
+        "ordering": "Inc-B55a then Inc-B55b, after Inc-CRUMB (9a773e4), before Inc-REPAIR.",
+        "protocol": "FULL protocol, serial reviews, soft cap 3.",
+        "sequencing_within_b55a": "The app.py:1601 hazard is fixed FIRST, before the declaration is wired through that seam.",
+        "ruling_2_hazard_first": {
+          "defect": "app.py:1596-1603. `except Exception: return None` is TOTAL, and None reads as \"this view declares nothing\" (app.py:1569, :2142).",
+          "why_first": "Inc-B55 is what makes the seam reachable by more than one renderer. Wiring a declaration through a seam that can swallow \"declaration broken\" into \"declares nothing\" would ship the silent skip A-98 exists to prevent.",
+          "fix": "Renderer->function resolution moves OUTSIDE the try and RAISES for an unregistered renderer. The try keeps catching LAYOUT failures only, which are data-dependent and for which None is the honest answer.",
+          "arm_required": "BROKEN and ABSENT must be DIFFERENT OBSERVABLES. An arm must distinguish the two Nones -- a view that declares nothing vs a declaration that failed -- or the fix is unfalsifiable."
+        },
+        "ruling_3_section_7_1_remeasured": {
+          "verdict": "IN Inc-B55a. The render defect is OPERATOR-VISIBLE.",
+          "measured_through_canvas_size": "At a 35x14 terminal, _canvas_size() hands outline 35x2; outline emits 2 logical lines that occupy 3 PHYSICAL rows into a 2-row canvas. outline.py:161 cuts lines[:h] on LOGICAL rows while the widget shows PHYSICAL rows.",
+          "why_in_scope": "A declaration derived from the logical row model would assert rows that are not painted -- a lying affordance, in the increment whose entire purpose is to stop the views lying about what they hid.",
+          "the_conflation_mattered": "02m measured 15 of 15 narrow configurations over-declaring; through the REAL screen it is 1 of 8 driven terminal sizes. The defect is real and reachable but far rarer than 02m suggested. The architect FLAGGED THIS ITSELF -- '02j's own correction records that the unit is the terminal, not the renderer' -- and was right to. Credit on the record: the author caught its own 02j conflation and said so before anyone checked.",
+          "why_the_gap_is_large": "_canvas_size() subtracts chrome and is NOT the terminal width: measured, a 100-column terminal hands the renderer 64 and a 118-column terminal hands it 58.",
+          "reachable_size_is_one_the_batch_drives": "35x14 is a size this batch already drives in tests/test_crumb.py. Not an exotic configuration."
+        },
+        "ruling_4_traceability_first": "The section 7.1 and 7.2 requirement rows (AT ids, US->AT chains) land BEFORE Inc-B55a opens, per 02m own checklist. No increment opens against asserted-but-unchained defects.",
+        "radial_construction": "CELL-OWNERSHIP REPLAY, never pos-derivation. Deriving from place() is M-N06.3-b verbatim: measured wrong by 6 of 8 at 30x6, because canvas put() is last-write-wins (mapper/canvas.py:103-105) and records no owner.",
+        "both_surfaces": "Each render paints its own header token as layered does (layered.py:520, _header_line :360-396). Strip-only declaration reintroduces B-60 in two views; _declare_after_layout (app.py:1609) exists because the two surfaces must agree."
       }
     ],
     "closed": [
@@ -369,7 +398,9 @@
         "discharge": "Pick the artifact of record (here state.json.open_blocks) and let every other document cite it rather than restate it. Where a requirements document must carry a status for readability, it carries the QUALIFIER and the pointer -- 'PARTIALLY CLOSED against vector X, see open_blocks' -- never a bare mark. At close, diff the two: a status word in a requirements file with no matching entry in the record is the defect."
       },
       "MEASURE WHAT THE OPERATOR READS AND THE GEOMETRY IT STANDS IN; EITHER ALONE CAN LIE. A widget must never be laid out from a render it is about to replace. When a defect leaves the painted output identical, assert the geometry -- an arm on the text cannot fail. (Pairs with Inc-STRIPS's composited-frame rule as the two halves of one law.)",
-      "LABELS ON EVIDENCE ARE DECLARATIONS TOO. AN ORACLE'S BASELINE IS FETCHED FROM THE RECORD (`git show <commit>:<path>`), NEVER FROM A WORKING DIRECTORY'S NAME. Exhibit: a comparison arm was pointed at a directory called `_confirm/head/` that was in fact a MID-INCREMENT working snapshot -- it carried `_width` but neither `on_mount`, `NoActiveAppError` nor `_KEYBAR_FALLBACK_CELLS`. Had the label been trusted, the gate would have compared against a tree that never existed as a gate."
+      "LABELS ON EVIDENCE ARE DECLARATIONS TOO. AN ORACLE'S BASELINE IS FETCHED FROM THE RECORD (`git show <commit>:<path>`), NEVER FROM A WORKING DIRECTORY'S NAME. Exhibit: a comparison arm was pointed at a directory called `_confirm/head/` that was in fact a MID-INCREMENT working snapshot -- it carried `_width` but neither `on_mount`, `NoActiveAppError` nor `_KEYBAR_FALLBACK_CELLS`. Had the label been trusted, the gate would have compared against a tree that never existed as a gate.",
+      "DISTRUST IS NOT A DIRECTION. Replacing a suspect note with a measurement is only half the move -- EVERY REPLACEMENT MEASUREMENT CARRIES ITS OWN BOUNDARY STATEMENT, and the failure is to state the old claim's limits while leaving the new one's unstated. Exhibit: a pre-gate rightly distrusted a recorded population and replaced it with a class census that could not see REACHABILITY. Classes are not reachability. The reviewer's check of the CHECKER is what landed the truth, and the original note had been right all along.",
+      "A CUT COPIED FROM A NEIGHBOUR IS A SPELLING TOO. A file list inherited from an adjacent increment drifts from the scope it was written for, and nothing makes the two agree. Exhibit: B-55 was routed to Inc-5 because Inc-5 'already owns all three of those files' -- a HIT-PAINTING cut -- and B-55 inherited the LIST rather than the SCOPE, carrying a module no operator can reach into an increment about what operators can see."
     ],
     "open_blocks": [
       {
