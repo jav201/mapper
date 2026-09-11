@@ -925,3 +925,13 @@ later increment inherits it.
 - Two `Inc-5` defects found while measuring: `LLR-N07.2.2b`'s threshold is **false on a correct
   implementation** (`text_differs=False, spans_differ=True`), and its derived renderer set sweeps in
   a `Protocol` that raises on instantiation.
+
+## Record — commit attribution transition
+
+From **`9a773e4`** (Inc-CRUMB's source commit) onward, commits carry
+`Co-Authored-By: Claude Opus 5 (1M context)` in place of `Claude Fable 5`. The authoring session's
+harness guidance explicitly replaces earlier attribution guidance, and honest attribution of the
+session that actually wrote the code outranks cosmetic trailer consistency. Commits up to and
+including `57fb403` keep Fable 5. **No history was rewritten** — force-pushing to normalise a
+trailer is force-push-for-cosmetics. The split is deliberate, and this line is why it reads that
+way. Coordinator ruling 2026-09-10.
