@@ -21,14 +21,31 @@ from mapper.model import Edge, Ficha, Graph, Node
 from mapper.views import outline
 from mapper.views.state import ViewState
 
+# SEVERAL GEOMETRIES, AND THE CODE REVIEW IS WHY. These arms drove one frame
+# (118x34), so replacing BOTH derivations with constants equal to their values
+# there left the entire default lane green at 1051 passed -- while `chain(200)`
+# under that mutant built a 96-cell row into a 24-cell canvas, a 4x overrun of
+# the exact pathology the caps exist to prevent. That is control 20 of this
+# batch's own catalog -- "a parametrization that samples one failure mode tests
+# one failure mode" -- and this module did not inherit it from the sibling that
+# quotes it verbatim.
+GEOMETRIES = ((118, 34), (40, 20), (24, 10))
 W, H = 118, 34
 
 
-def chain(depth: int) -> Graph:
+def chain(depth: int, titled: bool = True) -> Graph:
+    """A chain. `titled=False` gives titles that CANNOT contain the level.
+
+    The level-free titles exist because the depth-marker oracle was satisfied by
+    the fixture: titles read `nodo {i}`, so `str(depth - 1) in leaf` was True
+    from the TITLE whatever the marker said. A marker reporting `level // 10`
+    passed all ten arms.
+    """
     g = Graph()
     g.add_node(Node(id="n0", ficha=Ficha(title="raiz")))
     for i in range(1, depth):
-        g.add_node(Node(id=f"n{i}", ficha=Ficha(title=f"nodo {i}")))
+        title = f"nodo {i}" if titled else "nodo"
+        g.add_node(Node(id=f"n{i}", ficha=Ficha(title=title)))
         g.add_edge(Edge(f"n{i-1}", f"n{i}"))
     g.root_id = "n0"
     return g
@@ -43,8 +60,8 @@ def wide(n_chars: int) -> Graph:
     return g
 
 
-def _rows_of(graph: Graph):
-    rows, _sc = outline._rows(graph, ViewState(selected_id=graph.root_id, w=W, h=H))
+def _rows_of(graph: Graph, w: int = W, h: int = H):
+    rows, _sc = outline._rows(graph, ViewState(selected_id=graph.root_id, w=w, h=h))
     return rows
 
 
@@ -55,18 +72,37 @@ def _widest(rows) -> int:
 # ---------------------------------------------------------------- the walk cost
 
 
+@pytest.mark.parametrize("geom", GEOMETRIES)
 @pytest.mark.parametrize("depth", (200, 1000, 4000))
-def test_the_indent_is_bounded_by_geometry(depth):
+def test_the_indent_is_bounded_by_geometry(depth, geom):
     """MEASURED PRE-FIX: 8,029 cells at depth 4000, into a canvas 118 wide.
 
     The bound is DERIVED from the render width (`B-61`), so this asserts against
     `W` rather than against a number typed here -- a literal ceiling would pass
     at a width nobody drives.
     """
-    widest = _widest(_rows_of(chain(depth)))
-    assert widest <= W, (
-        f"depth {depth}: widest row is {widest} cells into a {W}-cell canvas. "
-        "The indent is unbounded again and the walk is quadratic in depth"
+    w, h = geom
+    rows = _rows_of(chain(depth), w, h)
+    leaf = rows[-1][1].plain
+    lead = len(leaf) - len(leaf.lstrip(" "))
+
+    # THE ORACLE IS THE INDENT, NOT THE WHOLE ROW, and getting that wrong is
+    # worth recording. The first strengthening of this arm asserted
+    # `widest_row <= w` and FAILED at (40,20) and (24,10) -- correctly, but for
+    # the wrong reason: a row is ALLOWED to exceed the width. Rich wraps it and
+    # `_fit` prices the physical rows that result; that is the whole basis of
+    # `B-61`. What must track the width is the INDENT, because that is the
+    # quadratic term. So the walk-cost bound is asserted where it lives, and the
+    # whole-row bound is the frame ceiling below.
+    assert lead <= w // 2, (
+        f"depth {depth} at {geom}: the leaf's indent run is {lead} cells against "
+        f"a derived budget of {w // 2}. The budget is not tracking the frame -- "
+        "a constant equal to the 118-wide value (59) passes at 118 and overruns "
+        "at 24"
+    )
+    assert _widest(rows) <= w * h + w, (
+        f"depth {depth} at {geom}: widest row is {_widest(rows)} cells against a "
+        f"frame of {w * h}"
     )
 
 
@@ -78,15 +114,20 @@ def test_a_compressed_indent_still_tells_the_truth_about_depth(depth):
     identically to a depth-3 one -- the picture would be cheap and false. The
     marker carries the REAL level, so the row still asserts the truth.
     """
-    rows = _rows_of(chain(depth))
+    # TITLES WITHOUT THE LEVEL, and the marker read ADJACENT to its glyph.
+    # Both halves are the fix: the old oracle was `str(depth-1) in leaf` over
+    # titles reading `nodo {i}`, so the TITLE satisfied it and a marker
+    # reporting `level // 10` -- lying about depth by 10x -- passed.
+    rows = _rows_of(chain(depth, titled=False))
     leaf = rows[-1][1].plain
     assert outline.DEPTH_MARK in leaf, (
         f"depth {depth}: the leaf row carries no compression marker, so a deep "
         f"chain is indistinguishable from a shallow one: {leaf[:60]!r}"
     )
-    assert str(depth - 1) in leaf, (
-        f"depth {depth}: the leaf row does not carry its true level "
-        f"({depth - 1}): {leaf[:60]!r}"
+    assert f"{outline.DEPTH_MARK}{depth - 1}" in leaf, (
+        f"depth {depth}: the marker does not state the TRUE level "
+        f"({depth - 1}) beside its glyph: {leaf[:60]!r}. A marker that "
+        "compresses is licensed; one that misreports depth is not"
     )
 
 
@@ -150,4 +191,43 @@ def test_an_ordinary_map_is_untouched_by_either_cap():
     lead = [len(t.plain) - len(t.plain.lstrip(" ")) for _n, t in rows[1:]]
     assert lead == sorted(lead) and lead[-1] > lead[0], (
         f"indentation no longer tracks depth on an ordinary map: {lead}"
+    )
+
+
+# ---------------------------------------------------------- the caps' premise
+
+
+def test_the_caps_licence_holds_outline_still_reads_no_pan():
+    """THE DEPENDENCY THE CAPS REST ON, ARMED (`PAN-1`).
+
+    Capping the indent is only safe because cells past the canvas width are
+    UNREACHABLE in this view -- outline reads no pan, so there is no horizontal
+    scroll that could take the operator into the region the cap removes.
+    `rail.py`'s licence to cap came from its fixed width and absent pan, and such
+    a licence does not transfer by resemblance; this one was checked.
+
+    IT WAS DECLARED AND NOT ARMED, WHICH THE CODE REVIEW CALLED ASYMMETRIC --
+    this same increment pinned radial's header-charge residue with two arms while
+    leaving its own premise on prose. If outline ever gains pan, the caps must be
+    revisited, and this arm is what says so at the moment it happens rather than
+    at the next review.
+
+    AST, NOT TEXT (control 22): the module's own docstrings discuss `pan_x` in
+    prose, so a grep answers "present" for a file with zero live reads. Only the
+    parsed tree distinguishes a description of the defect from the defect.
+    """
+    import ast
+    from pathlib import Path
+
+    src = Path(outline.__file__).read_text(encoding="utf-8")
+    reads = [
+        node.attr
+        for node in ast.walk(ast.parse(src))
+        if isinstance(node, ast.Attribute) and node.attr in ("pan_x", "pan_y")
+    ]
+    assert reads == [], (
+        f"outline now reads {sorted(set(reads))}. The cost caps assume content "
+        "past the canvas width is unreachable in this view -- if pan arrived, "
+        "that premise is gone and `_indent`'s budget must be revisited "
+        "(`PAN-1`, routed to S-D)"
     )

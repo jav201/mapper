@@ -2514,8 +2514,23 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
     grammar, and the module where `LLR-COERCE.2`'s coerce-then-truncate ordering already lives), and
     a compressed indent **carries the true depth** beside its marker, so a deep chain reads as deep
     and not as shallow. **What the operator sees may compress; what it asserts stays true** —
-    `PHYS-3`'s spirit. Pinned by `tests/test_outline_caps.py`, including a control asserting the caps
-    do **not** fire on an ordinary map.
+    `PHYS-3`'s spirit.
+  - **What `tests/test_outline_caps.py` actually pins, stated precisely because the first version of
+    this sentence overclaimed and `S-B(+C)`'s code review fired both halves:**
+    - *"derived, never a constant"* is pinned by driving **three geometries** — `(118,34)`, `(40,20)`,
+      `(24,10)` — and asserting the **indent run** against `w // 2` at each. Fired: with one geometry
+      driven, replacing both derivations with constants equal to their 118-wide values left the
+      **entire default lane green at 1051 passed**, while `chain(200)` under that mutant built a
+      **96-cell row into a 24-cell canvas**. That is this batch's own **control 20**, which the
+      sibling module quotes verbatim and this one had not inherited.
+    - *"carries the true depth"* is pinned by asserting the level **adjacent to its glyph**
+      (`f"{DEPTH_MARK}{level}"`) over fixtures whose titles **cannot contain the level**. Fired: with
+      the old oracle (`str(depth-1) in leaf`) over titles reading `nodo {i}`, a marker reporting
+      `level // 10` — **lying about depth by 10×** — passed all ten arms, because the *title*
+      satisfied the assertion.
+    - A **control** asserts the caps do **not** fire on an ordinary map, and a further arm pins the
+      caps' own premise: `views/outline.py` performs **zero** `pan_x`/`pan_y` attribute reads,
+      checked by **AST rather than text** because the module's docstrings discuss pan in prose.
   - **Capping is safe from pan, checked not assumed:** `views/outline.py` contains **zero** `pan_x` /
     `pan_y` references, so cells past the canvas width are unreachable in this view. `rail.py`'s
     licence to cap came from its fixed width and absent pan; such a licence does not transfer by
@@ -2558,8 +2573,18 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   - **The code already stated this case**, and the amendment follows it rather than leading it:
     `outline.py::_fit_declared` — *"never return an EMPTY frame… Fall back to the header the frame
     CAN hold; the strip still declares."*
-  - **Armed:** `tests/test_agree_floor.py` derives the floor sizes and asserts the proviso at each,
-    with a non-vacuity guard so the arm cannot pass by never reaching the floor.
+  - **Armed:** `tests/test_agree_floor.py` selects floor frames by the **geometric trigger itself** —
+    `outline.floor_reached(rows, w, h)`, the renderer's own predicate, single-sourced with
+    `_fit_declared` rather than transcribed — and asserts the proviso at each, with a non-vacuity
+    guard so the arm cannot pass by never reaching the floor. Its companion asserts the **unamended**
+    clause still governs every frame the predicate says is *not* at the floor, so the exception
+    cannot silently spread.
+    > **THIS SENTENCE WAS FALSE WHEN FIRST WRITTEN, and `S-B(+C)`'s code review caught it.** The arm
+    > originally selected frames by *"the canvas said nothing"* — the floor's **consequence**, not the
+    > floor. Fired: widening `_fit_declared`'s fallback **beyond** the empty-frame floor left the arm
+    > green at 4 passed while the exempted set grew **9 → 17** on `legacy` and **9 → 14** on
+    > `anidado`, so the exception could not lapse in the one direction that matters. Corrected, the
+    > same mutant is **KILLED**.
   - **RE-MEASURED after `S-B(+C)`'s cost caps landed**, because those caps move the row budget and a
     stale figure in an amendment is the defect this batch keeps naming: **still 9 of 90 on each
     fixture, the same sizes, the same shape.** It did not move, and the reason is informative rather
