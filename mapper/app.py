@@ -2146,10 +2146,34 @@ class MapScreen(Screen):
                         style=darkside.INK)
         return text
 
+    # The chrome around a toast's detail: the leading space, the label, and the
+    # three-cell gap before the detail starts.
+    _TOAST_CHROME_CELLS = 4
+
     def _event_toast(self, label: str, detail: str = "") -> None:
-        """Bottom strip for events only — status words, not glyphs."""
+        """Bottom strip for events only — status words, not glyphs.
+
+        THE DETAIL IS BOUNDED AT THIS SEAM, which is the only place all eleven
+        call sites pass through.  Several of them hand it a file-derived node
+        title, `#map-toast` carries no height rule, and the strip took its rows
+        from `#map-body` -- so a 4000-character detail rendered 36 rows at 118x34
+        and left the canvas ONE.  Same class as the crumb above it, with a
+        smaller blast radius: it needs an operator action and it clears on the
+        next toast, which is why it is degradation rather than a persistent
+        collapse.
+
+        `darkside.fit` COERCES AS WELL AS TRUNCATES -- it calls `plain` itself --
+        so bounding here also closes a coercion gap the security review found at
+        the export sink, which passed `str(path)` raw.  One seam, both defects,
+        every call site.
+        """
         toast = self.query_one("#map-toast", Static)
         if detail:
+            room = max(
+                self._TOAST_CHROME_CELLS,
+                self.size.width - len(label) - self._TOAST_CHROME_CELLS,
+            )
+            detail = darkside.fit(detail, min(room, len(detail))).rstrip()
             text = darkside.Text.assemble(
                 (f" {label}", f"bold {darkside.INK}"),
                 (f"   {detail}", darkside.MUT),
@@ -3349,6 +3373,25 @@ class MapperApp(App):
        ceiling bounds the pathological case without charging the ordinary one. */
     #map-minimap { max-height: 3; overflow: hidden; }
     #map-pagination { max-height: 3; overflow: hidden; }
+    /* `Inc-CRUMB` — the same bound on the two strips `Inc-STRIPS` did not reach,
+       and THE ORDER MATTERS: the Python bound landed FIRST, in
+       `darkside._crumb_line` and at the `_event_toast` seam. A CSS lid over
+       content that is not cell-bounded is how `Inc-STRIPS`' own F1 was born --
+       the strip reports its full height while silently eating what it was
+       supposed to declare. These are defence in depth over content that is
+       already bounded, not the bound itself.
+       TABSTRIP IS 3, AND THE FIRST DRAFT SAID 2.  The tab row is not one row at
+       every width: at 60 columns the tabs plus the wordmark exceed the terminal
+       and that row wraps, so a 2-row lid clipped the CRUMB away entirely -- the
+       strip reporting its full height while eating the very thing this
+       increment added.  That is `Inc-STRIPS`' own F1 reproduced by its own
+       remedy, caught here by this increment's crumb-declaration arm.
+       3 = a tab row that may wrap once, plus the one crumb row.  The tab row's
+       wrapping at narrow widths is PRE-EXISTING and is carried, not introduced:
+       `tab_strip` sizes itself to `max(width, tabs + wordmark)`, so below about
+       60 columns it overflows whatever this rule says. */
+    TabStrip { max-height: 3; overflow: hidden; }
+    #map-toast { max-height: 2; overflow: hidden; }
     #map-inspector {
         width: 36;
         height: 100%;
