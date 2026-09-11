@@ -99,7 +99,22 @@
         "behaviour_change": "HLR-N06.3 -- GATED. outline and radial will paint a declaration of the nodes they do NOT show. This changes what the operator sees under overflow, which is why the coordinator required full protocol rather than the lighter lane.",
         "protocol": "FULL protocol, serial reviews, soft cap 3, terminal-boundary pattern available at the cap.",
         "seat_touching": "TBD at the pre-gate -- if a key or seat is involved, the whole-seat keymap spec + pinned row diff per seat is owed.",
-        "ordering": "After Inc-CRUMB (closed 9a773e4), before Inc-REPAIR."
+        "ordering": "After Inc-CRUMB (closed 9a773e4), before Inc-REPAIR.",
+        "pregate_2026-09-10": {
+          "verdict": "CUT BLOCKED -- the recorded premise is refuted by measurement. Not implemented.",
+          "reproduced": "outline 5/8 and radial 2/8 at 30x6 on `legacy` reproduce EXACTLY on today's tree. The recorded numbers hold.",
+          "population_diverges": "C-14. The hole is NOT {outline, radial}. Censused over the DERIVED renderer set: mapper.views.lane holds THREE renderers that also hide nodes and declare nothing -- HybridLaneRenderer 2/8, LaneRenderer 2/8, RailTimelineRenderer 1/8. Five renderers across THREE view modules hide and stay silent, not two across two.",
+          "cost_if_unmeasured": "Implementing from the note would have shipped a declaration covering 2 of 5 offending renderers and closed B-55 over three renderers that still hide silently -- a gap behind a closed door, with the requirement marked closed.",
+          "new_design_question": "`painted_ids(graph, state)` is a MODULE-level pure function (layered.py:326), deliberately not an IRenderer member: the Protocol is runtime_checkable, so adding a member would flip all six shipped renderers to isinstance->False. But mapper.views.lane holds THREE renderer classes with different geometries, and ONE module-level function cannot answer for three. The shipped contract does not fit the measured population.",
+          "constraint": "02j's ruling, asserted mechanically by test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr: app.py must import painted_ids BY NAME and dispatch by identity -- never getattr-probe a renderer for it, because that answers 'declares nothing' and 'declaration is broken' with the same None.",
+          "tripwire": "test_a98_exactly_one_renderer_declares_its_painted_set pins painted_ids_exporters() == {mapper.views.layered}. It is DESIGNED to go red when a second renderer declares, and it will. That is the arm working, not a regression.",
+          "options_for_ruling": [
+            "A. Scope Inc-B55 to outline+radial as recorded; carry lane's three renderers as a NAMED, MEASURED gap. Honest, but closes B-55 over a known hole.",
+            "B. Widen to lane.py (4 source files: outline, radial, lane, app -- still within the recorded cap) and solve the one-module-three-geometries problem, which is a CONTRACT change and touches the A-98 census and 02j.",
+            "C. Change the contract to per-renderer declaration, the largest option; re-opens the runtime_checkable Protocol reasoning that put painted_ids at module level in the first place."
+          ],
+          "recommendation": "Do not pick this unilaterally -- it is an architecture call on a shipped contract, and the batch routes those to the architect before implementing."
+        }
       }
     ],
     "closed": [
