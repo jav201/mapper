@@ -2393,12 +2393,17 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 
 ---
 
-##### LLR-N06.3.4 — outline emits nothing the canvas cannot show, and declares what the cut hid
+##### LLR-N06.3.4 — the number outline shows matches what the operator cannot see
 
-> **CORRECTED BY `02n` (qa-reviewer, 2026-09-10). RATIFIED WITH CORRECTIONS.** The thresholds below
-> are the reviewer's wording, transcribed. The implementer drafted the original row AND would have
-> written the code satisfying it; that row was reviewed before the increment opened precisely so the
-> criteria and the work would not be argued by one voice at one table.
+> **CORRECTED BY `02n` (qa-reviewer, 2026-09-10), THEN RE-FRAMED BY COORDINATOR RULING.** The
+> thresholds are the reviewer's wording, transcribed. The implementer drafted the original row AND
+> would have written the code satisfying it; it was reviewed before the increment opened precisely so
+> the criteria and the work would not be argued by one voice at one table. **`02n` declined to ratify
+> past a framing question rather than hide it**, and that question is settled here: `PHYS-1`/`PHYS-2`
+> are a rendering-correctness property of one module, strong as regression but pressing a claim the
+> operator cannot state. They are **demoted to a pinned pilot arm**. Acceptance keeps the claim the
+> operator *can* state — *the number it shows me matches what I cannot see* — which is this batch's
+> law of measuring what the operator reads.
 
 - **Traceability:** HLR-N06.3
 - **Origin:** `02m` §7.1, re-measured through the live screen by `02n`.
@@ -2410,16 +2415,31 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 - **Touched symbols:** the `lines[:h]` cut at `mapper/views/outline.py:161`, and the new module-level
   `painted_ids` in `mapper/views/outline.py` — `NEW — created in Phase 3`.
 - **Validation:** `test (pilot)`
-- **Executed verification:** `pytest tests/test_overflow.py -k "at056"` — two arms, **named
-  normatively**: `test_at056_outline_cuts_at_the_rows_the_canvas_shows` (`PHYS-1`, `PHYS-2`) and
-  `test_at056_outline_declares_what_the_cut_hid` (`PHYS-3`, `PHYS-4`), each parametrised over the
-  driven table below. **The node names are part of this requirement, not a style preference:** `C-18`
+- **Executed verification (ACCEPTANCE):** `pytest tests/test_overflow.py -k "at056"` — one arm, **named
+  normatively**: `test_at056_outline_declares_what_the_cut_hid` (`PHYS-3`, `PHYS-4`), parametrised over
+  the driven table below. **The node name is part of this requirement, not a style preference:** `C-18`
   needs the `AT id → node` edge, and this batch already carries `AT-005` and `AT-006` with no node on
   disk and therefore no way to verify them. An arm asserting these clauses under a different name
-  **does not discharge `AT-056`**. Both arms drive `App.run_test(size=...)`, push `MapScreen("legacy")`,
-  press the real `o` chord, and read the **composited frame** clipped to the widget region with
+  **does not discharge `AT-056`**. The arm drives `App.run_test(size=...)`, pushes `MapScreen("legacy")`,
+  presses the real `o` chord, and reads the **composited frame** clipped to the widget region with
   `_rows_in` — never `render().plain`, never `painted_ids(...)`.
-- **Numeric pass threshold — FOUR clauses, all required, all read from the composited frame:**
+- **Acceptance threshold — TWO clauses, both required, both read from the composited frame:**
+  1. **`PHYS-3` — the declaration follows the cut, against a frame-derived oracle.**
+     `declared_hidden == |{ n in graph.nodes : n's painted trace is absent from the region-clipped
+     frame }|`. **Outline's painted trace, stated here and not inherited (`02m` §7.3):** the node's
+     title as `render` emits it, whitespace-collapsed, sought in the whitespace-collapsed join of the
+     region rows. Outline paints titles **unclipped and word-wraps** rather than truncating, so a title
+     survives a wrap whole — measured on `legacy` over 8 widths (`w = 20 … 32`), the per-row read and
+     the joined read agree **8 of 8**. `HLR-N06.3`'s `_clip(title, card_w - 3)` predicate is
+     **`layered`'s card geometry and does not apply here**: outline has no `card_w`. The hidden set
+     shall be derived from the frame and **never** from `painted_ids(...)` nor from
+     `len(graph.nodes) - len(painted)` (`C-31`).
+  2. **`PHYS-4` — the fixture is non-degenerate, asserted BEFORE the equality.** At each driven
+     clipping size, `1 <= declared_hidden < len(graph.nodes)` is asserted first, so `PHYS-3` cannot be
+     satisfied by `0 == 0` (`C-55`) or by `N == N`. At the zero control the assertion is inverted and
+     explicit: `declared_hidden == 0` **and** no overflow token, per `LLR-N06.3.3`.
+- **Pinned pilot regression — NOT acceptance, and pinned here so it cannot be dropped:**
+  `test_outline_cuts_at_the_rows_the_canvas_shows` (`tests/test_overflow.py`), same driven table.
   1. **`PHYS-1` — nothing is emitted that the canvas cannot show.** Every logical line
      `OutlineRenderer.render` returns is present in the region-clipped frame, compared on
      whitespace-collapsed text **joined across wrapped rows**. **Zero** emitted-but-unpainted lines at
@@ -2432,20 +2452,6 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
      other clause in this row** — a renderer painting nothing satisfies `PHYS-1` trivially and `PHYS-3`
      by declaring all `N` hidden against a frame where all `N` are absent. That is `MUT-1` of
      `HLR-N06.3`'s own mutation table, one renderer over. `PHYS-2` is the only clause it fails.
-  3. **`PHYS-3` — the declaration follows the cut, against a frame-derived oracle.**
-     `declared_hidden == |{ n in graph.nodes : n's painted trace is absent from the region-clipped
-     frame }|`. **Outline's painted trace, stated here and not inherited (`02m` §7.3):** the node's
-     title as `render` emits it, whitespace-collapsed, sought in the whitespace-collapsed join of the
-     region rows. Outline paints titles **unclipped and word-wraps** rather than truncating, so a title
-     survives a wrap whole — measured on `legacy` over 8 widths (`w = 20 … 32`), the per-row read and
-     the joined read agree **8 of 8**. `HLR-N06.3`'s `_clip(title, card_w - 3)` predicate is
-     **`layered`'s card geometry and does not apply here**: outline has no `card_w`. The hidden set
-     shall be derived from the frame and **never** from `painted_ids(...)` nor from
-     `len(graph.nodes) - len(painted)` (`C-31`).
-  4. **`PHYS-4` — the fixture is non-degenerate, asserted BEFORE the equality.** At each driven
-     clipping size, `1 <= declared_hidden < len(graph.nodes)` is asserted first, so `PHYS-3` cannot be
-     satisfied by `0 == 0` (`C-55`) or by `N == N`. At the zero control the assertion is inverted and
-     explicit: `declared_hidden == 0` **and** no overflow token, per `LLR-N06.3.3`.
 - **Driven size set — `fixtures/legacy`, outline mode, TERMINAL sizes. The fixture is normative: an
   arm on another map neither passes nor fails `AT-056`.**
 
@@ -2472,9 +2478,9 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 - **Open question carried into `Inc-B55a`'s pre-gate (`02n` §7.1):** at `(30,16)` outline emits 4
   logical lines needing 5 physical rows, `region.height` is 5, and the arithmetic FITS — yet the 4th
   line is absent and region row 4 is blank. **A second mechanism is in play beyond the `lines[:h]`
-  cut.** A correct cut may therefore still leave `PHYS-1` red. This must be diagnosed before the fix
-  is designed, not after.
-- **Acceptance:** `AT-056`
+  cut.** A correct cut may therefore still leave `PHYS-1` red. Diagnosed read-only at the pre-gate,
+  before the fix is designed — coordinator ruling 2026-09-10.
+- **Acceptance:** `AT-056` · **Test case:** `TC-089`
 
 ##### LLR-N06.3.5 — both declaring surfaces speak, agree, and are right
 
@@ -2535,7 +2541,38 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
 - **Named weaker variant this reddens (`M-N06.3.5-a`):** wire the **strip** through `_unpainted_ids`
   for outline and leave the canvas header alone. Green on `AGREE-2` only if absence is read as zero —
   exactly the `B-60` misreading — and **red on `AGREE-1`**.
-- **Acceptance:** `AT-057`
+- **Acceptance:** `AT-057` · **Test case:** `TC-090`
+
+##### LLR-N06.3.6 — a declaration that BROKE is not a view that declares nothing
+
+> **DRAFTED BY `02n` (qa-reviewer), PLACED BY COORDINATOR RULING 2026-09-10.** The reviewer wrote this
+> row and explicitly declined to insert it — *"I am not authorised to insert it"* — so it is placed
+> here rather than left as an assertion in a review artifact. It chains the hazard already ruled to
+> ride `Inc-B55a` **first**, which until now carried no `AT` id, no `LLR` row and no node.
+
+- **Traceability:** HLR-N06.3
+- **Origin:** `A-94 ruling_2_hazard_first`; requirement form drafted in `02n` §6.
+- **Statement:** While the declaration for the current view cannot be computed, the system shall not
+  paint the same surface it paints when the view has nothing to declare; a **broken** declaration and
+  an **absent** one shall be distinguishable observables.
+- **Touched symbols:** `mapper/app.py:1596-1603` — renderer-to-function resolution moves **outside**
+  the `try` and **raises** for an unregistered renderer; the `try` keeps catching layout failures only,
+  for which `None` is the honest answer.
+- **Validation:** `test (pilot)` + `test (unit)`
+- **Executed verification:** `pytest tests/test_overflow.py -k "at058"` — arms named
+  `test_at058_an_unregistered_renderer_raises_rather_than_declaring_nothing` and
+  `test_at058_a_layout_failure_still_degrades_to_absent`.
+- **Numeric pass threshold:** with a renderer that exports no `painted_ids`, resolution **raises** —
+  **0** frames in which it returns `None`. With a renderer whose layout raises, `_unpainted_ids`
+  returns `None` and the frame carries the declared degradation — **0** unhandled exceptions escaping
+  the message pump. The two paths produce **different** painted frames.
+- **Acceptance criteria:** `except Exception: return None` is total, and `None` reads as *"this view
+  declares nothing"* (`app.py:1569`, `:2142`), which `LLR-N06.3.3` makes mean *nothing is hidden*.
+  `Inc-B55` is what makes this seam reachable by more than one renderer. Wiring a declaration through
+  a seam that can swallow *"declaration broken"* into *"declares nothing"* ships the silent skip
+  `A-98` exists to prevent — **and it would silently swallow `AT-056` and `AT-057` themselves.**
+- **Sequencing:** fixed **FIRST** inside `Inc-B55a`, before the declaration is wired through the seam.
+- **Acceptance:** `AT-058` · **Test case:** `TC-091`
 ---
 
 ### 3.5 · US-N07 «búsqueda» — a search that says how much it found *(**Inc-4a** search core + **Inc-4b** seat and walk — §5.4, split by `#D36`)*
