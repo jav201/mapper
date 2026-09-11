@@ -55,9 +55,38 @@ Three candidates were tested **against each other**, not confirmed one at a time
 Exactly **one** line short at four sizes, **zero** at the other seven. The large blank tails at
 `(80,24)` and `(118,34)` are legitimate: the outline is 9 lines and the canvas is taller.
 
-`_declare_after_layout` (`app.py:1609`) already exists to repaint **both declaring surfaces** *"once
-layout is real"* (`B-56`, `B-60`). It repaints the **declaration** and not the canvas **content**.
-That asymmetry is the seam.
+### 2.2 · MY STATED SEAM WAS FALSE — corrected before a line was written
+
+The first version of this section said `_declare_after_layout` (`app.py:1609`) *"repaints the
+declaration and not the canvas content"*, and called that asymmetry the seam. **Reading the function
+refutes it:**
+
+- `app.py:1642` renders the **current** renderer at the **current** `_canvas_size()`.
+- `app.py:1649` is `canvas.update(text)` — **the content IS repainted.**
+- `app.py:1661-1663` is a **settle loop**: it re-schedules itself while `region != self._declared_for`
+  and stops when the region stops moving, so *"nothing re-renders after the settle"* is also wrong.
+- `on_resize` (`app.py:1665`) adds a second entry point, and its own docstring records that a SCREEN
+  resize is not a CANVAS resize.
+
+So the code already does the thing I proposed to add. **The observable stands** — `held < resettled`
+at four of eleven sizes, reproduced in two independent probes — **but the mechanism does not**, and
+the seam I named is not a seam.
+
+**This is exactly the trap this pre-gate was approved to prevent, caught one step before the code.**
+Designing the settle fix on the refuted story would have added a repaint next to an existing repaint
+and left the four sizes red.
+
+**Live candidate, NOT yet confirmed and NOT to be implemented against until it is:** `_canvas_size()`
+subtracts a MEASURED header height (`app.py:1492-1495`), and that measurement is `layered`'s header
+geometry. In `outline` mode the painted header is `◆ mapper · outline` — one row — while the
+subtraction may still be priced for `layered`'s, which wraps at narrow widths. That would under-give
+`h` by exactly one row in outline, at narrow widths only, which is the **exact shape** of the measured
+gap: `1` line at `(24,20)`, `(30,16)`, `(32,16)`, `(34,14)` and `0` everywhere else. The docstring at
+`:1495` already names charging a constant in either place as `B-61`.
+
+**Owed before implementation:** confirm or refute that candidate by direct observation, and identify
+what the settle loop's terminating pass actually rendered at. Until then the mechanism line in §2's
+table reads `H3/H4 CONFIRMED AS AN OBSERVABLE, MECHANISM OPEN`.
 
 ### 2.1 · The KeyBar mirror — same law, both directions
 
