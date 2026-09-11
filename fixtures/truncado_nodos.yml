@@ -1,0 +1,18 @@
+schema:
+  - key: D
+    label: documento
+    required: false
+
+nodes:
+  raiz:
+    title: Plataforma de Integracion Continua Corporativa
+    state: ok
+    meta: raiz
+  corto:
+    title: Breve
+    state: ok
+    meta: cabe entero
+  medio:
+    title: Titulo de largo medio
+    state: ok
+    meta: pasa el corte
