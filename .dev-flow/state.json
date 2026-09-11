@@ -207,7 +207,19 @@
             "a settle pass re-rendering at a different h"
           ],
           "why_it_blocks": "A correct cut may still leave PHYS-1 red. Designing against the wrong mechanism is the birth certificate of this batch's last three regressions.",
-          "boundary_required": "Per control 11, the diagnosis carries its own boundary statement naming what it sees AND cannot see."
+          "boundary_required": "Per control 11, the diagnosis carries its own boundary statement naming what it sees AND cannot see.",
+          "VERDICT": {
+            "mechanism": "STALE GEOMETRY, not cropping. The canvas widget HOLDS content rendered at a height one row smaller than the settled _canvas_size(), and nothing re-renders after the region settles. Result: one logical line short, with a blank row at the bottom of the canvas.",
+            "H1_lines_cut": "NOT the cause of the observed loss. At every loss size the held content fits the region exactly -- no line is dropped by wrapping. The logical/physical concern in outline.py:161 is real but does NOT manifest at these sizes.",
+            "H2_cropping": "REFUTED. Every line the widget holds appears on the frame. At (30,16) the widget holds 3 lines and the frame shows all 3 (wrapped to 4 rows) plus 1 blank. Nothing is emitted-and-cropped.",
+            "H3_H4_stale_render": "CONFIRMED. At (30,16) held=3 lines while a re-render at the settled cs_h=4 yields 4. Same off-by-one at (24,20), (32,16), (34,14).",
+            "quantified": "Gap is exactly 1 line at 4 of 11 driven sizes -- (24,20), (30,16), (32,16), (34,14) -- and 0 at the other 7. The blank tail at wide sizes ((80,24)=7, (118,34)=18) is legitimate: the outline is 9 lines and the canvas is taller.",
+            "the_shape_is_familiar": "This is Inc-CRUMB's KeyBar defect MIRRORED. There, a widget kept an auto-height computed from a render it had already replaced. Here, a widget keeps CONTENT rendered against a region that has since grown. Both are the same law: a widget must never be laid out from, or left holding, a render that no longer matches its geometry.",
+            "existing_settle_hook": "_declare_after_layout (app.py:1609) already exists to repaint BOTH declaring surfaces 'once layout is real' (B-56, B-60). It evidently repaints the DECLARATION but not the canvas CONTENT. That asymmetry is the likely seam for the fix.",
+            "consequence_for_the_cut": "Inc-B55a's fix is NOT primarily the lines[:h] logical/physical cut. Designing against that alone would have left PHYS-1 red at all four loss sizes -- exactly the wrong-mechanism trap the pre-gate was approved to prevent. With a settled re-render the content fills the canvas exactly at (30,16): 4 logical lines wrap to 5 physical rows against region_h 5, no blank row, and '    - Contabilidad' appears.",
+            "boundary": "This reads the canvas widget's held renderable, the composited frame rows, _canvas_size(), and a re-render under the reconstructed ViewState, all at ONE instant after pause(). It CANNOT see which h was passed at the moment of the live call -- the stale height is INFERRED from the produced line count -- nor intermediate frames, nor whether a later settle pass would change the answer. One fixture (legacy), outline only. No repo file was instrumented, so nothing inside refresh_canvas was observed directly.",
+            "open": "Whether the logical/physical cut at outline.py:161 manifests at any size once the stale render is fixed is UNMEASURED. It must be re-measured after the settle fix, not assumed discharged."
+          }
         }
       }
     ],
