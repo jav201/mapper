@@ -163,8 +163,22 @@ def test_a_monster_title_is_clipped_to_one_frame(n, geom):
 def test_the_clip_uses_the_existing_ellipsis_idiom():
     """ONE GRAMMAR. A second truncator would be a second thing to keep in step.
 
-    `layered._clip` is also where `LLR-COERCE.2`'s ordering lives -- coerce, THEN
-    truncate -- so routing through it fixes the ordering as well as the bound.
+    `layered._clip` is also the helper that COERCES the file-derived title, so
+    routing through it buys the bound and the coercion together.
+
+    THIS DOCSTRING CARRIED THE RETRACTED SENTENCE TWO DOCSTRINGS ABOVE THE ONE
+    THAT RETRACTED IT. It read "...is also where `LLR-COERCE.2`'s ordering lives
+    -- coerce, THEN truncate -- so routing through it fixes the ordering as well
+    as the bound", which is the verbatim claim retracted at `outline.py` and in
+    `AT-056`. `plain` maps all 235 banned points to one `U+FFFD` each and is
+    therefore index-preserving, so the ordering buys nothing here; a mutant
+    running the forbidden order stays green. Retracting a claim in one file while
+    it stands in the same file's neighbour is how it comes back.
+
+    What this arm actually asserts is narrow and stated as such: the clip uses
+    the ELLIPSIS idiom rather than a second truncator's grammar. The coercion is
+    pinned by `test_outlines_title_path_is_coerced_not_merely_clipped` below and,
+    repo-wide, by `test_inc3_census.py`.
     """
     rows = _rows_of(wide(400_000))
     fat = [t.plain for _n, t in rows if "x" in t.plain][0]
