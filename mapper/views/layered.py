@@ -78,12 +78,31 @@ def _vis_width(s: str) -> int:
 def _clip(s: str, width: int) -> str:
     """LLR-COERCE.2: coerce, THEN truncate.
 
-    The order is the requirement.  Truncation MANUFACTURES the defect out of a
-    source that was balanced: a title carrying U+202E … U+202C cut at `width`
-    between the two leaves an unterminated right-to-left override in the painted
-    row, and no amount of coercing afterwards puts the terminator back.  Every
-    truncator in this module funnels through here, so the ordering is stated in
-    one place rather than at each call site.
+    The order is the requirement, and EVERY truncator in this module funnels
+    through here so it is stated in one place rather than at each call site.
+
+    THE MECHANISM THIS DOCSTRING USED TO GIVE IS REFUTED, AND THE RETRACTION
+    BELONGS HERE BECAUSE THIS IS WHERE THE CLAIM ORIGINATED.  It read:
+    "Truncation MANUFACTURES the defect out of a source that was balanced: a
+    title carrying U+202E … U+202C cut at `width` between the two leaves an
+    unterminated right-to-left override in the painted row, and no amount of
+    coercing afterwards puts the terminator back."  MEASURED by `S-B(+C)`'s
+    security review: it cannot.  `_CONTROL_MAP` maps all 235 banned code points
+    to exactly ONE `U+FFFD` each, so `darkside.plain` is length- and
+    index-preserving and `truncate(plain(s)) == plain(truncate(s))` IDENTICALLY
+    -- 20,000 fuzzed hostile pairs, zero differences, and a mutant running the
+    FORBIDDEN order stayed green on all 1058 arms.  There is never an override
+    left to strand, because `plain` replaced it.
+
+    THE CODE IS UNCHANGED AND THE ORDER IS STILL RIGHT.  It costs nothing, and it
+    is the order that stays correct if `plain` ever DELETES rather than replaces
+    -- the day the old rationale would become true.  What changed is the reason
+    given, and it is retracted HERE rather than only at the call site that
+    inherited it: `S-B(+C)`'s confirmation pass found the copy retracted and the
+    ORIGINAL still standing, which is exactly how a refuted claim comes back.
+
+    The load-bearing property is that the output is COERCED, which is what
+    `tests/test_fold.py`'s split-at-width arm now asserts.
     """
     s = darkside.plain(s)
     if _vis_width(s) <= width:

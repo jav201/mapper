@@ -134,18 +134,29 @@ def test_a_compressed_indent_still_tells_the_truth_about_depth(depth):
 # ------------------------------------------------------------ F2, the row cap
 
 
+@pytest.mark.parametrize("geom", GEOMETRIES)
 @pytest.mark.parametrize("n", (10_000, 400_000))
-def test_a_monster_title_is_clipped_to_one_frame(n):
+def test_a_monster_title_is_clipped_to_one_frame(n, geom):
     """MEASURED PRE-FIX: a 400,000-character title built a 400,004-cell row.
 
     The ceiling is one FRAME (`w * h`): a row longer than that cannot be shown
     entirely by any frame of this size, so beyond it the renderer was building
     text only to wrap, price and discard it.
+
+    THREE GEOMETRIES, AND THE CONFIRMATION PASS IS WHY. The first fold added the
+    sweep to the INDENT arm and left this one at a single frame, so `F1` was only
+    half closed: substituting `row_cap = 4012` -- its value at 118x34 -- while
+    leaving the indent derived survived the ENTIRE DEFAULT LANE at 1059 passed,
+    building a 4,016-cell row into a 240-cell canvas. A 16.7x overrun at (24,10),
+    lane green. Control 20 twice in one module: a fix that applies the control to
+    one of two siblings has applied it to neither.
     """
-    widest = _widest(_rows_of(wide(n)))
-    assert widest <= W * H + W, (
-        f"a {n}-character title produced a {widest}-cell row; the frame is "
-        f"{W}x{H} = {W * H} cells"
+    w, h = geom
+    widest = _widest(_rows_of(wide(n), w, h))
+    assert widest <= w * h + w, (
+        f"a {n}-character title produced a {widest}-cell row at {geom}; the "
+        f"frame is {w}x{h} = {w * h} cells. A constant equal to the 118x34 value "
+        "passes there and overruns by 16.7x at (24,10)"
     )
 
 
@@ -239,12 +250,22 @@ def test_the_caps_licence_holds_outline_still_reads_no_pan():
 def test_outlines_title_path_is_coerced_not_merely_clipped():
     """`LLR-COERCE.2` AT OUTLINE'S CALL SITE -- the arm this increment shipped without.
 
-    `S-B(+C)`'s security review fired the gap: removing the COERCION and removing
-    the CAP fail the identical three tests, all of them cap tests, so the
-    coercion contributed **zero signal**. `TC-081`, the node `01-requirements.md`
-    designates for `LLR-COERCE.2`, does not exist. `_clip`'s own coercion is
-    pinned elsewhere (`test_fold.py`'s fold-pill arms), so a refactor of `_clip`
-    would be caught -- but a change to THIS call site would not have been.
+    THIS ARM'S FIRST DOCSTRING WAS FALSE, AND THE CONFIRMATION PASS MEASURED IT
+    FALSE. It repeated gate 2's premise -- "removing the COERCION and removing
+    the CAP fail the identical three tests, so the coercion contributed ZERO
+    SIGNAL" -- and that does not reproduce. Isolating the coercion (cap kept,
+    coercion removed) reddens TWO arms: this one AND
+    `test_inc3_census.py::test_a89_every_reached_renderer_coerces_what_it_paints`.
+    That census arm is UNCHANGED across both folds and was written two increments
+    earlier, so outline's coercion was already pinned before it was declared
+    unpinned. A true outcome resting on a false measurement -- this batch's own
+    recurring shape, and it was in the arm that exists to prevent it.
+
+    SO WHY THIS ARM STILL EXISTS. The census pins the property repo-wide; this
+    pins it AT THE CALL SITE, names the code points per `C-56`, and fails with a
+    message that says which one escaped. Defence in depth beside a census arm is
+    defensible -- claiming the call site was unarmed was not. `TC-081`, the node
+    `01-requirements.md` designates for `LLR-COERCE.2`, still does not exist.
 
     THE PROPERTY IS "COERCED AT ALL", AND THAT IS DELIBERATE. The same review
     refuted the ordering rationale this line once carried: `plain` maps every
