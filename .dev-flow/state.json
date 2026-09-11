@@ -191,7 +191,24 @@
           "4_traceability_table_rows": "AT-056/AT-057 have no TC- id and no row in section 5's traceability table. Siblings (AT-051b, AT-052, AT-053) each carry a titled paragraph plus a TC- id. Owed, and 02n could not determine whether that table is generated or hand-maintained.",
           "5_radial_predicate": "02m section 7.3's requirement half is discharged for OUTLINE by PHYS-3. Radial's painted predicate is owed in its own row at Inc-B55b and must be stated there, not left to a module docstring."
         },
-        "control_candidate_for_ratification": "A CORRECTION CAN REPRODUCE THE ERROR IT CORRECTS, ONE LEVEL DOWN. Fixing a unit conflation does not immunise the fix against the same conflation in a finer unit. Exhibit: 02m conflated renderer width with terminal width; the correction conflated the renderer's row BUDGET with the rows the canvas DISPLAYS -- and the right number was already printed in the corrector's own table, in the column it did not compare against. When you correct a unit error, re-state the unit of EVERY comparand in the corrected claim, not just the one that was wrong."
+        "rulings_2026-09-10_post_02n": {
+          "1_AT-058_PLACED": "LLR-N06.3.6 -> AT-058 -> TC-091 inserted in 01-requirements.md under HLR-N06.3, wording attributed to 02n's draft and ratified by coordinator ruling. The reviewer drafted it and declined to insert it ('I am not authorised to insert it'), so leaving it unplaced would have been the unchained-defect state ruling 4 forbade. Sequenced FIRST inside Inc-B55a.",
+          "2_acceptance_reframed": "AT-056 = PHYS-3 + PHYS-4 only -- the operator-statable claim, 'the number it shows me matches what I cannot see'. PHYS-1 + PHYS-2 DEMOTED to a named pinned pilot arm, test_outline_cuts_at_the_rows_the_canvas_shows, pinned inside the row so it cannot be dropped. Regression strength preserved; acceptance now honest about whose claim it presses.",
+          "3_control_12_ratified": "A correction can reproduce the error it corrects, one level down.",
+          "tc_ids_allocated": "TC-089 (AT-056), TC-090 (AT-057), TC-091 (AT-058). Highest previously in use was TC-088.",
+          "still_owed": "Section 5 traceability-table rows for AT-056/057/058 -- 02n could not determine whether that table is generated or hand-maintained. Radial's painted predicate is owed in Inc-B55b's own row."
+        },
+        "blocker_diagnosis": {
+          "status": "APPROVED read-only at the pre-gate, before any design.",
+          "question": "At (30,16) outline emits 4 logical lines needing 5 physical rows, region.height IS 5, the arithmetic FITS -- yet line 4 is absent and region row 4 is BLANK. At (34,14) the whole body line is emitted and the frame shows the header plus two blank rows. A SECOND mechanism beyond the lines[:h] cut.",
+          "candidates": [
+            "Static.update cropping",
+            "_apply_region_visibility",
+            "a settle pass re-rendering at a different h"
+          ],
+          "why_it_blocks": "A correct cut may still leave PHYS-1 red. Designing against the wrong mechanism is the birth certificate of this batch's last three regressions.",
+          "boundary_required": "Per control 11, the diagnosis carries its own boundary statement naming what it sees AND cannot see."
+        }
       }
     ],
     "closed": [
@@ -426,7 +443,8 @@
       "MEASURE WHAT THE OPERATOR READS AND THE GEOMETRY IT STANDS IN; EITHER ALONE CAN LIE. A widget must never be laid out from a render it is about to replace. When a defect leaves the painted output identical, assert the geometry -- an arm on the text cannot fail. (Pairs with Inc-STRIPS's composited-frame rule as the two halves of one law.)",
       "LABELS ON EVIDENCE ARE DECLARATIONS TOO. AN ORACLE'S BASELINE IS FETCHED FROM THE RECORD (`git show <commit>:<path>`), NEVER FROM A WORKING DIRECTORY'S NAME. Exhibit: a comparison arm was pointed at a directory called `_confirm/head/` that was in fact a MID-INCREMENT working snapshot -- it carried `_width` but neither `on_mount`, `NoActiveAppError` nor `_KEYBAR_FALLBACK_CELLS`. Had the label been trusted, the gate would have compared against a tree that never existed as a gate.",
       "DISTRUST IS NOT A DIRECTION. Replacing a suspect note with a measurement is only half the move -- EVERY REPLACEMENT MEASUREMENT CARRIES ITS OWN BOUNDARY STATEMENT, and the failure is to state the old claim's limits while leaving the new one's unstated. Exhibit: a pre-gate rightly distrusted a recorded population and replaced it with a class census that could not see REACHABILITY. Classes are not reachability. The reviewer's check of the CHECKER is what landed the truth, and the original note had been right all along.",
-      "A CUT COPIED FROM A NEIGHBOUR IS A SPELLING TOO. A file list inherited from an adjacent increment drifts from the scope it was written for, and nothing makes the two agree. Exhibit: B-55 was routed to Inc-5 because Inc-5 'already owns all three of those files' -- a HIT-PAINTING cut -- and B-55 inherited the LIST rather than the SCOPE, carrying a module no operator can reach into an increment about what operators can see."
+      "A CUT COPIED FROM A NEIGHBOUR IS A SPELLING TOO. A file list inherited from an adjacent increment drifts from the scope it was written for, and nothing makes the two agree. Exhibit: B-55 was routed to Inc-5 because Inc-5 'already owns all three of those files' -- a HIT-PAINTING cut -- and B-55 inherited the LIST rather than the SCOPE, carrying a module no operator can reach into an increment about what operators can see.",
+      "A CORRECTION CAN REPRODUCE THE ERROR IT CORRECTS, ONE LEVEL DOWN. Fixing a unit conflation does not immunise the fix against the same conflation in a finer unit. Exhibit: 02m conflated renderer width with terminal width; the correction conflated the renderer's row BUDGET with the rows the canvas DISPLAYS -- and the right number was already printed in the corrector's own table, in the column it did not compare against. When you correct a unit error, re-state the unit of EVERY comparand in the corrected claim, not just the one that was wrong."
     ],
     "open_blocks": [
       {
