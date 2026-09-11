@@ -163,9 +163,37 @@ temp-context `I001` still reads as added — which is why the authoritative chec
 
 Self-check: `C:\Users\jjgh8\clde\gate_selfcheck.py`.
 
+## The operator-facing footprint — the composited-frame sweep
+
+The pre-gate priced the **charge**. This prices the **frame**: 48 terminal sizes (8 widths × 6
+heights), outline view, a 13-node fixture, comparing body rows the canvas actually painted before
+and after the fix. The comparand is `canvas.render()` after layout and `canvas.region.height` — the
+composited frame, never the renderer's return value.
+
+> **35 of 48 terminal sizes showed at least one body row the operator could not see.**
+> 32 sizes lost **1** row, 3 sizes lost **2**. Worst case 2.
+
+The loss is concentrated where it hurts: every size from `(40,14)` up through `(118,20)` lost a row,
+and the three 2-row losses are all at width 28, the narrow band where layered's header wraps to three
+rows and outline's stays at one.
+
+**The sweep carries a positive control, and it is not clean — which is the point.** A deliberately
+inflated charge (`+5`) must shrink the frame; it moved at **44 of 48** sizes and was **blind at 4**:
+`(60,30)`, `(80,30)`, `(100,30)`, `(118,30)`. Those are structurally blind rather than broken — the
+whole 14-row fixture fits the region there, so no charge error can show. Reported rather than
+trimmed, because a sweep that hides its blind rows is claiming coverage it does not have.
+
+**AND THE FIRST RUN OF THIS SWEEP PRINTED A CONFIDENT LIE: "0 of 48".** It patched
+`screen.__class__._header_rows`, which mutates `MapScreen` for the whole **process**, so the "fixed"
+run that followed still carried the pre-fix patch and both columns reported identical numbers. The
+probe was measuring itself. Fixed by patching the **instance**, which dies with the screen — and the
+positive control is what would have caught it had I not noticed, which is why it is in the table
+rather than in my head.
+
+Probe: `C:\Users\jjgh8\clde\frame_sweep.py`.
+
 ## Still owed by this increment
 
-The **S-B half**: F2 per-row ceiling · walk cost · F7 residue · outline's AGREE-1 floor
-(`LLR-N06.3.5` remains OPEN). And the composited-frame question — *which terminal sizes turn the
-mischarge into a visibly wrong row* — is scoped to this increment and **not yet answered**; the
-pre-gate priced the charge, not the frame.
+The composited-frame question is now **answered** (35 of 48, above). Still owed from the **S-B
+half**: **F2's per-row ceiling · the walk cost · F7's one-line residue · outline's AGREE-1 floor**
+(`LLR-N06.3.5` remains OPEN). Each is its own measurement-then-fix, and none of them is started.
