@@ -818,7 +818,62 @@
         "owed_at": "THE WHOLE-BRANCH QA GATE, explicitly in its brief: that gate must INVESTIGATE or REPRODUCE-AND-EXPLAIN it BEFORE the merge. It may not pass on a green lane without addressing it.",
         "escalation": "If it fires again before that gate it gets its own read-only investigation immediately, rather than another tally mark."
       }
-    ]
+    ],
+    "inc_repair_pregate": {
+      "S1_wrap_threshold": {
+        "date": "2026-09-11",
+        "why_measured_first": "The security review fired ONE wrap and could not say at what density S1 escalates from one unreadable label to a whole row declared painted and invisible. It and I both said the fix depends on that number, so it is measured BEFORE a fix is chosen.",
+        "mechanism": "radial sizes a pill with len(title)+3, a CODE-POINT count, and Canvas.put stores one code point per grid cell. A wide character occupies TWO display columns, so a row of `inner` grid cells can emit up to 2*inner display columns. #map-canvas WRAPS, so the surplus becomes extra physical rows.",
+        "REGIME_1": "4-node map, ONE wide title on the root (control 15: this is the shape priced). OVERFLOW IS ALWAYS PRESENT -- up to 18 surplus display columns at 18 code points, at every size. But LOSS occurs at exactly ONE driven size: (30,20) at 18 code points / 36 cells / 18 overflow columns. And there phys=6 against regH=9, so NO ROW IS PUSHED OUT -- the region kept slack at every size. The lost node is the wide-titled one ITSELF.",
+        "REGIME_1_REFUTES_THE_ESCALATION": "With one wide title the hypothesised cascade does NOT occur. S1 in this regime is bounded to 'the wide-titled node is declared painted while unreadable' -- one node, not a row.",
+        "REGIME_2": "8 nodes, EVERY title wide (18 code points). ROWS ARE PUSHED OUT at 4 of 5 sizes: (40,24) phys=16 vs regH=13, (60,24) 15 vs 14, (80,24) 18 vs 15, (118,34) 29 vs 26. (30,20) sits at 8 vs 8. SO THE ESCALATION IS REAL, and it needs MANY wide titles rather than one long one.",
+        "ORACLE_LIMIT_IN_REGIME_2_STATED": "All eight titles in regime 2 are IDENTICAL, so a substring search cannot tell which node a painted image belongs to -- the `lost` column there is UNRELIABLE and reads 0 at three sizes where rows were demonstrably pushed out. `phys > regH` is the trustworthy signal in that regime. Recorded rather than reported as a clean count.",
+        "consequence_for_the_fix": "Cell-aware pill sizing (Text(title).cell_len instead of len(title)) prevents the overflow AT SOURCE, which removes both the single-node case and the cascade -- so ONE fix covers both regimes and the ledger's code-point-vs-cell question can be settled without a second mechanism. The fix does NOT need to handle cascade separately.",
+        "still_owed": "The ledger itself still records one grid cell per character. Sizing correctly stops the overflow; whether `title_cells` should record cell_len cells per character is the LLR-N06.3.3 question and is carried, not decided here."
+      },
+      "ledger_consolidated": {
+        "why": "C-50. The ledger was SCATTERED before it was measured: 2 items in `inc_repair_scope`, others in cut_amendment sub-keys, two in `open_blocks`, and the oldest (B-29, B-30, the alias bomb) only in 01-requirements.md section 3.9 and LLR-N13.1.7. Assembling it into one place was the first pre-gate act, because a ledger you have to reconstruct is one you will under-count.",
+        "correction": "`coverage.py:88` named a file that does not exist -- it is `mapper/screens/coverage.py`, and the defect is `escape(node.ficha.title or node.id)` at :87 and `escape(','.join(missing))` at :88 feeding a Rich Table. This batch already established that `escape` coerces NOTHING (Inc-CRUMB security review), so the batch standard is `darkside.plain`.",
+        "B-46_is_NOT_in_this_increment": "PLAN.md D34 rules B-46 into its own increment, Inc-CONFIRM, alongside Inc-REPAIR and before Inc-7. It was listed as a sibling, and the census confirms it sits in a different seam of app.py (`_ConfirmScreen`) than defect 2 (`_canvas_size`). Kept out."
+      },
+      "remeasured_2026-09-11": {
+        "verdict": "EVERY ITEM STILL MANIFESTS. Nothing is dropped, so no speculative-fix exemption applies to any of them.",
+        "cited": "SEC-F1 chrome.py TabStrip.__init__ (width omitted); DECL-118 chrome.py _KEYBAR_FALLBACK_CELLS and darkside.py:223 inline 118; S1 radial.py `cw = len(title) + 3`; S2 layered.py overflow_phrase; F7 residue outline.py:243; F2 outline.py:200 per-row cost; defect 2 app.py:1532 `_header_rows`; walk cost outline.py:281; coverage escape screens/coverage.py:87-88; store.py:452 load (B-29, B-30, alias bomb)."
+      },
+      "coupling_census": {
+        "method": "Grouped by the FILE and SEAM each item actually touches, then the grouping follows the overlap rather than the word.",
+        "shared_files": {
+          "mapper/widgets/chrome.py": [
+            "SEC-F1",
+            "DECL-118-TWICE/a"
+          ],
+          "mapper/views/outline.py": [
+            "F7-residue",
+            "F2-per-row-ceiling",
+            "walk-cost"
+          ],
+          "mapper/app.py": [
+            "defect-2-header-charge",
+            "B-46 (OUT -- Inc-CONFIRM)"
+          ]
+        },
+        "my_theme_prior_was_WRONG_IN_THREE_PLACES": [
+          "SEC-F1 (I called it geometry) and DECL-118 (I called it hygiene) are ONE coupled unit: SEC-F1's fix is TabStrip rendering at a real width, and the width it falls back to IS darkside.py:223's 118. Splitting them by theme would have fixed one half of one defect.",
+          "F7-residue (hygiene) shares outline.py AND its function neighbourhood with F2 and the walk cost (geometry/cost). The coordinator's rule applies exactly: a hygiene item touching the same seam belongs with the geometry.",
+          "S2 (layered.py) is NOT coupled to S1 (radial.py) by geometry -- it is coupled to F7-residue by the SENTENCE, across layered.py and outline.py. Two items I had in different buckets share one artifact."
+        ],
+        "genuinely_separate": "store.py's three defects share one file and touch nothing else. screens/coverage.py touches nothing else. defect 2 (app.py:_canvas_size) is file-shared with B-46 but SEAM-DISJOINT, and B-46 is out anyway."
+      },
+      "PROPOSED_CUT": {
+        "note": "SURFACED FOR RULING, NOT STARTED. Five stages, each named by what it TOUCHES.",
+        "S-A": "THE 118 FALLBACK -- SEC-F1 + DECL-118-TWICE(a,b). Files: widgets/chrome.py, darkside.py (2). One defect with two spellings and a consumer: de-duplicate the declared context to one home and give TabStrip.__init__ a resolved width so the CSS lid stops being load-bearing.",
+        "S-B": "OUTLINE'S CUT AND COST -- F2 per-row ceiling + walk cost + F7 residue + outline's AGREE-1 floor. Files: views/outline.py (1), possibly app.py if defect 2 rides. All four touch `_fit`/`_fit_declared`/`painted_ids`.",
+        "S-C": "DEFECT 2 -- app.py `_canvas_size` charging LAYERED's header in every view. File: app.py (1). SEAM-COUPLED to S-B (it sets the `h` that `_fit` spends), so it lands adjacent to or inside S-B. P3's constraint holds: the naive per-renderer charge overflows 6 of 9, so this needs the real geometry observed, not a different constant.",
+        "S-D": "RADIAL'S WIDTH -- S1 cell-aware pill sizing + S2 int hardening + THE WIDE-CHAR ARM + radial's AGREE-1 floor. Files: views/radial.py, views/layered.py (2). The arm lands WITH the fix per ruling, or it is the F4 story again. Wrap threshold already measured: one cell-aware fix covers both regimes.",
+        "S-E": "THE SECURITY SINKS -- store.py's B-29 / B-30 / LLR-N13.1.7 alias bomb, and screens/coverage.py's escape -> plain. Files: store.py, screens/coverage.py (2). FULL protocol per D35: this is the data-path stage.",
+        "open_question_for_the_ruling": "Whether S-C rides inside S-B (seam-coupled, but pushes that stage to 2 files) or stands alone. And whether S-E should split -- store.py is three LLRs with their own ATs (AT-049, AT-050) and is the only stage gating Inc-7."
+      }
+    }
   },
   "stations_active": [
     "P0",
