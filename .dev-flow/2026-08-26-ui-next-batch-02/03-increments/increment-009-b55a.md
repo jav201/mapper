@@ -199,6 +199,45 @@ All four are the "before" half of this increment's two-oracle evidence. Captured
   answers *"nothing to declare"*, *"not this view"* and *"the declaration broke"* with **one value**.
   That is the collision `AT-058` exists to break.
 
+## 6.5 · The settle-arming cost — MEASURED, not handed to the reviewer as a question
+
+I flagged repaint cost as a residual risk for the code review. The ruling was to measure it instead,
+under `S-15` discipline: **work, not call count**, because `S-15` proved render cost is the thing that
+explodes and the settle pass re-renders.
+
+Driven on the `Inc-STRIPS` fixture — **4001 branches, 12002 nodes** — at the declared context and at
+`80x24`. Decomposed rather than simulated, because pre-fix and post-fix cannot both run in one
+process without editing the tree:
+
+```
+STRIPS fixture: 4001 branches, 12002 nodes      median of 5 repeats, wall seconds
+
+  terminal  passes   A refresh_canvas   B one settle pass  post/pre
+ (118, 34)       1             0.0148              0.0018     1.12x
+           pre-fix ~ 0.0148s   post-fix ~ 0.0166s   added +0.0018s
+  (80, 24)       0             0.0089              0.0012     1.00x
+           pre-fix ~ 0.0089s   post-fix ~ 0.0089s   added +0.0000s
+```
+
+**Verdict: the delta is noise, and the measurement closes the question for free.** One settle pass
+costs **1.2–1.8 ms** against a `refresh_canvas` of **8.9–14.8 ms** on the largest graph this batch
+ships a bound for. The added work at the declared context is **+1.8 ms, about 12% of one repaint**,
+and it is **bounded**: `_declare_after_layout` re-schedules only while the region CHANGED, so a
+settled layout costs exactly one no-op pass. **No cheap guard is needed**, and adding one — arming
+only when the strip content changed — would buy 1.8 ms at the price of a second mechanism to keep
+correct, which is the trade `Inc-B55a` exists to stop making.
+
+The settle pass is cheap *relative to* `refresh_canvas` for a structural reason worth recording:
+`_declare_after_layout` repaints the canvas and the strip only, while `refresh_canvas` also rebuilds
+the minimap, the rail, the inspector and the tab strip.
+
+**Boundary.** Wall time in a headless `run_test` on one machine, one process, median of 5. It
+measures the Python-side render and update work — **not** the terminal I/O a real session adds on
+top — for THIS fixture at THESE sizes, and cannot speak for a differently shaped graph. **The
+`passes` column is pause-dependent and is the weakest number here**: `0` at `80x24` means the
+scheduled callback had not run when `pause()` returned, not that arming was skipped. The robust
+figure is the **per-pass cost**, which is what the bound above is built from.
+
 ## 7 · Gate checklist
 
 - [ ] Pre-gate captures landed on the pre-fix tree
