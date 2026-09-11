@@ -35,6 +35,7 @@ from mapper.views.layered import (
     header_rows,
     painted_ids,
 )
+from mapper.views.outline import painted_ids as outline_painted_ids
 from mapper.views.state import ViewState
 # The balanced builder, imported rather than re-typed: `HEADER_ROWS` now has to
 # be measured over node count, and a second copy of a graph builder is a copy
@@ -1026,10 +1027,36 @@ async def test_tc_038_both_declaring_surfaces_read_one_truth(tmp_path):
         assert _declared_total([strip]) == len(hidden)
         assert _declared_total(canvas_rows(screen)) == len(hidden)
 
-        # The outline view declares nothing, and says so with `None`.
+        # OUTLINE DECLARES TOO, SINCE `Inc-B55a`.  This tail used to assert the
+        # opposite -- that outline answered `None` -- and that was the `B-55`
+        # hole faithfully recorded: measured at 30x6 on `legacy`, outline traced
+        # 5 of 8 and declared none of the 3 it hid.  This arm's own property is
+        # "both declaring surfaces read one truth", so the moment a second view
+        # declares, the property is owed in that view too.
         await pilot.press("o")
         await pilot.pause()
         assert screen.outline_mode
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        assert hidden is not None, (
+            "outline declares since Inc-B55a; `None` here means the dispatch "
+            "lost its entry"
+        )
+        assert hidden, "nothing is hidden in outline at this size; vacuous"
+        strip = " ".join(
+            rows_in(screen, screen.query_one("#map-pagination").region)
+        )
+        assert _declared_total([strip]) == len(hidden)
+        assert strip.strip(), "the strip lost its reserved-affordance content"
+
+        # RADIAL is now the view that declares nothing, and says so with `None`
+        # -- the remaining `B-55` hole, stated rather than omitted.  It closes at
+        # `Inc-B55b`, where its painted set has to be a cell-ownership replay
+        # rather than a filter over `place()`: the canvas is last-write-wins and
+        # records no owner, so placement over-declares by 6 of 8 at 30x6.
+        await pilot.press("o")
+        await pilot.press("r")
+        await pilot.pause()
+        assert screen.radial_mode
         assert screen._unpainted_ids() is None  # noqa: SLF001
         strip = " ".join(
             rows_in(screen, screen.query_one("#map-pagination").region)
@@ -1203,11 +1230,18 @@ async def test_at058_an_unregistered_renderer_raises_rather_than_declaring_nothi
             "LookupError sends the next reader hunting"
         )
 
-        # The three the screen actually builds all resolve, and two of them
-        # resolve to the EXPLICIT `None` that means "declares nothing by
-        # design". That is the B-55 hole, stated rather than omitted.
+        # The three the screen actually builds all RESOLVE -- none of them can
+        # reach the raise. Two declare; `radial` resolves to the EXPLICIT `None`
+        # that means "declares nothing by design", which is the remaining B-55
+        # hole stated rather than omitted.
+        #
+        # This started as three `None`s and narrowed to one as `Inc-B55a` landed
+        # outline's declaration. It is written as identity against the imported
+        # functions, so wiring a view to the WRONG view's painted_ids fails here
+        # rather than silently declaring another geometry's set.
         assert screen._painted_ids_for(screen.renderer) is painted_ids  # noqa: SLF001
-        assert screen._painted_ids_for(screen.outline_renderer) is None  # noqa: SLF001
+        assert screen._painted_ids_for(  # noqa: SLF001
+            screen.outline_renderer) is outline_painted_ids
         assert screen._painted_ids_for(screen.radial_renderer) is None  # noqa: SLF001
 
 
@@ -1281,9 +1315,14 @@ async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_
 
         declaring = screen._pagination_text().plain  # noqa: SLF001
 
-        screen.outline_mode = True
+        # RADIAL is the "absent" case since `Inc-B55a`. It was `outline` when
+        # this arm was written, one commit earlier, and outline then gained a
+        # declaration -- which is the arm noticing that "a view that declares
+        # nothing" is a MOVING set, not a fixed one. Radial closes at Inc-B55b
+        # and this line moves again, deliberately, or the arm goes red.
+        screen.radial_mode = True
         absent = screen._pagination_text().plain  # noqa: SLF001
-        screen.outline_mode = False
+        screen.radial_mode = False
 
         original = screen._painted_ids_for  # noqa: SLF001
         screen._painted_ids_for = lambda r: (_ for _ in ()).throw(  # noqa: SLF001
