@@ -2494,6 +2494,32 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   line is absent and region row 4 is blank. **A second mechanism is in play beyond the `lines[:h]`
   cut.** A correct cut may therefore still leave `PHYS-1` red. Diagnosed read-only at the pre-gate,
   before the fix is designed — coordinator ruling 2026-09-10.
+- **AMENDED AT `S-B(+C)` — OUTLINE'S TWO COST CAPS CHANGE WHAT `AT-056`/`AT-057` OBSERVE, AND THAT
+  WAS RULED RATHER THAN ABSORBED** (coordinator ruling 2026-09-11; **wording ratified at
+  `S-B(+C)`'s own full-protocol gate**, alongside `LLR-N06.3.5`'s floor exception):
+  - **What changed.** `outline._indent` was `"  " * level`, unbounded and quadratic in depth, and a
+    ficha title reached the row unclipped. Both are now bounded by **geometry** — half the render
+    width for the indent, one frame (`w * h`) for the row — never by a constant (`B-61`).
+  - **Why this touches an acceptance test at all.** `_fit` prices rows **physically**, so a shorter
+    row occupies fewer physical rows, `_fit` **keeps more of them**, and the declared hidden count
+    moves with the picture. These caps are therefore **not cost-only**, and the ruling took that
+    deliberately rather than letting it arrive as a side effect.
+  - **Measured before the ruling** (`C:\Users\jjgh8\clde\cost_pregate.py`): at depth 4000 the widest
+    row was **8,029 cells** into a 118-cell canvas and the walk **built 15,996,000 indent
+    characters** against 468,460 capped (**34.1×**); `MAX_RENDER_NODES = 12000` puts the worst
+    admissible chain at **~144 million**. A 400,000-character title produced a **400,004-cell row**
+    and **3,390 physical rows** before `_fit` dropped it. After: **102 cells** and **4,016 cells**.
+  - **The licence carries a condition, and the condition is armed.** A capped form must **declare its
+    capping in the frame**: a clipped title uses the existing ellipsis idiom (`layered._clip` — one
+    grammar, and the module where `LLR-COERCE.2`'s coerce-then-truncate ordering already lives), and
+    a compressed indent **carries the true depth** beside its marker, so a deep chain reads as deep
+    and not as shallow. **What the operator sees may compress; what it asserts stays true** —
+    `PHYS-3`'s spirit. Pinned by `tests/test_outline_caps.py`, including a control asserting the caps
+    do **not** fire on an ordinary map.
+  - **Capping is safe from pan, checked not assumed:** `views/outline.py` contains **zero** `pan_x` /
+    `pan_y` references, so cells past the canvas width are unreachable in this view. `rail.py`'s
+    licence to cap came from its fixed width and absent pan; such a licence does not transfer by
+    resemblance.
 - **Acceptance:** `AT-056` · **Test case:** `TC-089`
 
 ##### LLR-N06.3.5 — both declaring surfaces speak, agree, and are right
@@ -2534,6 +2560,12 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
     CAN hold; the strip still declares."*
   - **Armed:** `tests/test_agree_floor.py` derives the floor sizes and asserts the proviso at each,
     with a non-vacuity guard so the arm cannot pass by never reaching the floor.
+  - **RE-MEASURED after `S-B(+C)`'s cost caps landed**, because those caps move the row budget and a
+    stale figure in an amendment is the defect this batch keeps naming: **still 9 of 90 on each
+    fixture, the same sizes, the same shape.** It did not move, and the reason is informative rather
+    than reassuring — `legacy` and `anidado` are **shallow with short titles**, so neither cap
+    engages for them. A deep or wide map **would** shift this set, which is exactly why the arm
+    derives its floor frames instead of listing them.
 - **Touched symbols:** the header token construction in `mapper/views/outline.py` and
   `mapper/views/radial.py` — `NEW — created in Phase 3` — reconciled by `_declare_after_layout`
   (`mapper/app.py:1609`), which exists because the two surfaces must agree (`B-56`, `B-60`).

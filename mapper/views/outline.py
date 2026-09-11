@@ -6,7 +6,7 @@ from rich.text import Text
 
 from mapper import darkside
 from mapper.model import Graph
-from mapper.views.layered import OVERFLOW_TOKEN
+from mapper.views.layered import OVERFLOW_TOKEN, _clip
 from mapper.views.state import ViewState
 
 
@@ -17,8 +17,42 @@ from mapper.views.state import ViewState
 MAX_RENDER_NODES = 12000
 
 
-def _indent(level: int) -> str:
-    return "  " * level
+# The compression marker.  A capped indent MUST NOT LIE ABOUT DEPTH: it carries
+# the TRUE level, so a deep chain reads as deep rather than as shallow.  What the
+# operator sees may compress; what it asserts stays true -- `PHYS-3`'s spirit,
+# and the condition attached to the ruling that licensed the cap.
+DEPTH_MARK = "⇲"
+
+
+def _indent(level: int, budget: int) -> str:
+    """The row's indent, bounded by GEOMETRY and declaring its own compression.
+
+    UNBOUNDED BEFORE `S-B(+C)`: this returned `"  " * level`, quadratic in depth
+    across a walk.  MEASURED -- at depth 4000 the leaf's indent alone is 7,998
+    cells into a canvas 118 wide, and the walk BUILDS 15,996,000 indent
+    characters against 468,460 capped, 34.1x.  With `MAX_RENDER_NODES = 12000`
+    the worst admissible chain builds ~144 million.  `rail.py` had already fixed
+    this exact shape.
+
+    CAPPING IS SAFE FROM PAN, CHECKED RATHER THAN ASSUMED: this module reads
+    neither `pan_x` nor `pan_y`, so cells past the canvas width are unreachable
+    here.  `rail.py`'s licence to cap came from its fixed width and absent pan,
+    and such a licence does not transfer by resemblance.
+
+    THE CAP IS NOT COST-ONLY, AND THAT WAS RULED RATHER THAN DECIDED HERE.
+    `_fit` prices rows PHYSICALLY, so a shorter row occupies fewer physical rows
+    and `_fit` keeps MORE of them -- the picture and the declared hidden count
+    both move.  Coordinator ruling 2026-09-11 took that deliberately: a
+    depth-4000 chain spending 69 physical rows to show one logical row is
+    pathology wearing fidelity's name.
+
+    `budget` is DERIVED from the render width by the caller, never a constant
+    (`B-61`).
+    """
+    if 2 * level <= budget:
+        return "  " * level
+    run = max(0, budget - len(str(level)) - 1)
+    return " " * run + f"{DEPTH_MARK}{level} "
 
 
 def _child_index(graph: Graph) -> dict[str, list[str]]:
@@ -163,19 +197,40 @@ def _rows(
     # Runs before walk, so walk never meets a cyclic graph.
     totals = subtree_counts()
 
+    # BOTH CAPS DERIVED FROM THE FRAME, NEVER SPELLED (`B-61`).
+    #
+    # `indent_budget` -- half the render width.  An indent allowed to fill the
+    # width would leave no cells for the title it is indenting, so the row would
+    # cost everything and say nothing.
+    #
+    # `row_cap` -- one whole frame.  A row longer than `w * h` cannot be shown
+    # ENTIRELY by any frame of this size, so that is the widest slice worth
+    # building; beyond it the renderer was constructing text to wrap, price and
+    # discard.  MEASURED: a 400,000-character title built a 400,004-cell row and
+    # 3,390 physical rows before `_fit` dropped it.
+    indent_budget = max(2, state.w // 2)
+    row_cap = max(state.w, state.w * state.h)
+
     def walk(nid: str, depth: int) -> None:
         stack = [(nid, depth)]
         while stack:
             cur, lv = stack.pop()
             node = graph.nodes[cur]
-            prefix = _indent(lv) + ("- " if lv else "")
+            prefix = _indent(lv, indent_budget) + ("- " if lv else "")
             line = Text()
             # B-47 / A-89: this renderer reaches `export.save_svg` through
             # `MapScreen.action_export_svg` exactly as the layered one does,
             # and it coerced nothing -- measured, a hostile title through it
             # writes an SVG that is not well-formed XML.  The guarantee
             # `AT-009` asserts held only in radial view.
-            title = darkside.plain(node.ficha.title)
+            # `_clip`, NOT a second truncator. It is the ellipsis idiom already
+            # in this family AND it fixes the coercion ORDER: `LLR-COERCE.2`
+            # says coerce THEN truncate, because cutting between a U+202E and
+            # its terminator manufactures an unterminated override that no later
+            # coercion can repair. `_clip` calls `darkside.plain` itself, so the
+            # coercion this line used to do explicitly is not lost -- it moved
+            # inside, ahead of the cut, which is where it has to be.
+            title = _clip(node.ficha.title, row_cap)
             if cur == selected_id:
                 block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
                 line.append(prefix, style=block)
