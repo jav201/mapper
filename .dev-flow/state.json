@@ -250,6 +250,15 @@
           "2": "Two defects, not one. Does defect 2 (header charge) ship in B55a, or route to Inc-REPAIR? It is real, it is invisible to the gap metric, and P3 says fixing it naively overflows at 6 of 9 sizes.",
           "3": "P5's ordering constraint: defect 1's arm must be built so B-55's own fix cannot make it vacuous. This constrains the increment's internal order beyond the recorded AT-058 -> mechanism -> painted_ids -> both surfaces.",
           "4": "P4's reverse-direction overflow (outline -> layered clips content) is a NEW, previously unmeasured defect of the same mechanism. In scope or carried?"
+        },
+        "left_open_item_RESOLVED": {
+          "date": "2026-09-10",
+          "question": "Whether outline.py:161's logical-vs-physical cut manifests at ANY size once the settle fix landed. Kept open in the record so the cut change would ship or be dropped on a measurement, not on an assumption.",
+          "verdict": "IT MANIFESTS. The cut change SHIPS -- it is not speculative code.",
+          "evidence": "anidado at (30,16), post-settle, read off the composited frame: the widget HOLDS 4 logical lines; at region width 30 they need 7 physical rows; the region has 5; the 4th line '    - Logistica  3 nodos · 3 sin acta' is ENTIRELY ABSENT from the frame. Same shape at (24,20) where '      - Flota  nivel flo' is absent.",
+          "consequence_for_painted_ids": "A declaration built from the logical `lines[:h]` slice would declare `Logistica` PAINTED while no cell of it reaches the frame -- precisely the lie AT-056 forbids. painted_ids must be built on PHYSICAL row accounting at the region's width, not on the logical slice.",
+          "MY_INSTRUMENT_WAS_WRONG_AGAIN": "The 144-size sweep computed physical rows with Console(width=region.width).render_lines(canvas.render()) and reported ZERO overflows, while the frame shows clipping at 9 of those same combinations. The COMPUTED prediction was refuted by the OBSERVED frame. The sweep's frame-based check (a title held but absent from the region rows) was the only trustworthy half, and it is what caught this. Same pattern as the rest of this batch: measurements through the composited frame hold up; anything derived beside it does not.",
+          "fixture_concern_for_the_gate": "ALL NINE cases are on `anidado`. AT-056's driven set is `legacy`-normative per 02n ('an arm on another map neither passes nor fails AT-056'). On the evidence here, the acceptance fixture may be BLIND to the defect the acceptance exists to forbid. This is a requirements question, not an implementation choice -- 02n made the fixture normative and the coordinator ratified it."
         }
       }
     ],
