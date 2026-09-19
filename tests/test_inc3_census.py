@@ -166,10 +166,13 @@ def test_llr_coerce_2_the_split_at_width_arm(tmp_path):
     because of the order, so the assertion could not see the ordering reversed.
 
     An arm whose stated intent a mutant proves it cannot verify is worse than no
-    arm, because it reads as coverage. The property that IS load-bearing is that
-    the output is coerced, so that is what is asserted -- and unlike the count,
-    it fails when a banned point is mapped to a DIFFERENT banned point rather
-    than to `U+FFFD`, which is the mutant that separates the two assertions.
+    arm, because it reads as coverage. What this arm CAN verify is that the
+    output is coerced, so that is what is asserted -- and unlike the count, it
+    fails when a banned point is mapped to a DIFFERENT banned point rather than
+    to `U+FFFD`, which is the mutant that separates the two assertions. That is
+    the WEAKER conjunct and NOT the ordering clause's substitute: the clause is
+    normative, and the load-bearing conjunct is the CELL BUDGET, armed in
+    `tests/test_darkside_budget.py`.
 
     The count assertions are kept BELOW the new one, no longer carrying the
     ordering claim: they still pin that this specific pair does not survive, and
@@ -187,8 +190,13 @@ def test_llr_coerce_2_the_split_at_width_arm(tmp_path):
             assert out == darkside.plain(out), (
                 name, width,
                 "the cut output is not coerced -- it must be indistinguishable "
-                "from its own coercion, which is the property the ordering "
-                "clause was reaching for",
+                "from its own coercion. This is the WEAKER conjunct of "
+                "`LLR-COERCE.2` and it is NOT the ordering clause's "
+                "substitute: it cannot see a reversed order, because a "
+                "truncate-then-coerce output is a fixed point by construction. "
+                "It is kept because it catches a banned-point-to-banned-point "
+                "remap that every length and cell check survives. The budget "
+                "is armed in test_darkside_budget.py.",
             )
             assert out.count(chr(0x202E)) == 0, (name, width)
             assert out.count(chr(0x202C)) == 0, (name, width)

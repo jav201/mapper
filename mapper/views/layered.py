@@ -109,8 +109,11 @@ def _clip(s: str, width: int) -> str:
     inherited it: `S-B(+C)`'s confirmation pass found the copy retracted and the
     ORIGINAL still standing, which is exactly how a refuted claim comes back.
 
-    The load-bearing property is that the output is COERCED, which is what
-    `tests/test_fold.py`'s split-at-width arm now asserts.
+    What `tests/test_fold.py`'s split-at-width arm CAN assert is that the output
+    is COERCED, and that is what it now asserts.  That conjunct is the WEAKER
+    one and it is NOT this clause's substitute: the ordering clause above stays
+    normative, and the load-bearing conjunct is the CELL BUDGET, armed in
+    `tests/test_darkside_budget.py`.
     """
     s = darkside.plain(s)
     if _vis_width(s) <= width:

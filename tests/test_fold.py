@@ -393,10 +393,12 @@ def test_tc_033_the_fold_pill_coerces_a_hostile_branch_title(tmp_path):
     # SCOPE: `plain` is index-preserving in CODE POINTS, not DISPLAY CELLS, so
     # the equivalence holds for the two length-based truncators and NOT for
     # `darkside.fit`, where the reversal overruns the budget by up to 11x and
-    # turns the default lane RED.  The ordering clause is normative.  The `U+202E` count is zero because the COERCION replaced it, never
-    # because of the order, so the assertion could not tell the two apart.
+    # turns the default lane RED.  The ordering clause is normative.  The
+    # `U+202E` count is zero because the COERCION replaced it, never because of
+    # the order, so the assertion could not tell the two apart.
     #
-    # Re-pointed at the property that IS load-bearing: the output is coerced.
+    # Re-pointed at the conjunct this arm CAN verify; the load-bearing one is
+    # the budget, armed in `tests/test_darkside_budget.py`.
     # `S-B(+C)` confirmation pass, `F5` item 2 -- a test whose stated intent it
     # cannot verify is worse than no test, because it reads as coverage.
     from mapper.views.layered import _fit
@@ -406,8 +408,12 @@ def test_tc_033_the_fold_pill_coerces_a_hostile_branch_title(tmp_path):
     assert len(cut) == 10
     assert cut == darkside.plain(cut), (
         "the cut output is not coerced -- `_fit`'s result must be indistinguish"
-        "able from its own coercion, which is the property the ordering clause "
-        "was reaching for"
+        "able from its own coercion. This is the WEAKER conjunct of "
+        "`LLR-COERCE.2` and it is NOT the ordering clause's substitute: it "
+        "cannot see a reversed order, because a truncate-then-coerce output is "
+        "a fixed point by construction. It is kept because it catches a "
+        "banned-point-to-banned-point remap that every length and cell check "
+        "survives. The budget is armed in test_darkside_budget.py."
     )
     assert cut.count(chr(0x202E)) == 0, "an unterminated override survived the cut"
 
