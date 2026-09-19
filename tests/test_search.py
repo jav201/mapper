@@ -1479,6 +1479,16 @@ _PASS_FREE_READERS = {
     "action_pan_up": "wrapper over `_pan`",
     "action_pan_down": "wrapper over `_pan`",
     "action_export_svg": "consumes the memo of the frame currently painted, which is what it depicts",
+    # `B-68` split the export's state construction out of `action_export_svg`,
+    # so the exemption moves with the code rather than being inherited by a name
+    # that no longer does the reading.  THE REASON IS NARROWER THAN ITS PARENT'S
+    # AND HAD TO BE RE-EARNED: this helper GROWS the canvas past the painted
+    # frame to reach the full extent, so "it depicts the frame on screen" is no
+    # longer why the memo is correct.  The memo is correct because the search
+    # resolution is a function of the GRAPH AND THE QUERY ALONE -- it is keyed on
+    # exactly those two -- and neither is touched by resizing the viewport.  A
+    # hit is a hit at any width.
+    "_export_view_state": "the resolution is keyed on graph+query, which growing the canvas cannot change",
     # Inc-4b's keypress-bound consumer, which this arm was written to force into
     # declaring itself.  It DECLINES to open a pass, and the reason is the same
     # shape as `_pan`'s rather than a shrug: the walk moves the selection AMONG

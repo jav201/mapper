@@ -44,7 +44,7 @@ therefore a plain string, not a widget reference.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import MISSING, dataclass, fields, replace
 from typing import Protocol, runtime_checkable
 
 from rich.text import Text
@@ -99,6 +99,76 @@ class ViewState:
     # rather than a `set` because this object is frozen and a mutable default
     # would let a renderer edit the caller's fold state while drawing.
     folded: frozenset[str] = frozenset()
+
+
+#: EVERY field of `ViewState`, classified for the EXPORT boundary.
+#:
+#: An export is a standalone artifact.  That principle was ruled once, for
+#: `focus_owner`, and then applied twice more one field at a time -- which is
+#: how a ruling about a CLASS gets discharged as a handful of instances and
+#: leaves the next field to be discovered by the next reviewer.  So the axis is
+#: enumerated here instead, and `export_neutralised` DERIVES the strip set from
+#: it: nothing spells the field list twice, and a field added to `ViewState`
+#: without a row here fails `tests/test_export_state.py` rather than silently
+#: inheriting whichever behaviour its neighbour had.
+#:
+#: The three kinds:
+#:
+#: * `transient` -- session state.  It says where the OPERATOR was, not what the
+#:   MAP is, so it must not reach a file that leaves the machine.  Reset to the
+#:   field's declared default on export.
+#: * `content` -- genuinely part of the picture being exported, and declared
+#:   IN-BAND so the recipient can see it: `diff` tints and labels its own
+#:   `eliminados` strip, `folded` prints a `+N` pill where a subtree was folded.
+#: * `geometry` -- the render request itself.  The export sets these; they are
+#:   neither the operator's session nor the map's content.
+#:
+#: `hits` is the sharpest of the transient three and the reason this is a
+#: security boundary rather than a tidiness one: it encodes WHAT THE OPERATOR
+#: WAS SEARCHING FOR, down to a per-branch numeral on every fold pill.  That is
+#: information about the SENDER, leaked to whoever receives the file.
+#: `selected_id` is the same class as `focus_owner` -- where the cursor was.
+#:
+#: A deliberate "export with the selection marked" mode is a SEPARATE feature
+#: whose inclusion is declared in the artifact, exactly like "export what I am
+#: looking at".  This table is not the place to smuggle one in.
+EXPORT_FIELD_KINDS = {
+    "selected_id": "transient",
+    "w": "geometry",
+    "h": "geometry",
+    "focus_owner": "transient",
+    "hits": "transient",
+    "diff": "content",
+    "pan_x": "transient",
+    "pan_y": "transient",
+    "folded": "content",
+}
+
+TRANSIENT_EXPORT_FIELDS = frozenset(
+    name for name, kind in EXPORT_FIELD_KINDS.items() if kind == "transient"
+)
+
+
+def _declared_default(field):
+    """The field's own declared default — the neutral value for an export."""
+    if field.default_factory is not MISSING:
+        return field.default_factory()
+    return field.default
+
+
+def export_neutralised(state: ViewState) -> ViewState:
+    """Return `state` with every TRANSIENT field reset to its declared default.
+
+    Derived from `EXPORT_FIELD_KINDS` and from the dataclass's own defaults, so
+    there is no second list of fields to keep in step and no second opinion
+    about what "neutral" means for any one of them.
+    """
+    neutral = {
+        f.name: _declared_default(f)
+        for f in fields(ViewState)
+        if f.name in TRANSIENT_EXPORT_FIELDS
+    }
+    return replace(state, **neutral)
 
 
 @runtime_checkable

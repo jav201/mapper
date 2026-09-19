@@ -219,8 +219,56 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       measuring at.
     #       Derived mechanically, not counted by eye: exactly one `.render(`
     #       appears in that module.
-    assert len(sites["argful"]) == 62, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 62; "
+    #
+    # 62 -> 61 at `Inc-CONFIRM` `B-68`, and this is the pin's FIRST DECREASE.
+    # Itemised on the same terms, because a pin that only explains growth is
+    # half a pin:
+    #   -1  `tests/test_app.py::test_b50_the_export_carries_the_diff_the_canvas_
+    #       is_showing` no longer replaces `_current_renderer` with an anonymous
+    #       `Spy` whose `render` forwarded to the real one -- that forward was
+    #       the arg-ful site.  `B-68` made the export ask `_consumes_pan` to
+    #       classify whatever `_current_renderer` returns, and that dispatch is
+    #       identity-based and raises on an unregistered object, so the double
+    #       had to stop being one.  It now patches the REAL renderer's `render`,
+    #       which forwards through a captured bound method rather than through
+    #       an attribute call -- invisible to this census by construction, which
+    #       is correct: no renderer-protocol call site was removed, a test
+    #       double stopped impersonating one.  The arm's assertions are
+    #       unchanged and it still kills the `diff=None` mutant.
+    #
+    # 61 -> 62 in the SAME increment, at its review round.  The round trip is
+    # itemised in both directions rather than netted away: a history reading
+    # 62 -> 62 would hide that two different sites moved opposite ways.
+    #   +1  `tests/test_app.py::test_an_export_never_encodes_where_the_keyboard_
+    #       was` renders a THIRD comparand, at `selected_id=None`.  The export
+    #       ruling widened to make the CURSOR transient as well as the keyboard
+    #       owner, so this arm's non-vacuity check now needs three mutually
+    #       distinguishable tones where two used to do: without the unselected
+    #       render, "the export carries no selection" cannot be told from "the
+    #       export carries a focused one".  It cannot share either existing
+    #       site, because those two ARE the pair it must be distinguished from.
+    #
+    # 62 -> 63 in the same increment's second review round:
+    #   +1  `tests/test_export_state.py::test_no_rendered_row_is_folded_in_the_
+    #       artifact` renders the map at its own grown extent and drives the
+    #       result through `save_svg`, to assert every rendered row arrives
+    #       WHOLE in the artifact.  It cannot share a site with any existing
+    #       arm: the geometry it renders at IS its subject -- that width is what
+    #       sizes the export console -- so a helper choosing the geometry would
+    #       be choosing the very thing the arm exists to check.
+    #
+    # 63 -> 64 at `Inc-CONFIRM`'s re-ruled fix round:
+    #   +1  `tests/test_export_state.py::test_a_live_search_and_a_moved_cursor_
+    #       do_not_reach_the_artifact` renders the CANVAS's own state -- session
+    #       and all -- immediately before and after a live search, as the
+    #       POSITIVE CONTROL for a byte-invariance assertion over the artifact.
+    #       It cannot share a site with any export arm: every one of those
+    #       renders the NEUTRALISED state, and this one exists precisely to
+    #       prove the un-neutralised state MOVES the picture.  Without it, "the
+    #       two exports are byte-equal" would be green if the session state were
+    #       inert, which is the vacuity the arm was written to refuse.
+    assert len(sites["argful"]) == 64, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 64; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
@@ -266,9 +314,20 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       read the same code path -- which is how a control stops being
     #       independent of the thing it controls (`C-60`).  Both are zero-arg
     #       WIDGET renders and must stay out of the A3.
-    assert len(sites["zeroarg"]) == 34, (
+    #
+    # 34 -> 35 at `Inc-CONFIRM` `HERMETIC-1`, ONE site, itemised on the same
+    # terms this pin's own docstring sets:
+    #   +1  `tests/test_app.py::test_repo_screen_two_pane_renders` asks the
+    #       `#repo-table` widget what it HOLDS, to assert the fetched branch was
+    #       actually painted.  The arm used to drive the real `gh` CLI and then
+    #       assert only that the widget EXISTS -- an assertion that passed
+    #       whether or not the fetch produced anything, which is why mocking the
+    #       seam had to come with a painted-result assertion rather than
+    #       replacing a live oracle with no oracle.  A zero-arg Textual WIDGET
+    #       render, correctly outside the A3.
+    assert len(sites["zeroarg"]) == 35, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "34; a DROP means widget sites were wrongly swept into the A3"
+        "35; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -373,14 +432,17 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     """
     zeroarg = render_call_sites()["zeroarg"]
     # 25 -> 26 in Inc-3, 26 -> 27 and 27 -> 28 in Inc-B55a, 28 -> 29 at
-    # Inc-REPAIR S-A, 30 -> 32 at S-B(+C), 32 -> 34 at S-D -- the same sites the
-    # cardinality pin above itemises.  The two pins move TOGETHER by
-    # construction: they read the same derivation, so a change that updated one
-    # and not the other is a red arm rather than a quiet divergence.  S-D is the
-    # first increment to move them where BOTH reds appeared in one lane run,
-    # which is that construction working rather than two independent failures.
-    assert len(zeroarg) == 34, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 34. A floor was "
+    # Inc-REPAIR S-A, 30 -> 32 at S-B(+C), 32 -> 34 at S-D, 34 -> 35 at
+    # Inc-CONFIRM `HERMETIC-1` -- the same sites the cardinality pin above
+    # itemises.  The two pins move TOGETHER by construction: they read the same
+    # derivation, so a change that updated one and not the other is a red arm
+    # rather than a quiet divergence.  S-D is the first increment to move them
+    # where BOTH reds appeared in one lane run, which is that construction
+    # working rather than two independent failures; `HERMETIC-1` is the second,
+    # and it reddened a THIRD arm with them -- the untracked-source guard, which
+    # caught the new test file before it could be invisible to all of these.
+    assert len(zeroarg) == 35, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 35. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )

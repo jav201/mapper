@@ -76,7 +76,39 @@ def test_map_screen_renders():
     assert "Root" in text.plain
 
 
-async def test_repo_screen_two_pane_renders(tmp_path):
+async def test_repo_screen_two_pane_renders(tmp_path, monkeypatch):
+    """The two-pane repo dashboard composes and paints its table.
+
+    HERMETIC-1: this used to drive the real `gh` CLI against a live repository,
+    so the arm could not run offline, could not run without credentials, and
+    took its verdict from whatever `jav201/taskboard` happened to contain that
+    day.  The seam is `GitHubConnector.fetch` -- the same one the neighbouring
+    URL-flow arm already mocks.  The fixture is a NON-EMPTY graph on purpose: an
+    empty one paints the same table whether the rows render or not.
+    """
+    fake_graph = Graph()
+    fake_graph.add_node(Node(id="jav201/taskboard", ficha=Ficha(title="taskboard", meta="repo")))
+    fake_graph.add_node(
+        Node(
+            id="kanban-variants",
+            ficha=Ficha(
+                title="kanban-variants",
+                meta="+3/-1",
+                state="ok",
+                notes="CI: ok",
+                fields={"kind": "branch", "date": "2026-09-01"},
+            ),
+        )
+    )
+    fake_graph.add_edge(Edge("jav201/taskboard", "kanban-variants"))
+
+    def fake_fetch(self, progress=None):
+        if progress:
+            progress(1, 1, "listo")
+        return fake_graph
+
+    monkeypatch.setattr("mapper.app.GitHubConnector.fetch", fake_fetch)
+
     app = MapperApp(tmp_path)
     async with app.run_test() as pilot:
         await pilot.pause()
@@ -87,6 +119,8 @@ async def test_repo_screen_two_pane_renders(tmp_path):
         # After mounting the table widget should exist.
         table = screen.query_one("#repo-table", Static)
         assert table is not None
+        # And it must have painted the fetched branch, not just mounted empty.
+        assert "kanban-variants" in table.render().plain
 
 
 async def test_focus_active_blocks_structural_edits(tmp_path):
@@ -380,10 +414,35 @@ async def test_an_export_never_encodes_where_the_keyboard_was(tmp_path, monkeypa
     focused = LayeredRenderer().render(g, ViewState(selected_id="root", w=80, h=24))
     inactive = LayeredRenderer().render(
         g, ViewState(selected_id="root", w=80, h=24, focus_owner="inspector"))
+    unselected = LayeredRenderer().render(g, ViewState(selected_id=None, w=80, h=24))
+
+    # THE NON-VACUITY CHECK, WIDENED WITH THE RULING: three tones must now be
+    # mutually distinguishable rather than two.  If "no selection" painted the
+    # same as "selected and focused", the assertion below would be accidentally
+    # true and this arm would be back to proving nothing.
     assert _tone_at(focused, "Raiz") != _tone_at(inactive, "Raiz"), (
-        "the two tones are identical, so this arm proves nothing"
+        "the focused and inactive tones are identical, so this arm proves nothing"
     )
-    assert exported_tone == _tone_at(focused, "Raiz")
+    assert _tone_at(unselected, "Raiz") != _tone_at(focused, "Raiz"), (
+        "an unselected node paints like a focused one, so 'the export carries no "
+        "selection' cannot be told from 'the export carries a focused one'"
+    )
+
+    # PORTED, NOT WEAKENED.  This arm was written for `focus_owner` alone and
+    # asserted the export paints the cursor in the FOCUSED tone rather than the
+    # inactive one -- correct while "where the cursor is" was still export
+    # content.  The transient-class ruling makes `selected_id` transient on this
+    # arm's OWN argument: a standalone artifact must not encode where the
+    # session was, and the cursor is exactly that.  The promise is therefore
+    # stronger now -- the export paints no selection at all -- and the assertion
+    # moves with it.  The original defect stays guarded by the second line.
+    assert exported_tone == _tone_at(unselected, "Raiz"), (
+        "the export encoded a selection; an artifact that leaves the machine "
+        "must not say where the operator's cursor was"
+    )
+    assert exported_tone != _tone_at(inactive, "Raiz"), (
+        "the export painted the INACTIVE tone -- the original `H2` defect"
+    )
 
 
 async def test_b50_the_export_carries_the_diff_the_canvas_is_showing(tmp_path, monkeypatch):
@@ -415,20 +474,28 @@ async def test_b50_the_export_carries_the_diff_the_canvas_is_showing(tmp_path, m
         screen.nav.cursor = "root"
 
         # Capture the state the shipped export hands the renderer.
+        # THE DOUBLE SPIES ON `render`, IT DOES NOT REPLACE THE RENDERER, and
+        # `B-68` is why the difference matters.  This arm used to swap
+        # `_current_renderer` for a factory returning an anonymous `Spy`, which
+        # was harmless while the only thing anyone asked that object for was
+        # `.render(...)`.  `B-68`'s export now asks `_consumes_pan` to CLASSIFY
+        # it, and that dispatch is identity-based and RAISES on a renderer it
+        # does not recognise -- deliberately, so an unknown view's pan class is
+        # never guessed at (`A-98`, ruling `02j`).  An unregistered double
+        # therefore made the export fail and this arm's `seen` stay empty.
+        #
+        # Patching the real renderer's `render` keeps its IDENTITY intact, which
+        # is what `_consumes_pan`, `_header_rows_for` and `_painted_ids_for` all
+        # key on.  Every assertion below is unchanged: this is the double being
+        # made faithful to a seam it now touches, not the arm being softened.
         seen = {}
-        real = screen._current_renderer
+        real_render = screen.renderer.render
 
-        def spy():
-            renderer = real()
+        def spy_render(graph, state):
+            seen["state"] = state
+            return real_render(graph, state)
 
-            class Spy:
-                def render(self, graph, state):
-                    seen["state"] = state
-                    return renderer.render(graph, state)
-
-            return Spy()
-
-        monkeypatch.setattr(screen, "_current_renderer", spy)
+        monkeypatch.setattr(screen.renderer, "render", spy_render)
 
         screen.query_text = "hij"
         screen.diff_active = True
@@ -445,14 +512,27 @@ async def test_b50_the_export_carries_the_diff_the_canvas_is_showing(tmp_path, m
         "the export dropped the active diff -- the exact under-fill the parameter "
         "object exists to prevent"
     )
-    # MIGRATED in Inc-4a: `ViewState.query` was removed and the renderer now
-    # receives RESOLVED ids.  The claim is unchanged -- the export must carry the
-    # live search -- but it is now asserted on the set the renderer actually
-    # consumes.  Non-emptiness is asserted first, or an export that dropped the
-    # search entirely would satisfy an equality against an empty set.
-    assert seen["state"].hits, "the export dropped the active query"
-    assert seen["state"].hits == frozenset({"hijo"}), (
-        "the export carried a hit set that is not the live query's"
+    # REVERSED BY RULING, AND THE REVERSAL IS THE POINT.  Inc-4a migrated this
+    # from `query` to the RESOLVED `hits` and kept the claim: *the export must
+    # carry the live search*.  The transient-class ruling overturns the claim
+    # itself -- `hits` encodes WHAT THE OPERATOR WAS SEARCHING FOR, down to a
+    # numeral on every fold pill, which is information about the SENDER and not
+    # about the map, leaked to whoever receives the file.
+    #
+    # So the assertion inverts rather than being deleted, and the PRECONDITION
+    # is asserted first: the screen really does have a live search resolving to
+    # `hijo` at this moment, or "the export carried no hits" would be green
+    # because there were never any hits to carry.
+    assert screen._search_hits() == frozenset({"hijo"}), (
+        "the screen has no live search here, so asserting the export dropped it "
+        "would be true for the wrong reason"
+    )
+    assert seen["state"].hits == frozenset(), (
+        "the export carried the operator's search; a standalone artifact must "
+        "not tell its recipient what the sender was looking for"
+    )
+    assert seen["state"].selected_id is None, (
+        "the export carried the cursor position -- same class as the search"
     )
     assert seen["state"].focus_owner == "", "the export must not carry live focus"
 
