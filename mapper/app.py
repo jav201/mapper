@@ -3582,12 +3582,21 @@ class MapScreen(Screen):
             # same category of error as letting them believe a STALE file is
             # current -- both are the artifact misdescribing itself, which is the
             # family `B-68` names.
+            # `CR17-F4`, and it is this fix's OWN principle turned on it. The
+            # sentence was justified as saying "only what `exists()` licenses"
+            # -- and then said an EXPORT wrote the file, which `exists()` does
+            # not license: a directory, or a file the operator dropped there,
+            # would have been called a previous export. `is_file()` licenses
+            # "el archivo"; nothing licenses a claim about its author, so no
+            # claim about its author is made. What the operator actually needs
+            # is that NOTHING WAS WRITTEN and what is there is not this export,
+            # and both of those are true whoever put it there.
             path = self.store.workspace / f"{self.map_id}.svg"
             stale = ""
-            if path.exists():
+            if path.is_file():
                 stale = (
-                    f" No se escribió nada: el archivo en {path} es de una "
-                    "exportación anterior."
+                    f" No se escribió nada: el archivo en {path} no corresponde "
+                    "a esta exportación."
                 )
             self.notify(
                 f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
@@ -3706,13 +3715,44 @@ class MapScreen(Screen):
     #: variable fixed.  Correcting how you measure does not correct what you
     #: measured over.
     #:
-    #: WHAT IS TRUE, WITH ITS BOUNDARY: at start heights of about 30 rows and
-    #: up, the worst admitted shape stays under 2 s.  Below that it rises
-    #: monotonically as the terminal shortens.  A CELLS-ONLY BUDGET CANNOT
-    #: EXPRESS A TIME BOUND, because cost depends on `w` and `h` separately and
-    #: this constant constrains only their product -- so no value of it makes
-    #: the universal true.  Making the freeze genuinely bounded needs a
-    #: different bound, and that is a ruling rather than a constant.
+    #: NO SAFE-SIDE TIME CLAIM IS MADE HERE, AND THE THIRD ATTEMPT AT ONE IS
+    #: STRUCK ALONGSIDE THE OTHER TWO.  It read: "at start heights of about 30
+    #: rows and up, the worst admitted shape stays under 2 s.  Below that it
+    #: rises monotonically as the terminal shortens."  BOTH HALVES ARE FALSE.
+    #:
+    #: The safe side fails AT ITS OWN BOUNDARY, on the very narrow-title family
+    #: it was derived from: at start height 30, 4 of 9 runs exceeded 2 s (min
+    #: 1.321, median 1.890, max 2.139), and an independent pass measured 7 of 9
+    #: with a median of 2.059.  THE ROOT CAUSE IS A STATISTIC.  The 1.91 s that
+    #: produced the sentence was a MINIMUM.  Best-of-N is the right statistic
+    #: for demonstrating a BREACH -- if the minimum exceeds the bound then every
+    #: run does -- and the WRONG one for demonstrating SAFETY, where nothing
+    #: about the other runs follows from the minimum.
+    #:
+    #: "Monotonically" is false because the start height FLOORS at 5: every
+    #: terminal at or below 15 rows admits the identical shape (fan 3,645,
+    #: measured at 15, 12 and 11 rows), so the curve rises and then PLATEAUS.
+    #: Three runs of that identical work measured 18.9 s, 21.0 s and 18.9 s --
+    #: a 2.1 s spread on one idle machine, which is its own argument against
+    #: any wall-clock sentence living in this docstring.
+    #:
+    #: THE FAMILY, THREE DEEP: the first derivation was struck for a
+    #: contaminated INSTRUMENT, the second for a SEARCH that held a governing
+    #: variable fixed, and this one for the STATISTIC.  Each correction was
+    #: sound and each left the next layer untouched.
+    #:
+    #: WHAT IS TRUE AND CLOCKLESS, and it is the MECHANISM rather than a number:
+    #: THE SAME MAP IS ADMITTED OR REFUSED DEPENDING ON THE TERMINAL.  A
+    #: 3,645-wide fanout fits this budget at start height 5 and is refused at
+    #: 30, because the budget bounds `w * h` while the start height is chosen by
+    #: the operator's terminal.  That is precisely why A CELLS-ONLY BUDGET
+    #: CANNOT EXPRESS A TIME BOUND: cost depends on `w` and `h` separately and
+    #: this constant constrains only their product, so no value of it makes any
+    #: universal true.  Making the freeze genuinely bounded needs a different
+    #: BOUND, which is a ruling rather than a constant -- and until there is
+    #: one, the export DECLARES the wait instead of promising its length.
+    #: `test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL` pins that
+    #: mechanism without a clock, so it cannot flake and cannot drift.
     #:
     #: SO THE CONSTANT RESTS ON UTILITY ALONE, which is untouched and never
     #: depended on the arithmetic: a 72001x24004 SVG is unreadable by anybody

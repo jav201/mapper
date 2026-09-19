@@ -431,7 +431,7 @@ async def test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind(tmp_path):
     # the product (`N anterior`, the settings rail, two keymap labels), so an
     # arm keyed on it alone would be one refactor away from passing for a
     # reason that has nothing to do with staleness.
-    assert "exportación anterior" in message, (
+    assert "no corresponde a esta exportación" in message, (
         f"the refusal names the file but never says it is STALE, which is the "
         f"whole finding -- an undeclared old artifact at the expected path: {message!r}"
     )
@@ -517,7 +517,7 @@ async def test_a_refusal_on_a_FIRST_export_claims_no_stale_file(tmp_path):
         message = notices[0]
         assert not path.exists(), "a refused first export wrote a file"
 
-    assert "exportación anterior" not in message, (
+    assert "no corresponde a esta exportación" not in message, (
         f"the refusal claims a previous export exists when none does: {message!r}"
     )
 
@@ -699,3 +699,51 @@ async def test_a_large_export_DECLARES_the_wait_before_it_freezes_the_pump(
         assert not declared, (
             f"a trivial export announced a wait it does not take: {declared}"
         )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("term_h, admitted", [(15, True), (40, False)])
+async def test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL(
+    tmp_path, term_h, admitted
+):
+    """`CR17-F6`: the mechanism, pinned WITHOUT A CLOCK.
+
+    THE ONE FACT EVERY STRUCK CLAIM WAS GROPING AT: a cells-only budget cannot
+    express a time bound, because cost depends on `w` and `h` SEPARATELY while
+    `EXPORT_MAX_CELLS` constrains only their PRODUCT. The visible consequence is
+    this -- the SAME map is admitted or refused depending on the operator's
+    TERMINAL, because the export starts at `max(5, size.height - 10)`. A short
+    terminal gives a small `h`, so the same cell budget admits a far wider and
+    far costlier map.
+
+    WHY THIS ARM AND NOT A TIMING ONE. A `< 2 s` arm was proposed and then
+    WITHDRAWN by the reviewer who proposed it, on its own new data: it would
+    re-assert in the suite a guarantee the requirement has just withdrawn, and
+    it is flaky by construction -- identical work measured 18.9 s, 21.0 s and
+    18.9 s on one idle machine. This arm holds no clock, so it cannot flake, and
+    it reddens the moment someone adds a second bound, which is exactly when a
+    reader wants to be told. It is the arm that would have caught `CR17-F1`
+    before it shipped.
+
+    IT DRIVES THE PRODUCT'S OWN METHOD. An earlier draft replayed the growth
+    loop inside the test, which is a hand-built model of the subject and could
+    not have seen a change at the call site.
+    """
+    from mapper.app import MapperApp, MapScreen
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, term_h)) as pilot:
+        await pilot.pause()
+        app.store.save("ancho", _wide_and_deep(3645, 0))
+        app.push_screen(MapScreen("ancho"))
+        await pilot.pause()
+        screen = app.screen
+        size = screen.size or app.size
+
+        if admitted:
+            state = screen._export_view_state(size)
+            assert state.w * state.h <= MapScreen.EXPORT_MAX_CELLS
+        else:
+            with pytest.raises(ExportTooLarge) as refused:
+                screen._export_view_state(size)
+            assert refused.value.cells > MapScreen.EXPORT_MAX_CELLS
