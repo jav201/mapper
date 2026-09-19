@@ -451,11 +451,19 @@ open a fourth block; see §6.
   `eliminados` diff ghost strip the screen was not showing, so a previous revision's node titles can
   leave the machine in a file the operator believed showed only what they could see. Not among the
   four rulings; not fixed; not widened into. It wants a one-line ruling and it is in §6.
-- **The lane guard's axis is PARTIALLY HELD, never held.** `from subprocess import Popen`,
-  `urllib`, `curl`/`wget`/`ssh` via a shell string, and any in-process HTTP client walk past it.
-  The sharp half, verbatim from the security pass: **`mapper/github.py` already imports `urllib`, so
-  an HTTP connector would restore the original defect with every arm green.** A socket-level guard
-  is its own increment.
+- **The lane guard's axis is PARTIALLY HELD, never held.** ⚠ **This bullet is CORRECTED — its
+  original form overstated the hole in two places, and the corrections were measured by the
+  re-confirmation security pass.** What actually walks past the guard is early-bound
+  `from subprocess import Popen`, and any in-process HTTP client, which is structurally invisible to
+  both the guard and the AST census. **`curl`/`wget`/`ssh` via a shell string do NOT walk past it**:
+  a `str`/`bytes` argv is refused outright and `os.system` is patched. And the citation that used to
+  carry the sharp half — *"`mapper/github.py` already imports `urllib`"* — is **STRUCK**: the import
+  is `urllib.parse` (line 17), which performs no I/O whatever. **The carry's risk is real and it now
+  rests on the argument rather than on that citation:** nothing in the guard or the census can see an
+  in-process HTTP client, so a future connector that drops the `gh` CLI for one would restore the
+  original defect with every arm green — that follows from what the instruments inspect, and needs no
+  import to prove it. A carry whose evidence is a false citation is a carry the first person who
+  checks it will dismiss. A socket-level guard is its own increment.
 - **`FLAKE-1` did not fire in this session's runs**, which is a weaker statement than it sounds: it
   has fired 2 times in 9 full-lane runs across two bases, so a clean run is the expected majority
   outcome and carries no information about the cause. Still owed at the whole-branch gate, and the

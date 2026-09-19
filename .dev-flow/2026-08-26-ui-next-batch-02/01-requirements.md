@@ -9177,14 +9177,20 @@ it is rejected.
 > partial-artifact path out of `_export_view_state` — including its exhaustion branch, which refuses
 > for the same reason rather than shipping whatever it had reached.
 
-**The budget is in CELLS, and the derivation is normative.** `MAX_RENDER_NODES` bounds the wrong
-magnitude in this seam — a 1,801-node map that is wide *and* deep prices far above a 4,002-node map
-that is only wide — which is `S-15` recurring one seam over. `EXPORT_MAX_CELLS = 350_000`, derived
-from a **measured bracket** rather than a fit evaluated at a round number: 315,252 cells → 1.801 s and
-490,052 cells → 2.631 s, so a **2-second** target (the point past which an uninterruptible TUI reads
-as hung rather than busy) falls at 357,156 cells, rounded **down**. A through-origin fit over seven
-points cross-checks at 5.4264 µs/cell. Heap is not the binding constraint at 18.9 bytes/cell — the
-whole budget is about 7 MB.
+**The budget is in CELLS, and the derivation is normative — SUPERSEDED BY AMENDMENT SET 9**, which
+**STRIKES** the per-cell arithmetic this clause carried and re-grounds the same constant. The text
+below is the amended clause; the struck arithmetic is quoted only inside set 9, where it is named
+false. `MAX_RENDER_NODES` bounds the wrong magnitude in this seam — a 1,801-node map that is wide
+*and* deep carries roughly 23× the **cells** of a 4,002-node map that is only wide, and costs several
+times the wall clock despite holding fewer than half the nodes — which is `S-15` recurring one seam
+over. `EXPORT_MAX_CELLS = 350_000`, and what justifies it is **the worst shape the budget ADMITS**,
+not a rate: measured clean, the worst accepted shape (1,000 wide, 312,026 cells, at the
+`size.height - 10` start a 35-row terminal gives) costs **1.447 s** against the **2-second** target —
+the point past which an uninterruptible TUI reads as hung rather than busy — a margin of about 28 %,
+and nothing the budget admits crosses the target. **No µs/cell rate appears here, and its absence is
+deliberate**: across the shapes this budget admits, cost spans 0.955–3.27 µs/cell, a 3.4× spread
+tracking **node density** rather than area, so no single rate can derive a cell budget in either
+direction. Heap is not the binding constraint.
 
 **The refusal names the route, not only the number.** The toast carries the measured extent in cells,
 the limit, and *"Enfoca un subárbol con `f` y exporta esa vista"*. `f` really does focus a subtree —
@@ -9230,3 +9236,85 @@ could see. It is reachable today (`=` to diff, `e` to export, on any map taller 
 it wants a one-line ruling — either this amendment states the inclusion as deliberate, or the strip
 is suppressed for an export state. **Silence is what is not enough**, and this line is here so the
 silence is not mistaken for a decision.
+
+---
+
+## Amendment set 9 — `A-100`'s cost derivation STRUCK. 2026-09-19. Base `f3398f4` (`feat/ui-next-batch-02`).
+
+### `A-100.1` — the constant stands; the arithmetic that justified it does not
+
+**Authority.** Coordinator ruling 2026-09-19, on findings raised independently by both independent
+passes of increment 016 — `code-reviewer` `N4` (the symptom) and `security-reviewer` `S-F9` (the
+mechanism) — and re-measured by the implementer because **the two reviewers' conclusions disagreed by
+6×** and a budget cannot be ruled on from either alone.
+
+**What is struck.** Every per-cell derivation `A-100` and `mapper/app.py` have carried. Two were
+written in turn:
+
+1. *"4.907 µs/cell, so 2.0 s / 4.907 µs = 407,616, round down to 400,000."*
+2. *"A measured bracket: 315,252 cells → 1.801 s and 490,052 → 2.631 s, so 2.000 s falls at 357,156,
+   round down to 350,000; cross-checked by a through-origin fit at 5.4264 µs/cell."*
+
+**Why struck rather than annotated, and this is the load-bearing sentence.** The second was not a
+faithful record taken under an undeclared condition — **it was the first defect re-run**. Both
+figures came from the same harness (`sec_b68_real_cost.py`, then `b68_budget_probe.py`), which calls
+`tracemalloc.start()` on the line *before* it takes `t0`, so an allocation profiler ran inside the
+entire timed region and inflated every point by **5.3–5.6×**. Measured clean, that bracket's own
+shape costs **0.301 s**, not 1.801 — reproduced independently at 0.321 s and 0.331 s by the two
+reviewers. A requirement whose *normative* clause is false must not stand even when its conclusion is
+right: a right answer resting on a false derivation invites the next reader to re-derive from the
+broken premise.
+
+**What replaces it.** The clause in `A-100` above: the constant is grounded on **the worst shape the
+budget ADMITS** (1.447 s against a 2-second target, ≈28 % margin), and carries **no rate at all**,
+because cost spans 0.955–3.27 µs/cell across admitted shapes — a 3.4× spread tracking node density.
+That spread is also *why* the two passes disagreed: wide-and-deep is cheap per cell, wide-only is
+dense and expensive, and each sampled one family. A proposed relaxation to ≈2.12 M cells is
+**REFUSED** — it generalises from the cheap family and would admit wide-only maps costing many
+seconds.
+
+**`A-100`'s utility ground is untouched and stands alone.** A 72001×24004 SVG is unreadable by
+anybody whatever it costs to produce, so the ruling never rested on the arithmetic — which is exactly
+why striking the arithmetic costs the ruling nothing.
+
+> **Note on the `125 minutes and 16 GB` figure in `A-100`'s *Two grounds* paragraph.** It comes from
+> the same contaminated harness, so the **time** is inflated by the same 5.3–5.6× (really ≈23
+> minutes); the **heap** figure is unaffected, since `tracemalloc` measures memory correctly even
+> while distorting the clock it shares a region with. The ground survives either reading — ≈23
+> minutes of uninterruptible freeze plus a multi-GB allocation refuses the shape just as decisively —
+> so the conclusion stands and the number is corrected rather than the clause withdrawn.
+
+### `A-100.2` — a refusal declares the stale artifact it leaves behind
+
+**Authority.** Coordinator ruling 2026-09-19 on `N2`, raised by `code-reviewer`.
+
+Refusing to write leaves whatever the **last** export wrote sitting at the very path the success
+toast names. The operator is told the export declined; without more they are not told the file still
+there is **old** — which is `B-68`'s own shape (*a file that looks current and is not*) one seam over,
+and is recorded as the **sixth** instance of *the increment that closes a defect family is the
+increment most likely to introduce a member of it*, **with its mitigation stated**: the operator was
+told the export refused, just not that the old file persists. Partial mitigation is still an instance.
+
+The refusal toast therefore **shall** name the path and state that the file there is from a previous
+export. It **shall not** delete it: the standard is that nothing is hidden without being *declared*,
+not that nothing stale exists, and deleting the operator's file on a refusal without confirmation is
+the destructive act `US-N05` already rules against — silently deleting would break a standing ruling
+in order to soften a lesser one. The sentence is **conditional**, because "the file there is stale"
+is a claim about the world and a map's first export has no file to be stale.
+
+**Acceptance — two arms, because the claim has two failure modes.**
+
+| Arm | What it refuses |
+|---|---|
+| `tests/test_export_state.py::test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind` | a refusal that leaves an undeclared stale artifact. Its fixture **exports first**, which is the case the budget arm is structurally blind to — that arm `unlink()`s before pressing, so it runs in a world where no prior artifact ever existed |
+| `tests/test_export_state.py::test_a_refusal_on_a_FIRST_export_claims_no_stale_file` | the cheapest way to pass the arm above: appending the sentence **unconditionally**, which would tell the operator something untrue |
+
+### `A-100.3` — two instrument gaps closed, both the same shape
+
+| Finding | What was wrong | Arm |
+|---|---|---|
+| `S-F10` | `save_svg` measures in terminal **cells** (`cell_len`), which is correct and was **unpinned** — substituting `len()` left 45 tests green while a CJK title folds a row at every shape. Two conjuncts of the width expression were already mutated; this was the third, and no arm could see it | `test_no_rendered_row_is_folded_in_the_artifact` gains wide-glyph parametrisations (`枝`, `分岐`) |
+| `S-F11` | The AST spawn census read **positional** argv only, so the identical undeclared spawn **failed** the census written positionally and **passed** it written `subprocess.run(args=[...])`. `SEC-F6` had already taught the runtime guard this exact lesson and the census deriving its population was not told | `test_the_spawn_census_sees_an_undeclared_binary_in_EITHER_SPELLING`, parametrised over both spellings and driving the **real** census function over a synthetic tree, plus a positive control so an empty walk cannot read as clean |
+
+Both are the batch's signature shape — **a lesson applied to an instance and not to its class** —
+landing in the instrument rather than in the product.

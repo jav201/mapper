@@ -201,8 +201,29 @@ def _squash(text: str) -> str:
     return "".join(text.split())
 
 
-@pytest.mark.parametrize("leaves", [8, 20, 40, 120])
-def test_no_rendered_row_is_folded_in_the_artifact(tmp_path, leaves):
+@pytest.mark.parametrize(
+    "leaves, title",
+    [
+        (8, "rama {}"),
+        (20, "rama {}"),
+        (40, "rama {}"),
+        (120, "rama {}"),
+        # `S-F10`: WIDE GLYPHS, and they are here because `cell_len` was
+        # CORRECT AND UNPINNED.  `save_svg` measures the picture in terminal
+        # CELLS, which is the only right unit for a canvas full of box-drawing
+        # and CJK -- but every narrow-title case above passes identically under
+        # `len()`, so substituting it left the whole suite green.  Measured: 45
+        # tests green with `len()`, while a CJK title folds a row at every
+        # shape through the real `e` chord.  `measured != pinned` in one line.
+        #
+        # Two conjuncts of the width expression were already mutated (the
+        # console constant and the measured `+ 1`); this is the third, and it
+        # was the one no arm could see.
+        (20, "枝 {}"),
+        (40, "分岐 {}"),
+    ],
+)
+def test_no_rendered_row_is_folded_in_the_artifact(tmp_path, leaves, title):
     """`SEC-F1`: the export console must be sized to the picture it is given.
 
     It was built at a hard-coded `width=200`.  That was invisible while the
@@ -222,7 +243,7 @@ def test_no_rendered_row_is_folded_in_the_artifact(tmp_path, leaves):
     graph = Graph()
     graph.add_node(Node(id="root", ficha=Ficha(title="raiz")))
     for i in range(leaves):
-        graph.add_node(Node(id=f"h{i}", ficha=Ficha(title=f"rama {i}")))
+        graph.add_node(Node(id=f"h{i}", ficha=Ficha(title=title.format(i))))
         graph.add_edge(Edge("root", f"h{i}"))
 
     state = ViewState(selected_id=None, w=118, h=34)
@@ -342,6 +363,113 @@ async def test_the_refusal_TELLS_the_operator_and_names_the_way_forward(tmp_path
     # ships for focusing a subtree, so the operator is not left without a path.
     assert " f " in message, (
         f"the refusal does not name the chord that makes the map exportable: {message!r}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind(tmp_path):
+    """`N2`: refusing to write leaves the LAST export sitting at the same path.
+
+    THE ARM ABOVE CANNOT SEE THIS, AND THAT IS WHY THIS ONE EXISTS.
+    `test_an_oversized_map_is_REFUSED_and_no_artifact_is_written` `unlink()`s
+    before it presses, so it runs in a world where no prior artifact ever
+    existed -- structurally blind to the only case where staleness is possible.
+    The blind spot was in the SETUP, not in the assertion.
+
+    THE HARM IS THE BATCH'S OWN FAMILY, ONE SEAM OVER.  `B-68` is *a file that
+    looks current and is not*.  After a refusal the operator has been told the
+    export declined -- but a file still sits at the path the success toast
+    names, and nothing says it is old.  Recorded as the SIXTH instance of *the
+    increment that closes a defect family is the increment most likely to
+    introduce a member of it*, WITH ITS MITIGATION STATED: the operator was
+    told the export refused, just not that the old file persists.  Partial
+    mitigation is still an instance.
+
+    DECLARED, NOT DELETED.  The standard is that nothing is hidden without
+    being declared, not that nothing stale exists, so the fix is the sentence.
+    Deleting the operator's file on a refusal without confirmation is the
+    destructive act `US-N05` already rules against.
+    """
+    from mapper.app import MapperApp, MapScreen
+
+    notices: list[str] = []
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        # A map that EXPORTS, so a real prior artifact exists on disk.
+        app.store.save("crece", _wide_and_deep(3, 3))
+        app.push_screen(MapScreen("crece"))
+        await pilot.pause()
+        screen = app.screen
+        path = screen.store.workspace / "crece.svg"
+
+        await pilot.press("e")
+        await pilot.pause()
+        assert path.exists(), "the fixture never produced a first artifact"
+        first = path.read_bytes()
+
+        # The same map grows past the budget. The operator presses `e` again.
+        screen.graph = _wide_and_deep(200, 100)
+        screen.notify = lambda msg, **kw: notices.append(str(msg))
+        await pilot.press("e")
+        await pilot.pause()
+
+        assert len(notices) == 1, f"expected exactly one refusal notice, got {notices}"
+        message = notices[0]
+
+        # The refusal still refuses: nothing was overwritten, no partial write.
+        assert path.read_bytes() == first, (
+            "the refused export modified the artifact on disk -- a refusal is not a write"
+        )
+
+    # AND IT SAYS THE FILE IS THERE AND OLD. Both halves, because "a file
+    # remains" and "it is stale" are separate things for the operator to know.
+    assert str(path) in message, (
+        f"the refusal does not name the file it left behind: {message!r}"
+    )
+    # The FULL PHRASE, not the bare word. `anterior` appears in seven places in
+    # the product (`N anterior`, the settings rail, two keymap labels), so an
+    # arm keyed on it alone would be one refactor away from passing for a
+    # reason that has nothing to do with staleness.
+    assert "exportación anterior" in message, (
+        f"the refusal names the file but never says it is STALE, which is the "
+        f"whole finding -- an undeclared old artifact at the expected path: {message!r}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_refusal_on_a_FIRST_export_claims_no_stale_file(tmp_path):
+    """The negative control for the arm above: the claim must never be FALSE.
+
+    "the file there is stale" is a claim about the world. On a map's first
+    export there is no file, so a refusal that said it anyway would be telling
+    the operator something untrue -- and the cheapest way to pass the arm above
+    is to append that sentence unconditionally. This is what forbids it.
+    """
+    from mapper.app import MapperApp, MapScreen
+
+    notices: list[str] = []
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        app.store.save("huge", _wide_and_deep(200, 100))
+        app.push_screen(MapScreen("huge"))
+        await pilot.pause()
+        screen = app.screen
+        path = screen.store.workspace / "huge.svg"
+        if path.exists():
+            path.unlink()
+        screen.notify = lambda msg, **kw: notices.append(str(msg))
+
+        await pilot.press("e")
+        await pilot.pause()
+
+        assert len(notices) == 1, f"expected exactly one refusal notice, got {notices}"
+        message = notices[0]
+        assert not path.exists(), "a refused first export wrote a file"
+
+    assert "exportación anterior" not in message, (
+        f"the refusal claims a previous export exists when none does: {message!r}"
     )
 
 
