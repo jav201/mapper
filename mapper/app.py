@@ -3480,9 +3480,39 @@ class MapScreen(Screen):
             # measured extent, the budget, and the chord that makes the map
             # small enough, because a refusal the operator cannot act on is a
             # capability regression rather than a safeguard.
+            #
+            # AND IT DECLARES THE STALE FILE, because refusing to write leaves
+            # whatever the LAST export wrote sitting at the very path the
+            # success toast names.  The operator is told the export refused;
+            # without this they are not told that the file still there is OLD --
+            # and a stale artifact at the expected path is this batch's own
+            # defect family (`B-68`: a file that looks current and is not),
+            # reintroduced one seam over by the increment that closed it.
+            #
+            # DECLARED RATHER THAN DELETED, and that is the correct answer
+            # rather than the cautious one.  The standard is that nothing is
+            # hidden without being DECLARED -- not that nothing stale exists --
+            # so an old file the operator has been told about is declared.  And
+            # deleting their file on their behalf, on a refusal, with no
+            # confirmation is the destructive act `US-N05` already ruled
+            # against: silently deleting would break a standing ruling in order
+            # to soften a lesser one.
+            #
+            # THE SENTENCE IS CONDITIONAL BECAUSE IT MUST NEVER BE FALSE.  "the
+            # file there is stale" is a claim about the world, and on a map's
+            # first export there is no file to be stale.  It is made only when
+            # one is actually present.
+            path = self.store.workspace / f"{self.map_id}.svg"
+            stale = ""
+            if path.exists():
+                stale = (
+                    f" El archivo en {path} es de una exportación anterior "
+                    "y ya no refleja este mapa."
+                )
             self.notify(
                 f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
-                f"límite {too_large.limit}. Enfoca un subárbol con f y exporta esa vista.",
+                f"límite {too_large.limit}. Enfoca un subárbol con f y exporta esa vista."
+                f"{stale}",
                 severity="warning",
                 markup=False,
             )
@@ -3511,9 +3541,18 @@ class MapScreen(Screen):
     #: IN CELLS BECAUSE CELLS ARE WHAT COSTS.  `Canvas.rows()` walks a dense
     #: `w x h` grid, so export cost tracks the map's BOUNDING-BOX AREA and not
     #: its node count.  `MAX_RENDER_NODES` bounds the wrong quantity here: a
-    #: 1,801-node map that is wide AND deep at once prices at 169 s, while a
-    #: 4,002-node map that is only wide prices at 14 s.  Bounding nodes in this
-    #: seam would license the expensive shape and refuse the cheap one.
+    #: 1,801-node map that is wide AND deep at once carries roughly 23x the
+    #: CELLS of a 4,002-node map that is only wide, and costs several times as
+    #: much wall clock despite holding fewer than half the nodes.  Bounding
+    #: nodes in this seam would license the expensive shape and refuse the
+    #: cheap one.
+    #:
+    #: (The figures that stood here -- "169 s" and "14 s" -- are STRUCK for the
+    #: same reason as the derivation below: both came from the profiler-
+    #: contaminated harness and overstate wall clock by 5.3-5.6x.  The ORDERING
+    #: they were cited for is real and survives re-measurement, so the claim
+    #: stands on the cell ratio, which no instrument error touches, rather than
+    #: on two seconds-figures that were never true.)
     #:
     #: THE TARGET IS **2 SECONDS** of synchronous freeze.  `action_export_svg`
     #: runs on the Textual message pump with no progress bar and no cancel, and
@@ -3521,24 +3560,47 @@ class MapScreen(Screen):
     #: busy.  Time is what binds, not memory: peak heap fits 18.9 bytes/cell,
     #: so the whole budget below costs about 7 MB.
     #:
-    #: THE DERIVATION IS A MEASURED BRACKET, not a fit evaluated at a round
-    #: number.  Timing render + `save_svg` + the write -- the whole act the
-    #: operator pays for -- on wide-and-deep shapes driven through this very
-    #: method: **315,252 cells -> 1.801 s** and **490,052 cells -> 2.631 s**.
-    #: Interpolating, 2.000 s falls at 357,156 cells; rounded DOWN to 350,000,
-    #: because the far side of this line is a freeze nobody can interrupt.  A
-    #: through-origin fit over seven points cross-checks it at 5.4264 us/cell,
-    #: i.e. 2 s at 368,569 cells -- the same answer from the other direction.
+    #: EVERY PER-CELL DERIVATION THIS CONSTANT ONCE CARRIED IS STRUCK.  Two
+    #: were written here in turn -- "4.907 us/cell, so 2.0 s / 4.907 us =
+    #: 407,616, round down to 400,000", then its replacement "a measured
+    #: bracket, 315,252 cells -> 1.801 s and 490,052 -> 2.631 s, so 2.000 s
+    #: falls at 357,156, round down to 350,000; cross-checked by a
+    #: through-origin fit at 5.4264 us/cell".  BOTH ARE FALSE, AND THEY ARE
+    #: FALSE FOR THE SAME REASON: the harness that produced them
+    #: (`sec_b68_real_cost.py`, then `b68_budget_probe.py`) calls
+    #: `tracemalloc.start()` on the line BEFORE it takes `t0`, so an allocation
+    #: profiler ran inside the whole timed region and inflated every point by
+    #: 5.3-5.6x.  Measured clean, that bracket's own shape costs **0.301 s**,
+    #: not 1.801 -- reproduced independently at 0.321 s and 0.331 s.
     #:
-    #: THE FIRST DERIVATION OF THIS CONSTANT IS STRUCK RATHER THAN ANNOTATED.
-    #: It read "4.907 us/cell, 2.0 s / 4.907 us = 407,616, rounded down to
-    #: 400,000".  Re-measured here the rate is 5.4264 us/cell, at which 400,000
-    #: cells costs 2.20 s -- so the round-DOWN that was supposed to buy headroom
-    #: bought an overshoot of its own stated target instead.  The 4.907 figure
-    #: was a faithful record of what was measured and the arithmetic on it was
-    #: right; what did not survive re-measurement is the CONCLUSION, so the
-    #: conclusion moves and the old number is not left standing beside the new
-    #: one for a reader to average.
+    #: A CORRECTION THAT CHANGES THE NUMBER BUT KEEPS THE INSTRUMENT HAS NOT
+    #: CORRECTED ANYTHING.  That is why this is a strike and not an annotation:
+    #: the second derivation was not a faithful record taken under an
+    #: undeclared condition, it was the first defect re-run.  When a figure is
+    #: wrong the question is whether the INPUT or the INSTRUMENT was wrong, and
+    #: re-deriving from the same instrument reproduces the defect while looking
+    #: like diligence.
+    #:
+    #: AND THE PER-CELL MODEL ITSELF IS WRONG, which is why no rate appears
+    #: above.  Across the shapes this budget ADMITS the cost spans **0.955 to
+    #: 3.27 us/cell** -- a 3.4x spread tracking NODE DENSITY, not area.  So a
+    #: single rate cannot derive a cell budget in either direction, and two
+    #: independent passes that each sampled one shape family reached answers 6x
+    #: apart: wide-and-deep is cheap per cell, wide-only is dense and expensive.
+    #:
+    #: WHAT ACTUALLY JUSTIFIES 350,000: A BUDGET IS JUDGED ON THE WORST SHAPE
+    #: IT ADMITS, not a typical one.  Hunted across both families and two
+    #: starting canvas heights, the worst ACCEPTED shape -- 1,000 wide,
+    #: 312,026 cells, at the `size.height - 10` start a 35-row terminal gives --
+    #: costs **1.447 s** against the 2-second target, a margin of about 28%.
+    #: Nothing the budget admits crosses the target.  A proposal to relax it to
+    #: ~2.12M cells was REFUSED: it generalised from the cheap family and would
+    #: admit wide-only maps costing many seconds.
+    #:
+    #: THE UTILITY GROUND IS UNTOUCHED AND STANDS ALONE.  Even were the cost
+    #: free, a 72001x24004 SVG is not an artifact any recipient can read, so
+    #: `A-100` does not rest on the arithmetic at all -- which is precisely why
+    #: striking the arithmetic costs the ruling nothing.
     #:
     #: WHAT THAT REFUSES, stated rather than discovered.  Measured: the pan
     #: fixture (4,320 cells), a 500-wide fanout (150,025), a 200-long chain

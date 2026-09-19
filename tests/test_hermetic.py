@@ -89,13 +89,33 @@ def test_the_viewer_launch_class_is_complete_and_still_unguarded():
 _SPAWN_FUNCS = {"run", "Popen", "call", "check_call", "check_output"}
 
 
-def _derived_spawn_executables() -> set[str]:
+def _spawn_argv(call: ast.Call):
+    """The argv expression of a spawn call, positional OR by `args=` keyword.
+
+    One reader for both forms, so the census cannot see a spawn in one spelling
+    and miss it in the other. Returns `None` when the call carries no argv at
+    all, which is the only case worth skipping.
+    """
+    if call.args:
+        return call.args[0]
+    for keyword in call.keywords:
+        if keyword.arg == "args":
+            return keyword.value
+    return None
+
+
+def _derived_spawn_executables(root=None) -> set[str]:
     """AST-walk the product and return every executable it can spawn.
 
     Derived, never hand-listed: a hand-listed population is a spec claim, and
     this arm exists precisely to catch the site nobody remembered to list.
+
+    `root` defaults to the real product tree and exists so an arm can drive
+    THIS function -- the one the census actually uses -- over a synthetic tree.
+    A probe that re-implements the walk to test the walk cannot disagree with
+    its author.
     """
-    root = pathlib.Path(__file__).resolve().parent.parent / "mapper"
+    root = pathlib.Path(root or pathlib.Path(__file__).resolve().parent.parent / "mapper")
     found: set[str] = set()
     for path in sorted(root.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -109,9 +129,19 @@ def _derived_spawn_executables() -> set[str]:
             # called `run` on something else (`app.run()` is not a subprocess).
             if not (isinstance(func.value, ast.Name) and func.value.id == "subprocess"):
                 continue
-            if not node.args:
+            # `S-F11`: THE ARGV MAY ARRIVE BY KEYWORD, AND THIS CENSUS WAS
+            # BLIND TO IT.  `subprocess.run(args=[...])` is the documented
+            # signature; this walk read `node.args[0]` only, so a product spawn
+            # of an undeclared binary written in that legal form PASSED the
+            # census while the identical spawn written positionally FAILED it.
+            # The runtime guard was taught exactly this by `SEC-F6`, and the
+            # census that derives its population was not -- a lesson applied to
+            # an instance and not to its class, which is the defect family this
+            # batch exists to close, landing in the instrument rather than in
+            # the product.
+            argv = _spawn_argv(node)
+            if argv is None:
                 continue
-            argv = node.args[0]
             if isinstance(argv, ast.List) and argv.elts:
                 head = argv.elts[0]
                 if isinstance(head, ast.Constant) and isinstance(head.value, str):
@@ -138,7 +168,7 @@ def _resolve_indirect_argv(tree: ast.AST, call: ast.Call) -> set[str]:
     the previous wording claimed "in the same function", which is not what the
     code does and would have sent a reader looking for a bug that is not there.
     """
-    target = call.args[0]
+    target = _spawn_argv(call)
     if not isinstance(target, ast.Name):
         return set()
     out: set[str] = set()
@@ -362,4 +392,57 @@ def test_the_network_marker_lifts_the_guard():
     """
     assert subprocess.run.__module__ == "subprocess", (
         "the `network` marker did not lift the lane guard"
+    )
+
+
+@pytest.mark.parametrize(
+    "spelling, source",
+    [
+        ("positional", 'subprocess.run(["curl", "https://example.invalid"])'),
+        ("keyword-argv", 'subprocess.run(args=["curl", "https://example.invalid"])'),
+    ],
+)
+def test_the_spawn_census_sees_an_undeclared_binary_in_EITHER_SPELLING(
+    tmp_path, spelling, source
+):
+    """`S-F11`: the census read positional argv only, so a legal form escaped it.
+
+    THE PAIR IS THE POINT.  Before this fix the two rows disagreed: the same
+    undeclared `curl` spawn FAILED the census written positionally and PASSED
+    it written `subprocess.run(args=[...])`. A census whose answer depends on
+    the caller's spelling is not a census -- and `SEC-F6` had already taught
+    the runtime guard this exact lesson, which is what makes this an instance
+    of *a lesson applied to an instance and not to its class*, landing in the
+    instrument rather than in the product.
+
+    IT DRIVES THE REAL CENSUS FUNCTION over a synthetic tree, rather than
+    re-implementing the walk to test the walk. A probe that models its subject
+    cannot disagree with its author.
+    """
+    module = tmp_path / "fake_product.py"
+    module.write_text(f"import subprocess\n\n\ndef go():\n    {source}\n", encoding="utf-8")
+
+    derived = _derived_spawn_executables(root=tmp_path)
+
+    assert "curl" in derived, (
+        f"the census did not see an undeclared `curl` spawn written {spelling}: "
+        f"derived {sorted(derived)}. A spawn the census cannot see is a spawn "
+        f"nobody has to classify."
+    )
+
+
+def test_the_spawn_census_positive_control_returns_a_NON_absence(tmp_path):
+    """The control for the arm above: an empty tree must NOT read as clean.
+
+    Every assertion above is that something IS found. The cheapest way to pass
+    a `not in` census is a walk that returns nothing at all, so this pins that
+    the walk's emptiness is a real answer about a real tree rather than a
+    broken traversal -- and the product census itself asserts non-emptiness
+    before comparing, for the same reason.
+    """
+    (tmp_path / "quiet.py").write_text("x = 1\n", encoding="utf-8")
+    assert _derived_spawn_executables(root=tmp_path) == set()
+    assert _derived_spawn_executables(), (
+        "the census returned NOTHING for the real product tree -- the walk is "
+        "broken, not the tree"
     )
