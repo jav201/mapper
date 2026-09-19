@@ -294,12 +294,146 @@ deleted**, and the thirty-ninth is `network`-marked, which is why *deselected* m
 
 | Field | Value |
 |---|---|
-| **Independent review** | **PENDING-FINAL-RUN** |
+| **Independent review** | `code-reviewer` · **OK to advance — 0 HIGH** · 4 MEDIUM + 2 LOW raised. `security-reviewer` · **OK from the security lens — 0 HIGH** · 5 MEDIUM + 4 LOW raised. Verdicts at `increment-016-confirm-code-review.md` and `increment-016-confirm-security-review.md`, both re-read on the shipped tree at `f3398f4`. |
 
 Inc-CONFIRM is **FULL protocol** by ruling `D35`, so both passes are owed. Increment 015's three HIGH
 findings (`CR-F1`, `SEC-F1`, `SEC-F2`) are all addressed here, and **none of them is self-cleared**:
-a fix that landed is not a finding that closed. Both reviewers must **re-read the tree themselves**
-and will not clear a HIGH on a report that the corrective pass ran.
+a fix that landed is not a finding that closed. Both reviewers **re-read the tree themselves** and
+each states in its own report that no HIGH was cleared on a report that the corrective pass ran —
+every closure rests on that reviewer's own measurement with a counterfactual.
+
+| HIGH | Closed by | The counterfactual that carries it |
+|---|---|---|
+| `CR-F1` | `code-reviewer`, own measurement | fired as a PAIR — MUTANT B kills the remedied arm, SURVIVES the pre-remedy one, and the remedy alone is inert on a healthy export |
+| `SEC-F1` | `security-reviewer`, own measurement | row identity read off the emitted SVG: 0 split rows at 8/12/16/20/40/120 leaves; `width=200` restored → 3 split rows at 20/40/120, independently reproducing the ~17-leaf threshold |
+| `SEC-F2` | `security-reviewer`, own measurement | the budget binds on every path, incl. renderers that decline the resize; refusal costs ≤0.124 s and writes nothing; the 125-minute freeze is not reachable |
+| `SEC-F3` | `security-reviewer`, own measurement | 9/9 fields classified both ways; a live search onto a node titled `CONTRATO-ACME-CONFIDENCIAL`, cursor moved onto it, pan at (20,3) → artifact **byte-identical** to the at-rest export |
+
+**Both reviewers independently confirmed the `mapper/app.py` digest discrepancy** recorded under
+*Corrections* (`code-reviewer` `N1`, MEDIUM; `security-reviewer` `S-F13`, LOW), and each rated it below
+HIGH **only because it re-derived the affected behaviour itself** — so the gate holds evidence on the
+shipped tree that is the reviewer's own, not this packet's.
+
+### Review-protocol failure by the resuming agent, recorded rather than smoothed
+
+Catalog entry 15 — *REVIEWS ARE SERIAL BY DEFAULT; PARALLEL REVIEW REQUIRES ONE ISOLATED,
+DIGEST-VERIFIED MIRROR PER REVIEWER*, **"a shared tree never does, however the briefs are worded"** —
+was violated: both passes were dispatched concurrently against the shared repo tree, with the briefs
+worded to forbid repo writes. The control names that wording in advance as what does not discharge it.
+Corrected mid-run: both reviewers moved to private mirrors and took the discharge's reading-side half
+(assert hash-stability of everything measured, across the reviewer's own run). Outcome, from their
+reports: `security-reviewer` had already chosen a mirror and measured nothing in the shared tree, and
+its tree-wide digest **equals** the pin taken before dispatch; `code-reviewer` had also already
+mirrored, and re-asserted all 299 tracked digests identical at close. **No tracked file moved and no
+evidence was corrupted** — but that is the outcome, not the control, and the control was not honoured.
+
+**Two extensions to entry 15 that this round earned, both found by reviewers, neither previously recorded:**
+
+1. **Per-reviewer DIRECTORIES are not per-reviewer `sys.path`.** A stray `inspect.py` in the shared
+   scratchpad root shadowed the stdlib module for anything run from there and killed one probe. The
+   file was the resuming agent's own.
+2. **Copying the tree is not isolation on this machine.** `site-packages/_editable_impl_mapper.pth`
+   points at the repo, so a plain `python script.py` imports `mapper` **from the repo** whatever
+   directory the script sits in. This produced a false green in `security-reviewer`'s own first
+   counterfactual, caught only because the `width=200` mutant failed to fire. Every probe now asserts
+   `mapper.__file__`. `pytest` from a mirror root resolves correctly; ad-hoc probes escape silently.
+
+---
+
+## 4c · Third resumption — everything below was re-measured, nothing inherited
+
+Two agents died to transient network errors before this packet was reviewed; neither committed. The
+first left the tree carrying the re-ruling with no record updated; the second wrote this packet and
+died before dispatching review. **No figure in §4 was taken on trust.** Re-measured independently:
+
+| Figure | This packet claimed | Re-measured | |
+|---|---|---|---|
+| default lane | `1133 passed, 20 deselected, 3 xfailed` | same, in 336.84 s | reproduced |
+| slow · network | `19 passed` · `1 passed` | same | reproduced |
+| ruff | 27, sets equal at equal scope | base 27 / head 27, added 0, removed 0, **both parses asserted non-empty** | reproduced |
+
+Both reviewers reproduced all four lanes independently as well (`code-reviewer` 334.57 s,
+`security-reviewer` 347.02 s).
+
+### Correction — a restore digest in §4 does not describe the tree this increment shipped
+
+| File | §4's recorded restore digest | Shipped at `f3398f4` | |
+|---|---|---|---|
+| `mapper/export.py` | `56773345bc4731f1` | `56773345bc4731f1` | matches |
+| `mapper/views/state.py` | `bf239adef8e1c159` | `bf239adef8e1c159` | matches |
+| `tests/test_pan.py` | `e65128c51866fa05` | `e65128c51866fa05` | matches |
+| `tests/conftest.py` | `c1acf140b03d3301` | `c1acf140b03d3301` | matches |
+| **`mapper/app.py`** | **`60c5dde90e610e20`** | **`914afcb8b0a364a6`** | **DIFFERS** |
+
+§4's EXPORT battery therefore fired against an `app.py` edited afterwards, so its `app.py` sites
+(`M1`, `M2`, `M5`, `M6`, `M7`, `M8`, `M10`, `M11` — the budget-and-refusal half) carry verdicts about a
+file this increment does not ship. **ANNOTATE, not STRIKE, by the control this increment mints**: the
+verdicts were a faithful record of a real measurement taken under a condition nobody declared. What
+did not survive is the claim that they cover the shipped file, and that claim is discharged by
+re-firing rather than by argument.
+
+### Mutation battery re-fired by the resuming agent, against the SHIPPED bytes
+
+11 sites; byte-level I/O; sha256 pins; verdicts printed BEFORE every restore assert; substitution count
+asserted at exactly 1 per site; `PYTHONDONTWRITEBYTECODE=1`; per-node verdicts parsed from `-rf`, never
+the exit code; baseline asserted green (45 nodes) before the first mutation.
+
+| Site | Expect | Verdict | Reddened |
+|---|---|---|---|
+| console reverted to `width=200` | KILL | KILLED | fold oracle at 20/40/120 leaves |
+| the measured `+ 1` dropped | KILL | KILLED | fold oracle at 8/20/40/120 |
+| `hits` transient → content | KILL | KILLED | 3 arms |
+| `selected_id` transient → content | KILL | KILLED | 3 arms |
+| cell budget defanged | KILL | KILLED | refusal + notice arms |
+| refusal KEPT, notice emptied | KILL | KILLED | **exactly one** — the notice arm |
+| exhaustion returns what it had | KILL | KILLED | the exhaustion arm |
+| MUTANT B vs the REMEDIED arm | KILL | KILLED | `test_b68_…_invariant_under_the_operators_pan` |
+| MUTANT B vs the PRE-REMEDY arm | SURVIVE | SURVIVED | reproduces `CR-F1` on this tree |
+| remedy reverted, export HEALTHY | SURVIVE | SURVIVED | remedy is inert on correct work |
+| comment-only negative control | SURVIVE | SURVIVED | — |
+
+Restores byte-identical; tree clean against `f3398f4` after the battery. **The pair is the point, not
+the kill** — *the mutant is killed* is satisfied by an arm that was already killing it.
+
+**The anchor failure is the instrument working.** Five sites in, the harness refused a mutation with
+`anchor matched 0x, needs exactly 1 — a mutation that never applied reads as a survivor`: `mapper/app.py`
+and `tests/test_pan.py` are **CRLF** in the working copy while `mapper/export.py` and
+`mapper/views/state.py` are **LF**, so a multi-line `\n` anchor matched nothing. Recorded because the
+same CRLF trap is already in the catalog twice, and because reporting it by name rather than printing
+SURVIVED is the whole difference between a battery and a decoration.
+
+### `EXPORT_MAX_CELLS`: the constant is SAFE and its recorded derivation is FALSE
+
+Raised independently by both reviewers from opposite directions — `code-reviewer` `N4` measured the
+symptom, `security-reviewer` `S-F9` found the mechanism — and then re-measured here because **the two
+reviewers' conclusions disagreed by 6×** and a budget cannot be ruled on from either alone.
+
+**The mechanism.** `sec_b68_real_cost.py:55-57` and `b68_budget_probe.py:68-75` both call
+`tracemalloc.start()` on the line BEFORE `t0 = time.time()` and stop it after `dt` is taken, so an
+allocation profiler runs inside the entire timed region. **The struck `4.907 µs/cell` and its
+replacement `5.4264 µs/cell` come from the same contaminated instrument — the correction changed the
+number and kept the instrument.** A/B, profiler off vs on: 5.28–5.64×.
+
+**Measured clean** (no profiler in the timed region), the docstring's own bracket shape:
+
+| Shape | Docstring claims | Clean | Agreement |
+|---|---|---|---|
+| 161 nodes, 315,252 cells | **1.801 s** | **0.301 s** | `code-reviewer` 0.321 s · `security-reviewer` 0.331 s — three independent measurements |
+
+**Cost is not a function of cells alone.** Across shapes the budget ADMITS, the rate spans **0.955 to
+3.27 µs/cell** — a 3.4× spread tracking node density, not area. This is why the two reviewers diverged:
+`security-reviewer` sampled the wide-and-deep family (cheap) and concluded the budget is ~6× too tight;
+`code-reviewer` hunted the wide-only family (dense) and found a thin margin.
+
+**A budget is judged on the worst shape it ADMITS.** Hunted across both families and two starting
+canvas heights: the worst accepted shape measured here costs **1.447 s** (1,000-wide, 312,026 cells, at
+the `size.height - 10` start a 35-row terminal gives) against the 2.000 s target — **margin ≈28 %**.
+
+**Disposition: `350_000` STANDS; its stated derivation does not.** `security-reviewer`'s proposed
+relaxation to ≈2.12 M cells is **refused** — it generalises from the cheap family and would admit
+wide-only maps costing many seconds. `A-100`'s *utility* ground is untouched and stands alone. **The
+false arithmetic is SURFACED, not patched**, per the running order's instruction to stop rather than
+open a fourth block; see §6.
 
 ---
 
@@ -357,6 +491,32 @@ and will not clear a HIGH on a report that the corrective pass ran.
 9. **Inc-CONFIRM item 3 is not started**: `F3`→qa, `F7`→ux, `SEC-H2`, `UI-AT058` plus the newer
    `"esta vista no se desplaza"` string, and the `B-64` driven sweep over the 31 reachable sites.
 
+### 10. SURFACED TO THE COORDINATOR — eleven findings from the confirmation round, none fixed here
+
+The running order says that if this fix round raises anything new outside the four rulings, **STOP and
+surface rather than open a fourth block**. It did, so these are recorded and routed, not patched. None
+is HIGH; both reviewers cleared the increment with them open.
+
+| Id | Sev | Finding | Recommended disposition |
+|---|---|---|---|
+| `S-F9` + `N4` | MED | **`EXPORT_MAX_CELLS`'s recorded derivation is false by ≈6×** — both harnesses time with `tracemalloc` running. The constant is safe (worst accepted shape 1.447 s vs a 2.0 s target); the arithmetic justifying it is not. `A-100` calls that derivation *normative*. | **STRIKE the cost arithmetic** from the `mapper/app.py` docstring and `A-100`; keep `350_000`; re-ground on the worst-accepted measurement and on utility, which stands alone. A docstring-only change — but it edits a ratified requirement, so it is the coordinator's. |
+| `N2` | MED | **A refusal leaves the PREVIOUS artifact standing** at the path the success toast named, unmentioned by the notice. New behaviour from this increment; at base the press overwrote. The budget arm `unlink()`s before asserting absence, so it is structurally blind to it. | Possibly the **sixth** instance of *the increment that closes a defect family introduces a member of it* — a stale file at the expected path is the family's shape, mitigated by the operator having been told. Deleting the operator's prior file is itself an unruled decision, so the remedy is likely the message. |
+| `S-F10` | MED | **`cell_len` is correct but UNPINNED.** Substituting `len()` leaves 45 tests green, while CJK titles fold a row at every shape through the real chord. The battery mutates the constant and the `+1` but never this third conjunct. | One wide-glyph parametrisation; the existing oracle catches it unchanged (reviewer-verified). |
+| `S-F11` | MED | **The AST spawn census is blind to `args=`.** A new product spawn of undeclared `curl` written positionally FAILS the census; written `subprocess.run(args=[...])` it PASSES. `SEC-F6`'s lesson was applied to the runtime guard and not to the census deriving the population. | Two-line fix. Same shape as the family this batch exists to close: a lesson applied to one instance and not its class. |
+| `N3` | MED | **The SVG text-layer reader is spelled twice** — `_SVG_CELL` byte-identical in `test_pan.py:714` and `test_export_state.py:186`, `_squash` likewise. This is the oracle two acceptance families rest on. | *ANYTHING SPELLED TWICE WILL DRIFT.* `conftest.py` is the existing shared home. |
+| `N1` / `S-F13` | MED / LOW | The `mapper/app.py` restore digest (§4c). | Corrected in §4c by re-firing; must not reach the record uncorrected. |
+| `S-F12` | LOW | `export_neutralised` fails **open** at runtime — an unclassified field rides through; only the test arm catches it. | — |
+| `S-F14` | LOW | Two isolation traps (§4b): shared `sys.path`, and the editable install defeating tree copies. | Extend catalog entry 15. |
+| `S-F15` | LOW | The suite cannot run outside a git working tree (`test_a3_census.py::tracked` shells `git ls-files`). | Record only; `HERMETIC-1`'s family, offline. |
+| `N5`, `N6` | LOW | `_declared_default`'s factory branch has no subject and is undeclared; the `_PASS_FREE_READERS` reason is true but no longer the simplest true statement. | — |
+
+**Two corrections to this packet's own record, from `security-reviewer`, in the direction of accuracy:**
+§5 says `curl`/`wget`/`ssh` walk past the guard *via a shell string* — **they do not**; a string argv is
+refused and `os.system` is patched. And the "`github.py` already imports `urllib`" evidence is
+`urllib.parse` (line 17), which performs no I/O — the carry's risk is real, but it should rest on the
+argument rather than on that import. The only silent bypass measured is early-bound
+`from subprocess import Popen`, plus structurally-invisible in-process HTTP.
+
 ---
 
 ## 7 · Suggested next task
@@ -376,7 +536,7 @@ reads; the `B-64` sweep must DRIVE the derived set rather than a hand-built mode
 | 3 | Layer 0 written where the criterion applies | `core` · `full` ‹one complete run owned by the orchestrator ~ Layer 0› | ✓ | `network_reaching` (11 params) and `export_neutralised` — both cross a declared boundary, both cyclomatic ≥3 |
 | 4 | **RED counterfactual** declared | `core` · `full` ‹RED counterfactual mandatory ~ RED counterfactual› | ✓ | §4 — MUTANT B, fired against both the pre- and post-remedy arm; restore digests named |
 | 5 | **Reverse census** declared | `core` · `full` ‹reverse census of the touched symbol ~ Reverse census› | ✓ | §4 — 5 probes, 3 fired, 2 named with their probe |
-| 6 | `code-reviewer` passed — a HIGH blocks | `core` · `full` ‹RED counterfactual mandatory ~ code-reviewer› | **PENDING-FINAL-RUN** | §4b |
+| 6 | `code-reviewer` passed — a HIGH blocks | `core` · `full` ‹RED counterfactual mandatory ~ code-reviewer› | ✓ | §4b — **OK to advance, 0 HIGH**; `CR-F1` closed on the reviewer's own paired counterfactual, not on this packet |
 | 7 | No file from another lane touched | all | ✓ | batch not forked |
 | 8 | Frozen interfaces untouched | all | ✓ | A3 probe — `IRenderer.render` unchanged; the new names are consumed by `mapper/app.py` alone |
 | 9 | Coverage claims verified **on disk** | all | ✓ | every figure re-measured this session; two inherited ones did not survive and are named in §4 |
@@ -385,5 +545,5 @@ reads; the `B-64` sweep must DRIVE the derived set rather than a hand-built mode
 | 12 | **Instrument RED-proof** declared | all | ✓ | §4 — 10 instruments; 2 reported a real defect in themselves and those readings were discarded |
 | 13 | **Correction population** declared | all | ✓ | §4 — 2 corrections, each enumerated before its first site was edited |
 | 14 | **Emitted-form assertion** declared | all | ✓ | §4 — 4 assertions over the exported SVG; `AT-009`'s blindness to folding named |
-| 15 | **Independent review** names somebody | all | **PENDING-FINAL-RUN** | §4b |
+| 15 | **Independent review** names somebody | all | ✓ | §4b — `code-reviewer` and `security-reviewer`, each re-reading the shipped tree at `f3398f4`; ⚠ dispatched in violation of catalog entry 15 and corrected mid-run, recorded in §4b |
 | 16 | **Evidence files** declared | all | ⚠ | `none — this batch declares no artifact_homes.evidence`; declared gap, inherited, surfaced in §6 item 2 |
