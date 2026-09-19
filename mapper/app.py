@@ -57,7 +57,11 @@ from .views.outline import (
     header_rows as outline_header_rows,
     painted_ids as outline_painted_ids,
 )
-from .views.radial import RadialRenderer, painted_ids as radial_painted_ids
+from .views.radial import (
+    RadialRenderer,
+    header_rows as radial_header_rows,
+    painted_ids as radial_painted_ids,
+)
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
 from .widgets.rail import RAIL_WIDTH, OutlineRail
@@ -72,6 +76,25 @@ from .widgets.rail import RAIL_WIDTH, OutlineRail
 # it -- `test_overflow.py` still spells the literal at 7 sites, which predate the
 # constant and are recorded rather than swept into this increment's diff.
 COUNT_REGION_ID = "map-pagination"
+
+# What a pan key says in a view that does not consume pan (`PAN-1`), spelled
+# ONCE so the branch that SETS it and the seam that CLEARS it cannot drift
+# (`DECL-118-TWICE`: anything spelled twice will drift, derive it).
+#
+# IT PAIRS THE REFUSAL WITH THE NEXT MOVE, which is this strip's house pattern --
+# `completa «X» · ↵ guarda · esc deja el campo`, `rail · ↵ plegar rama · esc
+# volver al mapa`.  A bare refusal would be the only hint here that tells the
+# operator what will not work without telling him what will, and in these two
+# views the alternative is the whole point of the ruling: navigation is
+# focus-based, so `j/k/h/l` is what moves.
+#
+# AND IT READS AS A STANDING PROPERTY, not a transient condition, which is what
+# the ruling says it is.  The contrast with `borde del territorio` is
+# deliberate: that one names a LOCATION and correctly reads as transient --
+# move the other way and it is gone.  This one never stops being true while the
+# view is on screen, and wording it as a passing state would be the `UI-AT058`
+# failure (text that invites the operator to wait out a permanent condition).
+PAN_INERT_HINT = "esta vista no se desplaza · navega con j/k/h/l"
 
 # WHAT the count line counts, in the operator's words, spelled ONCE.  The strip
 # also paints a page numeral (`1/8`) and an off-canvas numeral, so a bare
@@ -1530,16 +1553,17 @@ class MapScreen(Screen):
         reason (`A-98`, ruling `02j`): a probe answers "this view has no header"
         and "this view's charge is broken" with the same silence.
 
-        RADIAL IS AN EXPLICIT FALLBACK, NOT AN ABSENCE, AND `S-D` IS ITS CLOSER.
-        Radial's own first line is measured SHORTER than layered's at widths 24,
-        28 and 50-and-up, so it is overcharged too -- but `views/radial.py` is
-        `S-D`'s file and registering a charge for it here would put this stage
-        over its file cap.  Coordinator ruling 2026-09-11 took the option that
-        states the hole instead of omitting it, which is this batch's own
-        `AT-058` doctrine applied to a CHARGE rather than a declaration: radial
-        keeps layered's number, and the fact that it does is written down here
-        and PINNED BY AN ARM, so `S-D`'s fix reddens that arm rather than closing
-        the residue silently.
+        THE RADIAL RESIDUE IS CLOSED (`S-D`).  Until this stage radial was an
+        EXPLICIT fallback to `layered.header_rows` -- stated here and pinned by
+        an arm so the fix would redden the arm rather than close the hole
+        silently, which is this batch's `AT-058` doctrine applied to a CHARGE.
+        The residue was real and it was measured, not suspected: on the arm's own
+        fixture, layered's charge EXCEEDED radial's own first line at SEVEN of
+        the ten swept widths -- 24, 28, and every width from 50 up -- and each
+        overcharged row is a body row the region could have shown and the
+        renderer was never told about.  `radial.header_rows` now equals radial's
+        own first line at TEN of ten, which is the equality form the other two
+        entries hold to.
 
         An unregistered renderer RAISES.  A future view that genuinely has no
         header gets an explicit entry returning a charge of one, exactly as
@@ -1550,8 +1574,7 @@ class MapScreen(Screen):
         if renderer is self.outline_renderer:
             return outline_header_rows
         if renderer is self.radial_renderer:
-            # THE DECLARED RESIDUE.  Closed by `S-D`, which owns `radial.py`.
-            return header_rows
+            return radial_header_rows
         raise LookupError(f"no header charge registered for {renderer!r}")
 
     def _canvas_width(self) -> int:
@@ -1610,13 +1633,99 @@ class MapScreen(Screen):
             return w, 1                          # row_limit == 0 -> nothing painted
         return w, region.height - (rows - 1)
 
+    def _consumes_pan(self, renderer) -> bool:
+        """Does THIS renderer read the pan offsets it would be given?
+
+        IDENTITY, NEVER `getattr`, matching `_header_rows_for` and
+        `_painted_ids_for` for the same reason (`A-98`, ruling `02j`): a probe
+        must not answer "this view has no pan" and "this view's pan is broken"
+        with the same silence.
+
+        MEASURED, NOT INFERRED (`PAN-1`).  `views/outline.py` and
+        `views/radial.py` hold ZERO code references to `pan_x`/`pan_y` -- the one
+        textual match in outline is prose inside a docstring -- while
+        `views/layered.py` consumes both.  Driven end to end with pan set
+        DIRECTLY, so no keypress side effect could be mistaken for the thing:
+        layered's picture moves, outline's and radial's never do, at any size.
+
+        AND THE MANIFESTATION WAS WORSE THAN A WRONG NUMBER.  The screen computed
+        a LAYERED extent for every view and clamped `pan_x`/`pan_y` against it,
+        so in the two views that ignore pan the operator's keys moved nothing
+        while internal state advanced -- the app held a pan the picture never
+        reflected.  A lying affordance of the MOTION kind, the same family as the
+        `esc` rulings `#D38`/`#D43`: an affordance that teaches a rule which
+        silently stops holding.
+
+        RADIAL DOES NOT WANT PAN, and that is a ruling rather than an omission
+        (coordinator 2026-09-18).  Its navigation is focus-based and its layout
+        is polar around the selected node, so a viewport is a category error
+        rather than a missing feature.  The fix is therefore NOT "give radial
+        pan" but "stop advertising and advancing pan on behalf of a view that
+        does not consume it".  Reversible if a later measurement shows radial
+        genuinely wants a viewport.
+
+        EVERY RENDERER IS ENUMERATED AND AN UNREGISTERED ONE RAISES, exactly as
+        `_header_rows_for` and `_painted_ids_for` do.  The first version of this
+        method fell through to `False`, which is the defect its own citation of
+        `02j` forbids: a fourth renderer added tomorrow would be SILENTLY
+        classified as non-panning, with nothing anywhere saying so.  `False` is
+        a LEGITIMATE answer here, which is exactly why it may not double as the
+        answer for "I have never heard of this renderer".
+
+        THE RAISE IS UNGUARDED ON THE PAN PATH, AND THAT IS A DECISION RATHER
+        THAN AN ACCIDENT.  Of the three dispatches this one alone is called from
+        `_pan` BEFORE its `try`, so an unregistered renderer plus one pan
+        keypress would escape into the message pump -- the sink that `except`
+        exists for.  The sibling `_header_rows_for` MEASURED ITS WAY TO THE
+        OPPOSITE ANSWER and softens its raise in the drawing path, on the
+        argument that "a declaration that raises costs a numeral; a charge that
+        raises costs the whole picture".  That argument does not transfer: a
+        charge is needed to paint EVERY frame, so degrading keeps the map on
+        screen, whereas pan consumption is consulted only when the operator
+        presses a pan key -- and degrading it would silently reinstate exactly
+        the defect this raise was added to remove.  A view whose pan class is
+        unknown must not be guessed at on the operator's behalf.
+
+        WHAT THAT COSTS, stated here rather than discovered later: if a fourth
+        renderer is ever constructed without an entry here, the first pan press
+        takes the app down.  That is a code defect failing loudly the moment it
+        is first exercised, which is this batch's stated preference, and it is
+        unreachable in a shipped build -- `app.py` constructs exactly three
+        renderers and an arm pins that an unregistered one raises.
+        """
+        if renderer is self.renderer:
+            return True
+        if renderer is self.outline_renderer or renderer is self.radial_renderer:
+            # RULED, not absent: focus-based / polar navigation (2026-09-18).
+            return False
+        raise LookupError(f"no pan consumption registered for {renderer!r}")
+
     def _reclamp_pan(self, w: int, h: int) -> None:
         """Pull both offsets back into range for the frame about to be drawn.
 
         A resize or a fold shrinks the extent under a pan that was legal a
         moment ago, and `LLR-N06.1.2` says the system shall not ACCEPT an offset
         outside the range -- not merely that it shall not produce one.
+
+        A VIEW THAT DOES NOT CONSUME PAN DECLINES TO CLAMP, and HOLDS the
+        offsets (`PAN-1`).  Clamping against `layered`'s extent here would be the
+        same renderer-independent application of a layered-specific helper that
+        defect 2 was, one seam over -- so the branch exists.  But declining to
+        clamp is the whole of what it needs to do.
+
+        IT MUST NOT ZERO THEM, AND THE FIRST VERSION OF THIS BRANCH DID.
+        `refresh_canvas` calls this on every repaint, so zeroing here threw the
+        operator's pan away on a mere excursion into outline or radial -- no key
+        pressed, nothing declared, offsets gone, measured `(48, 0)` -> `(0, 0)`
+        on a round trip.  That is the SAME FAMILY this increment exists to
+        close, one seam over: `PAN-1`'s charge is "the app held a pan the
+        picture never reflected", and zeroing shipped "the app discarded a pan
+        the operator set, without saying so".  The non-consumer ignores the
+        offsets while it is on screen, and this method clamps them honestly on
+        the way back.
         """
+        if not self._consumes_pan(self._current_renderer()):
+            return
         (extent_x, span_x), (extent_y, span_y) = pan_extent(
             self.graph, self._view_state(w, h)
         )
@@ -1624,6 +1733,17 @@ class MapScreen(Screen):
         self.pan_y = self._clamp_pan(self.pan_y, extent_y, span_y)
 
     def _pan(self, dx: int, dy: int) -> None:
+        # INERT AND DECLARED, never inert and silent (`PAN-1`, ruling 2026-09-18).
+        # Before this, a pan key in outline or radial advanced `pan_x`/`pan_y`
+        # against a LAYERED extent and repainted a picture that consumes
+        # neither, so the operator got no movement, no message, and a hidden
+        # offset that outlived the view.  Saying so is the whole fix: a key that
+        # does nothing and explains why is an honest affordance; one that does
+        # nothing quietly is indistinguishable from a broken keyboard, which is
+        # the confusion `US-N06` exists to remove.
+        if not self._consumes_pan(self._current_renderer()):
+            self.query_one(HintLine).set_hint(PAN_INERT_HINT)
+            return
         w, h = self._canvas_size()
         try:
             (extent_x, span_x), (extent_y, span_y) = pan_extent(
@@ -3208,12 +3328,47 @@ class MapScreen(Screen):
     def action_toggle_outline(self) -> None:
         self.outline_mode = not self.outline_mode
         self.radial_mode = False
+        self._clear_pan_hint()
         self.refresh_canvas()
 
     def action_toggle_radial(self) -> None:
         self.radial_mode = not self.radial_mode
         self.outline_mode = False
+        self._clear_pan_hint()
         self.refresh_canvas()
+
+    def _clear_pan_hint(self) -> None:
+        """Drop `PAN_INERT_HINT` when the view changes underneath it.
+
+        THE HINT IS A STATEMENT ABOUT THE VIEW, so it stops being true the
+        moment the view changes -- and `_pan`'s own clear is reachable only on a
+        SUCCESSFUL pan, which a non-panning view never performs.  Without this
+        the hint LATCHES: press a pan key in radial, press `r` back to layered,
+        and the strip still reads "esta vista no se desplaza" while standing in
+        the view that does scroll.  Not merely stale -- FALSE in the view
+        displaying it.
+
+        This is the defect `_pan` already records one branch down ("the hint is
+        set on a no-op and nothing ever unset it ... it latched on the first
+        sideways press and then sat there describing every LIVE `J`/`K` as an
+        edge the operator had not reached"), reintroduced on a new surface by
+        the branch added to fix `PAN-1`.  Cleared HERE, at the seam where the
+        property stops holding, rather than on the next successful pan.
+
+        Scoped to the pan hint alone: an unconditional clear would swallow
+        whatever another handler had just declared.
+
+        READS `HintLine.text`, THE STORED VALUE, rather than rendering the
+        widget to inspect it.  A zero-arg `render()` here would be a WIDGET-
+        protocol call in PRODUCTION code -- correctly outside the `A3`, but the
+        census pins that population and a new production site changes it; the
+        first version of this method did exactly that and the `A3` pins caught
+        it.  The stored value is also the honest source: it is what `set_hint`
+        wrote, with no styling or wrapping in between.
+        """
+        hint = self.query_one(HintLine)
+        if hint.text == PAN_INERT_HINT:
+            hint.set_hint("")
 
     def action_toggle_diff(self) -> None:
         if self.diff_active:

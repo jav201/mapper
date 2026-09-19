@@ -101,32 +101,55 @@ def test_outline_is_charged_its_own_header_and_not_layereds(w):
     ), f"at w={w} outline's charge does not equal outline's own first line"
 
 
-@pytest.mark.parametrize("w", (24, 28, 50, 80, 118))
-def test_radial_still_receives_layereds_charge_and_S_D_must_redden_this(w):
-    """THE DECLARED RESIDUE, PINNED SO IT CANNOT CLOSE SILENTLY.
+@pytest.mark.parametrize("w", WIDTHS)
+def test_radial_is_charged_its_own_header_and_not_layereds(w):
+    """`radial.header_rows` prices RADIAL's header. `S-D` closed the residue.
 
-    `views/radial.py` is `S-D`'s file, so registering a radial charge here would
-    put `S-B(+C)` over its file cap. The coordinator ruled for the option that
-    STATES the hole rather than omitting it -- this batch's `AT-058` doctrine
-    applied to a charge instead of a declaration.
+    REWRITTEN FROM THE PIN, NOT DELETED, as the pin's own message instructed.
+    It previously asserted `layered.header_rows(...) > radial's own first line`
+    and was labelled *`S-D` MUST REDDEN THIS ARM*.
 
-    So this arm pins the WRONG number on purpose. It asserts radial is still
-    priced with layered's header AND that layered's header is genuinely larger
-    than radial's own first line at these widths, which is what makes the residue
-    real rather than a naming difference.
+    IT DID NOT REDDEN, AND THAT IS RECORDED RATHER THAN QUIETLY FIXED. `S-D`
+    landed the whole residue -- `radial.header_rows` now exists and the dispatch
+    routes to it -- and this arm STAYED GREEN through all five of its
+    parametrizations, because its predicate named neither of the two things
+    `S-D` changes: `layered.header_rows` is untouched, and radial's RENDERED
+    first line is untouched (verified inert over 144 renders). The predicate was
+    correct, exact, and about a different pair of objects than the change.
+    That is `C-40`'s defect exactly -- a pin whose declared subject is not the
+    subject of the change -- and it means the residue was pinned by ONE arm, the
+    dispatch arm below, not by the six instances the pre-gate expected.
 
-    **`S-D` MUST REDDEN THIS ARM.** When radial gets its own measured charge,
-    this arm fails and is rewritten to the equality form the other two use. A
-    green run of this arm after `S-D` means `S-D` did not close the residue.
+    The equality form below CAN redden: reverting the dispatch does not touch it,
+    but reverting `radial.header_rows` to layered's -- the actual defect -- makes
+    it fail at the seven widths where the two disagree.
     """
     graph = _graph()
-    charged = layered.header_rows(graph, w, w)
-    own = _first_line_rows(radial.RadialRenderer(), graph, w)
-    assert charged > own, (
-        f"at w={w} layered's charge ({charged}) no longer exceeds radial's own "
-        f"first line ({own}). Either radial's header grew or S-D landed; if S-D "
-        "landed, rewrite this arm to the equality form -- do not delete it"
-    )
+    assert radial.header_rows(graph, w, w) == _first_line_rows(
+        radial.RadialRenderer(), graph, w
+    ), f"at w={w} radial's charge does not equal radial's own first line"
+
+
+# THE SIZE OF THE RESIDUE `S-D` CLOSED, recorded as PROSE rather than as an arm,
+# because an arm was the wrong instrument for it and a review proved it.
+#
+# Measured on `_graph()` at the ten swept widths: `layered.header_rows` exceeded
+# radial's own first line at SEVEN of them -- 24, 28, and every width from 50 up
+# -- and not at 20, 34 or 40. Each of those rows was a body row the region could
+# have shown and the renderer was never told about. That is what made the residue
+# an overcharge rather than a naming difference.
+#
+# IT WAS BRIEFLY AN ARM AND THE ARM COULD NOT FAIL ON ITS OWN SUBJECT. Its
+# predicate was `layered.header_rows(...) > radial's RENDERED first line`, and
+# neither operand is anything `S-D` produced: reverting `radial.header_rows` to
+# layered's number -- the actual residue returning -- left it GREEN, while an
+# unrelated edit to layered's header or to radial's painted header would have
+# reddened it. Silent on the regression, loud on the irrelevant. That is `C-40`
+# twice in one module, and LABELLING it a pin did not repair a predicate
+# pointing at the wrong pair of objects.
+#
+# The residue is pinned twice already and correctly, by the two arms that name
+# what `S-D` actually changed: the equality arm above and the dispatch arm below.
 
 
 # ---------------------------------------------------------------------------
@@ -153,18 +176,23 @@ def test_the_dispatch_gives_each_view_its_own_charge():
     assert screen._header_rows_for(screen.outline_renderer) is outline.header_rows
 
 
-def test_radial_dispatch_is_the_DECLARED_residue_and_S_D_must_change_it():
-    """Radial is routed to LAYERED's charge ON PURPOSE, and that is pinned.
+def test_the_dispatch_gives_radial_its_own_charge():
+    """Radial is routed to RADIAL's charge. `S-D` closed the declared residue.
 
-    `views/radial.py` is `S-D`'s file; registering a radial charge here would put
-    `S-B(+C)` over its file cap. The coordinator ruled for stating the hole
-    rather than omitting it. **`S-D` MUST REDDEN THIS ARM** -- when radial gets
-    its own charge, this identity stops holding.
+    REWRITTEN FROM THE PIN, NOT DELETED, as the pin's own message instructed.
+    It asserted `... is layered.header_rows` and was labelled *`S-D` MUST REDDEN
+    THIS ARM*; it DID redden, verbatim, when the dispatch was registered --
+    `AssertionError: radial no longer receives layered's charge`.
+
+    THIS WAS THE ONLY ARM OF THE TWO THAT ACTUALLY REDDENED. Its sibling above
+    was labelled the same way and stayed green, because it named neither object
+    the change touches. The difference is worth keeping in view: this arm drives
+    `_header_rows_for`, the seam the defect lives in, while that one compared
+    two module-level functions the seam merely chooses between.
     """
     screen = _screen()
-    assert screen._header_rows_for(screen.radial_renderer) is layered.header_rows, (
-        "radial no longer receives layered's charge -- if S-D landed, rewrite "
-        "this arm to assert radial.header_rows; do not delete it"
+    assert screen._header_rows_for(screen.radial_renderer) is radial.header_rows, (
+        "radial is not routed to its own charge -- the declared residue is back"
     )
 
 

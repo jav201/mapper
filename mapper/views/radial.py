@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import math
 
+from rich.console import Console
 from rich.text import Text
 
 from mapper import darkside
@@ -101,6 +102,64 @@ def _degraded(n: int) -> Text:
         style=darkside.WARN,
     )
     return out
+
+
+def _header_line(unpainted: int) -> Text:
+    """THIS renderer's first line: the wordmark, plus the overflow declaration.
+
+    Factored out of `_paint` so `header_rows` prices the SAME line the canvas
+    paints.  A second spelling of it in the charge function is the shape this
+    batch has already paid for twice -- `DECL-118-TWICE` names it directly:
+    ANYTHING SPELLED TWICE WILL DRIFT, DERIVE IT.  The charge and the paint now
+    have one source, so a header that grows cannot leave the charge behind.
+    """
+    header = Text()
+    header.append("◆ ", style=darkside.INK)
+    header.append("mapper", style=darkside.WORDMARK)
+    header.append(" · mapa mental", style=darkside.MUT)
+    if unpainted:
+        header.append(f"  {overflow_phrase(unpainted)}", style=darkside.INK)
+    return header
+
+
+def header_rows(graph: Graph, w: int, wrap_w: int) -> int:
+    """PHYSICAL rows THIS renderer's first line occupies at `wrap_w`.
+
+    CLOSES THE DECLARED RESIDUE.  Until `S-D`, `MapScreen._header_rows_for`
+    charged radial with `layered.header_rows` as an EXPLICIT fallback -- stated
+    in that method and pinned by an arm, so this fix reddens the arm rather than
+    closing the hole silently.  The two headers are not the same line: layered's
+    is a wordmark plus a coverage meter plus an overflow declaration, this one is
+    `◆ mapper · mapa mental` plus the same declaration.  Every overcharged row is
+    a body row the region could have shown and the renderer was never told about.
+
+    RENDERED, NOT DIVIDED (`B-61`).  The same `Console.render_lines` instrument
+    `outline.header_rows` and `_fit` use.  A `ceil(cells / w)` formula prices the
+    line short of the wrap the widget actually performs, because Rich
+    WORD-WRAPS -- and a formula standing in for a measurement is precisely the
+    defect `B-61` records, twice already in this batch.  Measured, this header
+    takes TWO physical rows at 24x20 and 30x16, so returning the 1 a narrow
+    sweep happens to show would be wrong as well as unmeasured.
+
+    THE WORST CASE IS CHARGED, NOT THE CURRENT ONE, matching
+    `layered.header_rows`.  The line's length depends on `unpainted`, so pricing
+    today's value would make the charge vary with what the frame happened to
+    show.  `unpainted = len(graph.nodes)` is the longest the declaration can get,
+    and charging it is what makes the number stable across a repaint.
+
+    NO FIXED-POINT LOOP IS NEEDED HERE, and the reason is structural rather than
+    incidental: `painted` is computed in `_paint` BEFORE the header exists and
+    takes no input from it, so there is no feedback edge.  `outline` needs its
+    loop because its declaration is spent from the same budget its body is
+    fitted into; this one is not.
+
+    `graph` and `w` are used and unused respectively, and the signature still
+    matches `layered.header_rows` and `outline.header_rows` exactly so
+    `_canvas_size` can dispatch on the renderer without special-casing a shape.
+    """
+    console = Console(width=max(1, wrap_w))
+    line = _header_line(len(graph.nodes))
+    return max(1, len(console.render_lines(line, pad=False)))
 
 
 def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
@@ -340,10 +399,6 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
     )
 
     lines = [Text()]
-    header = Text()
-    header.append("◆ ", style=darkside.INK)
-    header.append("mapper", style=darkside.WORDMARK)
-    header.append(" · mapa mental", style=darkside.MUT)
     # BOTH DECLARING SURFACES, not just the strip (`LLR-N06.3.5`).  A canvas that
     # hides nodes and says nothing is not merely unhelpful: `LLR-N06.3.3` makes
     # silence mean *nothing is hidden*, so it asserts a smaller map than the one
@@ -364,9 +419,7 @@ def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
     # practice. `outline` needs its loop because its declaration is spent from
     # the same budget its body is fitted into; this one is not.
     unpainted = len(graph.nodes) - len(painted)
-    if unpainted:
-        header.append(f"  {overflow_phrase(unpainted)}", style=darkside.INK)
-    lines[0] = header
+    lines[0] = _header_line(unpainted)
     lines.extend(cv.rows())
 
     result = Text()

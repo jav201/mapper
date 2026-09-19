@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mapper.app import MapScreen, MapperApp
+from mapper.app import PAN_INERT_HINT, MapScreen, MapperApp
 from mapper.model import Edge, Ficha, Graph, Node
 from mapper.views.layered import LayeredRenderer, _tree_layout, pan_extent
 from mapper.views.state import ViewState
@@ -486,3 +486,188 @@ async def test_the_edge_hint_does_not_latch_across_a_live_pan(tmp_path):
         assert "borde del territorio" not in _hint(screen), (
             f"the edge hint survived a live pan: {_hint(screen)!r}"
         )
+
+
+# ==========================================================================
+# PAN-1 — a view that does not CONSUME pan must not have pan ADVERTISED or
+# ADVANCED on its behalf.
+#
+# EVERY ARM HERE DRIVES `pan_graph`, AND THAT IS LOAD-BEARING RATHER THAN
+# CONVENIENT. On the shipped maps `H`/`L` are no-ops at every width but one --
+# `app.py` records that measurement in `_pan` itself -- so an arm built on
+# `legacy` or `anidado` would assert "pan did not move" in a view where pan
+# never moves anyway, and would pass identically against the defect and against
+# the fix. Green by construction is the failure this whole increment is about.
+#
+# So each arm carries a POSITIVE CONTROL in the same body: the same key in
+# LAYERED must move the offsets. Without it the arm cannot tell INERT from THE
+# FIXTURE NEVER PANNED.
+
+
+# THE REAL CHORD FOR EACH VIEW, because `_clear_pan_hint` lives in
+# `action_toggle_outline` / `action_toggle_radial` and assigning the mode flags
+# BYPASSES both. An arm that switches views by `screen.outline_mode = True` is
+# not exercising the seam this increment added -- it is exercising a state
+# assignment that happens to repaint. `QA-B-10`'s rule, one surface over: a
+# chord-agnostic requirement is legitimate; a chord-agnostic acceptance is not.
+VIEW_KEY = {"outline_mode": "o", "radial_mode": "r"}
+
+
+async def _pan_is_live(screen) -> bool:
+    """Does layered pan actually move on this screen, at this size?"""
+    w, h = screen._canvas_size()
+    (extent_x, span_x), _ = pan_extent(screen.graph, screen._view_state(w, h))
+    return extent_x > span_x
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("flag", ("outline_mode", "radial_mode"))
+async def test_pan1_a_pan_key_is_inert_AND_DECLARED_in_a_non_panning_view(
+    tmp_path, flag
+):
+    """The key does nothing, and the strip SAYS SO. Both halves, or neither.
+
+    This is the arm that kills a mutant reverting `_consumes_pan` to "everything
+    pans": under that mutant the offsets move and the hint never appears, and
+    both assertions below fire.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        # POSITIVE CONTROL, FIRST. If layered does not move here, nothing below
+        # distinguishes the fix from a fixture that cannot pan.
+        assert await _pan_is_live(screen), (
+            "layered pan is dead on this fixture at this size, so an 'it did "
+            "not move' assertion below would be green by construction"
+        )
+        await pilot.press("L")
+        await pilot.pause()
+        assert screen.pan_x == MapScreen.PAN_STEP_X, (
+            "the control press did not move layered's pan; the arm cannot tell "
+            "inert from never-panned"
+        )
+
+        await pilot.press(VIEW_KEY[flag])
+        await pilot.pause()
+        assert getattr(screen, flag), f"{VIEW_KEY[flag]!r} did not enter {flag}"
+
+        held = (screen.pan_x, screen.pan_y)
+        await pilot.press("L")
+        await pilot.press("J")
+        await pilot.pause()
+
+        assert (screen.pan_x, screen.pan_y) == held, (
+            f"{flag}: a pan key ADVANCED the offsets in a view that does not "
+            f"consume them -- {held} -> {(screen.pan_x, screen.pan_y)}. That is "
+            "PAN-1 exactly: the app moves state the picture never reflects"
+        )
+        assert PAN_INERT_HINT in _hint(screen), (
+            f"{flag}: the pan key was inert and said NOTHING. Inert-and-silent "
+            "is indistinguishable from a broken keyboard, which is the "
+            f"confusion US-N06 exists to remove. Hint was {_hint(screen)!r}"
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("flag", ("outline_mode", "radial_mode"))
+async def test_pan1_a_view_excursion_does_not_DISCARD_the_operators_pan(
+    tmp_path, flag
+):
+    """The round trip, and NO PAN KEY IS PRESSED in the non-panning view.
+
+    A first version of `_reclamp_pan`'s non-consumer branch ZEROED the offsets
+    rather than declining to clamp them. `refresh_canvas` calls it on every
+    repaint, so merely visiting outline or radial threw the operator's pan away
+    -- no key pressed, nothing declared, offsets gone. That is the family this
+    requirement exists to close, one seam over: PAN-1's charge is "the app held
+    a pan the picture never reflected", and zeroing shipped "the app discarded a
+    pan the operator set, without saying so".
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        assert await _pan_is_live(screen), "layered pan is dead; arm is vacuous"
+
+        await pilot.press("L")
+        await pilot.press("L")
+        await pilot.pause()
+        panned = (screen.pan_x, screen.pan_y)
+        assert panned != (0, 0), (
+            "the control presses did not pan, so a round trip cannot show a loss"
+        )
+
+        await pilot.press(VIEW_KEY[flag])       # out, through the real action
+        await pilot.pause()
+        assert getattr(screen, flag), f"{VIEW_KEY[flag]!r} did not enter {flag}"
+
+        await pilot.press(VIEW_KEY[flag])       # and back, the same way
+        await pilot.pause()
+        assert not getattr(screen, flag), f"{VIEW_KEY[flag]!r} did not leave {flag}"
+
+        assert (screen.pan_x, screen.pan_y) == panned, (
+            f"{flag}: a view excursion DISCARDED the pan the operator set -- "
+            f"{panned} -> {(screen.pan_x, screen.pan_y)}, with no key pressed "
+            "and nothing declared"
+        )
+
+
+@pytest.mark.asyncio
+async def test_pan1_the_inert_hint_does_not_LATCH_into_a_view_where_pan_is_live(
+    tmp_path,
+):
+    """The hint is a statement ABOUT THE VIEW, so it dies with the view.
+
+    `_pan`'s own clear is reachable only on a SUCCESSFUL pan, which a
+    non-panning view never performs -- so without a clear at the toggle seam the
+    hint latches and then sits in LAYERED, where it is not stale but FALSE.
+    `app.py` already records this exact shape one branch down, for the edge hint.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        assert await _pan_is_live(screen), "layered pan is dead; arm is vacuous"
+
+        await pilot.press("r")                       # into radial
+        await pilot.pause()
+        await pilot.press("L")                       # inert, declares
+        await pilot.pause()
+        assert PAN_INERT_HINT in _hint(screen), (
+            "the hint never appeared, so this arm cannot show it failing to "
+            f"clear. Hint was {_hint(screen)!r}"
+        )
+
+        await pilot.press("r")                       # back to layered
+        await pilot.pause()
+
+        assert PAN_INERT_HINT not in _hint(screen), (
+            "the inert-pan hint LATCHED into layered, where pan IS live -- the "
+            f"strip is asserting something false about the view it is in: "
+            f"{_hint(screen)!r}"
+        )
+
+
+def test_pan1_an_unregistered_renderer_RAISES_rather_than_defaulting():
+    """`False` is a LEGITIMATE answer here, so it may not double as "I have
+    never heard of this renderer" (`A-98`, ruling `02j`).
+
+    THE BRANCH EXISTED AND NOTHING COULD SEE IT. `_consumes_pan` was corrected
+    to raise rather than fall through to `False`, and a mutant reverting exactly
+    that -- `raise` back to `return False` -- SURVIVED the whole suite. It was
+    the only new branch in this increment the suite could not distinguish from
+    its own defect, which is `measured != pinned` recurring inside the increment
+    that minted the phrase.
+
+    The shape is copied deliberately from the sibling seam's arm,
+    `test_an_unregistered_renderer_RAISES_rather_than_defaulting` in
+    `tests/test_canvas_header_charge.py`: this module's own convention, applied
+    to the third dispatch rather than re-invented for it.
+    """
+    from mapper.app import MapScreen as _MapScreen
+
+    screen = _MapScreen("test")
+    with pytest.raises(LookupError):
+        screen._consumes_pan(object())

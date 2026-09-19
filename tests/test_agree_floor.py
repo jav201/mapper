@@ -31,7 +31,7 @@ import pytest
 from textual.widgets import Static
 
 from mapper.app import COUNT_REGION_ID, MapperApp, MapScreen
-from mapper.views import outline
+from mapper.views import outline, radial
 
 WS = Path(__file__).resolve().parent.parent / "fixtures"
 
@@ -152,4 +152,100 @@ async def test_at057_above_the_floor_the_canvas_still_declares(map_id):
     assert ordinary, (
         f"{map_id}: the canvas declared at NO size that hides nodes. The floor "
         "exception has swallowed the general case"
+    )
+
+
+# ---------------------------------------------------------------------------
+# RADIAL. `S-D`'s workstream 2, re-scoped by coordinator ruling 2026-09-18 from
+# "fix the radial floor" to "VERIFY IT IS CLOSED AND RECORD IT".
+#
+# `state.json` recorded radial as having the floor too, at (16,14) and (14,12),
+# by a DIFFERENT mechanism than outline's: outline's header is dropped by `_fit`,
+# while radial's wraps and the token lands in a row `lines[:h]` then clips.
+# Re-driven on this tree, it NO LONGER REPRODUCES -- and the sizes matter, so the
+# grid below reaches WIDTH 14, four columns narrower than `SIZES` starts.
+#
+# The first version of that sweep began at width 24 and reported radial CLEAN --
+# a confident, measured, worthless zero, because the grid structurally excluded
+# the two sizes the claim was about (`C-31`, input-set-as-oracle).
+
+NARROW_SIZES = [(w, h) for w in (14, 16, 18, 20, 22, 24, 28, 34)
+                for h in (10, 12, 14, 16, 20)]
+
+
+async def _radial_frame(map_id: str, size):
+    """The same two surfaces, with the RADIAL renderer selected."""
+    app = MapperApp(WS)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        app.push_screen(MapScreen(map_id))
+        await pilot.pause()
+        screen = app.screen
+        screen.outline_mode = False
+        screen.radial_mode = True
+        screen.refresh_canvas()
+        await pilot.pause()
+
+        canvas = screen.query_one("#map-canvas", Static)
+        strip = screen.query_one(f"#{COUNT_REGION_ID}", Static)
+        w, h = screen._canvas_size()
+        painted = radial.painted_ids(screen.graph, screen._view_state(w, h))
+        return {
+            "canvas": _declared(canvas.render().plain),
+            "strip": _declared(strip.render().plain),
+            "truth": len(screen.graph.nodes) - len(painted),
+        }
+
+
+@pytest.mark.parametrize("map_id", ("legacy", "anidado"))
+async def test_radial_agree1_holds_at_every_frame_including_the_narrow_corner(map_id):
+    """RADIAL NEVER REACHES THE FLOOR, pinned so the claim cannot rot.
+
+    This arm records an ABSENCE -- radial has no floor frame -- and an absence is
+    only admissible if the probe that produced it CAN produce a non-absence
+    (`C-55`'s rider). The control is the KNOWN-PRESENT case, not a fixture built
+    to agree: OUTLINE, driven through the same parser over the same grid, does go
+    silent, and the guard below asserts it. If outline ever stops exhibiting the
+    floor here, this arm stops being evidence and says so rather than passing.
+    """
+    exercised = []
+    for size in NARROW_SIZES:
+        f = await _radial_frame(map_id, size)
+        if f["truth"] <= 0:
+            continue
+        exercised.append(size)
+        assert f["canvas"] is not None, (
+            f"radial/{map_id} at {size}: the canvas is SILENT on a frame hiding "
+            f"{f['truth']} node(s). Radial has acquired the floor it was measured "
+            "not to have -- this is a new finding, not a stale record"
+        )
+        assert f["canvas"] == f["truth"] == f["strip"], (
+            f"radial/{map_id} at {size}: canvas={f['canvas']} strip={f['strip']} "
+            f"truth={f['truth']} -- AGREE-1 requires all three to match"
+        )
+
+    assert exercised, (
+        f"radial/{map_id}: no size in the grid hid a single node, so this arm "
+        "asserted nothing about agreement"
+    )
+
+
+@pytest.mark.parametrize("map_id", ("legacy", "anidado"))
+async def test_the_narrow_grid_really_does_reach_a_floor_in_outline(map_id):
+    """THE CONTROL FOR THE ARM ABOVE, and it is the load-bearing row.
+
+    Radial's zero means something only because the same grid, the same parser and
+    the same screen DO produce canvas silence for outline. Without this, a parser
+    that had quietly stopped finding the token would report radial clean and
+    outline clean and look like good news.
+    """
+    silent = []
+    for size in NARROW_SIZES:
+        f = await _frame(map_id, size)
+        if f["truth"] > 0 and f["canvas"] is None:
+            silent.append(size)
+    assert silent, (
+        f"outline/{map_id}: the canvas declared at EVERY size in the narrow grid, "
+        "so this grid no longer reaches a floor and radial's clean result above "
+        "is not evidence of anything"
     )
