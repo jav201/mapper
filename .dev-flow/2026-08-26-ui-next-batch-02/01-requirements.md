@@ -636,8 +636,9 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   > - `out == plain(out)` **alone is strictly weaker** than the ordering clause and is *structurally
   >   incapable* of detecting the reversal: any truncate-then-coerce output is a fixed point by
   >   construction, because it ends in a coercion and `plain` is idempotent. **The length bound is
-  >   the discriminating conjunct** — and it is currently **unarmed**: no arm under `LLR-COERCE.2`
-  >   asserts the emitted budget over the derived set.
+  >   the discriminating conjunct** — and it was **unarmed at the time of this finding**: no arm
+  >   under `LLR-COERCE.2` asserted the emitted budget over the derived set. It is **armed now**, at
+  >   `tests/test_darkside_budget.py`, by the re-ruling recorded below.
   > - The "survives if `plain` ever **deletes**" rationale is also wrong — under deletion the output
   >   is still a fixed point and is *shorter*, so neither conjunct fires. The hypothetical that is
   >   **real** is a replacement whose **cell width differs from the source's**, which is `U+FFFD`
@@ -8815,6 +8816,7 @@ owns the keyboard) holds independently of it.
 | ~~`B-51`~~ | ~~The real `tab` key drops focus on `MapScreen`~~ — **RETRACTED IN FULL BY `A-96`. Not a defect.** It was an artifact of the default 80 x 24 Pilot size, at which the rail and inspector are correctly auto-hidden. At 118 x 34 the chain is populated and `M-10` reproduces verbatim | **withdrawn** |
 | `B-52` | With a modal pushed, `MapScreen._focus_owner()` returns `""` and the canvas paints the FOCUSED tone while not holding the keyboard. Contradicts `HLR-CNV.3`'s statement; no visible harm (the canvas is occluded), and the `""`-paints-focused conflation is the declared price of byte identity | design batch |
 | `B-53` | `#map-canvas` is `can_focus=False`, so the declared owner `"canvas"` is unreachable through the real wiring and the focused tone is arrived at via `""`. `B-05`'s three-region framing implies the canvas should be focusable | design batch |
+| **`B-62`** | **Length-based truncators overrun a CELL budget on wide characters.** `layered._vis_width` is `len(s)` — its own docstring says "Approximate visible width (simple: length, no CJK handling)" — so `_clip`/`_fit` budget in CODE POINTS while the surfaces they paint are budgeted in CELLS. Measured against the shipped `_clip`, each ratio taken from the SAME output as its cell count: a 16-code-point CJK title at budget 20 is returned **UNCUT at 32 cells (1.60×)** — `len ≤ 20`, so no truncation fires at all; a title of **21 code points or more** at that budget emits **39 cells (1.95×)**; at budget 2, **3 cells (1.50×)**. Opened by `S-B(+C)`'s `LLR-COERCE.2` budget arm; **re-id'd from `B-53` by confirmation pass 3b (`F13`), which found that id already occupied by the `can_focus` carry one row above** | later increment (owns `layered.py`'s width model) |
 | **`B-54`** | **Every Pilot-driven interaction assertion must DECLARE its terminal size.** Two of this app's three regions are size-conditional (`_apply_region_visibility`), so an interaction test at `run_test()`'s default 80 x 24 is testing a two-region app. `A-96` records what that cost. Sweep the suite for interaction arms that do not set `size=` | `qa-reviewer` |
 
 ---

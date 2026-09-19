@@ -582,6 +582,7 @@
       }
     ],
     "next": "Inc-REPAIR",
+    "next_stage": "S-D -- the LAST Inc-REPAIR stage. S-A, S-E and S-B(+C) are CLOSED (2026-09-18); `next` stays `Inc-REPAIR` because the increment is not finished, and this field says WHICH stage so the nested pointer is not ambiguous. S-D's pre-gate is MEASURED and its cut SURFACED at `inc_repair_pregate['S-D_pregate_surfaced_2026-09-18']`, including a file-set discrepancy against the sealed CUT_APPROVED that an implementer may NOT resolve. After Inc-REPAIR: Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9.",
     "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
     "controls_for_engineering_rules": [
       {
@@ -746,13 +747,16 @@
           "what": "AGREE-1 / LLR-N06.3.5 RE-MEASURED THROUGH THE REAL SCREEN on the tree with defect 2 fixed, because the prior frame-side numbers (legacy 14/135, anidado 15/135) were taken against a row budget that no longer exists, and because the architect flagged F7_1's figures as renderer-argument sizes that 'must be re-measured via _canvas_size() before being quoted'.",
           "result": "NINE of 90 sizes on legacy and NINE of 90 on anidado, and all eighteen have ONE shape: canvas declares NOTHING while the strip declares the TRUTH. Confined to the narrow/short corner -- widths 24..34 at heights 10 and 12, plus (24,14). The strip is CORRECT at every one of them; the disagreement is the canvas going silent.",
           "THIS_IS_THE_DOCUMENTED_FALLBACK_NOT_AN_IMPLEMENTATION_BUG": "outline.py's `_fit_declared` states this case deliberately: 'THE ONE FLOOR THE RULING STILL LEAVES: never return an EMPTY frame. If the widened header does not fit at all, `_fit` drops it too and the canvas paints NOTHING ... Fall back to the header the frame CAN hold; the strip still declares.' So the measured disagreement IS that ratified fallback firing.",
-          "THE_QUESTION_THIS_RAISES_IS_A_REQUIREMENTS_ONE": "LLR-N06.3.5 says both declaring surfaces agree. The H1-refined ruling that produced the fallback says never spend everything and inform nothing. At the empty-frame floor these two pull opposite ways, and the code currently obeys the second. EITHER LLR-N06.3.5 admits an explicit exception at the floor -- canvas silent, strip authoritative -- OR the fallback violates it and the H1 ruling is reopened. NOT DECIDED HERE: this is the substance of the open block, and choosing silently would be an implementer settling a ratified clause.",
+          "THE_QUESTION_THIS_RAISED_WAS_A_REQUIREMENTS_ONE_AND_IT_IS_NOW_DECIDED": "DECIDED AND ARMED -- this field previously read 'NOT DECIDED HERE' and that was STALE. The question was: LLR-N06.3.5 says both declaring surfaces agree, while the H1-refined ruling that produced the fallback says never spend everything and inform nothing; at the empty-frame floor the two pull opposite ways. RULED (coordinator): LLR-N06.3.5 ADMITS AN EXPLICIT FLOOR EXCEPTION and the H1 ruling STANDS UNREOPENED, under three conditions -- (1) the exception is CONDITIONAL: at every floor size the strip must be present in the frame and declare the truth, or the exception lapses; (2) it is DERIVED from the geometric condition, never enumerated as a size list; (3) its wording was ratified at the increment's own gate. IMPLEMENTED at `fdabc8d` ('LLR-N06.3.5 gains its empty-frame floor exception, armed') with four arms; mutants M-STRIPQUIET and M-CANVASQUIET both KILLED. Confirmation pass 3b ratified the text.",
+          "WHY_THIS_FIELD_WAS_STALE_AND_WHAT_IT_COST": "A coordination registry went stale against a ruling that had ALREADY LANDED in the tree -- this batch's own two-registries defect (`id_space_merge`), one altitude up: the code was armed at `fdabc8d` while this file still told every later reader the question was open. Nothing downstream was wrong, because the arms were real; what was wrong is that a reader trusting the registry would have re-opened a settled clause. Recorded rather than quietly corrected, because 'the registry disagreed with the tree' is the finding.",
           "boundary": "Outline only. Radial's AGREE-1 floor is a DISTINCT mechanism per this block's own wording, and radial is S-D's file, so no number here transfers to it.",
-          "probe": "C:\\Users\\jjgh8\\clde\\agree_sweep.py"
+          "probe": "An asyncio sweep driving the REAL screen at a size grid, reading both declaring surfaces off the composited frame and comparing them against the truth derived from the renderer's own painted set. Anchored on the OVERFLOW TOKEN, never on 'the first number in the line' -- a first-number parser harvests the pagination POSITION instead and reports a constant across every size, which is an instrument and not a finding.",
+          "RADIAL_HALF_RE_MEASURED_2026-09-18_AND_IT_NO_LONGER_REPRODUCES": "The `radial_measured_2026-09-11` verdict below is STALE. Re-driven on the current tree with OUTLINE as the known-present control (`C-55`'s rider: an absence is admissible only if the probe that produced it CAN produce a non-absence): outline reports 52 disagreements, radial reports ZERO over 78 (legacy) and 75 (anidado) exercised sizes. Confirmed POSITIVELY rather than by absence at the two sizes this block recorded as failures -- at (16,14) and (14,12) radial's canvas paints its own token and the strip agrees, truth=8 on both surfaces. DISCLOSED: the first grid ran widths 24..118 and therefore structurally EXCLUDED the recorded failure sizes at widths 14 and 16 -- a `C-31` input-set-as-oracle that would have produced a confident, measured, worthless zero; the grid was widened to 14..118 and re-run, and the zero above is from the widened grid. CONSEQUENCE (coordinator, 2026-09-18): S-D's AGREE-1 workstream is RE-SCOPED from 'fix' to 'verify closed and record'."
         }
       },
       {
-        "id": "B-49",
+        "id": "B-64 (38 `rich.markup.escape` calls at NON-parsing sinks; the reachable-sink sweep)",
+        "RENUMBERED_2026-09-18": "WAS `B-49`. Collided live-vs-live with `increment-001.md:360`, where `B-49` carries N-13 (ZWJ/ZWNJ coerced, breaking emoji and Persian/Indic text) from Inc-1. That entry is OLDER and keeps the number; this one moves. See `p3_progress.id_space_merge`.",
         "was": "SEC-M2-a (Inc-REPAIR S-E, SEC-M2's census)",
         "date": "2026-09-11",
         "severity": "MEDIUM",
@@ -768,7 +772,7 @@
           "why_the_measured_exposure_does_not_block": "The U+202E / U+200D survivors were measured in `lane.py`'s three renderers, and those are OPERATOR-UNREACHABLE. Live bidi in dead code is a defect, not an exposure.",
           "reachability_VERIFIED_INDEPENDENTLY_not_accepted": "The claim was re-derived here rather than taken on the coordinator's word, because it is now load-bearing for a security decision AND because this batch has already burned this exact axis once (my lane census counted CLASSES not REACHABILITY and the architect refuted it). Re-derived: `app.py` constructs exactly three renderers -- LayeredRenderer, OutlineRenderer, RadialRenderer at app.py:1201-1203, plus a second LayeredRenderer() at app.py:817 for the import preview. `lane`/`Lane` appears outside `views/` in exactly ONE place: `views/__init__.py`'s re-export. Zero construction sites, zero screen references. The claim holds.",
           "RIDER_1_AS_A_DRIVEN_GATE": "BEFORE MERGE, the whole-branch security pass DRIVES the REACHABLE shared-idiom sinks with `C:\\Users\\jjgh8\\clde\\b49_probe.py` (already written; cite it in the brief). The reachable set to drive is: app.py's ficha modal (the 14 app.py sites), factory.py (12), editor.py (4), darkside.py:393 (1) -- 31 of the 38. ANY REACHABLE SINK WITH RAW BIDI/JOINER SURVIVORS IS FIXED PRE-MERGE AS ITS OWN FINDING, not carried.",
-          "B_49_POST_MERGE_BODY": "The 7 unreachable lane.py sites and the cosmetic sweep (literal backslash + the width-budget breach at 70 of 70 widths from 20 to 89), plus the darkside.py:266-states-it / darkside.py:393-breaks-it pair.",
+          "B_64_POST_MERGE_BODY": "The 7 unreachable lane.py sites and the cosmetic sweep (literal backslash + the width-budget breach at 70 of 70 widths from 20 to 89), plus the darkside.py:266-states-it / darkside.py:393-breaks-it pair.",
           "refinement_recorded": "The loss is BIDI-AND-JOINER, not all control bytes: U+0007 survived NO renderer in the probe. And REACHABILITY is the new load-bearing distinction -- the same logic as the B-55 re-cut.",
           "probe": "C:\\Users\\jjgh8\\clde\\b49_probe.py -- drives a title carrying U+202E/U+200D/U+0007 through a renderer and reports raw survivors against U+FFFD presence. Carries its own control (OutlineRenderer, which uses darkside.plain) so a green result cannot be a probe that simply cannot see."
         }
@@ -795,7 +799,8 @@
         "not_fixed_here": "Out of S-B(+C)'s scope and its file cap; no behaviour was changed for it."
       },
       {
-        "id": "B-50 (outline's walk has no visited set)",
+        "id": "B-65 (outline's walk has no visited set)",
+        "RENUMBERED_2026-09-18": "WAS `B-50`. Collided live-vs-live with Inc-2's `B-50` (the export-during-diff behaviour change and the `focus_owner` placement it pins), live in 7 batch documents and in `mapper/app.py` and `tests/test_overflow.py`. That entry is OLDER and keeps the number. See `p3_progress.id_space_merge`.",
         "date": "2026-09-11",
         "severity": "MEDIUM, LATENT",
         "found_by": "S-B(+C) security review (gate 2)",
@@ -805,7 +810,8 @@
         "NOT_FIXED_HERE": "Out of S-B(+C)'s cut and its file cap. Route to a later increment; the cost caps this increment landed do NOT address it, because they bound row WIDTH and this is row COUNT."
       },
       {
-        "id": "B-51 (store.save accepts what store.load refuses)",
+        "id": "B-66 (store.save accepts what store.load refuses)",
+        "RENUMBERED_2026-09-18": "WAS `B-51`. Collided with the `A-95` carries-table `B-51` (the real tab key drops focus on MapScreen), RETRACTED IN FULL by `A-96` and still live in `tests/test_app.py` as the retraction's own record. A RETIRED number is not reusable -- withdrawn is not free -- so this one moves. See `p3_progress.id_space_merge`.",
         "date": "2026-09-11",
         "severity": "MEDIUM, PRE-EXISTING",
         "found_by": "S-B(+C) security review (gate 2)",
@@ -814,17 +820,19 @@
         "NOT_FIXED_HERE": "It owns `store.py`, not this stage's file, and it predates this increment."
       },
       {
-        "id": "B-52 (lone surrogates survive `darkside.plain`)",
+        "id": "B-67 (lone surrogates survive `darkside.plain`)",
+        "RENUMBERED_2026-09-18": "WAS `B-52`. Collided live-vs-live with the `A-95` carries-table `B-52` (with a modal pushed, `MapScreen._focus_owner()` returns the empty string and the canvas paints the FOCUSED tone), owned by the design batch. That entry is OLDER and keeps the number. See `p3_progress.id_space_merge`.",
         "date": "2026-09-11",
         "severity": "LOW",
         "found_by": "S-B(+C) security review (gate 2)",
         "what": "A lone surrogate passes `plain` and raises on encode. NO DOOR ESTABLISHED: the reviewer could not determine whether one can reach a `ficha.title` at all, and reported it as an observation rather than a finding. Recorded at that strength deliberately."
       },
       {
-        "id": "B-53 (length-based truncators overrun a CELL budget on wide characters)",
+        "id": "B-62 (length-based truncators overrun a CELL budget on wide characters)",
         "date": "2026-09-11",
         "severity": "MEDIUM",
         "found_by": "S-B(+C), the new LLR-COERCE.2 budget arm, on its first run",
+        "RE_ID_2026-09-18": "WAS `B-53`, which was ALREADY OCCUPIED. Confirmation pass 3b `F13`: `B-53` means `#map-canvas is can_focus=False` in the `A-95` carries table (01-requirements.md, design batch) and is load-bearing in that meaning across four increment artifacts. Re-id'd to `B-62`, derived MECHANICALLY rather than taken on the reviewer's word: an rglob census of every `\\bB-(\\d{1,3})\\b` token over the 257 .md/.py/.json/.txt/.toml/.cfg files ON DISK -- tracked AND untracked, which is load-bearing because the pass-3b document holding B-62's only occurrences is itself untracked -- excluding .git/, __pycache__/ and prototypes/ (each verified to hold no `B-<n>` token). It reports B-1..B-62 occupied with no gaps, and B-62's only two occurrences are that document's own recommendation to use it for THIS finding, so it carries no rival meaning. A naive max-plus-one would have orphaned the recommendation and manufactured a gap. The probe takes its root from argv[1] so it shares no constant with what it measures. Now also listed in the carries table where `B-53` sits, per F13's suggested fix.",
         "what": "`layered._vis_width` is `len(s)` -- its own docstring says 'Approximate visible width (simple: length, no CJK handling)' -- so `_clip` and `_fit` budget in CODE POINTS while the surfaces they paint are budgeted in CELLS. MEASURED: a CJK source at budget 20 emits 32 cells; at budget 2, 3 cells.",
         "why_it_is_a_finding_and_not_the_arm_being_wrong": "The gap is between what `_clip` DECLARES and what a painted surface NEEDS. The arm holds each truncator to its own declared metric (derived by probing, not hand-listed), so this does not redden it -- asserting cells against a documented code-point approximation would be measuring the approximation and calling it a defect, which is the wrong-oracle error this increment already made once.",
         "NOT_FIXED_HERE": "Pre-existing, out of S-B(+C)'s cut, and it touches `layered.py` which S-D does not own either. Route to a later increment.",
@@ -911,6 +919,43 @@
       "amended": "2026-09-10, coordinator ruling, from the two-commit shape Inc-CRUMB used.",
       "reason": "Per-stage commits leave every stage independently revertible, and given this project history of session expiry mid-increment, stage-committing is the SAFER shape -- uncommitted work across a long gate is the Inc-CRUMB exposure.",
       "requirement": "The close record still names the commits and states the shape, so the record says which one was used rather than implying the old one."
+    },
+    "external_blocks": [
+      {
+        "id": "V7 / flow-bundle revision label",
+        "date": "2026-09-18",
+        "status": "OPEN, EXTERNAL, NOT BLOCKING THIS BATCH. Explicitly NOT marked green.",
+        "what": "`devflow-validate.py` exits 1 with 16 blocks against this project. One is `V7`: the flow bundle's own `FLOW-VERSION.md` header declares `2026-09-18-rev84` while that same file's newest changelog row is `2026-09-18-rev83`.",
+        "HONEST_SCOPE": "The bundle's FILE-TABLE INTEGRITY PASSED -- every declared file unmoved, no undeclared file shipping. Only the revision LABEL is internally inconsistent. This is not a corrupted rule set; it is a bundle that cannot prove which revision it is.",
+        "why_it_does_not_block": "COORDINATOR RULING 2026-09-18 (D), on SCOPE and not convenience: (1) it lives in `~/.claude`, another session's working tree carrying uncommitted changes that `C-44` protects, so repairing it from here is exactly the cross-tree write this batch has punished four times; (2) the mirror is not editable by rule; (3) it cannot invalidate this batch's measurements -- every gate was taken under the pinned `rev46+` baseline, and a label drift in a bundle does not retroactively move a measurement.",
+        "the_other_15_blocks": "Pre-existing at `ce294f1` on a clean tree. `V2`'s five (AT-033/034/035/041/042 have no node on disk) are a RECORDED instrument limitation of this batch: `01-requirements.md:7141` states the validator harvests every `AT-\\d+` token with no supersession awareness, and AT-032..AT-040 left with `US-N14`'s deferral. The batch record shows prior runs dispositioned at 62 and 51 blocks.",
+        "surfaced_to": "The operator, separately, by the coordinator."
+      },
+      {
+        "id": "C-45 PULL -- flow currency",
+        "date": "2026-09-18",
+        "status": "DEFERRED to the post-merge boundary as its own increment. DECLARED, not omitted.",
+        "what": "This batch's baseline pins `flow_revision: rev46+`; the installed bundle is now rev83/84. Roughly 37 revisions of process change are unadopted.",
+        "why_deferred": "COORDINATOR RULING 2026-09-18 (D): adopting them mid-batch would invalidate the baseline every gate was measured against -- THE PROCESS DEFINITION IS PART OF THE INSTRUMENT. When it lands, the delta gets READ, not merely applied."
+      }
+    ],
+    "id_space_merge": {
+      "date": "2026-09-18",
+      "authority": "COORDINATOR RULING 2026-09-18, ruling (B). Provenance: COORDINATING AGENT, not the operator. It does NOT relax the merge gate.",
+      "ruling": "The `B-<n>` carries formed TWO overlapping registries -- the batch documents (the `A-95` carries table and the increment packets) and this file's `open_blocks`. Merge into ONE space. Each collision resolves by keeping the OLDER entry's number and reassigning the YOUNGER to the end of the sequence. A RETIRED number is never reused: withdrawn is not free.",
+      "why_it_was_a_defect_and_not_untidiness": "Four LIVE-vs-LIVE collisions, and the ambiguity had already bitten twice -- `F13` (the cell-budget finding routed onto the occupied `B-53`) and the coordinator's own standing carry list, which named `B-51` in this file's sense and `B-50` in the batch documents' sense in a single sentence, mixing both spaces without knowing it. Two registries mean one of them is false and nobody knows which.",
+      "census_method": "Both directions, never one (`C-65`): the intersection AND each registry's exclusive set. A one-way scan finds an id dropped from one registry and is blind to one dropped from the other. Probe reads both registries from disk and shares no hand-listed id with either.",
+      "mapping": [
+        {"was": "B-49", "now": "B-64", "meaning": "38 `rich.markup.escape` calls at NON-parsing sinks; the reachable-sink sweep", "older_occupant_kept_the_number": "Inc-1 N-13 -- ZWJ/ZWNJ coerced, breaking emoji and Persian/Indic text (`increment-001.md:360`)"},
+        {"was": "B-50", "now": "B-65", "meaning": "outline's walk has no visited set", "older_occupant_kept_the_number": "Inc-2 -- the export-during-diff behaviour change and the `focus_owner` placement it pins (7 batch docs, `mapper/app.py`, `tests/test_overflow.py`)"},
+        {"was": "B-51", "now": "B-66", "meaning": "`store.save` accepts what `store.load` refuses", "older_occupant_kept_the_number": "`A-95` carries table -- the real tab key drops focus on MapScreen, RETRACTED IN FULL by `A-96`. RETIRED, and a retired number is not free (`tests/test_app.py:269`)"},
+        {"was": "B-52", "now": "B-67", "meaning": "lone surrogates survive `darkside.plain`", "older_occupant_kept_the_number": "`A-95` carries table -- modal-pushed `_focus_owner()` returns the empty string and the canvas paints the FOCUSED tone (design batch)"},
+        {"was": "B-53", "now": "B-62", "meaning": "length-based truncators overrun a CELL budget on wide characters", "older_occupant_kept_the_number": "`A-95` carries table -- `#map-canvas` is `can_focus=False` (design batch). Resolved earlier the same day by `F13`, by the same rule, before the rule was stated."}
+      ],
+      "B-63_IS_BURNED_AND_WILL_NOT_BE_ASSIGNED": "`B-63` was transiently inscribed as a REJECTED candidate in this file's own `RE_ID` note, and the fold review then analysed it at length as a phantom. Both texts are evidence and neither is rewritten (`C-56`: a transcript is corpus, and rewriting one makes it say what it did not). Assigning `B-63` would leave a committed review document discussing an id as unassigned while it is assigned. One integer is cheaper than that ambiguity, so the sequence resumes at `B-64`.",
+      "the_transcripts_are_NOT_rewritten": "The sealed increment-001/002/003 records and the S-B(+C) review documents keep their original numbers. Those carry the OLDER senses (which keep their numbers anyway) or are transcripts of what was found when. THIS TABLE is the mechanism that keeps them readable: a reader meeting an old number resolves it here rather than finding the past edited. Re-anchoring a closed record to satisfy a rule written afterwards is editing the past.",
+      "blast_radius_verified": "No SOURCE or TEST file referenced any reassigned sense -- checked, every `B-49`/`B-50`/`B-51`/`B-52` occurrence in `mapper/app.py`, `tests/test_app.py` and `tests/test_overflow.py` carries an OLDER sense and is untouched. The renumber therefore has ZERO executable delta.",
+      "carry_list_restated_by_description": "The coordinator restated the standing carry list BY DESCRIPTION so no number governs it, explicitly including the data-loss carry verbatim and unrenamed in meaning: 'one keystroke, no confirmation, permanent overwrite, already fired on this repo's own fixtures.'"
     },
     "named_flakes": [
       {
@@ -1007,6 +1052,24 @@
         "F6_F7": "A dead guard in the AST arm (bools never equal 118) reordered. The constant moved above its first consumer and its claim narrowed -- the one place the fallback BUDGET is written, because the suite spells the declared SIZE (118,34) in a dozen places.",
         "reviewer_warning_recorded": "NOT EVERY 118 IS THIS ONE. app.py and rail.py document a 118-column auto-hide threshold that is MIN_CANVAS_WIDTH + RAIL_WIDTH + INSPECTOR_WIDTH = 58+24+36 -- a DERIVED number colliding by arithmetic accident. Folding them would be drift, not tidiness. Recorded in the arm docstring so a future tidy-up cannot make that mistake.",
         "reviewer_verified": "Repo-wide AST census re-derived independently: exactly ONE numeric 118 literal survives in mapper/. Raw text grep returns 25 hits, 24 prose -- a worse ratio than the 8-and-5 I first saw, so the AST rewrite was right. keybar default change behaviourally inert. on_mount does not fight on_resize: measured 3 startup calls at matching widths, one resize adds one render, no storm."
+      },
+      "S-B+C_CLOSED": {
+        "date": "2026-09-18",
+        "status": "CLOSED. Stages landed on this branch: S-A, S-E, S-B(+C). REMAINING: S-D only.",
+        "carried_verdict": "Confirmation pass 3b RATIFIED (`increment-013-sbc-confirmation-3b.md`). Five findings folded (`F13`-`F17`).",
+        "independent_review_of_the_fold": "APPROVED WITH FINDINGS, no HIGH (`increment-013-sbc-fold-review.md`). Five further findings folded (`F18`-`F22`), all narration that outran measurement in the very commit convened to stop that. The reviewer reproduced the lanes (1080/19/3, 302.33 s) and ruff (27/27) independently.",
+        "close_record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-013-sbc-close.md",
+        "gates_at_close": "Default lane 1080 passed / 19 deselected / 3 xfailed, exit 0, 304.62 s. Slow lane 19 passed / 1083 deselected, exit 0, 52.36 s. ruff 27 project and 27 --isolated, baseline 27. Ledger 1080 - 0 + 0 = 1080, observed 1080. FLAKE-1 did not fire. Re-run at the close gate rather than carried, although fold 2 touched zero .py files.",
+        "source_files": 1,
+        "executable_delta": "ZERO -- verified by two independently written AST instruments (docstrings stripped, string-literal CONTENT masked), each with a fired control.",
+        "THE_LIMIT_OF_THAT_PROOF": "The reviewer CONSTRUCTED the blind spot rather than asserting it: rewriting a new assertion message from 'WEAKER conjunct' to 'LOAD-BEARING conjunct' -- injecting back the exact refuted framing -- was reported IDENTICAL by the same instrument that detects `<=` to `<`. So the AST delta proves this fold is behaviourally inert and proves NOTHING about whether its sentences are true. Every semantic verdict in this close rests on reading, and is exactly as strong as that reading."
+      },
+      "S-D_pregate_surfaced_2026-09-18": {
+        "status": "PRE-GATE MEASURED, CUT SURFACED, NO CODE WRITTEN.",
+        "workstream_1_header_residue": "LIVE. `radial.header_rows` DOES NOT EXIST -- only `layered` and `outline` define one -- and `app.py::_header_rows_for` falls radial back to layered's charge BY IDENTITY, which that method's own docstring declares an explicit fallback awaiting S-D. SIX arm-instances are designed to redden: `test_radial_still_receives_layereds_charge_and_S_D_must_redden_this` at w=24,28,50,80,118 plus `test_radial_dispatch_is_the_DECLARED_residue_and_S_D_must_change_it`. Both say REWRITE, DO NOT DELETE. Derive the charge by MEASUREMENT: a `ceil(cells/w)` formula is `B-61`.",
+        "workstream_2_AGREE1_floor": "RE-SCOPED to 'verify closed and record' (coordinator 2026-09-18). Radial's floor NO LONGER REPRODUCES -- 0 disagreements against outline's 52 on the same instrument, confirmed POSITIVELY at the exact sizes recorded as failures. See the AGREE-1 open block.",
+        "workstream_3_PAN-1": "MEASURED AND CONFIRMED. With pan set DIRECTLY (isolating hint-line layout side effects) and render idempotence asserted: layered's picture moves at (40,20); radial's and outline's never do, at any driven size. Earlier picture changes under KEYPRESSES were hint-line side effects, not pan reaching the renderer -- an instrument artefact that would have been reported as a finding. CONSEQUENCE: outline's pan-nil HOLDS, so the cost-cap licence S-B(+C) landed rests on a premise that was VERIFIED here rather than assumed. 'Does radial WANT pan?' is a requirements question -- CARRY IT, do not answer it (coordinator).",
+        "FILE_SET_DISCREPANCY_SURFACED_NOT_DECIDED": "`CUT_APPROVED` seals S-D as `radial.py + layered.py (2)`. The resume brief says `radial.py + app.py`. The work argues for app.py: the pinned dispatch arm asserts `screen._header_rows_for(screen.radial_renderer) is layered.header_rows`, and `_header_rows_for` lives in `app.py`, so closing the residue REQUIRES an app.py edit. Meanwhile nothing measured so far requires a `layered.py` edit. This is a SEALED CUT and an implementer may not re-cut it -- surfaced for a coordinator ruling before S-D opens."
       },
       "S-E_pregate": {
         "date": "2026-09-11",
