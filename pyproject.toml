@@ -33,9 +33,20 @@ testpaths = ["tests"]
 # are 16 s of the suite's wall clock. They are deselected by default so the gate
 # stays fast, and they are NOT optional: CI must run `-m slow` as its own lane,
 # because that lane is where HLR-R02's acceptance actually lives.
-addopts = "-m 'not slow'"
+# The `network` lane is deselected for the same reason and a different one: an
+# arm that reaches a third party cannot produce a deterministic verdict, so it
+# may not sit in the lane a gate reads.  The DEPENDENCY IS THE POINT OF THE
+# MARKER -- it names what the lane needs (network reachability, and for `gh` an
+# authenticated CLI) instead of leaving it undeclared, which is the defect
+# HERMETIC-1 closed.  THE LANE IS CURRENTLY EMPTY OF LIVE-`gh` ARMS, and that
+# emptiness is declared rather than incidental: the one arm that used to reach
+# out asserted that a two-pane screen composes, which real repository data was
+# never needed to prove.  `tests/conftest.py` refuses network-reaching
+# subprocesses everywhere this marker is absent.
+addopts = "-m 'not slow and not network'"
 markers = [
     "slow: depth-5000 acceptance; deselected by default, run with -m slow",
+    "network: needs a reachable network (and, for `gh`, an authenticated CLI); deselected by default, run with -m network",
 ]
 # A HANG IS NOT A RESULT.  The per-test ceiling is deliberately far above every
 # arm's real cost -- the slowest measured arm in either lane is under 20 s, and

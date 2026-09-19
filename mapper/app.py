@@ -20,7 +20,7 @@ from textual.widgets import DataTable, Input, Label, Static
 
 from . import darkside
 from .diff import DiffResult, git_diff
-from .export import save_svg
+from .export import ExportError, ExportTooLarge, save_svg
 from .github import GitHubConnector, GitHubError
 from .import_csv import preview_csv
 from .keymap import (
@@ -51,7 +51,7 @@ from .views.layered import (
     pan_extent,
     painted_ids,
 )
-from .views.state import ViewState
+from .views.state import ViewState, export_neutralised
 from .views.outline import (
     OutlineRenderer,
     header_rows as outline_header_rows,
@@ -3469,32 +3469,215 @@ class MapScreen(Screen):
         try:
             size = self.size or self.app.size
             renderer = self._current_renderer()
-            # The same state the canvas draws from, EXCEPT the focus owner.
-            #
-            # Sharing the state is what closes the measured defect that decided
-            # the renderer contract: this site passed `query` and omitted
-            # `diff`, so an SVG exported during a diff silently lost its
-            # tinting.  One constructor leaves no second argument list to
-            # under-fill.
-            #
-            # But an export is a STANDALONE ARTIFACT, and "which screen region
-            # owns the keyboard" is meaningless inside it.  Measured on a plain
-            # operator sequence -- `tab` (or `g`, which focuses the rail), then
-            # `e` to export -- passing the live owner through painted the
-            # selected node in the INACTIVE tone.  An export always renders as
-            # though the canvas were focused.
-            text = renderer.render(
-                self.graph,
-                replace(
-                    self._view_state(max(20, size.width), max(5, size.height - 10)),
-                    focus_owner="",
-                ),
-            )
+            text = renderer.render(self.graph, self._export_view_state(size))
             path = self.store.workspace / f"{self.map_id}.svg"
             save_svg(text, path)
             self._event_toast("exportado", str(path))
+        except ExportTooLarge as too_large:
+            # A REFUSAL, AND IT NAMES THE ROUTE FORWARD.  Nothing is written --
+            # see `_export_view_state` for why a partial artifact is the one
+            # outcome this path may not produce.  The message carries the
+            # measured extent, the budget, and the chord that makes the map
+            # small enough, because a refusal the operator cannot act on is a
+            # capability regression rather than a safeguard.
+            self.notify(
+                f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
+                f"límite {too_large.limit}. Enfoca un subárbol con f y exporta esa vista.",
+                severity="warning",
+                markup=False,
+            )
         except Exception as e:
             self.notify(f"exportación fallida: {e}", severity="error", markup=False)
+
+    #: How many times `_export_view_state` may grow the canvas looking for the
+    #: size at which the whole map fits.  MEASURED, not guessed, and measured by
+    #: COUNTING THE CALLS THIS LOOP MAKES rather than by replaying it: across
+    #: the pan fixture, 200- and 1000-long chains, 200/500/4001-wide fanouts, a
+    #: 50x400-character title set and three wide-and-deep shapes, the extent
+    #: settles after exactly ONE growth step -- `layered._geometry` stops
+    #: shrinking `card_w` once the width is generous, so the second probe
+    #: already fits.
+    #:
+    #: AN INDEPENDENT PASS MEASURED TWO on its own shape set, and that number is
+    #: named here rather than reconciled away: six is headroom over both, and a
+    #: docstring quoting only the author's own figure is the declaration family
+    #: again.  Six is headroom for a shape nobody has measured, not a prediction
+    #: that six will ever be needed -- and the exhaustion path below REFUSES, so
+    #: being wrong about it costs a refusal rather than a cropped artifact.
+    EXPORT_EXTENT_STEPS = 6
+
+    #: The export's area budget, in CELLS, and the number is DERIVED.
+    #:
+    #: IN CELLS BECAUSE CELLS ARE WHAT COSTS.  `Canvas.rows()` walks a dense
+    #: `w x h` grid, so export cost tracks the map's BOUNDING-BOX AREA and not
+    #: its node count.  `MAX_RENDER_NODES` bounds the wrong quantity here: a
+    #: 1,801-node map that is wide AND deep at once prices at 169 s, while a
+    #: 4,002-node map that is only wide prices at 14 s.  Bounding nodes in this
+    #: seam would license the expensive shape and refuse the cheap one.
+    #:
+    #: THE TARGET IS **2 SECONDS** of synchronous freeze.  `action_export_svg`
+    #: runs on the Textual message pump with no progress bar and no cancel, and
+    #: beyond roughly two seconds an unresponsive TUI reads as hung rather than
+    #: busy.  Time is what binds, not memory: peak heap fits 18.9 bytes/cell,
+    #: so the whole budget below costs about 7 MB.
+    #:
+    #: THE DERIVATION IS A MEASURED BRACKET, not a fit evaluated at a round
+    #: number.  Timing render + `save_svg` + the write -- the whole act the
+    #: operator pays for -- on wide-and-deep shapes driven through this very
+    #: method: **315,252 cells -> 1.801 s** and **490,052 cells -> 2.631 s**.
+    #: Interpolating, 2.000 s falls at 357,156 cells; rounded DOWN to 350,000,
+    #: because the far side of this line is a freeze nobody can interrupt.  A
+    #: through-origin fit over seven points cross-checks it at 5.4264 us/cell,
+    #: i.e. 2 s at 368,569 cells -- the same answer from the other direction.
+    #:
+    #: THE FIRST DERIVATION OF THIS CONSTANT IS STRUCK RATHER THAN ANNOTATED.
+    #: It read "4.907 us/cell, 2.0 s / 4.907 us = 407,616, rounded down to
+    #: 400,000".  Re-measured here the rate is 5.4264 us/cell, at which 400,000
+    #: cells costs 2.20 s -- so the round-DOWN that was supposed to buy headroom
+    #: bought an overshoot of its own stated target instead.  The 4.907 figure
+    #: was a faithful record of what was measured and the arithmetic on it was
+    #: right; what did not survive re-measurement is the CONCLUSION, so the
+    #: conclusion moves and the old number is not left standing beside the new
+    #: one for a reader to average.
+    #:
+    #: WHAT THAT REFUSES, stated rather than discovered.  Measured: the pan
+    #: fixture (4,320 cells), a 500-wide fanout (150,025), a 200-long chain
+    #: (96,480) and 50 nodes carrying 400-character titles (15,025) all export.
+    #: A 1,000-deep chain (480,480) and a 4,001-way fanout (1,200,325) are
+    #: REFUSED.  The wide-and-deep boundary is MEASURED rather than
+    #: interpolated: 161 nodes (315,252 cells) export, 201 nodes (490,052)
+    #: do not.
+    #: That is the intended consequence rather than a regrettable one: a
+    #: 120x4004 artifact is four thousand rows tall and a 48013-column one is
+    #: unreadable by anybody, so the refusal costs a file nobody wanted.  `f`
+    #: focuses a subtree, which is the route the refusal message names.
+    EXPORT_MAX_CELLS = 350_000
+
+    def _export_view_state(self, size) -> ViewState:
+        """The state an export renders from: the canvas state, minus the session.
+
+        THE SAME STATE THE CANVAS DRAWS FROM, EXCEPT WHAT IS TRANSIENT.  Sharing
+        the state is what closes the measured defect that decided the renderer
+        contract: this site passed `query` and omitted `diff`, so an SVG
+        exported during a diff silently lost its tinting.  One constructor
+        leaves no second argument list to under-fill.
+
+        AN EXPORT IS A STANDALONE ARTIFACT, so it must not encode where the
+        session happened to be.  That was ruled once, for the focus owner:
+        "which screen region owns the keyboard" is meaningless inside a file,
+        and measured on a plain operator sequence -- `tab` (or `g`, which
+        focuses the rail), then `e` -- passing the live owner through painted
+        the selected node in the INACTIVE tone.  An export always renders as
+        though the canvas were focused.
+
+        `B-68` IS THAT SAME RULING, APPLIED TO THE OTHER HALF OF THE SAME
+        EXPRESSION.  The pan offsets are transient view state sitting in the
+        very `_view_state(...)` call the `focus_owner` `replace()` wrapped, and
+        they rode through untouched: the export sized itself from the TERMINAL
+        while `_geometry` shrinks `card_w` at that wider width until the tree
+        fits, collapsing `max_pan_x` to 0 -- so an offset perfectly legal on the
+        canvas was out of range for the export and shifted content off the
+        artifact's left edge.  Measured on the pan fixture: 47,263 bytes at
+        pan (0,0) against 16,718 at the reachable pan (49,10) -- roughly 65% of
+        the map missing from a file the operator hands to someone else, and
+        the file looks complete to both of them.  Reachable with no view
+        change: pan to the edge, press `e`.
+
+        SO THE FIX REMOVES THE STATE RATHER THAN BOUNDING IT.  Clamping the pan
+        to the export's own geometry would stop the content loss and still
+        encode a scroll position in a standalone artifact, which is the thing
+        the ruling forbids.  The recipient wants the MAP, not where the
+        operator happened to be looking.  An "export what I am looking at" mode,
+        if it is ever wanted, is a separate deliberate feature whose crop is
+        DECLARED IN THE ARTIFACT.
+
+        THE TRANSIENT SET IS DERIVED, NOT LISTED HERE.  `focus_owner`, then the
+        pan offsets, then `selected_id` and `hits` were each noticed one at a
+        time -- which is a ruling about a CLASS being discharged as a handful of
+        instances, leaving the next field for the next reviewer to find.  The
+        classification now lives beside the dataclass as
+        `views.state.EXPORT_FIELD_KINDS`, and `export_neutralised` resets every
+        field marked `transient` to its own declared default.  A field added to
+        `ViewState` without a row there fails an arm instead of inheriting
+        whichever behaviour its neighbour happened to have.
+
+        AND THE EXTENT IS BOUNDED, BECAUSE "ALWAYS FULL EXTENT" DID NOT SURVIVE
+        MEASUREMENT.  Export cost follows the map's BOUNDING-BOX AREA -- the
+        canvas walks a dense `w x h` grid -- so a wide AND deep map priced at
+        ~125 minutes and ~16 GB inside the product's own node cap, paid on the
+        message pump.  It also fails on utility before it fails on cost: a
+        72001x24004 SVG is not an artifact any recipient can read.
+
+        SO THIS REFUSES, AND A REFUSAL IS NOT A CROP.  The defect `B-68` names
+        is a file that LOOKS COMPLETE AND IS NOT.  Producing nothing and saying
+        why preserves that principle exactly; producing a truncated,
+        best-effort or silently-shrunk artifact reinstates it.  There is no
+        partial-artifact path out of this method, and the exhaustion case below
+        refuses for the same reason rather than shipping whatever it had
+        reached.
+
+        A VIEW THAT DOES NOT CONSUME PAN DECLINES THE RESIZE, matching
+        `_reclamp_pan` one seam over: outline and radial hold no viewport, so
+        growing a canvas to "fit the extent" would be applying a layered
+        helper renderer-independently -- the defect `PAN-1` closed.  Their
+        offsets are still zeroed, because zero is what they already behave as.
+
+        HONEST BOUNDARY: "full extent" here is GEOMETRIC.  It guarantees every
+        node's CARD is inside the artifact, not that every node's TITLE is
+        printed whole -- `layered._geometry` clamps `card_w` down as the tree
+        widens, so at 300 leaves a 40-character title still renders in about
+        nine columns. That clamping is identical to the canvas's and is not
+        changed here; it is stated so "the recipient wants the MAP" is not read
+        as "nothing is ever elided".
+        """
+        state = export_neutralised(
+            self._view_state(max(20, size.width), max(5, size.height - 10))
+        )
+        if not self._consumes_pan(self._current_renderer()):
+            return self._within_export_budget(state)
+        for _ in range(self.EXPORT_EXTENT_STEPS):
+            try:
+                (extent_x, span_x), (extent_y, span_y) = pan_extent(self.graph, state)
+            except Exception:
+                # Same argument as `refresh_canvas`'s guard and `_pan`'s: a
+                # graph that is not a tree raises out of `_tree_layout` by
+                # design, and an export is not worth killing the app over.  The
+                # render two lines up raises on the same graph into the same
+                # handler, so this returns the terminal-sized request rather
+                # than inventing a second failure mode for it.
+                return self._within_export_budget(state)
+            if extent_x <= span_x and extent_y <= span_y:
+                return self._within_export_budget(state)
+            state = replace(
+                state,
+                w=state.w + max(0, extent_x - span_x) + 2,
+                h=state.h + max(0, extent_y - span_y) + 1,
+            )
+        # EXHAUSTED WITHOUT FITTING.  Measured, this does not happen -- the
+        # extent settles in one step on every shape probed, and an independent
+        # pass reproduced it at two.  But returning `state` here would toast
+        # "exportado" over an artifact that is cropped for a reason nobody
+        # recorded, which is `B-68` with no pan to blame.  Refuse instead.
+        #
+        # AND IT REFUSES WITH ITS OWN REASON, not with `ExportTooLarge`.  This
+        # branch is reached by a state that did not CONVERGE, which is not the
+        # same event as a state that was too big -- an exhausted extent can sit
+        # under the budget, and `ExportTooLarge` would then hand the operator a
+        # number that contradicts its own sentence and advice (`f`) that cannot
+        # help.  A message must not name a culprit its condition cannot
+        # identify, so this one names what actually happened.
+        raise ExportError(
+            f"the export extent did not settle in {self.EXPORT_EXTENT_STEPS} steps "
+            f"(reached {state.w}x{state.h}); a cropped artifact is the defect this "
+            "refuses, so nothing is written"
+        )
+
+    def _within_export_budget(self, state: ViewState) -> ViewState:
+        """Return `state`, or refuse if rendering it would exceed the budget."""
+        cells = max(0, state.w) * max(0, state.h)
+        if cells > self.EXPORT_MAX_CELLS:
+            raise ExportTooLarge(cells, self.EXPORT_MAX_CELLS)
+        return state
 
     def _guard_focus_mutation(self) -> bool:
         """Return True if a structural mutation should proceed."""

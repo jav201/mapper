@@ -8,6 +8,9 @@ made that a defect rather than an untidiness.
 """
 from __future__ import annotations
 
+import re
+from html import unescape
+
 import pytest
 
 from mapper.app import PAN_INERT_HINT, MapScreen, MapperApp
@@ -671,3 +674,167 @@ def test_pan1_an_unregistered_renderer_RAISES_rather_than_defaulting():
     screen = _MapScreen("test")
     with pytest.raises(LookupError):
         screen._consumes_pan(object())
+
+
+# --------------------------------------------------------------------------
+# B-68 — the exported artifact does not encode the operator's scroll position
+
+
+async def _export_bytes(screen, pilot) -> bytes:
+    """Press the REAL `e` and read the file it wrote.
+
+    The real chord, not `action_export_svg`, for the reason stated at the top of
+    this module: a chord-agnostic acceptance is not acceptable here, and `e` is
+    the whole of how the operator reaches this.  And the bytes come from DISK --
+    the artifact is the deliverable, so the arm re-reads what was written rather
+    than asserting against the `Text` on the way in.
+    """
+    path = screen.store.workspace / f"{screen.map_id}.svg"
+    # A STALE ARTIFACT MUST NOT BE READABLE AS A FRESH ONE.  `action_export_svg`
+    # swallows every failure into a toast, so without this unlink a second press
+    # that does NOTHING AT ALL leaves the first press's file in place and the
+    # invariance assertion compares a file against itself.  Measured: a mutant
+    # raising at every non-zero pan -- the exact condition `B-68` is about --
+    # left BOTH acceptance arms green.  An invariant arm must assert its trigger
+    # actually occurred, and this one has two: the pan moved, AND an artifact
+    # was produced at that pan.
+    #
+    # Unlinking rather than checking mtime or size: Windows mtime granularity is
+    # coarse enough to alias two presses, and a correct re-write is
+    # byte-identical here BY CONSTRUCTION, so neither could tell a fresh
+    # artifact from a stale one.  Absence is the only signal that fails closed.
+    if path.exists():
+        path.unlink()
+    await pilot.press("e")
+    await pilot.pause()
+    assert path.exists(), "the `e` chord produced no artifact -- the export failed"
+    return path.read_bytes()
+
+
+_SVG_CELL = re.compile(
+    r'<text[^>]*?x="([0-9.]+)"[^>]*?clip-path="url\(#[^)]*?-line-(\d+)\)"[^>]*?>(.*?)</text>',
+    re.S,
+)
+
+
+def _svg_emitted_text(svg: bytes) -> str:
+    """The exported SVG's text layer, reassembled into lines.
+
+    `C-42`: assert the EMITTED form, never the form a human reads.  Rich writes
+    ONE `<text>` element per style run, and in a card-heavy picture those runs
+    are per character -- so a literal search for `"rama 5"` returns 0 matches
+    on an artifact that plainly contains it.  Measured: `"rama"` occurs 8 times
+    once the runs are reassembled and 0 times before.
+
+    The runs are re-joined per `line-N` clip path, ordered by `x`.  Padding
+    spaces are NOT emitted as runs, so the reassembled line reads `rama5`, and
+    callers compare with whitespace stripped from both sides rather than
+    pretending the artifact carries a space it does not.
+    """
+    lines: dict[int, list[tuple[float, str]]] = {}
+    for x, line_no, content in _SVG_CELL.findall(svg.decode("utf-8", errors="replace")):
+        lines.setdefault(int(line_no), []).append((float(x), unescape(content)))
+    return "\n".join(
+        "".join(run for _, run in sorted(lines[n])) for n in sorted(lines)
+    )
+
+
+def _squash(text: str) -> str:
+    """Drop whitespace, so a title compares against the emitted run sequence."""
+    return "".join(text.split())
+
+
+@pytest.mark.asyncio
+async def test_b68_the_export_is_invariant_under_the_operators_pan(tmp_path):
+    """`B-68`: an export is a standalone artifact, so it renders the FULL EXTENT.
+
+    The defect: `action_export_svg` read `pan_x`/`pan_y` through `_view_state`
+    and sized the render from the TERMINAL, while `layered._geometry` shrinks
+    `card_w` at that wider width until the tree fits -- collapsing `max_pan_x`
+    to 0.  So an offset perfectly legal on the canvas was out of range for the
+    export and shifted content off the artifact's left edge.  Measured on this
+    fixture before the fix: 47,263 bytes at pan (0,0) against 16,718 at the
+    reachable pan (49,10), roughly 65% of the map missing from a file handed to
+    a third party who cannot tell.
+
+    THE ASSERTION IS INVARIANCE, NOT SIZE.  Asserting "the export got bigger"
+    would pass on a fix that merely clamped the pan to the export's own
+    geometry -- which still encodes a scroll position, and is the weaker fix the
+    ruling rejected.  Byte-equality across two genuinely different pans is the
+    only predicate that distinguishes "the state was removed" from "the state
+    was bounded".
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        # POSITIVE CONTROL. If pan cannot move on this fixture at this size,
+        # "the two exports are identical" is true by construction and the arm
+        # proves nothing (`measured != pinned`).
+        assert await _pan_is_live(screen), (
+            "layered pan is dead on this fixture at this size, so an export "
+            "invariance assertion would be green whatever the export does"
+        )
+
+        at_origin = await _export_bytes(screen, pilot)
+
+        # Drive the pan to the far edge with the REAL chords, then assert it
+        # actually moved -- otherwise the second export is the first one again.
+        for _ in range(60):
+            await pilot.press("L")
+        for _ in range(30):
+            await pilot.press("J")
+        await pilot.pause()
+        assert (screen.pan_x, screen.pan_y) != (0, 0), (
+            "the pan chords did not move the view, so this arm is comparing an "
+            "export against itself"
+        )
+
+        at_edge = await _export_bytes(screen, pilot)
+
+    assert at_edge == at_origin, (
+        "the exported SVG changed when the operator panned: "
+        f"{len(at_origin)} bytes at the origin against {len(at_edge)} bytes at "
+        f"pan {(screen.pan_x, screen.pan_y)}. An export must not encode where "
+        "the session was looking."
+    )
+
+
+@pytest.mark.asyncio
+async def test_b68_the_export_carries_nodes_the_viewport_could_not_hold(tmp_path):
+    """The other half: invariance alone is satisfiable by exporting NOTHING.
+
+    Two identical empty artifacts are byte-equal, so the arm above cannot tell
+    a full-extent export from a broken one.  This one asserts the artifact
+    actually carries a node that the canvas at this size cannot paint -- which
+    is the content `B-68` was losing.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        assert await _pan_is_live(screen), "fixture does not overflow; nothing is off-screen"
+
+        painted = _squash("\n".join(canvas_rows(screen)))
+        off_screen = [
+            node.ficha.title
+            for node in screen.graph.nodes.values()
+            if node.ficha.title and _squash(node.ficha.title) not in painted
+        ]
+        assert off_screen, (
+            "every node is already on screen, so 'the export carries what the "
+            "viewport could not' is unfalsifiable on this fixture"
+        )
+
+        emitted = _squash(_svg_emitted_text(await _export_bytes(screen, pilot)))
+
+    # The instrument must be able to find something, or "nothing is missing" is
+    # a statement about a failed parse rather than about the artifact.
+    assert emitted, "the SVG text layer reassembled to nothing -- the reader is broken"
+
+    missing = [title for title in off_screen if _squash(title) not in emitted]
+    assert not missing, (
+        f"the export dropped {len(missing)} of {len(off_screen)} nodes that the "
+        f"viewport could not hold: {missing[:5]}"
+    )

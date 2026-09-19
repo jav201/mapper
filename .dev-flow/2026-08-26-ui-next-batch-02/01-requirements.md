@@ -9046,3 +9046,187 @@ lighter lane cost: the honest test is whether any defect found later would have 
 confirmation pass that lane skipped. Inc-1 is the control — its confirmation pass found **7 MEDIUM
 and 6 LOW**, including a fabricated measurement in production source and a "fix" that repaired
 nothing, so the pass is not ceremonial and the calibration is a real trade.
+
+## Amendment set 7 — INC-CONFIRM. 2026-09-18. Base `a552783` (`feat/ui-next-batch-02`).
+
+### A-99 — an export encodes no transient view state: `B-68`, and its parent is `Inc-2`'s `H2`
+
+**Parent, cited rather than asserted.** `Inc-2`'s finding `H2` ruled that `action_export_svg` pins
+`focus_owner=""` **because an export is a standalone artifact that must not encode where the
+keyboard was** (`03-increments/increment-002.md`, `H2`; the reviewer's form at
+`increment-002-code-review.md:134`; its RED counterfactual at
+`increment-002-retraction-check.md:231`). This amendment is that ruling applied to the **other**
+piece of transient view state in the **same expression**, and the family relationship was
+**verified in code rather than taken on trust** (`C-43`): `focus_owner=""` was normalised by a
+`replace()` wrapped around the very `_view_state(max(20, size.width), max(5, size.height - 10))`
+call that carried `pan_x`/`pan_y` through unreplaced. One expression; one piece of transient state
+neutralised and the other riding along. **We ruled the principle and shipped half of it.**
+
+**The defect (`B-68`).** The export read the live pan and sized the render from the **terminal**
+rather than the canvas, while `layered._geometry` shrinks `card_w` at that wider width until the
+tree fits — collapsing `max_pan_x` to 0. An offset perfectly legal on the canvas was therefore out
+of range for the export and shifted content off the artifact's left edge. **Measured on the
+`pan_graph` fixture at the declared 118×34 context: 47,263 bytes at pan (0,0) against 16,718 at the
+reachable pan (49,10)** — roughly 65% of the map missing from a file handed to a third party, with
+nothing declaring it, reachable with no view change (`pan to the edge, press e`). Proven
+pre-existing byte-identically against a simulated pre-`S-D` clamp, so it is a **declared deviation**
+from this batch's repair-only-what-is-newly-reachable rule, on the three grounds recorded at
+`state.json::p3_progress.open_blocks[B-68].RULED_IN_SCOPE_2026-09-18`.
+
+**The statement.** The artifact `mapper/export.py::save_svg` writes **shall** be a function of the
+graph and the view mode alone — never of the session's scroll position or of which region held the
+keyboard. Concretely: the export **shall** render the **full extent**, so that two exports of the
+same map at any two pan offsets are **byte-identical**.
+
+**Why full extent rather than a clamp.** The security reviewer drafted a two-line clamp against the
+export's own geometry. It stops the content loss and **still encodes a scroll position** in a
+standalone artifact, which is the thing the parent ruling forbids. Full extent **removes** the state
+instead of bounding it. If an *"export what I am looking at"* mode is ever wanted, that is a
+separate deliberate feature and its crop is **declared in the artifact**.
+
+**The `S-15` hazard was named in advance and MEASURED before implementing**, because cost follows
+paths rather than nodes and an unbounded extent would have refuted the direction. It does not:
+`pan_extent` settles after exactly **one** growth step on every shape probed — the pan fixture,
+200- and 1000-long chains, 200/500/4001-wide fanouts, and 50 nodes carrying 400-character titles.
+Full-extent cost over **that probe set**: the real fixture 120×36 / **52,915 B** / 0.00 s;
+`chain-1000` 120×4004 / 2.37 MB / 0.31 s; `fanout-4001` (Inc-4c's shape) 48013×35 /
+**9.82 MB / 14.42 s**.
+
+> **⚠ BOUNDARY OF THE TABLE ABOVE — read it before quoting any row.** Every figure in it is an
+> honest measurement **of the shape it names**, and the set is **NOT a worst case**: it varies one
+> dimension at a time and contains no map that is wide **and** deep together, which is the shape that
+> actually maximises cost. The convergence claim survives that gap — one growth step on every shape,
+> and the independent pass reproduced it at two — but the *cost* claim did not. The corrected worst
+> case is below, and it is ~500× the largest row here.
+
+**Acceptance.** Two arms, and neither is sufficient alone:
+
+| Arm | What it refuses |
+|---|---|
+| `tests/test_pan.py::test_b68_the_export_is_invariant_under_the_operators_pan` | the state being *bounded* rather than *removed* — byte-equality across two genuinely different pans is the only predicate that separates them, and it is RED on the rejected clamp-only fix |
+| `tests/test_pan.py::test_b68_the_export_carries_nodes_the_viewport_could_not_hold` | invariance satisfied by exporting *nothing* — two empty artifacts are byte-equal |
+
+Both carry the `_pan_is_live` positive control, because on a fixture where pan cannot move,
+"the two exports agree" is green by construction (`measured ≠ pinned`). Both drive the **real `e`
+chord** and read the artifact **back from disk** (`C-12`). The content arm asserts the **emitted
+form** (`C-42`): Rich writes one `<text>` element per style run, so a literal search for `"rama 5"`
+returns **0** matches on an artifact that plainly contains it, and **8** once the runs are
+reassembled per `line-N` clip path.
+
+**Executed counterfactual.** `R1` pre-fix revert → **2 failed**; `R2` the rejected clamp-only fix →
+**2 failed**; shipped fix → 2 passed; restore sha256-verified byte-identical
+(`0a842a67170c2bac26dbef3f9d12f819377a322abb5bafd3cdef2b70c1954fa2`).
+
+**⚠ THE COST FIGURE FIRST PUBLISHED IN THIS AMENDMENT WAS FALSE, AND IS STRUCK.** It read: *a
+full-extent export of a 4001-way fanout costs 14.42 s of render plus 1.52 s of write.* That number is
+real but it is **not the worst case**, because the probe set behind it was hand-listed and omitted the
+failing member (`C-31`): it swept fanout-only and chain-only shapes and never one that was **wide AND
+deep at once**. Struck rather than annotated, so this document does not assert both.
+
+**The measured worst case, from the independent security pass.** Export cost follows the map's
+**bounding-box AREA**, not its node count — `mapper/canvas.py::Canvas.rows` walks a dense `w x h`
+grid. Measured end to end: **20.0 s at 601 nodes**, **75.8 s at 1,201**, **169.1 s / 363 MB at
+1,801**. The worst shape inside the product's own `MAX_RENDER_NODES = 12000` is wide and deep
+together (fanout 6000 + chain 5999): a 72001 x 24004 canvas, **1.73 billion cells**, extrapolating to
+**~125 minutes and ~16 GB of heap** — paid synchronously on the Textual message pump, with no
+progress, no cancel and no confirmation, on a map the operator may have been handed rather than built.
+
+**This is not a carry and it is not a licence to crop.** `IF_MEASUREMENT_REFUTES_FULL_EXTENT` made
+this amendment conditional on precisely this measurement, and the measurement has now arrived from an
+instrument that was not the author's. The number goes back to the coordinator. A cap that **refuses**
+with a named toast is not a crop and remains available; a cap that silently shrinks the artifact is
+the defect `B-68` closed, and is refused.
+
+**⚠ AND THE FIX AS WRITTEN DOES NOT YET DELIVER THIS AMENDMENT'S OWN STATEMENT.**
+`mapper/export.py` builds the export console at a hard-coded `width=200`. A full extent is 241
+columns at 21 nodes, so above roughly seventeen leaves Rich **folds** every row into stacked chunks in
+row-major order: the artifact keeps every title, stays a well-formed SVG, and **loses the tree's
+adjacency**. That is this amendment's own failure class — complete-looking, structurally lying — one
+layer below the one it closed, and the acceptance arms miss it because their fixture's full extent is
+120 columns, under the threshold. **`A-99` is NOT SATISFIED by the current tree.**
+
+## Amendment set 8 — INC-CONFIRM, re-ruled. 2026-09-19. Base `a552783` (`feat/ui-next-batch-02`).
+
+### A-100 — SUPERSEDES `A-99`'s extent clause: the export is bounded, and above the bound it REFUSES
+
+**`A-99`'s principle stands; its DIRECTION does not.** The statement *"the artifact is a function of
+the graph and the view mode alone — never of the session's scroll position"* is unchanged and is
+still the acceptance. What is withdrawn is the clause that followed it — *"the export **shall**
+render the **full extent**"* — which is **STRUCK, not shadowed**, on the same terms as every other
+re-cut in this batch. The clause was made conditional in its own text
+(`IF_MEASUREMENT_REFUTES_FULL_EXTENT`), the measurement arrived from an instrument the author did not
+build, and the clause fired.
+
+**The statement, as it now reads.** The artifact `mapper/export.py::save_svg` writes **shall** be a
+function of the graph and the view mode alone. Concretely: two exports of the same map at any two pan
+offsets, with any search live and the cursor anywhere, **shall** be byte-identical; the export
+**shall** render every node's card inside the artifact **up to a declared area budget**; and above
+that budget it **shall** write **nothing at all** and tell the operator why.
+
+**Two grounds for refusing rather than rendering, and the second is the one that closes the
+question.** *Cost*: export cost follows the map's **bounding-box AREA** — `Canvas.rows()` walks a
+dense `w × h` grid — so the worst shape inside the product's own `MAX_RENDER_NODES` prices at roughly
+125 minutes and 16 GB on the message pump. *Utility*: a 72001×24004 SVG is unreadable by anybody, so
+"full extent always" produces something nobody wants. An off-pump render with progress and a cancel
+answers only the first, buying the operator the ability to wait for and then abort a useless file;
+it is rejected.
+
+> **A REFUSAL IS NOT A CROP, and the distinction is the whole of `B-68`.** The defect is *a file that
+> looks complete and is not*. Producing nothing and saying why preserves that principle exactly;
+> producing a truncated, best-effort or silently-shrunk artifact reinstates it. There is no
+> partial-artifact path out of `_export_view_state` — including its exhaustion branch, which refuses
+> for the same reason rather than shipping whatever it had reached.
+
+**The budget is in CELLS, and the derivation is normative.** `MAX_RENDER_NODES` bounds the wrong
+magnitude in this seam — a 1,801-node map that is wide *and* deep prices far above a 4,002-node map
+that is only wide — which is `S-15` recurring one seam over. `EXPORT_MAX_CELLS = 350_000`, derived
+from a **measured bracket** rather than a fit evaluated at a round number: 315,252 cells → 1.801 s and
+490,052 cells → 2.631 s, so a **2-second** target (the point past which an uninterruptible TUI reads
+as hung rather than busy) falls at 357,156 cells, rounded **down**. A through-origin fit over seven
+points cross-checks at 5.4264 µs/cell. Heap is not the binding constraint at 18.9 bytes/cell — the
+whole budget is about 7 MB.
+
+**The refusal names the route, not only the number.** The toast carries the measured extent in cells,
+the limit, and *"Enfoca un subárbol con `f` y exporta esa vista"*. `f` really does focus a subtree —
+verified in code, not assumed — so a refused export leaves the operator with a path rather than a
+dead chord.
+
+**Acceptance — `A-99`'s two arms stand, and four more are added.**
+
+| Arm | What it refuses |
+|---|---|
+| `tests/test_pan.py::test_b68_the_export_is_invariant_under_the_operators_pan` | the state being *bounded* rather than *removed* (unchanged) |
+| `tests/test_pan.py::test_b68_the_export_carries_nodes_the_viewport_could_not_hold` | invariance satisfied by exporting *nothing* (unchanged) |
+| `tests/test_export_state.py::test_an_oversized_map_is_REFUSED_and_no_artifact_is_written` | a budget that crops, truncates or ships a best-effort picture — the assertion is the **absence** of the artifact, which a toast-only check would not make |
+| `tests/test_export_state.py::test_the_refusal_TELLS_the_operator_and_names_the_way_forward` | a refusal that is silent, or that states a number without a route |
+| `tests/test_export_state.py::test_an_ordinary_map_still_exports` | the cheapest way to pass the two above: refuse everything |
+| `tests/test_export_state.py::test_an_extent_that_never_settles_REFUSES_instead_of_shipping_what_it_had` | an exhausted extent shipping what it had reached, with no pan to blame |
+
+**And the transient class is closed as a CENSUS, not as the two fields a reviewer happened to
+notice.** `focus_owner`, then the pan offsets, then `selected_id` and `hits` were each found one at a
+time by a different reader over three increments — a ruling about a *class* discharged as a handful
+of instances. `mapper/views/state.py` now classifies **every** `ViewState` field, the export derives
+its strip set from that table, and the classification is asserted **both ways** and **pinned**:
+`tests/test_export_state.py::test_every_view_state_field_is_classified_for_the_export_boundary` and
+`::test_the_transient_fields_are_the_ones_that_say_where_the_operator_was`. A field added to
+`ViewState` without a row now fails an arm rather than inheriting its neighbour's behaviour.
+
+**`hits` is the security half, and it is why this is not tidiness.** It is the resolution of whatever
+the operator last typed into search, down to a per-branch numeral on every fold pill — information
+about the **sender**, leaked to the recipient of a file. A deliberate *"export with the selection
+marked"* mode is a separate feature whose inclusion is declared **in the artifact**.
+
+**⚠ THE `width=200` DEFECT ABOVE IS CLOSED, and its threshold was reproduced independently.**
+`save_svg` sizes the console from the `Text` it is handed, measured in terminal **cells**. On the
+artifact: no fold at 16 leaves (197 columns), **3 of 5 rendered rows folded at 20 leaves** (245
+columns) under the old constant, and **0 of 5 at every size** under the measured width. `A-100` is
+satisfied by the current tree; `A-99`'s unsatisfied-warning is discharged by this amendment rather
+than deleted from it.
+
+**⚠ ONE MEDIUM REMAINS OPEN AND IS NOT CLOSED BY THIS AMENDMENT.** The export grows the canvas far
+enough to include the `eliminados` diff ghost strip the screen was not showing, so a previous
+revision's node titles can leave the machine in a file the operator believed showed only what they
+could see. It is reachable today (`=` to diff, `e` to export, on any map taller than the canvas) and
+it wants a one-line ruling — either this amendment states the inclusion as deliberate, or the strip
+is suppressed for an export state. **Silence is what is not enough**, and this line is here so the
+silence is not mistaken for a decision.
