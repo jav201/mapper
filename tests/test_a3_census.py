@@ -254,9 +254,21 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       helper would have to decide which one it was reading and would stop
     #       being able to see them disagree.  Both are zero-arg WIDGET renders
     #       and must stay out of the A3 -- which is what this pin protects.
-    assert len(sites["zeroarg"]) == 32, (
+    #
+    # 32 -> 34 in `S-D`, TWO sites, and they are the RADIAL twins of the two
+    # above:
+    #   +2  `tests/test_agree_floor.py::_radial_frame` reads the same two
+    #       declaring surfaces with the RADIAL renderer selected, for the
+    #       workstream that VERIFIES radial never reaches the floor.  It does not
+    #       share `_frame`: that helper selects `outline_mode` and derives its
+    #       truth from `outline.painted_ids`, and parameterising one helper over
+    #       the renderer would make the radial arms and their OUTLINE CONTROL
+    #       read the same code path -- which is how a control stops being
+    #       independent of the thing it controls (`C-60`).  Both are zero-arg
+    #       WIDGET renders and must stay out of the A3.
+    assert len(sites["zeroarg"]) == 34, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "32; a DROP means widget sites were wrongly swept into the A3"
+        "34; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -361,12 +373,14 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     """
     zeroarg = render_call_sites()["zeroarg"]
     # 25 -> 26 in Inc-3, 26 -> 27 and 27 -> 28 in Inc-B55a, 28 -> 29 at
-    # Inc-REPAIR S-A, 30 -> 32 at S-B(+C) -- the same sites the cardinality pin
-    # above itemises.  The two pins move TOGETHER by construction: they read the
-    # same derivation, so a change that updated one and not the other is a red
-    # arm rather than a quiet divergence.
-    assert len(zeroarg) == 32, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 32. A floor was "
+    # Inc-REPAIR S-A, 30 -> 32 at S-B(+C), 32 -> 34 at S-D -- the same sites the
+    # cardinality pin above itemises.  The two pins move TOGETHER by
+    # construction: they read the same derivation, so a change that updated one
+    # and not the other is a red arm rather than a quiet divergence.  S-D is the
+    # first increment to move them where BOTH reds appeared in one lane run,
+    # which is that construction working rather than two independent failures.
+    assert len(zeroarg) == 34, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 34. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
