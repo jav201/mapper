@@ -438,6 +438,55 @@ async def test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_a_refusal_does_not_call_a_CURRENT_artifact_stale(tmp_path):
+    """`CR17-F2`: `path.exists()` tests EXISTENCE, not STALENESS.
+
+    The guard and the sentence were not the same claim. The sentence said the
+    file "ya no refleja este mapa"; the guard established only that a file is
+    there. Measured: export a map, change NOTHING about the graph, then make the
+    same map exceed the budget -- the artifact on disk is still a faithful
+    export of that exact graph, and the refusal called it stale anyway.
+
+    The no-file negative control below could not see this. It covers "the claim
+    is ABSENT when there is no file"; this covers "the claim is TRUE whenever it
+    is made", and those are different obligations.
+    """
+    from mapper.app import MapperApp, MapScreen
+
+    notices: list[str] = []
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        app.store.save("crece", _wide_and_deep(3, 3))
+        app.push_screen(MapScreen("crece"))
+        await pilot.pause()
+        screen = app.screen
+        path = screen.store.workspace / "crece.svg"
+
+        await pilot.press("e")
+        await pilot.pause()
+        assert path.exists(), "the fixture never produced a first artifact"
+        before = path.read_bytes()
+
+        # THE GRAPH IS NOT TOUCHED. Only the budget verdict changes.
+        screen.EXPORT_MAX_CELLS = 1
+        screen.notify = lambda msg, **kw: notices.append(str(msg))
+        await pilot.press("e")
+        await pilot.pause()
+
+        assert len(notices) == 1, f"expected exactly one refusal notice, got {notices}"
+        message = notices[0]
+        assert path.read_bytes() == before, "the refused export rewrote the artifact"
+
+    # The file is a FAITHFUL export of the unchanged graph, so any sentence
+    # asserting it no longer reflects the map is FALSE.
+    assert "ya no refleja" not in message, (
+        "the refusal calls a CURRENT artifact stale: the graph never changed, so "
+        f"the file on disk still reflects it exactly. {message!r}"
+    )
+
+
+@pytest.mark.asyncio
 async def test_a_refusal_on_a_FIRST_export_claims_no_stale_file(tmp_path):
     """The negative control for the arm above: the claim must never be FALSE.
 

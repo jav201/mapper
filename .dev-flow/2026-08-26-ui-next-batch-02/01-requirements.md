@@ -9183,14 +9183,25 @@ below is the amended clause; the struck arithmetic is quoted only inside set 9, 
 false. `MAX_RENDER_NODES` bounds the wrong magnitude in this seam — a 1,801-node map that is wide
 *and* deep carries roughly 23× the **cells** of a 4,002-node map that is only wide, and costs several
 times the wall clock despite holding fewer than half the nodes — which is `S-15` recurring one seam
-over. `EXPORT_MAX_CELLS = 350_000`, and what justifies it is **the worst shape the budget ADMITS**,
-not a rate: measured clean, the worst accepted shape (1,000 wide, 312,026 cells, at the
-`size.height - 10` start a 35-row terminal gives) costs **1.447 s** against the **2-second** target —
-the point past which an uninterruptible TUI reads as hung rather than busy — a margin of about 28 %,
-and nothing the budget admits crosses the target. **No µs/cell rate appears here, and its absence is
-deliberate**: across the shapes this budget admits, cost spans 0.955–3.27 µs/cell, a 3.4× spread
-tracking **node density** rather than area, so no single rate can derive a cell budget in either
-direction. Heap is not the binding constraint.
+over. `EXPORT_MAX_CELLS = 350_000`, and **what justifies it is UTILITY — not a time guarantee.**
+
+> ⚠ **The time claim that stood here is STRUCK by amendment set 10** — the SECOND strike of this
+> constant's justification, for a different reason than the first. It read: *"what justifies it is
+> the worst shape the budget ADMITS … the worst accepted shape (1,000 wide, 312,026 cells, at the
+> `size.height - 10` start a 35-row terminal gives) costs 1.447 s against the 2-second target … a
+> margin of about 28 %, and nothing the budget admits crosses the target"*, together with a
+> *0.955–3.27 µs/cell, 3.4×* spread. **The universal is false.** The hunt behind it varied graph
+> shape while holding the **start height** fixed — and the start height is `max(5, size.height - 10)`,
+> set by the operator's terminal, and it is the governing variable for how much node **density** a
+> fixed cell budget admits. Measured clean, the worst **admitted** shape is `1.91 s` at a 40-row
+> terminal, `2.41 s` at 35 rows (the very terminal the struck sentence was measured on), `5.94 s` at
+> the classic 80×24, and `17.73 s` at 11 rows. **A cells-only budget cannot express a time bound at
+> all**: cost depends on `w` and `h` separately while this constant constrains only their product, so
+> no value of it makes the universal true.
+
+What remains true, with its boundary: at start heights of about 30 rows and up the worst admitted
+shape stays under 2 s, and below that it rises monotonically as the terminal shortens. Heap is not
+the binding constraint.
 
 **The refusal names the route, not only the number.** The toast carries the measured extent in cells,
 the limit, and *"Enfoca un subárbol con `f` y exporta esa vista"*. `f` really does focus a subtree —
@@ -9265,11 +9276,15 @@ reviewers. A requirement whose *normative* clause is false must not stand even w
 right: a right answer resting on a false derivation invites the next reader to re-derive from the
 broken premise.
 
-**What replaces it.** The clause in `A-100` above: the constant is grounded on **the worst shape the
-budget ADMITS** (1.447 s against a 2-second target, ≈28 % margin), and carries **no rate at all**,
-because cost spans 0.955–3.27 µs/cell across admitted shapes — a 3.4× spread tracking node density.
-That spread is also *why* the two passes disagreed: wide-and-deep is cheap per cell, wide-only is
-dense and expensive, and each sampled one family. A proposed relaxation to ≈2.12 M cells is
+**What replaces it.** ⚠ **This paragraph's own replacement was STRUCK IN TURN by amendment set 10 —
+read that before relying on anything here.** It grounded the constant on *"the worst shape the budget
+ADMITS (1.447 s against a 2-second target, ≈28 % margin)"* with a *0.955–3.27 µs/cell, 3.4×* spread.
+That universal is **false**: the hunt behind it held the start height fixed, and the start height is
+set by the terminal and governs admitted density. The constant now rests on **utility alone**, and
+the time guarantee is **withdrawn rather than restated**. What survives from this paragraph is the
+narrower and still-true observation that the per-cell rate varies with node density, which is *why*
+the two passes disagreed: wide-and-deep is cheap per cell, wide-only is dense and expensive, and each
+sampled one family. A proposed relaxation to ≈2.12 M cells is
 **REFUSED** — it generalises from the cheap family and would admit wide-only maps costing many
 seconds.
 
@@ -9318,3 +9333,87 @@ is a claim about the world and a map's first export has no file to be stale.
 
 Both are the batch's signature shape — **a lesson applied to an instance and not to its class** —
 landing in the instrument rather than in the product.
+
+---
+
+## Amendment set 10 — `A-100.1`'s REPLACEMENT is struck too. 2026-09-19. Base `152ecd9`.
+
+### `A-100.4` — the budget's time guarantee is withdrawn; the constant stands on utility alone
+
+**Authority.** Coordinator ruling 2026-09-19 stands; this amends its *implementation*, on
+`code-reviewer`'s finding `CR17-F1` (HIGH) against increment 017, **independently reproduced by the
+implementer before being accepted**.
+
+**What is struck.** The replacement clause written by amendment set 9 — *"what justifies it is the
+worst shape the budget ADMITS … 1.447 s … a margin of about 28 %, and nothing the budget admits
+crosses the target"*, and the *0.955–3.27 µs/cell, 3.4×* spread quoted beside it.
+
+**Why, and the reason is not the previous reason.** Set 9 struck the *first* derivation because the
+**instrument** was contaminated (`tracemalloc` inside the timed region). The instrument was fixed —
+and the **search** was left holding a governing variable fixed. `_export_view_state` starts at
+`h = max(5, size.height - 10)`: the start height comes from the operator's **terminal**, and it
+decides how much node **density** a fixed cell budget admits. A shorter terminal gives a smaller
+`h`, so `w × h ≤ 350_000` admits a far **wider** map — and width is what costs. The hunt varied
+graph shape across two families at two **tall** heights and then generalised over the whole region.
+
+**Measured clean, worst ADMITTED shape per terminal** (reproduced by the implementer; figures agree
+with the reviewer's to within a few percent):
+
+| Terminal | start `h` | worst admitted | cells | cost | vs 2 s |
+|---|---|---|---|---|---|
+| 118×40 | 30 | 940-wide | 349,711 | **1.91 s** | under |
+| 118×35 | 25 | 1,121-wide | 349,778 | **2.41 s** | 1.2× over |
+| 80×24 | 14 | 1,944-wide | 349,935 | **5.94 s** | 3.0× over |
+| 118×20 | 10 | 2,651-wide | 349,943 | **10.38 s** | 5.2× over |
+| 118×11 | 5 | 3,645-wide | 349,928 | **17.73 s** | 8.9× over |
+
+It is over target at **80×24, the classic default**, and over target at **the very terminal the
+struck sentence was measured on**. The reviewer additionally drove it end to end through the real
+`e` chord at 80×24: a 1,945-node map is **accepted**, writes a 4.6 MB artifact, and freezes the pump
+**7.5 s**.
+
+**`C-31` AT THE SEARCH RATHER THAN THE INSTRUMENT, and it lands on the increment that minted the
+corollary forbidding it.** Set 9 minted *"a correction that changes the number but keeps the
+instrument has not corrected anything"*, with the corollary that *a conclusion drawn from one family
+of inputs is not corrected by re-measuring that family more carefully*. Increment 017 then did
+exactly that, one variable over. **Correcting how you measure does not correct what you measured
+over** — and catalog entry 2 (*a newly minted control does not protect the increment that minted
+it*) is proven for the second time in two increments, both times on its own minting increment.
+
+**What replaces it.** Nothing, on the time axis: **the guarantee is withdrawn rather than restated
+at a new number.** A cells-only budget **provably cannot** express a time bound, because cost
+depends on `w` and `h` separately while `EXPORT_MAX_CELLS` constrains only their product — so no
+value of the constant makes the universal true, and picking a smaller one would repeat the mistake a
+third time. What is asserted instead is bounded and checkable: *at start heights of about 30 rows
+and up, the worst admitted shape stays under 2 s; below that it rises monotonically as the terminal
+shortens.*
+
+**`EXPORT_MAX_CELLS = 350_000` STANDS, on the UTILITY ground**, which has been untouched through
+both strikes and never depended on the arithmetic: a 72001×24004 SVG is unreadable by anybody
+whatever it costs to produce. The proposal to relax the budget to ≈2.12 M cells remains **REFUSED**.
+
+**OPEN, and routed to the coordinator rather than settled here:** whether the freeze is to be
+genuinely *bounded* — which needs a different bound (a `w`-aware or time-aware check, or moving the
+render off the message pump), not a different constant. That is a ruling, and the implementer
+declines to choose it.
+
+### `A-100.5` — the refusal's stale-file sentence said more than its guard established
+
+**Authority.** `code-reviewer` finding `CR17-F2` (MEDIUM), reproduced by the implementer.
+
+`A-100.2` required the stale-file claim be conditional *"so it can never be false"*. The guard was
+`path.exists()`, which establishes **existence**; the sentence said *"ya no refleja este mapa"*,
+which claims **staleness**. Those are different claims. Measured: export a map, change **nothing**
+about the graph, then make the same map exceed the budget — the artifact on disk is still a faithful
+export of that exact graph, and the refusal called it stale.
+
+The sentence now says only what `exists()` licenses: *"No se escribió nada: el archivo en `{path}`
+es de una exportación anterior."* Whether that file still matches the map is something the code does
+not know and must not assert. **Telling the operator a current file is stale is the same category of
+error as letting them believe a stale file is current** — both are the artifact misdescribing
+itself, which is the family `B-68` names.
+
+**Acceptance gains a third arm**, because the existing negative control covered only the *no-file*
+mode and so could not see this:
+`tests/test_export_state.py::test_a_refusal_does_not_call_a_CURRENT_artifact_stale` — the claim must
+be **true** whenever it is made, not merely **absent** when there is no file.
