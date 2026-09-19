@@ -57,6 +57,14 @@
     "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-4c -> Inc-5 -> Inc-W1 -> Inc-STRIPS -> Inc-CRUMB -> Inc-B55 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
     "cut_amendments": [
       {
+        "date": "2026-09-18",
+        "amendment": "S-D RE-CUT: `mapper/views/radial.py` + `mapper/app.py` (2). `mapper/views/layered.py` is DROPPED from the stage.",
+        "authority": "Coordinator ruling 2026-09-18 (1), on S-D's pre-gate measurement, after the implementer stopped at the sealed-cut boundary and surfaced it rather than re-cutting.",
+        "reason_is_MEASUREMENT_not_preference": "`CUT_APPROVED` sealed S-D as `radial.py + layered.py (2)`. The pre-gate measured otherwise. `radial.header_rows` DOES NOT EXIST -- only `layered` and `outline` define one -- and `app.py::_header_rows_for` falls radial back to layered's charge BY IDENTITY. The arm `test_radial_dispatch_is_the_DECLARED_residue_and_S_D_must_change_it` asserts `screen._header_rows_for(screen.radial_renderer) is layered.header_rows` and is DESIGNED TO REDDEN when S-D lands; `_header_rows_for` lives in `app.py`. So closing the residue NECESSARILY edits `app.py`. Conversely nothing measured in any of the three workstreams requires a `layered.py` edit, so it leaves the cut rather than sitting in it unused.",
+        "THE_BRIEF_IS_NOT_THE_AUTHORITY_AND_THIS_IS_RECORDED_DELIBERATELY": "The coordinator's resume brief happened to say `radial.py + app.py`, agreeing with the measurement. THAT AGREEMENT IS NOT WHAT MAKES THE CHANGE LEGITIMATE. A summary of a record does not outrank the record (coordinator ruling 2026-09-18 (A), the same principle that made the ratified artifact outrank the brief's three-finding list). The sealed cut outranked the brief, which is why the implementer stopped; THIS AMENDMENT is what makes the new file set authoritative.",
+        "precedent": "Same `C-21` shape as the Inc-4 split and the `A-94` B-55 re-cut: the cut is re-derived and the old row is STRUCK, never shadowed."
+      },
+      {
         "date": "2026-09-10",
         "amendment": "Inc-B55 INSERTED after Inc-STRIPS, before Inc-REPAIR",
         "authority": "Coordinator ruling 2026-09-10, on Inc-5's measured evidence.",
@@ -585,6 +593,7 @@
     "next_stage": "S-D -- the LAST Inc-REPAIR stage. S-A, S-E and S-B(+C) are CLOSED (2026-09-18); `next` stays `Inc-REPAIR` because the increment is not finished, and this field says WHICH stage so the nested pointer is not ambiguous. S-D's pre-gate is MEASURED and its cut SURFACED at `inc_repair_pregate['S-D_pregate_surfaced_2026-09-18']`, including a file-set discrepancy against the sealed CUT_APPROVED that an implementer may NOT resolve. After Inc-REPAIR: Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9.",
     "cut_authority": "01-requirements.md:5961 (amended 2026-08-29), FURTHER AMENDED 2026-09-10 by the coordinator ruling recorded in cut_amendments[0], which inserts Inc-B55 after Inc-STRIPS. Synced 2026-08-29 per coordinator ruling; the resume brief's Inc-STRIPS-before-Inc-5 order predates the 2026-08-29 amendment and is superseded.",
     "controls_for_engineering_rules": [
+      "AN AST-EQUALITY INSTRUMENT PROVES BEHAVIOURAL INERTNESS AND NOTHING ABOUT WHETHER THE SENTENCES ARE TRUE -- AND THE NARRATION AXIS THEREFORE NEEDS A READING INSTRUMENT, WHICH DOES NOT CONVERGE BY ITERATION. Minted 2026-09-18 by coordinator ruling (3) from the S-B(+C) fold review; the best control this fold produced, and the reviewer built it as a CONSTRUCTED blind spot rather than asserting one. EXHIBIT: the fold's certification rested on an AST comparison with docstrings stripped and string-literal CONTENT masked, which reported IDENTICAL on all four files and so proved the fold moved no control flow, call, name or assertion. The reviewer then rewrote a NEW assertion message from 'This is the WEAKER conjunct' to 'This is the LOAD-BEARING conjunct' -- injecting back the EXACT refuted framing the whole fold existed to remove -- and the same instrument reported IDENTICAL, while reporting DIFFERENT on `<=` to `<`. So a green from that instrument is evidence of inertness ONLY; every semantic verdict in such a fold rests on READING, and is exactly as strong as that reading. COROLLARY, and it is the operative half: because the only instrument on the narration axis is a reader, and readers do not converge by iteration the way a mutation harness does, narration confirmation is a TERMINAL PASS WITH A DECLARED BOUNDARY, never a loop. This batch measured the loop directly -- pass 3b raised F13-F17, folding those raised F18-F22, and each pass was correct and each produced a fresh crop. EVIDENCE OF THE SPECIES: F18 was a narration defect introduced by the commit that removed the narration defect F15.",
       {
         "id": "pending -- to be minted when docs/engineering-rules.md is created at phase 6",
         "date": "2026-09-10",
@@ -796,7 +805,15 @@
         "MEASURED_AND_IT_IS_WORSE_THAN_A_WRONG_EXTENT": "Counted mechanically: `views/outline.py` has ZERO `pan_x`/`pan_y` code references (its single textual match is prose inside a docstring I wrote), and `views/radial.py` has ZERO as well. So TWO OF THE THREE constructed renderers ignore pan entirely, while the screen still computes a layered extent and clamps `self.pan_x`/`self.pan_y` against it. The manifestation is therefore not merely a wrong number: in outline and radial the operator's pan keys move nothing while internal pan state advances, so the app holds a pan the picture never reflects.",
         "outline_half": "NIL TODAY, and that is the evidence the cost caps relied on: because outline reads no pan, cells past the canvas width are unreachable there, which is what made capping the indent safe. If outline ever gains pan, that licence lapses and the caps must be revisited -- recorded here so the dependency is not invisible.",
         "for_S_D_to_measure": "Whether radial's nil is the same nil: does radial WANT pan (a radial map larger than the canvas is the obvious case), and does the layered extent produce a clamp that would be wrong the moment it did? S-D owns radial.py, so the measurement belongs to its pre-gate.",
-        "not_fixed_here": "Out of S-B(+C)'s scope and its file cap; no behaviour was changed for it."
+        "not_fixed_here": "Out of S-B(+C)'s scope and its file cap; no behaviour was changed for it.",
+        "RULED_2026-09-18_DOES_RADIAL_WANT_PAN": {
+          "verdict": "NO -- and the defect is ELSEWHERE. Coordinator ruling 2026-09-18 (5), made to stop this question blocking S-D.",
+          "why_not": "Radial's navigation model is FOCUS-BASED: the layout is polar around the selected node, so 'scrolling' it is not a missing feature, it is a category error. Adding a viewport to a polar layout would answer a question nobody asked.",
+          "what_the_real_defect_is": "The one that was MEASURED: `MapScreen` advances and CLAMPS pan state against a LAYERED extent for views that never consume it, so the pan keys do nothing while internal state moves. That is a LYING AFFORDANCE OF THE MOTION KIND -- the operator presses a key, the app records movement, and the picture never reflects it. Same family as the `esc` ruling `#D38`/`#D43`: an affordance that teaches a rule which silently stops holding.",
+          "fix_direction": "NOT 'add pan to radial'. The rule is: A VIEW THAT DOES NOT CONSUME PAN MUST NOT HAVE PAN ADVERTISED OR ADVANCED ON ITS BEHALF -- either inert-and-declared, or absent from that view's keybar. The axis is the renderer-independent application of a layered-specific helper, which is defect 2's shape one seam over.",
+          "scope": "S-D's PAN-1 workstream. IF closing it properly needs more than the amended 2-file cut, CARRY it with this ruling attached rather than widening the cut.",
+          "reversibility": "Reversible if a later measurement shows radial genuinely wants a viewport. Recorded as a ruling on today's measured model, not as a permanent property of radial."
+        }
       },
       {
         "id": "B-65 (outline's walk has no visited set)",
@@ -920,6 +937,17 @@
       "reason": "Per-stage commits leave every stage independently revertible, and given this project history of session expiry mid-increment, stage-committing is the SAFER shape -- uncommitted work across a long gate is the Inc-CRUMB exposure.",
       "requirement": "The close record still names the commits and states the shape, so the record says which one was used rather than implying the old one."
     },
+    "whole_branch_gate_brief_items": [
+      {
+        "id": "fold-2 narration confirmation",
+        "date": "2026-09-18",
+        "authority": "Coordinator ruling 2026-09-18 (2). GRANTED, and it rides THE WHOLE-BRANCH QA GATE -- explicitly NOT S-D.",
+        "scope": "STRICTLY the sentences changed in commits `c921078` and `e2bc4d7`. Nothing wider.",
+        "why_it_exists": "The S-B(+C) fold review's findings F18-F22 were applied by the implementer, and the reviewer had written that whoever applies its snippets owes a reviewer who is not it. That second review was NOT obtained; the implementer stopped the recursion deliberately and declared the gap as the fold's hardest risk rather than letting it pass silently.",
+        "TERMINAL_BOUNDARY_ATTACHED": "Anything this pass raises OUTSIDE those sentences is a CARRY, not a fix. This is the batch's terminal-boundary pattern (same rule that produced Inc-W1), and here it is load-bearing for the reason the newly minted control states: the narration axis has only a reader for an instrument, and readers do not converge by iteration -- so this is a terminal pass, not another turn of the loop.",
+        "why_it_does_not_block_S-D": "The residual risk is docs-only: zero `.py` changes in fold 2, zero executable delta, both lanes green at the close gate, and F18's replacement figures re-derived with a firing control. Blocking a source increment on a docs-only risk would be the wrong trade."
+      }
+    ],
     "external_blocks": [
       {
         "id": "V7 / flow-bundle revision label",
