@@ -3517,16 +3517,28 @@ class MapScreen(Screen):
             # against: silently deleting would break a standing ruling in order
             # to soften a lesser one.
             #
-            # THE SENTENCE IS CONDITIONAL BECAUSE IT MUST NEVER BE FALSE.  "the
-            # file there is stale" is a claim about the world, and on a map's
-            # first export there is no file to be stale.  It is made only when
-            # one is actually present.
+            # THE SENTENCE IS CONDITIONAL BECAUSE IT MUST NEVER BE FALSE -- AND
+            # ITS FIRST FORM WAS FALSE ANYWAY.  It read "... es de una
+            # exportación anterior y ya no refleja este mapa", guarded by
+            # `path.exists()`.  But EXISTENCE IS NOT STALENESS, and the guard and
+            # the sentence were therefore two different claims.  Measured: export
+            # a map, change NOTHING about the graph, then make the same map
+            # exceed the budget -- the artifact on disk is still a faithful
+            # export of that exact graph, and the refusal called it stale.
+            #
+            # So it now says only what `exists()` licenses: nothing was written,
+            # a file is there, and an earlier export wrote it.  Whether that file
+            # still matches the map is something this code does not know and must
+            # not assert.  Telling the operator a CURRENT file is stale is the
+            # same category of error as letting them believe a STALE file is
+            # current -- both are the artifact misdescribing itself, which is the
+            # family `B-68` names.
             path = self.store.workspace / f"{self.map_id}.svg"
             stale = ""
             if path.exists():
                 stale = (
-                    f" El archivo en {path} es de una exportación anterior "
-                    "y ya no refleja este mapa."
+                    f" No se escribió nada: el archivo en {path} es de una "
+                    "exportación anterior."
                 )
             self.notify(
                 f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
@@ -3601,20 +3613,63 @@ class MapScreen(Screen):
     #: like diligence.
     #:
     #: AND THE PER-CELL MODEL ITSELF IS WRONG, which is why no rate appears
-    #: above.  Across the shapes this budget ADMITS the cost spans **0.955 to
-    #: 3.27 us/cell** -- a 3.4x spread tracking NODE DENSITY, not area.  So a
-    #: single rate cannot derive a cell budget in either direction, and two
+    #: above.  Cost per cell tracks NODE DENSITY, not area, so a single rate
+    #: cannot derive a cell budget in either direction -- which is why two
     #: independent passes that each sampled one shape family reached answers 6x
     #: apart: wide-and-deep is cheap per cell, wide-only is dense and expensive.
     #:
-    #: WHAT ACTUALLY JUSTIFIES 350,000: A BUDGET IS JUDGED ON THE WORST SHAPE
-    #: IT ADMITS, not a typical one.  Hunted across both families and two
-    #: starting canvas heights, the worst ACCEPTED shape -- 1,000 wide,
-    #: 312,026 cells, at the `size.height - 10` start a 35-row terminal gives --
-    #: costs **1.447 s** against the 2-second target, a margin of about 28%.
-    #: Nothing the budget admits crosses the target.  A proposal to relax it to
-    #: ~2.12M cells was REFUSED: it generalised from the cheap family and would
-    #: admit wide-only maps costing many seconds.
+    #: (The span first written here, "0.955 to 3.27 us/cell, a 3.4x spread", is
+    #: STRUCK with the universal below and for the same reason: it was measured
+    #: over the same restricted region, at tall start heights only.  An
+    #: independent pass measured up to ~53 us/cell once the start height is free
+    #: -- roughly a 55x spread.  The QUALITATIVE claim, that the rate varies
+    #: with density and so cannot be a single number, is what survives, and it
+    #: is stated without a figure because no figure is safe here.)
+    #:
+    #: WHAT JUSTIFIES 350,000 IS UTILITY, AND *NOT* A TIME GUARANTEE.  THE TIME
+    #: CLAIM THAT STOOD HERE IS STRUCK, AND IT IS THE SECOND DERIVATION OF THIS
+    #: CONSTANT TO BE STRUCK FOR A DIFFERENT REASON THAN THE ONE BEFORE IT.
+    #: It read: "the worst ACCEPTED shape -- 1,000 wide, 312,026 cells -- costs
+    #: 1.447 s against the 2-second target, a margin of about 28%.  Nothing the
+    #: budget admits crosses the target."  THE UNIVERSAL IS FALSE.
+    #:
+    #: WHY IT IS FALSE: the hunt varied GRAPH SHAPE and held the START HEIGHT
+    #: fixed, and the start height is not a free choice -- it is
+    #: `max(5, size.height - 10)`, set by the operator's TERMINAL, and it governs
+    #: how much node DENSITY a fixed cell budget admits.  A SHORTER terminal
+    #: gives a smaller `h`, so `w * h <= EXPORT_MAX_CELLS` admits a far WIDER
+    #: map, and width is what costs.  Measured clean, the worst ADMITTED shape
+    #: per terminal:
+    #:
+    #:     118x40 ->   940 wide, 349,711 cells ->  1.91 s   (under)
+    #:     118x35 -> 1,121 wide, 349,778 cells ->  2.41 s   (1.2x over)
+    #:      80x24 -> 1,944 wide, 349,935 cells ->  5.94 s   (3.0x over)
+    #:     118x20 -> 2,651 wide, 349,943 cells -> 10.38 s   (5.2x over)
+    #:     118x11 -> 3,645 wide, 349,928 cells -> 17.73 s   (8.9x over)
+    #:
+    #: It is over target at 80x24, the classic default, and over target at the
+    #: very terminal the struck sentence was measured on.
+    #:
+    #: THIS IS `C-31` AT THE SEARCH RATHER THAN THE INSTRUMENT, and it is the
+    #: corollary minted one revision earlier, applied to its own author: the
+    #: previous derivation was struck for a contaminated INSTRUMENT, the
+    #: instrument was fixed, and the SEARCH was left holding a governing
+    #: variable fixed.  Correcting how you measure does not correct what you
+    #: measured over.
+    #:
+    #: WHAT IS TRUE, WITH ITS BOUNDARY: at start heights of about 30 rows and
+    #: up, the worst admitted shape stays under 2 s.  Below that it rises
+    #: monotonically as the terminal shortens.  A CELLS-ONLY BUDGET CANNOT
+    #: EXPRESS A TIME BOUND, because cost depends on `w` and `h` separately and
+    #: this constant constrains only their product -- so no value of it makes
+    #: the universal true.  Making the freeze genuinely bounded needs a
+    #: different bound, and that is a ruling rather than a constant.
+    #:
+    #: SO THE CONSTANT RESTS ON UTILITY ALONE, which is untouched and never
+    #: depended on the arithmetic: a 72001x24004 SVG is unreadable by anybody
+    #: whatever it costs to produce.  A proposal to relax the budget to ~2.12M
+    #: cells is still REFUSED -- it generalised from the cheap shape family and
+    #: would admit wide-only maps costing many seconds more than these.
     #:
     #: THE UTILITY GROUND IS UNTOUCHED AND STANDS ALONE.  Even were the cost
     #: free, a 72001x24004 SVG is not an artifact any recipient can read, so
