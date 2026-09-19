@@ -9199,9 +9199,16 @@ over. `EXPORT_MAX_CELLS = 350_000`, and **what justifies it is UTILITY — not a
 > all**: cost depends on `w` and `h` separately while this constant constrains only their product, so
 > no value of it makes the universal true.
 
-What remains true, with its boundary: at start heights of about 30 rows and up the worst admitted
-shape stays under 2 s, and below that it rises monotonically as the terminal shortens. Heap is not
-the binding constraint.
+⚠ **This clause's own replacement sentence is STRUCK IN TURN by amendment set 11** — the THIRD false
+claim of this family. It read *"at start heights of about 30 rows and up the worst admitted shape
+stays under 2 s, and below that it rises monotonically as the terminal shortens."* Both halves are
+false: the safe side breaches at its own boundary (4 of 9 runs over 2 s, reproduced; 7 of 9
+independently), because the figure behind it was a **minimum** rather than an upper quantile; and the
+curve **plateaus** rather than rising, because the start height floors at 5.
+
+**No fourth number replaces it.** What is asserted instead is clockless and is the mechanism:
+**the same map is admitted or refused depending on the operator's terminal** — a 3,645-wide fanout
+fits the budget at start height 5 and is refused at 30. Heap is not the binding constraint.
 
 **The refusal names the route, not only the number.** The toast carries the measured extent in cells,
 the limit, and *"Enfoca un subárbol con `f` y exporta esa vista"*. `f` really does focus a subtree —
@@ -9384,9 +9391,10 @@ it*) is proven for the second time in two increments, both times on its own mint
 at a new number.** A cells-only budget **provably cannot** express a time bound, because cost
 depends on `w` and `h` separately while `EXPORT_MAX_CELLS` constrains only their product — so no
 value of the constant makes the universal true, and picking a smaller one would repeat the mistake a
-third time. What is asserted instead is bounded and checkable: *at start heights of about 30 rows
-and up, the worst admitted shape stays under 2 s; below that it rises monotonically as the terminal
-shortens.*
+third time. ⚠ **What was asserted instead — *"at start heights of about 30 rows and up, the worst
+admitted shape stays under 2 s; below that it rises monotonically as the terminal shortens"* — is
+ITSELF STRUCK by amendment set 11**, which is the third false claim of this family and the reason no
+number of any kind now appears. See `A-100.6`.
 
 **`EXPORT_MAX_CELLS = 350_000` STANDS, on the UTILITY ground**, which has been untouched through
 both strikes and never depended on the arithmetic: a 72001×24004 SVG is unreadable by anybody
@@ -9417,3 +9425,92 @@ itself, which is the family `B-68` names.
 mode and so could not see this:
 `tests/test_export_state.py::test_a_refusal_does_not_call_a_CURRENT_artifact_stale` — the claim must
 be **true** whenever it is made, not merely **absent** when there is no file.
+
+---
+
+## Amendment set 11 — the third strike, and the last number. 2026-09-19. Base `e6045a9`.
+
+### `A-100.6` — no safe-side time claim; the MECHANISM is pinned instead
+
+**Authority.** Coordinator ruling 2026-09-19 (1); `code-reviewer` finding `CR17-F6` (MEDIUM),
+reproduced by the implementer before acceptance.
+
+**What is struck.** *"At start heights of about 30 rows and up, the worst admitted shape stays under
+2 s; below that it rises monotonically as the terminal shortens."*
+
+**Both halves are false.** The safe side breaches **at its own boundary, on the very narrow-title
+family it was derived from**: at start height 30, 4 of 9 runs exceeded 2 s (min 1.321, median 1.890,
+max 2.139) reproduced here, and 7 of 9 with a median of 2.059 measured independently. And
+"monotonically" is false because the start height **floors at 5**: terminals of 15, 12 and 11 rows
+all admit the identical shape (fan 3,645), so the curve rises and then **plateaus**.
+
+**The root cause is a STATISTIC.** The 1.91 s behind the sentence was a **minimum**.
+
+> **Best-of-N is the correct statistic for demonstrating a BREACH and the wrong one for demonstrating
+> SAFETY.** If the minimum exceeds the bound, every run does — which is why the earlier HIGH stands
+> *a fortiori*. If the minimum is under it, nothing follows about the rest. A worst-case claim must be
+> established on an upper quantile.
+
+**THE FAMILY IS THREE DEEP, AND EVERY LAYER WAS A SOUND FIX OF THE ONE BEFORE IT.** Set 9 struck a
+contaminated **instrument**; set 10 struck a **search** that held a governing variable fixed; set 11
+strikes the **statistic**. *Correcting how you measure does not correct what you measured over — and
+correcting what you measured over does not correct which tail you quoted.*
+
+**What replaces it: nothing numeric, deliberately.** Three claims of this family have been false, so
+the replacement is **clockless** and is the mechanism all three were groping at:
+
+> **The same map is admitted or refused depending on the operator's terminal.** A 3,645-wide fanout
+> fits the budget at start height 5 and is refused at 30, because the budget bounds `w × h` while the
+> start height is `max(5, size.height - 10)` — chosen by the terminal. That is precisely why a
+> cells-only budget cannot express a time bound.
+
+**Acceptance.** `tests/test_export_state.py::test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL`,
+parametrised over two real terminal sizes and **driving the product's own `_export_view_state`**. It
+holds no clock, so it cannot flake, and it is killed from **both** directions — raising the budget
+reddens the refused row, lowering it reddens the admitted row.
+
+> A timing arm was recommended at pass 1 and **withdrawn by the reviewer who recommended it**, on its
+> own new data: it would re-assert in the suite a guarantee this requirement has just withdrawn, and
+> it is flaky by construction (1.978–2.146 s across nine identical runs). The withdrawal is recorded
+> because it is the better judgement, and because a recommendation retracted on measurement is worth
+> as much as one made on it.
+
+### `A-100.7` — the refusal claims nothing about who wrote the file
+
+**Authority.** `code-reviewer` finding `CR17-F4` (LOW), sharpened at pass 2.
+
+`A-100.5` justified the stale-file sentence as saying *"only what `exists()` licenses"* — and then
+asserted an **export** wrote the file, which `exists()` does not license: a directory, or a file the
+operator dropped at that path, would have been called a previous export. **This increment's own
+stated principle, turned on it.**
+
+Guarded by `is_file()`, which licenses *"el archivo"*, and claiming nothing about its author:
+*"No se escribió nada: el archivo en `{path}` no corresponde a esta exportación."* Both halves are
+true whoever put it there. Weakening the guard back to `exists()` reddens the negative control.
+
+### `A-100.8` — the export DECLARES its wait
+
+**Authority.** Coordinator ruling 2026-09-19 (1).
+
+A UI that stops responding with no indication is this batch's own defect class applied to **time**
+instead of content — hidden without being declared. Above `EXPORT_DECLARE_CELLS` the export
+**shall** announce itself before rendering, naming the **extent** and promising **no duration**
+(cost is not a function of cells; a cells-to-seconds claim would be the fourth false universal). The
+budget is checked first, so a refusal never announces a wait it will not take.
+
+> **The ruling's estimate of the cost was wrong, and it was measured rather than argued.** A notice
+> that arrives after the freeze it warns about is an apology, not a declaration. Measured, paint time
+> against work time: notify-then-block paints the toast **404 ms late**; `call_after_refresh`
+> **403 ms late**; an `async` action yielding with `sleep(0)` **403 ms late**. Only a real yield
+> paints first (**+50 ms**). **So declaring the wait DOES need async**, and `action_export_svg` is
+> now async with a 50 ms yield. That is the whole of the cost.
+
+**Acceptance.** `test_a_large_export_DECLARES_the_wait_before_it_freezes_the_pump`, parametrised over
+a large map and a trivial one — the second row refusing the cheapest cheat, announcing every export,
+which is how a declaration decays into noise.
+
+**Off-pump with progress and cancel remains the real fix and is CARRIED to the design batch**,
+alongside the render work-budget work, which is the same problem. **The earlier rejection of off-pump
+does not transfer**: it was rejected when it bought the ability to wait for and abort a useless 16 GB
+artifact. The artifact is now bounded and useful, so what off-pump buys has changed. **A ruling's
+grounds expire when the situation it ruled on does.**
