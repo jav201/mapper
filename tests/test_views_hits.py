@@ -71,16 +71,23 @@ def _graph():
     return g
 
 
-def _spans_at(cls, w, hits, selected=None):
+def _spans_at(cls, w, hits, selected=None, focus_owner=""):
     """The ONE render call site in this module.
 
     `selected` is a DEFAULTED parameter rather than a second helper, so the A3
     census's arg-ful call-site count does not move when the precedence arms
-    below start driving a selection.
+    below start driving a selection.  `focus_owner` is added the same way and
+    for the same reason -- and its absence is exactly why `UX-F7b` was invisible
+    here: every arm in this file rendered at the default `""`, which takes
+    `layered`'s FOCUSED selection branch, so the UNFOCUSED branch was observed
+    by none of them.
     """
     t = cls().render(
         _graph(),
-        ViewState(w=w, h=24, hits=frozenset(hits), selected_id=selected),
+        ViewState(
+            w=w, h=24, hits=frozenset(hits), selected_id=selected,
+            focus_owner=focus_owner,
+        ),
     )
     return t.plain, [(s.start, s.end, str(s.style)) for s in t.spans]
 
@@ -425,4 +432,52 @@ def test_llr_n07_2_2b_every_renderer_uses_THE_SAME_hit_style():
     every = set().union(*introduced.values())
     assert every == {HIT_STYLE}, (
         f"the renderers do not agree on one hit style: {introduced}"
+    )
+
+
+@pytest.mark.parametrize(
+    "cls", renderer_classes(), ids=lambda c: f"{c.__module__.split('.')[-1]}.{c.__name__}"
+)
+def test_llr_n07_2_2b_no_NON_hit_wears_the_hit_style_while_another_region_has_focus(cls):
+    """`UX-F7b`: a NON-hit painted in hit livery — a FALSE signal.
+
+    A FALSE SIGNAL OUTRANKS A WITHHELD ONE, and that is what separates this from
+    `F7` one arm above. `F7` is a selected node that IS a hit losing its hit
+    marking: a signal WITHHELD, and the pagination strip's `at/N` still carries
+    the answer, which is why that precedence was ruled correct and stands. This
+    is the inverse — the operator is told something IS a match when it is not,
+    and nothing in the frame contradicts it.
+
+    MEASURED BEFORE THE FIX, through the real chords: six titles in hit livery
+    against five declared hits, with the strip in the same frame reading `0/5`.
+    The cause was a collision of two style constants — `layered` painted the
+    UNFOCUSED selection in `INK on STEP`, which is the hit livery byte for byte
+    in four renderers.
+
+    WHY 50 ARMS MISSED IT: every one of them rendered at `focus_owner=""`, which
+    takes the FOCUSED selection branch. The unfocused branch this defect lives
+    in was reachable by the product and by no arm — a parametrisation that
+    samples one value of a field tests one value of it.
+
+    THE HIT STYLE IS DERIVED, NOT SPELLED: taken from what a hit actually
+    introduces in THIS renderer, so the arm cannot drift from the thing it
+    polices, and it is asserted non-empty first so a renderer that stopped
+    painting hits at all could not pass this vacuously.
+    """
+    _, without = _spans_at(cls, 120, set())
+    _, with_hit = _spans_at(cls, 120, {"hit"})
+    hit_styles = {st for _, _, st in with_hit} - {st for _, _, st in without}
+    assert hit_styles, (
+        f"{cls.__name__} introduces NO style for a hit, so this arm would pass "
+        "over nothing"
+    )
+
+    # No hits at all, a selection on a node that is not one, and the keyboard
+    # owned by another region. Nothing in this frame may wear hit livery.
+    _, unfocused = _spans_at(cls, 120, set(), selected="other", focus_owner="rail")
+    worn = {st for _, _, st in unfocused} & hit_styles
+    assert not worn, (
+        f"{cls.__name__} paints a NON-hit in the hit style {worn} while another "
+        f"region owns the focus: the frame declares a match the search never "
+        f"found"
     )

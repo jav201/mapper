@@ -698,10 +698,36 @@ class LayeredRenderer:
             # `""` means the owner is unknown, and it paints what the tree
             # painted before this field existed.  That is what keeps the
             # signature migration byte-identical.
+            # `UX-F7b`: THE UNFOCUSED SELECTION TONE WAS THE HIT TONE, BYTE FOR
+            # BYTE.  `INK on STEP` is the hit livery in four renderers, and this
+            # branch painted the selected card in exactly it -- so a selected
+            # node that is NOT a hit was painted as a match.  Driven with search
+            # live and the cursor on a non-hit: six titles in hit livery against
+            # five declared hits, with the strip in the same frame reading `0/5`.
+            #
+            # A FALSE SIGNAL OUTRANKS A WITHHELD ONE, which is what decides this.
+            # `F7` -- a selected node that IS a hit losing its hit marking --
+            # withholds a signal the strip's `at/N` already carries, and that
+            # precedence was ruled correct and STANDS.  This is the inverse and
+            # is strictly worse: it tells the operator something IS a match when
+            # it is not, and no channel contradicts it.
+            #
+            # NEITHER TEXT CAUSES THIS, determined before anything was changed:
+            # the precedence ruling says selection paints OVER hit, not that the
+            # two tones must be EQUAL, and `LLR-N07.2.2b` already forbids a
+            # non-hit wearing hit livery.  The cause is a collision of two style
+            # constants, so the fix belongs here and no amendment is owed for it.
+            #
+            # THE SMALLEST CHANGE THAT BREAKS THE COLLISION, and it strengthens
+            # this branch's own stated intent rather than redesigning it: the
+            # comment above says the selection should stop CLAIMING TO BE ACTIVE
+            # while staying visible, and a muted foreground says that more
+            # plainly than full-strength ink did.  The background is unchanged,
+            # so the card still reads as selected at a glance.
             if state.focus_owner in ("", "canvas"):
                 block_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
             else:
-                block_style = f"{darkside.INK} on {darkside.STEP}"
+                block_style = f"{darkside.MUT} on {darkside.STEP}"
             for j, ch in enumerate("▐ " + _fit(node.ficha.title, card_w - 3)):
                 cv.put(cx + j, y, ch, block_style)
 

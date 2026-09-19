@@ -1,6 +1,7 @@
 """Textual TUI app for mapper — darkside UI."""
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from dataclasses import replace
@@ -3494,13 +3495,49 @@ class MapScreen(Screen):
             idx = 0
         self._goto_gap(order[idx])
 
-    def action_export_svg(self) -> None:
+    #: Above this many cells the export ANNOUNCES ITSELF before it freezes the
+    #: pump.  A JUDGEMENT, named as one, and deliberately NOT derived from a
+    #: time: this seam's whole lesson is that cost is not a function of cells,
+    #: so any cells-to-seconds threshold would be that same false universal a
+    #: third time.  The notice therefore states the EXTENT and promises no
+    #: duration.  Roughly a quarter of the budget, which on the measured shapes
+    #: is about where an export stops being instantaneous on any terminal.
+    EXPORT_DECLARE_CELLS = 90_000
+
+    #: How long the export yields so the notice can actually REACH THE SCREEN.
+    #: MEASURED, and it is why this action is `async`.  A notice that arrives
+    #: after the freeze it warns about is an apology, not a declaration -- and
+    #: three cheaper shapes were measured and REJECTED: notifying then blocking
+    #: in the same handler paints the toast 404 ms LATE, `call_after_refresh`
+    #: 403 ms late, and an async action yielding with `sleep(0)` 403 ms late.
+    #: Only a real yield lets the pump mount and paint the toast first (+50 ms,
+    #: measured).  So declaring the wait DOES need async, and this constant is
+    #: the whole of what that costs.
+    EXPORT_DECLARE_PAUSE = 0.05
+
+    async def action_export_svg(self) -> None:
         if self.store is None:
             return
         try:
             size = self.size or self.app.size
             renderer = self._current_renderer()
-            text = renderer.render(self.graph, self._export_view_state(size))
+            # THE BUDGET IS CHECKED FIRST, so a refusal never announces a wait
+            # it is not going to take.
+            state = self._export_view_state(size)
+            cells = max(0, state.w) * max(0, state.h)
+            if cells >= self.EXPORT_DECLARE_CELLS:
+                # A FREEZE NOBODY WAS TOLD ABOUT IS THIS BATCH'S OWN DEFECT
+                # CLASS APPLIED TO TIME INSTEAD OF CONTENT -- hidden without
+                # being declared.  The export is bounded and useful now, but
+                # bounded is not instant: the worst shape the budget admits
+                # still costs seconds on a short terminal, and a TUI that stops
+                # answering with no indication reads as hung rather than busy.
+                self.notify(
+                    f"exportando {cells} celdas; puede tardar un momento.",
+                    markup=False,
+                )
+                await asyncio.sleep(self.EXPORT_DECLARE_PAUSE)
+            text = renderer.render(self.graph, state)
             path = self.store.workspace / f"{self.map_id}.svg"
             save_svg(text, path)
             self._event_toast("exportado", str(path))
