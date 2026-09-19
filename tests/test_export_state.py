@@ -639,3 +639,63 @@ async def test_an_ordinary_map_still_exports(tmp_path):
 
     assert path.exists(), "an ordinary map was refused; the budget is too tight"
     assert path.stat().st_size > 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "fan, depth, expect_notice",
+    [
+        (400, 0, True),   # ~168k cells: over the declare threshold, under budget
+        (3, 3, False),    # a few thousand cells: instantaneous, says nothing
+    ],
+)
+async def test_a_large_export_DECLARES_the_wait_before_it_freezes_the_pump(
+    tmp_path, fan, depth, expect_notice
+):
+    """A freeze nobody was told about is this batch's defect class, applied to TIME.
+
+    The export is bounded and useful now, but BOUNDED IS NOT INSTANT: the worst
+    shape the budget admits still costs seconds on a short terminal, and a TUI
+    that stops answering with no indication reads as hung rather than busy. That
+    is content hidden without declaration, one axis over.
+
+    THE NOTICE STATES THE EXTENT AND PROMISES NO DURATION, deliberately. Cost is
+    not a function of cells -- that is this seam's whole lesson, learned twice --
+    so a cells-to-seconds claim would be the same false universal a third time.
+
+    The second row is the control that stops the cheapest cheat: announcing
+    every export, which would make the notice meaningless and is exactly how a
+    declaration decays into noise.
+    """
+    from mapper.app import MapperApp, MapScreen
+
+    notices: list[str] = []
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        app.store.save("m", _wide_and_deep(fan, depth))
+        app.push_screen(MapScreen("m"))
+        await pilot.pause()
+        screen = app.screen
+        screen.notify = lambda msg, **kw: notices.append(str(msg))
+        path = screen.store.workspace / "m.svg"
+
+        await pilot.press("e")
+        await pilot.pause()
+
+        # The positive control: this map really does export. Without it, "no
+        # notice" would be green for a map that was refused outright.
+        assert path.exists(), "the fixture did not export at all"
+
+    declared = [n for n in notices if "celdas" in n and "tardar" in n]
+    if expect_notice:
+        assert declared, (
+            f"a {fan}-wide export froze the pump without announcing itself: {notices}"
+        )
+        assert str(MapScreen.EXPORT_DECLARE_CELLS) not in declared[0], (
+            "the notice quotes the THRESHOLD; it must quote the extent of THIS map"
+        )
+    else:
+        assert not declared, (
+            f"a trivial export announced a wait it does not take: {declared}"
+        )
