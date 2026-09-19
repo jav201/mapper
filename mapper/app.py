@@ -276,8 +276,27 @@ class _ConfirmScreen(ModalScreen[bool]):
         self.message = message
 
     def compose(self) -> ComposeResult:
+        # `SEC-H2`: `markup=False` IS THE SECURITY CONTROL, not a formatting
+        # preference.  `Static` renders a `str` through TEXTUAL's markup grammar
+        # -- wider than Rich's, and it accepts `[@click=<action>]`, which binds a
+        # runnable action to a span.  This message interpolates the node's ficha
+        # title, and a sidecar title is untrusted input, so a title can bind
+        # `screen.confirm` to the very words being read and archive a subtree on
+        # ONE CLICK, with no `y`.  Measured on the unfixed tree: the payload
+        # `[@click=screen.confirm]Acta[/]` painted as `¿archivar «Acta»?` -- a
+        # sentence IDENTICAL to the benign one.  That is what makes it a security
+        # defect rather than a rendering bug: the human-in-the-loop stops being
+        # enforced and the human cannot see that it stopped.  `[conceal]` hides
+        # the rest of the sentence, and an unclosed tag kills the app out of the
+        # compositor's own reflow, where no caller can catch it.
+        #
+        # FIXED AT THE SINK, DELIBERATELY.  Escaping at the one call site would
+        # be the instance fix for a class defect, and the next message built here
+        # would inherit the hazard.  A coercion idiom is correct only relative to
+        # its SINK -- and `markup=False` is the idiom this module already uses on
+        # every `notify`.
         yield Vertical(
-            Static(self.message, id="confirm-label"),
+            Static(self.message, id="confirm-label", markup=False),
             Static("", id="confirm-hints"),
             id="confirm-dialog",
         )
@@ -3815,7 +3834,16 @@ class MapScreen(Screen):
         # keys.  The message names how much goes, because "archivar" alone does
         # not tell the operator that the children go too.
         count = self._subtree_size(self.nav.cursor)
-        name = node.ficha.title or node.id
+        # `SEC-H2`, the SOURCE half, and it is a DIFFERENT hazard from the sink's.
+        # `markup=False` stops the title acting on the dialog; it does not stop
+        # the title REORDERING the sentence, because a bidi override is faithful
+        # text and every renderer paints it faithfully.  Measured on the unfixed
+        # tree: U+202E and U+200D reached the confirmation raw, so a title could
+        # rearrange the words the operator is approving.  `darkside.plain` maps
+        # the banned ranges to U+FFFD.  The archive toast eight lines above
+        # already called it on this identical value; this line built it again,
+        # raw -- which is why the fix is here and not only at the sink.
+        name = darkside.plain(node.ficha.title or node.id)
         # Archiving everything is not archiving, it is erasing.  The confirmation
         # used to promise it would "replace the root of the map" and then wrote an
         # EMPTY map to disk — nodes {}, root_id None — with the only recovery an
