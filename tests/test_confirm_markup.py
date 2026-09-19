@@ -12,9 +12,15 @@ reads -- ONE CLICK ON THE NODE NAME ARCHIVES THE SUBTREE WITHOUT `y`.
 WHY IT IS A SECURITY DEFECT AND NOT A RENDERING ONE: the rendered sentence is
 IDENTICAL to the benign one. The payload is not in the text the operator reads,
 so the system stops enforcing the human-in-the-loop and the human cannot see
-that it stopped. `[conceal]` hides the rest of the sentence; an unclosed tag
-kills the app out of the compositor's own reflow, where the caller cannot catch
-it.
+that it stopped. `[conceal]` hides the rest of the sentence; and a MALFORMED
+VALUE tag (`[@click=x?`, `[/`) raises `MarkupError` out of the compositor's own
+reflow, where the caller cannot catch it.
+
+CORRECTION TO THE ORIGINAL FINDING'S WORDING, measured by the confirming
+security pass on Textual 8.2.8: an UNCLOSED tag does NOT crash -- `[bold]never
+closed` renders fine. It is malformedness, not imbalance, that kills. Recorded
+because it changes what a regression payload has to be, and an arm written to
+the original wording would have been green for the wrong reason.
 
 TWO HAZARDS, TWO FIXES, AND THEY ARE NOT THE SAME HAZARD.
 
@@ -157,12 +163,73 @@ async def test_sec_h2_the_archive_confirmation_coerces_the_title_it_quotes(tmp_p
         )
 
 
-def test_sec_h2_the_oracle_can_tell_the_two_forms_apart():
-    """Instrument RED-proof: the oracle must distinguish parsed from literal.
+@pytest.mark.asyncio
+async def test_sec_h2_the_oracle_can_tell_the_two_forms_apart():
+    """Instrument RED-proof, and it must exercise THE ORACLE ITSELF.
 
-    Without this, both assertions above could be true of an oracle that never
-    looks at markup at all.
+    `S-F4`: the first version of this arm asserted things about `Text` and
+    `darkside.plain` and never called `_painted` at all -- an instrument
+    RED-proof that did not touch the instrument. Proven vacuous by mutation:
+    with `_painted` sabotaged to return `""`, the two arms above failed and
+    THIS ARM STILL PASSED. A proof that survives the breakage of its own
+    subject is not a proof of it.
+
+    It now drives `_painted` over both forms of the same `Static` and requires
+    them to DIFFER, which is the discriminating claim the arms above rest on.
     """
-    assert "[@click=screen.confirm]" in Text(f"x{CLICK_PAYLOAD}y").plain
+    from textual.app import App, ComposeResult
+    from textual.widgets import Static as S
+
+    class _Two(App):
+        def compose(self) -> ComposeResult:
+            yield S(f"x{CLICK_PAYLOAD}y", id="on")
+            yield S(f"x{CLICK_PAYLOAD}y", id="off", markup=False)
+
+    app = _Two()
+    async with app.run_test(size=(80, 10)) as pilot:
+        await pilot.pause()
+        parsed = _painted(app.query_one("#on", S))
+        literal = _painted(app.query_one("#off", S))
+
+    assert parsed != literal, (
+        "`_painted` cannot tell a markup-parsed Static from a literal one, so "
+        "every assertion resting on it is vacuous"
+    )
+    assert "[@click=screen.confirm]" not in parsed, (
+        f"markup=True did not consume the tags: {parsed!r}"
+    )
+    assert "[@click=screen.confirm]" in literal, (
+        f"markup=False did not paint the tags literally: {literal!r}"
+    )
+
+    # The coercion half of the oracle, kept because it is the other observable
+    # the arms above depend on.
     assert darkside.plain(f"acta{RLO}firmada").count(REPLACEMENT) == 1
     assert RLO not in darkside.plain(f"acta{RLO}firmada")
+    assert "[@click=screen.confirm]" in Text(f"x{CLICK_PAYLOAD}y").plain
+
+
+@pytest.mark.asyncio
+async def test_sec_h2_the_prompt_screen_twin_does_not_parse_markup(tmp_path):
+    """`S-F2`: the sink fix had to cover the CLASS, and it covered one member.
+
+    `_PromptScreen` is `_ConfirmScreen`'s structural twin -- a `str` parameter
+    rendered by a `Static`. Every caller passes a literal today, so this is not
+    exploitable; it is pinned because the ARGUMENT for fixing at the sink was
+    that the next caller must not be able to reopen it, and that argument is
+    worth exactly as much as the arm holding it.
+    """
+    from mapper.app import MapperApp, _PromptScreen
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        app.push_screen(_PromptScreen(f"¿nombre? {CLICK_PAYLOAD}"))
+        await pilot.pause()
+        painted = _painted(app.screen.query_one("#prompt-label", Static))
+
+    assert "nombre" in painted, f"the arm is not reading the prompt label: {painted!r}"
+    assert "[@click=screen.confirm]" in painted, (
+        "the prompt label parses Textual markup, so a title routed through it "
+        f"could bind a runnable action: {painted!r}"
+    )

@@ -236,8 +236,20 @@ class _PromptScreen(ModalScreen[str | None]):
         self.placeholder = placeholder
 
     def compose(self) -> ComposeResult:
+        # `S-F2`, and it is `SEC-H2`'s own lesson applied to the instance that
+        # fix missed.  `SEC-H2` was fixed AT THE SINK precisely so the CLASS
+        # would be closed rather than one call site -- and then only
+        # `_ConfirmScreen` got the switch, leaving its structural twin here with
+        # the grammar still on.  Every caller passes a literal today (all seven
+        # derived, and an independent census over the whole suite confirmed it),
+        # so nothing is exploitable; the point is that `self.title` is a `str`
+        # PARAMETER, and the next caller to route a node title through it would
+        # reopen the defect with every arm green.
+        #
+        # A class fix applied to one member of the class is an instance fix
+        # wearing a class fix's clothes.
         yield Vertical(
-            Static(self.title, id="prompt-label"),
+            Static(self.title, id="prompt-label", markup=False),
             Input(placeholder=self.placeholder, id="prompt-input"),
             Static("", id="prompt-hints"),
             id="prompt-dialog",
