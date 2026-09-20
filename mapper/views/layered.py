@@ -718,16 +718,33 @@ class LayeredRenderer:
             # non-hit wearing hit livery.  The cause is a collision of two style
             # constants, so the fix belongs here and no amendment is owed for it.
             #
-            # THE SMALLEST CHANGE THAT BREAKS THE COLLISION, and it strengthens
-            # this branch's own stated intent rather than redesigning it: the
-            # comment above says the selection should stop CLAIMING TO BE ACTIVE
-            # while staying visible, and a muted foreground says that more
-            # plainly than full-strength ink did.  The background is unchanged,
-            # so the card still reads as selected at a glance.
+            # THE TONE IS DERIVED FROM `#D28`, NOT CHOSEN.  This paints a node's
+            # TITLE -- readable, load-bearing text -- so the 4.5:1 floor governs,
+            # and picking the tone is applying a ratified constraint to a surface
+            # the ruling had not yet reached rather than making a design call.
+            #
+            # `MUT on STEP` WAS SHIPPED HERE FIRST AND IS ILLEGAL: measured
+            # 3.19:1, well under the floor.  It was reached by asking only what
+            # breaks the collision and never what is LEGAL -- which is how a
+            # contrast breach gets introduced by a correctness fix.
+            #
+            # `#D28`'s own discharge is that `MUT` readable text ESCALATES TO
+            # `INK`, and the constraint here is that it may not become `INK on
+            # STEP`, because that IS the hit livery.  `INK on PANEL` satisfies
+            # both: 17.18:1, and `PANEL` (#121212) is a different surface from
+            # `STEP` (#262626).  Measured alternatives and why each loses:
+            # `ACCENT on STEP` 4.13:1 and `GROUND on MUT` 4.43:1 are both under
+            # the floor; `WARN` and `ALERT` clear it but each holds a single
+            # declared job and would collide with it.
+            #
+            # And it reads right: `PANEL` is DARKER than `STEP`, so the unfocused
+            # selection sits RECESSED against the hit livery instead of competing
+            # with it -- which is what this branch has always said it wanted,
+            # still shown and no longer claiming to be active.
             if state.focus_owner in ("", "canvas"):
                 block_style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
             else:
-                block_style = f"{darkside.MUT} on {darkside.STEP}"
+                block_style = f"{darkside.INK} on {darkside.PANEL}"
             for j, ch in enumerate("▐ " + _fit(node.ficha.title, card_w - 3)):
                 cv.put(cx + j, y, ch, block_style)
 

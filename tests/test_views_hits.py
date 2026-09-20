@@ -481,3 +481,55 @@ def test_llr_n07_2_2b_no_NON_hit_wears_the_hit_style_while_another_region_has_fo
         f"region owns the focus: the frame declares a match the search never "
         f"found"
     )
+
+
+def test_the_unfocused_selection_tone_CLEARS_THE_CONTRAST_FLOOR():
+    """`#D28` applied to `STEP`/`PANEL`, which the ruling never reached.
+
+    The selection block paints a node's TITLE -- readable, load-bearing text --
+    so `#D28`'s 4.5:1 floor governs it, and the tone is therefore a MEASUREMENT
+    rather than a taste. This arm exists because the first fix for `UX-F7b`
+    shipped `MUT on STEP` at 3.19:1: breaking the hit collision was checked and
+    LEGALITY WAS NOT. One correctness fix introduced one accessibility defect,
+    which is this batch's own recurring shape in a new register.
+
+    TWO CONJUNCTS, ASSERTED SEPARATELY because they fail independently: the tone
+    must clear the floor, AND it must not be the hit livery. A tone satisfying
+    only the first reopens `UX-F7b`; a tone satisfying only the second is
+    illegal.
+
+    `_contrast` is IMPORTED, not re-spelled -- a third copy of a formula is how
+    two of them come to disagree, and this module already imports
+    `renderer_classes` across file boundaries for the same reason.
+    """
+    from tests.test_overflow import _contrast
+
+    # The renderer is DERIVED from the same set every other arm uses, so this
+    # arm cannot drift onto a class the census no longer covers.
+    layered = next(c for c in renderer_classes() if c.__name__ == "LayeredRenderer")
+
+    # Derived from the product, not transcribed: whatever style the unfocused
+    # selection introduces is what gets measured.
+    _, focused = _spans_at(layered, 120, set(), selected="other",
+                           focus_owner="canvas")
+    _, unfocused = _spans_at(layered, 120, set(), selected="other",
+                             focus_owner="rail")
+    introduced = {st for _, _, st in unfocused} - {st for _, _, st in focused}
+    assert introduced, (
+        "the unfocused selection introduces NO style of its own, so this arm "
+        "would measure nothing"
+    )
+
+    for style in introduced:
+        fg, _, bg = style.rpartition(" on ")
+        fg = fg.replace("bold ", "").strip()
+        if not bg or not fg.startswith("#"):
+            continue
+        ratio = _contrast(fg, bg.strip())
+        assert ratio >= 4.5, (
+            f"the unfocused selection paints readable text at {ratio:.2f}:1 "
+            f"({style}), under #D28's 4.5:1 floor"
+        )
+        assert style != HIT_STYLE, (
+            f"the unfocused selection wears the hit livery ({style}) -- UX-F7b"
+        )
