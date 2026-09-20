@@ -9572,3 +9572,52 @@ truthful but the *warning* is gone the moment the toast clears, while the card i
 **That is half the distinguishability defect, and it is the half that vanishes when the operator
 looks away.** A clause satisfied for one condition and green for the other is not satisfied. Both
 paths **shall** reach the declared card state.
+
+---
+
+## Amendment set 13 — the projection rule, ruled. 2026-09-19. Base `7c99df6`.
+
+### `A-103` — a row projects to ONE MEMBER PER DISTINCT TRIPLE it names
+
+**Authority.** Coordinator ruling 2026-09-19, on the ambiguity surfaced while implementing `Inc-7`.
+
+**The question.** `LLR-N16.2.1`'s instrument says to *"project every row onto the triple
+`(glyph, label, painted-in style)`"* and take the set of distinct triples. It does not say how a row
+naming **more than one** style projects, and two rows do: `V19` (*filled `SAGE` at or above 90 %
+coverage, else `INK`; empty `WORDMARK`*) and `V21` (*lit `MUT on PANEL`, unlit `WORDMARK on
+PANEL`*).
+
+**The rule, and it is determined by the requirement's purpose rather than chosen.**
+`LLR-N16.2.1` exists so that **every visual form the product paints is declared** — and a form *is*
+a triple, not a row. So **a compound row projects to one member per distinct triple it names.**
+`V19` contributes three members; `V21` contributes two.
+
+**Consequence, derived mechanically and not hand-listed:**
+
+| | |
+|---|---|
+| rows in §3.1–§3.4 | **22** |
+| **members of `declared_vocabulary`** | **25** |
+| compound rows | `V19` → 3, `V21` → 2 |
+
+> **THE ROW COUNT WAS NEVER THE RIGHT UNIT.** That is why *"any threshold written against the row
+> count is wrong before it is run"* is true, and why **every threshold citing 21 or 22 is
+> re-derived against the triple count rather than edited.** A threshold that counts rows counts the
+> document's formatting; a threshold that counts triples counts the painted forms, which is what the
+> requirement is about.
+
+### `A-104` — the assertion is LAYOUT-INDEPENDENT, stated so nobody later thinks otherwise
+
+**How the legend LAYS OUT a compound meaning — three tones on one line under one caption, or three
+separate lines — is a UX decision and is queued for the operator.** It does **not** block `Inc-8`
+and it does **not** change any arm.
+
+**The reason, stated rather than left to be rediscovered:** `LLR-N16.2.1`'s threshold is asserted
+over **painted triples**, derived from what the renderer and the legend each emit. A layout choice
+changes how many *lines* carry those triples; it cannot change the *set* of triples. So the arm is
+independent of the layout by construction.
+
+**This matters because the opposite belief is the expensive one.** A reader who thought the
+assertion depended on layout would hold `Inc-8` for a design verdict that cannot affect it — which is
+precisely the coupling this batch has already paid for once, when a *defect* and a *tone* were nearly
+bundled and had to be separated explicitly.
