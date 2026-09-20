@@ -702,48 +702,83 @@ async def test_a_large_export_DECLARES_the_wait_before_it_freezes_the_pump(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("term_h, admitted", [(15, True), (40, False)])
-async def test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL(
-    tmp_path, term_h, admitted
-):
-    """`CR17-F6`: the mechanism, pinned WITHOUT A CLOCK.
+async def test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL(tmp_path):
+    """`CR17-F6`: the mechanism, pinned WITHOUT A CLOCK -- and at its BOUNDARY.
 
     THE ONE FACT EVERY STRUCK CLAIM WAS GROPING AT: a cells-only budget cannot
     express a time bound, because cost depends on `w` and `h` SEPARATELY while
     `EXPORT_MAX_CELLS` constrains only their PRODUCT. The visible consequence is
-    this -- the SAME map is admitted or refused depending on the operator's
-    TERMINAL, because the export starts at `max(5, size.height - 10)`. A short
-    terminal gives a small `h`, so the same cell budget admits a far wider and
-    far costlier map.
+    that the SAME map is admitted or refused depending on the operator's
+    TERMINAL, since the export starts at `max(5, size.height - 10)`.
 
-    WHY THIS ARM AND NOT A TIMING ONE. A `< 2 s` arm was proposed and then
-    WITHDRAWN by the reviewer who proposed it, on its own new data: it would
-    re-assert in the suite a guarantee the requirement has just withdrawn, and
-    it is flaky by construction -- identical work measured 18.9 s, 21.0 s and
-    18.9 s on one idle machine. This arm holds no clock, so it cannot flake, and
-    it reddens the moment someone adds a second bound, which is exactly when a
-    reader wants to be told. It is the arm that would have caught `CR17-F1`
-    before it shipped.
+    THE FIRST VERSION OF THIS ARM PINNED 15 vs 40 AND WAS HALF-BLIND, which a
+    second reader measured: the extent settles at `max(8, start + 1)` where 8 is
+    the MAP'S OWN CONTENT HEIGHT, so anywhere below terminal 18 the start height
+    does not govern at all. Three mutations of the very expression the arm
+    exists to pin -- the floor `5`, and `-10` moved either way -- survived it.
+    The pin is now the BOUNDARY, 17 against 18, which reddens under both `-10`
+    shifts (measured).
 
-    IT DRIVES THE PRODUCT'S OWN METHOD. An earlier draft replayed the growth
-    loop inside the test, which is a hand-built model of the subject and could
-    not have seen a change at the call site.
+    IT ASSERTS CONTENT, NOT A TAUTOLOGY. The old asserts restated
+    `_within_export_budget`'s own postcondition -- `cells <= budget` after it
+    returned cannot fail -- so they decorated the raise/no-raise differential
+    rather than adding to it. What is asserted instead is the PLATEAU: terminals
+    9 through 17 settle to the IDENTICAL extent, which is the real mechanism
+    (a content-height floor) and is what makes the budget's verdict flip on one
+    row of terminal.
+
+    THE VIEW IS SET EXPLICITLY, because it is a SECOND governing variable and
+    inheriting it is how the struck sentences went wrong: `outline` and `radial`
+    decline the resize, so the export keeps a terminal-sized state and the
+    budget can never refuse there. This arm is about `layered`.
     """
     from mapper.app import MapperApp, MapScreen
 
-    app = MapperApp(tmp_path)
-    async with app.run_test(size=(118, term_h)) as pilot:
-        await pilot.pause()
-        app.store.save("ancho", _wide_and_deep(3645, 0))
-        app.push_screen(MapScreen("ancho"))
-        await pilot.pause()
-        screen = app.screen
-        size = screen.size or app.size
+    # THE BIG MAP IS NEVER MOUNTED ON SCREEN. Mounting it would make the screen
+    # RENDER 3,645 nodes five times over -- ~110 s, past the 120 s per-test
+    # timeout -- and rendering it is not what this arm is about.
+    # `_export_view_state` is layout arithmetic (~2.5 ms); the graph is swapped
+    # in after a trivial map has mounted, which is the idiom the refusal arms
+    # above already use.
+    ancho = _wide_and_deep(3645, 0)
+    seen: dict[int, int] = {}
+    refused_at: dict[int, int] = {}
+    for term_h in (9, 11, 15, 17, 18):
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, term_h)) as pilot:
+            await pilot.pause()
+            app.store.save("chico", _wide_and_deep(2, 2))
+            app.push_screen(MapScreen("chico"))
+            await pilot.pause()
+            screen = app.screen
+            screen.graph = ancho
+            assert screen._current_renderer().__class__.__name__ == "LayeredRenderer", (
+                "the arm inherited a view other than layered; the view is a second "
+                "governing variable and must not be left to the default"
+            )
+            try:
+                state = screen._export_view_state(screen.size or app.size)
+                seen[term_h] = state.w * state.h
+            except ExportTooLarge as too_large:
+                refused_at[term_h] = too_large.cells
 
-        if admitted:
-            state = screen._export_view_state(size)
-            assert state.w * state.h <= MapScreen.EXPORT_MAX_CELLS
-        else:
-            with pytest.raises(ExportTooLarge) as refused:
-                screen._export_view_state(size)
-            assert refused.value.cells > MapScreen.EXPORT_MAX_CELLS
+    # THE PLATEAU: below the boundary the terminal does not move the extent at
+    # all, because the map's own content height floors it. This is the content
+    # the old tautological asserts did not carry.
+    assert set(seen) == {9, 11, 15, 17}, f"expected 9/11/15/17 admitted, got {sorted(seen)}"
+    assert len(set(seen.values())) == 1, (
+        f"the extent moved across the plateau: {seen}. The plateau is the "
+        f"mechanism -- a content-height floor, not the start-height floor of 5."
+    )
+
+    # THE BOUNDARY: one row of terminal flips the verdict on an unchanged map.
+    assert set(refused_at) == {18}, f"expected refusal at 18 only, got {sorted(refused_at)}"
+    plateau_cells = next(iter(seen.values()))
+    assert refused_at[18] > plateau_cells, (
+        "the refused extent is not larger than the plateau extent, so the "
+        "terminal is not what decided"
+    )
+    assert plateau_cells <= MapScreen.EXPORT_MAX_CELLS < refused_at[18], (
+        f"the budget does not sit between the plateau ({plateau_cells:,}) and "
+        f"the next row up ({refused_at[18]:,}); this arm no longer pins a boundary"
+    )
