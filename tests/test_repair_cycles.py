@@ -587,3 +587,77 @@ async def test_llr_n13_1_5_a_LOAD_WARNING_also_reaches_the_card(tmp_path, monkey
         f"a map that recorded a LOAD WARNING is painted as healthy: {avisado!r}. "
         f"The warning was a transient toast; the card is permanent."
     )
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_the_card_carries_the_DECLARED_state_string(tmp_path):
+    """`F1`: the third limb of the threshold, which shipped unasserted.
+
+    `LLR-N13.1.5` declares the card state as a STRING THAT SHIPS, and
+    `PRED-VIS` adds the glyph limb ON TOP OF it -- not instead of it. The first
+    implementation painted ` ⊘ dañado `, a third string in neither `01b` nor the
+    LLR, and no arm asked for the declared one.
+
+    THE `↵` IS LOAD-BEARING AND THAT IS WHY THIS ARM EXISTS. `#D28` escalates
+    this seat from `MUT` to `INK` BECAUSE the copy invites an action; a card
+    without the invitation takes the escalated style while deleting the
+    justification for it. So the arm checks the invitation, not merely the word.
+    """
+    from mapper import darkside
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        (app.store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        painted = "".join(_cells(app.screen.query_one("#home-recents"), "roto"))
+
+    assert darkside.DAMAGED_MAP_STATE in painted, (
+        f"the card does not carry the declared state {darkside.DAMAGED_MAP_STATE!r}: "
+        f"{painted!r}"
+    )
+    assert chr(0x21B5) in painted, (
+        f"the card carries no invitation, so #D28's INK escalation has no "
+        f"justification on it: {painted!r}"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("surface", ["hero", "resume"])
+async def test_llr_n13_1_5_no_OTHER_surface_paints_a_damaged_map_as_healthy(
+    tmp_path, surface
+):
+    """`F2`: the clause is about the SCREEN, not about one widget on it.
+
+    The recents loop was fixed and the hero was not, so a map the system could
+    not READ was given a hero showing `0 nodos` in `INK` -- the calm tone --
+    measured BYTE-IDENTICAL to a healthy EMPTY map's hero. `resume` is the same
+    shape and invites the operator straight back into the unreadable map.
+
+    Both branches are named in `LLR-N13.1.5`'s Touched symbols; fixing one and
+    not the others is what half-satisfying a clause looks like.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        store.record_session("roto", "a")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        screen = app.screen
+        box = screen.query_one(
+            "#home-hero-box" if surface == "hero" else "#home-resume-box"
+        )
+        shown = box.display
+        # The card must still be there: the map is declared, not hidden.
+        rows = {str(k.value) for k in screen.query_one("#home-recents").rows}
+
+    assert "roto" in rows, "the damaged map lost its card; containment is the point"
+    assert not shown, (
+        f"the {surface} surface presents a map the system could not read as if "
+        f"it were usable; there is no honest {surface} for an unreadable map"
+    )

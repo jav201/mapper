@@ -9594,11 +9594,41 @@ a triple, not a row. So **a compound row projects to one member per distinct tri
 
 **Consequence, derived mechanically and not hand-listed:**
 
-| | |
-|---|---|
-| rows in §3.1–§3.4 | **22** |
-| **members of `declared_vocabulary`** | **25** |
-| compound rows | `V19` → 3, `V21` → 2 |
+> ⚠ **THE COUNT BELOW IS RETRACTED. `25` IS THE FIFTH WRONG GENERATION OF THIS NUMBER**, and
+> §5.2 / `A-07` had already warned that a fifth was coming. It was derived with a row regex of
+> `(V\d+)` — **digits only** — and three faults follow from that and from not reading §5.2 first:
+>
+> 1. **`V4a` and `V4b` were silently skipped.** A lettered row id is still a row. With them the
+>    table carries **24** rows, not 22.
+> 2. **`V4b` is a THIRD compound row** — *"`MUT`; the path to the selected node in `ACCENT`"* — and it
+>    appeared in neither the pending list nor the ruled projection's accounting.
+> 3. **Two removals the rule depends on cannot be performed as the documents describe them**, which
+>    is why no replacement number is offered here. See the conflicts below.
+>
+> **The RULE of `A-103` stands: a compound row projects to one member per distinct triple it names.**
+> Only the arithmetic is retracted. **A fifth wrong number is not repaired by a sixth**, so the count
+> is left UNDERIVED until the two conflicts are ruled.
+
+#### Two artifact conflicts, SURFACED rather than averaged
+
+**(a) `V4` and `V4a` are NOT byte-identical, though this document says they are.** §5.2 justifies
+collapsing them on byte-identity *"both `∙ ∙ ∙` / `territorio sin explorar` / `WORDMARK`
+(`01b:277`, `01b:287`)"*. Measured: `V4a`'s glyph cell is ``` `∙ ∙ ∙` (scattered braille,
+`U+2800`–`U+28FF`) ```. They may well be the same *painted form* — the parenthetical reads as a gloss
+— but that is a **judgement**, not the byte-identity the stated reason claims, and a dedupe rule
+resting on a false premise cannot be executed mechanically.
+
+**(b) `#D7`'s removal rule has NO SUBJECT in the source document.** `LLR-N16.2.1`'s instrument says
+to *"remove every triple whose row carries the `DEFERRED(#D7)` marker"*, and §5.2 says `V18` *"carries
+the `DEFERRED(#D7)` marker"*. Measured over `01b`: **zero** rows carry it. The only occurrence of the
+string `DEFERRED` anywhere in `01b` is inside this batch's own Amendment 1, quoting the instrument.
+**So the removal step has always been inert**, and `V18`'s exclusion rests on prose in a different
+document rather than on a marker the instrument can read.
+
+**Both are for the coordinator.** Either the markers are added to `01b` and the dedupe rule is
+restated on a criterion that holds, or the instrument is amended to match the artifacts. **`Inc-8`'s
+set-equality assertion cannot be written until one of those happens** — it would be asserting
+equality against a set whose size nobody can derive twice and get the same answer.
 
 > **THE ROW COUNT WAS NEVER THE RIGHT UNIT.** That is why *"any threshold written against the row
 > count is wrong before it is run"* is true, and why **every threshold citing 21 or 22 is

@@ -642,17 +642,35 @@ class HomeScreen(Screen):
         last_map, _ = store.last_session()
         if last_map:
             graph = load_or_notice(last_map)
-            if graph is not None:
+            # `A-102` reaches here too: a map that LOADED but recorded a load
+            # warning returns a graph, so `graph is not None` alone would hand
+            # the hero to a damaged map.
+            if graph is not None and last_map not in damaged:
                 hero_map = last_map
                 hero_metrics = self._map_metrics(graph)
 
         if hero_map is None and mmd_files:
             hero_map = mmd_files[0].stem
             graph = load_or_notice(hero_map)
-            if graph is not None:
+            if graph is not None and hero_map not in damaged:
                 hero_metrics = self._map_metrics(graph)
             else:
-                hero_metrics = {"total": 0, "con_acta": 0, "sin_acta": 0, "vencen": 0, "coverage": 0}
+                # `INC7-CR-F2`: THE ALL-ZERO SUBSTITUTION WAS THE CARD'S LIE, ONE WIDGET
+                # OVER.  A map the system could not READ was given a hero
+                # showing `0 nodos` in `INK` -- the CALM tone -- and measured
+                # BYTE-IDENTICAL to a healthy EMPTY map's hero.  The recents
+                # loop was fixed and this was not, which is exactly what
+                # `LLR-N13.1.5` means by naming the hero and resume branches in
+                # its Touched symbols: the clause is about the SCREEN, not about
+                # whichever widget the implementer happened to be looking at.
+                #
+                # THERE IS NO HONEST HERO FOR AN UNREADABLE MAP, so it does not
+                # get one.  The card already declares the damage; a second
+                # surface inventing metrics for it would be a second lie, and
+                # `A-102`'s load-warning path would otherwise have the same map
+                # declaring two different truths at once.
+                hero_map = None
+                hero_metrics = None
 
         hero_box = self.query_one("#home-hero-box", GroupBox)
         hero = self.query_one("#home-hero", Static)
@@ -674,9 +692,18 @@ class HomeScreen(Screen):
         # Resume row
         resume = self.query_one("#home-resume", Static)
         map_id, node_id = store.last_session()
-        if map_id and node_id:
-            graph = load_or_notice(map_id)
-            node = graph.nodes.get(node_id) if graph is not None else None
+        # `INC7-CR-F2`, the third surface: `retomar` invites the operator straight back
+        # into a map the system could not read, naming a node it never loaded.
+        # Same clause, same reason -- `LLR-N13.1.5` names this branch too.
+        # `INC7-SEC-F1` again, and it is the SAME SHAPE the security pass named
+        # one branch up: the first draft here split the load from the guard that
+        # protects its use, so the two were safe only by sharing a condition
+        # prefix.  One block, one condition, and the load is still performed for
+        # every session map because its NOTICE is owed whether or not a resume
+        # row is painted.
+        resume_graph = load_or_notice(map_id) if (map_id and node_id) else None
+        if map_id and node_id and map_id not in damaged and resume_graph is not None:
+            node = resume_graph.nodes.get(node_id)
             node_name = node.ficha.title if node else node_id
             resume.update(
                 Text.assemble(
@@ -719,7 +746,14 @@ class HomeScreen(Screen):
         for mmd in mmd_files:
             map_name = mmd.stem
             graph = load_or_notice(map_name)
-            if map_name in damaged:
+            # `INC7-SEC-F1`: guarded on `graph is None` DIRECTLY as well as on
+            # the `damaged` set.  The two are coupled today -- `damaged.add`
+            # sits under the same guard as `broken.append` and nothing else
+            # writes either -- but NOTHING ENFORCES that coupling, and the
+            # measured blast radius of it breaking is not one wrong card: an
+            # `AttributeError` here PROPAGATES OUT OF `on_mount` AND KILLS THE
+            # APP, which is the containment this whole clause exists to keep.
+            if map_name in damaged or graph is None:
                 # `LLR-N13.1.5` / `PRED-VIS`: A CARD THAT IS NOT A LIE.
                 #
                 # This branch used to substitute `concept, 0, 0`, which made a
@@ -736,8 +770,17 @@ class HomeScreen(Screen):
                 # `01b` section 3.4's `V22`, drawn from the declared vocabulary
                 # rather than invented here, which is what stops this painting
                 # a bare `!` that no arm can see.
+                # `INC7-CR-F1`: THE DECLARED CARD STATE, NOT A THIRD STRING.  This
+                # first shipped ` ⊘ dañado `, which appears in neither `01b`
+                # nor the LLR -- and that had a consequence beyond tidiness:
+                # `#D28` escalates this seat from `MUT` to `INK` precisely
+                # BECAUSE the copy INVITES AN ACTION (`↵ ver por qué`), so a
+                # card carrying no invitation took the escalated style while
+                # deleting its own justification.  `PRED-VIS` adds the glyph
+                # limb ON TOP OF the string; shipping the glyph alone inverted
+                # it.
                 kind_cell = Text.assemble(
-                    (f" {darkside.DAMAGED_MAP_GLYPH} dañado ",
+                    (f" {darkside.DAMAGED_MAP_GLYPH} {darkside.DAMAGED_MAP_STATE} ",
                      f"{darkside.INK} on {darkside.PANEL}"),
                 )
                 nodos = docs = "—"
