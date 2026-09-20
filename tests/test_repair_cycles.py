@@ -450,3 +450,140 @@ def test_at_r03b_a_diamond_is_not_called_a_cycle(tmp_path):
         parse(dump(diamond))
     assert not isinstance(excinfo.value, MermaidError)
     assert "multiple parents" in str(excinfo.value)
+
+
+# --------------------------------------------------------------------------
+# LLR-N13.1.5 / PRED-VIS — the damaged card is not a lie, and the difference is
+# carried by a DECLARED GLYPH rather than by the string alone.
+
+
+def _cells(table, key: str) -> list[str]:
+    """The painted cells of one row, as text."""
+    out = []
+    for col in table.columns:
+        cell = table.get_cell(key, col)
+        out.append(cell.plain if hasattr(cell, "plain") else str(cell))
+    return out
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_a_broken_map_is_distinguishable_from_a_healthy_EMPTY_one(
+    tmp_path,
+):
+    """`PRED-VIS`'s own reproduction, turned into the arm that refuses it.
+
+    The requirement reproduces the defect exactly: `roto` and `sano_vacio` paint
+    `['...', ' concept ', '0', '0']` BYTE-IDENTICALLY, and the only thing
+    separating them is a TRANSIENT toast against a PERMANENT card. The parked
+    inequality threshold passes on that frame the moment the string lands, which
+    is why the clause needs the visual limb or it certifies the defect.
+
+    `sano_vacio` IS THE CONTROL AND IT IS NOT OPTIONAL: a healthy map with zero
+    nodes is the one frame where the old `concept, 0, 0` substitution was
+    indistinguishable from a real load. An arm comparing `roto` against a
+    NON-empty healthy map would pass on the unfixed tree.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        (store.workspace / "sano_vacio.mmd").write_text("graph TD\n", encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        table = app.screen.query_one("#home-recents")
+
+        # Containment: one broken map costs ONE card, not the screen.
+        assert {"roto", "sano_vacio"} <= {str(k.value) for k in table.rows}
+
+        roto = _cells(table, "roto")
+        sano = _cells(table, "sano_vacio")
+
+    # The name column differs trivially; the clause is about the REST.
+    assert roto[1:] != sano[1:], (
+        f"the broken map paints the same non-name cells as a healthy EMPTY map: "
+        f"{roto} vs {sano}. That is the defect PRED-VIS reproduces."
+    )
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_the_damaged_card_carries_a_DECLARED_glyph(tmp_path):
+    """`PRED-VIS`'s membership clause, asserted at run time as it requires.
+
+    Without this, `Inc-7` could paint a bare `!` and every arm stays green --
+    `LLR-N16.2.1` asserts what the LEGEND paints, not what the CARD paints. The
+    glyph is therefore checked against `darkside.DECLARED_VOCABULARY`, which is
+    `01b` section 3.4's `V22` and not a literal chosen here.
+    """
+    from mapper import darkside
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        (app.store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        roto = _cells(app.screen.query_one("#home-recents"), "roto")
+
+    painted = "".join(roto)
+    declared = {g for g, _label, _style in darkside.DECLARED_VOCABULARY if g}
+    carried = {g for g in declared if g in painted}
+    assert carried, (
+        f"the damaged card carries no glyph from the declared vocabulary: {roto!r}. "
+        f"A card that differs only in text differs only to someone already reading it."
+    )
+    assert darkside.DAMAGED_MAP_GLYPH in painted, (
+        f"the damaged card does not carry V22 ({darkside.DAMAGED_MAP_GLYPH!r}): {roto!r}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_a_LOAD_WARNING_also_reaches_the_card(tmp_path, monkeypatch):
+    """`A-102`: the second condition, and it is the one that vanishes.
+
+    `LLR-N13.1.5` identifies a damaged map by the load path RAISING *or*
+    RECORDING A LOAD WARNING. Only the raise used to reach the card; a load
+    warning returned the graph and notified through a TRANSIENT toast while the
+    card is PERMANENT, so after the toast cleared there was no trace at all.
+
+    A clause satisfied for one condition and green for the other is not
+    satisfied.
+    """
+    from mapper import darkside
+    from mapper.store import MapStore
+
+    real_load = MapStore.load
+
+    def load_with_warning(self, name):
+        graph = real_load(self, name)
+        if name == "avisado":
+            graph.load_warnings.append("un aviso de carga")
+        return graph
+
+    monkeypatch.setattr(MapStore, "load", load_with_warning)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        (app.store.workspace / "avisado.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        (app.store.workspace / "sano.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        table = app.screen.query_one("#home-recents")
+        avisado = _cells(table, "avisado")
+        sano = _cells(table, "sano")
+
+    # The positive control: the identically-shaped map WITHOUT a warning is
+    # painted as healthy, so the difference is the warning and not the fixture.
+    assert darkside.DAMAGED_MAP_GLYPH not in "".join(sano), (
+        f"the control map is painted damaged; the fixture, not the warning, "
+        f"is doing the work: {sano!r}"
+    )
+    assert darkside.DAMAGED_MAP_GLYPH in "".join(avisado), (
+        f"a map that recorded a LOAD WARNING is painted as healthy: {avisado!r}. "
+        f"The warning was a transient toast; the card is permanent."
+    )
