@@ -588,6 +588,13 @@ DECLARED_VOCABULARY: tuple[VocabularyRow, ...] = (
      f"{INK} on {PANEL}"),
 )
 
+#: `LLR-N13.1.5`'s DECLARED CARD STATE -- the Spanish string that ships, spelled
+#: in the requirement and here, and nowhere else.  The `↵` is load-bearing:
+#: `#D28` escalates this seat from `MUT` to `INK` BECAUSE the copy invites an
+#: ACTION, so a card without the invitation would be taking the escalated style
+#: while deleting the reason for it.
+DAMAGED_MAP_STATE = "da\u00f1ado \u2014 \u21b5 ver por qu\u00e9"
+
 #: DECLARED INCOMPLETENESS, measured rather than glossed.  Two rows of `01b`
 #: name MORE THAN ONE style in a single `painted in` cell -- `V19` (filled
 #: `SAGE` at or above 90 % coverage, else `INK`; empty `WORDMARK`) and `V21`
