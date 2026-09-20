@@ -6505,7 +6505,7 @@ exists, and nothing said so.
 | **Inc-5** | none — drives the derived renderer set over existing graphs | `LLR-N07.2.2b` |
 | **Inc-REPAIR** | **a phantom-sidecar workspace** (`LLR-REPAIR.1`) · **an alias-bombed `nodes:` sidecar and its un-aliased control** (`LLR-N13.1.7`) | §3.9, `LLR-N13.1.7` |
 | **Inc-7** | **a two-map workspace, one map carrying a directed cycle** (`AT-025b`) | `LLR-N13.1.5` |
-| **Inc-8** | none — the legend reads the seat and the vocabulary declaration | `LLR-N16.2.1` |
+| **Inc-8** | none — the legend reads the seat and the vocabulary declaration, **which `Inc-7` creates** (`A-101`) | `LLR-N16.2.1` |
 | **Inc-9** | none — screen-scope migration drives shipped screens | `LLR-N16.1.2` |
 
 **EVERY FIXTURE IS BUILT IN A `tempfile.mkdtemp` WORKSPACE, NEVER BY WRITING INTO `fixtures/`.** This
@@ -9514,3 +9514,61 @@ alongside the render work-budget work, which is the same problem. **The earlier 
 does not transfer**: it was rejected when it bought the ability to wait for and abort a useless 16 GB
 artifact. The artifact is now bounded and useful, so what off-pump buys has changed. **A ruling's
 grounds expire when the situation it ruled on does.**
+
+---
+
+## Amendment set 12 — the vocabulary declaration moves to `Inc-7`. 2026-09-19. Base `3bf272c`.
+
+### `A-101` — CUT AMENDMENT: `LLR-N16.2.1`'s declaration is CREATED by `Inc-7`, CONSUMED by `Inc-8`
+
+**Authority.** Coordinator ruling 2026-09-19, on a structural dependency surfaced while opening
+`Inc-7`. This amends the ratified cut, so it is recorded with its reason rather than applied.
+
+**The dependency.** `LLR-N13.1.5`'s `PRED-VIS RESOLVED` requires the damaged-map glyph to be *"a
+member of `declared_vocabulary`, asserted at run time"*. That declaration is created by
+`LLR-N16.2.1` — *"a glyph-vocabulary declaration in `mapper/darkside.py` — NEW — created in Phase
+3"* — and §5.4's increment table assigns `LLR-N16.2.1` to **`Inc-8`**, which follows `Inc-7`.
+
+**A CLAUSE CANNOT DEPEND ON A DECLARATION THE NEXT INCREMENT CREATES.** Left as written, `Inc-7` has
+three bad options and no good one: assert membership against a declaration that does not exist
+(impossible), paint an undeclared glyph (reinstating precisely the defect `PRED-VIS` was written to
+prevent), or create the declaration anyway while `Inc-8` still nominally owns it (two homes for one
+declaration, which is the defect `LLR-N16.2.1` itself exists to forbid).
+
+**The amendment.** The declaration is **created by `Inc-7`**, the increment that first needs it, in
+`mapper/darkside.py` as `LLR-N16.2.1`'s *Touched symbols* already specify. **`Inc-8` CONSUMES it**:
+the legend reads the declaration and asserts style equality and set equality against it, as
+`LLR-N16.2.1`'s threshold already requires. **No requirement text changes** — only which increment
+performs the creation. §5.4's table row for `Inc-8` is amended from *"the legend reads the seat and
+the vocabulary declaration"* to *"the legend reads the seat and the vocabulary declaration, which
+`Inc-7` creates"*.
+
+**Why this direction and not the other.** Moving `LLR-N13.1.5` after `Inc-8` was rejected: the
+damaged-card defect is live and operator-visible today, and `Inc-8` is a legend increment with no
+reason to precede it. Moving the *creation* costs one file's ownership; moving the *defect* costs
+the operator a lying card for an extra increment.
+
+> **NO INCREMENT MAY ASSERT SET EQUALITY AGAINST A SET THAT DOES NOT YET EXIST**, which is the
+> general form and the reason this is a cut amendment rather than a note. `Inc-7` creates the full
+> derived set — all **22** rows of `declared_vocabulary`, not merely the row it paints — precisely so
+> that `Inc-8`'s set-equality assertion has a complete subject on the day it runs. A declaration
+> seeded with one member would make `Inc-8`'s threshold pass over a set of one, which is the
+> hand-chosen-floor defect `QA-M-09` already superseded once.
+
+**Consequence for `Inc-7`'s file budget, stated so the gate is not surprised:** `Inc-7` now touches
+`mapper/darkside.py` in addition to `mapper/app.py`. Both are SOURCE files and the increment remains
+within the cap.
+
+### `A-102` — `LLR-N13.1.5`'s damaged predicate covers BOTH load paths, not one
+
+**Authority.** Coordinator ruling 2026-09-19.
+
+`LLR-N13.1.5` identifies a damaged map by the load path **raising** *or* **recording a load
+warning** — two conditions. Measured at `3bf272c`, only the first reaches the card: `load_or_notice`
+returns `None` on a raise, and the recents loop's `else` branch substitutes `concept, 0, 0`; on a
+**load warning** it returns the graph and notifies through a **transient toast**, so the card is
+truthful but the *warning* is gone the moment the toast clears, while the card is **permanent**.
+
+**That is half the distinguishability defect, and it is the half that vanishes when the operator
+looks away.** A clause satisfied for one condition and green for the other is not satisfied. Both
+paths **shall** reach the declared card state.
