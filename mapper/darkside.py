@@ -558,53 +558,70 @@ def fit(s: str, w: int) -> str:
 # `tests/test_home.py` DERIVES from that document and compares, so this table is
 # a declaration to be checked rather than a second opinion.  Nothing here may be
 # edited without the row in `01b` moving first.
-VocabularyRow = tuple[str, str, str]
-
-#: Rows whose `painted in` cell names exactly ONE style, so each projects onto
-#: exactly one `(glyph, label, style)` triple.
-DECLARED_VOCABULARY: tuple[VocabularyRow, ...] = (
-    ("▐", "rama abierta", f"{INK} on {PANEL}"),
-    ("▐", "coincidencia de búsqueda", f"bold {GROUND} on {WARN}"),
-    ("▸", "rama plegada", f"{MUT} on {PANEL}"),
-    ("∙", "territorio sin explorar", WORDMARK),
-    ("▔", "nodo seleccionado", ACCENT),
-    ("┌┐", "minimapa: tu ventana en el todo", ACCENT),
-    ("▽", "declaración de desbordamiento", WORDMARK),
-    ("▽", "minimapa · leyenda de nodos", WORDMARK),
-    ("┌┐", "viewport dentro del minimapa", f"{ACCENT} on {PANEL}"),
-    ("▓", "densidad del territorio", f"{WORDMARK} on {PANEL}"),
-    ("▐", "coincide con la lente", f"{WARN} on {PANEL}"),
-    ("", "fuera de la lente", WORDMARK),
-    ("╎", "enlace atenuado", STEP),
-    ("✓", "sin campos pendientes", f"{SAGE} on {PANEL}"),
-    ("░", "ficha incompleta", f"{MUT} on {PANEL}"),
-    ("∗", "lente de campos", ACCENT),
-    ("⇄", "enlaza mapas", f"{VIOLET} on {PANEL}"),
-    ("◍", "procedencia repo", f"{TEAL} on {PANEL}"),
-    ("▲", "actas vencidas", f"{WARN} on {PANEL}"),
-    # `V22` -- the row `Inc-7` needs, added to `01b` section 3.4 by its
-    # Amendment 1 because the 21 rows before it carried ZERO with this meaning.
-    (DAMAGED_MAP_GLYPH := "⊘", "mapa dañado — no se pudo leer",
-     f"{INK} on {PANEL}"),
+#: `LLR-N16.2.1` -- the glyph vocabulary, DECLARED ONCE and DERIVED, never
+#: transcribed.  Each member is `(row id, label, style token)` exactly as
+#: `01b-ux-decisions.md` DECISION 3 sections 3.1-3.4 spells it.
+#:
+#: THE STYLE IS A TOKEN NAME, NOT A RESOLVED HEX.  `01b` declares tokens and the
+#: legend must paint what the renderer paints, so the comparison has to be on
+#: the same representation; resolving here would make the declaration
+#: uncheckable against its own source.
+#:
+#: NO COUNT IS WRITTEN ANYWHERE. Five generations of this number have been wrong
+#: in this project, so the number lives in ONE place -- `len()` of this tuple --
+#: and `tests/test_vocabulary_declaration.py` checks it against the document on
+#: every run.  That file is also why this comment is now TRUE: the previous
+#: version claimed a test derived and compared when none existed, which is a
+#: declaration wearing a check's clothes.
+#:
+#: Compound rows contribute ONE MEMBER PER DISTINCT TRIPLE (`A-103`); rows that
+#: name the same painted FORM collapse (`01b` Amendment 2(b) -- a glyph may be a
+#: SET of codepoints, so a braille RANGE is one device, not many).
+DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
+    ('V1', "", 'rama abierta', 'INK on PANEL'),
+    ('V2', "ó", 'coincidencia de búsqueda', 'bold GROUND on WARN'),
+    ('V3', "+▸", 'rama plegada (23 dentro)', 'MUT on PANEL'),
+    ('V4', "∙", 'territorio sin explorar', 'WORDMARK'),
+    ('V5', "▔", 'nodo seleccionado', 'ACCENT'),
+    ('V6', "─┌┐", 'minimapa: tu ventana en el todo', 'ACCENT'),
+    # V4a: collapses onto an earlier row -- same painted FORM.
+    ('V4b', "", 'enlace entre nodos', 'MUT'),
+    ('V4b', "", 'enlace entre nodos', 'ACCENT'),
+    ('V7', "·—", 'overflow declaration; the `N` **shall** reconcile with the sum of the `+N` in every painted pill', 'WORDMARK'),
+    ('V8', "·", 'minimap caption; `N` = total nodes in the graph', 'WORDMARK'),
+    ('V9', "─│┌┐└┘", 'viewport — the part of the territory now on screen', 'ACCENT on PANEL'),
+    ('V10', "░▒▓", 'territory density', 'WORDMARK on PANEL'),
+    ('V11', "▐", 'coincide con la lente', 'WARN on PANEL'),
+    ('V12', "", 'fuera de la lente', 'WORDMARK'),
+    ('V13', "╎", 'enlace atenuado', 'STEP'),
+    ('V14', "✓", 'sin campos pendientes', 'SAGE on PANEL'),
+    ('V15', "░", 'ficha incompleta', 'MUT on PANEL'),
+    ('V16', "∗", 'lente de campos', 'ACCENT'),
+    ('V17', "⇄", 'enlaza mapas', 'VIOLET on PANEL'),
+    # V18: removed by `#D7` -- ruled out of this batch.
+    ('V19', "█░", 'coverage microbar', 'SAGE'),
+    ('V19', "█░", 'coverage microbar', 'INK'),
+    ('V19', "█░", 'coverage microbar', 'WORDMARK'),
+    ('V20', "▲", 'actas vencidas', 'WARN on PANEL'),
+    ('V21', "∙", 'lit `= nodo con acta`, unlit `= sin acta`', 'MUT on PANEL'),
+    ('V21', "∙", 'lit `= nodo con acta`, unlit `= sin acta`', 'WORDMARK on PANEL'),
+    ('V22', "⊘", 'mapa dañado — no se pudo leer', 'INK on PANEL'),
 )
 
-#: `LLR-N13.1.5`'s DECLARED CARD STATE -- the Spanish string that ships, spelled
-#: in the requirement and here, and nowhere else.  The `↵` is load-bearing:
-#: `#D28` escalates this seat from `MUT` to `INK` BECAUSE the copy invites an
-#: ACTION, so a card without the invitation would be taking the escalated style
-#: while deleting the reason for it.
+#: `01b` row `V22`'s glyph, as its own constant rather than a walrus buried in
+#: the tuple above -- the previous form defined a public name as a side effect
+#: of building a literal, which reads as a typo and cannot be found by grep.
+DAMAGED_MAP_GLYPH = "\u2298"
+
+#: `LLR-N13.1.5`'s DECLARED CARD STATE -- the Spanish string that ships.
+#: The `\u21b5` is load-bearing: `#D28` escalates this seat from `MUT` to `INK`
+#: BECAUSE the copy invites an ACTION, so a card without the invitation would
+#: take the escalated style while deleting the reason for it.
 DAMAGED_MAP_STATE = "da\u00f1ado \u2014 \u21b5 ver por qu\u00e9"
 
-#: DECLARED INCOMPLETENESS, measured rather than glossed.  Two rows of `01b`
-#: name MORE THAN ONE style in a single `painted in` cell -- `V19` (filled
-#: `SAGE` at or above 90 % coverage, else `INK`; empty `WORDMARK`) and `V21`
-#: (lit `MUT on PANEL`, unlit `WORDMARK on PANEL`).  `LLR-N16.2.1`'s instrument
-#: says to project every row onto THE triple and take the set of distinct
-#: triples, which does not say how a row naming three styles projects.
-#:
-#: SO 22 ROWS ARE NOT 22 TRIPLES, and any threshold written against the ROW
-#: COUNT is wrong before it is run.  The projection rule for compound rows is a
-#: UX decision and is NOT taken here; these two rows are named as pending so the
-#: gap is a declared absence rather than a silent one.  `Inc-8`'s set-equality
-#: assertion needs that rule before it can be written.
-COMPOUND_ROWS_PENDING_A_PROJECTION_RULE: tuple[str, ...] = ("V19", "V21")
+#: THE PENDING-PROJECTION LIST IS GONE, and its removal is the point: the
+#: compound-row projection was RULED (`A-103`), so `V19` and `V21` are no
+#: longer a declared absence -- they are members, one per distinct triple, and
+#: `V4b` (which that list never named) is too.  A list of known gaps is only
+#: honest while the gap is open; kept past its ruling it becomes a second,
+#: stale opinion about a question that has been answered.
