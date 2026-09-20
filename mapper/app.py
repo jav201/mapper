@@ -589,6 +589,11 @@ class HomeScreen(Screen):
         # cost a notice rather than the screen.  Scoped to the sink: any
         # exception from a load, not only the types this batch knows about.
         broken: list[str] = []
+        # `LLR-N13.1.5` identifies a damaged map by the load path RAISING or
+        # RECORDING A LOAD WARNING.  Both land here, so the card state is
+        # decided by one set rather than by whichever branch a reader happens
+        # to be looking at.
+        damaged: set[str] = set()
 
         def load_or_notice(name: str) -> Graph | None:
             try:
@@ -596,6 +601,7 @@ class HomeScreen(Screen):
             except Exception as exc:
                 if name not in broken:
                     broken.append(name)
+                    damaged.add(name)
                     self.notify(
                         f"no se pudo cargar {darkside.plain(name)}: {darkside.plain(str(exc))}",
                         severity="error",
@@ -603,6 +609,15 @@ class HomeScreen(Screen):
                     )
                 return None
             if graph.load_warnings:
+                # `A-102`: A LOAD WARNING IS A DAMAGED MAP TOO.  `LLR-N13.1.5`
+                # names TWO conditions -- the load path RAISING or RECORDING A
+                # LOAD WARNING -- and only the raise used to reach the card.
+                # This path returned the graph and notified, so the card was
+                # truthful while the WARNING was a TRANSIENT toast and the card
+                # is PERMANENT: the moment the toast cleared there was no trace
+                # at all.  That is half the distinguishability defect, and it is
+                # the half that vanishes when the operator looks away.
+                damaged.add(name)
                 self.notify(
                     f"{darkside.plain(name)}: {darkside.plain('; '.join(graph.load_warnings))}",
                     severity="warning",
@@ -704,15 +719,38 @@ class HomeScreen(Screen):
         for mmd in mmd_files:
             map_name = mmd.stem
             graph = load_or_notice(map_name)
-            if graph is not None:
+            if map_name in damaged:
+                # `LLR-N13.1.5` / `PRED-VIS`: A CARD THAT IS NOT A LIE.
+                #
+                # This branch used to substitute `concept, 0, 0`, which made a
+                # broken map paint BYTE-IDENTICALLY to a healthy EMPTY one --
+                # reproduced in the requirement itself, `roto` and `sano_vacio`
+                # both painting `['', ' concept ', '0', '0']`.  The only thing
+                # separating them was a TRANSIENT toast against a PERMANENT
+                # card.
+                #
+                # THE GLYPH IS THE SIGNAL, NOT THE STRING.  The sala is SCANNED,
+                # not read -- its whole purpose is choosing where to work
+                # without opening anything -- and a card that differs only in
+                # text differs only to someone already reading it.  `⊘` is
+                # `01b` section 3.4's `V22`, drawn from the declared vocabulary
+                # rather than invented here, which is what stops this painting
+                # a bare `!` that no arm can see.
+                kind_cell = Text.assemble(
+                    (f" {darkside.DAMAGED_MAP_GLYPH} dañado ",
+                     f"{darkside.INK} on {darkside.PANEL}"),
+                )
+                nodos = docs = "—"
+            else:
                 kind = "legacy" if graph.schema else "concept"
+                kind_cell = Text.assemble(
+                    (f" {kind} ", f"{darkside.INK} on {darkside.STEP}"),
+                )
                 nodos = str(len(graph.nodes))
                 docs = str(len(graph.documents))
-            else:
-                kind, nodos, docs = "concept", "0", "0"
             table.add_row(
                 escape(map_name),
-                Text.assemble((f" {kind} ", f"{darkside.INK} on {darkside.STEP}")),
+                kind_cell,
                 nodos,
                 docs,
                 key=map_name,

@@ -543,3 +543,61 @@ def fit(s: str, w: int) -> str:
         text.truncate(w, overflow="ellipsis")
         return text.plain
     return text.plain + " " * (w - text.cell_len)
+
+
+# ---------------------------------------------------------------------------
+# `LLR-N16.2.1` — THE GLYPH VOCABULARY, DECLARED ONCE.
+#
+# CREATED HERE BY `Inc-7` RATHER THAN BY `Inc-8`, per cut amendment `A-101`.
+# `LLR-N13.1.5`'s `PRED-VIS` requires the damaged-map card glyph to be A MEMBER
+# OF THIS DECLARATION, asserted at run time -- and a clause cannot depend on a
+# declaration the NEXT increment creates.  `Inc-8`'s legend CONSUMES this; it
+# does not build a second one.
+#
+# THE SOURCE OF TRUTH IS `01b-ux-decisions.md` DECISION 3 sections 3.1-3.4, and
+# `tests/test_home.py` DERIVES from that document and compares, so this table is
+# a declaration to be checked rather than a second opinion.  Nothing here may be
+# edited without the row in `01b` moving first.
+VocabularyRow = tuple[str, str, str]
+
+#: Rows whose `painted in` cell names exactly ONE style, so each projects onto
+#: exactly one `(glyph, label, style)` triple.
+DECLARED_VOCABULARY: tuple[VocabularyRow, ...] = (
+    ("▐", "rama abierta", f"{INK} on {PANEL}"),
+    ("▐", "coincidencia de búsqueda", f"bold {GROUND} on {WARN}"),
+    ("▸", "rama plegada", f"{MUT} on {PANEL}"),
+    ("∙", "territorio sin explorar", WORDMARK),
+    ("▔", "nodo seleccionado", ACCENT),
+    ("┌┐", "minimapa: tu ventana en el todo", ACCENT),
+    ("▽", "declaración de desbordamiento", WORDMARK),
+    ("▽", "minimapa · leyenda de nodos", WORDMARK),
+    ("┌┐", "viewport dentro del minimapa", f"{ACCENT} on {PANEL}"),
+    ("▓", "densidad del territorio", f"{WORDMARK} on {PANEL}"),
+    ("▐", "coincide con la lente", f"{WARN} on {PANEL}"),
+    ("", "fuera de la lente", WORDMARK),
+    ("╎", "enlace atenuado", STEP),
+    ("✓", "sin campos pendientes", f"{SAGE} on {PANEL}"),
+    ("░", "ficha incompleta", f"{MUT} on {PANEL}"),
+    ("∗", "lente de campos", ACCENT),
+    ("⇄", "enlaza mapas", f"{VIOLET} on {PANEL}"),
+    ("◍", "procedencia repo", f"{TEAL} on {PANEL}"),
+    ("▲", "actas vencidas", f"{WARN} on {PANEL}"),
+    # `V22` -- the row `Inc-7` needs, added to `01b` section 3.4 by its
+    # Amendment 1 because the 21 rows before it carried ZERO with this meaning.
+    (DAMAGED_MAP_GLYPH := "⊘", "mapa dañado — no se pudo leer",
+     f"{INK} on {PANEL}"),
+)
+
+#: DECLARED INCOMPLETENESS, measured rather than glossed.  Two rows of `01b`
+#: name MORE THAN ONE style in a single `painted in` cell -- `V19` (filled
+#: `SAGE` at or above 90 % coverage, else `INK`; empty `WORDMARK`) and `V21`
+#: (lit `MUT on PANEL`, unlit `WORDMARK on PANEL`).  `LLR-N16.2.1`'s instrument
+#: says to project every row onto THE triple and take the set of distinct
+#: triples, which does not say how a row naming three styles projects.
+#:
+#: SO 22 ROWS ARE NOT 22 TRIPLES, and any threshold written against the ROW
+#: COUNT is wrong before it is run.  The projection rule for compound rows is a
+#: UX decision and is NOT taken here; these two rows are named as pending so the
+#: gap is a declared absence rather than a silent one.  `Inc-8`'s set-equality
+#: assertion needs that rule before it can be written.
+COMPOUND_ROWS_PENDING_A_PROJECTION_RULE: tuple[str, ...] = ("V19", "V21")
