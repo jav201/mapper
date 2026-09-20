@@ -312,7 +312,7 @@ here as two rows, because they mean different things:
 | # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
 |---|---|---|---|---|
 | V17 | `⇄ N` and legend chip `⇄ enlazado` | `enlaza mapas` | `VIOLET on PANEL` | **(proto)** `ui_next2/generate.py:134`, `:145` |
-| V18 | `◍ github` and legend chip `◍ del repo` | `procedencia repo` | `TEAL on PANEL` | **(proto)** `:136`, `:146` |
+| V18 | `◍ github` and legend chip `◍ del repo` | `procedencia repo` | `TEAL on PANEL` **DEFERRED(#D7)** | **(proto)** `:136`, `:146` |
 | V19 | `█` filled cells / `░` empty cells, 10 wide | coverage microbar | filled `SAGE` when coverage ≥ 90 %, else `INK`; empty `WORDMARK` | **(proto)** `:126-128`; legend chip `█ cerrada` at `:147` |
 | V20 | `▲ N vencen` and legend chip `▲ vence` | `actas vencidas` | `WARN on PANEL` | **(proto)** `:132`, `:148` |
 | V21 | `∙` in the card thumbnail | lit `= nodo con acta`, unlit `= sin acta` | lit `MUT on PANEL`, unlit `WORDMARK on PANEL` | **(proto)** `:100-101` |
@@ -766,3 +766,50 @@ and the look are separable, exactly as they were for the tone.
 legend must paint this row too. That consequence is the reason this is an amendment to a sealed
 artifact rather than an implementation detail, and it is the same consequence the requirement
 already anticipates for colour rows.
+
+---
+
+## Amendment 2 — the `#D7` marker, and a glyph may be a SET. 2026-09-19.
+
+**Authority.** Coordinator rulings 2026-09-19, on two conflicts surfaced while deriving
+`declared_vocabulary` for `Inc-8`.
+
+### (a) `DEFERRED(#D7)` is written onto `V18`'s row — the marker was always intended and never written
+
+`LLR-N16.2.1`'s instrument says to *"remove every triple whose row carries the `DEFERRED(#D7)`
+marker"*, and `01-requirements.md` §5.2 states that `V18` *"carries the `DEFERRED(#D7)` marker"*.
+**Measured: it did not, and no row in this document did.** The only occurrence of the string
+`DEFERRED` anywhere in `01b` was inside Amendment 1, quoting the instrument.
+
+> **SO THE REMOVAL STEP HAS BEEN INERT SINCE IT WAS AUTHORED, AND IS LIVE FOR THE FIRST TIME WITH
+> THIS AMENDMENT.** Nothing was removed by it, ever, and no derivation that relied on it was correct.
+> Every count downstream must be re-derived rather than adjusted, because a step that previously
+> removed nothing now removes a row.
+
+**This is the third instance in this batch of the same failure: the gap between two artifacts, in
+neither of them.** The exclusion lived as prose in `01-requirements.md`; the instrument that must act
+on it reads `01b`; each document was internally coherent and the join was empty. The first instance
+was `PRED-VIS` requiring a member of a set that had none; the second was `project every row onto the
+triple` being silently ambiguous. **Three makes it this project's characteristic failure rather than
+a run of bad luck.**
+
+### (b) A glyph may be a SET of codepoints, not only a single character
+
+`V4` and `V4a` **collapse to one member** — but **not** for the reason
+`01-requirements.md` §5.2 gives, and that reason is struck with attribution.
+
+**STRUCK:** *"`V4` and `V4a` are **byte-identical in glyph, label and style**"*. Measured, `V4`'s
+glyph cell is ``` `∙ ∙ ∙` ``` and `V4a`'s is ``` `∙ ∙ ∙` (scattered braille, `U+2800`–`U+28FF`) ```.
+**They are not byte-identical, and a dedupe resting on a false premise cannot be executed
+mechanically** — which is why the derivation refused to perform it rather than fudging the match.
+
+**WHAT REPLACES IT, and it changes the model rather than patching the claim.** They are one painted
+**FORM**: a braille field is a single visual device whose codepoint varies with the data, and
+*"scattered braille, `U+2800`–`U+28FF`"* is that device written as a **range**. So the vocabulary
+admits a glyph that is a **set of codepoints** — some members are a single character, some are a
+range used as one device.
+
+**Membership then reads mechanically:** *the painted codepoint is in the declared glyph set for that
+meaning.* This is consistent with the ruled projection and required no change to it — **a form is a
+triple, and nothing in "triple" ever required the glyph to be one character.** The singleton case is
+simply the range of size one.

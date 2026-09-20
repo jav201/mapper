@@ -529,7 +529,7 @@ async def test_llr_n13_1_5_the_damaged_card_carries_a_DECLARED_glyph(tmp_path):
         roto = _cells(app.screen.query_one("#home-recents"), "roto")
 
     painted = "".join(roto)
-    declared = {g for g, _label, _style in darkside.DECLARED_VOCABULARY if g}
+    declared = {g for _vid, g, _label, _style in darkside.DECLARED_VOCABULARY if g}
     carried = {g for g in declared if g in painted}
     assert carried, (
         f"the damaged card carries no glyph from the declared vocabulary: {roto!r}. "
