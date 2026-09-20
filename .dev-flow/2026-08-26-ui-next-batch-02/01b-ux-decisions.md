@@ -316,6 +316,7 @@ here as two rows, because they mean different things:
 | V19 | `█` filled cells / `░` empty cells, 10 wide | coverage microbar | filled `SAGE` when coverage ≥ 90 %, else `INK`; empty `WORDMARK` | **(proto)** `:126-128`; legend chip `█ cerrada` at `:147` |
 | V20 | `▲ N vencen` and legend chip `▲ vence` | `actas vencidas` | `WARN on PANEL` | **(proto)** `:132`, `:148` |
 | V21 | `∙` in the card thumbnail | lit `= nodo con acta`, unlit `= sin acta` | lit `MUT on PANEL`, unlit `WORDMARK on PANEL` | **(proto)** `:100-101` |
+| V22 | `⊘` before `mapa dañado — ↵ ver por qué` on that map's card | `mapa dañado — no se pudo leer` | `INK on PANEL` | **derived**, Amendment 1 (2026-09-19); style fixed by `PRED-VIS RESOLVED` / `#D28` |
 
 ### 3.5 · Colours with a job — the palette-v2 rows
 
@@ -690,3 +691,78 @@ Stated in writing rather than left to inference.
    looks like **if** it ships, and that specification is inert if Q-5 rules it out.
 7. **No product code was written or modified.** `mapper/**`, `tests/**` and `prototypes/**` are
    untouched. All probes ran from a scratchpad directory outside the repository.
+
+---
+
+## Amendment 1 — DECISION 3 §3.4 gains a damaged-map row. 2026-09-19.
+
+**Authority.** Coordinator ruling 2026-09-19, on a block raised while opening `Inc-7`. Amends a
+sealed PDR artifact through the amendment path, with the derivation that forced it recorded below.
+
+### The derivation that forced this row
+
+`LLR-N13.1.5`'s `PRED-VIS RESOLVED` requires the damaged-map card glyph to be **a member of
+`declared_vocabulary`, asserted at run time**, and states that the codepoint *"is drawn from the
+declared vocabulary by the increment that paints it"*. `declared_vocabulary` is derived, by
+`LLR-N16.2.1`'s own instrument, from DECISION 3 §3.1–§3.4 as the set of distinct
+`(glyph, label, painted-in style)` triples minus `DEFERRED(#D7)` rows.
+
+**Derived mechanically at `8ba326a`: 21 rows, `V1`–`V21`. Rows whose meaning is a damaged or
+unreadable map: ZERO.** §3.4 (Sala) is `V17` *enlaza mapas*, `V18` *procedencia repo*, `V19`
+coverage microbar, `V20` *actas vencidas*, `V21` *nodo con acta*. None of the other sixteen carries
+that meaning either.
+
+So the clause was **unsatisfiable as written**: `Inc-7` was required to draw a glyph from a set with
+no member of the needed meaning. **Reuse was ruled out rather than overlooked** — a glyph that says
+one thing and means another is the lying-affordance class this batch exists to remove, and `⚠` in
+particular would duplicate `V20`'s *warning* reading.
+
+> **HOW THIS SURVIVED RATIFICATION, recorded because it is a finding about ratification rather than
+> about this row.** The clause is coherent on its face: it names a set, a membership test and a
+> run-time assertion, and every reviewer who read it read something well-formed. **The defect is
+> invisible from reading the clause and visible only from DERIVING the set the clause points at** —
+> the gap is between two artifacts, in neither of them. A clause that quantifies over a derived set
+> is not checked until someone runs the derivation, and "it reads correctly" is not that.
+> **Generalised: a requirement that points at a derived set owes its derivation AT RATIFICATION
+> TIME, not at implementation time**, because implementation is where the cost of the gap is paid
+> and ratification is where it is cheap.
+
+### The row
+
+**The row is inserted INTO §3.4's table as `V22`, not appended here.** That placement is
+load-bearing rather than tidy: `declared_vocabulary` is derived from §3.1–§3.4, so a row
+living in an amendment section at the end of the file would be invisible to the very instrument
+this amendment exists to satisfy. Caught by re-running the derivation after writing it.
+
+**The style is not a choice.** `PRED-VIS RESOLVED` fixes it at `INK on PANEL` and forbids spending a
+colour token, because `SAGE`, `TEAL` and `VIOLET` are each already jobbed in §3.4/§3.5 and `ALERT` is
+free only by an accident of this batch's scope. Measured: `INK on PANEL` = **17.18 : 1** against
+`#D28`'s 4.5 : 1 floor.
+
+**The codepoint is DERIVED, and the filters are mechanical.** Candidates had to be (i) legal at the
+fixed style — satisfied identically by all, so not the discriminating filter; (ii) **exactly one
+terminal cell**, because this batch budgets in cells and a wide glyph shifts every column on the
+card; (iii) **not already carrying a meaning** among the 21; (iv) **not emoji-presentation**, since
+those render double-width in many terminals whatever `cell_len` reports; and (v) **free of a meaning
+collision** with an existing row. Fourteen survived (i)–(iii); **two survived all five** — `⊘`
+U+2298 CIRCLED DIVISION SLASH and `⦸` U+29B8 CIRCLED REVERSE SOLIDUS, which are visually
+near-identical. `⊘` ships on font coverage.
+
+Rejected with reasons, so the next reader does not re-litigate them: `⚠` duplicates `V20`'s warning
+reading **and** carries an emoji presentation; `✗`/`✘` read as the antonym of `V14` `✓ ficha
+completa` and therefore as `V15` *ficha incompleta*; `▨` sits in `V10`'s `▓▒░` density family; `ⓧ`
+reads into `V18` `◍`'s circled-provenance family; `☠`, `⁉`, `‼`, `⁇` are emoji-presentation; `⌒`,
+`⨯`, `↯` carry no failure meaning.
+
+**The aesthetic half is NOT settled here and is queued for the operator**, under the standing rule
+that a TUI design change gets a prototype round with real renders and his verdict. `⊘` ships now so
+the defect closes; `⊘` against `⦸` (and `✗` with its stated caveat) goes to that round alongside the
+`UX-F7b` selection tone. **Shipping a legal glyph now does not pre-empt that verdict** — the defect
+and the look are separable, exactly as they were for the tone.
+
+### Consequence for `LLR-N16.2.1`, stated rather than left to be discovered
+
+`declared_vocabulary` becomes **22 rows**. `LLR-N16.2.1` asserts **set equality** against it, so the
+legend must paint this row too. That consequence is the reason this is an amendment to a sealed
+artifact rather than an implementation detail, and it is the same consequence the requirement
+already anticipates for colour rows.
