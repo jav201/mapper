@@ -3646,8 +3646,17 @@ class MapScreen(Screen):
     #: THE TARGET IS **2 SECONDS** of synchronous freeze.  `action_export_svg`
     #: runs on the Textual message pump with no progress bar and no cancel, and
     #: beyond roughly two seconds an unresponsive TUI reads as hung rather than
-    #: busy.  Time is what binds, not memory: peak heap fits 18.9 bytes/cell,
-    #: so the whole budget below costs about 7 MB.
+    #: busy.  Time is what binds, not memory -- that part stands.
+    #:
+    #: BUT THE HEAP FIGURE IS STRUCK, AND IT IS THE FOURTH CLAIM OF THIS
+    #: DOCSTRING'S FAMILY, ONE AXIS OVER.  It read "peak heap fits 18.9
+    #: bytes/cell, so the whole budget below costs about 7 MB".  Measured with
+    #: no clock read at all: 42.8 B/cell at fan 940, and 147.9 B/cell at fan
+    #: 3,645 -- AT THE SAME CELL COUNT, and an independent reader measuring
+    #: render plus `save_svg` together got 292.3 B/cell and 102 MB against the
+    #: claimed 7.  A per-cell MEMORY rate varies with node density for exactly
+    #: the reason given below for why no per-cell TIME rate may appear, so the
+    #: same prohibition applies and no replacement figure is offered.
     #:
     #: EVERY PER-CELL DERIVATION THIS CONSTANT ONCE CARRIED IS STRUCK.  Two
     #: were written here in turn -- "4.907 us/cell, so 2.0 s / 4.907 us =
@@ -3718,23 +3727,52 @@ class MapScreen(Screen):
     #: NO SAFE-SIDE TIME CLAIM IS MADE HERE, AND THE THIRD ATTEMPT AT ONE IS
     #: STRUCK ALONGSIDE THE OTHER TWO.  It read: "at start heights of about 30
     #: rows and up, the worst admitted shape stays under 2 s.  Below that it
-    #: rises monotonically as the terminal shortens."  BOTH HALVES ARE FALSE.
+    #: rises monotonically as the terminal shortens."  NEITHER HALF SURVIVES,
+    #: but FOR DIFFERENT REASONS, and the first reason is not the one first
+    #: recorded.
     #:
-    #: The safe side fails AT ITS OWN BOUNDARY, on the very narrow-title family
-    #: it was derived from: at start height 30, 4 of 9 runs exceeded 2 s (min
-    #: 1.321, median 1.890, max 2.139), and an independent pass measured 7 of 9
-    #: with a median of 2.059.  THE ROOT CAUSE IS A STATISTIC.  The 1.91 s that
-    #: produced the sentence was a MINIMUM.  Best-of-N is the right statistic
-    #: for demonstrating a BREACH -- if the minimum exceeds the bound then every
-    #: run does -- and the WRONG one for demonstrating SAFETY, where nothing
-    #: about the other runs follows from the minimum.
+    #: THE SAFE SIDE IS NOT A PROPERTY OF THIS CODE AT ALL.  It was first
+    #: recorded here as FALSE, on 4-of-9 runs over 2 s at start height 30 and an
+    #: independent 7-of-9.  A SECOND READER THEN FAILED TO REPRODUCE IT
+    #: ENTIRELY: 27 runs of the identical shape, 0 over 2 s, 1.333 to 1.662 s,
+    #: on artifact bytes identical to both other parties'.  Three measurements
+    #: of the same work: 0/27, 4/9, 7/9.  SO THE SENTENCE DESCRIBES A
+    #: MACHINE-SESSION, NOT `mapper` -- and that is a BETTER ground for striking
+    #: it than "false", because "false" invites a fourth CORRECTED number while
+    #: this rules the whole claim shape out.  The 2-second boundary sits inside
+    #: between-machine variance, so an upper quantile taken here would have
+    #: RATIFIED the struck sentence on one machine and refuted it on another.
     #:
-    #: "Monotonically" is false because the start height FLOORS at 5: every
-    #: terminal at or below 15 rows admits the identical shape (fan 3,645,
-    #: measured at 15, 12 and 11 rows), so the curve rises and then PLATEAUS.
-    #: Three runs of that identical work measured 18.9 s, 21.0 s and 18.9 s --
-    #: a 2.1 s spread on one idle machine, which is its own argument against
-    #: any wall-clock sentence living in this docstring.
+    #: THE ROOT CAUSE IS STILL A STATISTIC, and the failed reproduction sharpens
+    #: it rather than weakening it.  The 1.91 s behind the sentence was a
+    #: MINIMUM.  Best-of-N is the right statistic for demonstrating a BREACH --
+    #: if the minimum exceeds the bound then every run does -- and the WRONG one
+    #: for demonstrating SAFETY, where nothing about the other runs follows from
+    #: it.  Measured across the three parties, the MINIMUM was the most
+    #: reproducible statistic (1.321 vs 1.333, 0.9% apart) and the tail the
+    #: least (1.617 vs 2.146), so quoting a minimum is wrong TWICE: it cannot
+    #: bound a maximum, AND it is the statistic most likely to look stable --
+    #: which makes a safety claim built on it look robust exactly when it is not.
+    #:
+    #: EVERY SECONDS-FIGURE SURVIVING IN THIS BLOCK IS `IRREDUCIBLY A READING`,
+    #: not a property: taken on one Windows machine, best-of-N unless stated,
+    #: n as given.  They are kept because they show the SHAPE of the cost, and
+    #: none of them may be used as a bound.
+    #:
+    #: "Monotonically" is false: the curve rises and then PLATEAUS.  ITS CAUSE
+    #: AND ITS BOUNDARY WERE BOTH STATED WRONG HERE AND ARE CORRECTED -- a wrong
+    #: CAUSE is worse than a wrong number, because it is what the next reader
+    #: reasons from.  The text said "the start height FLOORS at 5: every
+    #: terminal at or below 15 rows admits the identical shape".  Measured, the
+    #: extent settles at `max(8, start + 1)` where 8 is THE MAP'S OWN CONTENT
+    #: HEIGHT -- so the plateau runs to terminal 17, not 15, and it is the
+    #: content-height floor that causes it, not the start-height floor of 5.
+    #: Proof that the floor of 5 is not the cause: changing it to 1 leaves the
+    #: extent at terminals 9 through 17 completely unchanged.
+    #:
+    #: Three runs of that identical plateau work measured 18.9 s, 21.0 s and
+    #: 18.9 s -- a 2.1 s spread on one idle machine, which is its own argument
+    #: against any wall-clock sentence living in this docstring.
     #:
     #: THE FAMILY, THREE DEEP: the first derivation was struck for a
     #: contaminated INSTRUMENT, the second for a SEARCH that held a governing
@@ -3752,7 +3790,26 @@ class MapScreen(Screen):
     #: BOUND, which is a ruling rather than a constant -- and until there is
     #: one, the export DECLARES the wait instead of promising its length.
     #: `test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL` pins that
-    #: mechanism without a clock, so it cannot flake and cannot drift.
+    #: mechanism without a clock, so it cannot flake and cannot drift.  It pins
+    #: the BOUNDARY (17 admitted against 18 refused) rather than two far-apart
+    #: points, because the far-apart version missed three mutations of the very
+    #: expression it existed to pin.
+    #:
+    #: AND THE TERMINAL IS NOT THE ONLY GOVERNING VARIABLE -- THE VIEW IS A
+    #: SECOND ONE, named here because leaving it inherited is how all three
+    #: struck sentences went wrong.  `outline` and `radial` DECLINE the resize
+    #: (they hold no viewport), so the export keeps a terminal-sized state and
+    #: this budget can never refuse in those views at all: the same fan-3,645
+    #: map that is refused in `layered` at a 40-row terminal is admitted in both
+    #: of them.  Every figure in this block is a `layered` figure.
+    #:
+    #: DECLARED GAP, measured rather than assumed: the floor of `5` in
+    #: `max(5, size.height - 10)` is pinned by NOTHING.  Changing it to 1 leaves
+    #: every verdict unchanged, because the content-height floor of 8 dominates
+    #: for any map large enough to approach the budget -- so the floor is
+    #: observable only in the EXTENT of a small map, where the verdict never
+    #: moves.  It is a mandate nothing reads, and closing it needs an extent
+    #: arm rather than a budget one.
     #:
     #: SO THE CONSTANT RESTS ON UTILITY ALONE, which is untouched and never
     #: depended on the arithmetic: a 72001x24004 SVG is unreadable by anybody
@@ -3765,13 +3822,21 @@ class MapScreen(Screen):
     #: `A-100` does not rest on the arithmetic at all -- which is precisely why
     #: striking the arithmetic costs the ruling nothing.
     #:
-    #: WHAT THAT REFUSES, stated rather than discovered.  Measured: the pan
-    #: fixture (4,320 cells), a 500-wide fanout (150,025), a 200-long chain
-    #: (96,480) and 50 nodes carrying 400-character titles (15,025) all export.
-    #: A 1,000-deep chain (480,480) and a 4,001-way fanout (1,200,325) are
-    #: REFUSED.  The wide-and-deep boundary is MEASURED rather than
-    #: interpolated: 161 nodes (315,252 cells) export, 201 nodes (490,052)
-    #: do not.
+    #: WHAT THAT REFUSES -- AND EVERY ROW BELOW IS TERMINAL-SCOPED, which this
+    #: list did not say and which makes some of its rows conditional rather than
+    #: factual.  All of it was taken at `118x34`, identified after the fact by an
+    #: independent reader reproducing the 500-wide row at exactly 150,025 cells.
+    #: The CHAIN rows are content-bound and hold at any terminal; the FANOUT rows
+    #: are not, and at least one INVERTS: the 500-wide fanout is admitted at
+    #: `118x67` (348,058) and REFUSED at `118x68` (354,059).  Measured at
+    #: `118x34`: the pan fixture (4,320 cells), a 500-wide fanout (150,025), a
+    #: 200-long chain (96,480) and 50 nodes carrying 400-character titles
+    #: (15,025) all export.  A 1,000-deep chain (480,480) and a 4,001-way fanout
+    #: (1,200,325) are REFUSED.  The wide-and-deep boundary is MEASURED rather
+    #: than interpolated: 161 nodes (315,252 cells) export, 201 nodes (490,052)
+    #: do not -- that pair alone was NOT re-verified by the reader who found the
+    #: scoping defect, because its fixture is ambiguous from the text, so it is
+    #: flagged rather than confirmed.
     #: That is the intended consequence rather than a regrettable one: a
     #: 120x4004 artifact is four thousand rows tall and a 48013-column one is
     #: unreadable by anybody, so the refusal costs a file nobody wanted.  `f`
