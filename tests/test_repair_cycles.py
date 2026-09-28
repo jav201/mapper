@@ -10,6 +10,9 @@ unnoticed.
 """
 from __future__ import annotations
 
+import pathlib
+import re
+
 import pytest
 from textual.widgets import Static
 
@@ -23,6 +26,33 @@ ARROW = chr(0x2192)
 CYCLE_MMD = "graph TD\n    a[A] --> b[B]\n    b --> c[C]\n    c --> a\n"
 OTHER_CYCLE_MMD = "graph TD\n    x[X] --> y[Y]\n    y --> x\n"
 ACYCLIC_MMD = "graph TD\n    root[Root] --> a[A]\n    a --> b[B]\n    root --> c[C]\n"
+
+_REQUIREMENTS = (
+    pathlib.Path(__file__).resolve().parent.parent / ".dev-flow"
+    / "2026-08-26-ui-next-batch-02" / "01-requirements.md"
+)
+_LLR_HEADING = "##### LLR-N13.1.5"
+_CARD_STATE_LINE = re.compile(
+    r"Declared card state \(Spanish, the string that ships\):\*\*\s*`([^`]+)`"
+)
+
+
+def _declared_card_state_string() -> str:
+    """`CR-F1`: derive the declared card string from the REQUIREMENT, not from
+    `darkside.DAMAGED_MAP_STATE`.
+
+    The previous arm compared the painted card to the constant it is supposed
+    to be checking, so a wrong constant and a wrong card always agreed with
+    each other and the suite stayed green even with `mapa` missing. Reading
+    the requirement itself gives the arm something outside the module to
+    disagree with.
+    """
+    text = _REQUIREMENTS.read_bytes().decode("utf-8")
+    start = text.index(_LLR_HEADING)
+    end = text.index("#####", start + len(_LLR_HEADING))
+    match = _CARD_STATE_LINE.search(text[start:end])
+    assert match, "LLR-N13.1.5's declared card state line is missing or moved"
+    return match.group(1)
 
 
 def _diamond() -> Graph:
@@ -614,9 +644,13 @@ async def test_llr_n13_1_5_the_card_carries_the_DECLARED_state_string(tmp_path):
         await pilot.pause()
         painted = "".join(_cells(app.screen.query_one("#home-recents"), "roto"))
 
-    assert darkside.DAMAGED_MAP_STATE in painted, (
-        f"the card does not carry the declared state {darkside.DAMAGED_MAP_STATE!r}: "
-        f"{painted!r}"
+    declared = _declared_card_state_string()
+    assert declared == darkside.DAMAGED_MAP_STATE, (
+        f"darkside.DAMAGED_MAP_STATE is {darkside.DAMAGED_MAP_STATE!r} but "
+        f"01-requirements.md's LLR-N13.1.5 declares {declared!r}"
+    )
+    assert declared in painted, (
+        f"the card does not carry the declared state {declared!r}: {painted!r}"
     )
     assert chr(0x21B5) in painted, (
         f"the card carries no invitation, so #D28's INK escalation has no "
@@ -660,4 +694,57 @@ async def test_llr_n13_1_5_no_OTHER_surface_paints_a_damaged_map_as_healthy(
     assert not shown, (
         f"the {surface} surface presents a map the system could not read as if "
         f"it were usable; there is no honest {surface} for an unreadable map"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("surface", ["hero", "resume"])
+async def test_inc7_cr_r2_f1_the_A102_guard_hides_a_LOAD_WARNING_map_too(
+    tmp_path, monkeypatch, surface
+):
+    """`INC7-CR-R2-F1`: the `not in damaged` guard on the hero path
+    (`app.py:648`) and the resume path (`app.py:705`) is untested for HALF of
+    `A-102` -- removing either clause independently left the suite green.
+
+    `test_llr_n13_1_5_no_OTHER_surface_paints_a_damaged_map_as_healthy` drives
+    both surfaces through `roto`, a map whose LOAD RAISES. For that fixture
+    `load_or_notice` returns `None`, so `graph is not None` is already False
+    and the `not in damaged` clause never executes -- deleting it changes
+    nothing there. A map that LOADS but records a load WARNING (`A-102`'s
+    other condition) still returns a graph, so it is `damaged` ONLY through
+    the clause this arm exists to protect.
+    """
+    from mapper.store import MapStore
+
+    real_load = MapStore.load
+
+    def load_with_warning(self, name):
+        graph = real_load(self, name)
+        if name == "avisado":
+            graph.load_warnings.append("un aviso de carga")
+        return graph
+
+    monkeypatch.setattr(MapStore, "load", load_with_warning)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "avisado.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        store.record_session("avisado", "root")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        screen = app.screen
+        box = screen.query_one(
+            "#home-hero-box" if surface == "hero" else "#home-resume-box"
+        )
+        shown = box.display
+        rows = {str(k.value) for k in screen.query_one("#home-recents").rows}
+
+    assert "avisado" in rows, "the load-warned map lost its card"
+    assert not shown, (
+        f"the {surface} surface presents a map that loaded with a WARNING as "
+        f"if it were usable; A-102 names the load-warning path as damaged too, "
+        f"not only the raising path"
     )
