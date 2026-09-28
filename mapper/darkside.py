@@ -554,25 +554,28 @@ def fit(s: str, w: int) -> str:
 # declaration the NEXT increment creates.  `Inc-8`'s legend CONSUMES this; it
 # does not build a second one.
 #
-# THE SOURCE OF TRUTH IS `01b-ux-decisions.md` DECISION 3 sections 3.1-3.4, and
-# `tests/test_home.py` DERIVES from that document and compares, so this table is
-# a declaration to be checked rather than a second opinion.  Nothing here may be
-# edited without the row in `01b` moving first.
 #: `LLR-N16.2.1` -- the glyph vocabulary, DECLARED ONCE and DERIVED, never
-#: transcribed.  Each member is `(row id, label, style token)` exactly as
-#: `01b-ux-decisions.md` DECISION 3 sections 3.1-3.4 spells it.
+#: transcribed.  Each member is a 4-TUPLE `(row id, glyph, label, style
+#: token)`, exactly as `01b-ux-decisions.md` DECISION 3 sections 3.1-3.4 spells
+#: it.  THE SOURCE OF TRUTH IS `01b`; nothing here may be edited without the
+#: row in `01b` moving first.
 #:
 #: THE STYLE IS A TOKEN NAME, NOT A RESOLVED HEX.  `01b` declares tokens and the
 #: legend must paint what the renderer paints, so the comparison has to be on
 #: the same representation; resolving here would make the declaration
 #: uncheckable against its own source.
 #:
-#: NO COUNT IS WRITTEN ANYWHERE. Five generations of this number have been wrong
-#: in this project, so the number lives in ONE place -- `len()` of this tuple --
-#: and `tests/test_vocabulary_declaration.py` checks it against the document on
-#: every run.  That file is also why this comment is now TRUE: the previous
-#: version claimed a test derived and compared when none existed, which is a
-#: declaration wearing a check's clothes.
+#: WHAT `tests/test_vocabulary_declaration.py` DERIVES FROM `01b` AND CHECKS,
+#: on every run: that every declared (label, style) pair is FAITHFUL to a row
+#: in `01b` sections 3.1-3.4 -- no fabricated label, no drifted style -- and
+#: that `V22`'s glyph is pinned to the glyph `01b`'s row for `PRED-VIS` names.
+#:
+#: WHAT IT DOES NOT CHECK, and who owns closing it: COMPLETENESS -- dropping or
+#: renaming a row here leaves the suite green (`INC7-CR-R2-F3`, carried to
+#: `Inc-8`, which owes set equality against the document) -- and GLYPH-COLUMN
+#: FIDELITY for every row but `V22` -- the glyph column below is lifted from
+#: `01b`'s prose by hand and unchecked against it (`INC7-CR-R2-F2`, carried to
+#: `Inc-8`, which owes a written derivation rule for the glyph column).
 #:
 #: Compound rows contribute ONE MEMBER PER DISTINCT TRIPLE (`A-103`); rows that
 #: name the same painted FORM collapse (`01b` Amendment 2(b) -- a glyph may be a
@@ -617,7 +620,7 @@ DAMAGED_MAP_GLYPH = "\u2298"
 #: The `\u21b5` is load-bearing: `#D28` escalates this seat from `MUT` to `INK`
 #: BECAUSE the copy invites an ACTION, so a card without the invitation would
 #: take the escalated style while deleting the reason for it.
-DAMAGED_MAP_STATE = "da\u00f1ado \u2014 \u21b5 ver por qu\u00e9"
+DAMAGED_MAP_STATE = "mapa da\u00f1ado \u2014 \u21b5 ver por qu\u00e9"
 
 #: THE PENDING-PROJECTION LIST IS GONE, and its removal is the point: the
 #: compound-row projection was RULED (`A-103`), so `V19` and `V21` are no
