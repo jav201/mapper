@@ -420,16 +420,47 @@ def test_design_pass_q4_the_lens_rows_are_marked_deferred_and_not_declared():
     assert not lens & {m[0] for m in darkside.DECLARED_VOCABULARY}
 
 
-def test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5():
-    """The second derived set: `01b` §3.5's colours with a job, hex included."""
-    text = UX.read_text(encoding="utf-8")
+_COLOUR_ROW = re.compile(
+    r"^\|\s*(C\d+)\s*\|\s*`(.)`\s*\|\s*`([^`]+)`\s*\|\s*`([A-Z]+)`\s*\|\s*`(#[0-9a-f]{6})`"
+    r"\s*\|([^|]*)\|([^|]*)\|", re.M)
+#: What a hue can be painted on (verdict `F1`): the census's two kinds.
+PAINTED_ON = frozenset({"marks", "words"})
+
+
+def colour_rows() -> list[tuple[str, str, str, str, str, frozenset[str], frozenset[str]]]:
+    """`01b` §3.5, walked: `(id, swatch, label, token, hex, painted on, views)`
+    per row.  The `painted on` and `views` cells are `·`-separated sets."""
+    text = UX.read_bytes().decode("utf-8")
     table = text[text.index("### 3.5 "):text.index("### 3.6 ")]
-    rows = re.findall(r"^\|\s*`(.)`\s*\|\s*`([^`]+)`\s*\|\s*\**`([A-Z]+)`\**\s*\|\s*`(#[0-9a-f]{6})`",
-                      table, re.M)
+    rows = []
+    for rid, swatch, label, token, hexv, on, views in _COLOUR_ROW.findall(table):
+        rows.append((rid, swatch, label, token, hexv,
+                     frozenset(w.strip() for w in on.split("·")),
+                     frozenset(v.strip() for v in views.split("·") if v.strip())))
     assert len(rows) >= 2, f"the colour table walk derived {rows}"
-    assert list(darkside.DECLARED_COLOURS) == [(s, lab, tok) for s, lab, tok, _hex in rows]
-    for _s, _lab, tok, hexv in rows:
+    return rows
+
+
+def test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5():
+    """The second derived set: `01b` §3.5's colours with a job, id and hex
+    included, and each row's `painted on` cell drawn from the census's two
+    kinds."""
+    rows = colour_rows()
+    assert list(darkside.DECLARED_COLOURS) == [r[:4] for r in rows]
+    for rid, _s, _lab, tok, hexv, on, _views in rows:
         assert darkside.tokens()[tok] == hexv, (tok, hexv)
+        assert on and on <= PAINTED_ON, (rid, on)
+
+
+def test_f1_each_view_paints_the_colour_rows_its_01b_views_column_names():
+    """Verdict `F1`: the per-view colour partition, derived from §3.5's
+    Views column like the vocabulary's.  The keys are `VIEW_NAMES`."""
+    want: dict[str, set[str]] = {}
+    for rid, *_rest, views in colour_rows():
+        for view in views:
+            want.setdefault(view, set()).add(rid)
+    assert {v: set(ids) for v, ids in darkside.LEGEND_COLOURS.items()} == want
+    assert set(want) <= set(darkside.VIEW_NAMES.values()), set(want)
 
 
 # ---------------------------------------------------------------------------

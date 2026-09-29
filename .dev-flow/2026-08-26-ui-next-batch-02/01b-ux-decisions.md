@@ -397,16 +397,32 @@ removes (verdict `Q4`), so no legend paints them. The rows stay so the lens batc
 §3.1–3.4, y dar al rojo su segundo empleo «falta el acta»"*). Until design pass 2 this table was
 transcribed from the round-10 prototype (`ui_next2/generate.py:623-630`). A colour **has a job** when
 it is a hue: a token off the grey ramp (`GROUND`, `PANEL`, `STEP`, `INK`, `ASH`, `MUT`, `WORDMARK`
-carry surfaces and text, not a meaning). A row is here when the catalogue finds that hue **painted**
-by at least one of the four views, outside the app chrome; the both-directions arm is
-`tests/test_legend_design.py::test_e4_the_colour_rows_are_the_hues_the_views_paint`. Each row is a
-`█` swatch plus the label.
+carry surfaces and text, not a meaning). Each row is a `█` swatch plus the label.
 
-| Swatch | Label, exactly | Token | Hex | Painted by |
-|---|---|---|---|---|
-| `█` | `blue — where you can act` | `ACCENT` | `#1783ff` | the selection (`V23`, `V41`), radial's selected path (`V4b`, `V43`, `V44`) |
-| `█` | `amber — attention / due` | `WARN` | `#ffd230` | the fold bar (`V3`), rail counts (`V35`), coverage (`V38`), the sala's due and missing bars (`V19`, `V20`) |
-| `█` | `red — missing record` | `ALERT` | `#ff4f42` | `◫ sin acta` on an atlas card (`V26`, `views/layered.py:612-613`); the inspector's `sin acta` (`app.py:406-407`) |
+**PER VIEW since 2026-09-29, and one row per JOB** (verdict `F1`: *"colores por vista (cada leyenda
+muestra solo los colores que su vista pinta) y el ámbar declara también «faltantes, como conteo»"*).
+Each legend paints only the rows its **Views** cell names, and a colour with two jobs has two rows.
+The census reads every painted cell of each view outside the app chrome, over the states the D2 arm
+drives, and sorts each hue by what it is painted on: **words** when it is the foreground of a letter,
+**marks** otherwise (any other glyph, a numeral, and every background fill). A row is painted by a view
+when that view paints its hue on something its **Painted on** cell names; the view's rows are exactly
+those, and every (hue, words/marks) the view paints has a row. The per-view arm is
+`tests/test_legend_design.py::test_f1_each_legend_paints_the_colour_rows_its_view_paints`.
+
+| # | Swatch | Label, exactly | Token | Hex | Painted on | Views | Painted by |
+|---|---|---|---|---|---|---|---|
+| C1 | `█` | `blue — where you can act` | `ACCENT` | `#1783ff` | marks · words | atlas · outline · mind map · home | the selection (`V23`, `views/layered.py:745`; `views/outline.py:253`, `:275`; the rail cursor, `widgets/rail.py:241`), radial's selected path (`V4b`, `V43`, `V44`), `↩ retomar` (`V41`, `app.py:717`), the inspector's `+ agregar adjunto` (`widgets/inspector.py:171`) |
+| C2 | `█` | `amber — attention / due` | `WARN` | `#ffd230` | marks | atlas · outline · mind map · home | the fold bar (`V3`), rail counts (`V35`), coverage (`V38`), the home's due and missing bars (`V19`, `V20`) and its hero numeral (`app.py:540-542`) |
+| C3 | `█` | `amber — missing, as a count` | `WARN` | `#ffd230` | words | outline · home | the outline's branch note `N nodos · M sin acta` (`views/outline.py:270-273`); the home's `sin acta N` beside its bar (`app.py:558`) and `▲ 2 vencen hoy` (`V20`, `app.py:547`) |
+| C4 | `█` | `red — missing record` | `ALERT` | `#ff4f42` | marks · words | atlas · outline · mind map | `◫ sin acta` on an atlas card (`V26`, `views/layered.py:612-613`); the inspector's `<field>  requerido` for the selected node's missing fields (`widgets/inspector.py:188-193`), which every map view shows |
+
+**Change log — design pass 3** (verdict `F1`). Rows gained ids (`C1`–`C4`), a **Painted on** and a
+**Views** column. `WARN` gained its second job as its own row, `C3` (*missing items, as a count*), painted
+by the outline and the home only. `ALERT`'s row is painted by the three map views, **not the atlas
+alone**: the inspector paints `<field>  requerido` in `ALERT` for any selected node missing a required
+field, and the census now drives a state that selects one (`INC8-D3-F1`). The row's old citation,
+`app.py:406-407`, was the `↵` ficha peek, a separate modal screen, not the inspector; it is replaced
+by `widgets/inspector.py:188-193`.
 
 **Change log.** `SAGE` (`sage — completo / vigente`), `TEAL` (`teal — vino del repo`) and `VIOLET`
 (`violeta — enlaza mapas`) **left the table**: the catalogue finds each painted by none of the four

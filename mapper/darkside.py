@@ -731,15 +731,29 @@ LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
 }
 
 #: `LLR-N16.2.1`'s SECOND derived set: `01b` §3.5's colours with a job, as
-#: `(swatch, label, token)`.  Not members of the vocabulary above.  Since
-#: design pass 2 (verdict `E4`) §3.5 is derived from what the views PAINT,
-#: like §3.1-3.4: `SAGE`, `TEAL` and `VIOLET` are painted by no view and left
-#: the table, and `ALERT` gained its second job, the missing-record mark.
-DECLARED_COLOURS: tuple[tuple[str, str, str], ...] = (
-    ("█", "blue — where you can act", "ACCENT"),
-    ("█", "amber — attention / due", "WARN"),
-    ("█", "red — missing record", "ALERT"),
+#: `(row id, swatch, label, token)`.  Not members of the vocabulary above.
+#: Since design pass 2 (verdict `E4`) §3.5 is derived from what the views
+#: PAINT, like §3.1-3.4.  Since design pass 3 (verdict `F1`) a row is one JOB
+#: of a colour, so a token may hold two rows: amber marks attention (`C2`)
+#: and states missing items as a count (`C3`).
+DECLARED_COLOURS: tuple[tuple[str, str, str, str], ...] = (
+    ("C1", "█", "blue — where you can act", "ACCENT"),
+    ("C2", "█", "amber — attention / due", "WARN"),
+    ("C3", "█", "amber — missing, as a count", "WARN"),
+    ("C4", "█", "red — missing record", "ALERT"),
 )
+
+#: Verdict `F1`: each legend paints only the colour rows its own view paints,
+#: by row id.  DECLARED, CHECKED AGAINST 01B AND AGAINST THE VIEW: written by
+#: hand from §3.5's Views column; `tests/test_vocabulary_declaration.py` pins
+#: it equal to the document and `tests/test_legend_design.py` to each view's
+#: colour census.  A view absent here paints no colour section.
+LEGEND_COLOURS: dict[str, tuple[str, ...]] = {
+    VIEW_NAMES["canvas"]: ("C1", "C2", "C4"),
+    VIEW_NAMES["outline"]: ("C1", "C2", "C3", "C4"),
+    VIEW_NAMES["radial"]: ("C1", "C2", "C4"),
+    VIEW_NAMES["home"]: ("C1", "C2", "C3"),
+}
 
 
 #: `INC8-F-SEC-F1`: the style words `resolve_style` lets through besides token
@@ -762,7 +776,7 @@ def _declared_modifiers() -> frozenset[str]:
     words: set[str] = set()
     for _vid, _glyph, _label, style in DECLARED_VOCABULARY:
         words.update(w for w in style.split() if w not in names)
-    for _swatch, _label, token in DECLARED_COLOURS:
+    for _rid, _swatch, _label, token in DECLARED_COLOURS:
         words.update(w for w in token.split() if w not in names)
     return frozenset(words)
 
