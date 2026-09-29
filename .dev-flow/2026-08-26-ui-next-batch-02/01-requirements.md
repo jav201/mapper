@@ -9773,3 +9773,46 @@ named a braille dust field the atlas canvas never draws.
 **No statement changes and no threshold is loosened.** Only the ids the discharge cites are
 resolved. The passages in `LLR-N16.2.1`, §5.2 and `A-103` that discuss `V4`/`V4a` byte-identity
 describe the pre-rewrite table. They are history, and are annotated here rather than edited.
+
+---
+
+## Amendment set 15 — the docked legend runs full height. 2026-09-29. Base `29781d6`.
+
+### `A-107` — `TC-R36`'s height cap: the DOCKED legend is exempt; the modal keeps the cap
+
+**Authority.** Operator verdict round 2, item `E1` (`VERDICT-inc8-legend-2026-09-28.md`, section
+*Round 2*): *"(a) panel angosto de ~44 columnas, alto completo, vocabulario primero + la vista no se
+desplaza con la leyenda acoplada"*. The record's own reading of it: *"full height (needs a dated
+amendment of the sealed `TC-R36` for the DOCKED layout only)"*. Applied in Inc-8 design pass 2
+(`03-increments/increment-022-inc8-legend.md`, section *Design pass 2*). `A-107` was the next free id
+after a scan of all of `.dev-flow`; `A-106` was the last taken.
+
+**What is sealed, and where.** `TC-R36` belongs to the repair batch
+(`2026-08-26-repair-batch/01-requirements.md`, trace row `US-R05` → `HLR-R05` → `LLR-R05.1`,
+`LLR-R05.2`). It pins WHICH of `#help-dialog`'s two height declarations governs:
+`max-height: 28` at `140x45` (28 rows), and `height: 90%` at `100x24` (21 rows). It was written
+because the battery arm `L5` had been retired on a false "no-op" claim (`increment-004`, finding
+`F2`). When it was written the legend had one layout, a centred modal.
+
+**Why the docked layout is exempt.** Inc-8's verdict `D4` docks the legend on the right at
+`>= 118` columns, and `E1` makes that docked panel narrow (44 columns) and **full height**, so that
+it covers the ficha inspector whole instead of leaving an "L" of it beside a capped panel (`UX-F9`)
+and keeps most of the canvas visible (`INC8-F-UX-F1`: the 80-column panel covered 44 of the
+canvas's 58 columns at 118). `140x45` is now a docked size, so the cap cannot govern there: a
+full-height panel is 45 rows. Holding the cap for the docked layout would contradict the operator's
+verdict. Weakening `TC-R36` silently would contradict the sealed record. This amendment does neither.
+
+**What changes.**
+
+1. **Modal layout (below 118 columns): unchanged.** `max-height: 28` still governs on a tall
+   terminal, and `height: 90%` still governs on a short one. The cap is re-measured at `100x45`, a
+   modal width with the same 45 rows, where `90%` would give 40. That keeps `L5`'s question ("does
+   `max-height` govern on a tall terminal?") for the layout that still has the cap.
+2. **Docked layout (118 columns and wider): `height: 100%`,** exempt from `max-height`. `TC-R36`
+   gains the node `docked-full-height`: at `140x45` the dialog is 45 rows, governed by
+   `height: 100%`.
+3. `LLR-R05.1`'s substance, that every binding is reachable when more exist than fit, is untouched.
+   It is enforced by `TC-R24` and `AT-R12` in both layouts, and they stay green.
+
+**What is not loosened.** The modal bound is the same number, still asserted. The docked bound is a
+new, exact equality (the terminal's full height), not the absence of one.

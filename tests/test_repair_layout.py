@@ -473,13 +473,23 @@ def test_tc_r26_no_foreign_scope_binding_reaches_the_panel():
 
 @pytest.mark.parametrize(
     "size,expected,governed_by",
-    [((140, 45), 28, "max-height"), ((100, 24), 21, "height: 90%")],
-    ids=["cap-governs", "percentage-governs"],
+    [((100, 45), 28, "max-height"), ((100, 24), 21, "height: 90%"),
+     ((140, 45), 45, "docked height: 100% (A-107)")],
+    ids=["cap-governs", "percentage-governs", "docked-full-height"],
 )
 async def test_tc_r36_the_dialog_height_is_governed_by_a_named_declaration(
     tmp_path, size, expected, governed_by
 ):
     """Which of the dialog's two height declarations governs, at each size.
+
+    AMENDED 2026-09-29 by `A-107` (`01-requirements.md`), for the DOCKED layout
+    only.  Inc-8's operator verdict `E1` docks the legend as a narrow panel,
+    full height, at `>= 118` columns; `140x45` is docked, so the cap cannot
+    govern there any more and that size now pins the exemption itself
+    (`100%`, 45 rows).  The modal keeps this arm's original bound: the cap is
+    re-measured at `100x45` -- a modal width with the same 45 rows, where
+    `90%` would give 40 -- so `L5`'s question ("does `max-height` govern on a
+    tall terminal?") is still asked of the layout that still has the cap.
 
     Written in response to review finding `F2`, and written this way on purpose.
     The battery arm `L5` — raise `max-height` until today's 27 bindings fit —
