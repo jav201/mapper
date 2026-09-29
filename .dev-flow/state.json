@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-8",
-    "next_stage": "Inc-8 design pass 4 (2026-09-29): apply round-4 verdict G2-G5 (pan range while docked via a dated LLR-N06.1.2 amendment, red and amber labels, V34/V28 copy, 2-column reveal margin). Then ONE review round over pass-3 corrective + pass 4; if clean, Inc-8 CLOSES. Then the G6 micro-increment (store.py surrogate coercion + 6 guarded saves), then Inc-9, then Inc-EN (B-71), then whole-branch gates (FLAKE-1 first).",
+    "next": "Inc-8 follow-ups, then G6 micro-increment",
+    "next_stage": "Inc-8 CLOSED 2026-09-29 (closing review PASS). Inc-SCRUB landed (A-110). NEXT: Inc-8 follow-ups INC8-FINAL-F1..F6 (small, Sonnet), then the G6 micro-increment (store.py surrogate coercion + 6 guarded saves), then Inc-9 (English key labels, group headers, screen headers; one name per view), then Inc-EN (B-71), then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -862,6 +862,52 @@
         "G7": "stays in B-37",
         "G1": "43 kept, rail not counted; INC8-P3-CR-F4 carry (derive 43 from named renderer constants)",
         "carry": "INC8-P3-CR-F5 private layered._geometry import"
+      }
+    },
+    "INC-8_CLOSED_AND_SCRUB_2026-09-29": {
+      "date": "2026-09-29",
+      "INC-8_CLOSED": {
+        "closing_review": "code PASS -- 'Inc-8 closes' (INC8-FINAL review of 69d9a96..037c733); lane 1293 passed / 0 failed in the reviewer's worktree; 10 mutants, 8 RED as claimed, MUT-H2b and MUT-SEARCH survive -> F2, F3",
+        "closing_pass_commits": [
+          "316007b",
+          "7092526",
+          "ec820c8",
+          "7454211",
+          "0b6f1e2",
+          "35a469d",
+          "037c733"
+        ],
+        "operator_rounds": "5 verdict rounds + 1 language ruling + 1 width principle, all in VERDICT-inc8-legend-2026-09-28.md",
+        "follow_ups_non_blocking": {
+          "INC8-FINAL-F1": "diff-mode chip leaves the reveal margin at 1 (operator's H3 says 'todos los casos' -> fix, coordinator ruling)",
+          "INC8-FINAL-F2": "on_descendant_blur repaint unpinned",
+          "INC8-FINAL-F3": "_reclamp_pan census exemption unpinned (pan_extent never reads hits)",
+          "INC8-FINAL-F4": "'- 1' comment says last painted column; it is one past it",
+          "INC8-FINAL-F5": "record accuracy (4 intermediate commits red on the search census, not 1; caller list; V27 authority; unstated INSPECTOR_WIDTH < LEGEND_DOCKED_CELLS)",
+          "INC8-FINAL-F6": "double repaint on resize-close"
+        },
+        "carries": [
+          "INC8-CL-CR-F4 _reclamp_pan range unpinned -> qa",
+          "FLAKE-2 candidate test_hlr_n16_4_legend_declares_its_own_keys[size2]",
+          "B-72 with B-36",
+          "INC8-P3-CR-F4 derive 43 from renderer constants",
+          "INC8-P3-CR-F5 private layered._geometry import",
+          "INC8-D2-F2 app.py toast len()",
+          "diff-mode tones uncatalogued"
+        ]
+      },
+      "INC-SCRUB_2026-09-29": {
+        "authority": "operator: 'Limpia el usuario de los registros en un incremento propio'",
+        "requirement": "A-110",
+        "commits": [
+          "0031570",
+          "8cb6260",
+          "dbef9cd",
+          "c704ffa"
+        ],
+        "result": "70 tracked files, 261 occurrences -> '<operator>' (byte-exact substitution); guard tests/test_no_operator_paths.py (hermetic allow-list arm + environment backstop arm) RED 249 lines / 70 files -> GREEN; lane 1295 passed / 0 failed; coordinator re-verified 0 hits in tree and in commit messages",
+        "limit": "the username remains in git HISTORY on the public remote (origin, incl. master); removal needs a history rewrite + force push, NOT authorized",
+        "closes": "B-22 identity half; B-22 session-UUID half stays open"
       }
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
