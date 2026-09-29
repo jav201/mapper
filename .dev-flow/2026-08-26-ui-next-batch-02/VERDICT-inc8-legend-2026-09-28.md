@@ -107,4 +107,21 @@ Reading applied by the coordinator:
 - **Decisions and renders use ONE fixed reference width:** the declared context of use,
   `DECLARED_CONTEXT_CELLS` = 118 columns. Every design render shown to the operator includes the
   reference width, alongside a narrower and a wider one.
+---
+
+# Round 4 — operator verdict, 2026-09-29 (base `c7cdf85`)
+
+Decision page «Leyenda de mapper, cuarta ronda», pasted back verbatim. **Authority for Inc-8 design pass 4 and for the G6 micro-increment.** All seven took the recommended option.
+
+| id | Verdict (verbatim) | What it rules |
+|---|---|---|
+| G1 | mantener 43 de lienzo; el rail no cuenta | Dock minimum stays 43 canvas columns; the rail does not count as view. Switch points 87 (bare) / 111 (with rail) stand; `INC8-P3-CR-F4` (derive 43 from renderer constants) stays a carry for when `layered.py` is in scope |
+| G2 | enmendar LLR-N06.1.2: mientras la leyenda está acoplada, el rango legal usa el lienzo visible | Dated amendment to `LLR-N06.1.2`: while the legend is docked, the legal pan range is computed on the VISIBLE canvas, so an edge card can be revealed; on close the pan returns to the kept value exactly as today |
+| G3 | ampliar a «red — required, missing» | The red row reads `red — required, missing` (covers the atlas record mark and the inspector's required fields) |
+| G4 | una fila «amber — attention · missing count», en todas las vistas que pintan ámbar | ONE amber row, `amber — attention · missing count`, declared on every view that paints amber (replaces C2+C3) |
+| G5 | aplicar los tres: V34 «in the rail», V28 «field initial, pending», margen de 2 columnas | V34 → `folded branch, in the rail`; V28 → `field initial, pending`; the revealed card keeps a 2-column margin from the panel |
+| G6 | micro-incremento propio justo después de Inc-8: limpiar los campos de ficha al entrar al grafo y proteger los 6 guardados | A dedicated micro-increment right after Inc-8: ficha string fields are coerced as they enter the graph (load and in-app mutation), and the 6 unguarded `store.save()` call sites are guarded (`INC8-P3-SEC-F1`) |
+| G7 | dejarlo en B-37 (recalibrar MUT en un batch de diseño) | The MUT-on-GROUND 4.43:1 shortfall stays in `BACKLOG.md` B-37 (recalibrate MUT in a design batch) |
+
+Also landed before this record: the pass-3 corrective (`4a372dc`, `60bf183`, `da49eb0`) fixed the code-review BLOCK `INC8-P3-CR-F1` (opening the legend moved keyboard focus) and restores the pre-legend focus on close, including `None` (closes `INC8-P3-UX-F1` / `UX-F7`).
 
