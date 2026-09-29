@@ -2149,10 +2149,15 @@ class MapScreen(Screen):
             return darkside.VIEW_NAMES["radial"]
         return darkside.VIEW_NAMES["canvas"]
 
-    # -- the docked legend (Inc-8 verdicts `F2`, `F9`, `G2`) ----------------
+    # -- the docked legend (Inc-8 verdicts `F2`, `F9`, `G2`, `G5`) ----------
     # The legend reads `legend_view_left` and calls the two methods below;
     # nothing else does.  They move the view only through this screen's own
     # pan state and its clamp, never a renderer.
+
+    #: `G5`: the revealed card keeps this many columns clear of the docked
+    #: panel's left edge, so it does not sit flush against it.  Declared once
+    #: here; `_pan_revealing_selection` is the only reader.
+    REVEAL_MARGIN_CELLS = 2
 
     @property
     def legend_view_left(self) -> int:
@@ -2270,10 +2275,11 @@ class MapScreen(Screen):
         self._declare_after_layout()
 
     def _pan_revealing_selection(self, panel_x: int) -> int:
-        """The painted pan, moved right until the selected card's box ends at
-        or before screen column `panel_x`.  Only a renderer that consumes pan
-        moves (`PAN-1`: outline and radial do not pan).  Read from the state
-        the canvas was last painted from, through the same layout it draws
+        """The painted pan, moved right until the selected card's box ends
+        `REVEAL_MARGIN_CELLS` short of screen column `panel_x` (`G5`), or
+        already does.  Only a renderer that consumes pan moves (`PAN-1`:
+        outline and radial do not pan).  Read from the state the canvas was
+        last painted from, through the same layout it draws
         (`layered._geometry`, read only), so the card is where the frame
         paints it.
 
@@ -2302,10 +2308,11 @@ class MapScreen(Screen):
         canvas_x = self.query_one("#map-canvas", Static).region.x
         card_x, _card_y = geo.place(cursor)
         right = canvas_x + card_x + geo.card_w
-        if card_x >= geo.avail or right <= panel_x:
+        edge = panel_x - self.REVEAL_MARGIN_CELLS
+        if card_x >= geo.avail or right <= edge:
             return pan_x
         visible_span = panel_x - canvas_x
-        return self._clamp_pan(pan_x + right - panel_x, extent_x, visible_span)
+        return self._clamp_pan(pan_x + right - edge, extent_x, visible_span)
 
     def _current_crumb(self) -> list[str]:
         prefix = self.source_crumb or [self.map_id]

@@ -355,7 +355,7 @@ below (the instrument reads the tables), and recorded here with their reason.
 | V25 | `◫ ACTA-7` (a legacy card's document chip) | `the node's record` | `INK` | atlas | `views/layered.py:611-614` |
 | V26 | `◫ sin acta` | `missing record` | `ALERT` | atlas | `views/layered.py:612-613`; `ALERT`'s second job, §3.5 |
 | V27 | `D` letter `✓` mark (a schema letter and its filled mark, adjacent) | `field initial · ✓ filled` | letter `MUT`; mark `INK` | atlas | `views/layered.py:628-631` |
-| V28 | `D` letter `░` mark (a schema letter and its pending mark, adjacent) | `field initial · ░ pending` | letter `MUT`; mark `STEP` | atlas | `views/layered.py:628-631` |
+| V28 | `D` letter `░` mark (a schema letter and its pending mark, adjacent) | `field initial, pending` | letter `MUT`; mark `STEP` | atlas | `views/layered.py:628-631` |
 | V29 | `┬─┐` (box-drawing wires; glyph set `─│┌┐└┘├┤┬┴┼`, exactly the canvas's `_GLYPH` table) | `link between nodes` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
 | V4b | `⣉⡉⠉` (a braille edge, `U+2800`–`U+28FF`) | `link; blue: path to selected` | `INK`, `ASH` or `MUT` by branch; `ACCENT` on the path to the selected node | mind map | `views/radial.py:259-272`, `canvas.py:167-182` |
 | V42 | `●` (a node's marker, on its label's pill) | `node, grey of its branch` | `INK on PANEL`, `ASH on PANEL` or `MUT on PANEL` by branch | mind map | `views/radial.py:366-375`; the pill's ground `:302-304` |
@@ -370,7 +370,7 @@ below (the instrument reads the tables), and recorded here with their reason.
 | # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
 |---|---|---|---|---|---|
 | V33 | `▾` in the rail | `open branch` | `MUT` | atlas · outline · mind map | `widgets/rail.py:228` |
-| V34 | `▸` in the rail | `folded branch, left list` | `MUT` | atlas · outline · mind map | `widgets/rail.py:226` |
+| V34 | `▸` in the rail | `folded branch, in the rail` | `MUT` | atlas · outline · mind map | `widgets/rail.py:226` |
 | V35 | `3` beside a rail row | `pending fields here and below` | `WARN` | atlas · outline · mind map | `widgets/rail.py:248-249` |
 | V21a | `∙` in the rail's territory lattice | `node with a complete card` | `MUT` | atlas · outline · mind map | `widgets/rail.py:267-268` |
 | V21b | `·` in the rail's territory lattice | `node with pending fields` | `WORDMARK` | atlas · outline · mind map | `widgets/rail.py:267-268` |
@@ -451,6 +451,9 @@ section *Round 4*; the record is `increment-022`, section *Design pass 4*).
 |---|---|---|
 | `C4` | label `red — required, missing` (was `red — missing record`) — the mark still covers both the atlas's `◫ sin acta` and the inspector's `<field>  requerido` | `G3` |
 | `C2`, `C3` | **merged into ONE row, `C2`.** `C3`'s id retires; `C2`'s label becomes `amber — attention · missing count` (was `amber — attention / due`), its **Painted on** cell widens to `marks · words` (the union of the two retired cells), and its **Views** cell is unchanged (`C2` already named all four views before the merge, so the merged row is still declared on every view that paints amber) | `G4` |
+| `V34` | `folded branch, in the rail` (was `folded branch, left list`) | `G5` |
+| `V28` | `field initial, pending` (was `field initial · ░ pending`) | `G5` |
+| §3.1, `V26` | the revealed atlas card keeps a 2-column margin from the docked panel's left edge, declared as one constant (`mapper/app.py::MapScreen.REVEAL_MARGIN_CELLS`) | `G5` |
 
 ### 3.6 · Legend framing copy
 
