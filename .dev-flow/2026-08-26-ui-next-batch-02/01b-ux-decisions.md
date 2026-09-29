@@ -349,7 +349,7 @@ below (the instrument reads the tables), and recorded here with their reason.
 | V44 | `◆` (the root's marker) | `map root` | `ACCENT` | mind map | `views/radial.py:366-370` |
 | V30 | `◆` before `mapper` in the header | `view header` | `INK` | atlas · outline · mind map | `views/layered.py:432`, `views/outline.py:92`, `views/radial.py:117` |
 | V31 | `▽ 35 fuera de vista` | `nodes off screen` | `INK` | atlas · outline · mind map | `views/layered.py:451-454`, `views/outline.py:334`, `views/radial.py:121`, `app.py:2592` |
-| V45 | `⇲15` (the true level, where the outline caps a deep row's indent) | `true depth, indent capped` | `MUT` | outline | `views/outline.py:24`, `:55`, `:219`, `:261` |
+| V45 | `⇲15` (the true level, where the outline caps a deep row's indent) | `true depth, indent capped` | `MUT` | outline | `views/outline.py:24`, `:55`, `:219`, `:261`, `:264` |
 
 ### 3.2 · Map chrome shared by the three map views — rail, strips, ficha
 
