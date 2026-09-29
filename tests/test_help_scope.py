@@ -9,6 +9,7 @@ never read as legend content.
 from __future__ import annotations
 
 import pytest
+from rich.cells import cell_len
 from rich.style import Style
 from rich.text import Text
 from textual.app import App
@@ -712,3 +713,21 @@ def test_inc8_ux_f11_the_scrollbar_thumb_clears_the_non_text_contrast_floor():
     assert f"scrollbar-background: {darkside.PANEL};" in HelpScreen.CSS
     ratio = _contrast(darkside.ASH, darkside.PANEL)
     assert ratio >= 3.0, ratio
+
+
+@pytest.mark.parametrize("s", [
+    "left\tright", "first\nsecond", "carriage\rreturn", "中文字串",
+], ids=["tab", "newline", "cr", "cjk"])
+def test_inc8_p3_cr_f3_shown_cells_is_what_fit_actually_paints(s):
+    """`INC8-P3-CR-F3`: `shown_cells` was UNPINNED -- no arm measured it
+    against a real `fit` paint, and `_cells(darkside.plain(s))` (skipping
+    `_row_text`'s tab/newline/CR-to-space translation) survives every
+    existing arm.  `fit(s, big)` pads `_row_text(s)` out to `big` cells for a
+    `big` no real caller would truncate against; stripped of that padding,
+    its own cell length is exactly what a caller sizing by `shown_cells`
+    was promised.  A control character changes the measure: `rich.cells`
+    scores a bare `\\t`/`\\n`/`\\r` as ZERO cells, so the mutant under-counts
+    by one cell per row-breaker, and a wide CJK string keeps both sides
+    honest about double-width glyphs too."""
+    big = 100
+    assert darkside.shown_cells(s) == cell_len(darkside.fit(s, big).rstrip())
