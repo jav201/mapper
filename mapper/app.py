@@ -2129,6 +2129,37 @@ class MapScreen(Screen):
         self._declared_for = None
         self._declare_after_layout()
 
+    def on_descendant_focus(self, event: events.DescendantFocus) -> None:
+        """`H2` (closing verdict, round 5): repaint on every focus change, so
+        the selection's tone always matches the real focus owner --
+        `_view_state`'s `focus_owner` already decides blue (`V23`, on the
+        canvas) versus grey (`V24`, focus elsewhere); nothing here decides
+        the tone, it only asks for the repaint that reads it.
+
+        MEASURED DEFECT: `tab` alone never repainted anything on this
+        screen, so a card stayed painted blue after the keyboard had already
+        left the canvas -- and closing the legend after such a `tab`
+        inherited exactly that stale paint (`esc` restores the FOCUS
+        correctly, `_restore_after_legend` already does that, but nothing
+        told the canvas the tone underneath it was wrong before `?` was ever
+        pressed).
+
+        The canvas-only path (`_declare_after_layout`), never
+        `refresh_canvas`: this must not rebuild the inspector or move focus
+        itself, only redraw what the CURRENT focus already is.  Cheap when
+        the change stays inside the canvas: `_declare_after_layout` no-ops
+        whenever the `ViewState` it would paint -- `focus_owner` included --
+        already equals the one last painted (`P1`)."""
+        self._declare_after_layout()
+
+    def on_descendant_blur(self, event: events.DescendantBlur) -> None:
+        """The other half of `H2`: a field can blur to NOTHING (the
+        inspector's own `escape`, `FichaInspector.action_leave_field` ->
+        `set_focus(None)`) with no `DescendantFocus` to follow it. Without
+        this the tone would stay on "focus elsewhere" after the keyboard had
+        already left every region."""
+        self._declare_after_layout()
+
     def _current_renderer(self):
         if self.outline_mode:
             return self.outline_renderer
