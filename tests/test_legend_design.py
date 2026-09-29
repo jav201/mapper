@@ -63,6 +63,7 @@ from mapper.screens.help import (
     HelpScreen,
     vocabulary_for,
 )
+from mapper.views.layered import _geometry as layered_geometry
 from mapper.widgets.rail import RAIL_WIDTH
 
 # ---------------------------------------------------------------------------
@@ -902,6 +903,36 @@ async def test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card(tmp
 
 
 # ---------------------------------------------------------------------------
+# `G5`: the revealed card keeps a declared `REVEAL_MARGIN_CELLS`-column margin
+# from the panel's left edge, honoured whenever `G2`'s (possibly widened)
+# legal range leaves room for it.
+
+async def test_g5_the_revealed_card_keeps_its_declared_margin_from_the_panel(tmp_path):
+    """`G5`: the revealed card ends `REVEAL_MARGIN_CELLS` columns short of the
+    panel's left edge, not flush against it.  `FINA_4`'s card has pan room to
+    spare at the reference width -- it is not the map's own right edge,
+    `ti4` is (the `G2` arms above) -- so the margin is fully honoured rather
+    than eaten by `LLR-N06.1.2`'s legal range.  Read from the SAME painted
+    layout `_pan_revealing_selection` reads (`layered._geometry`), through
+    the real `?` key rather than a direct call, so this is the product's own
+    geometry, not a re-derivation of it."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        panel_x = REFERENCE_SIZE[0] - LEGEND_DOCKED_CELLS
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        _renderer, state = view._rendered_for
+        geo = layered_geometry(view.graph, state)
+        card_x, _card_y = geo.place(view.nav.cursor)
+        right = canvas.x + card_x + geo.card_w
+        assert panel_x - right == view.REVEAL_MARGIN_CELLS, (
+            panel_x, right, view.REVEAL_MARGIN_CELLS
+        )
+
+
+# ---------------------------------------------------------------------------
 # Pass-3 corrective: `INC8-P3-CR-F1` (blocking) / `INC8-P3-UX-F1`, carried
 # `INC8-P2-UX-F7`.  Opening the legend must not move the keyboard's focus.
 # `legend_docked` called `refresh_canvas` on every layout apply -- modal
@@ -987,11 +1018,16 @@ async def test_cr_f2_reopening_after_a_pan_keeps_the_new_pan(tmp_path):
     """`INC8-P3-CR-F2`: closing the legend must clear `_pan_before_legend`,
     or a pan the operator makes AFTER closing is discarded the next time they
     open the legend -- the second `legend_docked` would find a STALE "kept"
-    pan from the first open and revert to it instead of re-deriving a reveal
-    over the operator's own choice.  Walked through `FINA_4` at the
-    reference width: open reveals (0,0)->(7,0); close returns (7,0)->(0,0);
-    `L` is the operator's own pan, (0,0)->(8,0); a second open must keep it
-    exactly, and a second close must not move it."""
+    pan from the first open (`0`) and revert to it instead of re-deriving a
+    reveal over the operator's own choice.  Walked through `FINA_4` at the
+    reference width: open reveals (0,0)->(9,0) (`A-109`, `G5`: the reveal now
+    leaves `REVEAL_MARGIN_CELLS` clear of the panel, 2 columns more than the
+    flush target design pass 3 pinned here); close returns (9,0)->(0,0);
+    three `L` presses are the operator's own pan, (0,0)->(24,0) -- past the
+    reveal's OWN target, so a bug reusing the stale `0` would show a
+    DIFFERENT, distinguishable number here, not the same one by coincidence.
+    A second open must keep it exactly (the card is already clear, margin
+    included), and a second close must not move it."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=REFERENCE_SIZE) as pilot:
         view, _canvas = await _walked_map(app, pilot, FINA_4)
@@ -999,19 +1035,21 @@ async def test_cr_f2_reopening_after_a_pan_keeps_the_new_pan(tmp_path):
         await pilot.press("question_mark")
         await _settle(pilot)
         assert app.screen.has_class(DOCKED_CLASS)
-        assert (view.pan_x, view.pan_y) == (7, 0)
+        assert (view.pan_x, view.pan_y) == (9, 0)
         await pilot.press("escape")
         await _settle(pilot)
         assert (view.pan_x, view.pan_y) == (0, 0)
         await pilot.press("L")
+        await pilot.press("L")
+        await pilot.press("L")
         await _settle(pilot)
-        assert (view.pan_x, view.pan_y) == (8, 0)
+        assert (view.pan_x, view.pan_y) == (24, 0)
         await pilot.press("question_mark")
         await _settle(pilot)
-        assert (view.pan_x, view.pan_y) == (8, 0)
+        assert (view.pan_x, view.pan_y) == (24, 0)
         await pilot.press("escape")
         await _settle(pilot)
-        assert (view.pan_x, view.pan_y) == (8, 0)
+        assert (view.pan_x, view.pan_y) == (24, 0)
 
 
 @pytest.mark.parametrize("width", [100, DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE, 140])
