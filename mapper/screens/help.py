@@ -35,7 +35,11 @@ LEGEND_ROW_CELLS = LEGEND_PANEL_CELLS - 2 * _PAD_X - _SCROLLBAR_CELLS
 # `D4`: at this terminal width and wider the legend docks beside the view
 # instead of covering it.  The panel stays modal for keys in both layouts: a
 # key pressed while the legend is open never reaches the view under it.
-LEGEND_DOCK_MIN_WIDTH = 118
+# The operator's "118 columns" is the batch's declared context of use, the
+# width every render of this batch is drawn at, so it is read from its one
+# home (`test_crumb.py::test_decl_118_is_spelled_ONCE`).  It is NOT the map
+# screen's auto-hide threshold, which equals it by arithmetic (`INC8-D-Q7`).
+LEGEND_DOCK_MIN_WIDTH = darkside.DECLARED_CONTEXT_CELLS
 DOCKED_CLASS = "-docked"
 _KEY_CELLS = 10
 _SAMPLE_CELLS = 12
