@@ -542,13 +542,20 @@ async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_p
 
 async def test_d4_a_resize_moves_the_open_legend_between_layouts(tmp_path):
     """A resize across the threshold moves the open legend AND re-budgets what
-    it paints: the footer's rows are exactly the new layout's row width."""
+    it paints.  Read off the COMPOSITED FRAME: the title row is right-aligned
+    to the row budget, so the close hint's last cell sits exactly `row_cells`
+    in from the title widget's left edge -- and a legend that moved without
+    repainting leaves it at the OLD budget.  (Not the widget's `render()`:
+    `tests/test_a3_census.py` pins every zero-arg `.render()` site.)"""
     app = MapperApp(tmp_path)
 
     def footer_width(legend) -> int:
-        """What the footer widget holds NOW, not what a fresh render would give."""
-        painted = legend.query_one("#help-footer").render().plain
-        return max(darkside._cells(line) for line in painted.split("\n"))  # noqa: SLF001
+        region = legend.query_one("#help-title").region
+        strip = legend._compositor.render_strips()[region.y]  # noqa: SLF001
+        row = "".join(seg.text for seg in strip)
+        hint = "esc close"
+        assert hint in row, row
+        return row.index(hint) + len(hint) - region.x
 
     async with app.run_test(size=(140, 34)) as pilot:
         _view, legend = await _open_legend_over_map(app, pilot)
