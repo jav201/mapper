@@ -63,7 +63,7 @@ from mapper.screens.help import (
     HelpScreen,
     vocabulary_for,
 )
-from mapper.views.layered import _geometry as layered_geometry
+from mapper.views.layered import pan_extent
 from mapper.widgets.rail import RAIL_WIDTH
 
 # ---------------------------------------------------------------------------
@@ -903,32 +903,95 @@ async def test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card(tmp
 
 
 # ---------------------------------------------------------------------------
-# `G5`: the revealed card keeps a declared `REVEAL_MARGIN_CELLS`-column margin
-# from the panel's left edge, honoured whenever `G2`'s (possibly widened)
-# legal range leaves room for it.
+# `INC8-CL-CR-F1` (closing pass): `_restore_after_legend` restores the pan it
+# captured the instant the legend opened, unclamped -- a resize WHILE the
+# legend was open can shrink the extent under that kept number, and neither
+# `_move_pan` nor `_restore_after_legend` clamped anything before this fix.
+# At an UNCHANGED size `A-109` still governs exactly (already measured by
+# `test_g2_a_card_at_the_maps_right_edge_is_revealed_whole_and_closing_returns_it`,
+# above); this is the resize case that arm does not drive.
 
-async def test_g5_the_revealed_card_keeps_its_declared_margin_from_the_panel(tmp_path):
-    """`G5`: the revealed card ends `REVEAL_MARGIN_CELLS` columns short of the
-    panel's left edge, not flush against it.  `FINA_4`'s card has pan room to
-    spare at the reference width -- it is not the map's own right edge,
-    `ti4` is (the `G2` arms above) -- so the margin is fully honoured rather
-    than eaten by `LLR-N06.1.2`'s legal range.  Read from the SAME painted
-    layout `_pan_revealing_selection` reads (`layered._geometry`), through
-    the real `?` key rather than a direct call, so this is the product's own
-    geometry, not a re-derivation of it."""
+async def test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close(tmp_path):
+    """Opened on `ti4` (the map's own right edge) and panned to the OLD
+    range's legal maximum, then resized WIDER while the legend stays open:
+    closing must hand back a pan `LLR-N06.1.2` calls legal for the NEW size,
+    not the raw kept number."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=REFERENCE_SIZE) as pilot:
-        view, canvas = await _walked_map(app, pilot, FINA_4)
-        panel_x = REFERENCE_SIZE[0] - LEGEND_DOCKED_CELLS
+        view, _canvas = await _walked_map(app, pilot, TI_4)
+        await _panned_to_the_old_legal_max(pilot)
         await pilot.press("question_mark")
         await _settle(pilot)
         assert app.screen.has_class(DOCKED_CLASS)
-        _renderer, state = view._rendered_for
-        geo = layered_geometry(view.graph, state)
-        card_x, _card_y = geo.place(view.nav.cursor)
-        right = canvas.x + card_x + geo.card_w
-        assert panel_x - right == view.REVEAL_MARGIN_CELLS, (
-            panel_x, right, view.REVEAL_MARGIN_CELLS
+        await pilot.resize_terminal(200, REFERENCE_SIZE[1])
+        await _settle(pilot)
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        w, h = view._canvas_size()  # noqa: SLF001
+        (extent_x, span_x), _y = pan_extent(view.graph, view._view_state(w, h))  # noqa: SLF001
+        legal_max = max(0, extent_x - span_x)
+        assert view.pan_x <= legal_max, (view.pan_x, legal_max)
+
+
+# ---------------------------------------------------------------------------
+# `G5`: the revealed card keeps a declared `REVEAL_MARGIN_CELLS`-column margin
+# from the panel's left edge, honoured whenever `G2`'s (possibly widened)
+# legal range leaves room for it.  `H3` (closing verdict, round 5) withdrew
+# the edge's old exemption -- the margin is painted everywhere, edge card
+# included -- and moved the oracle off the geometry `_pan_revealing_selection`
+# itself reads: measuring `canvas_x + card_x + geo.card_w` against the panel
+# only checks the implementation agrees with itself, which is exactly how the
+# off-by-one (the box's own last column is declared width, never painted ink)
+# shipped invisibly at design pass 4. The arm below counts blank PAINTED
+# columns on the composited frame instead.
+
+#: (label, keys, edge, size).  `fina-4` at 140x45 is deliberately NOT here:
+#: measured, the wider canvas already shows that card clear of where the
+#: panel would fall (margin 16, no reveal pan needed at all), so it would
+#: assert a resting margin the reveal never produced rather than the
+#: declared one -- the same gap `test_f2_a_selection_clear_of_the_panel_does_
+#: not_move_the_view` exists to keep separate from the covered case above it.
+#: `ti-4` at BOTH sizes: panned to its legal maximum first, it is covered by
+#: the panel at any width, so the edge case `H3` is actually about is the one
+#: measured either way.
+_H3_CASES = [
+    ("fina-4", FINA_4, False, REFERENCE_SIZE),
+    ("ti-4", TI_4, True, REFERENCE_SIZE),
+    ("ti-4", TI_4, True, (140, 45)),
+]
+
+
+@pytest.mark.parametrize(
+    "keys,edge,size", [c[1:] for c in _H3_CASES], ids=[f"{c[0]}-{c[3][0]}x{c[3][1]}" for c in _H3_CASES]
+)
+async def test_h3_the_painted_margin_is_the_declared_one_everywhere(tmp_path, keys, edge, size):
+    """`H3`: `REVEAL_MARGIN_CELLS` (2) blank PAINTED columns between the
+    selected card's own last glyph and the docked panel's left edge --
+    counted on the composited frame, not the geometry.  The precondition
+    (the card is at least partly covered before `?`, so a reveal pan
+    actually has to run) is asserted, not assumed -- the same discipline
+    `test_f2_docking_pans_a_covered_selection_clear_and_closing_returns_it`
+    already uses -- because "no pan needed" and "the declared margin" are
+    different claims this arm must not conflate."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        view, canvas = await _walked_map(app, pilot, keys)
+        if edge:
+            await _panned_to_the_old_legal_max(pilot)
+        panel_x = size[0] - LEGEND_DOCKED_CELLS
+        pre_dock = _selection_cells(view, canvas)
+        assert pre_dock and max(x for x, _y in pre_dock) >= panel_x - view.REVEAL_MARGIN_CELLS, (
+            "the card is not covered enough to need a reveal pan; arm has no subject"
+        )
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        painted = [x for x, _y in _selection_cells(app.screen, canvas) if x < panel_x]
+        assert painted, "the selected card painted nothing left of the panel"
+        margin = panel_x - max(painted) - 1
+        assert margin == view.REVEAL_MARGIN_CELLS, (
+            f"panel_x={panel_x} last painted={max(painted)} margin={margin}"
         )
 
 
@@ -1011,18 +1074,63 @@ async def test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused(tmp_
         assert _canvas_cells(view, canvas) == cells
 
 
+# ---------------------------------------------------------------------------
+# `H2` (closing verdict, round 5): after `tab` moves the keyboard off the
+# canvas, closing the legend used to leave the selected card painted BLUE
+# (`V23`, the focused tone) instead of GREY (`V24`, "focus elsewhere") --
+# `tab` itself never repainted anything, so the stale tone was already wrong
+# before `?` was ever pressed; the legend's own close (`INC8-P3-CR-F1`)
+# restores the FOCUS exactly, which is not the same as the TONE being right.
+
+async def test_h2_the_canvas_repaints_on_every_focus_change(tmp_path):
+    """Driven with REAL keys, not `set_focus()`.  `FINA_4`, then `tab` alone:
+    the card must already read as "focus elsewhere" -- no `ACCENT`-filled
+    cell survives -- with no legend involved at all.  Then `tab` again until
+    `#insp-state` holds the keyboard -- not `#insp-title`, the pre-existing
+    `?`-eats-the-title bug (`B-36`/`H1`) this pass does NOT fix, which would
+    swallow the `?` below as a literal character instead of opening the
+    legend -- then `?`, then `esc`: the painted selection cells must be
+    IDENTICAL before `?` and after `esc`."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        assert _selection_cells(view, canvas), "no ACCENT fill before `tab`; arm has no subject"
+        await pilot.press("tab")
+        await _settle(pilot)
+        assert view.focused is not None, "tab did not move the focus; arm has no subject"
+        assert not _selection_cells(view, canvas), (
+            "the card is still painted in the focused (ACCENT) tone after a bare `tab`"
+        )
+        for _ in range(6):
+            if getattr(view.focused, "id", None) == INSPECTOR_FOCUS_ID:
+                break
+            await pilot.press("tab")
+            await _settle(pilot)
+        else:
+            raise AssertionError(f"tab never reached #{INSPECTOR_FOCUS_ID}")
+        before = _canvas_cells(view, canvas)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert isinstance(app.screen, HelpScreen)
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        assert _canvas_cells(view, canvas) == before
+
+
 async def test_cr_f2_reopening_after_a_pan_keeps_the_new_pan(tmp_path):
     """`INC8-P3-CR-F2`: closing the legend must clear `_pan_before_legend`,
     or a pan the operator makes AFTER closing is discarded the next time they
     open the legend -- the second `legend_docked` would find a STALE "kept"
     pan from the first open (`0`) and revert to it instead of re-deriving a
     reveal over the operator's own choice.  Walked through `FINA_4` at the
-    reference width: open reveals (0,0)->(9,0) (`A-109`, `G5`: the reveal now
-    leaves `REVEAL_MARGIN_CELLS` clear of the panel, 2 columns more than the
-    flush target design pass 3 pinned here); close returns (9,0)->(0,0);
-    three `L` presses are the operator's own pan, (0,0)->(24,0) -- past the
-    reveal's OWN target, so a bug reusing the stale `0` would show a
-    DIFFERENT, distinguishable number here, not the same one by coincidence.
+    reference width: open reveals (0,0)->(8,0) (`A-109`, `G5`: the reveal now
+    leaves `REVEAL_MARGIN_CELLS` clear of the panel -- `8`, not design pass
+    4's `9`, since `H3`'s off-by-one fix reads the card box's own last
+    PAINTED column, one short of where design pass 4 read it); close returns
+    (8,0)->(0,0); three `L` presses are the operator's own pan, (0,0)->(24,0)
+    -- past the reveal's OWN target, so a bug reusing the stale `0` would show
+    a DIFFERENT, distinguishable number here, not the same one by coincidence.
     A second open must keep it exactly (the card is already clear, margin
     included), and a second close must not move it."""
     app = MapperApp(tmp_path)
@@ -1032,7 +1140,7 @@ async def test_cr_f2_reopening_after_a_pan_keeps_the_new_pan(tmp_path):
         await pilot.press("question_mark")
         await _settle(pilot)
         assert app.screen.has_class(DOCKED_CLASS)
-        assert (view.pan_x, view.pan_y) == (9, 0)
+        assert (view.pan_x, view.pan_y) == (8, 0)
         await pilot.press("escape")
         await _settle(pilot)
         assert (view.pan_x, view.pan_y) == (0, 0)
