@@ -617,47 +617,47 @@ def fit(s: str, w: int) -> str:
 DAMAGED_MAP_GLYPH = "\u2298"
 
 DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
-    ('V1', "▐", 'nodo del mapa', 'STEP'),
-    ('V2', "▐ nómina", 'coincidencia de búsqueda', 'INK on STEP'),
-    ('V23', "▐ erp", 'nodo seleccionado', 'bold GROUND on ACCENT'),
-    ('V24', "▐ erp", 'seleccionado, con el foco en otra región', 'INK on PANEL'),
-    ('V3', "▐", 'rama plegada (23 dentro)', 'WARN'),
-    ('V3', "▸ inv +23", 'rama plegada (23 dentro)', 'MUT'),
-    ('V25', "◫ ACTA-7", 'acta del nodo', 'INK'),
-    ('V26', "◫ sin acta", 'nodo sin acta', 'ALERT'),
-    ('V27', "✓", 'campo del esquema lleno', 'INK'),
-    ('V28', "░", 'campo del esquema pendiente', 'STEP'),
-    ('V29', "┬─┐", 'enlace entre nodos', 'INK'),
-    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'INK'),
-    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'ASH'),
-    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'MUT'),
-    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'ACCENT'),
-    ('V42', "●", 'nodo (gris de su rama)', 'INK'),
-    ('V42', "●", 'nodo (gris de su rama)', 'ASH'),
-    ('V42', "●", 'nodo (gris de su rama)', 'MUT'),
-    ('V43', "●", 'nodo en el camino al seleccionado', 'ACCENT'),
-    ('V44', "◆", 'raíz del mapa', 'ACCENT'),
-    ('V30', "◆", 'encabezado de la vista', 'INK'),
-    ('V31', "▽ 35 fuera de vista", 'nodos fuera de vista', 'INK'),
-    ('V33', "▾", 'rama abierta', 'MUT'),
-    ('V34', "▸", 'rama plegada', 'MUT'),
-    ('V35', "3", 'campos pendientes bajo la rama', 'WARN'),
-    ('V21a', "∙", 'nodo con la ficha completa', 'MUT'),
-    ('V21b', "·", 'nodo con campos pendientes', 'WORDMARK'),
-    ('V36', "█", 'rama con todas sus actas', 'INK'),
-    ('V37', "▒", 'rama con la mitad o más de sus actas', 'MUT'),
-    ('V38', "░", 'rama con menos de la mitad de sus actas', 'WARN'),
-    ('V39', "╱", 'rama sin datos', 'WORDMARK'),
-    ('V32', "▰", 'medidor de avance', 'INK'),
-    ('V32', "▱", 'medidor de avance', 'STEP'),
-    ('V19', "█", 'nodos con y sin acta, en 10 celdas', 'INK'),
-    ('V19', "█", 'nodos con y sin acta, en 10 celdas', 'WARN'),
-    ('V19', "░", 'nodos con y sin acta, en 10 celdas', 'WORDMARK'),
-    ('V20', "▲ 2 vencen hoy", 'actas que vencen hoy', 'WARN on PANEL'),
-    ('V22', DAMAGED_MAP_GLYPH, 'mapa dañado — no se pudo leer', 'INK on PANEL'),
-    ('V40', "▁▂▃", 'actividad de los últimos 14 días', 'WORDMARK'),
-    ('V40', "▅▇█", 'actividad de los últimos 14 días', 'MUT'),
-    ('V41', "↩ retomar", 'volver a la última sesión', 'bold GROUND on ACCENT'),
+    ('V1', "▐", 'map node', 'STEP'),
+    ('V2', "▐ nómina", 'search match', 'INK on STEP'),
+    ('V23', "▐ erp", 'selected node', 'bold GROUND on ACCENT'),
+    ('V24', "▐ erp", 'selected, focus elsewhere', 'INK on PANEL'),
+    ('V3', "▐", 'folded branch, 23 inside', 'WARN'),
+    ('V3', "▸ inv +23", 'folded branch, 23 inside', 'MUT'),
+    ('V25', "◫ ACTA-7", "the node's record", 'INK'),
+    ('V26', "◫ sin acta", 'missing record', 'ALERT'),
+    ('V27', "D✓", 'field initial · ✓ filled', 'INK'),
+    ('V28', "░", 'field still pending', 'STEP'),
+    ('V29', "┬─┐", 'link between nodes', 'INK'),
+    ('V4b', "⣉⡉⠉", 'link; blue: path to selected', 'INK'),
+    ('V4b', "⣉⡉⠉", 'link; blue: path to selected', 'ASH'),
+    ('V4b', "⣉⡉⠉", 'link; blue: path to selected', 'MUT'),
+    ('V4b', "⣉⡉⠉", 'link; blue: path to selected', 'ACCENT'),
+    ('V42', "●", "node, in its branch's grey", 'INK'),
+    ('V42', "●", "node, in its branch's grey", 'ASH'),
+    ('V42', "●", "node, in its branch's grey", 'MUT'),
+    ('V43', "●", 'node on the selected path', 'ACCENT'),
+    ('V44', "◆", 'map root', 'ACCENT'),
+    ('V30', "◆", 'view header', 'INK'),
+    ('V31', "▽ 35 fuera de vista", 'nodes off screen', 'INK'),
+    ('V33', "▾", 'open branch', 'MUT'),
+    ('V34', "▸", 'folded branch', 'MUT'),
+    ('V35', "3", 'pending fields here and below', 'WARN'),
+    ('V21a', "∙", 'node with a complete card', 'MUT'),
+    ('V21b', "·", 'node with pending fields', 'WORDMARK'),
+    ('V36', "█", 'branch with all its records', 'INK'),
+    ('V37', "▒", 'branch: half or more records', 'MUT'),
+    ('V38', "░", 'branch: under half records', 'WARN'),
+    ('V39', "╱", 'branch with no data', 'WORDMARK'),
+    ('V32', "▰", 'progress meter', 'INK'),
+    ('V32', "▱", 'progress meter', 'STEP'),
+    ('V19', "█", 'record / no record, 10 cells', 'INK'),
+    ('V19', "█", 'record / no record, 10 cells', 'WARN'),
+    ('V19', "░", 'record / no record, 10 cells', 'WORDMARK'),
+    ('V20', "▲ 2 vencen hoy", 'records due today', 'WARN on PANEL'),
+    ('V22', DAMAGED_MAP_GLYPH, 'damaged map — unreadable', 'INK on PANEL'),
+    ('V40', "▁▂▃", 'activity, last 14 days', 'WORDMARK'),
+    ('V40', "▅▇█", 'activity, last 14 days', 'MUT'),
+    ('V41', "↩ retomar", 'back to your last session', 'bold GROUND on ACCENT'),
 )
 
 #: `01b` Amendment 2(b): a glyph may be a SET of codepoints.  A member listed
@@ -675,31 +675,46 @@ DECLARED_GLYPH_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
     "V40": ((0x2581, 0x2588),),
 }
 
+#: Verdict `D5` in English (the 2026-09-29 language ruling): ONE name per
+#: view, the same on screen and in the legend.  ASSUMPTION `A6`, operator
+#: question `INC8-D2-Q1`: the four words below are this pass's proposal, kept
+#: in this ONE constant so a correction is one line here plus the `01b` Views
+#: column (the partition arm pins the two equal).  Keyed by the renderer each
+#: name stands for.  Only the legend reads it in Inc-8; the other screens'
+#: own headers move to these names in Inc-9.
+VIEW_NAMES: dict[str, str] = {
+    "canvas": "atlas",
+    "outline": "outline",
+    "radial": "mind map",
+    "home": "home",
+}
+
 #: `HLR-N16.2` -- which members each view's legend paints, by row id.
 #: DECLARED, CHECKED AGAINST 01B: written by hand from the `01b` row's
 #: **Views** column, and
 #: `tests/test_vocabulary_declaration.py::test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names`
-#: pins it equal to what the document derives.  The keys are the one name per
-#: view the legend title carries (verdict `D5`).  A view absent here has an
+#: pins it equal to what the document derives.  The keys are `VIEW_NAMES`,
+#: the one name per view the legend title carries.  A view absent here has an
 #: empty vocabulary (`LLR-N16.2.2`).
 _MAP_CHROME = ("V30", "V31", "V33", "V34", "V35", "V21a", "V21b",
                "V36", "V37", "V38", "V39", "V32")
 LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
-    "atlas": ("V1", "V2", "V23", "V24", "V3", "V25", "V26", "V27", "V28", "V29",
-              *_MAP_CHROME),
-    "esquema": _MAP_CHROME,
-    "mapa mental": ("V4b", "V42", "V43", "V44", *_MAP_CHROME),
-    "sala": ("V19", "V20", "V22", "V40", "V41"),
+    VIEW_NAMES["canvas"]: ("V1", "V2", "V23", "V24", "V3", "V25", "V26", "V27", "V28",
+                           "V29", *_MAP_CHROME),
+    VIEW_NAMES["outline"]: _MAP_CHROME,
+    VIEW_NAMES["radial"]: ("V4b", "V42", "V43", "V44", *_MAP_CHROME),
+    VIEW_NAMES["home"]: ("V19", "V20", "V22", "V40", "V41"),
 }
 
 #: `LLR-N16.2.1`'s SECOND derived set: `01b` §3.5's colours with a job, as
-#: `(swatch, label, token)`.  Not members of the vocabulary above.
+#: `(swatch, label, token)`.  Not members of the vocabulary above.  Since
+#: design pass 2 (verdict `E4`) §3.5 is derived from what the views PAINT,
+#: like §3.1-3.4: `SAGE`, `TEAL` and `VIOLET` are painted by no view and left
+#: the table, and `ALERT` gained its second job, the missing-record mark.
 DECLARED_COLOURS: tuple[tuple[str, str, str], ...] = (
-    ("█", "azul — donde puedes actuar", "ACCENT"),
-    ("█", "ámbar — atención / vence", "WARN"),
-    ("█", "sage — completo / vigente", "SAGE"),
-    ("█", "teal — vino del repo", "TEAL"),
-    ("█", "violeta — enlaza mapas", "VIOLET"),
+    ("█", "blue — where you can act", "ACCENT"),
+    ("█", "amber — attention / due", "WARN"),
+    ("█", "red — missing record", "ALERT"),
 )
 
 

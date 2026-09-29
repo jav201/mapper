@@ -359,8 +359,10 @@ def test_amendment_2a_the_D7_row_contributes_no_member():
 def test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names():
     """The per-view partition, derived from `01b`'s Views column, not listed.
 
-    Verdict `D3`: radial (`mapa mental`) and outline (`esquema`) have
-    vocabularies of their own, and braille belongs to radial alone.
+    Verdict `D3`: radial and outline have vocabularies of their own, and
+    braille belongs to radial alone.  The view names are `darkside.VIEW_NAMES`
+    (English since the 2026-09-29 language ruling, assumption `A6`), and the
+    `01b` Views column must spell exactly those.
     """
     views_of = _views_by_row()
     assert views_of.get("V21a"), "the suffixed rows fell out of the Views walk"
@@ -370,8 +372,9 @@ def test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names():
         for view in views_of[vid]:
             want.setdefault(view, set()).add(vid)
     assert {v: set(ids) for v, ids in darkside.LEGEND_VIEWS.items()} == want
-    assert set(want) == {"atlas", "esquema", "mapa mental", "sala"}, set(want)
-    assert "V4b" in want["mapa mental"] and "V4b" not in want["atlas"]
+    assert set(want) == set(darkside.VIEW_NAMES.values()), set(want)
+    radial, atlas = darkside.VIEW_NAMES["radial"], darkside.VIEW_NAMES["canvas"]
+    assert "V4b" in want[radial] and "V4b" not in want[atlas]
 
 
 def test_design_pass_a_retired_id_is_never_a_row_again():
@@ -442,7 +445,7 @@ def test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6():
     assert headers_line, f"the section-headers line is not in 01b's §3.6: {section!r}"
     headers = tuple(_BACKTICK_RUN.findall(headers_line.group(1)))
     assert headers == (
-        help_screen.SECTION_KEYS, help_screen.SECTION_VOCABULARY, help_screen.SECTION_COLOURS,
+        help_screen.SECTION_VOCABULARY, help_screen.SECTION_COLOURS, help_screen.SECTION_KEYS,
     ), headers
 
     footer_line = _FOOTER_LINE.search(section)

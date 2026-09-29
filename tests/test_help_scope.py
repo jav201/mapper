@@ -20,6 +20,7 @@ from mapper.app import MapperApp
 from mapper.keymap import SCOPE_HELP, SCOPE_MAP, bindings_for, duplicate_chords
 from mapper.screens.help import (
     LEGEND_ROW_CELLS,
+    LEGEND_TITLE,
     SECTION_COLOURS,
     SECTION_VOCABULARY,
     HelpScreen,
@@ -116,9 +117,12 @@ def _paints_as(style: Style, declared: str) -> bool:
 # ---------------------------------------------------------------------------
 # HLR-N16.2 -- the title names the view (TC-066)
 
-#: One name per view, the one the legend title carries (Inc-8 verdict `D5`),
-#: and the key that switches a map to it.
-MAP_VIEW_KEYS = {"atlas": (), "esquema": ("o",), "mapa mental": ("r",)}
+#: One name per view, the one the legend title carries (Inc-8 verdict `D5`,
+#: English per the 2026-09-29 language ruling), read from `VIEW_NAMES`, and
+#: the key that switches a map to it.
+HOME_VIEW = darkside.VIEW_NAMES["home"]
+MAP_VIEW_KEYS = {darkside.VIEW_NAMES["canvas"]: (), darkside.VIEW_NAMES["outline"]: ("o",),
+                 darkside.VIEW_NAMES["radial"]: ("r",)}
 
 
 @pytest.mark.parametrize("view_keys,view", [(k, v) for v, k in MAP_VIEW_KEYS.items()])
@@ -127,7 +131,7 @@ async def test_hlr_n16_2_legend_names_the_map_view(tmp_path, view_keys, view):
     async with app.run_test(size=SIZE) as pilot:
         screen = await _legend_from_map(app, pilot, *view_keys)
         title = _rows_in(screen, screen.query_one("#help-title").region)
-        assert any(f"leyenda · {view}" in row for row in title), title
+        assert any(f"{LEGEND_TITLE} · {view}" in row for row in title), title
 
 
 async def test_hlr_n16_2_legend_names_the_sala(tmp_path):
@@ -135,7 +139,7 @@ async def test_hlr_n16_2_legend_names_the_sala(tmp_path):
     async with app.run_test(size=SIZE) as pilot:
         screen = await _legend_from_home(app, pilot)
         title = _rows_in(screen, screen.query_one("#help-title").region)
-        assert any("leyenda · sala" in row for row in title), title
+        assert any(f"{LEGEND_TITLE} · {HOME_VIEW}" in row for row in title), title
 
 
 # ---------------------------------------------------------------------------
@@ -152,7 +156,7 @@ async def test_llr_n16_2_1_every_member_is_painted_in_its_declared_style(tmp_pat
     """
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
-        if view == "sala":
+        if view == HOME_VIEW:
             await _legend_from_home(app, pilot)
         else:
             await _legend_from_map(app, pilot, *MAP_VIEW_KEYS[view])
