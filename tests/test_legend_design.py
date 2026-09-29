@@ -172,15 +172,18 @@ CYCLE_MMD = "graph TD\n    a[A] --> b[B]\n    b --> a\n"
 # the next.  The keys walk, fold (the lattice and the rail's `▸` show only when
 # the rail is short or a folded branch is not selected), search, and move the
 # focus to the rail (the unfocused selection).
+HOME_VIEW = darkside.VIEW_NAMES["home"]
 MAP_STATES = {
-    "atlas": ((), [(legacy_map, ()), (legacy_map, ("l", "z", "j")),
-                   (legacy_map, ("slash", "f", "i", "n", "enter")),
-                   (legacy_map, ("l", "g")), (legacy_map, ("z",)), (concept_map, ())]),
-    "esquema": (("o",), [(legacy_map, ()), (legacy_map, ("l", "z", "j")),
-                         (legacy_map, ("z",)), (concept_map, ())]),
-    "mapa mental": (("r",), [(legacy_map, ()), (legacy_map, ("l", "j", "l")),
-                             (legacy_map, ("l", "z", "j")), (legacy_map, ("z",)),
-                             (concept_map, ())]),
+    darkside.VIEW_NAMES["canvas"]: ((), [
+        (legacy_map, ()), (legacy_map, ("l", "z", "j")),
+        (legacy_map, ("slash", "f", "i", "n", "enter")),
+        (legacy_map, ("l", "g")), (legacy_map, ("z",)), (concept_map, ())]),
+    darkside.VIEW_NAMES["outline"]: (("o",), [
+        (legacy_map, ()), (legacy_map, ("l", "z", "j")),
+        (legacy_map, ("z",)), (concept_map, ())]),
+    darkside.VIEW_NAMES["radial"]: (("r",), [
+        (legacy_map, ()), (legacy_map, ("l", "j", "l")),
+        (legacy_map, ("l", "z", "j")), (legacy_map, ("z",)), (concept_map, ())]),
 }
 
 
@@ -220,7 +223,7 @@ async def _sala_harvest(tmp_path) -> set:
         app.notify = lambda *a, **k: None
         app.push_screen(HomeScreen())
         await _settle(pilot, 4)
-        assert isinstance(app.screen, HomeScreen) and app.screen.legend_view == "sala"
+        assert isinstance(app.screen, HomeScreen) and app.screen.legend_view == HOME_VIEW
         return harvest(app.screen)
 
 
@@ -236,12 +239,17 @@ def _agreement(view: str, painted: set) -> tuple[list, list]:
     return unpainted, undeclared
 
 
-@pytest.mark.parametrize("view", ["atlas", "esquema", "mapa mental", "sala"])
+@pytest.mark.parametrize("view", sorted(darkside.LEGEND_VIEWS))
 async def test_d2_the_legend_and_the_view_agree_in_both_directions(tmp_path, view):
     """`INC8-F2` / `UX-F3`, closed: what the legend explains is what the view
     paints, in the declared style, and nothing meaningful the view paints is
-    left out of the view's legend."""
-    painted = await (_sala_harvest(tmp_path) if view == "sala" else _map_harvest(tmp_path, view))
+    left out of the view's legend.  Parametrized on the declaration itself
+    (`INC8-F-CR-F5`), so a view added there is driven here or fails loudly."""
+    if view == HOME_VIEW:
+        painted = await _sala_harvest(tmp_path)
+    else:
+        assert view in MAP_STATES, f"{view!r} is declared but no state drives it"
+        painted = await _map_harvest(tmp_path, view)
     unpainted, undeclared = _agreement(view, painted)
     assert not unpainted and not undeclared, (
         f"{view}: SOUNDNESS -- declared but not painted in its declared style: {unpainted}\n"

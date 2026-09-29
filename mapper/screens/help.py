@@ -63,7 +63,7 @@ _INDENT = "  "
 # operator can move it without touching the painting logic -- it sits OUTSIDE
 # the scrollable pane either way, so it stays reachable with no scrolling
 # regardless of the flag.
-LEGEND_OWN_SCOPE_GROUP = "en esta leyenda"
+LEGEND_OWN_SCOPE_GROUP = "in this legend"
 LEGEND_OWN_SCOPE_FIRST = True
 
 # `A-104` -- ASSUMPTION, queued for the operator: a compound row (one `01b` row
@@ -73,11 +73,12 @@ LEGEND_OWN_SCOPE_FIRST = True
 # (glyph, style) pairs, not over lines.
 COMPOUND_ON_ONE_LINE = True
 
-# `01b` §3.6, verbatim.
-SECTION_KEYS = "teclas de esta vista"
-SECTION_VOCABULARY = "vocabulario de esta vista"
-SECTION_COLOURS = "colores con empleo"
-FOOTER_LINES = ("cada vista tiene SU leyenda — ", "misma tecla, contenido de la vista")
+# `01b` §3.6, verbatim -- in English since the 2026-09-29 language ruling.
+LEGEND_TITLE = "legend"
+SECTION_KEYS = "keys in this view"
+SECTION_VOCABULARY = "what this view paints"
+SECTION_COLOURS = "colours with a job"
+FOOTER_LINES = ("each view has its own legend —", "same key, this view's content")
 
 
 # `INC8-CR-F9`: this module had its own copy of `darkside._cells`. One
@@ -217,7 +218,7 @@ class HelpScreen(ModalScreen[None]):
         glyph_cells = min(_cells(close.glyph), hint_cells)
         label_cells = max(0, hint_cells - glyph_cells - 1)
         title_cells = max(0, LEGEND_ROW_CELLS - hint_cells)
-        title = darkside.fit(f"leyenda · {self.view}", title_cells).rstrip()
+        title = darkside.fit(f"{LEGEND_TITLE} · {self.view}", title_cells).rstrip()
         gap = max(0, LEGEND_ROW_CELLS - _cells(title) - hint_cells)
         return Text.assemble(
             (title, f"bold {darkside.INK}"),

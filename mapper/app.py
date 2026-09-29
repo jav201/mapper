@@ -485,8 +485,8 @@ class HomeScreen(Screen):
     """Home screen with GLANCE posture: one hero, everything else available."""
 
     KEY_SCOPE = SCOPE_HOME
-    # HLR-N16.2: the view name the legend's title carries.
-    legend_view = "sala"
+    # HLR-N16.2: the view name the legend's title carries (`darkside.VIEW_NAMES`).
+    legend_view = darkside.VIEW_NAMES["home"]
     BINDINGS = screen_bindings(SCOPE_HOME)
 
     def compose(self) -> ComposeResult:
@@ -2123,13 +2123,14 @@ class MapScreen(Screen):
     def legend_view(self) -> str:
         """HLR-N16.2: the name of the view `?` explains, read from the same
         two booleans `_current_renderer` reads.  One name per view, the one
-        the legend title carries (Inc-8 verdict `D5`); this screen's own
-        headers keep their words until Inc-9."""
+        the legend title carries (Inc-8 verdict `D5`, in English per the
+        2026-09-29 language ruling), read from `darkside.VIEW_NAMES`; this
+        screen's own headers keep their words until Inc-9."""
         if self.outline_mode:
-            return "esquema"
+            return darkside.VIEW_NAMES["outline"]
         if self.radial_mode:
-            return "mapa mental"
-        return "atlas"
+            return darkside.VIEW_NAMES["radial"]
+        return darkside.VIEW_NAMES["canvas"]
 
     def _current_crumb(self) -> list[str]:
         prefix = self.source_crumb or [self.map_id]
