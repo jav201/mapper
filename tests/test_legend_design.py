@@ -964,14 +964,12 @@ async def test_cr_f1_closing_the_legend_restores_the_focused_field(tmp_path, siz
         view, canvas = await _walked_map(app, pilot, FINA_4)
         field = view.query_one(f"#{INSPECTOR_FOCUS_ID}")
         view.set_focus(field)
-        # The walk's own repaints happened with focus at `None` (`_park_focus`,
-        # and nothing repaints the canvas on a plain focus change), so `cells`
-        # would otherwise be stale for the focus this arm is actually about.
-        # `_declare_after_layout` is the canvas-only path (`_move_pan` uses the
-        # same one): it repaints the frame for the CURRENT focus without
-        # touching the inspector, so setting up the arm does not itself
-        # trigger the defect the arm exists to catch.
-        view._declare_after_layout()  # noqa: SLF001
+        # `H4`'s sibling verdict `H2` (closing pass, round 5) made this
+        # repaint itself: `MapScreen.on_descendant_focus` now redraws the
+        # canvas on every focus change, so setup no longer needs the manual
+        # `_declare_after_layout()` call this line used to carry -- and no
+        # longer risks the defect it existed to dodge, since `set_focus`
+        # itself is what now repaints.
         await _settle(pilot)
         assert view.focused is field
         cells = _canvas_cells(view, canvas)
@@ -1000,7 +998,6 @@ async def test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused(tmp_
     async with app.run_test(size=size) as pilot:
         view, canvas = await _walked_map(app, pilot, FINA_4)
         view.set_focus(None)
-        view._declare_after_layout()  # noqa: SLF001
         await _settle(pilot)
         assert view.focused is None
         cells = _canvas_cells(view, canvas)
