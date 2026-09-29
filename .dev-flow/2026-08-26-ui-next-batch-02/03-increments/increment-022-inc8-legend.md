@@ -198,3 +198,80 @@ These were reached by pressing the real keys the legend now declares.
 - `6e5275f` test(legend): two arms strengthened after surviving mutants
 - `8dea408` test(legend): spell U+202E as an escape, not the character
 - this record (docs)
+
+## Corrective pass 1 (2026-09-28)
+
+Three independent reviews (code: BLOCK-UNTIL `INC8-CR-F1`; UX: BLOCK-UNTIL `INC8-UX-F1`/`F2`; security: PASS) followed `8dea408`. This section is that corrective pass. Design questions (label copy, vocabulary source, empty-vocabulary views, side panel vs modal, V4b/V12/V4 samples, V11-V16 deferral, `⊘`/`⦸`, V19's legend chip, glyph placement) went to the operator untouched, per the brief; they are not addressed here.
+
+Entry HEAD `fc57ac3`, tree clean. Exit is this record's commit.
+
+### Findings, disposition
+
+| Finding | Disposition |
+|---|---|
+| `INC8-CR-F1` / `INC8-UX-F1` / `INC8-UX-F10` (HIGH, blocking) | **Fixed.** `_render_own_scope_keys` paints `bindings_for(SCOPE_HELP)` (`up`/`down`/`pageup`/`pagedown`/`home`/`end`/`escape`/`q`) as its own always-visible widget (`#help-own-scope`), directly under the title, outside the scrollable pane. `LEGEND_OWN_SCOPE_GROUP` (`"en esta leyenda"`) and `LEGEND_OWN_SCOPE_FIRST` are named constants -- see ASSUMPTION A5. The arm (`test_hlr_n16_4_legend_declares_its_own_keys`) now compares `effective` against `painted` (read from the composited frame via `_painted_help_keys`, matching glyph+label together on one row) instead of `declared` (the seat). Mutants M1/M2 below. |
+| `INC8-CR-F2` (MEDIUM) | **Fixed.** `test_llr_n16_2_3_legend_coerces_and_bounds_every_string` now asserts `#help-bindings`'s `scrollable_content_region.width == LEGEND_ROW_CELLS`. Mutant M3. |
+| `INC8-CR-F3` (MEDIUM) | **Fixed.** `test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6` (`tests/test_vocabulary_declaration.py`) walks 01b §3.6 the way §3.5's colour table is walked: byte-read, UTF-8 decoded, anchored on `"Section headers, in order:"` / `"Footer, two lines:"`, compared in order against `help.SECTION_KEYS`/`SECTION_VOCABULARY`/`SECTION_COLOURS`/`FOOTER_LINES`. `LEGEND_OWN_SCOPE_GROUP` is deliberately NOT in that equality: 01b does not name it. Mutants: `teclas`->`atajos` and footer `SU`->`su`, both confirmed RED directly against the test (not run through the harness below, since neither is a byte-safe single-occurrence source mutation -- both were verified by monkeypatching `help_screen.SECTION_KEYS`/`FOOTER_LINES` at the module level and re-running the new test, shown in the session). |
+| `INC8-CR-F4` (MEDIUM) | **Fixed.** `tests/test_inc4_census.py:91`'s `len(restored) == 58` replaced with `len(restored) == len(entry) + 1`, derived from the assertion two lines above that already pins `len(entry)`. **Checked and NOT changed:** the `== 33` at `test_cd25a_the_seat_diff_is_exactly_the_three_rows_inc4b_declares` (~L62). Both are, strictly, implied by the surrounding set-equality assertions plus the literal sizes of `ENTRY_MAP_SEAT`/`DECLARED_ADDED`/`DECLARED_REMOVED` -- but `==33` is scoped to `bindings_for("map")` alone and carries none of `==58`'s actual defect (a count over the WHOLE `KEYMAP`, which drifted when Inc-8 added six unrelated help-scope rows and needed hand-bumping 52->58). Mutant M11 demonstrates the asymmetry directly: an unrelated dummy `repo`-scope binding added to `KEYMAP` leaves the now-derived `test_inc4_census.py` green (would have reddened the old `58` literal) while the untouched `==33` stays correctly green throughout, since `bindings_for("map")` is unaffected by a `repo`-scope addition. |
+| `INC8-CR-F5` (MEDIUM) | **Fixed.** `_harvest`'s member-style arm (`test_llr_n16_2_1_every_member_is_painted_in_its_declared_style`) now reads `#help-vocabulary` instead of `#help-dialog`, so the colours section's SAGE swatch (same glyph `█`, same style as `V19`'s SAGE sample) can no longer stand in for the vocabulary section actually painting it. Mutants M10a (paired: mutant + OLD region -> GREEN, proving the old arm's blindness) / M10b (same mutant + FIXED region -> RED). |
+| `INC8-CR-F7` (LOW) | **Fixed.** `_render_vocabulary` groups by a `dict` keyed on row id (first-seen order preserved) instead of `itertools.groupby`, which only merges adjacent runs. `_vocabulary_line` fits each sample into the room left after the ones before it and clamps the pad with `max(0, ...)`. Mutants M4 (grouping) / M5 (pad), plus a same-shape non-adjacent-row arm (`test_inc8_cr_f7_grouping_survives_a_non_adjacent_same_id_row`) and a compound-overflow arm (`test_inc8_cr_f7_a_compound_line_cannot_exceed_the_row_budget`). |
+| `INC8-SEC-F1` (LOW) | **Fixed.** `darkside.fit` maps LF/CR/TAB to a single space after `plain`'s own coercion (`_ROW_BREAKERS`), so an embedded LF can no longer paint a fabricated row and a TAB can no longer jump a terminal's own tab stops. `plain`'s own documented behaviour (LF/TAB preserved, e.g. for `widgets/inspector.py`'s notes field) is unchanged. Callers of `fit` audited: `mapper/app.py` (4 sites), `mapper/widgets/rail.py` (2 sites), `mapper/screens/help.py` (all sites), and `darkside._crumb_line`/`keybar` internally -- none depends on LF/TAB surviving into `fit`'s output. Mutant M6. |
+| `INC8-SEC-F2` (LOW) | **Fixed.** `resolve_style` allow-lists darkside's own token names plus the modifiers `DECLARED_VOCABULARY`/`DECLARED_COLOURS` actually use (`bold`, `on`), derived rather than hand-listed, and raises `ValueError` on anything else. Docstring's false "stays visible" claim corrected. Mutant M7. |
+| `INC8-SEC-F3` (LOW) | **Fixed.** `_render_title` clamps `hint_cells`/`glyph_cells`/`label_cells`/`title_cells`/`gap` so the assembled row can never exceed `LEGEND_ROW_CELLS`, however wide the seat's `dismiss_none` label gets. Mutant M8. |
+| `INC8-SEC-F4` (LOW) | **Fixed.** A hostile `DECLARED_COLOURS` member added to `test_llr_n16_2_3_legend_coerces_and_bounds_every_string` (label only; token stays real), plus a fast isolated arm (`test_inc8_sec_f4_a_hostile_colour_label_is_coerced_and_bounded`). Mutant M9. |
+| `INC8-UX-F11` (MEDIUM) | **Fixed.** `#help-bindings`'s `scrollbar-color`/`scrollbar-background` set to `ASH`/`PANEL` (7.43:1, `test_inc8_ux_f11_...` derives the ratio from the token hexes via `_contrast`), replacing Textual's own default (unstyled) thumb (measured 1.55:1). **Not `ACCENT`**: `LLR-S06.3.3` seals the `#1783ff` literal at exactly 8 tracked sites (`B-43`); a 9th would break that sealed, unrelated requirement, discovered when the first attempt (styling with `ACCENT`) reddened `tests/test_darkside_census.py::test_hue_census_no_blue_LITERAL_ships_outside_an_interactive_site`. Mutant M12. |
+| `INC8-CR-F9` (LOW) | **Fixed.** `help._cells` replaced by `_cells = darkside._cells`. `LEGEND_VIEWS`/`DECLARED_GLYPH_RANGES` "Derived" comments reworded to "declared, checked against 01b" (both are hand-written literals a TEST pins equal to a derivation, not values computed from 01b at import time). `resolve_style` carries its `LLR-N16.2.1` tag. |
+
+### New finding
+
+- **`INC8-C1-F1`** (found while fixing `SEC-F3`): `darkside.fit(s, 0)` on single-cell-width text returned a ~15-cell string, not `""`. Rich's `set_cell_size` special-cases non-positive width with `return ""` only on its NON-single-cell-width path; on the single-cell-width path it falls through to a plain Python slice, and `text[:max_width - 1]` with `max_width = 0` slices as `text[:-1]` -- everything but the last character -- then appends the ellipsis. Measured: `darkside.fit("leyenda · atlas", 0)` returned `"leyenda · atla…"` (15 cells). Fixed with an explicit `if w <= 0: return ""` guard at the top of `fit`, before `Text` is even constructed. No existing caller passed `w <= 0` (checked: `mapper/app.py`, `mapper/widgets/rail.py`, `tests/test_darkside*.py`, `tests/test_repair_depth.py`), so this is a latent-bug fix with no behaviour change for any live caller.
+
+### Mutation table
+
+Discipline: sha256-pin every file before mutating, apply via text-level `str.replace` (universal-newline decoded, so the harness never has to hand-spell each file's own CRLF/LF convention) after asserting the old text occurs exactly once, run the named pytest node(s), print the verdict BEFORE restoring, restore the EXACT original bytes, and re-verify the pin. The harness lives outside the repo at `C:\Users\jjgh8\AppData\Local\Temp\inc8c1\mutants.py`.
+
+Pins (post corrective-pass, pre-mutation -- these are also the exit pins, since every mutant restored and re-verified):
+
+- `mapper/darkside.py` `58f24ca4c463f2aa669488ff3f9175b09d067484aca3d7b27441094f3fd01e40`
+- `mapper/screens/help.py` `a95058bb9172fbf7324d9433d4b19fde1a5e9c9b2b1b3f7f680c05fa9a920699`
+- `mapper/keymap.py` `31f9beb2d6aef1bad1ddf122a80279c512061b912fc4b4daf2b1881bcc2140ec`
+
+| # | Mutant | File(s) | Verdict |
+|---|---|---|---|
+| M1 | `compose()` stops including the own-scope `Static` | help.py | **RED** `test_hlr_n16_4_legend_declares_its_own_keys` -- as claimed |
+| M2 | PAIRED: M1's paint-mutant + the OLD (seat-comparand) arm restored | help.py + test_help_scope.py | **GREEN** (expected) -- proves the pre-corrective arm was blind to M1's exact defect |
+| M3 | CSS `#help-dialog` width `80`->`64` | help.py | **RED** `test_llr_n16_2_3_legend_coerces_and_bounds_every_string` (the new pane-width assertion) |
+| M4 | `_render_vocabulary`'s dict grouping reverted to `itertools.groupby` | help.py | **RED** `test_inc8_cr_f7_grouping_survives_a_non_adjacent_same_id_row` |
+| M5 | `_vocabulary_line`'s per-sample room budget reverted to per-glyph-only clamp | help.py | **RED** `test_inc8_cr_f7_a_compound_line_cannot_exceed_the_row_budget` |
+| M6 | `fit()` stops translating LF/CR/TAB to a space | darkside.py | **RED** `test_inc8_sec_f1_fit_never_fabricates_a_row` |
+| M7 | `resolve_style` stops raising on an undeclared word | darkside.py | **RED** `test_inc8_sec_f2_resolve_style_raises_on_an_undeclared_word` |
+| M8 | `_render_title` stops clamping glyph/label/title widths | help.py | **RED** `test_inc8_sec_f3_a_wide_close_label_cannot_blow_the_row_budget` |
+| M9 | `_render_colours` stops fitting the label (raw label instead) | help.py | **RED** `test_inc8_sec_f4_a_hostile_colour_label_is_coerced_and_bounded` |
+| M10a | V19's SAGE sample stops being painted; OLD test region (`#help-dialog`) | help.py + test_help_scope.py | **GREEN** (expected) -- proves the pre-corrective region was blind |
+| M10b | SAME product mutant, FIXED region (`#help-vocabulary`) | help.py | **RED** `test_llr_n16_2_1_every_member_is_painted_in_its_declared_style[sala]` |
+| M11 | Unrelated dummy `repo`-scope binding added to `KEYMAP` | keymap.py | **GREEN** (expected) -- the derived `test_inc4_census.py` line does not redden on an unrelated scope's growth, unlike the literal `58` it replaced |
+| M12 | CSS `scrollbar-color` declaration removed | help.py | **RED** `test_inc8_ux_f11_the_scrollbar_thumb_clears_the_non_text_contrast_floor` |
+
+All 13 mutants (M1-M12, M10 counted as two) ran to their expected verdict; `git status --porcelain` was 0 lines after the batch, and every pin re-verified post-restore.
+
+`INC8-CR-F3`'s two mutants (`teclas`->`atajos`, footer `SU`->`su`) were verified directly in-session by monkeypatching `mapper.screens.help.SECTION_KEYS`/`FOOTER_LINES` and re-running `test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6`, both RED, rather than through the file-mutation harness (there is no single-occurrence byte-level source location for either -- `SECTION_KEYS`'s and `FOOTER_LINES`' definitions are one-line literals, and the harness's job of restoring the EXACT file is better served by exercising the module attribute directly for a two-word text substitution than by adding two more file mutants to the batch).
+
+### Lane and ruff
+
+- **Targeted, three times over the course of the pass:** `pytest tests/test_help_scope.py tests/test_vocabulary_declaration.py tests/test_inc4_census.py` -- final run **37 passed**.
+- **Full default lane, once, in the main tree, post both commits (`e7b2f00`):** **1206 passed, 20 deselected, 3 xfailed, 0 failed** in 434.28s. `FLAKE-1` did not fire. Reconciliation: 1198 (Inc-8's own exit figure) + 8 new arms (`test_inc8_cr_f3_...` in `test_vocabulary_declaration.py`; `test_inc8_sec_f1/f2/f3/f4`, `test_inc8_cr_f7_...` x2, `test_inc8_ux_f11_...` in `test_help_scope.py`) = 1206.
+- An earlier full-lane run (before the second commit) caught one real regression: `tests/test_repair_artifact_claims.py::test_every_cited_test_identifier_exists[help.py]`, a phantom test-name citation (`test_inc8_cr_f2_...`) left in a `help.py` comment that named a test that was never given that name (the actual arm lives inside `test_llr_n16_2_3_legend_coerces_and_bounds_every_string`). Fixed by citing the real test name. A second, earlier-still regression (`tests/test_repair_layout.py::test_tc_r25`/`test_tc_r26`, `LLR-R05.2`'s sealed requirement) is described under Findings/`INC8-CR-F1` and the commit log -- caught before any commit, by the same "run the untouched-file suite" discipline.
+- **ruff** (`--output-format=concise --no-cache`, no per-file diff needed: the SET of 27 errors matches the entry baseline exactly, verified by full-corpus count both before and after). One self-introduced error (an unused `LEGEND_OWN_SCOPE_GROUP` import in `tests/test_help_scope.py`, from an early draft that referenced it only in a docstring) was caught and removed before the count was taken.
+
+### Render
+
+Real Textual `run_test` + `export_screenshot`, top of the atlas legend through the real `question_mark` chord, saved outside the repo:
+
+- `C:\Users\jjgh8\AppData\Local\Temp\inc8c1\render\atlas_top_118x34.svg`
+- `C:\Users\jjgh8\AppData\Local\Temp\inc8c1\render\atlas_top_80x24.svg`
+
+### Commits (this pass)
+
+- `9295135` fix(legend): paint the legend's own scope (HLR-N16.4) -- `INC8-CR-F1`/`INC8-UX-F1`/`UX-F10` alone.
+- `e7b2f00` fix(legend): coercion, row-budget and derivation findings (CR-F2/F4/F5/F7/F9, SEC-F1-F4, UX-F11) -- every other finding, grouped in one commit rather than the brief's suggested three (test-derivation / SEC / F11+F9) because several land inside the SAME methods `9295135` already touches (`_render_title`, `_render_vocabulary`, `_vocabulary_line`), and splitting those hunks further risked staging a syntactically-broken intermediate file. `F1` -- the one split the coordinator specifically asked to see first -- is isolated in its own commit; the rest is not further subdivided. This is a deviation from the brief's exact grouping, made under time pressure at the coordinator's explicit prompt to commit as soon as green rather than continue refining commit granularity; documented here rather than left silent.
+- this record (docs)
