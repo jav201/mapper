@@ -230,13 +230,17 @@ Four files, within the 5-file cap this micro-increment declared
   `INC7-CR-R2-F3`, `INC7-SEC-R2-F1/F2/F3`, the `table.clear()` routing item)
   are unchanged and untouched by this pass.
 - No new `MICRO-SPARK-Fn` finding surfaced.
+- **`INC21-CR-F4`** (added at the review round) -- the sparkline's style tiers
+  are pinned by no arm (an INK-flattening mutant survives). Pre-existing,
+  CARRIED to `qa-reviewer`.
 
 ## Independent review
 
 **PASS, no HIGH findings.** The reviewer reproduced RED on base and GREEN on
-fix independently, and the two killing mutants they ran (guard removed;
-division-by-`max_count` forced back unguarded) matched this increment's own
-mutant table. Six non-blocking findings (`INC21-CR-F1` through
+fix independently and ran nine mutants of its own (M1-M9). Its two killing
+mutants that overlap this increment's table -- guard removed, and `idx = 0` --
+matched it; M3 (equivalent), M6, M7 and M8 survived, which is what produced
+`F1` and `F4` (wording corrected per `INC21-CR-F8`). Six non-blocking findings (`INC21-CR-F1` through
 `INC21-CR-F6`) were folded in before `Inc-8` rather than deferred, because
 `F1` leaves an `A-105` clause ("shall not flatten real activity") without an
 arm that actually tests it -- an overclaim under this batch's rules, not a
@@ -280,7 +284,7 @@ throughout.
 
 | # | Mutant | File : sha256 pin | Test run | Verdict | Restored, sha ok |
 |---|---|---|---|---|---|
-| M6 | `max_count = max(counts) if counts else 1` + the guard collapsed to `max_count = max(1, sum(counts))` | `mapper/app.py` : `aea69e4ffb19f0c8a733108063a465b81a29be3a24123999a9fca4e5d4b7878d` | `tests/test_sparkline_floor.py` | **RED on the new two-day arm, GREEN on the other two** -- `1 failed, 2 passed`; `sum(counts) = 3`, so `bars[-4]` came out `"▅"` (idx 5) instead of `"█"` | yes -- mutant sha `21cd3d1dbea4279e4d32c11e5f34831de96e49d94df626502d007c41b0dbce19`, restored sha matched the pin |
+| M6 | `max_count = max(counts) if counts else 1` + the guard collapsed to `max_count = max(1, sum(counts))` | `mapper/app.py` : `aea69e4ffb19f0c8a733108063a465b81a29be3a24123999a9fca4e5d4b7878d` | `tests/test_sparkline_floor.py` | **RED on the new two-day arm, GREEN on the other two** -- `1 failed, 2 passed`; `sum(counts) = 3`, so `bars[-4]` came out `"▅"` (idx 6: `int(2/3*9)`; corrected per `INC21-CR-F7`) instead of `"█"` | yes -- mutant sha `21cd3d1dbea4279e4d32c11e5f34831de96e49d94df626502d007c41b0dbce19`, restored sha matched the pin |
 | M7 | `idx = min(len(bars) - 1, int(c / max_count * (len(bars) - 1)))` replaced with the binary tier `idx = 9 if c else 0` | `mapper/app.py` : `aea69e4ffb19f0c8a733108063a465b81a29be3a24123999a9fca4e5d4b7878d` | `tests/test_sparkline_floor.py` | **RED on the new two-day arm, GREEN on the other two** -- `1 failed, 2 passed`; today's bar came out `"█"` (idx 9, since `c=1` is truthy) instead of `"▃"` | yes -- mutant sha `a622fc55dbf183975a060714f32f35c7badd47bbd107fcfce438115fc3630b43`, restored sha matched the pin |
 
 Neither `M6` nor `M7` reddens the first two arms -- expected and consistent

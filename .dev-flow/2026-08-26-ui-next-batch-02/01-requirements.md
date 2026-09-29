@@ -9696,7 +9696,7 @@ symptom).
 
 **`INC21-CR-F5` — the limit of what `test_agree_floor.py` proves, stated so it is not overclaimed.**
 `tests/test_agree_floor.py` exercises the zero-activity path only INCIDENTALLY: it mounts
-`HomeScreen` as a side effect of pushing `MapScreen`, and it happened to hit `max_count == 0` only
+`HomeScreen` because `MapperApp.on_mount` pushes it before the test pushes `MapScreen` (`INC21-CR-F9`), and it happened to hit `max_count == 0` only
 because its checked-in fixtures were stale enough (17 days, when this was measured) to fall outside
 the 14-day window. On a fresh checkout — every fixture's mtime at or near today — none of its 8 arms
 reach `max_count == 0` at all, and it exercises nothing about this defect. The screen-level "shall not
