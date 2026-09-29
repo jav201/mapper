@@ -464,9 +464,14 @@ async def test_e1_the_docked_panel_covers_the_inspector_whole_and_little_canvas(
     """Verdict `E1` / `UX-F9` / `INC8-F-UX-F1`.  The docked panel runs the full
     height, so the ficha inspector is covered WHOLE -- no "L" of it left
     below a capped panel -- and it is narrow, so most of the canvas stays
-    beside it.  The canvas share is asserted as a floor derived from the
-    geometry the panel promises: at most the panel's width minus the
-    inspector's is taken from the canvas."""
+    beside it.
+
+    `INC8-D2-F5`: the canvas bound was first written against
+    `LEGEND_DOCKED_CELLS` itself, so widening the panel back to 80 (mutant
+    `MA1`) moved the bound with it and every arm stayed green.  It is now read
+    from the VERDICT's number -- "panel angosto de ~44 columnas" -- with the
+    verdict's own tolerance of one column: the panel may take from the canvas
+    at most that width less the inspector it covers."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         view, legend = await _open_legend_over_map(app, pilot)
@@ -478,7 +483,14 @@ async def test_e1_the_docked_panel_covers_the_inspector_whole_and_little_canvas(
     assert dialog.x <= inspector.x and dialog.right >= inspector.right, (dialog, inspector)
     assert dialog.y <= inspector.y and dialog.bottom >= inspector.bottom, (dialog, inspector)
     covered = max(0, canvas.right - dialog.x)
-    assert covered <= LEGEND_DOCKED_CELLS - inspector.width, (covered, canvas, dialog)
+    assert covered <= VERDICT_E1_PANEL_CELLS + 1 - inspector.width, (covered, canvas, dialog)
+
+
+#: Verdict `E1`, round 2: "panel angosto de ~44 columnas".  The REQUIREMENT's
+#: number, held by the arm on purpose -- the product's `LEGEND_DOCKED_CELLS`
+#: is the implementation, and an arm that reads the implementation back cannot
+#: see it drift (`INC8-D2-F5`).
+VERDICT_E1_PANEL_CELLS = 44
 
 
 async def test_d4_the_docked_panel_is_modal_for_keys(tmp_path):
