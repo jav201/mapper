@@ -1550,3 +1550,154 @@ scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing wa
 - `4a372dc` fix(legend): opening/closing the legend no longer moves keyboard focus (`INC8-P3-CR-F1`)
 - `60bf183` test(legend): pin the reopen-after-pan sequence and shown_cells' row-breaker translation (`INC8-P3-CR-F2`, `INC8-P3-CR-F3`)
 - this record (docs)
+
+## Design pass 4 (2026-09-29)
+
+**What this pass is.** The operator's fourth design verdict
+(`VERDICT-inc8-legend-2026-09-28.md`, section *Round 4*), applied under the batch's `/dev-flow`
+rules. Entry HEAD `74e1e20`, tree clean. Independent reviews follow; this record does not review
+its own work.
+
+### Verdict items applied
+
+| Item | What was done | Commit | Arms |
+|---|---|---|---|
+| **G2** pan range while docked | `A-109` amends `LLR-N06.1.2`: while docked, `MapScreen._pan_revealing_selection`'s legal maximum uses the VISIBLE canvas (`panel_x - canvas_x`) instead of the canvas's own full drawn width (`geo.avail`) -- for this ONE call only. `_clamp_pan` itself, `_pan`, the modal path and the close path are untouched | `d65da78` | `test_g2_a_card_at_the_maps_right_edge_is_revealed_whole_and_closing_returns_it`, `test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card` |
+| **G3** red label | `DECLARED_COLOURS`'s `C4` label -> `red — required, missing` (was `red — missing record`), same token, same Views | `e273444` | `test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5` (doc/declaration EQUALS) |
+| **G4** one amber row | `C2`/`C3` merged into ONE row, id `C2`, label `amber — attention · missing count`, **Painted on** widened to `marks · words` (the union of the two retired cells). `LEGEND_COLOURS` drops `C3` everywhere -- `C2` was already declared on every view that paints amber, so no view's row set otherwise changes | `e273444` | the EQUALS test above; `test_f1_each_legend_paints_the_colour_rows_its_view_paints` (unchanged code, re-verified against the new declarations, both directions, both sizes) |
+| **G5** three parts | `V34` -> `folded branch, in the rail` (was `folded branch, left list`); `V28` -> `field initial, pending` (was `field initial · ░ pending`); `MapScreen.REVEAL_MARGIN_CELLS = 2`, the ONE named constant `_pan_revealing_selection` reads for the reveal's target margin | `446c1e3` | the vocabulary EQUALS test (`test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document`); `test_g5_the_revealed_card_keeps_its_declared_margin_from_the_panel`; `test_cr_f2_reopening_after_a_pan_keeps_the_new_pan` (re-pinned, see below) |
+| **G1**, **G7** | No change needed (43 canvas columns kept, rail not counted; `MUT`-on-`GROUND` stays `BACKLOG.md` `B-37`) | — | — |
+
+### The G2 mechanism, measured
+
+`ti4` (the legacy fixture's last leaf of its last branch) sits at the map's own right edge --
+`extent_x`'s own defining card. Walked there with the real keys and panned to the OLD range's legal
+maximum with the real `L` (80 presses, `HLR-N06.1`'s unwanted-behaviour clause makes every press past
+the clamp a documented no-op): at the reference width the card was cut to 3 of its 8 painted cells
+once docked, under the OLD clamp -- `INC8-D3-F2`'s carry, reproduced. Under the amended clamp, docked,
+all 8 cells sit left of the panel; closed, the pan returns to the EXACT pre-legend value (measured:
+`421` before, `427` docked, `421` after close, reference width). The same walk at `87×34` (the derived
+threshold) and `140×45` shows the same shape: 0 of 8 and 3 of 8 visible before docking respectively,
+8 of 8 docked, pan restored exactly on close (`measures.json`, below).
+
+### `A-108`'s carry (`INC8-D3-Q1`-`Q5`) and `G1`/`G7` need no code
+
+`INC8-D3-Q1` (the dock minimum, `43`) and `INC8-D3-Q3` (whether `red — missing record` should widen)
+are effectively closed by this round's `G1` (43 stands) and `G3` (the wording the operator chose).
+`G7` leaves `MUT`-on-`GROUND` in `BACKLOG.md` `B-37` untouched, as instructed; no arm needed.
+
+### A consequence of `G5`'s margin: one pre-existing pin moved
+
+`test_cr_f2_reopening_after_a_pan_keeps_the_new_pan` (`INC8-P3-CR-F2`) pinned `FINA_4`'s docked
+reveal at the reference width as `(7,0)`, flush against the panel (margin 0). With `G5`'s 2-column
+margin the same reveal is `(9,0)`. The test's second half -- a manual pan the operator makes after
+closing, which must survive reopening unchanged -- also needed a bigger manual pan: at the OLD single
+`L` press (pan `8`) the card's clearance from the panel was only 1 column, short of the new 2-column
+margin, so reopening would (correctly) nudge the pan by 1, landing on `9` -- the SAME number the
+first open's stale-kept-pan bug would also produce by coincidence, which would have defeated the
+arm's own ability to distinguish "correctly re-derived" from "incorrectly reused the stale first-open
+pan." Fixed by panning further (three `L` presses, pan `24` -- comfortably clear of the panel even
+with the margin), which keeps the two cases numerically distinct again. Measured, both before and
+after this fix, by the harness's own restore-and-rerun (`MUT-D4-G5`, below).
+
+### Mutation table
+
+Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8d4\mutation_harness.py`, outside the repo: a sha256
+pin taken per touched file before the first mutation (`app.py`
+`3daeac7610fb1ba1b0b0274e2af55846b9b916535b5555331cc9d32e7c2972c7`, `darkside.py`
+`b6d38d0e2838abccf397f9d44e0f209e39bcefc3e232592a4bb40464c8b3a9f9`), byte-level I/O throughout (the
+repo's tracked files are CRLF; every mutant string is built from `\x0d\x0a` explicitly, never a bare
+`\n`), one exact substring replaced exactly once per mutant, the verdict printed BEFORE the restore,
+and the pin re-verified after every restore. **All eight restores matched their pins**, and both
+files' final sha256 equal the same two pins (confirmed separately after the full battery).
+
+| # | Mutant | Verdict |
+|---|---|---|
+| `MUT-D4-G2a` | the docked reveal's clamp uses the old full-`avail` span instead of the visible-canvas span | **RED** -- `3 of 8 visible` (the edge card stays cut) |
+| `MUT-D4-G2b` | `_restore_after_legend` re-derives the close pan through `_pan_revealing_selection` instead of using the exact kept value | **RED** -- closed pan `(427,0)` instead of the kept `(421,0)` |
+| `MUT-D4-G5` | `REVEAL_MARGIN_CELLS` reverts to `0` | **RED** -- both `test_g5_...` and `test_cr_f2_reopening_...` (`(7,0)` instead of `(9,0)`) |
+| `MUT-D4-G3` | `C4`'s label reverts to `red — missing record` | **RED** -- doc/declaration EQUALS |
+| `MUT-D4-G4a` | `C3` is declared again as its own row (two amber rows again) | **RED** -- doc/declaration EQUALS |
+| `MUT-D4-G4b` | `C2` dropped from `LEGEND_COLOURS["home"]`, though home still paints amber | **RED** -- `test_f1_...[home-118x34]`, `[home-140x45]` |
+| `MUT-D4-V34` | `V34`'s label reverts to `folded branch, left list` | **RED** -- vocabulary EQUALS |
+| `MUT-D4-V28` | `V28`'s two rows revert to `field initial · ░ pending` | **RED** -- vocabulary EQUALS |
+
+### Lane and ruff
+
+- **Full default lane, once**, on the final tree (`446c1e3`), stdout and stderr kept together:
+  **`1287 passed, 20 deselected, 3 xfailed, 0 failed`** in 957.92 s (`0:15:57`). `FLAKE-1`
+  (`test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region`) did not fire -- zero
+  `FAILED`/`ERROR` lines in the run's own output, and its name appears nowhere in it. The
+  `Task was destroyed but it is pending!` lines after the summary are `asyncio`/Textual animator
+  cleanup noise from process teardown, not test output -- they appear after the pass/fail summary
+  line, attached to no test id.
+- **Reconciliation.** Baseline (this record's own entry, `74e1e20`, carried from the pass-3
+  corrective): `1284 passed, 20 deselected, 3 xfailed` = **1287** selected. This pass adds exactly
+  **3** nodes, all in `tests/test_legend_design.py`, none parametrized (counted by
+  `grep -c '^async def test_'` against the entry-HEAD file, `19` -> `22`):
+  `test_g2_a_card_at_the_maps_right_edge_is_revealed_whole_and_closing_returns_it`,
+  `test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card`,
+  `test_g5_the_revealed_card_keeps_its_declared_margin_from_the_panel`.
+  `tests/test_vocabulary_declaration.py` is unchanged in node count (`19` both trees) -- every G3/G4/G5
+  arm there is the EXISTING doc/declaration EQUALS machinery, re-verified against new data, not a
+  new test. `1287 + 3 = 1290` selected = `1287` passed `+ 3` xfailed ✓.
+- **ruff**, full repo, output normalised and sorted: entry **27**, exit **27**, and the two listings
+  are **byte-identical** (`diff` exit `0`). No new finding in any file this pass touched.
+
+### Render -- real `run_test` + `export_screenshot`, PNGs rasterised by headless Chrome
+
+`C:\Users\jjgh8\AppData\Local\Temp\inc8d4\render\`: **21 SVGs and 21 PNGs**, plus `measures.json`.
+`render.py` writes them; `rasterise_chrome.py` rasterises them. At each of the three required widths
+(**118×34** reference, **87×34** the derived dock threshold, **140×45**):
+
+- **`ti4`'s walk** (`G2`'s own subject, panned to the OLD range's legal maximum with the real `L`):
+  `atlas_<W>x<H>_ti-4_1-before-dock`, `_2-docked`, `_3-after-close`. Measured in `measures.json`:
+  118×34 -- 3 of 8 visible before, 8 of 8 docked, pan `421 -> 427 -> 421`; 87×34 -- 0 of 8 before
+  (narrower canvas), 8 of 8 docked, pan `392 -> 434 -> 392`; 140×45 -- 3 of 8 before, 8 of 8 docked,
+  pan `399 -> 405 -> 399`. Every case: exact pan restore on close.
+- **Every view's colour section** (`G3`/`G4`'s subject): `atlas_<W>x<H>_legend_colours`,
+  `outline_<W>x<H>_legend_colours`, `mind-map_<W>x<H>_legend_colours`, `home_<W>x<H>_legend_colours`
+  -- the real `?`, scrolled to `#help-colours`. Visually confirmed (`outline_118x34_legend_colours.png`):
+  exactly three rows, `blue — where you can act`, `amber — attention · missing count`,
+  `red — required, missing`.
+
+Files (SVG and PNG share the stem):
+
+```
+atlas_118x34_legend_colours    outline_118x34_legend_colours    mind-map_118x34_legend_colours    home_118x34_legend_colours
+atlas_118x34_ti-4_1-before-dock    atlas_118x34_ti-4_2-docked    atlas_118x34_ti-4_3-after-close
+atlas_87x34_legend_colours    outline_87x34_legend_colours    mind-map_87x34_legend_colours    home_87x34_legend_colours
+atlas_87x34_ti-4_1-before-dock    atlas_87x34_ti-4_2-docked    atlas_87x34_ti-4_3-after-close
+atlas_140x45_legend_colours    outline_140x45_legend_colours    mind-map_140x45_legend_colours    home_140x45_legend_colours
+atlas_140x45_ti-4_1-before-dock    atlas_140x45_ti-4_2-docked    atlas_140x45_ti-4_3-after-close
+```
+
+All under `C:\Users\jjgh8\AppData\Local\Temp\inc8d4\render\`, `.svg` and `.png`.
+
+### Carries (unchanged by this pass)
+
+- `INC8-P3-CR-F4` (the dock minimum `43` and its renderer-literal derivation), `CR-F5` (the private
+  `layered._geometry` import), `INC8-P3-SEC-F1` (the `store.py` surrogate persistence path).
+- `G6` -- its own micro-increment, routed after Inc-8 (round-4 verdict).
+- `INC8-D2-F2` (`app.py:2625`, the map toast sized by `len`), the diff mode's tones, Inc-9 / Inc-EN
+  (`B-71`) -- unchanged.
+
+### Files
+
+| Source (2 of 4 permitted) | Tests | Docs |
+|---|---|---|
+| `mapper/app.py` (`MapScreen.REVEAL_MARGIN_CELLS`; `_pan_revealing_selection`) | `tests/test_legend_design.py` | `01b-ux-decisions.md` (§3.1, §3.2, §3.5, two design-pass-4 change-log entries) |
+| `mapper/darkside.py` (`DECLARED_COLOURS`, `LEGEND_COLOURS`, `V28`/`V34` labels) | | `01-requirements.md` (`A-109` only) |
+| | | this record (design pass 4 section) |
+
+No renderer under `mapper/views/` or `mapper/canvas.py` was touched; `mapper/screens/help.py` was
+read (it consumes `colours_for`/`vocabulary_for`, already data-driven) but not edited -- the label and
+colour changes needed no reader-side change. `.dev-flow/state.json`, `prototypes/`, `mapper.db`, the
+scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing was pushed.
+
+### Commits (this pass)
+
+- `d65da78` fix(legend): amend LLR-N06.1.2 -- the docked reveal's pan range is the visible canvas (`G2`, `A-109`)
+- `e273444` feat(legend): the red row widens; the two amber rows merge into one (`G3`, `G4`)
+- `446c1e3` feat(legend): a declared 2-column margin on reveal; V34 and V28 reworded (`G5`)
+- this record (docs)
