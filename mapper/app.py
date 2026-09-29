@@ -2160,13 +2160,19 @@ class MapScreen(Screen):
         covers it.  A card already clear of the panel, or already past the
         canvas's right edge before the legend opened, does not move the view.
         The pan stays in `LLR-N06.1.2`'s legal range, so a card at the map's
-        own right edge can stay partly covered (`INC8-D3-F2`)."""
+        own right edge can stay partly covered (`INC8-D3-F2`).
+
+        The kept pan is PAINTED first, and the reveal is read from the state
+        that paint recorded (`_rendered_for`): the frame on screen at this
+        size, resolved inside `refresh_canvas`'s own paint pass.  So this
+        path never reads the search resolution outside a pass
+        (`test_search.py`'s census)."""
         if self._pan_before_legend is None:
             self._pan_before_legend = (self.pan_x, self.pan_y)
-        pan_x, pan_y = self._pan_before_legend
+        self.pan_x, self.pan_y = self._pan_before_legend
+        self.refresh_canvas()
         if panel_x is not None:
-            pan_x = self._pan_revealing_selection(pan_x, panel_x)
-        self._move_pan(pan_x, pan_y)
+            self._move_pan(self._pan_revealing_selection(panel_x), self.pan_y)
 
     def legend_closed(self) -> None:
         """The legend closed: the pan it held returns exactly (`F2`)."""
@@ -2180,17 +2186,18 @@ class MapScreen(Screen):
             self.pan_x, self.pan_y = pan_x, pan_y
             self.refresh_canvas()
 
-    def _pan_revealing_selection(self, pan_x: int, panel_x: int) -> int:
-        """`pan_x`, moved right until the selected card's box ends at or
-        before screen column `panel_x`.  Only a renderer that consumes pan
-        moves (`PAN-1`: outline and radial do not pan).  Read from the same
-        layout the canvas draws (`layered._geometry`, read only), so the card
-        is where the frame paints it."""
+    def _pan_revealing_selection(self, panel_x: int) -> int:
+        """The painted pan, moved right until the selected card's box ends at
+        or before screen column `panel_x`.  Only a renderer that consumes pan
+        moves (`PAN-1`: outline and radial do not pan).  Read from the state
+        the canvas was last painted from, through the same layout it draws
+        (`layered._geometry`, read only), so the card is where the frame
+        paints it."""
         cursor = self.nav.cursor
         if cursor is None or not self._consumes_pan(self._current_renderer()):
-            return pan_x
-        w, h = self._canvas_size()
-        state = replace(self._view_state(w, h), pan_x=pan_x)
+            return self.pan_x
+        _renderer, state = self._rendered_for
+        pan_x = state.pan_x
         try:
             geo = layered_geometry(self.graph, state)
             (extent_x, span_x), _y = pan_extent(self.graph, state)
