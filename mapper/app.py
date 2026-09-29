@@ -1367,6 +1367,19 @@ class MapScreen(Screen):
         # The pan the operator had when a docked legend moved the view, kept
         # until the legend closes (`legend_docked`, Inc-8 verdict `F2`).
         self._pan_before_legend: tuple[int, int] | None = None
+        # The focused widget's id (or `None`) at that same moment -- captured
+        # alongside the pan, restored alongside it (`INC8-P3-CR-F1`).  Valid
+        # only while `_pan_before_legend` is not `None`; the two are set and
+        # cleared together.
+        self._focus_before_legend: str | None = None
+        # Set by `legend_closed`, consumed by `on_screen_resume`: the pan and
+        # focus to restore once THIS screen is active again.  Restoring from
+        # `legend_closed` itself is too early -- it runs before the legend's
+        # own `dismiss()` even pops this screen back on, and Textual's own
+        # `AUTO_FOCUS` grabs the rail during that pop whenever nothing is
+        # focused (`INC8-P3-CR-F1`, carried `UX-F7`).  `on_screen_resume`
+        # answers the same `ScreenResume` that auto-focus does.
+        self._legend_restore_pending: tuple[int, int, str | None] | None = None
         # The canvas region `_declare_after_layout` last painted a numeral for.
         # `None` means "never", which is why the first pass always re-schedules.
         self._declared_for: Region | None = None
@@ -2162,29 +2175,99 @@ class MapScreen(Screen):
         The pan stays in `LLR-N06.1.2`'s legal range, so a card at the map's
         own right edge can stay partly covered (`INC8-D3-F2`).
 
-        The kept pan is PAINTED first, and the reveal is read from the state
-        that paint recorded (`_rendered_for`): the frame on screen at this
-        size, resolved inside `refresh_canvas`'s own paint pass.  So this
-        path never reads the search resolution outside a pass
+        Both steps go through `_move_pan` (`INC8-P3-CR-F1` fix `a`+`b`),
+        which repaints through `_declare_after_layout`'s canvas-only path --
+        never the rail or the inspector, so the keyboard's focus is never at
+        risk from opening the legend -- and which itself no-ops when nothing
+        actually needs repainting.  The reveal is read from the state the
+        reset-to-kept-pan step recorded (`_rendered_for`), so this path
+        never reads the search resolution outside a paint pass
         (`test_search.py`'s census)."""
         if self._pan_before_legend is None:
             self._pan_before_legend = (self.pan_x, self.pan_y)
-        self.pan_x, self.pan_y = self._pan_before_legend
-        self.refresh_canvas()
+            focused = self.focused
+            self._focus_before_legend = focused.id if focused is not None else None
+        kept_x, kept_y = self._pan_before_legend
+        self._move_pan(kept_x, kept_y)
         if panel_x is not None:
-            self._move_pan(self._pan_revealing_selection(panel_x), self.pan_y)
+            self._move_pan(self._pan_revealing_selection(panel_x), kept_y)
 
     def legend_closed(self) -> None:
-        """The legend closed: the pan it held returns exactly (`F2`)."""
-        if self._pan_before_legend is not None:
-            pan_x, pan_y = self._pan_before_legend
-            self._pan_before_legend = None
-            self._move_pan(pan_x, pan_y)
+        """The legend closed: the pan and the focus it held return exactly
+        (`F2`, `INC8-P3-CR-F1`).
+
+        This runs from `HelpScreen.action_dismiss_none`, BEFORE its own
+        `dismiss()` pops this screen back onto the stack -- the pop's
+        `ScreenResume` has not even been posted yet, and Textual's own
+        `AUTO_FOCUS` answers exactly that message by grabbing the rail
+        whenever nothing is focused here (carried `UX-F7`, measured on the
+        base tree, no code of this batch's).  Restoring here would just be
+        overwritten a moment later, so the restore itself waits for
+        `on_screen_resume`, which answers the very same message."""
+        if self._pan_before_legend is None:
+            return
+        self._legend_restore_pending = (*self._pan_before_legend, self._focus_before_legend)
+        self._pan_before_legend = None
+        self._focus_before_legend = None
+
+    def on_screen_resume(self, event: events.ScreenResume) -> None:
+        """Undo Textual's own post-resume auto-focus once the legend that
+        just closed left a restore pending (`INC8-P3-CR-F1` fix `c`).
+
+        `Screen._update_auto_focus` answers this SAME `ScreenResume` and
+        focuses the first focusable widget the instant `self.focused` is
+        `None` at resume -- regardless of what was focused before `?` was
+        pressed.  This handler is dispatched BEFORE that framework pass
+        (Textual walks the MRO for a `ScreenResume` handler and this
+        screen's own `on_screen_resume` sits ahead of `Screen`'s internal
+        `_on_screen_resume` in it), so restoring inline here would still
+        lose to the auto-focus that runs right after.  `call_after_refresh`
+        posts a fresh message instead, which this screen's queue processes
+        only once the `ScreenResume` already being handled -- auto-focus
+        included -- is done with."""
+        if self._legend_restore_pending is not None:
+            pan_x, pan_y, focus_id = self._legend_restore_pending
+            self._legend_restore_pending = None
+            self.call_after_refresh(self._restore_after_legend, pan_x, pan_y, focus_id)
+
+    def _restore_after_legend(self, pan_x: int, pan_y: int, focus_id: str | None) -> None:
+        """The pre-legend focus wins over the auto-focus grab -- restored
+        FIRST, so a pan repaint that follows (`_move_pan`) reads the real
+        owner through `_focus_owner` instead of the transient one.  That
+        ordering is what the operator saw as the selection card flashing
+        from blue to grey on `esc` (`INC8-P3-UX-F1`, carried `UX-F7`)."""
+        widget = None
+        if focus_id is not None:
+            matches = self.query(f"#{focus_id}")
+            if len(matches):
+                widget = matches.first()
+        self.set_focus(widget)
+        self._move_pan(pan_x, pan_y)
 
     def _move_pan(self, pan_x: int, pan_y: int) -> None:
-        if (pan_x, pan_y) != (self.pan_x, self.pan_y):
-            self.pan_x, self.pan_y = pan_x, pan_y
-            self.refresh_canvas()
+        """Move the pan and repaint through `_declare_after_layout`'s
+        canvas-only render path rather than `refresh_canvas`
+        (`INC8-P3-CR-F1` fix `a`+`b`).  A legend-driven pan move never
+        changes the selected node, the fold or the graph, so the rail and
+        the inspector have nothing to re-show; `refresh_canvas`'s own
+        rebuild of the inspector (`FichaInspector._rebuild`'s
+        `remove_children`) is exactly what threw the keyboard's focus to the
+        rail every time this ran, docked or modal.
+
+        Called UNCONDITIONALLY: `_declare_after_layout` already no-ops when
+        the `ViewState` it would paint equals `_rendered_for` (`P1`), so a
+        call that changes nothing costs one cheap dataclass compare.  A
+        hand-rolled `(pan_x, pan_y)` guard here looked equivalent and is NOT:
+        a terminal resize can change the CANVAS's geometry while leaving the
+        pan NUMBER the same, and that guard then skipped the repaint the new
+        geometry needed -- measured RED on
+        `test_f2_the_modal_layout_does_not_pan_and_a_resize_re_derives_the_pan`
+        (resized narrow then back to the reference width: the reveal came
+        back `(0, 0)` instead of the original `(7, 0)`, because the pan
+        value alone had not changed even though the frame it was read
+        against had)."""
+        self.pan_x, self.pan_y = pan_x, pan_y
+        self._declare_after_layout()
 
     def _pan_revealing_selection(self, panel_x: int) -> int:
         """The painted pan, moved right until the selected card's box ends at
