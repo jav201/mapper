@@ -150,11 +150,20 @@ def own_scope_word(action: str) -> str | None:
     return next((word for actions, word in OWN_SCOPE_COPY if action in actions), None)
 
 
-def vocabulary_for(view: str) -> list[tuple[str, str, str, str]]:
+def vocabulary_for(view: str, rail_shown: bool = True) -> list[tuple[str, str, str, str]]:
     """`LLR-N16.2.1`: the members `view`'s legend paints, in declaration order,
-    read from the ONE declaration -- never a copy of it."""
+    read from the ONE declaration -- never a copy of it.
+
+    `H4` (closing verdict, round 5): while `rail_shown` is `False`, the rows
+    the rail alone paints (`darkside.RAIL_VOCABULARY`) are dropped too --
+    there is nothing on screen left for them to explain.  Every other row
+    stays, coverage strip and meter included: their source is not the rail
+    widget (see `RAIL_VOCABULARY`'s own docstring)."""
     wanted = set(darkside.LEGEND_VIEWS.get(view, ()))
-    return [m for m in darkside.DECLARED_VOCABULARY if m[0] in wanted]
+    members = [m for m in darkside.DECLARED_VOCABULARY if m[0] in wanted]
+    if rail_shown:
+        return members
+    return [m for m in members if m[0] not in darkside.RAIL_VOCABULARY]
 
 
 def colours_for(view: str) -> list[tuple[str, str, str, str]]:
@@ -278,6 +287,10 @@ class HelpScreen(ModalScreen[None]):
         # Which layout the painted rows are budgeted for.  An unmounted screen
         # (the white-box arms) renders for the modal.
         self.docked = False
+        # `H4`: the rail state the vocabulary was LAST painted for.  `None`
+        # so the very first `_apply_layout` call always agrees with whatever
+        # `compose` already painted, and never repaints on a false mismatch.
+        self._rail_shown_painted: bool | None = None
 
     @property
     def row_cells(self) -> int:
@@ -296,13 +309,30 @@ class HelpScreen(ModalScreen[None]):
         answer (the map screen: its rail, when shown), else the left edge."""
         return getattr(self.host, "legend_view_left", 0)
 
+    def _rail_shown(self) -> bool:
+        """`H4`: whether the host's rail is visible right now, read live from
+        the host rather than cached -- a screen that declares no rail (the
+        sala) is always `True`, the vacuous case `vocabulary_for` already
+        handles by never dropping a row.  Keys are modal while the legend is
+        open, so a hand toggle (`R`) cannot fire; a resize across the host's
+        own auto-hide width is the only way this can change under an open
+        legend, which is why `_apply_layout` -- the resize path -- is what
+        reads it again, not just `compose`."""
+        return not getattr(self.host, "rail_hidden", False)
+
     def _apply_layout(self, width: int) -> None:
         docked = docks(width, self._view_left())
         self.set_class(docked, DOCKED_CLASS)
-        if docked != self.docked:
-            self.docked = docked
-            if self.is_mounted:
-                self._repaint()
+        rail_shown = self._rail_shown()
+        # `H4`: a resize can flip the host's rail without flipping `docked`
+        # (the two thresholds are derived independently) -- the old guard,
+        # keyed on `docked` alone, would leave a rail row painted after the
+        # rail it explains had already gone, or vice versa.
+        repaint = docked != self.docked or rail_shown != self._rail_shown_painted
+        self.docked = docked
+        self._rail_shown_painted = rail_shown
+        if repaint and self.is_mounted:
+            self._repaint()
         # Verdict `F2`: the view moves only because of docking -- keys never
         # reach it (`E1`).  The panel is flush right, so its edge is here.
         dock = getattr(self.host, "legend_docked", None)
@@ -322,7 +352,7 @@ class HelpScreen(ModalScreen[None]):
         explain the vocabulary's hues.  A view that paints no colour row
         (`F1`) omits the colour section too."""
         out: list[tuple[str, Text]] = []
-        vocabulary = vocabulary_for(self.view)
+        vocabulary = vocabulary_for(self.view, self._rail_shown())
         if vocabulary:
             out.append(("help-vocabulary", self._render_vocabulary(vocabulary)))
             if colours_for(self.view):
@@ -340,6 +370,7 @@ class HelpScreen(ModalScreen[None]):
 
     def compose(self) -> ComposeResult:
         self.docked = docks(self.app.size.width, self._view_left())
+        self._rail_shown_painted = self._rail_shown()
         body = [Static(text, id=widget_id) for widget_id, text in self._sections()]
         title = Static(self._render_title(), id="help-title")
         own_scope = Static(self._render_own_scope_keys(), id="help-own-scope")
