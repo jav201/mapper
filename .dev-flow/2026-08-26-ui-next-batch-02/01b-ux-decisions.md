@@ -262,61 +262,111 @@ moment a map has a different schema — C-31's family.
 
 ## DECISION 3 — the glyph vocabulary (US-N16's legend content)
 
-Complete and exact. Strings marked **(proto)** are reused verbatim from the generators; the citation
-is the source of record. Tokens are the names in `mapper/darkside.py` (`GROUND #000000`,
-`PANEL #121212`, `STEP #262626`, `INK #f5f5f5`, `MUT #737373`, `ACCENT #1783ff`, `WARN #ffd230`,
-`ALERT #ff4f42`, `WORDMARK #3a3a3a`) plus the three that land in this batch.
+**REWRITTEN 2026-09-28 FROM RENDERS OF THE SHIPPED PRODUCT** (Inc-8 design pass, operator verdict
+`D2` in `VERDICT-inc8-legend-2026-09-28.md`: *"derivar el vocabulario de lo que el producto pinta
+hoy; 01b se reescribe desde renders reales"*). Until this rewrite §3.1–§3.4 were transcribed from the
+round-9/10 prototype generators, and several rows described forms no renderer paints (`INC8-F2`,
+`UX-F3`). Every row below is a form the catalogue instrument found **painted** by the shipped
+product, cited to the renderer line that paints it. The instrument, its exclusion rule and the full
+harvest table are in `03-increments/increment-022-inc8-legend.md`, section *Design pass*.
 
-### 3.1 · Canvas vocabulary — the atlas view
+Tokens are the names in `mapper/darkside.py` (`GROUND #000000`, `PANEL #121212`, `STEP #262626`,
+`INK #f5f5f5`, `ASH #a3a3a3`, `MUT #737373`, `ACCENT #1783ff`, `WARN #ffd230`, `ALERT #ff4f42`,
+`WORDMARK #3a3a3a`) plus `SAGE`, `TEAL` and `VIOLET`. A style with no `on` clause matches the glyph on
+any ground (the rail, the strips and the canvas paint on `GROUND`; the inspector, cards and pills on
+`PANEL`).
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V1 | ` rrhh ` (node title, leading and trailing space, on a card) | `rama abierta` | `INK on PANEL` | **(proto)** `ui_next2/generate.py:610-611` |
-| V2 | ` nómina ` (node title on a card) | `coincidencia de búsqueda` | `bold GROUND on WARN` | **(proto)** `:612-613` |
-| V3 | `▸ <rama> +N` — e.g. `▸ inv +23` | `rama plegada (23 dentro)` | `MUT on PANEL` | **(proto)** `:614-615` |
-| V4 | `∙ ∙ ∙` | `territorio sin explorar` | `WORDMARK` | **(proto)** `:616-617` |
-| V5 | `▔▔▔▔` (under the selected node, its full width) | `nodo seleccionado` | `ACCENT` | **(proto)** `:618-619`, `ui_next/generate.py:430` |
-| V6 | `┌─┐` | `minimapa: tu ventana en el todo` | `ACCENT` | **(proto)** `:620-621` |
+The **Views** column names the legend(s) that paint the row, with the one name per view the legend
+title uses (verdict `D5`): `atlas`, `esquema`, `mapa mental`, `sala`. `LLR-N16.2.1`'s instrument reads
+the first four columns; `darkside.LEGEND_VIEWS` is checked against the fifth.
 
-**Braille edge dust — the one item the prototype legend does not itemise.** The generators paint two
-distinct braille populations and the legend collapses them into V4, which under-declares. Specified
-here as two rows, because they mean different things:
+**Change log — every pre-rewrite row, and what became of it.** Ids of forms that survive are
+reused so traces stay valid; a retired id is never reused. Retired rows are removed from the tables
+below (the instrument reads the tables), and recorded here with their reason.
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V4a | `∙ ∙ ∙` (scattered braille, `U+2800`–`U+28FF`) | `territorio sin explorar` | `WORDMARK` | `ui_next/generate.py:406-411` |
-| V4b | braille run tracing a path between two cards | `enlace entre nodos` | `MUT`; the path to the selected node in `ACCENT` | `ui_next/generate.py:412-416`, edge styles `MUT` / `ACCENT` at `:394-401` |
+| Old | Was | Now | Reason |
+|---|---|---|---|
+| `V1` | ` rrhh ` card title, `INK on PANEL`, *rama abierta* | `V1` `▐`, `STEP`, *nodo del mapa* | the card survives; its painted mark is its left edge. *Rama abierta* is the rail's `▾` (`V33`) |
+| `V2` | ` nómina ` card, `bold GROUND on WARN` | `V2` `▐ nómina`, `INK on STEP` | the hit card survives in the livery the renderer paints |
+| `V3` | `▸ inv +23`, `MUT on PANEL` | `V3` `▐` `WARN` + `▸ inv +23` `MUT` | the pill survives; the renderer paints it with a `WARN` bar |
+| `V4` | `∙ ∙ ∙`, `WORDMARK`, *territorio sin explorar* | **RETIRED** | no renderer paints a dust field on the atlas canvas. The `∙` the operator kept (`Q1·Q2`) is painted as the rail's lit territory dot, which is `V21a`'s form; see `INC8-D-Q2` |
+| `V4a` | scattered braille, `WORDMARK` | **RETIRED** | collapsed into `V4` (Amendment 2(b)); the atlas paints no braille |
+| `V4b` | braille path between cards, `MUT` / `ACCENT`, atlas | `V4b`, `mapa mental`, own sample | verdict `D3`, `Q1·Q2`: braille leaves the atlas; radial paints it in the branch greys and `ACCENT` |
+| `V5` | `▔▔▔▔`, `ACCENT`, *nodo seleccionado* | **RETIRED** | no renderer paints an underline; the selection is a block (`V23`, `V24`) |
+| `V6` | `┌─┐`, *minimapa: tu ventana* | **RETIRED** | no viewport box is painted |
+| `V7` | `plegadas: … — 41 nodos` | **RETIRED** | prototype caption; the overflow declaration the product paints is `V31` |
+| `V8` | `minimapa · 128 nodos` | **RETIRED** | prototype caption; not painted |
+| `V9` | viewport rectangle in the minimap | **RETIRED** | no viewport box is painted |
+| `V10` | `▓ ▒ ░` density cells | **RETIRED** | `▓` is not painted; the strip under the tabs paints branch coverage (`V36`–`V39`) |
+| `V11`–`V16` | lens rows | **DEFERRED(#D7)** marker added | verdict `Q4`: US-N14 is deferred whole (`#D23`); the marker is the one the instrument reads |
+| `V17` | `⇄ enlazado`, `VIOLET` | **RETIRED** | no renderer paints a cross-map link |
+| `V18` | `◍ del repo` | unchanged, **DEFERRED(#D7)** | already out of this batch |
+| `V19` | microbar, `SAGE` / `INK` / `WORDMARK` | `V19` microbar, `INK` / `WARN` / `WORDMARK` | the sala paints a con-acta bar and a sin-acta bar; `SAGE` is painted nowhere (`Q8` keeps the `█ █ ░` sample) |
+| `V20` | legend chip `▲ vence` | `V20` `▲ 2 vencen hoy` | the chip is not painted; the hero line is |
+| `V21` | `∙` in a card thumbnail, lit / unlit | split into `V21a` (lit `∙`) and `V21b` (unlit `·`) | no card thumbnail is painted; the rail's territory lattice paints the same lit / unlit pair in the same two styles |
+| `V22` | `⊘` damaged card | unchanged | verdict `Q7` |
+| — | — | `V23`–`V44` new | forms the catalogue found painted with no row |
 
-### 3.2 · Declared-overflow and viewport indicators
+### 3.1 · Canvas vocabulary — the three map views
 
-| # | Glyph / line, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V7 | `plegadas: inventarios · ventas — 41 nodos` | overflow declaration; the `N` **shall** reconcile with the sum of the `+N` in every painted pill | `WORDMARK` | **(proto)** `ui_next/generate.py:485` |
-| V8 | `minimapa · 128 nodos` | minimap caption; `N` = total nodes in the graph | `WORDMARK` | **(proto)** `:449` |
-| V9 | `┌──┐ │ │ └──┘` rectangle inside the minimap | viewport — the part of the territory now on screen | `ACCENT on PANEL` | **(proto)** `:442-448` |
-| V10 | `▓` `▒` `░` density cells inside the minimap | territory density | `WORDMARK on PANEL` | **(proto)** `:437-441` |
+| # | Glyph, exactly | Spanish label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V1 | `▐` (the left edge of a card) | `nodo del mapa` | `STEP` | atlas | `views/layered.py:595-602` |
+| V2 | `▐ nómina` (a card in hit livery) | `coincidencia de búsqueda` | `INK on STEP` | atlas | `views/layered.py:596-597` |
+| V23 | `▐ erp` (the selected card, focus on the canvas) | `nodo seleccionado` | `bold GROUND on ACCENT` | atlas | `views/layered.py:744-749` |
+| V24 | `▐ erp` (the selected card, focus in another region) | `seleccionado, con el foco en otra región` | `INK on PANEL` | atlas | `views/layered.py:746-749` |
+| V3 | `▐` bar and `▸ inv +23` pill | `rama plegada (23 dentro)` | bar `WARN`; pill `MUT` | atlas | `views/layered.py:666-667` |
+| V25 | `◫ ACTA-7` (a legacy card's document chip) | `acta del nodo` | `INK` | atlas | `views/layered.py:611-614` |
+| V26 | `◫ sin acta` | `nodo sin acta` | `ALERT` | atlas | `views/layered.py:612-613`; see `INC8-D-Q1` |
+| V27 | `✓` after a schema letter | `campo del esquema lleno` | `INK` | atlas | `views/layered.py:630-631` |
+| V28 | `░` after a schema letter | `campo del esquema pendiente` | `STEP` | atlas | `views/layered.py:630-631` |
+| V29 | `┬─┐` (box-drawing wires, `U+2500`–`U+257F`) | `enlace entre nodos` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
+| V4b | `⣉⡉⠉` (a braille edge, `U+2800`–`U+28FF`) | `enlace entre nodos (en azul, camino al seleccionado)` | `INK`, `ASH` or `MUT` by branch; `ACCENT` on the path to the selected node | mapa mental | `views/radial.py:259-272`, `canvas.py:167-182` |
+| V42 | `●` (a node's marker) | `nodo (gris de su rama)` | `INK`, `ASH` or `MUT` by branch | mapa mental | `views/radial.py:366-375` |
+| V43 | `●` on the path to the selected node | `nodo en el camino al seleccionado` | `ACCENT` | mapa mental | `views/radial.py:369-370` |
+| V44 | `◆` (the root's marker) | `raíz del mapa` | `ACCENT` | mapa mental | `views/radial.py:366-370` |
+| V30 | `◆` before `mapper` in the header | `encabezado de la vista` | `INK` | atlas · esquema · mapa mental | `views/layered.py:432`, `views/outline.py:92`, `views/radial.py:117` |
+| V31 | `▽ 35 fuera de vista` | `nodos fuera de vista` | `INK` | atlas · esquema · mapa mental | `views/layered.py:451-454`, `views/outline.py:334`, `views/radial.py:121`, `app.py:2592` |
+
+### 3.2 · Map chrome shared by the three map views — rail, strips, ficha
+
+| # | Glyph, exactly | Spanish label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V33 | `▾` in the rail | `rama abierta` | `MUT` | atlas · esquema · mapa mental | `widgets/rail.py:228` |
+| V34 | `▸` in the rail | `rama plegada` | `MUT` | atlas · esquema · mapa mental | `widgets/rail.py:226` |
+| V35 | `3` beside a rail row | `campos pendientes bajo la rama` | `WARN` | atlas · esquema · mapa mental | `widgets/rail.py:248-249` |
+| V21a | `∙` in the rail's territory lattice | `nodo con la ficha completa` | `MUT` | atlas · esquema · mapa mental | `widgets/rail.py:267-268` |
+| V21b | `·` in the rail's territory lattice | `nodo con campos pendientes` | `WORDMARK` | atlas · esquema · mapa mental | `widgets/rail.py:267-268` |
+| V36 | `█` beside a branch name in the coverage strip | `rama con todas sus actas` | `INK` | atlas · esquema · mapa mental | `app.py:2166-2167` |
+| V37 | `▒` beside a branch name in the coverage strip | `rama con la mitad o más de sus actas` | `MUT` | atlas · esquema · mapa mental | `app.py:2168-2169` |
+| V38 | `░` beside a branch name in the coverage strip | `rama con menos de la mitad de sus actas` | `WARN` | atlas · esquema · mapa mental | `app.py:2170` |
+| V39 | `╱` in the coverage strip's own key | `rama sin datos` | `WORDMARK` | atlas · esquema · mapa mental | `app.py:2163-2164`, `app.py:2276` |
+| V32 | `▰` full and `▱` empty | `medidor de avance` | full `INK`; empty `STEP` | atlas · esquema · mapa mental | `darkside.py:375-387`; used at `views/layered.py:440`, `app.py:2565`, `widgets/components.py:279` |
 
 ### 3.3 · Lens vocabulary — figure-ground
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V11 | `▐` (left bar of a matched card) | `coincide con la lente` | `WARN on PANEL` | **(proto)** `ui_next2/generate.py:341` |
-| V12 | bare title, no card, no chrome | `fuera de la lente` | `WORDMARK` | **(proto)** `:348` |
-| V13 | `╎` | `enlace atenuado` | `STEP` | **(proto)** `:333-336` |
-| V14 | `ficha completa ✓` | `sin campos pendientes` | `SAGE on PANEL` | **(proto)** `:345-346` |
-| V15 | `faltan campos ░` | `ficha incompleta` | `MUT on PANEL` | **(proto)** `:345-346` |
-| V16 | `∗` | `lente de campos` | `ACCENT` | **(proto)** `:312` |
+**Deferred whole with US-N14 (`#D23`); every row carries the `DEFERRED(#D7)` marker the instrument
+removes (verdict `Q4`), so no legend paints them. The rows stay so the lens batch starts from them.**
+
+| # | Glyph, exactly | Spanish label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V11 | `▐` (left bar of a matched card) | `coincide con la lente` | `WARN on PANEL` **DEFERRED(#D7)** | — | **(proto)** `ui_next2/generate.py:341` |
+| V12 | bare title, no card, no chrome | `fuera de la lente` | `WORDMARK` **DEFERRED(#D7)** | — | **(proto)** `:348` |
+| V13 | `╎` | `enlace atenuado` | `STEP` **DEFERRED(#D7)** | — | **(proto)** `:333-336` |
+| V14 | `ficha completa ✓` | `sin campos pendientes` | `SAGE on PANEL` **DEFERRED(#D7)** | — | **(proto)** `:345-346` |
+| V15 | `faltan campos ░` | `ficha incompleta` | `MUT on PANEL` **DEFERRED(#D7)** | — | **(proto)** `:345-346` |
+| V16 | `∗` | `lente de campos` | `ACCENT` **DEFERRED(#D7)** | — | **(proto)** `:312` |
 
 ### 3.4 · Sala (home) vocabulary
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V17 | `⇄ N` and legend chip `⇄ enlazado` | `enlaza mapas` | `VIOLET on PANEL` | **(proto)** `ui_next2/generate.py:134`, `:145` |
-| V18 | `◍ github` and legend chip `◍ del repo` | `procedencia repo` | `TEAL on PANEL` **DEFERRED(#D7)** | **(proto)** `:136`, `:146` |
-| V19 | `█` filled cells / `░` empty cells, 10 wide | coverage microbar | filled `SAGE` when coverage ≥ 90 %, else `INK`; empty `WORDMARK` | **(proto)** `:126-128`; legend chip `█ cerrada` at `:147` |
-| V20 | `▲ N vencen` and legend chip `▲ vence` | `actas vencidas` | `WARN on PANEL` | **(proto)** `:132`, `:148` |
-| V21 | `∙` in the card thumbnail | lit `= nodo con acta`, unlit `= sin acta` | lit `MUT on PANEL`, unlit `WORDMARK on PANEL` | **(proto)** `:100-101` |
-| V22 | `⊘` before `mapa dañado — ↵ ver por qué` on that map's card | `mapa dañado — no se pudo leer` | `INK on PANEL` | **derived**, Amendment 1 (2026-09-19); style fixed by `PRED-VIS RESOLVED` / `#D28` |
+| # | Glyph, exactly | Spanish label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V18 | `◍ github` and legend chip `◍ del repo` | `procedencia repo` | `TEAL on PANEL` **DEFERRED(#D7)** | — | **(proto)** `ui_next2/generate.py:136`, `:146` |
+| V19 | `█` con acta, `█` sin acta, `░` resto | `nodos con y sin acta, en 10 celdas` | con `INK`; sin `WARN`; resto `WORDMARK` | sala | `app.py:553-559`, `darkside.py:424-432` |
+| V20 | `▲ 2 vencen hoy` | `actas que vencen hoy` | `WARN on PANEL` | sala | `app.py:546-547` |
+| V22 | `⊘` before `mapa dañado — ↵ ver por qué` on that map's card | `mapa dañado — no se pudo leer` | `INK on PANEL` | sala | `app.py:790-791`; **derived**, Amendment 1 (2026-09-19); style fixed by `PRED-VIS RESOLVED` / `#D28` |
+| V40 | `▁▂▃` baja and `▅▇█` alta (bars, `U+2581`–`U+2588`) | `actividad de los últimos 14 días` | baja `WORDMARK`; alta `MUT` | sala | `app.py:583-589` |
+| V41 | `↩ retomar` | `volver a la última sesión` | `bold GROUND on ACCENT` | sala | `app.py:714-721` |
 
 ### 3.5 · Colours with a job — the palette-v2 rows
 

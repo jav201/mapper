@@ -100,7 +100,9 @@ def test_llr_n16_2_1_the_instrument_finds_the_suffixed_rows():
     directly rather than trusting the regex.
     """
     ids = [r[0] for r in derived_rows()]
-    assert "V4a" in ids and "V4b" in ids, (
+    # The Inc-8 design pass retired `V4a` and split `V21` into `V21a`/`V21b`;
+    # the hazard's known suffixed members are now these three.
+    assert {"V4b", "V21a", "V21b"} <= set(ids), (
         f"the suffixed rows are missing from the derivation: {ids}"
     )
     assert len(ids) == len(set(ids)), f"duplicate row ids in the derivation: {ids}"
@@ -195,16 +197,15 @@ _QUALIFIER = re.compile(r"([a-z]+)\s")
 _STYLE_TOKEN = re.compile(r"`((?:bold\s+)?[A-Z][A-Z_]*(?:\s+on\s+[A-Z][A-Z_]*)?)`")
 
 #: Rows whose glyph cell is PROSE: the rule derives no sample, the declaration
-#: carries `""`, and each is an open question for the operator
-#: (`increment-022` §Questions).  Pinned so a cell that gains a glyph, or a
-#: glyph that goes missing, reddens instead of passing.
-OPERATOR_QUESTIONS = {"V4b", "V12"}
+#: carries `""`, and each is an open question for the operator.  EMPTY since
+#: the Inc-8 design pass: `V4b` gained a real braille sample (verdict `Q1`/`Q2`)
+#: and `V12` is deferred with the lens (`Q4`).  Pinned so a new prose cell
+#: reddens instead of shipping an empty sample.
+OPERATOR_QUESTIONS: set[str] = set()
 
-#: `HLR-N16.2`'s view partition, by `01b` section.  `3.1` names its view
-#: ("the atlas view") and `3.4` its screen ("Sala (home)"); `3.2`'s minimap and
-#: overflow indicators live on the same map canvas, which is an ASSUMPTION
-#: recorded in `increment-022`.  `3.3` is the lens, deferred whole (`#D23`).
-SECTION_VIEW = {"3.1": "atlas", "3.2": "atlas", "3.4": "sala"}
+#: `01b` DECISION 3's fifth column, which names the legend(s) painting a row.
+_VIEWS_ROW = re.compile(r"^\|\s*(V\d+[a-z]?)\s*\|(?:[^|]*\|){3}([^|]*)\|", re.M)
+_RETIRED = re.compile(r"^\|\s*`(V\d+[a-z]?)`\s*\|[^|]*\|\s*\*\*RETIRED\*\*", re.M)
 
 
 def _leading_run(cell: str) -> list[str]:
@@ -264,14 +265,19 @@ def sample_by_style(glyph_cell: str, style_cell: str) -> dict[str, str | None]:
     return {st: sample for st in styles}
 
 
-def _rows_by_section() -> dict[str, str]:
-    """Row id -> the `01b` section (`3.1`..`3.4`) its table sits in."""
-    out: dict[str, str] = {}
-    for number, body in re.findall(r"^### (3\.[1-4]) (.*?)(?=^### )", _section() + "### ",
-                                   re.M | re.S):
-        for row in ROW.findall(body):
-            out[row[0]] = number
+def _views_by_row() -> dict[str, set[str]]:
+    """Row id -> the views its `01b` Views column names (`atlas · esquema`)."""
+    out: dict[str, set[str]] = {}
+    for vid, cell in _VIEWS_ROW.findall(_section()):
+        out[vid] = {v.strip() for v in cell.split("·") if v.strip() not in ("", "—")}
     return out
+
+
+def _retired_ids() -> set[str]:
+    """The ids the change log above §3.1 marks **RETIRED**."""
+    text = UX.read_bytes().decode("utf-8")
+    log = text[text.index("## DECISION 3 "):text.index("### 3.1 ")]
+    return set(_RETIRED.findall(log))
 
 
 def derived_members() -> tuple[set[tuple[str, str, str, str]], dict[str, set[tuple[int, int]]]]:
@@ -331,13 +337,18 @@ def test_inc7_cr_r2_f2_the_rule_leaves_exactly_the_operator_questions_open():
     assert undecided == OPERATOR_QUESTIONS, undecided
 
 
-def test_amendment_2b_V4a_collapses_into_V4_carrying_its_braille_range():
-    """`01b` Amendment 2(b): one painted form, a glyph SET with a range."""
+def test_every_declared_range_EQUALS_the_document():
+    """`01b` Amendment 2(b): a glyph may be a SET with a range.
+
+    Verdict `Q1`/`Q2`: the braille range left `V4` (retired) and belongs to
+    radial's edge row `V4b`, which also gained a real braille sample.
+    """
     _, ranges = derived_members()
-    declared_ids = {m[0] for m in darkside.DECLARED_VOCABULARY}
-    assert "V4a" not in declared_ids and "V4" in declared_ids
     assert {k: set(v) for k, v in darkside.DECLARED_GLYPH_RANGES.items()} == ranges
-    assert (0x2800, 0x28FF) in ranges["V4"], ranges
+    assert (0x2800, 0x28FF) in ranges["V4b"], ranges
+    assert "V4" not in ranges
+    v4b = {g for vid, g, _l, _s in darkside.DECLARED_VOCABULARY if vid == "V4b"}
+    assert v4b and all(0x2800 <= ord(c) <= 0x28FF for g in v4b for c in g), v4b
 
 
 def test_amendment_2a_the_D7_row_contributes_no_member():
@@ -345,17 +356,42 @@ def test_amendment_2a_the_D7_row_contributes_no_member():
     assert "V18" not in {m[0] for m in darkside.DECLARED_VOCABULARY}
 
 
-def test_hlr_n16_2_each_view_paints_the_rows_of_its_own_01b_sections():
-    """The per-view partition, derived from the sections rather than listed."""
-    section_of = _rows_by_section()
-    assert section_of.get("V4b") == "3.1", "the suffixed rows fell out of the section walk"
+def test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names():
+    """The per-view partition, derived from `01b`'s Views column, not listed.
+
+    Verdict `D3`: radial (`mapa mental`) and outline (`esquema`) have
+    vocabularies of their own, and braille belongs to radial alone.
+    """
+    views_of = _views_by_row()
+    assert views_of.get("V21a"), "the suffixed rows fell out of the Views walk"
     declared_ids = {m[0] for m in darkside.DECLARED_VOCABULARY}
     want: dict[str, set[str]] = {}
     for vid in declared_ids:
-        view = SECTION_VIEW.get(section_of[vid])
-        if view:
+        for view in views_of[vid]:
             want.setdefault(view, set()).add(vid)
     assert {v: set(ids) for v, ids in darkside.LEGEND_VIEWS.items()} == want
+    assert set(want) == {"atlas", "esquema", "mapa mental", "sala"}, set(want)
+    assert "V4b" in want["mapa mental"] and "V4b" not in want["atlas"]
+
+
+def test_design_pass_a_retired_id_is_never_a_row_again():
+    """Every id the change log retires is gone from the tables and from the
+    declaration -- a retired id is never reused, so a trace that cites it
+    cannot silently land on a different form."""
+    retired = _retired_ids()
+    assert {"V4", "V4a", "V5", "V6", "V7", "V8", "V9", "V10", "V17"} <= retired, retired
+    rows = {r[0] for r in derived_rows()}
+    declared = {m[0] for m in darkside.DECLARED_VOCABULARY}
+    assert not retired & rows, retired & rows
+    assert not retired & declared, retired & declared
+
+
+def test_design_pass_q4_the_lens_rows_are_marked_deferred_and_not_declared():
+    """Verdict `Q4`: `V11`-`V16` carry the `#D7` marker and leave the declaration."""
+    lens = {f"V{n}" for n in range(11, 17)}
+    marked = {r[0] for r in derived_rows() if "DEFERRED(#D7)" in "".join(r)}
+    assert lens <= marked, lens - marked
+    assert not lens & {m[0] for m in darkside.DECLARED_VOCABULARY}
 
 
 def test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5():
