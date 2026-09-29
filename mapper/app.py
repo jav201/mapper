@@ -573,10 +573,10 @@ class HomeScreen(Screen):
                     pass
             counts.append(day_count)
         max_count = max(counts) if counts else 1
-        # `A-105` -- `counts` always has 14 entries, so the `else 1` branch
-        # above never fires; when every entry is 0 (no `.mmd` modified in the
-        # 14-day window) `max_count` is 0, and `c / max_count` below must not
-        # divide by it.
+        # `A-105` / `INC7-CR-R3-F3` -- `counts` always has 14 entries, so the
+        # `else 1` branch above never fires; when every entry is 0 (no `.mmd`
+        # modified in the 14-day window) `max_count` is 0, and `c / max_count`
+        # below must not divide by it.
         max_count = max_count or 1
         bars = "▁▂▂▃▃▄▅▆▇█"
         parts: list[tuple[str, str]] = [("actividad 14d  ", darkside.MUT)]
