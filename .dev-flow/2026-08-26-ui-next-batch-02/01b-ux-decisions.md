@@ -354,7 +354,7 @@ below (the instrument reads the tables), and recorded here with their reason.
 | V3 | `▐` bar and `▸ inv +23` pill | `folded branch, 23 inside` | bar `WARN`; pill `MUT` | atlas | `views/layered.py:666-667` |
 | V25 | `◫ ACTA-7` (a legacy card's document chip) | `the node's record` | `INK` | atlas | `views/layered.py:611-614` |
 | V26 | `◫ sin acta` | `missing record` | `ALERT` | atlas | `views/layered.py:612-613`; `ALERT`'s second job, §3.5 |
-| V27 | `D` letter `✓` mark (a schema letter and its filled mark, adjacent) | `field initial · ✓ filled` | letter `MUT`; mark `INK` | atlas | `views/layered.py:628-631` |
+| V27 | `D` letter `✓` mark (a schema letter and its filled mark, adjacent) | `field initial, filled` | letter `MUT`; mark `INK` | atlas | `views/layered.py:628-631` |
 | V28 | `D` letter `░` mark (a schema letter and its pending mark, adjacent) | `field initial, pending` | letter `MUT`; mark `STEP` | atlas | `views/layered.py:628-631` |
 | V29 | `┬─┐` (box-drawing wires; glyph set `─│┌┐└┘├┤┬┴┼`, exactly the canvas's `_GLYPH` table) | `link between nodes` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
 | V4b | `⣉⡉⠉` (a braille edge, `U+2800`–`U+28FF`) | `link; blue: path to selected` | `INK`, `ASH` or `MUT` by branch; `ACCENT` on the path to the selected node | mind map | `views/radial.py:259-272`, `canvas.py:167-182` |
@@ -466,7 +466,7 @@ Every string below is what the legend paints; `tests/test_vocabulary_declaration
   (the vocabulary comes first in both layouts, verdict `E1`)
 - Own-scope group title: `in this legend` (verdict `E3`, which ratified `A5`)
 - Own-scope group words, by action: `close` (`esc`, `q`) · `scroll` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `ends` (`home`, `end`)
-- Footer, one line: `? always explains the view you are in`
+- Footer, two lines: `? explains the view you are in,` · `outside text fields`
 - Reserved chord line: `??` + `opens the full field guide`
 - Sample column (layout, not copy): 12 cells in the modal, so a sample up to 11 cells (`▐ ▸ inv +23`,
   `◫ sin acta`) shares its label's row; 8 cells docked, so the longest label fits the docked row (round 3)
