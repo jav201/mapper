@@ -510,7 +510,7 @@ def test_f1_each_view_paints_the_colour_rows_its_01b_views_column_names():
 
 _SECTION_36 = re.compile(r"### 3\.6 .*?(?=### 3\.7 )", re.S)
 _HEADERS_LINE = re.compile(r"Section headers, in order:\s*(.+)")
-_FOOTER_LINE = re.compile(r"Footer, one line:\s*(.+)")
+_FOOTER_LINE = re.compile(r"Footer, two lines:\s*(.+)")
 _BACKTICK_RUN = re.compile(r"`([^`]+)`")
 
 
