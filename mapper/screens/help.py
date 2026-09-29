@@ -238,12 +238,18 @@ class HelpScreen(ModalScreen[None]):
     }}
     """
 
-    def __init__(self, scope: str = SCOPE_APP, view: str | None = None) -> None:
+    def __init__(
+        self, scope: str = SCOPE_APP, view: str | None = None, host: object | None = None,
+    ) -> None:
         super().__init__()
         self.scope = scope
         # HLR-N16.2: the title names the VIEW; a screen that declares none is
         # named by its scope.
         self.view = view or scope
+        # The screen the legend explains.  Verdict `F2`: a host that offers
+        # `legend_docked` / `legend_closed` (the map screen) is told where the
+        # docked panel's edge is, so it can keep its selection in sight.
+        self.host = host
         # Which layout the painted rows are budgeted for.  An unmounted screen
         # (the white-box arms) renders for the modal.
         self.docked = False
@@ -262,6 +268,11 @@ class HelpScreen(ModalScreen[None]):
             self.docked = docked
             if self.is_mounted:
                 self._repaint()
+        # Verdict `F2`: the view moves only because of docking -- keys never
+        # reach it (`E1`).  The panel is flush right, so its edge is here.
+        dock = getattr(self.host, "legend_docked", None)
+        if dock is not None:
+            dock(width - LEGEND_DOCKED_CELLS if docked else None)
 
     def on_mount(self) -> None:
         self._apply_layout(self.app.size.width)
@@ -492,4 +503,7 @@ class HelpScreen(ModalScreen[None]):
         self._pane().scroll_end(animate=False)
 
     def action_dismiss_none(self) -> None:
+        closed = getattr(self.host, "legend_closed", None)
+        if closed is not None:
+            closed()
         self.dismiss(None)
