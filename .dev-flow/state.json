@@ -602,7 +602,7 @@
       }
     ],
     "next": "Inc-8",
-    "next_stage": "Inc-8 LAUNCHED 2026-09-28 (implementer claude-opus-5-5, operator instruction). Inc-7 RELEASED and the sparkline zero-division micro-increment (increment-021, A-105) RELEASED the same day. Then Inc-9 -> whole-branch gates (FLAKE-1 first).",
+    "next_stage": "Inc-8 in progress (2026-09-28). Landed: implementation (1538f4a..8e3841e), three reviews (code BLOCK CR-F1, ux BLOCK F1/F2, security PASS), corrective pass 1 (1996637, cd74eca, 3756b62; lane 1206 passed / 0 failed). Operator verdict on the design recorded in VERDICT-inc8-legend-2026-09-28.md. NEXT: code + ux re-review of corrective pass 1, then the design pass (D1-D5, Q4, Q1/Q2) on claude-opus-5-5, then reviews, then Inc-9.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -676,6 +676,84 @@
         "reviewer_opus_5_5": "3.9M",
         "coordinator": "not measured"
       }
+    },
+    "INC-8_STATUS_2026-09-28": {
+      "date": "2026-09-28",
+      "implementation": {
+        "model": "claude-opus-5-5",
+        "commits_old_to_new": {
+          "1538f4a": "1538f4a",
+          "0f342a1": "0f342a1",
+          "6e5275f": "6e5275f",
+          "8dea408": "e89a347",
+          "fc57ac3": "8e3841e"
+        },
+        "lane": "1198 passed / 0 failed (implementer; confirmed by the code reviewer in its own worktree)",
+        "tokens_raw": "26.6M"
+      },
+      "reviews_round_1": {
+        "code": "BLOCK-UNTIL INC8-CR-F1 (the legend never painted its own keys; the arm compared the seat, not the painted frame)",
+        "ux": "BLOCK-UNTIL INC8-UX-F1, F2 (same F1; six label rows paint as English spec prose)",
+        "security": "PASS (nothing file-derived reaches the legend at run time; parsing sinks -1; five LOW carries)",
+        "parallel_safety": "three lenses ran concurrently, each mutating only in its own worktree outside the repo"
+      },
+      "corrective_pass_1": {
+        "model": "claude-sonnet-5",
+        "commits": [
+          "1996637",
+          "cd74eca",
+          "3756b62"
+        ],
+        "fixed": [
+          "CR-F1/UX-F1/UX-F10",
+          "CR-F2",
+          "CR-F3",
+          "CR-F4",
+          "CR-F5",
+          "CR-F7",
+          "CR-F9",
+          "SEC-F1",
+          "SEC-F2",
+          "SEC-F3",
+          "SEC-F4",
+          "UX-F11"
+        ],
+        "new_finding": "INC8-C1-F1: darkside.fit(s, 0) returned ~15 cells on ASCII; guarded (w <= 0 -> '')",
+        "lane": "1206 passed, 20 deselected, 3 xfailed, 0 failed (implementer-measured; not yet re-measured by a reviewer)",
+        "deviation": "commit grouping 2 source commits instead of 4 (declared in the record)",
+        "assumption": "A5 -- own-scope group title 'en esta leyenda', unratified against 01b 3.6"
+      },
+      "operator_verdict": {
+        "record": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc8-legend-2026-09-28.md",
+        "summary": "D1 reviewer copy; D2 derive the vocabulary from what the product paints; D3 vocabularies for radial and outline; D4 side panel at >= 118 cols, modal below; D5 atlas / esquema / mapa mental / sala; Q7 keep U+2298; Q4 defer V11-V16 like V18; Q1/Q2 braille to radial, V4 keeps its dot; Q8 microbar; Q9 rewrite the message."
+      },
+      "Q9_HISTORY_REWRITE_EXECUTED": {
+        "what": "git filter-branch --msg-filter over 8dea408~1..HEAD replaced the literal U+202E in 8dea408's message with the text \\u202e; trees identical (git diff --quiet backup HEAD).",
+        "authority": "operator verdict Q9, 2026-09-28",
+        "backup_branch": "backup/pre-q9-reword-2026-09-28 -> c243eff",
+        "hash_map": {
+          "8dea408": "e89a347",
+          "fc57ac3": "8e3841e",
+          "9295135": "1996637",
+          "e7b2f00": "cd74eca",
+          "c243eff": "3756b62"
+        },
+        "remote": "unaffected -- the branch was never pushed past 8dea408's parent"
+      },
+      "backlog_added": [
+        "B-69 radial straight-line edge mode (operator idea, deferred, prototype round first)",
+        "B-70 render round item 2 (unfocused selection tone) still open"
+      ],
+      "operator_questions_open": [
+        "A5 own-scope group title into 01b 3.6"
+      ],
+      "routed_carries": [
+        "INC8-F1 AT-053 id used twice (coordinator renumbering)",
+        "INC8-F3 ctrl+q/ctrl+c undeclared in any scope",
+        "INC8-UX-F9 keymap group headers are English ids (Inc-9)",
+        "INC8-UX-F12 VerticalScroll's own bindings win over action_legend_*",
+        "INC8-SEC-F5 closed by Q9"
+      ]
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
