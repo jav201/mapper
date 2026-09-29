@@ -904,6 +904,37 @@ async def test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused(tmp_
         assert _canvas_cells(view, canvas) == cells
 
 
+async def test_cr_f2_reopening_after_a_pan_keeps_the_new_pan(tmp_path):
+    """`INC8-P3-CR-F2`: closing the legend must clear `_pan_before_legend`,
+    or a pan the operator makes AFTER closing is discarded the next time they
+    open the legend -- the second `legend_docked` would find a STALE "kept"
+    pan from the first open and revert to it instead of re-deriving a reveal
+    over the operator's own choice.  Walked through `FINA_4` at the
+    reference width: open reveals (0,0)->(7,0); close returns (7,0)->(0,0);
+    `L` is the operator's own pan, (0,0)->(8,0); a second open must keep it
+    exactly, and a second close must not move it."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, _canvas = await _walked_map(app, pilot, FINA_4)
+        assert (view.pan_x, view.pan_y) == (0, 0)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        assert (view.pan_x, view.pan_y) == (7, 0)
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert (view.pan_x, view.pan_y) == (0, 0)
+        await pilot.press("L")
+        await _settle(pilot)
+        assert (view.pan_x, view.pan_y) == (8, 0)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert (view.pan_x, view.pan_y) == (8, 0)
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert (view.pan_x, view.pan_y) == (8, 0)
+
+
 @pytest.mark.parametrize("width", [100, DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE, 140])
 async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_path, width):
     """`INC8-CR-F2`, in both layouts (`E1`: two widths, each derived): the
