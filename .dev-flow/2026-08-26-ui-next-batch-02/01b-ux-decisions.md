@@ -329,6 +329,20 @@ below (the instrument reads the tables), and recorded here with their reason.
 | §3.5 | derived from what the views paint: `SAGE`, `TEAL`, `VIOLET` left (painted by no view); `ALERT` gained its second job, the missing-record mark | `E4` |
 | §3.6 | English copy; the own-scope group `in this legend` is named; the vocabulary section comes first | `E1`, `E3`, language ruling |
 
+**Change log — design pass 3, 2026-09-29** (operator verdict round 3 and its width principle,
+`VERDICT-inc8-legend-2026-09-28.md`; the record is `increment-022`, section *Design pass 3*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| `V27`, `V28` | each row is a schema letter and its mark, painted ADJACENT: the letter in `MUT`, the view's grey for it (`views/layered.py:628-629`), the mark in its own tone. `V28`'s sample becomes `D░`, label `field initial · ░ pending` | `Q7` |
+| `V42`, `V43`, `V44`, `V40` | the ground they are painted on is declared (`on PANEL`): the census finds each ONLY on `PANEL` (radial's node pills, the home's cards), so a sample on `GROUND` misdescribed them. A member painted on both grounds (`V19`, `V32`, `V4b`) stays bare and is sampled on `GROUND` | `INC8-P2-UX-F6` |
+| `V42` | `node, grey of its branch` | copy |
+| `V37`, `V38` | `… recorded` | copy |
+| `V19` | `nodes with / without record` | copy |
+| `V34` | `folded branch, left list` — distinguished from `V3`, the atlas's folded-branch pill | copy |
+| §3.5 | per view; one row per job; `C3` new; red painted by the three map views | `F1`, `INC8-D3-F1` |
+| §3.6 | `what the colours mean`; one footer line; the close hint only in the own-scope group; `scroll` for `↑ ↓` | copy |
+
 ### 3.1 · Canvas vocabulary — the three map views
 
 | # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
@@ -340,13 +354,13 @@ below (the instrument reads the tables), and recorded here with their reason.
 | V3 | `▐` bar and `▸ inv +23` pill | `folded branch, 23 inside` | bar `WARN`; pill `MUT` | atlas | `views/layered.py:666-667` |
 | V25 | `◫ ACTA-7` (a legacy card's document chip) | `the node's record` | `INK` | atlas | `views/layered.py:611-614` |
 | V26 | `◫ sin acta` | `missing record` | `ALERT` | atlas | `views/layered.py:612-613`; `ALERT`'s second job, §3.5 |
-| V27 | `D✓` (a schema letter and its filled mark) | `field initial · ✓ filled` | `INK` | atlas | `views/layered.py:630-631` |
-| V28 | `░` after a schema letter | `field still pending` | `STEP` | atlas | `views/layered.py:630-631` |
+| V27 | `D` letter `✓` mark (a schema letter and its filled mark, adjacent) | `field initial · ✓ filled` | letter `MUT`; mark `INK` | atlas | `views/layered.py:628-631` |
+| V28 | `D` letter `░` mark (a schema letter and its pending mark, adjacent) | `field initial · ░ pending` | letter `MUT`; mark `STEP` | atlas | `views/layered.py:628-631` |
 | V29 | `┬─┐` (box-drawing wires; glyph set `─│┌┐└┘├┤┬┴┼`, exactly the canvas's `_GLYPH` table) | `link between nodes` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
 | V4b | `⣉⡉⠉` (a braille edge, `U+2800`–`U+28FF`) | `link; blue: path to selected` | `INK`, `ASH` or `MUT` by branch; `ACCENT` on the path to the selected node | mind map | `views/radial.py:259-272`, `canvas.py:167-182` |
-| V42 | `●` (a node's marker) | `node, in its branch's grey` | `INK`, `ASH` or `MUT` by branch | mind map | `views/radial.py:366-375` |
-| V43 | `●` on the path to the selected node | `node on the selected path` | `ACCENT` | mind map | `views/radial.py:369-370` |
-| V44 | `◆` (the root's marker) | `map root` | `ACCENT` | mind map | `views/radial.py:366-370` |
+| V42 | `●` (a node's marker, on its label's pill) | `node, grey of its branch` | `INK on PANEL`, `ASH on PANEL` or `MUT on PANEL` by branch | mind map | `views/radial.py:366-375`; the pill's ground `:302-304` |
+| V43 | `●` on the path to the selected node | `node on the selected path` | `ACCENT on PANEL` | mind map | `views/radial.py:369-370`; the pill's ground `:302-304` |
+| V44 | `◆` (the root's marker) | `map root` | `ACCENT on PANEL` | mind map | `views/radial.py:366-370`; the pill's ground `:302-304` |
 | V30 | `◆` before `mapper` in the header | `view header` | `INK` | atlas · outline · mind map | `views/layered.py:432`, `views/outline.py:92`, `views/radial.py:117` |
 | V31 | `▽ 35 fuera de vista` | `nodes off screen` | `INK` | atlas · outline · mind map | `views/layered.py:451-454`, `views/outline.py:334`, `views/radial.py:121`, `app.py:2592` |
 | V45 | `⇲15` (the true level, where the outline caps a deep row's indent) | `true depth, indent capped` | `MUT` | outline | `views/outline.py:24`, `:55`, `:219`, `:261`, `:264` |
@@ -356,13 +370,13 @@ below (the instrument reads the tables), and recorded here with their reason.
 | # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
 |---|---|---|---|---|---|
 | V33 | `▾` in the rail | `open branch` | `MUT` | atlas · outline · mind map | `widgets/rail.py:228` |
-| V34 | `▸` in the rail | `folded branch` | `MUT` | atlas · outline · mind map | `widgets/rail.py:226` |
+| V34 | `▸` in the rail | `folded branch, left list` | `MUT` | atlas · outline · mind map | `widgets/rail.py:226` |
 | V35 | `3` beside a rail row | `pending fields here and below` | `WARN` | atlas · outline · mind map | `widgets/rail.py:248-249` |
 | V21a | `∙` in the rail's territory lattice | `node with a complete card` | `MUT` | atlas · outline · mind map | `widgets/rail.py:267-268` |
 | V21b | `·` in the rail's territory lattice | `node with pending fields` | `WORDMARK` | atlas · outline · mind map | `widgets/rail.py:267-268` |
 | V36 | `█` beside a branch name in the coverage strip | `branch with all its records` | `INK` | atlas · outline · mind map | `app.py:2166-2167` |
-| V37 | `▒` beside a branch name in the coverage strip | `branch: half or more records` | `MUT` | atlas · outline · mind map | `app.py:2168-2169` |
-| V38 | `░` beside a branch name in the coverage strip | `branch: under half records` | `WARN` | atlas · outline · mind map | `app.py:2170` |
+| V37 | `▒` beside a branch name in the coverage strip | `branch: half or more recorded` | `MUT` | atlas · outline · mind map | `app.py:2168-2169` |
+| V38 | `░` beside a branch name in the coverage strip | `branch: under half recorded` | `WARN` | atlas · outline · mind map | `app.py:2170` |
 | V39 | `╱` in the coverage strip's own key | `branch with no data` | `WORDMARK` | atlas · outline · mind map | `app.py:2163-2164`, `app.py:2276` |
 | V32 | `▰` full and `▱` empty | `progress meter` | full `INK`; empty `STEP` | atlas · outline · mind map | `darkside.py:375-387`; used at `views/layered.py:440`, `app.py:2565`, `widgets/components.py:279` |
 
@@ -385,10 +399,10 @@ removes (verdict `Q4`), so no legend paints them. The rows stay so the lens batc
 | # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
 |---|---|---|---|---|---|
 | V18 | `◍ github` and legend chip `◍ del repo` | `came from the repo` | `TEAL on PANEL` **DEFERRED(#D7)** | — | **(proto)** `ui_next2/generate.py:136`, `:146` |
-| V19 | `█` con acta, `█` sin acta, `░` resto | `record / no record, 10 cells` | con `INK`; sin `WARN`; resto `WORDMARK` | home | `app.py:553-559`, `darkside.py:424-432` |
+| V19 | `█` con acta, `█` sin acta, `░` resto | `nodes with / without record` | con `INK`; sin `WARN`; resto `WORDMARK` | home | `app.py:553-559`, `darkside.py:424-432` |
 | V20 | `▲ 2 vencen hoy` | `records due today` | `WARN on PANEL` | home | `app.py:546-547` |
 | V22 | `⊘` before `mapa dañado — ↵ ver por qué` on that map's card | `damaged map — unreadable` | `INK on PANEL` | home | `app.py:790-791`; **derived**, Amendment 1 (2026-09-19); style fixed by `PRED-VIS RESOLVED` / `#D28` |
-| V40 | `▁▂▃` baja and `▅▇█` alta (bars, `U+2581`–`U+2588`) | `activity, last 14 days` | baja `WORDMARK`; alta `MUT` | home | `app.py:583-589` |
+| V40 | `▁▂▃` baja and `▅▇█` alta (bars, `U+2581`–`U+2588`) | `activity, last 14 days` | baja `WORDMARK on PANEL`; alta `MUT on PANEL` | home | `app.py:583-589`; the card's ground `app.py:4342` |
 | V41 | `↩ retomar` | `back to your last session` | `bold GROUND on ACCENT` | home | `app.py:714-721` |
 
 ### 3.5 · Colours with a job — derived from what the views paint
@@ -437,13 +451,15 @@ In English since the 2026-09-29 language ruling (first transcribed from `ui_next
 Every string below is what the legend paints; `tests/test_vocabulary_declaration.py` walks this list.
 
 - Panel title: `legend · atlas` — the second word is the **view name**, not a constant.
-- Top-right: `esc close` — the key's glyph is the seat's; the word is the own-scope group's `close`.
-- Section headers, in order: `what this view paints` · `colours with a job` · `keys in this view`
+- Top-right: nothing — the close hint is painted once, in the own-scope group (round 3).
+- Section headers, in order: `what this view paints` · `what the colours mean` · `keys in this view`
   (the vocabulary comes first in both layouts, verdict `E1`)
 - Own-scope group title: `in this legend` (verdict `E3`, which ratified `A5`)
-- Own-scope group words, by action: `close` (`esc`, `q`) · `line` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `ends` (`home`, `end`)
-- Footer, two lines: `each view has its own legend —` / `same key, this view's content`
+- Own-scope group words, by action: `close` (`esc`, `q`) · `scroll` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `ends` (`home`, `end`)
+- Footer, one line: `? always explains the view you are in`
 - Reserved chord line: `??` + `opens the full field guide`
+- Sample column (layout, not copy): 12 cells in the modal, so a sample up to 11 cells (`▐ ▸ inv +23`,
+  `◫ sin acta`) shares its label's row; 8 cells docked, so the longest label fits the docked row (round 3)
 
 ### 3.7 · ⚠ Two conflicts between the prototype legend and the shipped seat
 

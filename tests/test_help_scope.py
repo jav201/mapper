@@ -283,7 +283,7 @@ def _painted_help_keys(rows: list[str]) -> set[str]:
     """Which `SCOPE_HELP` keys the FRAME actually shows an item for.
 
     `INC8-CR-F1`, re-read for verdict `E3`'s two-line group
-    (`esc q close · ↑ ↓ line`): a row splits into ` · `-separated items, and
+    (`esc q close · ↑ ↓ scroll`): a row splits into ` · `-separated items, and
     an item is key glyphs followed by ONE word.  A key is painted when its
     glyph sits in an item whose word is the legend's word for its action
     (`OWN_SCOPE_COPY`) -- glyph alone would also hit `q` and `esc`'s OTHER
@@ -353,13 +353,12 @@ async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
             await pilot.press("question_mark")
             await pilot.pause()
             await pilot.pause()
-        # `_harvest` walks FORWARD from wherever the pane already sits; the
-        # loop above leaves it mid-scroll, which would skip the own-scope
-        # group painted at the very top.
-        pane = app.screen.query_one("#help-bindings")
-        pane.scroll_home(animate=False)
-        await pilot.pause()
-        rows = await _harvest(app, pilot, _rows_in)
+        # `INC8-P2-CR-F9`: read from the own-scope GROUP alone.  Until round
+        # 3 the title also painted `esc close`, so `esc` was proved by the
+        # title and a group that lost it stayed green.  The group sits
+        # outside the scrolling pane, so one read is all of it.
+        screen = app.screen
+        rows = _rows_in(screen, screen.query_one("#help-own-scope").region)
 
     painted = _painted_help_keys(rows)
     assert effective == painted, (
@@ -598,10 +597,32 @@ def test_inc8_sec_f3_a_wide_close_key_cannot_blow_the_row_budget(monkeypatch, do
     monkeypatch.setattr(keymap, "KEYMAP", patched)
     screen = HelpScreen(SCOPE_MAP, view="atlas")
     screen.docked = docked
-    for text in (screen._render_title(), screen._render_own_scope_keys()):  # noqa: SLF001
-        assert "XXXX" in text.plain, "the hostile glyph never reached this surface"
-        for line in text.plain.split("\n"):
-            assert Text(line).cell_len <= screen.row_cells, (Text(line).cell_len, line)
+    # Since round 3 the close hint is painted once, in the own-scope group:
+    # the title no longer carries the seat's glyph at all.
+    assert "XXXX" not in screen._render_title().plain  # noqa: SLF001
+    text = screen._render_own_scope_keys()  # noqa: SLF001
+    assert "XXXX" in text.plain, "the hostile glyph never reached this surface"
+    for line in text.plain.split("\n"):
+        assert Text(line).cell_len <= screen.row_cells, (Text(line).cell_len, line)
+
+
+@pytest.mark.parametrize("docked", [False, True], ids=["modal", "docked"])
+def test_inc8_p2_cr_f2_the_own_scope_group_is_its_title_and_two_lines(docked):
+    """`INC8-P2-CR-F2` / verdict `E3`: the group compresses to exactly its
+    title plus two lines, in both layouts -- no more, no fewer."""
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    screen.docked = docked
+    lines = screen._render_own_scope_keys().plain.split("\n")  # noqa: SLF001
+    assert len(lines) == 3, lines
+    assert lines[0] == help_screen.LEGEND_OWN_SCOPE_GROUP, lines[0]
+
+
+def test_inc8_p2_cr_f1_an_invisible_only_parent_is_not_painted_empty():
+    """`INC8-P2-CR-F1`: `INC8-F-SEC-F2`'s crumb arm proved the TAIL; an
+    ancestor is sized by the same rule and was untested.  A parent made only
+    of a zero-width code point keeps its one visible cell."""
+    line = darkside._crumb_line([chr(0x202E), "tail"], 80)  # noqa: SLF001
+    assert line.plain == chr(0xFFFD) + " / tail", ascii(line.plain)
 
 
 def test_inc8_f_sec_f2_an_invisible_only_part_is_not_painted_empty(monkeypatch):

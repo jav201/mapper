@@ -52,6 +52,7 @@ from mapper import darkside, keymap
 from mapper.app import HomeScreen, MapperApp, MapScreen
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from mapper.screens.help import (
+    ADJACENT_ROWS,
     DOCKED_CLASS,
     LEGEND_DOCK_MIN_VIEW_CELLS,
     LEGEND_DOCKED_CELLS,
@@ -130,7 +131,12 @@ def _hex(color) -> str | None:
 
 
 def _paints_as(style: Style | None, declared: str) -> bool:
-    """Same comparison the legend-side arm uses: fg, bold, and bg if declared."""
+    """The VIEW-side comparison: fg and bold as declared, and the ground only
+    when the member declares one -- a bare member is matched on any ground
+    here, and the D2 arm checks separately that its view paints it on
+    `GROUND` somewhere (`INC8-P2-UX-F6`).  NOT the legend-side arm's
+    comparison (`tests/test_help_scope.py::_paints_as`), which requires the
+    declared ground or, for a bare member, `GROUND` itself (verdict `E2`)."""
     want = Style.parse(darkside.resolve_style(declared))
     style = style or Style()
     if _hex(style.color) != _hex(want.color) or bool(style.bold) != bool(want.bold):
@@ -154,6 +160,31 @@ def harvest(screen) -> set[tuple[str, Style | None]]:
                         out.add((ch, seg.style))
                 x += cell_len(ch)
     return out
+
+
+def adjacent_pairs(screen) -> set[tuple[str, Style | None, str, Style | None]]:
+    """Verdict `Q7`: (letter, style, next glyph, style) for every LETTER the
+    view paints immediately before a meaningful glyph, outside X3/X5 -- the
+    form `V27`/`V28` name (a schema letter and its mark).  X1 keeps letters
+    out of `harvest`'s per-cell rule, so this is the targeted sight of the
+    letter's style; X1 itself is not widened."""
+    out: set[tuple[str, Style | None, str, Style | None]] = set()
+    for y, strip in enumerate(screen._compositor.render_strips()):  # noqa: SLF001
+        cells, x = [], 0
+        for seg in strip:
+            for ch in seg.text:
+                cells.append((x, ch, seg.style))
+                x += cell_len(ch)
+        for (x, a, sa), (_x, b, sb) in zip(cells, cells[1:]):
+            if unicodedata.category(a)[0] == "L" and meaningful(b):
+                widget, _ = screen.get_widget_at(x, y)
+                if not _excluded_widget(widget, y):
+                    out.add((a, sa, b, sb))
+    return out
+
+
+def _read_view(screen) -> tuple[set, set]:
+    return harvest(screen), adjacent_pairs(screen)
 
 
 # ---------------------------------------------------------------------------
@@ -289,20 +320,28 @@ async def drive_home(work, size, read):
 
 
 #: One harvest per (view, size) per session: the colour arm reads the frames
-#: the D2 arm already drove instead of driving them a second time.
+#: the D2 arm already drove instead of driving them a second time.  Run alone,
+#: each arm node drives its own (view, size) once -- one view's states, never
+#: the four (`INC8-P2-CR-F3`).
 _PAINTED: dict[tuple[str, tuple[int, int]], set] = {}
+_PAIRS: dict[tuple[str, tuple[int, int]], set] = {}
 
 
 async def painted_by(view: str, size, work) -> set:
     if (view, size) not in _PAINTED:
+        painted: set = set()
+        pairs: set = set()
         if view == HOME_VIEW:
-            painted = await drive_home(work / "home", size, harvest)
+            painted, pairs = await drive_home(work / "home", size, _read_view)
         else:
             assert view in MAP_STATES, f"{view!r} is declared but no state drives it"
-            painted = set()
             for factory, label, keys in MAP_STATES[view][1]:
-                painted |= await drive_map(work / label, view, size, factory, keys, harvest)
+                cells, adjacent = await drive_map(work / label, view, size, factory, keys,
+                                                  _read_view)
+                painted |= cells
+                pairs |= adjacent
         _PAINTED[(view, size)] = painted
+        _PAIRS[(view, size)] = pairs
     return _PAINTED[(view, size)]
 
 
@@ -320,13 +359,35 @@ def _paint(style) -> tuple:
     return (_hex(style.color), _hex(style.bgcolor), bool(style.bold))
 
 
-def _agreement(view: str, painted: set) -> tuple[list, list]:
+def _on_ground(style) -> bool:
+    bg = _hex((style or Style()).bgcolor)
+    return bg is None or bg == darkside.GROUND
+
+
+def _agreement(view: str, painted: set, pairs: set) -> tuple[list, list]:
     members = vocabulary_for(view)
     assert members, f"{view} explains nothing; this arm would pass vacuously"
     unpainted = [
         (vid, sample, style) for vid, sample, _label, style in members
         if not any(ch in glyph_set(vid, sample) and _paints_as(st, style) for ch, st in painted)
     ]
+    # `INC8-P2-UX-F6`: a member that declares no ground is sampled on
+    # `GROUND`, so its view must paint it on `GROUND` somewhere.  One painted
+    # only on a card or a pill declares that ground instead.
+    unpainted += [
+        (vid, sample, f"{style} (on GROUND)") for vid, sample, _label, style in members
+        if " on " not in f" {style} " and not any(
+            ch in glyph_set(vid, sample) and _paints_as(st, style) and _on_ground(st)
+            for ch, st in painted)
+    ]
+    # `Q7`: a row the legend paints as ADJACENT samples is painted by its view
+    # as that pair of cells, each in its member's style.
+    for vid in sorted(ADJACENT_ROWS & {m[0] for m in members}):
+        first, second = [m for m in members if m[0] == vid]
+        if not any(a == first[1] and _paints_as(sa, first[3])
+                   and b == second[1] and _paints_as(sb, second[3])
+                   for a, sa, b, sb in pairs):
+            unpainted.append((vid, first[1] + second[1], f"{first[3]} + {second[3]} (adjacent)"))
     undeclared = sorted({
         (ch, f"U+{ord(ch):04X}", *_paint(st)) for ch, st in painted
         if meaningful(ch) and not _explained(members, ch, st)
@@ -343,7 +404,7 @@ async def test_d2_the_legend_and_the_view_agree_in_both_directions(tmp_path, vie
     catalogue drives, at both of its sizes.  Parametrized on the declaration
     itself (`INC8-F-CR-F5`), so a view added there is driven here or fails."""
     painted = await painted_by(view, size, tmp_path)
-    unpainted, undeclared = _agreement(view, painted)
+    unpainted, undeclared = _agreement(view, painted, _PAIRS[(view, size)])
     assert not unpainted and not undeclared, (
         f"{view}: SOUNDNESS -- declared but not painted in its declared style: {unpainted}\n"
         f"{view}: COMPLETENESS -- painted (glyph, code point, fg, bg, bold) in no member "
@@ -735,35 +796,43 @@ async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_p
         assert pane.scrollable_content_region.width == want
 
 
-async def test_d4_a_resize_moves_the_open_legend_between_layouts(tmp_path):
-    """A resize across the threshold moves the open legend AND re-budgets what
-    it paints.  Read off the COMPOSITED FRAME: the title row is right-aligned
-    to the row budget, so the close hint's last cell sits exactly `row_cells`
-    in from the title widget's left edge -- and a legend that moved without
-    repainting leaves it at the OLD budget.  (Not the widget's `render()`:
-    `tests/test_a3_census.py` pins every zero-arg `.render()` site.)"""
-    app = MapperApp(tmp_path)
+#: Round 3, the copy verdict: "12-cell sample column in the modal"; the docked
+#: layout keeps design pass 2's eight.  The REQUIREMENT's numbers, held by
+#: the arm on purpose, as `VERDICT_E1_PANEL_CELLS` is (`INC8-D2-F5`).
+VERDICT_SAMPLE_CELLS = {"modal": 12, "docked": 8}
 
-    def footer_width(legend) -> int:
-        region = legend.query_one("#help-title").region
-        strip = legend._compositor.render_strips()[region.y]  # noqa: SLF001
-        row = "".join(seg.text for seg in strip)
-        hint = "esc close"
-        assert hint in row, row
-        return row.index(hint) + len(hint) - region.x
+
+async def test_d4_a_resize_moves_the_open_legend_between_layouts(tmp_path):
+    """A resize across the threshold moves the open legend AND repaints what
+    it paints for the new layout.  Read off the COMPOSITED FRAME: the first
+    vocabulary row's label starts after the indent and the layout's sample
+    column (12 modal, 8 docked), so a legend that moved without repainting
+    leaves the label at the OLD column.  (Until round 3 this read the title's
+    close hint, which the title no longer paints.  Not the widget's
+    `render()`: `tests/test_a3_census.py` pins every zero-arg `.render()`
+    site.)"""
+    app = MapperApp(tmp_path)
+    label = vocabulary_for(darkside.VIEW_NAMES["canvas"])[0][2]
+
+    def sample_column(legend) -> int:
+        region = legend.query_one("#help-vocabulary").region
+        rows = ["".join(seg.text for seg in strip)
+                for strip in legend._compositor.render_strips()]  # noqa: SLF001
+        row = next(r for r in rows[region.y:region.bottom] if label in r)
+        return row.index(label) - region.x - 2
 
     async with app.run_test(size=(140, 34)) as pilot:
         _view, legend = await _open_legend_over_map(app, pilot)
         assert legend.has_class(DOCKED_CLASS)
-        assert footer_width(legend) == LEGEND_DOCKED_ROW_CELLS
+        assert sample_column(legend) == VERDICT_SAMPLE_CELLS["docked"]
         await pilot.resize_terminal(DOCK_WIDTH_WITH_RAIL - 1, 34)
         await _settle(pilot)
         assert not legend.has_class(DOCKED_CLASS)
-        assert footer_width(legend) == LEGEND_ROW_CELLS
+        assert sample_column(legend) == VERDICT_SAMPLE_CELLS["modal"]
         await pilot.resize_terminal(DOCK_WIDTH_WITH_RAIL, 34)
         await _settle(pilot)
         assert legend.has_class(DOCKED_CLASS)
-        assert footer_width(legend) == LEGEND_DOCKED_ROW_CELLS
+        assert sample_column(legend) == VERDICT_SAMPLE_CELLS["docked"]
 
 
 async def test_cr_f6_the_harvest_advances_by_cell_width():
