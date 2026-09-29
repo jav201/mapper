@@ -165,4 +165,10 @@ earlier ledger** — they were found by re-executing the lenses' own conditions 
 |---|---|---|
 | P-21 | **A grep cannot tell a call from a MENTION of a call, and this cost four generations of one number.** The A3 `.render` census was wrong four times because *"blast radius"* names three different sets. Generation five was produced during the reconciliation itself: a grep returned 24 sites, the 24th being `renderer.render(...)` **inside a docstring** at `mapper/widgets/rail.py:180`. Settled by AST at **23 arg-ful sites / 10 files / 6 definitions**. **Rule: a census over source states its QUESTION, its INSTRUMENT and its measured-at SHA, and uses a language-aware parse — never a substring search** | `02g` §3 |
 
+### Design — operator ideas awaiting a prototype round (2026-09-28)
+
+| # | Item | Routing |
+|---|---|---|
+| B-69 | **Radial straight-line edge mode.** Operator, in the Inc-8 legend verdict (D3 note), verbatim: *"Estoy viendo que cuando hay demasiadas ramas el overlap dificulta la lectura, podemos agregar un modo de vista con líneas rectas, de modo que se vuelve más fácil seguir la pista a las ramas."* A view mode for radial («mapa mental») that draws edges as straight (or orthogonal) routes instead of the current braille curves, so dense branching stays traceable | **DEFERRED by the operator** (*"Agrégalo al backlog por ahora"*, 2026-09-28). Gate before any implementation: a prototype round with real renders — current curves vs straight vs orthogonal, on a dense many-branch fixture — and the operator's verdict (standing TUI-design rule) |
+| B-70 | **Render round 2026-09-19, item 2 — the unfocused selection tone (`UX-F7b`) still awaits the operator's verdict.** Item 1 (the damaged-card glyph) is CLOSED: `⊘` (U+2298), operator verdict 2026-09-28 (Inc-8 legend page, Q7) | Carry into the next decision page |
 
