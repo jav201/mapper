@@ -108,7 +108,12 @@ def _paints_as(style: Style, declared: str) -> bool:
 # ---------------------------------------------------------------------------
 # HLR-N16.2 -- the title names the view (TC-066)
 
-@pytest.mark.parametrize("view_keys,view", [((), "atlas"), (("o",), "outline"), (("r",), "radial")])
+#: One name per view, the one the legend title carries (Inc-8 verdict `D5`),
+#: and the key that switches a map to it.
+MAP_VIEW_KEYS = {"atlas": (), "esquema": ("o",), "mapa mental": ("r",)}
+
+
+@pytest.mark.parametrize("view_keys,view", [(k, v) for v, k in MAP_VIEW_KEYS.items()])
 async def test_hlr_n16_2_legend_names_the_map_view(tmp_path, view_keys, view):
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
@@ -142,7 +147,7 @@ async def test_llr_n16_2_1_every_member_is_painted_in_its_declared_style(tmp_pat
         if view == "sala":
             await _legend_from_home(app, pilot)
         else:
-            await _legend_from_map(app, pilot)
+            await _legend_from_map(app, pilot, *MAP_VIEW_KEYS[view])
         assert app.screen.view == view
         # `INC8-CR-F5`: scoped to `#help-vocabulary`, not the whole dialog --
         # see `_harvest`'s docstring for why the wider region is blind to a
@@ -163,20 +168,35 @@ async def test_llr_n16_2_1_every_member_is_painted_in_its_declared_style(tmp_pat
 # ---------------------------------------------------------------------------
 # LLR-N16.2.2 -- an empty vocabulary omits the section (TC-068)
 
-@pytest.mark.parametrize("view_keys,view", [((), "atlas"), (("o",), "outline")])
-async def test_llr_n16_2_2_empty_vocabulary_omits_the_section(tmp_path, view_keys, view):
-    """`outline` declares no vocabulary; `atlas` does and is the positive control."""
+@pytest.mark.parametrize("source", ["atlas", "componentes"])
+async def test_llr_n16_2_2_empty_vocabulary_omits_the_section(tmp_path, source):
+    """A screen with no canvas has no vocabulary: the components screen, opened
+    by its real `?`.  `atlas` declares one and is the positive control.
+
+    Until the Inc-8 design pass the empty case was `outline`; verdict `D3`
+    gave `esquema` a vocabulary of its own, so it no longer is one.
+    """
+    from mapper.screens.settings import SettingsScreen
+
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
-        await _legend_from_map(app, pilot, *view_keys)
-        assert app.screen.view == view
+        if source == "atlas":
+            await _legend_from_map(app, pilot)
+        else:
+            app.push_screen(SettingsScreen())
+            await pilot.pause()
+            await pilot.press("question_mark")
+            await pilot.pause()
+            await pilot.pause()
+            assert isinstance(app.screen, HelpScreen)
+        view, scope = app.screen.view, app.screen.scope
         rows = "\n".join(await _harvest(app, pilot, _rows_in))
 
     empty = not vocabulary_for(view)
-    assert empty == (view == "outline"), "the fixture views changed their vocabularies"
+    assert empty == (source != "atlas"), f"the fixture views changed their vocabularies: {view}"
     for header in (SECTION_VOCABULARY, SECTION_COLOURS):
         assert (header in rows) is not empty, f"{header!r} painted={header in rows} for {view}"
-    missing = [b.label for b in bindings_for(SCOPE_MAP) if b.label not in rows]
+    missing = [b.label for b in bindings_for(scope) if b.label not in rows]
     assert not missing, f"key rows lost with the section: {missing}"
 
 

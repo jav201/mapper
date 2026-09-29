@@ -2122,11 +2122,13 @@ class MapScreen(Screen):
     @property
     def legend_view(self) -> str:
         """HLR-N16.2: the name of the view `?` explains, read from the same
-        two booleans `_current_renderer` reads."""
+        two booleans `_current_renderer` reads.  One name per view, the one
+        the legend title carries (Inc-8 verdict `D5`); this screen's own
+        headers keep their words until Inc-9."""
         if self.outline_mode:
-            return "outline"
+            return "esquema"
         if self.radial_mode:
-            return "radial"
+            return "mapa mental"
         return "atlas"
 
     def _current_crumb(self) -> list[str]:

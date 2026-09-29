@@ -595,73 +595,101 @@ def fit(s: str, w: int) -> str:
 #: THE GLYPH IS THE LEGEND'S SAMPLE, DERIVED FROM `01b`'s GLYPH CELL BY A
 #: WRITTEN RULE (`INC7-CR-R2-F2`) -- stated once, in
 #: `tests/test_vocabulary_declaration.py::sample_by_style`, and applied to every
-#: row there.  An EMPTY glyph means the cell is PROSE and the rule cannot
-#: derive a sample from it (`V4b`, `V12`): an open question for the operator,
-#: never a guess.
+#: row there.  An EMPTY glyph would mean the cell is PROSE and the rule cannot
+#: derive a sample from it: an open question for the operator, never a guess.
+#: Since the Inc-8 design pass no declared row is prose.
 #:
 #: `tests/test_vocabulary_declaration.py` asserts SET EQUALITY between this
 #: tuple and the members it derives from `01b` (`INC7-CR-R2-F3`): dropping a
 #: row, renaming its id, or drifting its glyph, label or style reddens.
 #:
-#: Compound rows contribute ONE MEMBER PER DISTINCT TRIPLE (`A-103`); rows that
-#: name the same painted FORM collapse onto the first id that names it (`V4a`
-#: into `V4`, `01b` Amendment 2(b)); a `DEFERRED(#D7)` row contributes nothing
-#: (`V18`, Amendment 2(a)).
+#: Compound rows contribute ONE MEMBER PER DISTINCT TRIPLE (`A-103`); a
+#: `DEFERRED(#D7)` row contributes nothing (`V18`, and the lens rows `V11`-`V16`).
+#:
+#: THE ROWS ARE WHAT THE PRODUCT PAINTS (Inc-8 design pass, verdict `D2`).
+#: `01b` DECISION 3 was rewritten from a catalogue of real renders, and
+#: `tests/test_help_scope.py` renders each view and checks both directions:
+#: every member here is painted by its view in its declared style, and every
+#: meaningful glyph a view paints belongs to some member of that view.
 
 #: `01b` row `V22`'s glyph, as its own constant so the pending `⊘`/`⦸` verdict
 #: is a one-line swap (Amendment 1).
 DAMAGED_MAP_GLYPH = "\u2298"
 
 DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
-    ('V1', " rrhh ", 'rama abierta', 'INK on PANEL'),
-    ('V2', " nómina ", 'coincidencia de búsqueda', 'bold GROUND on WARN'),
-    ('V3', "▸ inv +23", 'rama plegada (23 dentro)', 'MUT on PANEL'),
-    ('V4', "∙ ∙ ∙", 'territorio sin explorar', 'WORDMARK'),
-    ('V5', "▔▔▔▔", 'nodo seleccionado', 'ACCENT'),
-    ('V6', "┌─┐", 'minimapa: tu ventana en el todo', 'ACCENT'),
-    ('V4b', "", 'enlace entre nodos', 'MUT'),
-    ('V4b', "", 'enlace entre nodos', 'ACCENT'),
-    ('V7', "plegadas: inventarios · ventas — 41 nodos", 'overflow declaration; the `N` **shall** reconcile with the sum of the `+N` in every painted pill', 'WORDMARK'),
-    ('V8', "minimapa · 128 nodos", 'minimap caption; `N` = total nodes in the graph', 'WORDMARK'),
-    ('V9', "┌──┐ │ │ └──┘", 'viewport — the part of the territory now on screen', 'ACCENT on PANEL'),
-    ('V10', "▓ ▒ ░", 'territory density', 'WORDMARK on PANEL'),
-    ('V11', "▐", 'coincide con la lente', 'WARN on PANEL'),
-    ('V12', "", 'fuera de la lente', 'WORDMARK'),
-    ('V13', "╎", 'enlace atenuado', 'STEP'),
-    ('V14', "ficha completa ✓", 'sin campos pendientes', 'SAGE on PANEL'),
-    ('V15', "faltan campos ░", 'ficha incompleta', 'MUT on PANEL'),
-    ('V16', "∗", 'lente de campos', 'ACCENT'),
-    ('V17', "⇄ enlazado", 'enlaza mapas', 'VIOLET on PANEL'),
-    ('V19', "█", 'coverage microbar', 'SAGE'),
-    ('V19', "█", 'coverage microbar', 'INK'),
-    ('V19', "░", 'coverage microbar', 'WORDMARK'),
-    ('V20', "▲ vence", 'actas vencidas', 'WARN on PANEL'),
-    ('V21', "∙", 'lit `= nodo con acta`, unlit `= sin acta`', 'MUT on PANEL'),
-    ('V21', "∙", 'lit `= nodo con acta`, unlit `= sin acta`', 'WORDMARK on PANEL'),
+    ('V1', "▐", 'nodo del mapa', 'STEP'),
+    ('V2', "▐ nómina", 'coincidencia de búsqueda', 'INK on STEP'),
+    ('V23', "▐ erp", 'nodo seleccionado', 'bold GROUND on ACCENT'),
+    ('V24', "▐ erp", 'seleccionado, con el foco en otra región', 'INK on PANEL'),
+    ('V3', "▐", 'rama plegada (23 dentro)', 'WARN'),
+    ('V3', "▸ inv +23", 'rama plegada (23 dentro)', 'MUT'),
+    ('V25', "◫ ACTA-7", 'acta del nodo', 'INK'),
+    ('V26', "◫ sin acta", 'nodo sin acta', 'ALERT'),
+    ('V27', "✓", 'campo del esquema lleno', 'INK'),
+    ('V28', "░", 'campo del esquema pendiente', 'STEP'),
+    ('V29', "┬─┐", 'enlace entre nodos', 'INK'),
+    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'INK'),
+    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'ASH'),
+    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'MUT'),
+    ('V4b', "⣉⡉⠉", 'enlace entre nodos (en azul, camino al seleccionado)', 'ACCENT'),
+    ('V42', "●", 'nodo (gris de su rama)', 'INK'),
+    ('V42', "●", 'nodo (gris de su rama)', 'ASH'),
+    ('V42', "●", 'nodo (gris de su rama)', 'MUT'),
+    ('V43', "●", 'nodo en el camino al seleccionado', 'ACCENT'),
+    ('V44', "◆", 'raíz del mapa', 'ACCENT'),
+    ('V30', "◆", 'encabezado de la vista', 'INK'),
+    ('V31', "▽ 35 fuera de vista", 'nodos fuera de vista', 'INK'),
+    ('V33', "▾", 'rama abierta', 'MUT'),
+    ('V34', "▸", 'rama plegada', 'MUT'),
+    ('V35', "3", 'campos pendientes bajo la rama', 'WARN'),
+    ('V21a', "∙", 'nodo con la ficha completa', 'MUT'),
+    ('V21b', "·", 'nodo con campos pendientes', 'WORDMARK'),
+    ('V36', "█", 'rama con todas sus actas', 'INK'),
+    ('V37', "▒", 'rama con la mitad o más de sus actas', 'MUT'),
+    ('V38', "░", 'rama con menos de la mitad de sus actas', 'WARN'),
+    ('V39', "╱", 'rama sin datos', 'WORDMARK'),
+    ('V32', "▰", 'medidor de avance', 'INK'),
+    ('V32', "▱", 'medidor de avance', 'STEP'),
+    ('V19', "█", 'nodos con y sin acta, en 10 celdas', 'INK'),
+    ('V19', "█", 'nodos con y sin acta, en 10 celdas', 'WARN'),
+    ('V19', "░", 'nodos con y sin acta, en 10 celdas', 'WORDMARK'),
+    ('V20', "▲ 2 vencen hoy", 'actas que vencen hoy', 'WARN on PANEL'),
     ('V22', DAMAGED_MAP_GLYPH, 'mapa dañado — no se pudo leer', 'INK on PANEL'),
+    ('V40', "▁▂▃", 'actividad de los últimos 14 días', 'WORDMARK'),
+    ('V40', "▅▇█", 'actividad de los últimos 14 días', 'MUT'),
+    ('V41', "↩ retomar", 'volver a la última sesión', 'bold GROUND on ACCENT'),
 )
 
 #: `01b` Amendment 2(b): a glyph may be a SET of codepoints.  A member listed
-#: here also owns every codepoint in each inclusive range -- `V4`'s scattered
-#: braille, written in `V4a`'s cell as `U+2800`-`U+28FF`.  DECLARED, CHECKED
-#: AGAINST 01B: this dict is written by hand, and
-#: `tests/test_vocabulary_declaration.py::test_amendment_2b_V4a_collapses_into_V4_carrying_its_braille_range`
+#: here also owns every codepoint in each inclusive range, read from the
+#: `U+XXXX`-`U+YYYY` pair in its `01b` glyph cell: the atlas's box-drawing wires
+#: (`V29`), radial's braille edges (`V4b`, verdict `Q1`/`Q2`) and the sala's
+#: activity bars (`V40`).  `V4` no longer exists and its braille entry is gone.
+#: DECLARED, CHECKED AGAINST 01B: this dict is written by hand, and
+#: `tests/test_vocabulary_declaration.py::test_every_declared_range_EQUALS_the_document`
 #: pins it equal to what the document derives -- it is not itself computed
 #: from `01b` at import time.
 DECLARED_GLYPH_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
-    "V4": ((0x2800, 0x28FF),),
+    "V29": ((0x2500, 0x257F),),
+    "V4b": ((0x2800, 0x28FF),),
+    "V40": ((0x2581, 0x2588),),
 }
 
 #: `HLR-N16.2` -- which members each view's legend paints, by row id.
-#: DECLARED, CHECKED AGAINST 01B: written by hand from the `01b` SECTION a row
-#: sits in (`3.1`/`3.2` the atlas canvas, `3.4` the sala), and
-#: `tests/test_vocabulary_declaration.py::test_hlr_n16_2_each_view_paints_the_rows_of_its_own_01b_sections`
-#: pins it equal to what the document derives.  `3.3` (lens) belongs to no
-#: view: US-N14 is deferred whole (`#D23`).  A view absent here has an empty
-#: vocabulary (`LLR-N16.2.2`).
+#: DECLARED, CHECKED AGAINST 01B: written by hand from the `01b` row's
+#: **Views** column, and
+#: `tests/test_vocabulary_declaration.py::test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names`
+#: pins it equal to what the document derives.  The keys are the one name per
+#: view the legend title carries (verdict `D5`).  A view absent here has an
+#: empty vocabulary (`LLR-N16.2.2`).
+_MAP_CHROME = ("V30", "V31", "V33", "V34", "V35", "V21a", "V21b",
+               "V36", "V37", "V38", "V39", "V32")
 LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
-    "atlas": ("V1", "V2", "V3", "V4", "V5", "V6", "V4b", "V7", "V8", "V9", "V10"),
-    "sala": ("V17", "V19", "V20", "V21", "V22"),
+    "atlas": ("V1", "V2", "V23", "V24", "V3", "V25", "V26", "V27", "V28", "V29",
+              *_MAP_CHROME),
+    "esquema": _MAP_CHROME,
+    "mapa mental": ("V4b", "V42", "V43", "V44", *_MAP_CHROME),
+    "sala": ("V19", "V20", "V22", "V40", "V41"),
 }
 
 #: `LLR-N16.2.1`'s SECOND derived set: `01b` §3.5's colours with a job, as
