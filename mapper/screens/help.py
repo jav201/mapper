@@ -21,7 +21,10 @@ from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, textual_bindings
 # `LLR-N16.2.3`'s row-length clause: every painted row of the scrolling body is
 # exactly this many cells -- `#help-dialog`'s width 80, less its 2+2 padding and
 # the 1-cell scrollbar.  A row wider than the pane would wrap, and the wrapped
-# half would read as a row of its own.
+# half would read as a row of its own.  `INC8-CR-F2`:
+# `test_llr_n16_2_3_legend_coerces_and_bounds_every_string` in
+# `tests/test_help_scope.py` pins this against the real widget's
+# `scrollable_content_region`, so a CSS width edit that stops matching reddens.
 LEGEND_ROW_CELLS = 75
 _KEY_CELLS = 10
 _SAMPLE_CELLS = 12
@@ -62,8 +65,9 @@ SECTION_COLOURS = "colores con empleo"
 FOOTER_LINES = ("cada vista tiene SU leyenda — ", "misma tecla, contenido de la vista")
 
 
-def _cells(s: str) -> int:
-    return Text(s).cell_len
+# `INC8-CR-F9`: this module had its own copy of `darkside._cells`. One
+# implementation, read from its one owner.
+_cells = darkside._cells
 
 
 def _trimmed(text: Text) -> Text:
@@ -116,6 +120,14 @@ class HelpScreen(ModalScreen[None]):
         height: 1fr;
         overflow-y: auto;
         scrollbar-size-vertical: 1;
+        /* `INC8-UX-F11`: Textual's own default (unstyled) thumb measured
+           1.55:1 against this pane's track -- under WCAG 1.4.11's 3:1 floor
+           for a non-text UI component.  `ASH` on `PANEL` measures 7.43:1
+           (`test_inc8_ux_f11_...` derives the ratio from the token hexes).
+           Not `ACCENT`: `LLR-S06.3.3` seals the blue LITERAL at exactly 8
+           sites (`B-43`), and this pane is not one of them. */
+        scrollbar-color: #a3a3a3;
+        scrollbar-background: #121212;
     }
     #help-title {
         margin-bottom: 1;
@@ -158,15 +170,24 @@ class HelpScreen(ModalScreen[None]):
     # pairs parses none, which is why the title is a `Text` and not a `str`.
 
     def _render_title(self) -> Text:
+        # `INC8-SEC-F3`.  `close.label` is a seat value: normally six letters,
+        # but nothing upstream bounds it, and an unbounded hint here painted a
+        # 95-cell row from a 75-cell budget.  Every width below is CLAMPED so
+        # `title + gap + glyph + " " + label` can never exceed `LEGEND_ROW_CELLS`,
+        # however wide the seat's label gets.
         close = next(b for b in bindings_for(SCOPE_HELP) if b.action == "dismiss_none")
         hint = f"{close.glyph} {close.label}"
-        title = darkside.fit(f"leyenda · {self.view}", LEGEND_ROW_CELLS - _cells(hint)).rstrip()
-        gap = LEGEND_ROW_CELLS - _cells(title) - _cells(hint)
+        hint_cells = min(_cells(hint), LEGEND_ROW_CELLS)
+        glyph_cells = min(_cells(close.glyph), hint_cells)
+        label_cells = max(0, hint_cells - glyph_cells - 1)
+        title_cells = max(0, LEGEND_ROW_CELLS - hint_cells)
+        title = darkside.fit(f"leyenda · {self.view}", title_cells).rstrip()
+        gap = max(0, LEGEND_ROW_CELLS - _cells(title) - hint_cells)
         return Text.assemble(
             (title, f"bold {darkside.INK}"),
             (" " * gap, ""),
-            (darkside.fit(close.glyph, _cells(close.glyph)), darkside.ACCENT),
-            (" " + darkside.fit(close.label, _cells(close.label)), darkside.ASH),
+            (darkside.fit(close.glyph, glyph_cells), darkside.ACCENT),
+            (" " + darkside.fit(close.label, label_cells), darkside.ASH),
         )
 
     def _append_key_group(
@@ -212,25 +233,49 @@ class HelpScreen(ModalScreen[None]):
         return _trimmed(Text.assemble(*parts))
 
     def _render_vocabulary(self, members: list[tuple[str, str, str, str]]) -> Text:
-        """LLR-N16.2.1 / HLR-N16.2: each sample painted in its declared style."""
+        """LLR-N16.2.1 / HLR-N16.2: each sample painted in its declared style.
+
+        `INC8-CR-F7`: grouped by a dict keyed on row id, not `itertools.groupby`.
+        `groupby` only merges RUNS of equal keys, so it silently SPLIT a row's
+        members the moment a different id sat between them in declaration
+        order -- true today only because `DECLARED_VOCABULARY` happens to keep
+        every row's members adjacent, a fact this function has no business
+        depending on.  A dict keyed by row id groups by IDENTITY regardless of
+        position, and still preserves first-seen order (`dict` since 3.7).
+        """
         text = Text.assemble((f"\n{SECTION_VOCABULARY}\n\n", f"bold {darkside.ASH}"))
-        rows = groupby(members, key=lambda m: m[0])
-        for _row_id, group in rows:
-            group = list(group)
+        rows: dict[str, list[tuple[str, str, str, str]]] = {}
+        for member in members:
+            rows.setdefault(member[0], []).append(member)
+        for group in rows.values():
             lines = [group] if COMPOUND_ON_ONE_LINE else [[m] for m in group]
             for line in lines:
                 self._vocabulary_line(text, line)
         return _trimmed(text)
 
     def _vocabulary_line(self, text: Text, members: list[tuple[str, str, str, str]]) -> None:
+        # `INC8-CR-F7`: each sample is fit into the ROOM LEFT after the ones
+        # before it, not just clamped against the row's total budget in
+        # isolation.  Clamping each sample alone bounded no ROW: several
+        # samples each individually under budget could still SUM past it, and
+        # the pad below went negative (`" " * negative` is silently `""`,
+        # never an error) while the row it padded stayed over width.
+        budget = LEGEND_ROW_CELLS - len(_INDENT)
         samples: list[tuple[str, str]] = []
+        width = 0
         for _row_id, glyph, _label, style in members:
-            if glyph:
-                if samples:
-                    samples.append((" ", ""))
-                shown = darkside.fit(glyph, min(_cells(glyph), LEGEND_ROW_CELLS - len(_INDENT)))
-                samples.append((shown, darkside.resolve_style(style)))
-        width = sum(_cells(s) for s, _ in samples)
+            if not glyph:
+                continue
+            sep = 1 if samples else 0
+            room = budget - width - sep
+            if room <= 0:
+                break
+            shown = darkside.fit(glyph, min(_cells(glyph), room))
+            if samples:
+                samples.append((" ", ""))
+                width += 1
+            samples.append((shown, darkside.resolve_style(style)))
+            width += _cells(shown)
         label = members[0][2]
         label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _SAMPLE_CELLS
         text.append(_INDENT)
@@ -239,7 +284,7 @@ class HelpScreen(ModalScreen[None]):
         if width >= _SAMPLE_CELLS:
             # A sample wider than its column keeps its own line rather than
             # being cut: a truncated glyph misdescribes the form it stands for.
-            text.append(" " * (LEGEND_ROW_CELLS - len(_INDENT) - width) + "\n")
+            text.append(" " * max(0, LEGEND_ROW_CELLS - len(_INDENT) - width) + "\n")
             text.append(_INDENT + " " * _SAMPLE_CELLS)
         else:
             text.append(" " * (_SAMPLE_CELLS - width))

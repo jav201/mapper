@@ -535,9 +535,37 @@ def plain(value: object) -> str:
     return value.translate(_CONTROL_MAP)
 
 
+# `INC8-SEC-F1`.  `plain()` deliberately PRESERVES tab and newline
+# (`PRESERVED_CODE_POINTS`) for a caller that wants a real multi-line field --
+# `widgets/inspector.py` hands a notes field through `plain` into a widget that
+# is allowed to wrap onto several rows. `fit` has no such caller: every result
+# becomes exactly ONE row of a fixed-width panel, so a label carrying a literal
+# LF painted a REAL line break once the padded string reached a `Text` sink,
+# fabricating a row the row-length budget never accounted for; a literal TAB
+# reaches a real terminal as its OWN cursor motion, past whatever padding was
+# computed here. Each becomes a single space, keeping the cell count `plain`
+# already measured. `\r` is listed for the same reason though `plain` already
+# coerces it (it sits in `COERCION_RANGES`): a row-bounding function should not
+# depend on that staying true elsewhere to keep its own single-row promise.
+_ROW_BREAKERS = {0x0009: " ", 0x000A: " ", 0x000D: " "}
+
+
 def fit(s: str, w: int) -> str:
-    """Pad or truncate *s* to exactly *w* display cells."""
-    s = plain(s)
+    """Pad or truncate *s* to exactly *w* display cells, as ONE row.
+
+    `INC8-C1-F1`.  `w <= 0` is handled BEFORE reaching `Text.truncate`: Rich's
+    own `set_cell_size`, for a single-cell-width string, truncates via a plain
+    Python slice (`text[:max_width]`) rather than special-casing a
+    non-positive width -- so `truncate(0, overflow="ellipsis")` sliced with
+    `[: -1]`, dropping the LAST character and keeping every other one, then
+    appended the ellipsis on top. Measured: `fit("leyenda · atlas", 0)`
+    returned a **15-cell** string, not an empty one, discovered while clamping
+    `screens/help.py::_render_title` against an oversized seat label
+    (`INC8-SEC-F3`). A budget of zero or fewer cells can only ever mean "".
+    """
+    if w <= 0:
+        return ""
+    s = plain(s).translate(_ROW_BREAKERS)
     text = Text(s)
     if text.cell_len > w:
         text.truncate(w, overflow="ellipsis")
@@ -615,16 +643,22 @@ DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
 
 #: `01b` Amendment 2(b): a glyph may be a SET of codepoints.  A member listed
 #: here also owns every codepoint in each inclusive range -- `V4`'s scattered
-#: braille, written in `V4a`'s cell as `U+2800`-`U+28FF`.  Derived and checked
-#: with the tuple above.
+#: braille, written in `V4a`'s cell as `U+2800`-`U+28FF`.  DECLARED, CHECKED
+#: AGAINST 01B: this dict is written by hand, and
+#: `tests/test_vocabulary_declaration.py::test_amendment_2b_V4a_collapses_into_V4_carrying_its_braille_range`
+#: pins it equal to what the document derives -- it is not itself computed
+#: from `01b` at import time.
 DECLARED_GLYPH_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
     "V4": ((0x2800, 0x28FF),),
 }
 
-#: `HLR-N16.2` -- which members each view's legend paints, by row id.  Derived
-#: from the `01b` SECTION a row sits in (`3.1`/`3.2` the atlas canvas, `3.4` the
-#: sala).  `3.3` (lens) belongs to no view: US-N14 is deferred whole (`#D23`).
-#: A view absent here has an empty vocabulary (`LLR-N16.2.2`).
+#: `HLR-N16.2` -- which members each view's legend paints, by row id.
+#: DECLARED, CHECKED AGAINST 01B: written by hand from the `01b` SECTION a row
+#: sits in (`3.1`/`3.2` the atlas canvas, `3.4` the sala), and
+#: `tests/test_vocabulary_declaration.py::test_hlr_n16_2_each_view_paints_the_rows_of_its_own_01b_sections`
+#: pins it equal to what the document derives.  `3.3` (lens) belongs to no
+#: view: US-N14 is deferred whole (`#D23`).  A view absent here has an empty
+#: vocabulary (`LLR-N16.2.2`).
 LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
     "atlas": ("V1", "V2", "V3", "V4", "V5", "V6", "V4b", "V7", "V8", "V9", "V10"),
     "sala": ("V17", "V19", "V20", "V21", "V22"),
@@ -641,14 +675,48 @@ DECLARED_COLOURS: tuple[tuple[str, str, str], ...] = (
 )
 
 
-def resolve_style(declared: str) -> str:
-    """A declared style (`"bold GROUND on WARN"`) as paint (`"bold #000000 on #ffd230"`).
+def _declared_modifiers() -> frozenset[str]:
+    """The non-token words `01b`'s own style cells actually use (`bold`, `on`).
 
-    Only whole words that name a token are replaced, so `bold` and `on` pass
-    through and an unknown word stays visible rather than vanishing.
+    Derived from `DECLARED_VOCABULARY` and `DECLARED_COLOURS` -- the two
+    corpora `resolve_style` exists to paint -- rather than hand-listed, so a
+    modifier this batch never declares cannot quietly become allow-listed.
     """
     names = tokens()
-    return " ".join(names.get(word, word) for word in declared.split())
+    words: set[str] = set()
+    for _vid, _glyph, _label, style in DECLARED_VOCABULARY:
+        words.update(w for w in style.split() if w not in names)
+    for _swatch, _label, token in DECLARED_COLOURS:
+        words.update(w for w in token.split() if w not in names)
+    return frozenset(words)
+
+
+def resolve_style(declared: str) -> str:
+    """`LLR-N16.2.1`: a declared style (`"bold GROUND on WARN"`) as paint
+    (`"bold #000000 on #ffd230"`).
+
+    Only whole words that name a darkside token, or a modifier `01b` actually
+    declares (`bold`, `on`), pass through. Everything else RAISES.
+
+    `declared` becomes part of a Rich *style* string, not painted text -- so an
+    unknown word was never "visible" the way the previous docstring claimed.
+    Handed unexamined to `Style.parse` at the paint sink, `link file:///x`
+    painted a live OSC-8 hyperlink and `[bold]` raised inside the render call
+    instead of at this boundary. Raising HERE, at the one seam every declared
+    style must cross, turns both into a defect this function catches rather
+    than one the paint sink discovers.
+    """
+    names = tokens()
+    modifiers = _declared_modifiers()
+    out = []
+    for word in declared.split():
+        if word in names:
+            out.append(names[word])
+        elif word in modifiers:
+            out.append(word)
+        else:
+            raise ValueError(f"resolve_style: undeclared style word {word!r} in {declared!r}")
+    return " ".join(out)
 
 #: `LLR-N13.1.5`'s DECLARED CARD STATE -- the Spanish string that ships.
 #: The `\u21b5` is load-bearing: `#D28` escalates this seat from `MUT` to `INK`
