@@ -9684,21 +9684,56 @@ license touching, the `14 x N_maps` glob-and-stat loop above it (`app.py:565-574
 this defect, and restructuring it here would be undeclared scope.
 
 **Validation.** `test (unit)` — `tests/test_sparkline_floor.py`, driving
-`HomeScreen._sparkline_text` directly against a workspace whose `.mmd` mtimes are set explicitly with
-`os.utime` relative to `date.today()` at test time (not to a fixed calendar date), plus the
-pre-existing `tests/test_agree_floor.py` (whose 8 arms mount `HomeScreen` incidentally and share this
-crash as a symptom).
+`HomeScreen._sparkline_text` directly against a workspace whose `.mmd` mtimes are set explicitly (to
+local noon of a chosen day, via `os.utime`) relative to `date.today()` at test time, not to a fixed
+calendar date. Three arms: `test_a105_a_zero_activity_workspace_paints_every_bar_at_the_floor` (the
+escaped-bug regression), `test_a105_activity_today_lights_exactly_the_last_bar` (the no-flattening
+control), and `test_a105_two_days_of_activity_scale_relative_to_each_other` (`INC21-CR-F1`; activity
+on two distinct days, proving `max_count` is the true maximum rather than a sum or a binary tier —
+see `increment-021`'s "review round" section for its mutant proof). Plus the pre-existing
+`tests/test_agree_floor.py` (whose 8 arms mount `HomeScreen` incidentally and share this crash as a
+symptom).
+
+**`INC21-CR-F5` — the limit of what `test_agree_floor.py` proves, stated so it is not overclaimed.**
+`tests/test_agree_floor.py` exercises the zero-activity path only INCIDENTALLY: it mounts
+`HomeScreen` as a side effect of pushing `MapScreen`, and it happened to hit `max_count == 0` only
+because its checked-in fixtures were stale enough (17 days, when this was measured) to fall outside
+the 14-day window. On a fresh checkout — every fixture's mtime at or near today — none of its 8 arms
+reach `max_count == 0` at all, and it exercises nothing about this defect. The screen-level "shall not
+raise" clause therefore rests on `test_a105_a_zero_activity_workspace_paints_every_bar_at_the_floor`,
+which builds its own zero-activity fixture on purpose and calls `_sparkline_text` directly, not on
+`test_agree_floor.py`.
 
 **Numeric pass threshold.** `0` exceptions raised, and `14`/`14` bars at the floor glyph, on a
 zero-activity workspace; exactly `1`/`14` bar at the maximum-tier glyph, and the remaining `13`/`14`
-at the floor glyph, on a workspace with one map modified today.
+at the floor glyph, on a workspace with one map modified today. **`INC21-CR-F1`, added on review:** on
+a workspace with two maps modified 3 days ago and one map modified today, `bars[-4]` is the
+maximum-tier glyph (index `9` of `"▁▂▂▃▃▄▅▆▇█"`, `"█"`), `bars[-1]` is index `4` of that same string
+(`"▃"`), and the remaining `12`/`14` bars are at the floor glyph — this is the threshold that
+distinguishes the true maximum from a sum or from a binary tier, which the single-day thresholds
+above cannot.
 
 **Date-independence, stated so nobody re-derives it by hand later.** The product behaviour this
 amendment defines is independent of the date the suite runs on: `tests/test_sparkline_floor.py`'s
-fixtures set `.mmd` mtimes relative to `date.today()` at test time via `os.utime`, not to a pinned
-calendar date, so the arm reproduces the same verdict on any date. This is deliberately narrower than
-`tests/test_agree_floor.py`'s own pre-existing hermeticity defect — its fixtures are checked-in
-`.mmd` files with fixed mtimes, so **that suite's result depends on the date it runs on**, which is
-what let `INC7-CR-R3-F3` escape undetected until those fixtures' mtimes happened to drift past 14
-days. That is a defect in `test_agree_floor.py`'s own setup, separate from the product crash this
-amendment fixes, and this amendment's new arm is not permitted to share it.
+fixtures set each `.mmd`'s mtime to LOCAL NOON of a day computed from `date.today()` at test time
+(`datetime.combine(day, time(12))`), not to a pinned calendar date — noon rather than an offset off
+`time.time()` so the stamp cannot land on the wrong side of midnight near a DST transition. So the arm
+reproduces the same verdict on any date. This is deliberately narrower than `tests/test_agree_floor.py`'s
+own pre-existing hermeticity defect — its fixtures are checked-in `.mmd` files with fixed mtimes, so
+**that suite's result depends on the date it runs on**, which is what let `INC7-CR-R3-F3` escape
+undetected until those fixtures' mtimes happened to drift past 14 days. That is a defect in
+`test_agree_floor.py`'s own setup, separate from the product crash this amendment fixes, and this
+amendment's new arms are not permitted to share it.
+
+**`INC21-CR-F3` — the residual race, and the choice made about it.** Any arm that uses TODAY as an
+activity day still calls `date.today()` twice: once when the fixture is built, once inside
+`_sparkline_text` when it runs. If the calendar date changes between those two calls (the test
+straddles local midnight), the expected bars would be computed for the wrong day. Rather than state
+that window as an accepted bound, `tests/test_sparkline_floor.py` REMOVES it: every such arm
+re-checks `date.today()` immediately after computing the bars and skips if it has moved. No arm in
+this suite accepts an unbounded or merely-documented race.
+
+**`INC21-CR-F4` — style tiers are unpinned; carried, not fixed here.** `_sparkline_text`'s
+`style = darkside.WORDMARK if idx < 4 else darkside.MUT` split (`app.py:586`) has no requirement or
+arm pinning which tier a bar's *style* (as opposed to its *glyph*) falls into. Out of this amendment's
+scope — carried to `qa-reviewer` for the follow-on batch, not fixed by this pass.

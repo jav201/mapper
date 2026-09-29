@@ -233,5 +233,78 @@ Four files, within the 5-file cap this micro-increment declared
 
 ## Independent review
 
-Not performed by this implementer. Per the operator's instruction, an
-independent review follows this record.
+**PASS, no HIGH findings.** The reviewer reproduced RED on base and GREEN on
+fix independently, and the two killing mutants they ran (guard removed;
+division-by-`max_count` forced back unguarded) matched this increment's own
+mutant table. Six non-blocking findings (`INC21-CR-F1` through
+`INC21-CR-F6`) were folded in before `Inc-8` rather than deferred, because
+`F1` leaves an `A-105` clause ("shall not flatten real activity") without an
+arm that actually tests it -- an overclaim under this batch's rules, not a
+nit.
+
+## Review round (`INC21-CR-F1` through `F6`)
+
+| Finding | Severity | Disposition |
+|---|---|---|
+| `INC21-CR-F1` | MEDIUM | **FIXED.** New arm `test_a105_two_days_of_activity_scale_relative_to_each_other` (two maps 3 days ago, one today); see below for the by-hand derivation and the `M6`/`M7` mutant kills. |
+| `INC21-CR-F2` | LOW | **FIXED.** The `app.py` guard comment now reads `A-105` / `INC7-CR-R3-F3`. `A-105`'s Validation line now names all three arm functions by name, not just the file. |
+| `INC21-CR-F3` | LOW | **FIXED -- race removed, not bounded.** Chose the second option offered: `_touch` now sets local noon of an explicit `date`, and every TODAY-dependent arm re-reads `date.today()` immediately after computing its bars and `pytest.skip`s if it moved. `A-105` states this choice explicitly (its own `INC21-CR-F3` paragraph). |
+| `INC21-CR-F4` | LOW | **CARRIED to `qa-reviewer`, not fixed.** `A-105` now names the gap explicitly (style-tier pinning, `app.py:586`) as its own `INC21-CR-F4` paragraph, out of this amendment's scope. |
+| `INC21-CR-F5` | LOW | **FIXED (documentation).** `A-105` states, as its own `INC21-CR-F5` paragraph, that `test_agree_floor.py` exercises the zero-activity path only incidentally (stale checked-in fixtures) and that the screen-level "shall not raise" clause rests on the first `test_sparkline_floor.py` arm, not on `test_agree_floor.py`. |
+| `INC21-CR-F6` | LOW | **FIXED, folded into `F3`'s fix.** `_touch` no longer uses `time.time() - N * 86400`; it takes a `date` and computes `datetime.combine(day, time(12))`. The prose ("mtimes relative to `date.today()`") and the code now agree because the code literally consumes `date` objects built from `date.today()`, not because the prose was reworded to match a `time.time()` implementation. |
+
+### `INC21-CR-F1`'s new arm, derived by hand
+
+`test_a105_two_days_of_activity_scale_relative_to_each_other`: two maps
+modified 3 days ago (count 2 that day), one map modified today (count 1).
+Correct `max_count = max(counts) = 2`. Against `bars = "▁▂▂▃▃▄▅▆▇█"`
+(`app.py:581`) and `idx = min(9, int(c / max_count * 9))` (`app.py:584`):
+
+- today: `c=1, max_count=2` -> `idx = int(1/2*9) = int(4.5) = 4` -> `bars[4] = "▃"`
+- 3 days ago: `c=2, max_count=2` -> `idx = int(2/2*9) = int(9.0) = 9` -> `bars[9] = "█"`
+- every other day: `c=0` -> `idx=0` -> `bars[0] = "▁"`
+
+In the 14-character output, today is the last character (index `-1`) and 3
+days ago is 3 positions earlier (index `-4`) -- exactly the `bars[-4] ==
+"█"`, `bars[-1] == "▃"` the coordinator specified; derived independently here
+against the real formula before running anything, then confirmed by the
+passing test.
+
+### Mutation proof (`INC21-CR-F1`)
+
+Same discipline as the first mutation table: sha256 pinned before each
+mutation, byte-level read/write, `tests/test_sparkline_floor.py` run and the
+verdict printed **before** restoring, byte-level restore, sha256
+re-verified. `git status --porcelain` showed only the intended diff
+throughout.
+
+| # | Mutant | File : sha256 pin | Test run | Verdict | Restored, sha ok |
+|---|---|---|---|---|---|
+| M6 | `max_count = max(counts) if counts else 1` + the guard collapsed to `max_count = max(1, sum(counts))` | `mapper/app.py` : `aea69e4ffb19f0c8a733108063a465b81a29be3a24123999a9fca4e5d4b7878d` | `tests/test_sparkline_floor.py` | **RED on the new two-day arm, GREEN on the other two** -- `1 failed, 2 passed`; `sum(counts) = 3`, so `bars[-4]` came out `"▅"` (idx 5) instead of `"█"` | yes -- mutant sha `21cd3d1dbea4279e4d32c11e5f34831de96e49d94df626502d007c41b0dbce19`, restored sha matched the pin |
+| M7 | `idx = min(len(bars) - 1, int(c / max_count * (len(bars) - 1)))` replaced with the binary tier `idx = 9 if c else 0` | `mapper/app.py` : `aea69e4ffb19f0c8a733108063a465b81a29be3a24123999a9fca4e5d4b7878d` | `tests/test_sparkline_floor.py` | **RED on the new two-day arm, GREEN on the other two** -- `1 failed, 2 passed`; today's bar came out `"█"` (idx 9, since `c=1` is truthy) instead of `"▃"` | yes -- mutant sha `a622fc55dbf183975a060714f32f35c7badd47bbd107fcfce438115fc3630b43`, restored sha matched the pin |
+
+Neither `M6` nor `M7` reddens the first two arms -- expected and consistent
+with `INC21-CR-F1`'s own diagnosis: both of those arms put activity on
+exactly one day, where the true maximum, the true sum, and "any activity"
+are numerically identical, so a wrong denominator or a wrong tiering scheme
+is invisible to them. The two-day arm is what makes `M6` and `M7`
+observable.
+
+### Verification after the review round
+
+Targeted only, per the coordinator's constraint (a test + comment + docs
+change does not need the full lane):
+
+```
+tests/test_sparkline_floor.py tests/test_agree_floor.py
+11 passed in 77.53s
+```
+
+Ruff: re-diffed against the same unmodified-HEAD baseline captured for the
+first pass of this increment (`git stash -u`, run, `git stash pop` --
+27 errors / 29 lines). `diff` is **empty** again after the review round's
+changes. Zero new errors, identical set.
+
+`mapper/app.py`'s diff versus `bc0ba0a` (this increment's first fix commit)
+is comment-only: the guard line and its logic are untouched; only the
+comment above it gained `/ INC7-CR-R3-F3`.
