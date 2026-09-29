@@ -942,9 +942,11 @@ beside it as `catalogue_pass1.py` (sha256 `616b8edc…`). Re-run from the repo r
 PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colours
 ```
 
-- **It re-states nothing** (`INC8-F-CR-F6`). It imports `SIZES`, `MAP_STATES`, `drive_map`,
+- **It re-states no rule** (`INC8-F-CR-F6`). It imports `SIZES`, `MAP_STATES`, `drive_map`,
   `drive_home`, `meaningful`, `_excluded_widget`, `OVERLAY_STYLES`, `glyph_set`, `_paints_as` and
-  `has_a_job` from `tests/test_legend_design.py`. It adds only counting and widget names.
+  `has_a_job` from `tests/test_legend_design.py`. It keeps its own harvest walk, `harvest_counted`,
+  which counts and names the widget: a second copy of the arm's `harvest` walk, kept in step by hand.
+  *(Corrected in design pass 3, `INC8-P2-CR-F6`: this line said the catalogue re-stated nothing.)*
 - **States** (the D2 arm drives the same ones): every map view × {legacy, concept} × {rest, walked,
   folded, folded-walk, search `fin`, rail-focus, unfocused-selection, folded-root}, plus a 26-level
   deep outline; the home screen with a legacy map, a concept map, a cyclic `roto.mmd` and a recorded
@@ -974,7 +976,7 @@ PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colo
   `test_cr_f6_the_harvest_advances_by_cell_width` was added (`27be355`), and `MH6` is RED on it.
 - **`INC8-D2-F5` — the narrow-panel arm was tautological.** Mutant `MA1` (panel 44 → 80) **SURVIVED
   every arm**: the canvas bound was written against `LEGEND_DOCKED_CELLS` itself. The arm now holds
-  the verdict's own number (`VERDICT_E1_PANEL_CELLS = 44`, ±1) (`a4dcdd2`). `MA1` re-fired: RED at
+  the verdict's own number (`VERDICT_E1_PANEL_CELLS = 44`, tolerance +1 only) (`a4dcdd2`). `MA1` re-fired: RED at
   both sizes.
 - **`INC8-D2-F6` — the resize arm broke a sealed census.** The first full lane went **2 failed**,
   both in `tests/test_a3_census.py`. It pins the tree's zero-argument `.render()` call sites at 35,
@@ -999,7 +1001,8 @@ PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colo
   `erp` and `inv` are data, not renderer copy, and could switch to English now. Kept as-is.
 - **`INC8-D2-Q4` — "two lines" for the own-scope group (`E3`).** Read as two KEY lines under the group
   title, so three rows with the title. Folding the title into the lines does not fit: the second line
-  is 36 of 39 docked cells.
+  is 38 of 39 docked cells (its 36 cells of items after the 2-cell indent). *(Corrected in design pass
+  3, `INC8-P2-CR-F7`: this line gave 36 of 39, and the E1-F5 line gave the tolerance as ±1.)*
 - **`INC8-D2-Q5` — section order.** `E1` ruled "vocabulary first". The colours follow the vocabulary
   because they explain its hues, and the keys come last: `vocabulary · colours · keys`. The
   alternative is `vocabulary · keys · colours`.
@@ -1148,3 +1151,310 @@ touched. Nothing was pushed.
 - `a4dcdd2` test(legend): the narrow-panel arm reads the verdict, not the constant (`INC8-D2-F5`)
 - `5d45c93` test(legend): the resize arm reads the frame, not `render()` (`INC8-D2-F6`)
 - this record and the `01b` `:264` citation (docs)
+
+## Design pass 3 (2026-09-29)
+
+**What this pass is.** The operator's third design verdict and the width principle
+(`VERDICT-inc8-legend-2026-09-28.md`, sections *Round 3* and *DESIGN PRINCIPLE*), plus the findings
+the pass-2 reviews carried in (`state.json` → `p3_progress.INC-8_ROUND_3_2026-09-29`), applied under
+the batch's `/dev-flow` rules. Entry HEAD `834b740`, tree clean. Independent reviews follow; this
+record does not review its own work.
+
+### Verdict items applied, and how the width principle shaped each
+
+The principle: behaviour derives for ANY width (operators zoom), and decisions and renders use ONE
+reference width, `DECLARED_CONTEXT_CELLS` = 118, shown beside a narrower and a wider render.
+
+| Item | What was done | Width principle | Commit | Arms |
+|---|---|---|---|---|
+| **F1** colours per view | `DECLARED_COLOURS` rows gain ids `C1`–`C4`, one row per JOB; `LEGEND_COLOURS` maps each view to its rows; the legend paints `colours_for(view)`, and a view with no row omits the section. `WARN` gains `C3`, *missing, as a count*. `01b` §3.5 gains **Painted on** (`marks` / `words`) and **Views** columns, every row cited to its renderer line | per view, not per width: the census is read at both sizes and must agree at each | `8c8c818` | `test_f1_each_legend_paints_the_colour_rows_its_view_paints` ×8 (both directions); `test_f1_each_view_paints_the_colour_rows_its_01b_views_column_names`; §3.5 EQUALS |
+| **F2** pan on dock | `MapScreen.legend_docked(panel_x)` / `legend_closed()`. The pan held when the legend opened is kept; every call starts from it; docked, the pan moves right just enough for the selected card's box to end at the panel's edge | the panel's edge is `width - 44` at any width, and the reveal is recomputed on every resize from the kept pan | `00915cc`, `46cb2dc`, `050572a` | `test_f2_…` ×5 |
+| **F9** derived threshold | `LEGEND_DOCK_MIN_WIDTH` (= 118) is gone. `help.docks(width, view_left)`: dock while `width - 44 - view_left >= LEGEND_DOCK_MIN_VIEW_CELLS` (43). `MapScreen.legend_view_left` is the rail's width when shown, else 0 | this IS the principle: no width is written; the switch derives from the panel, the minimum and the host's own chrome | `2db8d74` | `test_f9_the_legend_docks_exactly_while_the_view_keeps_its_minimum` ×6, the D4 arms re-derived, `test_f9_the_layout_sizes_drive_both_layouts`, `TC-R36` (`A-108`) |
+| **Q7** letter samples | `V27` = `D` (`MUT`) + `✓` (`INK`); `V28` = `D` (`MUT`) + `░` (`STEP`), label `field initial · ░ pending`; painted ADJACENT (`help.ADJACENT_ROWS`), as `views/layered.py:628-631` paints them | — | `9b45eb6` | D2's targeted adjacency check; `test_q7_the_adjacent_rows_are_the_ones_01b_paints_adjacent` |
+| **copy** ×9 | `what the colours mean`; `node, grey of its branch`; `… recorded` ×2; `nodes with / without record`; `scroll`; one footer line `? always explains the view you are in`; `V34` → `folded branch, left list`; the close hint once, in the group (the title paints its name alone); modal sample column 12, docked 8 | the sample columns are widths inside panels of FIXED width (80, 44), not terminal widths, so they stay declared; the no-cut arm checks both budgets | `9b45eb6` | §3.6 EQUALS arms, `test_e1_no_painted_string_is_cut_at_either_budget` ×2, the resize arm (holds the verdict's 12 and 8) |
+
+### Carried findings, disposition
+
+| Finding | What was done | Commit | Killing mutant |
+|---|---|---|---|
+| `INC8-P2-SEC-F1` (`B-67`, **closed**) | `COERCION_RANGES` gains `(0xD800, 0xDFFF)`; the census oracle reads `Cs` from `unicodedata` with Cc/Cf/Zl/Zp. New arm: `json.loads(json.dumps(...))` of a lone surrogate through `plain()` then `.encode("utf-8")`. **RED before the fix** at the encode line (`UnicodeEncodeError: … surrogates not allowed`), and the oracle RED listing U+D800–U+DFFF; **GREEN after** | `0a386e3` | `MS1` |
+| `INC8-P2-CR-F1` | `_crumb_line([chr(0x202E), "tail"], 80)` paints `U+FFFD / tail` | `9b45eb6` | `MS2b` |
+| `INC8-P2-CR-F2` | the own-scope group renders exactly its title + 2 lines, both layouts | `9b45eb6` | `ME3a` |
+| `INC8-P2-CR-F3` | the colour arm is per (view, size) over `painted_by`, so alone each node drives one view's states. Measured standalone: worst node `F1[mind map-140x45]` **46.71 s** in an F1-only run, **42.22 s** alone in its own process; the highest reading of that drive this pass is **48.21 s** (D2, same states). Ceiling 120 s. These are single readings, not a bound | `8c8c818` | — (cost, not behaviour) |
+| `INC8-P2-CR-F4` | `darkside._row_text(s)`, used by `shown_cells` and `fit` | `cd4aceb` | `MR1` |
+| `INC8-P2-CR-F5` | the view-side `_paints_as` docstring now says what it compares, and how it differs from the legend-side one | `9b45eb6` | — (prose) |
+| `INC8-P2-CR-F6`, `-F7` | struck in place in *Design pass 2*: the catalogue keeps its own harvest walk (`harvest_counted`); the E1 tolerance is **+1 only**; the group's second line is **38 of 39** docked cells | this record | — (prose) |
+| `INC8-P2-CR-F9` | the close hint leaves the title; `HLR-N16.4`'s painted-keys arm reads the own-scope GROUP's region alone | `9b45eb6` | `MK1` (pre/post pair below) |
+| `INC8-P2-UX-F6` | derived PER MEMBER from the census: a member painted only on `PANEL` declares it — `V40` (the home's cards, `app.py:4342`), `V42`/`V43`/`V44` (radial's node pills, `views/radial.py:302-304`). Members painted on both grounds (`V19`, `V32`, `V4b`) stay bare, sampled on `GROUND`. D2 now requires every bare member to be painted on `GROUND` somewhere. A compound row's separator takes the ground of the sample before it (**not pinned by an arm**) | `9b45eb6` | `MG1`, `MG2` |
+
+### Per-view colour table (catalogue, both sizes, all D2 states; cells)
+
+| view | ACCENT marks | ACCENT words | WARN marks | WARN words | ALERT marks | ALERT words | rows |
+|---|---|---|---|---|---|---|---|
+| atlas | 293 | 476 | 442 | 0 | 34 | 124 | `C1` `C2` `C4` |
+| outline | 904 | 504 | 948 | 1920 | 0 | 64 | `C1` `C2` `C3` `C4` |
+| mind map | 720 | 670 | 430 | 0 | 0 | 64 | `C1` `C2` `C4` |
+| home | 34 | 0 | 58 | 32 | 0 | 0 | `C1` `C2` `C3` |
+
+`C1` blue, marks · words; `C2` amber *attention / due*, marks; `C3` amber *missing, as a count*, words;
+`C4` red *missing record*, marks · words. The rule, written once
+(`tests/test_legend_design.py::colour_jobs`): a hue in the foreground of a LETTER is on *words*;
+any other foreground and every background is on *marks*. Catalogue: 1333 rows, **0 UNEXPLAINED**
+(`C:\Users\jjgh8\AppData\Local\Temp\inc8d3\catalogue.md`, `catalogue.json`).
+
+### The pan-on-dock mechanism
+
+- **Who moves the view.** The legend (`help.py::_apply_layout`) calls its host's
+  `legend_docked(width - 44)` when docked, `legend_docked(None)` when modal, and `legend_closed()`
+  on `esc`/`q`. `app.py::action_help` passes the screen as the host. A host without these (home,
+  settings) is not called. Keys stay modal (`E1`); nothing reaches the view.
+- **What moves.** `MapScreen.pan_x` only, through `_clamp_pan` and `refresh_canvas`, the screen's
+  own pan API. `legend_docked` paints the kept pan first, then reads the selected card from the
+  `ViewState` that paint recorded (`_rendered_for`) through `layered._geometry` (imported read-only
+  as `layered_geometry`, the same layout `pan_extent` and `painted_ids` read). So the search
+  resolution is only ever read inside `refresh_canvas`'s own paint pass (`INC8-D3-F6`). **No
+  renderer changed** (`layered.py`'s pin `0d1ac59d…` equals passes 1 and 2).
+- **When.** Only for a renderer that consumes pan (`_consumes_pan`: the atlas; outline and radial do
+  not pan, `PAN-1`), only when the panel is what covers the card: a card already clear of the panel,
+  or already past the canvas's right edge before the legend opened, does not move the view.
+- **Measured** on the ux review's walk (`l l l j j j j` at 118×34): **2 of 8** selection cells
+  visible beside the panel before, **8 of 8** docked; pan `(0, 0)` → `(7, 0)` → `(0, 0)` after
+  close. At 140×45 the same card is clear: 8 of 8, no pan. Outline (12 of 12) and mind map (1 of 1)
+  at 118×34 keep the selection visible without a pan (measured by `probe_pan.py`).
+- **Limit (`INC8-D3-F2`).** The pan stays in `LLR-N06.1.2`'s legal range `[0, E - W]`, so a card
+  at the map's own right edge (pan already at its maximum) stays partly covered by the panel.
+- **Pre-existing, measured, not changed (`INC8-P2-UX-F7`).** Under `run_test`, `esc` moves the focus
+  from `None` to the rail on the base tree too, which restyles the selection; the close arm therefore
+  compares pan, cursor, fold and the canvas's characters, not styles.
+
+### The derived threshold and its minimum
+
+`LEGEND_DOCK_MIN_VIEW_CELLS = 43`: the atlas's unit is a card and the wire that joins it to its
+sibling. The widest card is 26 columns (`views/layered.py:335`), the gap 3 (`:329`), and the wire
+lands on the sibling's centre, 13 columns in (`:639-640`): 26 + 3 + 13 + 1 = 43. **Operator
+question `INC8-D3-Q1`.**
+
+| layout | switch width (docks at and above) | at the switch | one below |
+|---|---|---|---|
+| a view starting at column 0 (home; a map opened below 118, rail auto-hidden) | **87** | 43 columns visible | 86: modal |
+| a map showing its rail (opened at 118, resized) | **111** | 43 columns visible | 110: modal |
+| reference, 118×34 | docked | 50 canvas columns (map), 74 (home) | — |
+| 140×45 | docked | 72 canvas columns (map), 96 (home) | — |
+| 80×24 | modal | — | — |
+
+The literal `118` no longer decides the layout; `test_crumb.py::test_decl_118_is_spelled_ONCE` is
+green. `DECLARED_CONTEXT_CELLS` is used by the arms and renders as the reference width only.
+
+### `A-108`
+
+Appended to `01-requirements.md` (Amendment set 16) after a scan of all of `.dev-flow` found no
+`A-108`. It supersedes `A-107`'s two width clauses ("below 118" / "118 and wider") with the derived
+rule. `TC-R36`'s two modal nodes move from 100 columns (now docked) to 86, the widest modal width,
+derived in the arm from the same two constants: same heights (28, 21), same declarations; each node
+now asserts the layout it measures.
+
+### The English copy — what changed this pass
+
+| Where | Now | Was |
+|---|---|---|
+| Section 2 | `what the colours mean` | `colours with a job` |
+| Title | `legend · <view>` alone | `legend · <view>` + `esc close` top right |
+| Own-scope words | `close` · `scroll` · `page` · `ends` | `close` · `line` · `page` · `ends` |
+| Footer | `? always explains the view you are in` (one line) | `each view has its own legend —` / `same key, this view's content` |
+| `V19` | `nodes with / without record` | `record / no record, 10 cells` |
+| `V27` | `D✓`, letter `MUT`, mark `INK`: `field initial · ✓ filled` | `D✓` all `INK` |
+| `V28` | `D░`, letter `MUT`, mark `STEP`: `field initial · ░ pending` | `░`: `field still pending` |
+| `V34` | `folded branch, left list` | `folded branch` |
+| `V37` | `branch: half or more recorded` | `branch: half or more records` |
+| `V38` | `branch: under half recorded` | `branch: under half records` |
+| `V42` | `node, grey of its branch` | `node, in its branch's grey` |
+| Colours | `C1` `blue — where you can act`; `C2` `amber — attention / due`; `C3` `amber — missing, as a count` (new); `C4` `red — missing record` | three rows, all views |
+
+Every other string in *Design pass 2*'s copy table stands.
+
+### Findings (`INC8-D3-Fn`)
+
+- **`INC8-D3-F1` — red is not the atlas's alone.** No D2 state had selected a node missing a record,
+  so the census never saw the inspector paint `<field>  requerido` in `ALERT` — which every map
+  view does (`widgets/inspector.py:188-193`). Probed through the real keys: with `rrhh1` selected,
+  atlas, outline and mind map all paint `ALERT`. The state table gains `legacy_map-missing-record`
+  (`l j l j`) for the three map views; `C4` is declared for all three. `01b`'s old citation
+  `app.py:406-407` was the `↵` ficha peek, a separate modal screen; replaced. `MC4` (the state
+  removed from outline) is RED, so the arm depends on it. The brief's mutant "red into outline's
+  legend → RED" does not apply as written: outline paints red. Its equivalents fired: `MC1` (red into
+  home) and `MC3` (red out of outline), both RED.
+- **`INC8-D3-F2` — the reveal is bounded by the legal pan range** (above). Not fixed: widening the
+  range while docked would amend `LLR-N06.1.2`. Operator question `INC8-D3-Q2`.
+- **`INC8-D3-F3` — two F2 arms were weaker than claimed; the battery found it.** `MP3` (re-pan a
+  clear card) survived: both clear cases started at pan 0, where a wrong LEFTWARD shift clamps back
+  to 0. `MP4` (pan in the modal) survived: the resize arm's modal width had already put the card past
+  the canvas edge. Fixed in `46cb2dc` (pan first, asserted; a card 13 columns short of the edge; a new
+  arm opening the modal at 86 over a card a docked edge would cut, asserted). Re-fired: `MP3`,
+  `MP3b`, `MP4` RED.
+- **`INC8-D3-F4` — shell heredocs collapse a doubled backslash.** A Bash heredoc turned `\\n` into
+  `\n` twice this pass (an edit script and a harness edit). Both failed LOUDLY (an unmatched edit, a
+  syntax error), before touching a repo file; every later script built the backslash with `chr(92)`,
+  and the Write/Edit tools kept `\\` intact (checked in `0a386e3`'s diff). **0 banned code points**
+  in every staged diff and every commit message of this pass (`inc8d3\scan.py`, before and after
+  each commit).
+- **`INC8-D3-F6` — the first full lane went 1 failed, mine.** `tests/test_search.py`'s census
+  (`test_every_reader_of_the_resolution_is_inside_a_paint_pass`) found `_pan_revealing_selection`
+  and `legend_docked` reaching the search resolution through `_view_state` without a paint pass.
+  The census pins its openers EXACTLY and offers a registry for exemptions, both in a file outside
+  this increment; moving another file's pin is not the fix (the `INC8-D2-F6` precedent). The reveal
+  now reads the state the preceding `refresh_canvas` recorded (`050572a`); behaviour is unchanged
+  and `MP1`–`MP5`, `MP3b` were re-fired against the rewritten methods, all RED. This is the tree's own
+  census firing on this pass's work, as `INC8-D-F6` and `INC8-D2-F6` did in passes 1 and 2.
+- **`INC8-D3-F5` — the `100` columns the pass-2 arms called modal now dock.** The "both layouts"
+  arms of `test_help_scope.py` gain a derived modal size, `(86, 24)`, beside `NARROW_SIZE`, and an
+  arm asserts the size list drives both layouts.
+
+### Operator questions (`INC8-D3-Qn`)
+
+- **`INC8-D3-Q1` — the dock minimum, `43`.** A card and the wire to its sibling's centre. It puts the
+  switch at 87 (view at column 0) and 111 (map with its rail). Alternatives, each one line:
+  `44` (the view keeps as much as the panel takes: 88 / 112); `50` (keeps the reference width's
+  own margin: 94 / 118). The value is not pinned by an arm on purpose until this is answered; the
+  arms pin the RULE (`MT1`–`MT5`).
+- **`INC8-D3-Q2` — a card at the map's right edge.** Accept that it can stay partly covered while
+  docked (today), or amend `LLR-N06.1.2` so the legal range uses the visible canvas while docked.
+- **`INC8-D3-Q3` — `red — missing record` in outline and mind map.** There, red is the inspector's
+  `<field>  requerido`, which covers the owner field too, not only the record. Keep the ruled label,
+  or widen it (for example `red — missing record or field`, 29 cells).
+- **`INC8-D3-Q4` — the amber pair.** `C2` `amber — attention / due` and `C3`
+  `amber — missing, as a count` paint two amber swatches in the outline and home legends. The
+  alternative is one row naming both jobs (≤ 34 docked cells, e.g. `amber — attention · missing count`).
+- **`INC8-D3-Q5` — `V34`'s qualifier**, `folded branch, left list`, is this pass's wording.
+- Still open: `INC8-D2-Q1` (view names), `-Q2` (copy), `-Q3` (Spanish samples), `-Q5` (section
+  order). `INC8-D2-Q7` is closed by `Q7`; `INC8-D-Q7` (which 118) is closed by `F9`.
+
+### Mutation table (this pass)
+
+Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8d3\mutants.py`, outside the repo: a sha256 pin per
+touched file; a byte-level replace in the file's own line endings, each `old` exactly once; stdout
+and stderr kept separate and the summary line asserted as found; the verdict printed **before** the
+restore; a byte restore and the pin re-verified. **All restores matched their pins** (34 in the first
+battery, 5 + 2 in the `INC8-D3-F3` re-fires, 6 in the `INC8-D3-F6` re-fire, 2 on the export), and `sha256sum -c` passed for all pinned files
+afterwards.
+
+| # | Mutant | Verdict |
+|---|---|---|
+| MC1 | red declared for home (declaration AND `01b`) | **RED** F1[home] ×2; §3.5 EQUALS and Views arms GREEN |
+| MC2 | amber's count job `C3` dropped (declaration, map AND `01b`) | **RED** F1[outline] ×2, F1[home] ×2; EQUALS GREEN |
+| MC3 | red dropped from outline (declaration AND `01b`) | **RED** F1[outline] ×2 |
+| MC4 | the record-less selection removed from outline's states | **RED** F1[outline] ×2 |
+| MP1 | no reveal on dock | **RED** F2 covered, F2 resize |
+| MP2 | close does not restore the pan | **RED** F2 covered |
+| MP3 | the clear check shifted 20 columns | **SURVIVED** first run (`INC8-D3-F3`) → arm fixed → **RED** [reference-panned] |
+| MP3b | the clear check removed | **RED** F2 clear ×2 |
+| MP4 | the modal layout pans | **SURVIVED** first run (`INC8-D3-F3`) → new arm → **RED** it; the resize arm stays GREEN |
+| MP5 | a card already off the canvas pulls the view | **RED** D4 visible-and-undimmed[87] |
+| MT1 | `docks`: `>=` → `>` | **RED** F9 [home-at, map-at, map-rail-at] |
+| MT2 | the view's left edge ignored | **RED** F9 [map-rail-below] |
+| MT3 | docks one column late | **RED** F9 ×3 (-at) |
+| MT4 | docks one column early | **RED** F9 ×3 (-below) |
+| MT5 | the map reports no rail | **RED** F9 [map-rail-below] |
+| MT6 | the open legend ignores a resize | **RED** resize, F2 resize |
+| MQ1 | the view paints the schema letter in `INK` (`layered.py`) | **RED** D2[atlas] ×2 |
+| MQ2 | no adjacent rows (the legend paints `D ✓`) | **RED** the Q7 pin |
+| ML1 | `colours with a job` again | **RED** §3.6 headers |
+| ML2 | two footer lines again | **RED** §3.6 footer |
+| ML3 | `line` again | **RED** §3.6 own words |
+| ML4 | the title paints a close hint again | **RED** §3.6 title |
+| ML5 | modal sample column 8 | **RED** resize |
+| MG1 | `V40` bare again (declaration AND `01b`) | **RED** D2[home] ×2; EQUALS GREEN |
+| MG2 | `V42` bare again (declaration AND `01b`) | **RED** D2[mind map] ×2 |
+| MS1 | the surrogate range removed | **RED** SEC-F1 arm, coercion oracle |
+| MS2b | a crumb parent sized by the raw string | **RED** CR-F1 arm |
+| ME3a | the own-scope group on four lines | **RED** CR-F2 ×2 |
+| MK1 | the group stops painting `esc` | **RED** HLR-N16.4 ×3 |
+| MR1 | `fit` paints `plain()` without the row breakers | **RED** SEC-F1 fit arm |
+
+**The pre/post pairs.** The tree at `2db8d74` (before Q7 and before the title lost its hint) was
+exported with `git archive` to `inc8d3\base_2db8d74`; its `mapper` import resolves to the export,
+checked by path. There, **`MQ1` SURVIVED** (D2[atlas] ×2 green: X1 hid the letter) and **`MK1`
+SURVIVED** (HLR-N16.4 ×3 green: the title proved `esc`). On the final tree both are RED. The
+letter's style and the group-only `esc` are new sight with this pass. For `UX-F6` the pre state is
+pass 2's own lane: `V40` bare with D2[home] green.
+
+**Not pinned, declared:** the value `43` (`INC8-D3-Q1`), and the ground of a compound row's
+separator.
+
+### Lane and ruff
+
+- **First full-lane run**, main tree at `46cb2dc`, stdout and stderr kept separate:
+  **`1 failed, 1274 passed, 20 deselected, 3 xfailed`** in 906 s. The failure is **`INC8-D3-F6`**
+  (`test_search.py`'s paint-pass census, mine), fixed in `050572a`. A faithful record of that tree,
+  so annotated, not struck. `FLAKE-1` did not fire.
+- **Final full-lane run** on the final code tree (`050572a`; this record and the pass-2 strikes were
+  in the working tree, uncommitted, and no test reads them): **`1275 passed, 20 deselected, 3 xfailed,
+  0 failed`** in 834 s. `FLAKE-1` did not fire. Running the lane twice is a deviation from "once",
+  declared: the first run's tree was not the one that ships.
+
+- **Reconciliation.** Entry `834b740` = 1247 passed + 3 xfailed = 1250 selected (the export collects
+  0 of `test_views_hits.py`'s 57 nodes, an artifact of the export, as in pass 2; with them it equals
+  the entry). The tree collects **1278**: **+36** new or re-parametrized nodes, **−8** removed.
+  - removed: `test_d4_the_layout_switches_at_118_columns` ×3, the row-budget arm's `[117]`/`[118]`,
+    the visible-and-undimmed arm's `[117]`/`[118]` (all re-parametrized at 86/87), and the global
+    `test_e4_the_colour_rows_are_the_hues_the_views_paint` (replaced by F1 ×8).
+  - `test_legend_design.py` **+26**: F1 ×8, F2 ×5, F9 ×6, the switch arm ×3, the row budget ×2 and
+    visible-and-undimmed ×2 at their new widths (with the −8 above, net +18).
+  - `test_help_scope.py` **+7**: the modal size in three "both layouts" arms (+3), the layout-size
+    trigger (+1), CR-F2 ×2, CR-F1 +1.
+  - `test_vocabulary_declaration.py` **+2**: the colour Views column, the Q7 pin.
+  - `test_darkside_census.py` **+1**: the surrogate arm.
+  - Nothing else changed. 1250 + 36 − 8 = **1278** selected = 1275 passed + 3 xfailed ✓.
+- **ruff** (`inc8d3\ruffset.py`, line and column dropped, paths normalised): entry **27**, exit
+  **27**, and the **sets are identical**.
+
+### Render — real `run_test` + `export_screenshot`, PNGs rasterised by headless Chrome
+
+`C:\Users\jjgh8\AppData\Local\Temp\inc8d3\render\`: **94 SVGs and 94 PNGs**, plus `measures.json`.
+`render.py` writes them; `rasterise_chrome.py` rasterises them. Every legend is opened through the
+real `?`: `_legend_top` at rest, `_legend_keys` at the keys section, `_legend_end` at the end.
+
+- **Every view with its legend** (`_view`, `_legend_top`, `_legend_keys`, `_legend_end`), for atlas,
+  outline, mind-map and home, at **118×34** (reference, docked), **87×34** (the derived threshold,
+  docked, 43 columns visible), **86×34** (one below, modal), **140×45** (docked) and **80×24**
+  (modal).
+- **The rail layout's threshold:** `atlas_111x34_rail_*` (docked, 43 canvas columns) and
+  `atlas_110x34_rail_*` (modal), a map opened at 118 and resized.
+- **The fina-4 walk:** `atlas_118x34_fina-4_1-before-dock`, `_2-docked`, `_3-after-close` (2 → 8 of
+  8 visible; pan 0 → 7 → 0), and the same at 140×45 (8 of 8, no pan).
+
+### Carries
+
+- **`INC8-D3-F2`** (a card at the map's right edge), `INC8-D3-Q1`–`Q5`.
+- **`INC8-P2-UX-F7`** — focus after `esc`: measured under `run_test` (focus `None` → the rail, on the
+  base tree too); a real launch is still unmeasured.
+- **`INC8-D2-F2`** (`app.py:2625`, the map toast sized by `len`), the diff mode's tones, and the D2
+  arm's lane cost (six map nodes of 28–48 s each), unchanged.
+- **Inc-9 / Inc-EN (`B-71`)** unchanged; `INC8-P2-UX-F4` stays routed to Inc-9.
+- `B-67` is **closed** by `0a386e3`.
+
+### Files
+
+| Source (3 of 4 permitted) | Tests | Docs |
+|---|---|---|
+| `mapper/screens/help.py` | `tests/test_legend_design.py` | `01b-ux-decisions.md` (§3.1–§3.6, pass-3 change log) |
+| `mapper/darkside.py` | `tests/test_help_scope.py` | `01-requirements.md` (`A-108` only) |
+| `mapper/app.py` (`action_help`'s host; `MapScreen.legend_view_left`, `legend_docked`, `legend_closed` and their two helpers; `_pan_before_legend`; the read-only `layered_geometry` import) | `tests/test_vocabulary_declaration.py` | this record (pass 3; three pass-2 lines struck in place) |
+| | `tests/test_darkside_census.py` (the coercion census) | |
+| | `tests/test_repair_layout.py` (`TC-R36`, per `A-108`) | |
+
+No renderer under `mapper/views/` or `mapper/canvas.py` was changed; the mutants touched
+`layered.py` only temporarily, restored and verified against its pin. `.dev-flow/state.json`,
+`prototypes/`, `mapper.db`, the scratch files and `backup/pre-q9-reword-2026-09-28` were not touched.
+Nothing was pushed.
+
+### Commits (this pass)
+
+- `0a386e3` fix(darkside): coerce lone surrogates in plain() (`INC8-P2-SEC-F1`, `B-67`)
+- `8c8c818` feat(legend): colour rows per view, one row per job (`F1`)
+- `00915cc` feat(legend): docking pans the selection clear of the panel (`F2`)
+- `2db8d74` feat(legend): the dock threshold is derived from the view left visible (`F9`, `A-108`)
+- `9b45eb6` feat(legend): letter samples, the nine copy adjustments, per-member grounds (`Q7`, copy, `UX-F6`)
+- `cd4aceb` refactor(darkside): one row coercion for shown_cells and fit (`INC8-P2-CR-F4`)
+- `46cb2dc` test(legend): the F2 arms see a wrong shift and a modal pan (`INC8-D3-F3`)
+- `050572a` fix(legend): the dock reveal reads the painted state, inside a paint pass (`INC8-D3-F6`)
+- this record, with the pass-2 strikes (docs)
