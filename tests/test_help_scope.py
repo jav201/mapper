@@ -193,9 +193,12 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
         screen = app.screen
         texts = [screen._render_title(), screen._render_keymap(),  # noqa: SLF001
                  screen._render_vocabulary(vocabulary_for(view))]  # noqa: SLF001
+        title = "\n".join(_rows_in(screen, screen.query_one("#help-title").region))
         rows = await _harvest(app, pilot, _rows_in)
 
     painted = "\n".join(rows)
+    # Per surface, so one sink parsing markup cannot hide behind the others.
+    assert "[bold red]x[/]" in title, f"the title interpreted markup: {title!r}"
     assert painted.count("[bold red]x[/]") >= 3, "a hostile string never reached the frame"
     assert not {ord(c) for c in painted} & BANNED
     for text in texts:
@@ -295,14 +298,17 @@ def test_d28_the_legend_chrome_clears_the_contrast_floor():
     and colour swatches, which must paint the VIEW's style, not the legend's.
     """
     assert f"background: {darkside.PANEL};" in HelpScreen.CSS
-    exempt = {darkside.resolve_style(m[3]) for m in darkside.DECLARED_VOCABULARY}
-    exempt |= {darkside.resolve_style(c[2]) for c in darkside.DECLARED_COLOURS}
+    # Exempt by the painted TEXT, never by style: a chrome seat sharing a style
+    # value with some vocabulary member (`MUT` is `V4b`'s) must still be read.
+    exempt = {m[1].strip() for m in darkside.DECLARED_VOCABULARY if m[1]}
+    exempt |= {c[0] for c in darkside.DECLARED_COLOURS}
     screen = HelpScreen(SCOPE_MAP, view="atlas")
     texts = [screen._render_title(), screen._render_keymap(),  # noqa: SLF001
              screen._render_vocabulary(vocabulary_for("atlas")),  # noqa: SLF001
              screen._render_colours(), screen._render_footer()]  # noqa: SLF001
     styles = {str(span.style) for text in texts for span in text.spans
-              if text.plain[span.start:span.end].strip()} - exempt
+              if (painted := text.plain[span.start:span.end].strip())
+              and painted not in exempt}
     assert len(styles) >= 3, styles
     for style in styles:
         fg = Style.parse(style).color
