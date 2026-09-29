@@ -455,6 +455,17 @@ section *Round 4*; the record is `increment-022`, section *Design pass 4*).
 | `V28` | `field initial, pending` (was `field initial · ░ pending`) | `G5` |
 | §3.1, `V26` | the revealed atlas card keeps a 2-column margin from the docked panel's left edge, declared as one constant (`mapper/app.py::MapScreen.REVEAL_MARGIN_CELLS`) | `G5` |
 
+**Change log — closing pass (Round 5), 2026-09-29** (operator verdict round 5,
+`VERDICT-inc8-legend-2026-09-28.md` section *Round 5 — closing questions*; the record is
+`increment-022`, section *Closing pass*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| `V27` | `field initial, filled` (was `field initial · ✓ filled`) — matches `V28`'s comma-separated wording exactly | `H4`'s companion copy item |
+| §3.1/§3.2, the reveal margin | fixed an off-by-one: the card's box has one trailing painted column that is never drawn (the title row's own fit leaves it blank), so `REVEAL_MARGIN_CELLS` was landing 3 blank columns short of the panel on an ordinary card and only 1 at the map's own right edge. The margin is now counted on the COMPOSITED FRAME, not the geometry, and is honoured everywhere: at the true right edge the docked reveal's legal range widens by the margin itself, withdrawing the "no blank space past the content" exception `A-109` gave that case (see `A-109`'s dated addendum in `01-requirements.md`) | `H3` |
+| §3.2 | while the host's rail is hidden (`R`, or auto-hidden below the auto-hide width), the legend omits the rows the rail alone paints (`V33`, `V34`, `V35`, `V21a`, `V21b` — `darkside.RAIL_VOCABULARY`, derived from this section's own **Source** column). `V36`-`V39` and `V32` stay, because their source is the always-visible coverage strip (`app.py`'s `#map-minimap`), not the rail widget | `H4` |
+| §3.6 | footer reworded to `? explains the view you are in, outside text fields` (was `? always explains the view you are in`), now two lines — the old wording over-promised what a focused text field does with `?` (`B-36`/`B-72`) | `H1` |
+
 ### 3.6 · Legend framing copy
 
 In English since the 2026-09-29 language ruling (first transcribed from `ui_next2/generate.py:599-634`).

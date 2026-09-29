@@ -9900,3 +9900,39 @@ docked; the return path never calls it.
 unit arms, `_pan`'s keyboard panning, the modal layout's pan-preserving path -- is unchanged and
 keeps the OLD range, `[0, max(0, extent - avail)]`. The modal layout never calls the amended call at
 all (`legend_docked(None)` skips `_pan_revealing_selection`), so nothing about it moves.
+
+---
+
+**Addendum, 2026-09-29 (closing verdict round 5, item `H3`).** The paragraph above headed *"The
+declared margin (`G5`)"* read the map's own true right edge as a case where the margin is honestly
+0 -- `LLR-N06.1.2`'s existing "no blank space past the content" principle, not a defect. The
+operator's closing answer to `H3` (`VERDICT-inc8-legend-2026-09-28.md`, section *Round 5 — closing
+questions*: *"2 columnas pintadas en todos los casos"*) withdraws that reading for this one case.
+The original paragraph is left standing above, unedited, as the record of what was believed at
+design pass 4; this addendum is what governs now.
+
+**What changes.** `_pan_revealing_selection`'s clamp widens the legal maximum it hands to
+`_clamp_pan` by `REVEAL_MARGIN_CELLS` (2), on top of the visible-canvas span this amendment already
+substitutes for `geo.avail`. Concretely: `_clamp_pan(target, extent_x + REVEAL_MARGIN_CELLS,
+visible_span)` rather than `_clamp_pan(target, extent_x, visible_span)`. This is the SAME kind of
+widening the amendment above already makes for the span -- room the docked panel already occupies
+on screen regardless of where the pan sits -- applied to the margin instead. At the map's own true
+right edge the pan can now move `REVEAL_MARGIN_CELLS` columns past where the content itself ends,
+so the card's own last painted column still lands the full margin short of the panel, the same as
+every other card. `_clamp_pan` itself is still untouched, and every other caller still passes the
+unwidened `(extent, span)` pair; this is the second and last thing this one call's clamp does
+differently from an ordinary pan.
+
+**The off-by-one this addendum travels with.** Design pass 4 measured the margin by comparing
+`canvas_x + card_x + geo.card_w` (the box's DECLARED width) against the panel's edge, not by
+counting the frame's own painted columns. A card's title row never paints that box's last column
+when the row carries no change chip (`views/layered.py`: `title_w = card_w - 3`, two columns short
+of the box's own right edge) -- the box is `card_w` columns wide, but only `card_w - 1` of them are
+ever ink. Measured on the composited frame: the old code painted 3 blank columns between an ordinary
+card's own last glyph and the panel, and only 1 at the map's true right edge (the old margin-is-0
+case, above) -- neither was the declared 2. `_pan_revealing_selection` now reads the box's last
+PAINTED column (`geo.card_w - 1` past the card's own left edge) rather than one past it, and the arms
+in `tests/test_legend_design.py` assert the margin on the COMPOSITED FRAME -- counting blank painted
+columns between the card and the panel -- rather than on the geometry the implementation itself
+reads, so a future regression that only re-derives the same wrong geometry cannot pass by agreeing
+with itself.

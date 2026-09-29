@@ -1701,3 +1701,179 @@ scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing wa
 - `e273444` feat(legend): the red row widens; the two amber rows merge into one (`G3`, `G4`)
 - `446c1e3` feat(legend): a declared 2-column margin on reveal; V34 and V28 reworded (`G5`)
 - this record (docs)
+
+## Closing pass (2026-09-29)
+
+**What this pass is.** Both closing reviews (code, ux) said Inc-8 may close (round 5,
+`VERDICT-inc8-legend-2026-09-28.md`, section *Round 5 — closing questions*). This pass applies
+the operator's four answers (`H1`-`H4`) plus one code finding the coordinator raised alongside them
+(`INC8-CL-CR-F1`), under the batch's `/dev-flow` rules. Entry HEAD `69d9a96`, tree clean. A narrow
+independent review follows; this record does not review its own work.
+
+### Verdict items applied
+
+| Item | What was done | Commit(s) | Arm(s) |
+|---|---|---|---|
+| **H2** stale selection tone | `MapScreen.on_descendant_focus`/`on_descendant_blur` repaint the canvas (`_declare_after_layout`, never `refresh_canvas`) on every focus change. `tab` alone never repainted anything before this; the stale blue-after-focus-left tone the operator saw on `esc` was the SAME defect, one layer up | `316007b` | `test_h2_the_canvas_repaints_on_every_focus_change` |
+| **H3** the margin is exact everywhere | `_pan_revealing_selection` fixes an off-by-one (`right = ... + geo.card_w - 1`, the card box's own last PAINTED column, not one past it) and widens the docked reveal's legal range by `REVEAL_MARGIN_CELLS`, withdrawing design pass 4's map's-true-right-edge exception. `A-109` gets a dated addendum (`01-requirements.md`), the original text left standing | `7092526` | `test_h3_the_painted_margin_is_the_declared_one_everywhere[fina-4-118x34, ti-4-118x34, ti-4-140x45]` |
+| **INC8-CL-CR-F1** re-clamp after close | `_restore_after_legend` calls `self._reclamp_pan(*self._canvas_size())` after the pan restore, then repaints once more (`_reclamp_pan` alone does not repaint) | `7092526`, `35a469d` (a self-caught regression -- see *Lane and ruff*) | `test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close` |
+| **H4** rail rows only while shown | `vocabulary_for(view, rail_shown)` drops `darkside.RAIL_VOCABULARY` while `rail_shown` is `False`. `RAIL_VOCABULARY` is derived from 01b §3.2's own **Source** column (`widgets/rail.py`-sourced rows only), checked against the document, not a hand list -- the coverage strip (`V36`-`V39`) and the meter (`V32`) share §3.2's title with the rail but are sourced from `app.py`'s always-visible minimap and `darkside.py`, so they stay either way | `ec820c8` | `test_h4_the_legend_lists_rail_rows_only_while_the_rail_is_shown`, `tests/test_vocabulary_declaration.py::test_h4_rail_vocabulary_EQUALS_the_01b_rail_sourced_rows` |
+| **H1** footer copy | Footer becomes `? explains the view you are in,` / `outside text fields` (two lines: the honest sentence no longer fits the docked row's 39-cell budget on one) | `7454211` | `tests/test_vocabulary_declaration.py::test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6` |
+| **V27 copy** | `field initial · ✓ filled` → `field initial, filled`, matching `V28`'s comma-separated wording | `7454211` | `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document` |
+
+### The off-by-one, measured
+
+`views/layered.py`'s title row paints `"▐ " + fit(title, card_w - 3)` -- at most `card_w - 1` columns
+from the card's own left edge, never the box's declared `card_w`-th column, when the row carries no
+change chip. `_pan_revealing_selection` read `canvas_x + card_x + geo.card_w` as the card's own right
+edge, one column past what is ever painted. Measured on the composited frame before this fix: an
+ordinary card (`FINA_4`) painted 3 blank columns between its last glyph and the docked panel, not the
+declared 2; the map's own right edge (`ti4`), under design pass 4's old exception, painted only 1.
+Both read exactly 2 after this pass's fix, at every width the arm drives (118, 140).
+
+### Findings (`INC8-CL-Fn`)
+
+- **`INC8-CL-F1`** (H4's own "if that can happen" hedge, investigated, not assumed). `H4`'s brief
+  asked whether the legend should repaint if the rail is toggled while it is open, and whether a
+  resize crossing the auto-hide width is the only path. Grepped: `_apply_region_visibility` (the
+  method that derives `rail_hidden` from width) is called only from `MapScreen.on_mount`,
+  `action_toggle_rail` and `action_toggle_inspector` -- **never** from `MapScreen.on_resize`. So a
+  live terminal resize does not change `rail_hidden` after mount, and `R`'s key cannot reach
+  `MapScreen` while `HelpScreen` (modal) owns the top of the screen stack. There is **no reachable
+  path today** for the rail to change while the legend is open. `HelpScreen._apply_layout`'s guard
+  (repaint on a rail-shown change, not just a `docked` flip) is kept anyway -- it is correct and
+  cheap, and stops being dead code the day either path opens (e.g. if `on_resize` is ever wired to
+  `_apply_region_visibility`). No arm drives this branch; none can, without faking state no real
+  key sequence produces. Carried, not owned by any reviewer role.
+- **`INC8-CL-F2`** (measured, not fixed -- out of this pass's boundary). `_pan_revealing_selection`'s
+  early-return branches (`cursor is None`, the layout `except`, `geo is None`, `card_x >= geo.avail
+  or right <= edge`) all return `state.pan_x`/`self.pan_x` unclamped against the WIDENED docked
+  range this pass introduces. Reasoned, not just assumed: `state.pan_x` was clamped, when last
+  rendered, against the ORDINARY range `[0, max(0, extent - avail)]`; the docked range this call
+  clamps against is `[0, max(0, extent - visible_span) + REVEAL_MARGIN_CELLS]`, and `visible_span
+  <= avail` always (the panel only ever narrows what is visible), so `extent - visible_span >=
+  extent - avail` and the widened bound is never tighter than the ordinary one. A value already
+  legal under the tighter bound is legal under the looser one. No counter-example found; recorded
+  because the brief asked the question directly, and "no defect" is a claim that needs saying, not
+  assuming.
+
+### Mutation table
+
+Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8cl\mutation_harness.py`, outside the repo: a sha256
+pin per touched file before the first mutation, byte-level I/O throughout (the repo's tracked files
+are CRLF; the harness round-trips through universal newlines rather than hand-spelling the file's own
+convention -- the discipline design pass 4's `M7` needed after failing to apply once for the opposite
+reason), one exact substring replaced exactly once per mutant, the verdict printed BEFORE the
+restore, and the pin re-verified after every restore. **All 8 restores matched their pins.**
+
+Pins (entry, and exit -- every mutant restored and re-verified). Run TWICE: once before the
+`test_search.py` regression fix (`35a469d`) and once after, since that fix touched `app.py` again;
+the pin below is the SECOND (final) run's, on the tree this record's own commits leave behind:
+
+- `mapper/app.py` `77a6b7f4b5d4bdacdb8a33e246fe7461e53c41e9a07175235748aed5448fe72c`
+- `mapper/darkside.py` `d7a1e9d25ec1ec957a6c424006b74cdebb7dbfe101fa294507c4cc5616ffac67`
+- `mapper/screens/help.py` `f7cce6fd89ceaccfa41a33895913cdd8c500d528da3b08de00d8465f4cacdc0e`
+
+| # | Mutant | File | Verdict |
+|---|---|---|---|
+| `MUT-H1` | `FOOTER_LINES` reverted to the old one-line wording | help.py | **RED** `test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6` |
+| `MUT-H2` | `on_descendant_focus`'s repaint call replaced with `pass` | app.py | **RED** `test_h2_the_canvas_repaints_on_every_focus_change` |
+| `MUT-H3a` | the off-by-one reverted (`- 1` dropped from `right`) | app.py | **RED** `test_h3_..._everywhere[fina-4-118x34]`, `[ti-4-118x34]` (margin measured 3 and 1) |
+| `MUT-H3b` | the widened extent reverted (edge exception restored) | app.py | **RED** `test_h3_..._everywhere[ti-4-118x34]` (margin measured 1) |
+| `MUT-CRF1` | the `_reclamp_pan` call (and its follow-up repaint) removed from `_restore_after_legend` | app.py | **RED** `test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close` |
+| `MUT-H4a` | `vocabulary_for`'s rail filter removed | help.py | **RED** `test_h4_the_legend_lists_rail_rows_only_while_the_rail_is_shown` |
+| `MUT-H4b` | `RAIL_VOCABULARY` drifts from 01b's Source column (`V36` added wrongly) | darkside.py | **RED** `test_h4_rail_vocabulary_EQUALS_the_01b_rail_sourced_rows` |
+| `MUT-V27` | `V27`'s label reverted to `field initial · ✓ filled` | darkside.py | **RED** `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document` |
+
+### Lane and ruff
+
+- **Targeted, at every commit of this pass** (each verified GREEN in isolation by committing, then
+  `git stash -u` to strip everything not yet committed, running the relevant subset, then `git stash
+  pop`): `316007b` (H2) 6/6; `7092526` (H3 + `INC8-CL-CR-F1`) 12/12; `ec820c8` (H4) 14/14; `7454211`
+  + `0b6f1e2` (H1 + V27, plus the 01b rows split out of it once the first attempt measured RED
+  without them) 63/63 over `test_vocabulary_declaration.py` + `test_help_scope.py`.
+- **Full default lane, once, on the final tree (`35a469d`):** **`1293 passed, 20 deselected, 3
+  xfailed, 0 failed`** in 863.27 s (`0:14:23`). `FLAKE-1`
+  (`test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region`) did not fire; `FLAKE-2`
+  (`test_hlr_n16_4_legend_declares_its_own_keys[size2]`) did not fire either. The `Task was
+  destroyed but it is pending!` lines after the summary are `asyncio`/Textual animator teardown
+  noise, attached to no test id, same as prior passes' own note on this.
+- **A regression this pass's own first draft introduced, and this run caught.** The FIRST full-lane
+  attempt (on `7092526`, before `ec820c8`/`7454211`/`0b6f1e2` landed) reddened
+  `tests/test_search.py::test_every_reader_of_the_resolution_is_inside_a_paint_pass`: `INC8-CL-CR-F1`'s
+  new `_reclamp_pan` call from `_restore_after_legend` reaches `_view_state` without a paint pass
+  open. Fixed in `35a469d`, not by opening a THIRD named pass (that arm separately pins the opener
+  set to exactly `{refresh_canvas, _declare_after_layout}`, and a third would have reddened that
+  half too) but by correcting `_reclamp_pan`'s own exemption in `_PASS_FREE_READERS`: its reason had
+  named ONE call site ("called from inside `refresh_canvas`'s pass") rather than the fact that makes
+  it safe from EITHER site -- `pan_extent` -> `_geometry` never reads `state.hits`, the one
+  memo-derived field of `ViewState`, so no `_search_memo` value, stale or fresh, changes what it
+  computes. `_restore_after_legend` and `on_screen_resume` are exempted on that same, now-general,
+  basis. Re-run of `tests/test_search.py` after the fix: 37 passed, 0 failed.
+- **Reconciliation.** Baseline (`3818a96`, measured by both the implementer and the code reviewer,
+  carried unchanged through `69d9a96`'s docs-only commit): `1287 passed, 20 deselected, 3 xfailed` =
+  1290 selected. This pass adds **6** nodes: `tests/test_legend_design.py` gains 5 net (`grep -c
+  '^async def test_'`: 21 -> 24 function defs; `test_g5_the_revealed_card_keeps_its_declared_margin_
+  from_the_panel` retired and replaced by the 3-case `test_h3_the_painted_margin_is_the_declared_
+  one_everywhere`, plus `test_h2_the_canvas_repaints_on_every_focus_change`,
+  `test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close` and
+  `test_h4_the_legend_lists_rail_rows_only_while_the_rail_is_shown`: -1 + 3 + 1 + 1 + 1 = 5),
+  `tests/test_vocabulary_declaration.py` gains 1 (`test_h4_rail_vocabulary_EQUALS_the_01b_rail_
+  sourced_rows`). `1290 + 6 = 1296` selected = **`1293` passed + 3 xfailed** ✓.
+- **ruff** (`--output-format=concise --no-cache`, full repo, normalised `file:line:col` stripped and
+  sorted before comparing): entry **27**, exit **27**, and the two normalised listings are
+  **identical** (`diff` exit `0`, verified by `git stash`/`stash pop` around the comparison rather
+  than checking out a second worktree).
+
+### Render -- real `run_test` + `export_screenshot`
+
+`C:\Users\jjgh8\AppData\Local\Temp\inc8cl\render\`: 28 SVGs plus `measures.json`, at **118×34**
+(reference), **87×34** (the derived dock threshold) and **140×45**:
+
+- **`fina-4_<W>x<H>_{1-before-dock,2-docked,3-after-close}.svg`** and **`ti-4_<W>x<H>_...`** (`H3`'s
+  subject): `measures.json` gives the exact pan at each step and the margin measured on the
+  composited frame once docked. `fina-4` at 140×45 is not covered enough to trigger a reveal at that
+  width (measured margin 16, no pan needed) -- the same reason `test_h3_...` does not drive that
+  combination either; `ti-4`, panned to the old legal maximum first, is covered at every width and
+  reads margin 2 throughout.
+- **`atlas_<W>x<H>_rail-{shown,hidden}.svg`** (`H4`'s subject): the vocabulary section with the rail
+  shown, then after the real `R` toggle. At 87×34 the rail auto-hides at rest (below the 118-column
+  threshold), so that pair's FIRST capture is already rail-hidden and the SECOND (after `R`) is
+  rail-shown -- filenames were corrected to match content rather than capture order.
+- **`tab_<W>x<H>_{1-before-question,2-after-escape}.svg`** (`H2`'s subject): `FINA_4`, tabbed to
+  `#insp-state`, then the real `?` and `esc`.
+
+### Carries (unchanged or newly filed by this pass)
+
+- `INC8-CL-CR-F4` (`_reclamp_pan`'s range is unpinned by any arm) → routed to `qa-reviewer`, per the
+  brief.
+- `INC8-CL-F1` (rail-hidden-while-open is not reachable through the shipped app today; the defensive
+  guard is kept, see *Findings* above) and `INC8-CL-F2` (the early-return branches read an already-
+  legal pan; reasoned safe, see *Findings*) — new findings from this pass, neither blocking.
+- The FLAKE-2 candidate (`test_hlr_n16_4_legend_declares_its_own_keys[size2]`) did not fire in this
+  pass's runs; still a carry per the brief.
+- `B-72` (the `?`-eats-the-title field bug, `B-36` family), `G6` (`store.py` ficha coercion), Inc-9 —
+  untouched, as instructed.
+
+### Files
+
+| Source (3 of 4 permitted) | Tests | Docs |
+|---|---|---|
+| `mapper/app.py` (`MapScreen.on_descendant_focus`/`on_descendant_blur`; `_restore_after_legend`; `_pan_revealing_selection`) | `tests/test_legend_design.py` | `01b-ux-decisions.md` (§3.1 `V27`, §3.6 footer, a closing-pass change-log entry) |
+| `mapper/darkside.py` (`RAIL_VOCABULARY`; `V27` label) | `tests/test_vocabulary_declaration.py` | `01-requirements.md` (`A-109`'s dated addendum only) |
+| `mapper/screens/help.py` (`FOOTER_LINES`; `vocabulary_for`; `HelpScreen._rail_shown`/`_apply_layout`/`_sections`/`compose`) | `tests/test_search.py` (`_PASS_FREE_READERS`, the regression fix only -- no test node added or removed) | this record (closing pass section) |
+
+`mapper/canvas.py` and every renderer under `mapper/views/` were read (to locate and confirm the
+off-by-one and the rail/coverage-strip source split) but not edited. `.dev-flow/state.json` was not
+touched. Nothing was staged from `prototypes/`, `mapper.db` or scratch, and
+`backup/pre-q9-reword-2026-09-28` was left untouched. Nothing was pushed.
+
+### Commits (this pass)
+
+- `316007b` fix(legend): repaint the canvas on every focus change (`H2`)
+- `7092526` fix(legend): the reveal margin is exact everywhere; re-clamp on close (`H3`, `INC8-CL-CR-F1`)
+- `ec820c8` feat(legend): rail rows only while the rail is shown (`H4`)
+- `7454211` fix(legend): the footer stops over-promising; V27 matches V28's wording (`H1`)
+- `0b6f1e2` docs(legend): 01b rows for H1/V27 -- the two rows the tests derive from
+- `35a469d` fix(legend): `INC8-CL-CR-F1`'s reclamp reads the resolution outside a pass
+- this record (docs)
