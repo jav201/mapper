@@ -96,7 +96,7 @@
 | B-19 | `_event_toast` is safe by construction (`Text.assemble` does not parse markup) but **nothing asserts it** | Inc-4 close | A future change routing it through `notify` would be silent |
 | B-20 | `_text_attributes()` recomputed once per node (`store.py:226`); `str` unreachable in `("str", str)` (`store.py:31`) | Inc-3 `F7`/`F9`, security `L4` | Declined twice with reason — cosmetic, and moving `store.py` after its battery bought a re-run for zero behavioural change |
 | B-21 | `F2`'s four sibling malformed shapes still deny the map: a node entry that is a string, a node entry that is a list, the `nodes` block a list, `attachments` non-list | Inc-3 `F2` | `LLR-R03.5` covers only a malformed `fields` block. Widening is **B-01/`F-M5`'s** repair |
-| B-22 | Operator identity and a Claude session UUID inside the `.dev-flow/**` battery transcripts | security `L2` | Harmless in a private repo; **a blocker for any public push** |
+| B-22 | Operator identity and a Claude session UUID inside the `.dev-flow/**` battery transcripts | security `L2` | Harmless in a private repo; **a blocker for any public push**. **Identity half CLOSED** in the working tree by Inc-SCRUB (`A-110`, `03-increments/increment-023-scrub-operator-paths.md`) — 261 occurrences across 70 tracked files replaced with `<operator>`, guarded by `tests/test_no_operator_paths.py`. The session-UUID half is still open. The real account name remains in git HISTORY on the public remote; that needs a history rewrite and force push, not authorized here |
 
 ### Process
 
