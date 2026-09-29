@@ -555,6 +555,14 @@ def plain(value: object) -> str:
 _ROW_BREAKERS = {0x0009: " ", 0x000A: " ", 0x000D: " "}
 
 
+def _row_text(s: object) -> str:
+    """The ONE coercion a painted row gets: `plain`, then every row breaker
+    as a single space.  `shown_cells` measures this and `fit` paints it, so
+    the width a caller sizes by is the width that is painted
+    (`INC8-P2-CR-F4`: the two used to spell the coercion separately)."""
+    return plain(s).translate(_ROW_BREAKERS)
+
+
 def shown_cells(s: str) -> int:
     """The cells `fit` will paint `s` in -- measured AFTER the coercion `fit`
     applies, never on the raw string.
@@ -567,7 +575,7 @@ def shown_cells(s: str) -> int:
     the defect was the caller measuring a different string than the one
     painted, so the callers size by this instead.
     """
-    return _cells(plain(s).translate(_ROW_BREAKERS))
+    return _cells(_row_text(s))
 
 
 def fit(s: str, w: int) -> str:
@@ -585,8 +593,7 @@ def fit(s: str, w: int) -> str:
     """
     if w <= 0:
         return ""
-    s = plain(s).translate(_ROW_BREAKERS)
-    text = Text(s)
+    text = Text(_row_text(s))
     if text.cell_len > w:
         text.truncate(w, overflow="ellipsis")
         return text.plain
