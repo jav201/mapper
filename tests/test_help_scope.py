@@ -169,7 +169,7 @@ async def test_llr_n16_2_2_empty_vocabulary_omits_the_section(tmp_path, view_key
 # ---------------------------------------------------------------------------
 # LLR-N16.2.3 -- everything reaching the legend is coerced and bounded (TC-069)
 
-HOSTILE = "[bold red]x[/] \x07 ‮ " + "漢" * 60
+HOSTILE = "[bold red]x[/] \x07 \u202e " + "漢" * 60
 BANNED = {cp for lo, hi in darkside.COERCION_RANGES for cp in range(lo, hi + 1)}
 
 
