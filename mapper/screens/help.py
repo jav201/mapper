@@ -114,7 +114,12 @@ LEGEND_TITLE = "legend"
 SECTION_VOCABULARY = "what this view paints"
 SECTION_COLOURS = "what the colours mean"
 SECTION_KEYS = "keys in this view"
-FOOTER_LINES = ("? always explains the view you are in",)
+#: `H1` (closing verdict, round 5): the old wording over-promised -- `?` typed
+#: into a focused text FIELD types a literal `?` there (select-all on focus
+#: replaces the title with it and saves it, `B-36`/`B-72`, a later batch's
+#: fix), it does not open the legend.  Two lines because the honest sentence
+#: no longer fits the docked row's budget (`LEGEND_DOCKED_ROW_CELLS`) on one.
+FOOTER_LINES = ("? explains the view you are in,", "outside text fields")
 
 
 # `INC8-CR-F9`: this module had its own copy of `darkside._cells`. One
