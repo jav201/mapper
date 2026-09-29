@@ -8,6 +8,8 @@ never read as legend content.
 """
 from __future__ import annotations
 
+import re
+
 import pytest
 from rich.style import Style
 from textual.app import App
@@ -209,9 +211,28 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
 # ---------------------------------------------------------------------------
 # HLR-N16.4 -- the legend declares every key that works inside it (TC-086)
 
+def _painted_help_keys(rows: list[str]) -> set[str]:
+    """Which `SCOPE_HELP` keys the FRAME actually shows a row for.
+
+    `INC8-CR-F1`.  Matched by glyph AND label together, in that order, on one
+    painted row -- glyph alone would also hit `q` and `esc`'s OTHER bindings in
+    the map scope's own `salir` group (`q -> inicio`, `esc -> volver`), which
+    paint the same two glyphs under a different label. The seat is used only
+    to decode a painted (glyph, label) pair back into the `key` name `effective`
+    is keyed on: the frame itself has no other name for a key than what it
+    paints.
+    """
+    out: set[str] = set()
+    for b in bindings_for(SCOPE_HELP):
+        pattern = re.compile(rf"(?<!\S){re.escape(b.glyph)}(?!\S).*{re.escape(b.label)}")
+        if any(pattern.search(row) for row in rows):
+            out.add(b.key)
+    return out
+
+
 @pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
 async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
-    """Keys with a MEASURED effect == keys the seat declares for the legend.
+    """Keys with a MEASURED effect == keys the legend actually PAINTS.
 
     The universe is DERIVED from the legend's live binding chain -- the chain
     Textual dispatches non-priority keys through, plus every priority binding --
@@ -219,6 +240,13 @@ async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
     (`ctrl+q`, `ctrl+c`), which no scope of this seat declares (`INC8-F3`).
     Each key is pressed for real from the MIDDLE of the scroll range, and its
     effect is read from the pane, the screen stack and the focus.
+
+    `INC8-CR-F1`.  The right-hand side used to be `declared` -- keys the SEAT
+    lists for `SCOPE_HELP`, regardless of whether the legend ever paints a row
+    for them -- which is exactly the gap `HLR-N16.4` names: "the set the legend
+    PAINTS for its own scope", not the set it merely declares. A mutant that
+    stops PAINTING a key's row while leaving its seat entry untouched left the
+    old arm green. `painted`, below, is read from the composited frame.
     """
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
@@ -250,9 +278,22 @@ async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
             if after != before:
                 effective.add(key)
 
-    assert effective == declared, (
-        f"work but undeclared: {sorted(effective - declared)}; "
-        f"declared but inert: {sorted(declared - effective)}"
+        if not isinstance(app.screen, HelpScreen):
+            await pilot.press("question_mark")
+            await pilot.pause()
+            await pilot.pause()
+        # `_harvest` walks FORWARD from wherever the pane already sits; the
+        # loop above leaves it mid-scroll, which would skip the own-scope
+        # group painted at the very top.
+        pane = app.screen.query_one("#help-bindings")
+        pane.scroll_home(animate=False)
+        await pilot.pause()
+        rows = await _harvest(app, pilot, _rows_in)
+
+    painted = _painted_help_keys(rows)
+    assert effective == painted, (
+        f"work but not painted: {sorted(effective - painted)}; "
+        f"painted but inert: {sorted(painted - effective)}"
     )
 
 

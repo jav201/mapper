@@ -27,6 +27,27 @@ _KEY_CELLS = 10
 _SAMPLE_CELLS = 12
 _INDENT = "  "
 
+# `INC8-CR-F1` / `INC8-UX-F1` / `UX-F10`.  `HLR-N16.4`'s threshold is "the keys
+# that have an effect equal the set the legend PAINTS for its own scope" --
+# and until this corrective pass the legend never painted its own six scroll
+# keys (or `q cerrar`) at all: only `esc cerrar`, in the title.  This group
+# paints `bindings_for(SCOPE_HELP)` -- the legend's own scope -- as its own
+# always-visible widget (`_render_own_scope_keys`), OUTSIDE the scrollable
+# pane and outside `_render_keymap` -- `LLR-R05.2` (`TC-R25`/`TC-R26`, a prior
+# batch's sealed requirement) pins `_render_keymap`'s presented set to EXACTLY
+# `bindings_for(self.scope)`, with no foreign-scope row, so `SCOPE_HELP`'s own
+# rows cannot be folded into that method without breaking it.
+#
+# `A5`, queued for the operator (see the corrective-pass record): `01b` §3.6
+# does not name this group, so its title is an Inc-8 constant pending
+# ratification, in the same class as Q3's un-ratified label prose.  Placement
+# is behind its own flag rather than hard-coded into `compose`, so the
+# operator can move it without touching the painting logic -- it sits OUTSIDE
+# the scrollable pane either way, so it stays reachable with no scrolling
+# regardless of the flag.
+LEGEND_OWN_SCOPE_GROUP = "en esta leyenda"
+LEGEND_OWN_SCOPE_FIRST = True
+
 # `A-104` -- ASSUMPTION, queued for the operator: a compound row (one `01b` row
 # naming several styles, e.g. `V19`) paints ALL its samples on ONE line, each
 # in its own style, under ONE caption.  `False` paints one line per member,
@@ -99,6 +120,9 @@ class HelpScreen(ModalScreen[None]):
     #help-title {
         margin-bottom: 1;
     }
+    #help-own-scope {
+        margin-bottom: 1;
+    }
     """
 
     def __init__(self, scope: str = SCOPE_APP, view: str | None = None) -> None:
@@ -117,11 +141,15 @@ class HelpScreen(ModalScreen[None]):
             body.append(Static(self._render_vocabulary(vocabulary), id="help-vocabulary"))
             body.append(Static(self._render_colours(), id="help-colours"))
         body.append(Static(self._render_footer(), id="help-footer"))
-        yield Vertical(
-            Static(self._render_title(), id="help-title"),
-            VerticalScroll(*body, id="help-bindings"),
-            id="help-dialog",
-        )
+        title = Static(self._render_title(), id="help-title")
+        own_scope = Static(self._render_own_scope_keys(), id="help-own-scope")
+        pane = VerticalScroll(*body, id="help-bindings")
+        # `A5` (`INC8-CR-F1`/`INC8-UX-F1`/`UX-F10`): the legend's own keys sit
+        # OUTSIDE the scrollable pane either way -- always painted, not merely
+        # "at rest" -- so `LEGEND_OWN_SCOPE_FIRST` only chooses which side of
+        # the scrollable body they sit on, never whether they are reachable.
+        children = [title, own_scope, pane] if LEGEND_OWN_SCOPE_FIRST else [title, pane, own_scope]
+        yield Vertical(*children, id="help-dialog")
 
     # -- painting ----------------------------------------------------------
     # LLR-N16.2.3: every string reaches the surface through `darkside.fit`,
@@ -141,18 +169,46 @@ class HelpScreen(ModalScreen[None]):
             (" " + darkside.fit(close.label, _cells(close.label)), darkside.ASH),
         )
 
+    def _append_key_group(
+        self, parts: list[tuple[str, str]], title: str,
+        bindings: list, label_cells: int, *, leading_blank: bool = True,
+    ) -> None:
+        prefix = "\n" if leading_blank else ""
+        parts.append((f"{prefix}{darkside.fit(title, LEGEND_ROW_CELLS).rstrip()}\n", darkside.ASH))
+        for binding in bindings:
+            parts.append((_INDENT, ""))
+            parts.append((darkside.fit(binding.glyph, _KEY_CELLS), darkside.ACCENT))
+            parts.append((darkside.fit(binding.label, label_cells) + "\n", darkside.INK))
+
     def _render_keymap(self) -> Text:
+        # `LLR-R05.2` (`TC-R25`/`TC-R26`, a prior batch's sealed requirement):
+        # this method's presented set is EXACTLY `bindings_for(self.scope)`,
+        # with no foreign-scope row -- `tests/test_repair_layout.py` parses
+        # this exact method and asserts it. `HLR-N16.4`'s own keys are a
+        # DIFFERENT scope (`SCOPE_HELP`) by construction, so they are painted
+        # by `_render_own_scope_keys` instead, never folded in here.
         label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _KEY_CELLS
         parts: list[tuple[str, str]] = [(SECTION_KEYS + "\n", f"bold {darkside.ASH}")]
         entries = bindings_for(self.scope)
         for group, bindings in groupby(
             sorted(entries, key=lambda b: b.group), key=lambda b: b.group
         ):
-            parts.append((f"\n{darkside.fit(group, LEGEND_ROW_CELLS).rstrip()}\n", darkside.ASH))
-            for binding in bindings:
-                parts.append((_INDENT, ""))
-                parts.append((darkside.fit(binding.glyph, _KEY_CELLS), darkside.ACCENT))
-                parts.append((darkside.fit(binding.label, label_cells) + "\n", darkside.INK))
+            self._append_key_group(parts, group, list(bindings), label_cells)
+        return _trimmed(Text.assemble(*parts))
+
+    def _render_own_scope_keys(self) -> Text:
+        """`INC8-CR-F1` / `INC8-UX-F1` / `UX-F10` / `HLR-N16.4`.
+
+        The legend's own scope (`SCOPE_HELP`), painted as its own always-shown
+        group -- see `compose`'s comment for why it is a SEPARATE widget from
+        `_render_keymap`, not a group folded into it.
+        """
+        label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _KEY_CELLS
+        parts: list[tuple[str, str]] = []
+        self._append_key_group(
+            parts, LEGEND_OWN_SCOPE_GROUP, bindings_for(SCOPE_HELP), label_cells,
+            leading_blank=False,
+        )
         return _trimmed(Text.assemble(*parts))
 
     def _render_vocabulary(self, members: list[tuple[str, str, str, str]]) -> Text:
