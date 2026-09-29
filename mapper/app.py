@@ -2149,7 +2149,7 @@ class MapScreen(Screen):
             return darkside.VIEW_NAMES["radial"]
         return darkside.VIEW_NAMES["canvas"]
 
-    # -- the docked legend (Inc-8 verdicts `F2`, `F9`) ---------------------
+    # -- the docked legend (Inc-8 verdicts `F2`, `F9`, `G2`) ----------------
     # The legend reads `legend_view_left` and calls the two methods below;
     # nothing else does.  They move the view only through this screen's own
     # pan state and its clamp, never a renderer.
@@ -2275,7 +2275,17 @@ class MapScreen(Screen):
         moves (`PAN-1`: outline and radial do not pan).  Read from the state
         the canvas was last painted from, through the same layout it draws
         (`layered._geometry`, read only), so the card is where the frame
-        paints it."""
+        paints it.
+
+        `A-109` (Inc-8 design pass 4, verdict `G2`): the target is clamped to
+        the range legal on the VISIBLE canvas -- the columns left of the
+        docked panel -- not the canvas's own full drawn width.  A card whose
+        pre-dock pan already sat at the OLD range's maximum (the map's own
+        right edge) used to stay partly covered: the old bound assumed the
+        whole drawn width was visible, when the panel already covers the
+        rightmost `panel_x`-to-`avail` slice of it regardless.  This is the
+        one clamp `LLR-N06.1.2` now amends, and only for this call: `_clamp_pan`
+        itself, and every other caller of it, is untouched."""
         cursor = self.nav.cursor
         if cursor is None or not self._consumes_pan(self._current_renderer()):
             return self.pan_x
@@ -2283,17 +2293,19 @@ class MapScreen(Screen):
         pan_x = state.pan_x
         try:
             geo = layered_geometry(self.graph, state)
-            (extent_x, span_x), _y = pan_extent(self.graph, state)
+            (extent_x, _span_x), _y = pan_extent(self.graph, state)
         except Exception:
             # A frame that cannot be laid out cannot be panned (`_pan`).
             return pan_x
         if geo is None or cursor not in geo.pos:
             return pan_x
+        canvas_x = self.query_one("#map-canvas", Static).region.x
         card_x, _card_y = geo.place(cursor)
-        right = self.query_one("#map-canvas", Static).region.x + card_x + geo.card_w
+        right = canvas_x + card_x + geo.card_w
         if card_x >= geo.avail or right <= panel_x:
             return pan_x
-        return self._clamp_pan(pan_x + right - panel_x, extent_x, span_x)
+        visible_span = panel_x - canvas_x
+        return self._clamp_pan(pan_x + right - panel_x, extent_x, visible_span)
 
     def _current_crumb(self) -> list[str]:
         prefix = self.source_crumb or [self.map_id]

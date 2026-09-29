@@ -9853,3 +9853,50 @@ instead of silently measuring the other layout.
 
 **What is not loosened.** The same three expected heights, the same two declarations under test, the
 same row counts. Only the width a modal is measured at moved, because the width that is modal moved.
+
+## Amendment set 17 — while the legend is docked, the legal pan range is the visible canvas. 2026-09-29. Base `74e1e20`.
+
+### `A-109` — `LLR-N06.1.2`'s legal pan range, while the legend is docked, is computed on the VISIBLE canvas
+
+**Authority.** Operator verdict round 4, item `G2` (`VERDICT-inc8-legend-2026-09-28.md`, section
+*Round 4*): *"enmendar LLR-N06.1.2: mientras la leyenda está acoplada, el rango legal usa el lienzo
+visible"*, closing the carry `INC8-D3-F2` and its question `INC8-D3-Q2`. Applied in Inc-8 design
+pass 4 (`03-increments/increment-022-inc8-legend.md`, section *Design pass 4*). A scan of all of
+`.dev-flow` found no `A-109`; `A-108` was the last id taken.
+
+**What is amended.** `LLR-N06.1.2`'s statement stands unchanged for every layout except one case:
+while the legend is DOCKED, the legend's own reveal (`MapScreen._pan_revealing_selection`, verdict
+`F2`) computes its legal maximum against the canvas columns VISIBLE left of the panel, not the
+canvas's own full drawn width. Before this amendment, the reveal's clamp used the same span as an
+ordinary pan (`geo.avail`, the full canvas), so a card whose pan was already at that OLD legal
+maximum -- the map's own right edge -- could not be panned any further, and stayed partly covered by
+the panel even though the panel already occupies that space on screen regardless of where the pan
+sits. The docked panel's own width, `LEGEND_DOCKED_CELLS`, never changes what the canvas ITSELF
+draws (`_chrome_width` does not count it); it only occupies screen columns the operator cannot see
+past. The old clamp reasoned about the drawn width as if all of it were visible, which was false the
+whole time the legend is docked.
+
+**The rule now.** For the ONE call `_pan_revealing_selection` makes to `_clamp_pan`, the span is
+`panel_x - canvas_x` (the columns actually visible left of the panel) instead of `geo.avail` (the
+canvas's full drawn width); `extent_x` (`E`) is unchanged. `_clamp_pan` itself is untouched -- it is
+still `max(0, min(offset, max(0, extent - span)))` -- and every OTHER caller (`_pan`, `_apply_region_visibility`'s repaint, the bare `LLR-N06.1.2` arms) still passes the full `(extent, span)` pair
+the ordinary pan always has. Practically: an edge card that a docked panel used to leave partly
+covered can now be panned fully clear of it, because the extra room the panel itself already
+occupies on screen is exactly the room the widened clamp legalizes.
+
+**The declared margin (`G5`).** The reveal aims for the card's right edge to land
+`REVEAL_MARGIN_CELLS` (2) columns short of the panel, not flush against it -- a separate, smaller
+declaration read by the same call, honoured whenever the (possibly widened) legal range leaves room
+for it. At the map's own true right edge the widened range has no slack left to give the margin
+(the card's true content boundary IS the legal maximum), so the margin there is exactly 0; this is
+`LLR-N06.1.2`'s own existing "no blank space past the content" principle, not a defect in the margin.
+
+**On close.** Unchanged. `legend_closed` keeps the pan it captured the instant the legend opened
+(`_pan_before_legend`) and `on_screen_resume` restores that EXACT value -- neither reads
+`_pan_revealing_selection` nor the widened clamp. The amendment governs one call, made only while
+docked; the return path never calls it.
+
+**What is not loosened.** Every `LLR-N06.1.2` arm outside the docked reveal -- the bare clamp's own
+unit arms, `_pan`'s keyboard panning, the modal layout's pan-preserving path -- is unchanged and
+keeps the OLD range, `[0, max(0, extent - avail)]`. The modal layout never calls the amended call at
+all (`legend_docked(None)` skips `_pan_revealing_selection`), so nothing about it moves.
