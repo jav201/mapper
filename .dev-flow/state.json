@@ -602,7 +602,7 @@
       }
     ],
     "next": "Inc-8",
-    "next_stage": "Inc-7 RELEASED 2026-09-28 (code lens round 4 PASS, all residuals discharged; security PASS since round 2). OPERATOR DECISION PENDING before Inc-8: INC7-CR-R3-F3 -- HomeScreen._sparkline_text divides by zero when no .mmd in the workspace was modified in the last 14 days (app.py ~573/579); it reds 8 arms in tests/test_agree_floor.py under preserved mtimes and blocks every full-lane gate. Coordinator recommends a micro-increment before Inc-8. Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first).",
+    "next_stage": "Inc-8 LAUNCHED 2026-09-28 (implementer claude-opus-5-5, operator instruction). Inc-7 RELEASED and the sparkline zero-division micro-increment (increment-021, A-105) RELEASED the same day. Then Inc-9 -> whole-branch gates (FLAKE-1 first).",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -646,6 +646,36 @@
         "INC7-SEC-R2-F1/F2/F3",
         "routed->qa: app.py table.clear() column duplication"
       ]
+    },
+    "SPARKLINE_MICRO_INCREMENT_RELEASED_2026-09-28": {
+      "date": "2026-09-28",
+      "head": "fe103a4 (+ coordinator doc fix for F7-F9, this commit)",
+      "commits": [
+        "54f1cfc",
+        "bc0ba0a",
+        "c371a0d",
+        "239f242",
+        "fe103a4"
+      ],
+      "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-021-sparkline-zero-division.md",
+      "requirement": "A-105 (parent HLR-N13.3 via LLR-N13.1.6): zero activity paints every bar at the floor and does not raise; real activity is not flattened; behaviour independent of the date the suite runs on.",
+      "authority": "Operator 2026-09-28: 'Corrigelo, pero que quede jugando con las reglas de /dev-flow.'",
+      "fix": "one guard line in HomeScreen._sparkline_text (max_count = max_count or 1) plus a comment naming A-105 and INC7-CR-R3-F3. The 14x glob loop (LLR-N13.1.6 cost clause) untouched.",
+      "escaped_bug_evidence": "regression RED on base (ZeroDivisionError app.py:579), GREEN on fix -- reproduced independently by the reviewer in a base worktree.",
+      "lane": "full default lane in the main working tree (stale fixture mtimes): 1170 passed, 20 deselected, 3 xfailed, 0 failed (implementer-measured, 2026-09-28). First clean full lane of the batch. FLAKE-1 did not fire.",
+      "hermeticity": "test_agree_floor's 8 arms do not read the sparkline; they pass at both mtime states (stale main tree, fresh worktree). Decision (a): no pinning. Its fixture-mtime dependence stays named as a carry.",
+      "review": "code-reviewer PASS twice: first pass 9 mutants (M6 max->sum and M7 binary tier survived -> INC21-CR-F1 MEDIUM); fold round added a two-day arm that kills both, noon-of-day mtimes, and a midnight skip. Findings F1-F3, F5, F6 fixed; F4 carried; F7-F9 (record/amendment wording) fixed by the coordinator in this commit.",
+      "carries": [
+        "INC21-CR-F4 -> qa-reviewer: sparkline style tiers unpinned (pre-existing)",
+        "LLR-N13.1.6 glob-cost clause open (14 globs per mount vs <= 2)",
+        "test_agree_floor fixture-mtime dependence (latent; not load-bearing post-fix)",
+        "M11 round() vs int() equivalent on fixture; rounding mode not in A-105's scope"
+      ],
+      "tokens_measured_raw": {
+        "implementer_sonnet": "21.3M",
+        "reviewer_opus_5_5": "3.9M",
+        "coordinator": "not measured"
+      }
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
