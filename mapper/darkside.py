@@ -476,8 +476,9 @@ def time_row(name: str, age_days: int, glyph: str, style: str, note: str,
 # the classes below that the layout depends on.
 PRESERVED_CODE_POINTS = frozenset({0x0009, 0x000A})
 
-# The list is exactly Unicode's Cc (control), Cf (format), Zl (line separator)
-# and Zp (paragraph separator) classes, MINUS PRESERVED_CODE_POINTS.  It is
+# The list is exactly Unicode's Cc (control), Cf (format), Zl (line separator),
+# Zp (paragraph separator) and Cs (surrogate) classes, MINUS
+# PRESERVED_CODE_POINTS.  It is
 # spelled out as literal ranges so a reviewer can read it, and
 # `tests/test_darkside_census.py` re-derives it from `unicodedata` and asserts
 # equality.  That derivation is the point: an oracle built FROM this list can
@@ -505,6 +506,10 @@ COERCION_RANGES: tuple[tuple[int, int], ...] = (
     (0x2028, 0x202E),                         # line/para seps, bidi embed/override
     (0x2060, 0x2064),                         # word joiner, invisible operators
     (0x2066, 0x206F),                         # bidi isolates, deprecated controls
+    # Cs, `INC8-P2-SEC-F1` / `B-67`: a lone surrogate decodes from an escaped
+    # JSON string and crashes the first strict-UTF-8 sink (a terminal write,
+    # an exported SVG) with `UnicodeEncodeError`.
+    (0xD800, 0xDFFF),                         # surrogates
     (0xFEFF, 0xFEFF),                         # byte-order mark
     (0xFFF9, 0xFFFB),                         # interlinear annotation
     (0x110BD, 0x110BD), (0x110CD, 0x110CD),   # Kaithi number signs
