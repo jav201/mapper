@@ -234,9 +234,10 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
     # hostile colour LABEL (the only file-derived part of a colour row; the
     # token stays a real one so `resolve_style` does not itself object).
     monkeypatch.setattr(darkside, "DECLARED_COLOURS", (
-        *darkside.DECLARED_COLOURS, ("█", HOSTILE, "ACCENT")))
+        *darkside.DECLARED_COLOURS, ("CX", "█", HOSTILE, "ACCENT")))
     view = "atlas" + HOSTILE
     monkeypatch.setitem(darkside.LEGEND_VIEWS, view, darkside.LEGEND_VIEWS["atlas"])
+    monkeypatch.setitem(darkside.LEGEND_COLOURS, view, (*darkside.LEGEND_COLOURS["atlas"], "CX"))
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
         await _open_map(app, pilot, _tree(app))
@@ -426,9 +427,9 @@ def test_e1_no_painted_string_is_cut_at_either_budget(docked):
         vocabulary = screen._render_vocabulary(vocabulary_for(view))  # noqa: SLF001
         for _vid, _glyph, label, _style in vocabulary_for(view):
             whole(label, vocabulary, f"{view} vocabulary")
-    colours = screen._render_colours()  # noqa: SLF001
-    for _swatch, label, _token in darkside.DECLARED_COLOURS:
-        whole(label, colours, "colours")
+        colours = screen._render_colours()  # noqa: SLF001
+        for _rid, _swatch, label, _token in help_screen.colours_for(view):
+            whole(label, colours, f"{view} colours")
     for line in help_screen.FOOTER_LINES:
         whole(line, screen._render_footer(), "footer")  # noqa: SLF001
     own = screen._render_own_scope_keys()  # noqa: SLF001
@@ -486,7 +487,7 @@ def test_d28_the_legend_chrome_clears_the_contrast_floor():
     # Exempt by the painted TEXT, never by style: a chrome seat sharing a style
     # value with some vocabulary member (`MUT` is `V4b`'s) must still be read.
     exempt = {m[1].strip() for m in darkside.DECLARED_VOCABULARY if m[1]}
-    exempt |= {c[0] for c in darkside.DECLARED_COLOURS}
+    exempt |= {c[1] for c in darkside.DECLARED_COLOURS}
     screen = HelpScreen(SCOPE_MAP, view="atlas")
     texts = [screen._render_title(), screen._render_keymap(),  # noqa: SLF001
              screen._render_vocabulary(vocabulary_for("atlas")),  # noqa: SLF001
@@ -611,7 +612,8 @@ def test_inc8_sec_f4_a_hostile_colour_label_is_coerced_and_bounded(monkeypatch):
     # and the record's own scan requirement (no new literal control/bidi
     # character) are best satisfied by not retyping the U+202E escape at all.
     monkeypatch.setattr(darkside, "DECLARED_COLOURS", (
-        *darkside.DECLARED_COLOURS, ("█", HOSTILE, "ACCENT")))
+        *darkside.DECLARED_COLOURS, ("CX", "█", HOSTILE, "ACCENT")))
+    monkeypatch.setitem(darkside.LEGEND_COLOURS, "atlas", (*darkside.LEGEND_COLOURS["atlas"], "CX"))
     screen = HelpScreen(SCOPE_MAP, view="atlas")
     text = screen._render_colours()  # noqa: SLF001
     assert "[bold red]x[/]" in text.plain, "the hostile label never reached the frame"

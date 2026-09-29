@@ -132,6 +132,14 @@ def vocabulary_for(view: str) -> list[tuple[str, str, str, str]]:
     return [m for m in darkside.DECLARED_VOCABULARY if m[0] in wanted]
 
 
+def colours_for(view: str) -> list[tuple[str, str, str, str]]:
+    """Verdict `F1`: the colour rows `view`'s legend paints -- only the ones
+    its own view paints -- in declaration order, read from the ONE
+    declaration."""
+    wanted = set(darkside.LEGEND_COLOURS.get(view, ()))
+    return [c for c in darkside.DECLARED_COLOURS if c[0] in wanted]
+
+
 def _trimmed(text: Text) -> Text:
     """Drop the last row's newline, which would paint an empty row under it."""
     if text.plain.endswith("\n"):
@@ -265,12 +273,14 @@ class HelpScreen(ModalScreen[None]):
         """(widget id, text) of the scrolling body, in `01b` §3.6's order:
         the vocabulary first (verdict `E1`).  LLR-N16.2.2: an empty
         vocabulary omits its section -- and the colour rows, which exist to
-        explain the vocabulary's hues."""
+        explain the vocabulary's hues.  A view that paints no colour row
+        (`F1`) omits the colour section too."""
         out: list[tuple[str, Text]] = []
         vocabulary = vocabulary_for(self.view)
         if vocabulary:
             out.append(("help-vocabulary", self._render_vocabulary(vocabulary)))
-            out.append(("help-colours", self._render_colours()))
+            if colours_for(self.view):
+                out.append(("help-colours", self._render_colours()))
         out.append(("help-content", self._render_keymap()))
         out.append(("help-footer", self._render_footer()))
         return out
@@ -443,7 +453,7 @@ class HelpScreen(ModalScreen[None]):
     def _render_colours(self) -> Text:
         label_cells = self.row_cells - len(_INDENT) - 3
         parts: list[tuple[str, str]] = [(f"{SECTION_COLOURS}\n\n", f"bold {darkside.ASH}")]
-        for swatch, label, token in darkside.DECLARED_COLOURS:
+        for _rid, swatch, label, token in colours_for(self.view):
             parts.append((_INDENT, ""))
             parts.append((darkside.fit(swatch, 1), darkside.resolve_style(token)))
             parts.append(("  ", ""))

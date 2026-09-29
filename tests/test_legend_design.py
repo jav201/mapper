@@ -232,13 +232,20 @@ _WALKS = (
 )
 _ON_BOTH = [(factory, f"{factory.__name__}-{label}", keys)
             for factory in (legacy_map, concept_map) for label, keys in _WALKS]
+#: `INC8-D3-F1`: the selection on a node missing its record (`rrhh1`, the
+#: legacy fixture's second `rrhh` leaf).  No state above selected one, so the
+#: inspector's `<field>  requerido` in `ALERT` -- painted by EVERY map view --
+#: was never seen, and the census read red as the atlas's alone.  Legacy
+#: only: the concept fixture has no schema, so nothing is required there.
+_MISSING_RECORD = (legacy_map, "legacy_map-missing-record", ("l", "j", "l", "j"))
 
 HOME_VIEW = darkside.VIEW_NAMES["home"]
 #: view -> (the keys that switch the map to it, [(fixture, label, keys)]).
 MAP_STATES = {
-    darkside.VIEW_NAMES["canvas"]: ((), _ON_BOTH),
-    darkside.VIEW_NAMES["outline"]: (("o",), [*_ON_BOTH, (deep_map, "deep_map-rest", ())]),
-    darkside.VIEW_NAMES["radial"]: (("r",), _ON_BOTH),
+    darkside.VIEW_NAMES["canvas"]: ((), [*_ON_BOTH, _MISSING_RECORD]),
+    darkside.VIEW_NAMES["outline"]: (("o",), [*_ON_BOTH, _MISSING_RECORD,
+                                              (deep_map, "deep_map-rest", ())]),
+    darkside.VIEW_NAMES["radial"]: (("r",), [*_ON_BOTH, _MISSING_RECORD]),
 }
 
 
@@ -350,21 +357,46 @@ def has_a_job(hex_value: str | None) -> bool:
     return bool(hex_value) and len({hex_value[1:3], hex_value[3:5], hex_value[5:7]}) > 1
 
 
-async def test_e4_the_colour_rows_are_the_hues_the_views_paint(tmp_path):
-    """Verdict `E4`: `01b` §3.5 derived from what is painted, both directions.
-    Every declared colour is a hue some view paints (fg or bg, outside the
-    app chrome); every hue a view paints is a declared colour.  Read over the
-    same frames as the D2 arm, at the declared context of use (`SIZES[0]`)."""
-    painted: set = set()
-    for view in sorted(darkside.LEGEND_VIEWS):
-        painted |= await painted_by(view, SIZES[0], tmp_path / view.replace(" ", "-"))
-    hues = {c for _ch, st in painted for c in _paint(st)[:2] if has_a_job(c)}
+def colour_jobs(painted) -> set[tuple[str, str]]:
+    """Verdict `F1`'s census rule, written ONCE: `(hue, kind)` for every hue
+    with a job a view paints.  A hue in the foreground of a LETTER is painted
+    on `words` (the count's `sin acta`, the inspector's `requerido`); any
+    other foreground -- a glyph, a numeral -- and every background fill is
+    painted on `marks`."""
+    out: set[tuple[str, str]] = set()
+    for ch, st in painted:
+        fg, bg, _bold = _paint(st)
+        if has_a_job(fg):
+            out.add((fg, "words" if unicodedata.category(ch)[0] == "L" else "marks"))
+        if has_a_job(bg):
+            out.add((bg, "marks"))
+    return out
+
+
+@pytest.mark.parametrize("size", SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.parametrize("view", sorted(darkside.LEGEND_VIEWS))
+async def test_f1_each_legend_paints_the_colour_rows_its_view_paints(tmp_path, view, size):
+    """Verdict `F1` (was `E4`, over the union of the views): PER VIEW, both
+    directions.  A row is painted by this view when the view paints its hue
+    on what §3.5's `Painted on` cell names; the view's declared rows are
+    exactly those, and every (hue, kind) the view paints has a declared row.
+    Read over the same frames as the D2 arm (`painted_by`, one drive per
+    view and size), so it costs one view's states when run alone
+    (`INC8-P2-CR-F3`)."""
+    from tests.test_vocabulary_declaration import colour_rows
+
+    rows = [(rid, darkside.tokens()[tok].lower(), on) for rid, _s, _l, tok, _h, on, _v
+            in colour_rows()]
+    assert all(has_a_job(h) for _rid, h, _on in rows), rows
+    jobs = colour_jobs(await painted_by(view, size, tmp_path))
+    declared = set(darkside.LEGEND_COLOURS.get(view, ()))
+    painted_rows = {rid for rid, h, on in rows if any(j[0] == h and j[1] in on for j in jobs)}
+    unexplained = sorted(j for j in jobs if not any(
+        rid in declared and j[0] == h and j[1] in on for rid, h, on in rows))
     names = {v.lower(): n for n, v in darkside.tokens().items()}
-    declared = {darkside.tokens()[tok].lower() for _s, _l, tok in darkside.DECLARED_COLOURS}
-    assert declared and all(has_a_job(h) for h in declared), declared
-    assert hues == declared, (
-        f"painted hues with no colour row: {sorted((h, names.get(h)) for h in hues - declared)}\n"
-        f"colour rows no view paints: {sorted((h, names.get(h)) for h in declared - hues)}"
+    assert painted_rows == declared and not unexplained, (
+        f"{view}: rows painted {sorted(painted_rows)}, declared {sorted(declared)}; "
+        f"painted with no declared row: {[(names.get(h, h), k) for h, k in unexplained]}"
     )
 
 
