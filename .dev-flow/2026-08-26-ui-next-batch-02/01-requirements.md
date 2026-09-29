@@ -9651,3 +9651,54 @@ independent of the layout by construction.
 assertion depended on layout would hold `Inc-8` for a design verdict that cannot affect it — which is
 precisely the coupling this batch has already paid for once, when a *defect* and a *tone* were nearly
 bundled and had to be separated explicitly.
+
+### `A-105` — the sparkline's zero-activity floor, and it does not depend on the calendar
+
+**Authority.** Operator-directed corrective, 2026-09-28, discharging `INC7-CR-R3-F3` (round-3 review
+of `Inc-7`, recorded in `increment-020-inc7-corrective-2.md`'s "Round 3" section and
+`state.json`'s `p3_progress.NEW_FINDING_ROUTED_TO_OPERATOR`). Routed to the operator rather than to a
+further `Inc-7` corrective pass, because fixing it touches `app.py`, which that round did not.
+
+**Parent.** `HLR-N13.3` (the sala paints within a declared budget, and an unsummarisable map says so
+on its own card), via `LLR-N13.1.6` (the sala loads at most once per map per mount), whose
+touched-symbols line already names `mapper/app.py::HomeScreen._sparkline_text`.
+
+**The gap.** No requirement in this document states what the 14-day activity sparkline paints when
+the workspace has zero activity in the window. `_sparkline_text` computes
+`max_count = max(counts) if counts else 1` (`app.py:575`) — `counts` always has 14 entries, one per
+day, so the `else 1` branch can never fire. When every entry is `0` — no `.mmd` in the workspace was
+modified in the last 14 days — `max_count` is `0`, and the division `c / max_count` (`app.py:579`)
+raises `ZeroDivisionError`, crashing `HomeScreen` for any workspace idle two weeks or more. Measured
+2026-09-28: this batch's own `fixtures/` directory (newest mtime `truncado.mmd`, 2026-09-11) is
+already 17 days stale and reproduces the crash today, in the main working tree, on unmodified code.
+
+**Statement.** A workspace with zero activity in the 14-day window shall paint a sparkline with every
+day at the floor bar (`bars[0]`), and `HomeScreen` shall not raise. A workspace with a map modified on
+the current day shall light exactly the last bar at the maximum tier (`bars[-1]`) — the zero-activity
+guard shall not flatten real activity.
+
+**Touched symbol.** `mapper/app.py::HomeScreen._sparkline_text` (the `max_count` computation at
+`app.py:575`, guarding the division at `:579`). This amendment does **not** touch, and does not
+license touching, the `14 x N_maps` glob-and-stat loop above it (`app.py:565-574`) — that cost is
+`LLR-N13.1.6`'s own open clause (its numeric pass threshold on `glob` calls per mount), unrelated to
+this defect, and restructuring it here would be undeclared scope.
+
+**Validation.** `test (unit)` — `tests/test_sparkline_floor.py`, driving
+`HomeScreen._sparkline_text` directly against a workspace whose `.mmd` mtimes are set explicitly with
+`os.utime` relative to `date.today()` at test time (not to a fixed calendar date), plus the
+pre-existing `tests/test_agree_floor.py` (whose 8 arms mount `HomeScreen` incidentally and share this
+crash as a symptom).
+
+**Numeric pass threshold.** `0` exceptions raised, and `14`/`14` bars at the floor glyph, on a
+zero-activity workspace; exactly `1`/`14` bar at the maximum-tier glyph, and the remaining `13`/`14`
+at the floor glyph, on a workspace with one map modified today.
+
+**Date-independence, stated so nobody re-derives it by hand later.** The product behaviour this
+amendment defines is independent of the date the suite runs on: `tests/test_sparkline_floor.py`'s
+fixtures set `.mmd` mtimes relative to `date.today()` at test time via `os.utime`, not to a pinned
+calendar date, so the arm reproduces the same verdict on any date. This is deliberately narrower than
+`tests/test_agree_floor.py`'s own pre-existing hermeticity defect — its fixtures are checked-in
+`.mmd` files with fixed mtimes, so **that suite's result depends on the date it runs on**, which is
+what let `INC7-CR-R3-F3` escape undetected until those fixtures' mtimes happened to drift past 14
+days. That is a defect in `test_agree_floor.py`'s own setup, separate from the product crash this
+amendment fixes, and this amendment's new arm is not permitted to share it.
