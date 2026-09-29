@@ -11,24 +11,31 @@ composited frame, in both directions:
   COMPLETENESS  every meaningful glyph the view paints belongs to some member
                 of that view's vocabulary.
 
-THE EXCLUSION RULE is written once, in `meaningful` and `_excluded_widget`,
-and it is the same rule the catalogue instrument in `increment-022` applied:
+THE EXCLUSION RULE is written once, in `meaningful`, `_excluded_widget` and
+`OVERLAY_STYLES`, and the catalogue instrument in `increment-022` IMPORTS it
+from here rather than re-stating it (`INC8-F-CR-F6`):
 
   X1  text          letters, digits and spaces (`L*`, `N*`, `Z*`)
-  X2  punctuation   Unicode `P*`, and every ASCII symbol
+  X2  punctuation   ASCII punctuation and symbols, plus the three separators
+                    the catalogue found painted as text: `·` `…` `—`
+                    (`INC8-F-CR-F2`; any OTHER non-ASCII mark is meaningful)
   X3  app chrome    the tab strip, the hint line, the key bar and the sala's
                     identity row -- the same on every screen, and not the view
   X4  key glyphs    a character the seat uses as a key's glyph (`↵`, `↑`): the
                     legend's key section explains those
   X5  table header  a `DataTable`'s column-header row
+  X6  overlays      (completeness only) a member's glyph under a selection or
+                    cursor tone: `V23`'s, `V24`'s, and the rail cursor's
+                    `INK on STEP` -- every other tone must be a member's own
 
-THE RULE'S KNOWN BLIND SPOTS, stated so nobody reads more into a green run:
-completeness is asserted per CHARACTER, not per style -- a declared glyph
-painted in an undeclared tone is caught only if that tone is a member
-(soundness), not by this arm; and X2 hides `·` (`V21b`, a punctuation code
-point that the rail's lattice uses as a mark), which soundness still checks.
-The diff mode (`=`) is not driven -- it needs a git history -- so its tones are
-not seen by either direction (carried in `increment-022`).
+COMPLETENESS IS PER (GLYPH, STYLE) since `INC8-F-CR-F4`: a declared glyph in a
+tone no member and no overlay declares is RED, not "explained".
+
+THE RULE'S KNOWN BLIND SPOTS, stated so nobody reads more into a green run: X2
+hides `·` (`V21b`, a separator code point the rail's lattice uses as a mark),
+which soundness still checks; the diff mode (`=`) is not driven -- it needs a
+git history -- so its tones are seen by neither direction (carried in
+`increment-022`).
 """
 from __future__ import annotations
 
@@ -37,6 +44,7 @@ import unicodedata
 from datetime import date
 
 import pytest
+from rich.cells import cell_len
 from rich.style import Style
 from textual.widgets import DataTable
 
@@ -52,8 +60,6 @@ from mapper.screens.help import (
     vocabulary_for,
 )
 
-VIEW_SIZE = (118, 34)
-
 # ---------------------------------------------------------------------------
 # The exclusion rule -- ONE statement of it.
 
@@ -63,11 +69,29 @@ KEY_GLYPHS = frozenset(
 )
 
 
+#: X2's non-ASCII half: the separators the catalogue found painted AS TEXT
+#: (`mapa · 36n`, a clipped title's `…`, the sala's `—`).  Named, not a
+#: category: `P*` as a whole would also have excused a `•` or a `‹` that a
+#: renderer started using as a mark (`INC8-F-CR-F2`).
+SEPARATORS = frozenset("·…—")
+
+
 def meaningful(ch: str) -> bool:
     """X1, X2 and X4: may this painted character carry a meaning of its own?"""
-    if ord(ch) < 0x80 or unicodedata.category(ch)[0] in "LNZP":
+    if ord(ch) < 0x80 or unicodedata.category(ch)[0] in "LNZ" or ch in SEPARATORS:
         return False
     return ch not in KEY_GLYPHS
+
+
+#: X6, completeness only: the tones that paint OVER a member's glyph without
+#: being that member's tone -- the selection on the canvas (`V23`), the
+#: selection with the focus elsewhere (`V24`), and the rail's cursor row, which
+#: paints `INK on STEP`.  Read from the declaration where a member owns the
+#: style; the cursor's is the one written here.
+OVERLAY_STYLES = frozenset(
+    {style for vid, _g, _l, style in darkside.DECLARED_VOCABULARY if vid in ("V23", "V24")}
+    | {"INK on STEP"}
+)
 
 
 def _excluded_widget(widget, y: int) -> bool:
@@ -112,7 +136,9 @@ def _paints_as(style: Style | None, declared: str) -> bool:
 
 def harvest(screen) -> set[tuple[str, Style | None]]:
     """(character, style) of every non-space cell of the composited frame that
-    the exclusion rule's X3/X5 leave to the view."""
+    the exclusion rule's X3/X5 leave to the view.  `x` advances by each
+    character's CELL width (`INC8-F-CR-F6`): per character, a wide glyph put
+    every later cell of its row under the wrong widget."""
     out: set[tuple[str, Style | None]] = set()
     for y, strip in enumerate(screen._compositor.render_strips()):  # noqa: SLF001
         x = 0
@@ -122,12 +148,14 @@ def harvest(screen) -> set[tuple[str, Style | None]]:
                     widget, _ = screen.get_widget_at(x, y)
                     if not _excluded_widget(widget, y):
                         out.add((ch, seg.style))
-                x += 1
+                x += cell_len(ch)
     return out
 
 
 # ---------------------------------------------------------------------------
-# Fixtures: the maps the catalogue instrument drove.
+# Fixtures and states: the ONE table both this arm and the catalogue
+# instrument drive (`INC8-F-CR-F6`: the catalogue imports `SIZES`,
+# `MAP_STATES`, `drive_map`, `drive_home` and the exclusion rule from here).
 
 SCHEMA = [SchemaField(key="D", label="documento", required=True),
           SchemaField(key="O", label="dueno", required=True)]
@@ -166,24 +194,48 @@ def concept_map() -> Graph:
     return g
 
 
+#: `INC8-F-UX-F4`: one chain this deep.  The outline indents two cells a
+#: level until the indent would pass half its render width, then paints the
+#: TRUE level as `⇲N` (`views/outline.py:_indent`, row `V45`).  26 levels
+#: reach past that point at both `SIZES`; the D2 arm's soundness half fails
+#: at a size where no `⇲` is painted, so "deep enough" is asserted, not hoped.
+DEEP_LEVELS = 26
+
+
+def deep_map() -> Graph:
+    g = Graph()
+    g.schema = list(SCHEMA)
+    g.add_node(Node(id="n0", ficha=Ficha(title="raiz", fields={"D": "a", "O": "x"})))
+    for d in range(1, DEEP_LEVELS + 1):
+        g.add_node(Node(id=f"n{d}", ficha=Ficha(title=f"nivel {d}", fields={"D": "a", "O": "x"})))
+        g.add_edge(Edge(f"n{d - 1}", f"n{d}"))
+    return g
+
+
 CYCLE_MMD = "graph TD\n    a[A] --> b[B]\n    b --> a\n"
 
-# (fixture, keys) per state; each state runs in a FRESH app so none leaks into
-# the next.  The keys walk, fold (the lattice and the rail's `▸` show only when
-# the rail is short or a folded branch is not selected), search, and move the
-# focus to the rail (the unfocused selection).
+#: Both sizes the catalogue measures at.
+SIZES = ((118, 34), (140, 45))
+
+#: The walks every map view is driven through, on both fixtures, each in a
+#: FRESH app so no state leaks into the next: rest, a walk, a fold (the
+#: rail's `▸` and lattice show only when a folded branch is not selected or
+#: the rail is short), a search, the focus on the rail (the unfocused
+#: selection), and the folded root.
+_WALKS = (
+    ("rest", ()), ("walked", ("l", "j", "l")), ("folded", ("l", "z")),
+    ("folded-walk", ("l", "z", "j")), ("search", ("slash", "f", "i", "n", "enter")),
+    ("rail-focus", ("g",)), ("unfocused-selection", ("l", "g")), ("folded-root", ("z",)),
+)
+_ON_BOTH = [(factory, f"{factory.__name__}-{label}", keys)
+            for factory in (legacy_map, concept_map) for label, keys in _WALKS]
+
 HOME_VIEW = darkside.VIEW_NAMES["home"]
+#: view -> (the keys that switch the map to it, [(fixture, label, keys)]).
 MAP_STATES = {
-    darkside.VIEW_NAMES["canvas"]: ((), [
-        (legacy_map, ()), (legacy_map, ("l", "z", "j")),
-        (legacy_map, ("slash", "f", "i", "n", "enter")),
-        (legacy_map, ("l", "g")), (legacy_map, ("z",)), (concept_map, ())]),
-    darkside.VIEW_NAMES["outline"]: (("o",), [
-        (legacy_map, ()), (legacy_map, ("l", "z", "j")),
-        (legacy_map, ("z",)), (concept_map, ())]),
-    darkside.VIEW_NAMES["radial"]: (("r",), [
-        (legacy_map, ()), (legacy_map, ("l", "j", "l")),
-        (legacy_map, ("l", "z", "j")), (legacy_map, ("z",)), (concept_map, ())]),
+    darkside.VIEW_NAMES["canvas"]: ((), _ON_BOTH),
+    darkside.VIEW_NAMES["outline"]: (("o",), [*_ON_BOTH, (deep_map, "deep_map-rest", ())]),
+    darkside.VIEW_NAMES["radial"]: (("r",), _ON_BOTH),
 }
 
 
@@ -195,27 +247,25 @@ async def _settle(pilot, n: int = 3) -> None:
         await pilot.pause()
 
 
-async def _map_harvest(tmp_path, view: str) -> set:
-    view_keys, states = MAP_STATES[view]
-    painted: set = set()
-    for i, (factory, keys) in enumerate(states):
-        app = MapperApp(tmp_path / f"s{i}")
-        async with app.run_test(size=VIEW_SIZE) as pilot:
-            app.store.save("mapa", factory())
-            app.push_screen(MapScreen("mapa"))
-            await _settle(pilot)
-            for key in (*view_keys, *keys):
-                await pilot.press(key)
-                await _settle(pilot, 2)
-            # The trigger is asserted, not assumed: the frame is that view's.
-            assert isinstance(app.screen, MapScreen) and app.screen.legend_view == view
-            painted |= harvest(app.screen)
-    return painted
+async def drive_map(work, view: str, size, factory, keys, read):
+    """One state of one map view, in a fresh app: `read(screen)`'s result."""
+    view_keys, _states = MAP_STATES[view]
+    app = MapperApp(work)
+    async with app.run_test(size=size) as pilot:
+        app.store.save("mapa", factory())
+        app.push_screen(MapScreen("mapa"))
+        await _settle(pilot)
+        for key in (*view_keys, *keys):
+            await pilot.press(key)
+            await _settle(pilot, 2)
+        # The trigger is asserted, not assumed: the frame is that view's.
+        assert isinstance(app.screen, MapScreen) and app.screen.legend_view == view
+        return read(app.screen)
 
 
-async def _sala_harvest(tmp_path) -> set:
-    app = MapperApp(tmp_path)
-    async with app.run_test(size=VIEW_SIZE) as pilot:
+async def drive_home(work, size, read):
+    app = MapperApp(work)
+    async with app.run_test(size=size) as pilot:
         app.store.save("legado", legacy_map())
         app.store.save("plataforma", concept_map())
         (app.store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
@@ -224,7 +274,39 @@ async def _sala_harvest(tmp_path) -> set:
         app.push_screen(HomeScreen())
         await _settle(pilot, 4)
         assert isinstance(app.screen, HomeScreen) and app.screen.legend_view == HOME_VIEW
-        return harvest(app.screen)
+        return read(app.screen)
+
+
+#: One harvest per (view, size) per session: the colour arm reads the frames
+#: the D2 arm already drove instead of driving them a second time.
+_PAINTED: dict[tuple[str, tuple[int, int]], set] = {}
+
+
+async def painted_by(view: str, size, work) -> set:
+    if (view, size) not in _PAINTED:
+        if view == HOME_VIEW:
+            painted = await drive_home(work / "home", size, harvest)
+        else:
+            assert view in MAP_STATES, f"{view!r} is declared but no state drives it"
+            painted = set()
+            for factory, label, keys in MAP_STATES[view][1]:
+                painted |= await drive_map(work / label, view, size, factory, keys, harvest)
+        _PAINTED[(view, size)] = painted
+    return _PAINTED[(view, size)]
+
+
+def _explained(members, ch: str, style) -> bool:
+    """COMPLETENESS per (glyph, style) (`INC8-F-CR-F4`): a member of this view
+    owns the glyph AND paints it in this tone, or X6 -- the tone is an
+    overlay painting over a glyph some member owns."""
+    owners = [m for m in members if ch in glyph_set(m[0], m[1])]
+    return any(_paints_as(style, m[3]) for m in owners) or (
+        bool(owners) and any(_paints_as(style, o) for o in OVERLAY_STYLES))
+
+
+def _paint(style) -> tuple:
+    style = style or Style()
+    return (_hex(style.color), _hex(style.bgcolor), bool(style.bold))
 
 
 def _agreement(view: str, painted: set) -> tuple[list, list]:
@@ -234,27 +316,52 @@ def _agreement(view: str, painted: set) -> tuple[list, list]:
         (vid, sample, style) for vid, sample, _label, style in members
         if not any(ch in glyph_set(vid, sample) and _paints_as(st, style) for ch, st in painted)
     ]
-    explained = frozenset().union(*(glyph_set(vid, sample) for vid, sample, _l, _s in members))
-    undeclared = sorted({ch for ch, _st in painted if meaningful(ch) and ch not in explained})
+    undeclared = sorted({
+        (ch, f"U+{ord(ch):04X}", *_paint(st)) for ch, st in painted
+        if meaningful(ch) and not _explained(members, ch, st)
+    }, key=str)
     return unpainted, undeclared
 
 
+@pytest.mark.parametrize("size", SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
 @pytest.mark.parametrize("view", sorted(darkside.LEGEND_VIEWS))
-async def test_d2_the_legend_and_the_view_agree_in_both_directions(tmp_path, view):
+async def test_d2_the_legend_and_the_view_agree_in_both_directions(tmp_path, view, size):
     """`INC8-F2` / `UX-F3`, closed: what the legend explains is what the view
     paints, in the declared style, and nothing meaningful the view paints is
-    left out of the view's legend.  Parametrized on the declaration itself
-    (`INC8-F-CR-F5`), so a view added there is driven here or fails loudly."""
-    if view == HOME_VIEW:
-        painted = await _sala_harvest(tmp_path)
-    else:
-        assert view in MAP_STATES, f"{view!r} is declared but no state drives it"
-        painted = await _map_harvest(tmp_path, view)
+    left out of the view's legend -- per (glyph, style), over every state the
+    catalogue drives, at both of its sizes.  Parametrized on the declaration
+    itself (`INC8-F-CR-F5`), so a view added there is driven here or fails."""
+    painted = await painted_by(view, size, tmp_path)
     unpainted, undeclared = _agreement(view, painted)
     assert not unpainted and not undeclared, (
         f"{view}: SOUNDNESS -- declared but not painted in its declared style: {unpainted}\n"
-        f"{view}: COMPLETENESS -- painted but in no member of this view: "
-        f"{[(c, f'U+{ord(c):04X}') for c in undeclared]}"
+        f"{view}: COMPLETENESS -- painted (glyph, code point, fg, bg, bold) in no member "
+        f"or overlay of this view: {undeclared}"
+    )
+
+
+def has_a_job(hex_value: str | None) -> bool:
+    """The colour section's exclusion rule (verdict `E4`), written ONCE: a
+    painted colour has a job when it is a HUE.  A grey -- `r == g == b`, the
+    surfaces and the text ramp -- carries no meaning a colour row explains."""
+    return bool(hex_value) and len({hex_value[1:3], hex_value[3:5], hex_value[5:7]}) > 1
+
+
+async def test_e4_the_colour_rows_are_the_hues_the_views_paint(tmp_path):
+    """Verdict `E4`: `01b` §3.5 derived from what is painted, both directions.
+    Every declared colour is a hue some view paints (fg or bg, outside the
+    app chrome); every hue a view paints is a declared colour.  Read over the
+    same frames as the D2 arm, at the declared context of use (`SIZES[0]`)."""
+    painted: set = set()
+    for view in sorted(darkside.LEGEND_VIEWS):
+        painted |= await painted_by(view, SIZES[0], tmp_path / view.replace(" ", "-"))
+    hues = {c for _ch, st in painted for c in _paint(st)[:2] if has_a_job(c)}
+    names = {v.lower(): n for n, v in darkside.tokens().items()}
+    declared = {darkside.tokens()[tok].lower() for _s, _l, tok in darkside.DECLARED_COLOURS}
+    assert declared and all(has_a_job(h) for h in declared), declared
+    assert hues == declared, (
+        f"painted hues with no colour row: {sorted((h, names.get(h)) for h in hues - declared)}\n"
+        f"colour rows no view paints: {sorted((h, names.get(h)) for h in declared - hues)}"
     )
 
 
@@ -410,7 +517,9 @@ def test_d2_the_exclusion_rule_keeps_the_forms_the_catalogue_kept():
     """The rule's own arm: it must not exclude a glyph a member depends on.
     A rule that dropped `▸` or braille would make completeness vacuous for
     exactly the forms the operator asked about."""
-    for ch in "▐▸◫✓░▰▱▽◆▾∙█▒╱▲⊘▁●↩⠀⣿":
+    # `INC8-F-CR-F2`: `•` and `‹` are punctuation code points a renderer
+    # could start using as marks; X2 excuses only the named separators.
+    for ch in "▐▸◫✓░▰▱▽◆▾∙█▒╱▲⊘▁●↩⠀⣿⇲•‹":
         assert meaningful(ch), f"U+{ord(ch):04X} is excluded by the rule"
     for ch in "a3 ·…—/%+":
         assert not meaningful(ch), f"{ch!r} should be text or punctuation"

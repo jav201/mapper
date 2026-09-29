@@ -108,10 +108,13 @@ def _hex(color) -> str | None:
 
 
 def _paints_as(style: Style, declared: str) -> bool:
+    """The legend paints a sample as the VIEW does: fg and bold as declared,
+    and the ground the member declares or, verdict `E2`, the view's own
+    `GROUND` -- never the panel's `PANEL` under it."""
     want = Style.parse(darkside.resolve_style(declared))
     if _hex(style.color) != _hex(want.color) or bool(style.bold) != bool(want.bold):
         return False
-    return want.bgcolor is None or _hex(style.bgcolor) == _hex(want.bgcolor)
+    return _hex(style.bgcolor) == (_hex(want.bgcolor) or darkside.GROUND)
 
 
 # ---------------------------------------------------------------------------
@@ -451,6 +454,23 @@ def test_inc8_sec_f2_resolve_style_raises_on_an_undeclared_word():
     # A declared style keeps working: the allow-list is additive, not a ban.
     assert (darkside.resolve_style("bold GROUND on WARN")
             == f"bold {darkside.GROUND} on {darkside.WARN}")
+
+
+def test_inc8_f_sec_f1_the_style_allow_list_does_not_authorize_itself(monkeypatch):
+    """`INC8-F-SEC-F1`.  The allow-list WAS `_declared_modifiers()` -- read from
+    the declarations it guards -- so declaring `link file:///x` in a row
+    allow-listed `link` and `file:///x`.  It is now the hard-coded
+    `_STYLE_MODIFIERS`; what the declarations use must sit inside it, and a
+    row declaring anything else raises at `resolve_style` -- the render
+    returns no `Text` at all, so no sink ever parses the word.  Under the old
+    derived allow-list the same call RETURNED a `Text` carrying a live link."""
+    assert darkside._declared_modifiers() <= darkside._STYLE_MODIFIERS  # noqa: SLF001
+    assert darkside._STYLE_MODIFIERS == frozenset({"bold", "on"})  # noqa: SLF001
+    monkeypatch.setattr(darkside, "DECLARED_VOCABULARY", (
+        *darkside.DECLARED_VOCABULARY, ("V1", "▐", "hostile", "link file:///x")))
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    with pytest.raises(ValueError, match=r"^resolve_style: undeclared style word 'link'"):
+        screen._render_vocabulary(vocabulary_for("atlas"))  # noqa: SLF001
 
 
 def test_inc8_sec_f3_a_wide_close_label_cannot_blow_the_row_budget(monkeypatch):
