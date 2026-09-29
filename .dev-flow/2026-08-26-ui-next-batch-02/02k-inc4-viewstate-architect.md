@@ -111,7 +111,7 @@ $ PYTHONUTF8=1 python -m pytest tests/test_a3_census.py -q
 ### P5 — the frozen artifact is byte-identical
 
 ```
---- tree: C:/Users/jjgh8/Github/mapper   (baseline 5f4816c)
+--- tree: C:/Users/<operator>/Github/mapper   (baseline 5f4816c)
   IRenderer.render : (self, graph: 'Graph', state: 'ViewState') -> 'Text'
   Layered.render   : (self, graph: 'Graph', state: 'ViewState') -> 'Text'
   ViewState roster : ['selected_id','w','h','focus_owner','query','diff','pan_x','pan_y','folded']

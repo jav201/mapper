@@ -90,7 +90,7 @@ this diff and neither file imports either. No file owned by increments 1, 2, 2b 
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 
 # the gate run — BOTH lanes
 PYTHONUTF8=1 python -m pytest -q -p no:randomly -o addopts=

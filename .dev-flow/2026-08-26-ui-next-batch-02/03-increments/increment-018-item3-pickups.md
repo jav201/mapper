@@ -95,7 +95,7 @@ and the measurement agrees. That `escape` call is a redundant no-op, not a hole.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8
 python -m pytest -q                       # read the SUMMARY line, not the tail
 python -m pytest tests/test_confirm_markup.py -q

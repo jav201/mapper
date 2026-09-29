@@ -354,7 +354,7 @@ and w=31..40, and derive the bounds from the measurements.
 
 ## 7 · Working-tree integrity
 
-- Baseline: sha256 over all 319 non-git files of `C:\Users\jjgh8\Github\mapper`, manifest digest
+- Baseline: sha256 over all 319 non-git files of `C:\Users\<operator>\Github\mapper`, manifest digest
   `a9daf76c34010a8de004737aaea2e2a2cff31d77d800a07bae92003ced115669`, taken before any lane started.
 - Re-verified **mid-pass** and **at the end**: `diff` of the manifests → identical, all 319 files.
   (`git status` was not relied on — vacuous for untracked files.)

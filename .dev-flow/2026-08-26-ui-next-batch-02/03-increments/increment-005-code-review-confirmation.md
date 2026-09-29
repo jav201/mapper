@@ -51,7 +51,7 @@ mutation, `PYTHONDONTWRITEBYTECODE=1` and `PYTHONUTF8=1` in every child process.
 described **by position and operation** and are not pasted verbatim (`C-56`). Mutation is applied at
 the **byte** level, not through text-mode I/O, because this tree mixes LF and CRLF files and newline
 translation would have rewritten lines the mutation never touched. Harness lives outside the repo
-(`C:\Users\jjgh8\clde\scratch\inc5_confirm\`); `.pytest_cache/` and `.ruff_cache/` are pre-existing
+(`C:\Users\<operator>\clde\scratch\inc5_confirm\`); `.pytest_cache/` and `.ruff_cache/` are pre-existing
 and git-ignored.
 
 **Instrument RED-proof (`C-57`), executed before any verdict was read.** The harness asserts the
@@ -320,7 +320,7 @@ is not valid here. Linting a `git archive` of `9ba2f26` extracted outside the re
 extra rule family (`I001`/`I002`) inherited from an ancestor configuration that the repository
 directory does not resolve — 70 findings there against 27 here, and a spurious "NEW `I001` in
 `tests/test_views_hits.py`". `--show-settings` shows the two rule sets differing. Any future SET
-comparison must be run **inside** `C:\Users\jjgh8\Github\mapper` (Inc-4c's `git stash` approach was
+comparison must be run **inside** `C:\Users\<operator>\Github\mapper` (Inc-4c's `git stash` approach was
 right for this reason), or restricted to per-file findings as I did above.
 
 Round-1 claims I re-checked and found honest: §11.3's own admission that *"every predicate

@@ -105,7 +105,7 @@ and named here either way so the classification is not taken on trust.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8
 
 python -m pytest -q                    # default lane
@@ -229,7 +229,7 @@ operator can build. `M7` is now KILLED.
 
 | Field | Value |
 |---|---|
-| **Evidence files** | `none — this batch declares no artifact_homes.evidence`. ⚠ **DECLARED GAP, inherited and not introduced here.** `state.json::artifact_homes` has ten keys and `evidence` is not among them, so there is no home to write to and no stored digest to re-derive. Every transcript this packet quotes was produced out of repo, under the session scratchpad and `C:/Users/jjgh8/clde/`, so **none of it is evidence under `C-59`**. Minting an evidence home mid-batch is a scope decision for the coordinator and is surfaced in §6 rather than taken. What makes the figures checkable meanwhile: every one is quoted verbatim here, and every harness is re-runnable. |
+| **Evidence files** | `none — this batch declares no artifact_homes.evidence`. ⚠ **DECLARED GAP, inherited and not introduced here.** `state.json::artifact_homes` has ten keys and `evidence` is not among them, so there is no home to write to and no stored digest to re-derive. Every transcript this packet quotes was produced out of repo, under the session scratchpad and `C:/Users/<operator>/clde/`, so **none of it is evidence under `C-59`**. Minting an evidence home mid-batch is a scope decision for the coordinator and is surfaced in §6 rather than taken. What makes the figures checkable meanwhile: every one is quoted verbatim here, and every harness is re-runnable. |
 
 ### Load-bearing emptiness — what is this resting on that is only true today?
 

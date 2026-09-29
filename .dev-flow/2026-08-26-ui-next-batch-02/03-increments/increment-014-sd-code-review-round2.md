@@ -2,7 +2,7 @@
 
 **Reviewer:** `code-reviewer` (independent of the author)
 **Date:** 2026-09-18
-**Repo/branch:** `C:\Users\jjgh8\Github\mapper` · `feat/ui-next-batch-02` · base `2f78ecc` · still uncommitted
+**Repo/branch:** `C:\Users\<operator>\Github\mapper` · `feat/ui-next-batch-02` · base `2f78ecc` · still uncommitted
 **Round-1 verdict:** BLOCKED · `BLOCK-UNTIL: F1, F2`
 **Predecessor:** `increment-014-sd-code-review.md`
 
@@ -145,7 +145,7 @@ to end from the base, not only relative to round 1.
 ### (1) Can each arm fail for the reason its name gives? — YES, and the attribution is clean · `executed`
 
 You ran three mutants but not per arm. I ran five and recorded **which node ids fired**
-(`C:\Users\jjgh8\clde\cr_sd_r2_battery.py`; scope: `test_pan.py`,
+(`C:\Users\<operator>\clde\cr_sd_r2_battery.py`; scope: `test_pan.py`,
 `test_canvas_header_charge.py`, `test_agree_floor.py`, `test_a3_census.py`):
 
 | Mutant | Verdict | Arms that fired |
@@ -414,7 +414,7 @@ writer.
 
 ## Probes
 
-`C:\Users\jjgh8\clde\` — `cr_sd_probe3c.py`, `cr_sd_probe4b.py`, `cr_sd_probe5.py`
+`C:\Users\<operator>\clde\` — `cr_sd_probe3c.py`, `cr_sd_probe4b.py`, `cr_sd_probe5.py`
 (round-1 instruments, re-run unchanged) · `cr_sd_r2_probe6.py` (**vacuous — kept as the
 record**) · `cr_sd_r2_probe7.py` (guarded extent collapse) · `cr_sd_r2_battery.py`
 (five mutants, per-arm attribution).

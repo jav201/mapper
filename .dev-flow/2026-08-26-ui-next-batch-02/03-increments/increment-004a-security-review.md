@@ -11,7 +11,7 @@ history predicts — came back **clean**.
 `.dev-flow/**` excluded as instructed. Reviewed against the six axes in the brief.
 
 All evidence below is executed command output. Hostile fixtures were built in
-`tempfile.mkdtemp` workspaces (`C:\Users\jjgh8\AppData\Local\Temp\secrev4a_*`); every
+`tempfile.mkdtemp` workspaces (`C:\Users\<operator>\AppData\Local\Temp\secrev4a_*`); every
 hostile code point was constructed with `chr()` and never spelled. **No tracked file was
 mutated:** `git status --porcelain` is byte-identical before and after all probes, and
 `git diff --quiet -- fixtures/` exits 0.
@@ -203,7 +203,7 @@ f-strings inside _count_line: ['f"0 {SEARCH_COUNT_SUBJECT}  "', 'f"{at}/{len(hit
    -> interpolated values are: ['SEARCH_COUNT_SUBJECT', 'at', 'len(hits)', 'SEARCH_COUNT_SUBJECT']
    painted count line   : '0/5 coincidencias en el mapa  '
    contains U+202E? False   contains U+200B? False   contains ESC U+001B? False   contains BEL U+0007? False
-   contains 'INYECTADO'? False   contains a node id? False   contains 'jjgh8'? False   contains 'sk-live'? False
+   contains 'INYECTADO'? False   contains a node id? False   contains '<operator>'? False   contains 'sk-live'? False
    markup spans on it   : []
 ```
 The fold-pill tail is `mapper/views/layered.py:599` → `tail = f" {n_hits}" if n_hits else ""`,
@@ -224,7 +224,7 @@ schema key, or ficha value reaches a widget id or CSS selector anywhere in this 
 membership tests that select a *style* (`mapper/views/layered.py:528`, `:598`) — never as
 text. The SVG export (`action_export_svg` → `save_svg`) was driven on the hostile graph
 with a populated `hits` set: `SVG contains U+202E? False / U+200B? False / ESC? False /
-BEL? False / 'jjgh8'? False / 'sk-live'? False / 'id_rsa'? False`. `frozenset` (not `set`)
+BEL? False / '<operator>'? False / 'sk-live'? False / 'id_rsa'? False`. `frozenset` (not `set`)
 correctly prevents a renderer mutating the caller's set mid-draw.
 
 **No hang, no unbounded recursion in the walk itself.** The walk is iterative with a

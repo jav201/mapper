@@ -28,7 +28,7 @@ Tests `tests/inc3_support.py`, `test_inc3_census.py`, `test_fold.py`, `test_over
 `test_pan.py` + 6 modified.
 
 **Shared working tree not modified.** All work ran in an exported copy at
-`C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\mapper-wt`
+`C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\mapper-wt`
 (Inc-3) and `…\9192a111-…\mapper-base` (`git archive 954f8f3`). A sha256 manifest of
 167 tracked `.py/.yml/.mmd/.md` files under `mapper/ tests/ fixtures/ .dev-flow/` was
 taken before and after: **167/167 digests identical**. The single manifest delta is one

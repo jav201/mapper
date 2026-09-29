@@ -201,7 +201,7 @@ Had I not checked, I would have shipped a docstring asserting a defect shape tha
 ## Mutation evidence
 
 Byte-level, CRLF-anchored, match-count asserted before firing, `__pycache__` purged, sha256 restore
-verified. Harness: `C:\Users\jjgh8\clde\sech1_verify.py`.
+verified. Harness: `C:\Users\<operator>\clde\sech1_verify.py`.
 
 ```
 BASELINE  11 passed in 0.37s

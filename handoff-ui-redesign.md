@@ -1,7 +1,7 @@
 # Handoff — mapper UI redesign
 
 **Session:** `wd_kimi_089f1915c010` / `session_ceba8bf4-b51e-479b-99e7-62c870db2ae0`  
-**Repo:** `C:/Users/jjgh8/Github/mapper` → `https://github.com/jav201/mapper`  
+**Repo:** `C:/Users/<operator>/Github/mapper` → `https://github.com/jav201/mapper`  
 **Last commit:** `3af8488` (docs(proto): unified mapper UI architecture and prototypes)
 
 ## What this is

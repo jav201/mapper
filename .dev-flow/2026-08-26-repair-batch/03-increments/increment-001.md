@@ -94,7 +94,7 @@ certified by `TC-R08b`, whose non-vacuity is proven by its own mutation arm (§4
 ## 3 · How to test
 
 ```bash
-cd C:\Users\jjgh8\Github\mapper
+cd C:\Users\<operator>\Github\mapper
 
 # Gate run — the summary is read from the file, because Textual's teardown
 # noise ("Task was destroyed but it is pending!") buries it on the terminal.

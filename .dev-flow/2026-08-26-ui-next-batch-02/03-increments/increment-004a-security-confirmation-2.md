@@ -320,7 +320,7 @@ recoverable — nothing is committed — so I checked more, not less).
 | No new sink for file-derived text | Sink scan over all 142 added `app.py` lines + all added `tests/` lines: 3 hits, all in tests, all AST censuses reading the repo's **own source** (`tests/test_search.py:587` `inspect.getfile(MapScreen)`; two in `tests/` over `mapper/views`). No new user-text, network, subprocess, `eval`/`exec` or path sink. |
 | `ViewState.hits` membership-only | `mapper/views/state.py:90` — `hits: frozenset[str] = frozenset()`. Unchanged, and structurally non-indexable. |
 | Blank-query rule at the owner | `mapper/search.py:91` — `if not q.strip(): return frozenset()` in `hits`. `query` delegates (`mapper/search.py:115` `found = self.hits(q)`), so the rule is enforced **once, at the owner**, and both entry points inherit it. |
-| No secret / path / username added | Scan for `jjgh8`, `javgranados`, `C:\Users`, `api_key`, `secret`, `token=`, `Bearer`, `ghp_`, `AKIA`, private-key headers over every added line in `mapper/` and `tests/`: **zero hits**. |
+| No secret / path / username added | Scan for `<operator>`, `javgranados`, `C:\Users`, `api_key`, `secret`, `token=`, `Bearer`, `ghp_`, `AKIA`, private-key headers over every added line in `mapper/` and `tests/`: **zero hits**. |
 | No hostile code point | Census over the 5 changed source files + the round-3 record for bidi / zero-width / control code points: **0 total**. Nothing spelled verbatim here. |
 
 Perf discharge (F1/F1a/F1b) not re-measured, per the brief.

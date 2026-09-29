@@ -492,7 +492,7 @@ Both self-declared out-of-fence additions check out. The undeclared ones are MED
 
 ### 3.12 · Working-tree integrity
 
-`git status --porcelain` in `C:\Users\jjgh8\Github\mapper` before and after this pass:
+`git status --porcelain` in `C:\Users\<operator>\Github\mapper` before and after this pass:
 
 ```
  M docs/ARCHITECTURE.md
@@ -989,7 +989,7 @@ twice).
 ## 5 · What I could not verify
 
 - **The working tree moved under me, and it is not what I reviewed.** `git status --porcelain` in
-  `C:\Users\jjgh8\Github\mapper` was **empty** when this pass began and now reports
+  `C:\Users\<operator>\Github\mapper` was **empty** when this pass began and now reports
   ` M .dev-flow/…/03-increments/increment-001.md`, `?? .dev-flow/…/05-carries.md`, and
   `?? tests/test_repair_artifact_claims.py` (mtimes 17:47–17:51, during this pass). **I created none of
   them** — I ran only read-only `git show` / `git status` / `grep` in the main tree, and every

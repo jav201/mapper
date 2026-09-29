@@ -149,7 +149,7 @@ Two mutants survived the **first** battery. The arms were fixed and both went RE
 
 ## Render
 
-Real Textual `run_test(size=(118, 34))` plus `export_screenshot`. The SVGs are saved outside the repo in `C:\Users\jjgh8\AppData\Local\Temp\inc8\render\`:
+Real Textual `run_test(size=(118, 34))` plus `export_screenshot`. The SVGs are saved outside the repo in `C:\Users\<operator>\AppData\Local\Temp\inc8\render\`:
 
 - `atlas_top.svg`: keys, from the map through the real `?`
 - `atlas_vocab.svg`: after `end` then `pageup`, showing the atlas vocabulary
@@ -228,7 +228,7 @@ Entry HEAD `fc57ac3`, tree clean. Exit is this record's commit.
 
 ### Mutation table
 
-Discipline: sha256-pin every file before mutating, apply via text-level `str.replace` (universal-newline decoded, so the harness never has to hand-spell each file's own CRLF/LF convention) after asserting the old text occurs exactly once, run the named pytest node(s), print the verdict BEFORE restoring, restore the EXACT original bytes, and re-verify the pin. The harness lives outside the repo at `C:\Users\jjgh8\AppData\Local\Temp\inc8c1\mutants.py`.
+Discipline: sha256-pin every file before mutating, apply via text-level `str.replace` (universal-newline decoded, so the harness never has to hand-spell each file's own CRLF/LF convention) after asserting the old text occurs exactly once, run the named pytest node(s), print the verdict BEFORE restoring, restore the EXACT original bytes, and re-verify the pin. The harness lives outside the repo at `C:\Users\<operator>\AppData\Local\Temp\inc8c1\mutants.py`.
 
 Pins (post corrective-pass, pre-mutation -- these are also the exit pins, since every mutant restored and re-verified):
 
@@ -267,8 +267,8 @@ All 13 mutants (M1-M12, M10 counted as two) ran to their expected verdict; `git 
 
 Real Textual `run_test` + `export_screenshot`, top of the atlas legend through the real `question_mark` chord, saved outside the repo:
 
-- `C:\Users\jjgh8\AppData\Local\Temp\inc8c1\render\atlas_top_118x34.svg`
-- `C:\Users\jjgh8\AppData\Local\Temp\inc8c1\render\atlas_top_80x24.svg`
+- `C:\Users\<operator>\AppData\Local\Temp\inc8c1\render\atlas_top_118x34.svg`
+- `C:\Users\<operator>\AppData\Local\Temp\inc8c1\render\atlas_top_80x24.svg`
 
 ### Commits (this pass)
 
@@ -739,7 +739,7 @@ against base's legend oracles (`test_help_scope.py`, `test_vocabulary_declaratio
 
 ### Render — real `run_test` + `export_screenshot`, with PNGs rasterised from them
 
-`C:\Users\jjgh8\AppData\Local\Temp\inc8d\render\`. Every file exists as `.svg` and `.png`.
+`C:\Users\<operator>\AppData\Local\Temp\inc8d\render\`. Every file exists as `.svg` and `.png`.
 `_top` / `_vocab` / `_end` are the legend's top, its vocabulary section and its end. The legend was
 opened through the real `?`.
 
@@ -935,7 +935,7 @@ scan of all of `.dev-flow` (no `A-107` anywhere; `A-106` was the last).
 
 ### The catalogue instrument (pass 2)
 
-`C:\Users\jjgh8\AppData\Local\Temp\inc8d\catalogue.py`, outside the repo; the pass-1 script is kept
+`C:\Users\<operator>\AppData\Local\Temp\inc8d\catalogue.py`, outside the repo; the pass-1 script is kept
 beside it as `catalogue_pass1.py` (sha256 `616b8edc…`). Re-run from the repo root:
 
 ```
@@ -953,7 +953,7 @@ PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colo
   session; at 118×34 and 140×45; each state in a fresh app.
 - **Result**: 1292 rows, **0 UNEXPLAINED**. `⇲` painted 17 times, all `= V45`. Depth-mark levels
   measured (`probe_depth.py`): 15–25 at 118×34 (26 is below the fold), 21–26 at 140×45.
-- Output: `C:\Users\jjgh8\AppData\Local\Temp\inc8d2\catalogue.md` and `catalogue.json`.
+- Output: `C:\Users\<operator>\AppData\Local\Temp\inc8d2\catalogue.md` and `catalogue.json`.
 
 ### Findings (`INC8-D2-Fn`)
 
@@ -1015,7 +1015,7 @@ PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colo
 
 ### Mutation table (this pass)
 
-Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8d2\mutants.py`, outside the repo, with the pass-1
+Harness `C:\Users\<operator>\AppData\Local\Temp\inc8d2\mutants.py`, outside the repo, with the pass-1
 discipline:
 
 - a sha256 pin per touched file;
@@ -1104,7 +1104,7 @@ sight is new with this pass.
 
 ### Render — real `run_test` + `export_screenshot`, PNGs rasterised by headless Chrome
 
-`C:\Users\jjgh8\AppData\Local\Temp\inc8d2\render\`: 40 SVGs and 40 PNGs, plus `measures.json`.
+`C:\Users\<operator>\AppData\Local\Temp\inc8d2\render\`: 40 SVGs and 40 PNGs, plus `measures.json`.
 `render.py` writes them; `rasterise_chrome.py` rasterises them. Each legend was opened through the
 real `?`. `_legend_top` is at rest, `_legend_keys` is scrolled to the keys section, and
 `_legend_end` is the end.
@@ -1200,7 +1200,7 @@ reference width, `DECLARED_CONTEXT_CELLS` = 118, shown beside a narrower and a w
 `C4` red *missing record*, marks · words. The rule, written once
 (`tests/test_legend_design.py::colour_jobs`): a hue in the foreground of a LETTER is on *words*;
 any other foreground and every background is on *marks*. Catalogue: 1333 rows, **0 UNEXPLAINED**
-(`C:\Users\jjgh8\AppData\Local\Temp\inc8d3\catalogue.md`, `catalogue.json`).
+(`C:\Users\<operator>\AppData\Local\Temp\inc8d3\catalogue.md`, `catalogue.json`).
 
 ### The pan-on-dock mechanism
 
@@ -1330,7 +1330,7 @@ Every other string in *Design pass 2*'s copy table stands.
 
 ### Mutation table (this pass)
 
-Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8d3\mutants.py`, outside the repo: a sha256 pin per
+Harness `C:\Users\<operator>\AppData\Local\Temp\inc8d3\mutants.py`, outside the repo: a sha256 pin per
 touched file; a byte-level replace in the file's own line endings, each `old` exactly once; stdout
 and stderr kept separate and the summary line asserted as found; the verdict printed **before** the
 restore; a byte restore and the pin re-verified. **All restores matched their pins** (34 in the first
@@ -1409,7 +1409,7 @@ separator.
 
 ### Render — real `run_test` + `export_screenshot`, PNGs rasterised by headless Chrome
 
-`C:\Users\jjgh8\AppData\Local\Temp\inc8d3\render\`: **94 SVGs and 94 PNGs**, plus `measures.json`.
+`C:\Users\<operator>\AppData\Local\Temp\inc8d3\render\`: **94 SVGs and 94 PNGs**, plus `measures.json`.
 `render.py` writes them; `rasterise_chrome.py` rasterises them. Every legend is opened through the
 real `?`: `_legend_top` at rest, `_legend_keys` at the keys section, `_legend_end` at the end.
 
@@ -1494,7 +1494,7 @@ Re-run of `tests/test_legend_design.py` + `tests/test_help_scope.py` after the f
 
 ### Mutation table
 
-Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8p3\mutation_harness.py`, outside the repo: a
+Harness `C:\Users\<operator>\AppData\Local\Temp\inc8p3\mutation_harness.py`, outside the repo: a
 sha256 pin per touched file taken before each mutation, a byte-level replace in the file's own
 CRLF line endings (`mapper/app.py`, `mapper/darkside.py`), the verdict printed BEFORE the
 restore, and the pin re-verified after. **All four restores matched their pins.**
@@ -1602,7 +1602,7 @@ after this fix, by the harness's own restore-and-rerun (`MUT-D4-G5`, below).
 
 ### Mutation table
 
-Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8d4\mutation_harness.py`, outside the repo: a sha256
+Harness `C:\Users\<operator>\AppData\Local\Temp\inc8d4\mutation_harness.py`, outside the repo: a sha256
 pin taken per touched file before the first mutation (`app.py`
 `3daeac7610fb1ba1b0b0274e2af55846b9b916535b5555331cc9d32e7c2972c7`, `darkside.py`
 `b6d38d0e2838abccf397f9d44e0f209e39bcefc3e232592a4bb40464c8b3a9f9`), byte-level I/O throughout (the
@@ -1646,7 +1646,7 @@ files' final sha256 equal the same two pins (confirmed separately after the full
 
 ### Render -- real `run_test` + `export_screenshot`, PNGs rasterised by headless Chrome
 
-`C:\Users\jjgh8\AppData\Local\Temp\inc8d4\render\`: **21 SVGs and 21 PNGs**, plus `measures.json`.
+`C:\Users\<operator>\AppData\Local\Temp\inc8d4\render\`: **21 SVGs and 21 PNGs**, plus `measures.json`.
 `render.py` writes them; `rasterise_chrome.py` rasterises them. At each of the three required widths
 (**118×34** reference, **87×34** the derived dock threshold, **140×45**):
 
@@ -1672,7 +1672,7 @@ atlas_140x45_legend_colours    outline_140x45_legend_colours    mind-map_140x45_
 atlas_140x45_ti-4_1-before-dock    atlas_140x45_ti-4_2-docked    atlas_140x45_ti-4_3-after-close
 ```
 
-All under `C:\Users\jjgh8\AppData\Local\Temp\inc8d4\render\`, `.svg` and `.png`.
+All under `C:\Users\<operator>\AppData\Local\Temp\inc8d4\render\`, `.svg` and `.png`.
 
 ### Carries (unchanged by this pass)
 
@@ -1759,7 +1759,7 @@ Both read exactly 2 after this pass's fix, at every width the arm drives (118, 1
 
 ### Mutation table
 
-Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8cl\mutation_harness.py`, outside the repo: a sha256
+Harness `C:\Users\<operator>\AppData\Local\Temp\inc8cl\mutation_harness.py`, outside the repo: a sha256
 pin per touched file before the first mutation, byte-level I/O throughout (the repo's tracked files
 are CRLF; the harness round-trips through universal newlines rather than hand-spelling the file's own
 convention -- the discipline design pass 4's `M7` needed after failing to apply once for the opposite
@@ -1827,7 +1827,7 @@ the pin below is the SECOND (final) run's, on the tree this record's own commits
 
 ### Render -- real `run_test` + `export_screenshot`
 
-`C:\Users\jjgh8\AppData\Local\Temp\inc8cl\render\`: 28 SVGs plus `measures.json`, at **118×34**
+`C:\Users\<operator>\AppData\Local\Temp\inc8cl\render\`: 28 SVGs plus `measures.json`, at **118×34**
 (reference), **87×34** (the derived dock threshold) and **140×45**:
 
 - **`fina-4_<W>x<H>_{1-before-dock,2-docked,3-after-close}.svg`** and **`ti-4_<W>x<H>_...`** (`H3`'s

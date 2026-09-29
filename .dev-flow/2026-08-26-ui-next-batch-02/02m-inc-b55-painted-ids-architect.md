@@ -35,7 +35,7 @@ one gate each rather than one gate for both.
 ### VERIFIED — constraint 1, the `runtime_checkable` hazard is real
 
 `mapper/views/state.py:104-116` declares `IRenderer` with exactly one member, `render`. Executed
-(`C:\Users\jjgh8\clde\arch_b55_probe.py`), a two-member Protocol flips **all six** shipped renderers:
+(`C:\Users\<operator>\clde\arch_b55_probe.py`), a two-member Protocol flips **all six** shipped renderers:
 
 ```
   LayeredRenderer          isinstance(IRenderer)=True  isinstance(ITwoMember)=False
@@ -69,7 +69,7 @@ data-member `runtime_checkable` Protocol returning `False` before any render and
 
 ### VERIFIED — your pre-gate numbers, reproduced exactly on an independent probe
 
-`C:\Users\jjgh8\clde\arch_b55_measure.py`, `legacy` (8 nodes) at 30x6, full-title oracle:
+`C:\Users\<operator>\clde\arch_b55_measure.py`, `legacy` (8 nodes) at 30x6, full-title oracle:
 
 ```
   LayeredRenderer           0/8       OutlineRenderer           5/8

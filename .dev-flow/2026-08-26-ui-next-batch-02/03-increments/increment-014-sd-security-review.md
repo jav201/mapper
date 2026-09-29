@@ -22,7 +22,7 @@ Nothing here is a deploy authorization. Clearing a risk is not granting a close.
   `refresh_canvas`, `action_export_svg`, `_ImportPreviewScreen`.
 
 All probes ran from my own scratchpad
-(`C:\Users\jjgh8\clde\mapper-ui-next3\out\sd-sec\`), byte-level, with
+(`C:\Users\<operator>\clde\mapper-ui-next3\out\sd-sec\`), byte-level, with
 `PYTHONDONTWRITEBYTECODE=1`, `PYTHONUTF8=1`, `__pycache__` purged.
 **Repo integrity proven by hash, before and after every probe:**
 

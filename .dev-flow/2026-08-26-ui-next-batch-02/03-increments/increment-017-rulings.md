@@ -71,7 +71,7 @@ instance; precision beats inflating the tally and beats suppressing it.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8
 
 python -m pytest -q                     # default lane
@@ -195,7 +195,7 @@ edits a normative requirement clause, so both are review-bearing. Owed before th
 
 **Inc-CONFIRM item 3** — the routed pickups, plus `N3`. `F3` and `F7` are independent-lens items and
 dispatch in parallel **to separate mirrors** (entry 15, and its two new extensions). `SEC-H2` and the
-`UI-AT058` register check are reads. The `B-64` sweep has its probe at `C:/Users/jjgh8/clde/b49_probe.py`
+`UI-AT058` register check are reads. The `B-64` sweep has its probe at `C:/Users/<operator>/clde/b49_probe.py`
 and must DRIVE the derived set rather than a hand-built model of it.
 
 ---

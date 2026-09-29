@@ -15,7 +15,7 @@
 ## 1 · Mirror, digests, and what moved under me
 
 Every mutation and probe ran in **my own mirrors**, never in the repo. The only file I wrote in
-`C:\Users\jjgh8\Github\mapper` is this report.
+`C:\Users\<operator>\Github\mapper` is this report.
 
 | Mirror | Path | Purpose |
 |---|---|---|

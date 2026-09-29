@@ -119,7 +119,7 @@ which is precisely the defect `HLR-N07.1` exists to close.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 
 # the increment's own nodes
 PYTHONUTF8=1 python -m pytest tests/test_search.py -q

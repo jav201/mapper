@@ -1,6 +1,6 @@
 # 04b · Security sign-off — Inc-4 (`osopen` / attachments)
 
-**Batch:** `2026-08-25-ui-next-batch-01` · **Repo:** `C:\Users\jjgh8\Github\mapper`
+**Batch:** `2026-08-25-ui-next-batch-01` · **Repo:** `C:\Users\<operator>\Github\mapper`
 **Reviewer:** `security-reviewer` · **Date:** 2026-08-25
 **Gate:** `docs/ARCHITECTURE.md:287` (risk A-4) — *"`security-reviewer` signs off before Inc-4 closes."*
 **Predecessor artifact:** `.dev-flow/2026-08-25-ui-next-batch-01/02b-security-review.md` (`approved with conditions`, 2 blockers, 6 majors)
@@ -162,7 +162,7 @@ if ".." in target:
 
 ```
 24 passed in 1.42s
-gitconfig  -> abierto ['C:\\Users\\jjgh8\\.gitconfig']
+gitconfig  -> abierto ['C:\\Users\\<operator>\\.gitconfig']
 calc.exe   -> abierto ['C:\\Windows\\System32\\calc.exe']
 powershell -> abierto ['C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe']
 ```
@@ -214,7 +214,7 @@ to touch this file will be editing the expression, not removing the line.
 | traversal | `../secret.txt` | `fuera del espacio de trabajo` | no |
 | nested traversal | `sub/../../secret.txt` | `fuera del espacio de trabajo` | no |
 | absolute outside (exists) | `<tmp>\secret.txt` | `fuera del espacio de trabajo` | no |
-| absolute outside (real) | `C:\Users\jjgh8\.gitconfig` | `fuera del espacio de trabajo` | no |
+| absolute outside (real) | `C:\Users\<operator>\.gitconfig` | `fuera del espacio de trabajo` | no |
 | UNC | `\\127.0.0.1\C$\Windows\System32\calc.exe` | `fuera del espacio de trabajo` | no |
 | **symlink → outside file** | `link_out.txt` | `fuera del espacio de trabajo` | **no** |
 | **symlink dir → outside** | `link_dir/secret.txt` | `fuera del espacio de trabajo` | **no** |
@@ -417,7 +417,7 @@ claim that these landed is not evidence that they landed.
 |---|---|---|
 | Each finding has what · where · why · recommendation | ✓ | §5 — both blockers and both majors carry all four; minors carry where + executed evidence + recommendation |
 | Each finding has a severity rating | ✓ | 2 `blocker` (N-1, N-2), 2 `major` (N-3, N-4), 7 `minor` (N-5…N-11) |
-| No secret values appear in this output | ✓ | No credential, token or key was read or emitted. `C:\Users\jjgh8\.gitconfig` appears only as a **resolved path** in probe output; its contents were never read |
+| No secret values appear in this output | ✓ | No credential, token or key was read or emitted. `C:\Users\<operator>\.gitconfig` appears only as a **resolved path** in probe output; its contents were never read |
 | Verdict is explicit | ✓ | §0 — **`sign-off blocked`** |
 | New tool/integration: scope and blast radius addressed | ✓ | §4 — `osopen` is the external-action surface. **Scope:** OS default-application launch. **Blast radius as implemented:** confined to the workspace root for `kind == "file"` (verified against 28 escape attempts incl. symlinks in both directions), and to `http`/`https` for `kind == "url"` — a genuine and large reduction from the PDR measurement. **Residual:** any file *inside* the workspace including executables (N-9); any http(s) host including one masked by userinfo (N-4). **Reversibility:** none — a launch cannot be undone. **Human-in-the-loop:** the `↵` keystroke is the approval, which is why N-2 (forged refusal text) and N-4 (forged host) matter more than their crash impact. **Data flow:** for `kind == "url"` the target host learns the operator's IP — flag under LFPDPPP where a client map is involved |
 | Every condition discharged with executed evidence, not the corrective pass's claim | ✓ | §2 — C-1 ✅, C-2 ⚠️, C-3 ⚠️, C-6 ⚠️, C-7 ❌; each backed by a probe in §3/§4/§5 |

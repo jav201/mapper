@@ -81,7 +81,7 @@ RadialRenderer        hittable=(root,first,hit,other)   root:13 first:11 hit:18 
   still paints** — message wrong, and that is a real `B-55` regression. The comment above it is careful
   (`:325-326`, "one of them *can* fire for a reason that is not the renderer's fault"); the message
   itself is not — it exculpates unconditionally.
-- **Where:** `C:\Users\jjgh8\Github\mapper\tests\test_views_hits.py:339-344`; declared in packet §6.2.
+- **Where:** `C:\Users\<operator>\Github\mapper\tests\test_views_hits.py:339-344`; declared in packet §6.2.
 - **Proven, not argued.** One mutant, `radial.py:221` slice `[:18] -> [:6]` (a renderer-side change,
   no fixture edit), produces **both messages in the same run**, blaming opposite parties for one cause:
 

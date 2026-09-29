@@ -202,7 +202,7 @@ Under the 4-source cap with 3 to spare. No new dependency. No file moved.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 PYTHONUTF8=1 python -m pytest -q -p no:randomly -o addopts= -m "not slow"   # fast lane
 PYTHONUTF8=1 python -m pytest -q -p no:randomly -o addopts= -m "slow"       # slow lane
 PYTHONUTF8=1 python -m ruff check mapper/ tests/

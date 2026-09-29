@@ -37,7 +37,7 @@ count asserted `== 1` before firing; `__pycache__` purged before and after; rest
 in a `finally`; sha256 verified equal after each. `mapper/screens/coverage.py` pristine and final:
 `374779563fbc3987…`. `mapper/store.py` never mutated: `f247d0158c782b7a…`.
 `tests/test_repair_sidecar.py` `1cfe5646c2f36918…`, `tests/test_darkside_census.py`
-`1db89d08348313879…` — both untouched. No mutating git commands. Scratch in `C:\Users\jjgh8\clde\secrev\`.
+`1db89d08348313879…` — both untouched. No mutating git commands. Scratch in `C:\Users\<operator>\clde\secrev\`.
 
 **Fired** (11 probes, all reproducible from the scratch scripts):
 `p1_markup.py` (9 markup classes × 3 call forms, + OSC-8 emission over 7 URI schemes),
@@ -528,7 +528,7 @@ defect reintroduced, five levels emitted 522,311 chars in 25 ms — red by 261×
    20,107,707 vs 2,000 — 10,053×, deterministic, 0.06 s.
 2. **SEC-H2** — `darkside.plain` at `app.py:3342` **and** `Text(...)` at `app.py:253`. Both, not
    either. Add an arm that drives `[@click=screen.confirm]` through `_ConfirmScreen` and asserts the
-   callback is not called on a click — the probe at `C:\Users\jjgh8\clde\secrev\p6_confirm_bypass.py`
+   callback is not called on a click — the probe at `C:\Users\<operator>\clde\secrev\p6_confirm_bypass.py`
    is the arm, ready to lift.
 3. **SEC-M1** — the behavioural coverage-cell arm the code review already required.
 4. SEC-M2, SEC-M3 and the LOWs are recommendations. SEC-M2 is the only one that changes the odds of

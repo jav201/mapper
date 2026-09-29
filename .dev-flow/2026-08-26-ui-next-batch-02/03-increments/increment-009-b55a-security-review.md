@@ -1,7 +1,7 @@
 # Security Review — Inc-B55a (`outline` declares what it hides)
 
 **Reviewer:** security-reviewer (independent, second and final gate)
-**Tree:** `C:\Users\jjgh8\Github\mapper` @ `d79602c`, working tree clean before and after.
+**Tree:** `C:\Users\<operator>\Github\mapper` @ `d79602c`, working tree clean before and after.
 **Verdict:** **SIGN-OFF** — no HIGH. Two MEDIUM/LOW findings recommended, neither blocking.
 
 ---

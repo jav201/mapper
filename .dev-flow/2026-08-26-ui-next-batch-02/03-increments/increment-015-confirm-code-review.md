@@ -29,7 +29,7 @@ Read in support, not under review: `mapper/github.py:44–58,137–156,245–263
 `01-requirements.md` amendment set 7 / `A-99`.
 
 All measurements below were taken on a **copy of the tree outside the repo**
-(`C:/Users/jjgh8/cr_mapper`). **No file in `C:/Users/jjgh8/Github/mapper` was modified by this review**
+(`C:/Users/<operator>/cr_mapper`). **No file in `C:/Users/<operator>/Github/mapper` was modified by this review**
 except this report.
 
 ---

@@ -160,7 +160,7 @@ R3F.7 requires byte-for-byte verification. **That is necessary and not sufficien
 review.** Two independent mechanisms:
 
 1. **The repo is pip-installed editable.** `_editable_impl_mapper.pth` in site-packages puts
-   `C:\Users\jjgh8\Github\mapper` permanently on `sys.path`, and `tests/` is a **package**
+   `C:\Users\<operator>\Github\mapper` permanently on `sys.path`, and `tests/` is a **package**
    (`tests/__init__.py`). A mirror run guarded only on `mapper.__file__` — the guard constraint 4 asks
    for — happily executes the **repo's** `tests/test_search.py` against the **mirror's** source. My
    first `MUT-A` run did exactly that.

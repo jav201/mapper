@@ -9,7 +9,7 @@
 | **Verdict** | **BLOCK — 2 HIGH** (`F1`, `F2`) |
 
 Everything below was MEASURED on this tree. No repo file was edited; every probe
-was written and run out of repo under `C:\Users\jjgh8\clde\`.
+was written and run out of repo under `C:\Users\<operator>\clde\`.
 
 ---
 
@@ -47,10 +47,10 @@ scope is taken as given. What is judged here is the FIX.**
 - **Measured (threshold):** no fold at 16 leaves (canvas 193 cols); **fold at
   20 leaves** (canvas 241 cols → 21 canvas rows become 25 emitted SVG lines);
   at 40 leaves, 21 rows → 33 lines; at 200 leaves, 7 non-blank rows → 86 lines
-  (**×12.3**). Probe: `C:\Users\jjgh8\clde\sec_b68_threshold.py`,
-  `C:\Users\jjgh8\clde\sec_b68_wide_artifact.py`.
+  (**×12.3**). Probe: `C:\Users\<operator>\clde\sec_b68_threshold.py`,
+  `C:\Users\<operator>\clde\sec_b68_wide_artifact.py`.
 - **Measured (the scramble itself), root + 20 leaves, canvas 241×25** — probe
-  `C:\Users\jjgh8\clde\sec_b68_scramble.py`:
+  `C:\Users\<operator>\clde\sec_b68_scramble.py`:
 
   rendered picture (what `B-68` promises the recipient):
   ```
@@ -82,7 +82,7 @@ scope is taken as given. What is judged here is the FIX.**
   columns** — below the 200-column fold threshold. The arms are true in the one
   band where the defect cannot appear, and `test_b68_…_carries_nodes_the_
   viewport_could_not_hold` asserts only PRESENCE of titles, which folding
-  preserves. Verified: `C:\Users\jjgh8\clde\sec_b68_artifact_shape.py` — 35
+  preserves. Verified: `C:\Users\<operator>\clde\sec_b68_artifact_shape.py` — 35
   canvas rows → 35 emitted lines, ratio 1.0.
 - **Recommendation (not applied — `software-dev` applies it):** size the export
   console from the Text it is given rather than from a constant, and extend one
@@ -110,7 +110,7 @@ scope is taken as given. What is judged here is the FIX.**
 - **Where:** `mapper/app.py:3466` + `mapper/app.py:3540-3556`;
   `mapper/canvas.py:167-170`.
 - **Measured end to end** (render + `save_svg` + write, probe
-  `C:\Users\jjgh8\clde\sec_b68_real_cost.py`):
+  `C:\Users\<operator>\clde\sec_b68_real_cost.py`):
 
   | map | nodes | export canvas | cells | wall clock | peak Python heap | artifact |
   |---|---|---|---|---|---|---|
@@ -121,7 +121,7 @@ scope is taken as given. What is judged here is the FIX.**
   Cost is linear in cells (measured across the three points). The worst shape
   inside `MAX_RENDER_NODES = 12000` is wide AND deep at once — fanout 6000 +
   chain 5999 → canvas **72001×24004 = 1.73 billion cells** (probe
-  `C:\Users\jjgh8\clde\sec_b68_cost_and_convergence.py`), which extrapolates
+  `C:\Users\<operator>\clde\sec_b68_cost_and_convergence.py`), which extrapolates
   from the measured points to **≈125 minutes and ≈16 GB of heap** — i.e. an
   OOM after a multi-minute freeze on any ordinary machine.
 - **Why it matters:** the packet declares this risk but with the wrong figure.
@@ -161,7 +161,7 @@ scope is taken as given. What is judged here is the FIX.**
   (`mapper/views/state.py`): `selected_id, w, h, focus_owner, hits, diff,
   pan_x, pan_y, folded`. `_export_view_state` neutralises exactly three
   (`mapper/app.py:3534-3536`). Measured, by exporting the same graph with only
-  one field varied (probe `C:\Users\jjgh8\clde\sec_b68_session_state.py`):
+  one field varied (probe `C:\Users\<operator>\clde\sec_b68_session_state.py`):
 
   | field | artifact changes? | what the recipient sees |
   |---|---|---|
@@ -201,7 +201,7 @@ scope is taken as given. What is judged here is the FIX.**
   export now grows the canvas specifically far enough to include the
   `eliminados` ghost strip — the titles of nodes that exist only in the
   revision being compared against. Measured (probe
-  `C:\Users\jjgh8\clde\sec_b68_diff2.py`): a 12-deep chain with one removed
+  `C:\Users\<operator>\clde\sec_b68_diff2.py`): a 12-deep chain with one removed
   node, at the declared context-of-use canvas 58×25 — on screen `"eliminados"`
   and the removed title are **not visible**; in the export canvas (60×56) both
   are **present**.
@@ -227,7 +227,7 @@ scope is taken as given. What is judged here is the FIX.**
 ### F5 — The lane guard can be walked past silently, and the lane's green now asserts hermeticity  [Severity: MEDIUM]
 
 Executed against the real `tests/conftest.py` from a scratch session outside
-the repo (`C:\Users\jjgh8\clde\sec_guard_probe\`, `test_bypass.py` +
+the repo (`C:\Users\<operator>\clde\sec_guard_probe\`, `test_bypass.py` +
 `test_precise.py`). Each row is a call form a future test could use.
 
 | form | verdict | note |
@@ -360,7 +360,7 @@ each want a one-line ruling more than they want code.
 | Full default lane re-run | `not-run` — 332 s, and no finding here depends on it; the lane's own green is `F5`'s subject, not its evidence |
 | Prior `B-68` security finding (S-D surface 4) | `executed` — the pan/geometry defect it named IS closed; the fix's own consequences are `F1`/`F2` |
 
-Probes live under `C:\Users\jjgh8\clde\` (out of repo — this batch declares no
+Probes live under `C:\Users\<operator>\clde\` (out of repo — this batch declares no
 `artifact_homes.evidence`, the same declared gap the packet records in §6 item 3).
 
 ## Evidence checklist

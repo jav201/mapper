@@ -173,7 +173,7 @@ to be closed here rather than deferred again.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 
 # the gate run — BOTH lanes; the slow lane is where AT-R17 and AT-R16b live
 PYTHONUTF8=1 python -m pytest -q -p no:randomly -o addopts=

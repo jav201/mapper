@@ -29,7 +29,7 @@ that did not reach the canvas must be declared" — `HLR-N06.3`, `B-55`'s own fa
 ## 1 · The instrument, and why its results are believable
 
 **Mirror, not the repo.** Every measurement below was taken in the isolated, digest-verified mirror
-`…\scratchpad\mirror-qa-f3`, never in `C:\Users\jjgh8\Github\mapper`. Byte identity was re-asserted at
+`…\scratchpad\mirror-qa-f3`, never in `C:\Users\<operator>\Github\mapper`. Byte identity was re-asserted at
 the start of this run rather than taken from the hand-off:
 
 ```

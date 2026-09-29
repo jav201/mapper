@@ -69,7 +69,7 @@ in every child process. Mutants are described **by position and operation**, nev
 (`C-56`). Anchors are **plain strings at a known occurrence index** — no multi-line regex — because
 this tree mixes line endings (`lane.py` is LF; `outline.py`, `radial.py`, `layered.py` are CRLF), and
 an anchor matching zero times is treated as **BAD**, raising rather than reporting a verdict. Harness
-lives outside the repository (`C:\Users\jjgh8\clde\scratch\inc5_pass3\`).
+lives outside the repository (`C:\Users\<operator>\clde\scratch\inc5_pass3\`).
 
 **Instrument RED-proof (`C-57`), run before any verdict was believed.** The parser resolved **zero**
 arms on its first run — pytest's ANSI colouring defeated the node-id pattern — and the arm-count

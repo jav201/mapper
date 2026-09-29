@@ -1,15 +1,15 @@
 ==============================================================================
 INCREMENT 4 MUTATION BATTERY - SUPPLEMENT (L4/L5 re-aimed)
-repo    : C:\Users\jjgh8\Github\mapper
-harness : C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery4b.py   (OUTSIDE the repo it mutates)
+repo    : C:\Users\<operator>\Github\mapper
+harness : C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery4b.py   (OUTSIDE the repo it mutates)
 started : 2026-08-27 08:24:14
 ==============================================================================
 
 --- BASELINE ---
 resolved : 425 nodes   (exit=0, 82.6s)
-tail     : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-19664' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+tail     : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-19664' coro=<sleep.<locals>.wait() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<operator>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
 Task was destroyed but it is pending!
-task: <Task cancelling name='Task-19664' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+task: <Task cancelling name='Task-19664' coro=<sleep.<locals>.wait() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<operator>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
 OK: 425/425 resolved, all PASSED.
 
 ------------------------------------------------------------------------------
@@ -29,9 +29,9 @@ ARM L4c  [deletion]  help.py
   proves: remove BOTH sources of scrolling at once — plain Vertical AND no overflow rule. This is S-08 itself restored, and it must redden
   mutation applied (hash moved off pristine): True
   resolved: 425 (expected 425)   exit=1   95.9s
-  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-20350' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-20350' coro=<sleep.<locals>.wait() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<operator>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
 Task was destroyed but it is pending!
-task: <Task cancelling name='Task-20350' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+task: <Task cancelling name='Task-20350' coro=<sleep.<locals>.wait() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<operator>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
   RED node-verdicts: 3
     RED  tests/test_repair_layout.py::test_at_r12_pressing_help_presents_every_map_binding[size0]  -> FAILED
     RED  tests/test_repair_layout.py::test_at_r12_pressing_help_presents_every_map_binding[size1]  -> FAILED

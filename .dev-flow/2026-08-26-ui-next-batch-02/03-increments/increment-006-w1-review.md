@@ -1,6 +1,6 @@
 # Code Review — Inc-W1 (confirmation pass, scoped to the design call)
 
-**Batch:** `2026-08-26-ui-next-batch-02` · **Increment:** `Inc-W1` · **Repo:** `C:\Users\jjgh8\Github\mapper`
+**Batch:** `2026-08-26-ui-next-batch-02` · **Increment:** `Inc-W1` · **Repo:** `C:\Users\<operator>\Github\mapper`
 **Reviewer:** `code-reviewer` (independent) · **Date:** 2026-09-10
 **Scope:** the design call and its correctness. NOT a re-audit of the renderers.
 

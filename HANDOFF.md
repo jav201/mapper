@@ -35,7 +35,7 @@ and rebuildable, never committed.
 
 ## The visual source of truth (prototypes — read these before designing)
 
-In `C:/Users/jjgh8/Github/taskboard/prototypes/mapper/`:
+In `C:/Users/<operator>/Github/taskboard/prototypes/mapper/`:
 
 - `out/mapper.html` — the five rendered views (concept, repo, mermaid,
   legacy, mental), each at 118×30 and 68×24. **This is what the user already

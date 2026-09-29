@@ -41,8 +41,8 @@ Criterion states use `/dev-flow` §*Evidence states*.
 **One declared stub-avoidance.** The toast was read through the real `notify()` → real `Toast` widget → compositor, using `run_test(notifications=True)`. The shipped arms at `tests/test_export_state.py:434` and `:471` stub `screen.notify` and assert the message **string**; that is a pre-layout proxy in `C-32`'s exact sense and cannot see footprint or clipping. See N-C2.
 
 Probes, runnable by copying into a mirror's `tests/`:
-`C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\5fba800c-287a-459a-b7c8-dd44777ea077\scratchpad\ux-probes\test_ux_probe_f7.py`
-`C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\5fba800c-287a-459a-b7c8-dd44777ea077\scratchpad\ux-probes\test_ux_probe_strings.py`
+`C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\5fba800c-287a-459a-b7c8-dd44777ea077\scratchpad\ux-probes\test_ux_probe_f7.py`
+`C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\5fba800c-287a-459a-b7c8-dd44777ea077\scratchpad\ux-probes\test_ux_probe_strings.py`
 Combined output digest, stable across 3 consecutive runs: `69fd8ab4a2791c7d`. See M3 for one unreproduced divergence.
 
 ---
@@ -176,7 +176,7 @@ Full string (`mapper/app.py:3512-3516`):
 | 80x12 | 6 | **11** | yes | **yes** | yes |
 | 80x10 | 6 | **11** (`y = -2`, clipped) | **NO** | **yes** | yes |
 
-With a realistic 30-char workspace path (`C:\Users\jjgh8\mapas\crece.svg`) the same frames measure 6 / 9 / 9 rows at 118x34 / 80x24 / 80x12, all three parts intact — so the 106-char figures above are `tmp_path`'s worst case, not the operator's normal one.
+With a realistic 30-char workspace path (`C:\Users\<operator>\mapas\crece.svg`) the same frames measure 6 / 9 / 9 rows at 118x34 / 80x24 / 80x12, all three parts intact — so the 106-char figures above are `tmp_path`'s worst case, not the operator's normal one.
 
 - **`Enfoca un subárbol con f y exporta esa vista.` is painted intact at every size measured, down to 80x10.** `ToastRack` is `dock: bottom; align: right bottom`, so an over-tall toast is clipped **at the top**, not the bottom. The actionable half is structurally the last thing to go.
 - **What the path does cost:** at 80x10 the **headline** `mapa demasiado grande para exportar` is clipped away, and it is clipped *because of* the appended path — the same terminal without the stale sentence paints it. So the path can cost the operator the sentence saying **what happened** while preserving the one saying **what to do**. That is the better half to keep, and it is the opposite trade from the one anticipated.

@@ -2613,7 +2613,7 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
     row occupies fewer physical rows, `_fit` **keeps more of them**, and the declared hidden count
     moves with the picture. These caps are therefore **not cost-only**, and the ruling took that
     deliberately rather than letting it arrive as a side effect.
-  - **Measured before the ruling** (`C:\Users\jjgh8\clde\cost_pregate.py`): at depth 4000 the widest
+  - **Measured before the ruling** (`C:\Users\<operator>\clde\cost_pregate.py`): at depth 4000 the widest
     row was **8,029 cells** into a 118-cell canvas and the walk **built 15,996,000 indent
     characters** against 468,460 capped (**34.1×**); `MAX_RENDER_NODES = 12000` puts the worst
     admissible chain at **~144 million**. A 400,000-character title produced a **400,004-cell row**
@@ -2692,7 +2692,7 @@ constructed with `chr(0x...)` at test time. **No control byte is written into th
   - **The trigger is DERIVED, never a list of sizes:** it is the geometric condition above. A
     hand-enumerated size list would silently stop matching the day a layout changed.
   - **Measured before amending**, on the tree with defect 2 fixed
-    (`C:\Users\jjgh8\clde\agree_sweep.py`): **9 of 90 sizes on `legacy` and 9 of 90 on `anidado` —
+    (`C:\Users\<operator>\clde\agree_sweep.py`): **9 of 90 sizes on `legacy` and 9 of 90 on `anidado` —
     eighteen in all**, every one the same shape, canvas silent and **strip correct**. Confined to
     widths 24–34 at heights 10 and 12, plus `(24,14)`. The prior frame-side figures (14/135, 15/135)
     were taken against a row budget defect 2 replaced, and are superseded.
@@ -9962,7 +9962,7 @@ of whoever runs this batch. Measured 2026-09-29, before this amendment's guard t
 operator's real Windows account name appears in 249 lines across 70 tracked files, almost entirely
 under `.dev-flow/` (battery transcripts, review docs, increment records, `state.json`, one file
 under `prototypes/`, and both root handoff files), naming the account inside an absolute
-`C:\Users\<name>\...` path. The repo is public; the operator asked for this explicitly.
+`C:\Users\<operator>\...` path. The repo is public; the operator asked for this explicitly.
 
 **Statement.** No file tracked by `git` shall contain an absolute user-profile path (in any spelling
 of drive letter, one or two backslashes or a forward slash, `Users`, a separator, then a name

@@ -3,7 +3,7 @@
 **Reviewer:** security-reviewer (independent, second and final gate)
 **Range:** `git diff 10fd573..4bb63bf -- mapper/ tests/ fixtures/`
 **Tree at review:** `4bb63bf`, clean on entry, clean on exit. **No source mutation was fired**
-— every probe ran read-only from `C:\Users\jjgh8\clde\` against temp workspaces, so the
+— every probe ran read-only from `C:\Users\<operator>\clde\` against temp workspaces, so the
 sha256/CRLF-anchor discipline was not exercised because nothing needed it.
 **Verdict: SIGN-OFF** — one MEDIUM (carry), one LOW (hardening note). No HIGH.
 
@@ -261,7 +261,7 @@ increment's cut and I measured it only to scope S1. Someone should look, but not
 Sole writer; **no evidence of another writer** — `git status --porcelain` empty on entry and on
 exit, `git diff --stat` empty, `git rev-parse HEAD` = `4bb63bf` throughout. No mutating git
 command was run. **No source mutation was fired**, so no restore was required; all probe
-scripts live in `C:\Users\jjgh8\clde\` and every map the probes built was written to a
+scripts live in `C:\Users\<operator>\clde\` and every map the probes built was written to a
 `tmp_path` or a `tempfile.mkdtemp()`, never into `fixtures/`. The exported probe SVG went to
 `%TEMP%`. `PYTHONUTF8=1` and `PYTHONDONTWRITEBYTECODE=1` on every run. The only repo file this
 review writes is this artifact.

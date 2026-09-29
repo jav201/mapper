@@ -1,7 +1,7 @@
 # Code Review — `Inc-CRUMB` (increment 008)
 
 **Batch:** `2026-08-26-ui-next-batch-02` · **Reviewer:** independent (`code-reviewer`), SERIAL, sole writer
-**Tree:** `C:\Users\jjgh8\Github\mapper` @ `57fb403` + working-tree diff · Python 3.12 / Textual 8.2.8 / Windows, `PYTHONUTF8=1`
+**Tree:** `C:\Users\<operator>\Github\mapper` @ `57fb403` + working-tree diff · Python 3.12 / Textual 8.2.8 / Windows, `PYTHONUTF8=1`
 
 ## VERDICT: **BLOCK** — 2 HIGH
 

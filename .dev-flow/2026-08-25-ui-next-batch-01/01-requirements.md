@@ -327,7 +327,7 @@ Both lenses returned **`approved with conditions`**. Every condition below was p
 ##### Security conditions (2 blockers, 6 majors)
 
 **S-B1 · `kind == "file"` currently launches anything on disk.** *Measured:* a `..` traversal target
-**launched** `C:\Users\jjgh8\.gitconfig`; `calc.exe` and `powershell.exe` **launched**.
+**launched** `C:\Users\<operator>\.gitconfig`; `calc.exe` and `powershell.exe` **launched**.
 `os.startfile.__doc__` — *"acts like double-clicking the file in Explorer"*. The confinement the
 module map mandates was structurally absent because the proposed signature had no `workspace` to
 put it in.

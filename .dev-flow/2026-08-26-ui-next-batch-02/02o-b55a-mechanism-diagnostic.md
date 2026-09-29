@@ -2,18 +2,18 @@
 
 Read-only lane. No repo source or test file was edited, created or deleted; no
 `print`/logging was added to `mapper/`. All instrumentation was in-process
-monkeypatching from probes under `C:\Users\jjgh8\clde\`. Working tree observed
+monkeypatching from probes under `C:\Users\<operator>\clde\`. Working tree observed
 CLEAN at `c6f3f25` before and after; no evidence of another writer.
 
 Probes written for this lane (all outside the repo):
 
-- `C:\Users\jjgh8\clde\b55a_trace.py` — wraps `_canvas_size`,
+- `C:\Users\<operator>\clde\b55a_trace.py` — wraps `_canvas_size`,
   `_declare_after_layout`, `on_resize`, `refresh_canvas` and `Static.update`,
   logs the ordered pass sequence.
-- `C:\Users\jjgh8\clde\b55a_region.py` — snapshots every id'd widget's region
+- `C:\Users\<operator>\clde\b55a_region.py` — snapshots every id'd widget's region
   before `o`, immediately after the `o` repaint returns, and after `pause()`.
-- `C:\Users\jjgh8\clde\b55a_intervene.py` — three causal interventions.
-- `C:\Users\jjgh8\clde\b55a_reverse.py` — the outline → layered direction.
+- `C:\Users\<operator>\clde\b55a_intervene.py` — three causal interventions.
+- `C:\Users\<operator>\clde\b55a_reverse.py` — the outline → layered direction.
 
 ---
 

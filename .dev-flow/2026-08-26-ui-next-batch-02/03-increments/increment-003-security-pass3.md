@@ -23,7 +23,7 @@ this batch is committed**. Measured, not predicted. Fix it in the same commit �
 ## Scope reviewed
 
 `.dev-flow/…/increment-003-security-confirmation.md` (findings) and `increment-003.md` §12 (round-2
-claims), against the uncommitted working tree at `C:\Users\jjgh8\Github\mapper`. Questions 1–5 only.
+claims), against the uncommitted working tree at `C:\Users\<operator>\Github\mapper`. Questions 1–5 only.
 Not re-checked, per the ruling: `SEC-F1`, `SEC-F2`, the breadcrumb, the `_branch_coverage_glyph`
 hang, the three guard placements, the `A-89` attribute-form derivation.
 

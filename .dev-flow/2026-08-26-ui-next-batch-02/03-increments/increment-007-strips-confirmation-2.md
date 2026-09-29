@@ -1,6 +1,6 @@
 # Increment 007 · Inc-STRIPS — Confirmation 2 (final)
 
-**Batch** `2026-08-26-ui-next-batch-02` · **Repo** `C:\Users\jjgh8\Github\mapper`
+**Batch** `2026-08-26-ui-next-batch-02` · **Repo** `C:\Users\<operator>\Github\mapper`
 **Scope** the four axes from `increment-007-strips-confirmation.md` (H1, H2, M1, M2) and §9.7's ledger
 **Sole writer** asserted · **Date** 2026-09-10
 

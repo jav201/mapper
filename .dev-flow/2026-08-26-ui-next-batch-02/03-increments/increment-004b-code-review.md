@@ -13,7 +13,7 @@ the five declared spec corrections. Detail below, including what I could not ver
 
 ## Scope reviewed
 
-Working tree of `C:/Users/jjgh8/Github/mapper` at branch `feat/ui-next-batch-02`,
+Working tree of `C:/Users/<operator>/Github/mapper` at branch `feat/ui-next-batch-02`,
 entry commit `a971432`, nothing committed.
 
 | File | Δ | Read |

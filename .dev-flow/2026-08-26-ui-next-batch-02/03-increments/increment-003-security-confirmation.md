@@ -320,7 +320,7 @@ arm is weak; that reading is confirmed, not merely repeated.
 ### F-F — the operator's absolute path (and Windows username) ships in the artifacts  [Severity: LOW]
 
 - **Where:** `increment-003.md:92`, and the same line in `increment-001.md:87` and `increment-002.md:75`
-  — `cd C:/Users/jjgh8/Github/mapper`.
+  — `cd C:/Users/<operator>/Github/mapper`.
 - **Why it matters:** `.dev-flow` is synced to the Obsidian vault by `dev-flow-sync` and these artifacts
   are the kind of thing that ends up in a client-facing report. The local username adds nothing.
 - **Recommendation:** `cd <repo root>` in the reproduction blocks.
@@ -360,7 +360,7 @@ arm is weak; that reading is confirmed, not merely repeated.
 |---|---|
 | Secrets / API keys / tokens / `.env` / SSH or private keys / bearer tokens | **0.** The 9 regex hits are all the English word "token" in prose about `OVERFLOW_TOKEN` / `FOLD_PILL_TOKEN` |
 | Emails · URLs · IP addresses | **0 · 0 · 0** |
-| Absolute paths / usernames | **1** — `cd C:/Users/jjgh8/…` in an artifact (**F-F**) |
+| Absolute paths / usernames | **1** — `cd C:/Users/<operator>/…` in an artifact (**F-F**) |
 | Destructive filesystem calls (`rm -rf`, `rmtree`, `unlink`, `remove`, `os.system`, `Popen`) | **0 added** |
 | New process surface | `subprocess.run(["git", "ls-files", *globs], cwd=REPO, capture_output=True, check=True)` in two test census helpers — fixed argv, no shell, `cwd` pinned. **Acceptable** |
 | New network surface | **none** |

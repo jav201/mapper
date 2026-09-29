@@ -244,7 +244,7 @@ stopping is what the increment boundary is for. **Agreed, without reservation.**
 
 ### F22 — An unreproducible absolute path in a tracked artifact. [Severity: LOW]
 
-- **What:** the `RE_ID` note cites `C:\\Users\\jjgh8\\clde\\bid_census.py`. That file is outside the
+- **What:** the `RE_ID` note cites `C:\\Users\\<operator>\\clde\\bid_census.py`. That file is outside the
   repo, in a session scratchpad; no future reader can resolve it. Pass 3b redacted the same path
   shape to `C:\Users\<operator>\clde\`. Not a secrets issue and not a first — the username already
   appears in ten-plus tracked `.dev-flow` artifacts, so this is convention drift, not a leak.

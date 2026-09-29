@@ -35,7 +35,7 @@ spot-checking the five the brief named.
 start:
 
 - **repo** — `git status --porcelain` empty; all 299 tracked digests identical to the opening pin.
-  The only file I wrote in `C:\Users\jjgh8\Github\mapper` is this report.
+  The only file I wrote in `C:\Users\<operator>\Github\mapper` is this report.
 - **mirror `mut`** — all 299 restored byte-identical after 14 mutation sites.
 - **mirror `work`** — all 299 held across three lane runs.
 
@@ -47,7 +47,7 @@ no edit, battery or probe ever ran in the repo. Stated plainly rather than left 
 **shared** between the agents in this session — it holds `mirror-cr/`, `mirror-sec/`, `sec016/`,
 other agents' harnesses, and a stray **`inspect.py`** that shadows the stdlib module for any script
 run from that directory. My first probe ran from the scratchpad root, imported
-`C:\Users\jjgh8\Github\mapper\mapper\__init__.py` (there is an editable install pointing at the
+`C:\Users\<operator>\Github\mapper\mapper\__init__.py` (there is an editable install pointing at the
 repo) and died on the shadowed `inspect`. **That reading was discarded, not published**; every probe
 below was re-run from inside `mut`, and I verified `mapper.__file__` resolves to the mirror there.
 Per-reviewer *directories* are not per-reviewer *sys.path* — worth adding to the control.

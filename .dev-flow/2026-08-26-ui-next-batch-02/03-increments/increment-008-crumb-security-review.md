@@ -1,7 +1,7 @@
 # Security Review — `Inc-CRUMB` (increment 008)
 
 **Batch:** `2026-08-26-ui-next-batch-02` · **Reviewer:** independent (`security-reviewer`), SERIAL, sole writer
-**Tree:** `C:\Users\jjgh8\Github\mapper` @ `57fb403` + working-tree diff (post-`F1`/`F2` fix tree)
+**Tree:** `C:\Users\<operator>\Github\mapper` @ `57fb403` + working-tree diff (post-`F1`/`F2` fix tree)
 Python 3.12 / Textual 8.2.8 / Windows, `PYTHONUTF8=1`, `PYTHONDONTWRITEBYTECODE=1`
 
 ## VERDICT: **SIGN-OFF** — 0 HIGH
@@ -289,7 +289,7 @@ _crumb_line(["proc", escape("[draft] informe")], 80).plain  -> 'proc / \[draft] 
 
 ```
 toast h=1  cells=118
-' exportado   C:\Users\jjgh8\Github\mapper\workspace\muy\long\long\long\long\long\…'
+' exportado   C:\Users\<operator>\Github\mapper\workspace\muy\long\long\long\long\long\…'
 ```
 
 - **Direction of change — this increment moves it two ways, neither of them worse:**

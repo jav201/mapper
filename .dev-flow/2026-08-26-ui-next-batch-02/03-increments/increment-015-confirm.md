@@ -69,7 +69,7 @@ does not have to take the classification on trust. Well under the cap.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8
 
 python -m pytest -q                    # default lane
@@ -125,7 +125,7 @@ acceptance arms. Deselected: `19 + 1` ✓. xfailed unchanged at 3 ✓.
 
 | Field | Value |
 |---|---|
-| **RED counterfactual** | The export's state expression reverted to its pre-fix form — both acceptance arms RED (2 failed); and the rejected clamp-only fix substituted at the same site — both arms RED again, which is the limb that proves the arms distinguish *state removed* from *state bounded*. Transcript at `C:/Users/jjgh8/clde/b68_counterfactual.py`'s run output (out of repo — see **Evidence files**). Restore digest `0a842a67170c2bac26dbef3f9d12f819377a322abb5bafd3cdef2b70c1954fa2`. |
+| **RED counterfactual** | The export's state expression reverted to its pre-fix form — both acceptance arms RED (2 failed); and the rejected clamp-only fix substituted at the same site — both arms RED again, which is the limb that proves the arms distinguish *state removed* from *state bounded*. Transcript at `C:/Users/<operator>/clde/b68_counterfactual.py`'s run output (out of repo — see **Evidence files**). Restore digest `0a842a67170c2bac26dbef3f9d12f819377a322abb5bafd3cdef2b70c1954fa2`. |
 
 **`R2` is the load-bearing limb.** The arm's own docstring claims byte-invariance separates a fix that
 REMOVES the scroll position from one that merely BOUNDS it. That is a prediction about what a test will
@@ -176,7 +176,7 @@ arm can watch its own teardown fail).
 
 | Field | Value |
 |---|---|
-| **Evidence files** | `none — this batch declares no artifact_homes.evidence`. ⚠ **This is a DECLARED GAP, not an omission.** `state.json::artifact_homes` has ten keys and `evidence` is not among them, so there is no home to write to and no digest to re-derive from a stored path. Every transcript this packet quotes was produced out of repo under `C:/Users/jjgh8/clde/` — the condition the outgoing agent declared for its own probes, inherited rather than introduced here. Minting an evidence home mid-batch is a scope decision for the coordinator, so it is **surfaced in §6** rather than taken. The transcripts are quoted verbatim in this packet, which is what makes the figures checkable in the meantime. |
+| **Evidence files** | `none — this batch declares no artifact_homes.evidence`. ⚠ **This is a DECLARED GAP, not an omission.** `state.json::artifact_homes` has ten keys and `evidence` is not among them, so there is no home to write to and no digest to re-derive from a stored path. Every transcript this packet quotes was produced out of repo under `C:/Users/<operator>/clde/` — the condition the outgoing agent declared for its own probes, inherited rather than introduced here. Minting an evidence home mid-batch is a scope decision for the coordinator, so it is **surfaced in §6** rather than taken. The transcripts are quoted verbatim in this packet, which is what makes the figures checkable in the meantime. |
 
 ### Load-bearing emptiness (C-55)
 
@@ -308,5 +308,5 @@ the census was run honestly and still missed it.
 
 **Inc-CONFIRM item 3** — the routed pickups, once the two reviews above return. `F3` and `F7` are
 independent-lens items and can be dispatched in parallel; `SEC-H2` and the `UI-AT058` register check
-are reads; the `B-64` driven sweep has its probe at `C:/Users/jjgh8/clde/b49_probe.py` and must DRIVE
+are reads; the `B-64` driven sweep has its probe at `C:/Users/<operator>/clde/b49_probe.py` and must DRIVE
 the derived set rather than a hand-built model of it.

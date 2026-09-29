@@ -58,7 +58,7 @@ inside the mirror before it imports anything else; `TRAP1 OK …mirror-f6-2nd\ma
 appears in every run. **Trap 2**: no scratch file is named after a stdlib module (`geom_probe.py`,
 `cost_probe.py`, `view_probe.py`, `heap_probe.py`, `content_probe.py`, `mutate.py`, `mutate2.py`).
 
-**Repo untouched.** `git status --porcelain` in `C:\Users\jjgh8\Github\mapper` is empty apart from
+**Repo untouched.** `git status --porcelain` in `C:\Users\<operator>\Github\mapper` is empty apart from
 this report. All measurement and all mutation happened in the mirror. `app.py` in the mirror was
 restored byte-identical after each of the eleven mutations, with sha256 re-asserted after every one.
 

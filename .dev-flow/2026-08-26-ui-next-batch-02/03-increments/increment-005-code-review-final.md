@@ -64,7 +64,7 @@ the next fired. `__pycache__` purged on both sides of every mutation; `PYTHONDON
 `elif bid in hits:` occurs three times in `lane.py` with identical indentation (S3/S5/S6), and the
 harness raises **BAD** rather than reporting a verdict if an anchor's occurrence count is below its
 index. Mutants described by **position and operation**. Harness outside the repository
-(`C:\Users\jjgh8\clde\scratch\inc5_final\`).
+(`C:\Users\<operator>\clde\scratch\inc5_final\`).
 
 **Instrument RED-proof (`C-57`), run before any verdict was believed.**
 

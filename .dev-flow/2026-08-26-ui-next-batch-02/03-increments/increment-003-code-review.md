@@ -35,7 +35,7 @@ of `test_fold.py` and `test_pan.py`.** Findings sourced from the delegated pass 
 ### Working-tree integrity
 
 All mutation was done in exports under the session scratchpad, never in
-`C:\Users\jjgh8\Github\mapper`. Proof by manifest, not by `git status`:
+`C:\Users\<operator>\Github\mapper`. Proof by manifest, not by `git status`:
 
 ```
 $ find mapper tests fixtures -type f \( -name '*.py' -o -name '*.yml' -o -name '*.mmd' \) \

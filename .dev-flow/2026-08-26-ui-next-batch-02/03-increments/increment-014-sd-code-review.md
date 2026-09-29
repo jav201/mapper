@@ -2,7 +2,7 @@
 
 **Reviewer:** `code-reviewer` (independent of the author)
 **Date:** 2026-09-18
-**Repo/branch:** `C:\Users\jjgh8\Github\mapper` · `feat/ui-next-batch-02` · base `2f78ecc`
+**Repo/branch:** `C:\Users\<operator>\Github\mapper` · `feat/ui-next-batch-02` · base `2f78ecc`
 **Scope:** the UNCOMMITTED working tree at review time.
 
 ## Verdict
@@ -60,7 +60,7 @@ preserve from discard (`C-31`, input-set-as-oracle; the code's own comment at
 width but one). I built a workspace whose map genuinely pans and **guarded the probe
 on `layered_moves > 0`**. Driven through the real screen actions, never a model.
 
-`C:\Users\jjgh8\clde\cr_sd_probe3c.py`, `grande` (61 nodes), both 118x34 and 80x24 —
+`C:\Users\<operator>\clde\cr_sd_probe3c.py`, `grande` (61 nodes), both 118x34 and 80x24 —
 and the same probe run against a detached `2f78ecc` worktree for the before-picture:
 
 | Step | HEAD `2f78ecc` | Working tree |
@@ -92,7 +92,7 @@ if not self._consumes_pan(self._current_renderer()):
 ```
 
 I applied exactly that one-line change under the mutation harness
-(`C:\Users\jjgh8\clde\cr_sd_fixcheck.py`, sha-verified restore) and re-drove it:
+(`C:\Users\<operator>\clde\cr_sd_fixcheck.py`, sha-verified restore) and re-drove it:
 
 - `ROUND_TRIP_PRESERVED` → **True**, `ROUND_TRIP_PRESERVED_RADIAL` → **True**, both sizes.
 - `outline_after_pan_key` stays `(48, 0)` — **the lying affordance stays dead** and the
@@ -119,7 +119,7 @@ the `_reclamp_pan` branch are both gated on it — it restores the exact pre-S-D
 affordance.
 
 ```
-target:        C:\Users\jjgh8\Github\mapper\mapper\app.py
+target:        C:\Users\<operator>\Github\mapper\mapper\app.py
 orig sha256:   49300f7dea4c280c05480fe9fa432943893d48e79e9532a7d7086c51dd5188d5
 CRLF anchor occurrences: 1
 mutant sha256: aac303223786c417f9e4c5f271a493a1e4b0e23846b88d2e8bc10bc6d7b403c3
@@ -132,7 +132,7 @@ restored sha256: 49300f7dea4c280c05480fe9fa432943893d48e79e9532a7d7086c51dd5188d
 restore verified byte-for-byte
 ```
 
-Discipline: `C:\Users\jjgh8\clde\cr_sd_mutate.py`, reviewer scratchpad, byte-level I/O,
+Discipline: `C:\Users\<operator>\clde\cr_sd_mutate.py`, reviewer scratchpad, byte-level I/O,
 **CRLF-normalised anchor asserted `== 1`** (an LF anchor would have matched zero times
 and the harness prints `BAD`, never `SURVIVED`), verdict printed **before** the restore
 assert, `PYTHONDONTWRITEBYTECODE=1`, `__pycache__` purged both sides, sha256 restore.
@@ -166,7 +166,7 @@ survives unrelated repaints.
 **Where.** `mapper/app.py:1681` (set) vs `mapper/app.py:1713` (the only clear, reachable
 only on a *successful* pan).
 
-**Evidence.** `C:\Users\jjgh8\clde\cr_sd_probe5.py`, guarded on
+**Evidence.** `C:\Users\<operator>\clde\cr_sd_probe5.py`, guarded on
 `GUARD_pan_is_live_in_layered == True`, both 118x34 and 80x24:
 
 ```
@@ -214,7 +214,7 @@ The residue is already pinned twice and correctly: `test_the_dispatch_gives_radi
 (the seam) and `test_radial_is_charged_its_own_header_and_not_layereds` (the equality).
 This arm adds no coverage and adds a false-alarm surface.
 
-**I did verify its arithmetic is honest.** `C:\Users\jjgh8\clde\cr_sd_probe1.py`, on the
+**I did verify its arithmetic is honest.** `C:\Users\<operator>\clde\cr_sd_probe1.py`, on the
 arm's OWN fixture: `layered_charge > radial_own` at exactly `24, 28, 50, 60, 80, 100,
 118` and **not** at `20, 34, 40`. The "**7 of 10**, 24 and 28 and every width from 50
 up" claim is reproduced exactly, and the chosen parametrization is exactly those 7.
@@ -323,7 +323,7 @@ No action owed on the code. The rewrite to the equality form is correct.
 
 **(d) The A3 census 32 → 34 is exactly the two sites claimed. CONFIRMED.** `n/a — no
 defect`. Derived by running `test_a3_census.render_call_sites()` — **the pin's own
-derivation** — against both trees (`C:\Users\jjgh8\clde\cr_sd_probe4.py`):
+derivation** — against both trees (`C:\Users\<operator>\clde\cr_sd_probe4.py`):
 
 ```
 zeroarg: HEAD=32  NOW=34  delta=+2
@@ -340,7 +340,7 @@ would have shown as an `argful` delta or a production-file site. There is none. 
 pins moved together in one lane run, as their construction requires.
 
 **The `_header_line` factoring is inert. CONFIRMED — I tried to falsify it and failed.**
-`C:\Users\jjgh8\clde\cr_sd_probe2.py` loads `2f78ecc:mapper/views/radial.py` as a
+`C:\Users\<operator>\clde\cr_sd_probe2.py` loads `2f78ecc:mapper/views/radial.py` as a
 separate module and compares `_paint` output — **plain text, style spans, and the
 returned painted set** — against the working tree:
 
@@ -477,7 +477,7 @@ report that the corrective pass ran.
 
 ## Probes
 
-Reviewer scratchpad — `C:\Users\jjgh8\clde\`:
+Reviewer scratchpad — `C:\Users\<operator>\clde\`:
 `cr_sd_probe1.py` (charge derivation) · `cr_sd_probe2.py` (inertness, HEAD-vs-now) ·
 `cr_sd_probe3.py` (round trip — **vacuous, kept as the record of the `C-31` near-miss**) ·
 `cr_sd_probe3b.py` (finding a pannable configuration) · `cr_sd_probe3c.py` (guarded round

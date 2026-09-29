@@ -61,7 +61,7 @@ purged on both sides of every mutation; `PYTHONDONTWRITEBYTECODE=1` and `PYTHONU
 process. Mutants described **by position and operation**, never pasted verbatim (`C-56`). Anchors are
 **plain strings at a known occurrence index**; an anchor matching fewer times than its index raises
 **BAD** rather than reporting a verdict. Harness outside the repository
-(`C:\Users\jjgh8\clde\scratch\inc5_pass4\`).
+(`C:\Users\<operator>\clde\scratch\inc5_pass4\`).
 
 **Instrument RED-proof (`C-57`), run before any verdict was believed.**
 

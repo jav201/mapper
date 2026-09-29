@@ -22,7 +22,7 @@ by default; parallel review requires one isolated, digest-verified mirror per
 reviewer*), all probing, mutation and lane work ran **outside the repo**, in a
 mirror that is mine alone:
 
-`C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\5fba800c-287a-459a-b7c8-dd44777ea077\scratchpad\sec016`
+`C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\5fba800c-287a-459a-b7c8-dd44777ea077\scratchpad\sec016`
 
 | Item | Result |
 |---|---|
@@ -188,7 +188,7 @@ Scanned the **full** diff (`a552783..f3398f4`, all 17 files) for `api_key`/`secr
   | **OFF** (what an operator pays) | **0.9448 µs/cell** | **≈2,116,951 cells** | **0.331 s** |
   | **ON** (the harness) | 5.1430 µs/cell | 388,882 cells | 1.800 s |
 
-  The ON arm reproduces the packet's own figures. **The cause is in the harness, read from source, not inferred:** `C:\Users\jjgh8\clde\b68_budget_probe.py:68-75` runs `tracemalloc.start()` **immediately before** `t0 = time.time()` and stops it after the render and `save_svg` — the allocation profiler is live inside the timed region, and this render is allocation-bound. The predecessor's `sec_b68_real_cost.py:55-57` has the identical shape, so **both** the struck 4.907 µs/cell and its 5.4264 µs/cell replacement come from the same contaminated instrument.
+  The ON arm reproduces the packet's own figures. **The cause is in the harness, read from source, not inferred:** `C:\Users\<operator>\clde\b68_budget_probe.py:68-75` runs `tracemalloc.start()` **immediately before** `t0 = time.time()` and stops it after the render and `save_svg` — the allocation profiler is live inside the timed region, and this render is allocation-bound. The predecessor's `sec_b68_real_cost.py:55-57` has the identical shape, so **both** the struck 4.907 µs/cell and its 5.4264 µs/cell replacement come from the same contaminated instrument.
 - **Why it matters:** by the batch's own **STRIKE-OR-ANNOTATE** control (catalog entry 0 — *was the number a faithful record of what was measured, or a false claim about the world?*), the replacement is a faithful record **taken under an undeclared condition**, and the conclusion drawn from it — *350,000 cells ≈ 2 s of operator-visible freeze* — is a claim about the world that re-measurement contradicts by 5.4×. The correction changed the number and kept the instrument. The control fired on the correction it minted.
 - **Reachable today:** yes, as lost capability rather than as a hazard. A 301-node map costing **0.92 s** is refused (I drove it: `974852 celdas, límite 350000`). The budget is roughly **6× tighter** than its own stated target.
 - **Direction, stated plainly:** the error is **conservative** — the product refuses earlier than it needs to. Nothing is unsafe, which is why this does not re-open `SEC-F2`.
@@ -249,7 +249,7 @@ Scanned the **full** diff (`a552783..f3398f4`, all 17 files) for `api_key`/`secr
 ### `S-F14` — process: the frozen tree had another writer, and the editable install defeats mirror isolation  [Severity: LOW — process, but it is the control the coordinator invoked]
 
 - **Another writer in the "frozen" tree.** My `tar` copy of the repo captured six untracked files that were **not** there when I ran `git status` at the start and are **not** there now: `p0_digests.py`, `probe_lib.py`, `probe_a_fold.py`, `probe_a2_combining.py`, `probe_b_plusone.py`, `probe_c_cost.py` — fold and `+1` probes, i.e. the concurrent code reviewer working in the shared tree. **No tracked file moved** (tree digest HELD at both ends), so no evidence was corrupted, and I removed the six from my mirror before running anything. Recorded because the coordinator's correction was issued on exactly this risk and it was live while it was being corrected.
-- **The editable install silently defeats mirror isolation.** `site-packages/_editable_impl_mapper.pth` contains `C:\Users\jjgh8\Github\mapper`. Any Python process whose `sys.path[0]` is not the mirror — **which is every plain `python script.py`, because `sys.path[0]` is the script's directory** — imports `mapper` **from the repo**. Copying the tree is therefore *not sufficient* for isolation on this machine. It produced a false green in my own first counterfactual (`SEC-F1` above) and I only caught it because the mutant failed to fire.
+- **The editable install silently defeats mirror isolation.** `site-packages/_editable_impl_mapper.pth` contains `C:\Users\<operator>\Github\mapper`. Any Python process whose `sys.path[0]` is not the mirror — **which is every plain `python script.py`, because `sys.path[0]` is the script's directory** — imports `mapper` **from the repo**. Copying the tree is therefore *not sufficient* for isolation on this machine. It produced a false green in my own first counterfactual (`SEC-F1` above) and I only caught it because the mutant failed to fire.
 - **Recommendation for the next parallel review:** give each reviewer's mirror `PYTHONPATH`, or assert `mapper.__file__` inside every probe (what I did), or `pip install -e` the mirror. A mirror alone is not the control it looks like. Also worth noting: `pytest` run from the mirror root **does** resolve the mirror (verified), so lane figures are safe; it is ad-hoc probes that silently escape.
 
 ### `S-F15` — the suite cannot run outside a git working tree  [Severity: LOW]

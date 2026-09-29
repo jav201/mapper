@@ -96,7 +96,6 @@ def undeclared_hits(root: Path) -> list[Hit]:
     return [h for h in scan_user_profile_paths(root) if h.segment not in ALLOWED_PATH_SEGMENTS]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="scrub pending")
 def test_a110_no_undeclared_user_profile_path_in_any_tracked_file():
     """A-110: every tracked user-profile path segment is a declared placeholder.
 
@@ -111,7 +110,6 @@ def test_a110_no_undeclared_user_profile_path_in_any_tracked_file():
     )
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="scrub pending")
 def test_a110_the_real_operator_username_appears_nowhere():
     """A-110's backstop: literal search for the real account name.
 

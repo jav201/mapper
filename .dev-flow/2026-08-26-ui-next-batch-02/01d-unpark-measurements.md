@@ -32,7 +32,7 @@ All probes import the production modules directly and are pure readers.
 
 ```python
 # common.py  (scratchpad)
-REPO = Path(r"C:\Users\jjgh8\Github\mapper")
+REPO = Path(r"C:\Users\<operator>\Github\mapper")
 sys.path.insert(0, str(REPO))
 from mapper.model import Edge, Ficha, Graph, Node
 from mapper.store import MapStore

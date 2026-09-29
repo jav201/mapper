@@ -161,7 +161,7 @@ the set difference. That works for files with a baseline; a **new** file has non
 temp-context `I001` still reads as added — which is why the authoritative check here is the
 **in-place** scan above, and `tests/test_canvas_header_charge.py` is clean in its real location.
 
-Self-check: `C:\Users\jjgh8\clde\gate_selfcheck.py`.
+Self-check: `C:\Users\<operator>\clde\gate_selfcheck.py`.
 
 ## The operator-facing footprint — the composited-frame sweep
 
@@ -190,7 +190,7 @@ probe was measuring itself. Fixed by patching the **instance**, which dies with 
 positive control is what would have caught it had I not noticed, which is why it is in the table
 rather than in my head.
 
-Probe: `C:\Users\jjgh8\clde\frame_sweep.py`.
+Probe: `C:\Users\<operator>\clde\frame_sweep.py`.
 
 ## Still owed by this increment
 
