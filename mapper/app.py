@@ -2136,9 +2136,17 @@ class MapScreen(Screen):
             return darkside.VIEW_NAMES["radial"]
         return darkside.VIEW_NAMES["canvas"]
 
-    # -- the docked legend (Inc-8 verdict `F2`) ----------------------------
-    # The legend calls these two; nothing else does.  They move the view only
-    # through this screen's own pan state and its clamp, never a renderer.
+    # -- the docked legend (Inc-8 verdicts `F2`, `F9`) ---------------------
+    # The legend reads `legend_view_left` and calls the two methods below;
+    # nothing else does.  They move the view only through this screen's own
+    # pan state and its clamp, never a renderer.
+
+    @property
+    def legend_view_left(self) -> int:
+        """`F9`: the first column of the view, so the legend docks only while
+        the canvas keeps its minimum beside the panel.  The rail is the only
+        region left of the canvas (`_chrome_width` counts it the same way)."""
+        return 0 if self.rail_hidden else RAIL_WIDTH
 
     def legend_docked(self, panel_x: int | None) -> None:
         """The legend is docked with its left edge at screen column `panel_x`,

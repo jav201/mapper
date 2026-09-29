@@ -29,6 +29,13 @@ from tests.test_overflow import _contrast
 from tests.test_repair_layout import NARROW_SIZE, WIDE_SIZES, _open_map, _rows_in, _tree
 
 SIZE = WIDE_SIZES[0]
+#: Verdict `F9` moved the dock threshold, so `NARROW_SIZE` (100 columns, the
+#: map's rail auto-hidden) now DOCKS.  The modal is kept in the "both
+#: layouts" arms at the widest width it holds for a view starting at column
+#: 0 -- derived from the panel and the minimum, not re-typed.
+MODAL_SIZE = (help_screen.LEGEND_DOCKED_CELLS + help_screen.LEGEND_DOCK_MIN_VIEW_CELLS - 1,
+              NARROW_SIZE[1])
+LAYOUT_SIZES = [SIZE, NARROW_SIZE, MODAL_SIZE]
 
 
 async def _legend_from_map(app, pilot, *view_keys: str):
@@ -294,7 +301,7 @@ def _painted_help_keys(rows: list[str]) -> set[str]:
             if (b.glyph, help_screen.own_scope_word(b.action)) in pairs}
 
 
-@pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
+@pytest.mark.parametrize("size", LAYOUT_SIZES)
 async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
     """Keys with a MEASURED effect == keys the legend actually PAINTS.
 
@@ -361,7 +368,7 @@ async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
     )
 
 
-@pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
+@pytest.mark.parametrize("size", LAYOUT_SIZES)
 async def test_e3_the_own_keys_are_visible_at_rest_and_at_the_end(tmp_path, size):
     """`INC8-F-CR-F1` / verdict `E3`: "visible at rest" is PINNED, not only
     painted somewhere in the scroll range.  The own-scope keys read off the
@@ -390,7 +397,21 @@ async def test_e3_the_own_keys_are_visible_at_rest_and_at_the_end(tmp_path, size
     assert at_end == painted, f"scrolled away at the end: {sorted(painted - at_end)}"
 
 
-@pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
+async def test_f9_the_layout_sizes_drive_both_layouts(tmp_path):
+    """The "both layouts" arms are parametrized on `LAYOUT_SIZES`; this is the
+    trigger they depend on, asserted: the modal size really is modal, and the
+    others dock -- so a threshold that moved again cannot quietly turn every
+    case into one layout."""
+    layouts = {}
+    for size in LAYOUT_SIZES:
+        app = MapperApp(tmp_path / f"{size[0]}x{size[1]}")
+        async with app.run_test(size=size) as pilot:
+            screen = await _legend_from_map(app, pilot)
+            layouts[size] = screen.docked
+    assert layouts == {SIZE: True, NARROW_SIZE: True, MODAL_SIZE: False}, layouts
+
+
+@pytest.mark.parametrize("size", LAYOUT_SIZES)
 async def test_e1_the_vocabulary_section_is_painted_first(tmp_path, size):
     """Verdict `E1`: the vocabulary comes BEFORE the keys, in both layouts,
     in the order `01b` §3.6 lists (pinned equal to these constants by
