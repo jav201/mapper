@@ -9936,3 +9936,58 @@ in `tests/test_legend_design.py` assert the margin on the COMPOSITED FRAME -- co
 columns between the card and the panel -- rather than on the geometry the implementation itself
 reads, so a future regression that only re-derives the same wrong geometry cannot pass by agreeing
 with itself.
+
+---
+
+## Amendment set 18 -- repo hygiene: no tracked file names the operator's real account. 2026-09-29. Base `037c733`.
+
+### `A-110` -- no tracked file shall contain an absolute user-profile path naming a real account
+
+**Authority.** Operator-directed hygiene corrective, 2026-09-29: *"Limpia el usuario de los
+registros en un incremento propio."* Closes the identity half of backlog carry `B-22` ("Operator
+identity and a Claude session UUID inside the `.dev-flow/**` battery transcripts") -- the
+session-UUID half of `B-22` is untouched by this amendment and remains open.
+
+**Parent.** None. A scan of §3's HLRs found no fit: `HLR-REPAIR.1` is the nearest candidate (it bars
+a filesystem path from an operator-facing MESSAGE the product's store raises at runtime), but its
+surface is the product's own runtime output to whoever opens `mapper`, not this repo's own
+`.dev-flow/` process records read by whoever clones a PUBLIC repo. Different actor, different
+surface, different channel -- widening `HLR-REPAIR.1` to cover it would put a repo-hygiene rule
+under a product HLR, the same kind of collision `#D5` already exists to prevent for source
+ownership. This is therefore a standalone hygiene requirement, carried by its own test rather than
+by any HLR/LLR chain.
+
+**The gap.** No requirement in this document governs what a tracked file may say about the identity
+of whoever runs this batch. Measured 2026-09-29, before this amendment's guard test existed: the
+operator's real Windows account name appears in 249 lines across 70 tracked files, almost entirely
+under `.dev-flow/` (battery transcripts, review docs, increment records, `state.json`, one file
+under `prototypes/`, and both root handoff files), naming the account inside an absolute
+`C:\Users\<name>\...` path. The repo is public; the operator asked for this explicitly.
+
+**Statement.** No file tracked by `git` shall contain an absolute user-profile path (in any spelling
+of drive letter, one or two backslashes or a forward slash, `Users`, a separator, then a name
+segment) whose name segment is a real account. Such a path shall instead be written with a declared
+placeholder (`<operator>`, or the generic `<user>` / `<USER>` / `<username>` already in use, or
+`%USERPROFILE%`) or must be a declared, non-identifying test fixture. Declared exemptions, each with
+its own reason, live beside the check in `tests/test_no_operator_paths.py::ALLOWED_PATH_SEGMENTS`:
+`<operator>`, `<user>`, `<USER>`, `<username>`, `OP` (a reviewer-constructed probe path, not an
+account), `secret]click[` / `secret` (one hostile markup-injection fixture, captured twice under
+different quoting), and `%USERPROFILE%`.
+
+**Touched files.** No product source. This amendment governs `.dev-flow/**` process records,
+`BACKLOG.md`, both root handoff files, and the one affected file under `prototypes/`.
+
+**Validation.** `test (unit)` -- `tests/test_no_operator_paths.py`, two arms:
+`test_a110_no_undeclared_user_profile_path_in_any_tracked_file` (hermetic; reads only the declared
+allow-list, never the environment) and `test_a110_the_real_operator_username_appears_nowhere`
+(reads the real account name from `$USERNAME` at run time -- never hardcoded -- and skips cleanly
+where that variable is unset). See `03-increments/increment-023-scrub-operator-paths.md` for the
+RED-before counts, the scrub, and the mutation battery that proves each arm can fail.
+
+**Numeric pass threshold.** `0` tracked lines with an undeclared user-profile path segment, and `0`
+tracked files containing the real account name, once `$USERNAME` is available to check it.
+
+**What is not claimed.** This amendment governs the working tree only. The real account name
+remains in git HISTORY on the public remote (every commit already pushed to `origin`, including
+`master`) -- removing it there needs a history rewrite and a force push, which the operator has not
+authorized, and this amendment does not ask for one.
