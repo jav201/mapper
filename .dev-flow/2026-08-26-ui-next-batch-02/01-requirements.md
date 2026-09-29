@@ -9816,3 +9816,40 @@ verdict. Weakening `TC-R36` silently would contradict the sealed record. This am
 
 **What is not loosened.** The modal bound is the same number, still asserted. The docked bound is a
 new, exact equality (the terminal's full height), not the absence of one.
+
+## Amendment set 16 — the dock threshold is derived. 2026-09-29. Base `00915cc`.
+
+### `A-108` — SUPERSEDES `A-107`'s width clauses: the legend docks while the view keeps a minimum
+
+**Authority.** Operator verdict round 3, item `F9` (`VERDICT-inc8-legend-2026-09-28.md`, section
+*Round 3*): *"derivar el umbral del ancho de lienzo que queda visible junto al panel de 44 (acoplar
+mientras quede un mínimo útil)"*, and the round's design principle: behaviour derives for any width,
+since operators zoom the terminal. Applied in Inc-8 design pass 3
+(`03-increments/increment-022-inc8-legend.md`, section *Design pass 3*). `A-108` was the next free id
+after a scan of all of `.dev-flow`; `A-107` was the last taken.
+
+**What is superseded.** `A-107` wrote its two layouts as *"below 118 columns"* (modal) and *"118
+columns and wider"* (docked), after verdict `D4`. Those two width clauses are replaced; nothing else
+in `A-107` changes.
+
+**The rule now.** The legend docks while at least `LEGEND_DOCK_MIN_VIEW_CELLS` columns of the view
+stay visible left of the 44-column panel (`mapper/screens/help.py::docks`), and is the modal
+otherwise. The switch width is therefore derived: `44 + LEGEND_DOCK_MIN_VIEW_CELLS` plus whatever
+chrome the host paints left of its view, which is the map's rail when shown. The minimum is one
+declared number, proposed as `43` and put to the operator as `INC8-D3-Q1`; with it the switch is at
+`87` columns for a view starting at column 0 (the home screen, or a map whose rail is auto-hidden)
+and at `111` for a map showing its rail. The reference width, `118`, docks either way.
+
+**Consequence for `TC-R36` (repair batch, sealed).** `A-107` re-measured the modal's cap at `100x45`.
+At `100` columns the legend now docks, so the two modal nodes move to the widest modal width over a
+map opened there, `44 + 43 - 1 = 86`, derived in the arm from the same two constants:
+
+1. `cap-governs`: `86x45`, 28 rows, `max-height` (where `90%` would give 40).
+2. `percentage-governs`: `86x24`, 21 rows, `height: 90%`.
+3. `docked-full-height`: unchanged, `140x45`, 45 rows.
+
+Each node now also asserts the layout it measures, so a threshold that moves again reddens the arm
+instead of silently measuring the other layout.
+
+**What is not loosened.** The same three expected heights, the same two declarations under test, the
+same row counts. Only the width a modal is measured at moved, because the width that is modal moved.

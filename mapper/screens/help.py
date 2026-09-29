@@ -19,8 +19,8 @@ from mapper import darkside
 from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, textual_bindings
 
 # The legend panel's two widths (Inc-8 verdicts `D4` and `E1`): a centred
-# modal below `LEGEND_DOCK_MIN_WIDTH` columns, and at or above it a NARROW
-# panel docked full height on the right -- the round-10 prototype's
+# modal, and -- while the view keeps its minimum beside it (`F9`, `docks`) --
+# a NARROW panel docked full height on the right -- the round-10 prototype's
 # proportion (`prototypes/ui_next2/generate.py:leyenda`, a 43-column panel on
 # a 118-column sheet), so the view keeps the canvas beside it.  The CSS below
 # is built from both.
@@ -46,14 +46,17 @@ LEGEND_DOCKED_ROW_CELLS = _row_cells(LEGEND_DOCKED_CELLS)
 # pins as governing on a tall terminal.  The docked panel is exempt and runs
 # full height: amendment `A-107`, verdict `E1`.
 LEGEND_MODAL_MAX_ROWS = 28
-# `D4`: at this terminal width and wider the legend docks beside the view
-# instead of covering it.  The panel stays modal for keys in both layouts: a
-# key pressed while the legend is open never reaches the view under it.
-# The operator's "118 columns" is the batch's declared context of use, the
-# width every render of this batch is drawn at, so it is read from its one
-# home (`test_crumb.py::test_decl_118_is_spelled_ONCE`).  It is NOT the map
-# screen's auto-hide threshold, which equals it by arithmetic (`INC8-D-Q7`).
-LEGEND_DOCK_MIN_WIDTH = darkside.DECLARED_CONTEXT_CELLS
+# Verdict `F9`: the legend docks while at least this many columns of the view
+# stay visible left of the docked panel, and is a modal below that -- at any
+# terminal width, since operators zoom (the width principle of round 3).
+# WHY 43: the atlas's unit of meaning is a card and the wire that joins it to
+# its sibling.  The widest card is 26 columns (`views/layered.py:335`), the
+# gap to the next card 3 (`:329`), and the wire lands on that card's centre,
+# 13 columns in (`:639-640`): 26 + 3 + 13 + 1 = 43.  Operator question
+# `INC8-D3-Q1`.  The switch width is derived, never written: it is
+# `LEGEND_DOCKED_CELLS + LEGEND_DOCK_MIN_VIEW_CELLS` plus whatever chrome the
+# host paints left of its view (the map's rail, when shown).
+LEGEND_DOCK_MIN_VIEW_CELLS = 43
 DOCKED_CLASS = "-docked"
 _KEY_CELLS = 10
 # The sample column.  Eight cells, so the docked label budget
@@ -118,6 +121,12 @@ def _sample_style(declared: str) -> str:
     keeps it; the label beside the sample stays on `PANEL`."""
     resolved = darkside.resolve_style(declared)
     return resolved if " on " in f" {resolved} " else f"{resolved} {_ON_GROUND}"
+
+
+def docks(width: int, view_left: int) -> bool:
+    """Verdict `F9`: at terminal `width`, with the view starting at column
+    `view_left`, the docked panel still leaves the view its minimum."""
+    return width - LEGEND_DOCKED_CELLS - view_left >= LEGEND_DOCK_MIN_VIEW_CELLS
 
 
 def own_scope_word(action: str) -> str | None:
@@ -261,8 +270,13 @@ class HelpScreen(ModalScreen[None]):
 
     # -- layout (`D4`, `E1`) -------------------------------------------------
 
+    def _view_left(self) -> int:
+        """The first column of the view this legend explains: the host's own
+        answer (the map screen: its rail, when shown), else the left edge."""
+        return getattr(self.host, "legend_view_left", 0)
+
     def _apply_layout(self, width: int) -> None:
-        docked = width >= LEGEND_DOCK_MIN_WIDTH
+        docked = docks(width, self._view_left())
         self.set_class(docked, DOCKED_CLASS)
         if docked != self.docked:
             self.docked = docked
@@ -304,7 +318,7 @@ class HelpScreen(ModalScreen[None]):
             self.query_one(f"#{widget_id}", Static).update(text)
 
     def compose(self) -> ComposeResult:
-        self.docked = self.app.size.width >= LEGEND_DOCK_MIN_WIDTH
+        self.docked = docks(self.app.size.width, self._view_left())
         body = [Static(text, id=widget_id) for widget_id, text in self._sections()]
         title = Static(self._render_title(), id="help-title")
         own_scope = Static(self._render_own_scope_keys(), id="help-own-scope")

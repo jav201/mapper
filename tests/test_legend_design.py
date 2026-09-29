@@ -53,7 +53,7 @@ from mapper.app import HomeScreen, MapperApp, MapScreen
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from mapper.screens.help import (
     DOCKED_CLASS,
-    LEGEND_DOCK_MIN_WIDTH,
+    LEGEND_DOCK_MIN_VIEW_CELLS,
     LEGEND_DOCKED_CELLS,
     LEGEND_DOCKED_ROW_CELLS,
     LEGEND_MODAL_MAX_ROWS,
@@ -62,6 +62,7 @@ from mapper.screens.help import (
     HelpScreen,
     vocabulary_for,
 )
+from mapper.widgets.rail import RAIL_WIDTH
 
 # ---------------------------------------------------------------------------
 # The exclusion rule -- ONE statement of it.
@@ -401,7 +402,16 @@ async def test_f1_each_legend_paints_the_colour_rows_its_view_paints(tmp_path, v
 
 
 # ---------------------------------------------------------------------------
-# D4 -- a side panel at >= 118 columns, the modal below.
+# D4 / F9 -- a side panel while the view keeps its minimum beside it, the
+# modal below.
+
+#: `F9`'s switch widths, DERIVED here from the panel and the minimum rather
+#: than read back from the product's `docks`.  A map opened narrower than the
+#: reference width has its rail auto-hidden, so its view starts at column 0;
+#: one opened at the reference width keeps its rail through a resize.
+DOCK_WIDTH_BARE = LEGEND_DOCKED_CELLS + LEGEND_DOCK_MIN_VIEW_CELLS
+DOCK_WIDTH_WITH_RAIL = DOCK_WIDTH_BARE + RAIL_WIDTH
+REFERENCE_SIZE = (darkside.DECLARED_CONTEXT_CELLS, 34)
 
 def _cells(screen, x_end: int) -> list[list[tuple]]:
     """(character, fg, bg, bold) of every cell of the composited frame left of
@@ -432,16 +442,16 @@ async def _open_legend_over_map(app, pilot):
     return view, app.screen
 
 
-@pytest.mark.parametrize("width", [LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH, 140])
-async def test_d4_the_layout_switches_at_118_columns(tmp_path, width):
-    """Docked at `LEGEND_DOCK_MIN_WIDTH` and wider -- verdict `E1`: the
+@pytest.mark.parametrize("width", [DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE, 140])
+async def test_d4_the_layout_switches_at_the_derived_width(tmp_path, width):
+    """Docked at the derived width and wider (`F9`) -- verdict `E1`: the
     narrow panel, flush right, full height (`A-107`); the centred modal one
     column below it, under `TC-R36`'s cap."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=(width, 34)) as pilot:
         _view, legend = await _open_legend_over_map(app, pilot)
         dialog = legend.query_one("#help-dialog").region
-        docked = width >= LEGEND_DOCK_MIN_WIDTH
+        docked = width >= DOCK_WIDTH_BARE
         assert legend.has_class(DOCKED_CLASS) is docked
         if docked:
             assert (dialog.x, dialog.right, dialog.y, dialog.height) == (
@@ -453,9 +463,52 @@ async def test_d4_the_layout_switches_at_118_columns(tmp_path, width):
             assert dialog.y > 0, f"not centred vertically: {dialog}"
 
 
-@pytest.mark.parametrize("width", [LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH])
+@pytest.mark.parametrize("screen,opened_at,width", [
+    ("home", DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE - 1),
+    ("home", DOCK_WIDTH_BARE, DOCK_WIDTH_BARE),
+    ("map", DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE - 1),
+    ("map", DOCK_WIDTH_BARE, DOCK_WIDTH_BARE),
+    ("map", REFERENCE_SIZE[0], DOCK_WIDTH_WITH_RAIL - 1),
+    ("map", REFERENCE_SIZE[0], DOCK_WIDTH_WITH_RAIL),
+], ids=["home-below", "home-at", "map-below", "map-at", "map-rail-below", "map-rail-at"])
+async def test_f9_the_legend_docks_exactly_while_the_view_keeps_its_minimum(
+    tmp_path, screen, opened_at, width,
+):
+    """Verdict `F9`: the dock threshold is derived from the view left visible
+    beside the 44-column panel.  Measured on the frame: the view's first
+    column is the canvas's own left edge (the rail, when shown, sits before
+    it) or the screen's, and the columns between it and where the panel's
+    edge falls must be at least `LEGEND_DOCK_MIN_VIEW_CELLS`.  Each case sits
+    ON the boundary -- asserted, so a wrong derivation cannot pass by
+    landing elsewhere -- and the map is also resized onto it, with its rail
+    shown, so a resize across it is driven too."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(opened_at, 34)) as pilot:
+        if screen == "home":
+            app.push_screen(HomeScreen())
+            await _settle(pilot)
+            view_left = app.screen.region.x
+        else:
+            app.store.save("mapa", legacy_map())
+            app.push_screen(MapScreen("mapa"))
+            await _settle(pilot)
+            if width != opened_at:
+                await pilot.resize_terminal(width, 34)
+                await _settle(pilot)
+            view_left = app.screen.query_one("#map-canvas").region.x
+        visible = width - LEGEND_DOCKED_CELLS - view_left
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert isinstance(app.screen, HelpScreen)
+        docked = app.screen.has_class(DOCKED_CLASS)
+    assert visible in (LEGEND_DOCK_MIN_VIEW_CELLS - 1, LEGEND_DOCK_MIN_VIEW_CELLS), (
+        f"{screen} at {width}: {visible} columns; this case is not on the boundary")
+    assert docked is (visible >= LEGEND_DOCK_MIN_VIEW_CELLS), (screen, width, visible, docked)
+
+
+@pytest.mark.parametrize("width", [DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE])
 async def test_d4_the_view_stays_visible_and_undimmed_beside_the_docked_panel(tmp_path, width):
-    """At >= 118 every cell left of the docked panel is the view's own cell,
+    """Docked, every cell left of the docked panel is the view's own cell,
     glyph AND style -- nothing covers it and nothing dims it.  One column
     narrower the modal's backdrop dims the view: the same comparison must
     differ there, which is what shows this arm can see a covered view at all."""
@@ -472,7 +525,7 @@ async def test_d4_the_view_stays_visible_and_undimmed_beside_the_docked_panel(tm
         after = _cells(app.screen, panel_x)
     assert any(cell[0].strip() for row in before for cell in row), "the view painted nothing"
     same = after == before
-    assert same is (width >= LEGEND_DOCK_MIN_WIDTH), (
+    assert same is (width >= DOCK_WIDTH_BARE), (
         f"width {width}: cells left of x={panel_x} unchanged = {same}")
 
 
@@ -482,16 +535,16 @@ async def test_d4_the_docked_panel_paints_nothing_over_the_visible_view(tmp_path
     reflowed; what the narrow panel still covers is measured in
     `test_e1_the_docked_panel_covers_the_inspector_whole_and_little_canvas`."""
     app = MapperApp(tmp_path)
-    async with app.run_test(size=(LEGEND_DOCK_MIN_WIDTH, 34)) as pilot:
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
         _view, legend = await _open_legend_over_map(app, pilot)
-        panel_x = LEGEND_DOCK_MIN_WIDTH - LEGEND_DOCKED_CELLS
+        panel_x = REFERENCE_SIZE[0] - LEGEND_DOCKED_CELLS
         regions = [w.region for w in legend.query("*") if w.region.width]
     assert regions, "the legend laid out nothing"
     left = [r for r in regions if r.x < panel_x]
     assert not left, f"legend widgets left of x={panel_x}: {left}"
 
 
-@pytest.mark.parametrize("size", [(LEGEND_DOCK_MIN_WIDTH, 34), (140, 45)])
+@pytest.mark.parametrize("size", [REFERENCE_SIZE, (140, 45)])
 async def test_e1_the_docked_panel_covers_the_inspector_whole_and_little_canvas(tmp_path, size):
     """Verdict `E1` / `UX-F9` / `INC8-F-UX-F1`.  The docked panel runs the full
     height, so the ficha inspector is covered WHOLE -- no "L" of it left
@@ -532,7 +585,7 @@ async def test_d4_the_docked_panel_is_modal_for_keys(tmp_path):
     and `q` close it.  The same map key, pressed once the legend is closed,
     DOES move the view -- the trigger the arm depends on, asserted."""
     app = MapperApp(tmp_path)
-    async with app.run_test(size=(LEGEND_DOCK_MIN_WIDTH, 34)) as pilot:
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
         view, legend = await _open_legend_over_map(app, pilot)
         assert legend.has_class(DOCKED_CLASS)
         state = (view.nav.cursor, view.outline_mode, view.radial_mode, frozenset(view.folded))
@@ -564,10 +617,9 @@ async def test_d4_the_docked_panel_is_modal_for_keys(tmp_path):
 # `FINA_4` leaves 2 of the selected card's 8 cells visible beside the panel.
 
 FINA_4 = ("l", "l", "l", "j", "j", "j", "j")
-REFERENCE_SIZE = (darkside.DECLARED_CONTEXT_CELLS, 34)
 #: A width the legend is modal at, for a map opened at the reference width
 #: (its rail stays shown on a resize).
-MODAL_WIDTH_WITH_RAIL = LEGEND_DOCK_MIN_WIDTH - 1
+MODAL_WIDTH_WITH_RAIL = DOCK_WIDTH_WITH_RAIL - 1
 
 
 def _selection_cells(screen, canvas) -> list[tuple[int, int]]:
@@ -669,7 +721,7 @@ async def test_f2_the_modal_layout_does_not_pan_and_a_resize_re_derives_the_pan(
         assert (view.pan_x, view.pan_y) == docked_pan
 
 
-@pytest.mark.parametrize("width", [100, LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH, 140])
+@pytest.mark.parametrize("width", [100, DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE, 140])
 async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_path, width):
     """`INC8-CR-F2`, in both layouts (`E1`: two widths, each derived): the
     budget the rows are painted to is the pane's real usable width, modal or
@@ -678,7 +730,7 @@ async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_p
     async with app.run_test(size=(width, 34)) as pilot:
         _view, legend = await _open_legend_over_map(app, pilot)
         pane = legend.query_one("#help-bindings")
-        want = LEGEND_DOCKED_ROW_CELLS if width >= LEGEND_DOCK_MIN_WIDTH else LEGEND_ROW_CELLS
+        want = LEGEND_DOCKED_ROW_CELLS if width >= DOCK_WIDTH_BARE else LEGEND_ROW_CELLS
         assert legend.row_cells == want
         assert pane.scrollable_content_region.width == want
 
@@ -704,11 +756,11 @@ async def test_d4_a_resize_moves_the_open_legend_between_layouts(tmp_path):
         _view, legend = await _open_legend_over_map(app, pilot)
         assert legend.has_class(DOCKED_CLASS)
         assert footer_width(legend) == LEGEND_DOCKED_ROW_CELLS
-        await pilot.resize_terminal(100, 34)
+        await pilot.resize_terminal(DOCK_WIDTH_WITH_RAIL - 1, 34)
         await _settle(pilot)
         assert not legend.has_class(DOCKED_CLASS)
         assert footer_width(legend) == LEGEND_ROW_CELLS
-        await pilot.resize_terminal(LEGEND_DOCK_MIN_WIDTH, 34)
+        await pilot.resize_terminal(DOCK_WIDTH_WITH_RAIL, 34)
         await _settle(pilot)
         assert legend.has_class(DOCKED_CLASS)
         assert footer_width(legend) == LEGEND_DOCKED_ROW_CELLS
