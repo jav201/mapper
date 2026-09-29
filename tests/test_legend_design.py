@@ -739,22 +739,48 @@ async def test_f2_docking_pans_a_covered_selection_clear_and_closing_returns_it(
         assert _canvas_chars(view, canvas) == chars
 
 
-@pytest.mark.parametrize("size,keys", [(REFERENCE_SIZE, ("l", "l")), ((140, 45), FINA_4)],
-                         ids=["reference-left-card", "140x45-fina-4"])
+@pytest.mark.parametrize("size,keys", [
+    (REFERENCE_SIZE, ("l", "l", "l", "j", "j", "j", "L")), ((140, 45), (*FINA_4, "L")),
+], ids=["reference-panned", "140x45-fina-4-panned"])
 async def test_f2_a_selection_clear_of_the_panel_does_not_move_the_view(tmp_path, size, keys):
     """Verdict `F2`: the view moves only when the panel covers the selection.
     A selected card already left of the panel's edge keeps the view where it
-    was -- `FINA_4`'s card itself, at a width whose panel does not reach it."""
+    was -- `FINA_4`'s card itself, at a width whose panel does not reach it.
+    The operator has panned first (`L`), and that is asserted: from pan 0 a
+    wrong shift to the LEFT clamps back to 0 and looks like "no move"
+    (mutant `MP3` survived the first version of this arm that way).  The
+    reference case's card ends 13 columns short of the panel's edge, so a
+    check that fired "close to" the panel would move it."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         view, canvas = await _walked_map(app, pilot, keys)
         panel_x = size[0] - LEGEND_DOCKED_CELLS
         before = _selection_cells(view, canvas)
         pan = (view.pan_x, view.pan_y)
+        assert pan[0] > 0, "the operator's pan did not move the view; the arm has no subject"
         assert before and all(x < panel_x for x, _y in before), (panel_x, before)
         await pilot.press("question_mark")
         await _settle(pilot)
         assert app.screen.has_class(DOCKED_CLASS)
+        assert (view.pan_x, view.pan_y) == pan
+
+
+async def test_f2_the_modal_layout_does_not_pan_a_selection_a_dock_would_cover(tmp_path):
+    """Verdict `F2` is about docking.  Opened MODAL, over a card a docked
+    panel's edge WOULD cut at this width -- asserted, so the arm has a subject
+    (mutant `MP4` survived the resize arm below, whose modal width had put
+    the card past the canvas edge already) -- the view keeps its pan."""
+    width = DOCK_WIDTH_BARE - 1
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(width, 34)) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        would_be_edge = width - LEGEND_DOCKED_CELLS
+        before = _selection_cells(view, canvas)
+        pan = (view.pan_x, view.pan_y)
+        assert before and any(x >= would_be_edge for x, _y in before), (would_be_edge, before)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert isinstance(app.screen, HelpScreen) and not app.screen.has_class(DOCKED_CLASS)
         assert (view.pan_x, view.pan_y) == pan
 
 
