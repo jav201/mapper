@@ -602,7 +602,7 @@
       }
     ],
     "next": "Inc-8",
-    "next_stage": "Inc-8 design pass 2 (2026-09-29): apply round-2 verdict E1-E6 and the LANGUAGE RULING (whole project in English, UI included) to the legend, plus the final-round review findings. Then one review round, then Inc-9 (English key labels and screen headers), then Inc-EN (B-71, every remaining user-facing string), then whole-branch gates (FLAKE-1 first).",
+    "next_stage": "Inc-8 design pass 3 (2026-09-29): apply the round-3 verdict (F1 per-view colours + WARN second job, F2 pan-on-dock, F9 derived dock threshold, Q7 D-letter samples, nine copy/modal edits) under the width principle, plus the pass-2 review findings and the lone-surrogate crash. Then one review round, then Inc-9, then Inc-EN (B-71), then whole-branch gates.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -786,6 +786,46 @@
         "B-71 whole UI to English (Inc-EN)"
       ],
       "note_worktrees": "the stale basewt worktree record was pruned as a side effect of reviewer worktree add/remove; its directory and commit 954f8f3 are intact"
+    },
+    "INC-8_ROUND_3_2026-09-29": {
+      "date": "2026-09-29",
+      "pass_2_commits": [
+        "9d51593",
+        "29781d6",
+        "9fbc6a8",
+        "4b7c2ba",
+        "27be355",
+        "a4dcdd2",
+        "5d45c93",
+        "7227521"
+      ],
+      "pass_2_reviews": {
+        "code": "PASS -- 12 carried findings discharged by mutant; geometry confirmed (50/58 canvas cols, 31/31 radial nodes at 118); lane 1247 passed / 0 failed; sealed arms unweakened beyond A-107",
+        "security": "PASS -- SEC-F1/F2 discharged; 33 map keys + clicks while docked, 0 files changed; 0 banned code points across 323 tracked files",
+        "ux": "BLOCK-UNTIL P2-UX-F1 (global colour table contradicts outline/home amber counts); INC8-F-UX-F1 DISCHARGED"
+      },
+      "operator_verdict_round_3": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc8-legend-2026-09-28.md section 'Round 3'",
+      "DESIGN_PRINCIPLE_WIDTH_2026-09-29": "terminal width is variable (operators zoom to fit more): behaviour derives for any width; decisions and renders use one fixed reference width, DECLARED_CONTEXT_CELLS = 118, shown alongside a narrower and a wider render",
+      "carried_into_design_pass_3": [
+        "INC8-P2-CR-F1 crumb parent sizing untested",
+        "INC8-P2-CR-F2 two-line own group untested",
+        "INC8-P2-CR-F3 E4 arm cost order-dependent (89.5 s alone)",
+        "INC8-P2-CR-F4 coercion written twice (shown_cells/fit)",
+        "INC8-P2-CR-F5 stale _paints_as docstring",
+        "INC8-P2-CR-F6 record overstates the catalogue",
+        "INC8-P2-CR-F7 record tolerance and row figures",
+        "INC8-P2-SEC-F1 lone surrogate survives plain() and crashes a strict-UTF-8 sink (B-67, now reproduced as a crash)",
+        "INC8-P2-UX-F6 V40 sample ground",
+        "INC8-P2-CR-F9 esc proved by the title, not the group"
+      ],
+      "routed_to_inc9": [
+        "INC8-P2-UX-F4 up to three names per view in one frame; no release between Inc-8 and Inc-9"
+      ],
+      "carries": [
+        "INC8-D2-F2 app.py:2625 map toast sizes fit by len() (wide-glyph early truncation; outside Inc-8 files)",
+        "diff-mode tones uncatalogued",
+        "INC8-P2-UX-F7 focus after esc (unmeasured on a real launch)"
+      ]
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
