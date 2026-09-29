@@ -2279,7 +2279,12 @@ class MapScreen(Screen):
         can shrink the extent under `pan_x`, and `_move_pan` alone does not
         clamp, it only repaints whatever it is handed.  At an unchanged size
         this is a no-op: the kept pan is already legal, so `A-109`'s "closing
-        still restores the kept pan exactly" is unaffected."""
+        still restores the kept pan exactly" is unaffected.
+
+        `_reclamp_pan` reaches `_view_state`, which is `_PASS_FREE_READERS`'
+        business, not this method's -- see that dict's own entry for why a
+        stale search memo cannot corrupt what `_reclamp_pan` computes here
+        (`test_search.py`)."""
         widget = None
         if focus_id is not None:
             matches = self.query(f"#{focus_id}")
