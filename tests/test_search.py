@@ -1472,7 +1472,17 @@ _PASS_FREE_READERS = {
     "_view_state": "resolver helper; builds the renderer's parameters in its caller's pass",
     "_pagination_text": "builds the strip; both of its callers open a pass first",
     "_unpainted_ids": "reached only from `_pagination_text`, inside that caller's pass",
-    "_reclamp_pan": "called from INSIDE `refresh_canvas`'s pass, deliberately (see its call site)",
+    # `INC8-CL-CR-F1` added a second call site (`_restore_after_legend`,
+    # outside any pass) beside `refresh_canvas`'s own -- the reason below now
+    # covers both, since it no longer depends on which one calls it.
+    "_reclamp_pan": (
+        "reaches `_view_state` only to reach `pan_extent`, which never reads "
+        "`state.hits` (the memo-derived field) -- `_geometry` uses `w`, `h`, "
+        "`folded` and `diff` alone -- so whatever the memo holds cannot change "
+        "what this computes, inside a pass or not"
+    ),
+    "_restore_after_legend": "its only path to the resolution is `_reclamp_pan`; see that entry",
+    "on_screen_resume": "defers to `_restore_after_legend` via `call_after_refresh`; see that entry",
     "_pan": "reads the extent of the frame ON SCREEN -- the frame being panned -- then repaints",
     "action_pan_left": "wrapper over `_pan`",
     "action_pan_right": "wrapper over `_pan`",
