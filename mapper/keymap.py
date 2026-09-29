@@ -167,6 +167,15 @@ KEYMAP: list[KeyBinding] = [
     # method HelpScreen does not define, which was a silent no-op.
     KeyBinding("escape", "esc", "dismiss_none", "cerrar", "help"),
     KeyBinding("q", "q", "dismiss_none", "cerrar", "help"),
+    # HLR-N16.4: every key that has an effect inside the legend is declared in
+    # it.  These six already scrolled the pane, undeclared, while the new
+    # vocabulary sections land below the fold.
+    KeyBinding("up", "↑", "legend_up", "subir", "help"),
+    KeyBinding("down", "↓", "legend_down", "bajar", "help"),
+    KeyBinding("pageup", "pageup", "legend_page_up", "página arriba", "help"),
+    KeyBinding("pagedown", "pagedown", "legend_page_down", "página abajo", "help"),
+    KeyBinding("home", "home", "legend_home", "al principio", "help"),
+    KeyBinding("end", "end", "legend_end", "al final", "help"),
     # -- app (available on every screen) ------------------------------------
     KeyBinding("ctrl+p", "ctrl+p", "palette", "paleta de acciones", "app"),
     KeyBinding("question_mark", "?", "help", "ayuda", "app"),

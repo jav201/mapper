@@ -59,7 +59,8 @@ EXPECTED_PER_SCOPE = {
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,
     keymap.SCOPE_PALETTE: 2,
-    keymap.SCOPE_HELP: 2,
+    # 2 -> 8: Inc-8 / HLR-N16.4 declares the legend's six scroll keys.
+    keymap.SCOPE_HELP: 8,
     keymap.SCOPE_APP: 2,
 }
 
@@ -137,6 +138,7 @@ def test_glyph_is_a_plausible_display_form_of_its_key():
     display = {
         "enter": "↵", "escape": "esc", "slash": "/",
         "equals_sign": "=", "question_mark": "?",
+        "up": "↑", "down": "↓",
     }
     for b in ALL_BINDINGS:
         expected = display.get(b.key, b.key)

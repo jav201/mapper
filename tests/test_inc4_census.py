@@ -86,7 +86,9 @@ def test_cd25b_no_chord_collides_on_entry_or_on_exit():
     # Put the removed row back, so the reconstruction really is the ENTRY seat
     # and not merely the exit seat with three rows missing.
     restored = [(b.scope, b.key) for b in entry] + [("map", "n")]
-    assert len(restored) == 52, len(restored)
+    # 52 at Inc-4b's close; +6 help-scope rows from Inc-8 (HLR-N16.4), which
+    # this reconstruction does not undo because they are not Inc-4b's.
+    assert len(restored) == 58, len(restored)
 
     seen: set[tuple[str, str]] = set()
     clashes: list[tuple[str, str]] = []
