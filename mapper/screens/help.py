@@ -18,14 +18,25 @@ from textual.widgets import Static
 from mapper import darkside
 from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, textual_bindings
 
+# The legend panel's width, ONE constant for both layouts (Inc-8 verdict `D4`):
+# a modal below `LEGEND_DOCK_MIN_WIDTH` columns, docked on the right at or above
+# it.  The CSS below is built from it.
+LEGEND_PANEL_CELLS = 80
+_PAD_X = 2
+_SCROLLBAR_CELLS = 1
 # `LLR-N16.2.3`'s row-length clause: every painted row of the scrolling body is
-# exactly this many cells -- `#help-dialog`'s width 80, less its 2+2 padding and
-# the 1-cell scrollbar.  A row wider than the pane would wrap, and the wrapped
-# half would read as a row of its own.  `INC8-CR-F2`:
+# exactly this many cells -- the panel less its left and right padding and the
+# scrollbar.  A row wider than the pane would wrap, and the wrapped half would
+# read as a row of its own.  `INC8-CR-F2`:
 # `test_llr_n16_2_3_legend_coerces_and_bounds_every_string` in
 # `tests/test_help_scope.py` pins this against the real widget's
-# `scrollable_content_region`, so a CSS width edit that stops matching reddens.
-LEGEND_ROW_CELLS = 75
+# `scrollable_content_region` in BOTH layouts.
+LEGEND_ROW_CELLS = LEGEND_PANEL_CELLS - 2 * _PAD_X - _SCROLLBAR_CELLS
+# `D4`: at this terminal width and wider the legend docks beside the view
+# instead of covering it.  The panel stays modal for keys in both layouts: a
+# key pressed while the legend is open never reaches the view under it.
+LEGEND_DOCK_MIN_WIDTH = 118
+DOCKED_CLASS = "-docked"
 _KEY_CELLS = 10
 _SAMPLE_CELLS = 12
 _INDENT = "  "
@@ -98,25 +109,35 @@ class HelpScreen(ModalScreen[None]):
         for key, action, label, priority in textual_bindings(SCOPE_HELP)
     ]
 
-    CSS = """
-    HelpScreen {
+    CSS = f"""
+    HelpScreen {{
         align: center middle;
         background: #000000 70%;
-    }
-    #help-dialog {
-        width: 80;
+    }}
+    #help-dialog {{
+        width: {LEGEND_PANEL_CELLS};
         height: 90%;
         max-height: 28;
         background: #121212;
-        padding: 1 2;
-    }
+        padding: 1 {_PAD_X};
+    }}
+    /* `D4`, docked: the view stays visible and undimmed on the left; the
+       panel sits top-right.  Depth is the one grey step from the view's ground
+       to PANEL -- no border.  The panel keeps the modal's height rules:
+       `TC-R36` (`LLR-R05`, a sealed prior batch) pins `max-height` as what
+       governs at 140x45, so a full-height dock is an operator question, not
+       a CSS line. */
+    HelpScreen.{DOCKED_CLASS} {{
+        align: right top;
+        background: #000000 0%;
+    }}
     /* S-08 (LLR-R05.1).  The map scope carries 27 bindings in 5 groups, which the
        body renders as 40 rows — more than `max-height` shows at any terminal
        size.  Before this rule the surplus was clipped away with no way to reach
        it, and the whole 11-member `view` group fell off the bottom in silence.
        The BINDINGS scroll while the title does not: the title is the one row
        that tells the operator which view they are reading. */
-    #help-bindings {
+    #help-bindings {{
         height: 1fr;
         overflow-y: auto;
         scrollbar-size-vertical: 1;
@@ -128,13 +149,13 @@ class HelpScreen(ModalScreen[None]):
            sites (`B-43`), and this pane is not one of them. */
         scrollbar-color: #a3a3a3;
         scrollbar-background: #121212;
-    }
-    #help-title {
+    }}
+    #help-title {{
         margin-bottom: 1;
-    }
-    #help-own-scope {
+    }}
+    #help-own-scope {{
         margin-bottom: 1;
-    }
+    }}
     """
 
     def __init__(self, scope: str = SCOPE_APP, view: str | None = None) -> None:
@@ -143,6 +164,17 @@ class HelpScreen(ModalScreen[None]):
         # HLR-N16.2: the title names the VIEW; a screen that declares none is
         # named by its scope.
         self.view = view or scope
+
+    # -- layout (`D4`) -----------------------------------------------------
+
+    def _apply_layout(self, width: int) -> None:
+        self.set_class(width >= LEGEND_DOCK_MIN_WIDTH, DOCKED_CLASS)
+
+    def on_mount(self) -> None:
+        self._apply_layout(self.app.size.width)
+
+    def on_resize(self, event) -> None:
+        self._apply_layout(event.size.width)
 
     def compose(self) -> ComposeResult:
         body = [Static(self._render_keymap(), id="help-content")]

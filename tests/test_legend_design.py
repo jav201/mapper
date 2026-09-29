@@ -43,7 +43,14 @@ from textual.widgets import DataTable
 from mapper import darkside, keymap
 from mapper.app import HomeScreen, MapperApp, MapScreen
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
-from mapper.screens.help import vocabulary_for
+from mapper.screens.help import (
+    DOCKED_CLASS,
+    LEGEND_DOCK_MIN_WIDTH,
+    LEGEND_PANEL_CELLS,
+    LEGEND_ROW_CELLS,
+    HelpScreen,
+    vocabulary_for,
+)
 
 VIEW_SIZE = (118, 34)
 
@@ -241,6 +248,154 @@ async def test_d2_the_legend_and_the_view_agree_in_both_directions(tmp_path, vie
         f"{view}: COMPLETENESS -- painted but in no member of this view: "
         f"{[(c, f'U+{ord(c):04X}') for c in undeclared]}"
     )
+
+
+# ---------------------------------------------------------------------------
+# D4 -- a side panel at >= 118 columns, the modal below.
+
+def _cells(screen, x_end: int) -> list[list[tuple]]:
+    """(character, fg, bg, bold) of every cell of the composited frame left of
+    `x_end` -- what the operator sees.  Not the `Style` object: two equal
+    paints compare unequal as objects once they cross a compositor.  A space
+    has no visible foreground, so its fg is dropped (measured: the modal
+    compositor gives 109 blank cells an `INK` fg they did not carry)."""
+    rows = []
+    for strip in screen._compositor.render_strips():  # noqa: SLF001
+        row: list[tuple] = []
+        for seg in strip:
+            st = seg.style or Style()
+            fg = None if seg.text.isspace() else _hex(st.color)
+            row.extend((ch, None if ch == " " else fg, _hex(st.bgcolor), bool(st.bold))
+                       for ch in seg.text)
+        rows.append(row[:x_end])
+    return rows
+
+
+async def _open_legend_over_map(app, pilot):
+    app.store.save("mapa", legacy_map())
+    app.push_screen(MapScreen("mapa"))
+    await _settle(pilot)
+    view = app.screen
+    await pilot.press("question_mark")
+    await _settle(pilot)
+    assert isinstance(app.screen, HelpScreen)
+    return view, app.screen
+
+
+@pytest.mark.parametrize("width", [LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH, 140])
+async def test_d4_the_layout_switches_at_118_columns(tmp_path, width):
+    """Docked top-right at `LEGEND_DOCK_MIN_WIDTH` and wider; the centred
+    modal one column below it.  Both keep the height `TC-R36` governs."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(width, 34)) as pilot:
+        _view, legend = await _open_legend_over_map(app, pilot)
+        dialog = legend.query_one("#help-dialog").region
+        docked = width >= LEGEND_DOCK_MIN_WIDTH
+        assert legend.has_class(DOCKED_CLASS) is docked
+        assert dialog.width == LEGEND_PANEL_CELLS and dialog.height <= 28, dialog
+        if docked:
+            assert (dialog.x, dialog.right, dialog.y) == (width - LEGEND_PANEL_CELLS, width, 0), dialog
+        else:
+            assert abs(dialog.x - (width - dialog.right)) <= 1, f"not centred: {dialog}"
+            assert dialog.y > 0, f"not centred vertically: {dialog}"
+
+
+@pytest.mark.parametrize("width", [LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH])
+async def test_d4_the_view_stays_visible_and_undimmed_beside_the_docked_panel(tmp_path, width):
+    """At >= 118 every cell left of the panel is the view's own cell, glyph
+    AND style -- nothing covers it and nothing dims it.  One column narrower
+    the modal's backdrop dims the view: the same comparison must differ there,
+    which is what shows this arm can see a covered view at all."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(width, 34)) as pilot:
+        app.store.save("mapa", legacy_map())
+        app.push_screen(MapScreen("mapa"))
+        await _settle(pilot)
+        panel_x = width - LEGEND_PANEL_CELLS
+        before = _cells(app.screen, panel_x)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert isinstance(app.screen, HelpScreen)
+        after = _cells(app.screen, panel_x)
+    assert any(cell[0].strip() for row in before for cell in row), "the view painted nothing"
+    same = after == before
+    assert same is (width >= LEGEND_DOCK_MIN_WIDTH), (
+        f"width {width}: cells left of x={panel_x} unchanged = {same}")
+
+
+async def test_d4_the_docked_panel_paints_nothing_over_the_visible_view(tmp_path):
+    """No widget of the legend reaches left of the panel's edge: the panel and
+    the part of the view left visible do not overlap.
+
+    WHAT THIS DOES NOT CLAIM, and the record says so: the view is not
+    reflowed, so at 118 columns the 80-column panel still covers the right of
+    the map screen -- the canvas from column 38 on and the ficha inspector.
+    That is `INC8-D-Q4`, measured in `increment-022`, for the operator."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(LEGEND_DOCK_MIN_WIDTH, 34)) as pilot:
+        _view, legend = await _open_legend_over_map(app, pilot)
+        panel_x = LEGEND_DOCK_MIN_WIDTH - LEGEND_PANEL_CELLS
+        regions = [w.region for w in legend.query("*") if w.region.width]
+    assert regions, "the legend laid out nothing"
+    left = [r for r in regions if r.x < panel_x]
+    assert not left, f"legend widgets left of x={panel_x}: {left}"
+
+
+async def test_d4_the_docked_panel_is_modal_for_keys(tmp_path):
+    """DECIDED: keys never reach the view while the legend is open, docked or
+    not.  A map key does nothing, a second `?` stacks nothing (`HLR-N16.3`),
+    `esc` and `q` close it.  The same map key, pressed once the legend is
+    closed, DOES move the view -- the trigger the arm depends on, asserted."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(LEGEND_DOCK_MIN_WIDTH, 34)) as pilot:
+        view, legend = await _open_legend_over_map(app, pilot)
+        assert legend.has_class(DOCKED_CLASS)
+        state = (view.nav.cursor, view.outline_mode, view.radial_mode, frozenset(view.folded))
+        depth = len(app.screen_stack)
+        for key in ("l", "o", "r", "z", "question_mark"):
+            await pilot.press(key)
+            await pilot.pause()
+            assert app.screen is legend, f"{key!r} closed or covered the legend"
+            assert len(app.screen_stack) == depth, f"{key!r} stacked a screen"
+        assert (view.nav.cursor, view.outline_mode, view.radial_mode,
+                frozenset(view.folded)) == state, "a key reached the view"
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.screen is view, "esc did not close the docked legend"
+        await pilot.press("l")
+        await _settle(pilot, 1)
+        assert view.nav.cursor != state[0], "the trigger key does nothing on the bare view"
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert isinstance(app.screen, HelpScreen)
+        await pilot.press("q")
+        await pilot.pause()
+        assert app.screen is view, "q did not close the docked legend"
+
+
+@pytest.mark.parametrize("width", [100, LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH, 140])
+async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_path, width):
+    """`INC8-CR-F2`, in both layouts: the budget is derived from the one panel
+    width, and the pane really is that wide, modal or docked."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(width, 34)) as pilot:
+        _view, legend = await _open_legend_over_map(app, pilot)
+        pane = legend.query_one("#help-bindings")
+        assert pane.scrollable_content_region.width == LEGEND_ROW_CELLS
+    assert LEGEND_ROW_CELLS == LEGEND_PANEL_CELLS - 5
+
+
+async def test_d4_a_resize_moves_the_open_legend_between_layouts(tmp_path):
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 34)) as pilot:
+        _view, legend = await _open_legend_over_map(app, pilot)
+        assert legend.has_class(DOCKED_CLASS)
+        await pilot.resize_terminal(100, 34)
+        await _settle(pilot)
+        assert not legend.has_class(DOCKED_CLASS)
+        await pilot.resize_terminal(LEGEND_DOCK_MIN_WIDTH, 34)
+        await _settle(pilot)
+        assert legend.has_class(DOCKED_CLASS)
 
 
 def test_d2_the_exclusion_rule_keeps_the_forms_the_catalogue_kept():
