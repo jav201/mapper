@@ -125,3 +125,24 @@ Decision page «Leyenda de mapper, cuarta ronda», pasted back verbatim. **Autho
 
 Also landed before this record: the pass-3 corrective (`4a372dc`, `60bf183`, `da49eb0`) fixed the code-review BLOCK `INC8-P3-CR-F1` (opening the legend moved keyboard focus) and restores the pre-legend focus on close, including `None` (closes `INC8-P3-UX-F1` / `UX-F7`).
 
+---
+
+# Round 5 — closing questions, operator answers 2026-09-29 (base `3818a96`)
+
+Both closing reviews said **Inc-8 may close** (code PASS, ux PASS-WITH-FINDINGS). Four
+questions were put to the operator directly; each answer took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| H1 · CL-UX-F2 | `?` typed in the inspector title field replaces the title with "?" and saves it (select-all on focus; pre-existing; B-36 family) | Junto con B-36, y ajustar el pie ya | The field fix goes with **B-36** (first item of the next design batch). Now: the legend footer stops over-promising — `? explains the view you are in, outside text fields` |
+| H2 · CL-UX-F1 | After `tab` into the inspector, closing the legend turns the selected card blue → grey (stale paint: `tab` does not repaint) | Sí, arreglarlo en Inc-8 | Repaint the canvas on every focus change; the arm is driven with real keys, not `set_focus()` |
+| H3 · CL-CR-F2/F3 · CL-UX-F3 | The 2-column reveal margin paints as 3 on an ordinary card and 1 at the map's edge; the edge exception was the implementer's | 2 columnas pintadas en todos los casos | The margin counts PAINTED columns, and the edge honours it too (the docked range widens by the margin). The arm asserts the composited frame, not the geometry. The implementer's edge exception in A-109 is withdrawn |
+| H4 · CL-UX-F4 | With the rail hidden (`R`, or auto below ~117 columns), the legend still lists rail rows | Ocultarlas cuando el rail no se ve | The legend lists rail rows only while the rail is shown, as colours are already per view |
+
+Also applied in the closing pass, not needing a ruling: `INC8-CL-CR-F1` (re-clamp the pan after
+close so a resize while the legend was open cannot leave it outside the legal range), and the
+coordinator aligns V27's copy with the operator's G5 wording for V28 (`field initial, filled` /
+`field initial, pending`). Carries: `INC8-CL-CR-F4` (no arm pins `_reclamp_pan`'s range) to
+qa-reviewer; a FLAKE-2 candidate — `test_hlr_n16_4_legend_declares_its_own_keys[size2]` failed
+once ("work but not painted: ['left']") under concurrent load, 0 of 21 since.
+
