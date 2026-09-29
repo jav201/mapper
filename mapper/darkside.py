@@ -562,60 +562,93 @@ def fit(s: str, w: int) -> str:
 #:
 #: THE STYLE IS A TOKEN NAME, NOT A RESOLVED HEX.  `01b` declares tokens and the
 #: legend must paint what the renderer paints, so the comparison has to be on
-#: the same representation; resolving here would make the declaration
-#: uncheckable against its own source.
+#: the same representation; `resolve_style` turns it into paint at the sink.
 #:
-#: WHAT `tests/test_vocabulary_declaration.py` DERIVES FROM `01b` AND CHECKS,
-#: on every run: that every declared (label, style) pair is FAITHFUL to a row
-#: in `01b` sections 3.1-3.4 -- no fabricated label, no drifted style -- and
-#: that `V22`'s glyph is pinned to the glyph `01b`'s row for `PRED-VIS` names.
+#: THE GLYPH IS THE LEGEND'S SAMPLE, DERIVED FROM `01b`'s GLYPH CELL BY A
+#: WRITTEN RULE (`INC7-CR-R2-F2`) -- stated once, in
+#: `tests/test_vocabulary_declaration.py::sample_by_style`, and applied to every
+#: row there.  An EMPTY glyph means the cell is PROSE and the rule cannot
+#: derive a sample from it (`V4b`, `V12`): an open question for the operator,
+#: never a guess.
 #:
-#: WHAT IT DOES NOT CHECK, and who owns closing it: COMPLETENESS -- dropping a
-#: row, or renaming a row's ID while leaving its label and style untouched,
-#: leaves the suite green (`INC7-CR-R2-F3`, carried to `Inc-8`, which owes set
-#: equality against the document) -- and GLYPH-COLUMN FIDELITY for every row
-#: but `V22` -- the glyph column below is lifted from `01b`'s prose by hand
-#: and unchecked against it (`INC7-CR-R2-F2`, carried to `Inc-8`, which owes a
-#: written derivation rule for the glyph column).
+#: `tests/test_vocabulary_declaration.py` asserts SET EQUALITY between this
+#: tuple and the members it derives from `01b` (`INC7-CR-R2-F3`): dropping a
+#: row, renaming its id, or drifting its glyph, label or style reddens.
 #:
 #: Compound rows contribute ONE MEMBER PER DISTINCT TRIPLE (`A-103`); rows that
-#: name the same painted FORM collapse (`01b` Amendment 2(b) -- a glyph may be a
-#: SET of codepoints, so a braille RANGE is one device, not many).
+#: name the same painted FORM collapse onto the first id that names it (`V4a`
+#: into `V4`, `01b` Amendment 2(b)); a `DEFERRED(#D7)` row contributes nothing
+#: (`V18`, Amendment 2(a)).
+
+#: `01b` row `V22`'s glyph, as its own constant so the pending `⊘`/`⦸` verdict
+#: is a one-line swap (Amendment 1).
+DAMAGED_MAP_GLYPH = "\u2298"
+
 DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
-    ('V1', "", 'rama abierta', 'INK on PANEL'),
-    ('V2', "ó", 'coincidencia de búsqueda', 'bold GROUND on WARN'),
-    ('V3', "+▸", 'rama plegada (23 dentro)', 'MUT on PANEL'),
-    ('V4', "∙", 'territorio sin explorar', 'WORDMARK'),
-    ('V5', "▔", 'nodo seleccionado', 'ACCENT'),
-    ('V6', "─┌┐", 'minimapa: tu ventana en el todo', 'ACCENT'),
-    # V4a: collapses onto an earlier row -- same painted FORM.
+    ('V1', " rrhh ", 'rama abierta', 'INK on PANEL'),
+    ('V2', " nómina ", 'coincidencia de búsqueda', 'bold GROUND on WARN'),
+    ('V3', "▸ inv +23", 'rama plegada (23 dentro)', 'MUT on PANEL'),
+    ('V4', "∙ ∙ ∙", 'territorio sin explorar', 'WORDMARK'),
+    ('V5', "▔▔▔▔", 'nodo seleccionado', 'ACCENT'),
+    ('V6', "┌─┐", 'minimapa: tu ventana en el todo', 'ACCENT'),
     ('V4b', "", 'enlace entre nodos', 'MUT'),
     ('V4b', "", 'enlace entre nodos', 'ACCENT'),
-    ('V7', "·—", 'overflow declaration; the `N` **shall** reconcile with the sum of the `+N` in every painted pill', 'WORDMARK'),
-    ('V8', "·", 'minimap caption; `N` = total nodes in the graph', 'WORDMARK'),
-    ('V9', "─│┌┐└┘", 'viewport — the part of the territory now on screen', 'ACCENT on PANEL'),
-    ('V10', "░▒▓", 'territory density', 'WORDMARK on PANEL'),
+    ('V7', "plegadas: inventarios · ventas — 41 nodos", 'overflow declaration; the `N` **shall** reconcile with the sum of the `+N` in every painted pill', 'WORDMARK'),
+    ('V8', "minimapa · 128 nodos", 'minimap caption; `N` = total nodes in the graph', 'WORDMARK'),
+    ('V9', "┌──┐ │ │ └──┘", 'viewport — the part of the territory now on screen', 'ACCENT on PANEL'),
+    ('V10', "▓ ▒ ░", 'territory density', 'WORDMARK on PANEL'),
     ('V11', "▐", 'coincide con la lente', 'WARN on PANEL'),
     ('V12', "", 'fuera de la lente', 'WORDMARK'),
     ('V13', "╎", 'enlace atenuado', 'STEP'),
-    ('V14', "✓", 'sin campos pendientes', 'SAGE on PANEL'),
-    ('V15', "░", 'ficha incompleta', 'MUT on PANEL'),
+    ('V14', "ficha completa ✓", 'sin campos pendientes', 'SAGE on PANEL'),
+    ('V15', "faltan campos ░", 'ficha incompleta', 'MUT on PANEL'),
     ('V16', "∗", 'lente de campos', 'ACCENT'),
-    ('V17', "⇄", 'enlaza mapas', 'VIOLET on PANEL'),
-    # V18: removed by `#D7` -- ruled out of this batch.
-    ('V19', "█░", 'coverage microbar', 'SAGE'),
-    ('V19', "█░", 'coverage microbar', 'INK'),
-    ('V19', "█░", 'coverage microbar', 'WORDMARK'),
-    ('V20', "▲", 'actas vencidas', 'WARN on PANEL'),
+    ('V17', "⇄ enlazado", 'enlaza mapas', 'VIOLET on PANEL'),
+    ('V19', "█", 'coverage microbar', 'SAGE'),
+    ('V19', "█", 'coverage microbar', 'INK'),
+    ('V19', "░", 'coverage microbar', 'WORDMARK'),
+    ('V20', "▲ vence", 'actas vencidas', 'WARN on PANEL'),
     ('V21', "∙", 'lit `= nodo con acta`, unlit `= sin acta`', 'MUT on PANEL'),
     ('V21', "∙", 'lit `= nodo con acta`, unlit `= sin acta`', 'WORDMARK on PANEL'),
-    ('V22', "⊘", 'mapa dañado — no se pudo leer', 'INK on PANEL'),
+    ('V22', DAMAGED_MAP_GLYPH, 'mapa dañado — no se pudo leer', 'INK on PANEL'),
 )
 
-#: `01b` row `V22`'s glyph, as its own constant rather than a walrus buried in
-#: the tuple above -- the previous form defined a public name as a side effect
-#: of building a literal, which reads as a typo and cannot be found by grep.
-DAMAGED_MAP_GLYPH = "\u2298"
+#: `01b` Amendment 2(b): a glyph may be a SET of codepoints.  A member listed
+#: here also owns every codepoint in each inclusive range -- `V4`'s scattered
+#: braille, written in `V4a`'s cell as `U+2800`-`U+28FF`.  Derived and checked
+#: with the tuple above.
+DECLARED_GLYPH_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
+    "V4": ((0x2800, 0x28FF),),
+}
+
+#: `HLR-N16.2` -- which members each view's legend paints, by row id.  Derived
+#: from the `01b` SECTION a row sits in (`3.1`/`3.2` the atlas canvas, `3.4` the
+#: sala).  `3.3` (lens) belongs to no view: US-N14 is deferred whole (`#D23`).
+#: A view absent here has an empty vocabulary (`LLR-N16.2.2`).
+LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
+    "atlas": ("V1", "V2", "V3", "V4", "V5", "V6", "V4b", "V7", "V8", "V9", "V10"),
+    "sala": ("V17", "V19", "V20", "V21", "V22"),
+}
+
+#: `LLR-N16.2.1`'s SECOND derived set: `01b` §3.5's colours with a job, as
+#: `(swatch, label, token)`.  Not members of the vocabulary above.
+DECLARED_COLOURS: tuple[tuple[str, str, str], ...] = (
+    ("█", "azul — donde puedes actuar", "ACCENT"),
+    ("█", "ámbar — atención / vence", "WARN"),
+    ("█", "sage — completo / vigente", "SAGE"),
+    ("█", "teal — vino del repo", "TEAL"),
+    ("█", "violeta — enlaza mapas", "VIOLET"),
+)
+
+
+def resolve_style(declared: str) -> str:
+    """A declared style (`"bold GROUND on WARN"`) as paint (`"bold #000000 on #ffd230"`).
+
+    Only whole words that name a token are replaced, so `bold` and `on` pass
+    through and an unknown word stays visible rather than vanishing.
+    """
+    names = tokens()
+    return " ".join(names.get(word, word) for word in declared.split())
 
 #: `LLR-N13.1.5`'s DECLARED CARD STATE -- the Spanish string that ships.
 #: The `\u21b5` is load-bearing: `#D28` escalates this seat from `MUT` to `INK`

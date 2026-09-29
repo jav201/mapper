@@ -485,6 +485,8 @@ class HomeScreen(Screen):
     """Home screen with GLANCE posture: one hero, everything else available."""
 
     KEY_SCOPE = SCOPE_HOME
+    # HLR-N16.2: the view name the legend's title carries.
+    legend_view = "sala"
     BINDINGS = screen_bindings(SCOPE_HOME)
 
     def compose(self) -> ComposeResult:
@@ -2116,6 +2118,16 @@ class MapScreen(Screen):
         if self.radial_mode:
             return self.radial_renderer
         return self.renderer
+
+    @property
+    def legend_view(self) -> str:
+        """HLR-N16.2: the name of the view `?` explains, read from the same
+        two booleans `_current_renderer` reads."""
+        if self.outline_mode:
+            return "outline"
+        if self.radial_mode:
+            return "radial"
+        return "atlas"
 
     def _current_crumb(self) -> list[str]:
         prefix = self.source_crumb or [self.map_id]
@@ -4443,7 +4455,10 @@ class MapperApp(App):
         self.push_screen(CommandPalette(scope), callback=on_command)
 
     def action_help(self) -> None:
-        self.push_screen(HelpScreen(getattr(self.screen, "KEY_SCOPE", SCOPE_APP)))
+        self.push_screen(HelpScreen(
+            getattr(self.screen, "KEY_SCOPE", SCOPE_APP),
+            view=getattr(self.screen, "legend_view", None),
+        ))
 
     def action_quit(self) -> None:
         self.exit()

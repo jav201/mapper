@@ -125,11 +125,10 @@ def test_llr_n16_2_1_the_D7_removal_step_HAS_A_SUBJECT():
 def test_llr_n16_2_1_every_declared_row_is_FAITHFUL_to_the_document():
     """The arm the docstring claimed existed. It did not, and the table drifted.
 
-    FAITHFULNESS, NOT SET EQUALITY. Set equality needs the compound-row
-    projection AND the glyph-set model applied to every row; this arm asserts the
-    weaker, decisive property that every row the product declares actually
-    appears in `01b` with that style. **Fabrication is what it catches**, and
-    fabrication is what happened.
+    FAITHFULNESS, NOT SET EQUALITY: every row the product declares appears in
+    `01b` with that style. **Fabrication is what it catches**, and fabrication is
+    what happened. Set equality, which Inc-8 owed, is
+    `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document` below.
     """
     rows = derived_rows()
     doc_styles: dict[str, set[str]] = {}
@@ -180,6 +179,194 @@ def test_llr_n16_2_1_the_damaged_map_row_is_declared_and_not_deferred():
         f"darkside.DAMAGED_MAP_GLYPH is {darkside.DAMAGED_MAP_GLYPH!r} -- one "
         f"of the two drifted, either from the other or from 01b itself"
     )
+
+
+# ---------------------------------------------------------------------------
+# Inc-8 -- `INC7-CR-R2-F2` (the glyph column, derived by a WRITTEN RULE) and
+# `INC7-CR-R2-F3` (completeness: set EQUALITY, not faithfulness).
+
+_CHIP = re.compile(r"legend chip\s+`([^`]+)`")
+_EXAMPLE = re.compile(r"e\.g\.\s+`([^`]+)`")
+_LEADING_TOKEN = re.compile(r"`([^`]+)`")
+_PLACEHOLDER = re.compile(r"<[^>]+>")
+_RANGE = re.compile(r"`U\+([0-9A-F]{4,6})`\s*[–-]\s*`U\+([0-9A-F]{4,6})`")
+_QUALIFIER = re.compile(r"([a-z]+)\s")
+_STYLE_TOKEN = re.compile(r"`((?:bold\s+)?[A-Z][A-Z_]*(?:\s+on\s+[A-Z][A-Z_]*)?)`")
+
+#: Rows whose glyph cell is PROSE: the rule derives no sample, the declaration
+#: carries `""`, and each is an open question for the operator
+#: (`increment-022` §Questions).  Pinned so a cell that gains a glyph, or a
+#: glyph that goes missing, reddens instead of passing.
+OPERATOR_QUESTIONS = {"V4b", "V12"}
+
+#: `HLR-N16.2`'s view partition, by `01b` section.  `3.1` names its view
+#: ("the atlas view") and `3.4` its screen ("Sala (home)"); `3.2`'s minimap and
+#: overflow indicators live on the same map canvas, which is an ASSUMPTION
+#: recorded in `increment-022`.  `3.3` is the lens, deferred whole (`#D23`).
+SECTION_VIEW = {"3.1": "atlas", "3.2": "atlas", "3.4": "sala"}
+
+
+def _leading_run(cell: str) -> list[str]:
+    """The backtick tokens that open the cell, separated only by whitespace."""
+    rest, run = cell.strip(), []
+    while (m := _LEADING_TOKEN.match(rest)):
+        run.append(m.group(1))
+        rest = rest[m.end():]
+        if not rest.startswith(" ") or not rest.lstrip().startswith("`"):
+            break
+        rest = rest.lstrip()
+    return run
+
+
+def sample_by_style(glyph_cell: str, style_cell: str) -> dict[str, str | None]:
+    """THE GLYPH RULE (`INC7-CR-R2-F2`) -- what the legend paints for each style.
+
+    Applied in order; the first that yields wins:
+
+    G1  LEGEND CHIP.  The cell names the legend's own form (`legend chip `X``):
+        that token, for every style of the row.  (`V17`, `V20`)
+    G2  QUALIFIED PAIRS.  The style cell has several `;`-separated segments,
+        each opening with a qualifier word, and the glyph cell pairs a token
+        with each of those words (`` `█` filled ``): each style takes the token
+        of the qualifier its segment opens with.  (`V19`)
+    G3  LEADING RUN.  The backtick tokens opening the cell, whitespace-separated,
+        joined with one space; a token with a `<placeholder>` is a TEMPLATE and
+        is dropped, and if nothing remains the `e.g.` token stands in.  Prose
+        after the run (a parenthetical, "rectangle inside ...") is a GLOSS, not
+        glyph.  (`V3` -> `▸ inv +23`, `V10` -> `▓ ▒ ░`)
+    G4  NOTHING.  A cell with no token is prose: `None`, and an operator
+        question -- never a guess.  (`V4b`, `V12`)
+
+    Codepoint RANGES (`` `U+2800`–`U+28FF` ``) are read separately by `_RANGE`;
+    they widen the glyph SET (Amendment 2(b)) and never become the sample.
+    """
+    styles = _STYLE_TOKEN.findall(style_cell)
+    chip = _CHIP.search(glyph_cell)
+    if chip:
+        return {st: chip.group(1) for st in styles}
+    segments = [s.strip() for s in style_cell.split(";")]
+    if len(segments) >= 2 and all(_QUALIFIER.match(s) for s in segments):
+        paired: dict[str, str | None] = {}
+        for segment in segments:
+            word = _QUALIFIER.match(segment).group(1)
+            token = re.search(r"`([^`]+)`\s+" + re.escape(word) + r"\b", glyph_cell)
+            if not token:
+                break
+            for st in _STYLE_TOKEN.findall(segment):
+                paired[st] = token.group(1)
+        else:
+            return paired
+    run = [t for t in _leading_run(glyph_cell) if not _PLACEHOLDER.search(t)]
+    if not run and (example := _EXAMPLE.search(glyph_cell)):
+        run = [example.group(1)]
+    sample = " ".join(run) if run else None
+    return {st: sample for st in styles}
+
+
+def _rows_by_section() -> dict[str, str]:
+    """Row id -> the `01b` section (`3.1`..`3.4`) its table sits in."""
+    out: dict[str, str] = {}
+    for number, body in re.findall(r"^### (3\.[1-4]) (.*?)(?=^### )", _section() + "### ",
+                                   re.M | re.S):
+        for row in ROW.findall(body):
+            out[row[0]] = number
+    return out
+
+
+def derived_members() -> tuple[set[tuple[str, str, str, str]], dict[str, set[tuple[int, int]]]]:
+    """`LLR-N16.2.1`'s instrument, run: `01b` §3.1-3.4 -> the declared members.
+
+    One member per distinct triple (`A-103`), the first id naming it keeps it
+    (`V4a` collapses into `V4`), `DEFERRED(#D7)` rows contribute nothing, and a
+    row's ranges attach to the member it collapsed into.
+    """
+    members: dict[tuple[str, str, str], str] = {}
+    ranges: dict[str, set[tuple[int, int]]] = {}
+    for vid, glyph_cell, label_cell, style_cell in derived_rows():
+        if "DEFERRED(#D7)" in glyph_cell + label_cell + style_cell:
+            continue
+        for style, sample in sample_by_style(glyph_cell, style_cell).items():
+            owner = members.setdefault((sample or "", _unwrap(label_cell), style), vid)
+            for lo, hi in _RANGE.findall(glyph_cell):
+                ranges.setdefault(owner, set()).add((int(lo, 16), int(hi, 16)))
+    return {(vid, g, lab, st) for (g, lab, st), vid in members.items()}, ranges
+
+
+def test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document():
+    """`INC7-CR-R2-F3`: SET EQUALITY in both directions, id included.
+
+    Faithfulness (above) caught fabrication only: dropping a row, or renaming
+    its id, stayed green.  Equality over the full 4-tuple reddens both.
+    """
+    declared = list(darkside.DECLARED_VOCABULARY)
+    assert len(declared) == len(set(declared)), "a member is declared twice"
+    derived, _ = derived_members()
+    missing = sorted(derived - set(declared))
+    extra = sorted(set(declared) - derived)
+    assert not missing and not extra, (
+        f"01b derives members the declaration lacks: {missing}\n"
+        f"the declaration carries members 01b does not derive: {extra}"
+    )
+
+
+def test_inc7_cr_r2_f2_every_glyph_follows_the_written_rule_row_by_row():
+    """`INC7-CR-R2-F2`, row by row, as `V22`'s pin does for one row.
+
+    Reported per (id, style) so a drifted glyph names its row rather than
+    surfacing as one opaque set difference.
+    """
+    derived, _ = derived_members()
+    want = {(vid, st): g for vid, g, _lab, st in derived}
+    got = {(vid, st): g for vid, g, _lab, st in darkside.DECLARED_VOCABULARY}
+    drift = sorted((k, got.get(k), want[k]) for k in want if got.get(k) != want[k])
+    assert not drift, "glyphs that do not follow the rule:\n  " + "\n  ".join(
+        f"{vid}/{st}: declared {g!r}, rule gives {w!r}" for (vid, st), g, w in drift
+    )
+
+
+def test_inc7_cr_r2_f2_the_rule_leaves_exactly_the_operator_questions_open():
+    """G4 is a question, not a default: the undecidable rows are pinned."""
+    undecided = {vid for vid, g, _lab, _st in derived_members()[0] if not g}
+    assert undecided == OPERATOR_QUESTIONS, undecided
+
+
+def test_amendment_2b_V4a_collapses_into_V4_carrying_its_braille_range():
+    """`01b` Amendment 2(b): one painted form, a glyph SET with a range."""
+    _, ranges = derived_members()
+    declared_ids = {m[0] for m in darkside.DECLARED_VOCABULARY}
+    assert "V4a" not in declared_ids and "V4" in declared_ids
+    assert {k: set(v) for k, v in darkside.DECLARED_GLYPH_RANGES.items()} == ranges
+    assert (0x2800, 0x28FF) in ranges["V4"], ranges
+
+
+def test_amendment_2a_the_D7_row_contributes_no_member():
+    assert "V18" in {r[0] for r in derived_rows()}, "V18 left 01b; this arm lost its subject"
+    assert "V18" not in {m[0] for m in darkside.DECLARED_VOCABULARY}
+
+
+def test_hlr_n16_2_each_view_paints_the_rows_of_its_own_01b_sections():
+    """The per-view partition, derived from the sections rather than listed."""
+    section_of = _rows_by_section()
+    assert section_of.get("V4b") == "3.1", "the suffixed rows fell out of the section walk"
+    declared_ids = {m[0] for m in darkside.DECLARED_VOCABULARY}
+    want: dict[str, set[str]] = {}
+    for vid in declared_ids:
+        view = SECTION_VIEW.get(section_of[vid])
+        if view:
+            want.setdefault(view, set()).add(vid)
+    assert {v: set(ids) for v, ids in darkside.LEGEND_VIEWS.items()} == want
+
+
+def test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5():
+    """The second derived set: `01b` §3.5's colours with a job, hex included."""
+    text = UX.read_text(encoding="utf-8")
+    table = text[text.index("### 3.5 "):text.index("### 3.6 ")]
+    rows = re.findall(r"^\|\s*`(.)`\s*\|\s*`([^`]+)`\s*\|\s*\**`([A-Z]+)`\**\s*\|\s*`(#[0-9a-f]{6})`",
+                      table, re.M)
+    assert len(rows) >= 2, f"the colour table walk derived {rows}"
+    assert list(darkside.DECLARED_COLOURS) == [(s, lab, tok) for s, lab, tok, _hex in rows]
+    for _s, _lab, tok, hexv in rows:
+        assert darkside.tokens()[tok] == hexv, (tok, hexv)
 
 
 def test_llr_n16_2_1_the_declaration_is_not_a_second_opinion():

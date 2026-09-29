@@ -52,6 +52,13 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("app", "question_mark"): ("help", "ayuda", "?", "app", False),
     ("help", "escape"): ("dismiss_none", "cerrar", "esc", "help", False),
     ("help", "q"): ("dismiss_none", "cerrar", "q", "help", False),
+    # Inc-8 / HLR-N16.4: the keys that scroll the legend are declared in it.
+    ("help", "up"): ("legend_up", "subir", "↑", "help", False),
+    ("help", "down"): ("legend_down", "bajar", "↓", "help", False),
+    ("help", "pageup"): ("legend_page_up", "página arriba", "pageup", "help", False),
+    ("help", "pagedown"): ("legend_page_down", "página abajo", "pagedown", "help", False),
+    ("help", "home"): ("legend_home", "al principio", "home", "help", False),
+    ("help", "end"): ("legend_end", "al final", "end", "help", False),
     ("home", "c"): ("consult", "consultar mapas", "c", "doors", False),
     ("home", "f"): ("factory", "fábrica", "f", "doors", False),
     ("home", "i"): ("import_csv", "importar csv", "i", "doors", False),
