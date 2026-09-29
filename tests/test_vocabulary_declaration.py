@@ -235,13 +235,14 @@ def sample_by_style(glyph_cell: str, style_cell: str) -> dict[str, str | None]:
     G2  QUALIFIED PAIRS.  The style cell has several `;`-separated segments,
         each opening with a qualifier word, and the glyph cell pairs a token
         with each of those words (`` `█` con acta ``): each style takes the
-        token of the qualifier its segment opens with.  (`V19`, `V40`, and
-        `V3`'s `bar` / `pill`)
+        token of the qualifier its segment opens with.  (`V19`, `V40`,
+        `V3`'s `bar` / `pill`, and since round 3 `V27` / `V28`'s `letter` /
+        `mark`)
     G3  LEADING RUN.  The backtick tokens opening the cell, whitespace-separated,
         joined with one space; a token with a `<placeholder>` is a TEMPLATE and
         is dropped, and if nothing remains the `e.g.` token stands in.  Prose
         after the run (a parenthetical) is a GLOSS, not glyph.
-        (`V31` -> `▽ 35 fuera de vista`, `V27` -> `D✓`)
+        (`V31` -> `▽ 35 fuera de vista`)
     G4  NOTHING.  A cell with no token is prose: `None`, and an operator
         question -- never a guess.  (No declared row since the Inc-8 design
         pass; `V12`'s bare-title cell would be one, and it is deferred.)
@@ -470,7 +471,7 @@ def test_f1_each_view_paints_the_colour_rows_its_01b_views_column_names():
 
 _SECTION_36 = re.compile(r"### 3\.6 .*?(?=### 3\.7 )", re.S)
 _HEADERS_LINE = re.compile(r"Section headers, in order:\s*(.+)")
-_FOOTER_LINE = re.compile(r"Footer, two lines:\s*(.+)")
+_FOOTER_LINE = re.compile(r"Footer, one line:\s*(.+)")
 _BACKTICK_RUN = re.compile(r"`([^`]+)`")
 
 
@@ -508,7 +509,7 @@ def test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6():
 
 
 _TITLE_LINE = re.compile(r"Panel title:\s*`([^`·]+?) · ")
-_TOP_RIGHT_LINE = re.compile(r"Top-right:\s*`(\S+) (\S+)`")
+_TOP_RIGHT_LINE = re.compile(r"Top-right:\s*nothing")
 _OWN_TITLE_LINE = re.compile(r"Own-scope group title:\s*`([^`]+)`")
 _OWN_WORDS_LINE = re.compile(r"Own-scope group words, by action:\s*(.+)")
 _OWN_WORD_ITEM = re.compile(r"`([^`]+)`\s*\(((?:`[^`]+`,?\s*)+)\)")
@@ -526,10 +527,12 @@ def test_e3_the_title_hint_and_own_scope_copy_EQUAL_section_3_6():
     section = _section_36()
     title = _TITLE_LINE.search(section)
     assert title and title.group(1) == help_screen.LEGEND_TITLE, title
-    top_right = _TOP_RIGHT_LINE.search(section)
-    close = next(b for b in bindings_for(SCOPE_HELP) if b.action == "dismiss_none")
-    assert top_right and top_right.groups() == (
-        close.glyph, help_screen.own_scope_word(close.action)), top_right
+    # Round 3: the close hint is painted once, in the own-scope group; §3.6
+    # says the title's top-right holds nothing, and the title paints nothing
+    # but its name.
+    assert _TOP_RIGHT_LINE.search(section), "01b's §3.6 still gives the title a hint"
+    screen = help_screen.HelpScreen(view="atlas")
+    assert screen._render_title().plain == f"{help_screen.LEGEND_TITLE} · atlas"  # noqa: SLF001
     own_title = _OWN_TITLE_LINE.search(section)
     assert own_title and own_title.group(1) == help_screen.LEGEND_OWN_SCOPE_GROUP, own_title
     words_line = _OWN_WORDS_LINE.search(section)
@@ -542,6 +545,19 @@ def test_e3_the_title_hint_and_own_scope_copy_EQUAL_section_3_6():
     assert doc == painted, (doc, painted)
     worded = {a for actions, _w in help_screen.OWN_SCOPE_COPY for a in actions}
     assert {b.action for b in seat} == worded, {b.action for b in seat} ^ worded
+
+
+def test_q7_the_adjacent_rows_are_the_ones_01b_paints_adjacent():
+    """Verdict `Q7`: the legend paints a row's samples with no space between
+    them exactly where `01b`'s glyph cell says the view paints them
+    ADJACENT (a schema letter and its mark), and each such row has exactly
+    two members, the letter and the mark."""
+    adjacent = {vid for vid, glyph_cell, _l, _s in derived_rows()
+                if "adjacent" in glyph_cell and "DEFERRED(#D7)" not in glyph_cell}
+    assert adjacent == help_screen.ADJACENT_ROWS, adjacent
+    for vid in adjacent:
+        members = [m for m in darkside.DECLARED_VOCABULARY if m[0] == vid]
+        assert len(members) == 2 and members[0][1].isalpha(), members
 
 
 def test_llr_n16_2_1_the_declaration_is_not_a_second_opinion():

@@ -59,12 +59,21 @@ LEGEND_MODAL_MAX_ROWS = 28
 LEGEND_DOCK_MIN_VIEW_CELLS = 43
 DOCKED_CLASS = "-docked"
 _KEY_CELLS = 10
-# The sample column.  Eight cells, so the docked label budget
-# (`LEGEND_DOCKED_ROW_CELLS - len(_INDENT) - _SAMPLE_CELLS` = 29) holds the
-# longest ruled label, `V35`'s "pending fields here and below" (verdict
-# `E6`), on one row.  A sample of eight cells or more takes its own line.
-_SAMPLE_CELLS = 8
+# The sample column, one per layout.  A sample as wide as its column or wider
+# takes its own line.  DOCKED, eight cells, so the docked label budget
+# (`LEGEND_DOCKED_ROW_CELLS - len(_INDENT) - 8` = 29) holds the longest ruled
+# labels, `V35`'s "pending fields here and below" and `V37`'s "branch: half
+# or more recorded", on one row.  MODAL, twelve (round-3 copy verdict), so the
+# atlas samples up to eleven cells (`▐ ▸ inv +23`, `◫ sin acta`) share their
+# label's row.  Both are widths inside a panel of fixed width, not terminal
+# widths, so the round-3 width principle leaves them declared.
+_SAMPLE_CELLS_DOCKED = 8
+_SAMPLE_CELLS_MODAL = 12
 _INDENT = "  "
+# Verdict `Q7`: rows whose members the view paints in ADJACENT cells -- a
+# schema letter and its mark (`views/layered.py:628-631`) -- so the legend
+# paints their samples with no space between them, each in its own style.
+ADJACENT_ROWS = frozenset({"V27", "V28"})
 
 # `HLR-N16.4`'s threshold is "the keys that have an effect equal the set the
 # legend PAINTS for its own scope".  This group paints `bindings_for(SCOPE_HELP)`
@@ -76,15 +85,16 @@ _INDENT = "  "
 #
 # Verdict `E3` ratified the group and its title (`A5`) and compressed it to two
 # lines.  Its words are the legend's own English copy, one word per ACTION,
-# the key glyphs read from the seat: `esc q close · ↑ ↓ line` /
-# `pageup pagedown page · home end ends`.  The seat's own labels stay as they
+# the key glyphs read from the seat: `esc q close · ↑ ↓ scroll` /
+# `pageup pagedown page · home end ends`.  Since round 3 it is the ONE place
+# the close hint is painted; the title no longer repeats it.  The seat's own labels stay as they
 # are until Inc-9 (key labels are Inc-9's), which is why the words live here.
 # `01b` §3.6 lists them, and an arm pins that every `SCOPE_HELP` action has one.
 LEGEND_OWN_SCOPE_GROUP = "in this legend"
 LEGEND_OWN_SCOPE_FIRST = True
 OWN_SCOPE_COPY: tuple[tuple[tuple[str, ...], str], ...] = (
     (("dismiss_none",), "close"),
-    (("legend_up", "legend_down"), "line"),
+    (("legend_up", "legend_down"), "scroll"),
     (("legend_page_up", "legend_page_down"), "page"),
     (("legend_home", "legend_end"), "ends"),
 )
@@ -102,9 +112,9 @@ COMPOUND_ON_ONE_LINE = True
 # The sections are painted in this order (verdict `E1`: the vocabulary first).
 LEGEND_TITLE = "legend"
 SECTION_VOCABULARY = "what this view paints"
-SECTION_COLOURS = "colours with a job"
+SECTION_COLOURS = "what the colours mean"
 SECTION_KEYS = "keys in this view"
-FOOTER_LINES = ("each view has its own legend —", "same key, this view's content")
+FOOTER_LINES = ("? always explains the view you are in",)
 
 
 # `INC8-CR-F9`: this module had its own copy of `darkside._cells`. One
@@ -117,10 +127,16 @@ _ON_GROUND = f"on {darkside.GROUND}"
 def _sample_style(declared: str) -> str:
     """Verdict `E2`: a sample is painted on GROUND, the view's own ground, so
     it reads as it does in the view -- a tone sitting on `PANEL` is a
-    different tone.  A member that declares its own ground (`INK on PANEL`)
-    keeps it; the label beside the sample stays on `PANEL`."""
+    different tone.  A member that declares its own ground (`INK on PANEL`,
+    `INC8-P2-UX-F6`: the ones its view paints only on a card or a pill) keeps
+    it; the label beside the sample stays on `PANEL`."""
     resolved = darkside.resolve_style(declared)
     return resolved if " on " in f" {resolved} " else f"{resolved} {_ON_GROUND}"
+
+
+def _ground(style: str) -> str:
+    """The ground a painted sample style sits on."""
+    return style.split(" on ", 1)[1]
 
 
 def docks(width: int, view_left: int) -> bool:
@@ -268,6 +284,11 @@ class HelpScreen(ModalScreen[None]):
         """The row budget of the layout the legend is in (`E1`)."""
         return LEGEND_DOCKED_ROW_CELLS if self.docked else LEGEND_ROW_CELLS
 
+    @property
+    def sample_cells(self) -> int:
+        """The sample column of the layout the legend is in (round 3)."""
+        return _SAMPLE_CELLS_DOCKED if self.docked else _SAMPLE_CELLS_MODAL
+
     # -- layout (`D4`, `E1`) -------------------------------------------------
 
     def _view_left(self) -> int:
@@ -338,29 +359,12 @@ class HelpScreen(ModalScreen[None]):
     # pairs parses none, which is why the title is a `Text` and not a `str`.
 
     def _render_title(self) -> Text:
-        # `INC8-SEC-F3`.  The hint's glyph is a seat value nothing upstream
-        # bounds, and an unbounded hint here painted a 95-cell row from a
-        # 75-cell budget.  Every width below is CLAMPED so
-        # `title + gap + glyph + " " + word` can never exceed the row budget.
-        row = self.row_cells
-        close = next(b for b in bindings_for(SCOPE_HELP) if b.action == "dismiss_none")
-        word = own_scope_word(close.action) or close.label
-        hint = f"{close.glyph} {word}"
-        # `INC8-F-SEC-F2`: sized by what `fit` will paint, not the raw seat value.
-        hint_cells = min(darkside.shown_cells(hint), row)
-        glyph_cells = min(darkside.shown_cells(close.glyph), hint_cells)
-        word_cells = max(0, hint_cells - glyph_cells - 1)
-        title_cells = max(0, row - hint_cells)
-        title = darkside.fit(f"{LEGEND_TITLE} · {self.view}", title_cells).rstrip()
-        gap = max(0, row - _cells(title) - hint_cells)
-        # `INC8-D2-F1`: the space before the word is painted only when the
-        # word gets a cell.  A glyph as wide as the row left `word_cells` at 0
-        # and the bare space made the row one cell over budget.
+        # Round 3: the close hint is painted once, in the own-scope group, so
+        # the title is the view's name alone -- bounded to the row like every
+        # other painted string (`INC8-SEC-F3`'s clamp now lives in that group).
         return Text.assemble(
-            (title, f"bold {darkside.INK}"),
-            (" " * gap, ""),
-            (darkside.fit(close.glyph, glyph_cells), darkside.ACCENT),
-            (" " + darkside.fit(word, word_cells) if word_cells else "", darkside.ASH),
+            (darkside.fit(f"{LEGEND_TITLE} · {self.view}", self.row_cells).rstrip(),
+             f"bold {darkside.INK}"),
         )
 
     def _append_key_group(
@@ -445,34 +449,40 @@ class HelpScreen(ModalScreen[None]):
         # the pad below went negative (`" " * negative` is silently `""`,
         # never an error) while the row it padded stayed over width.
         row = self.row_cells
+        column = self.sample_cells
         budget = row - len(_INDENT)
+        # `Q7`: a letter and its mark are painted in adjacent cells, as the
+        # view paints them; any other compound row keeps one space between.
+        gap = 0 if members[0][0] in ADJACENT_ROWS else 1
         samples: list[tuple[str, str]] = []
         width = 0
         for _row_id, glyph, _label, style in members:
             if not glyph:
                 continue
-            sep = 1 if samples else 0
+            sep = gap if samples else 0
             room = budget - width - sep
             if room <= 0:
                 break
             shown = darkside.fit(glyph, min(darkside.shown_cells(glyph), room))
-            if samples:
-                samples.append((" ", _ON_GROUND))
-                width += 1
+            if sep:
+                # On the ground of the sample before it (`INC8-P2-UX-F6`), so
+                # a row painted on `PANEL` is not split by a strip of `GROUND`.
+                samples.append((" ", f"on {_ground(samples[-1][1])}"))
+                width += sep
             samples.append((shown, _sample_style(style)))
             width += _cells(shown)
         label = members[0][2]
-        label_cells = row - len(_INDENT) - _SAMPLE_CELLS
+        label_cells = row - len(_INDENT) - column
         text.append(_INDENT)
         for sample, style in samples:
             text.append(sample, style=style)
-        if width >= _SAMPLE_CELLS:
+        if width >= column:
             # A sample wider than its column keeps its own line rather than
             # being cut: a truncated glyph misdescribes the form it stands for.
             text.append(" " * max(0, row - len(_INDENT) - width) + "\n")
-            text.append(_INDENT + " " * _SAMPLE_CELLS)
+            text.append(_INDENT + " " * column)
         else:
-            text.append(" " * (_SAMPLE_CELLS - width))
+            text.append(" " * (column - width))
         text.append(darkside.fit(label, label_cells) + "\n", style=darkside.INK)
 
     def _render_colours(self) -> Text:
