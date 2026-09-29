@@ -601,10 +601,52 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-7 RE-REVIEW",
-    "next_stage": "Inc-7 CORRECTIVE PASS 2 (round-2 re-review 2026-09-25, see 03-increments/increment-019-inc7-re-review.md). security-reviewer PASS (SEC-F1, SEC-F2 discharged). code-reviewer BLOCK-UNTIL CR-F1 (DAMAGED_MAP_STATE lacks 'mapa'; the arm is self-referential) and CR-F3 (darkside.py:557-558 still claims tests/test_home.py derives; the new docstring overclaims completeness and glyph derivation). CR-F2 discharged. After the fix: code-lens-only round 3, then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first).",
+    "next": "Inc-8",
+    "next_stage": "Inc-7 RELEASED 2026-09-28 (code lens round 4 PASS, all residuals discharged; security PASS since round 2). OPERATOR DECISION PENDING before Inc-8: INC7-CR-R3-F3 -- HomeScreen._sparkline_text divides by zero when no .mmd in the workspace was modified in the last 14 days (app.py ~573/579); it reds 8 arms in tests/test_agree_floor.py under preserved mtimes and blocks every full-lane gate. Coordinator recommends a micro-increment before Inc-8. Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first).",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
+    "INC-7_RELEASED_2026-09-28": {
+      "date": "2026-09-28",
+      "head": "c20baa6",
+      "commits": [
+        "8eb62d9",
+        "e0a17d2",
+        "6cbbeff",
+        "c20baa6"
+      ],
+      "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-020-inc7-corrective-2.md",
+      "rounds": "corrective pass 2 -> code round 3 BLOCK-UNTIL INC7-CR-R3-F1 -> fix -> code round 4 PASS. Security lens not reopened: the mapper/ diff is the constant plus docstring only, no sink touched.",
+      "discharged": {
+        "CR-F1": "constant corrected to 'mapa dañado — ↵ ver por qué'; the arm derives its expectation from 01-requirements LLR-N13.1.5. Reviewer mutants A, G1-G3 RED.",
+        "CR-F3": "stale test_home.py block deleted; docstring narrowed to what is checked. Its first rewrite still overclaimed the V22 pin (INC7-CR-R3-F1: constant vs constant, mutant E GREEN); fixed by deriving V22's glyph from 01b. Reviewer mutants E, H, I, J, K, L, N, O RED.",
+        "INC7-CR-R2-F1": "load-warning guards covered on hero (app.py:648, :655) and resume (:705); each removal reds its own parametrisation.",
+        "INC7-CR-R3-F2": "'renaming a row ID' wording; mutant Q GREEN, T RED, as stated."
+      },
+      "V22_TWO_STRINGS_RULED_LEGITIMATE": "01b V22's label cell 'mapa dañado — no se pudo leer' is the legend label; its glyph cell and LLR-N13.1.5 declare the card state 'mapa dañado — ↵ ver por qué'. Two strings, each declared once. No drift.",
+      "NEW_FINDING_ROUTED_TO_OPERATOR": {
+        "id": "INC7-CR-R3-F3",
+        "severity": "HIGH (product defect, pre-existing, not introduced by Inc-7)",
+        "what": "HomeScreen._sparkline_text: max_count = max(counts) if counts else 1, but counts always has 14 entries, so the fallback never fires; a workspace with no .mmd modified in the last 14 days gives max_count 0 and ZeroDivisionError. Breaks the home hero for any workspace idle two weeks.",
+        "measured": "newest fixtures/*.mmd mtime 2026-09-11; mtime-preserving copy at 0c4215a -> test_agree_floor 8 failed; fresh worktrees (mtime today) -> 8 passed at 0c4215a and e0a17d2.",
+        "consequence": "every full-lane figure taken from this working tree reds 8 arms until fixed; the whole-branch gates cannot produce a clean lane."
+      },
+      "process_notes": [
+        "Implementer on claude-sonnet-5, reviewer on claude-opus-5-5 -- first model split in this batch, operator-approved 2026-09-28.",
+        "c20baa6 lacks its Co-Authored-By trailer; self-reported by the implementer, not amended per instruction. Cosmetic."
+      ],
+      "tokens_measured_raw": {
+        "implementer_sonnet": "16.6M",
+        "reviewer_opus_5_5": "2.6M",
+        "coordinator": "not measured"
+      },
+      "carries_unchanged": [
+        "INC7-CR-R2-F2 -> Inc-8",
+        "INC7-CR-R2-F3 -> Inc-8",
+        "INC7-CR-R2-F4 merged with INC7-SEC-R2-F2",
+        "INC7-SEC-R2-F1/F2/F3",
+        "routed->qa: app.py table.clear() column duplication"
+      ]
+    },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
       "commit": "f3398f4 on feat/ui-next-batch-02, base a552783. Close shape STAGE-COMMITTED per `close_shape`: source landed first at a verified green, docs commit follows.",
