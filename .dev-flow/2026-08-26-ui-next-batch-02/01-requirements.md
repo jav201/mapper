@@ -9737,3 +9737,39 @@ this suite accepts an unbounded or merely-documented race.
 `style = darkside.WORDMARK if idx < 4 else darkside.MUT` split (`app.py:586`) has no requirement or
 arm pinning which tier a bar's *style* (as opposed to its *glyph*) falls into. Out of this amendment's
 scope — carried to `qa-reviewer` for the follow-on batch, not fixed by this pass.
+
+---
+
+## Amendment set 14 — the Inc-8 design pass retires vocabulary ids a threshold names. 2026-09-28. Base `9136a3f`.
+
+### `A-106` — `PRED-4`'s discharge named `V7`, `V8` and `V4`; the ids now resolve to forms the product paints
+
+**Authority.** Operator verdict `D2` (`VERDICT-inc8-legend-2026-09-28.md`: *"derivar el vocabulario
+de lo que el producto pinta hoy; 01b se reescribe desde renders reales"*), applied in the Inc-8
+design pass (`03-increments/increment-022-inc8-legend.md`, section *Design pass*). `01b` DECISION 3
+§3.1–§3.4 was rewritten from a catalogue of real renders. Rows that described forms no renderer
+paints were retired, and a retired id is never reused. The change log above `01b` §3.1 records every
+old row and what became of it.
+
+**The threshold that names retired ids.** `HLR-N06.3`'s `PRED-4` discharge reads *"`V7` and `V8`
+move off `WORDMARK` to `INK`; `WORDMARK` keeps `V4`"*, and its named weaker variant
+`M-N06.3-legibility` names `V7` and `V8` again. All three ids are retired. `V7` and `V8` were
+prototype captions (`plegadas: … — 41 nodos`, `minimapa · 128 nodos`) that no renderer paints. `V4`
+named a braille dust field the atlas canvas never draws.
+
+**What the discharge's subjects are now, so the threshold keeps them.**
+
+- The overflow declaration `PRED-4` exists for is `01b` row **`V31`** (`▽ N fuera de vista`). It is
+  painted in **`INK`** at every site: `views/layered.py:451-454`, `views/outline.py:334`,
+  `views/radial.py:121`, `app.py:2592`. `PRED-4` holds for it as ruled.
+- The minimap caption `V8` has no painted successor. The strip under the tabs is a coverage strip
+  (`V36`–`V39`), and its own count of undrawn branches (`+N ramas sin mostrar`) is painted in `INK`
+  by `MapScreen._minimap_text`. Among the vocabulary rows, `PRED-4`'s *"every token carrying a
+  declaration role, derived from `01b` DECISION 3"* therefore quantifies over `V31`.
+- `#D28`'s decorative exemption, which `V4` relied on (*"lattice dots … carry no floor"*), now covers
+  **`V21b`** (`·`, `WORDMARK`), the rail's unlit territory dot. That is the lattice dot the exemption
+  always described.
+
+**No statement changes and no threshold is loosened.** Only the ids the discharge cites are
+resolved. The passages in `LLR-N16.2.1`, §5.2 and `A-103` that discuss `V4`/`V4a` byte-identity
+describe the pre-rewrite table. They are history, and are annotated here rather than edited.

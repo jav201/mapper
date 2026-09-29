@@ -275,3 +275,513 @@ Real Textual `run_test` + `export_screenshot`, top of the atlas legend through t
 - `9295135` fix(legend): paint the legend's own scope (HLR-N16.4) -- `INC8-CR-F1`/`INC8-UX-F1`/`UX-F10` alone.
 - `e7b2f00` fix(legend): coercion, row-budget and derivation findings (CR-F2/F4/F5/F7/F9, SEC-F1-F4, UX-F11) -- every other finding, grouped in one commit rather than the brief's suggested three (test-derivation / SEC / F11+F9) because several land inside the SAME methods `9295135` already touches (`_render_title`, `_render_vocabulary`, `_vocabulary_line`), and splitting those hunks further risked staging a syntactically-broken intermediate file. `F1` -- the one split the coordinator specifically asked to see first -- is isolated in its own commit; the rest is not further subdivided. This is a deviation from the brief's exact grouping, made under time pressure at the coordinator's explicit prompt to commit as soon as green rather than continue refining commit granularity; documented here rather than left silent.
 - this record (docs)
+
+## Design pass (2026-09-28)
+
+**What this pass is.** The operator's design verdict on the legend
+(`VERDICT-inc8-legend-2026-09-28.md`, the authority for this pass), applied under the batch's
+`/dev-flow` rules. Entry HEAD `ca36a3f`, tree clean. Independent reviews follow; this record does not
+review its own work. Hashes cited from before the Q9 message rewrite are mapped in the verdict record.
+
+### Verdict items applied
+
+| Item | What was done | Commit | Arm(s) |
+|---|---|---|---|
+| `D2` derive from what is painted | A catalogue instrument drove each view over real fixtures and harvested every painted non-alphanumeric glyph with its style. `01b` DECISION 3 §3.1–§3.4 was rewritten from it, with a change log above §3.1 and a new **Views** column. `DECLARED_VOCABULARY` was re-derived from `01b` by the existing instrument: 41 members. | `7e1c2e2` | `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document`, `test_design_pass_a_retired_id_is_never_a_row_again` |
+| `D2` close `INC8-F2` / `UX-F3` | Each view is rendered and checked in both directions: every member is painted by its view in its declared style (soundness), and every meaningful glyph the view paints belongs to a member of that view (completeness). The exclusion rule is written once and has its own arm. | `efbb9ac` | `test_d2_the_legend_and_the_view_agree_in_both_directions[atlas, esquema, mapa mental, sala]`, `test_d2_the_exclusion_rule_keeps_the_forms_the_catalogue_kept` |
+| `D1` copy | Every surviving and new row has short, lowercase Spanish copy. It starts from the ux reviewer's proposal and is corrected where the painted form means something else. See *Copy, in one place* below. | `7e1c2e2` | `test_llr_n16_2_1_every_declared_row_is_FAITHFUL_to_the_document`, EQUALS |
+| `D3` esquema and mapa mental | `LEGEND_VIEWS` has four views. Radial gets braille (`V4b`), `●` (`V42`, `V43`) and the root `◆` (`V44`). All three map views share the rail and strip rows, so `▾ ▸ ▽` (`V33`, `V34`, `V31`) are in esquema. Braille left the atlas. | `7e1c2e2` | `test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names`, the D2 arm |
+| `Q1·Q2` | `V4b` moved to radial with a measured braille run as its sample, `⣉⡉⠉`. `V4`'s braille range left `DECLARED_GLYPH_RANGES`. The mechanism stays, because `V29` (box-drawing wires), `V4b` (braille) and `V40` (activity bars) own ranges. `V4` itself is retired; see `INC8-D-Q2`. | `7e1c2e2` | `test_every_declared_range_EQUALS_the_document` |
+| `Q4` | `V11`–`V16` carry `DEFERRED(#D7)`, so they leave the declaration. Their rows stay in §3.3. | `7e1c2e2` | `test_design_pass_q4_the_lens_rows_are_marked_deferred_and_not_declared` |
+| `Q8` | `V19`'s sample stays `█ █ ░`, now in the tones the sala paints (`INK`, `WARN`, `WORDMARK`). | `7e1c2e2` | EQUALS, the D2 arm `[sala]` |
+| `Q7` | No change (`⊘`). | — | — |
+| `D4` side panel | Docked top-right at ≥ 118 columns, the modal below. The panel is modal for keys in both layouts. See *D4* below. | `9136a3f` | six `test_d4_*` arms |
+| `D5` names | `MapScreen.legend_view` returns `atlas` / `esquema` / `mapa mental`; the sala stays `sala`. Other screens' headers are untouched (Inc-9 carry). | `7e1c2e2` | `test_hlr_n16_2_legend_names_the_map_view[atlas, esquema, mapa mental]` |
+| `A5` | Unchanged. The own-scope group `en esta leyenda` is still pending ratification. | — | — |
+
+### The catalogue instrument
+
+`%TEMP%\inc8d\catalogue.py`, outside the repo. Re-run it from the repo root:
+
+```
+PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md
+```
+
+- **What it drives.** `MapperApp.run_test` at 118×34 and 140×45. Two fixtures: a legacy map
+  (8 branches × 5 leaves; every third branch complete; one leaf due today) and a concept map
+  (6 × 3, with meta lines). Each state runs in a **fresh app**. The atlas states are rest, walk,
+  fold a branch, search `fin`, rail focus, rail focus after a walk (the unfocused selection), and
+  fold the root (the rail's lattice shows only when the rail is short). Esquema (`o`) and mapa
+  mental (`r`) use the same fixtures and similar states. The sala uses a legacy map, a concept map,
+  a cyclic `roto.mmd` and a recorded session.
+- **What it reads.** The composited frame (`screen._compositor.render_strips()`), cell by cell. For
+  each cell it records the glyph, fg, bg, bold and the widget under it. Nothing in it judges
+  meaning; the `--md` table below adds each row's disposition with the **same** rule the arm
+  enforces (it imports `tests/test_legend_design.py`).
+- **Two date-driven glyphs.** A re-run on another day can differ in the tab strip's moon
+  (`darkside.moon(date.today())`) and in the sala's sparkline tiers (file mtimes). Both are named
+  here so a difference there is not read as drift.
+- **Its own defect, caught and fixed before use (`INC8-D-F3`).** The first run harvested the rest
+  state during the screen's fade-in and recorded interpolated tones the product never declares
+  (`#b8b8b8` for `INK`, `#1c1c1c` for `STEP`, `#c33c32` for `ALERT`). Every state now waits for
+  scheduled animations and runs in a fresh app. The arm does the same.
+
+**The exclusion rule**, written once in `tests/test_legend_design.py` (`meaningful`,
+`_excluded_widget`):
+
+| Rule | Excludes | Why |
+|---|---|---|
+| `X1` text | letters, digits, spaces (`L*`, `N*`, `Z*`) | text is not a glyph; also covers padding |
+| `X2` punctuation | Unicode `P*`, and every ASCII symbol | separators (`·` in `mapa · 36n`), ellipses, `+`, `/`, `%` |
+| `X3` app chrome | the tab strip (with the moon wordmark `◕`), the hint line, the key bar, the sala's identity row | the same on every screen; not the view |
+| `X4` key glyphs | a character the seat uses as a key's glyph (`↵`, `↑`, `↓`) | the legend's key section explains them |
+| `X5` table header | a `DataTable`'s column-header row (`▐ name` in the sala) | column chrome |
+
+**Known blind spots**, stated so a green run is not over-read:
+
+- Completeness is per **character**, not per style. A declared glyph painted in an undeclared tone
+  is caught only if that tone is itself a member (by soundness). Overlay tones — the selection
+  block, hit livery, rail selection, radial pills on `PANEL` — are therefore not individually
+  declared for every glyph they cover.
+- `X2` hides `·`, which the rail's lattice uses as a mark (`V21b`). Soundness still checks it.
+- The diff mode (`=`) is not driven, because it needs a git history. Its tones are seen by neither
+  direction: `▐` in `ACCENT` for an added node, the `WARN` change chip, `ALERT` ghosts, and
+  `ACCENT` wires. This is a carry.
+- The hero's large numerals are drawn in `█`. They are covered character-wise by `V19` and
+  style-wise by coincidence, because they paint `INK` or `WARN` like the bars.
+
+**The catalogue table** (both sizes and all states merged; ASCII rows painted by the view are omitted as `X1`/`X2`; `n` is the cell count over all harvested frames). The disposition column is computed by the arm's own rule: `= Vn` is the member that explains the row in its declared style; *glyph of Vn, tone of an overlay* is a declared glyph under a selection, hit or rail-cursor tone (covered by completeness per character, see the blind spots).
+
+| view | glyph | code point | fg | bg | bold | widget(s) | n | disposition |
+|---|---|---|---|---|---|---|---|---|
+| atlas | `/` | U+002F | #737373 | #000000 |  | HintLine | 64 | X3 app chrome |
+| atlas | `·` | U+00B7 | #737373 | #000000 |  | HintLine | 56 | X3 app chrome |
+| atlas | `↵` | U+21B5 | #737373 | #000000 |  | HintLine | 24 | X3 app chrome |
+| atlas | `▸` | U+25B8 | #737373 | #000000 |  | HintLine | 28 | X3 app chrome |
+| atlas | `+` | U+002B | #3a3a3a | #000000 |  | KeyBar | 28 | X3 app chrome |
+| atlas | `/` | U+002F | #1783ff | #000000 |  | KeyBar | 28 | X3 app chrome |
+| atlas | `?` | U+003F | #1783ff | #000000 |  | KeyBar | 28 | X3 app chrome |
+| atlas | `…` | U+2026 | #3a3a3a | #000000 |  | KeyBar | 28 | X3 app chrome |
+| atlas | `↵` | U+21B5 | #1783ff | #000000 |  | KeyBar | 28 | X3 app chrome |
+| atlas | `/` | U+002F | #737373 | #000000 |  | TabStrip | 28 | X3 app chrome |
+| atlas | `◕` | U+25D5 | #3a3a3a | #000000 |  | TabStrip | 28 | X3 app chrome |
+| atlas | `▰` | U+25B0 | #f5f5f5 | #121212 |  | insp-coverage | 28 | = V32 |
+| atlas | `▱` | U+25B1 | #262626 | #121212 |  | insp-coverage | 14 | = V32 |
+| atlas | `·` | U+00B7 | #737373 | #000000 |  | map-canvas, map-rail | 84 | X2 punctuation |
+| atlas | `…` | U+2026 | #000000 | #1783ff | b | map-canvas | 4 | X2 punctuation |
+| atlas | `…` | U+2026 | #737373 | #000000 |  | map-canvas | 8 | X2 punctuation |
+| atlas | `…` | U+2026 | #f5f5f5 | #000000 |  | map-canvas | 13 | X2 punctuation |
+| atlas | `…` | U+2026 | #f5f5f5 | #262626 |  | map-canvas | 4 | X2 punctuation |
+| atlas | `…` | U+2026 | #f5f5f5 | #121212 |  | map-canvas | 4 | X2 punctuation |
+| atlas | `…` | U+2026 | #ff4f42 | #000000 |  | map-canvas | 7 | X2 punctuation |
+| atlas | `─` | U+2500 | #f5f5f5 | #000000 |  | map-canvas | 2168 | = V29 |
+| atlas | `│` | U+2502 | #f5f5f5 | #000000 |  | map-canvas | 35 | = V29 |
+| atlas | `┌` | U+250C | #f5f5f5 | #000000 |  | map-canvas | 71 | = V29 |
+| atlas | `┐` | U+2510 | #f5f5f5 | #000000 |  | map-canvas | 29 | = V29 |
+| atlas | `┬` | U+252C | #f5f5f5 | #000000 |  | map-canvas | 44 | = V29 |
+| atlas | `┼` | U+253C | #f5f5f5 | #000000 |  | map-canvas | 35 | = V29 |
+| atlas | `▐` | U+2590 | #000000 | #1783ff | b | map-canvas | 11 | = V23 |
+| atlas | `▐` | U+2590 | #262626 | #000000 |  | map-canvas | 148 | = V1 |
+| atlas | `▐` | U+2590 | #f5f5f5 | #262626 |  | map-canvas | 20 | = V2 |
+| atlas | `▐` | U+2590 | #f5f5f5 | #121212 |  | map-canvas | 4 | = V24 |
+| atlas | `▐` | U+2590 | #ffd230 | #000000 |  | map-canvas | 8 | = V3 |
+| atlas | `░` | U+2591 | #262626 | #000000 |  | map-canvas | 24 | = V28 |
+| atlas | `▰` | U+25B0 | #f5f5f5 | #000000 |  | map-canvas, map-pagination | 70 | = V32 |
+| atlas | `▱` | U+25B1 | #262626 | #000000 |  | map-canvas, map-pagination | 672 | = V32 |
+| atlas | `▸` | U+25B8 | #737373 | #000000 |  | map-canvas | 8 | = V3/V34 |
+| atlas | `▽` | U+25BD | #f5f5f5 | #000000 |  | map-canvas, map-pagination | 56 | = V31 |
+| atlas | `◆` | U+25C6 | #f5f5f5 | #000000 |  | map-canvas | 28 | = V30 |
+| atlas | `◫` | U+25EB | #f5f5f5 | #000000 |  | map-canvas | 74 | = V25 |
+| atlas | `◫` | U+25EB | #ff4f42 | #000000 |  | map-canvas | 12 | = V26 |
+| atlas | `✓` | U+2713 | #f5f5f5 | #000000 |  | map-canvas | 148 | = V27 |
+| atlas | `╱` | U+2571 | #3a3a3a | #000000 |  | map-minimap | 28 | = V39 |
+| atlas | `█` | U+2588 | #f5f5f5 | #000000 |  | map-minimap | 70 | = V36 |
+| atlas | `░` | U+2591 | #ffd230 | #000000 |  | map-minimap | 154 | = V38 |
+| atlas | `▒` | U+2592 | #737373 | #000000 |  | map-minimap | 56 | = V37 |
+| atlas | `·` | U+00B7 | #3a3a3a | #000000 |  | map-rail | 36 | X2 punctuation; = V21b |
+| atlas | `∙` | U+2219 | #737373 | #000000 |  | map-rail | 262 | = V21a |
+| atlas | `▸` | U+25B8 | #f5f5f5 | #262626 |  | map-rail | 8 | glyph of V3/V34, tone of an overlay |
+| atlas | `▾` | U+25BE | #000000 | #1783ff | b | map-rail | 8 | glyph of V33, tone of an overlay |
+| atlas | `▾` | U+25BE | #737373 | #000000 |  | map-rail | 138 | = V33 |
+| atlas | `▾` | U+25BE | #f5f5f5 | #262626 |  | map-rail | 8 | glyph of V33, tone of an overlay |
+| esquema | `/` | U+002F | #737373 | #000000 |  | HintLine | 64 | X3 app chrome |
+| esquema | `·` | U+00B7 | #737373 | #000000 |  | HintLine | 48 | X3 app chrome |
+| esquema | `↵` | U+21B5 | #737373 | #000000 |  | HintLine | 20 | X3 app chrome |
+| esquema | `▸` | U+25B8 | #737373 | #000000 |  | HintLine | 24 | X3 app chrome |
+| esquema | `+` | U+002B | #3a3a3a | #000000 |  | KeyBar | 24 | X3 app chrome |
+| esquema | `/` | U+002F | #1783ff | #000000 |  | KeyBar | 24 | X3 app chrome |
+| esquema | `?` | U+003F | #1783ff | #000000 |  | KeyBar | 24 | X3 app chrome |
+| esquema | `…` | U+2026 | #3a3a3a | #000000 |  | KeyBar | 24 | X3 app chrome |
+| esquema | `↵` | U+21B5 | #1783ff | #000000 |  | KeyBar | 24 | X3 app chrome |
+| esquema | `/` | U+002F | #737373 | #000000 |  | TabStrip | 24 | X3 app chrome |
+| esquema | `◕` | U+25D5 | #3a3a3a | #000000 |  | TabStrip | 24 | X3 app chrome |
+| esquema | `▰` | U+25B0 | #f5f5f5 | #121212 |  | insp-coverage | 24 | = V32 |
+| esquema | `▱` | U+25B1 | #262626 | #121212 |  | insp-coverage | 12 | = V32 |
+| esquema | `·` | U+00B7 | #000000 | #1783ff | b | map-canvas | 18 | X2 punctuation |
+| esquema | `·` | U+00B7 | #737373 | #000000 |  | map-canvas, map-rail | 72 | X2 punctuation |
+| esquema | `·` | U+00B7 | #ffd230 | #000000 |  | map-canvas | 114 | X2 punctuation |
+| esquema | `▽` | U+25BD | #f5f5f5 | #000000 |  | map-canvas, map-pagination | 24 | = V31 |
+| esquema | `◆` | U+25C6 | #f5f5f5 | #000000 |  | map-canvas | 24 | = V30 |
+| esquema | `╱` | U+2571 | #3a3a3a | #000000 |  | map-minimap | 24 | = V39 |
+| esquema | `█` | U+2588 | #f5f5f5 | #000000 |  | map-minimap | 60 | = V36 |
+| esquema | `░` | U+2591 | #ffd230 | #000000 |  | map-minimap | 132 | = V38 |
+| esquema | `▒` | U+2592 | #737373 | #000000 |  | map-minimap | 48 | = V37 |
+| esquema | `▰` | U+25B0 | #f5f5f5 | #000000 |  | map-pagination | 24 | = V32 |
+| esquema | `▱` | U+25B1 | #262626 | #000000 |  | map-pagination | 552 | = V32 |
+| esquema | `·` | U+00B7 | #3a3a3a | #000000 |  | map-rail | 36 | X2 punctuation; = V21b |
+| esquema | `∙` | U+2219 | #737373 | #000000 |  | map-rail | 237 | = V21a |
+| esquema | `▸` | U+25B8 | #f5f5f5 | #262626 |  | map-rail | 8 | glyph of V34, tone of an overlay |
+| esquema | `▾` | U+25BE | #000000 | #1783ff | b | map-rail | 4 | glyph of V33, tone of an overlay |
+| esquema | `▾` | U+25BE | #737373 | #000000 |  | map-rail | 116 | = V33 |
+| esquema | `▾` | U+25BE | #f5f5f5 | #262626 |  | map-rail | 8 | glyph of V33, tone of an overlay |
+| mapa mental | `/` | U+002F | #737373 | #000000 |  | HintLine | 48 | X3 app chrome |
+| mapa mental | `·` | U+00B7 | #737373 | #000000 |  | HintLine | 40 | X3 app chrome |
+| mapa mental | `↵` | U+21B5 | #737373 | #000000 |  | HintLine | 16 | X3 app chrome |
+| mapa mental | `▸` | U+25B8 | #737373 | #000000 |  | HintLine | 20 | X3 app chrome |
+| mapa mental | `+` | U+002B | #3a3a3a | #000000 |  | KeyBar | 20 | X3 app chrome |
+| mapa mental | `/` | U+002F | #1783ff | #000000 |  | KeyBar | 20 | X3 app chrome |
+| mapa mental | `?` | U+003F | #1783ff | #000000 |  | KeyBar | 20 | X3 app chrome |
+| mapa mental | `…` | U+2026 | #3a3a3a | #000000 |  | KeyBar | 20 | X3 app chrome |
+| mapa mental | `↵` | U+21B5 | #1783ff | #000000 |  | KeyBar | 20 | X3 app chrome |
+| mapa mental | `/` | U+002F | #737373 | #000000 |  | TabStrip | 20 | X3 app chrome |
+| mapa mental | `◕` | U+25D5 | #3a3a3a | #000000 |  | TabStrip | 20 | X3 app chrome |
+| mapa mental | `▰` | U+25B0 | #f5f5f5 | #121212 |  | insp-coverage | 20 | = V32 |
+| mapa mental | `▱` | U+25B1 | #262626 | #121212 |  | insp-coverage | 10 | = V32 |
+| mapa mental | `braille` | U+28xx | #1783ff | #000000 |  | map-canvas | 70 | = V4b |
+| mapa mental | `braille` | U+28xx | #737373 | #000000 |  | map-canvas | 1135 | = V4b |
+| mapa mental | `braille` | U+28xx | #737373 | #121212 |  | map-canvas | 80 | = V4b |
+| mapa mental | `braille` | U+28xx | #a3a3a3 | #121212 |  | map-canvas | 110 | = V4b |
+| mapa mental | `braille` | U+28xx | #a3a3a3 | #000000 |  | map-canvas | 1380 | = V4b |
+| mapa mental | `braille` | U+28xx | #f5f5f5 | #000000 |  | map-canvas | 1470 | = V4b |
+| mapa mental | `braille` | U+28xx | #f5f5f5 | #121212 |  | map-canvas | 80 | = V4b |
+| mapa mental | `·` | U+00B7 | #737373 | #000000 |  | map-canvas, map-rail | 60 | X2 punctuation |
+| mapa mental | `▽` | U+25BD | #f5f5f5 | #000000 |  | map-canvas, map-pagination | 20 | = V31 |
+| mapa mental | `◆` | U+25C6 | #000000 | #1783ff | b | map-canvas | 16 | glyph of V44/V30, tone of an overlay |
+| mapa mental | `◆` | U+25C6 | #1783ff | #121212 |  | map-canvas | 4 | = V44 |
+| mapa mental | `◆` | U+25C6 | #f5f5f5 | #000000 |  | map-canvas | 20 | = V30 |
+| mapa mental | `●` | U+25CF | #000000 | #1783ff | b | map-canvas | 4 | glyph of V42/V43, tone of an overlay |
+| mapa mental | `●` | U+25CF | #1783ff | #121212 |  | map-canvas | 4 | = V43 |
+| mapa mental | `●` | U+25CF | #737373 | #121212 |  | map-canvas | 160 | = V42 |
+| mapa mental | `●` | U+25CF | #a3a3a3 | #121212 |  | map-canvas | 202 | = V42 |
+| mapa mental | `●` | U+25CF | #f5f5f5 | #121212 |  | map-canvas | 220 | = V42 |
+| mapa mental | `╱` | U+2571 | #3a3a3a | #000000 |  | map-minimap | 20 | = V39 |
+| mapa mental | `█` | U+2588 | #f5f5f5 | #000000 |  | map-minimap | 50 | = V36 |
+| mapa mental | `░` | U+2591 | #ffd230 | #000000 |  | map-minimap | 110 | = V38 |
+| mapa mental | `▒` | U+2592 | #737373 | #000000 |  | map-minimap | 40 | = V37 |
+| mapa mental | `▰` | U+25B0 | #f5f5f5 | #000000 |  | map-pagination | 20 | = V32 |
+| mapa mental | `▱` | U+25B1 | #262626 | #000000 |  | map-pagination | 460 | = V32 |
+| mapa mental | `·` | U+00B7 | #3a3a3a | #000000 |  | map-rail | 36 | X2 punctuation; = V21b |
+| mapa mental | `∙` | U+2219 | #737373 | #000000 |  | map-rail | 212 | = V21a |
+| mapa mental | `▸` | U+25B8 | #f5f5f5 | #262626 |  | map-rail | 4 | glyph of V34, tone of an overlay |
+| mapa mental | `▾` | U+25BE | #000000 | #1783ff | b | map-rail | 4 | glyph of V33, tone of an overlay |
+| mapa mental | `▾` | U+25BE | #737373 | #000000 |  | map-rail | 92 | = V33 |
+| mapa mental | `▾` | U+25BE | #f5f5f5 | #262626 |  | map-rail | 8 | glyph of V33, tone of an overlay |
+| sala | `▸` | U+25B8 | #737373 | #000000 |  | HintLine | 2 | X3 app chrome |
+| sala | `+` | U+002B | #3a3a3a | #000000 |  | KeyBar | 2 | X3 app chrome |
+| sala | `/` | U+002F | #1783ff | #000000 |  | KeyBar | 2 | X3 app chrome |
+| sala | `?` | U+003F | #1783ff | #000000 |  | KeyBar | 2 | X3 app chrome |
+| sala | `…` | U+2026 | #3a3a3a | #000000 |  | KeyBar | 2 | X3 app chrome |
+| sala | `↵` | U+21B5 | #1783ff | #000000 |  | KeyBar | 2 | X3 app chrome |
+| sala | `◕` | U+25D5 | #3a3a3a | #000000 |  | TabStrip | 2 | X3 app chrome |
+| sala | `▁` | U+2581 | #3a3a3a | #121212 |  | home-hero | 26 | = V40 |
+| sala | `█` | U+2588 | #737373 | #121212 |  | home-hero | 2 | = V40 |
+| sala | `█` | U+2588 | #ffd230 | #121212 |  | home-hero | 42 | = V19 |
+| sala | `▲` | U+25B2 | #ffd230 | #121212 |  | home-hero | 2 | = V20 |
+| sala | `◕` | U+25D5 | #3a3a3a | #000000 |  | home-identity | 2 | X3 app chrome |
+| sala | `█` | U+2588 | #f5f5f5 | #000000 |  | home-microbar | 12 | = V19 |
+| sala | `█` | U+2588 | #ffd230 | #000000 |  | home-microbar | 8 | = V19 |
+| sala | `░` | U+2591 | #3a3a3a | #000000 |  | home-microbar | 20 | = V19 |
+| sala | `—` | U+2014 | #f5f5f5 | #121212 |  | home-recents | 2 | X2 punctuation |
+| sala | `—` | U+2014 | #f5f5f5 | #1c1c1c |  | home-recents | 4 | X2 punctuation |
+| sala | `↵` | U+21B5 | #f5f5f5 | #121212 |  | home-recents | 2 | X4 key glyph |
+| sala | `⊘` | U+2298 | #f5f5f5 | #121212 |  | home-recents | 2 | = V22 |
+| sala | `▐` | U+2590 | #737373 | #2f2f2f | b | home-recents(header) | 4 | X5 table header |
+| sala | `↩` | U+21A9 | #000000 | #1783ff | b | home-resume | 2 | = V41 |
+
+### `01b` change log
+
+It lives in `01b` itself, above §3.1, so there is one copy. In summary:
+
+- **Reused, form survives:** `V1` (card edge `▐`), `V2` (hit card), `V3` (fold pill, now with its
+  `WARN` bar), `V4b` (braille, now in radial), `V19` (microbar), `V20` (`▲`), `V22` (`⊘`).
+- **Split:** `V21` becomes `V21a` / `V21b`, the rail lattice's lit and unlit dot, in the same two
+  styles.
+- **Retired, never reused:** `V4`, `V4a`, `V5`, `V6`, `V7`, `V8`, `V9`, `V10`, `V17`.
+- **Deferred with the `#D7` marker:** `V11`–`V16` (verdict `Q4`), and `V18` as before.
+- **New:** `V23`–`V44`.
+
+`01-requirements.md` gained **`A-106`**, because `HLR-N06.3`'s `PRED-4` discharge literally names
+`V7`, `V8` and `V4`. The amendment resolves those ids to `V31` and `V21b` and changes no threshold.
+`A-106` was the next free id after a scan of all of `.dev-flow`; `A-105` was the last taken.
+
+### Copy, in one place (`D1`) — for the operator to correct
+
+The Spanish label each row paints, in the order the legend paints it. **Deviation** marks where the
+copy departs from the reviewer's proposal, with the reason.
+
+| Row | Sample | Label | Note |
+|---|---|---|---|
+| `V1` | `▐` | nodo del mapa | |
+| `V2` | `▐ nómina` | coincidencia de búsqueda | |
+| `V23` | `▐ erp` | nodo seleccionado | |
+| `V24` | `▐ erp` | seleccionado, con el foco en otra región | |
+| `V3` | `▐ ▸ inv +23` | rama plegada (23 dentro) | |
+| `V25` | `◫ ACTA-7` | acta del nodo | |
+| `V26` | `◫ sin acta` | nodo sin acta | painted in `ALERT`; `INC8-D-Q1` |
+| `V27` | `✓` | campo del esquema lleno | |
+| `V28` | `░` | campo del esquema pendiente | |
+| `V29` | `┬─┐` | enlace entre nodos | |
+| `V4b` | `⣉⡉⠉` ×4 tones | enlace entre nodos (en azul, camino al seleccionado) | |
+| `V42` | `● ● ●` | nodo (gris de su rama) | |
+| `V43` | `●` | nodo en el camino al seleccionado | |
+| `V44` | `◆` | raíz del mapa | |
+| `V30` | `◆` | encabezado de la vista | |
+| `V31` | `▽ 35 fuera de vista` | nodos fuera de vista | **deviation:** the proposal gave V7 *ramas plegadas fuera de vista*; the count the product paints is nodes, not branches, and V7 is retired |
+| `V33` | `▾` | rama abierta | |
+| `V34` | `▸` | rama plegada | |
+| `V35` | `3` | campos pendientes bajo la rama | |
+| `V21a` | `∙` | nodo con la ficha completa | **deviation:** the proposal split V21 into *con acta* / *sin acta*; the lattice lights a node when its ficha has no missing required field, which is more than an acta. `INC8-D-Q6` |
+| `V21b` | `·` | nodo con campos pendientes | as above |
+| `V36` | `█` | rama con todas sus actas | |
+| `V37` | `▒` | rama con la mitad o más de sus actas | |
+| `V38` | `░` | rama con menos de la mitad de sus actas | |
+| `V39` | `╱` | rama sin datos | |
+| `V32` | `▰ ▱` | medidor de avance | |
+| `V19` | `█ █ ░` | nodos con y sin acta, en 10 celdas | **deviation:** the proposal was *cobertura de fichas (10 celdas)*; the bars the sala paints count nodes with and without an acta, and the coverage figure is the text beside them. `INC8-D-Q6` |
+| `V20` | `▲ 2 vencen hoy` | actas que vencen hoy | |
+| `V22` | `⊘` | mapa dañado — no se pudo leer | unchanged (Q7) |
+| `V40` | `▁▂▃ ▅▇█` | actividad de los últimos 14 días | |
+| `V41` | `↩ retomar` | volver a la última sesión | |
+
+The D1 proposals for `V8`, `V9` and `V10` are not used, because D2 retired those rows.
+
+### `D4` — layout and keyboard, decided and pinned
+
+- **Width.** `LEGEND_PANEL_CELLS = 80` is the one panel width for both layouts.
+  `LEGEND_ROW_CELLS = LEGEND_PANEL_CELLS - 2*_PAD_X - _SCROLLBAR_CELLS = 75`, derived rather than a
+  literal. The `INC8-CR-F2` arm holds in both layouts
+  (`test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts[100, 117, 118, 140]`).
+- **Switch.** At `LEGEND_DOCK_MIN_WIDTH = 118` columns and wider, the legend screen takes the
+  `-docked` class. It is aligned `right top` with a `0%` backdrop, so the view stays visible and
+  undimmed on the left. Below 118 it is the centred modal over a 70% backdrop, as before. A resize
+  moves an open legend between layouts.
+- **Depth and chrome.** The panel sits on `PANEL` over the view's `GROUND`, one grey step, with no
+  border. `ACCENT` appears only on key glyphs. Chrome copy is unchanged and lowercase, apart from
+  §3.6's verbatim `SU` (A4). Readable text stays on `PANEL`, where `ACCENT` measures 5.11:1 (`#D28`,
+  `test_d28_the_legend_chrome_clears_the_contrast_floor`, unchanged and green).
+- **Height.** The docked panel keeps the modal's height rules. **`TC-R36`**
+  (`test_repair_layout.py`, `LLR-R05`, a sealed prior batch) pins `max-height` as what governs at
+  140×45. A full-height dock reddened it in this pass and was reverted, so it is `INC8-D-Q5`.
+- **Keys (decision).** The panel is **modal for keys in both layouts**. A map key does nothing while
+  the legend is open, a second `?` stacks nothing (`HLR-N16.3`), and `esc` / `q` close it. The
+  scroll keys scroll it: `HLR-N16.4`'s arm runs at 140×45, now docked, and at 100×24, modal, and is
+  green in both. Pinned by `test_d4_the_docked_panel_is_modal_for_keys`, which also asserts the
+  trigger: the same key moves the bare view once the legend is closed.
+- **Overlap — what is and is not claimed.** `test_d4_the_view_stays_visible_and_undimmed_beside_the_docked_panel`
+  compares every cell left of the panel, glyph and style, before and after `?`. They are identical
+  at 118. At 117 they must differ, and they do, because the backdrop dims them. That shows the arm
+  can see a covered view. `test_d4_the_docked_panel_paints_nothing_over_the_visible_view` asserts
+  that no legend widget reaches left of the panel's edge. **What is not claimed:** the view is not
+  reflowed. At 118 columns the 80-column panel covers the map screen from column 38 on, which is 44
+  of the canvas's 58 columns and the whole ficha inspector. That is `INC8-D-Q4`, measured below,
+  and it is the operator's call.
+
+### Findings (`INC8-D-Fn`)
+
+- **`INC8-D-F1` — the verdict record itself fails the lane.**
+  `VERDICT-inc8-legend-2026-09-28.md:23` (committed at `ca36a3f`, entry HEAD) carries a literal
+  U+202E. The sentence meant to spell it as six escape characters and wrote the character instead.
+  `test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts` is RED
+  on the entry tree and on every commit of this pass. The byte was confirmed in `git show HEAD:`
+  (line 23). The file is outside this pass's permitted docs and is the operator's authority record,
+  so it is **not** fixed here. Routed to the coordinator. The fix is a one-character edit.
+  This is the same defect class as `INC8-F5`, one document over.
+- **`INC8-D-F2` — the legend-side style arm read the wrong rows once the panel moved.**
+  `_harvest` read a scrolled widget's **unclipped** region. At the docked height `#help-vocabulary`
+  scrolls to `y=-10`, and `strips[-10:16]` slices from the **end** of the frame. The old centred
+  geometry happened to keep `y` non-negative. Fixed by clipping to the pane (`9136a3f`). `MH1`
+  re-proves the arm after the fix: it goes RED on all four views.
+- **`INC8-D-F3` — the catalogue's own first run measured a fade-in.** See the instrument section.
+  Caught because impossible tones appeared, not by review.
+- **`INC8-D-F4` — this pass's own view arm was blind to `V21b` on its first run.** `glyph_set`
+  filtered samples through the exclusion rule, which drops `·` (punctuation). The arm went RED on
+  soundness for `V21b` in three views. The instrument was fixed so that a sample with no meaningful
+  character stands for its own characters. The product was not changed.
+- **`INC8-D-F5` — a line-ending count lied, the trap control 37 names.** `grep -c $'\r$'` reported
+  `01b` as all-CRLF. It is LF in the worktree. The splice briefly wrote CRLF into the new section;
+  a byte count caught it before staging, and it was normalised.
+- **`INC8-D-F6` — a second literal 118.** `LEGEND_DOCK_MIN_WIDTH = 118` reddened
+  `test_crumb.py::test_decl_118_is_spelled_ONCE` in the first full lane. It was fixed in `40c5c6a`
+  and the D4 mutants were re-fired on the fixed file (7 of 7 RED, pins OK). This is the tree's own
+  census firing on this pass's work.
+
+### Operator questions (`INC8-D-Qn`)
+
+- **`INC8-D-Q1` — ALERT has a second job, and it is painted.** `01b` §3.5 says `ALERT`'s only job
+  is the malformed-query chip. The atlas paints `◫ sin acta` in `ALERT` (`views/layered.py:613`),
+  so `V26` declares it as painted. §3.5 was **not** widened and the renderer was **not** changed.
+  Either §3.5 gains an `ALERT` row, or the card moves to another tone. That is a renderer change,
+  which belongs to a later increment.
+- **`INC8-D-Q2` — `V4` is retired, although `Q1·Q2` said V4 keeps `∙`.** The catalogue finds `∙`
+  painted only as the rail's lit territory dot. That is `V21`'s form: a lit or unlit dot per node,
+  in `MUT` / `WORDMARK`, which are exactly `V21`'s declared styles. So the `∙` survives in `V21a`
+  and the id `V4` is retired. If the operator wants the id `V4` on that dot instead, `V21a` is
+  renamed. It is one row in `01b` and one line in `darkside`.
+- **`INC8-D-Q3` — §3.5's colour rows explain hues no view paints.** The catalogue found `SAGE`,
+  `TEAL` and `VIOLET` painted **nowhere** in the four views, yet the legend still paints their three
+  §3.5 rows. §3.5 was outside this rewrite (§3.1–§3.4), so it is unchanged.
+- **`INC8-D-Q4` — the docked panel covers most of the map at 118 columns.** Measured, with the
+  inspector shown: at 118×34 the rail is columns 0–23, the canvas 24–81 and the inspector 82–117.
+  The panel spans 38–117, so it covers 44 of the canvas's 58 columns and all of the inspector. At
+  140 it covers 44 of 80 canvas columns, and at 160 it covers 44 of 100. With the inspector shown,
+  the covered part is always 80 − 36 = 44 columns (`%TEMP%\inc8d\probe_q4.py`). The round-10
+  prototype's panel was 43 wide. Three options:
+  - a narrower panel: the budget follows, and `LEGEND_ROW_CELLS` changes in both layouts;
+  - reflowing the view beside the panel: this touches `MapScreen`'s region logic, whose
+    auto-collapse is sticky;
+  - accepting the overlay.
+- **`INC8-D-Q5` — full-height docking is blocked by a sealed arm.** The prototype's panel is full
+  height. `TC-R36` pins `max-height: 28` as governing at 140×45. Full height needs `TC-R36`
+  amended, or a docked-only exemption ruled.
+- **`INC8-D-Q6` — three labels depart from the D1 proposal because the painted form means
+  something else:**
+  - `V19` counts nodes with and without an acta; it is not coverage.
+  - `V21a` / `V21b` mean a complete or incomplete ficha, not an acta.
+  - `V31` counts nodes, not branches.
+
+  See the copy table.
+- **`INC8-D-Q7` — which 118 does D4 mean?** The threshold reads `darkside.DECLARED_CONTEXT_CELLS`,
+  the batch's declared context of use (the width every render is drawn at). The other candidate is
+  `MapScreen`'s auto-hide threshold (`MIN_CANVAS_WIDTH + RAIL_WIDTH + INSPECTOR_WIDTH`), which
+  equals 118 by arithmetic, lives in `app.py`, and cannot be imported into `help.py` without a
+  cycle. If the operator means the second, the difference shows only when one of those widths
+  changes.
+- **`A5`** (`en esta leyenda`) is still open, unchanged.
+
+### Mutation table (this pass)
+
+Harness `%TEMP%\inc8d\mutants.py`, outside the repo. Discipline:
+
+- a sha256 pin per touched file;
+- a byte-level replace in the file's own line endings, with each `old` occurring exactly once;
+- stdout and stderr captured separately, and the summary line asserted as found;
+- the verdict printed **before** the restore;
+- a byte restore, and the pin re-verified.
+
+All 19 restores matched their pins, and `git status --porcelain` showed 0 lines afterwards. Pins
+before the battery:
+
+- `mapper/darkside.py` `64ab8d0d74930c51595416b5198e67c30315591a9c1e45c2203806fe1666d048`
+- `mapper/screens/help.py` `ee549666c83be63129e3a47d67d5a29bd4cf5d0b78d3068b2ce73f525a1c72ed`
+- `mapper/app.py` `8bf4b8407e1d9b08eab1c68f39fea473e6fdf829c7321db3cda2f0c0169cb1ce`
+- `mapper/views/layered.py` `0d1ac59d031fb5766b81d389e39ad95e13d6ca8c20584d7eb8432deb38d7a60c`
+- `mapper/views/radial.py` `df3512af876b9ff4ac2be130e77cbdb65a30a28eb16570590f01723ccf00e920`
+- `tests/test_legend_design.py` `925281a994b992a8bb75ee7a599315db287bcfda5f16a83f122ff4f703e37bbb`
+- `01b-ux-decisions.md` `1ed8029eedaaea99df469a820c337b490f3c994294cc9e0c79f4533538c65dce`
+
+| # | Mutant | Verdict |
+|---|---|---|
+| MD1 | `◫ sin acta` painted `INK`, not `ALERT` (`layered.py`) | **RED** D2`[atlas]`, SOUNDNESS: `V26` |
+| MD2 | the sparkline never reaches its `MUT` tier (`app.py`) | **RED** D2`[sala]`, SOUNDNESS: `V40`/`MUT` |
+| MD3 | the fold pill paints `►` (`layered.py`) | **RED** D2`[atlas]`, COMPLETENESS: `U+25BA`; soundness empty |
+| MD4 | radial's header paints `◆◇` (`radial.py`) | **RED** D2`[mapa mental]`, COMPLETENESS: `U+25C7` |
+| MD5 | `V37` dropped from `01b` **and** the declaration together | **RED** only D2`[atlas]` (COMPLETENESS: `▒`); EQUALS and the partition arm stay **GREEN**. This is the gap the view arm closes |
+| MD6 | the exclusion rule drops every symbol (`S*`) | **RED** `test_d2_the_exclusion_rule_keeps_…` |
+| MV1 | retired `V5` comes back as a table row | **RED** `test_design_pass_a_retired_id_is_never_a_row_again` |
+| MV2 | `V13` loses its `#D7` marker | **RED** `test_design_pass_q4_…` |
+| MV3 | braille back in the atlas's Views cell | **RED** `test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names` |
+| MV4 | `V4b`'s braille range dropped from `darkside` | **RED** `test_every_declared_range_EQUALS_the_document` |
+| MV5 | `legend_view` returns `radial` again | **RED** `…names_the_map_view[mapa mental]` |
+| MH1 | the legend paints every sample `INK` (after `INC8-D-F2`) | **RED** `…every_member_is_painted…[atlas, esquema, mapa mental, sala]` |
+| M4a | dock threshold off by one (`>`) | **RED** `switches[118]`, `view_stays_visible[118]` |
+| M4b | docked backdrop `70%` (dims the view) | **RED** `view_stays_visible[118]`; `[117]` GREEN |
+| M4c | docked panel centred | **RED** `…paints_nothing_over_the_visible_view` |
+| M4d | a `key_l` on the legend forwards to the view | **RED** `…is_modal_for_keys` |
+| M4e | a `key_question_mark` pushes a second legend | **RED** `…is_modal_for_keys` |
+| M4f | row budget one cell short of the pane | **RED** `…row_budget…[100, 117, 118, 140]` |
+| M4g | `on_resize` ignored | **RED** `…a_resize_moves_the_open_legend_between_layouts` |
+
+**The pre/post pair (control: fire the same mutant against both oracles).** The pre-increment tree
+`ca36a3f` was exported with `git archive` to `%TEMP%\inc8d\base_ca36a3f`. Its `mapper` import
+resolves to the export, not the repo's editable install. That was checked by path, and by base's
+title arm passing on `outline`, which only base's `app.py` returns. MD1 and MD3 were fired there
+against base's legend oracles (`test_help_scope.py`, `test_vocabulary_declaration.py`,
+`test_repair_layout.py`, 51 nodes). **Both SURVIVED: 51 passed each.** Post-increment, both go
+**RED**. The view-side sight is new with this pass.
+
+### Lane and ruff
+
+- **First full-lane run**, once, main tree, at `9136a3f` (before the threshold fix), with stdout and
+  stderr kept separate: **`2 failed, 1225 passed, 20 deselected, 3 xfailed`** in 428 s. This is a
+  faithful record of that tree, so it is annotated, not struck.
+  - `test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts` is
+    **`INC8-D-F1`**, which was already present at entry.
+  - `test_crumb.py::test_decl_118_is_spelled_ONCE` was **mine** (`INC8-D-F6`).
+    `LEGEND_DOCK_MIN_WIDTH = 118` was a second literal of a number the package spells once. Fixed
+    in `40c5c6a` by reading `darkside.DECLARED_CONTEXT_CELLS`. The lane caught it; care did not.
+  - `FLAKE-1` did not fire.
+- **Reconciliation.** 1206 at entry, plus 21 new nodes, gives 1227, and 1225 + 2 = 1227 ✓. The 21:
+  - `test_vocabulary_declaration.py` +2: the retired-id arm and the `Q4` arm. The other changes
+    there were renames.
+  - `test_help_scope.py` +2: the member-style arm now runs over four views instead of two.
+  - `test_legend_design.py` +17, a new file: D2 ×4, the rule arm, the switch ×3, visible ×2,
+    overlap, keys, the budget ×4, and resize.
+- **Final full-lane run**, on the final tree with the docs in place: **`1 failed, 1226 passed, 20 deselected, 3 xfailed`** in 573 s at `40c5c6a`, with this record and `A-106` in the tree. The one failure is `INC8-D-F1`, and 1226 + 1 = 1227 ✓. `FLAKE-1` did not fire. This run is a
+  deviation from "once", and it is declared: the first run's tree was not the final one, and a lane
+  figure for a tree that did not ship is weaker than one for the tree that did.
+- **ruff** (`--output-format=concise --no-cache`, line and column dropped, paths normalised; the
+  instrument is `%TEMP%\inc8d\ruffset.py`):
+  - entry `ca36a3f`: **27** errors; exit: **27**; the sets are identical;
+  - the four touched Python files are clean.
+  - The export of `ca36a3f` reports 45, because an export has no `.git`, so ruff stops honouring
+    `.gitignore` and counts `prototypes/`. Compared like for like, excluding `prototypes/`, both
+    are 27.
+
+### Render — real `run_test` + `export_screenshot`, with PNGs rasterised from them
+
+`C:\Users\jjgh8\AppData\Local\Temp\inc8d\render\`. Every file exists as `.svg` and `.png`.
+`_top` / `_vocab` / `_end` are the legend's top, its vocabulary section and its end. The legend was
+opened through the real `?`.
+
+- **118×34, docked, with the view beside it:**
+  - `atlas_118x34_view`, `atlas_118x34_legend_top`, `_legend_vocab`, `_legend_end`
+  - `esquema_118x34_view`, `esquema_118x34_legend_top`, `_legend_vocab`, `_legend_end`
+  - `mapa-mental_118x34_view`, `mapa-mental_118x34_legend_top`, `_legend_vocab`, `_legend_end`
+  - `sala_118x34_view`, `sala_118x34_legend_top`, `_legend_vocab`, `_legend_end`
+- **80×24, modal:** `atlas_80x24_legend_{top,vocab,end}`, `esquema_…`, `mapa-mental_…`,
+  `sala_…`.
+
+### Carries
+
+- **Inc-9: rename the other screens' own headers** to `atlas` / `esquema` / `mapa mental` / `sala`.
+  The canvas headers still read `mapa de conceptos` / `outline` / `mapa mental` (`views/*.py`),
+  and the keymap's seat labels still read `alternar outline` / `alternar radial`. Verdict `D5` routes
+  these to Inc-9. The legend's own title is done.
+- **`INC8-D-F1`**: fix the literal U+202E in the verdict record. Coordinator.
+- **The diff mode's tones** (`▐` `ACCENT`, the `WARN` chip, `ALERT` ghosts, `ACCENT` wires) are in
+  neither the catalogue nor the arm, because a git history is needed to drive them.
+- **Per-style completeness** (see the instrument's blind spots).
+- `INC8-D-Q1`–`INC8-D-Q7` and `A5` go to the operator.
+- The earlier carries are unchanged: `INC8-F1`, `INC8-F3`, `UX-F9`, `UX-F12`, B-69 and B-70.
+  This pass closes `INC8-F2` and `UX-F3`.
+
+### Files
+
+| Source (3 of 4 permitted) | Tests | Docs |
+|---|---|---|
+| `mapper/darkside.py` | `tests/test_vocabulary_declaration.py` | `01b-ux-decisions.md` (DECISION 3 §3.1–§3.4 rewritten, with its change log) |
+| `mapper/screens/help.py` | `tests/test_help_scope.py` | `01-requirements.md` (`A-106` appended) |
+| `mapper/app.py` (`legend_view` only) | `tests/test_legend_design.py` (new) | this record |
+
+`keymap.py` was not needed. No renderer under `mapper/views/` was changed; the mutants touched them
+only temporarily, and every file was restored and verified against its pin. `.dev-flow/state.json`,
+`prototypes/`, `mapper.db`, `basewt` and the backup branch were not touched. Nothing was pushed.
+
+### Commits (this pass)
+
+- `7e1c2e2` feat(legend): the vocabulary derived from what the product paints — `01b`, the
+  declaration, names, and test updates
+- `efbb9ac` test(legend): the legend and the view agree in both directions
+- `9136a3f` feat(legend): the legend docks beside the view at ≥ 118 columns, including `INC8-D-F2`
+- `40c5c6a` fix(legend): the dock threshold reads the declared context of use (`INC8-D-F6`)
+- this record and `A-106` (docs)
