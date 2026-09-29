@@ -1458,3 +1458,95 @@ Nothing was pushed.
 - `46cb2dc` test(legend): the F2 arms see a wrong shift and a modal pan (`INC8-D3-F3`)
 - `050572a` fix(legend): the dock reveal reads the painted state, inside a paint pass (`INC8-D3-F6`)
 - this record, with the pass-2 strikes (docs)
+
+## Pass-3 corrective (2026-09-29)
+
+**What this pass is.** Design pass 3 (`c7cdf85`) got three independent reviews: code
+BLOCK-UNTIL `INC8-P3-CR-F1`, UX PASS-WITH-FINDINGS, security PASS. This pass closes the
+blocking finding and two coverage gaps the code review also raised. Design questions
+(`INC8-D3-Q1`-`Q5`), the dock-minimum literal (`INC8-P3-CR-F4`), the `store.py` surrogate
+path (`INC8-P3-SEC-F1`) and the private `layered._geometry` import (`CR-F5`) are for the
+operator, unchanged. Entry HEAD `c7cdf85`, tree clean.
+
+### Findings and disposition
+
+| Finding | Severity | What was done | Commit |
+|---|---|---|---|
+| `INC8-P3-CR-F1` | HIGH, blocking | `legend_docked` called `refresh_canvas()` on every layout apply, modal included, and `refresh_canvas` unconditionally rebuilds the ficha inspector (`FichaInspector._rebuild`'s `remove_children`), which destroys a focused field with nothing to restore it. `_move_pan` (the one path both `legend_docked` and `legend_closed` move pan through) now repaints through `_declare_after_layout`'s canvas-only render path instead -- it touches `#map-canvas` and the pagination `Static` only, never the rail or the inspector. `MapScreen` also saves the pre-legend focus (a widget id, or `None`) the moment the legend opens and restores it in a new `on_screen_resume` handler, deferred one message behind Textual's own post-resume auto-focus (`Screen._update_auto_focus`, `AUTO_FOCUS = "*"` at the app level, which grabs the rail the instant this screen resumes with `focused is None`) via `call_after_refresh`, so the operator's restore wins instead of being overwritten by it. | `4a372dc` |
+| `INC8-P3-UX-F1` (folds in carried `INC8-P2-UX-F7`) | same root as `CR-F1` | With focus `None` before `?`, `esc` used to leave the rail focused -- the same `_update_auto_focus` mechanism, independent of any inspector rebuild, since nothing needs destroying when nothing was focused. The deferred restore in `on_screen_resume` now explicitly re-asserts `None` afterward, so it returns `None` exactly, and the canvas is never repainted with the wrong focus baked into the selection's fill (blue when unfocused, `INK on PANEL` otherwise -- `views/layered.py:744-747`) because focus is restored BEFORE the pan-restore repaint that follows it, not after. | `4a372dc` |
+| `INC8-P3-CR-F2` | MEDIUM | No arm pinned that `legend_closed` clears `_pan_before_legend`. Behaviour was already correct (measured: the reopen-after-pan sequence below matched on the unmodified tree); added the arm to close the coverage gap. | `60bf183` |
+| `INC8-P3-CR-F3` | MEDIUM | `darkside.shown_cells` was unpinned against a real `fit()` paint for `\t`/`\n`/`\r` and wide text. Behaviour was already correct; added the arm. | `60bf183` |
+
+### A regression this pass's own first draft introduced, and caught before it shipped
+
+The first `_move_pan` skipped its repaint whenever the requested `(pan_x, pan_y)` tuple
+already equalled `(self.pan_x, self.pan_y)` -- a literal reading of fix `a`'s "compare the
+target pan with the painted pan, skip when they are equal". That guard is WRONG: a terminal
+resize can change the CANVAS's geometry while leaving the pan NUMBER unchanged, and the
+existing arm `test_f2_the_modal_layout_does_not_pan_and_a_resize_re_derives_the_pan` caught
+it on the first full run of the corrective's own test files -- resized narrow then back to
+the reference width, the reveal came back `(0, 0)` instead of the original `(7, 0)`. Fixed
+by dropping the hand-rolled tuple guard and calling `_declare_after_layout` unconditionally
+from `_move_pan`: it already no-ops correctly on a full `ViewState` equality check (`P1`),
+which is what a pan-only check cannot see (`_view_state` carries the canvas's `w`, `h` too).
+Re-run of `tests/test_legend_design.py` + `tests/test_help_scope.py` after the fix: 91 passed,
+0 failed.
+
+### Mutation table
+
+Harness `C:\Users\jjgh8\AppData\Local\Temp\inc8p3\mutation_harness.py`, outside the repo: a
+sha256 pin per touched file taken before each mutation, a byte-level replace in the file's own
+CRLF line endings (`mapper/app.py`, `mapper/darkside.py`), the verdict printed BEFORE the
+restore, and the pin re-verified after. **All four restores matched their pins.**
+
+| # | Mutant | Verdict |
+|---|---|---|
+| MUT-F1a | `_move_pan` reverted to unconditional `refresh_canvas` (fix `a`+`b` undone in one span; this also defeats fix `c`'s masking, since `_restore_after_legend`'s own final repaint goes through the same method) | **RED**: both `test_cr_f1_closing_the_legend_restores_the_focused_field` nodes |
+| MUT-F1b | `_restore_after_legend`'s `self.set_focus(widget)` dropped | **RED**: both `test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused` nodes |
+| MUT-F2 | `legend_closed`'s `self._pan_before_legend = None` dropped | **RED**: `test_cr_f2_reopening_after_a_pan_keeps_the_new_pan` |
+| MUT-F3 | `shown_cells` changed to `_cells(plain(s))` | **RED**: `test_inc8_p3_cr_f3_shown_cells_is_what_fit_actually_paints` `[tab]` and `[newline]` (`[cr]` and `[cjk]` do not distinguish this mutant and stay green -- `\r` is already coerced by `plain()` before `_row_text` ever sees it, and the CJK sample has no row-breaker to lose) |
+
+### Lane and ruff
+
+- **Targeted**, corrective's own test files, on the final tree: `tests/test_legend_design.py` +
+  `tests/test_help_scope.py` -- **91 passed, 0 failed**.
+- **Full default lane**, run once on `60bf183` (the main tree, both commits landed):
+  **1284 passed, 20 deselected, 3 xfailed, 0 failed** in 919 s. `FLAKE-1` did not fire.
+- **Reconciliation.** Baseline (both implementer and code reviewer, `c7cdf85`): 1275 passed +
+  3 xfailed = 1278 selected. This pass adds **9** nodes, all in `test_legend_design.py` /
+  `test_help_scope.py`: `test_cr_f1_closing_the_legend_restores_the_focused_field` ×2,
+  `test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused` ×2,
+  `test_cr_f2_reopening_after_a_pan_keeps_the_new_pan` ×1,
+  `test_inc8_p3_cr_f3_shown_cells_is_what_fit_actually_paints` ×4. Nothing removed, nothing
+  re-parametrized. 1278 + 9 = **1287** selected = 1284 passed + 3 xfailed ✓.
+- **ruff**: entry **27**, exit **27**, identical set (`F401`/`F841`, all pre-existing and outside
+  this pass's files).
+
+### Files
+
+| Source (1 of 4 permitted) | Tests | Docs |
+|---|---|---|
+| `mapper/app.py` (`MapScreen.__init__`'s `_focus_before_legend` / `_legend_restore_pending`; `legend_docked`, `legend_closed`, `_move_pan`; two new methods, `on_screen_resume` and `_restore_after_legend`) | `tests/test_legend_design.py` | this record (pass-3 corrective section) |
+| | `tests/test_help_scope.py` | |
+
+`mapper/darkside.py` was not touched -- `CR-F3` did not need it. No renderer under
+`mapper/views/` or `mapper/canvas.py` changed; `mapper/screens/help.py` was read but not
+edited (out of this pass's boundary). `.dev-flow/state.json`, `prototypes/`, `mapper.db`, the
+scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing was pushed.
+
+### Carries (unchanged by this pass)
+
+- `INC8-P3-CR-F4` (the dock minimum `43` and its renderer-literal derivation), the legal pan
+  range / edge card (`D3-Q2`), the red label (`D3-Q3`), the amber rows (`D3-Q4`), the `V34`
+  wording (`D3-Q5`), whether the rail counts as part of the view, `V28`'s label, the card
+  margin (`UX-F5`/`F6`), the `MUT` token contrast (`UX-F4`).
+- `INC8-P3-SEC-F1` (the `store.py` surrogate persistence path), `CR-F5` (the private
+  `layered._geometry` import).
+- `INC8-D3-F2`, `INC8-D3-Q1`-`Q5`, `INC8-D2-F2`, the diff mode's tones, Inc-9 / Inc-EN
+  (`B-71`) -- unchanged from design pass 3.
+
+### Commits (this pass)
+
+- `4a372dc` fix(legend): opening/closing the legend no longer moves keyboard focus (`INC8-P3-CR-F1`)
+- `60bf183` test(legend): pin the reopen-after-pan sequence and shown_cells' row-breaker translation (`INC8-P3-CR-F2`, `INC8-P3-CR-F3`)
+- this record (docs)
