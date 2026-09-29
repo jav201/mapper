@@ -20,7 +20,7 @@ for Inc-8's design pass.** Every item below was the page's recommended option un
 ## Q9 execution — history rewrite, messages only
 
 The message of `8dea408` carried a literal U+202E. Rewritten with `git filter-branch --msg-filter`
-over `8dea408~1..HEAD` (the U+202E replaced by the six characters `‮`); no tree changed
+over `8dea408~1..HEAD` (the U+202E replaced by the six characters `\u202e`); no tree changed
 (`git diff --quiet` between the backup and the new tip passes). Backup branch kept:
 `backup/pre-q9-reword-2026-09-28` → `c243eff`. The branch was never pushed past `8dea408`'s
 parent, so no remote history is affected. **Every hash cited in increment-022 and in reviewer
