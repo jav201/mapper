@@ -244,12 +244,12 @@ def _crumb_line(crumb: list[str], width: int) -> Text:
 
     tail = crumb[-1]
     tail_budget = max(_CRUMB_TAIL_MIN_CELLS, budget - _CRUMB_DROP_CELLS)
-    tail_text = fit(tail, min(tail_budget, _cells(tail))).rstrip()
+    tail_text = fit(tail, min(tail_budget, shown_cells(tail))).rstrip()
 
     kept: list[str] = []
     used = _cells(tail_text)
     for part in reversed(crumb[:-1]):
-        shown = fit(part, min(budget, _cells(part))).rstrip()
+        shown = fit(part, min(budget, shown_cells(part))).rstrip()
         cost = _cells(shown) + _CRUMB_SEP_CELLS
         if used + cost + _CRUMB_DROP_CELLS > budget:
             break
@@ -548,6 +548,21 @@ def plain(value: object) -> str:
 # coerces it (it sits in `COERCION_RANGES`): a row-bounding function should not
 # depend on that staying true elsewhere to keep its own single-row promise.
 _ROW_BREAKERS = {0x0009: " ", 0x000A: " ", 0x000D: " "}
+
+
+def shown_cells(s: str) -> int:
+    """The cells `fit` will paint `s` in -- measured AFTER the coercion `fit`
+    applies, never on the raw string.
+
+    `INC8-F-SEC-F2`.  Coercion changes width: a zero-width U+202E becomes a
+    one-cell U+FFFD.  A caller that sized `fit(s, _cells(s))` on the raw
+    string asked for ZERO cells, got `""`, and a crumb whose tail was only
+    invisible characters painted an EMPTY tail -- the one part the line
+    exists to show.  `fit`'s own contract stays exact (`w <= 0` means `""`);
+    the defect was the caller measuring a different string than the one
+    painted, so the callers size by this instead.
+    """
+    return _cells(plain(s).translate(_ROW_BREAKERS))
 
 
 def fit(s: str, w: int) -> str:

@@ -582,6 +582,25 @@ def test_inc8_sec_f3_a_wide_close_key_cannot_blow_the_row_budget(monkeypatch, do
             assert Text(line).cell_len <= screen.row_cells, (Text(line).cell_len, line)
 
 
+def test_inc8_f_sec_f2_an_invisible_only_part_is_not_painted_empty(monkeypatch):
+    """`INC8-F-SEC-F2`.  `fit(s, 0)` is `""` by contract, and callers sized it
+    by the RAW string: a part made only of zero-width code points measured 0
+    cells, asked `fit` for 0, and vanished -- though `fit` would have painted
+    it as a one-cell U+FFFD.  Callers now size by `darkside.shown_cells`.  The
+    crumb's tail, and a legend sample, each keep a visible cell."""
+    line = darkside._crumb_line(["root", "\u202e"], 80)  # noqa: SLF001
+    assert line.plain.endswith("\ufffd"), f"the crumb's tail was painted empty: {line.plain!r}"
+    assert darkside.shown_cells("\u202e") == 1 and darkside._cells("\u202e") == 0  # noqa: SLF001
+
+    monkeypatch.setattr(darkside, "DECLARED_VOCABULARY", (
+        *darkside.DECLARED_VOCABULARY, ("VZ", "\u200b", "an invisible sample", "INK")))
+    monkeypatch.setitem(darkside.LEGEND_VIEWS, "atlas", (*darkside.LEGEND_VIEWS["atlas"], "VZ"))
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    text = screen._render_vocabulary(vocabulary_for("atlas"))  # noqa: SLF001
+    row = next(ln for ln in text.plain.split("\n") if "an invisible sample" in ln)
+    assert "\ufffd" in row, f"the sample was painted empty: {row!r}"
+
+
 def test_inc8_sec_f4_a_hostile_colour_label_is_coerced_and_bounded(monkeypatch):
     """`INC8-SEC-F4`.  No arm covered `DECLARED_COLOURS` coercion at all until
     this pass added one to `test_llr_n16_2_3_legend_coerces_and_bounds_every_string`

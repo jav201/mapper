@@ -149,7 +149,7 @@ def _bounded_run(pieces: list[tuple[str, str]], budget: int) -> list[tuple[str, 
         room = budget - used
         if room <= 0:
             break
-        shown = darkside.fit(text, min(_cells(text), room))
+        shown = darkside.fit(text, min(darkside.shown_cells(text), room))
         out.append((shown, style))
         used += _cells(shown)
     return out
@@ -311,8 +311,9 @@ class HelpScreen(ModalScreen[None]):
         close = next(b for b in bindings_for(SCOPE_HELP) if b.action == "dismiss_none")
         word = own_scope_word(close.action) or close.label
         hint = f"{close.glyph} {word}"
-        hint_cells = min(_cells(hint), row)
-        glyph_cells = min(_cells(close.glyph), hint_cells)
+        # `INC8-F-SEC-F2`: sized by what `fit` will paint, not the raw seat value.
+        hint_cells = min(darkside.shown_cells(hint), row)
+        glyph_cells = min(darkside.shown_cells(close.glyph), hint_cells)
         word_cells = max(0, hint_cells - glyph_cells - 1)
         title_cells = max(0, row - hint_cells)
         title = darkside.fit(f"{LEGEND_TITLE} · {self.view}", title_cells).rstrip()
@@ -419,7 +420,7 @@ class HelpScreen(ModalScreen[None]):
             room = budget - width - sep
             if room <= 0:
                 break
-            shown = darkside.fit(glyph, min(_cells(glyph), room))
+            shown = darkside.fit(glyph, min(darkside.shown_cells(glyph), room))
             if samples:
                 samples.append((" ", _ON_GROUND))
                 width += 1
