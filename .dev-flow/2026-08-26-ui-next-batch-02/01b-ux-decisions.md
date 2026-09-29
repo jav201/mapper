@@ -426,9 +426,8 @@ those, and every (hue, words/marks) the view paints has a row. The per-view arm 
 | # | Swatch | Label, exactly | Token | Hex | Painted on | Views | Painted by |
 |---|---|---|---|---|---|---|---|
 | C1 | `█` | `blue — where you can act` | `ACCENT` | `#1783ff` | marks · words | atlas · outline · mind map · home | the selection (`V23`, `views/layered.py:745`; `views/outline.py:253`, `:275`; the rail cursor, `widgets/rail.py:241`), radial's selected path (`V4b`, `V43`, `V44`), `↩ retomar` (`V41`, `app.py:717`), the inspector's `+ agregar adjunto` (`widgets/inspector.py:171`) |
-| C2 | `█` | `amber — attention / due` | `WARN` | `#ffd230` | marks | atlas · outline · mind map · home | the fold bar (`V3`), rail counts (`V35`), coverage (`V38`), the home's due and missing bars (`V19`, `V20`) and its hero numeral (`app.py:540-542`) |
-| C3 | `█` | `amber — missing, as a count` | `WARN` | `#ffd230` | words | outline · home | the outline's branch note `N nodos · M sin acta` (`views/outline.py:270-273`); the home's `sin acta N` beside its bar (`app.py:558`) and `▲ 2 vencen hoy` (`V20`, `app.py:547`) |
-| C4 | `█` | `red — missing record` | `ALERT` | `#ff4f42` | marks · words | atlas · outline · mind map | `◫ sin acta` on an atlas card (`V26`, `views/layered.py:612-613`); the inspector's `<field>  requerido` for the selected node's missing fields (`widgets/inspector.py:188-193`), which every map view shows |
+| C2 | `█` | `amber — attention · missing count` | `WARN` | `#ffd230` | marks · words | atlas · outline · mind map · home | the fold bar (`V3`), rail counts (`V35`), coverage (`V38`), the home's due and missing bars (`V19`, `V20`) and its hero numeral (`app.py:540-542`); the outline's branch note `N nodos · M sin acta` (`views/outline.py:270-273`); the home's `sin acta N` beside its bar (`app.py:558`) and `▲ 2 vencen hoy` (`V20`, `app.py:547`) |
+| C4 | `█` | `red — required, missing` | `ALERT` | `#ff4f42` | marks · words | atlas · outline · mind map | `◫ sin acta` on an atlas card (`V26`, `views/layered.py:612-613`); the inspector's `<field>  requerido` for the selected node's missing fields (`widgets/inspector.py:188-193`), which every map view shows |
 
 **Change log — design pass 3** (verdict `F1`). Rows gained ids (`C1`–`C4`), a **Painted on** and a
 **Views** column. `WARN` gained its second job as its own row, `C3` (*missing items, as a count*), painted
@@ -444,6 +443,14 @@ views (`INC8-D-Q3`). The tokens stay declared in `darkside` for the batches that
 form. **`ALERT` joined the table with its second job**, the missing-record mark (`E4`, which closes
 `INC8-D-Q1`). Its first job, DECISION 2's malformed-query chip, is unchanged; that chip belongs to the
 deferred lens and is painted by none of these views, so this row names the job the views paint.
+
+**Change log — design pass 4, 2026-09-29** (operator verdict round 4, `VERDICT-inc8-legend-2026-09-28.md`
+section *Round 4*; the record is `increment-022`, section *Design pass 4*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| `C4` | label `red — required, missing` (was `red — missing record`) — the mark still covers both the atlas's `◫ sin acta` and the inspector's `<field>  requerido` | `G3` |
+| `C2`, `C3` | **merged into ONE row, `C2`.** `C3`'s id retires; `C2`'s label becomes `amber — attention · missing count` (was `amber — attention / due`), its **Painted on** cell widens to `marks · words` (the union of the two retired cells), and its **Views** cell is unchanged (`C2` already named all four views before the merge, so the merged row is still declared on every view that paints amber) | `G4` |
 
 ### 3.6 · Legend framing copy
 
