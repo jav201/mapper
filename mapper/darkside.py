@@ -742,14 +742,14 @@ LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
 #: `LLR-N16.2.1`'s SECOND derived set: `01b` §3.5's colours with a job, as
 #: `(row id, swatch, label, token)`.  Not members of the vocabulary above.
 #: Since design pass 2 (verdict `E4`) §3.5 is derived from what the views
-#: PAINT, like §3.1-3.4.  Since design pass 3 (verdict `F1`) a row is one JOB
-#: of a colour, so a token may hold two rows: amber marks attention (`C2`)
-#: and states missing items as a count (`C3`).
+#: PAINT, like §3.1-3.4.  Since design pass 4 (verdict `G4`) `WARN`'s two
+#: jobs -- attention and missing-as-a-count -- are ONE row, not two: `C2` and
+#: `C3` (design pass 3) painted two amber swatches in the outline and home
+#: legends for what an operator reads as one colour.  `C3`'s id is retired.
 DECLARED_COLOURS: tuple[tuple[str, str, str, str], ...] = (
     ("C1", "█", "blue — where you can act", "ACCENT"),
-    ("C2", "█", "amber — attention / due", "WARN"),
-    ("C3", "█", "amber — missing, as a count", "WARN"),
-    ("C4", "█", "red — missing record", "ALERT"),
+    ("C2", "█", "amber — attention · missing count", "WARN"),
+    ("C4", "█", "red — required, missing", "ALERT"),
 )
 
 #: Verdict `F1`: each legend paints only the colour rows its own view paints,
@@ -759,9 +759,9 @@ DECLARED_COLOURS: tuple[tuple[str, str, str, str], ...] = (
 #: colour census.  A view absent here paints no colour section.
 LEGEND_COLOURS: dict[str, tuple[str, ...]] = {
     VIEW_NAMES["canvas"]: ("C1", "C2", "C4"),
-    VIEW_NAMES["outline"]: ("C1", "C2", "C3", "C4"),
+    VIEW_NAMES["outline"]: ("C1", "C2", "C4"),
     VIEW_NAMES["radial"]: ("C1", "C2", "C4"),
-    VIEW_NAMES["home"]: ("C1", "C2", "C3"),
+    VIEW_NAMES["home"]: ("C1", "C2"),
 }
 
 
