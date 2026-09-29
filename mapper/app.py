@@ -48,6 +48,7 @@ from .views.layered import (
     MAX_RENDER_NODES,
     overflow_phrase,
     LayeredRenderer,
+    _geometry as layered_geometry,
     header_rows,
     pan_extent,
     painted_ids,
@@ -1363,6 +1364,9 @@ class MapScreen(Screen):
         self.folded: frozenset[str] = frozenset()
         self.pan_x = 0
         self.pan_y = 0
+        # The pan the operator had when a docked legend moved the view, kept
+        # until the legend closes (`legend_docked`, Inc-8 verdict `F2`).
+        self._pan_before_legend: tuple[int, int] | None = None
         # The canvas region `_declare_after_layout` last painted a numeral for.
         # `None` means "never", which is why the first pass always re-schedules.
         self._declared_for: Region | None = None
@@ -2131,6 +2135,67 @@ class MapScreen(Screen):
         if self.radial_mode:
             return darkside.VIEW_NAMES["radial"]
         return darkside.VIEW_NAMES["canvas"]
+
+    # -- the docked legend (Inc-8 verdict `F2`) ----------------------------
+    # The legend calls these two; nothing else does.  They move the view only
+    # through this screen's own pan state and its clamp, never a renderer.
+
+    def legend_docked(self, panel_x: int | None) -> None:
+        """The legend is docked with its left edge at screen column `panel_x`,
+        or is open but not docked (`None`, the modal layout).
+
+        The pan the operator had when the legend opened is kept, and every
+        call starts from it: a resize re-derives the reveal instead of
+        stacking one on another, and the modal layout gets the kept pan back
+        exactly.  Docked, the view pans right just enough for the selected
+        card to sit wholly left of the panel -- only when the panel is what
+        covers it.  A card already clear of the panel, or already past the
+        canvas's right edge before the legend opened, does not move the view.
+        The pan stays in `LLR-N06.1.2`'s legal range, so a card at the map's
+        own right edge can stay partly covered (`INC8-D3-F2`)."""
+        if self._pan_before_legend is None:
+            self._pan_before_legend = (self.pan_x, self.pan_y)
+        pan_x, pan_y = self._pan_before_legend
+        if panel_x is not None:
+            pan_x = self._pan_revealing_selection(pan_x, panel_x)
+        self._move_pan(pan_x, pan_y)
+
+    def legend_closed(self) -> None:
+        """The legend closed: the pan it held returns exactly (`F2`)."""
+        if self._pan_before_legend is not None:
+            pan_x, pan_y = self._pan_before_legend
+            self._pan_before_legend = None
+            self._move_pan(pan_x, pan_y)
+
+    def _move_pan(self, pan_x: int, pan_y: int) -> None:
+        if (pan_x, pan_y) != (self.pan_x, self.pan_y):
+            self.pan_x, self.pan_y = pan_x, pan_y
+            self.refresh_canvas()
+
+    def _pan_revealing_selection(self, pan_x: int, panel_x: int) -> int:
+        """`pan_x`, moved right until the selected card's box ends at or
+        before screen column `panel_x`.  Only a renderer that consumes pan
+        moves (`PAN-1`: outline and radial do not pan).  Read from the same
+        layout the canvas draws (`layered._geometry`, read only), so the card
+        is where the frame paints it."""
+        cursor = self.nav.cursor
+        if cursor is None or not self._consumes_pan(self._current_renderer()):
+            return pan_x
+        w, h = self._canvas_size()
+        state = replace(self._view_state(w, h), pan_x=pan_x)
+        try:
+            geo = layered_geometry(self.graph, state)
+            (extent_x, span_x), _y = pan_extent(self.graph, state)
+        except Exception:
+            # A frame that cannot be laid out cannot be panned (`_pan`).
+            return pan_x
+        if geo is None or cursor not in geo.pos:
+            return pan_x
+        card_x, _card_y = geo.place(cursor)
+        right = self.query_one("#map-canvas", Static).region.x + card_x + geo.card_w
+        if card_x >= geo.avail or right <= panel_x:
+            return pan_x
+        return self._clamp_pan(pan_x + right - panel_x, extent_x, span_x)
 
     def _current_crumb(self) -> list[str]:
         prefix = self.source_crumb or [self.map_id]
@@ -4461,6 +4526,7 @@ class MapperApp(App):
         self.push_screen(HelpScreen(
             getattr(self.screen, "KEY_SCOPE", SCOPE_APP),
             view=getattr(self.screen, "legend_view", None),
+            host=self.screen,
         ))
 
     def action_quit(self) -> None:

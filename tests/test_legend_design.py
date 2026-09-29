@@ -558,6 +558,117 @@ async def test_d4_the_docked_panel_is_modal_for_keys(tmp_path):
         assert app.screen is view, "q did not close the docked legend"
 
 
+# ---------------------------------------------------------------------------
+# F2 -- docking pans the view so the selection sits left of the panel; closing
+# returns it.  Measured on the ux review's atlas walk: at the reference width
+# `FINA_4` leaves 2 of the selected card's 8 cells visible beside the panel.
+
+FINA_4 = ("l", "l", "l", "j", "j", "j", "j")
+REFERENCE_SIZE = (darkside.DECLARED_CONTEXT_CELLS, 34)
+#: A width the legend is modal at, for a map opened at the reference width
+#: (its rail stays shown on a resize).
+MODAL_WIDTH_WITH_RAIL = LEGEND_DOCK_MIN_WIDTH - 1
+
+
+def _selection_cells(screen, canvas) -> list[tuple[int, int]]:
+    """Cells of the composited frame inside the canvas region painted with the
+    canvas selection's fill (`V23`, `ACCENT`) -- where the operator sees it."""
+    accent = darkside.ACCENT.lower()
+    return [(x, y) for y, row in enumerate(_cells(screen, canvas.right))
+            for x, cell in enumerate(row)
+            if cell[2] == accent and x >= canvas.x and canvas.y <= y < canvas.bottom]
+
+
+def _canvas_chars(screen, canvas) -> list[str]:
+    return ["".join(cell[0] for cell in row[canvas.x:canvas.right])
+            for row in _cells(screen, canvas.right)[canvas.y:canvas.bottom]]
+
+
+async def _walked_map(app, pilot, keys):
+    app.store.save("mapa", legacy_map())
+    app.push_screen(MapScreen("mapa"))
+    await _settle(pilot)
+    for key in keys:
+        await pilot.press(key)
+        await _settle(pilot, 2)
+    view = app.screen
+    return view, view.query_one("#map-canvas").region
+
+
+async def test_f2_docking_pans_a_covered_selection_clear_and_closing_returns_it(tmp_path):
+    """Verdict `F2`, both halves, through the real keys.  The trigger is
+    asserted: before `?` the docked panel's edge would cut the selected card.
+    Docked, every cell of it sits left of the panel; the fold and the cursor
+    are untouched (no key reached the view).  Closed, the pan is the prior
+    pan and the canvas holds the same characters it held before.  (Styles
+    are not compared: on `esc` the focus moves to the rail, a pre-existing
+    behaviour carried as `INC8-P2-UX-F7`, and the selection's fill follows
+    the focus.)"""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        panel_x = REFERENCE_SIZE[0] - LEGEND_DOCKED_CELLS
+        before = _selection_cells(view, canvas)
+        state = (view.pan_x, view.pan_y, view.nav.cursor, view.folded)
+        chars = _canvas_chars(view, canvas)
+        assert before and any(x >= panel_x for x, _y in before), (panel_x, before)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        docked = [c for c in _selection_cells(app.screen, canvas) if c[0] < panel_x]
+        assert len(docked) == len(before), f"{len(docked)} of {len(before)} visible"
+        assert (view.nav.cursor, view.folded) == state[2:], "a key reached the view"
+        assert view.pan_x > state[0], "the view did not move"
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        assert (view.pan_x, view.pan_y, view.nav.cursor, view.folded) == state
+        assert _canvas_chars(view, canvas) == chars
+
+
+@pytest.mark.parametrize("size,keys", [(REFERENCE_SIZE, ("l", "l")), ((140, 45), FINA_4)],
+                         ids=["reference-left-card", "140x45-fina-4"])
+async def test_f2_a_selection_clear_of_the_panel_does_not_move_the_view(tmp_path, size, keys):
+    """Verdict `F2`: the view moves only when the panel covers the selection.
+    A selected card already left of the panel's edge keeps the view where it
+    was -- `FINA_4`'s card itself, at a width whose panel does not reach it."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        view, canvas = await _walked_map(app, pilot, keys)
+        panel_x = size[0] - LEGEND_DOCKED_CELLS
+        before = _selection_cells(view, canvas)
+        pan = (view.pan_x, view.pan_y)
+        assert before and all(x < panel_x for x, _y in before), (panel_x, before)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        assert (view.pan_x, view.pan_y) == pan
+
+
+async def test_f2_the_modal_layout_does_not_pan_and_a_resize_re_derives_the_pan(tmp_path):
+    """Verdict `F2` is about docking: in the modal layout the view keeps its
+    pan.  Opened docked at the reference width the view pans; resized to the
+    modal layout the prior pan returns; resized back it pans again, to the
+    same place."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, _canvas = await _walked_map(app, pilot, FINA_4)
+        prior = (view.pan_x, view.pan_y)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        legend = app.screen
+        assert legend.has_class(DOCKED_CLASS) and view.pan_x > prior[0]
+        docked_pan = (view.pan_x, view.pan_y)
+        await pilot.resize_terminal(MODAL_WIDTH_WITH_RAIL, REFERENCE_SIZE[1])
+        await _settle(pilot)
+        assert not legend.has_class(DOCKED_CLASS)
+        assert (view.pan_x, view.pan_y) == prior, "the modal layout panned the view"
+        await pilot.resize_terminal(*REFERENCE_SIZE)
+        await _settle(pilot)
+        assert legend.has_class(DOCKED_CLASS)
+        assert (view.pan_x, view.pan_y) == docked_pan
+
+
 @pytest.mark.parametrize("width", [100, LEGEND_DOCK_MIN_WIDTH - 1, LEGEND_DOCK_MIN_WIDTH, 140])
 async def test_d4_the_row_budget_is_the_painted_pane_width_in_both_layouts(tmp_path, width):
     """`INC8-CR-F2`, in both layouts (`E1`: two widths, each derived): the
