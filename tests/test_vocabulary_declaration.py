@@ -35,6 +35,13 @@ UX = (pathlib.Path(__file__).resolve().parent.parent / ".dev-flow"
 ROW = re.compile(r"^\|\s*(V\d+[a-z]?)\s*\|(.+?)\|(.+?)\|(.+?)\|", re.M)
 STYLE = re.compile(r"`(?:bold\s+)?[A-Z][A-Z_]*(?:\s+on\s+[A-Z][A-Z_]*)?`")
 
+# `INC7-CR-R3-F1`'s anchor: the LITERAL id cell `V22`, not a digit pattern.
+# `ROW` above is already suffix-aware for the general walk, but this
+# derivation exists for exactly one row, so it names that row rather than
+# re-deriving it through a pattern built for many.
+_V22_ROW = re.compile(r"^\|\s*V22\s*\|(.*?)\|", re.M)
+_BACKTICK_TOKEN = re.compile(r"`([^`]+)`")
+
 
 def _unwrap(cell: str) -> str:
     """Strip ONLY a pair of backticks wrapping the WHOLE cell.
@@ -56,6 +63,32 @@ def derived_rows() -> list[tuple[str, str, str, str]]:
     rows = ROW.findall(_section())
     assert rows, "the row walk derived NOTHING; the instrument is broken, not the document"
     return rows
+
+
+def _v22_glyph_cell_from_01b() -> str:
+    """`INC7-CR-R3-F1`: read `01b`'s OWN row for `V22`, independently of
+    `darkside`.
+
+    Bytes, decoded UTF-8 explicitly, anchored on the literal id cell `V22`
+    rather than the general suffix-aware pattern above -- this derivation has
+    exactly one row to find, so it names that row instead of walking for it.
+    A missing row fails loudly here, not silently.
+    """
+    text = UX.read_bytes().decode("utf-8")
+    match = _V22_ROW.search(text)
+    assert match, "row `V22` (literal id) is not in 01b -- nothing to derive from"
+    return match.group(1)
+
+
+def _first_backtick_token(cell: str) -> str:
+    """The first backtick-quoted token in *cell*, failing loudly if absent
+    or empty rather than returning something that compares equal by accident.
+    """
+    match = _BACKTICK_TOKEN.search(cell)
+    assert match, f"no backtick-quoted token in the cell: {cell!r}"
+    token = match.group(1)
+    assert token, f"the backtick-quoted token in {cell!r} is empty"
+    return token
 
 
 def test_llr_n16_2_1_the_instrument_finds_the_suffixed_rows():
@@ -133,6 +166,19 @@ def test_llr_n16_2_1_the_damaged_map_row_is_declared_and_not_deferred():
         f"EXTRACTOR GOT IT WRONG: V22's cell quotes the whole card string after "
         f"its glyph, and a blind sweep of the cell pulled the accents out of that "
         f"prose into the glyph set."
+    )
+
+    # `INC7-CR-R3-F1`: the assert above is CONSTANT AGAINST CONSTANT --
+    # `declared["V22"]` comes from `DECLARED_VOCABULARY` and
+    # `darkside.DAMAGED_MAP_GLYPH` from the same module, so the two drifting
+    # TOGETHER away from `01b` left it green (mutant E: both changed to `X`).
+    # This derives the glyph from `01b`'s own row text, independently of
+    # anything `darkside` declares about itself.
+    doc_glyph = _first_backtick_token(_v22_glyph_cell_from_01b())
+    assert doc_glyph == darkside.DAMAGED_MAP_GLYPH, (
+        f"01b's V22 row gives the glyph {doc_glyph!r} but "
+        f"darkside.DAMAGED_MAP_GLYPH is {darkside.DAMAGED_MAP_GLYPH!r} -- one "
+        f"of the two drifted, either from the other or from 01b itself"
     )
 
 

@@ -570,12 +570,13 @@ def fit(s: str, w: int) -> str:
 #: in `01b` sections 3.1-3.4 -- no fabricated label, no drifted style -- and
 #: that `V22`'s glyph is pinned to the glyph `01b`'s row for `PRED-VIS` names.
 #:
-#: WHAT IT DOES NOT CHECK, and who owns closing it: COMPLETENESS -- dropping or
-#: renaming a row here leaves the suite green (`INC7-CR-R2-F3`, carried to
-#: `Inc-8`, which owes set equality against the document) -- and GLYPH-COLUMN
-#: FIDELITY for every row but `V22` -- the glyph column below is lifted from
-#: `01b`'s prose by hand and unchecked against it (`INC7-CR-R2-F2`, carried to
-#: `Inc-8`, which owes a written derivation rule for the glyph column).
+#: WHAT IT DOES NOT CHECK, and who owns closing it: COMPLETENESS -- dropping a
+#: row, or renaming a row's ID while leaving its label and style untouched,
+#: leaves the suite green (`INC7-CR-R2-F3`, carried to `Inc-8`, which owes set
+#: equality against the document) -- and GLYPH-COLUMN FIDELITY for every row
+#: but `V22` -- the glyph column below is lifted from `01b`'s prose by hand
+#: and unchecked against it (`INC7-CR-R2-F2`, carried to `Inc-8`, which owes a
+#: written derivation rule for the glyph column).
 #:
 #: Compound rows contribute ONE MEMBER PER DISTINCT TRIPLE (`A-103`); rows that
 #: name the same painted FORM collapse (`01b` Amendment 2(b) -- a glyph may be a
