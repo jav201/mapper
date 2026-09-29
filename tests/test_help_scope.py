@@ -12,6 +12,7 @@ import re
 
 import pytest
 from rich.style import Style
+from rich.text import Text
 from textual.app import App
 
 from mapper import darkside, keymap
@@ -52,18 +53,25 @@ async def _legend_from_home(app, pilot):
     return app.screen
 
 
-async def _harvest(app, pilot, reader):
-    """`reader(screen, dialog_region)` at EVERY scroll position of the pane.
+async def _harvest(app, pilot, reader, region_id: str = "#help-dialog"):
+    """`reader(screen, region)` at EVERY scroll position of the pane.
 
     `scroll_to` is legitimate here: it harvests content.  Whether an operator
     can scroll is `HLR-N16.4`'s arm, which presses real keys (`QA3-C-04`).
+
+    `region_id` narrows the read to one child widget (`INC8-CR-F5`): the
+    default, `#help-dialog`, also contains `#help-colours`, whose §3.5 swatch
+    paints the SAME glyph (`█`) in the SAME style (`SAGE`) as `V19`'s
+    coverage-microbar sample -- so a caller checking a vocabulary member's
+    style against the WHOLE dialog cannot tell "the vocabulary section painted
+    it" from "the colour row painted something that happens to match".
     """
     screen = app.screen
-    dialog = screen.query_one("#help-dialog")
+    region_widget = screen.query_one(region_id)
     pane = screen.query_one("#help-bindings")
     out = []
     for _ in range(60):
-        out.extend(reader(screen, dialog.region))
+        out.extend(reader(screen, region_widget.region))
         if pane.scroll_offset.y >= pane.max_scroll_y:
             return out
         pane.scroll_to(y=pane.scroll_offset.y + max(1, pane.region.height - 1), animate=False)
@@ -136,7 +144,11 @@ async def test_llr_n16_2_1_every_member_is_painted_in_its_declared_style(tmp_pat
         else:
             await _legend_from_map(app, pilot)
         assert app.screen.view == view
-        painted = await _harvest(app, pilot, _painted_segments)
+        # `INC8-CR-F5`: scoped to `#help-vocabulary`, not the whole dialog --
+        # see `_harvest`'s docstring for why the wider region is blind to a
+        # vocabulary section that stopped painting a member the colour rows
+        # happen to paint too (`V19`/`SAGE`).
+        painted = await _harvest(app, pilot, _painted_segments, region_id="#help-vocabulary")
 
     members = [m for m in vocabulary_for(view) if m[1]]
     assert len(members) == len([m for m in darkside.DECLARED_VOCABULARY
@@ -184,6 +196,11 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
         *keymap.KEYMAP, keymap.KeyBinding("F9", "F9", "home", HOSTILE, "salir")])
     monkeypatch.setattr(darkside, "DECLARED_VOCABULARY", (
         *darkside.DECLARED_VOCABULARY, ("V1", HOSTILE, HOSTILE, "INK on PANEL")))
+    # `INC8-SEC-F4`: no arm covered `DECLARED_COLOURS` coercion at all -- a
+    # hostile colour LABEL (the only file-derived part of a colour row; the
+    # token stays a real one so `resolve_style` does not itself object).
+    monkeypatch.setattr(darkside, "DECLARED_COLOURS", (
+        *darkside.DECLARED_COLOURS, ("█", HOSTILE, "ACCENT")))
     view = "atlas" + HOSTILE
     monkeypatch.setitem(darkside.LEGEND_VIEWS, view, darkside.LEGEND_VIEWS["atlas"])
     app = MapperApp(tmp_path)
@@ -194,14 +211,21 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
         await pilot.pause()
         screen = app.screen
         texts = [screen._render_title(), screen._render_keymap(),  # noqa: SLF001
-                 screen._render_vocabulary(vocabulary_for(view))]  # noqa: SLF001
+                 screen._render_vocabulary(vocabulary_for(view)),  # noqa: SLF001
+                 screen._render_colours()]  # noqa: SLF001
         title = "\n".join(_rows_in(screen, screen.query_one("#help-title").region))
         rows = await _harvest(app, pilot, _rows_in)
+
+        # `INC8-CR-F2`: `LEGEND_ROW_CELLS` was hand-copied from the CSS width.
+        # Pinned here against the real widget's own usable-width attribute, so
+        # a CSS edit that stops matching reddens instead of silently drifting.
+        pane = screen.query_one("#help-bindings")
+        assert pane.scrollable_content_region.width == LEGEND_ROW_CELLS
 
     painted = "\n".join(rows)
     # Per surface, so one sink parsing markup cannot hide behind the others.
     assert "[bold red]x[/]" in title, f"the title interpreted markup: {title!r}"
-    assert painted.count("[bold red]x[/]") >= 3, "a hostile string never reached the frame"
+    assert painted.count("[bold red]x[/]") >= 4, "a hostile string never reached the frame"
     assert not {ord(c) for c in painted} & BANNED
     for text in texts:
         for line in text.split("\n"):
@@ -355,3 +379,130 @@ def test_d28_the_legend_chrome_clears_the_contrast_floor():
         fg = Style.parse(style).color
         ratio = _contrast(_hex(fg), darkside.PANEL)
         assert ratio >= 4.5, f"{style} paints legend text at {ratio:.2f}:1 on PANEL"
+
+
+# ---------------------------------------------------------------------------
+# Inc-8 corrective pass 1 -- security findings and the remaining code-review
+# findings that do not need a running app.
+
+def test_inc8_sec_f1_fit_never_fabricates_a_row(monkeypatch):
+    """`INC8-SEC-F1`.  `plain()` deliberately PRESERVES a literal LF and TAB --
+    `widgets/inspector.py` hands a multi-line notes field through it into a
+    widget that is allowed to wrap.  `fit()` has no such caller: every result
+    becomes exactly ONE row of a fixed-width panel, so a label carrying an
+    embedded LF painted a REAL second row once the padded string reached a
+    `Text` sink -- a row the row-length budget never accounted for.
+    """
+    hostile = "\n q  BORRAR TODO"
+    monkeypatch.setattr(keymap, "KEYMAP", [
+        *keymap.KEYMAP, keymap.KeyBinding("f10", "F10", "home", hostile, "salir")])
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    text = screen._render_keymap()  # noqa: SLF001
+    lines = text.plain.split("\n")
+    hostile_lines = [ln for ln in lines if "BORRAR TODO" in ln]
+    assert len(hostile_lines) == 1, f"the label split across rows: {hostile_lines}"
+    assert "F10" in hostile_lines[0], "the glyph and the label parted onto two rows"
+    for line in lines:
+        assert Text(line).cell_len <= LEGEND_ROW_CELLS, (Text(line).cell_len, line)
+
+
+def test_inc8_sec_f2_resolve_style_raises_on_an_undeclared_word():
+    """`INC8-SEC-F2`.  `resolve_style` used to hand an unrecognised word
+    straight through: a declared style `link file:///x` painted a live OSC-8
+    hyperlink, and `[bold]` reached `Style.parse` and raised THERE instead of
+    at this boundary.  It now raises here, before any sink sees the word.
+    """
+    with pytest.raises(ValueError):
+        darkside.resolve_style("link file:///x")
+    with pytest.raises(ValueError):
+        darkside.resolve_style("[bold]")
+    # A declared style keeps working: the allow-list is additive, not a ban.
+    assert (darkside.resolve_style("bold GROUND on WARN")
+            == f"bold {darkside.GROUND} on {darkside.WARN}")
+
+
+def test_inc8_sec_f3_a_wide_close_label_cannot_blow_the_row_budget(monkeypatch):
+    """`INC8-SEC-F3`.  `close.label` is a seat value nothing upstream bounds;
+    an oversized one painted a 95-cell row from a 75-cell budget in
+    `_render_title`. Every width there is now clamped.
+    """
+    huge = "X" * 200
+    patched = [
+        keymap.KeyBinding("escape", "esc", "dismiss_none", huge, "help")
+        if (b.key, b.action, b.group) == ("escape", "dismiss_none", "help") else b
+        for b in keymap.KEYMAP
+    ]
+    monkeypatch.setattr(keymap, "KEYMAP", patched)
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    title = screen._render_title()  # noqa: SLF001
+    for line in title.plain.split("\n"):
+        assert Text(line).cell_len <= LEGEND_ROW_CELLS, (Text(line).cell_len, line)
+
+
+def test_inc8_sec_f4_a_hostile_colour_label_is_coerced_and_bounded(monkeypatch):
+    """`INC8-SEC-F4`.  No arm covered `DECLARED_COLOURS` coercion at all until
+    this pass added one to `test_llr_n16_2_3_legend_coerces_and_bounds_every_string`
+    (the real sink, through a running app).  This is the same guarantee read
+    directly off `_render_colours`, without the app, for a fast, isolated proof.
+    """
+    # Reuses the module-level `HOSTILE` rather than spelling a second one: `C-56`
+    # and the record's own scan requirement (no new literal control/bidi
+    # character) are best satisfied by not retyping the U+202E escape at all.
+    monkeypatch.setattr(darkside, "DECLARED_COLOURS", (
+        *darkside.DECLARED_COLOURS, ("█", HOSTILE, "ACCENT")))
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    text = screen._render_colours()  # noqa: SLF001
+    assert "[bold red]x[/]" in text.plain, "the hostile label never reached the frame"
+    for line in text.plain.split("\n"):
+        assert Text(line).cell_len <= LEGEND_ROW_CELLS, (Text(line).cell_len, line)
+
+
+def test_inc8_cr_f7_grouping_survives_a_non_adjacent_same_id_row():
+    """`INC8-CR-F7`.  `itertools.groupby` only merges RUNS of equal keys, so a
+    row's members SPLIT into two captions the moment a different id sat
+    between them in declaration order -- true only because
+    `DECLARED_VOCABULARY` happens to keep every row's members adjacent, a fact
+    `_render_vocabulary` has no business depending on.
+    """
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    members = [
+        ("V19", "█", "coverage microbar", "SAGE"),
+        ("V19", "█", "coverage microbar", "INK"),
+        ("V20", "▲ vence", "actas vencidas", "WARN on PANEL"),
+        ("V19", "░", "coverage microbar", "WORDMARK"),
+    ]
+    text = screen._render_vocabulary(members)  # noqa: SLF001
+    captions = text.plain.count("coverage microbar")
+    assert captions == 1, f"V19 split into {captions} captions: {text.plain!r}"
+
+
+def test_inc8_cr_f7_a_compound_line_cannot_exceed_the_row_budget():
+    """`INC8-CR-F7`.  Each sample used to be clamped only against the ROW
+    budget in isolation; several samples each individually under budget could
+    still SUM past it, and the pad went silently negative (`" " * negative`
+    is `""`, never an error) while the row it padded stayed over width.
+    """
+    screen = HelpScreen(SCOPE_MAP, view="atlas")
+    members = [
+        ("VX", "A" * 40, "una etiqueta", "INK"),
+        ("VX", "B" * 40, "una etiqueta", "ACCENT"),
+    ]
+    text = screen._render_vocabulary(members)  # noqa: SLF001
+    for line in text.plain.split("\n"):
+        assert Text(line).cell_len <= LEGEND_ROW_CELLS, (Text(line).cell_len, line)
+
+
+def test_inc8_ux_f11_the_scrollbar_thumb_clears_the_non_text_contrast_floor():
+    """`INC8-UX-F11`.  WCAG 1.4.11 non-text contrast: the scrollbar THUMB is a
+    UI component (it shows scroll position and is draggable) and must clear
+    3:1 against its own track.  Textual's own default (unstyled) thumb
+    measured 1.55:1 here.
+
+    `ASH`, not `ACCENT`: `LLR-S06.3.3` seals the blue literal `#1783ff` at
+    exactly 8 tracked sites (`B-43`, out of this pass's scope), so a 9th
+    would break a sealed requirement having nothing to do with this pane.
+    """
+    assert f"scrollbar-color: {darkside.ASH};" in HelpScreen.CSS
+    assert f"scrollbar-background: {darkside.PANEL};" in HelpScreen.CSS
+    ratio = _contrast(darkside.ASH, darkside.PANEL)
+    assert ratio >= 3.0, ratio

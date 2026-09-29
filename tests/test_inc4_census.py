@@ -86,9 +86,15 @@ def test_cd25b_no_chord_collides_on_entry_or_on_exit():
     # Put the removed row back, so the reconstruction really is the ENTRY seat
     # and not merely the exit seat with three rows missing.
     restored = [(b.scope, b.key) for b in entry] + [("map", "n")]
-    # 52 at Inc-4b's close; +6 help-scope rows from Inc-8 (HLR-N16.4), which
-    # this reconstruction does not undo because they are not Inc-4b's.
-    assert len(restored) == 58, len(restored)
+    # `INC8-CR-F4`: this used to pin `len(restored) == 58`, a LITERAL restating
+    # `len(KEYMAP)` across EVERY scope, not just `map` -- so it needed bumping
+    # (52 -> 58) the moment Inc-8 added six help-scope rows that this
+    # reconstruction does not even touch. The line above already pins
+    # `len(entry)`; `restored` is mechanically `entry` plus the one row put
+    # back, and asserting that arithmetic again under a hand-typed number adds
+    # no discriminating power, only a maintenance trap for every unrelated
+    # increment that grows `KEYMAP`.
+    assert len(restored) == len(entry) + 1, (len(restored), len(entry))
 
     seen: set[tuple[str, str]] = set()
     clashes: list[tuple[str, str]] = []

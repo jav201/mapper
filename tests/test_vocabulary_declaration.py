@@ -23,6 +23,7 @@ import pathlib
 import re
 
 from mapper import darkside
+from mapper.screens import help as help_screen
 
 UX = (pathlib.Path(__file__).resolve().parent.parent / ".dev-flow"
       / "2026-08-26-ui-next-batch-02" / "01b-ux-decisions.md")
@@ -367,6 +368,51 @@ def test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5():
     assert list(darkside.DECLARED_COLOURS) == [(s, lab, tok) for s, lab, tok, _hex in rows]
     for _s, _lab, tok, hexv in rows:
         assert darkside.tokens()[tok] == hexv, (tok, hexv)
+
+
+# ---------------------------------------------------------------------------
+# `INC8-CR-F3` -- 01b §3.6, the legend's own framing copy, walked the same way
+# §3.5's colour table is above: byte-read, UTF-8 decoded explicitly, anchored
+# on literal text, failing loudly on a missing anchor, and compared in order.
+
+_SECTION_36 = re.compile(r"### 3\.6 .*?(?=### 3\.7 )", re.S)
+_HEADERS_LINE = re.compile(r"Section headers, in order:\s*(.+)")
+_FOOTER_LINE = re.compile(r"Footer, two lines:\s*(.+)")
+_BACKTICK_RUN = re.compile(r"`([^`]+)`")
+
+
+def _section_36() -> str:
+    text = UX.read_bytes().decode("utf-8")
+    match = _SECTION_36.search(text)
+    assert match, "01b's §3.6 (Legend framing copy) is missing -- nothing to derive from"
+    return match.group(0)
+
+
+def test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6():
+    """01b §3.6 names the legend's section headers and footer VERBATIM.
+    `help.SECTION_KEYS`/`SECTION_VOCABULARY`/`SECTION_COLOURS`/`FOOTER_LINES`
+    were copied from it by hand and NOTHING derived them from the document --
+    the same defect `test_llr_n16_2_1_the_declaration_is_not_a_second_opinion`
+    exists to catch for the vocabulary table, unaddressed here until now.
+
+    `help.LEGEND_OWN_SCOPE_GROUP` (`en esta leyenda`, `INC8-CR-F1`) is
+    DELIBERATELY NOT asserted here: 01b §3.6 does not name it, and it stays an
+    un-ratified Inc-8 constant (see the corrective-pass record) rather than a
+    fourth row silently added to this equality.
+    """
+    section = _section_36()
+
+    headers_line = _HEADERS_LINE.search(section)
+    assert headers_line, f"the section-headers line is not in 01b's §3.6: {section!r}"
+    headers = tuple(_BACKTICK_RUN.findall(headers_line.group(1)))
+    assert headers == (
+        help_screen.SECTION_KEYS, help_screen.SECTION_VOCABULARY, help_screen.SECTION_COLOURS,
+    ), headers
+
+    footer_line = _FOOTER_LINE.search(section)
+    assert footer_line, f"the footer line is not in 01b's §3.6: {section!r}"
+    footer = tuple(_BACKTICK_RUN.findall(footer_line.group(1)))
+    assert footer == help_screen.FOOTER_LINES, footer
 
 
 def test_llr_n16_2_1_the_declaration_is_not_a_second_opinion():
