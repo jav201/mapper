@@ -598,6 +598,10 @@ def test_llr_coerce_1_no_declared_code_point_survives_plain():
     assert survivors == []
 
 
+#: The Unicode classes `COERCION_RANGES` covers.  `Cs` since `INC8-P2-SEC-F1`.
+COERCED_CLASSES = ("Cc", "Cf", "Zl", "Zp", "Cs")
+
+
 def test_llr_coerce_1_the_declared_list_equals_its_unicode_classes():
     """THE INDEPENDENT ORACLE. Everything else here is derived from the list.
 
@@ -616,21 +620,47 @@ def test_llr_coerce_1_the_declared_list_equals_its_unicode_classes():
     gained a member: re-derive the ranges and re-review the additions.  Do not
     widen the oracle to make it pass -- that would restore exactly the
     self-validating shape this test exists to replace.
+
+    `Cs` (the surrogates) joined the classes with `INC8-P2-SEC-F1` / `B-67`:
+    a POLICY change, not a widening to make a red arm pass.  The oracle still
+    reads `unicodedata`, so the declared list must now cover the whole class.
     """
     derived = {
         cp for cp in range(0x110000)
-        if unicodedata.category(chr(cp)) in ("Cc", "Cf", "Zl", "Zp")
+        if unicodedata.category(chr(cp)) in COERCED_CLASSES
     } - darkside.PRESERVED_CODE_POINTS
     declared = {cp for lo, hi in darkside.COERCION_RANGES for cp in range(lo, hi + 1)}
 
     assert declared - derived == set(), (
-        "declared but not a Cc/Cf/Zl/Zp code point: "
+        "declared but not a Cc/Cf/Zl/Zp/Cs code point: "
         f"{sorted(f'U+{c:04X}' for c in (declared - derived))}"
     )
     assert derived - declared == set(), (
         "in the classes the list claims to cover, but NOT declared: "
         f"{sorted(f'U+{c:04X}' for c in (derived - declared))}"
     )
+
+
+def test_inc8_p2_sec_f1_a_lone_surrogate_cannot_reach_a_strict_utf8_sink():
+    """`INC8-P2-SEC-F1` / `B-67`.  A lone surrogate (U+D800-U+DFFF, class `Cs`)
+    is not a character a file can hold in UTF-8, but it is a string Python
+    will hand over: `json.loads` decodes an ASCII-escaped one without
+    complaint.  Before this arm `plain()` passed it through, and the first
+    strict-UTF-8 sink -- a terminal write, `export_screenshot`'s SVG --
+    raised `UnicodeEncodeError` instead of painting.  The input is built by
+    `json.dumps`, so it is the escaped text a sidecar file really carries,
+    and this source file holds no surrogate of its own."""
+    import json
+
+    escaped = json.dumps("x" + chr(0xD800) + "y")
+    assert escaped.isascii() and "\\" in escaped, escaped
+    decoded = json.loads(escaped)
+    assert any(unicodedata.category(c) == "Cs" for c in decoded), "no surrogate: no subject"
+    with pytest.raises(UnicodeEncodeError):
+        decoded.encode("utf-8")
+    painted = darkside.plain(decoded)
+    painted.encode("utf-8")
+    assert painted == "x" + chr(0xFFFD) + "y", ascii(painted)
 
 
 def test_llr_coerce_1_tab_and_newline_are_preserved():
