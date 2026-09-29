@@ -639,6 +639,7 @@ DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
     ('V44', "◆", 'map root', 'ACCENT'),
     ('V30', "◆", 'view header', 'INK'),
     ('V31', "▽ 35 fuera de vista", 'nodes off screen', 'INK'),
+    ('V45', "⇲15", 'true depth, indent capped', 'MUT'),
     ('V33', "▾", 'open branch', 'MUT'),
     ('V34', "▸", 'folded branch', 'MUT'),
     ('V35', "3", 'pending fields here and below', 'WARN'),
@@ -661,16 +662,19 @@ DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
 )
 
 #: `01b` Amendment 2(b): a glyph may be a SET of codepoints.  A member listed
-#: here also owns every codepoint in each inclusive range, read from the
-#: `U+XXXX`-`U+YYYY` pair in its `01b` glyph cell: the atlas's box-drawing wires
-#: (`V29`), radial's braille edges (`V4b`, verdict `Q1`/`Q2`) and the sala's
-#: activity bars (`V40`).  `V4` no longer exists and its braille entry is gone.
+#: here also owns every codepoint in each inclusive range, read from its `01b`
+#: glyph cell: a `U+XXXX`-`U+YYYY` pair, or a `glyph set `...`` whose every
+#: character is a one-codepoint range.  Radial's braille edges (`V4b`, verdict
+#: `Q1`/`Q2`) and the sala's activity bars (`V40`) own ranges; the atlas's
+#: wires (`V29`) own EXACTLY the eleven glyphs `canvas._GLYPH` paints
+#: (`INC8-F-CR-F3`) -- the whole box-drawing block would have explained a
+#: `╳` no renderer draws, and did explain `V39`'s `╱` twice.
 #: DECLARED, CHECKED AGAINST 01B: this dict is written by hand, and
 #: `tests/test_vocabulary_declaration.py::test_every_declared_range_EQUALS_the_document`
 #: pins it equal to what the document derives -- it is not itself computed
 #: from `01b` at import time.
 DECLARED_GLYPH_RANGES: dict[str, tuple[tuple[int, int], ...]] = {
-    "V29": ((0x2500, 0x257F),),
+    "V29": tuple((ord(c), ord(c)) for c in "─│┌┐└┘├┤┬┴┼"),
     "V4b": ((0x2800, 0x28FF),),
     "V40": ((0x2581, 0x2588),),
 }
@@ -701,7 +705,7 @@ _MAP_CHROME = ("V30", "V31", "V33", "V34", "V35", "V21a", "V21b",
 LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
     VIEW_NAMES["canvas"]: ("V1", "V2", "V23", "V24", "V3", "V25", "V26", "V27", "V28",
                            "V29", *_MAP_CHROME),
-    VIEW_NAMES["outline"]: _MAP_CHROME,
+    VIEW_NAMES["outline"]: ("V45", *_MAP_CHROME),
     VIEW_NAMES["radial"]: ("V4b", "V42", "V43", "V44", *_MAP_CHROME),
     VIEW_NAMES["home"]: ("V19", "V20", "V22", "V40", "V41"),
 }
@@ -718,12 +722,21 @@ DECLARED_COLOURS: tuple[tuple[str, str, str], ...] = (
 )
 
 
+#: `INC8-F-SEC-F1`: the style words `resolve_style` lets through besides token
+#: names, HARD-CODED.  The allow-list used to be `_declared_modifiers()` itself
+#: -- derived from the very declarations it guards, so a row declaring
+#: `link file:///x` authorized `link` and `file:///x` by being declared.  A
+#: guard computed from its input guards nothing.  `_declared_modifiers()`
+#: stays, as what the declarations USE, and an arm pins it inside this set.
+_STYLE_MODIFIERS = frozenset({"bold", "on"})
+
+
 def _declared_modifiers() -> frozenset[str]:
     """The non-token words `01b`'s own style cells actually use (`bold`, `on`).
 
-    Derived from `DECLARED_VOCABULARY` and `DECLARED_COLOURS` -- the two
-    corpora `resolve_style` exists to paint -- rather than hand-listed, so a
-    modifier this batch never declares cannot quietly become allow-listed.
+    Derived from `DECLARED_VOCABULARY` and `DECLARED_COLOURS`.  NOT the
+    allow-list (`_STYLE_MODIFIERS` is): `tests/test_help_scope.py` pins this
+    inside it, so a new modifier is a decision, not a side effect of declaring.
     """
     names = tokens()
     words: set[str] = set()
@@ -738,8 +751,8 @@ def resolve_style(declared: str) -> str:
     """`LLR-N16.2.1`: a declared style (`"bold GROUND on WARN"`) as paint
     (`"bold #000000 on #ffd230"`).
 
-    Only whole words that name a darkside token, or a modifier `01b` actually
-    declares (`bold`, `on`), pass through. Everything else RAISES.
+    Only whole words that name a darkside token, or a word of the hard-coded
+    `_STYLE_MODIFIERS` (`bold`, `on`), pass through. Everything else RAISES.
 
     `declared` becomes part of a Rich *style* string, not painted text -- so an
     unknown word was never "visible" the way the previous docstring claimed.
@@ -750,12 +763,11 @@ def resolve_style(declared: str) -> str:
     than one the paint sink discovers.
     """
     names = tokens()
-    modifiers = _declared_modifiers()
     out = []
     for word in declared.split():
         if word in names:
             out.append(names[word])
-        elif word in modifiers:
+        elif word in _STYLE_MODIFIERS:
             out.append(word)
         else:
             raise ValueError(f"resolve_style: undeclared style word {word!r} in {declared!r}")

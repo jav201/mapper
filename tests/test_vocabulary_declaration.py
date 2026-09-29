@@ -193,6 +193,9 @@ _EXAMPLE = re.compile(r"e\.g\.\s+`([^`]+)`")
 _LEADING_TOKEN = re.compile(r"`([^`]+)`")
 _PLACEHOLDER = re.compile(r"<[^>]+>")
 _RANGE = re.compile(r"`U\+([0-9A-F]{4,6})`\s*[–-]\s*`U\+([0-9A-F]{4,6})`")
+#: `INC8-F-CR-F3`: a glyph cell may name its set character by character --
+#: `glyph set `─│┌┐``` -- and each character is a one-codepoint range.
+_GLYPH_SET = re.compile(r"glyph set\s+`([^`]+)`")
 _QUALIFIER = re.compile(r"([a-z]+)\s")
 _STYLE_TOKEN = re.compile(r"`((?:bold\s+)?[A-Z][A-Z_]*(?:\s+on\s+[A-Z][A-Z_]*)?)`")
 
@@ -226,20 +229,25 @@ def sample_by_style(glyph_cell: str, style_cell: str) -> dict[str, str | None]:
     Applied in order; the first that yields wins:
 
     G1  LEGEND CHIP.  The cell names the legend's own form (`legend chip `X``):
-        that token, for every style of the row.  (`V17`, `V20`)
+        that token, for every style of the row.  (No live row uses it since
+        the Inc-8 design pass; `V18`'s cell still carries one, and `V18` is
+        `DEFERRED(#D7)`.)
     G2  QUALIFIED PAIRS.  The style cell has several `;`-separated segments,
         each opening with a qualifier word, and the glyph cell pairs a token
-        with each of those words (`` `█` filled ``): each style takes the token
-        of the qualifier its segment opens with.  (`V19`)
+        with each of those words (`` `█` con acta ``): each style takes the
+        token of the qualifier its segment opens with.  (`V19`, `V40`, and
+        `V3`'s `bar` / `pill`)
     G3  LEADING RUN.  The backtick tokens opening the cell, whitespace-separated,
         joined with one space; a token with a `<placeholder>` is a TEMPLATE and
         is dropped, and if nothing remains the `e.g.` token stands in.  Prose
-        after the run (a parenthetical, "rectangle inside ...") is a GLOSS, not
-        glyph.  (`V3` -> `▸ inv +23`, `V10` -> `▓ ▒ ░`)
+        after the run (a parenthetical) is a GLOSS, not glyph.
+        (`V31` -> `▽ 35 fuera de vista`, `V27` -> `D✓`)
     G4  NOTHING.  A cell with no token is prose: `None`, and an operator
-        question -- never a guess.  (`V4b`, `V12`)
+        question -- never a guess.  (No declared row since the Inc-8 design
+        pass; `V12`'s bare-title cell would be one, and it is deferred.)
 
-    Codepoint RANGES (`` `U+2800`–`U+28FF` ``) are read separately by `_RANGE`;
+    Codepoint RANGES (`` `U+2800`–`U+28FF` ``) and GLYPH SETS
+    (`` glyph set `─│┌┐` ``) are read separately by `_RANGE` and `_GLYPH_SET`;
     they widen the glyph SET (Amendment 2(b)) and never become the sample.
     """
     styles = _STYLE_TOKEN.findall(style_cell)
@@ -296,6 +304,8 @@ def derived_members() -> tuple[set[tuple[str, str, str, str]], dict[str, set[tup
             owner = members.setdefault((sample or "", _unwrap(label_cell), style), vid)
             for lo, hi in _RANGE.findall(glyph_cell):
                 ranges.setdefault(owner, set()).add((int(lo, 16), int(hi, 16)))
+            for chars in _GLYPH_SET.findall(glyph_cell):
+                ranges.setdefault(owner, set()).update((ord(c), ord(c)) for c in chars)
     return {(vid, g, lab, st) for (g, lab, st), vid in members.items()}, ranges
 
 
@@ -349,6 +359,19 @@ def test_every_declared_range_EQUALS_the_document():
     assert "V4" not in ranges
     v4b = {g for vid, g, _l, _s in darkside.DECLARED_VOCABULARY if vid == "V4b"}
     assert v4b and all(0x2800 <= ord(c) <= 0x28FF for g in v4b for c in g), v4b
+
+
+def test_inc8_f_cr_f3_V29_owns_exactly_the_wires_the_canvas_paints():
+    """`INC8-F-CR-F3`: `V29` owned the whole box-drawing block, so a canvas
+    that started painting `╳` was already "explained".  Its set is now the
+    canvas's own wire table, read from `mapper.canvas` (a renderer this arm
+    does not edit), and `01b` spells the same eleven glyphs."""
+    from mapper import canvas
+
+    wires = {ord(g) for g in canvas._GLYPH.values() if g.strip()}  # noqa: SLF001
+    owned = {cp for lo, hi in darkside.DECLARED_GLYPH_RANGES["V29"] for cp in range(lo, hi + 1)}
+    assert owned == wires, (sorted(map(chr, owned - wires)), sorted(map(chr, wires - owned)))
+    assert ord("╳") not in owned and ord("╱") not in owned
 
 
 def test_amendment_2a_the_D7_row_contributes_no_member():

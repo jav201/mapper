@@ -93,6 +93,18 @@ def _trimmed(text: Text) -> Text:
     return text
 
 
+_ON_GROUND = f"on {darkside.GROUND}"
+
+
+def _sample_style(declared: str) -> str:
+    """Verdict `E2`: a sample is painted on GROUND, the view's own ground, so
+    it reads as it does in the view -- a tone sitting on `PANEL` is a
+    different tone.  A member that declares its own ground (`INK on PANEL`)
+    keeps it; the label beside the sample stays on `PANEL`."""
+    resolved = darkside.resolve_style(declared)
+    return resolved if " on " in f" {resolved} " else f"{resolved} {_ON_GROUND}"
+
+
 def vocabulary_for(view: str) -> list[tuple[str, str, str, str]]:
     """`LLR-N16.2.1`: the members `view`'s legend paints, in declaration order,
     read from the ONE declaration -- never a copy of it."""
@@ -309,9 +321,9 @@ class HelpScreen(ModalScreen[None]):
                 break
             shown = darkside.fit(glyph, min(_cells(glyph), room))
             if samples:
-                samples.append((" ", ""))
+                samples.append((" ", _ON_GROUND))
                 width += 1
-            samples.append((shown, darkside.resolve_style(style)))
+            samples.append((shown, _sample_style(style)))
             width += _cells(shown)
         label = members[0][2]
         label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _SAMPLE_CELLS

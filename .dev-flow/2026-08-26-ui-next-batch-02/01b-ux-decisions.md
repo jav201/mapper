@@ -324,6 +324,8 @@ below (the instrument reads the tables), and recorded here with their reason.
 | Views column | `esquema` → `outline`, `mapa mental` → `mind map`, `sala` → `home` | language ruling; `D5`; `A6` / `INC8-D2-Q1` |
 | `V27` | sample `✓` → `D✓`, label `field initial · ✓ filled` — the schema letters get their explanation | `E6`, `INC8-F-UX-F7` |
 | `V35` | label `pending fields here and below` | `E6`, `INC8-F-UX-F6` |
+| `V45` | **new**: the outline's depth mark `⇲N`, painted in `MUT` once a row is deeper than half the canvas can indent (depth 15 and past at 118 columns) | `INC8-F-UX-F4` |
+| `V29` | the glyph set narrows from the whole box-drawing block (`U+2500`–`U+257F`) to the eleven wires the canvas paints | `INC8-F-CR-F3` |
 | §3.5 | derived from what the views paint: `SAGE`, `TEAL`, `VIOLET` left (painted by no view); `ALERT` gained its second job, the missing-record mark | `E4` |
 | §3.6 | English copy; the own-scope group `in this legend` is named; the vocabulary section comes first | `E1`, `E3`, language ruling |
 
@@ -340,13 +342,14 @@ below (the instrument reads the tables), and recorded here with their reason.
 | V26 | `◫ sin acta` | `missing record` | `ALERT` | atlas | `views/layered.py:612-613`; `ALERT`'s second job, §3.5 |
 | V27 | `D✓` (a schema letter and its filled mark) | `field initial · ✓ filled` | `INK` | atlas | `views/layered.py:630-631` |
 | V28 | `░` after a schema letter | `field still pending` | `STEP` | atlas | `views/layered.py:630-631` |
-| V29 | `┬─┐` (box-drawing wires, `U+2500`–`U+257F`) | `link between nodes` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
+| V29 | `┬─┐` (box-drawing wires; glyph set `─│┌┐└┘├┤┬┴┼`, exactly the canvas's `_GLYPH` table) | `link between nodes` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
 | V4b | `⣉⡉⠉` (a braille edge, `U+2800`–`U+28FF`) | `link; blue: path to selected` | `INK`, `ASH` or `MUT` by branch; `ACCENT` on the path to the selected node | mind map | `views/radial.py:259-272`, `canvas.py:167-182` |
 | V42 | `●` (a node's marker) | `node, in its branch's grey` | `INK`, `ASH` or `MUT` by branch | mind map | `views/radial.py:366-375` |
 | V43 | `●` on the path to the selected node | `node on the selected path` | `ACCENT` | mind map | `views/radial.py:369-370` |
 | V44 | `◆` (the root's marker) | `map root` | `ACCENT` | mind map | `views/radial.py:366-370` |
 | V30 | `◆` before `mapper` in the header | `view header` | `INK` | atlas · outline · mind map | `views/layered.py:432`, `views/outline.py:92`, `views/radial.py:117` |
 | V31 | `▽ 35 fuera de vista` | `nodes off screen` | `INK` | atlas · outline · mind map | `views/layered.py:451-454`, `views/outline.py:334`, `views/radial.py:121`, `app.py:2592` |
+| V45 | `⇲15` (the true level, where the outline caps a deep row's indent) | `true depth, indent capped` | `MUT` | outline | `views/outline.py:24`, `:55`, `:219`, `:261` |
 
 ### 3.2 · Map chrome shared by the three map views — rail, strips, ficha
 
