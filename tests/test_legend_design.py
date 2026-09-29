@@ -697,6 +697,16 @@ def _canvas_chars(screen, canvas) -> list[str]:
             for row in _cells(screen, canvas.right)[canvas.y:canvas.bottom]]
 
 
+def _canvas_cells(screen, canvas) -> list[list[tuple]]:
+    """Every painted cell of the canvas region -- character, fg, bg, bold --
+    not just its characters (`_canvas_chars`).  `INC8-P3-CR-F1`: the pan a
+    docked legend restores on close is not the only thing that must return;
+    the selection's FILL must too, and a chars-only compare cannot see a
+    fill that changed colour while the text underneath stayed put."""
+    return [row[canvas.x:canvas.right]
+            for row in _cells(screen, canvas.right)[canvas.y:canvas.bottom]]
+
+
 async def _walked_map(app, pilot, keys):
     app.store.save("mapa", legacy_map())
     app.push_screen(MapScreen("mapa"))
@@ -713,17 +723,21 @@ async def test_f2_docking_pans_a_covered_selection_clear_and_closing_returns_it(
     asserted: before `?` the docked panel's edge would cut the selected card.
     Docked, every cell of it sits left of the panel; the fold and the cursor
     are untouched (no key reached the view).  Closed, the pan is the prior
-    pan and the canvas holds the same characters it held before.  (Styles
-    are not compared: on `esc` the focus moves to the rail, a pre-existing
-    behaviour carried as `INC8-P2-UX-F7`, and the selection's fill follows
-    the focus.)"""
+    pan and the canvas holds the same PAINTED CELLS it held before --
+    character, foreground, background and bold, not just characters.  Before
+    `INC8-P3-CR-F1` this arm skipped styles: `esc` moved the focus to the
+    rail (`INC8-P2-UX-F7`) and the selection's fill followed it, from blue to
+    grey, so a style compare would have RED-ed on the pre-existing carry
+    rather than on this pass's own regression -- crediting this arm's find to
+    a finding it did not test.  `INC8-P3-CR-F1` fixed the carry too (focus,
+    including a docked repaint's, now returns exactly), so the skip is gone."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=REFERENCE_SIZE) as pilot:
         view, canvas = await _walked_map(app, pilot, FINA_4)
         panel_x = REFERENCE_SIZE[0] - LEGEND_DOCKED_CELLS
         before = _selection_cells(view, canvas)
         state = (view.pan_x, view.pan_y, view.nav.cursor, view.folded)
-        chars = _canvas_chars(view, canvas)
+        cells = _canvas_cells(view, canvas)
         assert before and any(x >= panel_x for x, _y in before), (panel_x, before)
         await pilot.press("question_mark")
         await _settle(pilot)
@@ -736,7 +750,7 @@ async def test_f2_docking_pans_a_covered_selection_clear_and_closing_returns_it(
         await _settle(pilot)
         assert app.screen is view
         assert (view.pan_x, view.pan_y, view.nav.cursor, view.folded) == state
-        assert _canvas_chars(view, canvas) == chars
+        assert _canvas_cells(view, canvas) == cells
 
 
 @pytest.mark.parametrize("size,keys", [
@@ -806,6 +820,88 @@ async def test_f2_the_modal_layout_does_not_pan_and_a_resize_re_derives_the_pan(
         await _settle(pilot)
         assert legend.has_class(DOCKED_CLASS)
         assert (view.pan_x, view.pan_y) == docked_pan
+
+
+# ---------------------------------------------------------------------------
+# Pass-3 corrective: `INC8-P3-CR-F1` (blocking) / `INC8-P3-UX-F1`, carried
+# `INC8-P2-UX-F7`.  Opening the legend must not move the keyboard's focus.
+# `legend_docked` called `refresh_canvas` on every layout apply -- modal
+# included -- which rebuilds the ficha inspector (`FichaInspector._rebuild`'s
+# `remove_children`) and destroys a focused field; and even where nothing was
+# destroyed, Textual's own post-resume auto-focus (`AUTO_FOCUS = "*"`) grabs
+# the rail the moment this screen resumes with `focused` at `None`.  Closing
+# the legend must restore the EXACT pre-legend focus, `None` included, and
+# the canvas must not visibly repaint to show a different one -- checked on
+# every painted cell (`_canvas_cells`), not just its characters.
+
+INSPECTOR_FOCUS_ID = "insp-state"
+#: `86x34`: one below `DOCK_WIDTH_BARE` (`87`), so the legend is modal and a
+#: docked pan never fires -- the loss this pins is not about panning at all.
+MODAL_SIZE = (DOCK_WIDTH_BARE - 1, 34)
+
+
+@pytest.mark.parametrize("size,docked", [
+    (REFERENCE_SIZE, True), (MODAL_SIZE, False),
+], ids=["118x34-docked", "86x34-modal"])
+async def test_cr_f1_closing_the_legend_restores_the_focused_field(tmp_path, size, docked):
+    """Measured regression: `#insp-state` focused, `?` then `esc`, left focus
+    on `map-rail` -- at BOTH widths, so the loss was never about the docked
+    pan alone.  The canvas's own painted cells must also return unchanged: a
+    repaint that only recolours the selection's fill would pass a
+    characters-only compare and still be the bug."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        field = view.query_one(f"#{INSPECTOR_FOCUS_ID}")
+        view.set_focus(field)
+        # The walk's own repaints happened with focus at `None` (`_park_focus`,
+        # and nothing repaints the canvas on a plain focus change), so `cells`
+        # would otherwise be stale for the focus this arm is actually about.
+        # `_declare_after_layout` is the canvas-only path (`_move_pan` uses the
+        # same one): it repaints the frame for the CURRENT focus without
+        # touching the inspector, so setting up the arm does not itself
+        # trigger the defect the arm exists to catch.
+        view._declare_after_layout()  # noqa: SLF001
+        await _settle(pilot)
+        assert view.focused is field
+        cells = _canvas_cells(view, canvas)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS) is docked
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        assert view.focused is not None and view.focused.id == INSPECTOR_FOCUS_ID
+        assert _canvas_cells(view, canvas) == cells
+
+
+@pytest.mark.parametrize("size,docked", [
+    (REFERENCE_SIZE, True), (MODAL_SIZE, False),
+], ids=["118x34-docked", "86x34-modal"])
+async def test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused(tmp_path, size, docked):
+    """`INC8-P3-UX-F1`, carried `INC8-P2-UX-F7`: with nothing focused before
+    `?`, `esc` used to leave the rail focused -- `Screen._update_auto_focus`
+    grabs the first focusable widget whenever this screen resumes with
+    `focused is None`, regardless of whether a docked pan ever repainted
+    anything.  The operator-facing requirement is exact: `None` returns
+    `None`, and the selection's fill does not flash from blue to grey to
+    show a focus the operator never asked for."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        view.set_focus(None)
+        view._declare_after_layout()  # noqa: SLF001
+        await _settle(pilot)
+        assert view.focused is None
+        cells = _canvas_cells(view, canvas)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS) is docked
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        assert view.focused is None
+        assert _canvas_cells(view, canvas) == cells
 
 
 @pytest.mark.parametrize("width", [100, DOCK_WIDTH_BARE - 1, DOCK_WIDTH_BARE, 140])
