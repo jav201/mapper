@@ -823,6 +823,85 @@ async def test_f2_the_modal_layout_does_not_pan_and_a_resize_re_derives_the_pan(
 
 
 # ---------------------------------------------------------------------------
+# `A-109`, Inc-8 design pass 4, verdict `G2`.  Amends `LLR-N06.1.2`: while the
+# legend is docked, the reveal's legal pan range is computed on the VISIBLE
+# canvas -- left of the panel -- not the canvas's own full drawn width, so a
+# card at the map's own right edge (`INC8-D3-F2`'s carry) can be revealed
+# whole instead of staying clamped to a range that assumed the panel was not
+# there.
+
+#: The legacy fixture's last leaf of its last branch (`BRANCHES[-1]`, `"ti"`,
+#: leaf index 4) -- the map's own right edge, walked with the real keys: into
+#: the first branch, seven siblings across to the last, into its first leaf,
+#: four siblings down to the last.
+TI_4 = ("l", "j", "j", "j", "j", "j", "j", "j", "l", "j", "j", "j", "j")
+
+
+async def _panned_to_the_old_legal_max(pilot) -> None:
+    """Press the real `L` past any fixture's legal range -- `HLR-N06.1`'s
+    unwanted-behaviour clause makes every press beyond the clamp a documented
+    no-op, so this cannot overshoot into a state `_clamp_pan` would not
+    allow."""
+    for _ in range(80):
+        await pilot.press("L")
+        await pilot.pause()
+
+
+async def test_g2_a_card_at_the_maps_right_edge_is_revealed_whole_and_closing_returns_it(
+    tmp_path,
+):
+    """`A-109`, verdict `G2`.  `ti4` sits at the map's own right edge: walked
+    there and panned to the OLD range's legal maximum with the real `L`, its
+    card is still cut by the panel once docked under the OLD clamp -- exactly
+    the carry `INC8-D3-F2` described (measured before this fix: pan 421,
+    card cut by 6 of its 9 columns).  Docked under the amended clamp, every
+    cell of it sits left of the panel; closed, the pan is the EXACT pre-legend
+    value the operator had at the edge, not a widened one left behind."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, canvas = await _walked_map(app, pilot, TI_4)
+        await _panned_to_the_old_legal_max(pilot)
+        panel_x = REFERENCE_SIZE[0] - LEGEND_DOCKED_CELLS
+        pre_pan = (view.pan_x, view.pan_y)
+        before = _selection_cells(view, canvas)
+        assert before and any(x >= panel_x for x, _y in before), (panel_x, before)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        # Filtered to `x < panel_x` as the F2 arm above does: an unfiltered
+        # scan over the canvas region's own x-range also catches the docked
+        # panel's OWN sample row for `V23` ("|> erp", painted ACCENT to
+        # illustrate the style), which sits inside that same x-range once the
+        # panel is docked.
+        docked = [c for c in _selection_cells(app.screen, canvas) if c[0] < panel_x]
+        assert len(docked) == len(before), f"{len(docked)} of {len(before)} visible"
+        assert view.pan_x > pre_pan[0], "the amended clamp did not widen the range"
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        assert (view.pan_x, view.pan_y) == pre_pan, (
+            "the closed pan is not the exact pre-legend value"
+        )
+
+
+async def test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card(tmp_path):
+    """`G2` amends the DOCKED reveal only.  Opened modal, one column below the
+    derived threshold, over the same edge card panned to its legal maximum,
+    the view keeps its pan: `legend_docked(None)` never calls
+    `_pan_revealing_selection`, so the widened clamp never runs here."""
+    width = DOCK_WIDTH_BARE - 1
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(width, 34)) as pilot:
+        view, _canvas = await _walked_map(app, pilot, TI_4)
+        await _panned_to_the_old_legal_max(pilot)
+        pan = (view.pan_x, view.pan_y)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert isinstance(app.screen, HelpScreen) and not app.screen.has_class(DOCKED_CLASS)
+        assert (view.pan_x, view.pan_y) == pan
+
+
+# ---------------------------------------------------------------------------
 # Pass-3 corrective: `INC8-P3-CR-F1` (blocking) / `INC8-P3-UX-F1`, carried
 # `INC8-P2-UX-F7`.  Opening the legend must not move the keyboard's focus.
 # `legend_docked` called `refresh_canvas` on every layout apply -- modal
