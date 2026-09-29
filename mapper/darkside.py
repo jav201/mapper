@@ -739,6 +739,19 @@ LEGEND_VIEWS: dict[str, tuple[str, ...]] = {
     VIEW_NAMES["home"]: ("V19", "V20", "V22", "V40", "V41"),
 }
 
+#: Closing verdict `H4`: while the host's rail is hidden, its legend omits the
+#: rows the RAIL ALONE paints -- there is nothing left on screen for them to
+#: explain.  DERIVED FROM `01b` §3.2's own **Source** column, not a hand list:
+#: `test_h4_rail_vocabulary_EQUALS_the_01b_rail_sourced_rows` walks that
+#: column and pins this set equal to every row it cites into
+#: `widgets/rail.py`.  `_MAP_CHROME`'s remaining members -- `V30`/`V31` (the
+#: canvas header, `views/layered.py` and friends) and the coverage strip
+#: `V36`-`V39`/`V32` (`app.py`'s `#map-minimap`, a strip the rail's own
+#: `display` toggle never touches) -- stay visible regardless of the rail,
+#: because their source is not the rail widget: a naive reading of "rail,
+#: strips, ficha" as the whole of §3.2 would have hidden those two too.
+RAIL_VOCABULARY: frozenset[str] = frozenset({"V33", "V34", "V35", "V21a", "V21b"})
+
 #: `LLR-N16.2.1`'s SECOND derived set: `01b` §3.5's colours with a job, as
 #: `(row id, swatch, label, token)`.  Not members of the vocabulary above.
 #: Since design pass 2 (verdict `E4`) §3.5 is derived from what the views

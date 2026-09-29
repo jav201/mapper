@@ -46,7 +46,7 @@ from datetime import date
 import pytest
 from rich.cells import cell_len
 from rich.style import Style
-from textual.widgets import DataTable
+from textual.widgets import DataTable, Static
 
 from mapper import darkside, keymap
 from mapper.app import HomeScreen, MapperApp, MapScreen
@@ -411,6 +411,73 @@ async def test_d2_the_legend_and_the_view_agree_in_both_directions(tmp_path, vie
         f"{view}: COMPLETENESS -- painted (glyph, code point, fg, bg, bold) in no member "
         f"or overlay of this view: {undeclared}"
     )
+
+
+# `H4` (closing verdict, round 5): the D2 agreement above never drives a
+# rail-hidden state, so it cannot see a rail row that outlives the rail it
+# explains. Both directions, through the real `R` toggle and the real `?`
+# key: a rail-hidden legend must list none of `darkside.RAIL_VOCABULARY`; a
+# rail-shown legend must list every one of them its view declares -- and the
+# coverage strip / meter rows that share §3.2 with the rail, but not its
+# `display` toggle, must survive either way.
+RAIL_ROW_LABEL = {
+    "V33": "open branch", "V34": "folded branch, in the rail",
+    "V35": "pending fields here and below",
+    "V21a": "node with a complete card", "V21b": "node with pending fields",
+}
+NOT_RAIL_CHROME_LABEL = "branch: half or more recorded"  # V37 -- the coverage strip, not the rail
+
+#: `INVESTIGATED` (the brief's own "if that can happen" / "check whether a
+#: resize... is the only path"): `MapScreen.on_resize` does not call
+#: `_apply_region_visibility` (grepped: that method is called only from
+#: `on_mount`, `action_toggle_rail` and `action_toggle_inspector`), so a live
+#: resize never changes `rail_hidden` after mount. `R`'s key cannot reach
+#: `MapScreen` while `HelpScreen` (modal) owns the top of the stack. So there
+#: is NO real path for the rail to change while the legend is open today --
+#: filed as `INC8-CL-F1` rather than tested against a state this arm would
+#: have to fake. `HelpScreen._apply_layout`'s guard (repaint on a rail change
+#: OR a dock change, not `docked` alone) is kept anyway: it is correct and
+#: cheap, and stops being dead code the moment either path opens.
+
+
+async def test_h4_the_legend_lists_rail_rows_only_while_the_rail_is_shown(tmp_path):
+    """Both directions, through the real `R` toggle and the real `?` key, at
+    `REFERENCE_SIZE`: rail SHOWN and docked always coincide in this app (rail
+    shows only at width >= 118, and 118 already clears the with-rail dock
+    threshold of 111), so there is no modal-layout state to test this in --
+    the docked row budget (29 cells) is measured to hold every label below in
+    full, so this is not a truncation-obscured pass either."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        app.store.save("mapa", legacy_map())
+        app.push_screen(MapScreen("mapa"))
+        await _settle(pilot)
+        view = app.screen
+        assert not view.rail_hidden, "the rail is not shown at rest; arm has no subject"
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        legend = app.screen
+        assert isinstance(legend, HelpScreen) and legend.has_class(DOCKED_CLASS)
+        shown = legend.query_one("#help-vocabulary", Static).content.plain
+        for vid, label in RAIL_ROW_LABEL.items():
+            assert label in shown, f"rail row {vid} ({label!r}) missing while the rail is shown"
+        assert NOT_RAIL_CHROME_LABEL in shown
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert app.screen is view
+        await pilot.press("R")
+        await _settle(pilot)
+        assert view.rail_hidden, "`R` did not hide the rail; arm has no subject"
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        legend = app.screen
+        assert isinstance(legend, HelpScreen)
+        hidden = legend.query_one("#help-vocabulary", Static).content.plain
+        for vid, label in RAIL_ROW_LABEL.items():
+            assert label not in hidden, (
+                f"rail row {vid} ({label!r}) still listed while the rail is hidden"
+            )
+        assert NOT_RAIL_CHROME_LABEL in hidden
 
 
 def has_a_job(hex_value: str | None) -> bool:

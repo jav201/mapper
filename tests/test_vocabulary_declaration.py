@@ -401,6 +401,45 @@ def test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names():
     assert "V4b" in want[radial] and "V4b" not in want[atlas]
 
 
+#: `H4` (closing verdict, round 5): 01b §3.2's own Source column, the sixth
+#: cell -- four cells skipped (glyph, label, style, views) after the id.
+_SOURCE_ROW = re.compile(r"^\|\s*(V\d+[a-z]?)\s*\|(?:[^|]*\|){4}([^|]*)\|", re.M)
+
+
+def _section_32() -> str:
+    text = UX.read_bytes().decode("utf-8")
+    return text[text.index("### 3.2 "):text.index("### 3.3 ")]
+
+
+def _rail_sourced_rows_from_01b() -> set[str]:
+    """`H4`: the §3.2 rows whose Source cell names `widgets/rail.py` -- the
+    rail widget itself, not the always-visible coverage strip
+    (`app.py`'s `#map-minimap`, `V36`-`V39`) or the meter (`darkside.py`,
+    `V32`) that share this section's title ("rail, strips, ficha") without
+    sharing the rail's own `display` toggle.  This is the derivation
+    `darkside.RAIL_VOCABULARY` claims to be checked against, walked
+    independently of it."""
+    return {
+        vid for vid, source in _SOURCE_ROW.findall(_section_32())
+        if "widgets/rail.py" in source
+    }
+
+
+def test_h4_rail_vocabulary_EQUALS_the_01b_rail_sourced_rows():
+    """`darkside.RAIL_VOCABULARY` is not a hand list: it equals exactly the
+    §3.2 rows 01b's own Source column attributes to `widgets/rail.py`."""
+    from_doc = _rail_sourced_rows_from_01b()
+    assert from_doc, "the Source walk derived NOTHING; the instrument is broken, not 01b"
+    assert darkside.RAIL_VOCABULARY == from_doc, (
+        darkside.RAIL_VOCABULARY - from_doc, from_doc - darkside.RAIL_VOCABULARY
+    )
+    # The coverage strip and the meter are the named reason this cannot be a
+    # hand list copied from the section's title: they sit in the SAME
+    # section, painted regardless of the rail, so a reader who took "rail,
+    # strips, ficha" as one surface would have hidden them too.
+    assert {"V36", "V37", "V38", "V39", "V32"} & darkside.RAIL_VOCABULARY == set()
+
+
 def test_design_pass_a_retired_id_is_never_a_row_again():
     """Every id the change log retires is gone from the tables and from the
     declaration -- a retired id is never reused, so a trace that cites it
