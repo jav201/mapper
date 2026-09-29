@@ -71,7 +71,15 @@ async def _harvest(app, pilot, reader, region_id: str = "#help-dialog"):
     pane = screen.query_one("#help-bindings")
     out = []
     for _ in range(60):
-        out.extend(reader(screen, region_widget.region))
+        region = region_widget.region
+        if region_id != "#help-dialog":
+            # `INC8-D-F2`: a widget INSIDE the pane has an unclipped region
+            # that scrolls off the top -- measured `y=-10` at the docked
+            # height -- and a negative `y` makes `strips[y:y+h]` slice from
+            # the END of the frame.  What the operator sees of that widget is
+            # the part inside the pane.
+            region = region.intersection(pane.region)
+        out.extend(reader(screen, region))
         if pane.scroll_offset.y >= pane.max_scroll_y:
             return out
         pane.scroll_to(y=pane.scroll_offset.y + max(1, pane.region.height - 1), animate=False)
