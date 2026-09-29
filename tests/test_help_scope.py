@@ -8,8 +8,6 @@ never read as legend content.
 """
 from __future__ import annotations
 
-import re
-
 import pytest
 from rich.style import Style
 from rich.text import Text
@@ -17,6 +15,7 @@ from textual.app import App
 
 from mapper import darkside, keymap
 from mapper.app import MapperApp
+from mapper.screens import help as help_screen
 from mapper.keymap import SCOPE_HELP, SCOPE_MAP, bindings_for, duplicate_chords
 from mapper.screens.help import (
     LEGEND_ROW_CELLS,
@@ -251,11 +250,13 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
         title = "\n".join(_rows_in(screen, screen.query_one("#help-title").region))
         rows = await _harvest(app, pilot, _rows_in)
 
-        # `INC8-CR-F2`: `LEGEND_ROW_CELLS` was hand-copied from the CSS width.
+        # `INC8-CR-F2`: the row budget was hand-copied from the CSS width.
         # Pinned here against the real widget's own usable-width attribute, so
         # a CSS edit that stops matching reddens instead of silently drifting.
+        # `SIZE` is docked (verdict `E1`), so the budget is the docked one.
         pane = screen.query_one("#help-bindings")
-        assert pane.scrollable_content_region.width == LEGEND_ROW_CELLS
+        budget = screen.row_cells
+        assert screen.docked and pane.scrollable_content_region.width == budget
 
     painted = "\n".join(rows)
     # Per surface, so one sink parsing markup cannot hide behind the others.
@@ -264,29 +265,32 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
     assert not {ord(c) for c in painted} & BANNED
     for text in texts:
         for line in text.split("\n"):
-            assert line.cell_len <= LEGEND_ROW_CELLS, (line.cell_len, line.plain[:40])
+            assert line.cell_len <= budget, (line.cell_len, line.plain[:40])
 
 
 # ---------------------------------------------------------------------------
 # HLR-N16.4 -- the legend declares every key that works inside it (TC-086)
 
 def _painted_help_keys(rows: list[str]) -> set[str]:
-    """Which `SCOPE_HELP` keys the FRAME actually shows a row for.
+    """Which `SCOPE_HELP` keys the FRAME actually shows an item for.
 
-    `INC8-CR-F1`.  Matched by glyph AND label together, in that order, on one
-    painted row -- glyph alone would also hit `q` and `esc`'s OTHER bindings in
-    the map scope's own `salir` group (`q -> inicio`, `esc -> volver`), which
-    paint the same two glyphs under a different label. The seat is used only
-    to decode a painted (glyph, label) pair back into the `key` name `effective`
-    is keyed on: the frame itself has no other name for a key than what it
-    paints.
+    `INC8-CR-F1`, re-read for verdict `E3`'s two-line group
+    (`esc q close · ↑ ↓ line`): a row splits into ` · `-separated items, and
+    an item is key glyphs followed by ONE word.  A key is painted when its
+    glyph sits in an item whose word is the legend's word for its action
+    (`OWN_SCOPE_COPY`) -- glyph alone would also hit `q` and `esc`'s OTHER
+    bindings in the map scope's `salir` group (`q -> inicio`,
+    `esc -> volver`), which paint the same two glyphs under another word.
+    The seat is used only to decode a painted (glyph, word) pair back into the
+    `key` name `effective` is keyed on.
     """
-    out: set[str] = set()
-    for b in bindings_for(SCOPE_HELP):
-        pattern = re.compile(rf"(?<!\S){re.escape(b.glyph)}(?!\S).*{re.escape(b.label)}")
-        if any(pattern.search(row) for row in rows):
-            out.add(b.key)
-    return out
+    pairs: set[tuple[str, str]] = set()
+    for row in rows:
+        for item in row.split("·"):
+            tokens = item.split()
+            pairs.update((glyph, tokens[-1]) for glyph in tokens[:-1])
+    return {b.key for b in bindings_for(SCOPE_HELP)
+            if (b.glyph, help_screen.own_scope_word(b.action)) in pairs}
 
 
 @pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
@@ -354,6 +358,87 @@ async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
         f"work but not painted: {sorted(effective - painted)}; "
         f"painted but inert: {sorted(painted - effective)}"
     )
+
+
+@pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
+async def test_e3_the_own_keys_are_visible_at_rest_and_at_the_end(tmp_path, size):
+    """`INC8-F-CR-F1` / verdict `E3`: "visible at rest" is PINNED, not only
+    painted somewhere in the scroll range.  The own-scope keys read off the
+    dialog with the pane at its top, and again at its end, each equal every
+    own key the legend paints anywhere -- so the group cannot move into the
+    scrolling pane, at either end of it, without reddening.  The pane must
+    really scroll, or "at the end" would be "at rest" again."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        screen = await _legend_from_map(app, pilot)
+        dialog = screen.query_one("#help-dialog")
+        pane = screen.query_one("#help-bindings")
+        assert pane.max_scroll_y > 0, "the pane does not scroll; 'at the end' is 'at rest'"
+        pane.scroll_home(animate=False)
+        await pilot.pause()
+        await pilot.pause()
+        at_rest = _painted_help_keys(_rows_in(screen, dialog.region))
+        painted = _painted_help_keys(await _harvest(app, pilot, _rows_in))
+        pane.scroll_end(animate=False)
+        await pilot.pause()
+        await pilot.pause()
+        assert pane.scroll_offset.y == pane.max_scroll_y
+        at_end = _painted_help_keys(_rows_in(screen, dialog.region))
+    assert painted == {b.key for b in bindings_for(SCOPE_HELP)}, painted
+    assert at_rest == painted, f"not visible at rest: {sorted(painted - at_rest)}"
+    assert at_end == painted, f"scrolled away at the end: {sorted(painted - at_end)}"
+
+
+@pytest.mark.parametrize("size", [SIZE, NARROW_SIZE])
+async def test_e1_the_vocabulary_section_is_painted_first(tmp_path, size):
+    """Verdict `E1`: the vocabulary comes BEFORE the keys, in both layouts,
+    in the order `01b` §3.6 lists (pinned equal to these constants by
+    `test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6`).
+    Read from the painted frame: each header's first row, walking the pane
+    top to bottom, and the vocabulary header visible with the pane at rest."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        screen = await _legend_from_map(app, pilot)
+        pane = screen.query_one("#help-bindings")
+        at_rest = "\n".join(_rows_in(screen, pane.region))
+        rows = await _harvest(app, pilot, _rows_in, region_id="#help-bindings")
+    order = (SECTION_VOCABULARY, SECTION_COLOURS, help_screen.SECTION_KEYS)
+    first = [next((i for i, row in enumerate(rows) if header in row), None) for header in order]
+    assert None not in first and first == sorted(first), dict(zip(order, first))
+    assert SECTION_VOCABULARY in at_rest, "the vocabulary is not what the pane shows at rest"
+
+
+@pytest.mark.parametrize("docked", [False, True], ids=["modal", "docked"])
+def test_e1_no_painted_string_is_cut_at_either_budget(docked):
+    """Verdict `E1`: the row budget re-derives from each width, and a label
+    that would not fit is SHORTENED in the copy, never cut on screen.  Every
+    string each layout paints appears whole -- `fit` would have replaced its
+    tail with `…` -- and no row exceeds the layout's budget."""
+    def whole(needle: str, text: Text, where: str) -> None:
+        assert needle in text.plain, f"{where}: {needle!r} is cut at {screen.row_cells} cells"
+        for line in text.plain.split("\n"):
+            assert Text(line).cell_len <= screen.row_cells, (where, line)
+
+    for view in sorted(darkside.LEGEND_VIEWS):
+        screen = HelpScreen(SCOPE_MAP, view=view)
+        screen.docked = docked
+        whole(f"{help_screen.LEGEND_TITLE} · {view}", screen._render_title(), "title")  # noqa: SLF001
+        vocabulary = screen._render_vocabulary(vocabulary_for(view))  # noqa: SLF001
+        for _vid, _glyph, label, _style in vocabulary_for(view):
+            whole(label, vocabulary, f"{view} vocabulary")
+    colours = screen._render_colours()  # noqa: SLF001
+    for _swatch, label, _token in darkside.DECLARED_COLOURS:
+        whole(label, colours, "colours")
+    for line in help_screen.FOOTER_LINES:
+        whole(line, screen._render_footer(), "footer")  # noqa: SLF001
+    own = screen._render_own_scope_keys()  # noqa: SLF001
+    for _actions, word in help_screen.OWN_SCOPE_COPY:
+        whole(word, own, "own-scope group")
+    for scope in (SCOPE_MAP, keymap.SCOPE_HOME):
+        keys = HelpScreen(scope)
+        keys.docked = docked
+        for binding in bindings_for(scope):
+            whole(binding.label, keys._render_keymap(), f"{scope} keys")  # noqa: SLF001
 
 
 # ---------------------------------------------------------------------------
@@ -473,22 +558,28 @@ def test_inc8_f_sec_f1_the_style_allow_list_does_not_authorize_itself(monkeypatc
         screen._render_vocabulary(vocabulary_for("atlas"))  # noqa: SLF001
 
 
-def test_inc8_sec_f3_a_wide_close_label_cannot_blow_the_row_budget(monkeypatch):
-    """`INC8-SEC-F3`.  `close.label` is a seat value nothing upstream bounds;
-    an oversized one painted a 95-cell row from a 75-cell budget in
-    `_render_title`. Every width there is now clamped.
+@pytest.mark.parametrize("docked", [False, True], ids=["modal", "docked"])
+def test_inc8_sec_f3_a_wide_close_key_cannot_blow_the_row_budget(monkeypatch, docked):
+    """`INC8-SEC-F3`.  The close hint is built from a seat value nothing
+    upstream bounds; an oversized one painted a 95-cell row from a 75-cell
+    budget in `_render_title`.  Since verdict `E3` the hint's WORD is the
+    legend's own copy (`close`), so the seat value that reaches the title is
+    the key's GLYPH -- made huge here, in both layouts' budgets, and through
+    the own-scope group too, which paints the same glyph.
     """
     huge = "X" * 200
     patched = [
-        keymap.KeyBinding("escape", "esc", "dismiss_none", huge, "help")
+        keymap.KeyBinding("escape", huge, "dismiss_none", "cerrar", "help")
         if (b.key, b.action, b.group) == ("escape", "dismiss_none", "help") else b
         for b in keymap.KEYMAP
     ]
     monkeypatch.setattr(keymap, "KEYMAP", patched)
     screen = HelpScreen(SCOPE_MAP, view="atlas")
-    title = screen._render_title()  # noqa: SLF001
-    for line in title.plain.split("\n"):
-        assert Text(line).cell_len <= LEGEND_ROW_CELLS, (Text(line).cell_len, line)
+    screen.docked = docked
+    for text in (screen._render_title(), screen._render_own_scope_keys()):  # noqa: SLF001
+        assert "XXXX" in text.plain, "the hostile glyph never reached this surface"
+        for line in text.plain.split("\n"):
+            assert Text(line).cell_len <= screen.row_cells, (Text(line).cell_len, line)
 
 
 def test_inc8_sec_f4_a_hostile_colour_label_is_coerced_and_bounded(monkeypatch):

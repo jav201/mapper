@@ -457,10 +457,9 @@ def test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6():
     the same defect `test_llr_n16_2_1_the_declaration_is_not_a_second_opinion`
     exists to catch for the vocabulary table, unaddressed here until now.
 
-    `help.LEGEND_OWN_SCOPE_GROUP` (`en esta leyenda`, `INC8-CR-F1`) is
-    DELIBERATELY NOT asserted here: 01b §3.6 does not name it, and it stays an
-    un-ratified Inc-8 constant (see the corrective-pass record) rather than a
-    fourth row silently added to this equality.
+    The headers are in PAINTED order, the vocabulary first (verdict `E1`).
+    The own-scope group's title was un-ratified until verdict `E3`; it is
+    asserted by `test_e3_the_title_hint_and_own_scope_copy_EQUAL_section_3_6`.
     """
     section = _section_36()
 
@@ -475,6 +474,43 @@ def test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6():
     assert footer_line, f"the footer line is not in 01b's §3.6: {section!r}"
     footer = tuple(_BACKTICK_RUN.findall(footer_line.group(1)))
     assert footer == help_screen.FOOTER_LINES, footer
+
+
+_TITLE_LINE = re.compile(r"Panel title:\s*`([^`·]+?) · ")
+_TOP_RIGHT_LINE = re.compile(r"Top-right:\s*`(\S+) (\S+)`")
+_OWN_TITLE_LINE = re.compile(r"Own-scope group title:\s*`([^`]+)`")
+_OWN_WORDS_LINE = re.compile(r"Own-scope group words, by action:\s*(.+)")
+_OWN_WORD_ITEM = re.compile(r"`([^`]+)`\s*\(((?:`[^`]+`,?\s*)+)\)")
+
+
+def test_e3_the_title_hint_and_own_scope_copy_EQUAL_section_3_6():
+    """Verdict `E3` ratified the own-scope group and its title, and the
+    language ruling put every legend string in English.  So the rest of §3.6
+    is walked the same way as the headers above: the title's first word, the
+    close hint, the group's title, and one word per `SCOPE_HELP` action --
+    with its key glyphs, read from the seat -- in `01b`'s order.  Every action
+    of the legend's own scope has a word, so no own key can go unpainted."""
+    from mapper.keymap import SCOPE_HELP, bindings_for
+
+    section = _section_36()
+    title = _TITLE_LINE.search(section)
+    assert title and title.group(1) == help_screen.LEGEND_TITLE, title
+    top_right = _TOP_RIGHT_LINE.search(section)
+    close = next(b for b in bindings_for(SCOPE_HELP) if b.action == "dismiss_none")
+    assert top_right and top_right.groups() == (
+        close.glyph, help_screen.own_scope_word(close.action)), top_right
+    own_title = _OWN_TITLE_LINE.search(section)
+    assert own_title and own_title.group(1) == help_screen.LEGEND_OWN_SCOPE_GROUP, own_title
+    words_line = _OWN_WORDS_LINE.search(section)
+    assert words_line, "the own-scope words line is not in 01b's §3.6"
+    doc = [(word, tuple(_BACKTICK_RUN.findall(glyphs)))
+           for word, glyphs in _OWN_WORD_ITEM.findall(words_line.group(1))]
+    seat = bindings_for(SCOPE_HELP)
+    painted = [(word, tuple(b.glyph for b in seat if b.action in actions))
+               for actions, word in help_screen.OWN_SCOPE_COPY]
+    assert doc == painted, (doc, painted)
+    worded = {a for actions, _w in help_screen.OWN_SCOPE_COPY for a in actions}
+    assert {b.action for b in seat} == worded, {b.action for b in seat} ^ worded
 
 
 def test_llr_n16_2_1_the_declaration_is_not_a_second_opinion():

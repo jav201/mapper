@@ -18,20 +18,34 @@ from textual.widgets import Static
 from mapper import darkside
 from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, textual_bindings
 
-# The legend panel's width, ONE constant for both layouts (Inc-8 verdict `D4`):
-# a modal below `LEGEND_DOCK_MIN_WIDTH` columns, docked on the right at or above
-# it.  The CSS below is built from it.
+# The legend panel's two widths (Inc-8 verdicts `D4` and `E1`): a centred
+# modal below `LEGEND_DOCK_MIN_WIDTH` columns, and at or above it a NARROW
+# panel docked full height on the right -- the round-10 prototype's
+# proportion (`prototypes/ui_next2/generate.py:leyenda`, a 43-column panel on
+# a 118-column sheet), so the view keeps the canvas beside it.  The CSS below
+# is built from both.
 LEGEND_PANEL_CELLS = 80
+LEGEND_DOCKED_CELLS = 44
 _PAD_X = 2
 _SCROLLBAR_CELLS = 1
-# `LLR-N16.2.3`'s row-length clause: every painted row of the scrolling body is
-# exactly this many cells -- the panel less its left and right padding and the
-# scrollbar.  A row wider than the pane would wrap, and the wrapped half would
-# read as a row of its own.  `INC8-CR-F2`:
-# `test_llr_n16_2_3_legend_coerces_and_bounds_every_string` in
-# `tests/test_help_scope.py` pins this against the real widget's
-# `scrollable_content_region` in BOTH layouts.
-LEGEND_ROW_CELLS = LEGEND_PANEL_CELLS - 2 * _PAD_X - _SCROLLBAR_CELLS
+
+
+def _row_cells(panel_cells: int) -> int:
+    """`LLR-N16.2.3`'s row-length clause: every painted row of the scrolling
+    body is exactly this many cells -- the panel less its left and right
+    padding and the scrollbar.  A row wider than the pane would wrap, and the
+    wrapped half would read as a row of its own.  `INC8-CR-F2`:
+    `tests/test_legend_design.py` pins each budget against the real widget's
+    `scrollable_content_region` in its own layout."""
+    return panel_cells - 2 * _PAD_X - _SCROLLBAR_CELLS
+
+
+LEGEND_ROW_CELLS = _row_cells(LEGEND_PANEL_CELLS)
+LEGEND_DOCKED_ROW_CELLS = _row_cells(LEGEND_DOCKED_CELLS)
+# The modal's height cap, which `TC-R36` (`LLR-R05`, a sealed prior batch)
+# pins as governing on a tall terminal.  The docked panel is exempt and runs
+# full height: amendment `A-107`, verdict `E1`.
+LEGEND_MODAL_MAX_ROWS = 28
 # `D4`: at this terminal width and wider the legend docks beside the view
 # instead of covering it.  The panel stays modal for keys in both layouts: a
 # key pressed while the legend is open never reaches the view under it.
@@ -42,29 +56,37 @@ LEGEND_ROW_CELLS = LEGEND_PANEL_CELLS - 2 * _PAD_X - _SCROLLBAR_CELLS
 LEGEND_DOCK_MIN_WIDTH = darkside.DECLARED_CONTEXT_CELLS
 DOCKED_CLASS = "-docked"
 _KEY_CELLS = 10
-_SAMPLE_CELLS = 12
+# The sample column.  Eight cells, so the docked label budget
+# (`LEGEND_DOCKED_ROW_CELLS - len(_INDENT) - _SAMPLE_CELLS` = 29) holds the
+# longest ruled label, `V35`'s "pending fields here and below" (verdict
+# `E6`), on one row.  A sample of eight cells or more takes its own line.
+_SAMPLE_CELLS = 8
 _INDENT = "  "
 
-# `INC8-CR-F1` / `INC8-UX-F1` / `UX-F10`.  `HLR-N16.4`'s threshold is "the keys
-# that have an effect equal the set the legend PAINTS for its own scope" --
-# and until this corrective pass the legend never painted its own six scroll
-# keys (or `q cerrar`) at all: only `esc cerrar`, in the title.  This group
-# paints `bindings_for(SCOPE_HELP)` -- the legend's own scope -- as its own
-# always-visible widget (`_render_own_scope_keys`), OUTSIDE the scrollable
-# pane and outside `_render_keymap` -- `LLR-R05.2` (`TC-R25`/`TC-R26`, a prior
-# batch's sealed requirement) pins `_render_keymap`'s presented set to EXACTLY
-# `bindings_for(self.scope)`, with no foreign-scope row, so `SCOPE_HELP`'s own
-# rows cannot be folded into that method without breaking it.
+# `HLR-N16.4`'s threshold is "the keys that have an effect equal the set the
+# legend PAINTS for its own scope".  This group paints `bindings_for(SCOPE_HELP)`
+# -- the legend's own scope -- as its own always-visible widget
+# (`_render_own_scope_keys`), OUTSIDE the scrollable pane and outside
+# `_render_keymap`: `LLR-R05.2` (`TC-R25`/`TC-R26`, a prior batch's sealed
+# requirement) pins `_render_keymap`'s presented set to EXACTLY
+# `bindings_for(self.scope)`, with no foreign-scope row.
 #
-# `A5`, queued for the operator (see the corrective-pass record): `01b` §3.6
-# does not name this group, so its title is an Inc-8 constant pending
-# ratification, in the same class as Q3's un-ratified label prose.  Placement
-# is behind its own flag rather than hard-coded into `compose`, so the
-# operator can move it without touching the painting logic -- it sits OUTSIDE
-# the scrollable pane either way, so it stays reachable with no scrolling
-# regardless of the flag.
+# Verdict `E3` ratified the group and its title (`A5`) and compressed it to two
+# lines.  Its words are the legend's own English copy, one word per ACTION,
+# the key glyphs read from the seat: `esc q close · ↑ ↓ line` /
+# `pageup pagedown page · home end ends`.  The seat's own labels stay as they
+# are until Inc-9 (key labels are Inc-9's), which is why the words live here.
+# `01b` §3.6 lists them, and an arm pins that every `SCOPE_HELP` action has one.
 LEGEND_OWN_SCOPE_GROUP = "in this legend"
 LEGEND_OWN_SCOPE_FIRST = True
+OWN_SCOPE_COPY: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("dismiss_none",), "close"),
+    (("legend_up", "legend_down"), "line"),
+    (("legend_page_up", "legend_page_down"), "page"),
+    (("legend_home", "legend_end"), "ends"),
+)
+OWN_SCOPE_ITEMS_PER_LINE = 2
+_ITEM_SEP = " · "
 
 # `A-104` -- ASSUMPTION, queued for the operator: a compound row (one `01b` row
 # naming several styles, e.g. `V19`) paints ALL its samples on ONE line, each
@@ -74,24 +96,17 @@ LEGEND_OWN_SCOPE_FIRST = True
 COMPOUND_ON_ONE_LINE = True
 
 # `01b` §3.6, verbatim -- in English since the 2026-09-29 language ruling.
+# The sections are painted in this order (verdict `E1`: the vocabulary first).
 LEGEND_TITLE = "legend"
-SECTION_KEYS = "keys in this view"
 SECTION_VOCABULARY = "what this view paints"
 SECTION_COLOURS = "colours with a job"
+SECTION_KEYS = "keys in this view"
 FOOTER_LINES = ("each view has its own legend —", "same key, this view's content")
 
 
 # `INC8-CR-F9`: this module had its own copy of `darkside._cells`. One
 # implementation, read from its one owner.
 _cells = darkside._cells
-
-
-def _trimmed(text: Text) -> Text:
-    """Drop the last row's newline, which would paint an empty row under it."""
-    if text.plain.endswith("\n"):
-        text.right_crop(1)
-    return text
-
 
 _ON_GROUND = f"on {darkside.GROUND}"
 
@@ -105,11 +120,39 @@ def _sample_style(declared: str) -> str:
     return resolved if " on " in f" {resolved} " else f"{resolved} {_ON_GROUND}"
 
 
+def own_scope_word(action: str) -> str | None:
+    """The own-scope group's word for a `SCOPE_HELP` action, or `None`."""
+    return next((word for actions, word in OWN_SCOPE_COPY if action in actions), None)
+
+
 def vocabulary_for(view: str) -> list[tuple[str, str, str, str]]:
     """`LLR-N16.2.1`: the members `view`'s legend paints, in declaration order,
     read from the ONE declaration -- never a copy of it."""
     wanted = set(darkside.LEGEND_VIEWS.get(view, ()))
     return [m for m in darkside.DECLARED_VOCABULARY if m[0] in wanted]
+
+
+def _trimmed(text: Text) -> Text:
+    """Drop the last row's newline, which would paint an empty row under it."""
+    if text.plain.endswith("\n"):
+        text.right_crop(1)
+    return text
+
+
+def _bounded_run(pieces: list[tuple[str, str]], budget: int) -> list[tuple[str, str]]:
+    """Each piece coerced and fit into the ROOM LEFT after the ones before it,
+    so the run as a whole never exceeds `budget` cells (`INC8-CR-F7`'s rule,
+    for a row made of several strings)."""
+    out: list[tuple[str, str]] = []
+    used = 0
+    for text, style in pieces:
+        room = budget - used
+        if room <= 0:
+            break
+        shown = darkside.fit(text, min(_cells(text), room))
+        out.append((shown, style))
+        used += _cells(shown)
+    return out
 
 
 class HelpScreen(ModalScreen[None]):
@@ -134,19 +177,24 @@ class HelpScreen(ModalScreen[None]):
     #help-dialog {{
         width: {LEGEND_PANEL_CELLS};
         height: 90%;
-        max-height: 28;
+        max-height: {LEGEND_MODAL_MAX_ROWS};
         background: #121212;
         padding: 1 {_PAD_X};
     }}
-    /* `D4`, docked: the view stays visible and undimmed on the left; the
-       panel sits top-right.  Depth is the one grey step from the view's ground
-       to PANEL -- no border.  The panel keeps the modal's height rules:
-       `TC-R36` (`LLR-R05`, a sealed prior batch) pins `max-height` as what
-       governs at 140x45, so a full-height dock is an operator question, not
-       a CSS line. */
+    /* `D4` / `E1`, docked: the view stays visible and undimmed on the left; a
+       narrow panel runs the full height of the right edge, so it covers the
+       ficha inspector whole instead of leaving an "L" of it (`UX-F9`).
+       Depth is the one grey step from the view's ground to PANEL -- no
+       border.  Full height is `A-107`'s docked-only exemption from `TC-R36`'s
+       height cap; the modal keeps the cap. */
     HelpScreen.{DOCKED_CLASS} {{
         align: right top;
         background: #000000 0%;
+    }}
+    HelpScreen.{DOCKED_CLASS} #help-dialog {{
+        width: {LEGEND_DOCKED_CELLS};
+        height: 100%;
+        max-height: 100%;
     }}
     /* S-08 (LLR-R05.1).  The map scope carries 27 bindings in 5 groups, which the
        body renders as 40 rows — more than `max-height` shows at any terminal
@@ -167,6 +215,13 @@ class HelpScreen(ModalScreen[None]):
         scrollbar-color: #a3a3a3;
         scrollbar-background: #121212;
     }}
+    /* One blank row between sections, none above the first. */
+    #help-bindings > Static {{
+        margin-top: 1;
+    }}
+    #help-bindings > Static:first-child {{
+        margin-top: 0;
+    }}
     #help-title {{
         margin-bottom: 1;
     }}
@@ -181,11 +236,24 @@ class HelpScreen(ModalScreen[None]):
         # HLR-N16.2: the title names the VIEW; a screen that declares none is
         # named by its scope.
         self.view = view or scope
+        # Which layout the painted rows are budgeted for.  An unmounted screen
+        # (the white-box arms) renders for the modal.
+        self.docked = False
 
-    # -- layout (`D4`) -----------------------------------------------------
+    @property
+    def row_cells(self) -> int:
+        """The row budget of the layout the legend is in (`E1`)."""
+        return LEGEND_DOCKED_ROW_CELLS if self.docked else LEGEND_ROW_CELLS
+
+    # -- layout (`D4`, `E1`) -------------------------------------------------
 
     def _apply_layout(self, width: int) -> None:
-        self.set_class(width >= LEGEND_DOCK_MIN_WIDTH, DOCKED_CLASS)
+        docked = width >= LEGEND_DOCK_MIN_WIDTH
+        self.set_class(docked, DOCKED_CLASS)
+        if docked != self.docked:
+            self.docked = docked
+            if self.is_mounted:
+                self._repaint()
 
     def on_mount(self) -> None:
         self._apply_layout(self.app.size.width)
@@ -193,22 +261,38 @@ class HelpScreen(ModalScreen[None]):
     def on_resize(self, event) -> None:
         self._apply_layout(event.size.width)
 
-    def compose(self) -> ComposeResult:
-        body = [Static(self._render_keymap(), id="help-content")]
+    def _sections(self) -> list[tuple[str, Text]]:
+        """(widget id, text) of the scrolling body, in `01b` §3.6's order:
+        the vocabulary first (verdict `E1`).  LLR-N16.2.2: an empty
+        vocabulary omits its section -- and the colour rows, which exist to
+        explain the vocabulary's hues."""
+        out: list[tuple[str, Text]] = []
         vocabulary = vocabulary_for(self.view)
-        # LLR-N16.2.2: an empty vocabulary omits its section -- and the colour
-        # rows, which exist to explain the vocabulary's hues.
         if vocabulary:
-            body.append(Static(self._render_vocabulary(vocabulary), id="help-vocabulary"))
-            body.append(Static(self._render_colours(), id="help-colours"))
-        body.append(Static(self._render_footer(), id="help-footer"))
+            out.append(("help-vocabulary", self._render_vocabulary(vocabulary)))
+            out.append(("help-colours", self._render_colours()))
+        out.append(("help-content", self._render_keymap()))
+        out.append(("help-footer", self._render_footer()))
+        return out
+
+    def _repaint(self) -> None:
+        """A resize across the dock threshold re-budgets every painted row."""
+        self.query_one("#help-title", Static).update(self._render_title())
+        self.query_one("#help-own-scope", Static).update(self._render_own_scope_keys())
+        for widget_id, text in self._sections():
+            self.query_one(f"#{widget_id}", Static).update(text)
+
+    def compose(self) -> ComposeResult:
+        self.docked = self.app.size.width >= LEGEND_DOCK_MIN_WIDTH
+        body = [Static(text, id=widget_id) for widget_id, text in self._sections()]
         title = Static(self._render_title(), id="help-title")
         own_scope = Static(self._render_own_scope_keys(), id="help-own-scope")
         pane = VerticalScroll(*body, id="help-bindings")
-        # `A5` (`INC8-CR-F1`/`INC8-UX-F1`/`UX-F10`): the legend's own keys sit
-        # OUTSIDE the scrollable pane either way -- always painted, not merely
-        # "at rest" -- so `LEGEND_OWN_SCOPE_FIRST` only chooses which side of
-        # the scrollable body they sit on, never whether they are reachable.
+        # `E3` / `INC8-F-CR-F1`: the legend's own keys sit OUTSIDE the
+        # scrollable pane either way -- visible at rest AND at the end of the
+        # scroll range, pinned by `test_e3_the_own_keys_are_visible_at_rest_and_at_the_end`
+        # -- so `LEGEND_OWN_SCOPE_FIRST` only chooses which side of the body
+        # they sit on, never whether they are reachable.
         children = [title, own_scope, pane] if LEGEND_OWN_SCOPE_FIRST else [title, pane, own_scope]
         yield Vertical(*children, id="help-dialog")
 
@@ -219,24 +303,28 @@ class HelpScreen(ModalScreen[None]):
     # pairs parses none, which is why the title is a `Text` and not a `str`.
 
     def _render_title(self) -> Text:
-        # `INC8-SEC-F3`.  `close.label` is a seat value: normally six letters,
-        # but nothing upstream bounds it, and an unbounded hint here painted a
-        # 95-cell row from a 75-cell budget.  Every width below is CLAMPED so
-        # `title + gap + glyph + " " + label` can never exceed `LEGEND_ROW_CELLS`,
-        # however wide the seat's label gets.
+        # `INC8-SEC-F3`.  The hint's glyph is a seat value nothing upstream
+        # bounds, and an unbounded hint here painted a 95-cell row from a
+        # 75-cell budget.  Every width below is CLAMPED so
+        # `title + gap + glyph + " " + word` can never exceed the row budget.
+        row = self.row_cells
         close = next(b for b in bindings_for(SCOPE_HELP) if b.action == "dismiss_none")
-        hint = f"{close.glyph} {close.label}"
-        hint_cells = min(_cells(hint), LEGEND_ROW_CELLS)
+        word = own_scope_word(close.action) or close.label
+        hint = f"{close.glyph} {word}"
+        hint_cells = min(_cells(hint), row)
         glyph_cells = min(_cells(close.glyph), hint_cells)
-        label_cells = max(0, hint_cells - glyph_cells - 1)
-        title_cells = max(0, LEGEND_ROW_CELLS - hint_cells)
+        word_cells = max(0, hint_cells - glyph_cells - 1)
+        title_cells = max(0, row - hint_cells)
         title = darkside.fit(f"{LEGEND_TITLE} · {self.view}", title_cells).rstrip()
-        gap = max(0, LEGEND_ROW_CELLS - _cells(title) - hint_cells)
+        gap = max(0, row - _cells(title) - hint_cells)
+        # `INC8-D2-F1`: the space before the word is painted only when the
+        # word gets a cell.  A glyph as wide as the row left `word_cells` at 0
+        # and the bare space made the row one cell over budget.
         return Text.assemble(
             (title, f"bold {darkside.INK}"),
             (" " * gap, ""),
             (darkside.fit(close.glyph, glyph_cells), darkside.ACCENT),
-            (" " + darkside.fit(close.label, label_cells), darkside.ASH),
+            (" " + darkside.fit(word, word_cells) if word_cells else "", darkside.ASH),
         )
 
     def _append_key_group(
@@ -244,7 +332,7 @@ class HelpScreen(ModalScreen[None]):
         bindings: list, label_cells: int, *, leading_blank: bool = True,
     ) -> None:
         prefix = "\n" if leading_blank else ""
-        parts.append((f"{prefix}{darkside.fit(title, LEGEND_ROW_CELLS).rstrip()}\n", darkside.ASH))
+        parts.append((f"{prefix}{darkside.fit(title, self.row_cells).rstrip()}\n", darkside.ASH))
         for binding in bindings:
             parts.append((_INDENT, ""))
             parts.append((darkside.fit(binding.glyph, _KEY_CELLS), darkside.ACCENT))
@@ -257,7 +345,7 @@ class HelpScreen(ModalScreen[None]):
         # this exact method and asserts it. `HLR-N16.4`'s own keys are a
         # DIFFERENT scope (`SCOPE_HELP`) by construction, so they are painted
         # by `_render_own_scope_keys` instead, never folded in here.
-        label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _KEY_CELLS
+        label_cells = self.row_cells - len(_INDENT) - _KEY_CELLS
         parts: list[tuple[str, str]] = [(SECTION_KEYS + "\n", f"bold {darkside.ASH}")]
         entries = bindings_for(self.scope)
         for group, bindings in groupby(
@@ -267,19 +355,30 @@ class HelpScreen(ModalScreen[None]):
         return _trimmed(Text.assemble(*parts))
 
     def _render_own_scope_keys(self) -> Text:
-        """`INC8-CR-F1` / `INC8-UX-F1` / `UX-F10` / `HLR-N16.4`.
-
-        The legend's own scope (`SCOPE_HELP`), painted as its own always-shown
-        group -- see `compose`'s comment for why it is a SEPARATE widget from
-        `_render_keymap`, not a group folded into it.
-        """
-        label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _KEY_CELLS
-        parts: list[tuple[str, str]] = []
-        self._append_key_group(
-            parts, LEGEND_OWN_SCOPE_GROUP, bindings_for(SCOPE_HELP), label_cells,
-            leading_blank=False,
-        )
-        return _trimmed(Text.assemble(*parts))
+        """`HLR-N16.4` / verdict `E3`: the legend's own scope (`SCOPE_HELP`)
+        in two lines under its title -- each item the seat's key glyphs for
+        one word of `OWN_SCOPE_COPY`.  See `compose` for why it is a SEPARATE
+        widget from `_render_keymap`, outside the scrolling pane."""
+        seat = bindings_for(SCOPE_HELP)
+        items = []
+        for actions, word in OWN_SCOPE_COPY:
+            glyphs = [b.glyph for b in seat if b.action in actions]
+            if glyphs:
+                items.append((glyphs, word))
+        budget = self.row_cells - len(_INDENT)
+        parts: list[tuple[str, str]] = [
+            (darkside.fit(LEGEND_OWN_SCOPE_GROUP, self.row_cells).rstrip(), darkside.ASH)]
+        for start in range(0, len(items), OWN_SCOPE_ITEMS_PER_LINE):
+            pieces: list[tuple[str, str]] = []
+            for glyphs, word in items[start:start + OWN_SCOPE_ITEMS_PER_LINE]:
+                if pieces:
+                    pieces.append((_ITEM_SEP, darkside.ASH))
+                for i, glyph in enumerate(glyphs):
+                    pieces.append(((" " if i else "") + glyph, darkside.ACCENT))
+                pieces.append((" " + word, darkside.INK))
+            parts.append(("\n" + _INDENT, ""))
+            parts.extend(_bounded_run(pieces, budget))
+        return Text.assemble(*parts)
 
     def _render_vocabulary(self, members: list[tuple[str, str, str, str]]) -> Text:
         """LLR-N16.2.1 / HLR-N16.2: each sample painted in its declared style.
@@ -292,7 +391,7 @@ class HelpScreen(ModalScreen[None]):
         depending on.  A dict keyed by row id groups by IDENTITY regardless of
         position, and still preserves first-seen order (`dict` since 3.7).
         """
-        text = Text.assemble((f"\n{SECTION_VOCABULARY}\n\n", f"bold {darkside.ASH}"))
+        text = Text.assemble((f"{SECTION_VOCABULARY}\n\n", f"bold {darkside.ASH}"))
         rows: dict[str, list[tuple[str, str, str, str]]] = {}
         for member in members:
             rows.setdefault(member[0], []).append(member)
@@ -309,7 +408,8 @@ class HelpScreen(ModalScreen[None]):
         # samples each individually under budget could still SUM past it, and
         # the pad below went negative (`" " * negative` is silently `""`,
         # never an error) while the row it padded stayed over width.
-        budget = LEGEND_ROW_CELLS - len(_INDENT)
+        row = self.row_cells
+        budget = row - len(_INDENT)
         samples: list[tuple[str, str]] = []
         width = 0
         for _row_id, glyph, _label, style in members:
@@ -326,22 +426,22 @@ class HelpScreen(ModalScreen[None]):
             samples.append((shown, _sample_style(style)))
             width += _cells(shown)
         label = members[0][2]
-        label_cells = LEGEND_ROW_CELLS - len(_INDENT) - _SAMPLE_CELLS
+        label_cells = row - len(_INDENT) - _SAMPLE_CELLS
         text.append(_INDENT)
         for sample, style in samples:
             text.append(sample, style=style)
         if width >= _SAMPLE_CELLS:
             # A sample wider than its column keeps its own line rather than
             # being cut: a truncated glyph misdescribes the form it stands for.
-            text.append(" " * max(0, LEGEND_ROW_CELLS - len(_INDENT) - width) + "\n")
+            text.append(" " * max(0, row - len(_INDENT) - width) + "\n")
             text.append(_INDENT + " " * _SAMPLE_CELLS)
         else:
             text.append(" " * (_SAMPLE_CELLS - width))
         text.append(darkside.fit(label, label_cells) + "\n", style=darkside.INK)
 
     def _render_colours(self) -> Text:
-        label_cells = LEGEND_ROW_CELLS - len(_INDENT) - 3
-        parts: list[tuple[str, str]] = [(f"\n{SECTION_COLOURS}\n\n", f"bold {darkside.ASH}")]
+        label_cells = self.row_cells - len(_INDENT) - 3
+        parts: list[tuple[str, str]] = [(f"{SECTION_COLOURS}\n\n", f"bold {darkside.ASH}")]
         for swatch, label, token in darkside.DECLARED_COLOURS:
             parts.append((_INDENT, ""))
             parts.append((darkside.fit(swatch, 1), darkside.resolve_style(token)))
@@ -351,7 +451,7 @@ class HelpScreen(ModalScreen[None]):
 
     def _render_footer(self) -> Text:
         return Text.assemble(
-            ("\n" + "\n".join(darkside.fit(line, LEGEND_ROW_CELLS) for line in FOOTER_LINES),
+            ("\n".join(darkside.fit(line, self.row_cells) for line in FOOTER_LINES),
              darkside.ASH)
         )
 
