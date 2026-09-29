@@ -2271,7 +2271,15 @@ class MapScreen(Screen):
         FIRST, so a pan repaint that follows (`_move_pan`) reads the real
         owner through `_focus_owner` instead of the transient one.  That
         ordering is what the operator saw as the selection card flashing
-        from blue to grey on `esc` (`INC8-P3-UX-F1`, carried `UX-F7`)."""
+        from blue to grey on `esc` (`INC8-P3-UX-F1`, carried `UX-F7`).
+
+        `INC8-CL-CR-F1`: `_reclamp_pan` runs AFTER the restore, on the
+        canvas's CURRENT size -- a resize while the legend was open (docked
+        or modal; the legend keeps the operator's kept pan through either)
+        can shrink the extent under `pan_x`, and `_move_pan` alone does not
+        clamp, it only repaints whatever it is handed.  At an unchanged size
+        this is a no-op: the kept pan is already legal, so `A-109`'s "closing
+        still restores the kept pan exactly" is unaffected."""
         widget = None
         if focus_id is not None:
             matches = self.query(f"#{focus_id}")
@@ -2279,6 +2287,13 @@ class MapScreen(Screen):
                 widget = matches.first()
         self.set_focus(widget)
         self._move_pan(pan_x, pan_y)
+        self._reclamp_pan(*self._canvas_size())
+        # `_reclamp_pan` only clamps the two fields; it does not repaint.  A
+        # size that shrank the extent left the frame `_move_pan` just drew
+        # showing the UNCLAMPED value until this second, otherwise-cheap
+        # pass -- `_declare_after_layout` no-ops when nothing changed, so an
+        # unchanged size costs one extra dataclass compare, not a redraw.
+        self._declare_after_layout()
 
     def _move_pan(self, pan_x: int, pan_y: int) -> None:
         """Move the pan and repaint through `_declare_after_layout`'s
@@ -2322,7 +2337,28 @@ class MapScreen(Screen):
         whole drawn width was visible, when the panel already covers the
         rightmost `panel_x`-to-`avail` slice of it regardless.  This is the
         one clamp `LLR-N06.1.2` now amends, and only for this call: `_clamp_pan`
-        itself, and every other caller of it, is untouched."""
+        itself, and every other caller of it, is untouched.
+
+        `H3` (closing verdict, round 5) fixes two things in the SAME call:
+
+        `right`'s off-by-one.  A card's box is `geo.card_w` columns wide, but
+        the title row's own fit (`views/layered.py`: `title_w = card_w - 3`,
+        the glyph `▐ ` two columns ahead of it) never reaches the box's own
+        last column when the row carries no change chip -- that column is
+        declared width, not painted ink.  Treating it as painted put the
+        margin's target one column too far right, so `REVEAL_MARGIN_CELLS`
+        painted as 3 blank columns on an ordinary card, not 2.  `- 1` below
+        names the box's actual last PAINTED column instead.
+
+        The widened range.  At the map's own true right edge the OLD clamp
+        left the margin exactly 0 -- read at the time as `LLR-N06.1.2`'s own
+        "no blank space past the content" principle.  The operator's answer
+        withdrew that reading for this one case (`A-109`'s dated addendum):
+        the margin is painted everywhere, edge included, so the legal range
+        this call clamps against widens by `REVEAL_MARGIN_CELLS` too -- room
+        the docked panel already occupies on screen regardless of where the
+        pan sits, exactly `A-109`'s own argument for widening to the visible
+        span in the first place, one step further."""
         cursor = self.nav.cursor
         if cursor is None or not self._consumes_pan(self._current_renderer()):
             return self.pan_x
@@ -2338,12 +2374,14 @@ class MapScreen(Screen):
             return pan_x
         canvas_x = self.query_one("#map-canvas", Static).region.x
         card_x, _card_y = geo.place(cursor)
-        right = canvas_x + card_x + geo.card_w
+        right = canvas_x + card_x + geo.card_w - 1
         edge = panel_x - self.REVEAL_MARGIN_CELLS
         if card_x >= geo.avail or right <= edge:
             return pan_x
         visible_span = panel_x - canvas_x
-        return self._clamp_pan(pan_x + right - edge, extent_x, visible_span)
+        return self._clamp_pan(
+            pan_x + right - edge, extent_x + self.REVEAL_MARGIN_CELLS, visible_span
+        )
 
     def _current_crumb(self) -> list[str]:
         prefix = self.source_crumb or [self.map_id]
