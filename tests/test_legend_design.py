@@ -552,6 +552,30 @@ async def test_d4_a_resize_moves_the_open_legend_between_layouts(tmp_path):
         assert footer_width(legend) == LEGEND_DOCKED_ROW_CELLS
 
 
+async def test_cr_f6_the_harvest_advances_by_cell_width():
+    """`INC8-F-CR-F6`: `harvest` walks `x` by each character's CELL width.
+    No view paints a wide glyph today, so the D2 arm alone could not tell;
+    this frame can.  Two wide characters fill a 4-cell widget, and a `\u25b2`
+    follows in a `HintLine` (X3, excluded).  Advancing per CHARACTER puts the
+    `\u25b2` at x=2 -- inside the first widget -- and harvests chrome as view."""
+    from textual.app import App
+    from textual.containers import Horizontal
+    from textual.widgets import Static
+
+    class Frame(App):
+        CSS = "Static { width: 4; height: 1; }"
+
+        def compose(self):
+            yield Horizontal(Static("\u6f22\u6f22", id="view"), Static("\u25b2", id="HintLine"))
+
+    app = Frame()
+    async with app.run_test(size=(20, 3)) as pilot:
+        await pilot.pause()
+        painted = {ch for ch, _st in harvest(app.screen)}
+    assert "\u6f22" in painted, "the arm's own view cell was not harvested"
+    assert "\u25b2" not in painted, "a chrome cell after a wide glyph was read as the view's"
+
+
 def test_d2_the_exclusion_rule_keeps_the_forms_the_catalogue_kept():
     """The rule's own arm: it must not exclude a glyph a member depends on.
     A rule that dropped `▸` or braille would make completeness vacuous for
