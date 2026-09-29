@@ -39,3 +39,42 @@ Commits before `8dea408` (`1538f4a`, `0f342a1`, `6e5275f`, and everything earlie
 ## Still open for the operator
 - **A5** — the own-scope group title `en esta leyenda` (corrective pass 1) awaits ratification
   into 01b §3.6; same class as Q3.
+
+---
+
+# Round 2 — operator verdict, 2026-09-29 (base `4ae3091`)
+
+Given on the decision page «Leyenda de mapper, segunda ronda» (renders from the final ux review),
+pasted back verbatim, plus one clarifying answer. **Authority for Inc-8 design pass 2.**
+
+| id | Verdict (verbatim) | What it rules |
+|---|---|---|
+| E1 · UX-F1 · D-Q4 · D-Q5 | (a) panel angosto de ~44 columnas, alto completo, vocabulario primero + la vista no se desplaza con la leyenda acoplada | Docked panel ~44 columns wide (round-10 proportion), full height (needs a dated amendment of the sealed `TC-R36` for the DOCKED layout only), vocabulary section first. Keys stay modal while docked: the view does NOT scroll. The row budget re-derives from the new width |
+| E2 · UX-F2 | pintar cada celda de muestra sobre GROUND, el suelo de la vista | Every vocabulary sample cell is painted on GROUND, the view's own ground, so it reads as it does in the view |
+| E3 · UX-F3 · A5 | ratificar «en esta leyenda» y comprimir el grupo a dos líneas | A5 ratified — the own-scope group exists and is titled; **its wording follows the English ruling below**. The group compresses to two lines |
+| E4 · UX-F8 · D-Q1 · D-Q3 | derivar §3.5 de lo que se pinta, como §3.1–3.4, y dar al rojo su segundo empleo «falta el acta» | 01b §3.5 is derived from what is painted, the same way §3.1–3.4 are; ALERT gets a declared second job: the missing-acta mark `◫` |
+| E5 · UX-F5 | todo al español en Inc-9, junto con los encabezados de pantalla de D5; los colores se traducen ya en Inc-8 — nota: El proyecto debe estar en inglés en su completitud. | **SUPERSEDED by the clarification below.** Split kept: the legend's own strings now; key labels, group headers and screen headers in Inc-9 |
+| E6 · D-Q6 | aceptar las tres etiquetas corregidas, V35 y D✓ | V19, V21a/b and V31 keep their corrected meanings; V35 becomes "pending fields here and below"; field letters get the sample `D✓`. **Wording in English per the ruling below** |
+
+## LANGUAGE RULING — the whole project is in English, UI included (operator, 2026-09-29)
+
+The E5 note read *"El proyecto debe estar en inglés en su completitud."* Asked whether "the project"
+meant code and docs only or the UI too, the operator answered: **"Todo en inglés, también la UI."**
+
+This **reverses** the Spanish-copy direction of round 1's D1 and the Spanish view names of D5. It
+does not reverse their substance: D1's copy (what each row says) and D5's one-name-per-view rule
+stand, rendered in English. Consequences, as routed by the coordinator:
+
+- **Inc-8 (now):** every string the legend paints is English — vocabulary labels, the §3.5 colour
+  labels, the §3.6 section headers and footer, the own-scope group title, the title hint, the view
+  names. 01b §3.1–3.6 copy is rewritten in English accordingly.
+- **Inc-9:** key labels, key-group headers and the other screens' own headers — the strings Inc-9
+  already touches — in English.
+- **New increment after Inc-9 — `Inc-EN`:** every remaining user-facing string (sala, ficha,
+  inspector, toasts, notices, empty states, the damaged-card state `mapa dañado — ↵ ver por qué`
+  and its requirement) moves to English, driven by a MECHANICAL census of painted and notified
+  strings, with the requirement/test strings that pin Spanish copy re-derived rather than edited.
+  Recorded as `BACKLOG.md` **B-71** until it is cut into the batch.
+- The operator's own Spanish terms of art in this batch's records (sala, ficha, acta, leyenda) are
+  historical text and are not rewritten.
+
