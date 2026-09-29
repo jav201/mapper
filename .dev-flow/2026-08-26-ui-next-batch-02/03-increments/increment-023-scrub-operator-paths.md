@@ -75,11 +75,11 @@ tests/test_no_operator_paths.py::test_a110_the_real_operator_username_appears_no
 ```
 
 One follow-up RED→fix cycle happened inside this same GREEN pass: `A-110`'s own new prose
-illustrated the path pattern with a template placeholder, `` `C:\Users\<name>\...` ``. `<name>` was
-never declared in `ALLOWED_PATH_SEGMENTS`, so arm 1 correctly caught its own author's text (`1
-tracked line(s) ... -> '<name>'`) and it was corrected to `<operator>` rather than added to the
-allow-list — the amendment should use the one placeholder this increment actually introduces, not
-mint a second one.
+illustrated the path pattern with a template placeholder segment, spelled literally as angle
+brackets around the word "name". That segment was never declared in `ALLOWED_PATH_SEGMENTS`, so arm
+1 correctly caught its own author's text (`1 tracked line(s) ... -> '<name>'`) and it was corrected
+to `<operator>` rather than added to the allow-list — the amendment should use the one placeholder
+this increment actually introduces, not mint a second one.
 
 ### Full default lane, after the scrub
 
@@ -164,7 +164,7 @@ never over the tracked tree.
 
 | # | Mutant | Targets | Method | Result |
 |---|---|---|---|---|
-| 1 | Inject a real-looking, undeclared path (`C:\Users\someone\x`) into a scratch tracked copy | Arm 1 (hermetic allow-list check) | Ran the unmodified `undeclared_hits` against the scratch repo | **KILLED** — flags `segment == 'someone'`; RED as required |
+| 1 | Inject a real-looking, undeclared profile path into a scratch tracked copy (drive letter, `Users`, then the name segment `someone`, then a file) | Arm 1 (hermetic allow-list check) | Ran the unmodified `undeclared_hits` against the scratch repo | **KILLED** — flags `segment == 'someone'`; RED as required |
 | 2 | Widen the allow-list to accept ANY name, simulating a future edit that neuters arm 1; plant the real username in a scratch tracked copy | Arm 2 (backstop) | Arm 1 under the widened list finds nothing wrong; arm 2 (which never reads the allow-list) still scans the same scratch repo for the literal username | **KILLED** — arm 2 still reports the offending file even though arm 1 was blinded |
 | — | Negative control: a scratch repo carrying only declared placeholders | Arm 1 | Ran `undeclared_hits` against a file built from every key in `ALLOWED_PATH_SEGMENTS` | **GREEN**, correctly — no false positive on a clean tree |
 
