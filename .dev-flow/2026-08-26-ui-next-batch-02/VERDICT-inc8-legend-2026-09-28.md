@@ -78,3 +78,33 @@ stand, rendered in English. Consequences, as routed by the coordinator:
 - The operator's own Spanish terms of art in this batch's records (sala, ficha, acta, leyenda) are
   historical text and are not rewritten.
 
+---
+
+# Round 3 — operator verdict, 2026-09-29 (base `7227521`)
+
+Decision page «Leyenda de mapper, tercera ronda» (renders from the pass-2 ux review), pasted back
+verbatim. **Authority for Inc-8 design pass 3.** All five items took the recommended option.
+
+| id | Verdict (verbatim) | What it rules |
+|---|---|---|
+| F1 · P2-UX-F1 · D2-Q6 | colores por vista (cada leyenda muestra solo los colores que su vista pinta) y el ámbar declara también «faltantes, como conteo» | The colour rows are PER VIEW, derived from each view's own census. WARN (amber) gains a declared second job: missing items as a count (the outline footer and the home hero's "sin acta" counts). ALERT (red) keeps "missing record" and appears only where a view paints it |
+| F2 · P2-UX-F2 | al acoplar, desplazar la vista para que la selección quede a la izquierda del panel; al cerrar, volver a la posición anterior | On dock, the view pans so the selection sits left of the panel; on close, the view returns to its prior position. Keys stay modal (E1 unchanged): the view moves only because of docking |
+| F9 · D-Q7 | derivar el umbral del ancho de lienzo que queda visible junto al panel de 44 (acoplar mientras quede un mínimo útil) | The dock threshold is DERIVED from the canvas width left visible beside the 44-column panel; dock while a useful minimum remains. The minimum is a named, declared number |
+| Q7 · D2-Q7 · P2-CR-F8 | V28 como D░ «field initial · ░ pending», y la letra se pinta en el gris de la vista en V27 y V28 | V28's sample becomes `D░` ("field initial · ░ pending"); in V27 and V28 the letter is painted in the view's grey, as the view paints it |
+| copy · P2-UX-F3 · F5 | aplicar todos los ajustes de copy y del modal | All nine copy and modal adjustments on the page apply, including the 12-cell sample column in the modal |
+
+## DESIGN PRINCIPLE — terminal width is variable; keep a fixed reference width (operator, 2026-09-29)
+
+Verbatim note on the copy item: *"Usualmente el escalado de la terminal es una herramienta para hacer
+fit de más contenido y ese se mantienen variable, al menos así es en otras aplicaciones con TUI. Ten
+eso en cuenta también en la toma de decisiones, es bueno tener un ancho de columnas fijo como
+referencia considerando lo anterior."*
+
+Reading applied by the coordinator:
+- **Behaviour is derived for ANY width.** Operators zoom the terminal to fit more, so no layout may
+  assume a width; thresholds and budgets derive from geometry (this is why F9 derives the dock
+  threshold instead of fixing it).
+- **Decisions and renders use ONE fixed reference width:** the declared context of use,
+  `DECLARED_CONTEXT_CELLS` = 118 columns. Every design render shown to the operator includes the
+  reference width, alongside a narrower and a wider one.
+
