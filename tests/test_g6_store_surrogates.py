@@ -540,3 +540,122 @@ def test_g6c_f6_mmd_only_orphan_node_ficha_is_coerced(tmp_store):
     reloaded = tmp_store.load("orph")
     assert reloaded.nodes["orphan"].ficha.title == title
 
+
+def test_g6c_f7_crlf_notes_round_trip_as_lf_with_no_replacement_char(tmp_store):
+    """`G6-C-F7` (regression `A-111` introduced).  `plain()` maps `\\r`
+    (U+000D) to U+FFFD — correct at a paint sink, but `_coerce_field` runs it
+    on every LOADED string, so CRLF notes pasted on Windows corrupted on the
+    very first load, silently.
+
+    RED mutation: drop `_normalize_newlines` from `_coerce_field`'s two
+    branches.
+    """
+    g = Graph()
+    g.add_node(Node(id="root", ficha=Ficha(title="root", notes="line1\r\nline2")))
+    tmp_store.save("crlf", g)
+
+    reloaded = tmp_store.load("crlf")
+    notes = reloaded.nodes["root"].ficha.notes
+    assert notes == "line1\nline2"
+    assert "\ufffd" not in notes
+
+
+def test_g6c_f7_lone_cr_round_trips_as_lf(tmp_store):
+    """`G6-C-F7`, the lone-`\\r` half (old Mac line endings)."""
+    g = Graph()
+    g.add_node(Node(id="root", ficha=Ficha(title="root", notes="a\rb")))
+    tmp_store.save("cr", g)
+
+    reloaded = tmp_store.load("cr")
+    assert reloaded.nodes["root"].ficha.notes == "a\nb"
+
+
+def test_g6c_f7_tab_cjk_emoji_round_trip_byte_identical(tmp_store):
+    """`G6-C-F7`'s negative control: TAB/CJK/emoji are untouched by the
+    newline normalization and still round-trip exactly, same as before
+    `A-111`.
+    """
+    text = "col1\tcol2 \u4e2d\u6587 \U0001F600"
+    g = Graph()
+    g.add_node(Node(id="root", ficha=Ficha(title="root", notes=text)))
+    tmp_store.save("mixed", g)
+
+    reloaded = tmp_store.load("mixed")
+    assert reloaded.nodes["root"].ficha.notes == text
+
+
+def test_g6c_f8a_two_phase_write_leaves_both_files_unchanged_on_temp_failure(
+    tmp_store, monkeypatch
+):
+    """`G6-C-F8`(a).  A forced failure writing the SECOND temp file must
+    leave BOTH on-disk truth files exactly as they were before the save
+    attempt — the previous single-phase `save()` had already replaced
+    `.mmd` by the time `_nodos.yml`'s write could still fail.
+
+    RED mutation: revert `save()` to the single-phase
+    `self._atomic_write(mmd_path, ...); self._atomic_write(yml_path, ...)`.
+    """
+    g = Graph()
+    g.add_node(Node(id="root", ficha=Ficha(title="v1")))
+    tmp_store.save("torn", g)
+
+    mmd_path = tmp_store.workspace / "torn.mmd"
+    yml_path = tmp_store.workspace / "torn_nodos.yml"
+    mmd_before = mmd_path.read_bytes()
+    yml_before = yml_path.read_bytes()
+
+    g.nodes["root"].ficha.title = "v2"
+
+    real_write_text = Path.write_text
+
+    def failing_write_text(self, *a, **kw):
+        if self.name == "torn_nodos.yml.tmp":
+            raise OSError("boom (forced by G6-C-F8a mutation harness)")
+        return real_write_text(self, *a, **kw)
+
+    monkeypatch.setattr(Path, "write_text", failing_write_text)
+    with pytest.raises(OSError):
+        tmp_store.save("torn", g)
+    monkeypatch.undo()
+
+    assert mmd_path.read_bytes() == mmd_before, "the .mmd file was torn"
+    assert yml_path.read_bytes() == yml_before, "the sidecar file was torn"
+
+
+def test_g6c_f8b_failure_between_replaces_is_warned_on_next_load(
+    tmp_store, monkeypatch
+):
+    """`G6-C-F8`(b).  A crash between the two `replace()` calls leaves `.mmd`
+    replaced and the sidecar stale — the next `load()` must warn (naming the
+    map, no path) rather than silently reverting the edit with no trace.
+
+    RED mutation: drop the `_mmd_hash` mismatch check from `load()` (or drop
+    writing `_mmd_hash` in `save()`).
+    """
+    g = Graph()
+    g.add_node(Node(id="root", ficha=Ficha(title="v1")))
+    tmp_store.save("torn2", g)
+
+    g.nodes["root"].ficha.title = "v2"
+
+    real_replace = Path.replace
+    calls = {"n": 0}
+
+    def flaky_replace(self, target):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise OSError("boom (forced by G6-C-F8b mutation harness, 2nd replace)")
+        return real_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", flaky_replace)
+    with pytest.raises(OSError):
+        tmp_store.save("torn2", g)
+    monkeypatch.undo()
+
+    reloaded = tmp_store.load("torn2")
+    assert any("desincronizado" in w for w in reloaded.load_warnings), (
+        f"no mismatch warning: {reloaded.load_warnings}"
+    )
+    assert "torn2" in "; ".join(reloaded.load_warnings)
+    # The stale sidecar is what actually loaded — the edit "reverted", now WARNED.
+    assert reloaded.nodes["root"].ficha.title == "v1"
