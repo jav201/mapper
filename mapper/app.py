@@ -2352,8 +2352,25 @@ class MapScreen(Screen):
         last column when the row carries no change chip -- that column is
         declared width, not painted ink.  Treating it as painted put the
         margin's target one column too far right, so `REVEAL_MARGIN_CELLS`
-        painted as 3 blank columns on an ordinary card, not 2.  `- 1` below
-        names the box's actual last PAINTED column instead.
+        painted as 3 blank columns on an ordinary card, not 2.  `right` below
+        is ONE COLUMN PAST the last column this call has reason to believe is
+        painted -- never "the box's own last painted column" itself, which is
+        `right - 1` (`INC8-FU-F4`: an earlier revision of this docstring said
+        the second thing and meant the first).
+
+        `INC8-FU-F1` (follow-up, non-blocking at Inc-8's close): a changed
+        card paints ONE MORE column than an ordinary one.  `views/layered.py`
+        paints the diff chip through the box's own last column
+        (`chip_x + len(chip) - 1 == cx + geo.card_w - 1`), the exact column
+        the ordinary case never reaches -- and the selection's own highlight
+        pass never repaints that one column either way, diff or not, so it is
+        the chip's paint that survives there.  Measured before this fix: a
+        changed, selected card left only 1 blank column, not the declared 2,
+        because `right` subtracted the ordinary case's `- 1` even where the
+        chip made that column painted ink.  `chip_painted` below reads the
+        SAME predicate `views/layered.py` gates the chip's own paint on
+        (`changed.get(nid)` truthy, not merely `nid in changed`, which would
+        wrongly count a diff entry whose list happens to be empty).
 
         The widened range.  At the map's own true right edge the OLD clamp
         left the margin exactly 0 -- read at the time as `LLR-N06.1.2`'s own
@@ -2379,7 +2396,9 @@ class MapScreen(Screen):
             return pan_x
         canvas_x = self.query_one("#map-canvas", Static).region.x
         card_x, _card_y = geo.place(cursor)
-        right = canvas_x + card_x + geo.card_w - 1
+        changed = state.diff.changed if state.diff else {}
+        chip_painted = bool(changed.get(cursor))
+        right = canvas_x + card_x + geo.card_w - (0 if chip_painted else 1)
         edge = panel_x - self.REVEAL_MARGIN_CELLS
         if card_x >= geo.avail or right <= edge:
             return pan_x
