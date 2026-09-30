@@ -77,7 +77,8 @@ async def test_at_n03b_selecting_a_palette_entry_executes_it(tmp_path):
         palette = app.screen
         assert isinstance(palette, CommandPalette)
 
-        palette.query_one("#palette-input").value = "cobertura"
+        # `A-112`: the seat's label for `coverage` is English since Inc-9.
+        palette.query_one("#palette-input").value = "coverage"
         await pilot.pause()
         assert [b.action for b in palette._items] == ["coverage"], (
             "the query must narrow to exactly one entry for this test to be exact"
@@ -86,7 +87,7 @@ async def test_at_n03b_selecting_a_palette_entry_executes_it(tmp_path):
         await pilot.press("enter")
         await pilot.pause()
         assert isinstance(app.screen, CoverageScreen), (
-            "selecting 'cobertura' must execute action_coverage, not merely close the palette"
+            "selecting 'coverage' must execute action_coverage, not merely close the palette"
         )
 
 

@@ -250,16 +250,17 @@ def test_groups_for_keybar_order_and_glyphs():
     groups = groups_for_keybar(["nav", "app"])
     assert [g[0] for g in groups] == ["nav", "app"]
     nav_pairs = groups[0][1]
-    assert ("j", "siguiente") in nav_pairs
+    # `A-112`: English labels since Inc-9.
+    assert ("j", "next sibling") in nav_pairs
     # The keybar shows the glyph, never the Textual key name.
-    assert ("↵", "abrir ficha") in nav_pairs
+    assert ("↵", "open card") in nav_pairs
     assert not any(k == "enter" for k, _ in nav_pairs)
 
 
 def test_palette_items_filters_by_scope_and_query():
     map_items = palette_items("", keymap.SCOPE_MAP)
     assert all(b.scope in {keymap.SCOPE_MAP, keymap.SCOPE_APP} for b in map_items)
-    hits = palette_items("cobertura", keymap.SCOPE_MAP)
+    hits = palette_items("coverage", keymap.SCOPE_MAP)
     assert [b.action for b in hits] == ["coverage"]
     # A query matching nothing returns nothing rather than everything.
     assert palette_items("zzzzz", keymap.SCOPE_MAP) == []

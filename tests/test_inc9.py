@@ -342,7 +342,7 @@ CHROME_LEXICON = frozenset("""
     add all app archive attachment back bottom branch browse build card child choose
     close command component connect coverage csv default details diff disabled document
     documents doors down edit export factory file focus focused fold from generate go
-    hide home import last leave legend list map maps match mind missing nav new next node
+    help hide home import last leave legend list map maps match mind missing nav new next node
     office open outline page palette pan parent plug previous quit rail remove repo
     repository resume right left run save scroll search settings show sibling start svg
     template to toggle top tree undo up view
@@ -363,8 +363,9 @@ def _seat_strings() -> list[tuple[str, str]]:
 
 
 def _keybar_literals() -> list[tuple[str, str]]:
-    """Group headers and labels of every hand-written `KeyBar([...])` literal."""
-    out = []
+    """Group headers and labels of every hand-written `KeyBar([...])` literal,
+    and the keybar's own truncation word (`A-112` st. 3)."""
+    out = [("mapper/darkside.py", darkside.KEYBAR_MORE)]
     for path, source in _product_sources().items():
         for node in ast.walk(ast.parse(source)):
             if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
@@ -427,8 +428,8 @@ def _judge(strings: list[tuple[str, str]]) -> list[tuple[str, str, str]]:
     return bad
 
 
-@pytest.mark.parametrize("source", ["seat", "keybar", "headers"])
-@pytest.mark.xfail(strict=True, reason="RED: Spanish chrome before Inc-9 (A-112)")
+@pytest.mark.parametrize("source", ["seat", "keybar", pytest.param("headers", marks=pytest.mark.xfail(
+    strict=True, reason="RED: Spanish screen headers until Inc-9's header step"))])
 def test_a112_the_chrome_is_english(source):
     strings = {"seat": _seat_strings, "keybar": _keybar_literals,
                "headers": _screen_headers}[source]()
@@ -451,7 +452,6 @@ def test_a112_every_language_exception_is_still_real():
         assert owner.startswith("Inc-"), owner
 
 
-@pytest.mark.xfail(strict=True, reason="RED: 'alternar radial' does not name 'mind map'")
 def test_a112_a_label_that_names_a_view_uses_its_one_name():
     rows = [(view, b) for view in darkside.VIEW_NAMES for b in keymap.KEYMAP
             if b.action == f"toggle_{view}"]
@@ -517,7 +517,6 @@ def _projection(seat) -> set[tuple]:
     return {(b.scope, b.key, b.action, b.glyph, b.priority) for b in seat}
 
 
-@pytest.mark.xfail(strict=True, reason="RED until Inc-9 adds its rows and regroups")
 def test_cd25a_the_seat_diff_is_exactly_what_inc9_declares():
     entry = _entry_seat()
     before, after = _projection(entry.KEYMAP), _projection(keymap.KEYMAP)

@@ -294,6 +294,11 @@ def group_box(renderable, pad_x: int = 1) -> Panel:
 
 
 # Keybar -------------------------------------------------------------------
+#: The keybar's truncation word after the help glyph (`A-112` st. 3): the
+#: marker's width and its paint read this one spelling.
+KEYBAR_MORE = "all"
+
+
 def keybar(
     groups: Sequence[tuple[str, Sequence[tuple[str, str]]]],
     width: int = DECLARED_CONTEXT_CELLS,
@@ -305,7 +310,7 @@ def keybar(
 
     When the bar does not fit, a bare `…` is a lie by omission: it says something
     was cut but not that anything is missing, let alone how much or how to see it.
-    This ends with `… +N  ? todas`, naming the count hidden and the key that shows
+    This ends with `… +N  ? all`, naming the count hidden and the key that shows
     them.  Measured before this change: the bar rendered 216 cells at a hard-coded
     118, so 9 of 17 bindings were shown and `m cobertura` — the entry point to the
     coverage flow — was simply invisible.
@@ -333,7 +338,7 @@ def keybar(
 
     # Re-assemble, counting how many bindings actually fit inside the budget the
     # marker leaves behind.
-    marker_width = len(f" … +{total}  {help_key} todas")
+    marker_width = len(f" … +{total}  {help_key} {KEYBAR_MORE}")
     budget = max(0, width - marker_width)
     kept: list[tuple[str, str]] = []
     shown = 0
@@ -358,7 +363,7 @@ def keybar(
     out = Text.assemble(*kept)
     out.append(f" … +{hidden}", style=WORDMARK)
     out.append(f"  {help_key}", style=ACCENT)
-    out.append(" todas", style=MUT)
+    out.append(f" {KEYBAR_MORE}", style=MUT)
     return out
 
 
