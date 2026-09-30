@@ -387,11 +387,17 @@ def _screen_headers() -> list[tuple[str, str]]:
     literal crumbs passed to `TabStrip`, and the literal text of a `Static` or
     `Label` whose id names it a title, header or label -- inside every product
     `Screen` subclass."""
-    out = []
-    tab_strip = ast.parse(inspect.getsource(darkside.tab_strip))
-    for node in ast.walk(tab_strip):
-        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") == "tabs":
-            out += [("mapper/darkside.py", pair.elts[1].value) for pair in node.value.elts]
+    tabs = []
+    for node in ast.walk(ast.parse(inspect.getsource(darkside.tab_strip))):
+        # `INC9-F5`: `tabs` is ANNOTATED -- an `Assign`-only walk derived no
+        # tab label at all, and the census stayed green on a Spanish tab
+        # (mutant M14).  Each source now asserts itself non-empty.
+        target = node.target if isinstance(node, ast.AnnAssign) else (
+            node.targets[0] if isinstance(node, ast.Assign) else None)
+        if getattr(target, "id", "") == "tabs":
+            tabs += [("mapper/darkside.py", pair.elts[1].value) for pair in node.value.elts]
+    assert tabs, "no tab label derived from darkside.tab_strip"
+    out = list(tabs)
     screens = {cls.__name__ for module in PRODUCT_MODULES
                for _, cls in inspect.getmembers(module, inspect.isclass)
                if issubclass(cls, Screen) and cls.__module__ == module.__name__}
@@ -411,6 +417,7 @@ def _screen_headers() -> list[tuple[str, str]]:
                         and isinstance(node.args[0], ast.Constant)
                         and isinstance(ident, ast.Constant) and _HEADER_ID.search(ident.value)):
                     out.append((path, node.args[0].value))
+    assert len(out) > len(tabs), "no crumb or title derived from any Screen subclass"
     return out
 
 
