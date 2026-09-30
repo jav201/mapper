@@ -585,6 +585,24 @@ class MapStore:
                     )
                 ],
             )
+        # `G6-C-F6`: an "orphan" node -- one `mermaid.parse` (via `graph =
+        # parse(mmd_text)` above) materialised from the `.mmd` alone, because
+        # the sidecar carries no entry for it -- never enters the loop above,
+        # so its `Ficha` (title set raw by `mermaid.parse`; every other field
+        # at its default) skipped every coercion `A-111` added. A bidi mark or
+        # a lone surrogate in an mmd-only node's label reached the graph, and
+        # `_reindex`'s sqlite3 bind, uncoerced. `fields`/`attachments` are left
+        # alone: `mermaid.parse` never populates either, so there is nothing
+        # there to coerce.
+        for nid, node in graph.nodes.items():
+            if nid in seen_ids:
+                continue
+            node.ficha = Ficha(
+                **{
+                    attr: _coerce_field(graph, nid, attr, getattr(node.ficha, attr))
+                    for attr in _text_attributes()
+                }
+            )
         return graph
 
     def load(self, map_id: str) -> Graph:

@@ -499,3 +499,44 @@ async def test_g6c_f4_guardar_como_name_with_lone_surrogate_saves_cleanly(tmp_pa
         assert reloaded.nodes["root"].ficha.title == "root"
 
 
+def test_g6c_f5_edge_label_is_coerced():
+    """`G6-C-F5`.  `Edge.label`, set raw by `mermaid.parse` straight from the
+    `.mmd` text, never passed through `A-111`'s coercion (scoped to sidecar
+    text positions). A bidi mark in an edge label must come out coerced.
+
+    RED mutation: drop the `plain()` call around `_unescape_mermaid(edge_label)`
+    in `mermaid.parse`.
+    """
+    from mapper.mermaid import parse
+
+    mmd = f"graph TD\n    root[root] -->|nota{BIDI_MARK}| child[child]\n"
+    graph = parse(mmd)
+    edge = next(e for e in graph.edges if e.child_id == "child")
+    assert BIDI_MARK not in edge.label
+    assert "\ufffd" in edge.label
+
+
+def test_g6c_f6_mmd_only_orphan_node_ficha_is_coerced(tmp_store):
+    """`G6-C-F6`.  An mmd-only ("orphan") node — the sidecar carries no entry
+    for it — used to skip every `A-111` coercion; its title, set raw by
+    `mermaid.parse`, reached the graph (and `_reindex`'s sqlite3 bind)
+    uncoerced.
+
+    RED mutation: drop the post-loop coercion pass over nodes not in
+    `seen_ids` in `_graph_from_sidecar`.
+    """
+    mmd = f"graph TD\n    root[root] --> orphan[orph{BIDI_MARK}an]\n"
+    (tmp_store.workspace / "orph.mmd").write_text(mmd, encoding="utf-8")
+    (tmp_store.workspace / "orph_nodos.yml").write_text("nodes: {}\n", encoding="utf-8")
+
+    graph = tmp_store.load("orph")
+
+    title = graph.nodes["orphan"].ficha.title
+    assert BIDI_MARK not in title
+    assert "\ufffd" in title
+
+    # Round-trips through a save + reload as valid UTF-8, same as (a).
+    tmp_store.save("orph", graph)
+    reloaded = tmp_store.load("orph")
+    assert reloaded.nodes["orphan"].ficha.title == title
+
