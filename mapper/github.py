@@ -127,11 +127,18 @@ def _tags(cwd: Path) -> list[str]:
 
 
 def _repo_name_from_url(url: str) -> str:
+    """The last URL segment, which becomes a directory name under the cache.
+
+    `B-77b`: it is typed text, so it is refused when it could leave the cache
+    (`..`, a run of dots, a separator, a drive colon) or name nothing (empty).
+    """
     parsed = urlparse(url)
-    if parsed.path:
-        name = parsed.path.rstrip("/").rsplit("/", 1)[-1]
-        return name.removesuffix(".git")
-    return "repo"
+    if not parsed.path:
+        return "repo"
+    name = parsed.path.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+    if not name.strip(". ") or any(c in name for c in "/\\:"):
+        raise GitHubError("refusing the repository URL: its last segment is not a usable name")
+    return name
 
 
 def _ensure_cloned(url: str, cache_dir: Path) -> Path:
@@ -150,7 +157,9 @@ def _ensure_cloned(url: str, cache_dir: Path) -> Path:
         encoding="utf-8",
     )
     if result.returncode != 0:
-        raise GitHubError(f"could not clone {url}: {result.stderr.strip()}")
+        # `INC9BC-SEC-F3`: git's stderr names the absolute cache path, and the
+        # URL may carry credentials.  The repo's name and the failure class only.
+        raise GitHubError(f"could not clone {name}: git clone failed (exit {result.returncode})")
     return target
 
 
