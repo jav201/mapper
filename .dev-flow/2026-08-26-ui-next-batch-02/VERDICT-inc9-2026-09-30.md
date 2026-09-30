@@ -35,3 +35,37 @@ each answer took the recommended option. **This record is the authority for Inc-
   `screens/coverage.py`, `screens/editor.py`; the widened strict-xfail arm (INC9-CR-F1) is its gate.
 - **Inc-9c** — wording, naming, hints, toasts: `keymap.py`, `app.py`, `darkside.py`,
   `screens/settings.py`, `screens/help.py`; plus INC9-CR-F2..F8 and G6-SEC-F9 in tests.
+
+---
+
+# Round 2 — after the Inc-9b/9c reviews (2026-09-30, base `fddd07d`)
+
+Reviews of Inc-9b + Inc-9c: code PASS (uninterrupted lane 1438 passed / 0 failed), ux
+PASS-WITH-FINDINGS, security BLOCK-UNTIL INC9BC-SEC-F1 (the factory office-import toast still paints
+the expanded profile path). The ux reviewer also reproduced two PRE-EXISTING data defects in
+`MapStore.create_seed` (silent overwrite of an existing map; `../x` writes outside the workspace);
+the coordinator cut them as **Inc-SEED** (`7521ac9..06d132c`, requirement A-113) without an
+operator question — a defect, not a design choice. Four design questions were put to the operator;
+each answer took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| L1 · INC9BC-UX-F1/F2 | The tab strip paints `n build` / `f factory` where `n`/`f` mean something else | Letras solo en home | Key letters appear on the tab strip ONLY on home, where they act, with the seat's labels (`c browse maps`, `n build map`); every other screen paints tab names without letters |
+| L2 · INC9BC-UX-F5 | Every hint line starts with `siguiente ▸` | `next ▸` ya | The hint prefix is chrome; it moves to `next ▸` now under K3 |
+| L3 · INC9BC-UX-F7 | Home bar leads with `maps j/k/↵` | Las puertas primero | On home the `open` group precedes `maps`, in the bar and the legend alike |
+| L4 · INC9BC-UX-F6 | The factory hint repeats keys the bar shows and wraps mid-label at 87 | Solo las acciones: d · i · g | The factory hint is `d edit document · i import office file · g generate office file` |
+
+Coordinator ruling on `INC9B-A1`: keep `atlas · concept map` / `atlas · legacy tree` (the ux
+reviewer's recommendation; `atlas (legacy tree)` noted as an alternative, not adopted).
+
+## Split (operator's 4-source-file cap)
+
+- **Inc-9d — security and defects:** `screens/factory.py` (INC9BC-SEC-F1 toast, B-77a, the L4 hint,
+  INC9BC-SEC-F4 unguarded copy), `github.py` (INC9BC-SEC-F3 clone stderr path, B-77b `..` URL segment),
+  `app.py` (the repo worker's `exit_on_error` so the GitHubError toast is reachable; INC9BC-UX-F3 map
+  hint; INC9BC-UX-F13 duplicated recents header). Tests: INC9BC-CR-F1 / SEC-F2 census lexical-try gap,
+  INC9BC-CR-F2 K3 sentinel arm, INC9BC-CR-F5 `w=36`.
+- **Inc-9e — the design answers:** `darkside.py` (L1 tab strip, L2 `next ▸`, INC9BC-CR-F6 explicit no-tab),
+  `keymap.py` (L3 home order), `screens/palette.py` (INC9C-F2 / INC9BC-UX-F4: group headers and an
+  English footer from the seat).
+
