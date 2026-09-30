@@ -65,6 +65,7 @@ from mapper.screens.help import (
     vocabulary_for,
 )
 from mapper.views.layered import pan_extent
+from mapper.widgets.inspector import INSPECTOR_WIDTH
 from mapper.widgets.rail import RAIL_WIDTH
 
 # ---------------------------------------------------------------------------
@@ -1052,6 +1053,19 @@ async def test_inc8_fu_f6_the_resize_close_repaints_once(tmp_path):
         (extent_x, span_x), _y = pan_extent(view.graph, view._view_state(w, h))  # noqa: SLF001
         legal_max = max(0, extent_x - span_x)
         assert view.pan_x <= legal_max, (view.pan_x, legal_max)
+
+
+def test_inc8_fu_f5d_the_docked_panel_covers_more_than_the_inspectors_width():
+    """`INC8-FU-F5d` (follow-up, non-blocking at Inc-8's close): `INC8-CL-F2`'s
+    own "no defect" argument for `_pan_revealing_selection`'s early-return
+    branches leans on `visible_span <= avail` always holding, and THAT reduces
+    (`canvas_x` and `avail` both derived from `_chrome_width`, the rail's own
+    width cancelling out of the sum whichever side of the canvas it sits on)
+    to `INSPECTOR_WIDTH + 2 <= LEGEND_DOCKED_CELLS` -- a fact about these two
+    constants' declared VALUES, not something either constant's own type or
+    `_pan_revealing_selection`'s code enforces.  One line, pinning the fact the
+    reasoning depends on rather than re-deriving the reasoning itself."""
+    assert INSPECTOR_WIDTH + 2 <= LEGEND_DOCKED_CELLS, (INSPECTOR_WIDTH, LEGEND_DOCKED_CELLS)
 
 
 # ---------------------------------------------------------------------------

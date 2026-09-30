@@ -1877,3 +1877,63 @@ touched. Nothing was staged from `prototypes/`, `mapper.db` or scratch, and
 - `0b6f1e2` docs(legend): 01b rows for H1/V27 -- the two rows the tests derive from
 - `35a469d` fix(legend): `INC8-CL-CR-F1`'s reclamp reads the resolution outside a pass
 - this record (docs)
+
+### Follow-ups correction (`INC8-FU-F4`, `INC8-FU-F5`), 2026-09-29
+
+The closing review that passed this increment also filed six non-blocking follow-ups
+(`INC8-FINAL-F1`-`F6`, `.dev-flow/state.json`'s `follow_ups_non_blocking`), fixed in a separate
+pass (`INC8-FU-Fn` below) under this same batch. This subsection is the record-accuracy correction
+that pass owed back to THIS record; it does not rewrite anything above.
+
+- **(a) the search census's own RED window was four commits, not one.** The *Lane and ruff* section
+  above, under *A regression this pass's own first draft introduced*, names only `7092526` as where
+  the first full-lane attempt "reddened" `test_every_reader_of_the_resolution_is_inside_a_paint_pass`.
+  Checked directly (a scratch worktree, each of the four commits checked out in isolation and the
+  one test run standalone): the underlying defect (`_restore_after_legend` and `on_screen_resume`
+  reaching the search resolution without opening a pass and without a stated reason) is introduced
+  AT `7092526` and is not touched again until `35a469d` fixes it -- so the census is RED in isolation
+  at `7092526`, `ec820c8`, `7454211` AND `0b6f1e2`, all four, not only the one commit this record's
+  prose happened to name. `35a469d` is GREEN. The record's own targeted-verification bullets (the
+  "targeted, at every commit of this pass" line, just above) never ran the FULL `test_search.py`
+  census at the three intermediate commits -- only the relevant SUBSET each one's own item touches --
+  which is why the four-commit RED window went unstated rather than merely unfixed.
+- **(b) a fourth caller of `_apply_region_visibility`.** `INC8-CL-F1`, above, greps three callers
+  (`MapScreen.on_mount`, `action_toggle_rail`, `action_toggle_inspector`) and concludes no reachable
+  path toggles `rail_hidden` while the legend is open. `_goto_gap` (reached from `action_coverage`'s
+  `CoverageScreen` callback) is a fourth: `git grep -n "_apply_region_visibility(" mapper/app.py`
+  shows it. The conclusion still holds -- `CoverageScreen` is itself a modal screen, and the legend
+  cannot be open AND have `action_coverage`'s callback fire through it, so this fourth caller opens
+  no new path while the legend is on top of the stack -- but the finding's own grep undercounted its
+  subject, and a claim of "no reachable path" is only as good as the caller list it was checked
+  against.
+- **(c) `V27`'s copy change has no operator verdict behind it; it is the coordinator's own alignment
+  with `G5`'s `V28` wording, not an `H4` item.** `01b-ux-decisions.md`'s closing-pass change-log row
+  for `V27` names the authority as `` `H4`'s companion copy item ``, which is wrong on its face -- `H4`
+  is round 5's rail-visibility ruling and says nothing about `V27`'s label. This record's own commit
+  list, immediately above, reads `` `7454211` ... V27 matches V28's wording (`H1`) `` -- the `(H1)`
+  there names the COMMIT this landed in, alongside `H1`'s own footer fix, not an attribution of
+  authority to `H1` either. The correct authority is stated in `VERDICT-inc8-legend-2026-09-28.md`,
+  Round 5's closing paragraph: *"the coordinator aligns V27's copy with the operator's G5 wording for
+  V28"* -- `G5` (design pass 4) is what ratified `V28`'s comma-separated wording in the first place; a
+  correction note is appended to 01b's own authority cell.
+- **(d) an unstated dependency behind `INC8-CL-F2`'s "no defect" reasoning.** `INC8-CL-F2`, above,
+  argues `visible_span <= avail` always, because "the panel only ever narrows what is visible."
+  Derived in full: `canvas_x + avail` reduces to `size.width - (inspector width, if shown) - 2`
+  (the rail's own width cancels out of the sum whether shown or not), and `panel_x = size.width -
+  LEGEND_DOCKED_CELLS`; the inequality `panel_x - canvas_x <= avail` therefore holds iff
+  `INSPECTOR_WIDTH + 2 <= LEGEND_DOCKED_CELLS` -- `36 + 2 = 38 <= 44`, true today, with 6 columns of
+  slack, but a fact about the two constants' VALUES, not a structural guarantee `_pan_revealing_
+  selection`'s own code enforces. `INC8-CL-F2`'s argument never named this; it read as if
+  "visible_span <= avail" followed from the panel narrowing the view alone. Pinned with a one-line
+  arm, `test_inc8_fu_f5d_the_docked_panel_covers_more_than_the_inspectors_width`, in
+  `tests/test_legend_design.py`.
+- **(e) `INC8-FU-F4`: the "`- 1`" wording, here too.** The *Verdict items applied* table's `H3` row,
+  above, glosses the fix as `` right = ... + geo.card_w - 1`, the card box's own last PAINTED
+  column, not one past it ``  -- backwards.  `right` IS one column past the last column the call
+  treats as painted (the actual last painted column, in the no-diff-chip case, is `right - 1`); the
+  row says the opposite of what the code does.  Same correction as `01-requirements.md`'s `A-109`
+  addendum and `01b-ux-decisions.md`'s own change-log row, both corrected alongside this one rather
+  than left to disagree with it.  `INC8-FU-F1` (follow-up) also found the premise underneath this
+  row -- that the box's own last column is NEVER painted ink -- holds only when the card carries no
+  diff chip; `views/layered.py` paints that same column WARN when it does, which is why the fix now
+  branches on `changed.get(cursor)` before choosing which column `right` names.
