@@ -1017,6 +1017,43 @@ async def test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close(tmp_pat
         assert view.pan_x <= legal_max, (view.pan_x, legal_max)
 
 
+async def test_inc8_fu_f6_the_resize_close_repaints_once(tmp_path):
+    """`INC8-FU-F6` (follow-up, non-blocking at Inc-8's close): `_restore_after_
+    legend` used to call `_declare_after_layout` TWICE for one restore -- once
+    inside `_move_pan`, which the pre-fix version used to set the pan, and once
+    at its own tail to show what `_reclamp_pan` had just clamped.  Counted
+    directly on the method's own call, on the SAME resize-while-docked setup
+    `INC8-CL-CR-F1`'s own arm above uses, so this is the exact path that
+    regression already exercises -- called directly rather than through the
+    real `escape` because the real close ALSO runs Textual's own post-resume
+    auto-focus (`on_screen_resume`, `H2`'s own focus/blur handlers), which
+    would add repaints of its own and blur what this arm is pinned to."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, _canvas = await _walked_map(app, pilot, TI_4)
+        await _panned_to_the_old_legal_max(pilot)
+        await pilot.press("question_mark")
+        await _settle(pilot)
+        assert app.screen.has_class(DOCKED_CLASS)
+        await pilot.resize_terminal(200, REFERENCE_SIZE[1])
+        await _settle(pilot)
+        pan_before = (view.pan_x, view.pan_y)
+        calls = []
+        real = view._declare_after_layout  # noqa: SLF001
+
+        def counted():
+            calls.append(1)
+            return real()
+
+        view._declare_after_layout = counted  # noqa: SLF001
+        view._restore_after_legend(*pan_before, None)  # noqa: SLF001
+        assert len(calls) == 1, f"_declare_after_layout ran {len(calls)} times, not once"
+        w, h = view._canvas_size()  # noqa: SLF001
+        (extent_x, span_x), _y = pan_extent(view.graph, view._view_state(w, h))  # noqa: SLF001
+        legal_max = max(0, extent_x - span_x)
+        assert view.pan_x <= legal_max, (view.pan_x, legal_max)
+
+
 # ---------------------------------------------------------------------------
 # `G5`: the revealed card keeps a declared `REVEAL_MARGIN_CELLS`-column margin
 # from the panel's left edge, honoured whenever `G2`'s (possibly widened)
