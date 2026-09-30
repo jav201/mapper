@@ -10157,3 +10157,94 @@ incomplete against its own statement above:
 (8 original + 12 corrective, one of which is the AST census) fail; `0` `store.save()`-shaped call
 sites anywhere under `mapper/` without a `try` body or the shared `_save_or_toast` helper around them
 (derived by AST walk, not hand-listed).
+
+
+### `A-112` -- Inc-9: English chrome (key labels, key-group headers, screen headers), one name per view on the headers Inc-9 owns, and the thresholds that make both checkable
+
+**Authority.** Operator LANGUAGE RULING, 2026-09-29 (`VERDICT-inc8-legend-2026-09-28.md` § "LANGUAGE
+RULING", verbatim *"Todo en inglés, también la UI."*), which routes to Inc-9 *"key labels, key-group
+headers and the other screens' own headers"*; round-1 `D5` as re-ruled in English (*"one name per
+view, the same on screen and in the legend"*; `atlas` / `outline` / `mind map` / `home`, ratified
+2026-09-29); carried finding `INC8-P2-UX-F4` (the atlas and radial headers paint names the legend
+does not use). **The exact English wording is NOT ruled**: every string this amendment introduces
+is listed, old and new, in `03-increments/increment-025-inc9.md` § "English copy table" for the
+operator to correct. A correction is a copy edit; it does not reopen this amendment.
+
+**Why an amendment and not a silent edit.** No requirement in this document names the language of
+the chrome, and several sealed arms pin Spanish label VALUES (`AT-N03h`'s whole-seat table, the tab
+strip, the keybar truncation marker). Re-deriving a sealed arm needs a requirement to re-derive it
+against; this is that requirement. Arms that pin BEHAVIOUR (which key dispatches which action, which
+scope a screen opens the legend on, priority, the collision set) are not re-derived and stay as
+they are.
+
+**Statement.**
+
+1. **Key labels.** Every `mapper/keymap.py::KEYMAP` label, in every scope, shall be short lowercase
+   English naming what the key does from the operator's side.
+2. **Key-group headers.** Every `mapper/keymap.py::GROUP_SCOPE` key (it is painted, verbatim, as the
+   group header in the keybar, the legend and the palette) shall be English. The two Spanish groups
+   are renamed: `lista` -> `list`, `salir` -> `leave`. The rename moves no key between scopes.
+3. **Hand-written key bars.** The two screens that still paint a hand-written `KeyBar` literal
+   (`HomeScreen`, `RepoScreen`) shall paint English group headers and labels. They are not migrated
+   into the seat by this amendment (`#D9` migrates `FactoryScreen` and `SettingsScreen` only); the
+   keybar's truncation marker (`darkside.keybar`, `? todas`) is part of the key bar and moves too.
+4. **Screen headers -- the set, defined so it can be DERIVED, never enumerated.** A screen header is:
+   (a) a tab label painted by `darkside.tab_strip`; (b) a string literal passed as `crumb=` to
+   `TabStrip` inside a `Screen` subclass; (c) the literal first argument of a `Static` or `Label`
+   composed inside a `Screen` subclass whose `id` ends in `-title`, `-header` or `-label`; (d) the
+   home screen's identity row name. The subject set is computed by walking every product module's
+   `Screen` subclasses with `ast` at test time. Every member shall be English. **Not members**, and
+   therefore `Inc-EN`'s (`BACKLOG.md` B-71): hint lines, toasts, prompt titles passed at a call site
+   (`_PromptScreen("guardar como", ...)`), modal hint rows (`↵ confirmar`), sidebar hint blocks, demo
+   content on the components sheet, and every string a renderer paints below its header line.
+5. **One name per view, on the headers Inc-9 owns.** The home screen's identity row shall read its
+   name from `darkside.VIEW_NAMES["home"]`. Every seat label that names a view (`toggle_<view>`)
+   shall name it by `darkside.VIEW_NAMES[<view>]`. The tab strip and the key labels shall use one
+   word per screen (`factory` on the door, the tab and the legend title; `settings` on the door, the
+   crumb and the legend title).
+6. **The painted-keys parser of `HLR-N16.4` shall not read a key-section row as an own-scope item**
+   (`INC8-P2-CR-F9`): an own-scope item is matched only in the exact form the own-scope group paints
+   it -- the seat's glyphs for one `OWN_SCOPE_COPY` word, single-spaced, then that word -- so a key
+   row painting a glyph and a label under the key column's padding never matches, whatever its
+   English label.
+7. **`LLR-N06.2.5`'s coercion half, clarified, not widened:** a site that routes the WHOLE formatted
+   message through `darkside.plain()` routes every interpolated value through it. `plain()` is
+   index-preserving replacement, so coercing the assembled string and coercing each value produce
+   the same painted row. The census accepts either shape; it accepts no third.
+8. **`C-D9a`'s precondition, recorded.** The positive control `C-D9a` demands (a real focus
+   transition on `SettingsScreen` with its `tab` bindings present) could not be built on the shipped
+   screen: executed at `6fe35f5`, 9 `tab` presses give `transitions=0`, `focus_chain` length **0**.
+   Root cause, measured: `settings.py::_StateRow.__init__` assigns its third column widget to
+   `self.disabled`, which is Textual's own `Widget.disabled` reactive -- a truthy widget object
+   disables the row and every component inside it (`_self_or_ancestors_disabled` is `True` for the
+   DEFAULT column's switch). The attribute is renamed; the sheet becomes traversable; the control is
+   then built and the drop is decided on it, as `C-D9a` rules.
+
+**Numeric pass thresholds** (every count evaluated at run time; none typed here):
+
+- labels (statement 1), group headers (2), hand-written key-bar strings (3) and screen headers (4)
+  carrying a non-ASCII LETTER (`unicodedata` category `L*`, code point > 127): `== 0`;
+- words in the same subject set that are not in the declared chrome lexicon
+  (`tests/test_inc9.py::CHROME_LEXICON`): `== 0`. The lexicon is a DECLARATION (a dictionary is not
+  derivable from the code it judges); the SUBJECT set is derived. A new English word is added to the
+  lexicon deliberately, in the same commit that paints it -- the same "changing the seat is a
+  deliberate edit" rule `AT-N03h` applies to the seat;
+- subject-set size `> 0` for each of the four sources, asserted BEFORE any member is judged;
+- declared exceptions: each names the increment that closes it, and a stale-exception guard reddens
+  when the excepted string is gone -- the `#D10` register's mechanism, reused;
+- `toggle_<view>` labels not containing `VIEW_NAMES[<view>]`: `== 0`;
+- the home identity row, read from the painted frame, contains `VIEW_NAMES["home"]` and not the old
+  name.
+
+**Split, recorded rather than absorbed (`INC9-F2`).** Statement 5 for the three MAP views' own
+headers (`views/layered.py`: `árbol legacy` / `mapa de conceptos`; `views/radial.py`: `mapa mental`;
+`views/outline.py` spells `outline` as a literal rather than reading it) and statement 4 for two
+screens outside Inc-9's declared files (`screens/coverage.py` `coverage-title`, `screens/editor.py`
+`editor-title`) would take Inc-9 to **8 source files against a cap of 5**. They are declared
+exceptions owned by **`Inc-9b`**, carried by a strict-xfail arm and by the language census's
+exception register, so the split is a mechanical handoff and not a promise. The coordinator cuts
+`Inc-9b`.
+
+**What is not claimed.** No toast, notice, prompt, hint line, inspector string or sala string moves
+language here (`Inc-EN`, B-71). No renderer file is edited. The legend's own copy (`help.py`) is
+Inc-8's and is untouched.

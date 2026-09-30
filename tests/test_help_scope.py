@@ -302,6 +302,21 @@ def _painted_help_keys(rows: list[str]) -> set[str]:
             if (b.glyph, help_screen.own_scope_word(b.action)) in pairs}
 
 
+@pytest.mark.xfail(strict=True, reason="INC8-P2-CR-F9: RED until Inc-9 anchors the parser")
+def test_inc8_p2_cr_f9_a_key_row_never_reads_as_an_own_scope_item():
+    """`A-112` st. 6.  A key-section row whose label happens to BE an
+    own-scope word -- `esc` over `close`, under the key column's padding --
+    is not an own-scope item; the item form itself still is.  Both rows are
+    built from the painters' own pieces, not typed."""
+    key_row = help_screen._INDENT + darkside.fit("esc", help_screen._KEY_CELLS) + "close"  # noqa: SLF001
+    assert _painted_help_keys([key_row]) == set(), key_row
+    item = help_screen._ITEM_SEP.join(  # noqa: SLF001
+        " ".join([*(b.glyph for b in bindings_for(SCOPE_HELP) if b.action in actions), word])
+        for actions, word in help_screen.OWN_SCOPE_COPY)
+    assert _painted_help_keys([help_screen._INDENT + item]) == {  # noqa: SLF001
+        b.key for b in bindings_for(SCOPE_HELP)}
+
+
 @pytest.mark.parametrize("size", LAYOUT_SIZES)
 async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
     """Keys with a MEASURED effect == keys the legend actually PAINTS.
