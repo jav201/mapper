@@ -40,7 +40,7 @@ from mapper.screens.help import HelpScreen
 from mapper.screens.settings import SettingsScreen
 from mapper.store import MapStore
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
-from tests.test_inc9 import HELP_SCREENS, OPENERS, _product_sources
+from tests.test_inc9 import HELP_SCREENS, OPENERS, _message_arg, _product_sources
 from tests.test_no_operator_paths import USER_PROFILE_PATH
 from tests.test_repair_layout import _frame_rows, _rows_in, _tree
 
@@ -217,13 +217,6 @@ async def test_inc9c_sec_f1_no_toast_paints_an_absolute_path(tmp_path, monkeypat
     assert workspace not in joined and str(tmp_path) not in joined, (site, toasts)
     for name in names:
         assert name in joined, f"{site}: the toast no longer names {name!r}: {toasts}"
-
-
-def _message_arg(call: ast.Call):
-    """The message expression of a `notify` call, positional or `message=`."""
-    if call.args:
-        return call.args[0]
-    return next((k.value for k in call.keywords if k.arg == "message"), None)
 
 
 _RAW_EXCEPTION_NAMES = frozenset({"e", "exc", "err", "error"})

@@ -370,35 +370,44 @@ async def test_g6c_f3_new_map_on_mount_save_degrades_to_a_toast(tmp_path):
         assert any("no se pudo guardar" in n for n, _ in notices)
 
 
-def _store_save_calls(tree: ast.AST) -> list[ast.Call]:
-    """Every call to `.save(` whose object's own last identifier is literally
-    `store` — `store.save(`, `self.store.save(`, `self.app.store.save(`.
+def _store_save_calls(tree: ast.AST) -> list[ast.AST]:
+    """Every reference to a `.save` in `tree` that is not `MapStore`'s own.
 
-    Derived structurally (the base identifier), never a hand-listed line
-    number or file path — so a NEW call site anywhere under `mapper/` is
-    found automatically. `self.save(...)` inside `MapStore` itself (its own
-    `create_seed`/`create_from_template`) does not match: its object is
-    `self`, not `store`, and it is `MapStore` calling its OWN method, not a
-    caller reaching into a store instance it holds.
+    `G6-SEC-F9` (MEDIUM): this used to match a call whose receiver's last
+    identifier was literally `store`, so `db = store; db.save(...)` -- or any
+    other name, alias, bound method or `getattr` -- evaded the census (shown
+    live).  It is now STRUCTURAL and judges by the method, not the receiver's
+    spelling: every `Attribute` named `save` (a call, or a reference such as
+    `go = store.save`) and every `getattr(x, "save")` is a site to judge.
+
+    One exemption, named and narrow: `self.save(...)` inside `class MapStore`
+    (its `create_seed` / `create_from_template`), which is the store calling its
+    OWN method; their callers carry the `try`.  Anything else -- a receiver that
+    is not provably something other than a store -- is judged by the same rule
+    as `store.save`: inside `_save_or_toast`, or inside a `try` body.
     """
-    calls = []
+    parents = {child: parent for parent in ast.walk(tree)
+               for child in ast.iter_child_nodes(parent)}
+
+    def in_map_store(node: ast.AST) -> bool:
+        while node in parents:
+            node = parents[node]
+            if isinstance(node, ast.ClassDef):
+                return node.name == "MapStore"
+        return False
+
+    sites: list[ast.AST] = []
     for node in ast.walk(tree):
-        if not (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "save"
-        ):
-            continue
-        obj = node.func.value
-        if isinstance(obj, ast.Attribute):
-            base_name = obj.attr
-        elif isinstance(obj, ast.Name):
-            base_name = obj.id
-        else:
-            base_name = None
-        if base_name == "store":
-            calls.append(node)
-    return calls
+        if isinstance(node, ast.Attribute) and node.attr == "save":
+            own = isinstance(node.value, ast.Name) and node.value.id == "self"
+            if own and in_map_store(node):
+                continue
+            sites.append(node)
+        elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+              and node.func.id == "getattr" and len(node.args) >= 2
+              and isinstance(node.args[1], ast.Constant) and node.args[1].value == "save"):
+            sites.append(node)
+    return sites
 
 
 def _node_contains(container: ast.AST, target: ast.AST) -> bool:
@@ -674,7 +683,6 @@ _F9_EVASIONS = {
 }
 
 
-@pytest.mark.xfail(strict=True, reason="Inc-9c: committed RED; closed by the test-strength step")
 @pytest.mark.parametrize("source", sorted(_F9_EVASIONS), ids=str)
 def test_g6_sec_f9_the_save_census_sees_through_a_renamed_receiver(source):
     """`G6-SEC-F9` (MEDIUM): the census matched a receiver literally named
@@ -685,7 +693,6 @@ def test_g6_sec_f9_the_save_census_sees_through_a_renamed_receiver(source):
     assert _store_save_calls(tree), f"the census missed: {source}"
 
 
-@pytest.mark.xfail(strict=True, reason="Inc-9c: committed RED; closed by the test-strength step")
 def test_g6_sec_f9_the_stores_own_internal_save_is_not_a_call_site():
     """The one exemption, named: `MapStore` calling its OWN `self.save` inside
     the class (its `create_*` methods, whose callers carry the `try`)."""
