@@ -468,9 +468,13 @@ class FactoryScreen(Screen):
         target = store.workspace / f"{self.document_name}-{node.id}{suffix}"
         try:
             office.resolve(path, doc.tags, target)
-            self.notify(darkside.plain(f"generado: {target}"), markup=False)
+            # `INC9-SEC-F1`: the file's name and the exception TYPE, never the
+            # workspace's absolute path or `str(exc)` (`_save_or_toast`'s rule).
+            self.notify(darkside.plain(f"generado: {target.name}"), markup=False)
         except Exception as exc:
-            self.notify(darkside.plain(f"no se pudo generar: {exc}"), severity="error", markup=False)
+            self.notify(
+                darkside.plain(f"no se pudo generar: {type(exc).__name__}"),
+                severity="error", markup=False)
 
     def action_start_node(self) -> None:
         """Return to the node that was selected when the factory opened."""

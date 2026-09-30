@@ -424,8 +424,15 @@ async def test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind(tmp_path):
 
     # AND IT SAYS THE FILE IS THERE AND OLD. Both halves, because "a file
     # remains" and "it is stale" are separate things for the operator to know.
-    assert str(path) in message, (
+    # `INC9-SEC-F1`: it names the file by NAME.  The arm used to demand the
+    # absolute path in the toast -- the very leak (the Windows profile) the
+    # increment closes -- so the pin moved from `str(path)` to `path.name`, and
+    # the absolute path is now forbidden.
+    assert path.name in message, (
         f"the refusal does not name the file it left behind: {message!r}"
+    )
+    assert str(path) not in message and str(tmp_path) not in message, (
+        f"the refusal paints an absolute path: {message!r}"
     )
     # The FULL PHRASE, not the bare word. `anterior` appears in seven places in
     # the product (`N anterior`, the settings rail, two keymap labels), so an
