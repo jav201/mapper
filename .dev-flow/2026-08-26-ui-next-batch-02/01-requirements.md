@@ -10254,3 +10254,10 @@ exception register, so the split is a mechanical handoff and not a promise. The 
 **What is not claimed.** No toast, notice, prompt, hint line, inspector string or sala string moves
 language here (`Inc-EN`, B-71). No renderer file is edited. The legend's own copy (`help.py`) is
 Inc-8's and is untouched.
+
+**Note, 2026-09-30 (Inc-9b, `03-increments/increment-026-inc9b.md`).** The split this amendment names in statement 5
+("the headers Inc-9 owns") and in statement 4's census is now closed. Statement 5's one-name rule extends to the map
+views' own headers and `_degraded` banners (`atlas` / `mind map` / `outline`, read from `darkside.VIEW_NAMES`; the atlas
+header states its kind as secondary English text, assumption `INC9B-A1`), and statement 4's English rule is met by the
+`coverage` and `edit document` titles. `LANGUAGE_EXCEPTIONS` is empty. No statement changed; the threshold arms are
+`tests/test_inc9.py::test_inc9b_*`.
