@@ -383,6 +383,8 @@ LANGUAGE_EXCEPTIONS: dict[tuple[str, str], str] = {}
 def _seat_strings() -> list[tuple[str, str]]:
     out = [("mapper/keymap.py", b.label) for b in keymap.KEYMAP]
     out += [("mapper/keymap.py", group) for group in keymap.GROUP_SCOPE]
+    # Inc-9c (`K1`): what is PAINTED is the header, and two groups may share one.
+    out += [("mapper/keymap.py", header) for header in keymap.GROUP_HEADER.values()]
     return out
 
 
