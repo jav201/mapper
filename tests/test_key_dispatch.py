@@ -64,6 +64,8 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("home", "i"): ("import_csv", "import csv", "i", "doors", False),
     ("home", "j"): ("table_down", "next map", "j", "list", False),
     ("home", "k"): ("table_up", "previous map", "k", "list", False),
+    # Inc-9c / INC9-UX-F11: `↵` on home is declared, so the legend lists it.
+    ("home", "enter"): ("open_selected", "open map", "↵", "list", False),
     ("home", "n"): ("construct", "build map", "n", "doors", False),
     ("home", "p"): ("plug", "connect repo", "p", "doors", False),
     ("home", "q"): ("quit", "quit", "q", "exit", False),

@@ -145,6 +145,10 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("s", "s", "settings", "components", "doors"),
     KeyBinding("j", "j", "table_down", "next map", "list"),
     KeyBinding("k", "k", "table_up", "previous map", "list"),
+    # `INC9-UX-F11`: the home key bar has always said `↵ open`; the recents table
+    # answers it only while it holds focus, so the seat declares it and the
+    # screen answers it from anywhere on the screen.
+    KeyBinding("enter", "↵", "open_selected", "open map", "list"),
     # Not a list action: it leaves the application.
     KeyBinding("q", "q", "quit", "quit", "exit"),
     # -- map · navigation ---------------------------------------------------

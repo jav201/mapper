@@ -167,14 +167,19 @@ _HINT_NAME_OVERHEAD = 23
 _HINT_NAME_MIN_CELLS = 8
 
 
-def screen_bindings(scope: str) -> list[Binding]:
+def screen_bindings(scope: str, priority_actions: tuple[str, ...] = ()) -> list[Binding]:
     """Generate a screen's `BINDINGS` from the one keymap seat (US-N03).
 
     Screens never hand-write a binding list: the seat is the single source, so the
     keys a screen binds and the keys the palette and help advertise cannot drift.
+
+    `priority_actions` raises named actions to priority on THIS screen only --
+    for a screen whose text field would otherwise swallow the key (`INC9-UX-F2`:
+    `?` typed into the connect-repo field).  The seat's own `priority` column, and
+    so every other screen, is untouched.
     """
     return [
-        Binding(key, action, label, priority=priority)
+        Binding(key, action, label, priority=priority or action in priority_actions)
         for key, action, label, priority in textual_bindings(scope)
     ]
 
@@ -541,15 +546,7 @@ class HomeScreen(Screen):
         )
         yield Static("", id="home-archived")
         yield HintLine("elige una puerta para empezar")
-        yield KeyBar(
-            [
-                ("maps", [("j/k", "next/previous map"), ("↵", "open"), ("r", "resume")]),
-                ("open", [("c", "browse"), ("p", "connect repo"), ("n", "build"),
-                          ("t", "template"), ("i", "import csv"), ("f", "factory")]),
-                ("global", [("s", "components"), ("ctrl+p", "palette"), ("?", "legend"),
-                            ("q", "quit")]),
-            ]
-        )
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def _map_metrics(self, graph: Graph) -> dict[str, int]:
         total = len(graph.nodes)
@@ -844,33 +841,41 @@ class HomeScreen(Screen):
                 key=map_name,
             )
 
+    #: What each door does, in prose (Inc-EN's); the KEY and its NAME come from the seat.
+    _DOOR_NOTES = {
+        "c": "abre un mapa reciente",
+        "p": "conecta un repositorio",
+        "n": "crea un nuevo mapa",
+        "t": "mapa desde plantilla",
+        "i": "CSV / TSV de nodos",
+        "f": "documentos de proceso",
+    }
+
     def _empty_text(self) -> Text:
-        lines: list[tuple[str, str]] = [
-            ("c", darkside.ACCENT),
-            (" browse       ", darkside.INK),
-            ("abre un mapa reciente\n", darkside.MUT),
-            ("p", darkside.ACCENT),
-            (" connect repo ", darkside.INK),
-            ("conecta un repositorio\n", darkside.MUT),
-            ("n", darkside.ACCENT),
-            (" build        ", darkside.INK),
-            ("crea un nuevo mapa\n", darkside.MUT),
-            ("t", darkside.ACCENT),
-            (" template     ", darkside.INK),
-            ("mapa desde plantilla\n", darkside.MUT),
-            ("i", darkside.ACCENT),
-            (" import       ", darkside.INK),
-            ("CSV / TSV de nodos\n", darkside.MUT),
-            ("f", darkside.ACCENT),
-            (" factory      ", darkside.INK),
-            ("documentos de proceso\n", darkside.MUT),
-        ]
-        return Text.assemble(*lines)
+        """The door list: each door's key and name are the SEAT's (`INC9-UX-F4`)."""
+        doors = [b for b in bindings_for(SCOPE_HOME)
+                 if b.group == "doors" and b.key in self._DOOR_NOTES]
+        width = max(len(b.label) for b in doors) + 1
+        parts: list[tuple[str, str]] = []
+        for b in doors:
+            parts += [
+                (b.glyph, darkside.ACCENT),
+                (f" {b.label:<{width}}", darkside.INK),
+                (self._DOOR_NOTES[b.key] + "\n", darkside.MUT),
+            ]
+        return Text.assemble(*parts)
 
     def action_consult(self) -> None:
         table = self.query_one("#home-recents", DataTable)
         if table.display:
             table.focus()
+
+    def action_open_selected(self) -> None:
+        """`↵` on home: open the map under the recents cursor, whatever has focus."""
+        table = self.query_one("#home-recents", DataTable)
+        if table.display and table.row_count:
+            row = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
+            self._open_map(str(row.value))
 
     def action_table_down(self) -> None:
         table = self.query_one("#home-recents", DataTable)
@@ -1056,19 +1061,37 @@ class _ImportPreviewScreen(Screen):
         self.app.action_palette()
 
 
+class _RepoInput(Input):
+    """The owner/name field, which lets `?` through to the legend (`INC9-UX-F2`).
+
+    Textual removes a key from the binding chain while a focused widget reports it
+    would CONSUME it (`check_consume_key`), and an `Input` consumes every printable
+    character -- priority or not.  So the screen's priority `?` binding was never
+    even consulted.  `?` is not valid in owner/name, and a pasted URL is a paste,
+    not a key event, so giving it up costs the field nothing.
+    """
+
+    def check_consume_key(self, key: str, character: str | None) -> bool:
+        if key == "question_mark":
+            return False
+        return super().check_consume_key(key, character)
+
+
 class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
     KEY_SCOPE = SCOPE_PLUG
     # `K4`: the legend's title reads the SCREEN's name, not the scope id.
     legend_view = "connect repo"
-    BINDINGS = screen_bindings(SCOPE_PLUG)
+    # `INC9-UX-F2`: the screen's only widget is a text field, which swallowed `?`;
+    # `?` never appears in owner/name or a pasted URL (a paste is not a key).
+    BINDINGS = screen_bindings(SCOPE_PLUG, priority_actions=("help",))
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=["connect repo"])
         yield Vertical(
             Label("connect repo", id="repo-title"),
-            Input(placeholder="owner/name o URL de github", id="repo-input"),
+            _RepoInput(placeholder="owner/name o URL de github", id="repo-input"),
             id="repo-dialog",
         )
         yield HintLine("ingresa owner/name, URL o ruta local y presiona ↵", "↵")
@@ -1105,6 +1128,12 @@ class PlugRepoScreen(Screen):
     def action_palette(self) -> None:
         self.app.action_palette()
 
+    def action_help(self) -> None:
+        # A priority binding runs on THIS screen or not at all (the app's own
+        # `?` is not priority, so the priority pass never reaches it): the screen
+        # answers, and the legend still opens on this screen's scope (`B-18`).
+        self.app.action_help()
+
 
 class RepoScreen(Screen):
     """A GitHub repo rendered as a two-pane branch dashboard (variant C)."""
@@ -1133,12 +1162,7 @@ class RepoScreen(Screen):
                 yield Static(self._progress_text(), id="repo-progress")
                 yield Static(self._sidebar_hints(), id="repo-sidebar-hints")
             yield Static(self._render_table(), id="repo-table", expand=True)
-        yield KeyBar(
-            [
-                ("repo", [("j/k", "next/previous branch")]),
-                ("global", [("ctrl+p", "palette"), ("?", "legend"), ("q", "back")]),
-            ]
-        )
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     @staticmethod
     def _sidebar_hints() -> str:

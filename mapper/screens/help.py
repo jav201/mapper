@@ -16,7 +16,14 @@ from textual.screen import ModalScreen
 from textual.widgets import Static
 
 from mapper import darkside
-from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, group_header, textual_bindings
+from mapper.keymap import (
+    SCOPE_APP,
+    SCOPE_HELP,
+    bar_group_order,
+    bindings_for,
+    group_header,
+    textual_bindings,
+)
 
 # The legend panel's two widths (Inc-8 verdicts `D4` and `E1`): a centred
 # modal, and -- while the view keeps its minimum beside it (`F9`, `docks`) --
@@ -425,8 +432,10 @@ class HelpScreen(ModalScreen[None]):
         label_cells = self.row_cells - len(_INDENT) - _KEY_CELLS
         parts: list[tuple[str, str]] = [(SECTION_KEYS + "\n", f"bold {darkside.ASH}")]
         entries = bindings_for(self.scope)
+        # `INC9-UX-F10`: the key bar's group order, not the alphabet's.
+        order = {g: i for i, g in enumerate(bar_group_order(self.scope))}
         for group, bindings in groupby(
-            sorted(entries, key=lambda b: b.group), key=lambda b: b.group
+            sorted(entries, key=lambda b: order[b.group]), key=lambda b: b.group
         ):
             self._append_key_group(parts, group_header(group), list(bindings), label_cells)
         return _trimmed(Text.assemble(*parts))

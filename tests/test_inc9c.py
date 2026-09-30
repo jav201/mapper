@@ -45,7 +45,7 @@ from tests.test_no_operator_paths import USER_PROFILE_PATH
 from tests.test_repair_layout import _frame_rows, _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"ux"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
@@ -733,4 +733,4 @@ async def test_inc9c_the_key_bar_and_the_legend_name_every_group_alike(tmp_path,
 
 def test_inc9c_helpers_are_not_vacuous():
     assert len(SITES) == 10 and len(K1_LABELS) == 13
-    assert _frame_rows and OPEN_STEPS
+    assert _frame_rows
