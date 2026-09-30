@@ -91,9 +91,17 @@ FACTORY_TREE_BOUND_SECONDS = 8.0
 # reproduces the one that produced them.
 GOLDEN_SIZES = ((140, 45), (80, 24), (140, 8), (300, 120))
 
+# Inc-9b (A-112 "Split"): the Layered and Radial keys were RE-CAPTURED for the
+# header's English name, and ONLY for it.  Bounded BEFORE the re-capture, against
+# `git show 77200b8:` of both renderers: at every one of the eight keys exactly
+# ONE row differs -- row 0, the header -- the row count is unchanged, and the
+# old copy of the renderer reproduces the digest that was pinned (so the method
+# matches the pin's).  Layered: `árbol legacy` -> `atlas . legacy tree`;
+# Radial: `mapa mental` -> `mind map`.  The four Outline keys are unmoved: its
+# header already spelled `outline`, and were NOT re-captured.
 MASTER_LEGACY_DIGESTS = {
-    ("LayeredRenderer", 140, 45): "a76157aa1fe1c5da5cfc6dfc1ede7bf32b0a06b41245476840664cea7ee09ca9",
-    ("LayeredRenderer", 80, 24): "5a519c0c42a831f2d23ba4074932787a413db2c0d3648d3f9cae6c9d432c0aec",
+    ("LayeredRenderer", 140, 45): "f7b8be1fd4ee5229af6f254558b465065ceb87b3f5b6aaa6f59297e89f016588",
+    ("LayeredRenderer", 80, 24): "1b70f1152dbb6cbf35ecb190da1fbc8d2a512b8525c66bff6ee448c52f04d6fc",
     # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-3.  REASON: this
     # is the only one of the four `LayeredRenderer` sizes at which `legacy` has
     # an unpainted node (4 of 8; the other three paint 8 of 8), so it is the only
@@ -110,8 +118,8 @@ MASTER_LEGACY_DIGESTS = {
     # predicted GREEN, verified GREEN and NOT re-captured.  Re-capturing a
     # predicted-green digest is a gate failure: a red pin is evidence, a
     # re-captured pin is a claim.
-    ("LayeredRenderer", 140, 8): "de4d768749d9282f3747ab14b8cd0356d690cc31a921733938b89a231c66bf96",
-    ("LayeredRenderer", 300, 120): "e133509b464d85d5d34256468c9832abc014699ab581283ae91ee939779bd320",
+    ("LayeredRenderer", 140, 8): "a0bd757b4703659274af1bac500fc10d11dfd90eae1942eff0d339a511177a57",
+    ("LayeredRenderer", 300, 120): "da670df87a118b46917be6b4e892425e522ceb8e50fcaa5972eb6ce40a6e1c4b",
     ("OutlineRenderer", 140, 45): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
     ("OutlineRenderer", 80, 24): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
     # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-B55a.  REASON:
@@ -152,10 +160,10 @@ MASTER_LEGACY_DIGESTS = {
     # and were NOT recaptured.  Re-capturing a predicted-green digest is a gate
     # failure, because it silently drops the guard on a renderer that must not
     # move -- which is what a wholesale re-capture of this dictionary does.
-    ("RadialRenderer", 140, 45): "398b922562e3b3b7809296b0afb7b5ba3785371b7f11e6992e6a5b6e78d13d99",
-    ("RadialRenderer", 80, 24): "3f174032180edeab8e3a362a19608eaa060680e623912f46834a73921c46e5df",
-    ("RadialRenderer", 140, 8): "4dee6c1c4fcd527b32b508bbb22f171b5026de09a0bf2b39729bf2a0794f08d0",
-    ("RadialRenderer", 300, 120): "3f8dac90f262d9cba30138c43a15d30f48b0218049cdb43834128a77073f5337",
+    ("RadialRenderer", 140, 45): "51f923479d5369c6687bb1eb0d537902e9942911e85473cd390bd9bf8b59c188",
+    ("RadialRenderer", 80, 24): "9d07cbdb1010219a7788a75125f50659b0522468583b0766e2c4d9a802f36a65",
+    ("RadialRenderer", 140, 8): "5311cb7738b2f6b38434444a8c92cb893d6d8e194ffd5f0df6ee26e8dbaa0feb",
+    ("RadialRenderer", 300, 120): "642c28d2ac4e29be6e7315967016309937060be63e3549a7d06b3eff87b2f9ce",
 }
 
 # The same arm for this increment's two files.  `OutlineRail.render` takes no

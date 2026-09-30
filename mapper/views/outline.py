@@ -68,7 +68,7 @@ def _degraded(n: int) -> Text:
     out = Text()
     out.append("◆ ", style=darkside.INK)
     out.append("mapper", style=darkside.WORDMARK)
-    out.append(" · outline", style=darkside.MUT)
+    out.append(f" · {darkside.VIEW_NAMES['outline']}", style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
         f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
@@ -91,7 +91,7 @@ def _header_line() -> Text:
     out = Text()
     out.append("◆ ", style=darkside.INK)
     out.append("mapper", style=darkside.WORDMARK)
-    out.append(" · outline", style=darkside.MUT)
+    out.append(f" · {darkside.VIEW_NAMES['outline']}", style=darkside.MUT)
     return out
 
 

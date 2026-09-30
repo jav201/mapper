@@ -94,7 +94,7 @@ def _degraded(n: int) -> Text:
     out = Text()
     out.append("◆ ", style=darkside.INK)
     out.append("mapper", style=darkside.WORDMARK)
-    out.append(" · mapa mental", style=darkside.MUT)
+    out.append(f" · {darkside.VIEW_NAMES['radial']}", style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
         f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
@@ -116,7 +116,7 @@ def _header_line(unpainted: int) -> Text:
     header = Text()
     header.append("◆ ", style=darkside.INK)
     header.append("mapper", style=darkside.WORDMARK)
-    header.append(" · mapa mental", style=darkside.MUT)
+    header.append(f" · {darkside.VIEW_NAMES['radial']}", style=darkside.MUT)
     if unpainted:
         header.append(f"  {overflow_phrase(unpainted)}", style=darkside.INK)
     return header
@@ -130,7 +130,7 @@ def header_rows(graph: Graph, w: int, wrap_w: int) -> int:
     in that method and pinned by an arm, so this fix reddens the arm rather than
     closing the hole silently.  The two headers are not the same line: layered's
     is a wordmark plus a coverage meter plus an overflow declaration, this one is
-    `◆ mapper · mapa mental` plus the same declaration.  Every overcharged row is
+    `◆ mapper · mind map` plus the same declaration.  Every overcharged row is
     a body row the region could have shown and the renderer was never told about.
 
     RENDERED, NOT DIVIDED (`B-61`).  The same `Console.render_lines` instrument

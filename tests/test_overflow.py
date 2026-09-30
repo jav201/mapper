@@ -472,19 +472,22 @@ def test_llr_n06_3_1_the_charge_band_over_node_count_and_width(tmp_path):
         charged_by_w[20], charged_by_w[21]
     )
 
-    # THE BAND, DERIVED.  `w >= 35` is two rows at every node count the renderer
-    # will draw and at both wrap widths; below 23 it is never two.
+    # THE BAND, DERIVED.  `w >= 37` is two rows at every node count the renderer
+    # will draw and at both wrap widths; below 23 it is never two.  (Inc-9b:
+    # the band read `w >= 35` while the legacy header named the map `arbol
+    # legacy`; `atlas . legacy tree` is seven cells longer, so the header wraps
+    # two widths later.  Re-derived from the grid, not typed from the old one.)
     assert all(
         charged_by_w[w] == {2}
-        for w in (35, 36, 37, 38, 39, 40, 50, 58, 80, 140, 300)
-    ), {w: charged_by_w[w] for w in charged_by_w if w >= 35}
+        for w in (37, 38, 39, 40, 50, 58, 80, 140, 300)
+    ), {w: charged_by_w[w] for w in charged_by_w if w >= 37}
     assert all(2 not in charged_by_w[w] for w in range(20, 23)), {
         w: charged_by_w[w] for w in range(20, 23)
     }
     # The node-count axis is real ON ITS OWN, at a width where the small graph
     # is already down to two rows — the half the old grid's 30→50 jump could
-    # not see.
-    assert charged_by_w[31] == {2, 3}, charged_by_w[31]
+    # not see.  (`w = 35` since Inc-9b; it was 31.)
+    assert charged_by_w[35] == {2, 3}, charged_by_w[35]
 
     # MONOTONE IN THE WRAP WIDTH: a narrower wrap can only cost more rows.  This
     # is what makes a measured region width safe to trust — if the measurement

@@ -168,12 +168,18 @@ def _hidden_ids(index: dict[str, list[str]], folded: frozenset[str]) -> frozense
     return frozenset(hidden)
 
 
+def _view_label(legacy: bool) -> str:
+    """The canvas header's name: the view (`VIEW_NAMES`), then the map kind."""
+    kind = "legacy tree" if legacy else "concept map"
+    return f" · {darkside.VIEW_NAMES['canvas']} · {kind}"
+
+
 def _degraded(n: int, legacy: bool) -> Text:
     """Declared degradation: naming what was dropped beats raising."""
     out = Text()
     out.append("◆ ", style=darkside.INK)
     out.append("mapper", style=darkside.WORDMARK)
-    out.append(" · árbol legacy" if legacy else " · mapa de conceptos", style=darkside.MUT)
+    out.append(_view_label(legacy), style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
         f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
@@ -431,9 +437,7 @@ def _header_line(
     header = Text()
     header.append("◆ ", style=darkside.INK)
     header.append("mapper", style=darkside.WORDMARK)
-    header.append(
-        " · árbol legacy" if legacy else " · mapa de conceptos", style=darkside.MUT
-    )
+    header.append(_view_label(legacy), style=darkside.MUT)
     if legacy:
         filled = min(5, max(0, round(pct / 20)))
         header.append(" " * max(0, avail - 48))

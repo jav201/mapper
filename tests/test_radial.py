@@ -11,7 +11,9 @@ BRAILLE = range(0x2800, 0x2900)
 # Canvas composed the layers.  This is a regression PIN, not the gate: its
 # subject is the renderer's pre-existing output, which is exactly what must not
 # change.  The gate is the derived containment arm below.
-PRE_CHANGE_PAINTED = set("acefilmnoprstvz·◆●")
+# `l` left this set in Inc-9b: it came from the header's old Spanish name (`mapa
+# mental`); the English `mind map` has none, and no pill title contains one.
+PRE_CHANGE_PAINTED = set("acefimnoprstvz·◆●")
 
 M1_TITLES = ("finanzas", "inventarios", "nomina", "compras", "reportes")
 
