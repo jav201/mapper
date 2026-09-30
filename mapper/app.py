@@ -2268,18 +2268,26 @@ class MapScreen(Screen):
 
     def _restore_after_legend(self, pan_x: int, pan_y: int, focus_id: str | None) -> None:
         """The pre-legend focus wins over the auto-focus grab -- restored
-        FIRST, so a pan repaint that follows (`_move_pan`) reads the real
-        owner through `_focus_owner` instead of the transient one.  That
-        ordering is what the operator saw as the selection card flashing
-        from blue to grey on `esc` (`INC8-P3-UX-F1`, carried `UX-F7`).
+        FIRST, so the one repaint that follows reads the real owner through
+        `_focus_owner` instead of the transient one.  That ordering is what
+        the operator saw as the selection card flashing from blue to grey on
+        `esc` (`INC8-P3-UX-F1`, carried `UX-F7`).
 
-        `INC8-CL-CR-F1`: `_reclamp_pan` runs AFTER the restore, on the
+        `INC8-CL-CR-F1`: the pan is re-clamped AFTER the restore, on the
         canvas's CURRENT size -- a resize while the legend was open (docked
         or modal; the legend keeps the operator's kept pan through either)
-        can shrink the extent under `pan_x`, and `_move_pan` alone does not
-        clamp, it only repaints whatever it is handed.  At an unchanged size
-        this is a no-op: the kept pan is already legal, so `A-109`'s "closing
-        still restores the kept pan exactly" is unaffected.
+        can shrink the extent under `pan_x`.  At an unchanged size this is a
+        no-op: the kept pan is already legal, so `A-109`'s "closing still
+        restores the kept pan exactly" is unaffected.
+
+        `INC8-FU-F6` (follow-up, non-blocking at Inc-8's close): this used to
+        set the pan through `_move_pan`, which repaints on its own, and then
+        repaint AGAIN below to show what `_reclamp_pan` had just clamped --
+        two calls to `_declare_after_layout` for one restore, the second
+        cheap only because it usually has nothing left to change.  The pan is
+        set directly here instead (the same assignment `_move_pan` makes,
+        without its repaint), clamped, and declared exactly once, over the
+        FINAL value either step could have produced.
 
         `_reclamp_pan` reaches `_view_state`, which is `_PASS_FREE_READERS`'
         business, not this method's -- see that dict's own entry for why a
@@ -2291,13 +2299,8 @@ class MapScreen(Screen):
             if len(matches):
                 widget = matches.first()
         self.set_focus(widget)
-        self._move_pan(pan_x, pan_y)
+        self.pan_x, self.pan_y = pan_x, pan_y
         self._reclamp_pan(*self._canvas_size())
-        # `_reclamp_pan` only clamps the two fields; it does not repaint.  A
-        # size that shrank the extent left the frame `_move_pan` just drew
-        # showing the UNCLAMPED value until this second, otherwise-cheap
-        # pass -- `_declare_after_layout` no-ops when nothing changed, so an
-        # unchanged size costs one extra dataclass compare, not a redraw.
         self._declare_after_layout()
 
     def _move_pan(self, pan_x: int, pan_y: int) -> None:
