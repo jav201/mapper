@@ -50,6 +50,7 @@ from textual.widgets import DataTable, Static
 
 from mapper import darkside, keymap
 from mapper.app import HomeScreen, MapperApp, MapScreen
+from mapper.diff import DiffResult
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from mapper.screens.help import (
     ADJACENT_ROWS,
@@ -760,6 +761,21 @@ def _selection_cells(screen, canvas) -> list[tuple[int, int]]:
             if cell[2] == accent and x >= canvas.x and canvas.y <= y < canvas.bottom]
 
 
+def _painted_margin_cells(screen, canvas) -> list[tuple[int, int]]:
+    """Cells of the composited frame inside the canvas region painted with any
+    background OTHER than GROUND, the view's own ground (`E2`).  Broader than
+    `_selection_cells`'s ACCENT-only filter: `INC8-FU-F1`'s margin claim is
+    about whichever tone the LAST painted column actually carries, and a
+    changed card's trailing chip paints WARN there, not ACCENT -- an
+    ACCENT-only read cannot see it and would under-count the blank columns
+    that follow."""
+    ground = darkside.GROUND.lower()
+    return [(x, y) for y, row in enumerate(_cells(screen, canvas.right))
+            for x, cell in enumerate(row)
+            if cell[2] is not None and cell[2] != ground
+            and x >= canvas.x and canvas.y <= y < canvas.bottom]
+
+
 def _canvas_chars(screen, canvas) -> list[str]:
     return ["".join(cell[0] for cell in row[canvas.x:canvas.right])
             for row in _cells(screen, canvas.right)[canvas.y:canvas.bottom]]
@@ -1021,18 +1037,22 @@ async def test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close(tmp_pat
 #: not_move_the_view` exists to keep separate from the covered case above it.
 #: `ti-4` at BOTH sizes: panned to its legal maximum first, it is covered by
 #: the panel at any width, so the edge case `H3` is actually about is the one
-#: measured either way.
+#: measured either way.  `fina-4-diff` (`INC8-FU-F1`, follow-up): the SAME
+#: walk as `fina-4`, with a diff chip attached to the selected card, so the
+#: card's own last painted column is the chip's WARN, not the title row's
+#: ACCENT -- the case `_selection_cells`' ACCENT-only filter cannot see.
 _H3_CASES = [
-    ("fina-4", FINA_4, False, REFERENCE_SIZE),
-    ("ti-4", TI_4, True, REFERENCE_SIZE),
-    ("ti-4", TI_4, True, (140, 45)),
+    ("fina-4", FINA_4, False, REFERENCE_SIZE, False),
+    ("ti-4", TI_4, True, REFERENCE_SIZE, False),
+    ("ti-4", TI_4, True, (140, 45), False),
+    ("fina-4-diff", FINA_4, False, REFERENCE_SIZE, True),
 ]
 
 
 @pytest.mark.parametrize(
-    "keys,edge,size", [c[1:] for c in _H3_CASES], ids=[f"{c[0]}-{c[3][0]}x{c[3][1]}" for c in _H3_CASES]
+    "keys,edge,size,diff", [c[1:] for c in _H3_CASES], ids=[f"{c[0]}-{c[3][0]}x{c[3][1]}" for c in _H3_CASES]
 )
-async def test_h3_the_painted_margin_is_the_declared_one_everywhere(tmp_path, keys, edge, size):
+async def test_h3_the_painted_margin_is_the_declared_one_everywhere(tmp_path, keys, edge, size, diff):
     """`H3`: `REVEAL_MARGIN_CELLS` (2) blank PAINTED columns between the
     selected card's own last glyph and the docked panel's left edge --
     counted on the composited frame, not the geometry.  The precondition
@@ -1040,21 +1060,39 @@ async def test_h3_the_painted_margin_is_the_declared_one_everywhere(tmp_path, ke
     actually has to run) is asserted, not assumed -- the same discipline
     `test_f2_docking_pans_a_covered_selection_clear_and_closing_returns_it`
     already uses -- because "no pan needed" and "the declared margin" are
-    different claims this arm must not conflate."""
+    different claims this arm must not conflate.
+
+    `INC8-FU-F1` (follow-up, non-blocking at Inc-8's close): the `diff` cases
+    inject the diff the way `action_toggle_diff` itself sets it (`self.diff`,
+    `self.diff_active`, then a repaint) rather than driving the real key,
+    which needs a git history this fixture does not carry -- this file's own
+    module docstring already names diff mode as undriven for exactly that
+    reason.  `_painted_margin_cells` reads any non-GROUND background, not
+    just `ACCENT`, so the diff case's WARN chip counts as painted the same
+    way the ordinary cases' ACCENT fill does; the three non-diff cases keep
+    measuring margin 2 under the broader filter too, which is what shows the
+    broadening did not just move the goalposts to fit."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         view, canvas = await _walked_map(app, pilot, keys)
         if edge:
             await _panned_to_the_old_legal_max(pilot)
+        if diff:
+            cursor = view.nav.cursor
+            assert cursor is not None, "no selection to attach the diff chip to"
+            view.diff = DiffResult(changed={cursor: ["title"]})
+            view.diff_active = True
+            view.refresh_canvas()
+            await _settle(pilot)
         panel_x = size[0] - LEGEND_DOCKED_CELLS
-        pre_dock = _selection_cells(view, canvas)
+        pre_dock = _painted_margin_cells(view, canvas)
         assert pre_dock and max(x for x, _y in pre_dock) >= panel_x - view.REVEAL_MARGIN_CELLS, (
             "the card is not covered enough to need a reveal pan; arm has no subject"
         )
         await pilot.press("question_mark")
         await _settle(pilot)
         assert app.screen.has_class(DOCKED_CLASS)
-        painted = [x for x, _y in _selection_cells(app.screen, canvas) if x < panel_x]
+        painted = [x for x, _y in _painted_margin_cells(app.screen, canvas) if x < panel_x]
         assert painted, "the selected card painted nothing left of the panel"
         margin = panel_x - max(painted) - 1
         assert margin == view.REVEAL_MARGIN_CELLS, (
