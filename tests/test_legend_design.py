@@ -1223,6 +1223,39 @@ async def test_h2_the_canvas_repaints_on_every_focus_change(tmp_path):
         assert _canvas_cells(view, canvas) == before
 
 
+async def test_inc8_fu_f2_the_blur_repaint_is_pinned(tmp_path):
+    """`INC8-FU-F2` (follow-up, non-blocking at Inc-8's close): `H2`'s OTHER
+    half -- `on_descendant_blur` -- fires when a field blurs to NOTHING
+    (`FichaInspector`'s own `escape` -> `FieldInput.action_leave_field` ->
+    `on_field_input_left` -> `set_focus(None)`), with no `DescendantFocus` to
+    follow it.  `test_h2_the_canvas_repaints_on_every_focus_change` drives
+    `tab` and the legend's own close, both of which move focus TO a widget
+    and so exercise `on_descendant_focus` -- neither drives the blur-to-
+    nothing path alone, which is what this arm was missing before this pass.
+    `#insp-title` on purpose, not `#insp-state`: its own pre-existing
+    `?`-eats-the-title bug (`B-36`/`H1`) is irrelevant here, since this arm's
+    own `escape` never types a `?`."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=REFERENCE_SIZE) as pilot:
+        view, canvas = await _walked_map(app, pilot, FINA_4)
+        for _ in range(6):
+            if getattr(view.focused, "id", None) == "insp-title":
+                break
+            await pilot.press("tab")
+            await _settle(pilot)
+        else:
+            raise AssertionError("tab never reached #insp-title")
+        assert not _selection_cells(view, canvas), (
+            "the card is still painted ACCENT while the field holds focus; arm has no subject"
+        )
+        await pilot.press("escape")
+        await _settle(pilot)
+        assert view.focused is None, "escape did not blur the field to nothing"
+        cells = _selection_cells(view, canvas)
+        assert cells, "no ACCENT fill returned after the blur"
+        assert len(cells) == 8, f"ACCENT fill did not return to its painted 8 cells: {len(cells)}"
+
+
 async def test_cr_f2_reopening_after_a_pan_keeps_the_new_pan(tmp_path):
     """`INC8-P3-CR-F2`: closing the legend must clear `_pan_before_legend`,
     or a pan the operator makes AFTER closing is discarded the next time they

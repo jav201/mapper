@@ -1607,6 +1607,60 @@ def test_every_reader_of_the_resolution_is_inside_a_paint_pass(tmp_path):
     assert all(_PASS_FREE_READERS.values()), "an exemption carries no reason"
 
 
+def _layered_tree():
+    """`mapper/views/layered.py` parsed, for the census below."""
+    import ast
+    import inspect
+    import pathlib
+
+    from mapper.views import layered
+
+    src = pathlib.Path(inspect.getfile(layered)).read_text(encoding="utf-8")
+    return ast.parse(src)
+
+
+def test_inc8_fu_f3_geometry_and_pan_extent_never_read_hits():
+    """`INC8-FU-F3` (follow-up, non-blocking at Inc-8's close): `_reclamp_pan`'s
+    entry in `_PASS_FREE_READERS` above stakes its whole reason on one claim --
+    `_geometry` (and `pan_extent`, which only calls it) never reads
+    `state.hits`, the one memo-derived field of `ViewState`.  Nothing pinned
+    that claim before this arm; a fixture-equality check
+    (`pan_extent(g, s) == pan_extent(g, dataclasses.replace(s, hits=...))`)
+    can only agree on the fixtures it happens to try, and would stay green
+    the day a NEW field derived from `hits` reached `_geometry` through some
+    path that fixture's other inputs still hold equal.  This walks the two
+    functions' own AST instead: it fails the moment either one gains a
+    `.hits` read, for ANY input, which is the stronger of the two the brief
+    asked to choose between.
+
+    Restricted to `_geometry` and `pan_extent` themselves, not their
+    transitive callees, because `state` (the only thing `hits` lives on)
+    never crosses into either one's helpers: `_child_index`, `_hidden_ids`,
+    `_tree_layout` and `_vis_width` all take a `graph`, an `index` or a
+    string -- never a `ViewState` -- so a `.hits` read reaching `_geometry`
+    from underneath it would have to travel through a parameter neither
+    helper accepts.  `render`, the one function in this module that DOES
+    read `state.hits` (to tint hit cards), is a different function this
+    arm does not touch."""
+    import ast
+
+    tree = _layered_tree()
+    funcs = {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name in ("_geometry", "pan_extent")
+    }
+    assert set(funcs) == {"_geometry", "pan_extent"}, (
+        f"expected both functions parsed, got {sorted(funcs)}"
+    )
+    for name, node in funcs.items():
+        hits_reads = [
+            sub for sub in ast.walk(node)
+            if isinstance(sub, ast.Attribute) and sub.attr == "hits"
+        ]
+        assert not hits_reads, f"{name} reads `.hits`: {[ast.dump(h) for h in hits_reads]}"
+
+
 def test_the_resolution_cannot_be_corrupted_by_the_caller(tmp_path):
     """What `_search_order` hands out is not the memo's own object.
 
