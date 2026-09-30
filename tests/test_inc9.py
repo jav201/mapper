@@ -348,12 +348,10 @@ CHROME_LEXICON = frozenset("""
     template to toggle top tree undo up view
 """.split())
 
-#: Screen headers outside Inc-9's declared files, owned by the increment that
-#: closes each (`A-112` "Split").  The stale guard below reddens when one goes.
-LANGUAGE_EXCEPTIONS = {
-    ("mapper/screens/coverage.py", "cobertura incompleta"): "Inc-9b",
-    ("mapper/screens/editor.py", "editar documento"): "Inc-9b",
-}
+#: Screen headers allowed to stay non-English, owned by the increment that
+#: closes each.  Empty since Inc-9b closed the last two (`A-112` "Split"); the
+#: stale guard below reddens when an entry outlives its source.
+LANGUAGE_EXCEPTIONS: dict[tuple[str, str], str] = {}
 
 
 def _seat_strings() -> list[tuple[str, str]]:
@@ -475,10 +473,6 @@ async def test_a112_the_home_header_reads_its_one_name(tmp_path):
     assert darkside.VIEW_NAMES["home"] in row.split(), row
 
 
-_INC9B_GATE = pytest.mark.xfail(
-    strict=True, reason="Inc-9b: the map views' own headers are outside Inc-9's cap")
-
-
 def _map_view_first_lines() -> list[tuple[str, str, str]]:
     """`(view, which line, its first painted row)` for every map-view header
     and every `_degraded` banner, legacy and concept atlas both (`INC9-CR-F1`)."""
@@ -502,14 +496,12 @@ def _map_view_first_lines() -> list[tuple[str, str, str]]:
     return rows
 
 
-@_INC9B_GATE
 def test_inc9b_each_map_view_header_names_its_view():
     wrong = {(v, w): t for v, w, t in _map_view_first_lines()
              if f"· {darkside.VIEW_NAMES[v]}" not in t}
     assert wrong == {}, wrong
 
 
-@_INC9B_GATE
 def test_inc9b_each_map_view_header_reads_view_names_not_a_literal(monkeypatch):
     """The name must be READ: swap every entry for a sentinel and each header
     and banner follows it.  A header that spells its name fails here even when
@@ -521,7 +513,6 @@ def test_inc9b_each_map_view_header_reads_view_names_not_a_literal(monkeypatch):
     assert wrong == {}, wrong
 
 
-@_INC9B_GATE
 def test_inc9b_the_atlas_states_its_map_kind_in_english_as_secondary_text():
     from mapper.views import layered
 
@@ -532,11 +523,10 @@ def test_inc9b_the_atlas_states_its_map_kind_in_english_as_secondary_text():
             assert f"· {darkside.VIEW_NAMES['canvas']} · {kind}" in line, line
 
 
-@_INC9B_GATE
 async def test_inc9b_the_coverage_and_editor_titles_are_english_and_state_free():
     from textual.app import App
 
-    from mapper.model import Edge, Ficha, Node, SchemaField
+    from mapper.model import Ficha, Node, SchemaField
     from mapper.screens.coverage import CoverageScreen
     from mapper.screens.editor import EditorScreen
 

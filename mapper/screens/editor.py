@@ -76,7 +76,7 @@ class EditorScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("editar documento", id="editor-title"),
+            Static("edit document", id="editor-title"),
             TextArea(text=self.source, language="markdown", id="editor-textarea"),
             Static(self._render_preview(self.source), id="editor-preview"),
             Static(self._detected_line(self.source), id="editor-detected"),

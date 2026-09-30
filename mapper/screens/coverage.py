@@ -67,7 +67,7 @@ class CoverageScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("cobertura incompleta", id="coverage-title"),
+            Static("coverage", id="coverage-title"),
             DataTable(id="coverage-table", cursor_type="row"),
             Static("", id="coverage-empty"),
             id="coverage-dialog",
