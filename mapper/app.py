@@ -45,7 +45,7 @@ from .motion import pulse_cursor
 from .osopen import OK as OSOPEN_OK, open_external
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .search import SearchIndex
-from .store import MapStore, TEMPLATES
+from .store import TEMPLATES, MapIdError, MapStore, MapStoreError
 from .views.layered import (
     MAX_RENDER_NODES,
     overflow_phrase,
@@ -193,8 +193,25 @@ def keybar_groups(scope: str) -> list[str]:
     return bar_group_order(scope)
 
 
-def _save_or_toast(screen: Screen, store: "MapStore", map_id: str, graph: Graph) -> bool:
+def _refusal_toast(screen: Screen, exc: Exception) -> bool:
+    """Toast a refused map id (`A-113`) and return `True`; any other error: `False`.
+
+    A `MapIdError`'s text is authored by the store and names the rule, never the
+    typed name or a path, so it is the one exception text that may be shown.
+    """
+    if not isinstance(exc, MapIdError):
+        return False
+    screen.notify(darkside.plain(str(exc)), severity="error", markup=False)
+    return True
+
+
+def _save_or_toast(
+    screen: Screen, store: "MapStore", map_id: str, graph: Graph, *, new: bool = False
+) -> bool:
     """Guard a `store.save()` call: on any raise, toast and return `False`.
+
+    `new=True` writes through `store.create`, which refuses an id that is taken
+    (`A-113`); the CSV "save as" is a creation, an edit of an open map is not.
 
     The ONE guarded call site every other `store.save()` call routes through
     (`G6-C-F2`/`G6-C-F3`) — a screen calls this instead of writing its own
@@ -211,8 +228,11 @@ def _save_or_toast(screen: Screen, store: "MapStore", map_id: str, graph: Graph)
     toast unplained" total rather than case-by-case.
     """
     try:
-        store.save(map_id, graph)
+        write = store.create if new else store.save
+        write(map_id, graph)
     except Exception as e:  # noqa: BLE001 -- deliberately generic, see A-111.
+        if _refusal_toast(screen, e):
+            return False
         screen.notify(
             f"no se pudo guardar {darkside.plain(map_id)!r}: "
             f"{darkside.plain(type(e).__name__)}",
@@ -513,8 +533,17 @@ class ConstructScreen(ModalScreen[str | None]):
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         name = event.value.strip().replace(" ", "-")
-        if name:
-            self.dismiss(name)
+        if not name:
+            return
+        # `A-113`: refuse here too, so the dialog stays open and the name can be
+        # fixed; the store refuses again by itself (it is the boundary).
+        try:
+            self.app.store.check_new_map_id(name)  # type: ignore[attr-defined]
+        except MapStoreError as e:
+            if _refusal_toast(self, e):
+                return
+            raise
+        self.dismiss(name)
 
 
 # ---------------------------------------------------------------------------
@@ -921,6 +950,8 @@ class HomeScreen(Screen):
                 store.create_seed(name)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
+                if _refusal_toast(self, e):
+                    return
                 # `INC9-SEC-F1`: the map's name and the exception TYPE, never
                 # `str(e)` -- an `OSError` embeds the absolute path (`_save_or_toast`).
                 self.notify(
@@ -939,6 +970,8 @@ class HomeScreen(Screen):
                 store.create_from_template(name, template_id)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
+                if _refusal_toast(self, e):
+                    return
                 self.notify(
                     darkside.plain(f"no se pudo crear el mapa {name!r}: {type(e).__name__}"),
                     severity="error", markup=False)
@@ -1045,7 +1078,7 @@ class _ImportPreviewScreen(Screen):
             # `store.save(name, ...)` as the map id, uncoerced until now.
             name = darkside.plain(name)
             store: MapStore = self.app.store  # type: ignore[attr-defined]
-            if not _save_or_toast(self, store, name, self.preview_graph):
+            if not _save_or_toast(self, store, name, self.preview_graph, new=True):
                 return
             self.app.push_screen(MapScreen(name))
 

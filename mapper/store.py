@@ -19,6 +19,44 @@ class MapStoreError(Exception):
     pass
 
 
+class MapIdError(MapStoreError):
+    """A map id the store refuses.  The message is authored text that names the
+    RULE and never the typed name or a path, so a UI may show it verbatim."""
+
+
+#: Windows device names: `CON.mmd` is the console, whatever follows the dot.
+_RESERVED_NAMES = frozenset(
+    {"CON", "PRN", "AUX", "NUL"}
+    | {f"{d}{n}" for d in ("COM", "LPT") for n in "123456789¹²³"}
+)
+_INVALID_CHARS = frozenset('<>"|?*')
+
+
+def check_map_id(map_id: str) -> None:
+    """Refuse a map id that does not name a file inside the workspace (`A-113`).
+
+    The ONE place the rule lives; every read and write of a map id goes through
+    it, so the UI, a CSV "save as" name and a file-derived `map:` link share it.
+    """
+    if not isinstance(map_id, str) or not map_id.strip():
+        raise MapIdError("el nombre del mapa está vacío")
+    if "/" in map_id or "\\" in map_id or ":" in map_id:
+        raise MapIdError(
+            "el nombre del mapa no puede contener separadores de ruta (/ \\) "
+            "ni letra de unidad (:)")
+    if ".." in map_id:
+        raise MapIdError("el nombre del mapa no puede contener '..'")
+    if any(ord(c) < 32 or c in _INVALID_CHARS for c in map_id):
+        raise MapIdError(
+            "el nombre del mapa contiene caracteres no válidos en Windows "
+            '(< > " | ? * o de control)')
+    if map_id.split(".", 1)[0].rstrip().upper() in _RESERVED_NAMES:
+        raise MapIdError(
+            "el nombre del mapa usa un nombre reservado de Windows (CON, NUL, COM1...)")
+    if map_id != map_id.rstrip(" .") or map_id != map_id.lstrip(" "):
+        raise MapIdError("el nombre del mapa no puede empezar con espacio ni terminar en punto o espacio")
+
+
 def _text_fields(cls: type) -> tuple[str, ...]:
     """The attributes `cls` declares as text, derived from the model.
 
@@ -633,6 +671,7 @@ class MapStore:
         return graph
 
     def load(self, map_id: str) -> Graph:
+        check_map_id(map_id)
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
         if not mmd_path.exists():
@@ -761,6 +800,7 @@ class MapStore:
         return tmp
 
     def save(self, map_id: str, graph: Graph) -> None:
+        check_map_id(map_id)
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
         from .mermaid import CYCLE_ARROW, dump
@@ -802,6 +842,21 @@ class MapStore:
         yml_tmp.replace(yml_path)
         self._reindex(map_id, mmd_text, yml_text, graph)
 
+    def check_new_map_id(self, map_id: str) -> None:
+        """`check_map_id`, plus: nothing may already be there (`A-113`)."""
+        check_map_id(map_id)
+        if (self.workspace / f"{map_id}.mmd").exists() or (
+            self.workspace / f"{map_id}_nodos.yml"
+        ).exists():
+            raise MapIdError(
+                f"ya existe el mapa {plain(map_id)!r}; elige otro nombre (no se sobrescribe)")
+
+    def create(self, map_id: str, graph: Graph) -> None:
+        """Write a NEW map.  Unlike `save`, which replaces by design, this refuses
+        an id that is taken: one keystroke must never overwrite a map."""
+        self.check_new_map_id(map_id)
+        self.save(map_id, graph)
+
     def create_seed(self, map_id: str) -> Graph:
         """Create a new map with a small demo tree so it is immediately navigable."""
         graph = Graph()
@@ -813,7 +868,7 @@ class MapStore:
         graph.add_node(child_b)
         graph.add_edge(Edge(parent_id="root", child_id="n1"))
         graph.add_edge(Edge(parent_id="root", child_id="n2"))
-        self.save(map_id, graph)
+        self.create(map_id, graph)
         return graph
 
     def create_from_template(self, map_id: str, template_id: str) -> Graph:
@@ -837,7 +892,7 @@ class MapStore:
             ficha=Ficha(title=template.get("seed_title", map_id)),
         )
         graph.add_node(root)
-        self.save(map_id, graph)
+        self.create(map_id, graph)
         return graph
 
     def _state_path(self) -> Path:
