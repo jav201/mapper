@@ -271,7 +271,6 @@ async def test_llr_n14_3_2_nine_tabs_from_the_map_still_walk_the_ring(tmp_path):
 # ---------------------------------------------------------------------------
 # #D10 -- `.factory-tag` retoned (Inc-1 registered it, Inc-9 closes it)
 
-@pytest.mark.xfail(strict=True, reason="RED: ACCENT on a label until Inc-9 retones it")
 def test_d10_the_factory_tag_is_painted_in_mut():
     from mapper.screens.factory import FactoryScreen
 
@@ -309,7 +308,6 @@ def _coerced(arg) -> bool:
     return False
 
 
-@pytest.mark.xfail(strict=True, reason="RED: 16 dynamic sites uncoerced before Inc-9")
 def test_llr_n06_2_5_notify_sites_are_coerced():
     sites = _notify_sites()
     assert len(sites) > 0, "the AST walk found no notify call: the census is vacuous"

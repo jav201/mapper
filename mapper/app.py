@@ -909,7 +909,7 @@ class HomeScreen(Screen):
                 store.create_seed(name)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(f"no se pudo crear el mapa: {e}", severity="error", markup=False)
+                self.notify(darkside.plain(f"no se pudo crear el mapa: {e}"), severity="error", markup=False)
 
         self.app.push_screen(ConstructScreen(), callback=on_name)
 
@@ -923,7 +923,7 @@ class HomeScreen(Screen):
                 store.create_from_template(name, template_id)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(f"no se pudo crear el mapa: {e}", severity="error", markup=False)
+                self.notify(darkside.plain(f"no se pudo crear el mapa: {e}"), severity="error", markup=False)
 
         def on_template(template_id: str | None) -> None:
             if template_id is None:
@@ -944,12 +944,12 @@ class HomeScreen(Screen):
                 return
             path = Path(path_str).expanduser()
             if not path.exists():
-                self.notify(f"archivo no encontrado: {path}", severity="error", markup=False)
+                self.notify(darkside.plain(f"archivo no encontrado: {path}"), severity="error", markup=False)
                 return
             try:
                 preview = preview_csv(path)
             except Exception as e:
-                self.notify(f"no se pudo leer CSV: {e}", severity="error", markup=False)
+                self.notify(darkside.plain(f"no se pudo leer CSV: {e}"), severity="error", markup=False)
                 return
             self.app.push_screen(_ImportPreviewScreen(preview, path))
 
@@ -1312,12 +1312,12 @@ class RepoScreen(Screen):
         try:
             worker = self.fetch_graph()
             self.graph = await worker.wait()
-            self.notify(f"conectado: {len(self.graph.nodes)} nodos", markup=False)
+            self.notify(darkside.plain(f"conectado: {len(self.graph.nodes)} nodos"), markup=False)
         except GitHubError as exc:
-            self.notify(str(exc), severity="error", markup=False)
+            self.notify(darkside.plain(str(exc)), severity="error", markup=False)
             self.graph = Graph()
         except Exception as exc:
-            self.notify(f"error inesperado: {exc}", severity="error", markup=False)
+            self.notify(darkside.plain(f"error inesperado: {exc}"), severity="error", markup=False)
             self.graph = Graph()
         self.loading = False
         self.nav = NavigationModel(self.graph)
@@ -3294,7 +3294,7 @@ class MapScreen(Screen):
         if status == OSOPEN_OK:
             self._event_toast("abierto", darkside.plain(att.caption or att.path))
         else:
-            self.notify(f"{status}: {shown}", severity="warning", markup=False)
+            self.notify(darkside.plain(f"{status}: {shown}"), severity="warning", markup=False)
 
     def on_ficha_inspector_attachment_add_requested(
         self, event: FichaInspector.AttachmentAddRequested
@@ -3835,7 +3835,7 @@ class MapScreen(Screen):
         added = len(diff.added)
         removed = len(diff.removed)
         changed = len(diff.changed)
-        self.notify(f"diff: +{added} -{removed} ~{changed}", markup=False)
+        self.notify(darkside.plain(f"diff: +{added} -{removed} ~{changed}"), markup=False)
 
     def action_coverage(self) -> None:
         def on_select(node_id: str | None) -> None:
@@ -3948,7 +3948,7 @@ class MapScreen(Screen):
                 # still costs seconds on a short terminal, and a TUI that stops
                 # answering with no indication reads as hung rather than busy.
                 self.notify(
-                    f"exportando {cells} celdas; puede tardar un momento.",
+                    darkside.plain(f"exportando {cells} celdas; puede tardar un momento."),
                     markup=False,
                 )
                 await asyncio.sleep(self.EXPORT_DECLARE_PAUSE)
@@ -4014,14 +4014,14 @@ class MapScreen(Screen):
                     "a esta exportación."
                 )
             self.notify(
-                f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
+                darkside.plain(f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
                 f"límite {too_large.limit}. Enfoca un subárbol con f y exporta esa vista."
-                f"{stale}",
+                f"{stale}"),
                 severity="warning",
                 markup=False,
             )
         except Exception as e:
-            self.notify(f"exportación fallida: {e}", severity="error", markup=False)
+            self.notify(darkside.plain(f"exportación fallida: {e}"), severity="error", markup=False)
 
     #: How many times `_export_view_state` may grow the canvas looking for the
     #: size at which the whole map fits.  MEASURED, not guessed, and measured by

@@ -96,7 +96,7 @@ class FactoryScreen(Screen):
         background: #1783ff;
         color: #000000;
     }
-    .factory-tag { color: #1783ff; }
+    .factory-tag { color: #737373; }
     .factory-missing { color: #ff4f42; }
     """
 
@@ -421,7 +421,7 @@ class FactoryScreen(Screen):
                 return
             source = Path(path_str).expanduser()
             if not source.exists():
-                self.notify(f"archivo no encontrado: {source}", severity="error", markup=False)
+                self.notify(darkside.plain(f"archivo no encontrado: {source}"), severity="error", markup=False)
                 return
             kind = source.suffix.lower().lstrip(".")
             if kind not in {"docx", "pptx", "xlsx"}:
@@ -444,7 +444,7 @@ class FactoryScreen(Screen):
             )
             self._persist()
             self._refresh()
-            self.notify(f"plantilla importada: {rel}", markup=False)
+            self.notify(darkside.plain(f"plantilla importada: {rel}"), markup=False)
 
         self.app.push_screen(
             _PromptScreen("ruta del archivo office", "/ruta/a/plantilla.docx"),
@@ -468,9 +468,9 @@ class FactoryScreen(Screen):
         target = store.workspace / f"{self.document_name}-{node.id}{suffix}"
         try:
             office.resolve(path, doc.tags, target)
-            self.notify(f"generado: {target}", markup=False)
+            self.notify(darkside.plain(f"generado: {target}"), markup=False)
         except Exception as exc:
-            self.notify(f"no se pudo generar: {exc}", severity="error", markup=False)
+            self.notify(darkside.plain(f"no se pudo generar: {exc}"), severity="error", markup=False)
 
     def action_start_node(self) -> None:
         """Return to the node that was selected when the factory opened."""
