@@ -524,7 +524,9 @@ async def test_inc9c_k3_the_construct_modal_footer_is_english(tmp_path):
 
 @red("hints")
 async def test_inc9c_k3_the_factory_import_and_map_hints_use_the_seat_word(tmp_path):
-    from mapper.app import DEFAULT_MAP_HINT
+    from mapper.app import map_hint
+
+    default_map_hint = map_hint()
 
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
@@ -546,9 +548,10 @@ async def test_inc9c_k3_the_factory_import_and_map_hints_use_the_seat_word(tmp_p
     assert "salir" not in factory_hint and "inicio" not in factory_hint, factory_hint
     assert _seat_pair("import", "save") in import_hint and _seat_pair("import", "home") in import_hint
     assert "guarda" not in import_hint and "volver" not in import_hint, import_hint
-    assert _seat_pair("map", "open_ficha") in DEFAULT_MAP_HINT, DEFAULT_MAP_HINT
-    assert _seat_pair("map", "search") in DEFAULT_MAP_HINT, DEFAULT_MAP_HINT
-    assert "ficha" not in DEFAULT_MAP_HINT and "buscar" not in DEFAULT_MAP_HINT
+    assert _seat_pair("map", "open_ficha") in default_map_hint, default_map_hint
+    assert _seat_pair("map", "search") in default_map_hint, default_map_hint
+    assert "ficha" not in default_map_hint and "buscar" not in default_map_hint
+    assert "navega" not in default_map_hint, default_map_hint
 
 
 @red("hints")

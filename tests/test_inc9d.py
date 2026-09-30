@@ -34,7 +34,7 @@ from tests.test_no_operator_paths import USER_PROFILE_PATH
 from tests.test_repair_layout import _frame_rows, _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"hint", "header", "sentinel"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
