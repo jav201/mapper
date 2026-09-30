@@ -18,6 +18,7 @@ from textual.geometry import Region
 from textual.reactive import reactive
 from textual.screen import ModalScreen, Screen
 from textual.widgets import DataTable, Input, Label, Static
+from textual.worker import WorkerFailed
 
 from . import darkside
 from .diff import DiffResult, git_diff
@@ -1367,7 +1368,7 @@ class RepoScreen(Screen):
         table = self.query_one("#repo-table", Static)
         table.update(self._render_table())
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def fetch_graph(self) -> Graph:
         def on_progress(current: int, total: int, stage: str) -> None:
             try:
@@ -1393,11 +1394,15 @@ class RepoScreen(Screen):
             worker = self.fetch_graph()
             self.graph = await worker.wait()
             self.notify(darkside.plain(f"conectado: {len(self.graph.nodes)} nodos"), markup=False)
-        except GitHubError as exc:
-            self.notify(darkside.plain(str(exc)), severity="error", markup=False)
-            self.graph = Graph()
         except Exception as exc:
-            self.notify(darkside.plain(f"error inesperado: {type(exc).__name__}"), severity="error", markup=False)
+            # `INC9BC-SEC-F3`: the worker does not exit the app (`exit_on_error`),
+            # so its failure arrives here wrapped, and `GitHubError` is reachable.
+            if isinstance(exc, WorkerFailed):
+                exc = exc.error
+            if isinstance(exc, GitHubError):
+                self.notify(darkside.plain(str(exc)), severity="error", markup=False)
+            else:
+                self.notify(darkside.plain(f"error inesperado: {type(exc).__name__}"), severity="error", markup=False)
             self.graph = Graph()
         self.loading = False
         self.nav = NavigationModel(self.graph)
