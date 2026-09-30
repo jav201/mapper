@@ -35,6 +35,7 @@ from .keymap import (
     KeyBinding,
     bar_group_order,
     bindings_for,
+    group_header,
     groups_for_keybar,
     hint_pair,
     label_for,
@@ -144,11 +145,14 @@ _QUERY_ECHO_CELLS = 32
 # The map's resting hint, spelled ONCE.  Three sites restore it now that `esc`
 # clears a live search instead of leaving the map (`#D38`): `compose`, the field
 # editor's exit, and the clear itself.  Three copies of a sentence are three
-# chances for two of them to drift.
-DEFAULT_MAP_HINT = (
-    f"navega con j/k/h/l · {hint_pair(SCOPE_MAP, 'open_ficha')} · "
-    f"{hint_pair(SCOPE_MAP, 'search')}"
-)
+# chances for two of them to drift.  A function, not a constant: every word
+# beside a key is the seat's (`K3`), and a test that relabels the seat rebuilds
+# it (`INC9BC-CR-F2`).  `INC9BC-UX-F3`: `j/k/h/l move`, in the seat's word.
+def map_hint() -> str:
+    return (
+        f"j/k/h/l {group_header('nav')} · {hint_pair(SCOPE_MAP, 'open_ficha')} · "
+        f"{hint_pair(SCOPE_MAP, 'search')}"
+    )
 
 # The ceiling on the fold-auto-open segment of the walk's hint line.  Branch
 # TITLES are file-derived: unbounded in length, and one walk can open several
@@ -793,7 +797,9 @@ class HomeScreen(Screen):
 
         # Recents table
         table = self.query_one("#home-recents", DataTable)
-        table.clear()
+        # `INC9BC-UX-F13`: `clear()` keeps the columns, so each return to home
+        # added the four again (24 after three returns).
+        table.clear(columns=True)
         table.add_columns("▐ name", "kind", "nodos", "docs")
 
         archived = self.query_one("#home-archived", Static)
@@ -1540,7 +1546,7 @@ class MapScreen(Screen):
         yield Input(placeholder="/buscar", id="search-input")
         yield Static("", id=COUNT_REGION_ID)
         yield Static("", id="map-toast")
-        yield HintLine(DEFAULT_MAP_HINT)
+        yield HintLine(map_hint())
         # The keybar reads the same seat the bindings are generated from, so it
         # cannot advertise a key the screen does not bind (US-N03).
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
@@ -3349,7 +3355,7 @@ class MapScreen(Screen):
         """`escape` inside a field returns focus to the map, keeping the value."""
         event.stop()
         self.set_focus(None)
-        self.query_one(HintLine).set_hint(DEFAULT_MAP_HINT)
+        self.query_one(HintLine).set_hint(map_hint())
 
     # -- attachments (US-N02) ----------------------------------------------
     def on_ficha_inspector_attachment_activated(
@@ -3541,7 +3547,7 @@ class MapScreen(Screen):
             if self._search_is_live():
                 self.query_one(HintLine).set_hint(self._search_hint(order))
             else:
-                self.query_one(HintLine).set_hint(DEFAULT_MAP_HINT)
+                self.query_one(HintLine).set_hint(map_hint())
 
     def on_input_blurred(self, event: Input.Blurred) -> None:
         if event.input.id == "search-input":
@@ -4648,7 +4654,7 @@ class MapScreen(Screen):
         if self._search_is_live():
             self.query_text = ""
             self.refresh_canvas()
-            self.query_one(HintLine).set_hint(DEFAULT_MAP_HINT)
+            self.query_one(HintLine).set_hint(map_hint())
             return
         self.app.pop_screen()
 
