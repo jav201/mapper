@@ -248,7 +248,8 @@ def test_bindings_for_includes_app_scope_but_not_other_screens():
 
 def test_groups_for_keybar_order_and_glyphs():
     groups = groups_for_keybar(["nav", "app"])
-    assert [g[0] for g in groups] == ["nav", "app"]
+    # `K1`: the header is what the operator reads, not the group id.
+    assert [g[0] for g in groups] == ["move", "global"]
     nav_pairs = groups[0][1]
     # `A-112`: English labels since Inc-9.
     assert ("j", "next sibling") in nav_pairs

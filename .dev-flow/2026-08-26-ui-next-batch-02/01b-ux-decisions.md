@@ -498,7 +498,7 @@ Every string below is what the legend paints; `tests/test_vocabulary_declaration
 - Section headers, in order: `what this view paints` · `what the colours mean` · `keys in this view`
   (the vocabulary comes first in both layouts, verdict `E1`)
 - Own-scope group title: `in this legend` (verdict `E3`, which ratified `A5`)
-- Own-scope group words, by action: `close` (`esc`, `q`) · `scroll` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `ends` (`home`, `end`)
+- Own-scope group words, by action: `close` (`esc`, `q`) · `scroll` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `top/bottom` (`home`, `end`)
 - Footer, two lines: `? explains the view you are in,` · `outside text fields`
 - Reserved chord line: `??` + `opens the full field guide`
 - Sample column (layout, not copy): 12 cells in the modal, so a sample up to 11 cells (`▐ ▸ inv +23`,
