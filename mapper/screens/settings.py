@@ -67,8 +67,8 @@ class SettingsScreen(Screen):
     """
 
     def compose(self) -> ComposeResult:
-        yield TabStrip("c", crumb=["preferencias"])
-        yield Static("componente        default          focused          disabled",
+        yield TabStrip("c", crumb=["settings"])
+        yield Static("component         default          focused          disabled",
                      id="settings-header")
         with Vertical(id="settings-grid"):
             yield _StateRow("switch", lambda: DsSwitch(True))

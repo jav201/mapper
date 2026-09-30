@@ -34,10 +34,11 @@ def test_step_meter_zero():
 def test_tab_strip_has_tabs():
     text = darkside.tab_strip("c")
     plain = text.plain
-    assert "consultar" in plain
+    # `A-112` st. 4: English tab labels since Inc-9.
+    assert "browse" in plain
     assert "repo" in plain
-    assert "construir" in plain
-    assert "fábrica" in plain
+    assert "build" in plain
+    assert "factory" in plain
     assert "mapper" in plain
 
 

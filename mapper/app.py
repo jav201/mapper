@@ -368,7 +368,7 @@ class _TemplateScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("elegir plantilla", id="template-title"),
+            Static("choose template", id="template-title"),
             DataTable(id="template-table", cursor_type="row"),
             id="template-dialog",
         )
@@ -482,7 +482,7 @@ class ConstructScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("nuevo mapa", id="construct-label"),
+            Static("new map", id="construct-label"),
             Input(placeholder="mi-nuevo-mapa", id="construct-input"),
             Static("", id="construct-hints"),
             id="construct-dialog",
@@ -669,7 +669,8 @@ class HomeScreen(Screen):
         identity_text = Text()
         identity_text.append(glyph, style=darkside.WORDMARK)
         identity_text.append(" mapper", style=darkside.WORDMARK)
-        identity_text.append("   mapas vivos", style=darkside.MUT)
+        # `A-112` st. 5: the view's one name, the legend title's (`D5`).
+        identity_text.append(f"   {darkside.VIEW_NAMES['home']}", style=darkside.MUT)
         identity.update(identity_text)
 
         mmd_files = sorted(store.workspace.glob("*.mmd"))
@@ -1046,9 +1047,9 @@ class PlugRepoScreen(Screen):
     BINDINGS = screen_bindings(SCOPE_PLUG)
 
     def compose(self) -> ComposeResult:
-        yield TabStrip("p", crumb=["conectar repo"])
+        yield TabStrip("p", crumb=["connect repo"])
         yield Vertical(
-            Label("conectar repositorio", id="repo-title"),
+            Label("connect repository", id="repo-title"),
             Input(placeholder="owner/name o URL de github", id="repo-input"),
             id="repo-dialog",
         )

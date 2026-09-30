@@ -95,7 +95,7 @@ async def test_at_n03d_help_shows_exactly_the_active_scope(tmp_path):
     """AT-N03d — `?` shows the keys that work here, and none that do not.
 
     RED mutation: render the whole KEYMAP instead of `bindings_for(self.scope)`;
-    "consultar mapas" then appears in a map's help and the absence assertion fails.
+    the home door's label then appears in a map's help and the absence assertion fails.
     """
     app = MapperApp(tmp_path)
     async with app.run_test() as pilot:
@@ -111,7 +111,10 @@ async def test_at_n03d_help_shows_exactly_the_active_scope(tmp_path):
         shown = help_screen.query_one("#help-content").render().plain
         for binding in keymap.bindings_for(keymap.SCOPE_MAP):
             assert binding.label in shown, f"{binding.label} works here but help hides it"
-        assert "consultar mapas" not in shown, "help advertises a key that does nothing here"
+        # Read from the seat (`A-112`): a typed label went vacuous the day the
+        # seat's copy changed language.
+        door = next(b.label for b in keymap.KEYMAP if b.action == "consult")
+        assert door not in shown, "help advertises a key that does nothing here"
 
 
 async def test_palette_empty_query_dispatches_nothing(tmp_path):

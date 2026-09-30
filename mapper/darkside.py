@@ -134,11 +134,12 @@ def moon(d: date) -> tuple[str, str]:
 # Tab strip ----------------------------------------------------------------
 def tab_strip(active: str, crumb: list[str] | None = None, width: int = 0) -> Text:
     """Render the darkside tab strip."""
+    # `A-112` st. 4-5: English, one word per screen -- the door's label.
     tabs: list[tuple[str, str]] = [
-        ("c", "consultar"),
+        ("c", "browse"),
         ("p", "repo"),
-        ("n", "construir"),
-        ("f", "fábrica"),
+        ("n", "build"),
+        ("f", "factory"),
     ]
     pieces: list[tuple[str, str]] = []
     for key, label in tabs:

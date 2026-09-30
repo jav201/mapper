@@ -428,8 +428,7 @@ def _judge(strings: list[tuple[str, str]]) -> list[tuple[str, str, str]]:
     return bad
 
 
-@pytest.mark.parametrize("source", ["seat", "keybar", pytest.param("headers", marks=pytest.mark.xfail(
-    strict=True, reason="RED: Spanish screen headers until Inc-9's header step"))])
+@pytest.mark.parametrize("source", ["seat", "keybar", "headers"])
 def test_a112_the_chrome_is_english(source):
     strings = {"seat": _seat_strings, "keybar": _keybar_literals,
                "headers": _screen_headers}[source]()
@@ -460,7 +459,6 @@ def test_a112_a_label_that_names_a_view_uses_its_one_name():
     assert wrong == [], wrong
 
 
-@pytest.mark.xfail(strict=True, reason="RED: the home header says 'mapas vivos'")
 async def test_a112_the_home_header_reads_its_one_name(tmp_path):
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
