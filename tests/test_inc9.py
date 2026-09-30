@@ -475,17 +475,93 @@ async def test_a112_the_home_header_reads_its_one_name(tmp_path):
     assert darkside.VIEW_NAMES["home"] in row.split(), row
 
 
-@pytest.mark.xfail(strict=True, reason="Inc-9b: the map views' own headers are outside Inc-9's cap")
-def test_inc9b_each_map_view_header_names_its_view():
+_INC9B_GATE = pytest.mark.xfail(
+    strict=True, reason="Inc-9b: the map views' own headers are outside Inc-9's cap")
+
+
+def _map_view_first_lines() -> list[tuple[str, str, str]]:
+    """`(view, which line, its first painted row)` for every map-view header
+    and every `_degraded` banner, legacy and concept atlas both (`INC9-CR-F1`)."""
     from mapper.views import layered, outline, radial
 
-    headers = {
-        "canvas": layered._header_line(Graph(), 118, False, 0, 0).plain,  # noqa: SLF001
-        "outline": outline._header_line().plain,  # noqa: SLF001
-        "radial": radial._header_line(0).plain,  # noqa: SLF001
-    }
-    wrong = {k: h for k, h in headers.items() if f"· {darkside.VIEW_NAMES[k]}" not in h}
+    def first(text) -> str:
+        return text.plain.split("\n")[0]
+
+    g = Graph()
+    rows = [
+        ("canvas", "header", first(layered._header_line(g, 118, False, 0, 0))),  # noqa: SLF001
+        ("canvas", "header legacy", first(layered._header_line(g, 118, True, 0, 0))),  # noqa: SLF001
+        ("canvas", "degraded", first(layered._degraded(9, False))),  # noqa: SLF001
+        ("canvas", "degraded legacy", first(layered._degraded(9, True))),  # noqa: SLF001
+        ("radial", "header", first(radial._header_line(0))),  # noqa: SLF001
+        ("radial", "degraded", first(radial._degraded(9))),  # noqa: SLF001
+        ("outline", "header", first(outline._header_line())),  # noqa: SLF001
+        ("outline", "degraded", first(outline._degraded(9))),  # noqa: SLF001
+    ]
+    assert {v for v, _, _ in rows} == set(darkside.VIEW_NAMES) - {"home"}, rows
+    return rows
+
+
+@_INC9B_GATE
+def test_inc9b_each_map_view_header_names_its_view():
+    wrong = {(v, w): t for v, w, t in _map_view_first_lines()
+             if f"· {darkside.VIEW_NAMES[v]}" not in t}
     assert wrong == {}, wrong
+
+
+@_INC9B_GATE
+def test_inc9b_each_map_view_header_reads_view_names_not_a_literal(monkeypatch):
+    """The name must be READ: swap every entry for a sentinel and each header
+    and banner follows it.  A header that spells its name fails here even when
+    the spelling happens to equal the ratified word."""
+    for view in darkside.VIEW_NAMES:
+        monkeypatch.setitem(darkside.VIEW_NAMES, view, f"zz-{view}-zz")
+    wrong = {(v, w): t for v, w, t in _map_view_first_lines()
+             if f"· zz-{v}-zz" not in t}
+    assert wrong == {}, wrong
+
+
+@_INC9B_GATE
+def test_inc9b_the_atlas_states_its_map_kind_in_english_as_secondary_text():
+    from mapper.views import layered
+
+    g = Graph()
+    for legacy, kind in ((False, "concept map"), (True, "legacy tree")):
+        for line in (layered._header_line(g, 118, legacy, 0, 0).plain,  # noqa: SLF001
+                     layered._degraded(9, legacy).plain.split("\n")[0]):  # noqa: SLF001
+            assert f"· {darkside.VIEW_NAMES['canvas']} · {kind}" in line, line
+
+
+@_INC9B_GATE
+async def test_inc9b_the_coverage_and_editor_titles_are_english_and_state_free():
+    from textual.app import App
+
+    from mapper.model import Edge, Ficha, Node, SchemaField
+    from mapper.screens.coverage import CoverageScreen
+    from mapper.screens.editor import EditorScreen
+
+    schema = [SchemaField(key="D", label="documento", required=True)]
+    incomplete = Graph(schema=schema)
+    incomplete.add_node(Node(id="root", ficha=Ficha(title="Root")))
+    complete = Graph(schema=schema)
+    complete.add_node(Node(id="root", ficha=Ficha(title="Root", fields={"D": "r"})))
+    titles: dict[str, str] = {}
+    app = App()
+    async with app.run_test(size=SIZE) as pilot:
+        for name, graph in (("coverage, incomplete map", incomplete),
+                            ("coverage, complete map", complete)):
+            await app.push_screen(CoverageScreen(graph, "demo"))
+            await pilot.pause()
+            assert app.screen.complete is (graph is complete), name
+            titles[name] = app.screen.query_one("#coverage-title").content
+            await app.pop_screen()
+        await app.push_screen(EditorScreen("x"))
+        await pilot.pause()
+        titles["editor"] = app.screen.query_one("#editor-title").content
+    assert _judge([("screen", t) for t in titles.values()]) == [], titles
+    cov = {titles["coverage, incomplete map"], titles["coverage, complete map"]}
+    assert len(cov) == 1, f"the coverage title changes with the state it reports: {cov}"
+    assert "incomplete" not in next(iter(cov)), cov
 
 
 # ---------------------------------------------------------------------------
