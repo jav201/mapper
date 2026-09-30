@@ -13,12 +13,21 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from mapper import darkside, office
-from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, textual_bindings
+from mapper.keymap import SCOPE_FACTORY, group_header, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
 
 _TAG_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
+#: The hint line under the tree: every word beside a key is the seat's (`K3`).
+#: `q` only -- `esc` leaves the same way and the key bar lists both.
+_HINT = " · ".join([
+    f"j/k/h/l {group_header('tree')}",
+    *(hint_pair(SCOPE_FACTORY, action) for action in
+      ("edit_doc", "import_office", "generate_office", "start_node")),
+    hint_pair(SCOPE_FACTORY, "home", key="q"),
+])
 
 
 class _Nav:
@@ -126,7 +135,7 @@ class FactoryScreen(Screen):
         with Horizontal(id="factory-body"):
             yield Static(id="factory-tree")
             yield Static(id="factory-preview")
-        yield HintLine("j/k/h/l navega · d edita · i importa · g genera · 0 inicio · q salir")
+        yield HintLine(_HINT)
         from mapper.app import keybar_groups
 
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
