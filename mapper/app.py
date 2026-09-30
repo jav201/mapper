@@ -910,7 +910,11 @@ class HomeScreen(Screen):
                 store.create_seed(name)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(darkside.plain(f"no se pudo crear el mapa: {e}"), severity="error", markup=False)
+                # `INC9-SEC-F1`: the map's name and the exception TYPE, never
+                # `str(e)` -- an `OSError` embeds the absolute path (`_save_or_toast`).
+                self.notify(
+                    darkside.plain(f"no se pudo crear el mapa {name!r}: {type(e).__name__}"),
+                    severity="error", markup=False)
 
         self.app.push_screen(ConstructScreen(), callback=on_name)
 
@@ -924,7 +928,9 @@ class HomeScreen(Screen):
                 store.create_from_template(name, template_id)
                 self.app.push_screen(MapScreen(name))
             except Exception as e:
-                self.notify(darkside.plain(f"no se pudo crear el mapa: {e}"), severity="error", markup=False)
+                self.notify(
+                    darkside.plain(f"no se pudo crear el mapa {name!r}: {type(e).__name__}"),
+                    severity="error", markup=False)
 
         def on_template(template_id: str | None) -> None:
             if template_id is None:
@@ -945,12 +951,16 @@ class HomeScreen(Screen):
                 return
             path = Path(path_str).expanduser()
             if not path.exists():
-                self.notify(darkside.plain(f"archivo no encontrado: {path}"), severity="error", markup=False)
+                # `INC9-SEC-F1`: the file's name, never the path the operator's
+                # `~` expanded to.
+                self.notify(darkside.plain(f"archivo no encontrado: {path.name}"), severity="error", markup=False)
                 return
             try:
                 preview = preview_csv(path)
             except Exception as e:
-                self.notify(darkside.plain(f"no se pudo leer CSV: {e}"), severity="error", markup=False)
+                self.notify(
+                    darkside.plain(f"no se pudo leer CSV {path.name!r}: {type(e).__name__}"),
+                    severity="error", markup=False)
                 return
             self.app.push_screen(_ImportPreviewScreen(preview, path))
 
@@ -1318,7 +1328,7 @@ class RepoScreen(Screen):
             self.notify(darkside.plain(str(exc)), severity="error", markup=False)
             self.graph = Graph()
         except Exception as exc:
-            self.notify(darkside.plain(f"error inesperado: {exc}"), severity="error", markup=False)
+            self.notify(darkside.plain(f"error inesperado: {type(exc).__name__}"), severity="error", markup=False)
             self.graph = Graph()
         self.loading = False
         self.nav = NavigationModel(self.graph)
@@ -3956,7 +3966,7 @@ class MapScreen(Screen):
             text = renderer.render(self.graph, state)
             path = self.store.workspace / f"{self.map_id}.svg"
             save_svg(text, path)
-            self._event_toast("exportado", str(path))
+            self._event_toast("exportado", path.name)
         except ExportTooLarge as too_large:
             # A REFUSAL, AND IT NAMES THE ROUTE FORWARD.  Nothing is written --
             # see `_export_view_state` for why a partial artifact is the one
@@ -4011,7 +4021,7 @@ class MapScreen(Screen):
             stale = ""
             if path.is_file():
                 stale = (
-                    f" No se escribió nada: el archivo en {path} no corresponde "
+                    f" No se escribió nada: el archivo {path.name} no corresponde "
                     "a esta exportación."
                 )
             self.notify(
@@ -4022,7 +4032,7 @@ class MapScreen(Screen):
                 markup=False,
             )
         except Exception as e:
-            self.notify(darkside.plain(f"exportación fallida: {e}"), severity="error", markup=False)
+            self.notify(darkside.plain(f"exportación fallida: {type(e).__name__}"), severity="error", markup=False)
 
     #: How many times `_export_view_state` may grow the canvas looking for the
     #: size at which the whole map fits.  MEASURED, not guessed, and measured by

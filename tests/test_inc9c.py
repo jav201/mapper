@@ -45,7 +45,7 @@ from tests.test_no_operator_paths import USER_PROFILE_PATH
 from tests.test_repair_layout import _frame_rows, _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"toasts", "wording", "hints", "ux"}
+OPEN_STEPS: set[str] = {"wording", "hints", "ux"}
 
 
 def red(step: str):
@@ -179,9 +179,14 @@ async def test_inc9c_sec_f1_no_toast_paints_an_absolute_path(tmp_path, monkeypat
     the toast exists and still names what failed."""
     opens, driver, names = SITES[site]
     if site == "repo-unexpected":
-        def blow(self, progress=None):
-            raise OSError(f"[Errno 2] No such file: '{PROFILE}'")
-        monkeypatch.setattr("mapper.app.GitHubConnector.fetch", blow)
+        # `@work(thread=True)` exits the app on a worker failure, so the
+        # `except Exception` around `wait()` is reached only by a failure of the
+        # wait itself; a stub worker whose `wait()` raises drives exactly that.
+        class _Failing:
+            async def wait(self):
+                raise OSError(f"[Errno 2] No such file: '{PROFILE}'")
+
+        monkeypatch.setattr(RepoScreen, "fetch_graph", lambda self: _Failing())
     app = MapperApp(tmp_path)
     toasts: list[str] = []
     async with app.run_test(size=SIZE) as pilot:
