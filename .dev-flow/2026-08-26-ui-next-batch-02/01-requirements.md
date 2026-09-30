@@ -10107,3 +10107,53 @@ mutation that a subsequent save failed to persist -- the operator is told and th
 running; recovering the specific edit is a `u` (undo) away if a snapshot was pushed, same as any
 other declined write. `B-67` ("lone surrogates survive `darkside.plain`") is closed for paint/export
 by Inc-8 pass-3; this amendment closes its persistence half -- see `.dev-flow/BACKLOG.md` B-67.
+
+**Appended note (G6 corrective pass, `G6-C-F1`..`F8`, closing security review `BLOCK-UNTIL
+G6-C-F1, F2, F3, F8`).** The independent security review found the increment as landed (`65621f3`)
+incomplete against its own statement above:
+
+1. **`G6-C-F3` corrects a factual error in this requirement and in
+   `03-increments/increment-024-g6-store-surrogates.md` §1.** Both said "every `store.save()` call
+   site in `mapper/app.py` now degrades to a toast." That was false: `MapScreen.on_mount`'s
+   `map_id == "new"` branch is an 8th call site, and it was unguarded. It is now routed through the
+   same guard as the other seven. The false claim is corrected here rather than silently rewritten;
+   see the increment record's own "Corrective pass" section for the fuller account.
+2. **`G6-C-F1`** closes the same gap one level down: `mapper/screens/factory.py::_persist` --
+   reached from `action_edit_doc` and `action_import_office` -- called `store.save()` with no guard
+   at all, and `action_edit_doc`'s `EditorScreen` callback assigned `Document.source` raw. Both are
+   now guarded/coerced the same way every `mapper/app.py` site is.
+3. **`G6-C-F2`** replaces every guard's toast wording. `f"no se pudo guardar: {e}"` interpolated the
+   exception's own `str()`, which for `OSError` embeds the full absolute path and, on Windows, the
+   account name -- the exact leak `B-30` already closed for `store.load`'s toast (`store.py` ~594-599).
+   Every guard (the pre-existing one, the six from this amendment, `G6-C-F1`'s and `G6-C-F3`'s) now
+   shares ONE helper, `mapper/app.py::_save_or_toast`, whose toast names the map id and the exception
+   TYPE only -- both passed through `darkside.plain()` -- never `str(e)`. The Spanish wording is
+   unchanged; only the leak is removed (Inc-EN, `B-71`, still owns translating it).
+4. **`G6-C-F4`** coerces the "guardar como" map name (`ImportPreviewScreen.action_save`) before it
+   reaches `store.save(name, ...)` -- the one remaining mutation site this amendment's statement 1
+   missed.
+5. **`G6-C-F7`** fixes a REGRESSION this amendment itself introduced: `plain()` maps `\r` (U+000D) to
+   U+FFFD, correct at a paint sink but not at the LOAD boundary `_coerce_field` widened to call
+   `plain()` on every stored string. A note with real CRLF line endings (pasted on Windows) corrupted
+   permanently on its first load, silently. `_coerce_field` now normalizes `\r\n`/`\r` to `\n` BEFORE
+   calling `plain()`, at the storage-coercion site only -- `plain()` itself is unchanged, and every
+   paint call site still gets the U+FFFD behaviour this amendment specified.
+6. **`G6-C-F5`/`F6`** widen the coercion's OWN stated scope ("the two points [ficha string fields]
+   enter the in-memory graph") to two text positions this amendment's implementation missed inside
+   that same scope: `Edge.label` (set raw by `mermaid.parse`, never a sidecar text position) and an
+   mmd-only ("orphan") node's `Ficha` (a node the sidecar carries no entry for at all, so it never
+   entered `_graph_from_sidecar`'s per-node loop). Both are now coerced.
+7. **`G6-C-F8`** is a pre-existing defect (not introduced by this amendment, not part of its
+   original fence) the same security review flagged alongside it: `save()` wrote `.mmd` then
+   `_nodos.yml` as two independent atomic replaces, so a failure between them left the pair torn --
+   the newer file replaced, the older stale -- and the next `load()` rebuilt from the stale sidecar
+   with no warning, reverting the edit silently. `save()` now writes both temp files before either
+   replace, and stamps the sidecar with a fingerprint of the `.mmd` text it was saved alongside
+   (`_mmd_hash`, reusing `_text_hash` -- the module's one hashing routine); `load()` compares that
+   fingerprint against the `.mmd` actually on disk and appends a `load_warning` naming the map (no
+   path) on a mismatch. See `.dev-flow/BACKLOG.md` for the residual window this still leaves.
+
+**Numeric pass threshold, corrective pass.** `0` of the 20 arms in `tests/test_g6_store_surrogates.py`
+(8 original + 12 corrective, one of which is the AST census) fail; `0` `store.save()`-shaped call
+sites anywhere under `mapper/` without a `try` body or the shared `_save_or_toast` helper around them
+(derived by AST walk, not hand-listed).
