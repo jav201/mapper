@@ -45,7 +45,7 @@ from tests.test_no_operator_paths import USER_PROFILE_PATH
 from tests.test_repair_layout import _frame_rows, _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"hints", "ux"}
+OPEN_STEPS: set[str] = {"ux"}
 
 
 def red(step: str):
@@ -485,9 +485,11 @@ def test_inc9c_k4_import_and_repo_keep_their_names():
 # ---------------------------------------------------------------------------
 # K3 -- key hints in English, each key with its seat label's word
 
-def _seat_pair(scope: str, action: str) -> str:
-    b = _row(scope, action)
-    return f"{b.glyph} {b.label}"
+def _seat_pair(scope: str, action: str, key: str | None = None) -> str:
+    rows = [b for b in keymap.KEYMAP if b.scope == scope and b.action == action
+            and (key is None or b.key == key)]
+    assert len(rows) == 1, (scope, action, key, rows)
+    return f"{rows[0].glyph} {rows[0].label}"
 
 
 @red("hints")
@@ -546,8 +548,9 @@ async def test_inc9c_k3_the_factory_import_and_map_hints_use_the_seat_word(tmp_p
         app.push_screen(imp)
         await pilot.pause()
         import_hint = _text(imp.query_one(HintLine))
-    for action in ("edit_doc", "import_office", "generate_office", "start_node", "home"):
+    for action in ("edit_doc", "import_office", "generate_office", "start_node"):
         assert _seat_pair("factory", action) in factory_hint, (action, factory_hint)
+    assert _seat_pair("factory", "home", key="q") in factory_hint, factory_hint
     assert "salir" not in factory_hint and "inicio" not in factory_hint, factory_hint
     assert _seat_pair("import", "save") in import_hint and _seat_pair("import", "home") in import_hint
     assert "guarda" not in import_hint and "volver" not in import_hint, import_hint

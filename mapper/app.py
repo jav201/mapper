@@ -35,6 +35,8 @@ from .keymap import (
     bar_group_order,
     bindings_for,
     groups_for_keybar,
+    hint_pair,
+    label_for,
     textual_bindings,
 )
 from .mermaid import dump as dump_mermaid, slugify
@@ -142,7 +144,10 @@ _QUERY_ECHO_CELLS = 32
 # clears a live search instead of leaving the map (`#D38`): `compose`, the field
 # editor's exit, and the clear itself.  Three copies of a sentence are three
 # chances for two of them to drift.
-DEFAULT_MAP_HINT = "navega con j/k/h/l · ↵ ficha · / buscar"
+DEFAULT_MAP_HINT = (
+    f"navega con j/k/h/l · {hint_pair(SCOPE_MAP, 'open_ficha')} · "
+    f"{hint_pair(SCOPE_MAP, 'search')}"
+)
 
 # The ceiling on the fold-auto-open segment of the walk's hint line.  Branch
 # TITLES are file-derived: unbounded in length, and one walk can open several
@@ -291,9 +296,9 @@ class _PromptScreen(ModalScreen[str | None]):
         self.query_one("#prompt-input", Input).focus()
         hints = Text.assemble(
             ("↵", darkside.INK),
-            (" confirmar   ", darkside.MUT),
+            (" confirm   ", darkside.MUT),
             ("esc", darkside.INK),
-            (" cancelar", darkside.MUT),
+            (" cancel", darkside.MUT),
         )
         self.query_one("#prompt-hints", Static).update(hints)
 
@@ -348,7 +353,7 @@ class _ConfirmScreen(ModalScreen[bool]):
     def on_mount(self) -> None:
         hints = Text.assemble(
             ("y", darkside.INK),
-            (" sí   ", darkside.MUT),
+            (" yes   ", darkside.MUT),
             ("n", darkside.INK),
             (" no", darkside.MUT),
         )
@@ -492,9 +497,9 @@ class ConstructScreen(ModalScreen[str | None]):
         self.query_one("#construct-input", Input).focus()
         hints = Text.assemble(
             ("↵", darkside.INK),
-            (" crear   ", darkside.MUT),
+            (" create   ", darkside.MUT),
             ("esc", darkside.INK),
-            (" cancelar", darkside.MUT),
+            (" cancel", darkside.MUT),
         )
         self.query_one("#construct-hints", Static).update(hints)
 
@@ -996,7 +1001,7 @@ class _ImportPreviewScreen(Screen):
     def compose(self) -> ComposeResult:
         yield TabStrip("i", crumb=["import", self.source_path.name])
         yield Static("", id="import-preview-canvas")
-        yield HintLine("s guarda · esc volver")
+        yield HintLine(f"{hint_pair(SCOPE_IMPORT, 'save')} · {hint_pair(SCOPE_IMPORT, 'home')}")
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
@@ -1126,17 +1131,21 @@ class RepoScreen(Screen):
                 yield Static(self.repo, id="repo-name")
                 yield Static(self._stages_text(), id="repo-stages")
                 yield Static(self._progress_text(), id="repo-progress")
-                yield Static(
-                    "j/k navega tabla\n↵ detalle\nq inicio\n? ayuda",
-                    id="repo-sidebar-hints",
-                )
+                yield Static(self._sidebar_hints(), id="repo-sidebar-hints")
             yield Static(self._render_table(), id="repo-table", expand=True)
         yield KeyBar(
             [
-                ("repo", [("j/k", "next/previous branch"), ("↵", "details")]),
+                ("repo", [("j/k", "next/previous branch")]),
                 ("global", [("ctrl+p", "palette"), ("?", "legend"), ("q", "back")]),
             ]
         )
+
+    @staticmethod
+    def _sidebar_hints() -> str:
+        """The body panel's key hints, read from the seat (`K3`).  No `↵` line:
+        this screen binds no enter and no handler answers it (`INC9C-F1`)."""
+        pairs = [hint_pair(SCOPE_REPO, a) for a in ("next_sibling", "prev_sibling", "home")]
+        return "\n".join([*pairs, hint_pair(SCOPE_APP, "help")])
 
     def _stages_text(self) -> Text:
         stages = ["iniciando", "leyendo ramas", "calculando métricas", "listo"]
@@ -1594,7 +1603,8 @@ class MapScreen(Screen):
             self.action_toggle_rail()
         rail.focus()
         self.query_one(HintLine).set_hint(
-            "rail · ↵ plegar rama · esc volver al mapa", "esc"
+            f"rail · ↵ {label_for(SCOPE_MAP, 'collapse_branch')} · "
+            f"esc {label_for(SCOPE_MAP, 'back_or_home')}", "esc"
         )
         self.refresh_canvas()
 
@@ -3904,7 +3914,7 @@ class MapScreen(Screen):
                 # `↵` is what commits, not ctrl+s — MapScreen binds no ctrl+s at
                 # all, and advertising a key that does nothing on the primary flow
                 # is the exact defect US-N03 exists to remove.
-                f"completa «{missing[0].label}» · ↵ guarda · esc deja el campo", "↵"
+                f"completa «{missing[0].label}» · ↵ save · esc leave field", "↵"
             )
         return True
 

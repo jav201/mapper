@@ -306,6 +306,28 @@ def groups_for_keybar(
     return [(group_header(name), group_bindings.get(name, [])) for name in active_groups]
 
 
+def hint_pair(scope: str, action: str, key: str | None = None) -> str:
+    """`"glyph label"` of the ONE seat row *scope* binds to *action* (narrowed by
+    *key* when an action has two chords, as `home` does in the factory).
+
+    Key hints painted outside the key bar -- a screen's hint line, a modal's
+    footer -- are built from this, so the word beside a key is the seat's word
+    (`K3`): the same key never reads two ways on one screen.
+    """
+    rows = [
+        b for b in KEYMAP
+        if b.scope == scope and b.action == action and (key is None or b.key == key)
+    ]
+    if len(rows) != 1:
+        raise KeyError((scope, action, key, len(rows)))
+    return f"{rows[0].glyph} {rows[0].label}"
+
+
+def label_for(scope: str, action: str) -> str:
+    """The label of the one seat row *scope* binds to *action*."""
+    return hint_pair(scope, action).split(" ", 1)[1]
+
+
 def palette_items(query: str, scope: str = SCOPE_APP) -> list[KeyBinding]:
     """Fuzzy-filter the bindings reachable from *scope* by glyph, label and action."""
     candidates = bindings_for(scope)
