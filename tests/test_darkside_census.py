@@ -236,12 +236,9 @@ CONFORMING_BLUE = {
 # Known-open exceptions.  Each names the increment that closes it, so the
 # stale-exception guard below reddens if that increment forgets -- a mechanical
 # handoff instead of a promise.
+# `.factory-tag` (`#D10`'s own entry) CLOSED by Inc-9: retoned to MUT
+# (`tests/test_inc9.py::test_d10_the_factory_tag_is_painted_in_mut`).
 OPEN_EXCEPTIONS = {
-    ("mapper/screens/factory.py", ".factory-tag { color: #1783ff; }"):
-        "ACCENT on a non-interactive tag. A tag is a label, not an affordance "
-        "(the sibling .factory-node-selected at :101 uses the same blue as a "
-        "selection background, which IS legitimate). Retones to MUT in Inc-9, "
-        "which owns screens/factory.py.",
     ("mapper/views/lane.py",
      'parts.append(("▱", darkside.ALERT if behind else darkside.STEP))'):
         "Being N commits BEHIND is neither a failure nor a blockage -- it is "
@@ -316,7 +313,8 @@ def test_hue_census_no_blue_LITERAL_ships_outside_an_interactive_site():
     to be papered over with a broader test name than the test earns.
     """
     sites = _sites(tracked_sources(), BLUE)
-    assert len(sites) == 8, f"derived {len(sites)} blue literal lines, expected 8"
+    # 8 -> 7 at Inc-9: `.factory-tag` retoned to MUT, closing `#D10`'s entry.
+    assert len(sites) == 7, f"derived {len(sites)} blue literal lines, expected 7"
 
     unclassified = [
         (path, line) for path, line, _ in sites
@@ -364,9 +362,13 @@ def test_llr_s06_3_2_the_register_is_the_size_the_dispositions_imply():
     'sin acta' string painted in two different severity tokens (Inc-7).
 
     After Inc-3: five.  After Inc-5: two.  After Inc-7: one.  After Inc-9: zero.
+
+    MEASURED at Inc-9's entry (`6fe35f5`): six, not one -- the Inc-3, Inc-5
+    and Inc-7 rows are still present in the source, so the plan's countdown
+    never ran (`INC9-F4`).  Inc-9 closes its own row only: six -> five.
     """
-    assert len(OPEN_EXCEPTIONS) == 6
-    owners = {"Inc-3", "Inc-5", "Inc-7", "Inc-9"}
+    assert len(OPEN_EXCEPTIONS) == 5
+    owners = {"Inc-3", "Inc-5", "Inc-7"}
     for reason in OPEN_EXCEPTIONS.values():
         assert any(o in reason for o in owners), (
             "every registered exception names the increment that closes it, or "
