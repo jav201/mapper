@@ -659,3 +659,37 @@ def test_g6c_f8b_failure_between_replaces_is_warned_on_next_load(
     assert "torn2" in "; ".join(reloaded.load_warnings)
     # The stale sidecar is what actually loaded — the edit "reverted", now WARNED.
     assert reloaded.nodes["root"].ficha.title == "v1"
+
+
+# ---------------------------------------------------------------------------
+# G6-SEC-F9 -- the save census is structural, not a name match (Inc-9c)
+
+_F9_EVASIONS = {
+    "alias of a parameter": "def f(store):\n    db = store\n    db.save('m', g)\n",
+    "alias of an attribute": "class S:\n    def f(self):\n        db = self.store\n        db.save('m', g)\n",
+    "alias of a chain": "class S:\n    def f(self):\n        s = self.app.store\n        s.save('m', g)\n",
+    "bound method": "def f(store):\n    go = store.save\n    go('m', g)\n",
+    "getattr": "def f(store):\n    getattr(store, 'save')('m', g)\n",
+    "an unknown receiver": "def f(x):\n    x.save('m', g)\n",
+}
+
+
+@pytest.mark.xfail(strict=True, reason="Inc-9c: committed RED; closed by the test-strength step")
+@pytest.mark.parametrize("source", sorted(_F9_EVASIONS), ids=str)
+def test_g6_sec_f9_the_save_census_sees_through_a_renamed_receiver(source):
+    """`G6-SEC-F9` (MEDIUM): the census matched a receiver literally named
+    `store`, so `db = store; db.save(...)` evaded it (demonstrated live).  It is
+    now structural: EVERY `.save` reference in product code is a call site to
+    judge, whatever the receiver is called or however it is reached."""
+    tree = ast.parse(_F9_EVASIONS[source])
+    assert _store_save_calls(tree), f"the census missed: {source}"
+
+
+@pytest.mark.xfail(strict=True, reason="Inc-9c: committed RED; closed by the test-strength step")
+def test_g6_sec_f9_the_stores_own_internal_save_is_not_a_call_site():
+    """The one exemption, named: `MapStore` calling its OWN `self.save` inside
+    the class (its `create_*` methods, whose callers carry the `try`)."""
+    inside = "class MapStore:\n    def create(self):\n        self.save('m', g)\n"
+    outside = "class Other:\n    def create(self):\n        self.save('m', g)\n"
+    assert _store_save_calls(ast.parse(inside)) == []
+    assert _store_save_calls(ast.parse(outside))
