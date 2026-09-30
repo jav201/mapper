@@ -488,6 +488,9 @@ def test_llr_n06_3_1_the_charge_band_over_node_count_and_width(tmp_path):
     # is already down to two rows — the half the old grid's 30→50 jump could
     # not see.  (`w = 35` since Inc-9b; it was 31.)
     assert charged_by_w[35] == {2, 3}, charged_by_w[35]
+    # `INC9BC-CR-F5`: one width further still straddles: the band's edge is
+    # `w >= 37`, so 36 is the last width where the node count matters.
+    assert charged_by_w[36] == {2, 3}, charged_by_w[36]
 
     # MONOTONE IN THE WRAP WIDTH: a narrower wrap can only cost more rows.  This
     # is what makes a measured region width safe to trust — if the measurement
