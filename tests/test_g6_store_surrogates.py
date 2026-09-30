@@ -432,6 +432,76 @@ def _in_function(tree: ast.AST, call: ast.Call, name: str) -> bool:
     return False
 
 
+def _site_guarded(tree: ast.AST, site: ast.AST) -> bool:
+    """Is this `.save` site guarded?  Inc-9d (`INC9BC-CR-F1`, `SEC-F2`) changes the
+    body: until then a `try` counted lexically, so a reference taken inside one and
+    called after it, a lambda handed to `call_later`, and a `try/finally` with no
+    `except` all passed."""
+    return _in_function(tree, site, "_save_or_toast") or _in_try_body(tree, site)
+
+
+#: Synthetic functions the census judges.  Each is (source, guarded?): the judge is
+#: exercised on code whose answer is known, because the product tree holds no site
+#: of these shapes and an arm over the product alone could never redden.
+_CENSUS_CASES = {
+    "call in try/except Exception": (
+        "def f(store):\n    try:\n        store.save(1)\n    except Exception:\n        pass\n", True),
+    "call in try/except a tuple holding Exception": (
+        "def f(store):\n    try:\n        store.save(1)\n"
+        "    except (OSError, Exception):\n        pass\n", True),
+    "call in try/bare except": (
+        "def f(store):\n    try:\n        store.save(1)\n    except:\n        pass\n", True),
+    "call inside _save_or_toast": (
+        "def _save_or_toast(store):\n    store.save(1)\n", True),
+    "bare reference inside _save_or_toast": (
+        "def _save_or_toast(store):\n    go = store.save\n    go(1)\n", True),
+    "E1 reference taken in a try, called after it": (
+        "def f(store):\n    try:\n        go = store.save\n    except Exception:\n        pass\n"
+        "    go(1)\n", False),
+    "E2 lambda in a try, run later": (
+        "def f(self, store):\n    try:\n        self.call_later(lambda: store.save(1))\n"
+        "    except Exception:\n        pass\n", False),
+    "E3 try/finally with no except": (
+        "def f(store):\n    try:\n        store.save(1)\n    finally:\n        pass\n", False),
+    "a handler narrower than Exception": (
+        "def f(store):\n    try:\n        store.save(1)\n    except OSError:\n        pass\n", False),
+    "a def nested in the try body": (
+        "def f(store):\n    try:\n        def go():\n            store.save(1)\n"
+        "    except Exception:\n        pass\n    go()\n", False),
+    "call in the except handler": (
+        "def f(store):\n    try:\n        pass\n    except Exception:\n        store.save(1)\n", False),
+    "call with no try": ("def f(store):\n    store.save(1)\n", False),
+}
+
+#: Committed RED (strict xfail); emptied by the commit that rewrites the judge.
+_CENSUS_RED = [pytest.mark.xfail(
+    strict=True, reason="Inc-9d: committed RED; closed by the 'census' step")]
+
+
+#: The unguarded shapes the lexical rule wrongly accepted.  The other two
+#: unguarded cases are controls: the old rule already refused them.
+_CENSUS_WAS_ACCEPTED = {
+    "E1 reference taken in a try, called after it", "E2 lambda in a try, run later",
+    "E3 try/finally with no except", "a handler narrower than Exception",
+    "a def nested in the try body",
+}
+
+
+@pytest.mark.parametrize("case", [
+    pytest.param(name, marks=_CENSUS_RED if name in _CENSUS_WAS_ACCEPTED else [])
+    for name in _CENSUS_CASES
+])
+def test_inc9d_cr_f1_the_census_judges_a_site_by_what_actually_catches_it(case):
+    """`INC9BC-CR-F1` / `SEC-F2`: a site is guarded only if a handler for `Exception`
+    (or broader) in the SAME function as the call can catch it; a `.save` reference
+    that is not itself called is guarded only inside `_save_or_toast`."""
+    source, guarded = _CENSUS_CASES[case]
+    tree = ast.parse(source)
+    sites = _store_save_calls(tree)
+    assert sites, "the synthetic case holds no `.save` site: the arm is vacuous"
+    assert all(_site_guarded(tree, s) for s in sites) is guarded, case
+
+
 def test_g6c_f3_census_every_store_save_call_is_guarded():
     """`G6-C-F3`.  An AST walk over every `.py` file under `mapper/`: every
     `store.save(`-shaped call must sit inside `_save_or_toast` (the one
@@ -453,9 +523,7 @@ def test_g6c_f3_census_every_store_save_call_is_guarded():
         tree = ast.parse(source, filename=str(path))
         for call in _store_save_calls(tree):
             total += 1
-            if _in_function(tree, call, "_save_or_toast"):
-                continue
-            if _in_try_body(tree, call):
+            if _site_guarded(tree, call):
                 continue
             unguarded.append(f"{path.relative_to(mapper_dir.parent)}:{call.lineno}")
 
