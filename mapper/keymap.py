@@ -63,13 +63,15 @@ GROUP_SCOPE: dict[str, str] = {
     "repo": SCOPE_REPO,
     "plug": SCOPE_PLUG,
     "import": SCOPE_IMPORT,
-    "palette": SCOPE_PALETTE,
-    "help": SCOPE_HELP,
-    "app": SCOPE_APP,
+    # Before `app`: `keybar_groups` paints a scope's groups in THIS order, and
+    # the app-wide group closes every bar (`INC9-F6`, seen in the renders).
     "tree": SCOPE_FACTORY,
     "document": SCOPE_FACTORY,
     "factory": SCOPE_FACTORY,
     "settings": SCOPE_SETTINGS,
+    "palette": SCOPE_PALETTE,
+    "help": SCOPE_HELP,
+    "app": SCOPE_APP,
 }
 
 
