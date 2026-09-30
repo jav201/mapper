@@ -9937,6 +9937,18 @@ columns between the card and the panel -- rather than on the geometry the implem
 reads, so a future regression that only re-derives the same wrong geometry cannot pass by agreeing
 with itself.
 
+**Correction, 2026-09-29 (Inc-8 follow-ups, `INC8-FU-F4`).** The paragraph immediately above says
+`_pan_revealing_selection` "now reads the box's last PAINTED column (`geo.card_w - 1` past the
+card's own left edge)" -- imprecise. `right` (`canvas_x + card_x + geo.card_w - 1`, the ordinary,
+no-diff-chip case) is ONE COLUMN PAST the last column this call treats as painted; the actual last
+painted column is `right - 1`. The clamp still lands the declared margin, because `right` is used
+consistently as a one-past boundary by the call that reads it, not as the painted column itself --
+but the docstring and this addendum both named the wrong one. `INC8-FU-F1` (follow-up, non-blocking
+at Inc-8's close) additionally found that "the box's own last column is declared width, not painted
+ink" is a claim about the NO-DIFF-CHIP case only: a card carrying a diff chip (toggled with `=`)
+DOES paint that column, WARN, so `_pan_revealing_selection` now reads `state.diff.changed.get(cursor)`
+to tell the two cases apart before deciding which column `right` names.
+
 ---
 
 ## Amendment set 18 -- repo hygiene: no tracked file names the operator's real account. 2026-09-29. Base `037c733`.

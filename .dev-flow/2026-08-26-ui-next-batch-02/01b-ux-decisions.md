@@ -466,6 +466,28 @@ section *Round 4*; the record is `increment-022`, section *Design pass 4*).
 | §3.2 | while the host's rail is hidden (`R`, or auto-hidden below the auto-hide width), the legend omits the rows the rail alone paints (`V33`, `V34`, `V35`, `V21a`, `V21b` — `darkside.RAIL_VOCABULARY`, derived from this section's own **Source** column). `V36`-`V39` and `V32` stay, because their source is the always-visible coverage strip (`app.py`'s `#map-minimap`), not the rail widget | `H4` |
 | §3.6 | footer reworded to `? explains the view you are in, outside text fields` (was `? always explains the view you are in`), now two lines — the old wording over-promised what a focused text field does with `?` (`B-36`/`B-72`) | `H1` |
 
+**Correction, 2026-09-29 (Inc-8 follow-ups, `INC8-FU-F4`).** The row above for `§3.1/§3.2, the
+reveal margin` says the card's box "has one trailing painted column that is never drawn" — that is
+self-contradictory as written (a column that is never drawn is not painted; the correct claim is the
+opposite of what the words say). What is true: the box is `card_w` columns wide, but the title
+row's own fit reaches only `card_w - 1` of them when the row carries no diff chip — the box's own
+LAST column is declared WIDTH, not painted ink, in that case. `_pan_revealing_selection`'s `right`
+is one column PAST the last column this call treats as painted, not that column itself (the same
+correction made in `A-109`'s own dated addendum in `01-requirements.md` and in
+`03-increments/increment-022-inc8-legend.md`'s *Closing pass* section). `INC8-FU-F1` (this pass)
+also found the "never drawn" half is a NON-diff-mode fact only: a card carrying a diff chip (`=`)
+DOES paint that same box's last column, WARN — which is why the fix now reads whether the selected
+card carries one before deciding which column is the true last painted one.
+
+**Correction, 2026-09-29 (Inc-8 follow-ups, `INC8-FU-F5c`).** The `V27` row's own **Authority**
+cell, above, reads `` `H4`'s companion copy item `` — wrong: `H4` is round 5's rail-visibility
+ruling (it governs the §3.2 row two below it) and rules nothing about `V27`'s label. `V27`'s copy
+change carries no operator verdict of its own; it is the coordinator's alignment of `V27`'s wording
+with `V28`'s, which design pass 4's `G5` already ratified as comma-separated
+(`VERDICT-inc8-legend-2026-09-28.md`, Round 5's closing paragraph: *"the coordinator aligns V27's
+copy with the operator's G5 wording for V28"*). The correct authority is `G5`, read alongside the
+coordinator's own alignment, not `H4`.
+
 ### 3.6 · Legend framing copy
 
 In English since the 2026-09-29 language ruling (first transcribed from `ui_next2/generate.py:599-634`).
