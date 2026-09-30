@@ -14,19 +14,31 @@ increment-024-g6-store-surrogates.md`:
 Every arm reproduces the defect exactly as described: a lone surrogate
 (U+D800-U+DFFF) is never typed literally into this file; it is built with
 `chr()` / `json.dumps`, per the batch's control-character discipline.
+
+---
+
+The section below (`test_g6c_*`) is the G6 CORRECTIVE PASS: the independent
+security review returned `BLOCK-UNTIL G6-C-F1, F2, F3, F8` against `65621f3`
+(the three commits above), plus F4/F5/F6/F7 (medium/low). Each `test_g6c_*`
+function names the finding it arms in its own docstring. No literal control
+character or bidi mark is ever typed into this file either; every one is
+built with `chr()`.
 """
 from __future__ import annotations
 
+import ast
 import json
+from pathlib import Path
 
 import pytest
 
 from mapper.app import MapperApp, MapScreen, _ConfirmScreen, _PromptScreen
-from mapper.model import Attachment, Edge, Ficha, Graph, Node
+from mapper.model import Attachment, Document, Edge, Ficha, Graph, Node
 from mapper.store import MapStore
 from mapper.widgets.inspector import FichaInspector
 
 LONE_SURROGATE = chr(0xD800)
+BIDI_MARK = chr(0x200E)  # LEFT-TO-RIGHT MARK, in `darkside.COERCION_RANGES`.
 
 
 def _seed(app, map_id="g6", *, with_attachment=False):
@@ -236,3 +248,254 @@ async def test_g6c_each_unguarded_save_site_degrades_to_a_toast(tmp_path, site):
         assert any("no se pudo guardar" in n for n, _ in notices), (
             f"{site}: the toast did not name the save failure — {notices}"
         )
+
+
+# ---------------------------------------------------------------------------
+# G6 corrective pass — G6-C-F1 .. F8
+# ---------------------------------------------------------------------------
+
+
+async def test_g6c_f1_factory_persist_degrades_to_a_toast_and_survives(tmp_path):
+    """`G6-C-F1`.  `FactoryScreen._persist` called `store.save()` with no
+    guard — reached from `action_edit_doc` (via `EditorScreen`'s `on_save`)
+    and `action_import_office`.  Forced to raise through the real
+    `action_edit_doc` path, it must toast and the screen must survive.
+
+    RED mutation: remove the `try`/`except` `_save_or_toast` puts around
+    `_persist`'s `store.save()` call (i.e. call `store.save` directly again).
+    """
+    from mapper.screens.editor import EditorScreen
+    from mapper.screens.factory import FactoryScreen
+
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        g = Graph()
+        g.add_node(Node(id="root", ficha=Ficha(title="root")))
+        g.documents["plantilla"] = Document(name="plantilla", source="hola")
+        app.store.save("fx", g)
+
+        screen = FactoryScreen(
+            g, process_name="fx", document_name="plantilla", map_id="fx"
+        )
+        app.push_screen(screen)
+        await pilot.pause()
+
+        notices: list[tuple[str, dict]] = []
+        app.notify = lambda msg, **kw: notices.append((str(msg), kw))
+
+        def exploding_save(*_a, **_kw):
+            raise RuntimeError("boom (forced by G6-C-F1 mutation harness)")
+
+        app.store.save = exploding_save
+
+        screen.action_edit_doc()
+        await pilot.pause()
+        assert isinstance(app.screen, EditorScreen)
+        await pilot.press("ctrl+s")
+        await pilot.pause()
+
+        assert isinstance(app.screen, FactoryScreen), (
+            "the forced save failure crashed the factory screen"
+        )
+        assert notices, "no toast was shown when store.save raised"
+        assert any("no se pudo guardar" in n for n, _ in notices)
+
+
+async def test_g6c_f2_save_failure_toast_names_no_path_or_username(tmp_path):
+    """`G6-C-F2`.  The save-failure toast used to interpolate `str(e)`
+    directly — an `OSError`'s own message embeds the full absolute path and,
+    on Windows, the account name.  The placeholder `<operator>` stands in for
+    a real account name; a real one is never typed here (see
+    `tests/test_no_operator_paths.py`).
+
+    RED mutation: interpolate `{e}` again in `_save_or_toast`'s toast.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        map_id = _seed(app)
+        screen = await _open(app, pilot, map_id)
+
+        notices: list[tuple[str, dict]] = []
+        app.notify = lambda msg, **kw: notices.append((str(msg), kw))
+
+        fake_path = r"C:\Users\<operator>\x"
+        raw_message = f"[Errno 13] Permission denied: '{fake_path}'"
+
+        def exploding_save(*_a, **_kw):
+            raise OSError(raw_message)
+
+        screen.store.save = exploding_save
+
+        await _drive_field_commit(app, pilot, screen)
+
+        assert notices, "no toast was shown when store.save raised"
+        toast = notices[-1][0]
+        assert "\\Users\\" not in toast, f"the toast leaked a path: {toast!r}"
+        assert fake_path not in toast, f"the toast leaked the fake path: {toast!r}"
+        assert raw_message not in toast, f"the toast leaked str(e): {toast!r}"
+        assert "Permission denied" not in toast
+        assert map_id in toast, f"the toast dropped the map id: {toast!r}"
+        assert "OSError" in toast, f"the toast dropped the exception type: {toast!r}"
+
+
+async def test_g6c_f3_new_map_on_mount_save_degrades_to_a_toast(tmp_path):
+    """`G6-C-F3`.  The 8th `store.save()` call site — `MapScreen.on_mount`'s
+    `map_id == "new"` branch — was unguarded.  Forced to raise, `on_mount`
+    itself must not crash; the screen still mounts with the in-memory map and
+    a toast names the failure.
+
+    RED mutation: drop the `_save_or_toast` guard around this site (call
+    `self.store.save(...)` directly again).
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        notices: list[tuple[str, dict]] = []
+        app.notify = lambda msg, **kw: notices.append((str(msg), kw))
+
+        def exploding_save(*_a, **_kw):
+            raise RuntimeError("boom (forced by G6-C-F3 mutation harness)")
+
+        app.store.save = exploding_save
+
+        app.push_screen(MapScreen("new"))
+        await pilot.pause()
+
+        assert isinstance(app.screen, MapScreen), (
+            "the 8th store.save() site crashed on_mount"
+        )
+        assert notices, "no toast was shown when the new-map save raised"
+        assert any("no se pudo guardar" in n for n, _ in notices)
+
+
+def _store_save_calls(tree: ast.AST) -> list[ast.Call]:
+    """Every call to `.save(` whose object's own last identifier is literally
+    `store` — `store.save(`, `self.store.save(`, `self.app.store.save(`.
+
+    Derived structurally (the base identifier), never a hand-listed line
+    number or file path — so a NEW call site anywhere under `mapper/` is
+    found automatically. `self.save(...)` inside `MapStore` itself (its own
+    `create_seed`/`create_from_template`) does not match: its object is
+    `self`, not `store`, and it is `MapStore` calling its OWN method, not a
+    caller reaching into a store instance it holds.
+    """
+    calls = []
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "save"
+        ):
+            continue
+        obj = node.func.value
+        if isinstance(obj, ast.Attribute):
+            base_name = obj.attr
+        elif isinstance(obj, ast.Name):
+            base_name = obj.id
+        else:
+            base_name = None
+        if base_name == "store":
+            calls.append(node)
+    return calls
+
+
+def _node_contains(container: ast.AST, target: ast.AST) -> bool:
+    return any(n is target for n in ast.walk(container))
+
+
+def _in_try_body(tree: ast.AST, call: ast.Call) -> bool:
+    """`call` sits in some `try:`'s BODY (not its `except`/`else`/`finally`)."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Try):
+            for stmt in node.body:
+                if _node_contains(stmt, call):
+                    return True
+    return False
+
+
+def _in_function(tree: ast.AST, call: ast.Call, name: str) -> bool:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            if _node_contains(node, call):
+                return True
+    return False
+
+
+def test_g6c_f3_census_every_store_save_call_is_guarded():
+    """`G6-C-F3`.  An AST walk over every `.py` file under `mapper/`: every
+    `store.save(`-shaped call must sit inside `_save_or_toast` (the one
+    guarded call, guarding itself) or inside a `try` body. The call LIST is
+    derived from the AST, never hand-listed.
+
+    RED mutation: add ANY new `self.store.save(...)` (or `store.save(...)`)
+    call under `mapper/` with no `try` around it and not inside
+    `_save_or_toast` — this test reddens without editing the test itself.
+    """
+    mapper_dir = Path(__file__).resolve().parents[1] / "mapper"
+    py_files = sorted(mapper_dir.rglob("*.py"))
+    assert py_files, "no .py files found under mapper/ — the walk itself is broken"
+
+    total = 0
+    unguarded: list[str] = []
+    for path in py_files:
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        for call in _store_save_calls(tree):
+            total += 1
+            if _in_function(tree, call, "_save_or_toast"):
+                continue
+            if _in_try_body(tree, call):
+                continue
+            unguarded.append(f"{path.relative_to(mapper_dir.parent)}:{call.lineno}")
+
+    assert total >= 1, (
+        "the AST pattern matched no store.save(...) call at all — "
+        "the census would be vacuously green"
+    )
+    assert not unguarded, f"unguarded store.save() call sites: {unguarded}"
+
+
+async def test_g6c_f4_guardar_como_name_with_lone_surrogate_saves_cleanly(tmp_path):
+    """`G6-C-F4`.  The "guardar como" map name (`ImportPreviewScreen.action_save`)
+    is operator-typed and reached `store.save(name, ...)` uncoerced. A lone
+    surrogate typed there must not raise uncaught; it is coerced before the
+    save and the resulting map is reloadable.
+
+    RED mutation: drop the `name = darkside.plain(name)` line in `action_save`.
+    """
+    from mapper.app import _ImportPreviewScreen
+
+    app = MapperApp(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        g = Graph()
+        g.add_node(Node(id="root", ficha=Ficha(title="root")))
+        app.push_screen(_ImportPreviewScreen(g, tmp_path / "nodos.csv"))
+        await pilot.pause()
+
+        screen = app.screen
+        screen.action_save()
+        await pilot.pause()
+        assert isinstance(app.screen, _PromptScreen)
+
+        prompt = app.screen
+        from textual.widgets import Input
+
+        raw_name = f"mapa{LONE_SURROGATE}raro"
+        prompt.query_one("#prompt-input", Input).value = raw_name
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert isinstance(app.screen, MapScreen), (
+            "a surrogate in the 'guardar como' name crashed the session"
+        )
+        saved_id = app.screen.map_id
+        assert LONE_SURROGATE not in saved_id
+        assert "\ufffd" in saved_id
+
+        reloaded = MapStore(tmp_path).load(saved_id)
+        assert reloaded.nodes["root"].ficha.title == "root"
+
+

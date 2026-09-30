@@ -144,13 +144,20 @@ class FactoryScreen(Screen):
         self._refresh()
 
     def _persist(self) -> None:
-        """Persist graph changes to disk when we belong to a saved map."""
+        """Persist graph changes to disk when we belong to a saved map.
+
+        `G6-C-F1`: guarded the same way every `mapper/app.py` site is
+        (`_save_or_toast`) — an unguarded raise here used to escape
+        `action_edit_doc`/`action_import_office` uncaught.
+        """
         if not self.map_id:
             return
         store = getattr(self.app, "store", None)
         if store is None:
             return
-        store.save(self.map_id, self.graph)
+        from mapper.app import _save_or_toast
+
+        _save_or_toast(self, store, self.map_id, self.graph)
 
     def _step_meter(self) -> Text:
         total = max(1, self._max_depth() + 1)
@@ -398,6 +405,9 @@ class FactoryScreen(Screen):
         def on_save(source: str | None) -> None:
             if source is None:
                 return
+            # `G6-C-F1`: `EditorScreen` hands back raw operator text — coerced
+            # here, at graph entry, the same as every other A-111 mutation site.
+            source = darkside.plain(source)
             if self.document_name in self.graph.documents:
                 self.graph.documents[self.document_name].source = source
                 self.graph.documents[self.document_name].kind = "text"
@@ -432,7 +442,9 @@ class FactoryScreen(Screen):
             import shutil
 
             shutil.copy2(source, target)
-            rel = target.relative_to(store.workspace).as_posix()
+            # `G6-C-F1`: `rel` carries `source.name`, itself carrying whatever
+            # the operator typed at the "ruta del archivo office" prompt.
+            rel = darkside.plain(target.relative_to(store.workspace).as_posix())
             self.graph.documents[self.document_name] = Document(
                 name=self.document_name,
                 path=rel,
