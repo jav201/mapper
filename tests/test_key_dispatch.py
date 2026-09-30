@@ -112,6 +112,20 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("repo", "j"): ("next_sibling", "siguiente", "j", "repo", True),
     ("repo", "k"): ("prev_sibling", "anterior", "k", "repo", True),
     ("repo", "q"): ("home", "inicio", "q", "repo", True),
+    # Inc-9 (`#D9`): the factory and the components sheet join the seat,
+    # `priority` carried over from their hand-written lists.
+    ("factory", "j"): ("next_sibling", "next sibling", "j", "tree", True),
+    ("factory", "k"): ("prev_sibling", "previous sibling", "k", "tree", True),
+    ("factory", "h"): ("parent", "parent", "h", "tree", True),
+    ("factory", "l"): ("child", "child", "l", "tree", True),
+    ("factory", "0"): ("start_node", "start node", "0", "tree", True),
+    ("factory", "d"): ("edit_doc", "edit document", "d", "document", True),
+    ("factory", "i"): ("import_office", "import office file", "i", "document", True),
+    ("factory", "g"): ("generate_office", "generate office file", "g", "document", True),
+    ("factory", "q"): ("home", "back", "q", "factory", True),
+    ("factory", "escape"): ("home", "back", "esc", "factory", True),
+    ("settings", "q"): ("home", "back", "q", "settings", True),
+    ("settings", "escape"): ("home", "back", "esc", "settings", True),
 }
 
 

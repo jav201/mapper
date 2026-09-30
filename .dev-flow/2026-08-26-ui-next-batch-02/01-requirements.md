@@ -10217,8 +10217,14 @@ they are.
    Root cause, measured: `settings.py::_StateRow.__init__` assigns its third column widget to
    `self.disabled`, which is Textual's own `Widget.disabled` reactive -- a truthy widget object
    disables the row and every component inside it (`_self_or_ancestors_disabled` is `True` for the
-   DEFAULT column's switch). The attribute is renamed; the sheet becomes traversable; the control is
-   then built and the drop is decided on it, as `C-D9a` rules.
+   DEFAULT column's switch). The attribute is renamed; the sheet becomes traversable (14 targets).
+   **Measured on the repaired sheet, the drop is NOT neutral -- it is a repair.** Nine real `tab`
+   presses make 8 transitions, each to the next member of the focus chain (the positive control:
+   the probe sees a move). The pre-drop `tab`/`shift+tab` bindings, re-declared verbatim on a
+   subclass, leave focus on ONE target for all nine presses -- `LLR-N06.5`'s own measurement ("a
+   screen-level `tab` binding ... 0 focus moves in 9 presses") reproduced on this screen. The
+   drop ships, `SettingsScreen` leaves `TAB_BINDING_EXCEPTIONS`, and the arm asserts both walks
+   (`tests/test_inc9.py::test_cd9a_the_probe_sees_transitions_and_the_drop_restores_traversal`).
 
 **Numeric pass thresholds** (every count evaluated at run time; none typed here):
 

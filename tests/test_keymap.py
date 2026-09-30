@@ -23,8 +23,10 @@ from mapper.app import (
     _ImportPreviewScreen,
 )
 from mapper.keymap import GROUP_SCOPE, KEYMAP, bindings_for, groups_for_keybar, palette_items
+from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
+from mapper.screens.settings import SettingsScreen
 
 # Which class owns each scope's actions.  App-scope actions live on the App and are
 # reachable from every screen by fall-through.
@@ -37,6 +39,9 @@ SCOPE_OWNER = {
     keymap.SCOPE_PALETTE: CommandPalette,
     keymap.SCOPE_HELP: HelpScreen,
     keymap.SCOPE_APP: MapperApp,
+    # Inc-9 (`#D9`, LLR-N16.1.2): the last two help screens join the seat.
+    keymap.SCOPE_FACTORY: FactoryScreen,
+    keymap.SCOPE_SETTINGS: SettingsScreen,
 }
 
 # Per-scope sizes, pinned EXACTLY.  A `>=` fence leaves slack, and slack is
@@ -62,6 +67,11 @@ EXPECTED_PER_SCOPE = {
     # 2 -> 8: Inc-8 / HLR-N16.4 declares the legend's six scroll keys.
     keymap.SCOPE_HELP: 8,
     keymap.SCOPE_APP: 2,
+    # Inc-9 (`#D9`): the factory's ten own bindings and the sheet's two, moved
+    # out of each screen's hand-written list; `tab`/`shift+tab` are not rows
+    # (`C-D9a`).  Updated in the same edit as the seat rows.
+    keymap.SCOPE_FACTORY: 10,
+    keymap.SCOPE_SETTINGS: 2,
 }
 
 # Derived from the live module, never hand-listed (control C-31).

@@ -13,6 +13,7 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from mapper import darkside, office
+from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, textual_bindings
 from mapper.model import Document, Graph, Node
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
@@ -62,19 +63,13 @@ class _Nav:
 class FactoryScreen(Screen):
     """Factory mode: resolve documents against a process tree."""
 
+    # LLR-N16.1.2 / `#D9`: generated from the seat, like every migrated screen.
+    # The app-scope `palette` and `help` rows dispatch to the App, which opens
+    # both on THIS scope (B-18: the screen used to open them unscoped).
+    KEY_SCOPE = SCOPE_FACTORY
     BINDINGS = [
-        Binding("j", "next_sibling", "Siguiente", priority=True),
-        Binding("k", "prev_sibling", "Anterior", priority=True),
-        Binding("h", "parent", "Padre", priority=True),
-        Binding("l", "child", "Hijo", priority=True),
-        Binding("d", "edit_doc", "Editar doc", priority=True),
-        Binding("i", "import_office", "Importar office", priority=True),
-        Binding("g", "generate_office", "Generar", priority=True),
-        Binding("0", "start_node", "Inicio", priority=True),
-        Binding("q", "home", "Salir", priority=True),
-        Binding("escape", "home", "Salir", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
+        Binding(key, action, label, priority=priority)
+        for key, action, label, priority in textual_bindings(SCOPE_FACTORY)
     ]
 
     CSS = """
@@ -132,13 +127,9 @@ class FactoryScreen(Screen):
             yield Static(id="factory-tree")
             yield Static(id="factory-preview")
         yield HintLine("j/k/h/l navega · d edita · i importa · g genera · 0 inicio · q salir")
-        yield KeyBar(
-            [
-                ("nav", [("j/k", "sig/ant"), ("h/l", "padre/hijo"), ("0", "inicio")]),
-                ("doc", [("d", "editar"), ("i", "importar"), ("g", "generar")]),
-                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q/esc", "salir")]),
-            ]
-        )
+        from mapper.app import keybar_groups
+
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
         self._refresh()
@@ -489,13 +480,3 @@ class FactoryScreen(Screen):
 
     def action_home(self) -> None:
         self.app.pop_screen()
-
-    def action_palette(self) -> None:
-        from mapper.screens.palette import CommandPalette
-
-        self.app.push_screen(CommandPalette())
-
-    def action_help(self) -> None:
-        from mapper.screens.help import HelpScreen
-
-        self.app.push_screen(HelpScreen())
