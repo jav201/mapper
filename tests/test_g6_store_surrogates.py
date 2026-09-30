@@ -414,14 +414,23 @@ def _node_contains(container: ast.AST, target: ast.AST) -> bool:
     return any(n is target for n in ast.walk(container))
 
 
-def _in_try_body(tree: ast.AST, call: ast.Call) -> bool:
-    """`call` sits in some `try:`'s BODY (not its `except`/`else`/`finally`)."""
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Try):
-            for stmt in node.body:
-                if _node_contains(stmt, call):
-                    return True
-    return False
+_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+
+
+def _innermost_scope(parents: dict, node: ast.AST) -> ast.AST | None:
+    """The `def` or `lambda` whose body `node` runs in (None at module level)."""
+    while node in parents:
+        node = parents[node]
+        if isinstance(node, _SCOPES):
+            return node
+    return None
+
+
+def _catches_exception(handler: ast.ExceptHandler) -> bool:
+    """`except:`, `except Exception`, `except BaseException`, or a tuple holding one."""
+    kinds = handler.type.elts if isinstance(handler.type, ast.Tuple) else [handler.type]
+    return any(k is None or (isinstance(k, ast.Name) and k.id in ("Exception", "BaseException"))
+               for k in kinds)
 
 
 def _in_function(tree: ast.AST, call: ast.Call, name: str) -> bool:
@@ -433,11 +442,32 @@ def _in_function(tree: ast.AST, call: ast.Call, name: str) -> bool:
 
 
 def _site_guarded(tree: ast.AST, site: ast.AST) -> bool:
-    """Is this `.save` site guarded?  Inc-9d (`INC9BC-CR-F1`, `SEC-F2`) changes the
-    body: until then a `try` counted lexically, so a reference taken inside one and
-    called after it, a lambda handed to `call_later`, and a `try/finally` with no
-    `except` all passed."""
-    return _in_function(tree, site, "_save_or_toast") or _in_try_body(tree, site)
+    """Is this `.save` site guarded?  (`INC9BC-CR-F1`, `SEC-F2`, Inc-9d.)
+
+    Inside `_save_or_toast`, which guards itself; or CALLED inside the body of a
+    `try` that has a handler for `Exception` (or broader) and runs in the same
+    innermost `def`/`lambda` as the call.  A `try` counted lexically before, so a
+    reference taken inside one and called after it, a lambda handed to
+    `call_later`, a def nested in the body, a `try/finally` with no `except` and a
+    handler for `OSError` alone all passed.  A `.save` that is not the `func` of a
+    call is a reference and can be called anywhere: only `_save_or_toast` holds it.
+    `getattr(store, "sa" + "ve")` stays a declared residual (`INC9C-F10`).
+    """
+    if _in_function(tree, site, "_save_or_toast"):
+        return True
+    parents = {child: parent for parent in ast.walk(tree)
+               for child in ast.iter_child_nodes(parent)}
+    caller = parents.get(site)
+    if not (isinstance(caller, ast.Call) and caller.func is site):
+        return False
+    scope = _innermost_scope(parents, site)
+    return any(
+        isinstance(node, ast.Try)
+        and any(_catches_exception(h) for h in node.handlers)
+        and _innermost_scope(parents, node) is scope
+        and any(_node_contains(stmt, site) for stmt in node.body)
+        for node in ast.walk(tree)
+    )
 
 
 #: Synthetic functions the census judges.  Each is (source, guarded?): the judge is
@@ -473,24 +503,12 @@ _CENSUS_CASES = {
     "call with no try": ("def f(store):\n    store.save(1)\n", False),
 }
 
-#: Committed RED (strict xfail); emptied by the commit that rewrites the judge.
-_CENSUS_RED = [pytest.mark.xfail(
-    strict=True, reason="Inc-9d: committed RED; closed by the 'census' step")]
+#  The unguarded shapes the lexical rule wrongly accepted (E1, E2, E3, the narrow
+#  handler, the nested def) were committed RED as strict xfails (`a5ddf5d`); the
+#  other two unguarded cases are controls the old rule already refused.
 
 
-#: The unguarded shapes the lexical rule wrongly accepted.  The other two
-#: unguarded cases are controls: the old rule already refused them.
-_CENSUS_WAS_ACCEPTED = {
-    "E1 reference taken in a try, called after it", "E2 lambda in a try, run later",
-    "E3 try/finally with no except", "a handler narrower than Exception",
-    "a def nested in the try body",
-}
-
-
-@pytest.mark.parametrize("case", [
-    pytest.param(name, marks=_CENSUS_RED if name in _CENSUS_WAS_ACCEPTED else [])
-    for name in _CENSUS_CASES
-])
+@pytest.mark.parametrize("case", list(_CENSUS_CASES))
 def test_inc9d_cr_f1_the_census_judges_a_site_by_what_actually_catches_it(case):
     """`INC9BC-CR-F1` / `SEC-F2`: a site is guarded only if a handler for `Exception`
     (or broader) in the SAME function as the call can catch it; a `.save` reference

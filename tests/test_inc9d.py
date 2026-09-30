@@ -163,11 +163,22 @@ async def test_inc9d_l4_the_factory_hint_is_the_three_actions_on_one_row(tmp_pat
 # INC9BC-SEC-F4 -- the office import's copy degrades to a toast
 
 @red("factory")
-async def test_inc9d_sec_f4_a_failing_copy_is_a_toast_not_a_crash(tmp_path, monkeypatch):
+@pytest.mark.parametrize("failing", ["copy", "mkdir"])
+async def test_inc9d_sec_f4_a_failing_copy_is_a_toast_not_a_crash(tmp_path, monkeypatch, failing):
     source = tmp_path / "elsewhere" / "plantilla-nueva.docx"
     source.parent.mkdir()
     source.write_bytes(b"x")
-    monkeypatch.setattr("shutil.copy2", _boom)
+    if failing == "copy":
+        monkeypatch.setattr("shutil.copy2", _boom)
+    else:
+        real_mkdir = pathlib.Path.mkdir
+
+        def mkdir(self, *a, **kw):
+            if self.name == "templates":
+                _boom()
+            return real_mkdir(self, *a, **kw)
+
+        monkeypatch.setattr(pathlib.Path, "mkdir", mkdir)
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
@@ -213,9 +224,10 @@ def test_inc9d_sec_f3_a_failed_clone_message_carries_no_local_path(tmp_path, mon
     cache = tmp_path / "home" / ".cache" / "mapper" / "repos"
     monkeypatch.setattr("subprocess.run", _GitRun(subprocess.run))
     with pytest.raises(GitHubError) as caught:
-        _ensure_cloned("https://example.invalid/owner/widget.git", cache)
+        _ensure_cloned("https://user:s3cr3t-token@example.invalid/owner/widget.git", cache)
     message = str(caught.value)
     assert "widget" in message, message
+    assert "s3cr3t-token" not in message and "example.invalid" not in message, message
     assert str(cache) not in message and str(tmp_path) not in message, _redact(message)
     assert "Cloning into" not in message and "128" in message, _redact(message)
     assert not _leaks_the_profile(message), "the message paints the user profile"
@@ -361,6 +373,7 @@ async def test_inc9d_ux_f13_the_recents_header_is_one_row_after_three_returns(tm
 def _sentinel_seat(monkeypatch):
     seat = [dataclasses.replace(b, label=f"zz-{b.action}") for b in keymap.KEYMAP]
     monkeypatch.setattr(keymap, "KEYMAP", seat)
+    monkeypatch.setattr(keymap, "GROUP_HEADER", {g: f"zz-{g}" for g in keymap.GROUP_HEADER})
     return seat
 
 
@@ -393,8 +406,56 @@ async def test_inc9d_cr_f2_every_k3_hint_follows_a_relabelled_seat(tmp_path, mon
         hints["repo panel"] = (repo._sidebar_hints(), [
             ("repo", "next_sibling"), ("repo", "prev_sibling"), ("repo", "home"),
             ("app", "help")])
+        assert "j/k/h/l zz-nav" in hints["map"][0], hints["map"][0]
         for name, (text, pairs) in hints.items():
             assert pairs
             for scope, action in pairs:
                 assert keymap.hint_pair(scope, action) in text, (name, scope, action, text)
                 assert f"zz-{action}" in text, (name, action, text)
+
+
+@pytest.mark.asyncio
+async def test_inc9d_ux_f3_every_restore_of_the_map_hint_is_the_same_hint(tmp_path):
+    """The resting hint is written at four sites (`compose` and three restores:
+    leaving a field, submitting a blank search, clearing a live one).  Each is
+    driven through its real keys after the hint was overwritten, so a site that
+    still writes a hand-typed copy of an older hint is seen."""
+    from mapper.app import map_hint
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        app.push_screen(MapScreen(_tree(app)))
+        for _ in range(3):
+            await pilot.pause()
+        screen = app.screen
+        hint = screen.query_one(HintLine)
+        expected = map_hint()
+        assert hint.text == expected, hint.text
+
+        for _ in range(8):
+            if getattr(screen.focused, "id", None) == "insp-title":
+                break
+            await pilot.press("tab")
+            await pilot.pause()
+        else:
+            raise AssertionError("tab never reached the title field")
+        hint.set_hint("zz-overwritten")
+        await pilot.press("escape")
+        await pilot.pause()
+        assert hint.text == expected, ("leaving a field", hint.text)
+
+        hint.set_hint("zz-overwritten")
+        await pilot.press("slash")
+        await pilot.press("enter")
+        await pilot.pause()
+        assert hint.text == expected, ("a blank search", hint.text)
+
+        await pilot.press("slash")
+        await pilot.press(*"fin")
+        await pilot.press("enter")
+        await pilot.pause()
+        assert hint.text != expected, "the query is not live: the arm has no subject"
+        await pilot.press("escape")
+        await pilot.pause()
+        assert hint.text == expected, ("clearing a live search", hint.text)
