@@ -16,8 +16,6 @@ import inspect
 import pathlib
 import pkgutil
 import re
-import subprocess
-import sys
 import types
 import unicodedata
 
@@ -204,7 +202,7 @@ def test_b18_no_product_site_constructs_an_unscoped_legend():
 # ---------------------------------------------------------------------------
 # C-D9a -- the `tab` drop on SettingsScreen, gated on a WORKING positive control
 
-async def _tab_walk(tmp_path, cls) -> list[int]:
+async def _tab_walk(tmp_path, cls) -> tuple[list[int], int]:
     """Nine real `tab` presses; each focused widget as its index in the
     screen's own focus chain, so two apps' walks compare."""
     app = MapperApp(tmp_path)
@@ -219,7 +217,7 @@ async def _tab_walk(tmp_path, cls) -> list[int]:
             await pilot.press("tab")
             await pilot.pause()
             walk.append(chain.index(app.focused) if app.focused in chain else -1)
-    return walk
+    return walk, len(chain)
 
 
 async def test_cd9a_the_probe_sees_transitions_and_the_drop_restores_traversal(tmp_path):
@@ -237,10 +235,14 @@ async def test_cd9a_the_probe_sees_transitions_and_the_drop_restores_traversal(t
         BINDINGS = [Binding("tab", "focus_next", "Siguiente", priority=True),
                     Binding("shift+tab", "focus_previous", "Anterior", priority=True)]
 
-    shipped = await _tab_walk(tmp_path / "shipped", SettingsScreen)
-    pre_drop = await _tab_walk(tmp_path / "pre_drop", WithScreenTab)
+    shipped, ring = await _tab_walk(tmp_path / "shipped", SettingsScreen)
+    pre_drop, _ = await _tab_walk(tmp_path / "pre_drop", WithScreenTab)
     assert -1 not in shipped, shipped
     assert sum(a != b for a, b in zip(shipped, shipped[1:])) == 8, shipped
+    # `INC9-CR-F6`: the ORDER, not just the count -- eight jumps to arbitrary
+    # stops would satisfy the count; traversal is each press to the NEXT member.
+    assert ring >= 2 and all(b == (a + 1) % ring for a, b in zip(shipped, shipped[1:])), (
+        shipped, ring)
     assert len(set(pre_drop)) == 1, f"the pre-drop bindings moved focus after all: {pre_drop}"
     assert "SettingsScreen" not in keymap.TAB_BINDING_EXCEPTIONS
 
@@ -298,6 +300,15 @@ def _notify_sites() -> list[tuple[str, int, ast.Call]]:
     return out
 
 
+def _message_arg(call: ast.Call):
+    """The message expression of a `notify` call: positional, or `message=`
+    (`INC9-CR-F4`: the census read `args[0]` only, so `notify(message=f"...")`
+    was invisible to it)."""
+    if call.args:
+        return call.args[0]
+    return next((k.value for k in call.keywords if k.arg == "message"), None)
+
+
 def _coerced(arg) -> bool:
     """`A-112` st. 7: the whole message through `plain()`, or every
     interpolated value through it.  No third shape."""
@@ -311,13 +322,14 @@ def _coerced(arg) -> bool:
 def test_llr_n06_2_5_notify_sites_are_coerced():
     sites = _notify_sites()
     assert len(sites) > 0, "the AST walk found no notify call: the census is vacuous"
-    dynamic = [(p, n, c) for p, n, c in sites if c.args and not isinstance(c.args[0], ast.Constant)]
+    dynamic = [(p, n, c) for p, n, c in sites
+               if _message_arg(c) is not None and not isinstance(_message_arg(c), ast.Constant)]
     assert dynamic, "no dynamic site: nothing below is judged"
     markup_on = [(p, n) for p, n, c in dynamic
                  if not any(k.arg == "markup" and isinstance(k.value, ast.Constant)
                             and k.value.value is False for k in c.keywords)]
     assert markup_on == [], f"dynamic notify sites parsing markup: {markup_on}"
-    uncoerced = [(p, n) for p, n, c in dynamic if not _coerced(c.args[0])]
+    uncoerced = [(p, n) for p, n, c in dynamic if not _coerced(_message_arg(c))]
     assert uncoerced == [], f"dynamic notify sites not routed through plain(): {uncoerced}"
 
 
@@ -331,6 +343,19 @@ def test_llr_n06_2_5_the_coercion_predicate_discriminates():
     assert not _coerced(arg("f'x {e}'"))
     assert not _coerced(arg("f'x {darkside.plain(e)} {n}'"))
     assert not _coerced(arg("str(exc)"))
+
+
+def test_llr_n06_2_5_the_census_reads_a_message_keyword():
+    """`INC9-CR-F4`: a site that passes its message by keyword is judged like any
+    other.  The mutant this arm kills is `notify(message=f"...")` in product code."""
+    def call(src):
+        return ast.parse(src, mode="eval").body
+    positional = call("self.notify(darkside.plain(f'x {e}'), markup=False)")
+    keyword = call("self.notify(message=f'x {e}', markup=False)")
+    assert _message_arg(positional) is positional.args[0]
+    assert _message_arg(keyword) is keyword.keywords[0].value
+    assert not _coerced(_message_arg(keyword)), "a keyword message slipped the predicate"
+    assert _message_arg(call("self.notify(severity='error')")) is None
 
 
 # ---------------------------------------------------------------------------
@@ -472,6 +497,8 @@ async def test_a112_the_home_header_reads_its_one_name(tmp_path):
         screen = app.screen
         row = "".join(_rows_in(screen, screen.query_one("#home-identity").region))
     assert darkside.VIEW_NAMES["home"] in row.split(), row
+    # `INC9-CR-F8`: and the name it replaced is not painted beside it.
+    assert "mapas vivos" not in row, row
 
 
 def _map_view_first_lines() -> list[tuple[str, str, str]]:
@@ -559,6 +586,74 @@ async def test_inc9b_the_coverage_and_editor_titles_are_english_and_state_free()
 # C-D25a / C-D25b -- Inc-9's own seat diff against the batch state it entered
 
 ENTRY_SHA = "6fe35f5"
+#: The seat as it stood at `ENTRY_SHA`, pinned as a LITERAL:
+#: `(scope, key, action, glyph, priority, group)`.  It was read with `git show`,
+#: which ERRORs on a shallow clone (`INC9-CR-F2`); a literal cannot, and -- like
+#: `EXPECTED_SEAT` -- it is the specification precisely because it is not derived
+#: from the thing it checks.  Generated from `git show 6fe35f5:mapper/keymap.py`
+#: when it was pinned.
+ENTRY_ROWS = (
+    ('app', 'ctrl+p', 'palette', 'ctrl+p', False, 'app'),
+    ('app', 'question_mark', 'help', '?', False, 'app'),
+    ('help', 'down', 'legend_down', '↓', False, 'help'),
+    ('help', 'end', 'legend_end', 'end', False, 'help'),
+    ('help', 'escape', 'dismiss_none', 'esc', False, 'help'),
+    ('help', 'home', 'legend_home', 'home', False, 'help'),
+    ('help', 'pagedown', 'legend_page_down', 'pagedown', False, 'help'),
+    ('help', 'pageup', 'legend_page_up', 'pageup', False, 'help'),
+    ('help', 'q', 'dismiss_none', 'q', False, 'help'),
+    ('help', 'up', 'legend_up', '↑', False, 'help'),
+    ('home', 'c', 'consult', 'c', False, 'doors'),
+    ('home', 'f', 'factory', 'f', False, 'doors'),
+    ('home', 'i', 'import_csv', 'i', False, 'doors'),
+    ('home', 'j', 'table_down', 'j', False, 'lista'),
+    ('home', 'k', 'table_up', 'k', False, 'lista'),
+    ('home', 'n', 'construct', 'n', False, 'doors'),
+    ('home', 'p', 'plug', 'p', False, 'doors'),
+    ('home', 'q', 'quit', 'q', False, 'lista'),
+    ('home', 'r', 'resume', 'r', False, 'doors'),
+    ('home', 's', 'settings', 's', False, 'doors'),
+    ('home', 't', 'template', 't', False, 'doors'),
+    ('import', 'escape', 'home', 'esc', False, 'import'),
+    ('import', 's', 'save', 's', False, 'import'),
+    ('map', 'A', 'add_attachment', 'A', False, 'node'),
+    ('map', 'H', 'pan_left', 'H', False, 'view'),
+    ('map', 'I', 'toggle_inspector', 'I', False, 'view'),
+    ('map', 'J', 'pan_down', 'J', False, 'view'),
+    ('map', 'K', 'pan_up', 'K', False, 'view'),
+    ('map', 'L', 'pan_right', 'L', False, 'view'),
+    ('map', 'M', 'next_gap', 'M', False, 'view'),
+    ('map', 'N', 'prev_hit', 'N', False, 'nav'),
+    ('map', 'R', 'toggle_rail', 'R', False, 'view'),
+    ('map', 'X', 'remove_attachment', 'X', False, 'node'),
+    ('map', 'a', 'add_child', 'a', False, 'node'),
+    ('map', 'd', 'open_documents', 'd', False, 'node'),
+    ('map', 'e', 'export_svg', 'e', False, 'view'),
+    ('map', 'enter', 'open_ficha', '↵', False, 'nav'),
+    ('map', 'equals_sign', 'toggle_diff', '=', False, 'view'),
+    ('map', 'escape', 'back_or_home', 'esc', False, 'salir'),
+    ('map', 'f', 'toggle_focus', 'f', False, 'view'),
+    ('map', 'g', 'focus_rail', 'g', False, 'view'),
+    ('map', 'h', 'parent', 'h', False, 'nav'),
+    ('map', 'j', 'next_sibling', 'j', False, 'nav'),
+    ('map', 'k', 'prev_sibling', 'k', False, 'nav'),
+    ('map', 'l', 'child', 'l', False, 'nav'),
+    ('map', 'm', 'coverage', 'm', False, 'view'),
+    ('map', 'n', 'next_hit', 'n', False, 'nav'),
+    ('map', 'o', 'toggle_outline', 'o', False, 'view'),
+    ('map', 'q', 'home', 'q', False, 'salir'),
+    ('map', 'r', 'toggle_radial', 'r', False, 'view'),
+    ('map', 'slash', 'search', '/', False, 'nav'),
+    ('map', 'u', 'undo', 'u', False, 'node'),
+    ('map', 'x', 'archive', 'x', False, 'node'),
+    ('map', 'z', 'collapse_branch', 'z', False, 'view'),
+    ('palette', 'enter', 'run_selected', '↵', False, 'palette'),
+    ('palette', 'escape', 'dismiss_none', 'esc', False, 'palette'),
+    ('plug', 'escape', 'home', 'esc', True, 'plug'),
+    ('repo', 'j', 'next_sibling', 'j', True, 'repo'),
+    ('repo', 'k', 'prev_sibling', 'k', True, 'repo'),
+    ('repo', 'q', 'home', 'q', True, 'repo'),
+)
 #: The rows the seat gained since `ENTRY_SHA`: Inc-9's `#D9` migration of the two
 #: last help screens, and Inc-9c's `home enter` (`INC9-UX-F11`).
 DECLARED_ADDED = frozenset({
@@ -574,29 +669,33 @@ DECLARED_ADDED = frozenset({
 DECLARED_REGROUPED = frozenset({("lista", "list"), ("lista", "exit"), ("salir", "leave")})
 
 
-def _entry_seat():
-    source = subprocess.run(
-        ["git", "show", f"{ENTRY_SHA}:mapper/keymap.py"], cwd=ROOT, check=True,
-        capture_output=True, text=True, encoding="utf-8").stdout
-    module = types.ModuleType("keymap_at_entry")
-    sys.modules[module.__name__] = module
-    try:
-        exec(compile(source, "keymap_at_entry", "exec"), module.__dict__)  # noqa: S102
-    finally:
-        sys.modules.pop(module.__name__)
-    return module
+def _entry_projection() -> set[tuple]:
+    return {row[:5] for row in ENTRY_ROWS}
 
 
 def _projection(seat) -> set[tuple]:
     return {(b.scope, b.key, b.action, b.glyph, b.priority) for b in seat}
 
 
+def _entry_duplicate_chords() -> list[tuple[str, str]]:
+    """`keymap.duplicate_chords()`'s rule, applied to the pinned entry rows."""
+    pairs = [(row[0], row[1]) for row in ENTRY_ROWS]
+    clashes = {p for p in pairs if pairs.count(p) > 1}
+    app_keys = {key for scope, key in pairs if scope == "app"}
+    clashes |= {(scope, key) for scope, key in pairs if scope != "app" and key in app_keys}
+    return sorted(clashes)
+
+
+def test_cd25_the_pinned_entry_seat_is_not_vacuous():
+    assert len(ENTRY_ROWS) == 60, len(ENTRY_ROWS)
+    assert len({row[:2] for row in ENTRY_ROWS}) == 60, "two entry rows share a (scope, key)"
+
+
 def test_cd25a_the_seat_diff_is_exactly_what_inc9_declares():
-    entry = _entry_seat()
-    before, after = _projection(entry.KEYMAP), _projection(keymap.KEYMAP)
+    before, after = _entry_projection(), _projection(keymap.KEYMAP)
     assert before - after == set(), f"a row was lost or rebound: {sorted(before - after)}"
     assert {row[:3] for row in after - before} == DECLARED_ADDED
-    old = {(b.scope, b.key): b.group for b in entry.KEYMAP}
+    old = {(row[0], row[1]): row[5] for row in ENTRY_ROWS}
     moved = {(old[(b.scope, b.key)], b.group) for b in keymap.KEYMAP
              if (b.scope, b.key) in old and old[(b.scope, b.key)] != b.group}
     assert moved == DECLARED_REGROUPED, moved
@@ -614,6 +713,5 @@ def test_inc9_f6_the_app_group_closes_every_generated_key_bar(scope):
 
 
 def test_cd25b_no_chord_collides_on_entry_or_on_exit():
-    entry = _entry_seat()
-    assert entry.duplicate_chords() == []
+    assert _entry_duplicate_chords() == []
     assert keymap.duplicate_chords() == []
