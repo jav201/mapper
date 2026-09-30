@@ -235,7 +235,7 @@ async def test_llr_n16_2_3_legend_coerces_and_bounds_every_string(tmp_path, monk
     splits at the width.  Painted: no banned code point, the markup literal,
     and no row wider than `LEGEND_ROW_CELLS` (the row-length clause)."""
     monkeypatch.setattr(keymap, "KEYMAP", [
-        *keymap.KEYMAP, keymap.KeyBinding("F9", "F9", "home", HOSTILE, "salir")])
+        *keymap.KEYMAP, keymap.KeyBinding("F9", "F9", "home", HOSTILE, "leave")])
     monkeypatch.setattr(darkside, "DECLARED_VOCABULARY", (
         *darkside.DECLARED_VOCABULARY, ("V1", HOSTILE, HOSTILE, "INK on PANEL")))
     # `INC8-SEC-F4`: no arm covered `DECLARED_COLOURS` coercion at all -- a
@@ -288,21 +288,28 @@ def _painted_help_keys(rows: list[str]) -> set[str]:
     an item is key glyphs followed by ONE word.  A key is painted when its
     glyph sits in an item whose word is the legend's word for its action
     (`OWN_SCOPE_COPY`) -- glyph alone would also hit `q` and `esc`'s OTHER
-    bindings in the map scope's `salir` group (`q -> inicio`,
-    `esc -> volver`), which paint the same two glyphs under another word.
-    The seat is used only to decode a painted (glyph, word) pair back into the
-    `key` name `effective` is keyed on.
+    bindings in the map scope's `leave` group (`q -> home`,
+    `esc -> back`), which paint the same two glyphs under another word.
+    The seat is used only to decode a painted item back into the `key` names
+    `effective` is keyed on.
+
+    `INC8-P2-CR-F9` (`A-112` st. 6): an item is matched WHOLE, in the exact
+    form the group paints it -- the seat's glyphs for one word, single-spaced,
+    then the word.  Pairing any glyph token with the last token of any
+    `·`-split piece also matched a key-section row (`esc` padded to the key
+    column, then `close`) once the seat's labels became English words.
     """
-    pairs: set[tuple[str, str]] = set()
+    forms: dict[str, set[str]] = {}
+    for actions, word in help_screen.OWN_SCOPE_COPY:
+        seat = [b for b in bindings_for(SCOPE_HELP) if b.action in actions]
+        forms[" ".join([*(b.glyph for b in seat), word])] = {b.key for b in seat}
+    painted: set[str] = set()
     for row in rows:
-        for item in row.split("·"):
-            tokens = item.split()
-            pairs.update((glyph, tokens[-1]) for glyph in tokens[:-1])
-    return {b.key for b in bindings_for(SCOPE_HELP)
-            if (b.glyph, help_screen.own_scope_word(b.action)) in pairs}
+        for item in row.split(help_screen._ITEM_SEP.strip()):  # noqa: SLF001
+            painted |= forms.get(item.strip(), set())
+    return painted
 
 
-@pytest.mark.xfail(strict=True, reason="INC8-P2-CR-F9: RED until Inc-9 anchors the parser")
 def test_inc8_p2_cr_f9_a_key_row_never_reads_as_an_own_scope_item():
     """`A-112` st. 6.  A key-section row whose label happens to BE an
     own-scope word -- `esc` over `close`, under the key column's padding --
@@ -552,7 +559,7 @@ def test_inc8_sec_f1_fit_never_fabricates_a_row(monkeypatch):
     """
     hostile = "\n q  BORRAR TODO"
     monkeypatch.setattr(keymap, "KEYMAP", [
-        *keymap.KEYMAP, keymap.KeyBinding("f10", "F10", "home", hostile, "salir")])
+        *keymap.KEYMAP, keymap.KeyBinding("f10", "F10", "home", hostile, "leave")])
     screen = HelpScreen(SCOPE_MAP, view="atlas")
     text = screen._render_keymap()  # noqa: SLF001
     lines = text.plain.split("\n")

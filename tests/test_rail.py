@@ -182,7 +182,8 @@ def test_at_n03e_keybar_truncation_names_what_is_hidden():
 
     narrow = darkside.keybar(groups, width=40)
     assert narrow.cell_len <= 40, "the bar must fit the width it was given"
-    assert "?" in narrow.plain and "todas" in narrow.plain
+    # `A-112` st. 3: the marker's word is read from its one spelling.
+    assert "?" in narrow.plain and darkside.KEYBAR_MORE in narrow.plain
 
     # The count must be REAL: hidden + shown == total.
     marker = narrow.plain.split("… +")[1]

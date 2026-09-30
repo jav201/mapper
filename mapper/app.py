@@ -538,10 +538,10 @@ class HomeScreen(Screen):
         yield HintLine("elige una puerta para empezar")
         yield KeyBar(
             [
-                ("nav", [("j/k", "elegir"), ("↵", "abrir"), ("r", "retomar")]),
-                ("doors", [("c", "consultar"), ("p", "repo"), ("n", "construir"),
-                           ("t", "plantilla"), ("i", "importar csv"), ("f", "fábrica")]),
-                ("app", [("s", "componentes"), ("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "salir")]),
+                ("nav", [("j/k", "choose"), ("↵", "open"), ("r", "resume")]),
+                ("doors", [("c", "browse"), ("p", "repo"), ("n", "build"),
+                           ("t", "template"), ("i", "import csv"), ("f", "factory")]),
+                ("app", [("s", "settings"), ("ctrl+p", "palette"), ("?", "legend"), ("q", "quit")]),
             ]
         )
 
@@ -1119,8 +1119,8 @@ class RepoScreen(Screen):
             yield Static(self._render_table(), id="repo-table", expand=True)
         yield KeyBar(
             [
-                ("nav", [("j/k", "sig/ant"), ("↵", "detalle")]),
-                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q", "inicio")]),
+                ("nav", [("j/k", "next/previous"), ("↵", "details")]),
+                ("app", [("ctrl+p", "palette"), ("?", "legend"), ("q", "home")]),
             ]
         )
 

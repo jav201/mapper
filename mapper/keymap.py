@@ -8,7 +8,7 @@ accident (LLR-N03.1):
 ``key``     the Textual key name — what actually binds (``enter``, ``slash``).
 ``glyph``   the display form the operator reads (``↵``, ``/``).
 ``action``  the ``action_*`` method stem — what actually dispatches.
-``label``   Spanish prose — what the palette and help show.
+``label``   English prose — what the palette and help show (`A-112`).
 
 This module has no Textual dependency: it returns plain tuples and the screen turns
 them into ``Binding`` objects.  The dependency ban in ``docs/ARCHITECTURE.md`` §3
@@ -55,11 +55,11 @@ TAB_BINDING_EXCEPTIONS = ("EditorScreen",)
 # `BINDINGS` from it: an undeclared group is a key nobody owns.
 GROUP_SCOPE: dict[str, str] = {
     "doors": SCOPE_HOME,
-    "lista": SCOPE_HOME,
+    "list": SCOPE_HOME,
     "nav": SCOPE_MAP,
     "node": SCOPE_MAP,
     "view": SCOPE_MAP,
-    "salir": SCOPE_MAP,
+    "leave": SCOPE_MAP,
     "repo": SCOPE_REPO,
     "plug": SCOPE_PLUG,
     "import": SCOPE_IMPORT,
@@ -93,24 +93,24 @@ class KeyBinding:
 # the binding's scope — asserted at import time by tests/test_keymap.py.
 KEYMAP: list[KeyBinding] = [
     # -- home ---------------------------------------------------------------
-    KeyBinding("c", "c", "consult", "consultar mapas", "doors"),
-    KeyBinding("p", "p", "plug", "conectar repo", "doors"),
-    KeyBinding("n", "n", "construct", "construir mapa", "doors"),
-    KeyBinding("t", "t", "template", "desde plantilla", "doors"),
-    KeyBinding("i", "i", "import_csv", "importar csv", "doors"),
-    KeyBinding("f", "f", "factory", "fábrica", "doors"),
-    KeyBinding("r", "r", "resume", "retomar último", "doors"),
-    KeyBinding("s", "s", "settings", "componentes", "doors"),
-    KeyBinding("j", "j", "table_down", "bajar", "lista"),
-    KeyBinding("k", "k", "table_up", "subir", "lista"),
-    KeyBinding("q", "q", "quit", "salir", "lista"),
+    KeyBinding("c", "c", "consult", "browse maps", "doors"),
+    KeyBinding("p", "p", "plug", "connect repo", "doors"),
+    KeyBinding("n", "n", "construct", "build map", "doors"),
+    KeyBinding("t", "t", "template", "from template", "doors"),
+    KeyBinding("i", "i", "import_csv", "import csv", "doors"),
+    KeyBinding("f", "f", "factory", "factory", "doors"),
+    KeyBinding("r", "r", "resume", "resume last", "doors"),
+    KeyBinding("s", "s", "settings", "settings", "doors"),
+    KeyBinding("j", "j", "table_down", "down", "list"),
+    KeyBinding("k", "k", "table_up", "up", "list"),
+    KeyBinding("q", "q", "quit", "quit", "list"),
     # -- map · navigation ---------------------------------------------------
-    KeyBinding("j", "j", "next_sibling", "siguiente", "nav"),
-    KeyBinding("k", "k", "prev_sibling", "anterior", "nav"),
-    KeyBinding("h", "h", "parent", "padre", "nav"),
-    KeyBinding("l", "l", "child", "hijo", "nav"),
-    KeyBinding("enter", "↵", "open_ficha", "abrir ficha", "nav"),
-    KeyBinding("slash", "/", "search", "buscar", "nav"),
+    KeyBinding("j", "j", "next_sibling", "next sibling", "nav"),
+    KeyBinding("k", "k", "prev_sibling", "previous sibling", "nav"),
+    KeyBinding("h", "h", "parent", "parent", "nav"),
+    KeyBinding("l", "l", "child", "child", "nav"),
+    KeyBinding("enter", "↵", "open_ficha", "open card", "nav"),
+    KeyBinding("slash", "/", "search", "search", "nav"),
     # US-N07 `#D5b`.  `n` walks the live *coincidencias* set and `N` walks it
     # backwards, in `nav` beside the `/` that produces the set.  `n` used to be
     # `next_gap`, which moves to `M` in the `view` block below: the walk is the
@@ -118,71 +118,71 @@ KEYMAP: list[KeyBinding] = [
     # worklist is reached for once, and only one of the two can own the letter
     # its Spanish label starts with.  Both labels are true in EVERY state, so the
     # seat stays a static set and the whole-seat pin stays set equality (`#D10`).
-    KeyBinding("n", "n", "next_hit", "siguiente coincidencia", "nav"),
-    KeyBinding("N", "N", "prev_hit", "coincidencia anterior", "nav"),
+    KeyBinding("n", "n", "next_hit", "next match", "nav"),
+    KeyBinding("N", "N", "prev_hit", "previous match", "nav"),
     # -- map · node ---------------------------------------------------------
-    KeyBinding("a", "a", "add_child", "agregar hijo", "node"),
-    KeyBinding("d", "d", "open_documents", "documentos", "node"),
-    KeyBinding("x", "x", "archive", "archivar", "node"),
-    KeyBinding("u", "u", "undo", "deshacer", "node"),
-    KeyBinding("A", "A", "add_attachment", "agregar adjunto", "node"),
-    KeyBinding("X", "X", "remove_attachment", "quitar adjunto", "node"),
+    KeyBinding("a", "a", "add_child", "add child", "node"),
+    KeyBinding("d", "d", "open_documents", "documents", "node"),
+    KeyBinding("x", "x", "archive", "archive node", "node"),
+    KeyBinding("u", "u", "undo", "undo", "node"),
+    KeyBinding("A", "A", "add_attachment", "add attachment", "node"),
+    KeyBinding("X", "X", "remove_attachment", "remove attachment", "node"),
     # -- map · view ---------------------------------------------------------
-    KeyBinding("f", "f", "toggle_focus", "alternar foco", "view"),
-    KeyBinding("o", "o", "toggle_outline", "alternar outline", "view"),
-    KeyBinding("r", "r", "toggle_radial", "alternar radial", "view"),
-    KeyBinding("e", "e", "export_svg", "exportar svg", "view"),
-    KeyBinding("equals_sign", "=", "toggle_diff", "alternar diff", "view"),
-    KeyBinding("m", "m", "coverage", "cobertura", "view"),
+    KeyBinding("f", "f", "toggle_focus", "toggle focus", "view"),
+    KeyBinding("o", "o", "toggle_outline", "toggle outline", "view"),
+    KeyBinding("r", "r", "toggle_radial", "toggle mind map", "view"),
+    KeyBinding("e", "e", "export_svg", "export svg", "view"),
+    KeyBinding("equals_sign", "=", "toggle_diff", "toggle diff", "view"),
+    KeyBinding("m", "m", "coverage", "coverage", "view"),
     # Relocated from `n` by `#D5b`.  Uppercase because the shifted-pair
     # precedent is already in this seat (`A`/`X` beside `a`/`x`, `HJKL` beside
     # `hjkl`) and `M` was free: of the uppercase letters only `A`, `H`, `I`,
     # `J`, `K`, `L`, `R` and `X` were taken before this row.
-    KeyBinding("M", "M", "next_gap", "siguiente faltante", "view"),
-    KeyBinding("R", "R", "toggle_rail", "mostrar/ocultar rail", "view"),
-    KeyBinding("I", "I", "toggle_inspector", "mostrar/ocultar ficha", "view"),
-    KeyBinding("g", "g", "focus_rail", "ir al rail", "view"),
-    KeyBinding("z", "z", "collapse_branch", "plegar rama", "view"),
+    KeyBinding("M", "M", "next_gap", "next missing", "view"),
+    KeyBinding("R", "R", "toggle_rail", "show/hide rail", "view"),
+    KeyBinding("I", "I", "toggle_inspector", "show/hide card", "view"),
+    KeyBinding("g", "g", "focus_rail", "go to rail", "view"),
+    KeyBinding("z", "z", "collapse_branch", "fold branch", "view"),
     # US-N06 pan.  `hjkl` already navigates the tree in this scope and `⇧hjkl`
     # moves the window over it — the shifted-pair precedent is already in the
     # seat (`A`/`X` beside `a`/`x`).  Executed at `ea1fbf9` and re-derived at
     # `954f8f3`: all four arrive as their own `event.key`, and of the uppercase
     # letters only `A`, `I`, `R` and `X` were taken.
-    KeyBinding("H", "H", "pan_left", "desplazar izquierda", "view"),
-    KeyBinding("J", "J", "pan_down", "desplazar abajo", "view"),
-    KeyBinding("K", "K", "pan_up", "desplazar arriba", "view"),
-    KeyBinding("L", "L", "pan_right", "desplazar derecha", "view"),
+    KeyBinding("H", "H", "pan_left", "pan left", "view"),
+    KeyBinding("J", "J", "pan_down", "pan down", "view"),
+    KeyBinding("K", "K", "pan_up", "pan up", "view"),
+    KeyBinding("L", "L", "pan_right", "pan right", "view"),
     # -- map · leaving ------------------------------------------------------
-    KeyBinding("q", "q", "home", "inicio", "salir"),
-    KeyBinding("escape", "esc", "back_or_home", "volver", "salir"),
+    KeyBinding("q", "q", "home", "home", "leave"),
+    KeyBinding("escape", "esc", "back_or_home", "back", "leave"),
     # -- repo ---------------------------------------------------------------
-    KeyBinding("j", "j", "next_sibling", "siguiente", "repo", priority=True),
-    KeyBinding("k", "k", "prev_sibling", "anterior", "repo", priority=True),
-    KeyBinding("q", "q", "home", "inicio", "repo", priority=True),
+    KeyBinding("j", "j", "next_sibling", "next sibling", "repo", priority=True),
+    KeyBinding("k", "k", "prev_sibling", "previous sibling", "repo", priority=True),
+    KeyBinding("q", "q", "home", "home", "repo", priority=True),
     # -- plug repo ----------------------------------------------------------
     # `escape` stays priority here: the screen's only widget is a text input the
     # operator must be able to abandon mid-typing.
-    KeyBinding("escape", "esc", "home", "volver", "plug", priority=True),
+    KeyBinding("escape", "esc", "home", "back", "plug", priority=True),
     # -- import preview -----------------------------------------------------
-    KeyBinding("s", "s", "save", "guardar mapa", "import"),
-    KeyBinding("escape", "esc", "home", "volver", "import"),
+    KeyBinding("s", "s", "save", "save map", "import"),
+    KeyBinding("escape", "esc", "home", "back", "import"),
     # -- palette (modal) ----------------------------------------------------
-    KeyBinding("enter", "↵", "run_selected", "ejecutar", "palette"),
-    KeyBinding("escape", "esc", "dismiss_none", "cerrar", "palette"),
+    KeyBinding("enter", "↵", "run_selected", "run", "palette"),
+    KeyBinding("escape", "esc", "dismiss_none", "close", "palette"),
     # -- help (modal) -------------------------------------------------------
     # Its own scope: borrowing the palette's bound `enter -> run_selected`, a
     # method HelpScreen does not define, which was a silent no-op.
-    KeyBinding("escape", "esc", "dismiss_none", "cerrar", "help"),
-    KeyBinding("q", "q", "dismiss_none", "cerrar", "help"),
+    KeyBinding("escape", "esc", "dismiss_none", "close", "help"),
+    KeyBinding("q", "q", "dismiss_none", "close", "help"),
     # HLR-N16.4: every key that has an effect inside the legend is declared in
     # it.  These six already scrolled the pane, undeclared, while the new
     # vocabulary sections land below the fold.
-    KeyBinding("up", "↑", "legend_up", "subir", "help"),
-    KeyBinding("down", "↓", "legend_down", "bajar", "help"),
-    KeyBinding("pageup", "pageup", "legend_page_up", "página arriba", "help"),
-    KeyBinding("pagedown", "pagedown", "legend_page_down", "página abajo", "help"),
-    KeyBinding("home", "home", "legend_home", "al principio", "help"),
-    KeyBinding("end", "end", "legend_end", "al final", "help"),
+    KeyBinding("up", "↑", "legend_up", "scroll up", "help"),
+    KeyBinding("down", "↓", "legend_down", "scroll down", "help"),
+    KeyBinding("pageup", "pageup", "legend_page_up", "page up", "help"),
+    KeyBinding("pagedown", "pagedown", "legend_page_down", "page down", "help"),
+    KeyBinding("home", "home", "legend_home", "to top", "help"),
+    KeyBinding("end", "end", "legend_end", "to bottom", "help"),
     # -- factory (LLR-N16.1.2, `#D9`) ----------------------------------------
     # Migrated from the screen's own list with `priority` kept: every one of
     # its bindings was `priority=True`, and the migration changes no dispatch.
@@ -202,8 +202,8 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("q", "q", "home", "back", "settings", priority=True),
     KeyBinding("escape", "esc", "home", "back", "settings", priority=True),
     # -- app (available on every screen) ------------------------------------
-    KeyBinding("ctrl+p", "ctrl+p", "palette", "paleta de acciones", "app"),
-    KeyBinding("question_mark", "?", "help", "ayuda", "app"),
+    KeyBinding("ctrl+p", "ctrl+p", "palette", "command palette", "app"),
+    KeyBinding("question_mark", "?", "help", "legend", "app"),
 ]
 
 
