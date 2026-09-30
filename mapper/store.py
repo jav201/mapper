@@ -50,6 +50,30 @@ def _text_attributes() -> tuple[str, ...]:
 _SCALARS = (str, int, float, bool)
 
 
+def _normalize_newlines(value: str) -> str:
+    """CRLF/CR to LF, at the STORAGE coercion boundary only.
+
+    `G6-C-F7`: `plain()` maps `\\r` (U+000D, in `COERCION_RANGES`'s C0 row) to
+    U+FFFD -- correct for a lone `\\r` reaching a paint sink, where a bare
+    carriage return would move the cursor rather than render, but this is the
+    LOAD path, not paint. A note pasted on Windows and saved carries real
+    `\\r\\n` line endings; before `A-111` widened `_coerce_field` to call
+    `plain()` at all, that round-tripped byte-for-byte. After it, the SAME
+    file corrupts on its very first load: `"line1\\r\\nline2"` becomes
+    `"line1\\ufffd\\nline2"`, permanently, with no warning -- a regression
+    `A-111` introduced, not a pre-existing defect.
+
+    Fixed HERE, not in `plain()`: `plain()` is the one shared rule paint sites
+    also call (`mapper/widgets/inspector.py`), and a paint-side single-row
+    budget genuinely cannot afford a literal newline (see `plain`'s own
+    `fit`-adjacent comment in `darkside.py`) -- changing `plain()` itself
+    would silently change what every paint call site renders. Normalizing
+    newlines is `_coerce_field`'s own business: it is the one place that
+    knows a value is entering STORAGE, not a fixed-width cell.
+    """
+    return value.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
     """Return `value` as text, or `""` when it cannot faithfully become text.
 
@@ -63,13 +87,16 @@ def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
     table.  Type coercion alone lets a lone surrogate (already a `str`) pass
     threshold 1 untouched and reach `_reindex`'s sqlite3 bind raw
     (`INC8-P3-SEC-F1`).  Reusing `plain()` rather than a second table.
+
+    `G6-C-F7` widens it again, ahead of `plain()`, to normalize line endings
+    first -- see `_normalize_newlines`.
     """
     if isinstance(value, str):
-        return plain(value)
+        return plain(_normalize_newlines(value))
     if value is None:
         return ""
     if isinstance(value, _SCALARS):
-        return plain(str(value))
+        return plain(_normalize_newlines(str(value)))
     if isinstance(value, (date, datetime)):
         return value.isoformat()
     _warn(graph, f"campo ilegible: {node_id}.{key}")
@@ -692,6 +719,20 @@ class MapStore:
                 f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible "
                 f"({type(exc).__name__})"
             ) from exc
+        # `G6-C-F8`(b): a two-phase `save()` still has a window between its two
+        # `replace()` calls -- a crash there leaves `.mmd` replaced and
+        # `_nodos.yml` stale (or the reverse). Detected by comparing the mmd
+        # fingerprint THIS sidecar was saved alongside (`save()` records it as
+        # `_mmd_hash`) against the mmd actually on disk right now: a mismatch
+        # means the pair was never written together. Old sidecars carry no
+        # `_mmd_hash` at all (`None`), so this is silent on every file saved
+        # before this fix -- no false positive on a legacy map. LLR-R03.5: the
+        # map still loads (the stale sidecar is still legible), so this is a
+        # load_warning, not a denial, the same shape `_warn` already gives
+        # every other malformed field. The map id only -- no path.
+        recorded_hash = sidecar.get("_mmd_hash")
+        if recorded_hash is not None and recorded_hash != self._text_hash(mmd_text, ""):
+            _warn(graph, f"mapa desincronizado: {map_id}")
         try:
             self._reindex(map_id, mmd_text, yml_text, graph)
         except MapStoreError:
@@ -706,11 +747,18 @@ class MapStore:
             ) from exc
         return graph
 
-    def _atomic_write(self, path: Path, text: str) -> None:
-        """Write `text` to `path` atomically via a temp file + rename."""
+    def _write_tmp(self, path: Path, text: str) -> Path:
+        """Write `text` to `path`'s own `.tmp` sibling; return that sibling.
+
+        Split from the replace step (`G6-C-F8`(a)) so `save()` can write BOTH
+        temp files before either original is touched -- a single-file
+        "write, then immediately replace" helper is exactly what made the
+        previous two-call sequence torn: replacing `.mmd` was already
+        irreversible by the time `_nodos.yml`'s OWN write could still fail.
+        """
         tmp = path.with_suffix(path.suffix + ".tmp")
         tmp.write_text(text, encoding="utf-8")
-        tmp.replace(path)
+        return tmp
 
     def save(self, map_id: str, graph: Graph) -> None:
         mmd_path = self.workspace / f"{map_id}.mmd"
@@ -729,9 +777,29 @@ class MapStore:
 
         mmd_text = dump(graph)
         sidecar = self._build_sidecar(graph)
+        # `G6-C-F8`(b): fingerprint the mmd THIS sidecar is written alongside,
+        # so a later `load()` can tell a torn write (one file replaced, the
+        # other stale) from a clean pair -- see the mismatch check in `load()`.
+        # Reuses `_text_hash`, already the module's one hashing routine (it
+        # fingerprints a pair for `_reindex`'s cache-invalidation check),
+        # rather than adding a second hash function for the same purpose. The
+        # second argument is `""`: only the mmd side needs a fingerprint here,
+        # because the yml file itself is the thing carrying it.
+        sidecar["_mmd_hash"] = self._text_hash(mmd_text, "")
         yml_text = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
-        self._atomic_write(mmd_path, mmd_text)
-        self._atomic_write(yml_path, yml_text)
+
+        # `G6-C-F8`(a): two-phase write.  Both temp files are written FIRST;
+        # only once both writes succeed does either original get replaced, and
+        # the mmd replace always precedes the yml replace. A failure while
+        # writing either temp file (full disk, permissions) leaves BOTH
+        # originals untouched -- the previous version wrote-and-replaced
+        # `.mmd`, then wrote-and-replaced `_nodos.yml` as two fully independent
+        # steps, so a failure in the SECOND file's write left the FIRST file
+        # already replaced and the second stale on disk after one failed save.
+        mmd_tmp = self._write_tmp(mmd_path, mmd_text)
+        yml_tmp = self._write_tmp(yml_path, yml_text)
+        mmd_tmp.replace(mmd_path)
+        yml_tmp.replace(yml_path)
         self._reindex(map_id, mmd_text, yml_text, graph)
 
     def create_seed(self, map_id: str) -> Graph:
