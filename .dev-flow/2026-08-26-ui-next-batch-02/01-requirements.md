@@ -10261,3 +10261,21 @@ views' own headers and `_degraded` banners (`atlas` / `mind map` / `outline`, re
 header states its kind as secondary English text, assumption `INC9B-A1`), and statement 4's English rule is met by the
 `coverage` and `edit document` titles. `LANGUAGE_EXCEPTIONS` is empty. No statement changed; the threshold arms are
 `tests/test_inc9.py::test_inc9b_*`.
+
+**Note, 2026-09-30 (Inc-9c, `03-increments/increment-027-inc9c.md`).** The operator's answers K1-K4
+(`VERDICT-inc9-2026-09-30.md`) refine statements 2, 3 and 5; no numeric threshold is loosened.
+
+- **Statement 2.** What a key group PAINTS is now `keymap.GROUP_HEADER[group]`, not the group id; two groups may share
+  one word (`move` for `nav` on the map and `tree` in the factory). The language census judges the ids and the headers
+  (`_seat_strings`). Renamed: `doors` -> `open`, `list` -> `maps`, `app` -> `global`, `plug` -> `connect repo`,
+  `settings` -> `components`; new home group `exit` holds `q quit` (it is not a list action).
+- **Statement 3.** `HomeScreen` and `RepoScreen` no longer paint a hand-written `KeyBar`: both are built from the seat
+  (`INC9-UX-F4`), so their words are the seat's. The truncation marker reads `? all keys`.
+- **Statement 5.** One word per screen: `components` (the `s` key, the door, the crumb, the legend title; the tab strip
+  marks no tab) replaces `settings`; `connect repo` (tab, door, title, crumb, key-group header, legend title, read from
+  the screen's name) replaces the plug screen's four names.
+- **Key hints (K3), within statement 4's "not members".** The key-hint strings listed in the record moved to English;
+  each key uses its seat label's word, built with `keymap.hint_pair`. Toasts and prose remain Inc-EN.
+- **Numeric.** The legend's own-scope group is its title plus the FEWEST lines its four items need at the layout's row
+  budget (2 modal, 3 docked), derived independently in `tests/test_help_scope.py`; the former "exactly two in both
+  layouts" was the band of the old word `ends` (`INC9B-F1`).
