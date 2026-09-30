@@ -267,9 +267,6 @@ LEAK_EXCEPTIONS: dict[tuple[str, str], str] = {
     ("mapper/app.py", "str(exc)"): "INC9C-F3: `GitHubError`'s own message (git stderr) "
                                   "and `store.load`'s path-free `MapStoreError` text",
     ("mapper/app.py", "str(e)"): "`store.load`'s `MapStoreError`, written path-free at B-30",
-    ("mapper/screens/factory.py", "source"): "INC9C-F4: echo of the path the operator "
-                                            "typed at the prompt (factory.py is outside this "
-                                            "increment's file budget beyond two sites)",
 }
 
 
@@ -541,9 +538,11 @@ async def test_inc9c_k3_the_factory_import_and_map_hints_use_the_seat_word(tmp_p
         app.push_screen(imp)
         await pilot.pause()
         import_hint = _text(imp.query_one(HintLine))
-    for action in ("edit_doc", "import_office", "generate_office", "start_node"):
+    # Inc-9d (`L4`): the hint is the three document actions; the keys the bar
+    # already shows (`0`, `q`) are no longer repeated.
+    for action in ("edit_doc", "import_office", "generate_office"):
         assert _seat_pair("factory", action) in factory_hint, (action, factory_hint)
-    assert _seat_pair("factory", "home", key="q") in factory_hint, factory_hint
+    assert _seat_pair("factory", "start_node") not in factory_hint, factory_hint
     assert "salir" not in factory_hint and "inicio" not in factory_hint, factory_hint
     assert _seat_pair("import", "save") in import_hint and _seat_pair("import", "home") in import_hint
     assert "guarda" not in import_hint and "volver" not in import_hint, import_hint

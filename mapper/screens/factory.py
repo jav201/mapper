@@ -13,21 +13,21 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from mapper import darkside, office
-from mapper.keymap import SCOPE_FACTORY, group_header, groups_for_keybar, hint_pair, textual_bindings
+from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
 
 _TAG_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
 
-#: The hint line under the tree: every word beside a key is the seat's (`K3`).
-#: `q` only -- `esc` leaves the same way and the key bar lists both.
-_HINT = " · ".join([
-    f"j/k/h/l {group_header('tree')}",
-    *(hint_pair(SCOPE_FACTORY, action) for action in
-      ("edit_doc", "import_office", "generate_office", "start_node")),
-    hint_pair(SCOPE_FACTORY, "home", key="q"),
-])
+def factory_hint() -> str:
+    """The hint line under the tree: the three document actions, every word beside
+    a key the seat's (`K3`).  The movement, `0` and `q` keys are not repeated: the
+    key bar beside it lists them (`L4`).  A function, not a constant, so a test
+    that relabels the seat can rebuild it (`INC9BC-CR-F2`)."""
+    return " · ".join(
+        hint_pair(SCOPE_FACTORY, action)
+        for action in ("edit_doc", "import_office", "generate_office"))
 
 
 class _Nav:
@@ -135,7 +135,7 @@ class FactoryScreen(Screen):
         with Horizontal(id="factory-body"):
             yield Static(id="factory-tree")
             yield Static(id="factory-preview")
-        yield HintLine(_HINT)
+        yield HintLine(factory_hint())
         from mapper.app import keybar_groups
 
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
@@ -429,8 +429,11 @@ class FactoryScreen(Screen):
             if path_str is None:
                 return
             source = Path(path_str).expanduser()
+            # `INC9BC-SEC-F1`: the NAME as typed, never the expansion -- `~`
+            # resolves to the user profile, and a toast is painted and logged.
+            name = Path(path_str).name
             if not source.exists():
-                self.notify(darkside.plain(f"archivo no encontrado: {source}"), severity="error", markup=False)
+                self.notify(darkside.plain(f"archivo no encontrado: {name}"), severity="error", markup=False)
                 return
             kind = source.suffix.lower().lstrip(".")
             if kind not in {"docx", "pptx", "xlsx"}:
@@ -438,10 +441,18 @@ class FactoryScreen(Screen):
                 return
             store = self.app.store  # type: ignore[attr-defined]
             target = store.workspace / "templates" / source.name
-            target.parent.mkdir(parents=True, exist_ok=True)
             import shutil
 
-            shutil.copy2(source, target)
+            try:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+            except Exception as exc:
+                # `INC9BC-SEC-F4`: the file's name and the exception TYPE, never
+                # `str(exc)` (an `OSError` embeds the absolute path).
+                self.notify(
+                    darkside.plain(f"no se pudo importar {name}: {type(exc).__name__}"),
+                    severity="error", markup=False)
+                return
             # `G6-C-F1`: `rel` carries `source.name`, itself carrying whatever
             # the operator typed at the "ruta del archivo office" prompt.
             rel = darkside.plain(target.relative_to(store.workspace).as_posix())
