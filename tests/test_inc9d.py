@@ -25,7 +25,6 @@ from textual.widgets import DataTable, Input, Static
 from mapper import keymap
 from mapper.app import HomeScreen, MapperApp, MapScreen, RepoScreen, _PromptScreen
 from mapper.github import GitHubError, _ensure_cloned, _repo_name_from_url
-from mapper.model import Document, Ficha, Graph, Node
 from mapper.screens.factory import FactoryScreen
 from mapper.store import MapStore
 from mapper.widgets.chrome import HintLine
