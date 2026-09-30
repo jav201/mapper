@@ -25,7 +25,7 @@ from mapper.app import ConstructScreen, MapperApp, MapScreen
 from mapper.model import Ficha, Graph, Node
 from mapper.store import TEMPLATES, MapStore, MapStoreError
 
-OPEN_STEPS: set[str] = {"seed-safety"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
