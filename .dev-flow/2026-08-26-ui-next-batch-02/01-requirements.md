@@ -10003,3 +10003,107 @@ tracked files containing the real account name, once `$USERNAME` is available to
 remains in git HISTORY on the public remote (every commit already pushed to `origin`, including
 `master`) -- removing it there needs a history rewrite and a force push, which the operator has not
 authorized, and this amendment does not ask for one.
+
+---
+
+## Amendment set 19 -- ficha text is coerced at graph entry, and `store.save()` degrades to a toast (G6). 2026-09-29. Base `3611c20`.
+
+### `A-111` -- ficha string fields are coerced at graph entry (load and mutation), and every `store.save()` call site degrades to a toast
+
+**Authority.** Operator verdict, Round 4, `VERDICT-inc8-legend-2026-09-28.md` § "Round 4", `G6`,
+verbatim: *"micro-incremento propio justo después de Inc-8: limpiar los campos de ficha al entrar al
+grafo y proteger los 6 guardados."* Closes `INC8-P3-SEC-F1` (Inc-8 pass-3 security review, MEDIUM):
+`mapper/store.py`'s persistence path handles raw, uncoerced strings, and 6 of 8 `store.save()` call
+sites in `mapper/app.py` have no guard.
+
+**Parent, stated honestly rather than assumed -- it does not fit in one piece.**
+
+- **The load half widens `LLR-STO.1.1`** (external, shipped, `.dev-flow/2026-08-27-repair-batch-
+  02/01-requirements.md:114`; parent `HLR-STO.1`). That LLR already requires `MapStore.load` to
+  "apply the scalar-coercion ladder to every text position" `_build_sidecar` serialises -- but its
+  ladder (`mapper/store.py::_coerce_field`) coerces TYPE only (scalars to `str`, containers refused).
+  A lone surrogate is already a `str`: it passes threshold 1 of `LLR-STO.1.1` untouched and reaches
+  `_reindex`'s sqlite3 bind, raw. This amendment widens that ladder, AT THE STORE BOUNDARY ONLY, to
+  additionally route every coerced text position through `darkside.plain()`'s declared
+  `COERCION_RANGES` table (`HLR-COERCE` / `LLR-COERCE.1`, this batch, §3.0) -- reusing the one
+  declared list, not a second one. This is a widening of an already-shipped requirement, not a new
+  one, following the precedent this document already set for `LLR-N13.1.7` (a new LLR that
+  references `LLR-STO.1.1` rather than redefining it).
+- **The mutation half has no existing parent, and none was forced.** `LLR-STO.1.1`'s position census
+  is derived by walking `_build_sidecar`'s OUTPUT shape -- it governs `load` (and, transitively,
+  anything that round-trips through `_graph_from_sidecar`, which covers `_pop_snapshot`'s undo path
+  for free). It says nothing about a `Ficha` field set directly from a UI event BEFORE any
+  serialisation happens, which is the surface `mapper/app.py`'s six mutation sites are. `HLR-COERCE`
+  itself does not fit either: its own text rules it out by construction -- "this HLR has no parent
+  story... a product-wide control whose subject survives the descoping of every story", scoped
+  explicitly to a PAINTED surface ("what would reverse the no-parent-story ruling: evidence of a
+  `notify` or paint site inside `mapper/views/` or `mapper/widgets/`"). `mapper/app.py`'s mutation
+  sites are neither a paint site nor a `views`/`widgets` module. So the mutation half is declared
+  standalone here, the same way `A-110` stood alone for repo hygiene: carried by its own test, not by
+  an HLR/LLR chain.
+- **The save-guard half has no parent at all, and is a different KIND of requirement.** Coercion is a
+  content transform; degrading a raised exception to a toast is an availability/containment
+  property, closer in spirit to `LLR-N13.1.5`'s per-map containment than to any coercion LLR -- but
+  `LLR-N13.1.5` is scoped to `load_or_notice`'s warning channel, not to `MapScreen`'s six mutation
+  actions. No requirement in this document or its cross-batch references covers "a `store.save()`
+  raise must not escape a message handler." Declared standalone, same reasoning as `A-110`.
+
+**The gap, measured on `3611c20` (before this amendment's RED arms existed).** (1) `_coerce_field`'s
+`str` branch (`mapper/store.py`) returns the value UNCHANGED -- confirmed: a sidecar carrying the
+YAML-escaped scalar `"\ud800"` decodes to a real lone surrogate, and `store.load` raises
+`MapStoreError("no se pudo indexar ...: UnicodeEncodeError")` because the raw surrogate reaches
+`_reindex`'s sqlite3 bind uncoerced -- the map cannot be opened, though the failure is graceful (a
+typed error, not a crash). (2) None of `mapper/app.py`'s six mutation sites -- field commit,
+attachment add, attachment remove, undo, add-child, archive -- coerces the text it assigns to the
+graph. A surrogate typed or pasted into the title `Input` and committed reaches `node.ficha.title`
+raw, and the next `store.save()` call raises an UNCAUGHT `UnicodeEncodeError` out of
+`_atomic_write`'s `Path.write_text(..., encoding="utf-8")` -- this one escapes the message handler
+and crashes the session, losing the edit. Files already on disk are not corrupted, because the
+`.tmp` write fails before `replace()`. (3) None of the same six sites guards `store.save()` at all:
+any raise from it -- a full disk, a permissions error, or the surrogate case above -- is uncaught.
+Only `action_save` and the `on_mount` new-map branch already guard or otherwise cannot carry
+attacker-controlled text.
+
+**Statement.**
+
+1. Every ficha string field -- title, notes, meta, state, schema-defined field values, the
+   `document.tags`/`document.inherited` map values, and attachment kind/path/caption -- shall be
+   coerced against `darkside.plain()`'s rule (the declared `COERCION_RANGES` table) at the two points
+   it enters the in-memory graph: `MapStore.load`'s sidecar parse (widening `LLR-STO.1.1`'s existing
+   type-coercion ladder in place, at its own site), and every `mapper/app.py` mutation that assigns
+   raw UI-sourced text onto a `Ficha`/`Attachment`/`Node` before it is added to `self.graph`. The
+   coercion is reused from its one declared site (`darkside.plain`); this amendment does not declare
+   a second table.
+2. Every `store.save()` call site in `mapper/app.py` shall guard the call the way `action_save`
+   already does: on any exception, show an operator-visible toast naming the failure (`markup=False`)
+   and return without proceeding to the call's own success-path steps (persisting `base_graph`,
+   refreshing the canvas, or showing a success toast). No `store.save()` call site may let an
+   exception escape its message handler.
+3. No other behaviour changes. A field value that contains no code point in `COERCION_RANGES` is
+   unaffected; a `store.save()` call that does not raise proceeds exactly as before.
+
+**Touched files.** `mapper/store.py` (the `_coerce_field` widening) and `mapper/app.py` (the six
+mutation-site coercions and the six `store.save()` guards). No change to `darkside.py`: `plain()` is
+already a public, importable function: reused, not duplicated.
+
+**Validation.** `test (unit)` + `test (pilot)` -- `tests/test_g6_store_surrogates.py`, three arms:
+(a) a sidecar carrying an escaped lone surrogate title loads clean and round-trips through a save
+(store-level, unit); (b) the real `FichaInspector.FieldCommitted` event, posted with a raw lone
+surrogate title on a mounted `MapScreen`, does not crash the session and reloads clean (pilot); (c)
+each of the 6 unguarded call sites, parametrized, forced to raise via a monkeypatched `store.save`
+and driven through its own real action -- field commit, attachment add, attachment remove, undo,
+add-child, archive -- asserting a toast naming the failure and a surviving `MapScreen`. See
+`03-increments/increment-024-g6-store-surrogates.md` for the RED-before evidence (all 8 arms
+reproduce the exact defect mechanism named above, not a fixture artefact) and the mutation battery
+that proves each arm can fail.
+
+**Numeric pass threshold.** `0` of the 8 arms in `tests/test_g6_store_surrogates.py` fail; `0`
+`store.save()` call sites in `mapper/app.py` without a `try`/`except` around the call.
+
+**What is not claimed.** This amendment does not change what happens to a container-typed field
+(still refused and recorded, per `LLR-STO.1.1` threshold 2 -- untouched) or add validation for a
+scenario that cannot reach the graph. It does not retry a failed save, or roll back an in-memory
+mutation that a subsequent save failed to persist -- the operator is told and the session keeps
+running; recovering the specific edit is a `u` (undo) away if a snapshot was pushed, same as any
+other declined write. `B-67` ("lone surrogates survive `darkside.plain`") is closed for paint/export
+by Inc-8 pass-3; this amendment closes its persistence half -- see `.dev-flow/BACKLOG.md` B-67.
