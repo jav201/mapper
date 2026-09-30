@@ -183,6 +183,36 @@ def keybar_groups(scope: str) -> list[str]:
     return [g for g, s in GROUP_SCOPE.items() if s in (scope, SCOPE_APP)]
 
 
+def _save_or_toast(screen: Screen, store: "MapStore", map_id: str, graph: Graph) -> bool:
+    """Guard a `store.save()` call: on any raise, toast and return `False`.
+
+    The ONE guarded call site every other `store.save()` call routes through
+    (`G6-C-F2`/`G6-C-F3`) — a screen calls this instead of writing its own
+    `try`/`except`, so the toast wording lives in one place, not eight.
+
+    `G6-C-F2`: the toast names the map id and the exception TYPE only, never
+    `str(e)` — an `OSError`'s own message embeds the full absolute path and,
+    on Windows, the operator's account name (the leak `store.load`'s toast was
+    already fixed against at `B-30`; this is the same fix for `store.save`).
+    Both interpolated pieces are routed through `darkside.plain()`: `map_id`
+    can be operator-typed (`ImportPreviewScreen.action_save`'s "guardar como"
+    prompt, `G6-C-F4`) and a masked exception type name is always ASCII, but
+    routing it too costs nothing and keeps the rule "nothing reaches this
+    toast unplained" total rather than case-by-case.
+    """
+    try:
+        store.save(map_id, graph)
+    except Exception as e:  # noqa: BLE001 -- deliberately generic, see A-111.
+        screen.notify(
+            f"no se pudo guardar {darkside.plain(map_id)!r}: "
+            f"{darkside.plain(type(e).__name__)}",
+            severity="error",
+            markup=False,
+        )
+        return False
+    return True
+
+
 class NavigationModel:
     """Cursor navigation over a tree graph."""
 
@@ -989,12 +1019,13 @@ class _ImportPreviewScreen(Screen):
         def on_name(name: str | None) -> None:
             if not name:
                 return
+            # `G6-C-F4`: the "guardar como" name is operator-typed and reaches
+            # `store.save(name, ...)` as the map id, uncoerced until now.
+            name = darkside.plain(name)
             store: MapStore = self.app.store  # type: ignore[attr-defined]
-            try:
-                store.save(name, self.preview_graph)
-                self.app.push_screen(MapScreen(name))
-            except Exception as e:
-                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            if not _save_or_toast(self, store, name, self.preview_graph):
+                return
+            self.app.push_screen(MapScreen(name))
 
         self.app.push_screen(
             _PromptScreen("guardar como", self.source_path.stem),
@@ -1465,7 +1496,11 @@ class MapScreen(Screen):
             self.graph.add_node(Node(id="root", ficha=Ficha(title="nuevo mapa")))
             self.base_graph = self.graph
             if self.store is not None:
-                self.store.save(self.map_id, self.graph)
+                # `G6-C-F3`: the 8th `store.save()` call site — unguarded until
+                # now.  A raise here (full disk, permissions) used to escape
+                # `on_mount` uncaught; the in-memory map is still shown either
+                # way, so a failed first save is a toast, not a blocked screen.
+                _save_or_toast(self, self.store, self.map_id, self.graph)
         else:
             try:
                 self.base_graph = self.store.load(self.map_id)
@@ -3217,10 +3252,7 @@ class MapScreen(Screen):
             node.ficha.state = value
         else:
             node.ficha.fields[event.field] = value
-        try:
-            self.store.save(self.map_id, self.graph)
-        except Exception as e:
-            self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+        if not _save_or_toast(self, self.store, self.map_id, self.graph):
             return
         self.base_graph = self.graph
         self.refresh_canvas()
@@ -3290,10 +3322,7 @@ class MapScreen(Screen):
             target = darkside.plain(target)
             kind = "url" if "://" in target else "file"
             node.ficha.attachments.append(Attachment(kind=kind, path=target))
-            try:
-                self.store.save(self.map_id, self.graph)
-            except Exception as e:
-                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            if not _save_or_toast(self, self.store, self.map_id, self.graph):
                 return
             self.base_graph = self.graph
             self.refresh_canvas()
@@ -3314,10 +3343,7 @@ class MapScreen(Screen):
             return
         removed = node.ficha.attachments.pop(event.index)
         self._push_snapshot()
-        try:
-            self.store.save(self.map_id, self.graph)
-        except Exception as e:
-            self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+        if not _save_or_toast(self, self.store, self.map_id, self.graph):
             return
         self.base_graph = self.graph
         self.refresh_canvas()
@@ -3368,10 +3394,7 @@ class MapScreen(Screen):
         self.base_graph = graph
         if self.nav.cursor not in self.graph.nodes:
             self.nav.cursor = self.graph.root_id
-        try:
-            self.store.save(self.map_id, self.graph)
-        except Exception as e:
-            self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+        if not _save_or_toast(self, self.store, self.map_id, self.graph):
             return
         self.refresh_canvas()
         self._event_toast("deshacer", "estado restaurado")
@@ -4400,10 +4423,7 @@ class MapScreen(Screen):
             node = Node(id=nid, ficha=Ficha(title=title))
             self.graph.add_node(node)
             self.graph.add_edge(Edge(parent_id=parent_id, child_id=nid))
-            try:
-                self.store.save(self.map_id, self.graph)
-            except Exception as e:
-                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            if not _save_or_toast(self, self.store, self.map_id, self.graph):
                 return
             self.base_graph = self.graph
             self.nav.cursor = nid
@@ -4439,10 +4459,7 @@ class MapScreen(Screen):
                 return
             self._push_snapshot()
             self._remove_subtree(self.nav.cursor)
-            try:
-                self.store.save(self.map_id, self.graph)
-            except Exception as e:
-                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            if not _save_or_toast(self, self.store, self.map_id, self.graph):
                 return
             self.base_graph = self.graph
             self.nav.cursor = self.graph.root_id
