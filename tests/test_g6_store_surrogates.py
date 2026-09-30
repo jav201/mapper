@@ -23,7 +23,7 @@ import pytest
 
 from mapper.app import MapperApp, MapScreen, _ConfirmScreen, _PromptScreen
 from mapper.model import Attachment, Edge, Ficha, Graph, Node
-from mapper.store import MapStore, MapStoreError
+from mapper.store import MapStore
 from mapper.widgets.inspector import FichaInspector
 
 LONE_SURROGATE = chr(0xD800)
@@ -57,7 +57,6 @@ async def _open(app, pilot, map_id, cursor="a"):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="G6 fix pending")
 def test_g6a_load_coerces_a_sidecar_lone_surrogate_title_instead_of_denying_the_map(
     tmp_store,
 ):
@@ -95,7 +94,6 @@ def test_g6a_load_coerces_a_sidecar_lone_surrogate_title_instead_of_denying_the_
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="G6 fix pending")
 async def test_g6b_field_committed_with_a_surrogate_title_does_not_crash(tmp_path):
     """A broken paste lands a lone surrogate in the title Input; on submit the
     inspector posts the real `FieldCommitted` event with that raw value.
@@ -199,7 +197,6 @@ SITES = {
 }
 
 
-@pytest.mark.xfail(strict=True, reason="G6 fix pending")
 @pytest.mark.parametrize("site", sorted(SITES))
 async def test_g6c_each_unguarded_save_site_degrades_to_a_toast(tmp_path, site):
     """Force `store.save` to raise at each of the 6 call sites named in

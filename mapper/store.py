@@ -11,6 +11,7 @@ from typing import Any, get_type_hints
 
 import yaml
 
+from .darkside import plain
 from .model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
 
 
@@ -56,13 +57,19 @@ def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
     (LLR-R03.2).  A container must NOT coerce: `str({})` is `"{}"`, a truthy
     string, so `coverage()` would go on counting the malformed field as
     documented and the miscount would survive its own fix.
+
+    `A-111` widens `LLR-STO.1.1`'s type-coercion ladder, at this site, to also
+    route the result through `darkside.plain()`'s declared `COERCION_RANGES`
+    table.  Type coercion alone lets a lone surrogate (already a `str`) pass
+    threshold 1 untouched and reach `_reindex`'s sqlite3 bind raw
+    (`INC8-P3-SEC-F1`).  Reusing `plain()` rather than a second table.
     """
     if isinstance(value, str):
-        return value
+        return plain(value)
     if value is None:
         return ""
     if isinstance(value, _SCALARS):
-        return str(value)
+        return plain(str(value))
     if isinstance(value, (date, datetime)):
         return value.isoformat()
     _warn(graph, f"campo ilegible: {node_id}.{key}")

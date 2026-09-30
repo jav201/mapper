@@ -3206,15 +3206,22 @@ class MapScreen(Screen):
         # Snapshot BEFORE mutating, so `u` reverts this edit rather than an
         # unrelated earlier structural change.
         self._push_snapshot()
+        # `A-111`: coerced with `plain()`'s rule before it ever reaches the
+        # graph — a broken paste must not carry a lone surrogate to `save()`.
+        value = darkside.plain(event.value)
         if event.field == "title":
-            node.ficha.title = event.value
+            node.ficha.title = value
         elif event.field == "notes":
-            node.ficha.notes = event.value
+            node.ficha.notes = value
         elif event.field == "state":
-            node.ficha.state = event.value
+            node.ficha.state = value
         else:
-            node.ficha.fields[event.field] = event.value
-        self.store.save(self.map_id, self.graph)
+            node.ficha.fields[event.field] = value
+        try:
+            self.store.save(self.map_id, self.graph)
+        except Exception as e:
+            self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            return
         self.base_graph = self.graph
         self.refresh_canvas()
         self._event_toast("guardado", darkside.plain(node.ficha.title or node.id))
@@ -3278,9 +3285,16 @@ class MapScreen(Screen):
             if not target:
                 return
             self._push_snapshot()
+            # `A-111`: coerced before it reaches the graph, same rule as
+            # `plain()` — the prompt is a real `Input`, not a hostile file.
+            target = darkside.plain(target)
             kind = "url" if "://" in target else "file"
             node.ficha.attachments.append(Attachment(kind=kind, path=target))
-            self.store.save(self.map_id, self.graph)
+            try:
+                self.store.save(self.map_id, self.graph)
+            except Exception as e:
+                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+                return
             self.base_graph = self.graph
             self.refresh_canvas()
             self._event_toast("adjunto agregado", darkside.plain(target))
@@ -3300,7 +3314,11 @@ class MapScreen(Screen):
             return
         removed = node.ficha.attachments.pop(event.index)
         self._push_snapshot()
-        self.store.save(self.map_id, self.graph)
+        try:
+            self.store.save(self.map_id, self.graph)
+        except Exception as e:
+            self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            return
         self.base_graph = self.graph
         self.refresh_canvas()
         self._event_toast(
@@ -3350,7 +3368,11 @@ class MapScreen(Screen):
         self.base_graph = graph
         if self.nav.cursor not in self.graph.nodes:
             self.nav.cursor = self.graph.root_id
-        self.store.save(self.map_id, self.graph)
+        try:
+            self.store.save(self.map_id, self.graph)
+        except Exception as e:
+            self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+            return
         self.refresh_canvas()
         self._event_toast("deshacer", "estado restaurado")
 
@@ -4366,6 +4388,8 @@ class MapScreen(Screen):
             if not title or self.store is None:
                 return
             self._push_snapshot()
+            # `A-111`: coerced before it reaches the graph or `slugify`.
+            title = darkside.plain(title)
             parent_id = self.nav.cursor
             base = slugify(title) or "n"
             nid = base
@@ -4376,7 +4400,11 @@ class MapScreen(Screen):
             node = Node(id=nid, ficha=Ficha(title=title))
             self.graph.add_node(node)
             self.graph.add_edge(Edge(parent_id=parent_id, child_id=nid))
-            self.store.save(self.map_id, self.graph)
+            try:
+                self.store.save(self.map_id, self.graph)
+            except Exception as e:
+                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+                return
             self.base_graph = self.graph
             self.nav.cursor = nid
             self.refresh_canvas()
@@ -4411,7 +4439,11 @@ class MapScreen(Screen):
                 return
             self._push_snapshot()
             self._remove_subtree(self.nav.cursor)
-            self.store.save(self.map_id, self.graph)
+            try:
+                self.store.save(self.map_id, self.graph)
+            except Exception as e:
+                self.notify(f"no se pudo guardar: {e}", severity="error", markup=False)
+                return
             self.base_graph = self.graph
             self.nav.cursor = self.graph.root_id
             self.refresh_canvas()
