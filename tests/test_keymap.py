@@ -51,7 +51,8 @@ SCOPE_OWNER = {
 # only signal was a passing-test count that nothing asserted.  Changing the seat
 # must now be a deliberate edit here.
 EXPECTED_PER_SCOPE = {
-    keymap.SCOPE_HOME: 11,
+    # 11 -> 12: Inc-9c declares `enter` on home (`INC9-UX-F11`).
+    keymap.SCOPE_HOME: 12,
     # 25 -> 29: Inc-3 adds the four US-N06 pan chords `H` `J` `K` `L` to the
     # `view` group.  Updated deliberately, in the same edit as the seat rows.
     # 29 -> 31: Inc-4b's `#D5b` adds `N` (`prev_hit`, `nav`) and `M`

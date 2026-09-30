@@ -559,8 +559,10 @@ async def test_inc9b_the_coverage_and_editor_titles_are_english_and_state_free()
 # C-D25a / C-D25b -- Inc-9's own seat diff against the batch state it entered
 
 ENTRY_SHA = "6fe35f5"
-#: The rows Inc-9 declares: `#D9`'s migration of the two last help screens.
+#: The rows the seat gained since `ENTRY_SHA`: Inc-9's `#D9` migration of the two
+#: last help screens, and Inc-9c's `home enter` (`INC9-UX-F11`).
 DECLARED_ADDED = frozenset({
+    ("home", "enter", "open_selected"),
     ("factory", "j", "next_sibling"), ("factory", "k", "prev_sibling"),
     ("factory", "h", "parent"), ("factory", "l", "child"),
     ("factory", "0", "start_node"), ("factory", "d", "edit_doc"),

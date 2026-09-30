@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
+from textual.containers import VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Static
 
@@ -21,6 +21,11 @@ from mapper.widgets.components import (
     DsSwitch,
     DsTextField,
 )
+
+
+class _Grid(VerticalScroll, can_focus=False):
+    """The sheet's rows, scrolling (`INC9-UX-F3`): nine rows of four lines outgrow a
+    34-row terminal.  The container is not itself a tab stop -- the components are."""
 
 
 class _StateRow(Static):
@@ -43,9 +48,6 @@ class _StateRow(Static):
         yield self.default
         yield self.focused
         yield self.inert
-
-    def on_mount(self) -> None:
-        self.focused.focus()
 
 
 class SettingsScreen(Screen):
@@ -73,7 +75,7 @@ class SettingsScreen(Screen):
         yield TabStrip("s", crumb=["components"])
         yield Static("component         default          focused          disabled",
                      id="settings-header")
-        with Vertical(id="settings-grid"):
+        with _Grid(id="settings-grid"):
             yield _StateRow("switch", lambda: DsSwitch(True))
             yield _StateRow("stepper", lambda: DsStepper(3, min_value=0, max_value=9))
             yield _StateRow("slider", lambda: DsSlider(0.55))
@@ -87,6 +89,11 @@ class SettingsScreen(Screen):
         from mapper.app import keybar_groups
 
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
+
+    def on_mount(self) -> None:
+        # Each row used to focus its own `focused` cell on mount, so the LAST row
+        # won -- the tag chip, below the fold.  Focus starts on the first.
+        self.call_after_refresh(lambda: self.query(_StateRow).first().focused.focus())
 
     def action_home(self) -> None:
         self.app.pop_screen()
