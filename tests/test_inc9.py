@@ -533,6 +533,17 @@ def test_cd25a_the_seat_diff_is_exactly_what_inc9_declares():
     assert moved == DECLARED_REGROUPED, moved
 
 
+@pytest.mark.parametrize("scope", sorted(set(keymap.GROUP_SCOPE.values()) - {keymap.SCOPE_APP}
+                                           - set(keymap.MODAL_SCOPES)))
+def test_inc9_f6_the_app_group_closes_every_generated_key_bar(scope):
+    """`INC9-F6`: the renders showed the factory and settings bars LEADING
+    with `app`, because their groups were declared after it."""
+    from mapper.app import keybar_groups
+
+    groups = keybar_groups(scope)
+    assert groups[-1] == "app" and groups.count("app") == 1, groups
+
+
 def test_cd25b_no_chord_collides_on_entry_or_on_exit():
     entry = _entry_seat()
     assert entry.duplicate_chords() == []
