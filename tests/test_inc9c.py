@@ -45,7 +45,7 @@ from tests.test_no_operator_paths import USER_PROFILE_PATH
 from tests.test_repair_layout import _frame_rows, _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"wording", "hints", "ux"}
+OPEN_STEPS: set[str] = {"hints", "ux"}
 
 
 def red(step: str):
@@ -399,7 +399,7 @@ async def test_inc9c_k1_home_door_list_reads_browse_and_build(tmp_path):
 # ---------------------------------------------------------------------------
 # INC9-UX-F4 -- the home door list and the home key bar read the seat
 
-@red("wording")
+@red("ux")
 async def test_inc9c_ux_f4_home_reads_its_labels_from_the_seat(tmp_path):
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
@@ -701,7 +701,7 @@ _HAND_WRITTEN_BARS = {"HomeScreen", "RepoScreen"}
 
 
 @pytest.mark.parametrize("name", [
-    pytest.param(n, marks=[red("ux")] if n in _HAND_WRITTEN_BARS and "ux" in OPEN_STEPS else [])
+    pytest.param(n, marks=[red("wording")] if n in _HAND_WRITTEN_BARS and "wording" in OPEN_STEPS else [])
     for n in sorted(set(HELP_SCREENS) - {"MapScreen"})])
 async def test_inc9c_the_key_bar_and_the_legend_name_every_group_alike(tmp_path, monkeypatch, name):
     from mapper.app import GitHubConnector

@@ -340,12 +340,13 @@ def test_llr_n06_2_5_the_coercion_predicate_discriminates():
 #: a deliberate edit in the commit that paints it.
 CHROME_LEXICON = frozenset("""
     add all app archive attachment back bottom branch browse build card child choose
-    close command component connect coverage csv default details diff disabled document
-    documents doors down edit export factory file focus focused fold from generate go
-    help hide home import last leave legend list map maps match mind missing nav new next node
-    office open outline page palette pan parent plug previous quit rail remove repo
-    repository resume right left run save scroll search settings show sibling start svg
-    template to toggle top tree undo up view
+    close command component components connect coverage csv default details diff disabled
+    document documents doors down edit exit export factory file focus focused fold from
+    generate global go help hide home import incomplete keys last leave legend list map
+    maps match mind missing move nav new next node office open outline page palette pan
+    parent plug previous quit rail remove repo report repository resume right left run
+    save scroll search settings show sibling start svg template to toggle top tree undo
+    unfold up view
 """.split())
 
 #: Screen headers allowed to stay non-English, owned by the increment that
@@ -568,7 +569,7 @@ DECLARED_ADDED = frozenset({
     ("settings", "q", "home"), ("settings", "escape", "home"),
 })
 #: Group headers renamed to English (`A-112` st. 2); no key changes scope.
-DECLARED_REGROUPED = frozenset({("lista", "list"), ("salir", "leave")})
+DECLARED_REGROUPED = frozenset({("lista", "list"), ("lista", "exit"), ("salir", "leave")})
 
 
 def _entry_seat():

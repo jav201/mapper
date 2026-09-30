@@ -137,7 +137,7 @@ def tab_strip(active: str, crumb: list[str] | None = None, width: int = 0) -> Te
     # `A-112` st. 4-5: English, one word per screen -- the door's label.
     tabs: list[tuple[str, str]] = [
         ("c", "browse"),
-        ("p", "repo"),
+        ("p", "connect repo"),
         ("n", "build"),
         ("f", "factory"),
     ]
@@ -297,7 +297,7 @@ def group_box(renderable, pad_x: int = 1) -> Panel:
 # Keybar -------------------------------------------------------------------
 #: The keybar's truncation word after the help glyph (`A-112` st. 3): the
 #: marker's width and its paint read this one spelling.
-KEYBAR_MORE = "all"
+KEYBAR_MORE = "all keys"
 
 
 def keybar(

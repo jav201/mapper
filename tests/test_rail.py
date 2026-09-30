@@ -182,13 +182,19 @@ def test_at_n03e_keybar_truncation_names_what_is_hidden():
 
     narrow = darkside.keybar(groups, width=40)
     assert narrow.cell_len <= 40, "the bar must fit the width it was given"
-    # `A-112` st. 3: the marker's word is read from its one spelling.
-    assert "?" in narrow.plain and darkside.KEYBAR_MORE in narrow.plain
+    # `INC9-CR-F5`: the old pin (`KEYBAR_MORE in narrow.plain`) passed on an empty
+    # string.  The word is non-empty and the tail is EXACT (`K1`: `? all keys`).
+    assert darkside.KEYBAR_MORE.strip()
+    assert narrow.plain.endswith("  ? all keys"), narrow.plain
+    assert narrow.plain.endswith(f"  ? {darkside.KEYBAR_MORE}")
 
     # The count must be REAL: hidden + shown == total.
     marker = narrow.plain.split("… +")[1]
     hidden = int(marker.split()[0])
-    shown = sum(1 for _, bindings in groups for key, _ in bindings if f"{key} " in narrow.plain)
+    # Counted in the bar's body only: the marker's own words (`all keys`) contain
+    # `l ` and would be taken for the `l` key (`INC9C`: the word is a hidden input).
+    body = narrow.plain.split("… +")[0]
+    shown = sum(1 for _, bindings in groups for key, _ in bindings if f"{key} " in body)
     assert hidden > 0
     assert hidden + shown == total, f"marker claims {hidden} hidden, but {shown} of {total} shown"
 

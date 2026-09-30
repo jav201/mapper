@@ -48,14 +48,18 @@ UNMIGRATED_SCREENS = (
 # seat yet.  `tab` belongs to focus traversal: a screen-level `tab` binding was
 # measured to produce 0 focus moves in 9 presses (LLR-N06.5).  `SettingsScreen`
 # left at Inc-9: `C-D9a`'s probe, with a working positive control, measured the
-# drop neutral (`tests/test_inc9.py`).
+# pre-drop bindings HOLDING focus on one target for all 9 presses, against 8
+# transitions once they were gone.  The drop was a REPAIR, not a neutral edit
+# (`tests/test_inc9.py`, `INC9-CR-F3`).
 TAB_BINDING_EXCEPTIONS = ("EditorScreen",)
 
 # Every group maps to exactly one scope.  Written down because Inc-1 generates
-# `BINDINGS` from it: an undeclared group is a key nobody owns.
+# `BINDINGS` from it: an undeclared group is a key nobody owns.  The order is the
+# key bar's order (`bar_group_order`), and the legend paints the same order.
 GROUP_SCOPE: dict[str, str] = {
-    "doors": SCOPE_HOME,
     "list": SCOPE_HOME,
+    "doors": SCOPE_HOME,
+    "exit": SCOPE_HOME,
     "nav": SCOPE_MAP,
     "node": SCOPE_MAP,
     "view": SCOPE_MAP,
@@ -73,6 +77,42 @@ GROUP_SCOPE: dict[str, str] = {
     "help": SCOPE_HELP,
     "app": SCOPE_APP,
 }
+
+# What each group is CALLED where the operator reads it: the key bar, the legend
+# and the palette (`K1`, `K4`).  The group id above is the seat's own handle and
+# names exactly one scope; the header is prose and two scopes may share one word
+# (`nav` on the map and `tree` in the factory are both `move`).
+GROUP_HEADER: dict[str, str] = {
+    "list": "maps",
+    "doors": "open",
+    "exit": "exit",
+    "nav": "move",
+    "node": "node",
+    "view": "view",
+    "leave": "leave",
+    "repo": "repo",
+    "plug": "connect repo",
+    "import": "import",
+    "tree": "move",
+    "document": "document",
+    "factory": "factory",
+    "settings": "components",
+    "palette": "palette",
+    "help": "help",
+    "app": "global",
+}
+
+
+def group_header(group: str) -> str:
+    """The header painted for *group* (key bar, legend, palette)."""
+    return GROUP_HEADER[group]
+
+
+def bar_group_order(scope: str) -> list[str]:
+    """The group ids a *scope* paints, in the key bar's order: the scope's own
+    groups in `GROUP_SCOPE` order, then the app-wide group that closes every bar.
+    The legend reads this too (`INC9-UX-F10`), so the two cannot disagree."""
+    return [g for g, s in GROUP_SCOPE.items() if s in (scope, SCOPE_APP)]
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,10 +142,11 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("i", "i", "import_csv", "import csv", "doors"),
     KeyBinding("f", "f", "factory", "factory", "doors"),
     KeyBinding("r", "r", "resume", "resume last", "doors"),
-    KeyBinding("s", "s", "settings", "settings", "doors"),
-    KeyBinding("j", "j", "table_down", "down", "list"),
-    KeyBinding("k", "k", "table_up", "up", "list"),
-    KeyBinding("q", "q", "quit", "quit", "list"),
+    KeyBinding("s", "s", "settings", "components", "doors"),
+    KeyBinding("j", "j", "table_down", "next map", "list"),
+    KeyBinding("k", "k", "table_up", "previous map", "list"),
+    # Not a list action: it leaves the application.
+    KeyBinding("q", "q", "quit", "quit", "exit"),
     # -- map · navigation ---------------------------------------------------
     KeyBinding("j", "j", "next_sibling", "next sibling", "nav"),
     KeyBinding("k", "k", "prev_sibling", "previous sibling", "nav"),
@@ -130,21 +171,21 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("A", "A", "add_attachment", "add attachment", "node"),
     KeyBinding("X", "X", "remove_attachment", "remove attachment", "node"),
     # -- map · view ---------------------------------------------------------
-    KeyBinding("f", "f", "toggle_focus", "toggle focus", "view"),
+    KeyBinding("f", "f", "toggle_focus", "focus branch", "view"),
     KeyBinding("o", "o", "toggle_outline", "toggle outline", "view"),
     KeyBinding("r", "r", "toggle_radial", "toggle mind map", "view"),
     KeyBinding("e", "e", "export_svg", "export svg", "view"),
-    KeyBinding("equals_sign", "=", "toggle_diff", "toggle diff", "view"),
-    KeyBinding("m", "m", "coverage", "coverage", "view"),
+    KeyBinding("equals_sign", "=", "toggle_diff", "show/hide diff", "view"),
+    KeyBinding("m", "m", "coverage", "coverage report", "view"),
     # Relocated from `n` by `#D5b`.  Uppercase because the shifted-pair
     # precedent is already in this seat (`A`/`X` beside `a`/`x`, `HJKL` beside
     # `hjkl`) and `M` was free: of the uppercase letters only `A`, `H`, `I`,
     # `J`, `K`, `L`, `R` and `X` were taken before this row.
-    KeyBinding("M", "M", "next_gap", "next missing", "view"),
+    KeyBinding("M", "M", "next_gap", "next incomplete", "view"),
     KeyBinding("R", "R", "toggle_rail", "show/hide rail", "view"),
     KeyBinding("I", "I", "toggle_inspector", "show/hide card", "view"),
     KeyBinding("g", "g", "focus_rail", "go to rail", "view"),
-    KeyBinding("z", "z", "collapse_branch", "fold branch", "view"),
+    KeyBinding("z", "z", "collapse_branch", "fold/unfold", "view"),
     # US-N06 pan.  `hjkl` already navigates the tree in this scope and `⇧hjkl`
     # moves the window over it — the shifted-pair precedent is already in the
     # seat (`A`/`X` beside `a`/`x`).  Executed at `ea1fbf9` and re-derived at
@@ -158,9 +199,10 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("q", "q", "home", "home", "leave"),
     KeyBinding("escape", "esc", "back_or_home", "back", "leave"),
     # -- repo ---------------------------------------------------------------
-    KeyBinding("j", "j", "next_sibling", "next sibling", "repo", priority=True),
-    KeyBinding("k", "k", "prev_sibling", "previous sibling", "repo", priority=True),
-    KeyBinding("q", "q", "home", "home", "repo", priority=True),
+    KeyBinding("j", "j", "next_sibling", "next branch", "repo", priority=True),
+    KeyBinding("k", "k", "prev_sibling", "previous branch", "repo", priority=True),
+    # It lands on the connect-repo screen, not home.
+    KeyBinding("q", "q", "home", "back", "repo", priority=True),
     # -- plug repo ----------------------------------------------------------
     # `escape` stays priority here: the screen's only widget is a text input the
     # operator must be able to abandon mid-typing.
@@ -192,7 +234,7 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("k", "k", "prev_sibling", "previous sibling", "tree", priority=True),
     KeyBinding("h", "h", "parent", "parent", "tree", priority=True),
     KeyBinding("l", "l", "child", "child", "tree", priority=True),
-    KeyBinding("0", "0", "start_node", "start node", "tree", priority=True),
+    KeyBinding("0", "0", "start_node", "back to start", "tree", priority=True),
     KeyBinding("d", "d", "edit_doc", "edit document", "document", priority=True),
     KeyBinding("i", "i", "import_office", "import office file", "document", priority=True),
     KeyBinding("g", "g", "generate_office", "generate office file", "document", priority=True),
@@ -204,7 +246,7 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("q", "q", "home", "back", "settings", priority=True),
     KeyBinding("escape", "esc", "home", "back", "settings", priority=True),
     # -- app (available on every screen) ------------------------------------
-    KeyBinding("ctrl+p", "ctrl+p", "palette", "command palette", "app"),
+    KeyBinding("ctrl+p", "ctrl+p", "palette", "palette", "app"),
     KeyBinding("question_mark", "?", "help", "legend", "app"),
 ]
 
@@ -249,7 +291,8 @@ def groups_for_keybar(
 ) -> list[tuple[str, list[tuple[str, str]]]]:
     """Return keybindings grouped for `darkside.keybar`.
 
-    Each tuple is (group_name, [(glyph, label), ...]) in the requested order.
+    Each tuple is (header, [(glyph, label), ...]) in the requested order, the
+    header being what the operator reads (`group_header`), not the group id.
     The keybar shows the *glyph*, never the Textual key name — nobody presses a
     key called "question_mark".
     """
@@ -260,7 +303,7 @@ def groups_for_keybar(
         group_bindings.setdefault(binding.group, []).append(
             (binding.glyph, binding.label)
         )
-    return [(name, group_bindings.get(name, [])) for name in active_groups]
+    return [(group_header(name), group_bindings.get(name, [])) for name in active_groups]
 
 
 def palette_items(query: str, scope: str = SCOPE_APP) -> list[KeyBinding]:

@@ -16,7 +16,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Static
 
 from mapper import darkside
-from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, textual_bindings
+from mapper.keymap import SCOPE_APP, SCOPE_HELP, bindings_for, group_header, textual_bindings
 
 # The legend panel's two widths (Inc-8 verdicts `D4` and `E1`): a centred
 # modal, and -- while the view keeps its minimum beside it (`F9`, `docks`) --
@@ -86,9 +86,10 @@ ADJACENT_ROWS = frozenset({"V27", "V28"})
 # Verdict `E3` ratified the group and its title (`A5`) and compressed it to two
 # lines.  Its words are the legend's own English copy, one word per ACTION,
 # the key glyphs read from the seat: `esc q close · ↑ ↓ scroll` /
-# `pageup pagedown page · home end ends`.  Since round 3 it is the ONE place
-# the close hint is painted; the title no longer repeats it.  The seat's own labels stay as they
-# are until Inc-9 (key labels are Inc-9's), which is why the words live here.
+# `pageup pagedown page · home end top/bottom`.  Since round 3 it is the ONE place
+# the close hint is painted; the title no longer repeats it.  The seat's labels are
+# English since Inc-9 (`A-112`) but name the ACTION per key (`to top`, `to bottom`),
+# while this line names a PAIR of keys with one word, which is why the words live here.
 # `01b` §3.6 lists them, and an arm pins that every `SCOPE_HELP` action has one.
 LEGEND_OWN_SCOPE_GROUP = "in this legend"
 LEGEND_OWN_SCOPE_FIRST = True
@@ -96,7 +97,7 @@ OWN_SCOPE_COPY: tuple[tuple[tuple[str, ...], str], ...] = (
     (("dismiss_none",), "close"),
     (("legend_up", "legend_down"), "scroll"),
     (("legend_page_up", "legend_page_down"), "page"),
-    (("legend_home", "legend_end"), "ends"),
+    (("legend_home", "legend_end"), "top/bottom"),
 )
 OWN_SCOPE_ITEMS_PER_LINE = 2
 _ITEM_SEP = " · "
@@ -427,7 +428,7 @@ class HelpScreen(ModalScreen[None]):
         for group, bindings in groupby(
             sorted(entries, key=lambda b: b.group), key=lambda b: b.group
         ):
-            self._append_key_group(parts, group, list(bindings), label_cells)
+            self._append_key_group(parts, group_header(group), list(bindings), label_cells)
         return _trimmed(Text.assemble(*parts))
 
     def _render_own_scope_keys(self) -> Text:
@@ -444,16 +445,31 @@ class HelpScreen(ModalScreen[None]):
         budget = self.row_cells - len(_INDENT)
         parts: list[tuple[str, str]] = [
             (darkside.fit(LEGEND_OWN_SCOPE_GROUP, self.row_cells).rstrip(), darkside.ASH)]
-        for start in range(0, len(items), OWN_SCOPE_ITEMS_PER_LINE):
+
+        def run(line_items) -> list[tuple[str, str]]:
             pieces: list[tuple[str, str]] = []
-            for glyphs, word in items[start:start + OWN_SCOPE_ITEMS_PER_LINE]:
+            for glyphs, word in line_items:
                 if pieces:
                     pieces.append((_ITEM_SEP, darkside.ASH))
                 for i, glyph in enumerate(glyphs):
                     pieces.append(((" " if i else "") + glyph, darkside.ACCENT))
                 pieces.append((" " + word, darkside.INK))
+            return pieces
+
+        # Up to `OWN_SCOPE_ITEMS_PER_LINE` items a line, but only while the line
+        # FITS its layout's budget: a word is a hidden input to that band
+        # (`INC9B-F1`).  `top/bottom` made the docked pair 42 cells against a
+        # 37-cell row, and `_bounded_run` then cut it -- two keys silently gone.
+        lines: list[list] = []
+        for item in items:
+            if lines and len(lines[-1]) < OWN_SCOPE_ITEMS_PER_LINE and sum(
+                    _cells(text) for text, _ in run([*lines[-1], item])) <= budget:
+                lines[-1].append(item)
+            else:
+                lines.append([item])
+        for line_items in lines:
             parts.append(("\n" + _INDENT, ""))
-            parts.extend(_bounded_run(pieces, budget))
+            parts.extend(_bounded_run(run(line_items), budget))
         return Text.assemble(*parts)
 
     def _render_vocabulary(self, members: list[tuple[str, str, str, str]]) -> Text:

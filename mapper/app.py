@@ -25,7 +25,6 @@ from .export import ExportError, ExportTooLarge, save_svg
 from .github import GitHubConnector, GitHubError
 from .import_csv import preview_csv
 from .keymap import (
-    GROUP_SCOPE,
     SCOPE_APP,
     SCOPE_HOME,
     SCOPE_IMPORT,
@@ -33,6 +32,7 @@ from .keymap import (
     SCOPE_PLUG,
     SCOPE_REPO,
     KeyBinding,
+    bar_group_order,
     bindings_for,
     groups_for_keybar,
     textual_bindings,
@@ -180,7 +180,7 @@ def keybar_groups(scope: str) -> list[str]:
     Derived rather than hand-listed: a second list naming the map's groups would
     be exactly the drift the seat exists to prevent.
     """
-    return [g for g, s in GROUP_SCOPE.items() if s in (scope, SCOPE_APP)]
+    return bar_group_order(scope)
 
 
 def _save_or_toast(screen: Screen, store: "MapStore", map_id: str, graph: Graph) -> bool:
@@ -538,10 +538,11 @@ class HomeScreen(Screen):
         yield HintLine("elige una puerta para empezar")
         yield KeyBar(
             [
-                ("nav", [("j/k", "choose"), ("↵", "open"), ("r", "resume")]),
-                ("doors", [("c", "browse"), ("p", "repo"), ("n", "build"),
-                           ("t", "template"), ("i", "import csv"), ("f", "factory")]),
-                ("app", [("s", "settings"), ("ctrl+p", "palette"), ("?", "legend"), ("q", "quit")]),
+                ("maps", [("j/k", "next/previous map"), ("↵", "open"), ("r", "resume")]),
+                ("open", [("c", "browse"), ("p", "connect repo"), ("n", "build"),
+                          ("t", "template"), ("i", "import csv"), ("f", "factory")]),
+                ("global", [("s", "components"), ("ctrl+p", "palette"), ("?", "legend"),
+                            ("q", "quit")]),
             ]
         )
 
@@ -841,22 +842,22 @@ class HomeScreen(Screen):
     def _empty_text(self) -> Text:
         lines: list[tuple[str, str]] = [
             ("c", darkside.ACCENT),
-            (" consult  ", darkside.INK),
+            (" browse       ", darkside.INK),
             ("abre un mapa reciente\n", darkside.MUT),
             ("p", darkside.ACCENT),
-            (" repo     ", darkside.INK),
+            (" connect repo ", darkside.INK),
             ("conecta un repositorio\n", darkside.MUT),
             ("n", darkside.ACCENT),
-            (" construct", darkside.INK),
+            (" build        ", darkside.INK),
             ("crea un nuevo mapa\n", darkside.MUT),
             ("t", darkside.ACCENT),
-            (" template ", darkside.INK),
+            (" template     ", darkside.INK),
             ("mapa desde plantilla\n", darkside.MUT),
             ("i", darkside.ACCENT),
-            (" import   ", darkside.INK),
+            (" import       ", darkside.INK),
             ("CSV / TSV de nodos\n", darkside.MUT),
             ("f", darkside.ACCENT),
-            (" factory  ", darkside.INK),
+            (" factory      ", darkside.INK),
             ("documentos de proceso\n", darkside.MUT),
         ]
         return Text.assemble(*lines)
@@ -1054,12 +1055,14 @@ class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
     KEY_SCOPE = SCOPE_PLUG
+    # `K4`: the legend's title reads the SCREEN's name, not the scope id.
+    legend_view = "connect repo"
     BINDINGS = screen_bindings(SCOPE_PLUG)
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=["connect repo"])
         yield Vertical(
-            Label("connect repository", id="repo-title"),
+            Label("connect repo", id="repo-title"),
             Input(placeholder="owner/name o URL de github", id="repo-input"),
             id="repo-dialog",
         )
@@ -1130,8 +1133,8 @@ class RepoScreen(Screen):
             yield Static(self._render_table(), id="repo-table", expand=True)
         yield KeyBar(
             [
-                ("nav", [("j/k", "next/previous"), ("↵", "details")]),
-                ("app", [("ctrl+p", "palette"), ("?", "legend"), ("q", "home")]),
+                ("repo", [("j/k", "next/previous branch"), ("↵", "details")]),
+                ("global", [("ctrl+p", "palette"), ("?", "legend"), ("q", "back")]),
             ]
         )
 

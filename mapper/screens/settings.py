@@ -55,6 +55,8 @@ class SettingsScreen(Screen):
     # Textual's own traversal (`C-D9a`); `palette` and `help` dispatch to the
     # App, which opens both on THIS scope (B-18).
     KEY_SCOPE = SCOPE_SETTINGS
+    # `K2`: the screen is `components` on every surface -- this is the legend's title.
+    legend_view = "components"
     BINDINGS = [
         Binding(key, action, label, priority=priority)
         for key, action, label, priority in textual_bindings(SCOPE_SETTINGS)
@@ -67,7 +69,8 @@ class SettingsScreen(Screen):
     """
 
     def compose(self) -> ComposeResult:
-        yield TabStrip("c", crumb=["settings"])
+        # `K2`: no tab is active here -- the sheet is none of the four doors.
+        yield TabStrip("s", crumb=["components"])
         yield Static("component         default          focused          disabled",
                      id="settings-header")
         with Vertical(id="settings-grid"):

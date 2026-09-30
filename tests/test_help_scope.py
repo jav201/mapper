@@ -631,13 +631,45 @@ def test_inc8_sec_f3_a_wide_close_key_cannot_blow_the_row_budget(monkeypatch, do
 
 @pytest.mark.parametrize("docked", [False, True], ids=["modal", "docked"])
 def test_inc8_p2_cr_f2_the_own_scope_group_is_its_title_and_two_lines(docked):
-    """`INC8-P2-CR-F2` / verdict `E3`: the group compresses to exactly its
-    title plus two lines, in both layouts -- no more, no fewer."""
+    """`INC8-P2-CR-F2` / verdict `E3`: the group compresses to its title plus the
+    FEWEST lines its four items need -- two in the modal, where they always fit.
+
+    Re-derived at Inc-9c (`INC9B-F1`: a label's width is a hidden input to a
+    layout band).  The operator's `home end top/bottom` (K1) makes the second
+    pair 42 cells against the docked row's 37, so the docked panel needs a third
+    line; the old "exactly two, in both layouts" was the band of the old word.
+    The expectation is derived from the grid, not written: the minimal number of
+    lines that hold the items in `01b`'s order, at most `OWN_SCOPE_ITEMS_PER_LINE`
+    to a line, each line within the row budget -- computed here independently of
+    the renderer's own packing."""
     screen = HelpScreen(SCOPE_MAP, view="atlas")
     screen.docked = docked
     lines = screen._render_own_scope_keys().plain.split("\n")  # noqa: SLF001
-    assert len(lines) == 3, lines
     assert lines[0] == help_screen.LEGEND_OWN_SCOPE_GROUP, lines[0]
+
+    seat = bindings_for(SCOPE_HELP)
+    widths = []
+    for actions, word in help_screen.OWN_SCOPE_COPY:
+        glyphs = [b.glyph for b in seat if b.action in actions]
+        widths.append(len(" ".join(glyphs)) + 1 + len(word))
+    budget = screen.row_cells - len(help_screen._INDENT)  # noqa: SLF001
+    sep = len(help_screen._ITEM_SEP)  # noqa: SLF001
+    fewest = None
+    for split in range(1 << (len(widths) - 1)):
+        groups, cur = [], [widths[0]]
+        for i, w in enumerate(widths[1:]):
+            if split >> i & 1:
+                groups.append(cur)
+                cur = [w]
+            else:
+                cur.append(w)
+        groups.append(cur)
+        if all(len(g) <= help_screen.OWN_SCOPE_ITEMS_PER_LINE
+               and sum(g) + sep * (len(g) - 1) <= budget for g in groups):
+            fewest = len(groups) if fewest is None else min(fewest, len(groups))
+    assert fewest is not None, (widths, budget)
+    assert len(lines) - 1 == fewest, (docked, widths, budget, lines)
+    assert fewest == (3 if docked else 2), (docked, fewest)
 
 
 def test_inc8_p2_cr_f1_an_invisible_only_parent_is_not_painted_empty():
