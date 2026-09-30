@@ -10279,3 +10279,49 @@ header states its kind as secondary English text, assumption `INC9B-A1`), and st
 - **Numeric.** The legend's own-scope group is its title plus the FEWEST lines its four items need at the layout's row
   budget (2 modal, 3 docked), derived independently in `tests/test_help_scope.py`; the former "exactly two in both
   layouts" was the band of the old word `ends` (`INC9B-F1`).
+
+## Amendment set 20 -- a map id typed by the operator names a file inside the workspace, and creating never overwrites. 2026-09-30. Base `fddd07d`.
+
+### `A-113` -- map-id confinement and create-never-overwrites (`Inc-SEED`)
+
+**Authority.** Finding `INC9BC-UX` section E, `SEED-1` and `SEED-2` (independent UX review of
+`Inc-9b`/`Inc-9c`, reproduced through the real key path from home): `MapStore.create_seed`
+(`mapper/store.py`, created 2026-08-23) (1) replaces an existing map, both its `.mmd` and its
+`_nodos.yml`, with the seed tree, and (2) accepts `../x` and writes `x.mmd` and `x_nodos.yml` one
+directory above the workspace. Both are pre-existing; neither was introduced by this batch.
+
+**Statement.**
+
+1. **Confinement.** A map id names a file INSIDE the workspace. The store refuses, with a
+   `MapStoreError`, an id that is empty, contains a path separator (`/`, `\`), `..`, a drive letter or
+   any `:`, a character invalid in a Windows file name (`< > : " | ? *`, control characters), a
+   reserved Windows device name (`CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, case
+   folded, with or without an extension), or that ends in a dot or a space. The check is ONE
+   `MapStore` method and runs on every read and write of a map id (`save`, `load`), so a typed id, a
+   CSV "save as" name, a template-map name and a file-derived link (`map:` field) are all covered by
+   the same code. The UI also refuses the typed name early, in the construct dialog.
+2. **The toast names the rule, never a path and never the typed text.** Each refusal is a short
+   Spanish sentence stating which rule was broken (copy is translated by `Inc-EN`, `B-71`). No
+   absolute path, no workspace path and no echo of the rejected name reaches the operator.
+3. **Creation never overwrites.** Creating a map (construct, from template, CSV "save as") whose id
+   already has a `.mmd` or a `_nodos.yml` is refused with a toast; nothing on disk changes. A
+   dedicated `MapStore.create` enforces this; `save` stays the overwrite-by-design path for editing
+   an open map.
+
+**Policy choice, recorded.** Two options were open for statement 3: refuse with a toast, or ask for
+confirmation and then overwrite. **Refusal is chosen.** It is simpler (no new modal state, no
+confirmation screen to keep in step across three entry points), it matches this batch's position on
+`B-36`/`B-72` that one keystroke must never overwrite, and it loses nothing: the operator who wants
+the old map replaced can still pick another name. A confirm-then-overwrite gesture can be added later
+as its own decision without touching the store rule.
+
+**Trace.** Standalone, the same way `A-110` and the mutation half of `A-111` are. The nearest
+parent, `HLR-STO.1` (`LLR-STO.1.1`, the load-side scalar ladder), governs what the store does with
+file text, not with operator-typed ids; widening it would stretch its subject. The property is
+closer in kind to `osopen`'s confinement test (`REFUSED_OUTSIDE`) than to any store LLR. Carried by
+`tests/test_seed_safety.py`.
+
+**What is not claimed.** Toast wording stays Spanish (`Inc-EN`). The check-then-write in `create`
+is not atomic against a second process creating the same id between the check and the write; the
+store has a single writer by construction (one TUI, one operator). No change to `save` semantics for
+an existing open map.
