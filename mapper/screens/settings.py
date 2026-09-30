@@ -8,6 +8,7 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from mapper import darkside
+from mapper.keymap import SCOPE_SETTINGS, groups_for_keybar, textual_bindings
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 from mapper.widgets.components import (
     DsChip,
@@ -30,14 +31,18 @@ class _StateRow(Static):
         self.label = label
         self.default = widget_factory()
         self.focused = widget_factory()
-        self.disabled = widget_factory()
-        self.disabled.disabled = True
+        # `A-112` st. 8: NOT `self.disabled` -- that is Textual's own
+        # `Widget.disabled`, and a widget object there is truthy, which
+        # disabled this row and every component in it: the sheet had no focus
+        # chain at all, so `tab` could never move focus.
+        self.inert = widget_factory()
+        self.inert.disabled = True
 
     def compose(self) -> ComposeResult:
         yield Static(self.label, classes="settings-label")
         yield self.default
         yield self.focused
-        yield self.disabled
+        yield self.inert
 
     def on_mount(self) -> None:
         self.focused.focus()
@@ -46,13 +51,13 @@ class _StateRow(Static):
 class SettingsScreen(Screen):
     """Canary screen: every darkside component in its three states."""
 
+    # LLR-N16.1.2 / `#D9`: generated from the seat.  `tab`/`shift+tab` are
+    # Textual's own traversal (`C-D9a`); `palette` and `help` dispatch to the
+    # App, which opens both on THIS scope (B-18).
+    KEY_SCOPE = SCOPE_SETTINGS
     BINDINGS = [
-        Binding("q", "home", "Salir", priority=True),
-        Binding("escape", "home", "Salir", priority=True),
-        Binding("tab", "focus_next", "Siguiente", priority=True),
-        Binding("shift+tab", "focus_previous", "Anterior", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
+        Binding(key, action, label, priority=priority)
+        for key, action, label, priority in textual_bindings(SCOPE_SETTINGS)
     ]
 
     CSS = """
@@ -76,20 +81,9 @@ class SettingsScreen(Screen):
             yield _StateRow("pagination", lambda: DsPagination(2, 5))
             yield _StateRow("tag chip", lambda: DsChip(label="legacy"))
         yield HintLine("tab recorre componentes — el foco es el bloque sólido", "tab")
-        yield KeyBar(
-            [
-                ("nav", [("tab", "siguiente"), ("shift+tab", "anterior")]),
-                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q/esc", "salir")]),
-            ]
-        )
+        from mapper.app import keybar_groups
+
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def action_home(self) -> None:
         self.app.pop_screen()
-
-    def action_palette(self) -> None:
-        self.app.action_palette()
-
-    def action_help(self) -> None:
-        from mapper.screens.help import HelpScreen
-
-        self.app.push_screen(HelpScreen())

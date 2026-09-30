@@ -31,22 +31,25 @@ SCOPE_IMPORT = "import"
 SCOPE_PALETTE = "palette"
 SCOPE_HELP = "help"
 SCOPE_APP = "app"
+# LLR-N16.1.2 / `#D9`: the last two screens that bind the help chord.
+SCOPE_FACTORY = "factory"
+SCOPE_SETTINGS = "settings"
 
 # Screens whose bindings are NOT yet in this seat.  This is not decoration: it is
 # the exception list the conformance tests quantify over, so a screen leaving the
 # seat, or a new `tab` binding appearing on one of these, reddens a test instead of
 # passing unnoticed.
 UNMIGRATED_SCREENS = (
-    "FactoryScreen",
     "EditorScreen",
-    "SettingsScreen",
     "CoverageScreen",
 )
 
 # The only screens permitted to bind `tab`, and solely because they are not in the
 # seat yet.  `tab` belongs to focus traversal: a screen-level `tab` binding was
-# measured to produce 0 focus moves in 9 presses (LLR-N06.5).
-TAB_BINDING_EXCEPTIONS = ("SettingsScreen", "EditorScreen")
+# measured to produce 0 focus moves in 9 presses (LLR-N06.5).  `SettingsScreen`
+# left at Inc-9: `C-D9a`'s probe, with a working positive control, measured the
+# drop neutral (`tests/test_inc9.py`).
+TAB_BINDING_EXCEPTIONS = ("EditorScreen",)
 
 # Every group maps to exactly one scope.  Written down because Inc-1 generates
 # `BINDINGS` from it: an undeclared group is a key nobody owns.
@@ -63,6 +66,10 @@ GROUP_SCOPE: dict[str, str] = {
     "palette": SCOPE_PALETTE,
     "help": SCOPE_HELP,
     "app": SCOPE_APP,
+    "tree": SCOPE_FACTORY,
+    "document": SCOPE_FACTORY,
+    "factory": SCOPE_FACTORY,
+    "settings": SCOPE_SETTINGS,
 }
 
 
@@ -176,6 +183,24 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("pagedown", "pagedown", "legend_page_down", "página abajo", "help"),
     KeyBinding("home", "home", "legend_home", "al principio", "help"),
     KeyBinding("end", "end", "legend_end", "al final", "help"),
+    # -- factory (LLR-N16.1.2, `#D9`) ----------------------------------------
+    # Migrated from the screen's own list with `priority` kept: every one of
+    # its bindings was `priority=True`, and the migration changes no dispatch.
+    KeyBinding("j", "j", "next_sibling", "next sibling", "tree", priority=True),
+    KeyBinding("k", "k", "prev_sibling", "previous sibling", "tree", priority=True),
+    KeyBinding("h", "h", "parent", "parent", "tree", priority=True),
+    KeyBinding("l", "l", "child", "child", "tree", priority=True),
+    KeyBinding("0", "0", "start_node", "start node", "tree", priority=True),
+    KeyBinding("d", "d", "edit_doc", "edit document", "document", priority=True),
+    KeyBinding("i", "i", "import_office", "import office file", "document", priority=True),
+    KeyBinding("g", "g", "generate_office", "generate office file", "document", priority=True),
+    KeyBinding("q", "q", "home", "back", "factory", priority=True),
+    KeyBinding("escape", "esc", "home", "back", "factory", priority=True),
+    # -- settings (LLR-N16.1.2, `#D9`) ---------------------------------------
+    # No `tab`/`shift+tab` rows: the screen only re-declared Textual's own
+    # traversal, and `C-D9a` measured dropping them neutral.
+    KeyBinding("q", "q", "home", "back", "settings", priority=True),
+    KeyBinding("escape", "esc", "home", "back", "settings", priority=True),
     # -- app (available on every screen) ------------------------------------
     KeyBinding("ctrl+p", "ctrl+p", "palette", "paleta de acciones", "app"),
     KeyBinding("question_mark", "?", "help", "ayuda", "app"),

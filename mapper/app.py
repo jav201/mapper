@@ -1038,9 +1038,6 @@ class _ImportPreviewScreen(Screen):
     def action_palette(self) -> None:
         self.app.action_palette()
 
-    def action_help(self) -> None:
-        self.app.push_screen(HelpScreen())
-
 
 class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
@@ -1088,9 +1085,6 @@ class PlugRepoScreen(Screen):
 
     def action_palette(self) -> None:
         self.app.action_palette()
-
-    def action_help(self) -> None:
-        self.app.push_screen(HelpScreen())
 
 
 class RepoScreen(Screen):
@@ -1353,9 +1347,6 @@ class RepoScreen(Screen):
 
     def action_palette(self) -> None:
         self.app.action_palette()
-
-    def action_help(self) -> None:
-        self.app.push_screen(HelpScreen())
 
 
 class MapScreen(Screen):

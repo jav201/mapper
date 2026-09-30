@@ -89,7 +89,6 @@ def test_llr_n16_1_1_an_emptied_derivation_turns_red():
 # ---------------------------------------------------------------------------
 # LLR-N16.1.2 -- every help screen declares a scope the seat really offers
 
-@pytest.mark.xfail(strict=True, reason="RED until Inc-9 declares SCOPE_FACTORY/SCOPE_SETTINGS")
 def test_llr_n16_1_2_every_help_screen_declares_a_scope():
     declared = set(keymap.GROUP_SCOPE.values())
     undeclared = sorted(name for name, cls in HELP_SCREENS.items()
@@ -100,7 +99,6 @@ def test_llr_n16_1_2_every_help_screen_declares_a_scope():
     assert thin == {}, f"a declared scope the seat leaves (nearly) empty: {thin}"
 
 
-@pytest.mark.xfail(strict=True, reason="RED until Inc-9 migrates both screens (C-D9b)")
 def test_cd9b_unmigrated_screens_shrinks_to_the_two_left():
     assert keymap.UNMIGRATED_SCREENS == ("EditorScreen", "CoverageScreen")
 
@@ -123,9 +121,6 @@ OPENERS = {
     "FactoryScreen": lambda app, cls: cls(_factory_graph(app)),
     "SettingsScreen": lambda app, cls: cls(),
 }
-#: The executed pre-state (M-11): these five open the legend on `app`.
-RED_BEFORE_INC9 = {"_ImportPreviewScreen", "PlugRepoScreen", "RepoScreen",
-                   "FactoryScreen", "SettingsScreen"}
 
 
 def test_every_derived_help_screen_has_an_opener():
@@ -143,14 +138,7 @@ def _key_rows(rows: list[str]) -> set[tuple[str, str]]:
     return out
 
 
-def _route_params():
-    for name in sorted(HELP_SCREENS):
-        marks = [pytest.mark.xfail(strict=True, reason="B-18 / LLR-N16.1.2, RED before Inc-9")] \
-            if name in RED_BEFORE_INC9 else []
-        yield pytest.param(name, marks=marks, id=name)
-
-
-@pytest.mark.parametrize("name", list(_route_params()))
+@pytest.mark.parametrize("name", sorted(HELP_SCREENS))
 async def test_hlr_n16_1_every_help_route_carries_its_scope(tmp_path, monkeypatch, name):
     """Press the real help chord on each derived screen: the legend opens on
     THAT screen's declared scope, its title names the screen's view, and the
@@ -205,7 +193,6 @@ def _help_constructions() -> list[tuple[str, int, ast.Call]]:
     return out
 
 
-@pytest.mark.xfail(strict=True, reason="B-18: five un-scoped HelpScreen() routes before Inc-9")
 def test_b18_no_product_site_constructs_an_unscoped_legend():
     sites = _help_constructions()
     assert sites, "the AST walk found no HelpScreen construction: the probe is broken"
@@ -235,21 +222,26 @@ async def _tab_walk(tmp_path, cls) -> list[int]:
     return walk
 
 
-@pytest.mark.xfail(strict=True, reason="RED: the sheet has no focus chain before Inc-9 (A-112 st. 8)")
-async def test_cd9a_the_probe_sees_a_transition_and_the_drop_is_neutral(tmp_path):
+async def test_cd9a_the_probe_sees_transitions_and_the_drop_restores_traversal(tmp_path):
+    """`C-D9a`, measured rather than assumed.  The PDR's probe saw `None` x 9
+    and could not fail (`A-112` st. 8).  This one walks the sheet's own focus
+    chain: on the shipped screen nine presses make eight transitions, each to
+    the next member -- the POSITIVE control, proof the probe sees a move.  The
+    pre-drop bindings, re-declared on a subclass, leave focus where it is: they
+    did not re-declare traversal, they stopped it (`LLR-N06.5`'s measurement,
+    reproduced).  So the drop is not neutral; it is a repair, and it ships."""
     from mapper.screens.settings import SettingsScreen
 
     class WithScreenTab(SettingsScreen):
-        """The pre-drop bindings, re-declared: the POSITIVE control."""
-        BINDINGS = [Binding("tab", "focus_next", "", priority=True),
-                    Binding("shift+tab", "focus_previous", "", priority=True)]
+        """The pre-drop `tab`/`shift+tab` bindings, verbatim."""
+        BINDINGS = [Binding("tab", "focus_next", "Siguiente", priority=True),
+                    Binding("shift+tab", "focus_previous", "Anterior", priority=True)]
 
-    control = await _tab_walk(tmp_path / "control", WithScreenTab)
     shipped = await _tab_walk(tmp_path / "shipped", SettingsScreen)
-    transitions = sum(a != b for a, b in zip(control, control[1:]))
-    assert -1 not in control and transitions >= 1, (
-        f"the probe cannot see a focus transition, so it cannot judge the drop: {control}")
-    assert shipped == control, f"dropping the screen's tab changed traversal: {shipped} vs {control}"
+    pre_drop = await _tab_walk(tmp_path / "pre_drop", WithScreenTab)
+    assert -1 not in shipped, shipped
+    assert sum(a != b for a, b in zip(shipped, shipped[1:])) == 8, shipped
+    assert len(set(pre_drop)) == 1, f"the pre-drop bindings moved focus after all: {pre_drop}"
     assert "SettingsScreen" not in keymap.TAB_BINDING_EXCEPTIONS
 
 
