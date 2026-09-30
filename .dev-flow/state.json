@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-8 follow-ups, then G6 micro-increment",
-    "next_stage": "Inc-8 CLOSED 2026-09-29 (closing review PASS). Inc-SCRUB landed (A-110). NEXT: Inc-8 follow-ups INC8-FINAL-F1..F6 (small, Sonnet), then the G6 micro-increment (store.py surrogate coercion + 6 guarded saves), then Inc-9 (English key labels, group headers, screen headers; one name per view), then Inc-EN (B-71), then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6.",
+    "next": "Inc-9 reviews",
+    "next_stage": "Inc-9 landed (7e64508..a1d1a32; lane 1369 passed / 0 failed); independent reviews next, then the operator's verdict on the English copy table, then Inc-9b (INC9-F2: map-view and coverage/editor headers, file-cap split), then the G6-SEC-F9 census fix, then Inc-EN (B-71), then whole-branch gates (FLAKE-1 first).",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -908,6 +908,62 @@
         "result": "70 tracked files, 261 occurrences -> '<operator>' (byte-exact substitution); guard tests/test_no_operator_paths.py (hermetic allow-list arm + environment backstop arm) RED 249 lines / 70 files -> GREEN; lane 1295 passed / 0 failed; coordinator re-verified 0 hits in tree and in commit messages",
         "limit": "the username remains in git HISTORY on the public remote (origin, incl. master); removal needs a history rewrite + force push, NOT authorized",
         "closes": "B-22 identity half; B-22 session-UUID half stays open"
+      }
+    },
+    "G6_CLOSED_AND_INC-9_LANDED_2026-09-30": {
+      "date": "2026-09-30",
+      "G6_CLOSED": {
+        "commits": [
+          "1130d4c",
+          "c383d0a",
+          "65621f3",
+          "943e808",
+          "3db2216",
+          "6c205d6",
+          "6fe35f5"
+        ],
+        "requirement": "A-111",
+        "security": "first review BLOCK (G6-SEC-F1/F2/F3/F8 HIGH, F4/F7 MEDIUM, F5/F6 LOW); corrective pass; re-verification PASS -- INC8-P3-SEC-F1 CLOSED; B-67 fully closed",
+        "open": {
+          "G6-SEC-F9": "MEDIUM: the save census matches a receiver named literally 'store'; renaming it to 'db' evades it (demonstrated live). Fix after Inc-9.",
+          "G6-F1": "_pop_snapshot assigns before the guarded save (carry)",
+          "B-73": "torn-write detect-only residual",
+          "lane_anomaly": "the re-verifier saw ~15-20 F in a partial, self-killed run on 6fe35f5 in its own worktree; unattributed. Inc-9's lane on 68e3675 was 0 failed; the whole-branch gate re-runs the lane"
+        }
+      },
+      "INC-9_LANDED": {
+        "commits": [
+          "7e64508",
+          "b998085",
+          "bd1d99c",
+          "6b39b78",
+          "66fae00",
+          "82a231c",
+          "68e3675",
+          "a1d1a32"
+        ],
+        "requirement": "A-112",
+        "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-025-inc9.md",
+        "lane": "1369 passed, 4 xfailed, 20 deselected, 0 failed (implementer, 6 sequential chunks)",
+        "operator_rulings_applied": "view names atlas / outline / mind map / home (ratified 2026-09-29); key labels, group headers, screen headers in English",
+        "closed": [
+          "B-18",
+          "LLR-N16.1.1/.2",
+          "#D10 .factory-tag row",
+          "LLR-N06.2.5 notify census",
+          "INC8-P2-CR-F9"
+        ],
+        "findings": {
+          "INC9-F1": "settings screen had no focus chain (_StateRow shadowed Widget.disabled) -- fixed",
+          "INC9-F2": "file cap: map-view headers + coverage/editor titles split to Inc-9b (strict xfail + stale-guarded register)",
+          "INC9-F3": "plug screen's legend unreachable by keyboard (text field swallows ?)",
+          "INC9-F4": "#D10 register had 6 rows at entry; Inc-3/5/7 rows still in source",
+          "INC9-F5": "census skipped annotated assignment -- fixed",
+          "INC9-F6": "key bars led with app -- fixed",
+          "INC9-F7": "stale comment in help.py",
+          "INC9-F8": "legend titles name scopes (plug) vs door text 'connect repo' -- operator question"
+        },
+        "pending": "operator verdict on the English copy table (record section 'English copy table'); independent reviews"
       }
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
