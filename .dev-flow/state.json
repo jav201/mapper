@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-9d/SEED-2/9e reviews",
-    "next_stage": "Inc-9 line landed through Inc-9e (lane 1558 passed / 0 failed). NEXT: one review round (code, ux, security) over Inc-9d + Inc-SEED-2 + Inc-9e; then Inc-EN (B-71, + INC9E-F2 search hint); then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6. Operator file cap is now 4 source files.",
+    "next": "Inc-9f reviews (code, ux, security) at ce8b240",
+    "next_stage": "Inc-9 line landed through Inc-9f (lane 1610 passed / 0 failed). Round over Inc-9d + Inc-SEED-2 + Inc-9e: all three lenses PASS (VERDICT-inc9 Round 3, M1-M2). NEXT: Inc-9f review round; then Inc-EN (B-71, + INC9E-F2 search hint, INC9D-F3 pan-inert hint); then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6. Operator file cap is 4 source files.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -1081,6 +1081,60 @@
         ]
       },
       "pending_reviews": "Inc-9d, Inc-SEED-2, Inc-9e not yet independently reviewed"
+    },
+    "INC-9f_AND_ROUND_3_2026-09-30": {
+      "date": "2026-09-30",
+      "ROUND_3_REVIEWS": {
+        "scope": "Inc-9d + Inc-SEED-2 + Inc-9e at bd7d673",
+        "code": "PASS (lane 1558/0 uninterrupted; FLAKE-1/2 green)",
+        "security": "PASS (no HIGH/MEDIUM)",
+        "ux": "PASS-WITH-FINDINGS"
+      },
+      "VERDICT": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc9-2026-09-30.md Round 3 (M1, M2 + Inc-9f scope)",
+      "INC-9f": {
+        "commits": [
+          "7834fec",
+          "1127242",
+          "7f37c61",
+          "f405105",
+          "3a7fa8d",
+          "ce8b240"
+        ],
+        "requirement": "A-114",
+        "record": "increment-032-inc9f.md",
+        "lane": "1610 passed / 3 xfailed / 0 failed",
+        "mutants": "30/30 killed",
+        "source_files": "3 (github.py, app.py, screens/palette.py)",
+        "measured_on_base_532d32e": [
+          "gh flag injection reachable from connect-repo entry",
+          "_ensure_cloned --upload-pack executed when called directly",
+          "branch named --output=marker.txt made git log write a file"
+        ],
+        "closed": [
+          "argument injection (--, --end-of-options, refuse leading '-' and 'scheme::')",
+          "R3-CR-F7 bare-mirror reconnect",
+          "R3-SEC-F1 clone timeout + gh stderr",
+          "M2 fixed categories + stage panel",
+          "M1 home hint",
+          "R3-UX-F1/F7 palette",
+          "R3-CR-F1/F2/F3/F5/F6"
+        ],
+        "to_ratify": [
+          "clone timeout 120 s (reads keep 30 s)",
+          "--end-of-options needs git >= 2.24",
+          "failure glyph painted INK not WARN",
+          "'timed out' added to the fixed set"
+        ],
+        "carries": [
+          "non-English git locale -> unknown (LC_ALL=C not set)",
+          "RepoScreen Static(self.repo) parses markup",
+          "fetch timeout on cache hit raises instead of stale mirror",
+          "palette footer does not advertise arrows",
+          "hostile remote creating '--' refs over real fetch unmeasured"
+        ]
+      },
+      "pushed": "bd7d673..ce8b240 to origin/feat/ui-next-batch-02",
+      "pending_reviews": "Inc-9f launched 2026-09-30 (code, ux, security; separate worktrees at ce8b240)"
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
