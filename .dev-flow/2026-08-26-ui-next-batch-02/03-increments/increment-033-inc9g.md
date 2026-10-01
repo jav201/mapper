@@ -105,10 +105,10 @@ toast carries only a fixed category, so `markup=True` would be an equivalent mut
 
 | check | state |
 |---|---|
-| `tests/test_inc9g.py`, default lane | executed: see the lane line below |
+| `tests/test_inc9g.py`, default lane | executed: 71 arms green in the full lane |
 | the one `network`-marked arm (`real_git_two_local_remotes...`), local bare repositories, HOME in a temp dir | executed: green on HEAD, RED on the base |
 | Full lane, first run at `e34e65a`: **1 failed, 1680 passed, 3 xfailed, 21 deselected**, 22:39 | executed. The 1 failure was `test_fold`: my arm file spelled two code points as literals; fixed in the next commit, `test_fold` + `test_no_operator_paths` + `test_inc9g` re-run green (92 passed) |
-| Full lane, final run | LANE_FINAL |
+| Full lane, final run | **1681 passed, 3 xfailed, 21 deselected, 0 failed**, 19:02 (at `4f6b568`; reconciled with 1610: +71 arms in `test_inc9g.py`, the `network` arm deselected) |
 | `ruff check .` against `2d1a1b8`, set difference (line numbers stripped) | executed: new = none, gone = none (the base archive also lists `prototypes/`, which the working tree does not carry; excluded from both sides) |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | not hit |
 
@@ -151,4 +151,4 @@ home hint reads `next ▸ choose a door`. Text frames show layout, not colour; t
 ## Commits
 
 `36c1701` arms (RED) · `4764561` github items · `8d74b73` N1 arms (RED) + 9f seed · `8ad867d` app items ·
-`78459bd` palette · `e34e65a` review items 7-14 · the `test_fold` escape fix · docs commit (this record, `A-115`).
+`78459bd` palette · `e34e65a` review items 7-14 · `28c6c6d` the `test_fold` escape fix · `4f6b568` docs (this record, `A-115`); a last docs commit fills in the final lane line.
