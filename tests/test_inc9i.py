@@ -19,6 +19,7 @@ import pytest
 from textual.widgets import Static
 
 from mapper.app import HomeScreen, MapperApp, RepoScreen
+from mapper import github
 from mapper.github import GitHubConnector, GitHubError, _ensure_cloned, _local_branches, _mirror_dir
 from tests import test_inc9h
 from tests.test_inc9f import (  # noqa: F401
@@ -110,7 +111,8 @@ def test_inc9i_cr_f1_a_cache_the_base_built_with_only_the_dot_git_mirror_accepts
 def test_inc9i_cr_f1_real_git_r_dot_git_then_r_shows_each_repos_own_branches(tmp_path, monkeypatch):
     # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
     # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
-    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
+    real_is_url = github._is_url
+    monkeypatch.setattr("mapper.github._is_url", lambda v: v.startswith("file://") or real_is_url(v))
     def git(cwd, *args):
         return subprocess.run(
             ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
@@ -260,9 +262,12 @@ def test_inc9i_sec_f2_userinfo_in_a_typed_url_is_refused_before_any_process(url,
         GitHubConnector(url, cache_dir=tmp_path / "cache").fetch()
     message = str(caught.value)
     assert run.calls == [], run.calls
-    assert message == "refusing the repository: not a supported URL, owner/name, or local folder", message
-    for typed in ("tok3n", "u:", "example", "@", "o/r"):
+    assert message == (
+        "refusing the repository: use https://host/path, git@host:path, owner/name or a"
+        " local folder"), message
+    for typed in ("tok3n", "u:", "example", "o/r"):
         assert typed not in message, (typed, message)
+    assert message.count("@") == 1, message  # only the sentence's own `git@host:path`
     assert not (tmp_path / "cache").exists(), "no directory was made for a refused URL"
 
 

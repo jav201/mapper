@@ -1171,7 +1171,7 @@ class PlugRepoScreen(Screen):
         # Strip scheme and trailing .git from GitHub URLs.
         lowered = value.lower()
         if lowered.startswith("https://github.com/") or lowered.startswith("http://github.com/"):
-            path = value.split("github.com/", 1)[1]
+            path = value.split("/", 3)[3]  # the check above is case-insensitive, so is this
             path = path.removesuffix(".git")
             return path  # owner/name
         if ":" in value and "git@github.com" in lowered:

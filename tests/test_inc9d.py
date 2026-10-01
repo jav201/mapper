@@ -254,9 +254,12 @@ def test_inc9d_sec_f3_s1_a_token_url_is_refused_with_nothing_leaked(tmp_path, mo
         _ensure_cloned("https://user:s3cr3t-token@example.invalid/owner/widget.git", cache)
     message = str(caught.value)
     assert run.calls == [] and not cache.exists(), (run.calls, cache.exists())
-    assert message == "refusing the repository: not a supported URL, owner/name, or local folder", message
-    for leaked in ("s3cr3t-token", "example.invalid", "widget", "user:", "@"):
+    assert message == (
+        "refusing the repository: use https://host/path, git@host:path, owner/name or a"
+        " local folder"), message
+    for leaked in ("s3cr3t-token", "example.invalid", "widget", "user:"):
         assert leaked not in message, (leaked, message)
+    assert message.count("@") == 1, message  # only the sentence's own `git@host:path`
     assert str(cache) not in message and str(tmp_path) not in message, _redact(message)
     assert not _leaks_the_profile(message), "the message paints the user profile"
 

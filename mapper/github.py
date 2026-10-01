@@ -17,7 +17,7 @@ import subprocess
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from .darkside import plain
 from .model import Edge, Ficha, Graph, Node
@@ -47,7 +47,8 @@ _HOST = r"[A-Za-z0-9][A-Za-z0-9.-]*"
 _SEG = r"[A-Za-z0-9._~-]+"
 _HTTPS_URL = re.compile(rf"https://{_HOST}(?::[0-9]+)?(?P<path>(?:/{_SEG})+/?)")
 _SCP_URL = re.compile(rf"git@{_HOST}:(?P<path>{_SEG}(?:/{_SEG})*/?)")
-_UNSUPPORTED = "refusing the repository: not a supported URL, owner/name, or local folder"
+_UNSUPPORTED = ("refusing the repository: use https://host/path, git@host:path, owner/name "
+                "or a local folder")
 UNRECOGNISED = "(unrecognised URL)"
 
 
@@ -65,17 +66,42 @@ def _is_owner_name(value: str) -> bool:
             and bool(_NAME_RE.fullmatch(parts[1])) and parts[1] not in (".", ".."))
 
 
+def _classify(spec: str) -> str:
+    """`INC9K-CR-F2`: the ONE decision for a typed repo, read by `fetch` and `painted_repo` so
+    what is painted is exactly what `fetch` takes.  Returns "local", "url" or "gh", or raises
+    `GitHubError` with the refusal (nothing is echoed)."""
+    _refuse_unsafe(spec)
+    if _is_local_path(spec):
+        return "local"
+    if _is_url(spec):
+        _repo_name_from_url(spec)
+        return "url"
+    if _is_owner_name(spec):
+        return "gh"
+    raise GitHubError(_UNSUPPORTED)
+
+
 def painted_repo(spec: str) -> str:
-    """`S1` + `R1`: the typed text, only when it is an accepted URL, a valid owner/name or a local
-    directory; any other text (a credential form included) is never painted, whatever it holds."""
-    if _is_url(spec) or _is_owner_name(spec) or _is_local_path(spec):
-        return spec
-    return UNRECOGNISED
+    """`S1` + `R1`: the typed text, only when `fetch` would take it; any other text (a credential
+    form included) is never painted, whatever it holds."""
+    try:
+        _classify(spec)
+    except GitHubError:
+        return UNRECOGNISED
+    return spec
 
 
 def _is_local_path(value: str) -> bool:
-    p = Path(value).expanduser()
-    return p.is_dir() and (p / ".git").is_dir()
+    """Total: no typed text makes it raise.  A text that starts with two slashes (a UNC path or a
+    device path) is never a folder and is refused BEFORE any filesystem call, which on Windows
+    would be an SMB lookup on the UI thread."""
+    if len(value) >= 2 and value[0] in "\\/" and value[1] in "\\/":
+        return False
+    try:
+        p = Path(value).expanduser()
+        return p.is_dir() and (p / ".git").is_dir()
+    except (RuntimeError, OSError, ValueError):
+        return False
 
 
 _SUBPROCESS_TIMEOUT = 30
@@ -457,12 +483,13 @@ class GitHubConnector:
         # `INC9F-SEC-F4`: both segments go into `gh api` paths; `.` and `..` are path
         # steps and `?`, `#`, `%` would add a query or a fragment.  `S1`: `fetch` has refused
         # a malformed spec already, with the one sentence; this is the same check, kept.
+        # `INC9K-SEC-F2`: the names the API returns are data too: each is one encoded segment.
         if not _is_owner_name(self.repo):
             raise GitHubError(_UNSUPPORTED)
         owner, name = self.repo.split("/")
 
         repo_info = self._gh(["repo", "view", self.repo, "--json", "name,defaultBranchRef"])
-        default_branch = repo_info.get("defaultBranchRef", {}).get("name", "main")
+        default_branch = quote(repo_info.get("defaultBranchRef", {}).get("name", "main"), safe="")
 
         branches = self._gh([
             "api", f"repos/{owner}/{name}/branches?per_page=20",
@@ -486,9 +513,10 @@ class GitHubConnector:
 
         for idx, branch in enumerate(branches, 1):
             bname = branch["name"]
+            qname = quote(bname, safe="")
             # ahead/behind against default branch
             comparison = self._gh([
-                "api", f"repos/{owner}/{name}/compare/{default_branch}...{bname}",
+                "api", f"repos/{owner}/{name}/compare/{default_branch}...{qname}",
             ])
             ahead = comparison.get("ahead_by", 0)
             behind = comparison.get("behind_by", 0)
@@ -497,12 +525,12 @@ class GitHubConnector:
             ci = ""
             try:
                 commit = self._gh([
-                    "api", f"repos/{owner}/{name}/commits/{bname}",
+                    "api", f"repos/{owner}/{name}/commits/{qname}",
                 ])
                 sha = commit.get("sha", "")
                 if sha:
                     checks = self._gh([
-                        "api", f"repos/{owner}/{name}/commits/{sha}/check-runs",
+                        "api", f"repos/{owner}/{name}/commits/{quote(sha, safe='')}/check-runs",
                     ])
                     conclusions = [
                         c.get("conclusion", "")
@@ -578,13 +606,11 @@ class GitHubConnector:
         # `INC9G-CR-F7`: a connector that connects twice must not carry the first
         # connect's stale category into the second.
         self.stale = ""
-        _refuse_unsafe(self.repo)
-        if _is_local_path(self.repo):
+        kind = _classify(self.repo)
+        if kind == "local":
             cwd = Path(self.repo).expanduser().resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
-        if _is_url(self.repo):
+        if kind == "url":
             cwd = _ensure_cloned(self.repo, self.cache_dir, on_stale=self._mark_stale)
             return _build_graph_from_git(cwd, _repo_name_from_url(self.repo), progress=progress)
-        if not _is_owner_name(self.repo):
-            raise GitHubError(_UNSUPPORTED)
         return self._fetch_gh(progress=progress)
