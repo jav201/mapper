@@ -92,7 +92,7 @@ occurs exactly once in each. `\n` below marks a line break (the file's own endin
 | `M8` | `SEC-F2` (a token with no password) | `github.py` | `"@" in urlparse(url).netloc` -> `urlparse(url).password is not None` | RED | `sec_f2_userinfo_..._[https://tok3n-x@example.invalid/o/r.git]` |
 | `M9` | `SEC-F2` pin (no false refusal) | `github.py` | `"@" in urlparse(url).netloc` -> `"@" in url` | RED | `sec_f2_a_url_without_userinfo_and_an_scp_style_address_still_connect` |
 
-11 harness runs (8 distinct mutations: `M1`, `M1d`, `M1n` are one mutation against three arm sets), 11 RED, 0 survived, 0 skipped.
+11 harness runs (9 distinct mutations: `M1`, `M1d`, `M1n` are one mutation against three arm sets), 11 RED, 0 survived, 0 skipped.
 Not run: a mutant for the `authentication required` pin arm (a pin: green on the base).
 
 ## 5. Test results
@@ -100,10 +100,10 @@ Not run: a mutant for the `authentication required` pin arm (a pin: green on the
 | check | state |
 |---|---|
 | `tests/test_inc9i.py` 13 default + 1 `network` (real local bare repositories, HOME and USERPROFILE in `tmp_path`) and `tests/test_inc9h.py` | executed: green on HEAD; RED/GREEN table above |
-| Full default lane, once, uninterrupted, last step, output to a file | LANE_RESULT |
+| Full default lane, once, uninterrupted, last step, output to a file | executed: **1735 passed, 3 xfailed, 24 deselected, 0 failed**, 19:09 (baseline 1722: +13 default arms; the `network` arm is deselected). Run on `7f482d5` after the docs commit, because `test_no_operator_paths` reads `.dev-flow`; this result line is the only edit after it |
 | `ruff check . --exclude prototypes` set difference vs `a0ff3b9` (a detached worktree, line and column stripped) | executed: new = none, gone = none (28 findings on each side) |
 | Literal Cf/Cc characters in `tests/test_inc9i.py` and `tests/test_inc9h.py` (scan before every commit) | executed: none |
-| Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | FLAKES |
+| Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | not hit |
 | `git stash` | not used |
 | Real remote, real `gh`, real cache | not-run (every arm is stubbed or uses local bare repositories under `tmp_path`) |
 
