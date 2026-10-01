@@ -1039,7 +1039,7 @@ class HomeScreen(Screen):
                 # `INC9L-SEC-F2`: a text outside the allow-list is never looked at, and never named:
                 # `~nosuchuser...` made `expanduser` raise and the traceback printed the typed text.
                 # `U1`: it says what is accepted, in one fixed sentence.
-                self.notify(PATH_NOT_SUPPORTED, severity="error", markup=False)
+                self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="error", markup=False)
                 return
             if not path.is_file():
                 # `INC9-SEC-F1`: the file's name, never the path the operator's
@@ -3442,7 +3442,7 @@ class MapScreen(Screen):
         if att.kind == "file" and safe_local_path(att.path) is None:
             # `U1`: a target outside the allow-list (a sidecar can hold any text) is not looked at and
             # not named; the same sentence as the prompts.
-            self.notify(PATH_NOT_SUPPORTED, severity="warning", markup=False)
+            self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="warning", markup=False)
             return
         status = open_external(
             att.kind, att.path, workspace=self.store.workspace,
@@ -3476,7 +3476,7 @@ class MapScreen(Screen):
             kind = "url" if "://" in target else "file"
             if kind == "file" and not _is_workspace_file_target(target, self.store.workspace):
                 # `U2`: refused at ADD time, nothing stored, no undo snapshot taken.
-                self.notify(PATH_NOT_SUPPORTED, severity="warning", markup=False)
+                self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="warning", markup=False)
                 return
             self._push_snapshot()
             node.ficha.attachments.append(Attachment(kind=kind, path=target))
