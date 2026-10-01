@@ -228,3 +228,7 @@ At 87 the header row is shorter (the `◕ mapper` mark moves left); every other 
 
 `b64026b` arms (strict xfail) · `910cba3` `github.py` + `app.py` + sealed-arm edits + `OPEN_STEPS` emptied · docs commit (this record, `A-120`) · docs commit (the full-lane result).
 No push; `state.json` untouched.
+
+## Full-lane result
+
+2137 passed, 3 xfailed, 24 deselected, 0 failed in 1111.70s (18:31), `-rf`, run once and uninterrupted (background limit 50 minutes) on `ae8a76c` (the docs commit; `test_no_operator_paths` reads `.dev-flow`). Baseline 2036/0 plus the 101 cases of `test_inc9l`. No known flake appeared (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`: not hit). This result line is added by the docs commit after the run.
