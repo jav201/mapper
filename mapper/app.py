@@ -154,6 +154,20 @@ def map_hint() -> str:
         f"{hint_pair(SCOPE_MAP, 'search')}"
     )
 
+# The home hint (`M1`): `↵` opens the selected map, and the doors are still the way
+# to start.  The word beside `↵` is the seat's (`K3`), so a function, like `map_hint`.
+def home_hint() -> str:
+    return f"{hint_pair(SCOPE_HOME, 'open_selected')} · or choose a door"
+
+
+# The key of the home strip's first door, from the seat: `tab_strip` marks a tab
+# active, and paints the doors' letters, only when handed THIS key (`R3-CR-F3`).
+def _home_door_key() -> str:
+    return next(
+        b.key for b in bindings_for(SCOPE_HOME, include_app=False) if b.action == "consult"
+    )
+
+
 # The ceiling on the fold-auto-open segment of the walk's hint line.  Branch
 # TITLES are file-derived: unbounded in length, and one walk can open several
 # nested folds at once, so both the count and the width need a bound or the
@@ -565,7 +579,7 @@ class HomeScreen(Screen):
     BINDINGS = screen_bindings(SCOPE_HOME)
 
     def compose(self) -> ComposeResult:
-        yield TabStrip("c")
+        yield TabStrip(_home_door_key())
         yield Static("", id="home-identity")
         yield GroupBox(Static(id="home-hero"), id="home-hero-box")
         yield Static("", id="home-microbar")
@@ -579,7 +593,7 @@ class HomeScreen(Screen):
             id="home-recents-box",
         )
         yield Static("", id="home-archived")
-        yield HintLine("elige una puerta para empezar")
+        yield HintLine(home_hint())
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def _map_metrics(self, graph: Graph) -> dict[str, int]:
@@ -1192,6 +1206,7 @@ class RepoScreen(Screen):
         self.graph = Graph()
         self.nav = NavigationModel(self.graph)
         self.selected_index = 0
+        self.failure = ""
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=[self.repo])
@@ -1212,6 +1227,14 @@ class RepoScreen(Screen):
         return "\n".join([*pairs, hint_pair(SCOPE_APP, "help")])
 
     def _stages_text(self) -> Text:
+        if self.failure:
+            # `M2`: the toast expires; the panel is what stays.  The same fixed
+            # sentence the toast carries, and the way out in the seat's word.
+            return Text.assemble(
+                ("▲ failed\n", darkside.INK),
+                (self.failure + "\n", darkside.INK),
+                (hint_pair(SCOPE_REPO, "home"), darkside.MUT),
+            )
         stages = ["iniciando", "leyendo ramas", "calculando métricas", "listo"]
         if self.loading:
             current = min(2, int(3 * self.progress_current / max(1, self.progress_total)))
@@ -1231,6 +1254,8 @@ class RepoScreen(Screen):
         return text
 
     def _progress_text(self) -> Text:
+        if self.failure:
+            return Text("")
         pct = min(100, int(100 * self.progress_current / max(1, self.progress_total)))
         width = 22
         filled = int(width * pct / 100)
@@ -1406,9 +1431,10 @@ class RepoScreen(Screen):
             if isinstance(exc, WorkerFailed):
                 exc = exc.error
             if isinstance(exc, GitHubError):
-                self.notify(darkside.plain(str(exc)), severity="error", markup=False)
+                self.failure = darkside.plain(str(exc))
             else:
-                self.notify(darkside.plain(f"error inesperado: {type(exc).__name__}"), severity="error", markup=False)
+                self.failure = darkside.plain(f"error inesperado: {type(exc).__name__}")
+            self.notify(darkside.plain(self.failure), severity="error", markup=False)
             self.graph = Graph()
         self.loading = False
         self.nav = NavigationModel(self.graph)

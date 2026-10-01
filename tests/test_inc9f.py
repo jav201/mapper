@@ -32,7 +32,7 @@ from tests.test_inc9c import PROFILE
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"repo", "home", "palette"}
+OPEN_STEPS: set[str] = {"palette"}
 
 
 def red(step: str):
@@ -417,10 +417,10 @@ async def test_inc9f_m2_the_stage_panel_paints_the_failure_after_the_toast_expir
         for _ in range(3):
             await pilot.pause()
         stages = screen.query_one("#repo-stages", Static)
-        painted = "\n".join(_rows_in(screen, stages.region))
+        painted = " ".join("\n".join(_rows_in(screen, stages.region)).split())
         frame = "\n".join(_frame_rows(screen))
     assert "host not found" in painted, painted
-    assert keymap.hint_pair(keymap.SCOPE_REPO, "home") in frame, frame
+    assert keymap.hint_pair(keymap.SCOPE_REPO, "home") in painted, painted
     assert "listo" not in painted, f"a failed clone still reads 'listo': {painted}"
     assert "100%" not in frame and "0%" not in frame, frame
 
