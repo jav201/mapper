@@ -10619,3 +10619,42 @@ characters (`h..x` passes and fails at resolution); a LOCAL DIRECTORY is painted
 the local directory as displayable); no real `git clone` was run against an accepted form (stubs only); the Inc-9j security and
 code review tables were not on disk, so "every form in the review tables" is covered by the forms in the Inc-9j arms and the
 operator's list.
+
+### `A-120` -- the Inc-9k review fixes and the operator's T1 (`Inc-9l`), dated 2026-10-01
+
+**Authority.** The operator's Round 9, T1 (`VERDICT-inc9-2026-09-30.md`, answer "Decir las formas": the fixed sentence becomes
+`refusing the repository: use https://host/path, git@host:path, owner/name or a local folder`, still echoing nothing), and the
+coordinator's rulings for the findings of the Inc-9k code, ux and security reviews (`INC9K-SEC-F1`, `INC9K-SEC-F2`,
+`INC9K-CR-F1`, `-F2`, `-F3`, `-F5`, `OBS-1`, the UNC hardening). T2 (`http://` refused) is already the behaviour of `A-119` st. 2;
+T3 is routed to Inc-EN. The record is `increment-038-inc9l.md`.
+
+**Statement.** Changes `A-119` st. 4 (the text of the sentence) and st. 6 (what is painted); the rest of `A-119` stands.
+
+1. **The sentence (T1).** The one refusal sentence is exactly `refusing the repository: use https://host/path, git@host:path, owner/name or a local folder`. It
+   echoes nothing of the typed text. Its own `@` (from `git@host:path`) is the only `@` a refusal message may hold. The two finer
+   sentences (`it may not start with '-'`, `transport helpers are not accepted`) stand. Sealed arms that pinned the old text change
+   by the label only (`test_inc9k::SENTENCE`, `test_inc9d`, `test_inc9h`, `test_inc9i`, `test_inc9j`); no leak assertion is weakened (the
+   `"@"` entry of two leak lists becomes `message.count("@") == 1`, because the sentence now holds the one `@` of `git@host:path`).
+2. **One decision (`INC9K-CR-F2`).** `github._classify(text)` is the one place a typed repo is decided: `_refuse_unsafe`, then a local
+   git directory, then `_is_url` plus a usable clone name (`_repo_name_from_url`), then owner/name, else the sentence. `fetch` dispatches on it;
+   `painted_repo` returns the text only when `_classify` does not raise. So `painted_repo(x) != (unrecognised URL)` if and only if `fetch(x)` reaches a
+   process. The forms that were painted but refused (`git@h:r`, `https://h/...`, `https://h/o/.git`, `https://h/o/..git`, `-a/b`, a local git
+   directory named `-x`) now paint `(unrecognised URL)`.
+3. **`_is_local_path` is total (`INC9K-SEC-F1`).** It returns False on `RuntimeError`, `OSError` or `ValueError`: `~name...` for a user that cannot be resolved raised
+   `RuntimeError` out of `expanduser`, which crashed the app (Textual's traceback prints locals, and so the typed text) and reached `fetch` as
+   `error inesperado: RuntimeError`. A typed text can no longer make the predicate raise.
+4. **UNC (coordinator ruling).** A typed text whose first two characters are each `/` or `\` is not a local folder and is refused BEFORE any
+   filesystem call (so no SMB or NTLM lookup on the UI thread). It paints `(unrecognised URL)` and gets the sentence. This covers UNC, `\\?\` and `\\.\` device paths
+   and the mixed forms `/\host` and `\/host`, which Windows also reads as UNC (a superset of the ruling: declared).
+5. **The GitHub URL rewrite is case-consistent (`OBS-1`).** `PlugRepoScreen._normalize_repo("HTTPS://GITHUB.COM/o/n")` raised an `IndexError`
+   (a case-insensitive check, a case-sensitive split). It now returns `o/n`; `http(s)://github.com/o/n` still returns `o/n`.
+6. **API-derived names are one encoded path segment (`INC9K-SEC-F2`).** In `_fetch_gh` the default branch, each branch name and each commit sha go into a
+   `gh api` path through `urllib.parse.quote(name, safe="")`, so `%2e%2e/%2e%2e/user`, `x#frag`, `{owner}` (gh expands `{owner}` and `{repo}`)
+   cannot steer an authenticated request. A branch name with `/` is sent as `%2F`.
+
+**Trace.** Standalone, like `A-113`..`A-119`. Carried by `tests/test_inc9l.py` and the reworked arms listed in `increment-038-inc9l.md` section 2.
+
+**What is not claimed.** `%2F` for a branch with a slash in `compare/` and `commits/` was not measured against the live GitHub API (stubs only); a text with
+leading whitespace before two slashes is not specially treated (the screen strips typed text; `fetch` of a padded text goes to the sentence by the
+grammar); the `_normalise_url` `.strip()` is inert and left alone (`CR-F6`); `tests/test_inc9j.py` still has a stale phrase in the docstring of the upper-case pin
+(`the gh path ... its own fixed sentence`), outside the brief.
