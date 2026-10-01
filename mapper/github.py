@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
+from .darkside import plain
 from .model import Edge, Ficha, Graph, Node
 
 
@@ -26,6 +27,11 @@ ProgressCallback = Callable[[int, int, str], None]
 
 class GitHubError(Exception):
     pass
+
+
+class GitHubTimeout(GitHubError):
+    """A process ran out of its budget.  The typed signal `_refresh_mirror` reads
+    (`INC9G-CR-F5`): a message suffix is a protocol any other error could join."""
 
 
 _URL_RE = re.compile(r"^(https?://|git@).+")
@@ -124,7 +130,7 @@ def _run_git(
         category = _failure_category(exc.stderr, exc.returncode)
         raise GitHubError(f"git {args[0]} failed: {category}") from None
     except subprocess.TimeoutExpired:
-        raise GitHubError(f"git {args[0]} failed: {_TIMED_OUT}") from None
+        raise GitHubTimeout(f"git {args[0]} failed: {_TIMED_OUT}") from None
 
 
 def _default_branch(cwd: Path) -> str:
@@ -222,15 +228,25 @@ def _refresh_mirror(target: Path) -> str:
     still holds what the last connect saw.  A refresh moves history, so it gets the
     clone's budget, not a read's.
     """
+    # `INC9G-SEC-F2`: `--prune`, or a branch the remote deleted stays in the mirror and is
+    # shown as live.
     try:
-        result = _run_git(target, ["fetch", "--all"], check=False, timeout=_CLONE_TIMEOUT)
-    except GitHubError as exc:
-        if not str(exc).endswith(_TIMED_OUT):
-            raise
+        result = _run_git(target, ["fetch", "--prune", "--all"], check=False, timeout=_CLONE_TIMEOUT)
+    except GitHubTimeout:
         return _TIMED_OUT
     if result.returncode != 0:
         return _failure_category(result.stderr, result.returncode)
     return ""
+
+
+def _mirror_dir(cache_dir: Path, name: str, form: str) -> Path:
+    return cache_dir / f"{name}-{hashlib.sha256(form.encode('utf-8')).hexdigest()[:12]}"
+
+
+def _is_mirror_of(mirror: Path, url: str) -> bool:
+    """Whether the mirror's `origin` is the URL as typed (a trailing `/` aside)."""
+    result = _run_git(mirror, ["config", "--get", "remote.origin.url"], check=False)
+    return result.returncode == 0 and result.stdout.strip().rstrip("/") == url.rstrip("/")
 
 
 def _ensure_cloned(
@@ -240,12 +256,21 @@ def _ensure_cloned(
 
     `on_stale` is told the category when a cache hit could not be refreshed.
     """
+    url = url.strip()
     _refuse_unsafe(url)
     name = _repo_name_from_url(url)
     # `INC9F-SEC-F1`: the last segment alone collides (`alice/tools`, `bob/tools`),
     # and a cache hit then shows whichever remote the mirror holds.
-    target = cache_dir / f"{name}-{hashlib.sha256(_normalise_url(url).encode('utf-8')).hexdigest()[:12]}"
+    target = _mirror_dir(cache_dir, name, _normalise_url(url))
     # `--mirror` makes a BARE repository: `HEAD` is a file and there is no `.git`.
+    if (target / "HEAD").is_file() and not _is_mirror_of(target, url):
+        # `INC9G-SEC-F1`: one normal form, two remotes (`r` and `r.git` on a plain server, a
+        # hash collision, a tampered cache): the mirror there is not this URL's.  This URL
+        # gets its own directory, keyed on the form as typed; if that holds another remote
+        # too, the connect is refused.  The key never reads the mirror's contents otherwise.
+        target = _mirror_dir(cache_dir, name, url.rstrip("/"))
+        if (target / "HEAD").is_file() and not _is_mirror_of(target, url):
+            raise GitHubError("refusing the cached copy: it belongs to another repository")
     if (target / "HEAD").is_file():
         stale = _refresh_mirror(target)
         if stale and on_stale is not None:
@@ -266,12 +291,12 @@ def _ensure_cloned(
         raise GitHubError("git CLI not found") from exc
     except subprocess.TimeoutExpired:
         # No chaining: the timeout carries the argv, and the URL may hold a token.
-        raise GitHubError(f"could not clone '{name}': {_TIMED_OUT}") from None
+        raise GitHubError(f"could not clone '{plain(name)}': {_TIMED_OUT}") from None
     if result.returncode != 0:
         # `INC9BC-SEC-F3`, `M2`: the repo's name and one fixed category, never
         # git's own text (the cache path, the URL's credentials).
         category = _failure_category(result.stderr, result.returncode)
-        raise GitHubError(f"could not clone '{name}': {category}")
+        raise GitHubError(f"could not clone '{plain(name)}': {category}")
     return target
 
 
@@ -376,6 +401,8 @@ class GitHubConnector:
                 check=True,
                 encoding="utf-8",
                 timeout=_SUBPROCESS_TIMEOUT,
+                # `INC9G-SEC-F5`: never wait on a prompt (`git`'s own twin is `_git_env`).
+                env={**os.environ, "GH_PROMPT_DISABLED": "1"},
             )
         except subprocess.CalledProcessError as exc:
             category = _failure_category(exc.stderr, exc.returncode)
@@ -388,14 +415,14 @@ class GitHubConnector:
 
     def _fetch_gh(self, progress: ProgressCallback | None = None) -> Graph:
         parts = self.repo.split("/")
-        if len(parts) != 2:
-            raise GitHubError(f"repo must be owner/name, got {self.repo}")
-        owner, name = parts
         # `INC9F-SEC-F4`: both segments go into `gh api` paths; `.` and `..` are path
-        # steps and `?`, `#`, `%` would add a query or a fragment.
-        if (not _OWNER_RE.fullmatch(owner) or not _NAME_RE.fullmatch(name)
-                or name in (".", "..")):
-            raise GitHubError("refusing the repository: owner/name has characters GitHub does not allow")
+        # steps and `?`, `#`, `%` would add a query or a fragment.  `INC9G-SEC-F4`: one
+        # fixed sentence for every malformed spec, the wrong number of segments included:
+        # it echoes nothing the operator typed.
+        if (len(parts) != 2 or not _OWNER_RE.fullmatch(parts[0]) or not _NAME_RE.fullmatch(parts[1])
+                or parts[1] in (".", "..")):
+            raise GitHubError("refusing the repository: expected owner/name, with the characters GitHub allows")
+        owner, name = parts
 
         repo_info = self._gh(["repo", "view", self.repo, "--json", "name,defaultBranchRef"])
         default_branch = repo_info.get("defaultBranchRef", {}).get("name", "main")
@@ -511,6 +538,9 @@ class GitHubConnector:
         self.stale = category
 
     def fetch(self, progress: ProgressCallback | None = None) -> Graph:
+        # `INC9G-CR-F7`: a connector that connects twice must not carry the first
+        # connect's stale category into the second.
+        self.stale = ""
         _refuse_unsafe(self.repo)
         if _is_local_path(self.repo):
             cwd = Path(self.repo).expanduser().resolve()
