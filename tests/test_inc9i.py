@@ -26,7 +26,7 @@ from tests.test_inc9g import URL_A
 from tests.test_inc9h import _StaleMirror, _clones, _connect, _settle
 from tests.test_repair_layout import _rows_in
 
-OPEN_STEPS: set[str] = {"panel"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
@@ -34,6 +34,13 @@ def red(step: str):
         return pytest.mark.xfail(
             strict=True, reason=f"Inc-9i: committed RED; closed by the '{step}' step")
     return lambda fn: fn
+
+
+def red_marks(step: str) -> list:
+    if step not in OPEN_STEPS:
+        return []
+    return [pytest.mark.xfail(
+        strict=True, reason=f"Inc-9i: committed RED; closed by the '{step}' step")]
 
 
 # ---------------------------------------------------------------------------
@@ -206,7 +213,7 @@ class _AuthMirror(_StaleMirror):
 
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 @pytest.mark.parametrize("mode,category", [
-    pytest.param("exit1", "unknown (exit 1)", marks=[red("panel")]),
+    pytest.param("exit1", "unknown (exit 1)", marks=red_marks("panel")),
     # a pin: at 30 cells the base happens to break this one BEFORE the category (measured)
     ("auth", "authentication required"),
 ])

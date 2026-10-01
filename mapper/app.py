@@ -1260,8 +1260,10 @@ class RepoScreen(Screen):
         if self.stale and not self.loading:
             # `P1`: the toast expires and `listo` would read as a fresh connect; the line
             # stays for as long as the cached copy is what the screen shows.
+            # `INC9H-UX-F1`: the category goes on its own line, so the 30-cell sidebar never
+            # breaks it (`unknown (exit` / `1)`).
             text.append("\n", "")
-            text.append(darkside.plain(f"▲ cached copy: {self.stale}"), darkside.INK)
+            text.append(darkside.plain(f"▲ cached copy:\n{self.stale}"), darkside.INK)
         return text
 
     def _progress_text(self) -> Text:
