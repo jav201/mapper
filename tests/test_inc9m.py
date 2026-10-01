@@ -29,7 +29,7 @@ from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9j import _Boom
 from tests.test_repair_layout import _frame_rows
 
-OPEN_STEPS: set[str] = {"u1"}
+OPEN_STEPS: set[str] = set()
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 

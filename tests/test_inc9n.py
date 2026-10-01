@@ -32,7 +32,7 @@ from tests.test_attachments import RecordingLauncher, _open, _seed
 from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9m import _env, _flat, _no_fs, _norm, _open_prompt, _stub_gh
 
-OPEN_STEPS: set[str] = {"f1", "f2", "u1", "u2", "f3", "crf5", "crf8"}
+OPEN_STEPS: set[str] = set()
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 
@@ -361,6 +361,7 @@ async def test_inc9n_u1_pin_a_missing_accepted_path_keeps_naming_its_file(surfac
         assert toasts == [f"archivo no encontrado: missing.{ext}"], toasts
 
 
+@red("u1")
 def test_inc9n_u1_the_sentence_is_written_with_a_real_ellipsis_in_one_place():
     from mapper import app as app_mod
 

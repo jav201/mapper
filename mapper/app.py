@@ -309,6 +309,22 @@ class NavigationModel:
 # ---------------------------------------------------------------------------
 
 
+# `U1` (Round 10): the one sentence for a typed or stored path outside the allow-list; it names nothing.
+PATH_NOT_SUPPORTED = "path not supported: use C:\\… or a relative path"
+
+
+def _is_workspace_file_target(target: str, workspace: Path) -> bool:
+    """`U2`: a `file` attachment is stored only if `safe_local_path` accepts it and it stays inside the
+    workspace (`open_external`'s own confinement, applied at add time)."""
+    local = safe_local_path(target)
+    if local is None:
+        return False
+    try:
+        return (workspace / local).resolve().is_relative_to(Path(workspace).resolve())
+    except (OSError, ValueError):
+        return False
+
+
 class _PromptScreen(ModalScreen[str | None]):
     """Simple darkside modal that returns a single text value."""
 
@@ -1022,9 +1038,10 @@ class HomeScreen(Screen):
             if path is None:
                 # `INC9L-SEC-F2`: a text outside the allow-list is never looked at, and never named:
                 # `~nosuchuser...` made `expanduser` raise and the traceback printed the typed text.
-                self.notify("archivo no encontrado", severity="error", markup=False)
+                # `U1`: it says what is accepted, in one fixed sentence.
+                self.notify(PATH_NOT_SUPPORTED, severity="error", markup=False)
                 return
-            if not path.exists():
+            if not path.is_file():
                 # `INC9-SEC-F1`: the file's name, never the path the operator's
                 # `~` expanded to.
                 self.notify(darkside.plain(f"archivo no encontrado: {path.name}"), severity="error", markup=False)
@@ -1039,7 +1056,7 @@ class HomeScreen(Screen):
             self.app.push_screen(_ImportPreviewScreen(preview, path))
 
         self.app.push_screen(
-            _PromptScreen("ruta del CSV / TSV", "/ruta/a/nodos.csv"),
+            _PromptScreen("ruta del CSV / TSV", "C:\\path\\to\\nodes.csv"),
             callback=on_path,
         )
 
@@ -1322,7 +1339,7 @@ class RepoScreen(Screen):
         # `INC9L-CR-F3`: the one decision `fetch` and `painted_repo` already read; a remote
         # (`gh` or a URL) keeps the `github` badge, and a refused text is not a remote.
         try:
-            return "local" if github._classify(self.repo) == "local" else "github"
+            return "local" if github.source_kind(self.repo) == "local" else "github"
         except GitHubError:
             return "local"
 
@@ -3422,6 +3439,11 @@ class MapScreen(Screen):
         if not 0 <= event.index < len(node.ficha.attachments):
             return
         att = node.ficha.attachments[event.index]
+        if att.kind == "file" and safe_local_path(att.path) is None:
+            # `U1`: a target outside the allow-list (a sidecar can hold any text) is not looked at and
+            # not named; the same sentence as the prompts.
+            self.notify(PATH_NOT_SUPPORTED, severity="warning", markup=False)
+            return
         status = open_external(
             att.kind, att.path, workspace=self.store.workspace,
             launcher=getattr(self.app, "attachment_launcher", None),
@@ -3448,11 +3470,15 @@ class MapScreen(Screen):
         def on_target(target: str | None) -> None:
             if not target:
                 return
-            self._push_snapshot()
             # `A-111`: coerced before it reaches the graph, same rule as
             # `plain()` — the prompt is a real `Input`, not a hostile file.
             target = darkside.plain(target)
             kind = "url" if "://" in target else "file"
+            if kind == "file" and not _is_workspace_file_target(target, self.store.workspace):
+                # `U2`: refused at ADD time, nothing stored, no undo snapshot taken.
+                self.notify(PATH_NOT_SUPPORTED, severity="warning", markup=False)
+                return
+            self._push_snapshot()
             node.ficha.attachments.append(Attachment(kind=kind, path=target))
             if not _save_or_toast(self, self.store, self.map_id, self.graph):
                 return

@@ -52,11 +52,12 @@ def safe_local_path(text: str) -> Path | None:
     r"""`S1` applied to a typed LOCAL path: a closed allow-list, decided on strings before any
     filesystem call, so no SMB or NTLM lookup and no NT-namespace path is ever probed.
 
-    Refused (None): an empty text, a NUL, a leading `-`; a `~` that cannot be expanded; and
-    everything that is not (a) drive-absolute (a letter drive and a root, as `C:\x`) or (b)
-    relative (no drive, no root, and the typed text does not start with a separator).  That
-    covers UNC, `\\?\`, `\\.\`, `\??\`, `/??/`, root-relative `\x` and drive-relative `C:x`.
-    The caller may stat the returned path, and only then.
+    Refused (None): an empty text, a NUL, a leading `-`; a `~` that cannot be expanded; a DOS device
+    name (`con`, `nul`, `conin$`, `com1`, `aux`, `lpt1`...) in ANY component, with an extension, trailing
+    dots or spaces, in any case; and everything that is not (a) drive-absolute (a letter drive and a
+    root, as `C:\x`) or (b) relative (no drive and no root).  That covers UNC, `\\?\`, `\\.\`, `\??\`,
+    `/??/`, root-relative `\x` and drive-relative `C:x`.  The caller may stat the returned path, and only
+    then.
     """
     if not isinstance(text, str) or not text or "\x00" in text or text.startswith("-"):
         return None
@@ -65,9 +66,14 @@ def safe_local_path(text: str) -> Path | None:
         parsed = PureWindowsPath(str(expanded))
     except (RuntimeError, OSError, ValueError):
         return None
+    # `INC9M-SEC-F2`: opening a device name hangs (`Import-CSV CON` was measured to) or reads a console.
+    # `PureWindowsPath.is_reserved()` (3.12) judges the LAST component only, so every component is asked;
+    # Python 3.13 spells it `os.path.isreserved`.
+    if any(PureWindowsPath(part).is_reserved() for part in parsed.parts):
+        return None
     if _DRIVE.fullmatch(parsed.drive) and parsed.root == "\\":
         return expanded
-    if not parsed.drive and not parsed.root and text[0] not in "\\/":
+    if not parsed.drive and not parsed.root:
         return expanded
     return None
 
@@ -151,7 +157,7 @@ def open_external(
         return REFUSED_TYPE
     if not resolved.is_relative_to(root):
         return REFUSED_OUTSIDE
-    if not resolved.exists() or resolved.is_dir():
+    if not resolved.is_file():
         return REFUSED_ERROR
     try:
         launch(str(resolved))
