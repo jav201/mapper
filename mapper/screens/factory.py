@@ -447,7 +447,7 @@ class FactoryScreen(Screen):
             if source is None:
                 # `INC9L-SEC-F2`: outside the allow-list: not looked at, and not named.
                 # `U1`: the one fixed sentence, as the CSV prompt's.
-                self.notify(PATH_NOT_SUPPORTED, severity="error", markup=False)
+                self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="error", markup=False)
                 return
             # `INC9BC-SEC-F1`: the NAME as typed, never the expansion -- `~`
             # resolves to the user profile, and a toast is painted and logged.
