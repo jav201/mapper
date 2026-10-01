@@ -26,7 +26,7 @@ from tests.test_inc9f import (  # noqa: F401  (hermetic is a fixture)
 from tests.test_repair_layout import _frame_rows
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"palette", "github", "app"}
+OPEN_STEPS: set[str] = {"palette", "app"}
 
 
 def red(step: str):
@@ -190,7 +190,8 @@ def _bare_with_branch(root: pathlib.Path, owner: str, branch: str) -> str:
 
 @pytest.mark.network
 @red("github")
-def test_inc9g_sec_f1_real_git_two_local_remotes_show_their_own_branches(tmp_path, hermetic):
+@pytest.mark.usefixtures("hermetic")
+def test_inc9g_sec_f1_real_git_two_local_remotes_show_their_own_branches(tmp_path):
     url_a = _bare_with_branch(tmp_path, "alice", "alice-main")
     url_b = _bare_with_branch(tmp_path, "bob", "bob-main")
     cache = tmp_path / "cache"
@@ -238,7 +239,8 @@ def test_inc9g_sec_f3_a_clone_timeout_is_still_an_error(tmp_path, monkeypatch):
     "../user", "o/n?x=1", "o/..", "./n", "o/.", "o/n#frag", "o%2f/n", "o/n x", "o_x/n",
     "o/n‮", "o/n\u0000",
 ])
-def test_inc9g_sec_f4_a_malformed_owner_name_never_reaches_gh(spec, monkeypatch):
+def test_inc9g_sec_f4_a_malformed_owner_name_never_reaches_gh(spec, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)  # a relative spec like `o/..` is a LOCAL path when it names a repo
     run = _Run(returncode=0)
     monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:
