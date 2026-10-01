@@ -151,3 +151,21 @@ answer took the recommended option. Code and security reviews were still running
 | id | Question | Answer (verbatim label) | What it rules |
 |---|---|---|---|
 | R1 · INC9I-UX-F1 | A refused credential URL is still painted, token included (crumb, repo name), and kept in the field after `q` | Ocultar en pantalla, campo se queda | Every surface that paints a typed URL redacts userinfo (`https://***@host/…`); the connect-repo field keeps the operator's own text for correction (never persisted). Routed to the next increment with the Inc-9i review findings |
+
+---
+
+# Round 8 — Inc-9j reviews (2026-10-01, base `c8a692d`)
+
+ux PASS-WITH-NOTICES (R1 discharged), security PASS (INC9I-SEC-F1 verified closed against libcurl's own
+parser and git's credential parser; INC9J-SEC-F1 MEDIUM: credential forms without `://` are painted
+unredacted). The code review was still running when this answer was taken. Four rounds in a row found a
+new odd URL form, so the coordinator proposed replacing the deny-list with an allow-list. The answer took
+the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| S1 · INC9J-SEC-F1/F3, INC9J-UX-F1 | Replace the URL deny-list with a closed allow-list? | Lista cerrada | A typed repo URL is accepted only as `https://host[:port]/path` or `git@host:path`, simple characters only (no `@` before the host, no userinfo, no `?`, `#`, whitespace, backslash, extra or encoded slashes; ASCII host). Everything else is refused before any process with one fixed sentence that echoes nothing, and every painted surface shows `(unrecognised URL)` instead of the text. The connect field keeps the typed text (R1). The deny-list pieces (`_refuse_userinfo`, `redact_userinfo` heuristics) become redundant and are removed or reduced to the allow-list. `owner/name` (gh path) is unchanged |
+
+Coordinator rulings for the same increment: INC9J-UX-F1 (no-host URL told to use a credential helper)
+is subsumed — the allow-list refusal sentence names no cause beyond "not a supported repository URL".
+INC9J-UX-F3 (palette test raced once) is logged as FLAKE-3 candidate for the whole-branch gates.
