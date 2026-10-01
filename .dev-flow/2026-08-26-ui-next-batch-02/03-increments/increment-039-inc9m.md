@@ -218,3 +218,9 @@ No push; `state.json` untouched.
 2221 passed, 3 xfailed, 24 deselected, 0 failed in 1122.91s (18:42), `-rf`, run once and uninterrupted (background limit 60 minutes) on `a56410e` (the docs commit; `test_no_operator_paths` reads
 `.dev-flow`). Baseline 2137/0 plus the 85 cases of `test_inc9m`, minus the one deleted `/tmp/x` case of `test_inc9l` (2137 + 85 - 1 = 2221). No known flake appeared
 (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`: not hit). The 3 xfailed are the pre-existing ones. This result line is added by the docs commit after the run.
+
+## Correction (added in Inc-9n, `INC9M-CR-F6`)
+
+Section 6 claims the `ruff` set difference against `19b2824` was "new = none". That measurement is wrong as a claim about the tree: the base worktree it used had the new arms copied in, so the
+two unused imports of `tests/test_inc9m.py` (`subprocess`, `textual.widgets.Static`) sat on both sides and the difference hid them. Re-measured on a clean base worktree they are two new F401; they were
+removed in Inc-9n (`increment-040-inc9n.md` section 7).
