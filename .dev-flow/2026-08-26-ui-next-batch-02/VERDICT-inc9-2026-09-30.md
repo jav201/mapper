@@ -127,3 +127,16 @@ with the remaining findings. Two questions were put to the operator; both took t
 |---|---|---|---|
 | P1 · INC9G-UX-F2 / INC9G-SEC-F3 | The stale cached copy is toast-only; the panel reads `listo · 100%` | Línea fija en el panel | The repo stage panel paints `▲ cached copy: <category>` in INK (as N3) for as long as the cached copy is shown; the toast stays and gains `· q back to retry` |
 | P2 · INC9G-UX-F3 | `conectado: N nodos` and the stale warning fire together and contradict | Un solo aviso | On a stale connect only the warning fires, carrying the count: `showing the cached copy (N nodes): <category>` |
+
+---
+
+# Round 6 — Inc-9h landed (2026-10-01, `8e8f9f0..134d74c`)
+
+The Inc-9h implementer found that two coordinator-specified arms conflict (`…/r` vs `…/r.git` distinct;
+`tools`, `tools/`, `tools.git`, `tools.git/` one mirror) and resolved it: the directory key keeps the
+A-115 normal form, a cache hit compares the mirror's `remote.origin.url` with the typed URL (`.git` kept),
+and a mismatch gets its own directory keyed on the typed form.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| Q1 · INC9G-SEC-F1 | In the repo cache, are `…/r` and `…/r.git` one repo or two? | Distintos, se acepta doble clon | Two remotes; a repo is never shown under another's URL; `tools` then `tools.git` from one cache clones twice, accepted |
