@@ -36,14 +36,19 @@ from tests.test_inc9g import (
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"palette", "repo", "github", "diff", "home"}
+OPEN_STEPS: set[str] = {"repo", "github", "diff", "home"}
+
+
+def red_marks(step: str) -> list:
+    if step not in OPEN_STEPS:
+        return []
+    return [pytest.mark.xfail(
+        strict=True, reason=f"Inc-9h: committed RED; closed by the '{step}' step")]
 
 
 def red(step: str):
-    if step not in OPEN_STEPS:
-        return lambda fn: fn
-    return pytest.mark.xfail(
-        strict=True, reason=f"Inc-9h: committed RED; closed by the '{step}' step")
+    marks = red_marks(step)
+    return marks[0] if marks else (lambda fn: fn)
 
 
 async def _settle(pilot, n: int = 4) -> None:
@@ -88,7 +93,7 @@ async def test_inc9h_cr_f1_row_zero_is_legible_after_a_filter_edit_and_after_bac
 
 @pytest.mark.parametrize("scope", [
     keymap.SCOPE_HOME,  # a pin: it was already green on the base (measured)
-    pytest.param(keymap.SCOPE_MAP, marks=red("palette")),
+    pytest.param(keymap.SCOPE_MAP, marks=red_marks("palette")),
 ])
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9h_cr_f1_row_zero_is_legible_after_a_no_match_filter_is_cleared(

@@ -98,8 +98,8 @@ class CommandPalette(ModalScreen[str | None]):
             id="palette-dialog",
         )
 
-    def on_mount(self) -> None:
-        self._refresh_list("")
+    async def on_mount(self) -> None:
+        await self._refresh_list("")
         self.query_one("#palette-input", Input).focus()
 
     def _binding_label(self, binding: KeyBinding, selected: bool = False) -> Text:
@@ -127,9 +127,12 @@ class CommandPalette(ModalScreen[str | None]):
         for i, (label, binding) in enumerate(zip(self._labels, self._items)):
             label.update(self._binding_label(binding, selected=(i == lit)))
 
-    def _refresh_list(self, query: str) -> None:
+    async def _refresh_list(self, query: str) -> None:
         list_view = self.query_one("#palette-list", ListView)
-        list_view.clear()
+        # `INC9G-CR-F1`: `clear()` removes the rows on a later turn.  Unawaited, `index = 0`
+        # below lit a node that was being removed and the new first row never got
+        # `-highlight`: `↵` ran a row painted GROUND on the plain ground (1.12:1).
+        await list_view.clear()
         self._labels = []
         # Grouped in the key bar's order, so the palette and the bar read alike.
         order = {g: i for i, g in enumerate(bar_group_order(self.scope))}
@@ -177,8 +180,8 @@ class CommandPalette(ModalScreen[str | None]):
         }[event.key]
         list_view.index = max(0, min(len(self._items) - 1, target))
 
-    def on_input_changed(self, event: Input.Changed) -> None:
-        self._refresh_list(event.value)
+    async def on_input_changed(self, event: Input.Changed) -> None:
+        await self._refresh_list(event.value)
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         # The search box holds focus, so it consumes `enter` before the screen
