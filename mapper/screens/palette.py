@@ -1,7 +1,9 @@
 """Command palette screen (ctrl+p)."""
 from __future__ import annotations
 
+from rich.cells import cell_len
 from rich.text import Text
+from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
@@ -64,13 +66,13 @@ class CommandPalette(ModalScreen[str | None]):
         color: #f5f5f5;
         background: #121212;
     }
-    #palette-list > ListItem.--highlight {
+    #palette-list > ListItem.-highlight {
         background: #1783ff;
         color: #000000;
     }
     .palette-group { color: #737373; }
     .palette-key { color: #f5f5f5; }
-    #palette-list > ListItem.--highlight .palette-key {
+    #palette-list > ListItem.-highlight .palette-key {
         color: #000000;
     }
     #palette-count {
@@ -85,6 +87,7 @@ class CommandPalette(ModalScreen[str | None]):
         self.scope = scope
         self._items: list[KeyBinding] = []
         self._head_cells = 0
+        self._label_cells = 0
 
     def compose(self) -> ComposeResult:
         yield Vertical(
@@ -103,10 +106,11 @@ class CommandPalette(ModalScreen[str | None]):
         # interpolated into a markup-parsed string.
         # The HEADER word the key bar paints, never the seat's group id (`INC9C-F2`).
         head = group_header(binding.group)
+        # Both columns are padded to the seat's widest word, so the label column
+        # and the key column each start at one cell on every row.
         return Text.assemble(
-            (f"{head:<{self._head_cells}}  ", darkside.WORDMARK),
-            (binding.label, darkside.INK),
-            ("  ", ""),
+            (head + " " * (self._head_cells - cell_len(head)) + "  ", darkside.WORDMARK),
+            (binding.label + " " * (self._label_cells - cell_len(binding.label)) + "  ", darkside.INK),
             (binding.glyph, darkside.ACCENT),
         )
 
@@ -115,7 +119,8 @@ class CommandPalette(ModalScreen[str | None]):
         list_view.clear()
         # Grouped in the key bar's order, so the palette and the bar read alike.
         order = {g: i for i, g in enumerate(bar_group_order(self.scope))}
-        self._head_cells = max(len(group_header(g)) for g in order)
+        self._head_cells = max(cell_len(group_header(g)) for g in order)
+        self._label_cells = max(cell_len(b.label) for b in palette_items("", self.scope))
         self._items = sorted(palette_items(query, self.scope), key=lambda b: order[b.group])
         for binding in self._items:
             label = Static(self._binding_label(binding))
@@ -136,6 +141,26 @@ class CommandPalette(ModalScreen[str | None]):
                 (f" {close_word}", darkside.MUT),
             )
         )
+
+    def on_key(self, event: events.Key) -> None:
+        # The search box holds focus, so the list never sees the arrows: forward
+        # them, and leave the box focused so typing keeps filtering.
+        if event.key not in ("up", "down", "pageup", "pagedown"):
+            return
+        event.stop()
+        event.prevent_default()
+        list_view = self.query_one("#palette-list", ListView)
+        if not self._items:
+            return
+        step = max(1, list_view.size.height - 1)
+        current = list_view.index or 0
+        target = {
+            "up": current - 1,
+            "down": current + 1,
+            "pageup": current - step,
+            "pagedown": current + step,
+        }[event.key]
+        list_view.index = max(0, min(len(self._items) - 1, target))
 
     def on_input_changed(self, event: Input.Changed) -> None:
         self._refresh_list(event.value)
