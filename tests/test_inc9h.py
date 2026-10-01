@@ -35,7 +35,7 @@ from tests.test_inc9g import (
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = set()
+OPEN_STEPS: set[str] = {"inc9i"}
 
 
 def red_marks(step: str) -> list:
@@ -284,14 +284,21 @@ def test_inc9h_sec_f1_a_mirror_that_holds_another_remote_is_not_reused_this_url_
     assert _ensure_cloned(URL_A, cache) == mine and len(_clones(run)) == 1
 
 
-@red("github")
+@red("inc9i")
 def test_inc9h_sec_f1_when_the_own_directory_is_foreign_too_the_connect_is_refused(tmp_path, monkeypatch):
+    # `Inc-9i`, `INC9H-CR-F1`: reworked.  It used to tamper the PRIMARY directory only, which on a
+    # URL with no `.git` is also the fallback directory, so it pinned the defect (one tampered
+    # directory refused for good) as intended.  Now the primary AND the URL's own (fallback)
+    # directory are tampered, one after the other: only that is a refusal.
     run = _Mirror()
     monkeypatch.setattr("subprocess.run", run)
     cache = tmp_path / "cache"
-    url = "https://example.invalid/alice/tools"  # no `.git`, no `/`: its own key IS the shared key
-    foreign = _ensure_cloned(url, cache)
-    run.origin[str(foreign)] = "https://example.invalid/mallory/tools"
+    url = "https://example.invalid/alice/tools"
+    primary = _ensure_cloned(url, cache)
+    run.origin[str(primary)] = "https://example.invalid/mallory/tools"
+    own = _ensure_cloned(url, cache)  # the primary is foreign: the URL gets its own directory
+    assert own != primary, (own, primary)
+    run.origin[str(own)] = "https://example.invalid/mallory/tools"  # and that one is tampered too
     run.calls.clear()
     with pytest.raises(GitHubError) as caught:
         _ensure_cloned(url, cache)
