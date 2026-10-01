@@ -23,7 +23,7 @@ from textual.worker import WorkerFailed
 from . import darkside
 from .diff import DiffResult, git_diff
 from .export import ExportError, ExportTooLarge, save_svg
-from .github import GitHubConnector, GitHubError, redact_userinfo
+from .github import GitHubConnector, GitHubError, painted_repo
 from .import_csv import preview_csv
 from .keymap import (
     SCOPE_APP,
@@ -1207,8 +1207,8 @@ class RepoScreen(Screen):
     def __init__(self, repo: str):
         super().__init__()
         self.repo = repo
-        # `INC9I-UX-F1`: what is painted; `self.repo` stays as typed for the connector.
-        self.shown = redact_userinfo(repo)
+        # `S1`: what is painted; `self.repo` stays as typed for the connector.
+        self.shown = painted_repo(repo)
         self.graph = Graph()
         self.nav = NavigationModel(self.graph)
         self.selected_index = 0

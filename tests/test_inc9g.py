@@ -199,7 +199,10 @@ def _bare_with_branch(root: pathlib.Path, owner: str, branch: str) -> str:
 @pytest.mark.network
 @red("github")
 @pytest.mark.usefixtures("hermetic")
-def test_inc9g_sec_f1_real_git_two_local_remotes_show_their_own_branches(tmp_path):
+def test_inc9g_sec_f1_real_git_two_local_remotes_show_their_own_branches(tmp_path, monkeypatch):
+    # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
+    # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
+    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
     url_a = _bare_with_branch(tmp_path, "alice", "alice-main")
     url_b = _bare_with_branch(tmp_path, "bob", "bob-main")
     cache = tmp_path / "cache"
@@ -270,13 +273,18 @@ def test_inc9g_sec_f4_a_well_formed_owner_name_reaches_gh(spec, monkeypatch):
 # ---------------------------------------------------------------------------
 # INC9F-SEC-F2 -- typed repo text is painted as text, never parsed as markup
 
-HOSTILE = ["a[/b]", "[@click=app.quit]q[/]", "[link=file:///x]a[/link]"]
+# `S1` rework: a URL carrying markup is outside the allow-list and is never painted (`test_inc9k`);
+# a LOCAL DIRECTORY is painted as typed, and its name may hold markup, so the arm types the names of
+# directories (relative, a `.git` inside each) instead.
+HOSTILE = ["[b]a", "[@click=app.quit]q", "[link=x]a"]
 
 
 @red("app")
 @pytest.mark.parametrize("typed", HOSTILE)
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9g_sec_f2_typed_repo_text_is_shown_literally(tmp_path, monkeypatch, typed, size):
+    (tmp_path / typed / ".git").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
     def fetch(self, progress=None):
         raise GitHubError("could not query 'x': timed out")
     monkeypatch.setattr(GitHubConnector, "fetch", fetch)

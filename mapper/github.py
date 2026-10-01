@@ -2,7 +2,8 @@
 
 Priority:
   1. Local filesystem path that points at a git repo -> read with `git` commands.
-  2. URL (`https://`, `http://`, `git@`) -> clone to a local cache and read with `git`.
+  2. A URL on the closed allow-list (`https://host[:port]/path`, `git@host:path`; see `_is_url`)
+     -> clone to a local cache and read with `git`.
   3. `owner/name` -> use the authenticated `gh` CLI (existing behaviour) with optional
      local clone/cache if the repo is public and git is available.
 """
@@ -34,11 +35,42 @@ class GitHubTimeout(GitHubError):
     (`INC9G-CR-F5`): a message suffix is a protocol any other error could join."""
 
 
-_URL_RE = re.compile(r"^(https?://|git@).+")
+# `S1` (operator, Round 8): a typed repo URL is accepted only as one of these two shapes, and
+# every other text is refused.  The allow-list lives here and nowhere else: `fetch`,
+# `_ensure_cloned` and `painted_repo` all read `_is_url`.
+#   https://host[:port]/seg(/seg)*[/]   host: ASCII letters, digits, `-` and `.`, starts with a
+#                                        letter or digit; port: digits; no userinfo, no IPv6
+#   git@host:seg(/seg)*[/]              the same host and segments; no port
+# seg: one or more of `[A-Za-z0-9._~-]`, never `.` or `..`, never starting with `-`.  Anything else
+# (`?`, `#`, `%`, `@`, whitespace, `\`, `//` in the path, `http://`, other schemes) is outside.
+_HOST = r"[A-Za-z0-9][A-Za-z0-9.-]*"
+_SEG = r"[A-Za-z0-9._~-]+"
+_HTTPS_URL = re.compile(rf"https://{_HOST}(?::[0-9]+)?(?P<path>(?:/{_SEG})+/?)")
+_SCP_URL = re.compile(rf"git@{_HOST}:(?P<path>{_SEG}(?:/{_SEG})*/?)")
+_UNSUPPORTED = "refusing the repository: not a supported URL, owner/name, or local folder"
+UNRECOGNISED = "(unrecognised URL)"
 
 
 def _is_url(value: str) -> bool:
-    return bool(_URL_RE.match(value))
+    match = _HTTPS_URL.fullmatch(value) or _SCP_URL.fullmatch(value)
+    if match is None:
+        return False
+    return all(seg not in (".", "..") and not seg.startswith("-")
+               for seg in match.group("path").strip("/").split("/"))
+
+
+def _is_owner_name(value: str) -> bool:
+    parts = value.split("/")
+    return (len(parts) == 2 and bool(_OWNER_RE.fullmatch(parts[0]))
+            and bool(_NAME_RE.fullmatch(parts[1])) and parts[1] not in (".", ".."))
+
+
+def painted_repo(spec: str) -> str:
+    """`S1` + `R1`: the typed text, only when it is an accepted URL, a valid owner/name or a local
+    directory; any other text (a credential form included) is never painted, whatever it holds."""
+    if _is_url(spec) or _is_owner_name(spec) or _is_local_path(spec):
+        return spec
+    return UNRECOGNISED
 
 
 def _is_local_path(value: str) -> bool:
@@ -98,40 +130,6 @@ def _refuse_unsafe(spec: str) -> None:
         raise GitHubError("refusing the repository: it may not start with '-'")
     if _TRANSPORT_HELPER_RE.match(spec.lstrip()):
         raise GitHubError("refusing the repository: transport helpers are not accepted")
-
-
-def _http_parts(url: str) -> tuple[str, str, str] | None:
-    """`(scheme, authority, rest)` of an http(s) URL, read the way curl does (`INC9I-SEC-F1`):
-    every slash and backslash after `://` is skipped, so `https:///u:tok@h/r` has the authority
-    `u:tok@h` although `urlparse` finds no netloc; the authority ends at the first `/`, `?`
-    or `#`.  `None` for anything that is not an http(s) URL."""
-    scheme, sep, after = url.strip().partition("://")
-    if not sep or scheme.lower() not in ("http", "https"):
-        return None
-    after = after.lstrip("/\\")
-    authority = re.split(r"[/?#]", after, maxsplit=1)[0]
-    return scheme, authority, after[len(authority):]
-
-
-def redact_userinfo(url: str) -> str:
-    """`INC9I-UX-F1`: the form of a typed URL that may be painted: `https://***@host/...`.
-    One helper for every surface; a URL without userinfo comes back as it was."""
-    parts = _http_parts(url)
-    if parts is None or "@" not in parts[1]:
-        return url
-    scheme, authority, rest = parts
-    return f"{scheme}://***@{authority.rpartition('@')[2]}{rest}"
-
-
-def _refuse_userinfo(url: str) -> None:
-    """`INC9H-SEC-F2`: `git clone --mirror` writes the URL, token and all, to the mirror's
-    `config`.  A typed http(s) URL with userinfo is refused before any process starts; the
-    sentence echoes nothing.  `INC9I-SEC-F1`: the authority is read as curl reads it, and a
-    URL with no host (`urlparse` finds no netloc) is refused too."""
-    parts = _http_parts(url)
-    if parts is not None and ("@" in parts[1] or not urlparse(url.strip()).netloc):
-        raise GitHubError(
-            "refusing the URL: it carries a credential; use the git credential helper instead")
 
 
 def _git_env() -> dict[str, str]:
@@ -290,11 +288,13 @@ def _ensure_cloned(
 
     `on_stale` is told the category when a cache hit could not be refreshed.
 
-    `INC9I-CR-F3`: the caller has refused userinfo (`_refuse_userinfo`); `GitHubConnector.fetch`
-    is the typed-URL entry point, and nothing else in `mapper/` calls this.
+    `S1`: a text outside the allow-list is refused here too, before any process (`INC9J-SEC-F2`),
+    so a direct call is no weaker than `GitHubConnector.fetch`; `INC9I-CR-F3` still pins `fetch`
+    as the only production caller.
     """
-    url = url.strip()
     _refuse_unsafe(url)
+    if not _is_url(url):
+        raise GitHubError(_UNSUPPORTED)
     name = _repo_name_from_url(url)
     # `INC9F-SEC-F1`: the last segment alone collides (`alice/tools`, `bob/tools`),
     # and a cache hit then shows whichever remote the mirror holds.
@@ -454,15 +454,12 @@ class GitHubConnector:
         return json.loads(result.stdout or "{}")
 
     def _fetch_gh(self, progress: ProgressCallback | None = None) -> Graph:
-        parts = self.repo.split("/")
         # `INC9F-SEC-F4`: both segments go into `gh api` paths; `.` and `..` are path
-        # steps and `?`, `#`, `%` would add a query or a fragment.  `INC9G-SEC-F4`: one
-        # fixed sentence for every malformed spec, the wrong number of segments included:
-        # it echoes nothing the operator typed.
-        if (len(parts) != 2 or not _OWNER_RE.fullmatch(parts[0]) or not _NAME_RE.fullmatch(parts[1])
-                or parts[1] in (".", "..")):
-            raise GitHubError("refusing the repository: expected owner/name, with the characters GitHub allows")
-        owner, name = parts
+        # steps and `?`, `#`, `%` would add a query or a fragment.  `S1`: `fetch` has refused
+        # a malformed spec already, with the one sentence; this is the same check, kept.
+        if not _is_owner_name(self.repo):
+            raise GitHubError(_UNSUPPORTED)
+        owner, name = self.repo.split("/")
 
         repo_info = self._gh(["repo", "view", self.repo, "--json", "name,defaultBranchRef"])
         default_branch = repo_info.get("defaultBranchRef", {}).get("name", "main")
@@ -586,7 +583,8 @@ class GitHubConnector:
             cwd = Path(self.repo).expanduser().resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
         if _is_url(self.repo):
-            _refuse_userinfo(self.repo)
             cwd = _ensure_cloned(self.repo, self.cache_dir, on_stale=self._mark_stale)
             return _build_graph_from_git(cwd, _repo_name_from_url(self.repo), progress=progress)
+        if not _is_owner_name(self.repo):
+            raise GitHubError(_UNSUPPORTED)
         return self._fetch_gh(progress=progress)
