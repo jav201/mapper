@@ -10387,3 +10387,48 @@ words, not process arguments. Carried by `tests/test_inc9f.py`.
 **What is not claimed.** The categories rely on git's English stderr: under another locale the text will not
 match and the category is `unknown (exit N)` (a safe failure; carried). The 120 s clone timeout is a margin,
 not a measurement. `ssh`-form URLs (`git@host:path`) are not parsed beyond the leading-dash and `::` rules.
+
+### `A-115` -- the Inc-9f review defects (`Inc-9g`)
+
+**Authority.** The independent reviews of `Inc-9f` (UX and security, then the code review), the coordinator's
+rulings on defects, and the operator's answer `N1` (`VERDICT-inc9-2026-09-30.md`, Round 4). Findings are named
+`INC9F-UX-F1`, `INC9F-UX-F2` (`N1`), `INC9F-SEC-F1`..`F4` and `INC9F-CR-F1`..`F6`; the record is
+`increment-033-inc9g.md`. `N2` (the arrows in the palette footer) is routed to `Inc-EN`, not here.
+
+**Statement.** Amends `A-114`.
+
+1. **The selected palette row is legible (`INC9F-UX-F1`).** Every glyph on the highlighted row reaches a
+   contrast of at least 4.5:1 against the highlight background, on every palette scope and under a relabelled
+   seat. The row is painted in one ground-on-accent colour; the unselected rows keep their three.
+2. **A mirror is keyed on the whole URL (`INC9F-SEC-F1`).** The cache directory is `<last segment>-<12 hex of
+   the sha256 of the normalised URL>`; the normal form drops surrounding space, a trailing `/` and `.git`.
+   `alice/tools` and `bob/tools` no longer share a mirror.
+3. **Typed repo text is text (`INC9F-SEC-F2`).** The repo screen paints the typed repository through
+   `darkside.plain()` as a `Text`; `a[/b]`, `[@click=...]` and `[link=...]` are shown literally and plant
+   nothing. The crumb already painted a `Text`; an arm pins both.
+4. **A cache hit that cannot be refreshed continues on the mirror and says so (`INC9F-SEC-F3`,
+   `INC9F-CR-F4`).** A fetch that times out or exits non-zero does not abort the connect. The refresh gets the
+   clone's 120 s budget. The connector records the fixed category it is stale for and the repo screen toasts
+   `showing the cached copy: <category>` (through `plain()`, markup off).
+5. **`owner/name` is validated for `gh` (`INC9F-SEC-F4`).** The owner matches `[A-Za-z0-9-]+`, the name
+   `[A-Za-z0-9._-]+` and is not `.` or `..`; anything else is refused before a process starts, with a fixed
+   sentence that echoes nothing.
+6. **The home hint drops `↵ open map` when there is nothing to open (`N1`, `INC9F-UX-F2`).** With no recent
+   map the hint is the invitation to choose a door alone; with maps it stays the seat-derived `↵ open map ·
+   or choose a door`.
+7. **The classifier (`INC9F-CR-F1`, `F2`, `F5`, `F6`).** The order of the four categories is pinned by
+   overlapping samples; each `gh` stderr sample names its own category; only `permission denied (publickey`
+   counts as authentication (a local filesystem refusal is `unknown (exit N)`); the fixed set is declared once
+   (`github.CATEGORIES`, `_TIMED_OUT`).
+8. **Every `git` call runs with `LC_ALL=C` and `GIT_TERMINAL_PROMPT=0`.** The category is chosen from English
+   stderr, so a localised `git` no longer falls to `unknown`, and a private HTTPS repo fails instead of
+   waiting on a prompt. The environment is built per call, so a test's temp `HOME` reaches git.
+9. **The transport-helper refusal reads the same stripped text as the dash refusal** (`INC9F-CR`, item 14).
+
+**Trace.** Standalone, like `A-113` and `A-114`. Carried by `tests/test_inc9g.py`; two `test_inc9f.py` arms
+changed (declared in the record).
+
+**What is not claimed.** `LC_ALL=C` is not measured against a localised `git` (no such git here). The stale
+toast is a toast: the stage panel does not carry it. `gh` is not given the English environment (its stderr is
+English already in the samples used). The hash is a cache key, not a security boundary: a collision needs a
+second preimage of 48 bits, and is not claimed impossible.
