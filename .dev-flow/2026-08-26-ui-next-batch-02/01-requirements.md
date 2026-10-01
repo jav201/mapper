@@ -10717,7 +10717,7 @@ puts the helper in `osopen` and has all three import it, so the map and the code
 3. **`U1`.** A text refused by `safe_local_path` toasts exactly `path not supported: use C:\… or a relative path` (one sentence, a real ellipsis, naming nothing) in the CSV prompt,
    the office prompt and the attachment open. A missing accepted path keeps `archivo no encontrado: <name>` (Inc-EN translates it). The placeholders are `C:\path\to\nodes.csv` and
    `C:\path\to\template.docx`.
-4. **`U2`.** Adding a `file` attachment validates with `safe_local_path` AND workspace containment at ADD time; a refusal stores nothing, takes no undo snapshot and toasts the U1 sentence.
+4. **`U2`.** Adding a `file` attachment validates with `safe_local_path` AND workspace containment at ADD time; a refusal stores nothing and toasts the U1 sentence (the undo snapshot is taken only after the check).
    URL attachments are unchanged.
 5. **`INC9M-SEC-F3`.** In `_fetch_gh`, `commit` is bound to `{}` at the top of each branch iteration.
 6. **`INC9M-SEC-F4` + `CR` section 1 (architecture).** `safe_local_path` stays in `osopen`. `docs/ARCHITECTURE.md` section 3: `github` and `screens` may import `osopen.safe_local_path` only;

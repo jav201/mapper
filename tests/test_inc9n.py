@@ -173,6 +173,29 @@ def test_inc9n_f1_office_path_is_none_for_a_hostile_text_without_a_filesystem_ca
     assert hits == []
 
 
+async def test_inc9n_f1_a_junction_inside_the_workspace_that_leads_outside_is_refused(tmp_path, monkeypatch):
+    """`resolve()` follows a directory junction (no privilege needed): lexically inside, really outside."""
+    import subprocess
+
+    _env(monkeypatch, tmp_path)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    _make_docx(tmp_path / "outside" / "a.docx", "outside")
+    made = subprocess.run(["cmd", "/c", "mklink", "/J", str(ws / "link"), str(tmp_path / "outside")],
+                          capture_output=True, text=True)
+    if made.returncode != 0:
+        pytest.skip("a directory junction could not be created here")
+    app = MapperApp(ws)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        screen = FactoryScreen(_doc_graph("link/a.docx"), process_name="demo")
+        app.push_screen(screen)
+        for _ in range(4):
+            await pilot.pause()
+        assert screen._office_path(screen.graph.documents["plantilla"]) is None
+        assert "archivo de plantilla no encontrado" in _flat(screen), _flat(screen)
+
+
 async def test_inc9n_f1_pin_a_workspace_relative_document_still_previews(tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
     _make_docx(tmp_path / "docs" / "a.docx", "hola {{nombre}}")
