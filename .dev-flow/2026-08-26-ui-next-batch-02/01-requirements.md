@@ -10352,3 +10352,38 @@ The rule set of `A-113` changes in five places. Findings are named `SEED2-Fn`.
 `a..b` refusal case (it is now valid). **What is not claimed.** The 100-character limit is a margin
 against `MAX_PATH`, not a measurement on the operator's workspace; short-name spellings (`PROGRA~1`) and
 alternate-data-stream spellings are not covered (`B-78`).
+
+
+### `A-114` -- repository specs are data, and a failed connect is one of a fixed set (`Inc-9f`)
+
+**Authority.** Round 3 of `VERDICT-inc9-2026-09-30.md`: the operator's answers `M1` and `M2`, and the
+coordinator's Inc-9f rulings (argument injection, `R3-CR-F7`, `R3-SEC-F1`). Findings are named
+`INC9F-Fn` (`increment-032-inc9f.md`).
+
+**Statement.**
+
+1. **A typed repository spec is data, never an option.** A URL or `owner/name` spec that starts with `-`,
+   or that starts with a transport-helper prefix (`ext::`, `file::`, any `scheme::`), is refused with a
+   `GitHubError` before any `git` or `gh` process starts. Every `git` call puts `--` before the URL and the
+   target; a ref name that came out of a repository (a branch or tag) is handed to `git log` and
+   `git rev-list` after `--end-of-options`. A local path is still accepted where it was (a directory with a
+   `.git`).
+2. **A failed `git` or `gh` call is reported as one fixed category:** `host not found`,
+   `not found or private`, `authentication required`, `network unreachable`, `timed out`,
+   `unknown (exit N)`. The category is chosen in code from stable fragments of the tool's English stderr;
+   the stderr is never painted and never put in an exception message. A clone is
+   `could not clone '<name>': <category>`. The clone has a timeout (120 s; a read keeps 30 s).
+3. **The failure outlives the toast.** The repo screen's stage panel paints the same sentence and the way
+   out (the seat's word for `home`), and no progress bar.
+4. **Reconnecting a mirror fetches.** `git clone --mirror` makes a bare repository, so the cache-hit test
+   is `HEAD` as a file, not `.git`.
+5. **Home and the palette (`M1`, `R3-UX-F1`, `R3-UX-F7`).** The home hint is the seat's `open map` plus the
+   invitation to choose a door. The palette paints its selected row, takes up/down/pageup/pagedown from the
+   search box, runs the highlighted row on `enter`, and pads its label column to the seat's widest word.
+
+**Trace.** Standalone, the same way `A-113` is: the nearest rule, `A-112` (English chrome), governs
+words, not process arguments. Carried by `tests/test_inc9f.py`.
+
+**What is not claimed.** The categories rely on git's English stderr: under another locale the text will not
+match and the category is `unknown (exit N)` (a safe failure; carried). The 120 s clone timeout is a margin,
+not a measurement. `ssh`-form URLs (`git@host:path`) are not parsed beyond the leading-dash and `::` rules.
