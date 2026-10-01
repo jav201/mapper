@@ -848,12 +848,19 @@ async def test_the_paint_site_differences_one_set_on_a_PARTIAL_overlap(tmp_path)
     `erp` folded, with `tests/test_overflow.py` 12 of 12 green.
 
     So: `anidado` at the NESTED fold `{ops, log}` — `TC-039`'s own state — driven
-    at 50x16 instead of 140x45, read through the STRIP, with the truth taken
+    at 50x15 instead of 140x45, read through the STRIP, with the truth taken
     from the composited frame by the oracle and never from the helper under
     test.  The size was found by sweeping 56 sizes × 3 folds on `anidado` and 30
     × 4 on `legacy` for the state where BOTH causes bite at once; on these two
     shallow shipped maps it is a narrow band, which is itself why no arm was
     standing on it.
+
+    THE ROW COUNT IS THE MAP HINT'S (Inc-9d).  This was 50x16 while the resting
+    hint (`siguiente ▸ navega con j/k/h/l · ...`, 54 cells) WRAPPED at 50 columns
+    and took a second row.  The English hint is 49 cells and fits one, so the same
+    canvas height is one row less of screen: 50x15.  Re-swept over widths 44-52 and
+    heights 14-18: the overlap state holds at height <= 15 at every width tried,
+    and at 16 only where the hint still wraps (width <= 48).
 
     THE OVERLAP IS ASSERTED, NOT ASSUMED, on all three clauses that make the row
     discriminating: a fold hides something, the VIEWPORT independently hides
@@ -863,7 +870,7 @@ async def test_the_paint_site_differences_one_set_on_a_PARTIAL_overlap(tmp_path)
     install(tmp_path, "anidado")
     folded = ("ops", "log")
     app = MapperApp(tmp_path)
-    async with app.run_test(size=(50, 16)) as pilot:
+    async with app.run_test(size=(50, 15)) as pilot:
         await pilot.pause()
         screen = await open_map(app, pilot, "anidado")
         screen.folded = frozenset(folded)
