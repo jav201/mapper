@@ -26,7 +26,7 @@ from tests.test_inc9g import URL_A
 from tests.test_inc9h import _StaleMirror, _clones, _connect, _settle
 from tests.test_repair_layout import _rows_in
 
-OPEN_STEPS: set[str] = {"github", "panel", "creds"}
+OPEN_STEPS: set[str] = {"panel"}
 
 
 def red(step: str):

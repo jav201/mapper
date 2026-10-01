@@ -100,6 +100,15 @@ def _refuse_unsafe(spec: str) -> None:
         raise GitHubError("refusing the repository: transport helpers are not accepted")
 
 
+def _refuse_userinfo(url: str) -> None:
+    """`INC9H-SEC-F2`: `git clone --mirror` writes the URL, token and all, to the mirror's
+    `config`.  A typed http(s) URL with userinfo is refused before any process starts; the
+    sentence echoes nothing."""
+    if url.lower().startswith(("http://", "https://")) and "@" in urlparse(url).netloc:
+        raise GitHubError(
+            "refusing the URL: it carries a credential; use the git credential helper instead")
+
+
 def _git_env() -> dict[str, str]:
     """The environment of every `git` call (`INC9F-CR` item 13): English stderr, so
     `_failure_category` matches on a localised git, and no credential prompt, so a
@@ -268,7 +277,10 @@ def _ensure_cloned(
         # hash collision, a tampered cache): the mirror there is not this URL's.  This URL
         # gets its own directory, keyed on the form as typed; if that holds another remote
         # too, the connect is refused.  The key never reads the mirror's contents otherwise.
-        target = _mirror_dir(cache_dir, name, url.rstrip("/"))
+        # `INC9H-SEC-F1`: the key lives in a space of its own.  Without the prefix a URL with
+        # no `.git` keyed the fallback on the very string the primary key is (`tools` after
+        # `tools.git`), found the same foreign mirror again and refused for good.
+        target = _mirror_dir(cache_dir, name, "as-typed:" + url.rstrip("/"))
         if (target / "HEAD").is_file() and not _is_mirror_of(target, url):
             raise GitHubError("refusing the cached copy: it belongs to another repository")
     if (target / "HEAD").is_file():
@@ -546,6 +558,7 @@ class GitHubConnector:
             cwd = Path(self.repo).expanduser().resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
         if _is_url(self.repo):
+            _refuse_userinfo(self.repo)
             cwd = _ensure_cloned(self.repo, self.cache_dir, on_stale=self._mark_stale)
             return _build_graph_from_git(cwd, _repo_name_from_url(self.repo), progress=progress)
         return self._fetch_gh(progress=progress)
