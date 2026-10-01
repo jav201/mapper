@@ -166,3 +166,9 @@ it is killed.
 | `SEED2-F4` | closed (reproduced on `save`/`create`, not on `create_seed`) |
 | `SEED2-F5` | closed |
 | `SEED2-F6` (`B-78`) | carry |
+
+## Note, 2026-09-30 (`Inc-9f`, `R3-CR-F6`)
+
+The census row for `MapScreen` constructions says "8 calls". The sites it lists are seven: `app.py:930`,
+`:949`, `:958`, `:978`, `:1090`, `:1028` and `:3516`. The count is 7; the conclusion (no call passes a
+literal) is unchanged.
