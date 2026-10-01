@@ -18,15 +18,17 @@ import pytest
 from textual.widgets import ListView
 
 from mapper import keymap
-from mapper.app import MapperApp, RepoScreen
+from mapper.app import HomeScreen, MapperApp, RepoScreen
+from mapper.model import Graph
 from mapper.github import GitHubConnector, GitHubError, _ensure_cloned, _local_branches
 from tests.test_inc9f import (  # noqa: F401  (hermetic is a fixture)
     NARROW, SIZE, _Mirror, _Run, _open_palette, _sentinel_seat, hermetic,
 )
-from tests.test_repair_layout import _frame_rows
+from mapper.widgets.chrome import HintLine
+from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"palette", "app"}
+OPEN_STEPS: set[str] = {"palette", "app", "home"}
 
 
 def red(step: str):
@@ -291,3 +293,51 @@ async def test_inc9g_sec_f2_typed_repo_text_is_shown_literally(tmp_path, monkeyp
                 style = seg.style
                 assert style is None or style.link is None, (seg.text, style.link)
                 assert style is None or not style.meta, (seg.text, style.meta)
+
+
+# ---------------------------------------------------------------------------
+# N1 / INC9F-UX-F2 -- with nothing to open, the home hint does not offer `↵ open map`
+
+async def _home_hint(tmp_path, size, *, maps: bool, relabel: bool = False, monkeypatch=None):
+    app = MapperApp(tmp_path)
+    if maps:
+        app.store.save("demo", Graph())
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        if relabel:
+            _sentinel_seat(monkeypatch)
+            app.push_screen(HomeScreen())
+            for _ in range(3):
+                await pilot.pause()
+        assert isinstance(app.screen, HomeScreen)
+        hint = app.screen.query_one(HintLine)
+        return hint.text, _rows_in(app.screen, hint.region)
+
+
+@red("home")
+@pytest.mark.parametrize("size", [SIZE, NARROW])
+async def test_inc9g_n1_no_recent_maps_the_hint_only_invites_a_door(tmp_path, size):
+    text, rows = await _home_hint(tmp_path, size, maps=False)
+    derived = keymap.hint_pair(keymap.SCOPE_HOME, "open_selected")
+    assert derived not in text and "↵" not in text, text
+    assert len(rows) == 1 and "choose a door" in rows[0], rows
+    assert derived not in rows[0] and "↵" not in rows[0], rows
+
+
+@pytest.mark.parametrize("size", [SIZE, NARROW])
+async def test_inc9g_n1_with_recent_maps_the_hint_still_names_enter(tmp_path, size):
+    text, rows = await _home_hint(tmp_path, size, maps=True)
+    derived = keymap.hint_pair(keymap.SCOPE_HOME, "open_selected")
+    assert derived in text and "choose a door" in text, text
+    assert len(rows) == 1 and derived in rows[0] and "choose a door" in rows[0], rows
+
+
+@red("home")
+async def test_inc9g_n1_the_relabelled_seat_word_is_gone_without_maps_and_present_with(
+        tmp_path, monkeypatch):
+    (tmp_path / "a").mkdir()
+    without, _ = await _home_hint(tmp_path / "a", SIZE, maps=False, relabel=True, monkeypatch=monkeypatch)
+    assert "zz-open_selected" not in without and "choose a door" in without, without
+    (tmp_path / "b").mkdir()
+    withmaps, _ = await _home_hint(tmp_path / "b", SIZE, maps=True, relabel=True, monkeypatch=monkeypatch)
+    assert "zz-open_selected" in withmaps, withmaps

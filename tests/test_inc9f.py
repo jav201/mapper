@@ -24,6 +24,7 @@ import pytest
 from textual.widgets import Input, ListView, Static
 
 from mapper import github, keymap
+from mapper.model import Graph
 from mapper.app import HomeScreen, MapperApp, PlugRepoScreen, RepoScreen
 from mapper.github import GitHubConnector, GitHubError, _ensure_cloned
 from mapper.screens.palette import CommandPalette
@@ -438,6 +439,7 @@ def _sentinel_seat(monkeypatch):
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9f_m1_the_home_hint_names_enter_and_invites_a_door(tmp_path, size):
     app = MapperApp(tmp_path)
+    app.store.save("demo", Graph())  # `N1`: with recents `↵` opens one, so the hint names it
     async with app.run_test(size=size) as pilot:
         await pilot.pause()
         assert isinstance(app.screen, HomeScreen)
@@ -454,6 +456,7 @@ async def test_inc9f_m1_the_home_hint_follows_a_relabelled_seat(tmp_path, monkey
     """A hand-written `↵ open map` equals today's label and would pass the arm above;
     it cannot contain a word it has never heard."""
     app = MapperApp(tmp_path)
+    app.store.save("demo", Graph())
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         _sentinel_seat(monkeypatch)
