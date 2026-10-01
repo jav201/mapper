@@ -28,7 +28,7 @@ from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 from tests.test_repair_layout import _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"palette"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
