@@ -13,12 +13,11 @@ with HOME and USERPROFILE pointed at it.  No user-profile path is typed literall
 """
 from __future__ import annotations
 
-import pathlib
 import subprocess
 
 import pytest
 from textual.screen import Screen
-from textual.widgets import Input, ListView, Static
+from textual.widgets import ListView, Static
 
 from mapper import github, keymap
 from mapper.app import HomeScreen, MapperApp, RepoScreen
