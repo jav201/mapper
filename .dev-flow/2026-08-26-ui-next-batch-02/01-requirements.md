@@ -10528,3 +10528,42 @@ arms in `test_inc9d` and `test_inc9f` call it with a token URL to prove the clon
 boundary is the connector). The non-breaking-space result (statement 4) is measured on `rich.text.Text.wrap` at 30
 cells, where a text with NBSP between the words of `unknown (exit 1)` still wrapped between `(exit` and `1)`; it was not
 re-measured in a Textual render.
+
+
+### `A-118` -- the Inc-9i review defects (`Inc-9j`), dated 2026-10-01
+
+**Authority.** The independent reviews of `Inc-9i` (code, UX, security) and the operator's Round 7, R1
+(`VERDICT-inc9-2026-09-30.md`, "Ocultar en pantalla, campo se queda"). Findings are named `INC9I-*`; the record is
+`increment-036-inc9j.md`.
+
+**Statement.** Amends `A-117` statement 5; adds statements 12 and 13.
+
+1. **The credential refusal reads the authority the way curl does (`INC9I-SEC-F1`, amends `A-117` st. 5).** For a typed
+   `http(s)://` URL every `/` and `\` after `://` is skipped and the authority ends at the first `/`, `?` or `#`. The URL
+   is refused, with the same fixed sentence and nothing echoed, before any process starts, when that authority contains
+   `@`, or when `urlparse(url).netloc` is empty. So `https:///tok@h/o/r`, `http:///u:tok@h/o/r`, `https:////u:p@h/o/r`
+   and `https:///\u:p@h/o/r` are refused (curl treats `u:tok` as userinfo there although `urlparse` finds no netloc); a
+   URL with no host at all (`https:///h/o/r`) is refused too. Still connecting: `git@host:o/r`, `https://h/o/r@v2`,
+   `https://h/o/r.git`, `https://h/o/r/`, and `https://tok?@h/o/r` (the host is `tok`: the `@` is in the query, and git's
+   own credential parsing agrees). An upper-case scheme (`HTTPS://`) never reaches this check: `_is_url` is
+   case-sensitive and the `gh` path refuses it with its own fixed sentence.
+2. **A typed URL is never painted with its userinfo (`INC9I-UX-F1`, operator R1, statement 12).** One helper,
+   `github.redact_userinfo`, returns `scheme://***@host/...` (the scheme as typed, the userinfo replaced by `***`, the
+   authority read as in statement 1, so the three-slash form is redacted too); a URL without userinfo comes back
+   unchanged. `RepoScreen` paints the redacted form in the crumb and in `#repo-name`; `RepoScreen.repo` stays as typed
+   (the connector needs it). No toast and no failure line names the URL (the refusal and `could not clone` name a fixed
+   sentence and the last path segment). The connect-repo input field keeps the operator's own text after `q`, for
+   correction; it is not cleared and not persisted.
+3. **`_ensure_cloned` is reached from production code only through `GitHubConnector.fetch` (`INC9I-CR-F3`, statement
+   13).** Its docstring says the caller has refused userinfo; a pin test fails when another production reference
+   appears.
+4. **Arms only (no behaviour change).** `INC9I-CR-F1`: the `▲ cached copy:` category sits on its own line for every
+   category in `CATEGORIES` plus `unknown (exit 1)` and `unknown (exit 128)`. `INC9I-CR-F2`: `R/` after `r.git` then `r`
+   finds the as-typed directory `r` made, with no third clone.
+
+**Trace.** Standalone, like `A-113`..`A-117`. Carried by `tests/test_inc9j.py` and two reworked arms in
+`tests/test_inc9i.py`.
+
+**What is not claimed.** `_ensure_cloned` called directly still takes userinfo (statement 13 pins who calls it, not what
+it accepts). Query-string secrets (`?token=...`) are not userinfo and are not redacted. A real clone of the three-slash
+form against curl was measured by the security reviewer, not re-run here.
