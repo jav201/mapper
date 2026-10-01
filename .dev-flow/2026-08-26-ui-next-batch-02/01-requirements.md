@@ -10487,6 +10487,8 @@ error, not a stale mirror (only the refresh has a stale path).
 
 ### `A-117` -- the Inc-9h review defects (`Inc-9i`), dated 2026-10-01
 
+> **Superseded in part by `A-119` (2026-10-01):** statement 5 (the credential refusal for a typed `http(s)://` URL) is replaced by the closed allow-list; `.../r@v2` is refused now. Kept as the record of what was decided then.
+
 **Authority.** The independent reviews of `Inc-9h` (code, UX, security), the coordinator's ruling on `INC9H-UX-F1` and
 `INC9H-SEC-F2`, and the operator's Round 6, Q1 (`VERDICT-inc9-2026-09-30.md`): `.../r` and `.../r.git` are distinct
 remotes, a double clone is accepted, a repo is never shown under another's URL, and no spelling is locked out. Findings
@@ -10532,6 +10534,8 @@ re-measured in a Textual render.
 
 ### `A-118` -- the Inc-9i review defects (`Inc-9j`), dated 2026-10-01
 
+> **Superseded in part by `A-119` (2026-10-01):** statements 1 and 2 (the curl-style authority read and `redact_userinfo`) are replaced by the closed allow-list and `painted_repo`; statements 3 and 4 stand. Kept as the record of what was decided then.
+
 **Authority.** The independent reviews of `Inc-9i` (code, UX, security) and the operator's Round 7, R1
 (`VERDICT-inc9-2026-09-30.md`, "Ocultar en pantalla, campo se queda"). Findings are named `INC9I-*`; the record is
 `increment-036-inc9j.md`.
@@ -10567,3 +10571,51 @@ re-measured in a Textual render.
 **What is not claimed.** `_ensure_cloned` called directly still takes userinfo (statement 13 pins who calls it, not what
 it accepts). Query-string secrets (`?token=...`) are not userinfo and are not redacted. A real clone of the three-slash
 form against curl was measured by the security reviewer, not re-run here.
+
+
+### `A-119` -- the closed allow-list for typed repo URLs (`Inc-9k`), dated 2026-10-01
+
+**Authority.** The operator's Round 8, S1 (`VERDICT-inc9-2026-09-30.md`), answer "Lista cerrada". Quoted: "A typed repo URL
+is accepted only as `https://host[:port]/path` or `git@host:path`, simple characters only (no `@` before the host, no
+userinfo, no `?`, `#`, whitespace, backslash, extra or encoded slashes; ASCII host). Everything else is refused before any
+process with one fixed sentence that echoes nothing, and every painted surface shows `(unrecognised URL)` instead of the
+text. The connect field keeps the typed text (R1). The deny-list pieces (`_refuse_userinfo`, `redact_userinfo` heuristics)
+become redundant and are removed or reduced to the allow-list. `owner/name` (gh path) is unchanged". Four rounds in a row
+found a new odd URL form; the deny-list is replaced. The record is `increment-037-inc9k.md`.
+
+**Statement.** Supersedes the deny-list statements of `A-117` statement 5 and of `A-118` statements 1 and 2 (they stay in
+the text above, marked); `A-118` statement 3 (the `_ensure_cloned` caller pin) and statement 4 stand.
+
+1. **The grammar (one place, `github._is_url`).** A typed URL is accepted only if the WHOLE text matches one of:
+   `https://HOST[:PORT]/SEG(/SEG)*[/]` or `git@HOST:SEG(/SEG)*[/]`. `HOST` starts with an ASCII letter or digit and then
+   holds ASCII letters, digits, `-` and `.` (a DNS name or an IPv4 address; no IPv6 brackets, no userinfo). `PORT` is one
+   or more ASCII digits (https form only). `SEG` is one or more of `[A-Za-z0-9._~-]`, is never `.` or `..`, and never starts
+   with `-`. So the path has no `?`, `#`, `%`, `@`, whitespace, backslash, empty segment (`//`) or non-ASCII character, and
+   the text has no leading or trailing whitespace.
+2. **`http://` is refused (decision).** A git remote over plain http is not needed; the default of the brief is taken.
+3. **`https://h/o/r@v2` is refused now (declared).** The `@` in the path is outside the grammar. It connected before
+   (`A-117` st. 5, `A-118` st. 1); it does not. No spelling with `@` anywhere is accepted.
+4. **The refusal is one sentence.** `refusing the repository: not a supported URL, owner/name, or local folder`, before any
+   process and before any directory is made, for every text that is not an accepted URL, a valid `owner/name`
+   (`A-113`..: the `gh` path, unchanged) or a local git directory (unchanged). It echoes nothing. This replaces the credential
+   sentence and the `gh` path's own sentence (`expected owner/name, ...`); no sealed arm required either. Kept (they name a
+   rule and echo nothing, and `test_inc9g` requires the second): `refusing the repository: it may not start with '-'` and
+   `...: transport helpers are not accepted`, which run first.
+5. **`_ensure_cloned` applies the same check (`INC9J-SEC-F2`).** Next to `_refuse_unsafe`, on the text as given (it no longer
+   strips: a padded URL is refused), so a direct call is no weaker than `GitHubConnector.fetch`. `fetch` and the new
+   `painted_repo` read the same `_is_url`. `A-118` st. 3 (the AST pin) is kept: it still holds, and it keeps `fetch` the one
+   typed-URL entry point.
+6. **Display.** `github.painted_repo(text)` returns the text only when it is an accepted URL, a valid `owner/name` or a local
+   git directory, and `(unrecognised URL)` otherwise. `RepoScreen` feeds the crumb and `#repo-name` with it; the failure
+   line and the toasts carry only the fixed sentence or `plain(name)`. Accepted URLs cannot carry userinfo, so nothing is
+   redacted: `redact_userinfo`, `_refuse_userinfo` and `_http_parts` are removed. `RepoScreen.repo` stays as typed and the
+   connect-repo field keeps the typed text (R1).
+
+**Trace.** Standalone, like `A-113`..`A-118`. Carried by `tests/test_inc9k.py` and the reworked sealed arms listed in
+`increment-037-inc9k.md` section 2.
+
+**What is not claimed.** An IDN host must be typed as ASCII (`xn--...`); a host is not checked as a valid DNS name beyond its
+characters (`h..x` passes and fails at resolution); a LOCAL DIRECTORY is painted as typed whatever its path holds (S1 names
+the local directory as displayable); no real `git clone` was run against an accepted form (stubs only); the Inc-9j security and
+code review tables were not on disk, so "every form in the review tables" is covered by the forms in the Inc-9j arms and the
+operator's list.
