@@ -245,7 +245,7 @@ def test_inc9g_sec_f3_a_clone_timeout_is_still_an_error(tmp_path, monkeypatch):
 @red("github")
 @pytest.mark.parametrize("spec", [
     "../user", "o/n?x=1", "o/..", "./n", "o/.", "o/n#frag", "o%2f/n", "o/n x", "o_x/n",
-    "o/n‮", "o/n\u0000",
+    "o/n\u202e", "o/n\u0000",
 ])
 def test_inc9g_sec_f4_a_malformed_owner_name_never_reaches_gh(spec, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)  # a relative spec like `o/..` is a LOCAL path when it names a repo
@@ -255,7 +255,7 @@ def test_inc9g_sec_f4_a_malformed_owner_name_never_reaches_gh(spec, tmp_path, mo
         GitHubConnector(spec).fetch()
     assert run.calls == [], run.calls
     assert "refus" in str(caught.value)
-    assert "‮" not in str(caught.value) and "\x00" not in str(caught.value)
+    assert "\u202e" not in str(caught.value) and "\x00" not in str(caught.value)
 
 
 @pytest.mark.parametrize("spec", ["alice/tools", "my-org/a_b.js", "A1/.github", "o/n-1.2_3"])
