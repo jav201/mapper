@@ -69,3 +69,32 @@ reviewer's recommendation; `atlas (legacy tree)` noted as an alternative, not ad
   `keymap.py` (L3 home order), `screens/palette.py` (INC9C-F2 / INC9BC-UX-F4: group headers and an
   English footer from the seat).
 
+---
+
+# Round 3 — after the Inc-9d / Inc-SEED-2 / Inc-9e reviews (2026-09-30, base `bd7d673`)
+
+All three lenses PASS: code (uninterrupted lane 1558 passed / 0 failed; FLAKE-1/2 green), security
+(no HIGH/MEDIUM; every closure re-executed), ux PASS-WITH-FINDINGS (the eight previous findings
+discharged on the painted frame). Two questions were put to the operator; both took the recommended
+option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| M1 · R3-UX-F6 | With the doors first (L3), the home bar never shows `↵ open map` | Ponerlo en la pista de home | The home hint carries `↵ open map` (seat-derived) alongside the invitation to choose a door; the bar is unchanged |
+| M2 · R3-UX-F2 | A failed clone says only `git clone failed (exit 128)` | Categorías fijas | Code classifies git's failure into a FIXED set (`host not found`, `not found or private`, `authentication required`, `network unreachable`, `unknown (exit N)`); git's own text is never painted (it names paths, the URL may carry a token); the failure is also painted in the repo screen's stage panel so it outlives the toast |
+
+## Coordinator rulings — Inc-9f scope (defects)
+
+- **Argument injection (from the code review's hand-off, unverified):** `git clone --mirror <url> <target>`
+  passes the URL positionally without `--`; a value starting with `-` reaches git as an option. Verify
+  reachability with an arm; fix with `--` and by refusing a URL that starts with `-`. Highest priority.
+- **R3-CR-F7 (pre-existing, measured):** the cache-hit check looks for `.git`, but `--mirror` is bare,
+  so reconnecting a repo always fails. Check `HEAD` instead.
+- **R3-SEC-F1:** clone timeout; `_gh` no longer echoes `gh` stderr (same fixed-category treatment).
+- **R3-UX-F1 (pre-existing):** the palette never paints its selected row (CSS `--highlight` vs Textual's
+  `-highlight`) and arrows do nothing while the Input holds focus. **R3-UX-F7** keys aligned in a column.
+- **R3-CR-F1** census holes (re-raising handlers, generator expressions), **R3-CR-F2** palette width pin,
+  **R3-CR-F3** home passes the seat key, not the literal `"c"`, **R3-CR-F5** stale assert,
+  **R3-CR-F6** record miscount.
+- Source files: `github.py`, `app.py`, `screens/palette.py` (3 of the operator's 4).
+
