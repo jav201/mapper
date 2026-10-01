@@ -471,14 +471,32 @@ _CENSUS_CASES = {
     "call in the except handler": (
         "def f(store):\n    try:\n        pass\n    except Exception:\n        store.save(1)\n", False),
     "call with no try": ("def f(store):\n    store.save(1)\n", False),
+    "X3 a handler that re-raises": (
+        "def f(store):\n    try:\n        store.save(1)\n    except Exception:\n        raise\n",
+        False),
+    "X3b a handler that raises another from it": (
+        "def f(store):\n    try:\n        store.save(1)\n    except Exception as e:\n"
+        "        raise RuntimeError('x') from e\n", False),
+    "X4 a generator built in the try, consumed later": (
+        "def f(store, rows):\n    try:\n        gen = (store.save(r) for r in rows)\n"
+        "    except Exception:\n        pass\n    list(gen)\n", False),
 }
+
+#: Committed RED first (Inc-9f, `R3-CR-F1`): the judge counted a handler that
+#: re-raises as a guard, and treated a generator expression as running in the
+#: function that built it.
+_CENSUS_RED = {"X3 a handler that re-raises", "X3b a handler that raises another from it",
+               "X4 a generator built in the try, consumed later"}
 
 #  The unguarded shapes the lexical rule wrongly accepted (E1, E2, E3, the narrow
 #  handler, the nested def) were committed RED as strict xfails (`a5ddf5d`); the
 #  other two unguarded cases are controls the old rule already refused.
 
 
-@pytest.mark.parametrize("case", list(_CENSUS_CASES))
+@pytest.mark.parametrize("case", [
+    pytest.param(c, marks=pytest.mark.xfail(
+        strict=True, reason="Inc-9f: committed RED; closed by the 'census' step"))
+    if c in _CENSUS_RED else c for c in _CENSUS_CASES])
 def test_inc9d_cr_f1_the_census_judges_a_site_by_what_actually_catches_it(case):
     """`INC9BC-CR-F1` / `SEC-F2`: a site is guarded only if a handler for `Exception`
     (or broader) in the SAME function as the call can catch it; a `.save` reference
