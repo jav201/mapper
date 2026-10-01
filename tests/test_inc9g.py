@@ -202,7 +202,8 @@ def _bare_with_branch(root: pathlib.Path, owner: str, branch: str) -> str:
 def test_inc9g_sec_f1_real_git_two_local_remotes_show_their_own_branches(tmp_path, monkeypatch):
     # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
     # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
-    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
+    real_is_url = github._is_url
+    monkeypatch.setattr("mapper.github._is_url", lambda v: v.startswith("file://") or real_is_url(v))
     url_a = _bare_with_branch(tmp_path, "alice", "alice-main")
     url_b = _bare_with_branch(tmp_path, "bob", "bob-main")
     cache = tmp_path / "cache"

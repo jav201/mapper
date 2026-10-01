@@ -65,7 +65,9 @@ def test_inc9j_sec_f1_extra_slashes_do_not_hide_userinfo_from_the_refusal(url, t
     message = str(caught.value)
     assert run.calls == [], run.calls
     # `S1` rework: the one fixed sentence of the allow-list replaces the credential sentence.
-    assert message == ("refusing the repository: not a supported URL, owner/name, or local folder"), message
+    assert message == (
+        "refusing the repository: use https://host/path, git@host:path, owner/name or a"
+        " local folder"), message
     assert not (tmp_path / "cache").exists(), "no directory was made for a refused URL"
 
 
@@ -86,7 +88,9 @@ def test_inc9j_sec_f1_a_url_with_no_host_at_all_is_refused_before_any_process(tm
     monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:
         GitHubConnector("https:///h/o/r", cache_dir=tmp_path / "cache").fetch()
-    assert str(caught.value).startswith("refusing the repository") and run.calls == []
+    assert str(caught.value) == (
+        "refusing the repository: use https://host/path, git@host:path, owner/name or a"
+        " local folder") and run.calls == []
 
 
 @pytest.mark.parametrize("url", [
@@ -201,7 +205,8 @@ def _references_to_ensure_cloned() -> list[tuple[str, str]]:
 
 
 def test_inc9j_cr_f3_ensure_cloned_is_referenced_in_production_only_from_the_connector_fetch():
-    """The caller of `_ensure_cloned` is the one that has refused userinfo (`fetch`)."""
+    """`fetch` is the one production entry point for a typed URL; `_ensure_cloned` also refuses a
+    text outside the allow-list by itself (A-119 st. 5), so a direct call is no weaker."""
     found = _references_to_ensure_cloned()
     assert ("github.py", "<definition>") in found, found
     others = [f for f in found if f != ("github.py", "<definition>")]

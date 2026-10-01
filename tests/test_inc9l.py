@@ -25,7 +25,7 @@ from tests.test_inc9f import NARROW, SIZE, _Run, hermetic  # noqa: F401
 from tests.test_inc9j import _Boom, _type_and_connect
 from tests.test_repair_layout import _frame_rows, _rows_in
 
-OPEN_STEPS: set[str] = {"t1", "total", "unc", "mirror", "obs1", "quote"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
@@ -92,26 +92,24 @@ async def test_inc9l_t1_the_refusal_screen_paints_the_sentence(tmp_path, monkeyp
 # ---------------------------------------------------------------------------
 # INC9K-SEC-F1 -- `_is_local_path` is total: no text makes it raise
 
-class _Unresolvable:
-    def __init__(self, exc):
-        self.exc = exc
-
-    def __call__(self, path_self):
-        raise self.exc
+def _unresolvable(exc):
+    def expanduser(path_self):
+        raise exc
+    return expanduser
 
 
 @red("total")
 @pytest.mark.parametrize("exc", [RuntimeError("Could not determine home directory."),
                                  OSError("boom"), ValueError("embedded null byte")])
 def test_inc9l_sec_f1_the_local_path_predicate_never_raises(exc, monkeypatch):
-    monkeypatch.setattr(pathlib.Path, "expanduser", _Unresolvable(exc))
+    monkeypatch.setattr(pathlib.Path, "expanduser", _unresolvable(exc))
     assert github._is_local_path("~nosuchuser:tok@h/o/r") is False
     assert github.painted_repo("~nosuchuser:tok@h/o/r") == UNRECOGNISED
 
 
 @red("total")
 def test_inc9l_sec_f1_fetch_refuses_with_the_fixed_sentence_not_an_unexpected_error(tmp_path, monkeypatch):
-    monkeypatch.setattr(pathlib.Path, "expanduser", _Unresolvable(RuntimeError("x")))
+    monkeypatch.setattr(pathlib.Path, "expanduser", _unresolvable(RuntimeError("x")))
     run = _Boom()
     monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:

@@ -328,7 +328,8 @@ def test_inc9h_sec_f1_the_same_remote_in_the_four_spellings_gets_one_mirror_name
 def test_inc9h_sec_f1_real_git_c_r_and_c_r_dot_git_show_their_own_branches(tmp_path, monkeypatch):
     # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
     # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
-    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
+    real_is_url = github._is_url
+    monkeypatch.setattr("mapper.github._is_url", lambda v: v.startswith("file://") or real_is_url(v))
     def git(cwd, *args):
         return subprocess.run(
             ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
@@ -376,7 +377,8 @@ def test_inc9h_sec_f2_the_refresh_is_fetch_prune_all(tmp_path, monkeypatch):
 def test_inc9h_sec_f2_real_git_a_branch_deleted_on_the_remote_is_gone_after_a_reconnect(tmp_path, monkeypatch):
     # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
     # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
-    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
+    real_is_url = github._is_url
+    monkeypatch.setattr("mapper.github._is_url", lambda v: v.startswith("file://") or real_is_url(v))
     url = _bare_with_branch(tmp_path, "alice", "main")
     bare = tmp_path / "alice" / "tools.git"
     work = tmp_path / "alice-work"
@@ -434,7 +436,9 @@ def test_inc9h_sec_f4_the_clone_message_shows_the_name_through_plain(tmp_path, m
         _ensure_cloned(hostile, tmp_path / "cache")
     message = str(caught.value)
     assert run.calls == [], run.calls
-    assert message == "refusing the repository: not a supported URL, owner/name, or local folder", message
+    assert message == (
+        "refusing the repository: use https://host/path, git@host:path, owner/name or a"
+        " local folder"), message
     assert "\u202e" not in message and "\u001b" not in message, repr(message)
     assert "wi" not in message and "get" not in message and tail not in message, message
 
@@ -449,7 +453,9 @@ def test_inc9h_sec_f4_the_timeout_clone_message_shows_the_name_through_plain(tmp
         _ensure_cloned(hostile, tmp_path / "cache")
     assert run.calls == [], run.calls
     assert "\u202e" not in str(caught.value), repr(str(caught.value))
-    assert str(caught.value).startswith("refusing the repository: ")
+    assert str(caught.value) == (
+        "refusing the repository: use https://host/path, git@host:path, owner/name or a"
+        " local folder")
 
 
 # ---------------------------------------------------------------------------
@@ -585,7 +591,6 @@ def test_inc9h_cr_f7_a_padded_url_is_cloned_and_keyed_as_its_stripped_form(tmp_p
     with pytest.raises(GitHubError, match="^refusing the repository: "):
         _ensure_cloned("  " + URL_A + "\t ", cache)
     assert _clones(run) == [] and not cache.exists(), (_clones(run), cache.exists())
-    assert [c[-2] for c in _clones(run)] == []
     first = _ensure_cloned(URL_A, cache)
     assert [c[-2] for c in _clones(run)] == [URL_A], _clones(run)
     run.calls.clear()

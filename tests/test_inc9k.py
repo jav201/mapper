@@ -30,7 +30,8 @@ def red(step: str):
     return lambda fn: fn
 
 
-SENTENCE = "refusing the repository: not a supported URL, owner/name, or local folder"
+SENTENCE = ("refusing the repository: use https://host/path, git@host:path, owner/name or a"
+            " local folder")
 UNRECOGNISED = "(unrecognised URL)"
 # Kept: they name a rule, echo nothing, and the Inc-9f..9j arms for dash and `ext::` stand on them.
 FINER = {"refusing the repository: it may not start with '-'",
