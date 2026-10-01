@@ -140,3 +140,14 @@ and a mismatch gets its own directory keyed on the typed form.
 | id | Question | Answer (verbatim label) | What it rules |
 |---|---|---|---|
 | Q1 · INC9G-SEC-F1 | In the repo cache, are `…/r` and `…/r.git` one repo or two? | Distintos, se acepta doble clon | Two remotes; a repo is never shown under another's URL; `tools` then `tools.git` from one cache clones twice, accepted |
+
+---
+
+# Round 7 — Inc-9i ux review (2026-10-01, base `e865d43`)
+
+ux PASS-WITH-NOTICES (the three Inc-9i changes discharged). One question was put to the operator; the
+answer took the recommended option. Code and security reviews were still running when it was taken.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| R1 · INC9I-UX-F1 | A refused credential URL is still painted, token included (crumb, repo name), and kept in the field after `q` | Ocultar en pantalla, campo se queda | Every surface that paints a typed URL redacts userinfo (`https://***@host/…`); the connect-repo field keeps the operator's own text for correction (never persisted). Routed to the next increment with the Inc-9i review findings |
