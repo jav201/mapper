@@ -19,9 +19,10 @@ countable).  It therefore takes plain strings plus the workspace root.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Callable
 from urllib.parse import urlparse
 
@@ -42,6 +43,33 @@ REFUSED_TYPE = "destino inválido"
 REFUSED_SCHEME = "esquema no permitido"
 REFUSED_OUTSIDE = "fuera del espacio de trabajo"
 REFUSED_ERROR = "no se pudo abrir"
+
+
+_DRIVE = re.compile(r"[A-Za-z]:")
+
+
+def safe_local_path(text: str) -> Path | None:
+    r"""`S1` applied to a typed LOCAL path: a closed allow-list, decided on strings before any
+    filesystem call, so no SMB or NTLM lookup and no NT-namespace path is ever probed.
+
+    Refused (None): an empty text, a NUL, a leading `-`; a `~` that cannot be expanded; and
+    everything that is not (a) drive-absolute (a letter drive and a root, as `C:\x`) or (b)
+    relative (no drive, no root, and the typed text does not start with a separator).  That
+    covers UNC, `\?\`, `\.\`, `\??\`, `/??/`, root-relative `\x` and drive-relative `C:x`.
+    The caller may stat the returned path, and only then.
+    """
+    if not isinstance(text, str) or not text or "\x00" in text or text.startswith("-"):
+        return None
+    try:
+        expanded = Path(text).expanduser()
+        parsed = PureWindowsPath(str(expanded))
+    except (RuntimeError, OSError, ValueError):
+        return None
+    if _DRIVE.fullmatch(parsed.drive) and parsed.root == "\\":
+        return expanded
+    if not parsed.drive and not parsed.root and text[0] not in "\/":
+        return expanded
+    return None
 
 
 def _default_launcher(target: str) -> None:
@@ -102,6 +130,11 @@ def open_external(
         except (OSError, ValueError):
             return REFUSED_ERROR
         return OK
+
+    # `INC9L-SEC-F5`: the same closed allow-list as a typed path, BEFORE `resolve()`: resolving
+    # a UNC or NT-namespace target is itself a network or device lookup.
+    if kind == "file" and safe_local_path(target) is None:
+        return REFUSED_TYPE
 
     # kind == "file": confinement is the control, and it is checked BEFORE the
     # launcher is reached.  Existence is NOT an authorisation — it answers "will

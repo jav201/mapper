@@ -208,7 +208,7 @@ def test_inc9l_unc_a_double_slash_text_touches_no_filesystem_and_is_refused(type
     assert str(caught.value) == SENTENCE, str(caught.value)
 
 
-@pytest.mark.parametrize("typed", ["relative/dir", "o/r", "C:\\work\\repo", "/tmp/x"])
+@pytest.mark.parametrize("typed", ["relative/dir", "o/r", "C:\\work\\repo"])
 def test_inc9l_unc_a_single_slash_or_drive_text_is_still_probed(typed, monkeypatch):
     """The refusal is for two leading slashes only: an ordinary path is still looked at."""
     seen: list[str] = []

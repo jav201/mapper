@@ -21,6 +21,7 @@ from urllib.parse import quote, urlparse
 
 from .darkside import plain
 from .model import Edge, Ficha, Graph, Node
+from .osopen import safe_local_path
 
 
 ProgressCallback = Callable[[int, int, str], None]
@@ -92,14 +93,17 @@ def painted_repo(spec: str) -> str:
 
 
 def _is_local_path(value: str) -> bool:
-    """Total: no typed text makes it raise.  A text that starts with two slashes (a UNC path or a
-    device path) is never a folder and is refused BEFORE any filesystem call, which on Windows
-    would be an SMB lookup on the UI thread."""
-    if len(value) >= 2 and value[0] in "\\/" and value[1] in "\\/":
+    """Total: no typed text makes it raise.  `S1` applied to paths: `safe_local_path` accepts only a
+    drive-absolute or a relative path and decides on the string, so a UNC, device or NT-namespace
+    text is refused BEFORE any filesystem call (on Windows an SMB lookup on the UI thread).
+
+    `INC9L-CR-F4` (accepted): the `OSError` catch is broad because the ruling wants a total
+    predicate; a local folder that cannot be read may fall through to the `owner/name` path."""
+    path = safe_local_path(value)
+    if path is None:
         return False
     try:
-        p = Path(value).expanduser()
-        return p.is_dir() and (p / ".git").is_dir()
+        return path.is_dir() and (path / ".git").is_dir()
     except (RuntimeError, OSError, ValueError):
         return False
 
@@ -266,10 +270,13 @@ def _repo_name_from_url(url: str) -> str:
     `B-77b`: it is typed text, so it is refused when it could leave the cache
     (`..`, a run of dots, a separator, a drive colon) or name nothing (empty).
     """
-    parsed = urlparse(url)
-    if not parsed.path:
+    # `INC9L-CR-F2`: `git@host:path` has no URL path for `urlparse` (`git@h:r` reads as a scheme and
+    # a path-less URL, which refused the very form the refusal sentence tells the user to type).
+    scp = _SCP_URL.fullmatch(url)
+    path = scp.group("path") if scp else urlparse(url).path
+    if not path:
         return "repo"
-    name = parsed.path.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+    name = path.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
     if not name.strip(". ") or any(c in name for c in "/\\:"):
         raise GitHubError("refusing the repository URL: its last segment is not a usable name")
     return name
@@ -489,7 +496,11 @@ class GitHubConnector:
         owner, name = self.repo.split("/")
 
         repo_info = self._gh(["repo", "view", self.repo, "--json", "name,defaultBranchRef"])
-        default_branch = quote(repo_info.get("defaultBranchRef", {}).get("name", "main"), safe="")
+        default = repo_info.get("defaultBranchRef", {}).get("name", "main")
+        # `INC9L-SEC-F3`: `.` and `..` are path steps, which `quote` leaves as they are.
+        if default in (".", ".."):
+            raise GitHubError("unexpected response from gh repo view")
+        qdefault = quote(default, safe="")
 
         branches = self._gh([
             "api", f"repos/{owner}/{name}/branches?per_page=20",
@@ -513,10 +524,12 @@ class GitHubConnector:
 
         for idx, branch in enumerate(branches, 1):
             bname = branch["name"]
+            if bname in (".", ".."):
+                continue
             qname = quote(bname, safe="")
             # ahead/behind against default branch
             comparison = self._gh([
-                "api", f"repos/{owner}/{name}/compare/{default_branch}...{qname}",
+                "api", f"repos/{owner}/{name}/compare/{qdefault}...{qname}",
             ])
             ahead = comparison.get("ahead_by", 0)
             behind = comparison.get("behind_by", 0)
@@ -528,7 +541,7 @@ class GitHubConnector:
                     "api", f"repos/{owner}/{name}/commits/{qname}",
                 ])
                 sha = commit.get("sha", "")
-                if sha:
+                if sha and sha not in (".", ".."):
                     checks = self._gh([
                         "api", f"repos/{owner}/{name}/commits/{quote(sha, safe='')}/check-runs",
                     ])
@@ -574,11 +587,14 @@ class GitHubConnector:
 
         for idx, tag in enumerate(tags, 1):
             tname = tag.get("name", f"tag-{idx}")
-            raw = tag.get("commit", {}).get("url", "")
+            # `INC9L-SEC-F4`: the API's own `commit.url` is data and would be handed to `gh api`
+            # as the whole request (a foreign host, a `-X` flag); the path is built from the sha.
+            sha = tag.get("commit", {}).get("sha", "")
             date_str = ""
-            if raw:
+            if sha and sha not in (".", ".."):
                 try:
-                    commit_data = self._gh(["api", raw])
+                    commit_data = self._gh(
+                        ["api", f"repos/{owner}/{name}/commits/{quote(sha, safe='')}"])
                     date_str = (
                         commit_data.get("commit", {})
                         .get("committer", {})
@@ -608,7 +624,7 @@ class GitHubConnector:
         self.stale = ""
         kind = _classify(self.repo)
         if kind == "local":
-            cwd = Path(self.repo).expanduser().resolve()
+            cwd = safe_local_path(self.repo).resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
         if kind == "url":
             cwd = _ensure_cloned(self.repo, self.cache_dir, on_stale=self._mark_stale)
