@@ -1573,30 +1573,19 @@ class MapScreen(Screen):
         search.disabled = True
         self.focus()
 
-        if self.map_id == "new":
+        try:
+            self.base_graph = self.store.load(self.map_id)
+            self.graph = self.base_graph
+            self._notice_load_warnings(self.base_graph)
+        except Exception as e:
+            self.notify(
+                f"error cargando mapa: {darkside.plain(str(e))}",
+                severity="error",
+                markup=False,
+            )
             self.graph = Graph()
-            self.graph.add_node(Node(id="root", ficha=Ficha(title="nuevo mapa")))
+            self.graph.add_node(Node(id="root", ficha=Ficha(title="error")))
             self.base_graph = self.graph
-            if self.store is not None:
-                # `G6-C-F3`: the 8th `store.save()` call site — unguarded until
-                # now.  A raise here (full disk, permissions) used to escape
-                # `on_mount` uncaught; the in-memory map is still shown either
-                # way, so a failed first save is a toast, not a blocked screen.
-                _save_or_toast(self, self.store, self.map_id, self.graph)
-        else:
-            try:
-                self.base_graph = self.store.load(self.map_id)
-                self.graph = self.base_graph
-                self._notice_load_warnings(self.base_graph)
-            except Exception as e:
-                self.notify(
-                    f"error cargando mapa: {darkside.plain(str(e))}",
-                    severity="error",
-                    markup=False,
-                )
-                self.graph = Graph()
-                self.graph.add_node(Node(id="root", ficha=Ficha(title="error")))
-                self.base_graph = self.graph
 
         self.nav = NavigationModel(self.graph)
 
