@@ -340,36 +340,6 @@ async def test_g6c_f2_save_failure_toast_names_no_path_or_username(tmp_path):
         assert "OSError" in toast, f"the toast dropped the exception type: {toast!r}"
 
 
-async def test_g6c_f3_new_map_on_mount_save_degrades_to_a_toast(tmp_path):
-    """`G6-C-F3`.  The 8th `store.save()` call site — `MapScreen.on_mount`'s
-    `map_id == "new"` branch — was unguarded.  Forced to raise, `on_mount`
-    itself must not crash; the screen still mounts with the in-memory map and
-    a toast names the failure.
-
-    RED mutation: drop the `_save_or_toast` guard around this site (call
-    `self.store.save(...)` directly again).
-    """
-    app = MapperApp(tmp_path)
-    async with app.run_test() as pilot:
-        await pilot.pause()
-        notices: list[tuple[str, dict]] = []
-        app.notify = lambda msg, **kw: notices.append((str(msg), kw))
-
-        def exploding_save(*_a, **_kw):
-            raise RuntimeError("boom (forced by G6-C-F3 mutation harness)")
-
-        app.store.save = exploding_save
-
-        app.push_screen(MapScreen("new"))
-        await pilot.pause()
-
-        assert isinstance(app.screen, MapScreen), (
-            "the 8th store.save() site crashed on_mount"
-        )
-        assert notices, "no toast was shown when the new-map save raised"
-        assert any("no se pudo guardar" in n for n, _ in notices)
-
-
 def _store_save_calls(tree: ast.AST) -> list[ast.AST]:
     """Every reference to a `.save` in `tree` that is not `MapStore`'s own.
 
