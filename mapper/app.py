@@ -1211,6 +1211,7 @@ class RepoScreen(Screen):
         self.nav = NavigationModel(self.graph)
         self.selected_index = 0
         self.failure = ""
+        self.stale = ""
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=[self.repo])
@@ -1411,7 +1412,10 @@ class RepoScreen(Screen):
                 self.app.call_from_thread(self._update_progress, current, total, stage)
             except Exception:
                 pass
-        return GitHubConnector(self.repo).fetch(progress=on_progress)
+        connector = GitHubConnector(self.repo)
+        graph = connector.fetch(progress=on_progress)
+        self.stale = connector.stale
+        return graph
 
     def _update_progress(self, current: int, total: int, stage: str) -> None:
         try:
@@ -1430,6 +1434,10 @@ class RepoScreen(Screen):
             worker = self.fetch_graph()
             self.graph = await worker.wait()
             self.notify(darkside.plain(f"conectado: {len(self.graph.nodes)} nodos"), markup=False)
+            if self.stale:
+                # `INC9F-CR-F4`: the refresh failed; what is painted is the cached copy.
+                self.notify(darkside.plain(f"showing the cached copy: {self.stale}"),
+                            severity="warning", markup=False)
         except Exception as exc:
             # `INC9BC-SEC-F3`: the worker does not exit the app (`exit_on_error`),
             # so its failure arrives here wrapped, and `GitHubError` is reachable.

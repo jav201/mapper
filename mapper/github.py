@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 from collections.abc import Callable
@@ -43,6 +44,8 @@ _SUBPROCESS_TIMEOUT = 30
 # A mirror clone moves a whole history, so it gets a longer budget than a read.
 _CLONE_TIMEOUT = 120
 
+_TIMED_OUT = "timed out"
+
 # `M2`: a failure is reported as ONE of these, chosen by code from stable
 # fragments of the tool's English stderr.  The stderr itself is never painted or
 # put in an exception: it names the cache path, and a URL may carry a token.
@@ -54,7 +57,7 @@ _CATEGORY_MARKERS = (
     )),
     ("authentication required", (
         "could not read username", "could not read password", "authentication failed",
-        "terminal prompts disabled", "permission denied", "invalid username or password",
+        "terminal prompts disabled", "permission denied (publickey", "invalid username or password",
         "http 401", "http 403", "error: 401", "error: 403", "gh auth login",
     )),
     ("not found or private", (
@@ -67,6 +70,9 @@ _CATEGORY_MARKERS = (
         "couldn't connect", "unable to connect", "error connecting to",
     )),
 )
+# `INC9F-CR-F6`: the fixed set, declared once: the four stderr categories and the
+# timeout (`unknown (exit N)` is the open remainder and carries its own code).
+CATEGORIES = tuple(name for name, _ in _CATEGORY_MARKERS) + (_TIMED_OUT,)
 _OWNER_RE = re.compile(r"[A-Za-z0-9-]+")
 _NAME_RE = re.compile(r"[A-Za-z0-9._-]+")
 _TRANSPORT_HELPER_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*::")
@@ -84,11 +90,24 @@ def _refuse_unsafe(spec: str) -> None:
     """A typed repository spec is data, never an option or a transport helper."""
     if spec.lstrip().startswith("-"):
         raise GitHubError("refusing the repository: it may not start with '-'")
-    if _TRANSPORT_HELPER_RE.match(spec):
+    if _TRANSPORT_HELPER_RE.match(spec.lstrip()):
         raise GitHubError("refusing the repository: transport helpers are not accepted")
 
 
-def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
+def _git_env() -> dict[str, str]:
+    """The environment of every `git` call (`INC9F-CR` item 13): English stderr, so
+    `_failure_category` matches on a localised git, and no credential prompt, so a
+    private HTTPS repo fails instead of hanging.  Built per call, not at import: a
+    snapshot would pin the HOME the process started with."""
+    return {**os.environ, "LC_ALL": "C", "GIT_TERMINAL_PROMPT": "0"}
+
+
+def _run_git(
+    cwd: Path,
+    args: list[str],
+    check: bool = True,
+    timeout: int = _SUBPROCESS_TIMEOUT,
+) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(
             ["git", "-C", str(cwd)] + args,
@@ -96,7 +115,8 @@ def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.Compl
             text=True,
             check=check,
             encoding="utf-8",
-            timeout=_SUBPROCESS_TIMEOUT,
+            timeout=timeout,
+            env=_git_env(),
         )
     except FileNotFoundError as exc:
         raise GitHubError("git CLI not found") from exc
@@ -104,7 +124,7 @@ def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.Compl
         category = _failure_category(exc.stderr, exc.returncode)
         raise GitHubError(f"git {args[0]} failed: {category}") from None
     except subprocess.TimeoutExpired:
-        raise GitHubError(f"git {args[0]} failed: timed out") from None
+        raise GitHubError(f"git {args[0]} failed: {_TIMED_OUT}") from None
 
 
 def _default_branch(cwd: Path) -> str:
@@ -195,8 +215,31 @@ def _normalise_url(url: str) -> str:
     return url.strip().rstrip("/").removesuffix(".git")
 
 
-def _ensure_cloned(url: str, cache_dir: Path) -> Path:
-    """Clone or refresh `url` into a cache directory and return the path."""
+def _refresh_mirror(target: Path) -> str:
+    """Fetch into a cached mirror; "" when fresh, else the fixed category it is stale for.
+
+    `INC9F-CR-F4`: a timeout or a failed fetch is not a failed connect: the mirror
+    still holds what the last connect saw.  A refresh moves history, so it gets the
+    clone's budget, not a read's.
+    """
+    try:
+        result = _run_git(target, ["fetch", "--all"], check=False, timeout=_CLONE_TIMEOUT)
+    except GitHubError as exc:
+        if not str(exc).endswith(_TIMED_OUT):
+            raise
+        return _TIMED_OUT
+    if result.returncode != 0:
+        return _failure_category(result.stderr, result.returncode)
+    return ""
+
+
+def _ensure_cloned(
+    url: str, cache_dir: Path, on_stale: Callable[[str], None] | None = None,
+) -> Path:
+    """Clone or refresh `url` into a cache directory and return the path.
+
+    `on_stale` is told the category when a cache hit could not be refreshed.
+    """
     _refuse_unsafe(url)
     name = _repo_name_from_url(url)
     # `INC9F-SEC-F1`: the last segment alone collides (`alice/tools`, `bob/tools`),
@@ -204,11 +247,9 @@ def _ensure_cloned(url: str, cache_dir: Path) -> Path:
     target = cache_dir / f"{name}-{hashlib.sha256(_normalise_url(url).encode('utf-8')).hexdigest()[:12]}"
     # `--mirror` makes a BARE repository: `HEAD` is a file and there is no `.git`.
     if (target / "HEAD").is_file():
-        try:
-            _run_git(target, ["fetch", "--all"], check=False)
-        except GitHubError:
-            # `INC9F-SEC-F3`: a stale mirror beats no map, as a failed fetch already does.
-            pass
+        stale = _refresh_mirror(target)
+        if stale and on_stale is not None:
+            on_stale(stale)
         return target
     target.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -219,12 +260,13 @@ def _ensure_cloned(url: str, cache_dir: Path) -> Path:
             check=False,
             encoding="utf-8",
             timeout=_CLONE_TIMEOUT,
+            env=_git_env(),
         )
     except FileNotFoundError as exc:
         raise GitHubError("git CLI not found") from exc
     except subprocess.TimeoutExpired:
         # No chaining: the timeout carries the argv, and the URL may hold a token.
-        raise GitHubError(f"could not clone '{name}': timed out") from None
+        raise GitHubError(f"could not clone '{name}': {_TIMED_OUT}") from None
     if result.returncode != 0:
         # `INC9BC-SEC-F3`, `M2`: the repo's name and one fixed category, never
         # git's own text (the cache path, the URL's credentials).
@@ -320,6 +362,9 @@ class GitHubConnector:
         if cache_dir is None:
             cache_dir = Path.home() / ".cache" / "mapper" / "repos"
         self.cache_dir = Path(cache_dir)
+        # The category a cache hit could not be refreshed for ("" = fresh): the
+        # screen says so, because the map it paints is the cached copy.
+        self.stale = ""
 
     def _gh(self, args: list[str]) -> dict | list:
         cmd = ["gh"] + args
@@ -338,7 +383,7 @@ class GitHubConnector:
         except FileNotFoundError as exc:
             raise GitHubError("gh CLI not found") from exc
         except subprocess.TimeoutExpired:
-            raise GitHubError(f"could not query '{self.repo}': timed out") from None
+            raise GitHubError(f"could not query '{self.repo}': {_TIMED_OUT}") from None
         return json.loads(result.stdout or "{}")
 
     def _fetch_gh(self, progress: ProgressCallback | None = None) -> Graph:
@@ -462,12 +507,15 @@ class GitHubConnector:
 
         return graph
 
+    def _mark_stale(self, category: str) -> None:
+        self.stale = category
+
     def fetch(self, progress: ProgressCallback | None = None) -> Graph:
         _refuse_unsafe(self.repo)
         if _is_local_path(self.repo):
             cwd = Path(self.repo).expanduser().resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
         if _is_url(self.repo):
-            cwd = _ensure_cloned(self.repo, self.cache_dir)
+            cwd = _ensure_cloned(self.repo, self.cache_dir, on_stale=self._mark_stale)
             return _build_graph_from_git(cwd, _repo_name_from_url(self.repo), progress=progress)
         return self._fetch_gh(progress=progress)
