@@ -39,6 +39,50 @@ def _is_local_path(value: str) -> bool:
 
 
 _SUBPROCESS_TIMEOUT = 30
+# A mirror clone moves a whole history, so it gets a longer budget than a read.
+_CLONE_TIMEOUT = 120
+
+# `M2`: a failure is reported as ONE of these, chosen by code from stable
+# fragments of the tool's English stderr.  The stderr itself is never painted or
+# put in an exception: it names the cache path, and a URL may carry a token.
+# Order matters: the first category with a matching fragment wins.
+_CATEGORY_MARKERS = (
+    ("host not found", (
+        "could not resolve host", "name or service not known", "no such host",
+        "temporary failure in name resolution", "unknown host",
+    )),
+    ("authentication required", (
+        "could not read username", "could not read password", "authentication failed",
+        "terminal prompts disabled", "permission denied", "invalid username or password",
+        "http 401", "http 403", "error: 401", "error: 403", "gh auth login",
+    )),
+    ("not found or private", (
+        "repository not found", "' not found", "does not exist", "http 404", "error: 404",
+        "could not resolve to a repository", "does not appear to be a git repository",
+    )),
+    ("network unreachable", (
+        "network is unreachable", "failed to connect", "connection refused",
+        "connection timed out", "connection reset", "no route to host",
+        "couldn't connect", "unable to connect", "error connecting to",
+    )),
+)
+_TRANSPORT_HELPER_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*::")
+
+
+def _failure_category(stderr: str | None, returncode: int) -> str:
+    low = (stderr or "").lower()
+    for category, markers in _CATEGORY_MARKERS:
+        if any(m in low for m in markers):
+            return category
+    return f"unknown (exit {returncode})"
+
+
+def _refuse_unsafe(spec: str) -> None:
+    """A typed repository spec is data, never an option or a transport helper."""
+    if spec.lstrip().startswith("-"):
+        raise GitHubError("refusing the repository: it may not start with '-'")
+    if _TRANSPORT_HELPER_RE.match(spec):
+        raise GitHubError("refusing the repository: transport helpers are not accepted")
 
 
 def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.CompletedProcess:
@@ -53,8 +97,11 @@ def _run_git(cwd: Path, args: list[str], check: bool = True) -> subprocess.Compl
         )
     except FileNotFoundError as exc:
         raise GitHubError("git CLI not found") from exc
-    except subprocess.TimeoutExpired as exc:
-        raise GitHubError(f"git timeout: {' '.join(args)}") from exc
+    except subprocess.CalledProcessError as exc:
+        category = _failure_category(exc.stderr, exc.returncode)
+        raise GitHubError(f"git {args[0]} failed: {category}") from None
+    except subprocess.TimeoutExpired:
+        raise GitHubError(f"git {args[0]} failed: timed out") from None
 
 
 def _default_branch(cwd: Path) -> str:
@@ -90,7 +137,7 @@ def _ahead_behind(cwd: Path, base: str, branch: str) -> tuple[int, int]:
     """Return (ahead, behind) for `branch` relative to `base`."""
     result = _run_git(
         cwd,
-        ["rev-list", "--left-right", "--count", f"{base}...{branch}"],
+        ["rev-list", "--left-right", "--count", "--end-of-options", f"{base}...{branch}"],
         check=False,
     )
     if result.returncode != 0 or not result.stdout:
@@ -107,7 +154,7 @@ def _ahead_behind(cwd: Path, base: str, branch: str) -> tuple[int, int]:
 def _last_commit_info(cwd: Path, branch: str) -> dict[str, str]:
     """Return author and date for the latest commit on branch."""
     fmt = "%an|%aI|%s"
-    result = _run_git(cwd, ["log", "-1", f"--format={fmt}", branch], check=False)
+    result = _run_git(cwd, ["log", "-1", f"--format={fmt}", "--end-of-options", branch], check=False)
     info = {"author": "", "date": "", "subject": ""}
     if result.returncode != 0 or not result.stdout:
         return info
@@ -143,23 +190,33 @@ def _repo_name_from_url(url: str) -> str:
 
 def _ensure_cloned(url: str, cache_dir: Path) -> Path:
     """Clone or refresh `url` into a cache directory and return the path."""
+    _refuse_unsafe(url)
     name = _repo_name_from_url(url)
     target = cache_dir / name
-    if target.exists() and (target / ".git").is_dir():
+    # `--mirror` makes a BARE repository: `HEAD` is a file and there is no `.git`.
+    if (target / "HEAD").is_file():
         _run_git(target, ["fetch", "--all"], check=False)
         return target
     target.parent.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(
-        ["git", "clone", "--mirror", url, str(target)],
-        capture_output=True,
-        text=True,
-        check=False,
-        encoding="utf-8",
-    )
+    try:
+        result = subprocess.run(
+            ["git", "clone", "--mirror", "--", url, str(target)],
+            capture_output=True,
+            text=True,
+            check=False,
+            encoding="utf-8",
+            timeout=_CLONE_TIMEOUT,
+        )
+    except FileNotFoundError as exc:
+        raise GitHubError("git CLI not found") from exc
+    except subprocess.TimeoutExpired:
+        # No chaining: the timeout carries the argv, and the URL may hold a token.
+        raise GitHubError(f"could not clone '{name}': timed out") from None
     if result.returncode != 0:
-        # `INC9BC-SEC-F3`: git's stderr names the absolute cache path, and the
-        # URL may carry credentials.  The repo's name and the failure class only.
-        raise GitHubError(f"could not clone {name}: git clone failed (exit {result.returncode})")
+        # `INC9BC-SEC-F3`, `M2`: the repo's name and one fixed category, never
+        # git's own text (the cache path, the URL's credentials).
+        category = _failure_category(result.stderr, result.returncode)
+        raise GitHubError(f"could not clone '{name}': {category}")
     return target
 
 
@@ -263,11 +320,12 @@ class GitHubConnector:
                 timeout=_SUBPROCESS_TIMEOUT,
             )
         except subprocess.CalledProcessError as exc:
-            raise GitHubError(exc.stderr.strip() or exc.stdout.strip()) from exc
+            category = _failure_category(exc.stderr, exc.returncode)
+            raise GitHubError(f"could not query '{self.repo}': {category}") from None
         except FileNotFoundError as exc:
             raise GitHubError("gh CLI not found") from exc
-        except subprocess.TimeoutExpired as exc:
-            raise GitHubError(f"gh timeout: {' '.join(args)}") from exc
+        except subprocess.TimeoutExpired:
+            raise GitHubError(f"could not query '{self.repo}': timed out") from None
         return json.loads(result.stdout or "{}")
 
     def _fetch_gh(self, progress: ProgressCallback | None = None) -> Graph:
@@ -387,6 +445,7 @@ class GitHubConnector:
         return graph
 
     def fetch(self, progress: ProgressCallback | None = None) -> Graph:
+        _refuse_unsafe(self.repo)
         if _is_local_path(self.repo):
             cwd = Path(self.repo).expanduser().resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
