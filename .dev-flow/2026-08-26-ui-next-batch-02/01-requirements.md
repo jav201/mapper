@@ -10432,3 +10432,55 @@ changed (declared in the record).
 toast is a toast: the stage panel does not carry it. `gh` is not given the English environment (its stderr is
 English already in the samples used). The hash is a cache key, not a security boundary: a collision needs a
 second preimage of 48 bits, and is not claimed impossible.
+
+### `A-116` -- the Inc-9g review defects (`Inc-9h`), dated 2026-10-01
+
+**Authority.** The independent reviews of `Inc-9g` (code, UX, security) and the operator's answers `P1` and `P2`
+(`VERDICT-inc9-2026-09-30.md`, Round 5). Findings are named `INC9G-CR-F1`..`F7`, `INC9G-UX-F1`..`F3`,
+`INC9G-SEC-F1`..`F5`; the record is `increment-034-inc9h.md`.
+
+**Statement.** Amends `A-115`.
+
+1. **Row 0 is lit after every filter edit (`INC9G-CR-F1` = `INC9G-UX-F1`).** The palette awaits `ListView.clear()`
+   before it rebuilds the rows, so the first row of any filtered list carries `-highlight` and is painted in the
+   `A-115` st. 1 colours (at least 4.5:1); `↵` runs the row the operator can see. The rows' label list is rebuilt
+   with the rows.
+2. **The stale cached copy stays on the panel (`P1` = `INC9G-UX-F2` / `INC9G-SEC-F3`).** While the cached copy is
+   what the repo screen shows, the stage panel paints `▲ cached copy: <category>` in INK (as `N3`), under the
+   stages, after the toast has expired. A fresh connect paints no such line. The toast gains `· <way back> to retry`,
+   the way back being the seat's word for the screen's `home` action (`q back`), derived as the failure panel does.
+3. **One toast per connect (`P2` = `INC9G-UX-F3`).** A stale connect fires only the warning
+   `showing the cached copy (N nodes): <category> · q back to retry`; the `conectado: N nodos` toast is not fired
+   with it. A fresh connect is unchanged.
+4. **A mirror is the remote that was asked for (`INC9G-SEC-F1`).** On a cache hit the mirror's
+   `remote.origin.url` is compared with the URL as typed (stripped, a trailing `/` dropped; `.git` is NOT dropped:
+   it is what separates `r` from `r.git` on a plain server). If they differ the mirror is not reused: the URL gets
+   its own directory, keyed on the form as typed; if that directory holds another remote too, the connect is
+   refused with one fixed sentence that names neither URL. The `A-115` st. 2 key is unchanged, so the four
+   spellings of one remote (`.../tools`, `.../tools/`, `.../tools.git`, `.../tools.git/`) still key ONE directory
+   (`INC9G-CR-F3`); a cost, declared: two spellings that differ in `.git` and are the same remote are cloned twice
+   when both are used from one cache.
+5. **The refresh prunes (`INC9G-SEC-F2`).** The refresh is `fetch --prune --all`: a branch the remote deleted is
+   gone from the mirror and from the map.
+6. **One fixed sentence for a malformed `owner/name` (`INC9G-SEC-F4`).** Every malformed spec, the wrong number
+   of segments included, is refused with the same sentence, which echoes nothing typed. The `could not clone
+   '<name>'` messages keep the readable last segment of the URL, through `darkside.plain()`.
+7. **No prompt from `gh`, one environment for `git` (`INC9G-SEC-F5`).** `gh` runs with `GH_PROMPT_DISABLED=1`;
+   `diff.py`'s `git show` runs in `github._git_env()` (imported: `diff.py` already depends on the package and
+   `github.py` does not import it, so there is no cycle).
+8. **The stale signal is typed (`INC9G-CR-F5`).** A `git` call of `_run_git` that times out raises `GitHubTimeout(GitHubError)`
+   (the clone and `gh` timeouts stay plain `GitHubError`: neither has a stale path);
+   `_refresh_mirror` catches that and nothing else, so a missing `git` on a cache hit is still an error and is not
+   a stale mirror.
+9. **Small corrections (`INC9G-CR-F2`, `F6`, `F7`).** `GitHubConnector.fetch()` resets `stale` at its top;
+   `_ensure_cloned` strips the URL once at its top; `HomeScreen.compose` takes `home_hint()` and the first
+   `on_mount` sets the real hint (the glob is no longer written twice). `INC9G-CR-F2` is an arm: the home hint
+   follows the maps across a push and a pop.
+
+**Trace.** Standalone, like `A-113`..`A-115`. Carried by `tests/test_inc9h.py`. Changed existing arms (declared in
+the record): the `test_inc9g` stale-toast arm (new text, by `P2`) and the `_Mirror` stub in `test_inc9f.py`.
+
+**What is not claimed.** The `LC_ALL=C` and gh-environment carries of `A-115` stand. A mirror cloned before this
+change has the same directory and the same `origin`, so it is still hit. The two `.git` spellings above cost a
+second clone; a user who types one spelling never pays it. A timeout inside the config read of a cache hit is an
+error, not a stale mirror (only the refresh has a stale path).
