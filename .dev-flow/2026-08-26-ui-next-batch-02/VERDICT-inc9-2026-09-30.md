@@ -113,3 +113,17 @@ were taken. Four questions were put to the operator; each answer took the recomm
 | N2 · INC9F-UX-F4 | The palette footer does not advertise the arrows | Agregar ↑↓ al pie | The footer reads `↑↓ move · ↵ run · esc close`, seat-derived. Routed to Inc-EN (needs `keymap.py`) |
 | N3 · INC9F-UX-F5 | `▲ failed` is painted INK | Dejarlo en blanco | INK stays; amber remains reserved for attention / pending |
 | N4 · Inc-9f decisions | Ratify the implementer's four decisions | Ratificar las cuatro | Clone timeout 120 s (reads 30 s); `--end-of-options` (git >= 2.24); `▲` in INK; `timed out` in the fixed category set |
+
+---
+
+# Round 5 — after the Inc-9g reviews (2026-10-01, base `3dbd5a4`)
+
+Security PASS (five LOW). Code BLOCK-UNTIL INC9G-CR-F1 and ux FAIL on the same defect (INC9G-UX-F1):
+after any filter edit the palette's first row is painted GROUND on the plain row ground (1.12:1) while
+`↵` still runs it — introduced by Inc-9g's repaint (`ListView.clear()` not awaited). Routed to Inc-9h
+with the remaining findings. Two questions were put to the operator; both took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| P1 · INC9G-UX-F2 / INC9G-SEC-F3 | The stale cached copy is toast-only; the panel reads `listo · 100%` | Línea fija en el panel | The repo stage panel paints `▲ cached copy: <category>` in INK (as N3) for as long as the cached copy is shown; the toast stays and gains `· q back to retry` |
+| P2 · INC9G-UX-F3 | `conectado: N nodos` and the stale warning fire together and contradict | Un solo aviso | On a stale connect only the warning fires, carrying the count: `showing the cached copy (N nodes): <category>` |
