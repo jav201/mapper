@@ -193,3 +193,14 @@ computed, not asserted anywhere).
 `e2d49a1` app (panel line, one toast, home hint) and the `test_inc9g` toast text · `150943b` the escape fix
 (`test_fold`) · `36e21a5` unused imports (ruff) · `927da29` env-arm messages · docs commit (this record, `A-116`,
 the `increment-033` correction). No push; `state.json` untouched.
+
+## Correction (appended in Inc-9i, 2026-10-01; section 2 stands as written above)
+
+Section 2, `INC9G-SEC-F1`, says the connect is refused "only if that directory is foreign too ... reachable only when
+the key and the typed form coincide, i.e. a collision or a tampered cache". **That is false.** For a URL with no `.git`
+the typed-form key (`url.rstrip("/")`) IS the primary key (`_normalise_url(url)`), so after `.../tools.git` was
+connected, connecting `.../tools` from the SAME cache found the same foreign mirror in its "own" directory and was
+refused, every time (`INC9H-CR-F1` = `INC9H-SEC-F1`; the arm
+`test_inc9h_sec_f1_when_the_own_directory_is_foreign_too_the_connect_is_refused` pinned exactly that as intended). It
+also locked out caches the base had already built with `tools.git`. Fixed in `Inc-9i` (`A-117`): the fallback key is
+`"as-typed:" + url.rstrip("/")`, so the refusal is reachable only by a tamper or a hash collision of both directories.

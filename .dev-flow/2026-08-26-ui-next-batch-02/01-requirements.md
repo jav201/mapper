@@ -10484,3 +10484,47 @@ the record): the `test_inc9g` stale-toast arm (new text, by `P2`) and the `_Mirr
 change has the same directory and the same `origin`, so it is still hit. The two `.git` spellings above cost a
 second clone; a user who types one spelling never pays it. A timeout inside the config read of a cache hit is an
 error, not a stale mirror (only the refresh has a stale path).
+
+### `A-117` -- the Inc-9h review defects (`Inc-9i`), dated 2026-10-01
+
+**Authority.** The independent reviews of `Inc-9h` (code, UX, security), the coordinator's ruling on `INC9H-UX-F1` and
+`INC9H-SEC-F2`, and the operator's Round 6, Q1 (`VERDICT-inc9-2026-09-30.md`): `.../r` and `.../r.git` are distinct
+remotes, a double clone is accepted, a repo is never shown under another's URL, and no spelling is locked out. Findings
+are named `INC9H-*`; the record is `increment-035-inc9i.md`.
+
+**Statement.** Amends `A-116` statement 4; adds statements 10 and 11.
+
+1. **The fallback key is disjoint from the primary key (`INC9H-CR-F1` = `INC9H-SEC-F1`, amends `A-116` st. 4).** When
+   the mirror in the primary directory (keyed on the `A-115` normal form) is not this URL's, the URL gets its own
+   directory keyed on `"as-typed:" + <the URL as typed, trailing "/" dropped>`. The two key spaces never meet, so a
+   URL with no `.git` (`.../tools`) no longer finds, in its fallback, the very mirror it just found foreign in its
+   primary (`.../tools.git`). Consequences: in ONE cache, `r.git` then `r` and `r` then `r.git` each give two clones,
+   each showing its own branches, with no refusal; a cache the base built (only the `tools.git` mirror, in the primary
+   directory) accepts `tools`. The refusal ("refusing the cached copy: it belongs to another repository") remains, and
+   is reachable only when BOTH the primary and the URL's own directory hold another remote: a tampered cache or a hash
+   collision. The cost declared in `A-116` st. 4 stands (the two spellings are cloned twice from one cache).
+2. **The origin comparison is exact (`INC9H-CR-F2`).** An origin that differs from the typed URL only by letter case is
+   another remote; it is not folded. (An arm; no code changed.)
+3. **No stale across reconnects (`INC9H-CR-F3`).** A stale connect, `q` back, a fresh connect: the second screen paints
+   no `▲ cached copy` line and fires only `conectado: N nodos`. (An arm; no code changed.) Not claimed: the palette
+   filter-edit serialisation arm (see the record, section 2).
+4. **The category never breaks across lines (`INC9H-UX-F1`, coordinator ruling).** The stage panel's stale line is two
+   lines: `▲ cached copy:` and, under it, the category (`unknown (exit 1)`, `authentication required`, `host not found`,
+   `timed out`, ...). Wrapping before the category is the ruling's second option; a non-breaking space was measured
+   to be no option (Rich's wrapper treats it as a space). The text is unchanged; only the line break moves.
+5. **A credential in a typed URL is refused (`INC9H-SEC-F2`, coordinator ruling).** A typed `http(s)://` URL whose
+   authority holds userinfo (`https://u:tok@host/r`, `https://tok@host/r`) is refused in `GitHubConnector.fetch`,
+   before any process starts and before any directory is made, with one fixed sentence that echoes nothing typed:
+   `refusing the URL: it carries a credential; use the git credential helper instead`. An scp-style `git@host:o/r`
+   address and an `@` in the path (`.../r@v2`) are not userinfo and still connect.
+
+**Trace.** Standalone, like `A-113`..`A-116`. Carried by `tests/test_inc9i.py` and one reworked arm in
+`tests/test_inc9h.py` (`..._when_the_own_directory_is_foreign_too_the_connect_is_refused`: it now tampers the primary
+AND the URL's own directory; the version it replaces pinned the defect as intended, in that it tampered only the
+primary, which for a URL with no `.git` was also the fallback).
+
+**What is not claimed.** `_ensure_cloned` itself still accepts a URL with userinfo when called directly (two sealed
+arms in `test_inc9d` and `test_inc9f` call it with a token URL to prove the clone message leaks nothing; the typed
+boundary is the connector). The non-breaking-space result (statement 4) is measured on `rich.text.Text.wrap` at 30
+cells, where a text with NBSP between the words of `unknown (exit 1)` still wrapped between `(exit` and `1)`; it was not
+re-measured in a Textual render.
