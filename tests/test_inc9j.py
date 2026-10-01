@@ -15,15 +15,15 @@ import ast
 import pathlib
 
 import pytest
-from textual.widgets import Input
+from textual.widgets import Input, Static
 
 from mapper import github
 from mapper.app import MapperApp, PlugRepoScreen, RepoScreen
 from mapper.github import GitHubConnector, GitHubError
 from tests.test_inc9f import NARROW, SIZE, _Run, hermetic  # noqa: F401
-from tests.test_repair_layout import _frame_rows
+from tests.test_repair_layout import _frame_rows, _rows_in
 
-OPEN_STEPS: set[str] = {"creds", "redact"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
@@ -174,7 +174,9 @@ async def test_inc9j_ux_f1_a_typed_credential_is_painted_nowhere_but_in_the_fiel
         flat = " ".join("\n".join(_frame_rows(screen)).split())
         assert "tok" not in flat and "user:" not in flat, flat
         assert "***@" in flat, flat
-        assert str(screen.query_one("#repo-name").renderable).count("***@") == 1
+        name = screen.query_one("#repo-name", Static)
+        shown = " ".join("\n".join(_rows_in(screen, name.region)).split())
+        assert shown.count("***@") == 1, shown
         assert screen.repo == typed, "the connector still gets the URL as typed"
         assert [t for t in toasts if "tok" in t or "user:" in t] == [], toasts
         await pilot.press("q")

@@ -23,7 +23,7 @@ from textual.worker import WorkerFailed
 from . import darkside
 from .diff import DiffResult, git_diff
 from .export import ExportError, ExportTooLarge, save_svg
-from .github import GitHubConnector, GitHubError
+from .github import GitHubConnector, GitHubError, redact_userinfo
 from .import_csv import preview_csv
 from .keymap import (
     SCOPE_APP,
@@ -1207,6 +1207,8 @@ class RepoScreen(Screen):
     def __init__(self, repo: str):
         super().__init__()
         self.repo = repo
+        # `INC9I-UX-F1`: what is painted; `self.repo` stays as typed for the connector.
+        self.shown = redact_userinfo(repo)
         self.graph = Graph()
         self.nav = NavigationModel(self.graph)
         self.selected_index = 0
@@ -1214,11 +1216,11 @@ class RepoScreen(Screen):
         self.stale = ""
 
     def compose(self) -> ComposeResult:
-        yield TabStrip("p", crumb=[self.repo])
+        yield TabStrip("p", crumb=[self.shown])
         with Horizontal(id="repo-dashboard"):
             with Vertical(id="repo-sidebar"):
                 # `INC9F-SEC-F2`: typed text, painted as text: `Static(str)` parses markup.
-                yield Static(Text(darkside.plain(self.repo)), id="repo-name")
+                yield Static(Text(darkside.plain(self.shown)), id="repo-name")
                 yield Static(self._stages_text(), id="repo-stages")
                 yield Static(self._progress_text(), id="repo-progress")
                 yield Static(self._sidebar_hints(), id="repo-sidebar-hints")

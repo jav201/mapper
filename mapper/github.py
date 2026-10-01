@@ -100,11 +100,36 @@ def _refuse_unsafe(spec: str) -> None:
         raise GitHubError("refusing the repository: transport helpers are not accepted")
 
 
+def _http_parts(url: str) -> tuple[str, str, str] | None:
+    """`(scheme, authority, rest)` of an http(s) URL, read the way curl does (`INC9I-SEC-F1`):
+    every slash and backslash after `://` is skipped, so `https:///u:tok@h/r` has the authority
+    `u:tok@h` although `urlparse` finds no netloc; the authority ends at the first `/`, `?`
+    or `#`.  `None` for anything that is not an http(s) URL."""
+    scheme, sep, after = url.strip().partition("://")
+    if not sep or scheme.lower() not in ("http", "https"):
+        return None
+    after = after.lstrip("/\\")
+    authority = re.split(r"[/?#]", after, maxsplit=1)[0]
+    return scheme, authority, after[len(authority):]
+
+
+def redact_userinfo(url: str) -> str:
+    """`INC9I-UX-F1`: the form of a typed URL that may be painted: `https://***@host/...`.
+    One helper for every surface; a URL without userinfo comes back as it was."""
+    parts = _http_parts(url)
+    if parts is None or "@" not in parts[1]:
+        return url
+    scheme, authority, rest = parts
+    return f"{scheme}://***@{authority.rpartition('@')[2]}{rest}"
+
+
 def _refuse_userinfo(url: str) -> None:
     """`INC9H-SEC-F2`: `git clone --mirror` writes the URL, token and all, to the mirror's
     `config`.  A typed http(s) URL with userinfo is refused before any process starts; the
-    sentence echoes nothing."""
-    if url.lower().startswith(("http://", "https://")) and "@" in urlparse(url).netloc:
+    sentence echoes nothing.  `INC9I-SEC-F1`: the authority is read as curl reads it, and a
+    URL with no host (`urlparse` finds no netloc) is refused too."""
+    parts = _http_parts(url)
+    if parts is not None and ("@" in parts[1] or not urlparse(url.strip()).netloc):
         raise GitHubError(
             "refusing the URL: it carries a credential; use the git credential helper instead")
 
@@ -264,6 +289,9 @@ def _ensure_cloned(
     """Clone or refresh `url` into a cache directory and return the path.
 
     `on_stale` is told the category when a cache hit could not be refreshed.
+
+    `INC9I-CR-F3`: the caller has refused userinfo (`_refuse_userinfo`); `GitHubConnector.fetch`
+    is the typed-URL entry point, and nothing else in `mapper/` calls this.
     """
     url = url.strip()
     _refuse_unsafe(url)
