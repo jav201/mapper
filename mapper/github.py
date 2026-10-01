@@ -82,6 +82,12 @@ def _classify(spec: str) -> str:
     raise GitHubError(_UNSUPPORTED)
 
 
+def source_kind(spec: str) -> str:
+    """`INC9M-CR-F8`: the public name of the one decision (`"local"`, `"url"` or `"gh"`); raises
+    `GitHubError` for a refused text.  The badge reads this, not the private `_classify`."""
+    return _classify(spec)
+
+
 def painted_repo(spec: str) -> str:
     """`S1` + `R1`: the typed text, only when `fetch` would take it; any other text (a credential
     form included) is never painted, whatever it holds."""
@@ -525,6 +531,9 @@ class GitHubConnector:
         for idx, branch in enumerate(branches, 1):
             bname = branch["name"]
             if bname in (".", ".."):
+                # `INC9M-CR-F5`: a skipped branch still counts, so progress reaches the total.
+                if progress:
+                    progress(idx, total, "calculando métricas")
                 continue
             qname = quote(bname, safe="")
             # ahead/behind against default branch
@@ -536,6 +545,9 @@ class GitHubConnector:
 
             # CI verdict from latest commit check-runs
             ci = ""
+            # `INC9M-SEC-F3`: bound per iteration, so a failing lookup neither leaves it unbound
+            # nor keeps the previous branch's date.
+            commit: dict = {}
             try:
                 commit = self._gh([
                     "api", f"repos/{owner}/{name}/commits/{qname}",
@@ -624,7 +636,10 @@ class GitHubConnector:
         self.stale = ""
         kind = _classify(self.repo)
         if kind == "local":
-            cwd = safe_local_path(self.repo).resolve()
+            local = safe_local_path(self.repo)
+            if local is None:
+                raise GitHubError(_UNSUPPORTED)
+            cwd = local.resolve()
             return _build_graph_from_git(cwd, cwd.name, progress=progress)
         if kind == "url":
             cwd = _ensure_cloned(self.repo, self.cache_dir, on_stale=self._mark_stale)

@@ -10700,3 +10700,35 @@ separator on NTFS), not a network path, and the ruling's grammar is applied as w
 `tests/test_inc9m.py` spies prove that no filesystem call is made for the named hostile forms; no real UNC or NT-namespace path was ever opened, and nothing was measured against
 a live SMB share, a live `gh`, or a real `git clone`. `docs/ARCHITECTURE.md` section 3 bans `screens` from importing `osopen` and lists `model` as the only dependency of `github`; the coordinator's ruling
 puts the helper in `osopen` and has all three import it, so the map and the code now disagree in writing until the map is updated (carried; no test enforces it).
+
+### `A-122` -- the Inc-9m review fixes: sidecar paths, DOS devices, the refusal sentence, attachment-add (`Inc-9n`), dated 2026-10-01
+
+**Authority.** The operator's U1 and U2 (Round 10 of `VERDICT-inc9-2026-09-30.md`), the coordinator's rulings for `INC9M-SEC-F1`..`F4` and `INC9M-CR-F1`..`F8`
+(the findings of the Inc-9m reviews). The record is `increment-040-inc9n.md`.
+
+**Statement.** Amends `A-121`; the rest of `A-121` stands.
+
+1. **`INC9M-SEC-F1` (HIGH).** `FactoryScreen._office_path` returns `None` unless `safe_local_path(doc.path)` accepts the sidecar text, and the result is confined to the
+   workspace (lexical containment first, then `resolve()` + `is_relative_to`, as `open_external` does). A sidecar `documents[].path` is not typed text: a UNC, `//`, `\??\UNC`,
+   device or outside-the-workspace path is never stat'ed or read; the screen shows its existing `archivo de plantilla no encontrado`.
+2. **`INC9M-SEC-F2` / `CR-F1`.** `safe_local_path` returns `None` for a DOS device name (`con`, `nul`, `conin$`, `conout$`, `com1`, `aux`, `lpt1`, `prn`...) in ANY component, in any case,
+   with an extension, trailing dots or spaces (`PureWindowsPath(part).is_reserved()` per component; Python 3.13 spells it `os.path.isreserved`). Both import prompts require
+   `is_file()`, and `open_external(kind="file")` requires `is_file()` before launching.
+3. **`U1`.** A text refused by `safe_local_path` toasts exactly `path not supported: use C:\… or a relative path` (one sentence, a real ellipsis, naming nothing) in the CSV prompt,
+   the office prompt and the attachment open. A missing accepted path keeps `archivo no encontrado: <name>` (Inc-EN translates it). The placeholders are `C:\path\to\nodes.csv` and
+   `C:\path\to\template.docx`.
+4. **`U2`.** Adding a `file` attachment validates with `safe_local_path` AND workspace containment at ADD time; a refusal stores nothing, takes no undo snapshot and toasts the U1 sentence.
+   URL attachments are unchanged.
+5. **`INC9M-SEC-F3`.** In `_fetch_gh`, `commit` is bound to `{}` at the top of each branch iteration.
+6. **`INC9M-SEC-F4` + `CR` section 1 (architecture).** `safe_local_path` stays in `osopen`. `docs/ARCHITECTURE.md` section 3: `github` and `screens` may import `osopen.safe_local_path` only;
+   the inbound ban is "`open_external` is referenced only from `app`"; the `github` row now lists `design` too (pre-existing drift). `tests/test_arch_osopen_callers.py` derives it from the ASTs.
+7. **`INC9M-CR-F3`.** The badge arm paints a real `RepoScreen` through a stubbed `fetch`. **`CR-F5`.** `_fetch_gh` calls `progress` before the `.`/`..` `continue`.
+   **`CR-F6`.** Two unused imports removed from `tests/test_inc9m.py`. **`CR-F7`.** The `test_inc9l` arm about "single slash" is renamed (a label change).
+   **`CR-F8`.** The `text[0] not in "\\/"` guard is dropped (equivalent: surviving mutants N9, N11 of `increment-039`); `github.source_kind(spec)` is public and the badge reads it; `fetch` no longer calls `.resolve()` on an Optional.
+
+**Trace.** Standalone, like `A-113`..`A-121`. Carried by `tests/test_inc9n.py`, `tests/test_arch_osopen_callers.py` and the sealed-arm changes listed in `increment-040-inc9n.md`.
+
+**What is not claimed.** On POSIX every absolute path is refused (`INC9M-CR-F4`, coordinator ruling: mapper is Windows-only for typed paths; nothing was run on POSIX). The device-name
+test is `PureWindowsPath.is_reserved()` of Python 3.12 per component; a name it does not know is not refused. A relative text with a `:` inside (`CC:\x`) is still accepted (`A-121`). No real
+UNC, `\??\UNC`, console or COM device was ever opened: spies refuse and record, and `preview_csv` is stubbed where a device name is typed. Nothing was measured against a live SMB share,
+a live `gh`, a real clone, or another terminal than Textual's headless driver.

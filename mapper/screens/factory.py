@@ -1,6 +1,7 @@
 """Document factory screen for process-template editing."""
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -272,13 +273,26 @@ class FactoryScreen(Screen):
         return doc.kind in {"docx", "pptx", "xlsx"}
 
     def _office_path(self, doc: Document) -> Path | None:
+        """`INC9M-SEC-F1`: `doc.path` comes from the sidecar of a map that may have been shared, so it is
+        judged like typed text: the closed allow-list first (no UNC, no device name: a stat of those is
+        an SMB lookup or a console), then confined to the workspace, as `open_external` does.  The
+        lexical containment test runs before `resolve()` so an outside absolute path is never stat'ed."""
         if not doc.path:
             return None
-        store = self.app.store  # type: ignore[attr-defined]
-        candidate = Path(doc.path)
-        if candidate.is_absolute():
-            return candidate
-        return store.workspace / candidate
+        local = safe_local_path(doc.path)
+        if local is None:
+            return None
+        workspace = Path(self.app.store.workspace)  # type: ignore[attr-defined]
+        joined = workspace / local
+        if not Path(os.path.normpath(joined)).is_relative_to(os.path.normpath(workspace)):
+            return None
+        try:
+            resolved = joined.resolve()
+            if not resolved.is_relative_to(workspace.resolve()):
+                return None
+        except (OSError, ValueError):
+            return None
+        return resolved
 
     def _preview(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
@@ -424,7 +438,7 @@ class FactoryScreen(Screen):
         self.app.push_screen(EditorScreen(doc.source), callback=on_save)
 
     def action_import_office(self) -> None:
-        from mapper.app import _PromptScreen
+        from mapper.app import PATH_NOT_SUPPORTED, _PromptScreen
 
         def on_path(path_str: str | None) -> None:
             if path_str is None:
@@ -432,12 +446,13 @@ class FactoryScreen(Screen):
             source = safe_local_path(path_str)
             if source is None:
                 # `INC9L-SEC-F2`: outside the allow-list: not looked at, and not named.
-                self.notify("archivo no encontrado", severity="error", markup=False)
+                # `U1`: the one fixed sentence, as the CSV prompt's.
+                self.notify(PATH_NOT_SUPPORTED, severity="error", markup=False)
                 return
             # `INC9BC-SEC-F1`: the NAME as typed, never the expansion -- `~`
             # resolves to the user profile, and a toast is painted and logged.
             name = Path(path_str).name
-            if not source.exists():
+            if not source.is_file():
                 self.notify(darkside.plain(f"archivo no encontrado: {name}"), severity="error", markup=False)
                 return
             kind = source.suffix.lower().lstrip(".")
@@ -472,7 +487,7 @@ class FactoryScreen(Screen):
             self.notify(darkside.plain(f"plantilla importada: {rel}"), markup=False)
 
         self.app.push_screen(
-            _PromptScreen("ruta del archivo office", "/ruta/a/plantilla.docx"),
+            _PromptScreen("ruta del archivo office", "C:\\path\\to\\template.docx"),
             callback=on_path,
         )
 
