@@ -443,7 +443,8 @@ def test_inc9h_sec_f5_gh_runs_with_its_prompts_disabled(monkeypatch):
         GitHubConnector("alice/tools").fetch()
     assert run.calls and run.calls[0][0][0] == "gh", run.calls
     env = run.calls[0][1].get("env")
-    assert env is not None and env["GH_PROMPT_DISABLED"] == "1", env
+    # (the message names the one key, never the whole environment)
+    assert env is not None and env.get("GH_PROMPT_DISABLED") == "1", (env or {}).get("GH_PROMPT_DISABLED")
     assert "PATH" in env or "Path" in env, "the gh call still inherits the process environment"
 
 
@@ -459,8 +460,8 @@ def test_inc9h_sec_f5_git_show_in_diff_runs_in_the_no_prompt_english_environment
     for argv, kw in run.calls:
         env = kw.get("env")
         assert env is not None, argv
-        assert env["LC_ALL"] == "C" and env["GIT_TERMINAL_PROMPT"] == "0", (argv, env)
-        assert env["HOME"] == str(tmp_path), "built per call, not snapshotted"
+        assert (env.get("LC_ALL"), env.get("GIT_TERMINAL_PROMPT")) == ("C", "0"), argv
+        assert env.get("HOME") == str(tmp_path), "built per call, not snapshotted"
 
 
 # ---------------------------------------------------------------------------
