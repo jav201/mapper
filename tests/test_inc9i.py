@@ -21,7 +21,9 @@ from textual.widgets import Static
 from mapper.app import HomeScreen, MapperApp, RepoScreen
 from mapper.github import GitHubConnector, GitHubError, _ensure_cloned, _local_branches, _mirror_dir
 from tests import test_inc9h
-from tests.test_inc9f import NARROW, SIZE, _Mirror, _Run, hermetic  # noqa: F401
+from tests.test_inc9f import (  # noqa: F401
+    CATEGORIES, NARROW, SIZE, STDERR_SAMPLES, _Mirror, _Run, hermetic,
+)
 from tests.test_inc9g import URL_A
 from tests.test_inc9h import _StaleMirror, _clones, _connect, _settle
 from tests.test_repair_layout import _rows_in
@@ -77,6 +79,8 @@ def test_inc9i_cr_f1_r_then_r_dot_git_in_one_cache_still_gives_two_clones(tmp_pa
     for _ in range(2):
         assert _ensure_cloned(R, cache) == plain and _ensure_cloned(R_GIT, cache) == dotted
     assert len(_clones(run)) == 2, _clones(run)
+    # `INC9I-CR-F2`: a trailing slash is the same URL as `R`, so it finds `R`'s own directory
+    assert _ensure_cloned(R + "/", cache) == plain and len(_clones(run)) == 2, _clones(run)
 
 
 @red("github")
@@ -202,27 +206,38 @@ async def test_inc9i_cr_f3_a_fresh_connect_after_a_stale_one_paints_no_cached_co
 # ---------------------------------------------------------------------------
 # INC9H-UX-F1 -- the category on the `▲ cached copy:` line never breaks across lines
 
-class _AuthMirror(_StaleMirror):
+_JUNK_STDERR = "fatal: something git never says\n"
+UNKNOWN_EXITS = ("unknown (exit 1)", "unknown (exit 128)")
+
+
+class _CategoryMirror(_StaleMirror):
+    """The refresh fails the way the CATEGORY named by `mode` says: the stderr that
+    `_failure_category` maps to it, a timeout, or stderr git never says with that exit code."""
+
     def __call__(self, argv, *a, **kw):
-        if self.armed and "fetch" in argv and self.mode == "auth":
+        if self.armed and "fetch" in argv:
             self.calls.append((list(argv), kw))
-            return subprocess.CompletedProcess(
-                argv, 128, "", "fatal: could not read Username for x: terminal prompts disabled\n")
-        return super().__call__(argv, *a, **kw)
+            if self.mode == "timed out":
+                raise subprocess.TimeoutExpired(argv, 120)
+            if self.mode.startswith("unknown (exit "):
+                return subprocess.CompletedProcess(argv, int(self.mode[14:-1]), "", _JUNK_STDERR)
+            return subprocess.CompletedProcess(argv, 128, "", STDERR_SAMPLES[self.mode])
+        return super(_StaleMirror, self).__call__(argv, *a, **kw)
 
 
 @pytest.mark.parametrize("size", [SIZE, NARROW])
-@pytest.mark.parametrize("mode,category", [
-    pytest.param("exit1", "unknown (exit 1)", marks=red_marks("panel")),
-    # a pin: at 30 cells the base happens to break this one BEFORE the category (measured)
-    ("auth", "authentication required"),
-])
+@pytest.mark.parametrize("category", [*CATEGORIES, *UNKNOWN_EXITS])
 async def test_inc9i_ux_f1_the_stale_category_is_never_split_across_lines(
-        tmp_path, monkeypatch, mode, category, size):
-    monkeypatch.setattr(test_inc9h, "_StaleMirror", _AuthMirror)
-    got = await _connect(tmp_path, monkeypatch, mode, size, stale=True)
+        tmp_path, monkeypatch, category, size):
+    """`INC9I-CR-F1`: every category the panel can name, on its own line under the label.
+    At 30 cells `▲ cached copy: host not found` would fit on one row, so the 'own line'
+    claim is asserted on the row, not only on the category being present."""
+    monkeypatch.setattr(test_inc9h, "_StaleMirror", _CategoryMirror)
+    got = await _connect(tmp_path, monkeypatch, category, size, stale=True)
     rows = [" ".join(r.split()) for r in got["frame"].split("\n")]
     assert any(category in row for row in rows), (category, [r for r in rows if r][:14])
+    label_rows = [r for r in rows if "▲ cached copy:" in r]
+    assert len(label_rows) == 1 and category not in label_rows[0], (category, label_rows)
     assert "▲ cached copy:" in got["painted"] and category in got["painted"], got["painted"]
 
 
