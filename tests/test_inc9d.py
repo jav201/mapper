@@ -228,7 +228,7 @@ def test_inc9d_sec_f3_a_failed_clone_message_carries_no_local_path(tmp_path, mon
     assert "widget" in message, message
     assert "s3cr3t-token" not in message and "example.invalid" not in message, message
     assert str(cache) not in message and str(tmp_path) not in message, _redact(message)
-    assert "Cloning into" not in message and "128" in message, _redact(message)
+    assert "Cloning into" not in message and "host not found" in message, _redact(message)
     assert not _leaks_the_profile(message), "the message paints the user profile"
 
 

@@ -32,7 +32,7 @@ from tests.test_inc9c import PROFILE
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"github", "repo", "home", "palette"}
+OPEN_STEPS: set[str] = {"repo", "home", "palette"}
 
 
 def red(step: str):
