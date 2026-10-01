@@ -291,7 +291,13 @@ class _Mirror(_Run):
     """`git clone --mirror` as git does it, measured on a local bare repository: the
     target is a BARE repository (`HEAD` is a file, there is no `.git`), and a second
     clone into it fails with exit 128, `destination path ... already exists and is
-    not an empty directory`.  Every other call (`fetch`) succeeds."""
+    not an empty directory`.  Every other call (`fetch`) succeeds.  `Inc-9h`: the
+    clone records the URL it was given and `config --get remote.origin.url` answers
+    with it, as git does (`origin` is the URL as typed)."""
+
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.origin: dict[str, str] = {}
 
     def __call__(self, argv, *a, **kw):
         self.calls.append((list(argv), kw))
@@ -301,6 +307,12 @@ class _Mirror(_Run):
                 return subprocess.CompletedProcess(argv, 128, "", "fatal: destination path exists\n")
             target.mkdir(parents=True)
             (target / "HEAD").write_text("ref: refs/heads/main\n")
+            self.origin[str(target)] = argv[-2]
+        elif list(argv)[3:6] == ["config", "--get", "remote.origin.url"]:
+            url = self.origin.get(argv[2])
+            if url is None:
+                return subprocess.CompletedProcess(argv, 1, "", "")
+            return subprocess.CompletedProcess(argv, 0, url + "\n", "")
         return subprocess.CompletedProcess(argv, 0, "", "")
 
 
