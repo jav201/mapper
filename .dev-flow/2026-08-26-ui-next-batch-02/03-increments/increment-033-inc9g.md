@@ -152,3 +152,15 @@ home hint reads `next ▸ choose a door`. Text frames show layout, not colour; t
 
 `36c1701` arms (RED) · `4764561` github items · `8d74b73` N1 arms (RED) + 9f seed · `8ad867d` app items ·
 `78459bd` palette · `e34e65a` review items 7-14 · `28c6c6d` the `test_fold` escape fix · `4f6b568` docs (this record, `A-115`); a last docs commit fills in the final lane line.
+
+## Correction appended 2026-10-01 (Inc-9h, `INC9G-CR-F2`; the text above is not rewritten)
+
+Section 4 lists the mutant `hint never refreshed after mount` as RED, killed by
+`no_recent_maps_the_hint_only_invites_a_door`. **That claim was wrong.** The mutant text was described, not
+quoted, and the arm cannot kill it: `HomeScreen.compose` globbed the workspace and built the first hint
+correctly, so removing the `on_mount` line `self.query_one(HintLine).set_hint(home_hint(bool(mmd_files)))`
+(the review's `R8`) leaves every arm that starts the app on a fixed workspace green. Only a change of the
+maps between two visits to the screen reaches that line. `Inc-9h` adds that arm
+(`test_inc9h_cr_f2_the_home_hint_follows_the_maps_when_the_screen_resumes`: save a map, push and pop a screen,
+the `↵` pair is present; delete the `.mmd`, push and pop, it is absent) and kills the exact text above
+(`HOME-1`) and the hard-coded variants (`HOME-2`, `HOME-3`); see `increment-034-inc9h.md` section 4.
