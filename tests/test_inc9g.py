@@ -28,7 +28,7 @@ from mapper.widgets.chrome import HintLine
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"palette"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
@@ -91,8 +91,10 @@ def _assert_row_legible(screen, item, binding):
 
 def _assert_row_keeps_its_colours(screen, item, binding):
     cells = _row_cells(screen, item)
-    glyph = [fg for t, fg, _ in cells if binding.glyph in t]
-    assert glyph and _hex(glyph[0]) == ACCENT, (binding.glyph, glyph)
+    # The key is the row's last painted segment (a short glyph also occurs in words).
+    lit = [(t, fg) for t, fg, _ in cells if t.strip()]
+    assert lit[-1][0].strip() == binding.glyph, (binding.glyph, lit)
+    assert _hex(lit[-1][1]) == ACCENT, (binding.glyph, lit)
     assert all(bg is None or _hex(bg) != SELECTED_BG for _, _, bg in cells), cells
 
 

@@ -88,6 +88,7 @@ class CommandPalette(ModalScreen[str | None]):
         self._items: list[KeyBinding] = []
         self._head_cells = 0
         self._label_cells = 0
+        self._labels: list[Static] = []
 
     def compose(self) -> ComposeResult:
         yield Vertical(
@@ -101,22 +102,35 @@ class CommandPalette(ModalScreen[str | None]):
         self._refresh_list("")
         self.query_one("#palette-input", Input).focus()
 
-    def _binding_label(self, binding: KeyBinding) -> Text:
+    def _binding_label(self, binding: KeyBinding, selected: bool = False) -> Text:
         # Every field is placed as its own span with an explicit style: nothing is
         # interpolated into a markup-parsed string.
         # The HEADER word the key bar paints, never the seat's group id (`INC9C-F2`).
         head = group_header(binding.group)
         # Both columns are padded to the seat's widest word, so the label column
         # and the key column each start at one cell on every row.
-        return Text.assemble(
-            (head + " " * (self._head_cells - cell_len(head)) + "  ", darkside.WORDMARK),
-            (binding.label + " " * (self._label_cells - cell_len(binding.label)) + "  ", darkside.INK),
-            (binding.glyph, darkside.ACCENT),
+        # `INC9F-UX-F1`: a span's colour beats the `-highlight` CSS, and the row's
+        # background IS the accent, so the selected row is painted in one ground-on-
+        # accent colour (5.7:1) instead of the unselected row's three.
+        head_style, label_style, key_style = (
+            (darkside.GROUND,) * 3 if selected
+            else (darkside.WORDMARK, darkside.INK, darkside.ACCENT)
         )
+        return Text.assemble(
+            (head + " " * (self._head_cells - cell_len(head)) + "  ", head_style),
+            (binding.label + " " * (self._label_cells - cell_len(binding.label)) + "  ", label_style),
+            (binding.glyph, key_style),
+        )
+
+    def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        lit = self.query_one("#palette-list", ListView).index
+        for i, (label, binding) in enumerate(zip(self._labels, self._items)):
+            label.update(self._binding_label(binding, selected=(i == lit)))
 
     def _refresh_list(self, query: str) -> None:
         list_view = self.query_one("#palette-list", ListView)
         list_view.clear()
+        self._labels = []
         # Grouped in the key bar's order, so the palette and the bar read alike.
         order = {g: i for i, g in enumerate(bar_group_order(self.scope))}
         self._head_cells = max(cell_len(group_header(g)) for g in order)
@@ -125,6 +139,7 @@ class CommandPalette(ModalScreen[str | None]):
         for binding in self._items:
             label = Static(self._binding_label(binding))
             label.add_class("palette-binding")
+            self._labels.append(label)
             list_view.append(ListItem(label))
         if self._items:
             list_view.index = 0
