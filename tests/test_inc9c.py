@@ -459,7 +459,8 @@ async def test_inc9c_k4_connect_repo_is_one_name_on_every_surface(tmp_path):
         await pilot.pause()
         legend_title = _rows_in(app.screen, app.screen.query_one("#help-title").region)
     joined = " ".join(strip)
-    assert "p connect repo" in joined, strip
+    # `Inc-9e` (`L1`): letters are home-only; the name stays.
+    assert "connect repo" in joined and "p connect repo" not in joined, strip
     assert strip[1].count("connect repo") == 1 and "connect repo" in strip[1], strip
     assert title == "connect repo" and door == "connect repo"
     assert "connect repo" in groups, groups

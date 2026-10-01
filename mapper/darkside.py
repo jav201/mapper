@@ -41,6 +41,8 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.text import Text
 
+from mapper import keymap
+
 # Palette ------------------------------------------------------------------
 GROUND = "#000000"
 PANEL = "#121212"
@@ -132,21 +134,34 @@ def moon(d: date) -> tuple[str, str]:
 
 
 # Tab strip ----------------------------------------------------------------
-def tab_strip(active: str, crumb: list[str] | None = None, width: int = 0) -> Text:
-    """Render the darkside tab strip."""
-    # `A-112` st. 4-5: English, one word per screen -- the door's label.
-    tabs: list[tuple[str, str]] = [
-        ("c", "browse"),
-        ("p", "connect repo"),
-        ("n", "build"),
-        ("f", "factory"),
-    ]
+# The four home doors the strip names, by SEAT ACTION.  The key and the label are
+# the seat's (`L1`): a label written here would drift from the key bar's.
+_TAB_ACTIONS = ("consult", "plug", "construct", "factory")
+
+
+def tab_strip(active: str | None, crumb: list[str] | None = None, width: int = 0) -> Text:
+    """Render the darkside tab strip.
+
+    *active* is the key of the tab to mark, or `None` for NO active tab (the
+    components screen is not one of the four).
+
+    KEY LETTERS ARE PAINTED ON HOME ONLY (`L1`).  On the map `n` means `next
+    match` and `f` means `focus branch`, so a letter beside a tab there would give
+    one key two meanings on one screen; every other screen paints the tab NAMES.
+    Home is the one strip with the first door active and no crumb (the map's
+    crumb is never empty): `TabStrip` carries no flag for it, and adding one means
+    editing the widget and every call site.
+    """
+    home = {b.action: b for b in keymap.bindings_for(keymap.SCOPE_HOME, include_app=False)}
+    doors = [home[action] for action in _TAB_ACTIONS]
+    letters = crumb is None and active == doors[0].key
     pieces: list[tuple[str, str]] = []
-    for key, label in tabs:
-        if key == active:
-            pieces.append((f" {key} {label} ", f"bold {GROUND} on {ACCENT}"))
+    for door in doors:
+        label = f"{door.glyph} {door.label}" if letters else door.label
+        if door.key == active:
+            pieces.append((f" {label} ", f"bold {GROUND} on {ACCENT}"))
         else:
-            pieces.append((f" {key} {label} ", f"{MUT} on {STEP}"))
+            pieces.append((f" {label} ", f"{MUT} on {STEP}"))
         pieces.append(("  ", ""))
     # Drop trailing two spaces.
     if pieces:
@@ -371,7 +386,7 @@ def keybar(
 # Hint line ----------------------------------------------------------------
 def hint_line(text: str, key: str | None = None) -> Text:
     """Render a next-step hint line."""
-    parts: list[tuple[str, str]] = [("siguiente ▸ ", MUT), (plain(text), MUT)]
+    parts: list[tuple[str, str]] = [("next ▸ ", MUT), (plain(text), MUT)]
     if key:
         parts.append((f" {key}", INK))
     return Text.assemble(*parts)
