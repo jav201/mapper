@@ -229,7 +229,7 @@ async def test_seed_construct_dialog_stays_open_on_a_refused_name(tmp_path):
 
 @red("seed-safety")
 @pytest.mark.parametrize(
-    "name", BAD_NAMES + ["", " ", "x.", "..", "a..b", "a*b", "NUL.txt", "com1", "lpt9"])
+    "name", BAD_NAMES + ["", " ", "x.", "..", "a*b", "NUL.txt", "com1", "lpt9"])
 def test_seed_store_refuses_every_write_door(tmp_path, name):
     ws = tmp_path / "ws"
     store = MapStore(ws)

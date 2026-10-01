@@ -28,8 +28,11 @@ class MapIdError(MapStoreError):
 _RESERVED_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
     | {f"{d}{n}" for d in ("COM", "LPT") for n in "123456789¹²³"}
+    | {"CONIN$", "CONOUT$", "CLOCK$"}
 )
 _INVALID_CHARS = frozenset('<>"|?*')
+#: `<id>_nodos.yml` plus a temp suffix must fit MAX_PATH (260) beside the workspace.
+MAX_MAP_ID_LEN = 100
 
 
 def check_map_id(map_id: str) -> None:
@@ -40,19 +43,23 @@ def check_map_id(map_id: str) -> None:
     """
     if not isinstance(map_id, str) or not map_id.strip():
         raise MapIdError("el nombre del mapa está vacío")
+    if len(map_id) > MAX_MAP_ID_LEN:
+        raise MapIdError(f"el nombre del mapa es demasiado largo (máximo {MAX_MAP_ID_LEN} caracteres)")
     if "/" in map_id or "\\" in map_id or ":" in map_id:
         raise MapIdError(
             "el nombre del mapa no puede contener separadores de ruta (/ \\) "
             "ni letra de unidad (:)")
-    if ".." in map_id:
-        raise MapIdError("el nombre del mapa no puede contener '..'")
     if any(ord(c) < 32 or c in _INVALID_CHARS for c in map_id):
         raise MapIdError(
             "el nombre del mapa contiene caracteres no válidos en Windows "
             '(< > " | ? * o de control)')
+    if any(0xD800 <= ord(c) <= 0xDFFF for c in map_id):
+        raise MapIdError("el nombre del mapa contiene caracteres que no se pueden guardar en un archivo")
     if map_id.split(".", 1)[0].rstrip().upper() in _RESERVED_NAMES:
         raise MapIdError(
             "el nombre del mapa usa un nombre reservado de Windows (CON, NUL, COM1...)")
+    # Separators are refused above, so `..` means the parent only when the id IS
+    # dots; every dot-only id ends in a dot and dies here.
     if map_id != map_id.rstrip(" .") or map_id != map_id.lstrip(" "):
         raise MapIdError("el nombre del mapa no puede empezar con espacio ni terminar en punto o espacio")
 
