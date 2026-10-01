@@ -169,3 +169,16 @@ the recommended option.
 Coordinator rulings for the same increment: INC9J-UX-F1 (no-host URL told to use a credential helper)
 is subsumed — the allow-list refusal sentence names no cause beyond "not a supported repository URL".
 INC9J-UX-F3 (palette test raced once) is logged as FLAKE-3 candidate for the whole-branch gates.
+
+---
+
+# Round 9 — Inc-9k ux review (2026-10-01, base `c6b9d32`)
+
+ux PASS-WITH-NOTICES (S1 display and the accepted forms discharged). Three questions were put to the
+operator; each answer took the recommended option. Code and security reviews were still running.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| T1 · INC9K-UX-F1 | The refusal sentence does not say how to write an accepted repo | Decir las formas | The fixed sentence becomes `refusing the repository: use https://host/path, git@host:path, owner/name or a local folder` (still echoes nothing). Routed to the next increment |
+| T2 · INC9K-UX-F3 | Refuse `http://`? | Rechazarlo | Ratifies the coordinator default: https only |
+| T3 · INC9K-UX-F2 | `?` in the connect field opens help instead of typing | Corregir en Inc-EN | In a text field `?` types; help stays on `?` outside fields. Routed to Inc-EN with B-36 / B-72 |
