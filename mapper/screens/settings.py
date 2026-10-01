@@ -72,7 +72,7 @@ class SettingsScreen(Screen):
 
     def compose(self) -> ComposeResult:
         # `K2`: no tab is active here -- the sheet is none of the four doors.
-        yield TabStrip("s", crumb=["components"])
+        yield TabStrip(None, crumb=["components"])
         yield Static("component         default          focused          disabled",
                      id="settings-header")
         with _Grid(id="settings-grid"):

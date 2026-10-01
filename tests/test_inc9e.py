@@ -28,7 +28,7 @@ from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 from tests.test_repair_layout import _rows_in, _tree
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"tabs", "hint", "cr_f6", "order", "palette"}
+OPEN_STEPS: set[str] = {"order", "palette"}
 
 
 def red(step: str):
@@ -73,7 +73,7 @@ async def _screens(app, pilot):
     yield "home", app.screen
     for name, make in (
         ("map", lambda: MapScreen(_tree(app))),
-        ("factory", FactoryScreen),
+        ("factory", lambda: FactoryScreen(app.store.load(_tree(app)))),
         ("components", SettingsScreen),
         ("connect repo", PlugRepoScreen),
     ):
@@ -151,11 +151,14 @@ async def test_inc9e_l1_the_strip_follows_a_relabelled_seat_on_every_screen(tmp_
         map_id = _tree(app)
         _sentinel_seat(monkeypatch)
         for name, make in (("home", None), ("map", lambda: MapScreen(map_id)),
-                           ("factory", FactoryScreen), ("connect repo", PlugRepoScreen)):
+                           ("factory", lambda: FactoryScreen(app.store.load(map_id))),
+                           ("connect repo", PlugRepoScreen)):
             if make:
                 app.push_screen(make())
                 await pilot.pause()
                 await pilot.pause()
+            widget = app.screen.query_one(TabStrip)
+            widget.set_crumb(widget.crumb)  # a re-render reads the (relabelled) seat
             strip = _strip_text(app.screen)
             for action in TAB_ACTIONS:
                 assert f"zz-{action}" in strip, (name, action, strip)
