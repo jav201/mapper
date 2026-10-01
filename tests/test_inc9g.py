@@ -15,14 +15,18 @@ import pathlib
 import subprocess
 
 import pytest
-from textual.widgets import ListView
+from textual.widgets import Input, ListView
 
 from mapper import keymap
 from mapper.app import HomeScreen, MapperApp, RepoScreen
 from mapper.model import Graph
-from mapper.github import GitHubConnector, GitHubError, _ensure_cloned, _local_branches
+from mapper import github
+from mapper.github import (
+    CATEGORIES, GitHubConnector, GitHubError, _ensure_cloned, _failure_category, _local_branches,
+)
 from tests.test_inc9f import (  # noqa: F401  (hermetic is a fixture)
-    NARROW, SIZE, _Mirror, _Run, _open_palette, _sentinel_seat, hermetic,
+    CATEGORIES as ORACLE_CATEGORIES, NARROW, SIZE, _Mirror, _Run, _message, _open_palette,
+    _sentinel_seat, hermetic,
 )
 from mapper.widgets.chrome import HintLine
 from tests.test_repair_layout import _frame_rows, _rows_in
@@ -345,3 +349,219 @@ async def test_inc9g_n1_the_relabelled_seat_word_is_gone_without_maps_and_presen
     (tmp_path / "b").mkdir()
     withmaps, _ = await _home_hint(tmp_path / "b", SIZE, maps=True, relabel=True, monkeypatch=monkeypatch)
     assert "zz-open_selected" in withmaps, withmaps
+
+
+# ---------------------------------------------------------------------------
+# INC9F-CR-F1 -- the classifier's precedence is pinned, pair by pair
+
+OVERLAPS = [
+    ("host not found", "authentication required",
+     "fatal: Could not resolve host: x\nfatal: Authentication failed for 'https://x/'\n"),
+    ("host not found", "not found or private",
+     "dial tcp: lookup x: no such host\nfatal: repository 'https://x/o/w.git/' not found\n"),
+    ("host not found", "network unreachable",
+     "dial tcp: lookup x: no such host\nerror connecting to x\n"),
+    ("authentication required", "not found or private",
+     "remote: Repository not found.\nfatal: Authentication failed for 'https://x/'\n"),
+    ("authentication required", "network unreachable",
+     "fatal: Failed to connect to x port 443\nfatal: could not read Username for 'https://x'\n"),
+    ("not found or private", "network unreachable",
+     "fatal: Failed to connect to x port 443\nfatal: repository 'https://x/o/w.git/' does not exist\n"),
+]
+
+
+@pytest.mark.parametrize("winner,loser,stderr", OVERLAPS)
+def test_inc9g_cr_f1_when_two_categories_match_the_earlier_one_wins(winner, loser, stderr):
+    assert _failure_category(stderr, 1) == winner, (winner, loser)
+
+
+@pytest.mark.parametrize("winner,loser,stderr", OVERLAPS)
+def test_inc9g_cr_f1_the_clone_message_names_the_winner_exactly(
+        winner, loser, stderr, tmp_path, monkeypatch):
+    message = _message("https://example.invalid/owner/widget.git", tmp_path,
+                       _Run(stderr=stderr), monkeypatch)
+    assert message == f"could not clone 'widget': {winner}", message
+
+
+# ---------------------------------------------------------------------------
+# INC9F-CR-F2 -- every gh sample names its own category, exactly
+
+GH_SAMPLES = [
+    ("not found or private", "gh: Not Found (HTTP 404)\n"),
+    ("network unreachable", "error connecting to api.github.com\n"),
+    ("authentication required", "To get started with GitHub CLI, please run:  gh auth login\n"),
+    ("host not found", "dial tcp: lookup api.github.com: no such host\n"),
+]
+
+
+@pytest.mark.parametrize("category,stderr", GH_SAMPLES)
+def test_inc9g_cr_f2_a_gh_failure_is_its_own_category_exactly(category, stderr, monkeypatch):
+    monkeypatch.setattr("subprocess.run", _Run(
+        raises=subprocess.CalledProcessError(1, ["gh"], stderr=stderr)))
+    with pytest.raises(GitHubError) as caught:
+        GitHubConnector("owner/name").fetch()
+    assert str(caught.value) == f"could not query 'owner/name': {category}", str(caught.value)
+
+
+# ---------------------------------------------------------------------------
+# INC9F-CR-F3 -- the search box keeps its editing keys
+
+async def test_inc9g_cr_f3_editing_keys_edit_the_search_box(tmp_path):
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        palette, _ = await _open_palette(app, pilot)
+        box = palette.query_one("#palette-input", Input)
+        await pilot.press(*"fact", "left", "left", "x", "home", "y")
+        await pilot.pause()
+        assert box.value == "yfaxct", box.value
+        await pilot.press("end", "z")
+        await pilot.pause()
+        assert box.value == "yfaxctz", box.value
+
+
+# ---------------------------------------------------------------------------
+# INC9F-CR-F4 -- a cache hit that cannot be refreshed shows the cached copy, and says so
+
+class _StaleFetch(_Mirror):
+    """A mirror whose `fetch` times out (`timeout=True`) or exits non-zero."""
+
+    def __init__(self, *, timeout: bool):
+        super().__init__()
+        self.timeout = timeout
+        self.armed = False
+
+    def __call__(self, argv, *a, **kw):
+        if self.armed and "fetch" in argv:
+            self.calls.append((list(argv), kw))
+            if self.timeout:
+                raise subprocess.TimeoutExpired(argv, 120)
+            return subprocess.CompletedProcess(
+                argv, 128, "", "fatal: unable to access: Could not resolve host: x\n")
+        return super().__call__(argv, *a, **kw)
+
+
+@pytest.mark.parametrize("timeout,category", [(True, "timed out"), (False, "host not found")])
+def test_inc9g_cr_f4_the_connector_flags_a_stale_mirror(tmp_path, monkeypatch, timeout, category):
+    run = _StaleFetch(timeout=timeout)
+    monkeypatch.setattr("subprocess.run", run)
+    cache = tmp_path / "cache"
+    _ensure_cloned(URL_A, cache)
+    run.armed = True
+    seen: list[str] = []
+    assert _ensure_cloned(URL_A, cache, on_stale=seen.append).is_dir()
+    assert seen == [category], seen
+    fetches = [kw for argv, kw in run.calls if "fetch" in argv]
+    assert [kw["timeout"] for kw in fetches] == [github._CLONE_TIMEOUT], fetches
+
+
+def test_inc9g_cr_f4_a_fresh_mirror_is_not_flagged(tmp_path, monkeypatch):
+    monkeypatch.setattr("subprocess.run", _Mirror())
+    cache = tmp_path / "cache"
+    _ensure_cloned(URL_A, cache)
+    seen: list[str] = []
+    _ensure_cloned(URL_A, cache, on_stale=seen.append)
+    assert seen == []
+
+
+@pytest.mark.parametrize("timeout,category", [(True, "timed out"), (False, "host not found")])
+@pytest.mark.usefixtures("hermetic")
+async def test_inc9g_cr_f4_the_repo_screen_loads_the_cached_copy_and_toasts(
+        tmp_path, monkeypatch, timeout, category):
+    run = _StaleFetch(timeout=timeout)
+    monkeypatch.setattr("subprocess.run", run)
+    _ensure_cloned(URL_A, tmp_path / ".cache" / "mapper" / "repos")
+    run.armed = True
+    app = MapperApp(tmp_path)
+    toasts: list[str] = []
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        app.notify = lambda msg, **kw: toasts.append(str(msg))
+        app.push_screen(RepoScreen(URL_A))
+        screen = None
+        for _ in range(30):
+            await pilot.pause()
+            screen = app.screen
+            if isinstance(screen, RepoScreen) and not screen.loading:
+                break
+        assert isinstance(screen, RepoScreen) and not screen.loading, "the worker never ended"
+        assert screen.failure == "" and len(screen.graph.nodes) >= 1, (screen.failure, screen.graph)
+    assert f"showing the cached copy: {category}" in toasts, toasts
+
+
+@pytest.mark.usefixtures("hermetic")
+async def test_inc9g_cr_f4_a_fresh_connect_does_not_toast_a_stale_copy(tmp_path, monkeypatch):
+    monkeypatch.setattr("subprocess.run", _Mirror())
+    _ensure_cloned(URL_A, tmp_path / ".cache" / "mapper" / "repos")
+    app = MapperApp(tmp_path)
+    toasts: list[str] = []
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        app.notify = lambda msg, **kw: toasts.append(str(msg))
+        app.push_screen(RepoScreen(URL_A))
+        for _ in range(30):
+            await pilot.pause()
+            if isinstance(app.screen, RepoScreen) and not app.screen.loading:
+                break
+    assert toasts and not any("cached copy" in t for t in toasts), toasts
+
+
+# ---------------------------------------------------------------------------
+# INC9F-CR-F5 -- only an ssh key refusal is an authentication failure
+
+def test_inc9g_cr_f5_a_local_permission_denied_is_not_an_authentication_failure(tmp_path, monkeypatch):
+    run = _Run(stderr="fatal: could not create work tree dir 'x': Permission denied\n")
+    message = _message("https://example.invalid/owner/widget.git", tmp_path, run, monkeypatch)
+    assert message == "could not clone 'widget': unknown (exit 128)", message
+
+
+def test_inc9g_cr_f5_an_ssh_key_refusal_is_still_an_authentication_failure(tmp_path, monkeypatch):
+    run = _Run(stderr="git@example.invalid: Permission denied (publickey).\n")
+    message = _message("https://example.invalid/owner/widget.git", tmp_path, run, monkeypatch)
+    assert message == "could not clone 'widget': authentication required", message
+
+
+# ---------------------------------------------------------------------------
+# INC9F-CR-F6 -- the fixed category set is declared once
+
+def test_inc9g_cr_f6_the_declared_set_is_the_set_the_operator_ruled():
+    assert set(CATEGORIES) == set(ORACLE_CATEGORIES), CATEGORIES
+
+
+def test_inc9g_cr_f6_the_timeout_category_is_spelled_once():
+    source = pathlib.Path(github.__file__).read_text(encoding="utf-8")
+    # the definition, and the stderr marker `connection timed out`
+    assert source.count("timed out") == 2, source.count("timed out")
+
+
+# ---------------------------------------------------------------------------
+# Item 13 -- every git call carries the English, no-prompt environment
+
+@pytest.mark.usefixtures("hermetic")
+def test_inc9g_env_every_git_call_runs_in_a_no_prompt_english_environment(tmp_path, monkeypatch):
+    run = _Mirror()
+    monkeypatch.setattr("subprocess.run", run)
+    cache = tmp_path / ".cache" / "mapper" / "repos"
+    _ensure_cloned(URL_A, cache)
+    GitHubConnector(URL_A).fetch()  # a cache hit: fetch, then every read
+    gits = [(argv, kw) for argv, kw in run.calls if argv[0] == "git"]
+    assert len(gits) > 4, gits
+    for argv, kw in gits:
+        env = kw.get("env")
+        assert env is not None, argv
+        assert env["LC_ALL"] == "C" and env["GIT_TERMINAL_PROMPT"] == "0", (argv, env)
+        assert env["HOME"] == str(tmp_path), "the env is built per call, not snapshotted at import"
+
+
+# ---------------------------------------------------------------------------
+# Item 14 -- the transport-helper rule reads the same stripped text as the dash rule
+
+@pytest.mark.parametrize("spec", ["  ext::sh x", "\text::sh x", " file::x"])
+def test_inc9g_refuse_a_padded_transport_helper(spec, tmp_path, monkeypatch):
+    run = _Run()
+    monkeypatch.setattr("subprocess.run", run)
+    with pytest.raises(GitHubError, match="transport helpers"):
+        _ensure_cloned(spec, tmp_path / "cache")
+    with pytest.raises(GitHubError, match="transport helpers"):
+        GitHubConnector(spec).fetch()
+    assert run.calls == [], run.calls
