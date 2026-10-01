@@ -388,7 +388,7 @@ def test_inc9h_sec_f2_real_git_a_branch_deleted_on_the_remote_is_gone_after_a_re
 # INC9G-SEC-F4 -- one fixed sentence per malformed owner/name; names pass through plain()
 
 MALFORMED = ["zq", "zq/yw/xv", "zq/yw/xv/wu", "zq//yw", "/zq", "zq/", "../zqyw", "zq/yw?x=1",
-             "zq/..", "zq/yw‮", "zq/yw\u0000", "zq/yw\u001b[31m", "zq/y w", "zq/y\u007fw"]
+             "zq/..", "zq/yw\u202e", "zq/yw\u0000", "zq/yw\u001b[31m", "zq/y w", "zq/y\u007fw"]
 
 
 @red("github")
@@ -412,24 +412,24 @@ def test_inc9h_sec_f4_every_malformed_owner_name_gets_the_same_fixed_sentence(tm
 @red("github")
 @pytest.mark.parametrize("stderr,tail", [("fatal: Could not resolve host: x\n", "host not found")])
 def test_inc9h_sec_f4_the_clone_message_shows_the_name_through_plain(tmp_path, monkeypatch, stderr, tail):
-    hostile = "https://example.invalid/o/wi‮d\u001b[31mget.git"
+    hostile = "https://example.invalid/o/wi\u202ed\u001b[31mget.git"
     run = _Run(stderr=stderr)
     monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:
         _ensure_cloned(hostile, tmp_path / "cache")
     message = str(caught.value)
     assert message.startswith("could not clone '") and message.endswith(f"': {tail}"), message
-    assert "‮" not in message and "\u001b" not in message, repr(message)
+    assert "\u202e" not in message and "\u001b" not in message, repr(message)
     assert "wi" in message and "get" in message, message
 
 
 @red("github")
 def test_inc9h_sec_f4_the_timeout_clone_message_shows_the_name_through_plain(tmp_path, monkeypatch):
-    hostile = "https://example.invalid/o/wi‮dget.git"
+    hostile = "https://example.invalid/o/wi\u202edget.git"
     monkeypatch.setattr("subprocess.run", _Run(raises=subprocess.TimeoutExpired(["git"], 1)))
     with pytest.raises(GitHubError) as caught:
         _ensure_cloned(hostile, tmp_path / "cache")
-    assert "‮" not in str(caught.value), repr(str(caught.value))
+    assert "\u202e" not in str(caught.value), repr(str(caught.value))
     assert str(caught.value).endswith(": timed out")
 
 
