@@ -182,3 +182,17 @@ operator; each answer took the recommended option. Code and security reviews wer
 | T1 · INC9K-UX-F1 | The refusal sentence does not say how to write an accepted repo | Decir las formas | The fixed sentence becomes `refusing the repository: use https://host/path, git@host:path, owner/name or a local folder` (still echoes nothing). Routed to the next increment |
 | T2 · INC9K-UX-F3 | Refuse `http://`? | Rechazarlo | Ratifies the coordinator default: https only |
 | T3 · INC9K-UX-F2 | `?` in the connect field opens help instead of typing | Corregir en Inc-EN | In a text field `?` types; help stays on `?` outside fields. Routed to Inc-EN with B-36 / B-72 |
+
+---
+
+# Round 10 — Inc-9m reviews (2026-10-01, base `c2af781`)
+
+security BLOCK-UNTIL INC9M-SEC-F1 (HIGH, pre-existing: a sidecar `documents[].path` such as `\host\s\a.docx`
+is stat'ed when the factory screen opens — SMB/NTLM exposure from a shared map); code OK (no HIGH;
+CR-F1 device names, CR-F2 refused-vs-not-found, CR-F3 badge arm, CR-F4 POSIX scope); ux PASS-WITH-NOTICES.
+Two questions were put to the operator; both took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| U1 · INC9M-UX-F1 / CR-F2 | A refused path and a missing file both toast `archivo no encontrado` | Aviso propio | A refused path toasts a name-free English sentence, `path not supported: use C:\… or a relative path`; a missing accepted path keeps naming its file. The prompts' placeholders become forms the grammar accepts |
+| U2 · INC9M-UX-F3 | A `file` attachment pointing at a network share is refused only at open time | Rechazar al agregar | The local-path rule stays (no network targets); the refusal happens when the attachment is added, with the U1 sentence, not later at open time |
