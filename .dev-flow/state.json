@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-9i reviews (code, ux, security) at a59f88a",
-    "next_stage": "Inc-9h landed (8e8f9f0..134d74c, A-116, lane 1722/0); its reviews: ux PASS, code and security BLOCK-UNTIL the same defect (r.git then r refused permanently). Inc-9i landed (a0ff3b9..a59f88a, A-117, lane 1735/0) fixing it. NEXT: Inc-9i review round; then Inc-EN (B-71 + N2 + INC9E-F2 + INC9D-F3 + INC9H-UX-F2/F6); then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6. Operator file cap is 4 source files.",
+    "next": "Inc-9j reviews (code, ux, security) at fbda1b8",
+    "next_stage": "Inc-9i reviews: code OK, ux PASS-WITH-NOTICES (R1), security BLOCK-UNTIL INC9I-SEC-F1 (three-slash URL bypassed the credential refusal). Inc-9j landed (e3a9c95..fbda1b8, A-118, lane 1778/0) fixing it plus R1 redaction. NEXT: Inc-9j review round; then Inc-EN; then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6. Operator file cap is 4 source files.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -1081,6 +1081,30 @@
         ]
       },
       "pending_reviews": "Inc-9d, Inc-SEED-2, Inc-9e not yet independently reviewed"
+    },
+    "INC-9i_REVIEWS_AND_9j_2026-10-01": {
+      "date": "2026-10-01",
+      "INC-9i_REVIEWS": {
+        "code": "OK to advance (CR-F1 MEDIUM weak arm, CR-F2..F4 LOW); lane 1730+5 env-only failures (no git identity in hermetic HOME)",
+        "ux": "PASS-WITH-NOTICES; INC9I-UX-F1 -> R1",
+        "security": "BLOCK-UNTIL INC9I-SEC-F1 (https:///u:tok@host bypass, persisted credential; proved via loopback HTTP server, declared deviation)"
+      },
+      "VERDICT_ROUND_7": "R1: redact userinfo on every painted surface; the connect field keeps the typed text",
+      "INC-9j": {
+        "commits": [
+          "a86c90b",
+          "5887154",
+          "178c582",
+          "51f5da9",
+          "fbda1b8"
+        ],
+        "requirement": "A-118",
+        "record": "increment-036-inc9j.md",
+        "lane": "1778 passed / 3 xfailed / 0 failed",
+        "mutants": "12/12",
+        "source_files": "2 (github.py, app.py)"
+      },
+      "pending": "Inc-9j reviews"
     },
     "INC-9h_AND_9i_2026-10-01": {
       "date": "2026-10-01",
