@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-9l reviews (code, ux, security) at 24df266",
-    "next_stage": "Inc-9k reviews: code OK, security PASS (1827-string fuzz; SEC-F1 MEDIUM ~user crash), ux PASS-WITH-NOTICES (T1-T3, Round 9). Inc-9l landed (606a13a..24df266, A-120, lane 2137/0). NEXT: Inc-9l review round; then Inc-EN (with T3); then whole-branch gates (FLAKE-1 first, FLAKE-3 candidate, one unidentified lane flake seen by the Inc-9k security reviewer), merge, dev-flow-sync, phase 6.",
+    "next": "Inc-9m reviews (code, ux, security) at 455a62d",
+    "next_stage": "Inc-9l reviews: code OK, ux PASS-WITH-NOTICES, security PASS but UNC closure contested (NT-prefix ??-UNC bypass). Inc-9m landed (19b2824..455a62d, A-121, lane 2221/0): closed allow-list for typed local paths (S1 applied to paths). NEXT: Inc-9m review round; then Inc-EN (with T3); then whole-branch gates (FLAKE-1 first, FLAKE-3 candidate), merge, dev-flow-sync, phase 6.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -1081,6 +1081,35 @@
         ]
       },
       "pending_reviews": "Inc-9d, Inc-SEED-2, Inc-9e not yet independently reviewed"
+    },
+    "INC-9l_REVIEWS_AND_9m_2026-10-01": {
+      "date": "2026-10-01",
+      "INC-9l_REVIEWS": {
+        "code": "OK to advance (lane 2137/0 -rf); CR-F1 UNC bypass, CR-F2 one-segment scp refused, CR-F3 _source_kind drift (MEDIUM); CR-F4/F5 LOW",
+        "security": "PASS, no HIGH; SEC-F1 MEDIUM NT-prefix ??-UNC bypass, SEC-F2 MEDIUM ~user crash in import prompts (pre-existing), SEC-F3..F5 LOW",
+        "ux": "PASS-WITH-NOTICES; T1 discharged; UX-F1 specific refusal reasons kept (coordinator)"
+      },
+      "INC-9m": {
+        "commits": [
+          "5b1d61d",
+          "594cc9e",
+          "c740ef8",
+          "a56410e",
+          "455a62d"
+        ],
+        "requirement": "A-121",
+        "record": "increment-039-inc9m.md",
+        "lane": "2221 passed / 3 xfailed / 0 failed (-rf)",
+        "mutants": "35 RED / 3 equivalent survivors (declared)",
+        "source_files": "4 (osopen.py, github.py, app.py, screens/factory.py) at the cap",
+        "carries": [
+          "docs/ARCHITECTURE.md section 3 bans screens->osopen and github imports beyond model; helper placement conflicts (not enforced by a test)",
+          "CC:x-style text accepted as a relative name (':' in relative names)",
+          "_fetch_gh 'commit' unbound after a GitHubError (pre-existing)",
+          "CSV placeholder /ruta/a/nodos.csv now refused (Inc-EN copy)"
+        ]
+      },
+      "pending": "Inc-9m reviews"
     },
     "INC-9k_REVIEWS_AND_9l_2026-10-01": {
       "date": "2026-10-01",
