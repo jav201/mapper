@@ -156,7 +156,10 @@ def map_hint() -> str:
 
 # The home hint (`M1`): `↵` opens the selected map, and the doors are still the way
 # to start.  The word beside `↵` is the seat's (`K3`), so a function, like `map_hint`.
-def home_hint() -> str:
+# `N1`: with no recent map `↵` does nothing, so the hint does not offer it.
+def home_hint(has_maps: bool = True) -> str:
+    if not has_maps:
+        return "choose a door"
     return f"{hint_pair(SCOPE_HOME, 'open_selected')} · or choose a door"
 
 
@@ -593,7 +596,7 @@ class HomeScreen(Screen):
             id="home-recents-box",
         )
         yield Static("", id="home-archived")
-        yield HintLine(home_hint())
+        yield HintLine(home_hint(any(self.app.store.workspace.glob("*.mmd"))))  # type: ignore[attr-defined]
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def _map_metrics(self, graph: Graph) -> dict[str, int]:
@@ -725,6 +728,7 @@ class HomeScreen(Screen):
         identity.update(identity_text)
 
         mmd_files = sorted(store.workspace.glob("*.mmd"))
+        self.query_one(HintLine).set_hint(home_hint(bool(mmd_files)))
         hero_map: str | None = None
         hero_metrics: dict[str, int] | None = None
 
@@ -1212,7 +1216,8 @@ class RepoScreen(Screen):
         yield TabStrip("p", crumb=[self.repo])
         with Horizontal(id="repo-dashboard"):
             with Vertical(id="repo-sidebar"):
-                yield Static(self.repo, id="repo-name")
+                # `INC9F-SEC-F2`: typed text, painted as text: `Static(str)` parses markup.
+                yield Static(Text(darkside.plain(self.repo)), id="repo-name")
                 yield Static(self._stages_text(), id="repo-stages")
                 yield Static(self._progress_text(), id="repo-progress")
                 yield Static(self._sidebar_hints(), id="repo-sidebar-hints")

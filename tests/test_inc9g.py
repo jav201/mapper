@@ -28,7 +28,7 @@ from mapper.widgets.chrome import HintLine
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"palette", "app", "home"}
+OPEN_STEPS: set[str] = {"palette"}
 
 
 def red(step: str):
@@ -292,7 +292,9 @@ async def test_inc9g_sec_f2_typed_repo_text_is_shown_literally(tmp_path, monkeyp
             for seg in strip:
                 style = seg.style
                 assert style is None or style.link is None, (seg.text, style.link)
-                assert style is None or not style.meta, (seg.text, style.meta)
+                # Textual stamps every cell with its own `offset`; a planted action is any other key.
+                planted = set(style.meta) - {"offset"} if style and style.meta else set()
+                assert not planted, (seg.text, style.meta)
 
 
 # ---------------------------------------------------------------------------
