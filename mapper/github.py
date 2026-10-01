@@ -8,6 +8,7 @@ Priority:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -66,6 +67,8 @@ _CATEGORY_MARKERS = (
         "couldn't connect", "unable to connect", "error connecting to",
     )),
 )
+_OWNER_RE = re.compile(r"[A-Za-z0-9-]+")
+_NAME_RE = re.compile(r"[A-Za-z0-9._-]+")
 _TRANSPORT_HELPER_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*::")
 
 
@@ -188,14 +191,24 @@ def _repo_name_from_url(url: str) -> str:
     return name
 
 
+def _normalise_url(url: str) -> str:
+    return url.strip().rstrip("/").removesuffix(".git")
+
+
 def _ensure_cloned(url: str, cache_dir: Path) -> Path:
     """Clone or refresh `url` into a cache directory and return the path."""
     _refuse_unsafe(url)
     name = _repo_name_from_url(url)
-    target = cache_dir / name
+    # `INC9F-SEC-F1`: the last segment alone collides (`alice/tools`, `bob/tools`),
+    # and a cache hit then shows whichever remote the mirror holds.
+    target = cache_dir / f"{name}-{hashlib.sha256(_normalise_url(url).encode('utf-8')).hexdigest()[:12]}"
     # `--mirror` makes a BARE repository: `HEAD` is a file and there is no `.git`.
     if (target / "HEAD").is_file():
-        _run_git(target, ["fetch", "--all"], check=False)
+        try:
+            _run_git(target, ["fetch", "--all"], check=False)
+        except GitHubError:
+            # `INC9F-SEC-F3`: a stale mirror beats no map, as a failed fetch already does.
+            pass
         return target
     target.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -333,6 +346,11 @@ class GitHubConnector:
         if len(parts) != 2:
             raise GitHubError(f"repo must be owner/name, got {self.repo}")
         owner, name = parts
+        # `INC9F-SEC-F4`: both segments go into `gh api` paths; `.` and `..` are path
+        # steps and `?`, `#`, `%` would add a query or a fragment.
+        if (not _OWNER_RE.fullmatch(owner) or not _NAME_RE.fullmatch(name)
+                or name in (".", "..")):
+            raise GitHubError("refusing the repository: owner/name has characters GitHub does not allow")
 
         repo_info = self._gh(["repo", "view", self.repo, "--json", "name,defaultBranchRef"])
         default_branch = repo_info.get("defaultBranchRef", {}).get("name", "main")

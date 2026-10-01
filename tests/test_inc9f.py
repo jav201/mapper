@@ -173,7 +173,7 @@ def test_inc9f_f1_the_clone_argv_ends_options_before_the_url(tmp_path, monkeypat
     argv = clones[0]
     assert "--" in argv, argv
     assert argv.index("--") < argv.index(url) < len(argv), argv
-    assert argv[-2] == url and argv[-1].endswith("widget"), argv
+    assert argv[-2] == url and pathlib.Path(argv[-1]).name.startswith("widget-"), argv
 
 
 def _terminated(elements: list[ast.expr]) -> bool:
