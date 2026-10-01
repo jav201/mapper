@@ -10658,3 +10658,45 @@ T3 is routed to Inc-EN. The record is `increment-038-inc9l.md`.
 leading whitespace before two slashes is not specially treated (the screen strips typed text; `fetch` of a padded text goes to the sentence by the
 grammar); the `_normalise_url` `.strip()` is inert and left alone (`CR-F6`); `tests/test_inc9j.py` still has a stale phrase in the docstring of the upper-case pin
 (`the gh path ... its own fixed sentence`), outside the brief.
+
+### `A-121` -- a closed allow-list for typed local paths and the Inc-9l review fixes (`Inc-9m`), dated 2026-10-01
+
+**Authority.** The operator's S1 (Round 8, closed allow-list) and T1 (Round 9, the refusal sentence), applied by the coordinator's ruling to typed LOCAL paths
+("local paths get an allow-list, like URLs"), and the coordinator's rulings for the findings of the Inc-9l reviews (`INC9L-SEC-F1`..`F5`, `INC9L-CR-F1`..`F5`,
+`INC9L-UX-F1`). The record is `increment-039-inc9m.md`.
+
+**Statement.** Replaces `A-120` st. 4 (the two-slash deny-check) with an allow-list; the rest of `A-120` stands.
+
+1. **One helper.** `osopen.safe_local_path(text) -> Path | None` is the one place a typed local path is judged; `github`, `app` and `screens/factory`
+   import it, and none of them calls `expanduser` itself. Every decision is made on strings BEFORE any filesystem call; the caller may stat the
+   returned path, and only then. Grammar: (1) `None` on a non-`str`, an empty text, a NUL, or a leading `-`; (2) `Path(text).expanduser()`, and `None`
+   on `RuntimeError`, `OSError` or `ValueError`; (3) on `PureWindowsPath` of the expanded text, accept ONLY (a) a drive that is one ASCII letter and `:` AND
+   root `\`, or (b) no drive, no root, and a typed text that does not start with `\` or `/`; everything else is `None` (UNC, `\\?\`, `\\.\`, `\??\`, `/??/`,
+   root-relative `\x`, drive-relative `C:x`, a `~` that expands to UNC).
+2. **`INC9L-SEC-F1` / `CR-F1`.** `github._is_local_path` reads the helper (and keeps its `RuntimeError`/`OSError`/`ValueError` catch for the stat calls).
+   `fetch` resolves the folder through the helper.
+3. **`INC9L-SEC-F2`.** The import-CSV and import-office prompts judge the typed path with the helper; `None` gives the existing not-found toast
+   `archivo no encontrado` WITHOUT a name (the typed text is never echoed: `~nosuchuser/secret-token.csv` made `expanduser` raise and the crash
+   printed the typed text). A path the helper accepts keeps `archivo no encontrado: <name>`.
+4. **`INC9L-SEC-F5`.** `osopen.open_external(kind="file")` applies the same rule to `target` before `resolve()`; a refusal is the existing
+   `destino inválido`. (A file target that starts with `-` is refused too: the same rule.)
+5. **`INC9L-SEC-F3`.** `_fetch_gh` builds no path for an API-derived branch name or commit sha equal to `.` or `..`; a default branch equal to `.` or `..` ends the
+   fetch with `unexpected response from gh repo view` before any `gh api` call.
+6. **`INC9L-SEC-F4`.** A tag's date is read from `repos/{owner}/{name}/commits/{quote(sha, safe='')}` built from `tag["commit"]["sha"]`; the API's own
+   `commit.url` is never handed to `gh`.
+7. **`INC9L-CR-F2`.** `_repo_name_from_url` takes the path of a `git@host:path` from the allow-list match, so `git@h:r` and `git@h:project.git` (the literal form T1
+   tells the user to type) are accepted and reach `git clone --mirror`. Row `c00` of the Inc-9l consistency table was "refused"; it is now accepted (declared sealed-arm change).
+8. **`INC9L-CR-F3`.** `RepoScreen._source_kind` reads `github._classify`: `local` is `local`, `gh` and `url` are `github` (the wording is unchanged); a refused text is `local`.
+9. **`INC9L-CR-F5`.** The encoded default branch is `qdefault`.
+10. **`INC9L-CR-F4` (accepted).** The broad `OSError` catch in `_is_local_path` stays: the ruling wants a total predicate. A local folder that cannot be read may fall
+    through to the `owner/name` path.
+11. **`INC9L-UX-F1` (coordinator decision, no code).** The specific refusal reasons (`last segment is not a usable name`, `may not start with '-'`,
+    `transport helpers are not accepted`) stay alongside the T1 sentence.
+
+**Trace.** Standalone, like `A-113`..`A-120`. Carried by `tests/test_inc9m.py` and the sealed-arm change listed in `increment-039-inc9m.md` section 2.
+
+**What is not claimed.** A relative text with a `:` inside (`CC:\x`) has no drive for `PureWindowsPath` and is accepted by branch (b); it is a local relative name (a stream
+separator on NTFS), not a network path, and the ruling's grammar is applied as written. A leading-whitespace text is not trimmed (the screens strip typed text). The
+`tests/test_inc9m.py` spies prove that no filesystem call is made for the named hostile forms; no real UNC or NT-namespace path was ever opened, and nothing was measured against
+a live SMB share, a live `gh`, or a real `git clone`. `docs/ARCHITECTURE.md` section 3 bans `screens` from importing `osopen` and lists `model` as the only dependency of `github`; the coordinator's ruling
+puts the helper in `osopen` and has all three import it, so the map and the code now disagree in writing until the map is updated (carried; no test enforces it).
