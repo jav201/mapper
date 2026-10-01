@@ -15,23 +15,21 @@ import ast
 import contextlib
 import os
 import pathlib
-import subprocess
 import sys
 import types
 
 import pytest
-from textual.widgets import Static
 
 from mapper import github, osopen
 from mapper.app import MapperApp, RepoScreen, _PromptScreen
 from mapper.github import GitHubConnector, GitHubError
-from mapper.model import Document, Ficha, Graph, Node
+from mapper.model import Document, Edge, Ficha, Graph, Node
 from mapper.screens.factory import FactoryScreen
 from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9j import _Boom
 from tests.test_repair_layout import _frame_rows
 
-OPEN_STEPS: set[str] = set()
+OPEN_STEPS: set[str] = {"u1"}
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 
@@ -49,6 +47,8 @@ def _red_mark(step: str):
 
 
 UNRECOGNISED = "(unrecognised URL)"
+# `U1` (Inc-9n): the refusal of a text outside the allow-list, with a real ellipsis written as an escape.
+U1 = "path not supported: use C:\\\u2026 or a relative path"
 SENTENCE = ("refusing the repository: use https://host/path, git@host:path, owner/name "
             "or a local folder")
 
@@ -308,7 +308,7 @@ def _env(monkeypatch, tmp_path):
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
 
 
-@red("f2")
+@red("u1")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9m_sec_f2_import_csv_survives_a_tilde_nosuchuser_and_paints_nothing_typed(
         tmp_path, monkeypatch, size):
@@ -321,10 +321,10 @@ async def test_inc9m_sec_f2_import_csv_survives_a_tilde_nosuchuser_and_paints_no
         frame = _flat(app.screen)
         assert "secret-token" not in frame and "nosuchuser" not in frame, frame
         assert not any("secret-token" in t or "nosuchuser" in t for t in toasts), toasts
-        assert "archivo no encontrado" in toasts, toasts
+        assert U1 in toasts and "archivo no encontrado" not in toasts, toasts
 
 
-@red("f2")
+@red("u1")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9m_sec_f2_import_office_survives_a_tilde_nosuchuser_and_paints_nothing_typed(
         tmp_path, monkeypatch, size):
@@ -339,10 +339,10 @@ async def test_inc9m_sec_f2_import_office_survives_a_tilde_nosuchuser_and_paints
         frame = _flat(app.screen)
         assert "secret-token" not in frame and "nosuchuser" not in frame, frame
         assert not any("secret-token" in t or "nosuchuser" in t for t in toasts), toasts
-        assert "archivo no encontrado" in toasts, toasts
+        assert U1 in toasts and "archivo no encontrado" not in toasts, toasts
 
 
-@red("f2")
+@red("u1")
 @pytest.mark.parametrize("surface", ["csv", "office"])
 async def test_inc9m_sec_f2_a_typed_unc_path_causes_no_filesystem_call(tmp_path, monkeypatch, surface):
     _env(monkeypatch, tmp_path)
@@ -356,7 +356,7 @@ async def test_inc9m_sec_f2_a_typed_unc_path_causes_no_filesystem_call(tmp_path,
             await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", f"\\\\h\\s\\x.{ext}")
         assert app.is_running
-        assert "archivo no encontrado" in toasts, toasts
+        assert U1 in toasts and "archivo no encontrado" not in toasts, toasts
         assert not any("x." + ext in t for t in toasts), toasts
     assert spy.hits == [], spy.hits
 
@@ -567,15 +567,28 @@ def test_inc9m_cr_f3_a_refused_text_is_badged_local_not_as_a_remote(text):
 
 @red("crf3")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
-async def test_inc9m_cr_f3_the_badge_is_painted_from_classify(tmp_path, monkeypatch, size):
+@pytest.mark.parametrize("repo,badge", [("git@h:grp/sub/r.git", "github"), ("o/r", "github"), ("work", "local")])
+async def test_inc9m_cr_f3_the_badge_is_painted_from_classify(tmp_path, monkeypatch, size, repo, badge):
+    """`INC9M-CR-F3` (Inc-9n): the screen really connects through a stubbed `fetch` that returns a one-branch
+    `Graph`, and the badge text is in the PAINTED frame; the method-level check stays as a second assertion."""
     _env(monkeypatch, tmp_path)
-    monkeypatch.setattr("subprocess.run", _Run(returncode=128, stderr="fatal: Could not resolve host: x\n"))
+    (tmp_path / "work" / ".git").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
+    graph = Graph()
+    graph.add_node(Node(id=repo, ficha=Ficha(title=repo, meta="repo")))
+    graph.add_node(Node(id="main", ficha=Ficha(title="main", meta="+0/-0", state="ok",
+                                               fields={"kind": "branch", "date": "2026-01-01"})))
+    graph.add_edge(Edge(parent_id=repo, child_id="main"))
+    monkeypatch.setattr(GitHubConnector, "fetch", lambda self, progress=None: graph)
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         await pilot.pause()
-        screen = RepoScreen("git@h:grp/sub/r.git")
+        screen = RepoScreen(repo)
         app.push_screen(screen)
         for _ in range(10):
             await pilot.pause()
-        badge = screen._source_badge().plain.strip()
-        assert badge == "github", badge
+        frame = _flat(screen)
+        assert screen.graph is graph and "main" in frame, frame
+        other = "local" if badge == "github" else "github"
+        assert f" {badge} " in frame and f" {other} " not in frame, frame
+        assert screen._source_badge().plain.strip() == badge
