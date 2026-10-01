@@ -107,7 +107,10 @@ def test_inc9i_cr_f1_a_cache_the_base_built_with_only_the_dot_git_mirror_accepts
 @pytest.mark.network
 @red("github")
 @pytest.mark.usefixtures("hermetic")
-def test_inc9i_cr_f1_real_git_r_dot_git_then_r_shows_each_repos_own_branches(tmp_path):
+def test_inc9i_cr_f1_real_git_r_dot_git_then_r_shows_each_repos_own_branches(tmp_path, monkeypatch):
+    # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
+    # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
+    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
     def git(cwd, *args):
         return subprocess.run(
             ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
@@ -257,15 +260,15 @@ def test_inc9i_sec_f2_userinfo_in_a_typed_url_is_refused_before_any_process(url,
         GitHubConnector(url, cache_dir=tmp_path / "cache").fetch()
     message = str(caught.value)
     assert run.calls == [], run.calls
-    assert "credential helper" in message and message.startswith("refusing"), message
+    assert message == "refusing the repository: not a supported URL, owner/name, or local folder", message
     for typed in ("tok3n", "u:", "example", "@", "o/r"):
         assert typed not in message, (typed, message)
     assert not (tmp_path / "cache").exists(), "no directory was made for a refused URL"
 
 
 def test_inc9i_sec_f2_a_url_without_userinfo_and_an_scp_style_address_still_connect(tmp_path, monkeypatch):
-    for url in ("https://example.invalid/o/r.git", "https://example.invalid/o/r@v2",
-                "git@example.invalid:o/r.git"):
+    # `S1` rework: `.../r@v2` has an `@` in the path, outside the allow-list; it is refused (`test_inc9k`).
+    for url in ("https://example.invalid/o/r.git", "git@example.invalid:o/r.git"):
         run = _Run(returncode=0)
         monkeypatch.setattr("subprocess.run", run)
         try:

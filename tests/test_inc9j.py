@@ -64,8 +64,8 @@ def test_inc9j_sec_f1_extra_slashes_do_not_hide_userinfo_from_the_refusal(url, t
         GitHubConnector(url, cache_dir=tmp_path / "cache").fetch()
     message = str(caught.value)
     assert run.calls == [], run.calls
-    assert message == ("refusing the URL: it carries a credential; "
-                       "use the git credential helper instead"), message
+    # `S1` rework: the one fixed sentence of the allow-list replaces the credential sentence.
+    assert message == ("refusing the repository: not a supported URL, owner/name, or local folder"), message
     assert not (tmp_path / "cache").exists(), "no directory was made for a refused URL"
 
 
@@ -86,14 +86,14 @@ def test_inc9j_sec_f1_a_url_with_no_host_at_all_is_refused_before_any_process(tm
     monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:
         GitHubConnector("https:///h/o/r", cache_dir=tmp_path / "cache").fetch()
-    assert str(caught.value).startswith("refusing the URL") and run.calls == []
+    assert str(caught.value).startswith("refusing the repository") and run.calls == []
 
 
 @pytest.mark.parametrize("url", [
-    "git@example.invalid:o/r.git", "https://example.invalid/o/r@v2", "https://example.invalid/o/r.git",
+    "git@example.invalid:o/r.git", "https://example.invalid/o/r.git",
     "https://example.invalid/o/r/",
-    # git's own credential parsing agrees: the host is `tok`, the `@` is in the query
-    "https://tok?@example.invalid/o/r",
+    # `S1` rework: `.../r@v2` and `https://tok?@h/o/r` hold `@` outside the allow-list; both are
+    # refused now (`test_inc9k`), so they no longer belong to this no-false-refusal list.
 ])
 def test_inc9j_sec_f1_no_false_refusal(url, tmp_path, monkeypatch):
     run = _Run(returncode=0)
@@ -108,33 +108,8 @@ def test_inc9j_sec_f1_no_false_refusal(url, tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 # INC9I-UX-F1 (operator R1) -- every surface that paints a typed URL redacts userinfo
 
-REDACTED = [
-    ("https://user:tok@example.invalid/o/r.git", "https://***@example.invalid/o/r.git"),
-    ("https://tok@h/o/r", "https://***@h/o/r"),
-    ("http://u:@h/o/r", "http://***@h/o/r"),
-    ("https:///u:tok@h/o/r", "https://***@h/o/r"),
-    ("https:////u:p@h/o/r", "https://***@h/o/r"),
-    ("https:///\\u:p@h/o/r", "https://***@h/o/r"),
-    ("HTTP://u:p@h/o/r", "HTTP://***@h/o/r"),
-    ("https://a@b@h/o/r", "https://***@h/o/r"),
-    ("https://u:p@h/o/r@v2", "https://***@h/o/r@v2"),
-    ("https://u:p@h:8443/o/r?x=1#f", "https://***@h:8443/o/r?x=1#f"),
-]
-UNTOUCHED = ["https://h/o/r@v2", "git@h:o/r.git", "o/r", "https://tok?@h/o/r", "/some/local/path",
-             "https://h/o/r.git", ""]
-
-
-@red("redact")
-@pytest.mark.parametrize("typed,shown", REDACTED)
-def test_inc9j_ux_f1_the_helper_keeps_scheme_and_host_and_replaces_userinfo(typed, shown):
-    assert github.redact_userinfo(typed) == shown
-
-
-@red("redact")
-@pytest.mark.parametrize("typed", UNTOUCHED)
-def test_inc9j_ux_f1_the_helper_leaves_a_url_without_userinfo_alone(typed):
-    assert github.redact_userinfo(typed) == typed
-
+# `S1` (Inc-9k): the redaction helper is gone; the display rule is `github.painted_repo`
+# (`tests/test_inc9k.py`).  The arms of the helper were deleted with it.
 
 TYPED = "https://user:tok@example.invalid/o/r.git"
 THREE_SLASH = "https:///user:tok@example.invalid/o/r.git"
@@ -172,11 +147,11 @@ async def test_inc9j_ux_f1_a_typed_credential_is_painted_nowhere_but_in_the_fiel
         await _type_and_connect(app, pilot, typed)
         screen = app.screen
         flat = " ".join("\n".join(_frame_rows(screen)).split())
-        assert "tok" not in flat and "user:" not in flat, flat
-        assert "***@" in flat, flat
+        # `S1` rework: a credential form is not painted at all; the text is `(unrecognised URL)`.
+        assert "tok" not in flat and "user:" not in flat and "***" not in flat, flat
         name = screen.query_one("#repo-name", Static)
         shown = " ".join("\n".join(_rows_in(screen, name.region)).split())
-        assert shown.count("***@") == 1, shown
+        assert shown == "(unrecognised URL)", shown
         assert screen.repo == typed, "the connector still gets the URL as typed"
         assert [t for t in toasts if "tok" in t or "user:" in t] == [], toasts
         await pilot.press("q")

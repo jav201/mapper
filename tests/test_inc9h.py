@@ -325,7 +325,10 @@ def test_inc9h_sec_f1_the_same_remote_in_the_four_spellings_gets_one_mirror_name
 @pytest.mark.network
 @red("github")
 @pytest.mark.usefixtures("hermetic")
-def test_inc9h_sec_f1_real_git_c_r_and_c_r_dot_git_show_their_own_branches(tmp_path):
+def test_inc9h_sec_f1_real_git_c_r_and_c_r_dot_git_show_their_own_branches(tmp_path, monkeypatch):
+    # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
+    # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
+    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
     def git(cwd, *args):
         return subprocess.run(
             ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
@@ -370,7 +373,10 @@ def test_inc9h_sec_f2_the_refresh_is_fetch_prune_all(tmp_path, monkeypatch):
 @pytest.mark.network
 @red("github")
 @pytest.mark.usefixtures("hermetic")
-def test_inc9h_sec_f2_real_git_a_branch_deleted_on_the_remote_is_gone_after_a_reconnect(tmp_path):
+def test_inc9h_sec_f2_real_git_a_branch_deleted_on_the_remote_is_gone_after_a_reconnect(tmp_path, monkeypatch):
+    # `S1`: this arm clones real local bare repositories (`file://`), outside the allow-list by
+    # design; the allow-list is the unit under test in `test_inc9k`, so it is lifted here.
+    monkeypatch.setattr("mapper.github._is_url", lambda _value: True)
     url = _bare_with_branch(tmp_path, "alice", "main")
     bare = tmp_path / "alice" / "tools.git"
     work = tmp_path / "alice-work"
@@ -418,25 +424,32 @@ def test_inc9h_sec_f4_every_malformed_owner_name_gets_the_same_fixed_sentence(tm
 @red("github")
 @pytest.mark.parametrize("stderr,tail", [("fatal: Could not resolve host: x\n", "host not found")])
 def test_inc9h_sec_f4_the_clone_message_shows_the_name_through_plain(tmp_path, monkeypatch, stderr, tail):
+    # `S1` rework: a name with a bidi override or an ESC can no longer reach a clone (the allow-list
+    # has no such character), so the arm now asserts the stronger form of its intent: the hostile
+    # URL is refused before any process, and the message holds no control or bidi character.
     hostile = "https://example.invalid/o/wi\u202ed\u001b[31mget.git"
     run = _Run(stderr=stderr)
     monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:
         _ensure_cloned(hostile, tmp_path / "cache")
     message = str(caught.value)
-    assert message.startswith("could not clone '") and message.endswith(f"': {tail}"), message
+    assert run.calls == [], run.calls
+    assert message == "refusing the repository: not a supported URL, owner/name, or local folder", message
     assert "\u202e" not in message and "\u001b" not in message, repr(message)
-    assert "wi" in message and "get" in message, message
+    assert "wi" not in message and "get" not in message and tail not in message, message
 
 
 @red("github")
 def test_inc9h_sec_f4_the_timeout_clone_message_shows_the_name_through_plain(tmp_path, monkeypatch):
     hostile = "https://example.invalid/o/wi\u202edget.git"
-    monkeypatch.setattr("subprocess.run", _Run(raises=subprocess.TimeoutExpired(["git"], 1)))
+    # `S1` rework: see the arm above; the hostile name is refused before the clone that could time out.
+    run = _Run(raises=subprocess.TimeoutExpired(["git"], 1))
+    monkeypatch.setattr("subprocess.run", run)
     with pytest.raises(GitHubError) as caught:
         _ensure_cloned(hostile, tmp_path / "cache")
+    assert run.calls == [], run.calls
     assert "\u202e" not in str(caught.value), repr(str(caught.value))
-    assert str(caught.value).endswith(": timed out")
+    assert str(caught.value).startswith("refusing the repository: ")
 
 
 # ---------------------------------------------------------------------------
@@ -567,8 +580,14 @@ def test_inc9h_cr_f7_a_padded_url_is_cloned_and_keyed_as_its_stripped_form(tmp_p
     run = _Mirror()
     monkeypatch.setattr("subprocess.run", run)
     cache = tmp_path / "cache"
-    padded = _ensure_cloned("  " + URL_A + "\t ", cache)
+    # `S1` rework: whitespace is outside the allow-list, so a padded URL is refused (no clone, no
+    # directory) instead of being keyed as its stripped form; the stripped form clones once.
+    with pytest.raises(GitHubError, match="^refusing the repository: "):
+        _ensure_cloned("  " + URL_A + "\t ", cache)
+    assert _clones(run) == [] and not cache.exists(), (_clones(run), cache.exists())
+    assert [c[-2] for c in _clones(run)] == []
+    first = _ensure_cloned(URL_A, cache)
     assert [c[-2] for c in _clones(run)] == [URL_A], _clones(run)
     run.calls.clear()
-    assert _ensure_cloned(URL_A, cache) == padded
-    assert _clones(run) == [], "the stripped form hits the mirror the padded form made"
+    assert _ensure_cloned(URL_A, cache) == first
+    assert _clones(run) == [], "the second connect hits the mirror the first made"

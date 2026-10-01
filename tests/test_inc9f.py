@@ -367,7 +367,9 @@ def test_inc9f_m2_git_text_is_never_in_the_message(tmp_path, monkeypatch):
               f"Could not resolve host: example.invalid\nCloning into bare repository "
               f"'{PROFILE}\\.cache\\mapper\\repos\\widget'...\n")
     run = _Run(stderr=stderr)
-    message = _message("https://user:s3cr3t-token@example.invalid/owner/widget.git",
+    # `S1` rework (declared): the typed URL no longer carries userinfo (it is refused, `test_inc9k`);
+    # the token stays in git's stderr above, so every leak assertion below keeps its force.
+    message = _message("https://example.invalid/owner/widget.git",
                        tmp_path, run, monkeypatch)
     assert message == "could not clone 'widget': host not found", message
     for leaked in ("s3cr3t-token", "example.invalid", "<operator>", "Cloning", "\\", "user:"):

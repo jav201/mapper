@@ -218,17 +218,46 @@ class _GitRun:
         return self.real(argv, *a, **kw)
 
 
+class _TokenStderrRun(_GitRun):
+    """`_GitRun`, whose stderr also names a token URL: the message must hold none of it."""
+
+    def __call__(self, argv, *a, **kw):
+        out = super().__call__(argv, *a, **kw)
+        if list(argv)[:3] == ["git", "clone", "--mirror"]:
+            out.stderr += "fatal: unable to access 'https://user:s3cr3t-token@example.invalid/owner/widget.git/'\n"
+        return out
+
+
 @red("github")
 def test_inc9d_sec_f3_a_failed_clone_message_carries_no_local_path(tmp_path, monkeypatch):
+    # `S1` rework (declared): the URL typed here carried userinfo; userinfo is outside the allow-list,
+    # so the typed URL is now an allowed one and the token lives in git's stderr, where the arm
+    # still asserts it never reaches the message.  The token-URL form is the next arm.
     cache = tmp_path / "home" / ".cache" / "mapper" / "repos"
-    monkeypatch.setattr("subprocess.run", _GitRun(subprocess.run))
+    monkeypatch.setattr("subprocess.run", _TokenStderrRun(subprocess.run))
     with pytest.raises(GitHubError) as caught:
-        _ensure_cloned("https://user:s3cr3t-token@example.invalid/owner/widget.git", cache)
+        _ensure_cloned("https://example.invalid/owner/widget.git", cache)
     message = str(caught.value)
     assert "widget" in message, message
     assert "s3cr3t-token" not in message and "example.invalid" not in message, message
     assert str(cache) not in message and str(tmp_path) not in message, _redact(message)
     assert "Cloning into" not in message and "host not found" in message, _redact(message)
+    assert not _leaks_the_profile(message), "the message paints the user profile"
+
+
+@red("github")
+def test_inc9d_sec_f3_s1_a_token_url_is_refused_with_nothing_leaked(tmp_path, monkeypatch):
+    cache = tmp_path / "home" / ".cache" / "mapper" / "repos"
+    run = _GitRun(subprocess.run)
+    monkeypatch.setattr("subprocess.run", run)
+    with pytest.raises(GitHubError) as caught:
+        _ensure_cloned("https://user:s3cr3t-token@example.invalid/owner/widget.git", cache)
+    message = str(caught.value)
+    assert run.calls == [] and not cache.exists(), (run.calls, cache.exists())
+    assert message == "refusing the repository: not a supported URL, owner/name, or local folder", message
+    for leaked in ("s3cr3t-token", "example.invalid", "widget", "user:", "@"):
+        assert leaked not in message, (leaked, message)
+    assert str(cache) not in message and str(tmp_path) not in message, _redact(message)
     assert not _leaks_the_profile(message), "the message paints the user profile"
 
 
