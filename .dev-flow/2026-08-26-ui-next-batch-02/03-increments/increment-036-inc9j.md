@@ -92,10 +92,10 @@ the `HTTPS://` pin and of the `git@...` no-false-refusal pins (pins green on the
 | check | state |
 |---|---|
 | `tests/test_inc9j.py` + `tests/test_inc9i.py`, then with `test_inc9h/d/f/g` | executed: 56 passed (1 `network` deselected); 246 passed with `--runxfail` |
-| Full default lane, once, uninterrupted, last step, output to a file | FULL_LANE_RESULT |
+| Full default lane, once, uninterrupted, last step, output to a file | executed: **1778 passed, 3 xfailed, 24 deselected, 0 failed**, 17:29 (baseline 1735: +33 arms in `test_inc9j`, +10 from the `test_inc9i` parametrisation: 4 cases became 14). Run on `51f5da9` (after the docs commit, because `test_no_operator_paths` reads `.dev-flow`); this result line is the only edit after it |
 | `ruff check . --exclude prototypes --output-format concise` set difference vs `e3a9c95` (a detached worktree, line and column stripped) | executed: new = none, gone = none (26 lines each side by this counting) |
 | Literal Cf/Cc characters in `tests/test_inc9j.py` and `tests/test_inc9i.py` (scan before every commit) | executed: none |
-| Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | FLAKES |
+| Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | not hit (0 failed) |
 | `git stash` | not used |
 | Real remote, real `gh`, real cache, real credentials, network, loopback servers | not-run (every arm is a stub; HOME and USERPROFILE in `tmp_path`) |
 | A real `git clone` of `https:///u:tok@host/...` against the fix | not-run (the security reviewer measured the bypass; here the refusal is asserted by a stub that fails on any process) |
