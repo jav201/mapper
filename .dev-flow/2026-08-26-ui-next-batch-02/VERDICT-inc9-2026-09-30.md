@@ -98,3 +98,18 @@ option.
   **R3-CR-F6** record miscount.
 - Source files: `github.py`, `app.py`, `screens/palette.py` (3 of the operator's 4).
 
+
+---
+
+# Round 4 — after the Inc-9f reviews (2026-09-30, base `ce8b240`)
+
+Security PASS (no HIGH; INC9F-SEC-F1..F4 routed to Inc-9g), ux PASS except INC9F-UX-F1 (selected
+palette row's key invisible, routed to Inc-9g); the code review was still running when these answers
+were taken. Four questions were put to the operator; each answer took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| N1 · INC9F-UX-F2 | With no recent maps the home hint says `↵ open map` and `↵` does nothing | Ocultar «↵ open map» | When there is nothing to open the home hint drops the `↵ open map` part and keeps only the invitation to choose a door. Routed to Inc-9g (`app.py`) |
+| N2 · INC9F-UX-F4 | The palette footer does not advertise the arrows | Agregar ↑↓ al pie | The footer reads `↑↓ move · ↵ run · esc close`, seat-derived. Routed to Inc-EN (needs `keymap.py`) |
+| N3 · INC9F-UX-F5 | `▲ failed` is painted INK | Dejarlo en blanco | INK stays; amber remains reserved for attention / pending |
+| N4 · Inc-9f decisions | Ratify the implementer's four decisions | Ratificar las cuatro | Clone timeout 120 s (reads 30 s); `--end-of-options` (git >= 2.24); `▲` in INK; `timed out` in the fixed category set |
