@@ -418,7 +418,7 @@ def _screen_headers() -> list[tuple[str, str]]:
     # literal list that no longer exists.
     tabs = [("mapper/darkside.py", keymap.label_for(keymap.SCOPE_HOME, action))
             for action in darkside._TAB_ACTIONS]
-    assert tabs, "no tab label derived from darkside.tab_strip"
+    assert tabs, "darkside._TAB_ACTIONS names no door: the strip would derive no label"
     out = list(tabs)
     screens = {cls.__name__ for module in PRODUCT_MODULES
                for _, cls in inspect.getmembers(module, inspect.isclass)
