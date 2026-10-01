@@ -55,7 +55,7 @@ def safe_local_path(text: str) -> Path | None:
     Refused (None): an empty text, a NUL, a leading `-`; a `~` that cannot be expanded; and
     everything that is not (a) drive-absolute (a letter drive and a root, as `C:\x`) or (b)
     relative (no drive, no root, and the typed text does not start with a separator).  That
-    covers UNC, `\?\`, `\.\`, `\??\`, `/??/`, root-relative `\x` and drive-relative `C:x`.
+    covers UNC, `\\?\`, `\\.\`, `\??\`, `/??/`, root-relative `\x` and drive-relative `C:x`.
     The caller may stat the returned path, and only then.
     """
     if not isinstance(text, str) or not text or "\x00" in text or text.startswith("-"):
@@ -67,7 +67,7 @@ def safe_local_path(text: str) -> Path | None:
         return None
     if _DRIVE.fullmatch(parsed.drive) and parsed.root == "\\":
         return expanded
-    if not parsed.drive and not parsed.root and text[0] not in "\/":
+    if not parsed.drive and not parsed.root and text[0] not in "\\/":
         return expanded
     return None
 
