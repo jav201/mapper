@@ -486,7 +486,10 @@ async def test_inc9g_cr_f4_the_repo_screen_loads_the_cached_copy_and_toasts(
                 break
         assert isinstance(screen, RepoScreen) and not screen.loading, "the worker never ended"
         assert screen.failure == "" and len(screen.graph.nodes) >= 1, (screen.failure, screen.graph)
-    assert f"showing the cached copy: {category}" in toasts, toasts
+    # `Inc-9h` P2: the count is in the one warning, and so is the way back (the seat's word).
+    way_back = keymap.hint_pair(keymap.SCOPE_REPO, "home")
+    expected = f"showing the cached copy ({len(screen.graph.nodes)} nodes): {category} · {way_back} to retry"
+    assert expected in toasts, toasts
 
 
 @pytest.mark.usefixtures("hermetic")

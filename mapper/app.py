@@ -596,7 +596,7 @@ class HomeScreen(Screen):
             id="home-recents-box",
         )
         yield Static("", id="home-archived")
-        yield HintLine(home_hint(any(self.app.store.workspace.glob("*.mmd"))))  # type: ignore[attr-defined]
+        yield HintLine(home_hint())
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def _map_metrics(self, graph: Graph) -> dict[str, int]:
@@ -1257,6 +1257,11 @@ class RepoScreen(Screen):
                 text.append(f"{marker} {stage}", darkside.PULSE if self.loading else darkside.INK)
             else:
                 text.append(f"○ {stage}", darkside.WORDMARK)
+        if self.stale and not self.loading:
+            # `P1`: the toast expires and `listo` would read as a fresh connect; the line
+            # stays for as long as the cached copy is what the screen shows.
+            text.append("\n", "")
+            text.append(darkside.plain(f"▲ cached copy: {self.stale}"), darkside.INK)
         return text
 
     def _progress_text(self) -> Text:
@@ -1433,11 +1438,18 @@ class RepoScreen(Screen):
         try:
             worker = self.fetch_graph()
             self.graph = await worker.wait()
-            self.notify(darkside.plain(f"conectado: {len(self.graph.nodes)} nodos"), markup=False)
+            count = len(self.graph.nodes)
             if self.stale:
                 # `INC9F-CR-F4`: the refresh failed; what is painted is the cached copy.
-                self.notify(darkside.plain(f"showing the cached copy: {self.stale}"),
-                            severity="warning", markup=False)
+                # `P2`: this is the ONE toast of a stale connect (`conectado` would
+                # contradict it); `P1` pairs it with the panel line.  The way back is the seat's.
+                self.notify(
+                    darkside.plain(
+                        f"showing the cached copy ({count} nodes): {self.stale} · "
+                        f"{hint_pair(SCOPE_REPO, 'home')} to retry"),
+                    severity="warning", markup=False)
+            else:
+                self.notify(darkside.plain(f"conectado: {count} nodos"), markup=False)
         except Exception as exc:
             # `INC9BC-SEC-F3`: the worker does not exit the app (`exit_on_error`),
             # so its failure arrives here wrapped, and `GitHubError` is reachable.
