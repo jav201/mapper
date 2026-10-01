@@ -384,7 +384,9 @@ def _node_contains(container: ast.AST, target: ast.AST) -> bool:
     return any(n is target for n in ast.walk(container))
 
 
-_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+# A generator expression is a scope of its own: it runs when it is consumed, not
+# where it is written (`R3-CR-F1`).  The eager comprehensions run in place.
+_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.GeneratorExp)
 
 
 def _innermost_scope(parents: dict, node: ast.AST) -> ast.AST | None:
@@ -397,7 +399,11 @@ def _innermost_scope(parents: dict, node: ast.AST) -> ast.AST | None:
 
 
 def _catches_exception(handler: ast.ExceptHandler) -> bool:
-    """`except:`, `except Exception`, `except BaseException`, or a tuple holding one."""
+    """`except:`, `except Exception`, `except BaseException`, or a tuple holding one,
+    whose body does not raise: a handler that re-raises passes the error on, so it
+    guards nothing (`R3-CR-F1`)."""
+    if any(isinstance(n, ast.Raise) for stmt in handler.body for n in ast.walk(stmt)):
+        return False
     kinds = handler.type.elts if isinstance(handler.type, ast.Tuple) else [handler.type]
     return any(k is None or (isinstance(k, ast.Name) and k.id in ("Exception", "BaseException"))
                for k in kinds)
@@ -482,21 +488,13 @@ _CENSUS_CASES = {
         "    except Exception:\n        pass\n    list(gen)\n", False),
 }
 
-#: Committed RED first (Inc-9f, `R3-CR-F1`): the judge counted a handler that
-#: re-raises as a guard, and treated a generator expression as running in the
-#: function that built it.
-_CENSUS_RED = {"X3 a handler that re-raises", "X3b a handler that raises another from it",
-               "X4 a generator built in the try, consumed later"}
 
 #  The unguarded shapes the lexical rule wrongly accepted (E1, E2, E3, the narrow
 #  handler, the nested def) were committed RED as strict xfails (`a5ddf5d`); the
 #  other two unguarded cases are controls the old rule already refused.
 
 
-@pytest.mark.parametrize("case", [
-    pytest.param(c, marks=pytest.mark.xfail(
-        strict=True, reason="Inc-9f: committed RED; closed by the 'census' step"))
-    if c in _CENSUS_RED else c for c in _CENSUS_CASES])
+@pytest.mark.parametrize("case", list(_CENSUS_CASES))
 def test_inc9d_cr_f1_the_census_judges_a_site_by_what_actually_catches_it(case):
     """`INC9BC-CR-F1` / `SEC-F2`: a site is guarded only if a handler for `Exception`
     (or broader) in the SAME function as the call can catch it; a `.save` reference
