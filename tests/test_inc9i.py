@@ -65,6 +65,8 @@ def test_inc9i_cr_f1_r_dot_git_then_r_in_one_cache_gives_two_clones_and_no_refus
     run.calls.clear()
     assert _ensure_cloned(R_GIT, cache) == dotted and _ensure_cloned(R, cache) == plain
     assert _clones(run) == [], "each spelling hits its own mirror"
+    # `INC9I-CR-F2`: `R/` is `R`: it finds the as-typed directory `R` made, not a third clone
+    assert _ensure_cloned(R + "/", cache) == plain and _clones(run) == [], _clones(run)
 
 
 def test_inc9i_cr_f1_r_then_r_dot_git_in_one_cache_still_gives_two_clones(tmp_path, monkeypatch):
@@ -79,8 +81,6 @@ def test_inc9i_cr_f1_r_then_r_dot_git_in_one_cache_still_gives_two_clones(tmp_pa
     for _ in range(2):
         assert _ensure_cloned(R, cache) == plain and _ensure_cloned(R_GIT, cache) == dotted
     assert len(_clones(run)) == 2, _clones(run)
-    # `INC9I-CR-F2`: a trailing slash is the same URL as `R`, so it finds `R`'s own directory
-    assert _ensure_cloned(R + "/", cache) == plain and len(_clones(run)) == 2, _clones(run)
 
 
 @red("github")
