@@ -36,7 +36,7 @@ from tests.test_inc9g import (
 from tests.test_repair_layout import _frame_rows, _rows_in
 
 #: Steps not yet implemented.  An arm keyed to a step in this set is a strict xfail.
-OPEN_STEPS: set[str] = {"repo", "github", "diff", "home"}
+OPEN_STEPS: set[str] = {"repo"}
 
 
 def red_marks(step: str) -> list:
@@ -270,18 +270,35 @@ def test_inc9h_sec_f1_c_r_and_c_r_dot_git_are_two_remotes_with_two_mirrors(tmp_p
 
 
 @red("github")
-def test_inc9h_sec_f1_a_mirror_that_holds_another_remote_is_refused_not_reused(tmp_path, monkeypatch):
+def test_inc9h_sec_f1_a_mirror_that_holds_another_remote_is_not_reused_this_url_gets_its_own(
+        tmp_path, monkeypatch):
     run = _Mirror()
     monkeypatch.setattr("subprocess.run", run)
     cache = tmp_path / "cache"
-    target = _ensure_cloned(URL_A, cache)
-    run.origin[str(target)] = "https://example.invalid/mallory/tools.git"  # a hash collision, or a tampered cache
+    foreign = _ensure_cloned(URL_A, cache)
+    run.origin[str(foreign)] = "https://example.invalid/mallory/tools.git"  # a collision, or a tampered cache
+    run.calls.clear()
+    mine = _ensure_cloned(URL_A, cache)
+    assert mine != foreign and mine.parent == cache, (mine, foreign)
+    assert [c[-2] for c in _clones(run)] == [URL_A], run.calls
+    assert not any(argv[:3] == ["git", "-C", str(foreign)] and "fetch" in argv for argv, _ in run.calls),         "the foreign mirror was refreshed and shown"
+    assert _ensure_cloned(URL_A, cache) == mine and len(_clones(run)) == 1
+
+
+@red("github")
+def test_inc9h_sec_f1_when_the_own_directory_is_foreign_too_the_connect_is_refused(tmp_path, monkeypatch):
+    run = _Mirror()
+    monkeypatch.setattr("subprocess.run", run)
+    cache = tmp_path / "cache"
+    url = "https://example.invalid/alice/tools"  # no `.git`, no `/`: its own key IS the shared key
+    foreign = _ensure_cloned(url, cache)
+    run.origin[str(foreign)] = "https://example.invalid/mallory/tools"
     run.calls.clear()
     with pytest.raises(GitHubError) as caught:
-        _ensure_cloned(URL_A, cache)
+        _ensure_cloned(url, cache)
     message = str(caught.value)
-    assert "mallory" not in message and "alice" not in message, message
-    assert not any("fetch" in argv for argv, _ in run.calls), "a foreign mirror was refreshed and shown"
+    assert "mallory" not in message and "alice" not in message and "refus" in message, message
+    assert _clones(run) == [] and not any("fetch" in argv for argv, _ in run.calls), run.calls
 
 
 def test_inc9h_sec_f1_the_same_remote_in_the_four_spellings_gets_one_mirror_name_and_no_second_clone(
