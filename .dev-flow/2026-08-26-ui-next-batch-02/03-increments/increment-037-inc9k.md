@@ -140,10 +140,10 @@ the dash/transport pins and the owner/name-through-gh and local-directory pins (
 | check | state |
 |---|---|
 | `tests/test_inc9k.py` + `test_inc9j/i/h/d/f/g`, `test_github`, `test_inc9/c/e` (incl. the 4 `network` real-git arms, local bare repos only) | executed: 623 passed on `71d2de2` |
-| Full default lane, once, uninterrupted, last step | see the result line below |
+| Full default lane, once, uninterrupted, last step | executed: **2036 passed, 3 xfailed, 24 deselected, 0 failed**, 18:11 (baseline 1778/0), run on `b7e52cc` (the docs commit; `test_no_operator_paths` reads `.dev-flow`) |
 | `ruff check . --exclude prototypes --output-format concise`, set difference vs `a906c80` (a detached worktree; line and column stripped) | executed: 28 lines each side, new = none, gone = none |
 | Literal Cf/Cc/C1 characters in the touched test files | executed: none (control and bidi are `\u` escapes) |
-| Known flakes | see the result line below |
+| Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`) | not hit (0 failed) |
 | `git stash` | not used |
 | Real remote, real `gh`, real cache, network, loopback servers | not-run (stubs; HOME and USERPROFILE in `tmp_path`; the 4 `network` arms clone local bare repos) |
 | A real `git clone` of an accepted URL form | not-run (the stub asserts the argv `git clone --mirror -- URL target`) |
@@ -190,4 +190,4 @@ no row of the frame. Not measured: any terminal other than Textual's headless dr
 
 ## Full-lane result
 
-pending
+2036 passed, 3 xfailed, 24 deselected, 0 failed in 1091.96s (18:11), on `b7e52cc`. A first run was stopped by the background time limit I set (10 min, my error) before it finished; it produced no result and was re-run once, uninterrupted, from the start; this is that run.
