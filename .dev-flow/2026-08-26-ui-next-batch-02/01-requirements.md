@@ -10325,3 +10325,30 @@ closer in kind to `osopen`'s confinement test (`REFUSED_OUTSIDE`) than to any st
 is not atomic against a second process creating the same id between the check and the write; the
 store has a single writer by construction (one TUI, one operator). No change to `save` semantics for
 an existing open map.
+
+
+#### `A-113` -- dated note 2026-09-30 (`Inc-SEED-2`, closes the security review of `Inc-SEED`)
+
+The rule set of `A-113` changes in five places. Findings are named `SEED2-Fn`.
+
+1. **Statement 2 is softened (`SEED2-F3`).** "No echo of the rejected name" becomes **no path and no
+   profile**. A refusal never carries an absolute path, a workspace path or the operator's profile
+   directory. The "ya existe el mapa 'X'" toast legitimately echoes `X`, because `X` is a valid id of a map
+   that is already in the operator's own list; the typed text of a REFUSED name is still not echoed.
+2. **The `"new"` sentinel is removed (`SEED2-F1`).** `MapScreen.on_mount` no longer treats the id `new` as
+   "make a fresh map". A real map named `new` opens like any other and is never rewritten by opening it.
+   Nothing produced `MapScreen("new")` (census in `increment-030-seed-2.md`).
+3. **The `..` substring rule is dropped (`SEED2-F2`, `B-76`).** `v1..v2` is a legitimate id. Separators and
+   `:` are refused, so `..` names the parent only when the id is made of dots; `.`, `..`, `...` and any
+   dot-only id are still refused, by the existing rule that refuses an id ending in a dot or a space.
+4. **Length (`SEED2-F3`).** An id longer than **100 characters** is refused with a rule message. The
+   number is chosen so `<id>_nodos.yml` plus a temp suffix and the workspace path stay under `MAX_PATH`
+   (260) for any workspace path up to about 140 characters.
+5. **Characters and names.** A lone surrogate (U+D800 to U+DFFF) in an id is refused (`SEED2-F4`): `save`
+   wrote both files before the sqlite reindex raised. `CONIN$`, `CONOUT$` and `CLOCK$` join the reserved
+   device names (`SEED2-F5`).
+
+**Trace.** Standalone, as `A-113`. Carried by `tests/test_seed2.py`; `tests/test_seed_safety.py` loses its
+`a..b` refusal case (it is now valid). **What is not claimed.** The 100-character limit is a margin
+against `MAX_PATH`, not a measurement on the operator's workspace; short-name spellings (`PROGRA~1`) and
+alternate-data-stream spellings are not covered (`B-78`).
