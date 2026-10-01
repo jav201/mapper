@@ -17,7 +17,7 @@ from mapper.model import Ficha, Graph, Node
 from mapper.store import MapIdError, MapStore, check_map_id
 from tests.test_seed_safety import _digest, _drive, _tree_snapshot
 
-OPEN_STEPS: set[str] = {"f2", "f3", "f4", "f5"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
