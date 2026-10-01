@@ -15,6 +15,7 @@ from textual.widgets import Static
 from mapper import darkside, office
 from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
+from mapper.osopen import safe_local_path
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
 
@@ -428,7 +429,11 @@ class FactoryScreen(Screen):
         def on_path(path_str: str | None) -> None:
             if path_str is None:
                 return
-            source = Path(path_str).expanduser()
+            source = safe_local_path(path_str)
+            if source is None:
+                # `INC9L-SEC-F2`: outside the allow-list: not looked at, and not named.
+                self.notify("archivo no encontrado", severity="error", markup=False)
+                return
             # `INC9BC-SEC-F1`: the NAME as typed, never the expansion -- `~`
             # resolves to the user profile, and a toast is painted and logged.
             name = Path(path_str).name

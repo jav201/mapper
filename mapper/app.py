@@ -20,7 +20,7 @@ from textual.screen import ModalScreen, Screen
 from textual.widgets import DataTable, Input, Label, Static
 from textual.worker import WorkerFailed
 
-from . import darkside
+from . import darkside, github
 from .diff import DiffResult, git_diff
 from .export import ExportError, ExportTooLarge, save_svg
 from .github import GitHubConnector, GitHubError, painted_repo
@@ -44,7 +44,7 @@ from .keymap import (
 from .mermaid import dump as dump_mermaid, slugify
 from .model import Attachment, Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
-from .osopen import OK as OSOPEN_OK, open_external
+from .osopen import OK as OSOPEN_OK, open_external, safe_local_path
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .search import SearchIndex
 from .store import TEMPLATES, MapIdError, MapStore, MapStoreError
@@ -1018,7 +1018,12 @@ class HomeScreen(Screen):
         def on_path(path_str: str | None) -> None:
             if path_str is None:
                 return
-            path = Path(path_str).expanduser()
+            path = safe_local_path(path_str)
+            if path is None:
+                # `INC9L-SEC-F2`: a text outside the allow-list is never looked at, and never named:
+                # `~nosuchuser...` made `expanduser` raise and the traceback printed the typed text.
+                self.notify("archivo no encontrado", severity="error", markup=False)
+                return
             if not path.exists():
                 # `INC9-SEC-F1`: the file's name, never the path the operator's
                 # `~` expanded to.
@@ -1314,12 +1319,12 @@ class RepoScreen(Screen):
         return Text.assemble(("● ", darkside.INK), ("ok", darkside.MUT))
 
     def _source_kind(self) -> str:
-        repo_path = Path(self.repo).expanduser()
-        if repo_path.is_dir() and (repo_path / ".git").is_dir():
+        # `INC9L-CR-F3`: the one decision `fetch` and `painted_repo` already read; a remote
+        # (`gh` or a URL) keeps the `github` badge, and a refused text is not a remote.
+        try:
+            return "local" if github._classify(self.repo) == "local" else "github"
+        except GitHubError:
             return "local"
-        if "://" in self.repo or self.repo.count("/") == 1:
-            return "github"
-        return "local"
 
     def _source_badge(self) -> Text:
         kind = self._source_kind()
