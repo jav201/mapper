@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-9 reviews",
-    "next_stage": "Inc-9 landed (7e64508..a1d1a32; lane 1369 passed / 0 failed); independent reviews next, then the operator's verdict on the English copy table, then Inc-9b (INC9-F2: map-view and coverage/editor headers, file-cap split), then the G6-SEC-F9 census fix, then Inc-EN (B-71), then whole-branch gates (FLAKE-1 first).",
+    "next": "Inc-9d/SEED-2/9e reviews",
+    "next_stage": "Inc-9 line landed through Inc-9e (lane 1558 passed / 0 failed). NEXT: one review round (code, ux, security) over Inc-9d + Inc-SEED-2 + Inc-9e; then Inc-EN (B-71, + INC9E-F2 search hint); then whole-branch gates (FLAKE-1 first), merge, dev-flow-sync, phase 6. Operator file cap is now 4 source files.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -965,6 +965,122 @@
         },
         "pending": "operator verdict on the English copy table (record section 'English copy table'); independent reviews"
       }
+    },
+    "INC-9b_TO_9e_AND_SEED_2026-09-30": {
+      "date": "2026-09-30",
+      "INC-9_REVIEWS": {
+        "code": "PASS",
+        "security": "PASS",
+        "ux": "PASS-WITH-FINDINGS",
+        "lane": "1369 passed / 0 failed uninterrupted (code reviewer)"
+      },
+      "VERDICT": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc9-2026-09-30.md (K1-K4, L1-L4)",
+      "INC-9b": {
+        "commits": [
+          "36304a3",
+          "ce753f9",
+          "bab76c1"
+        ],
+        "record": "increment-026-inc9b.md",
+        "lane": "1373/0"
+      },
+      "INC-9c": {
+        "commits": [
+          "930be78",
+          "90c8ce8",
+          "8303a60",
+          "5495f5e",
+          "2147205",
+          "a0b63ba",
+          "9994499",
+          "fddd07d"
+        ],
+        "record": "increment-027-inc9c.md",
+        "lane": "1438/0",
+        "file_cap": "6 source files, operator approval 2026-09-30 'Dejalo terminar con los 6'"
+      },
+      "INC-9bc_REVIEWS": {
+        "code": "PASS (lane 1438/0 uninterrupted)",
+        "ux": "PASS-WITH-FINDINGS",
+        "security": "BLOCK-UNTIL INC9BC-SEC-F1 -> closed in Inc-9d"
+      },
+      "INC-SEED": {
+        "commits": [
+          "7521ac9",
+          "597b7fa",
+          "06d132c"
+        ],
+        "requirement": "A-113",
+        "record": "increment-028-seed-safety.md",
+        "lane": "1485/0",
+        "security": "PASS (396 hostile runs, 0 escapes); SEED-SEC-F1..F5 -> Inc-SEED-2",
+        "what": "refuse overwrite of an existing map; validate typed map ids at the store (traversal)"
+      },
+      "INC-9d": {
+        "commits": [
+          "a5ddf5d",
+          "fe935ac",
+          "147eec7",
+          "c97a0ba",
+          "0ae61e6",
+          "cf16c10",
+          "dedcc81",
+          "a4f8b42"
+        ],
+        "record": "increment-029-inc9d.md",
+        "lane": "1522/0",
+        "closed": [
+          "INC9BC-SEC-F1 (factory toast path)",
+          "B-77a",
+          "B-77b",
+          "INC9BC-SEC-F3 (clone stderr + worker exit)",
+          "INC9BC-SEC-F4",
+          "INC9BC-UX-F3",
+          "INC9BC-UX-F13",
+          "INC9BC-CR-F1/F2/F5",
+          "L4"
+        ]
+      },
+      "INC-SEED-2": {
+        "commits": [
+          "fd37b9e",
+          "ee6c3f5",
+          "6b9fc44",
+          "e475bd9"
+        ],
+        "record": "increment-030-seed-2.md",
+        "lane": "1541/0",
+        "closed": [
+          "SEED-SEC-F1 (map named 'new' overwritten on open)",
+          "B-76 (v1..v2)",
+          "SEED-SEC-F3/F4/F5"
+        ],
+        "open": "B-78 (100-char id limit unmeasured on the real Drive workspace)"
+      },
+      "INC-9e": {
+        "commits": [
+          "35e77fb",
+          "e8283e0",
+          "54d4a45",
+          "0a37fb6",
+          "e0d73c4"
+        ],
+        "record": "increment-031-inc9e.md",
+        "lane": "1558/0",
+        "closed": [
+          "L1",
+          "L2",
+          "L3",
+          "INC9C-F2 / INC9BC-UX-F4 palette",
+          "INC9BC-CR-F6",
+          "INC9BC-UX-F1"
+        ],
+        "carries": [
+          "INC9E-F1 home detection heuristic (letters flag)",
+          "INC9E-F2 search hint -> Inc-EN"
+        ]
+      },
+      "pending_reviews": "Inc-9d, Inc-SEED-2, Inc-9e not yet independently reviewed"
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
