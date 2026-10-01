@@ -56,9 +56,10 @@ TAB_BINDING_EXCEPTIONS = ("EditorScreen",)
 # Every group maps to exactly one scope.  Written down because Inc-1 generates
 # `BINDINGS` from it: an undeclared group is a key nobody owns.  The order is the
 # key bar's order (`bar_group_order`), and the legend paints the same order.
+# `L3`: on home the doors (`open`) come BEFORE `maps`, in the bar and the legend.
 GROUP_SCOPE: dict[str, str] = {
-    "list": SCOPE_HOME,
     "doors": SCOPE_HOME,
+    "list": SCOPE_HOME,
     "exit": SCOPE_HOME,
     "nav": SCOPE_MAP,
     "node": SCOPE_MAP,
