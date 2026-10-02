@@ -34,7 +34,7 @@ from tests.test_inc9o import V1, W2, _doc_graph, _link, _tree
 from tests.test_inc9p import _generate, _import, _Replace, _ws_tree
 from tests.test_inc9q import _long_junction_tree
 
-OPEN_STEPS: set[str] = {"backstop", "colon", "generate", "maxpath", "utf16", "preview"}
+OPEN_STEPS: set[str] = set()
 
 Y1 = 'path not supported: ":" is not allowed in a file name'
 CR_F2 = "output path could not be checked: move the workspace to a shorter folder"
@@ -138,7 +138,7 @@ def test_inc9r_y1_the_colon_reason_has_one_sentence_on_every_surface(surface):
 
 
 @red("colon")
-@pytest.mark.parametrize("text", ["notes: draft.pdf", "a:b/x.pdf", "docs/notes: draft.pdf", "lnk::$DATA"])
+@pytest.mark.parametrize("text", ["notes: draft.pdf", "ab:c/x.pdf", "docs/notes: draft.pdf", "lnk::$DATA"])
 def test_inc9r_y1_a_colon_in_a_component_is_the_colon_reason(text, tmp_path):
     ws = tmp_path / "ws"
     ws.mkdir()

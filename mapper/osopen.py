@@ -58,9 +58,20 @@ PATH_TEMPLATES_UNCHECKED = (
 # `INC9P-SEC-F3` (Round 13, same pattern as X1): an attachment that is a hard link when it is opened.
 ATTACHMENT_HARD_LINKED = "attachment has several hard links: replace it with a plain copy"
 
-# A not-found past this many characters cannot be trusted: without long-path support `lstat` fails on a path
-# this long whether or not the component exists, so the walk would stop before a link it never saw.
+# `Y1` (Round 14): the colon's own sentence; fixed, it echoes nothing.
+PATH_COLON = 'path not supported: ":" is not allowed in a file name'
+# `INC9Q-CR-F2` (Round 14): generate's own sentence for a target that could not be checked (a long path).
+PATH_OUTPUT_UNCHECKED = "output path could not be checked: move the workspace to a shorter folder"
+
+# A not-found at this many UTF-16 units or more cannot be trusted: without long-path support `lstat` fails on a path
+# this long whether or not the component exists, so the walk would stop before a link it never saw.  It is asked
+# again with the long-path prefix (`INC9Q-CR-F3`).  Measured in UTF-16 units, as Windows counts (`INC9Q-SEC-F1`).
 _MAX_PATH = 260
+_LONG_PREFIX = "\\\\?\\"
+
+
+def _utf16_units(text: str) -> int:
+    return len(text.encode("utf-16-le")) // 2
 
 
 _DRIVE = re.compile(r"[A-Za-z]:")
@@ -128,44 +139,53 @@ def hard_linked(path: Path) -> bool:
 
 def refusal_sentence(reason: str, *, surface: str = "attachment") -> str:
     """`INC9P-CR-F1`: the ONE reason -> sentence mapping for a path `confine_reason` refused.  `link` is `W2`,
-    `allow_list` and `normalised` are `U1`, everything else is `V1`; an `unreadable` import target (*surface*
-    `import`) has its own sentence (`INC9P-CR-F3`).  The factory template keeps its own mapping for `V2`, `W1`
-    and the missing-template text, and calls this for the common reasons."""
+    `colon` is `Y1`, `allow_list` and `normalised` are `U1`, everything else is `V1`; an `unreadable` target has
+    its own sentence on the `import` surface (`INC9P-CR-F3`) and on the `generate` surface (`INC9Q-CR-F2`).  The
+    factory template keeps its own mapping for `V2` and the missing-template text, and calls this for the common
+    reasons; generate keeps `W1` for a name `check_map_id` refuses."""
     if reason == "link":
         return PATH_THROUGH_LINK
+    if reason == "colon":
+        return PATH_COLON
     if reason in ("allow_list", "normalised"):
         return PATH_NOT_SUPPORTED
     if reason == "unreadable" and surface == "import":
         return PATH_TEMPLATES_UNCHECKED
+    if reason == "unreadable" and surface == "generate":
+        return PATH_OUTPUT_UNCHECKED
     return PATH_OUTSIDE_WORKSPACE
 
 
 def confine_reason(text: str, workspace: Path) -> tuple[Path | None, str]:
     """The ONE containment rule, with its cause: `(resolved, "ok")` or `(None, reason)`.
 
-    Reasons: `allow_list` (`safe_local_path` refused), `normalised` (a component Windows rewrites), `outside`
-    (lexically, or after `resolve()`), `link` (a symlink or reparse point under the workspace), `unreadable`
-    (a component could not be inspected, a not-found past MAX_PATH, or `resolve()` failed).
+    Reasons: `allow_list` (`safe_local_path` refused), `colon` (a `:` in a file name, `Y1`), `normalised` (a
+    component Windows rewrites), `outside` (lexically, or after `resolve()`), `link` (a symlink or reparse point
+    under the workspace, or the OS reaches somewhere else than the walk did), `unreadable` (a component could not
+    be inspected, a re-check at MAX_PATH failed, or `resolve()` failed).
 
     In order: (1) `safe_local_path` (the closed allow-list; it expands `~` for every caller, so add and open
     agree); (1b) `INC9O-SEC-F1` / `INC9P-SEC-F1`: refuse, on the text and before ANY filesystem call, a
     component other than `.` and `..` that ends in a dot or a space (`...`, `. .`, `d `, `d. .`), and a `:` in
     any component but the drive anchor (`lnk:$I30`, `lnk::$BITMAP`, `JLINKN~1:$I30`): Windows normalises the
-    first and reads the second as a stream, so `lstat` raises not-found, the walk stops and `resolve()` would
-    follow a link behind it; (2) lexical containment (no filesystem call); (3) a walk from the workspace down
-    with `os.lstat`, refusing a symlink or any reparse point (junction, mount point) BEFORE anything below it is
-    touched; a not-found at MAX_PATH or beyond is `unreadable` (`INC9P-SEC-F4`); (4) only then `resolve()` and
-    a last `is_relative_to`.  When the walk stopped on a not-found component, the OS resolves only the WALKED
-    prefix and the remaining parts are appended lexically: it is never asked about a tail the walk did not
-    inspect (defence in depth).  Policy: links inside the workspace are not followed.  The workspace root itself
-    may be a link; only what lies under it is walked.
+    first (`normalised`) and reads the second as a stream (`colon`, `Y1`), so `lstat` raises not-found, the walk
+    stops and `resolve()` would follow a link behind it; (2) lexical containment (no filesystem call); (3) a walk
+    from the workspace down with `os.lstat`, refusing a symlink or any reparse point (junction, mount point)
+    BEFORE anything below it is touched; a not-found at MAX_PATH (260 UTF-16 units) or beyond is asked again with
+    the long-path prefix: a link found is `link`, another error is `unreadable`, a confirmed not-found is a
+    missing tail like any other (`INC9P-SEC-F4`, `INC9Q-CR-F3`); (4) only then the OS is asked what the consumer
+    will reach: the walked prefix resolved plus the tail (`resolved`) and the whole path resolved (`full`) must
+    agree, else `link` (`INC9Q-CR-F1`: the walk can be told not-found about a link the consumer follows), and
+    `resolved` must lie under the resolved workspace, else `outside`.  Policy: links inside the workspace are not
+    followed.  The workspace root itself may be a link; only what lies under it is walked.
     """
     local = safe_local_path(text)
     if local is None:
         return None, "allow_list"
     components = local.parts[1:] if local.anchor else local.parts
-    if any(":" in part for part in components) or any(
-            part not in (".", "..") and part != part.rstrip(" .") for part in local.parts):
+    if any(":" in part for part in components):
+        return None, "colon"
+    if any(part not in (".", "..") and part != part.rstrip(" .") for part in local.parts):
         return None, "normalised"
     joined = _lexically_inside(local, workspace)
     if joined is None:
@@ -179,24 +199,31 @@ def confine_reason(text: str, workspace: Path) -> tuple[Path | None, str]:
         try:
             info = os.lstat(current)
         except (FileNotFoundError, NotADirectoryError):
-            if len(os.fspath(current)) >= _MAX_PATH:
+            if _utf16_units(os.fspath(current)) < _MAX_PATH:
+                tail = parts[index:]
+                break
+            try:
+                info = os.lstat(_LONG_PREFIX + os.fspath(current))
+            except FileNotFoundError:
+                tail = parts[index:]
+                break
+            except (OSError, ValueError):
                 return None, "unreadable"
-            tail = parts[index:]
-            break
         except (OSError, ValueError):
             return None, "unreadable"
         if is_link(info):
             return None, "link"
         walked = current
     try:
-        if tail:
-            resolved = walked.resolve().joinpath(*tail)
-        else:
-            resolved = (Path(workspace) / local).resolve()
-        if not resolved.is_relative_to(Path(workspace).resolve()):
-            return None, "outside"
+        ws_real = Path(workspace).resolve()
+        resolved = walked.resolve().joinpath(*tail)
+        full = (Path(workspace) / local).resolve()
     except (OSError, ValueError):
         return None, "unreadable"
+    if os.path.normcase(full) != os.path.normcase(resolved):
+        return None, "link"
+    if not resolved.is_relative_to(ws_real):
+        return None, "outside"
     return resolved, "ok"
 
 

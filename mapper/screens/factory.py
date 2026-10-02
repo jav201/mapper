@@ -21,7 +21,7 @@ from mapper import darkside, office
 from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
 from mapper.osopen import (
-    PATH_NOT_SUPPORTED, PATH_THROUGH_LINK, confine_reason, hard_linked, is_link, refusal_sentence, safe_local_path,
+    PATH_NOT_SUPPORTED, confine_reason, hard_linked, is_link, refusal_sentence, safe_local_path,
 )
 from mapper.store import MapIdError, check_map_id
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
@@ -343,10 +343,13 @@ class FactoryScreen(Screen):
 
     def _missing_text(self, reason: str) -> str:
         """The sentence for a template that cannot be used, from the REASON `_template` gave: `W2` (a link),
-        `U1` (`X2`: the path rule refused it: allow-list or normalised) and `V2` (outside the workspace, decided
-        by text); only a missing or unreadable template (or one that is not there) says 'not found'."""
-        if reason in ("link", "allow_list", "normalised"):
+        `Y1` (a colon), `U1` (`X2`: the path rule refused it: allow-list or normalised) and `V2` (outside the
+        workspace, decided by text); only a missing or unreadable template (or one that is not there) says 'not
+        found'."""
+        if reason in ("link", "colon", "allow_list", "normalised"):
             return refusal_sentence(reason)
+        if reason == "hard_linked":
+            return TEMPLATE_HARD_LINKED
         if reason == "outside":
             return TEMPLATE_OUTSIDE
         return TEMPLATE_MISSING
@@ -359,6 +362,9 @@ class FactoryScreen(Screen):
 
         if self._is_office(doc):
             path, reason = self._template(doc)
+            # `INC9Q-SEC-F2`: the preview does not read what generate refuses (X1, as generate says it).
+            if path is not None and hard_linked(path):
+                path, reason = None, "hard_linked"
             if path is None or not path.exists():
                 return Text.assemble((self._missing_text(reason), darkside.ALERT))
             preview = office.extract_preview_text(path)
@@ -581,8 +587,8 @@ class FactoryScreen(Screen):
         # plain relative name for the allow-list.
         target, reason = confine_reason(f"./{self.document_name}-{node.id}{suffix}", Path(store.workspace))
         if target is None:
-            sentence = PATH_THROUGH_LINK if reason == "link" else DOC_NAME_NOT_A_FILE_NAME
-            self.notify(darkside.plain(sentence), severity="error", markup=False)
+            # `INC9Q-CR-F2`: the one mapping, with its own surface; only a `check_map_id` failure (above) is W1.
+            self.notify(darkside.plain(refusal_sentence(reason, surface="generate")), severity="error", markup=False)
             return
         if hard_linked(path):
             self.notify(darkside.plain(TEMPLATE_HARD_LINKED), severity="error", markup=False)

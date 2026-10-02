@@ -39,7 +39,7 @@ from tests.test_inc9o import V1, W2, _activate, _doc_graph, _link, _tree
 from tests.test_inc9p import MISSING, _generate, _import, _Replace, _ws_tree
 
 # Inc-9r: the arms whose expectation changed (Y1 `r_colon`, CR-F1 `r_backstop`) are committed RED first, keyed by step.
-OPEN_STEPS: set[str] = {"r_colon", "r_backstop"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 

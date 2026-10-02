@@ -314,7 +314,8 @@ class NavigationModel:
 
 def _path_refusal(text: str, workspace: Path) -> str | None:
     """The fixed sentence for a `file` attachment text that may not be stored or opened, else None: the one
-    reason -> sentence mapping, `osopen.refusal_sentence` (`U1`, `W2`, `V1`; an unreadable component is V1)."""
+    reason -> sentence mapping, `osopen.refusal_sentence` (`U1`, `Y1` for a colon, `W2`, `V1`; an unreadable
+    component is V1)."""
     path, reason = confine_reason(text, workspace)
     if path is not None:
         return None
