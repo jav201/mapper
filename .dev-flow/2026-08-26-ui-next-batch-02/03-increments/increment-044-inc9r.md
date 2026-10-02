@@ -180,3 +180,13 @@ The CR-F2 toast is the render of a simulated failure (`os.lstat` raising `Permis
 ## Full-lane result
 
 `2621 passed, 24 deselected, 3 xfailed` (0 failed) in 1334 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `857cf0b`, run AFTER the record was final except this section, with a temp HOME and a git identity from the environment. Baseline 2570/0; the delta is the new `test_inc9r.py` arms and the added `sub/l:$I30` params. The 3 xfailed are pre-existing. **A first lane run on the same head failed 5 `test_github` tests** (`git commit` exit 128, "Author identity unknown"): my own environment error (a temp HOME with no git identity), not code; the lane was re-run in full with the identity variables and is the result above. After this section was appended only this `.md` changed; the lane was NOT re-run.
+
+## Corrections, 2026-10-02 (appended by Inc-9s, `A-127`; nothing above is rewritten)
+
+Three statements in this record were wrong or overstated. They are corrected here, not edited in place (`B-81`).
+
+1. **Declared reading 5 is wrong (`INC9R-CR-F3`).** It says an import SOURCE with a colon cannot be made to exist, so there is no Pilot arm. An NTFS alternate data stream can be one: creating `<dir>\ab:b.docx` with `open(..., "wb")` makes the file `ab` carrying the stream `b.docx`, and typing that path at the import prompt passes `safe_local_path`, `is_file()` and the `.docx` suffix check, then reaches the target `./templates/ab:b.docx`, which is the `colon` reason. Y1 on import is therefore testable end to end; `tests/test_inc9s.py` does it (a Pilot arm with real keys, asserting the Y1 toast and an empty `templates`).
+2. **The mutant table names intended killers (`INC9R-CR-F4`).** The "Verdict: killing test" column of section 4 is the arm each mutant was written to be killed by, not the first `-x` failure the harness printed; the first failure can be an earlier arm of the suite run. The count (16 run, 16 killed, 0 survived) stands; the attribution column is intent.
+3. **`normcase` in the step-4 comparison is not load-bearing (`INC9R-CR-F1`).** Section 4 and the code present `os.path.normcase(full) != os.path.normcase(resolved)` as guarding a case difference. The code reviewer measured that it carries no tested load (no arm depends on it). It is belt-and-braces, not a control. No mutant of it was claimed or run, and none is claimed now.
+
+Not corrected here: `hard_linked` as a pseudo-reason in `_missing_text` (`INC9R-CR-F2`) stays in `B-81`.

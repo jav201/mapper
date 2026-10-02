@@ -10825,3 +10825,19 @@ links are junctions or symlinks to a LOCAL directory under a temp path, and spie
 **Trace.** Standalone, like `A-113`..`A-125`. Carried by `tests/test_inc9r.py`, the edited arms of `tests/test_inc9q.py` and the record.
 
 **What is not claimed.** Windows only; nothing was run on POSIX. No real UNC, `\??\UNC`, console or COM device and no link to a network target was created or opened: links are junctions to a LOCAL directory under a temp path and `os.link` hard links between temp files; the long-path trees were created under a temp path with the `\\?\` prefix and removed. A volume or process with long paths enabled was not measured. The race between the walk and the write is still narrowed, not closed (`A-125` item 4).
+
+### `A-127` -- a lone surrogate in a typed path is refused by the allow-list; the Inc-9r record corrections (`Inc-9s`), dated 2026-10-02
+
+**Authority.** The Inc-9r security review `INC9R-SEC-F3` (LOW, a regression of `929a039`) and the code review `INC9R-CR-F1`, `F3`, `F4` as carried by `B-81`. The record is `increment-045-inc9s.md`.
+
+**Statement.** Amends `A-126`; the rest of `A-126` stands.
+
+1. **`INC9R-SEC-F3`.** `safe_local_path` returns None for any text that contains a character of Unicode category `Cs` (a lone surrogate, such as `\ud800` or `\udc80`), after the type, empty, NUL and leading `-` checks and before any `Path` is built. Cause of the defect: `_utf16_units` encoded the path with `text.encode("utf-16-le")` inside the `FileNotFoundError` handler of the walk, so the outer `except` could not catch the `UnicodeEncodeError`, and `confine_reason` and `open_external` raised for a component such as a lone `\ud800` followed by `/x.pdf`, or `docs/` + a lone `\udc80` + `.pdf` (both were `ok` at `bf68d07`). Now `confine_reason` returns `(None, "allow_list")` (the `U1` sentence) with zero filesystem calls, and `open_external` returns `REFUSED_TYPE` and does not raise. Second guard: `_utf16_units` encodes with `"utf-16-le", "surrogatepass"`, so a lone surrogate counts as one unit and never raises. An astral character (`\U0001F600`) is not category `Cs` (it is `So`), counts as 2 units and is accepted (pinned).
+2. **`B-81` record corrections.** Appended to `increment-044-inc9r.md` (nothing rewritten): declared reading 5 is wrong, since an NTFS stream `ab:b.docx` can be an import source (`INC9R-CR-F3`); the mutant table names intended killers, not the first `-x` failure (`INC9R-CR-F4`); `normcase` in the step-4 comparison carries no tested load (`INC9R-CR-F1`).
+3. **`INC9R-CR-F3`, the end-to-end arm.** `tests/test_inc9s.py` creates a stream file in a temp directory, imports it with real keys and asserts the Y1 toast and that nothing is written under `templates`.
+
+**Sealed-arm changes.** None.
+
+**Trace.** Standalone, like `A-113`..`A-126`. Carried by `tests/test_inc9s.py` and the record.
+
+**What is not claimed.** Windows only; nothing was run on POSIX. The `Cs` refusal is on the text; whether the Windows API accepts any lone surrogate in a name is not claimed either way. `hard_linked` as a pseudo-reason in `_missing_text` (`INC9R-CR-F2`) stays in `B-81`. The other `B-79` and `B-80` residuals are untouched.
