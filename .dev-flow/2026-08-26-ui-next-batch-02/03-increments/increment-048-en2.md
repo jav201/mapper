@@ -111,4 +111,12 @@ Evidence (`tests/test_en2.py`, real `tab` keys, both 140 and 87 columns): with a
 
 ## Full-lane result
 
-(pending at the time this file was committed; the result is recorded below once the lane ends.)
+`2660 passed, 1 failed, 24 deselected, 3 xfailed` in 1486 s (24 min 46 s), `python -m pytest -rf -q -W error::SyntaxWarning`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `0ac089b` (the last code and test change), run as the last step. Baseline 2653/0; the delta is the 8 new `test_en2.py` items (2653 + 8 = 2661 = 2660 passed + 1 failed).
+
+The one failure: `tests/test_inc9c.py::test_inc9c_ux_f3_components_scroll_and_every_tab_stop_is_on_screen[size0]` -- `tab stops off screen at (118, 34): [(12, 'DsSwitch')]`. It is a layout-timing check on the components sheet (`settings.py`, one of this increment's files), so it was not waved away:
+- Alone, `-k ux_f3_components_scroll`: 2 passed. The whole file `test_inc9c.py`, three times in a row: 55 passed each (20 s).
+- The edit to `settings.py` is strings only (four literals; the hint line stays one line, the demo values are the same width: `moon tide night` vs `luna marea noche` is a shorter row, never a taller one), no CSS, no row added.
+- The lane ran while another process family on this machine (a different project's validator runs, dozens of python processes at once, seen in the process list) was loading the CPU; the check measures where the scroll settled after a `pause`.
+- NOT measured: the same lane on `6092d26` under the same load, so "flaky under load" is the inference, not a measurement. If the reviewer reproduces it on a quiet machine, the cause is in `settings.py`'s edit and this record is wrong.
+
+Lane history, declared: earlier launches in this session were invalid and not counted: (1) died after 18 tests when its shell exited; (2) stopped by me to fold in EN1-REV-F1/F2; (3) a lane whose temp HOME had no git identity (5 failures in `test_github.py`, all `Author identity unknown`: an environment fault of mine, not code) -- a wrapper I stopped did not stop its python child, so a second lane overlapped and wrote into the same output file; I stopped the survivor and ran the lane above to a fresh file with nothing else of mine running.
