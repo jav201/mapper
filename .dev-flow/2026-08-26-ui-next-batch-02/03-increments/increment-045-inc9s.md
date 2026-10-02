@@ -61,3 +61,7 @@ Not mutated (declared): the "nothing is written under `templates`" half of the P
 - `f372ea2` the arms, strict xfail.
 - `2459fd6` the fix (1 source file; `OPEN_STEPS` emptied).
 - the records (`044` corrections, `A-127`, this file).
+
+## Full-lane result
+
+`2634 passed, 24 deselected, 3 xfailed` (0 failed) in 1356 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `f252606`, with a temp HOME and a git identity from the environment, run as the last step. Baseline 2621/0; the delta is the 13 new `test_inc9s.py` items. The 3 xfailed are pre-existing. After this section was appended only this `.md` changed; the lane was NOT re-run.
