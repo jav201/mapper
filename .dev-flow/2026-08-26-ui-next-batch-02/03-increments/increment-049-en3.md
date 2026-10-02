@@ -98,3 +98,9 @@ The two pins that DO depend on the shorter declaration (section 3b) are at 20..3
 - Unmeasured: widths other than 118, 87 and the sweep sizes; a rendered image of the canvas (digests and segment lists are the evidence); `radial`'s own labels at other fixtures; whether C1/C3 are caught by any test other than the census (run alone); POSIX.
 - Left for later increments (declared): `darkside.py` `V26`, `V31` and the rest of the legend (EN-4); `app.py` `sin acta`, `con acta`, `nodos sin acta`, `ramas sin mostrar`, hints and toasts (EN-5); `keymap.py` (EN-6); `store.py` schema labels, the `views/state.py` comment mentioning `eliminados`. `test_repair_depth` test name still says "spanish" (ids unchanged on purpose).
 - Suggested next: EN-4 (`store`, `darkside`, `widgets/components`), following the declared term `record`.
+
+## Full-lane result
+
+`2667 passed, 24 deselected, 3 xfailed` in 1724.7 s (28 min 45 s), `python -B -m pytest -rf -q -W error::SyntaxWarning`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `7afc185` (the last code and test change), run as the last step. Baseline 2660 passed + 1 failed (the `test_inc9c` ux_f3 flake) = 2661; the delta is the 6 new `test_en3.py` items (2661 + 6 = 2667). The flake did not fail this time.
+
+Lane history, declared: a first full lane on `c36ea34` ended `1 failed, 2666 passed` -- `test_a3_census::test_tc_a3_the_census_cardinalities_are_PINNED` (derived 65 arg-ful `.render(...)` call sites against a pinned 64): the `test_en3.py` lane arm is the +1. It was re-run alone after the fix and passed (15 of 15 in that file). The pin and its ledger entry are in section 3; the lane above was then re-run in full from a fresh output file, nothing else of mine running. That first lane's one failure was not a flake and is not waved away.
