@@ -601,8 +601,8 @@
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
-    "next": "Inc-9n reviews (code, ux, security) at 74030a0",
-    "next_stage": "Inc-9m reviews: code OK, ux PASS-WITH-NOTICES (U1, U2 Round 10), security BLOCK-UNTIL INC9M-SEC-F1 (sidecar office path stat'ed on factory open). Inc-9n landed (73c2670..74030a0, A-122, lane 2344 passed / 1 failed = FLAKE-3, passed 3/3 alone). NEXT: Inc-9n review round; close the Inc-9 line when a round has no MEDIUM/HIGH; then Inc-EN (with T3); then whole-branch gates (FLAKE-1 first, FLAKE-3 now observed in a full lane), merge, dev-flow-sync, phase 6.",
+    "next": "Inc-9o reviews (code, ux, security) at the state commit",
+    "next_stage": "Inc-9n reviews: code OK (FLAKE-3 diagnosed as a test race), ux PASS-WITH-NOTICES (V1, V2 Round 11), security BLOCK-UNTIL INC9N-SEC-F1 (sidecar document name chose the generate-office write path). Inc-9o landed (63b2de3..a952792, A-123, lane 2427/0): one confine() helper with a reparse-point walk, filename-safe generate target, V1, V2, FLAKE-3 test fix. NEXT: Inc-9o review round; close the Inc-9 line when a round has no MEDIUM/HIGH; then Inc-EN (with T3); then whole-branch gates, merge, dev-flow-sync, phase 6.",
     "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {"date": "2026-09-25", "head_reviewed": "2de10da", "process": "rev46+, serial lenses", "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED", "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED", "new_findings": ["INC7-CR-R2-F1 MEDIUM A-102 warning guards untested (Inc-7, non-blocking)", "INC7-CR-R2-F2 MEDIUM glyph column unfaithful and unchecked (carry -> Inc-8)", "INC7-CR-R2-F3 LOW completeness unchecked (carry -> Inc-8)", "INC7-CR-R2-F4 LOW warning toast not de-duplicated (merged into INC7-SEC-R2-F2)", "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)", "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)", "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)", "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"], "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run", "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"},
     "INC-7_RELEASED_2026-09-28": {
@@ -1081,6 +1081,33 @@
         ]
       },
       "pending_reviews": "Inc-9d, Inc-SEED-2, Inc-9e not yet independently reviewed"
+    },
+    "INC-9n_REVIEWS_AND_9o_2026-10-01": {
+      "date": "2026-10-01",
+      "INC-9n_REVIEWS": {
+        "code": "OK (lane 2344 + 1 FLAKE-3); CR-F1 relative workspace, CR-F2 three containment copies, CR-F3 FLAKE-3 test race (MEDIUM)",
+        "security": "BLOCK-UNTIL INC9N-SEC-F1 HIGH (pre-existing: documents[].name -> generate-office write outside workspace / UNC); F3 MEDIUM links followed; F2 LOW; disclosure: one real resolve() reached a link naming a non-existent host",
+        "ux": "PASS-WITH-NOTICES; V1, V2"
+      },
+      "VERDICT_ROUND_11": "V1 own sentence for outside-workspace attachments; V2 factory says template outside the workspace, import with i",
+      "INC-9o": {
+        "commits": [
+          "e781be2",
+          "b518c09",
+          "e56662d",
+          "b1dd3f0",
+          "ed9ce49",
+          "a952792"
+        ],
+        "requirement": "A-123",
+        "record": "increment-041-inc9o.md",
+        "lane": "2427 passed / 3 xfailed / 0 failed (-rf)",
+        "mutants": "31 RED / 2 equivalent on Windows",
+        "source_files": "3 (osopen.py, app.py, screens/factory.py)",
+        "flake3": "test fix: bounded poll on palette._items; 30/30 isolated; not seen in two full lanes",
+        "drive_check": "coordinator lstat (read-only) of the operator's Google Drive folders: plain directories, not reparse points"
+      },
+      "pending": "Inc-9o reviews"
     },
     "INC-9m_REVIEWS_AND_9n_2026-10-01": {
       "date": "2026-10-01",
