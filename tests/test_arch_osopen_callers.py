@@ -1,8 +1,9 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
 Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app`.  `github` may import
-`osopen.safe_local_path`; `screens` that name plus `confine`, `lexically_outside` and the sentence constant
-`PATH_NOT_SUPPORTED` (Inc-9o, `A-123`): none of them launches anything.  Derived from the modules' own ASTs, so
+`osopen.safe_local_path`; `screens` that name plus `confine_reason` and the three sentence constants
+`PATH_NOT_SUPPORTED`, `PATH_OUTSIDE_WORKSPACE`, `PATH_THROUGH_LINK` (Inc-9p, `A-124`; Inc-9o's `confine` and
+`lexically_outside` are no longer imported by a screen): none of them launches anything.  Derived from the modules' own ASTs, so
 a new caller fails the test instead of passing a hand-listed expectation.
 """
 from __future__ import annotations
@@ -19,7 +20,7 @@ PKG = pathlib.Path(mapper.__file__).parent
 DOCS = PKG.parent / "docs" / "ARCHITECTURE.md"
 LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
 ALLOWED_FILES = {"app.py", "osopen.py"}
-OPEN_STEPS: set[str] = set()
+OPEN_STEPS: set[str] = {"arch9p"}  # Inc-9p
 
 
 def red(step: str):
@@ -73,11 +74,12 @@ def _osopen_imports(tree: ast.AST):
 
 ALLOWED_OUTSIDE_APP = {
     "github.py": {"safe_local_path"},
-    "screens/factory.py": {"safe_local_path", "confine", "lexically_outside", "PATH_NOT_SUPPORTED"},
+    "screens/factory.py": {"safe_local_path", "confine_reason", "PATH_NOT_SUPPORTED", "PATH_OUTSIDE_WORKSPACE",
+                           "PATH_THROUGH_LINK"},
 }
 
 
-@red("arch")
+@red("arch9p")
 def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
     seen: dict[str, set[str]] = {}
     for rel, tree in _sources():
@@ -127,14 +129,15 @@ def _section3() -> str:
     return text[text.index("## 3 "):text.index("## 4 ")]
 
 
-@red("arch")
+@red("arch9p")
 def test_the_architecture_map_says_what_the_modules_import():
     section = _section3()
     github_row = _row(section, "github")
     screens_row = _row(section, "screens")
     osopen_row = _row(section, "osopen")
     assert "`osopen.safe_local_path`" in github_row and "`design`" in github_row, github_row
-    for name in ("safe_local_path", "confine", "lexically_outside", "PATH_NOT_SUPPORTED"):
+    for name in ("safe_local_path", "confine_reason", "PATH_NOT_SUPPORTED", "PATH_OUTSIDE_WORKSPACE",
+                 "PATH_THROUGH_LINK"):
         assert f"`osopen.{name}`" in screens_row, (name, screens_row)
     assert "`open_external` is referenced only from `app`" in osopen_row, osopen_row
     assert "`widgets` / `views` / `screens` → `osopen`" not in osopen_row, osopen_row

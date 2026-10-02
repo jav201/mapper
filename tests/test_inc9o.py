@@ -33,13 +33,17 @@ from tests.test_inc9f import NARROW, SIZE
 from tests.test_inc9m import _env, _flat, _no_fs, _norm
 from tests.test_inc9n import U1, _add_attachment, _make_docx, _toasts
 
-OPEN_STEPS: set[str] = set()
+# Inc-9p: the arms whose expected sentence changed (`W1`, `W2`) were committed RED first, keyed by step.
+OPEN_STEPS: set[str] = {"w1", "w2"}
 
 PKG = pathlib.Path(osopen.__file__).parent
 
 V1 = "attachment must be inside the workspace: use a relative path"
 V2 = "template outside the workspace: import it with i"
-NAME_NOT_USABLE = "document name cannot be used as a file name"
+# Inc-9p (`W1`, `W2`): the three sentences are literals here, so an arm does not pass because it imports them.
+W1_DOC = "document name cannot be a file name: rename it in the map's _nodos.yml (documents)"
+W1_NODE = "node id cannot be a file name: rename the node"
+W2 = "path goes through a link: use a real folder inside the workspace"
 MISSING = "archivo de plantilla no encontrado"
 
 
@@ -177,6 +181,11 @@ class _Walk:
         if nt is not None and hasattr(nt, "_getfinalpathname"):
             monkeypatch.setattr(nt, "_getfinalpathname",
                                 self._wrap("nt._getfinalpathname", nt._getfinalpathname))
+        ntp = sys.modules.get("ntpath")
+        if ntp is not None and hasattr(ntp, "_getfinalpathname"):
+            # `INC9O-SEC-F4`: `realpath` binds the name inside `ntpath`; patching `nt` alone is blind to it.
+            monkeypatch.setattr(ntp, "_getfinalpathname",
+                                self._wrap("ntpath._getfinalpathname", ntp._getfinalpathname))
 
     def _wrap(self, name, real):
         def probe(*a, **kw):
@@ -425,8 +434,9 @@ async def test_inc9o_v1_opening_a_unc_file_keeps_the_allow_list_sentence(size, t
         assert launcher.calls == []
 
 
-@red("v1")
+@red("w2")
 async def test_inc9o_v1_opening_a_file_behind_a_link_toasts_the_workspace_sentence(tmp_path, monkeypatch):
+    """Inc-9p (`W2`): a path through a link has its own sentence, no longer V1."""
     _env(monkeypatch, tmp_path)
     ws = tmp_path / "ws"
     ws.mkdir()
@@ -437,7 +447,7 @@ async def test_inc9o_v1_opening_a_file_behind_a_link_toasts_the_workspace_senten
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         launcher, notes = await _activate(app, pilot, [Attachment(kind="file", path="link/a.pdf", caption="c")])
-        assert notes == [V1], notes
+        assert notes == [W2], notes
         assert launcher.calls == []
 
 
@@ -491,6 +501,9 @@ class _Forms:
         nt = sys.modules.get("nt")
         if nt is not None and hasattr(nt, "_getfinalpathname"):
             monkeypatch.setattr(nt, "_getfinalpathname", self._wrap("nt._getfinalpathname", nt._getfinalpathname))
+        ntp = sys.modules.get("ntpath")
+        if ntp is not None and hasattr(ntp, "_getfinalpathname"):
+            monkeypatch.setattr(ntp, "_getfinalpathname", self._wrap("ntpath._getfinalpathname", ntp._getfinalpathname))
 
     def _bad(self, value) -> bool:
         if not isinstance(value, (str, os.PathLike)):
@@ -570,8 +583,10 @@ async def test_inc9o_v2_pin_every_other_missing_template_keeps_the_existing_text
     assert spy.hits == [], spy.hits
 
 
+@red("w2")
 async def test_inc9o_v2_a_template_behind_a_link_is_not_called_outside(tmp_path, monkeypatch):
-    """Not decided by text: a link is refused by the walk, and the existing text is kept (V2 is lexical)."""
+    """Not decided by text: a link is refused by the walk, so V2 ('outside') is not said.  Inc-9p (`W2`): it
+    says its own sentence for a link instead of the old 'not found'."""
     _env(monkeypatch, tmp_path)
     ws = tmp_path / "ws"
     ws.mkdir()
@@ -584,7 +599,7 @@ async def test_inc9o_v2_a_template_behind_a_link_is_not_called_outside(tmp_path,
         app.push_screen(screen)
         for _ in range(4):
             await pilot.pause()
-        assert MISSING in _flat(screen) and V2 not in _flat(screen), _flat(screen)
+        assert W2 in _flat(screen) and MISSING not in _flat(screen) and V2 not in _flat(screen), _flat(screen)
 
 
 @red("confine")
@@ -613,7 +628,7 @@ def _tree(root: pathlib.Path) -> list[str]:
     return sorted(str(p.relative_to(root)) for p in root.rglob("*"))
 
 
-@red("name")
+@red("w1")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 @pytest.mark.parametrize("name", HOSTILE_NAMES)
 async def test_inc9o_sec_f1_a_hostile_document_name_writes_nothing_and_touches_nothing_outside(
@@ -634,12 +649,12 @@ async def test_inc9o_sec_f1_a_hostile_document_name_writes_nothing_and_touches_n
         screen.action_generate_office()
         await pilot.pause()
         assert app.is_running
-        assert toasts == [NAME_NOT_USABLE], toasts
+        assert toasts == [W1_DOC], toasts
         assert _tree(tmp_path) == before, set(_tree(tmp_path)) ^ set(before)
     assert spy.hits == [], spy.hits
 
 
-@red("name")
+@red("w1")
 @pytest.mark.parametrize("node_id", ["a:b", "con", "x.", "a b "])
 async def test_inc9o_sec_f1_a_hostile_node_id_writes_nothing(node_id, tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -656,7 +671,7 @@ async def test_inc9o_sec_f1_a_hostile_node_id_writes_nothing(node_id, tmp_path, 
             await pilot.pause()
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [NAME_NOT_USABLE], toasts
+        assert toasts == [W1_NODE], toasts
         assert _tree(tmp_path) == before
 
 
@@ -678,7 +693,7 @@ async def test_inc9o_sec_f1_pin_a_normal_name_still_generates_inside_the_workspa
     assert (ws / "plantilla-root.docx").is_file()
 
 
-@red("name")
+@red("w2")
 async def test_inc9o_sec_f1_a_link_where_the_output_would_be_written_is_refused(tmp_path, monkeypatch):
     """The name is plain, but `ws/plantilla-root.docx` is a link: nothing may be written through it."""
     _env(monkeypatch, tmp_path)
@@ -696,5 +711,5 @@ async def test_inc9o_sec_f1_a_link_where_the_output_would_be_written_is_refused(
             await pilot.pause()
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [NAME_NOT_USABLE], toasts
+        assert toasts == [W2], toasts
     assert _tree(tmp_path / "outside") == []

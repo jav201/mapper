@@ -106,6 +106,11 @@ def _no_fs(monkeypatch):
         nt = _nt()
         if nt is not None and hasattr(nt, "_getfinalpathname"):
             m.setattr(nt, "_getfinalpathname", boom("nt._getfinalpathname"))
+        # `INC9O-SEC-F4`: `os.path.realpath` binds `_getfinalpathname` by NAME inside `ntpath`, so patching
+        # `nt` alone leaves the call unseen.
+        ntp = sys.modules.get("ntpath")
+        if ntp is not None and hasattr(ntp, "_getfinalpathname"):
+            m.setattr(ntp, "_getfinalpathname", boom("ntpath._getfinalpathname"))
         yield hits
 
 
