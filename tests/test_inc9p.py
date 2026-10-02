@@ -34,13 +34,16 @@ from tests.test_inc9o import (
     V1, V2, W1_DOC, W1_NODE, W2, _activate, _doc_graph, _Forms, _link, _tree,
 )
 
-OPEN_STEPS: set[str] = set()
+# Inc-9q: the arms whose expected sentence changed (X1, X2) were committed RED first, keyed by step.
+OPEN_STEPS: set[str] = {"x1", "x2"}
 
 PKG = pathlib.Path(osopen.__file__).parent
 
 MISSING = "archivo de plantilla no encontrado"
-# Not operator-ruled copy (declared in A-124): the hard-link refusal has no verdict sentence.
-HARD = "file has several hard links: use a plain file"
+# Inc-9q (X1, Round 13): one hard-link sentence per site; Inc-9p had a single, non-ruled sentence.
+HARD_TEMPLATE = "template has several hard links: replace it with a plain copy"
+HARD_OUTPUT = "output file has several hard links: delete or rename it"
+HARD_IMPORT = "templates file has several hard links: delete or rename it"
 
 
 def red(step: str):
@@ -100,6 +103,7 @@ def test_inc9p_sec_f1_an_edge_dot_or_space_in_any_component_is_refused(text, tmp
     assert hits == [], hits
 
 
+@red("x2")
 @red("norm")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9p_sec_f1_the_factory_preview_never_touches_a_link_behind_a_normalised_part(
@@ -119,10 +123,10 @@ async def test_inc9p_sec_f1_the_factory_preview_never_touches_a_link_behind_a_no
         app.push_screen(screen)
         for _ in range(4):
             await pilot.pause()
-        assert "SECRET-OUTSIDE" not in _flat(screen) and MISSING in _flat(screen), _flat(screen)
+        assert "SECRET-OUTSIDE" not in _flat(screen) and U1 in _flat(screen), _flat(screen)
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [MISSING], toasts
+        assert toasts == [U1], toasts
     assert spy.hits == [], spy.hits
 
 
@@ -312,10 +316,15 @@ async def test_inc9p_w2_the_factory_preview_and_generate_say_the_link_sentence(s
     assert _tree(tmp_path / "outside") == ["a.docx"]
 
 
-@pytest.mark.parametrize("doc_path", ["\\\\h\\s\\a.docx", "con", "d /a.docx", "docs/missing.docx"])
-async def test_inc9p_w2_pin_the_other_template_refusals_keep_the_old_text(doc_path, tmp_path, monkeypatch):
-    """Declared (A-124): the template keeps `archivo de plantilla no encontrado` for every cause but a link
-    and an outside location, as the sealed Inc-9o V2 pin has it."""
+@pytest.mark.parametrize("doc_path,expected", [
+    pytest.param("\\\\h\\s\\a.docx", U1, marks=_red_mark("x2")),
+    pytest.param("con", U1, marks=_red_mark("x2")),
+    pytest.param("d /a.docx", U1, marks=_red_mark("x2")),
+    ("docs/missing.docx", MISSING),
+])
+async def test_inc9p_w2_pin_the_other_template_refusals_say_u1_or_not_found(doc_path, expected, tmp_path, monkeypatch):
+    """Inc-9q (X2): a template the path rule refuses (allow-list, normalised) says U1; only a missing template
+    keeps `archivo de plantilla no encontrado`.  (Inc-9p declared the old text for all of them.)"""
     _env(monkeypatch, tmp_path)
     app = MapperApp(tmp_path)
     toasts = _toasts(app)
@@ -325,10 +334,10 @@ async def test_inc9p_w2_pin_the_other_template_refusals_keep_the_old_text(doc_pa
         app.push_screen(screen)
         for _ in range(4):
             await pilot.pause()
-        assert MISSING in _flat(screen) and W2 not in _flat(screen), _flat(screen)
+        assert expected in _flat(screen) and W2 not in _flat(screen), _flat(screen)
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [MISSING], toasts
+        assert toasts == [expected], toasts
 
 
 @red("reason")
@@ -357,14 +366,14 @@ def _equivalence_cases(ws: pathlib.Path, o: pathlib.Path):
     ]
 
 
-@red("equiv")
 @pytest.mark.parametrize("index", range(7))
-def test_inc9p_lexically_outside_is_the_outside_reason_of_confine_reason(index, tmp_path):
+def test_inc9p_confine_reason_outside_is_the_lexical_step(index, tmp_path):
+    """Inc-9q (`INC9P-CR-F4`): `lexically_outside` is gone; its second assertion stays as a table over the one
+    rule: a text is `outside` exactly when its lexical test says so, and a text refused earlier is not."""
     ws = tmp_path / "ws"
     (ws / "docs").mkdir(parents=True)
     (tmp_path / "ws2").mkdir()
     label, text, expected = _equivalence_cases(ws, tmp_path)[index]
-    assert osopen.lexically_outside(text, ws) is expected, label
     assert (osopen.confine_reason(text, ws)[1] == "outside") is expected, label
 
 
@@ -400,6 +409,7 @@ async def _generate(app, pilot, graph):
     return screen, toasts
 
 
+@red("x1")
 @red("hard")
 async def test_inc9p_sec_f2_a_hard_linked_target_is_refused_and_the_victim_is_untouched(tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -413,11 +423,12 @@ async def test_inc9p_sec_f2_a_hard_linked_target_is_refused_and_the_victim_is_un
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         _, toasts = await _generate(app, pilot, _doc_graph("docs/t.docx"))
-        assert toasts == [HARD], toasts
+        assert toasts == [HARD_OUTPUT], toasts
     assert victim.read_bytes() == before
     assert (ws / "plantilla-root.docx").read_bytes() == before
 
 
+@red("x1")
 @red("hard")
 async def test_inc9p_sec_f2_a_hard_linked_template_is_refused_and_nothing_is_written(tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -430,7 +441,7 @@ async def test_inc9p_sec_f2_a_hard_linked_template_is_refused_and_nothing_is_wri
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         _, toasts = await _generate(app, pilot, _doc_graph("docs/t.docx"))
-        assert toasts == [HARD], toasts
+        assert toasts == [HARD_TEMPLATE], toasts
     assert not (ws / "plantilla-root.docx").exists()
 
 
@@ -573,6 +584,7 @@ async def test_inc9p_cr_f2_importing_through_a_templates_junction_writes_nothing
     assert _tree(tmp_path / "outside") == []
 
 
+@red("x1")
 @red("import")
 async def test_inc9p_cr_f2_importing_over_a_hard_linked_template_leaves_the_victim_untouched(tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -588,7 +600,7 @@ async def test_inc9p_cr_f2_importing_over_a_hard_linked_template_leaves_the_vict
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         toasts = await _import(app, pilot, src)
-        assert toasts == [HARD], toasts
+        assert toasts == [HARD_IMPORT], toasts
     assert victim.read_bytes() == before
 
 
