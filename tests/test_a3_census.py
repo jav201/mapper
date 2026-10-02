@@ -267,8 +267,15 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       prove the un-neutralised state MOVES the picture.  Without it, "the
     #       two exports are byte-equal" would be green if the session state were
     #       inert, which is the vacuity the arm was written to refuse.
-    assert len(sites["argful"]) == 64, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 64; "
+    #
+    # 64 -> 65 at `Inc-EN-3`:
+    #   +1  `tests/test_en3.py::test_hybrid_lane_with_no_branches_says_so_in_english`
+    #       renders a repo with no branches through `HybridLaneRenderer` and reads
+    #       the painted `(no branches)`.  It cannot share a site with another arm:
+    #       no other test drives that renderer on a root-only graph, and the
+    #       string it reads is the one the census arm can only see in the AST.
+    assert len(sites["argful"]) == 65, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 65; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,

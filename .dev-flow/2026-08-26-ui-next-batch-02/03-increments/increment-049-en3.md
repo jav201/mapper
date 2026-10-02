@@ -25,7 +25,7 @@ Found by the FULL non-docstring literal dump (an AST walk, 4 files), beyond the 
 
 ## 2. Files modified
 
-Source (4, the cap): `mapper/views/lane.py`, `layered.py`, `outline.py`, `radial.py`. Tests: `tests/test_en3.py` (new, 6 items: 4 file arms, 1 oracle control, 1 lane arm); relabelled or re-derived in `test_overflow`, `test_inc3_census`, `test_repair_depth`; comment only in `test_canvas_header_charge`. Docs: `01-requirements.md` (append `A-131`), this file. `darkside.py`, `app.py`, `keymap.py`, `store.py`, `views/state.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `7a9d383` (code, tests, A-131), then this record.
+Source (4, the cap): `mapper/views/lane.py`, `layered.py`, `outline.py`, `radial.py`. Tests: `tests/test_en3.py` (new, 6 items: 4 file arms, 1 oracle control, 1 lane arm); relabelled or re-derived in `test_overflow`, `test_inc3_census`, `test_repair_depth`; the call-site pin `64 -> 65` in `test_a3_census`; comment only in `test_canvas_header_charge`. Docs: `01-requirements.md` (append `A-131`), this file. `darkside.py`, `app.py`, `keymap.py`, `store.py`, `views/state.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `7a9d383` (code, tests, A-131), `c36ea34` (this record), then the `test_a3_census` pin.
 
 ## 3. Sealed-arm changes
 
@@ -37,6 +37,7 @@ Source (4, the cap): `mapper/views/lane.py`, `layered.py`, `outline.py`, `radial
 | `test_repair_depth.py:191-192` | `OMITTED`, `OVER_BOUND` (the over-bound notice fragments; the test name still says "spanish", ids unchanged on purpose) | `"Se omiti"+chr(0xF3)` -> `"not drawn"`; `"supera el l"+chr(0xED)+"mite"` -> `"exceeds the"`. The negative pin `OMITTED not in text.plain` (a map AT the bound still draws) stays live: the degraded notice is the only place the phrase appears, and the positive arm pins it in all three renderers |
 | `test_repair_depth.py` `MASTER_LEGACY_DIGESTS` | 8 sha256 keys (Layered x4, Outline x4) | re-derived, see 3a. The four Radial keys did not move |
 | `test_canvas_header_charge.py:253` | comment only | `fuera de vista` -> `out of view` |
+| `test_a3_census.py:270` | `len(sites["argful"]) == 64`, the pinned count of arg-ful `.render(...)` call sites (found by the first full lane, which the targeted run had not covered) | `64` -> `65`, with an itemised ledger entry: the +1 is `test_en3.py`'s lane arm, the only new renderer call site |
 
 Not relabelled, and why:
 - `test_legacy_fixture.py:40-41` (`"selecciona un nodo" not in`, `"cobertura" not in`) and `"SIN ACTA" not in ... or ...`: the Spanish negative pins stay (a Spanish regression would still trip them) and EN-2 already added the English counterparts; the `SIN ACTA` pin was already vacuous (upper case against a lower-case `sin acta`) and is not made worse. Not touched.
