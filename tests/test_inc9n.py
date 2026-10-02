@@ -32,7 +32,7 @@ from tests.test_attachments import RecordingLauncher, _open, _seed
 from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9m import _env, _flat, _no_fs, _norm, _open_prompt, _stub_gh
 
-OPEN_STEPS: set[str] = set()
+OPEN_STEPS: set[str] = {"w2"}  # Inc-9p: the one arm whose sentence changed, RED first
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 
@@ -181,6 +181,7 @@ def test_inc9n_f1_office_path_is_none_for_a_hostile_text_without_a_filesystem_ca
     assert hits == []
 
 
+@red("w2")
 async def test_inc9n_f1_a_junction_inside_the_workspace_that_leads_outside_is_refused(tmp_path, monkeypatch):
     """`resolve()` follows a directory junction (no privilege needed): lexically inside, really outside."""
     import subprocess
@@ -201,7 +202,8 @@ async def test_inc9n_f1_a_junction_inside_the_workspace_that_leads_outside_is_re
         for _ in range(4):
             await pilot.pause()
         assert screen._office_path(screen.graph.documents["plantilla"]) is None
-        assert "archivo de plantilla no encontrado" in _flat(screen), _flat(screen)
+        # Inc-9p (`W2`): a link has its own sentence now.
+        assert "path goes through a link: use a real folder inside the workspace" in _flat(screen), _flat(screen)
 
 
 async def test_inc9n_f1_pin_a_workspace_relative_document_still_previews(tmp_path, monkeypatch):

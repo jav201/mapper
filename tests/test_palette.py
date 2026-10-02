@@ -141,6 +141,8 @@ async def test_palette_empty_query_dispatches_nothing(tmp_path):
         await pilot.press("ctrl+p")
         await pilot.pause()
         palette = app.screen
+        await _until(pilot, lambda: bool(palette._items))
+        assert palette._items, "the palette offered nothing before the query: the empty result below would be vacuous"
         palette.query_one("#palette-input").value = "zzzzznotacommand"
         await _until(pilot, lambda: palette._items == [])
         assert palette._items == []
