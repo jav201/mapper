@@ -186,7 +186,7 @@ CONFORMING_SEVERITY = {
     # hue on a missing-fields list -- only the coercion moved.
     ("mapper/screens/coverage.py", '(darkside.plain(",".join(missing)), darkside.ALERT)'),
     ("mapper/screens/factory.py", '("no se puede dibujar: el mapa tiene un ciclo", darkside.ALERT)'),
-    ("mapper/screens/factory.py", 'return Text.assemble(("archivo de plantilla no encontrado", darkside.ALERT))'),
+    ("mapper/screens/factory.py", 'return Text.assemble((self._missing_text(doc), darkside.ALERT))'),
     ("mapper/screens/factory.py", 'parts.append((escape(f"{{{{{key}}}}}"), darkside.ALERT))'),
     ("mapper/views/lane.py", '"risk": darkside.WARN,'),
     ("mapper/views/lane.py", '"late": darkside.WARN,'),
