@@ -1,8 +1,9 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
-Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app`.  `github` and
-`screens` may import `osopen.safe_local_path`, which decides on strings and launches nothing.  Derived from
-the modules' own ASTs, so a new caller fails the test instead of passing a hand-listed expectation.
+Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app`.  `github` may import
+`osopen.safe_local_path`; `screens` that name plus `confine`, `lexically_outside` and the sentence constant
+`PATH_NOT_SUPPORTED` (Inc-9o, `A-123`): none of them launches anything.  Derived from the modules' own ASTs, so
+a new caller fails the test instead of passing a hand-listed expectation.
 """
 from __future__ import annotations
 
@@ -18,7 +19,7 @@ PKG = pathlib.Path(mapper.__file__).parent
 DOCS = PKG.parent / "docs" / "ARCHITECTURE.md"
 LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
 ALLOWED_FILES = {"app.py", "osopen.py"}
-OPEN_STEPS: set[str] = set()
+OPEN_STEPS: set[str] = {"arch"}
 
 
 def red(step: str):
@@ -70,7 +71,14 @@ def _osopen_imports(tree: ast.AST):
                     yield "module", alias.name
 
 
-def test_outside_app_only_safe_local_path_is_imported_from_osopen():
+ALLOWED_OUTSIDE_APP = {
+    "github.py": {"safe_local_path"},
+    "screens/factory.py": {"safe_local_path", "confine", "lexically_outside", "PATH_NOT_SUPPORTED"},
+}
+
+
+@red("arch")
+def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
     seen: dict[str, set[str]] = {}
     for rel, tree in _sources():
         if rel in ALLOWED_FILES:
@@ -79,9 +87,33 @@ def test_outside_app_only_safe_local_path_is_imported_from_osopen():
         if imports:
             seen[rel] = {name for _, name in imports}
     assert seen, "the AST walk found no osopen import outside app: the probe is broken"
-    assert all(names == {"safe_local_path"} for names in seen.values()), seen
+    assert seen == ALLOWED_OUTSIDE_APP, seen
     assert not any(rel.startswith(("widgets/", "views/")) for rel in seen), seen
-    assert set(seen) == {"github.py", "screens/factory.py"}, set(seen)
+    assert not any(n in seen["github.py"] | seen["screens/factory.py"] for n in LAUNCH_NAMES), seen
+
+
+def _back_edges() -> dict[str, list[int]]:
+    """The `from mapper.app import ...` sites (a `screens` -> `app` back-edge), by file, with their lines."""
+    found: dict[str, list[int]] = {}
+    for rel, tree in _sources():
+        if not rel.startswith("screens/"):
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and (node.module == "mapper.app" or (
+                    node.level and (node.module or "") == "app")):
+                found.setdefault(rel, []).append(node.lineno)
+    return {rel: sorted(lines) for rel, lines in found.items()}
+
+
+@red("arch")
+def test_the_four_known_back_edges_are_exactly_the_ones_the_map_lists():
+    edges = _back_edges()
+    assert {rel: len(lines) for rel, lines in edges.items()} == {"screens/factory.py": 3, "screens/settings.py": 1}, edges
+    row = _row(_section3(), "screens")
+    for rel, lines in edges.items():
+        for line in lines:
+            assert f"`mapper/{rel}:{line}`" in row, (rel, line, row)
+    assert "factory.py:343" not in row, row
 
 
 def _row(table_text: str, module: str) -> str:
@@ -102,7 +134,8 @@ def test_the_architecture_map_says_what_the_modules_import():
     screens_row = _row(section, "screens")
     osopen_row = _row(section, "osopen")
     assert "`osopen.safe_local_path`" in github_row and "`design`" in github_row, github_row
-    assert "`osopen.safe_local_path`" in screens_row, screens_row
+    for name in ("safe_local_path", "confine", "lexically_outside", "PATH_NOT_SUPPORTED"):
+        assert f"`osopen.{name}`" in screens_row, (name, screens_row)
     assert "`open_external` is referenced only from `app`" in osopen_row, osopen_row
     assert "`widgets` / `views` / `screens` → `osopen`" not in osopen_row, osopen_row
     github_src = ast.parse((PKG / "github.py").read_text(encoding="utf-8"))

@@ -32,7 +32,7 @@ from tests.test_attachments import RecordingLauncher, _open, _seed
 from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9m import _env, _flat, _no_fs, _norm, _open_prompt, _stub_gh
 
-OPEN_STEPS: set[str] = set()
+OPEN_STEPS: set[str] = {"v1", "v2"}
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 
@@ -51,6 +51,9 @@ def _red_mark(step: str):
 
 # `U1`, with a real ellipsis (U+2026) written as an escape.
 U1 = "path not supported: use C:\\\u2026 or a relative path"
+# Inc-9o (`A-123`): `V1` and `V2` (Round 11) replace what these arms said for a path that is only outside.
+V1 = "attachment must be inside the workspace: use a relative path"
+V2 = "template outside the workspace: import it with i"
 
 DEVICES = [
     "con", "nul", "conin$", "conout$", "com1", "aux", "lpt1", "prn", "COM\u00b9",
@@ -134,9 +137,12 @@ def _toasts(app):
     return toasts
 
 
-@red("f1")
+_HOSTILE_FRAMES = [pytest.param(d, marks=_red_mark("f1") + (_red_mark("v2") if d == "C:\\outside\\a.docx" else []))
+                   for d in HOSTILE_DOCS]
+
+
 @pytest.mark.parametrize("size", [SIZE, NARROW])
-@pytest.mark.parametrize("doc_path", HOSTILE_DOCS)
+@pytest.mark.parametrize("doc_path", _HOSTILE_FRAMES)
 async def test_inc9n_f1_a_hostile_sidecar_document_is_never_stat_ed_and_the_screen_survives(
         doc_path, size, tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -150,11 +156,13 @@ async def test_inc9n_f1_a_hostile_sidecar_document_is_never_stat_ed_and_the_scre
         for _ in range(4):
             await pilot.pause()
         assert app.is_running and app.screen is screen
-        assert "archivo de plantilla no encontrado" in _flat(screen), _flat(screen)
+        # Inc-9o (`V2`): a path outside the workspace says so; every other refusal keeps the old text.
+        expected = V2 if doc_path == "C:\\outside\\a.docx" else "archivo de plantilla no encontrado"
+        assert expected in _flat(screen), _flat(screen)
         assert screen._office_path(screen.graph.documents["plantilla"]) is None
         screen.action_generate_office()
         await pilot.pause()
-        assert "archivo de plantilla no encontrado" in toasts, toasts
+        assert expected in toasts, toasts
         assert app.is_running
     assert spy.hits == [], spy.hits
 
@@ -225,7 +233,7 @@ async def test_inc9n_f1_pin_a_drive_absolute_document_inside_the_workspace_still
         assert "hola" in _flat(screen), _flat(screen)
 
 
-@red("f1")
+@red("v2")
 async def test_inc9n_f1_a_dotdot_document_that_leaves_the_workspace_is_refused(tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
     ws = tmp_path / "ws"
@@ -238,7 +246,7 @@ async def test_inc9n_f1_a_dotdot_document_that_leaves_the_workspace_is_refused(t
         for _ in range(4):
             await pilot.pause()
         assert screen._office_path(screen.graph.documents["plantilla"]) is None
-        assert "archivo de plantilla no encontrado" in _flat(screen), _flat(screen)
+        assert V2 in _flat(screen), _flat(screen)
 
 
 # ---------------------------------------------------------------------------
@@ -447,6 +455,7 @@ async def test_inc9n_u1_opening_a_refused_file_attachment_toasts_the_sentence(ta
     assert spy.hits == [], spy.hits
 
 
+@red("v1")
 async def test_inc9n_u1_pin_a_file_attachment_outside_the_workspace_keeps_its_own_refusal(tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
     app = MapperApp(tmp_path)
@@ -458,7 +467,7 @@ async def test_inc9n_u1_pin_a_file_attachment_outside_the_workspace_keeps_its_ow
         screen.notify = lambda msg, **kw: notes.append(str(msg))
         screen.query_one("#map-inspector", FichaInspector).post_message(FichaInspector.AttachmentActivated("nom", 0))
         await pilot.pause()
-        assert notes and osopen.REFUSED_OUTSIDE in notes[0] and U1 not in notes, notes
+        assert notes == [V1], notes
 
 
 # ---------------------------------------------------------------------------
@@ -479,7 +488,9 @@ async def _add_attachment(app, pilot, typed):
 
 @red("u2")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
-@pytest.mark.parametrize("typed", ["\\\\h\\s\\x.pdf", "/x.pdf", "C:\\outside-ws\\x.pdf", "..\\x.pdf", "con"])
+@pytest.mark.parametrize("typed", [
+    "\\\\h\\s\\x.pdf", "/x.pdf", "con",
+    pytest.param("C:\\outside-ws\\x.pdf", marks=_red_mark("v1")), pytest.param("..\\x.pdf", marks=_red_mark("v1"))])
 async def test_inc9n_u2_adding_a_non_local_file_stores_nothing_and_toasts_the_sentence(
         typed, size, tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -489,7 +500,9 @@ async def test_inc9n_u2_adding_a_non_local_file_stores_nothing_and_toasts_the_se
         await pilot.pause()
         screen, toasts = await _add_attachment(app, pilot, typed)
         assert app.is_running
-        assert toasts == [U1], toasts
+        # Inc-9o (`V1`): a path the allow-list accepts but the workspace does not contain has its own sentence.
+        expected = V1 if typed in ("C:\\outside-ws\\x.pdf", "..\\x.pdf") else U1
+        assert toasts == [expected], toasts
         assert screen.graph.nodes["nom"].ficha.attachments == []
         assert MapStore(ws).load("att").nodes["nom"].ficha.attachments == []
         assert "adjunto agregado" not in _flat(app.screen)

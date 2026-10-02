@@ -382,6 +382,7 @@ async def test_at_n02b_activating_an_attachment_reaches_the_boundary(tmp_path):
         assert launcher.calls == ["https://example.com/acta"]
 
 
+@pytest.mark.xfail(strict=True, reason="Inc-9o: committed RED; closed by the 'v1' step")
 async def test_at_n02d_a_refused_attachment_is_reported_not_silently_dropped(tmp_path):
     """AT-N02d — a refusal must be visible; a dropped status word is a silent no-op.
 
@@ -403,7 +404,8 @@ async def test_at_n02d_a_refused_attachment_is_reported_not_silently_dropped(tmp
 
         assert launcher.calls == [], "a traversal target reached the launcher"
         assert notes, "the refusal was silent"
-        assert osopen.REFUSED_OUTSIDE in notes[0]
+        # Inc-9o (`V1`, Round 11): the app's refusal of an outside path is the fixed sentence, not the status word.
+        assert notes == ["attachment must be inside the workspace: use a relative path"], notes
 
 
 async def test_llr_n02_10_the_inspector_shows_the_real_target(tmp_path):
