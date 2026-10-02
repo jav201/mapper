@@ -10859,3 +10859,49 @@ links are junctions or symlinks to a LOCAL directory under a temp path, and spie
 **Trace.** Standalone, like `A-113`..`A-127`. Carried by `tests/test_inc9x3.py` and the record.
 
 **What is not claimed.** Windows only; nothing was run on POSIX. The final hop to the operating system (MAN-01) is not exercised: the launcher is stubbed. Terminal mouse input is Pilot's synthetic click, not a real terminal's.
+
+### `A-129` -- English strings in `osopen`, `github`, the factory screen and the editor (`Inc-EN-1`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` (EN-Q1, the 7-increment plan, EN-1 first) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING ("Todo en inglés, también la UI", `B-71`). The record is `increment-047-en1.md`.
+
+**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below, the string it quotes is now the English one. Only the words change; every refusal sentence (`U1`, `V1`, `V2`, `W1`, `W2`, `X1`, `Y1`), every condition that selects a string and every value-echo rule is as sealed.
+
+| Where | Old | New |
+|---|---|---|
+| `osopen` status words (values only; the constant names stay) | `abierto` | `opened` |
+| | `tipo no abrible` | `cannot open this type` |
+| | `destino inválido` | `invalid target` |
+| | `esquema no permitido` | `scheme not allowed` |
+| | `fuera del espacio de trabajo` | `outside the workspace` |
+| | `no se pudo abrir` | `could not open` |
+| `github` root meta | `ramas {n} · tags {n} · default …` | `branches {n} · tags {n} · default …` |
+| `github` progress labels | `leyendo ramas` | `reading branches` |
+| | `calculando métricas` | `computing metrics` |
+| | `listo` | `ready` |
+| factory | `archivo de plantilla no encontrado` | `template file not found` |
+| | `no se puede dibujar: el mapa tiene un ciclo` | `cannot draw: the map has a cycle` |
+| | `sin documento` | `no document` |
+| | `documento` (default tab name) | `document` |
+| | `proceso` (default process name) | `process` |
+| | `(vacío)` | `(empty)` |
+| | `(sin tags)` | `(no tags)` |
+| | `archivo no encontrado: {name}` | `file not found: {name}` |
+| | `solo .docx / .pptx / .xlsx` | `only .docx / .pptx / .xlsx` |
+| | `no se pudo importar {name}: {Type}` | `could not import {name}: {Type}` |
+| | `plantilla importada: {rel}` | `template imported: {rel}` |
+| | `ruta del archivo office` | `office file path` |
+| | `el documento actual no es office` | `the current document is not an office file` |
+| | `generado: {shown}` | `generated: {shown}` |
+| | `no se pudo generar: {Type}` | `could not generate: {Type}` |
+| editor | `Guardar` / `Cancelar` / `Prever` | `Save` / `Cancel` / `Preview` |
+| | `ctrl+s salvar · esc cancelar · tab prever` | `ctrl+s save · esc cancel · tab preview` |
+| | `detectados: ` | `detected: ` |
+| | `ninguno` | `none` |
+
+**Not changed (declared).** `app.py` paints its own literals `abierto` (the attachment-open toast) and `iniciando` / `leyendo ramas` / `calculando métricas` / `listo` (the connect-repo stage list); they stay Spanish until `EN-5`. `app.py` compares the open status by the constant `OK`, not by its text, so the value change is safe there. The `progress` label that `github.py` passes is stored by the app and never painted.
+
+**Sealed-arm changes.** Label changes only, no assertion weakened, listed in `increment-047-en1.md` section 3.
+
+**Trace.** Standalone, like `A-113`..`A-128`. Carried by `tests/test_en1.py` (a census of the four files' non-docstring literals) and by the relabelled pins in the record.
+
+**What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general.
