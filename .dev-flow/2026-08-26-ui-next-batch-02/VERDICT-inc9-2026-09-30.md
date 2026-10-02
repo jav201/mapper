@@ -228,3 +228,25 @@ recommended option. The security reviewer stated in writing that no network-targ
 |---|---|---|---|
 | W1 · INC9O-UX-F1 | The generate refusal does not say where to rename the document | Decir dónde | `document name cannot be a file name: rename it in the map's _nodos.yml (documents)`; a separate sentence when the node id is the cause |
 | W2 · INC9O-UX-F2 | A path through a link inside the workspace is told "must be inside the workspace" | Frase propia | `path goes through a link: use a real folder inside the workspace`, for attachments and templates |
+
+---
+
+# Round 13 — Inc-9p reviews (2026-10-02, base `5af3f1c`)
+
+security BLOCK-UNTIL INC9P-SEC-F1 (HIGH: a stream-type suffix on a link component — `lnk:$I30`,
+`lnk::$BITMAP` — makes the walk stop, then `resolve()` follows the junction; an inside junction is even
+returned `ok`); code OK (full lane 2510 passed / 0 failed; CR-F1 duplicated reason mapping, CR-F2/F7 test
+gaps, CR-F3 import wording); ux PASS-WITH-NOTICES (W1, W2 discharged; found a pre-existing defect: an
+attachment chip cannot be opened by keyboard or mouse). Three questions were put to the operator; each
+took the recommended option. The account name is in no commit of `7ebac19..5af3f1c` (both reviewers).
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| X1 · INC9P-UX-F3 | Hard-link sentence | Una frase por sitio | Template: `template has several hard links: replace it with a plain copy`; output: `output file has several hard links: delete or rename it`; import target: `templates file has several hard links: delete or rename it` |
+| X2 · INC9P-UX-F4 | A template refused by the path rule says "not found" | Usar U1 | allow_list and normalised template refusals show U1; "not found" stays only for a missing or unreadable template |
+| X3 · INC9P-UX-F1 | Attachment chips cannot be opened by keyboard or mouse | Incremento propio ya | A small increment right after the Inc-9 line closes, with a real-key test |
+
+Coordinator rulings for the next increment: the import's unreadable-target sentence becomes
+`templates folder could not be checked: use a real folder named templates inside the workspace`
+(INC9P-CR-F3); an attachment that is a hard link at open time gets
+`attachment has several hard links: replace it with a plain copy` (INC9P-SEC-F3, same pattern as X1).
