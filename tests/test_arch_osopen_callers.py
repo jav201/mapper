@@ -22,7 +22,7 @@ LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
 ALLOWED_FILES = {"app.py", "osopen.py"}
 # Inc-9q: the allowed-name arms were committed RED first (the set changed: `refusal_sentence`, `hard_linked`,
 # `is_link` in; `PATH_OUTSIDE_WORKSPACE` out).
-OPEN_STEPS: set[str] = {"arch9q"}
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):

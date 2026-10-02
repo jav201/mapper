@@ -33,7 +33,7 @@ from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9m import _env, _flat, _no_fs, _norm, _open_prompt, _stub_gh
 
 # Inc-9q (X2): the hostile-document arms whose sentence changed from "not found" to U1 were committed RED first.
-OPEN_STEPS: set[str] = {"x2"}
+OPEN_STEPS: set[str] = set()
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 

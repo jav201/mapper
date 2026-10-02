@@ -35,7 +35,7 @@ from tests.test_inc9n import U1, _add_attachment, _make_docx, _toasts
 
 # Inc-9p: the arms whose expected sentence changed (`W1`, `W2`) were committed RED first, keyed by step.
 # Inc-9q (X2): the three sealed V2 pins whose sentence changed to U1 were committed RED first.
-OPEN_STEPS: set[str] = {"x2"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 
@@ -282,6 +282,9 @@ def test_inc9o_confine_refuses_when_the_final_resolve_fails(error, tmp_path, mon
 def test_inc9o_confine_judges_what_resolve_returns_as_a_last_check(tmp_path, monkeypatch):
     ws = tmp_path / "ws"
     ws.mkdir()
+    # Inc-9q: the file exists, so the walk reaches the end and `resolve()` is asked about the whole path.  (A
+    # missing file is judged by the resolved WALKED prefix plus a lexical tail: `test_inc9q`.)
+    (ws / "a.pdf").write_bytes(b"1")
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()
     real = pathlib.Path.resolve
