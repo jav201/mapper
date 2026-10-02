@@ -44,7 +44,9 @@ from .keymap import (
 from .mermaid import dump as dump_mermaid, slugify
 from .model import Attachment, Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
-from .osopen import OK as OSOPEN_OK, open_external, safe_local_path
+from .osopen import (
+    OK as OSOPEN_OK, PATH_NOT_SUPPORTED, PATH_OUTSIDE_WORKSPACE, confine, open_external, safe_local_path,
+)
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .search import SearchIndex
 from .store import TEMPLATES, MapIdError, MapStore, MapStoreError
@@ -309,20 +311,14 @@ class NavigationModel:
 # ---------------------------------------------------------------------------
 
 
-# `U1` (Round 10): the one sentence for a typed or stored path outside the allow-list; it names nothing.
-PATH_NOT_SUPPORTED = "path not supported: use C:\\… or a relative path"
-
-
-def _is_workspace_file_target(target: str, workspace: Path) -> bool:
-    """`U2`: a `file` attachment is stored only if `safe_local_path` accepts it and it stays inside the
-    workspace (`open_external`'s own confinement, applied at add time)."""
-    local = safe_local_path(target)
-    if local is None:
-        return False
-    try:
-        return (workspace / local).resolve().is_relative_to(Path(workspace).resolve())
-    except (OSError, ValueError):
-        return False
+def _path_refusal(text: str, workspace: Path) -> str | None:
+    """The fixed sentence for a `file` attachment text that may not be stored or opened, else None:
+    `U1` when the allow-list refuses it, `V1` when the allow-list accepts it and `confine` does not."""
+    if safe_local_path(text) is None:
+        return PATH_NOT_SUPPORTED
+    if confine(text, workspace) is None:
+        return PATH_OUTSIDE_WORKSPACE
+    return None
 
 
 class _PromptScreen(ModalScreen[str | None]):
@@ -3439,10 +3435,11 @@ class MapScreen(Screen):
         if not 0 <= event.index < len(node.ficha.attachments):
             return
         att = node.ficha.attachments[event.index]
-        if att.kind == "file" and safe_local_path(att.path) is None:
-            # `U1`: a target outside the allow-list (a sidecar can hold any text) is not looked at and
-            # not named; the same sentence as the prompts.
-            self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="warning", markup=False)
+        refusal = _path_refusal(att.path, self.store.workspace) if att.kind == "file" else None
+        if refusal is not None:
+            # `U1` / `V1`: a target outside the allow-list (a sidecar can hold any text) or outside the
+            # workspace is not looked at and not named; the same fixed sentences as the add prompt.
+            self.notify(darkside.plain(refusal), severity="warning", markup=False)
             return
         status = open_external(
             att.kind, att.path, workspace=self.store.workspace,
@@ -3474,9 +3471,10 @@ class MapScreen(Screen):
             # `plain()` — the prompt is a real `Input`, not a hostile file.
             target = darkside.plain(target)
             kind = "url" if "://" in target else "file"
-            if kind == "file" and not _is_workspace_file_target(target, self.store.workspace):
+            refusal = _path_refusal(target, self.store.workspace) if kind == "file" else None
+            if refusal is not None:
                 # `U2`: refused at ADD time, nothing stored, no undo snapshot taken.
-                self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="warning", markup=False)
+                self.notify(darkside.plain(refusal), severity="warning", markup=False)
                 return
             self._push_snapshot()
             node.ficha.attachments.append(Attachment(kind=kind, path=target))
