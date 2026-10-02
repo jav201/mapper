@@ -50,6 +50,8 @@ REFUSED_ERROR = "no se pudo abrir"
 # contain.  Both live here so `app` and `screens` import them without a `screens` -> `app` edge.
 PATH_NOT_SUPPORTED = "path not supported: use C:\\\u2026 or a relative path"
 PATH_OUTSIDE_WORKSPACE = "attachment must be inside the workspace: use a relative path"
+# `W2` (Round 12): the third sentence, for a path that goes through a link or reparse point inside the workspace.
+PATH_THROUGH_LINK = "path goes through a link: use a real folder inside the workspace"
 
 
 _DRIVE = re.compile(r"[A-Za-z]:")
@@ -69,7 +71,9 @@ def safe_local_path(text: str) -> Path | None:
     if not isinstance(text, str) or not text or "\x00" in text or text.startswith("-"):
         return None
     try:
-        expanded = Path(text).expanduser()
+        # `INC9O-CR-F5`: only a text that STARTS with `~` is expanded; `./~x` is a plain relative name (pathlib
+        # drops the `./`, so asking `expanduser` about the parsed path would expand it).
+        expanded = Path(text).expanduser() if text.startswith("~") else Path(text)
         parsed = PureWindowsPath(str(expanded))
     except (RuntimeError, OSError, ValueError):
         return None
@@ -97,10 +101,9 @@ def _lexically_inside(local: Path, workspace: Path) -> str | None:
 
 
 def lexically_outside(text: str, workspace: Path) -> bool:
-    """True when `safe_local_path` accepts *text* and the path lies outside *workspace* by text alone,
-    without touching the disk (`V2`).  A refused text is not 'outside': it is unsupported."""
-    local = safe_local_path(text)
-    return local is not None and _lexically_inside(local, workspace) is None
+    """True when `confine_reason` refuses *text* as `outside` (`V2`, `INC9O-CR-F1`): the one step 2, not a
+    second rule.  A refused text (allow-list, normalised) is not 'outside': it is unsupported."""
+    return confine_reason(text, workspace)[1] == "outside"
 
 
 def _is_link(info: os.stat_result) -> bool:
@@ -108,21 +111,30 @@ def _is_link(info: os.stat_result) -> bool:
         getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT)
 
 
-def confine(text: str, workspace: Path) -> Path | None:
-    """The ONE containment rule: the resolved target of *text* inside *workspace*, or None.
+def confine_reason(text: str, workspace: Path) -> tuple[Path | None, str]:
+    """The ONE containment rule, with its cause: `(resolved, "ok")` or `(None, reason)`.
 
-    In order: (1) `safe_local_path` (the closed allow-list; it expands `~` for every caller, so add and
-    open agree); (2) lexical containment, no stat; (3) a walk from the workspace down with `os.lstat`,
-    refusing a symlink or any reparse point (junction, mount point) BEFORE anything below it is touched;
-    (4) only then `resolve()` and a last `is_relative_to`.  Policy: links inside the workspace are not
-    followed.  The workspace root itself may be a link; only what lies under it is walked.
+    Reasons: `allow_list` (`safe_local_path` refused), `normalised` (a component Windows rewrites), `outside`
+    (lexically, or after `resolve()`), `link` (a symlink or reparse point under the workspace), `unreadable`
+    (a component could not be inspected, or `resolve()` failed).
+
+    In order: (1) `safe_local_path` (the closed allow-list; it expands `~` for every caller, so add and open
+    agree); (1b) `INC9O-SEC-F1`: refuse, on the text and before ANY filesystem call, a component other than
+    `.` and `..` that ends in a dot or a space (`...`, `. .`, `d `, `d. .`): Windows normalises it, so the walk
+    below would stop early and `resolve()` would follow a link behind it; (2) lexical containment, no stat;
+    (3) a walk from the workspace down with `os.lstat`, refusing a symlink or any reparse point (junction,
+    mount point) BEFORE anything below it is touched; (4) only then `resolve()` and a last `is_relative_to`.
+    Policy: links inside the workspace are not followed.  The workspace root itself may be a link; only what
+    lies under it is walked.
     """
     local = safe_local_path(text)
     if local is None:
-        return None
+        return None, "allow_list"
+    if any(part not in (".", "..") and part != part.rstrip(" .") for part in local.parts):
+        return None, "normalised"
     joined = _lexically_inside(local, workspace)
     if joined is None:
-        return None
+        return None, "outside"
     root = Path(os.path.abspath(workspace))
     current = root
     for part in Path(joined).parts[len(root.parts):]:
@@ -132,16 +144,21 @@ def confine(text: str, workspace: Path) -> Path | None:
         except (FileNotFoundError, NotADirectoryError):
             break
         except (OSError, ValueError):
-            return None
+            return None, "unreadable"
         if _is_link(info):
-            return None
+            return None, "link"
     try:
         resolved = (Path(workspace) / local).resolve()
         if not resolved.is_relative_to(Path(workspace).resolve()):
-            return None
+            return None, "outside"
     except (OSError, ValueError):
-        return None
-    return resolved
+        return None, "unreadable"
+    return resolved, "ok"
+
+
+def confine(text: str, workspace: Path) -> Path | None:
+    """The resolved target of *text* inside *workspace*, or None; see `confine_reason` for the rule."""
+    return confine_reason(text, workspace)[0]
 
 
 def _default_launcher(target: str) -> None:

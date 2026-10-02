@@ -34,7 +34,7 @@ from tests.test_inc9m import _env, _flat, _no_fs, _norm
 from tests.test_inc9n import U1, _add_attachment, _make_docx, _toasts
 
 # Inc-9p: the arms whose expected sentence changed (`W1`, `W2`) were committed RED first, keyed by step.
-OPEN_STEPS: set[str] = {"w1", "w2"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 

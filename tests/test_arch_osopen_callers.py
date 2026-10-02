@@ -20,7 +20,7 @@ PKG = pathlib.Path(mapper.__file__).parent
 DOCS = PKG.parent / "docs" / "ARCHITECTURE.md"
 LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
 ALLOWED_FILES = {"app.py", "osopen.py"}
-OPEN_STEPS: set[str] = {"arch9p"}  # Inc-9p
+OPEN_STEPS: set[str] = set()
 
 
 def red(step: str):
