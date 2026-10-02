@@ -71,8 +71,8 @@ def _degraded(n: int) -> Text:
     out.append(f" · {darkside.VIEW_NAMES['outline']}", style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
-        f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
-        "Se omitió el listado de nodos y los conteos por rama.",
+        f"map of {n} nodes exceeds the {MAX_RENDER_NODES}-node limit; "
+        "the node list and the per-branch counts were not drawn.",
         style=darkside.WARN,
     )
     return out
@@ -267,9 +267,9 @@ def _rows(
             children = index.get(cur)
             if children:
                 total, missing = totals[cur]
-                note = f"  {total} nodos"
+                note = f"  {total} nodes"
                 if missing:
-                    note += f" · {missing} sin acta"
+                    note += f" · {missing} no record"
                 style = darkside.WARN if missing else darkside.MUT
                 if cur == selected_id:
                     style = f"bold {darkside.GROUND} on {darkside.ACCENT}"
@@ -331,7 +331,7 @@ def _widen(
 ) -> list[tuple[str | None, Text]]:
     """`rows` with the declaration appended to the header, built in ONE place."""
     header = rows[0][1].copy()
-    header.append(f"  {OVERFLOW_TOKEN} {hidden} fuera de vista", style=darkside.INK)
+    header.append(f"  {OVERFLOW_TOKEN} {hidden} out of view", style=darkside.INK)
     return [(rows[0][0], header), *rows[1:]]
 
 

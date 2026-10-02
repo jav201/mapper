@@ -78,7 +78,7 @@ CONFIGURATIONS = PINNED_CONFIGURATIONS + ADDED_CONFIGURATIONS
 # The header wraps, so a per-row regex either misses the numeral or binds it to
 # the wrong label (QA-N-06).  The rows are joined before this is applied.
 _DECLARED = re.compile(
-    re.escape(OVERFLOW_TOKEN) + r"\s*(\d+)\s+fuera\s+de\s+vista"
+    re.escape(OVERFLOW_TOKEN) + r"\s*(\d+)\s+out\s+of\s+view"
 )
 _PILL = re.compile(re.escape(FOLD_PILL_TOKEN) + r".*?\+(\d+)")
 
@@ -93,7 +93,7 @@ def _declared_total(rows: list[str]) -> int | None:
     is the difference between reading the frame and reading a frame that happens
     not to have wrapped.  A row is padded to the region width, so joining two
     rows puts the padding INSIDE the sentence: at a 30-column pagination strip
-    the declaration paints as `... fuera de ` / `vista ...` and the joined text
+    the declaration paints as `... out of ` / `view ...` and the joined text
     carries two spaces.  With a literal space this helper returned `None` on a
     strip that was declaring the right number all along -- i.e. it reported the
     requirement's unwanted behaviour on correct output, which would have been
@@ -501,11 +501,15 @@ def test_llr_n06_3_1_the_charge_band_over_node_count_and_width(tmp_path):
             narrow = header_rows(graph if n == 8 else _balanced(n), w, w - 2)
             assert narrow >= charged, (n, w, narrow, charged)
 
-    # AND THE BAND REACHES 34 at the top of the legal node range, which is the
+    # AND THE BAND REACHES 32 at the top of the legal node range, which is the
     # bound the oldest pin recorded as `w <= 30`.  Derived, not quoted.
+    # (EN-3: it read 34 and 35 while the declaration said `fuera de vista`;
+    # `out of view` is three cells shorter, so the header wraps three widths
+    # sooner.  Re-derived by sweeping `w` over 28..39 on both sides: the Spanish
+    # tree gave 3 rows up to 34, this tree gives 3 rows up to 32.)
     huge = _balanced(11999)
-    assert header_rows(huge, 34, 34) == 3, header_rows(huge, 34, 34)
-    assert header_rows(huge, 35, 35) == 2, header_rows(huge, 35, 35)
+    assert header_rows(huge, 32, 32) == 3, header_rows(huge, 32, 32)
+    assert header_rows(huge, 33, 33) == 2, header_rows(huge, 33, 33)
 
 
 @pytest.mark.asyncio
@@ -961,7 +965,7 @@ async def test_tc_039_the_screen_helper_differences_one_set_on_the_overlap_case(
             rows_in(screen, screen.query_one("#map-pagination").region)
         )
         assert _declared_total([strip]) == len(truth) == 4, strip
-        assert f"{naive} fuera de vista" not in strip, (
+        assert f"{naive} out of view" not in strip, (
             f"the strip declares the naive sum {naive}; the truth is {len(truth)}"
         )
 
@@ -1753,7 +1757,12 @@ async def test_at057_both_surfaces_declare_when_a_view_hides(tmp_path, module, s
         )
 
 
-@pytest.mark.parametrize("size", [(24, 20), (30, 16), (32, 16), (34, 14)],
+# EN-3: the last two sizes read (32, 16) and (34, 14) while the outline declaration said `fuera de vista`.  The arm
+# needs a width at which the REAL outline strip wraps to two rows (so the one-row stub hands the canvas a row back);
+# `out of view` is three cells shorter, so that wrap now ends three widths sooner.  Measured over w 24..37 at h 14, 16
+# and 20 on both trees: the Spanish tree moved the region up to w = 34, this tree up to w = 31.  The two sizes moved by
+# the same three cells; (24, 20) and (30, 16) are unchanged.
+@pytest.mark.parametrize("size", [(24, 20), (30, 16), (29, 16), (31, 14)],
                          ids=lambda s: f"{s[0]}x{s[1]}")
 @pytest.mark.asyncio
 async def test_p1_survives_a_strip_reflow_after_the_canvas_is_painted(tmp_path, size):

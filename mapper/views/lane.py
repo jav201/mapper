@@ -329,7 +329,7 @@ class HybridLaneRenderer:
 
         branches = graph.children_of(graph.root_id)
         if not branches:
-            lines.append(Text("(sin ramas)"))
+            lines.append(Text("(no branches)"))
             return Text("\n").join(lines)
 
         for bid in branches[: h - 4]:

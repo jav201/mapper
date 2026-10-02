@@ -294,7 +294,7 @@ def test_a89_every_reached_renderer_coerces_what_it_paints():
     # `fields` CARRIES THE PAYLOAD TOO, and its absence was a measured hole
     # rather than an omission of taste: the legacy card's `◫` document chip
     # (`layered.py:459`) paints `ficha.fields["D"]`, and with no `fields` on any
-    # ficha that branch painted the constant "◫ sin acta" at every size.
+    # ficha that branch painted the constant "◫ no record" at every size.
     # Mutation-tested, removing its `_fit` survived the entire 789-arm suite --
     # a shipped coercion with nothing standing on it.
     fields = {"D": hostile("acta"), "A": hostile("a"), "B": hostile("b")}
@@ -380,7 +380,7 @@ def test_a89_every_reached_renderer_coerces_what_it_paints():
         "the DiffResult changes nothing the renderer paints; the diff-only "
         "sinks are still outside this census"
     )
-    assert "eliminados" in diff_frame, (
+    assert "removed" in diff_frame, (
         "the ghost row is not painted, so `removed_titles` never reaches its sink"
     )
 

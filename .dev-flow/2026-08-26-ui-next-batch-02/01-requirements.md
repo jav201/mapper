@@ -10947,3 +10947,35 @@ Appended; `A-129` is not rewritten. `A-129`'s table remaps `archivo no encontrad
 **Trace.** Standalone, like `A-113`..`A-129`. Carried by `tests/test_en2.py` (a census of the four files' non-docstring literals, and the `Z2` arms) and by the relabelled pins in the record.
 
 **What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. `Z2` is measured on the map screen at 140 and 87 columns, not on every surface that could host the inspector.
+
+### `A-131` -- English strings in the lane, layered, outline and radial views (`Inc-EN-3`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` (EN-Q1) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING (`B-71`). The record is `increment-049-en3.md`.
+
+**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below **as painted by the four files named in the table** (`views/lane.py`, `views/layered.py`, `views/outline.py`, `views/radial.py`), the string it quotes is now the English one; the same words painted by another file (`app.py`, `darkside.py`, `keymap.py`, `store.py`, `components.py`) stay as that file has them until its own increment (see "Not changed" below). Only the words change; no condition, style, key or row order is touched. Geometry moves only where a string's length changes (see "Width").
+
+| Where | Old | New |
+|---|---|---|
+| `lane` hybrid view, a repo with no branches | `(sin ramas)` | `(no branches)` |
+| `layered`, `outline` overflow declaration (one sentence, `overflow_phrase` and `outline._widen`) | `▽ {n} fuera de vista` | `▽ {n} out of view` |
+| `layered` header node count | `{n} nodos` | `{n} nodes` |
+| `layered` card document chip, no record | `◫ sin acta` | `◫ no record` |
+| `layered` diff ghost strip caption | `eliminados` | `removed` |
+| `outline` collapsed-branch note | `  {total} nodos` / ` · {missing} sin acta` | `  {total} nodes` / ` · {missing} no record` |
+| over-bound notice, `layered` | `mapa de {n} nodos: supera el límite de {M} nodos. Se omitió el dibujo del árbol completo (fichas, aristas y cobertura).` | `map of {n} nodes exceeds the {M}-node limit; the full tree (cards, edges and coverage) was not drawn.` |
+| over-bound notice, `outline` | `… Se omitió el listado de nodos y los conteos por rama.` | `map of {n} nodes exceeds the {M}-node limit; the node list and the per-branch counts were not drawn.` |
+| over-bound notice, `radial` | `… Se omitió el dibujo radial completo (nodos, aristas y etiquetas).` | `map of {n} nodes exceeds the {M}-node limit; the full radial drawing (nodes, edges and labels) was not drawn.` |
+
+**The term for `acta` (declared for `EN-4` and `EN-5`).** `acta` is the node's document field (`fields["D"]`, the `◫` chip): the record that backs the card. The legend's own English description already says so (`darkside.py` rows `V25` "the node's record" and `V26` "missing record"). The one English term is **`record`**: `no record` for the absence (`◫ no record`, `{n} no record`), and `with record` where a count of the filled ones is painted. `darkside.py` (`V26`, `EN-4`) and `app.py` (`sin acta`, `con acta`, `nodos sin acta`, `EN-5`) follow it. This is a naming rule for those increments; `A-131` changes only the four views.
+
+**Width.** Measured at 118 and 87 columns on the legacy fixture, base `5865bc8` against this tree (record, section 4). The card chip is padded to the same width, so no card cell moves. The declaration is three cells shorter (`out of view` for `fuera de vista`); the outline branch note is one cell longer (`no record` for `sin acta`); the three over-bound sentences are shorter (115, 99 and 111 cells became 97, 96 and 105). Two geometry facts moved with the declaration and are re-derived in the sealed arms: the widest width at which a 11,999-node `layered` header takes three rows (34 became 32) and the widest width at which the real outline strip wraps to two rows (34 became 31).
+
+**Quoted by an earlier requirement.** `01-requirements.md` quotes `▽ N fuera de vista` (`V31`, `AT-056`/`PRED-4` text), `eliminados`, `sin acta` and `el mapa supera el límite de <N> nodos` in sentences that describe what the views paint; as painted by these four files they now read as the table says. The older text is a dated record and is not edited.
+
+**Not changed (declared).** `darkside.py` legend rows `V26` (`◫ sin acta`) and `V31` (`▽ 35 fuera de vista`) and the other Spanish legend copy (`EN-4`); `app.py` (`sin acta`, `con acta`, `nodos sin acta`, `ramas sin mostrar`, the pagination hint, the connect toast; `EN-5`); `keymap.py` (`EN-6`); `store.py` schema labels such as `documento` (`EN-4`); the comment in `views/state.py` that mentions `eliminados`; docstrings and comments in the four files that quote Spanish words (not user-facing).
+
+**Sealed-arm changes.** Label changes, and two re-derived geometry pins, listed in `increment-049-en3.md` section 3.
+
+**Trace.** Standalone, like `A-113`..`A-130`. Carried by `tests/test_en3.py` (a census of the four files' non-docstring literals, and the lane arm) and by the relabelled pins in the record.
+
+**What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. Widths are measured at 118 and 87 columns on the legacy fixture and at the sweep sizes named in the record, not at every width.

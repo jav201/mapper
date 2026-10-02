@@ -250,7 +250,7 @@ def test_the_outline_charge_is_measured_and_not_the_constant_one(w):
     THE RENDERED-FIRST-LINE ORACLE DOES NOT APPLY HERE, AND THAT IS A FINDING
     RATHER THAN AN INCONVENIENCE. Driven at these widths, the arm above fails --
     not because the charge is wrong, but because the two sides stop describing
-    the same line. `_fit_declared` WIDENS `rows[0]` with the `fuera de vista`
+    the same line. `_fit_declared` WIDENS `rows[0]` with the `out of view`
     declaration when rows are hidden, so the renderer's first emitted line is the
     DECLARING header, while the charge prices the BARE one.
 
