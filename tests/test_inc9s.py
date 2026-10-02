@@ -20,7 +20,7 @@ from tests.test_inc9n import _make_docx
 from tests.test_inc9o import _tree
 from tests.test_inc9p import _import
 
-OPEN_STEPS: set[str] = {"surrogate"}
+OPEN_STEPS: set[str] = set()
 
 Y1 = 'path not supported: ":" is not allowed in a file name'
 
