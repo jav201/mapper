@@ -26,7 +26,7 @@ ACCENTED = re.compile("[áéíóúñüÁÉÍÓÚÑÜ¿¡]")
 
 SPANISH_WORDS = frozenset("""
 abierto abrible abrir archivo calculando cancelar ciclo con del destino detectados dibujar documento el esquema
-espacio fuera generado generar guardar importada importar inválido leyendo listo mapa ninguno no‑se
+espacio fuera generado generar guardar importada importar inválido leyendo listo mapa ninguno
 permitido plantilla prever proceso pudo ramas ruta salvar se sin solo tipo trabajo válido vacío
 """.split())
 
