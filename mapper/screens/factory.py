@@ -57,16 +57,16 @@ def _write_via_sibling(target: Path, write: Callable[[Path], object]) -> None:
     hard link at *target* is broken instead of written through.  The sibling is removed when anything fails.
 
     `INC9P-SEC-F2`: right after `mkstemp` the parent is inspected again; one that became a link or reparse point
-    since (it was not one before) is refused before anything is written.  This NARROWS the window between the
+    since is refused before anything is written (`target` comes from `confine_reason`, i.e. resolved, so its parent is
+    never a link unless it was swapped).  This NARROWS the window between the
     caller's walk and the write; it does not close it (the parent can still be swapped after this check).  The
     atomic write also drops the target's metadata (owner, ACL, attributes): the new file is a fresh temp file."""
     target.parent.mkdir(parents=True, exist_ok=True)
-    was_link = is_link(target.parent.lstat())
     fd, name = tempfile.mkstemp(dir=target.parent, prefix=".tmp-", suffix=target.suffix)
     os.close(fd)
     tmp = Path(name)
     try:
-        if not was_link and is_link(target.parent.lstat()):
+        if is_link(target.parent.lstat()):
             raise ParentIsALink(target.parent.name)
         write(tmp)
         os.replace(tmp, target)
