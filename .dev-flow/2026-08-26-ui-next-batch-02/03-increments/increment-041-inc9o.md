@@ -62,6 +62,7 @@ Policy, declared: **links inside the workspace are not followed.** `lexically_ou
 | `test_inc9n::test_inc9n_u1_pin_a_file_attachment_outside_the_workspace_keeps_its_own_refusal` | `notes == [V1]` (was `REFUSED_OUTSIDE in notes[0]` and `U1 not in notes`) | V1 at open time |
 | `test_attachments::test_at_n02d_a_refused_attachment_is_reported_not_silently_dropped` | `notes == [V1 sentence]` (was `REFUSED_OUTSIDE in notes[0]`); the refusal is still visible and the launcher still untouched | V1 at open time |
 | `test_arch_osopen_callers`: `test_outside_app_only_safe_local_path_is_imported_from_osopen` renamed `..._only_the_allowed_names_are_imported_from_osopen`; the architecture-map arm also asks for the four names | the allowed set grew by `confine`, `lexically_outside`, `PATH_NOT_SUPPORTED` in `screens/factory.py` | `A-123` item 7; the set is still derived from the ASTs |
+| `test_darkside_census::test_hue_census_every_severity_and_busy_site_is_classified` (the register key of `factory.py`) | the key `return Text.assemble(("archivo de plantilla no encontrado", darkside.ALERT))` is now `return Text.assemble((self._missing_text(doc), darkside.ALERT))`; same severity (ALERT), same job | found by the FIRST full lane (1 failed, 2426 passed): the census keys on the source text of the site, which V2 changed. No hue or severity changed |
 | `test_palette::test_at_n03b...`, `test_palette_empty_query_dispatches_nothing` | `pilot.pause()` -> `_until(pilot, <predicate on palette._items>)` (<= 20 pauses); assertions unchanged | FLAKE-3, a test race |
 
 No assertion that a refusal leaks the typed text was weakened; V1 and V2 name nothing typed.
@@ -91,7 +92,7 @@ The first RED measurement showed four wrong keys: two pins keyed RED that pass o
 | SEC-F1: node ids `a:b`, `con`, `x.`, `a b `; a link standing where the output would be written | 4 + 1 | RED x5 | green |
 | SEC-F1 pin: a normal name still writes `plantilla-root.docx` inside the workspace and toasts `generado: plantilla-root.docx` | 1 | pin | green |
 | arch: the allowed names, the four back-edges (derived from the ASTs) listed in the map with their lines, the map names the four imports | 3 | RED x3 | green |
-| sealed arms changed (section 2) | 9 | RED x9 | green |
+| sealed arms changed (section 2; the census key was found by the first full lane, not by an arm) | 9 | RED x9 | green |
 
 Not claimed by the arms: a hostile name on the BASE was spied (refuse and record BEFORE the real call), so the RED run itself touched nothing outside `tmp_path`; no real UNC, console or COM device, and no link to a network target was created.
 
