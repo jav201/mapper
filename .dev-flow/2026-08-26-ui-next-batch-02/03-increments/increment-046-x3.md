@@ -67,3 +67,7 @@ Not mutated (declared): a double launch (it would show as a two-item list, but n
 - `086c746` the arms, strict xfail.
 - `b4ccca9` the fix (1 source file; `OPEN_STEPS` emptied).
 - the records (`A-128`, this file).
+
+## Full-lane result
+
+`2648 passed, 24 deselected, 3 xfailed` (0 failed) in 1328 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `2fa4845`, with a temp HOME and a git identity from the environment, run as the last step. Baseline 2634/0; the delta is the 14 new `test_inc9x3.py` items. The 3 xfailed are pre-existing. A first attempt of the lane ran WITHOUT the git identity in its environment (my omission) and reported 5 failed in `tests/test_github.py` (`git commit` exit 128, "Author identity unknown"); it was discarded and the lane re-run once, as above. After this section was appended only this `.md` changed; the lane was NOT re-run.
