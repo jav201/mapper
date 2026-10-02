@@ -36,6 +36,7 @@ SPANISH_WORDS = frozenset("""
 adjunto adjuntos agregar bloq bloque campo cargando cerrar ciclo cobertura completo componentes dibujar el estado
 faltan faltantes falta ficha foco luna marea mapa nodo noche notas puede recorre requerido riesgo salir selecciona
 seleccionar sistema tarde territorio todo vacio vacío
+con de del el en es etiqueta la las los ningun ninguna ninguno nombre para por se sin un una y
 """.split())
 
 # `open_ficha` is the seat's action id (an identifier in `keymap.py`, not copy); `Z2` looks the seat row up by it.
@@ -84,6 +85,9 @@ def test_scanner_sees_what_it_claims():
     assert spanish_hits("x = 'salir del campo'") != []
     assert spanish_hits("x = f'mapa \u00b7 {n}n'") != []
     assert spanish_hits("x = 'ac\u00e9rcate'") != []
+    assert spanish_hits("x = '(ninguna etiqueta)'") != []
+    assert spanish_hits("x = 'nombre de la ruta'") != []
+    assert spanish_hits("x = 'delta porter lasso unity'") == []  # whole words only: no substring hits
     assert spanish_hits("x = 'all complete.'\ny = 'no such host'") == []
     assert spanish_hits('def f():\n    """todo completo del campo"""\n') == []
 

@@ -10906,11 +10906,15 @@ links are junctions or symlinks to a LOCAL directory under a temp path, and spie
 
 **What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general.
 
+### `A-129` correction note -- scope of the `archivo no encontrado` remap (`EN1-REV-F1`), dated 2026-10-02
+
+Appended; `A-129` is not rewritten. `A-129`'s table remaps `archivo no encontrado: {name}` to `file not found: {name}` without saying where. The remap applies to the **office prompt only** (the factory screen's literal). The **CSV prompt's** sentence `archivo no encontrado: {name}` is `app.py:1044`'s own literal and **stays Spanish until `EN-5`**; the CSV pins (`test_inc9m`, `test_inc9n`) are Spanish for that reason. `A-129`'s blanket sentence ("wherever an earlier requirement or amendment quotes one of the Spanish strings below, the string it quotes is now the English one") applies **only at the sites in `A-129`'s table**, not to the same words painted by another file.
+
 ### `A-130` -- English strings in the coverage report, the components sheet, the inspector and the rail (`Inc-EN-2`), dated 2026-10-02
 
 **Authority.** `VERDICT-inc-en-2026-10-02.md` (EN-Q1; Round 2, `Z2`) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING (`B-71`). The record is `increment-048-en2.md`.
 
-**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below, the string it quotes is now the English one. Only the words change; no condition, geometry, style, key or row order is touched.
+**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below **as painted by the four files named in the table**, the string it quotes is now the English one; the same words painted by another file (`app.py`, `keymap.py`, `darkside.py`, `components.py`, `store.py`) stay as that file has them until its own increment (see "Not changed" below). Only the words change; no condition, geometry, style, key or row order is touched.
 
 | Where | Old | New |
 |---|---|---|
