@@ -13,6 +13,16 @@ from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
 
 
+async def _until(pilot, ready, tries=20):
+    """`INC9N-CR-F3` (FLAKE-3, a test race, not a user race): `Input.value = ...` is applied by a message the
+    palette handles on a later turn, so one `pause()` sometimes asserts before it ran.  Poll the observable
+    (`palette._items`), at most `tries` pauses, and let the unchanged assertion judge what it settled on."""
+    for _ in range(tries):
+        if ready():
+            return
+        await pilot.pause()
+
+
 def _seed(app, map_id="palette-test"):
     g = Graph()
     g.add_node(Node(id="root", ficha=Ficha(title="Root")))
@@ -79,7 +89,7 @@ async def test_at_n03b_selecting_a_palette_entry_executes_it(tmp_path):
 
         # `A-112`: the seat's label for `coverage` is English since Inc-9.
         palette.query_one("#palette-input").value = "coverage"
-        await pilot.pause()
+        await _until(pilot, lambda: [b.action for b in palette._items] == ["coverage"])
         assert [b.action for b in palette._items] == ["coverage"], (
             "the query must narrow to exactly one entry for this test to be exact"
         )
@@ -132,7 +142,7 @@ async def test_palette_empty_query_dispatches_nothing(tmp_path):
         await pilot.pause()
         palette = app.screen
         palette.query_one("#palette-input").value = "zzzzznotacommand"
-        await pilot.pause()
+        await _until(pilot, lambda: palette._items == [])
         assert palette._items == []
         await pilot.press("enter")
         await pilot.pause()

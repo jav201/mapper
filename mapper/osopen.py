@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import re
+import stat
 import subprocess
 import sys
 from pathlib import Path, PureWindowsPath
@@ -43,6 +44,12 @@ REFUSED_TYPE = "destino inválido"
 REFUSED_SCHEME = "esquema no permitido"
 REFUSED_OUTSIDE = "fuera del espacio de trabajo"
 REFUSED_ERROR = "no se pudo abrir"
+
+# `U1` (Round 10): the one sentence for a typed or stored path outside the allow-list; it names nothing.
+# `V1` (Round 11): the second sentence, for a path the allow-list accepts but the workspace does not
+# contain.  Both live here so `app` and `screens` import them without a `screens` -> `app` edge.
+PATH_NOT_SUPPORTED = "path not supported: use C:\\\u2026 or a relative path"
+PATH_OUTSIDE_WORKSPACE = "attachment must be inside the workspace: use a relative path"
 
 
 _DRIVE = re.compile(r"[A-Za-z]:")
@@ -76,6 +83,65 @@ def safe_local_path(text: str) -> Path | None:
     if not parsed.drive and not parsed.root:
         return expanded
     return None
+
+
+def _lexically_inside(local: Path, workspace: Path) -> str | None:
+    """The absolute, normalised target when it lies under *workspace* by TEXT alone, else None.  No
+    filesystem call (`abspath` only joins and collapses `..`).  The comparison is by path parts, so
+    `ws2` is not inside `ws`, and case-folded by `normcase` (a no-op off Windows)."""
+    root = os.path.abspath(workspace)
+    joined = os.path.abspath(Path(workspace) / local)
+    if Path(os.path.normcase(joined)).is_relative_to(os.path.normcase(root)):
+        return joined
+    return None
+
+
+def lexically_outside(text: str, workspace: Path) -> bool:
+    """True when `safe_local_path` accepts *text* and the path lies outside *workspace* by text alone,
+    without touching the disk (`V2`).  A refused text is not 'outside': it is unsupported."""
+    local = safe_local_path(text)
+    return local is not None and _lexically_inside(local, workspace) is None
+
+
+def _is_link(info: os.stat_result) -> bool:
+    return stat.S_ISLNK(info.st_mode) or bool(
+        getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT)
+
+
+def confine(text: str, workspace: Path) -> Path | None:
+    """The ONE containment rule: the resolved target of *text* inside *workspace*, or None.
+
+    In order: (1) `safe_local_path` (the closed allow-list; it expands `~` for every caller, so add and
+    open agree); (2) lexical containment, no stat; (3) a walk from the workspace down with `os.lstat`,
+    refusing a symlink or any reparse point (junction, mount point) BEFORE anything below it is touched;
+    (4) only then `resolve()` and a last `is_relative_to`.  Policy: links inside the workspace are not
+    followed.  The workspace root itself may be a link; only what lies under it is walked.
+    """
+    local = safe_local_path(text)
+    if local is None:
+        return None
+    joined = _lexically_inside(local, workspace)
+    if joined is None:
+        return None
+    root = Path(os.path.abspath(workspace))
+    current = root
+    for part in Path(joined).parts[len(root.parts):]:
+        current = current / part
+        try:
+            info = os.lstat(current)
+        except (FileNotFoundError, NotADirectoryError):
+            break
+        except (OSError, ValueError):
+            return None
+        if _is_link(info):
+            return None
+    try:
+        resolved = (Path(workspace) / local).resolve()
+        if not resolved.is_relative_to(Path(workspace).resolve()):
+            return None
+    except (OSError, ValueError):
+        return None
+    return resolved
 
 
 def _default_launcher(target: str) -> None:
@@ -142,20 +208,10 @@ def open_external(
     if kind == "file" and safe_local_path(target) is None:
         return REFUSED_TYPE
 
-    # kind == "file": confinement is the control, and it is checked BEFORE the
-    # launcher is reached.  Existence is NOT an authorisation — it answers "will
-    # this fail?", not "should this open?" — so the containment test runs whether
-    # or not the path is there.
-    try:
-        # `workspace / target` already discards the left operand when target is
-        # absolute, which is exactly what is wanted: an absolute target resolves
-        # as itself and is then judged by the containment test below.  The old
-        # is_absolute() ternary was dead code saying the same thing twice.
-        resolved = (workspace / target).resolve()
-        root = Path(workspace).resolve()
-    except (OSError, ValueError):
-        return REFUSED_TYPE
-    if not resolved.is_relative_to(root):
+    # kind == "file": confinement is the control, and it is checked BEFORE the launcher is reached.
+    # Existence is NOT an authorisation: the containment test runs whether or not the path is there.
+    resolved = confine(target, Path(workspace))
+    if resolved is None:
         return REFUSED_OUTSIDE
     if not resolved.is_file():
         return REFUSED_ERROR

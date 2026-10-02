@@ -1,7 +1,6 @@
 """Document factory screen for process-template editing."""
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
 
@@ -16,11 +15,17 @@ from textual.widgets import Static
 from mapper import darkside, office
 from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
-from mapper.osopen import safe_local_path
+from mapper.osopen import PATH_NOT_SUPPORTED, confine, lexically_outside, safe_local_path
+from mapper.store import MapIdError, check_map_id
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
 
 _TAG_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
+# `V2` (Round 11): the template exists as a path, but outside the workspace; derived from the text alone.
+TEMPLATE_OUTSIDE = "template outside the workspace: import it with i"
+TEMPLATE_MISSING = "archivo de plantilla no encontrado"
+NAME_NOT_USABLE = "document name cannot be used as a file name"
 
 def factory_hint() -> str:
     """The hint line under the tree: the three document actions, every word beside
@@ -274,25 +279,17 @@ class FactoryScreen(Screen):
 
     def _office_path(self, doc: Document) -> Path | None:
         """`INC9M-SEC-F1`: `doc.path` comes from the sidecar of a map that may have been shared, so it is
-        judged like typed text: the closed allow-list first (no UNC, no device name: a stat of those is
-        an SMB lookup or a console), then confined to the workspace, as `open_external` does.  The
-        lexical containment test runs before `resolve()` so an outside absolute path is never stat'ed."""
+        judged like typed text, by the one rule (`osopen.confine`): allow-list, lexical containment, no
+        links followed, then `resolve()`.  A refused path is never stat'ed."""
         if not doc.path:
             return None
-        local = safe_local_path(doc.path)
-        if local is None:
-            return None
-        workspace = Path(self.app.store.workspace)  # type: ignore[attr-defined]
-        joined = workspace / local
-        if not Path(os.path.normpath(joined)).is_relative_to(os.path.normpath(workspace)):
-            return None
-        try:
-            resolved = joined.resolve()
-            if not resolved.is_relative_to(workspace.resolve()):
-                return None
-        except (OSError, ValueError):
-            return None
-        return resolved
+        return confine(doc.path, Path(self.app.store.workspace))  # type: ignore[attr-defined]
+
+    def _missing_text(self, doc: Document) -> str:
+        """`V2`: say why the template is not there when the cause is its location, decided by text."""
+        if doc.path and lexically_outside(doc.path, Path(self.app.store.workspace)):  # type: ignore[attr-defined]
+            return TEMPLATE_OUTSIDE
+        return TEMPLATE_MISSING
 
     def _preview(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
@@ -303,7 +300,7 @@ class FactoryScreen(Screen):
         if self._is_office(doc):
             path = self._office_path(doc)
             if path is None or not path.exists():
-                return Text.assemble(("archivo de plantilla no encontrado", darkside.ALERT))
+                return Text.assemble((self._missing_text(doc), darkside.ALERT))
             preview = office.extract_preview_text(path)
             # Show a resolved preview by replacing tags in the plain text.
             for key, value in doc.tags.items():
@@ -438,7 +435,7 @@ class FactoryScreen(Screen):
         self.app.push_screen(EditorScreen(doc.source), callback=on_save)
 
     def action_import_office(self) -> None:
-        from mapper.app import PATH_NOT_SUPPORTED, _PromptScreen
+        from mapper.app import _PromptScreen
 
         def on_path(path_str: str | None) -> None:
             if path_str is None:
@@ -501,16 +498,30 @@ class FactoryScreen(Screen):
             return
         path = self._office_path(doc)
         if path is None or not path.exists():
-            self.notify("archivo de plantilla no encontrado", severity="error")
+            self.notify(darkside.plain(self._missing_text(doc)), severity="error", markup=False)
             return
         store = self.app.store  # type: ignore[attr-defined]
+        # `INC9N-SEC-F1`: the sidecar chooses `document_name` and the node id, and together they are the
+        # output FILE NAME.  Each must be a plain file name (no separator, drive letter, control, reserved
+        # device or edge dot/space: `check_map_id`'s rules) and the result is confined to the workspace
+        # before anything is written.
         suffix = Path(doc.path).suffix or ".docx"
-        target = store.workspace / f"{self.document_name}-{node.id}{suffix}"
+        try:
+            check_map_id(self.document_name)
+            check_map_id(node.id)
+        except MapIdError:
+            self.notify(darkside.plain(NAME_NOT_USABLE), severity="error", markup=False)
+            return
+        target = confine(f"{self.document_name}-{node.id}{suffix}", Path(store.workspace))
+        if target is None:
+            self.notify(darkside.plain(NAME_NOT_USABLE), severity="error", markup=False)
+            return
         try:
             office.resolve(path, doc.tags, target)
-            # `INC9-SEC-F1`: the file's name and the exception TYPE, never the
+            # `INC9-SEC-F1`: the workspace-relative name and the exception TYPE, never the
             # workspace's absolute path or `str(exc)` (`_save_or_toast`'s rule).
-            self.notify(darkside.plain(f"generado: {target.name}"), markup=False)
+            shown = target.relative_to(Path(store.workspace).resolve()).as_posix()
+            self.notify(darkside.plain(f"generado: {shown}"), markup=False)
         except Exception as exc:
             self.notify(
                 darkside.plain(f"no se pudo generar: {type(exc).__name__}"),

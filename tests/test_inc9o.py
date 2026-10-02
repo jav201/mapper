@@ -33,7 +33,7 @@ from tests.test_inc9f import NARROW, SIZE
 from tests.test_inc9m import _env, _flat, _no_fs, _norm
 from tests.test_inc9n import U1, _add_attachment, _make_docx, _toasts
 
-OPEN_STEPS: set[str] = {"confine", "walk", "v1", "v2", "name"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 
