@@ -196,3 +196,19 @@ Two questions were put to the operator; both took the recommended option.
 |---|---|---|---|
 | U1 · INC9M-UX-F1 / CR-F2 | A refused path and a missing file both toast `archivo no encontrado` | Aviso propio | A refused path toasts a name-free English sentence, `path not supported: use C:\… or a relative path`; a missing accepted path keeps naming its file. The prompts' placeholders become forms the grammar accepts |
 | U2 · INC9M-UX-F3 | A `file` attachment pointing at a network share is refused only at open time | Rechazar al agregar | The local-path rule stays (no network targets); the refusal happens when the attachment is added, with the U1 sentence, not later at open time |
+
+---
+
+# Round 11 — Inc-9n reviews (2026-10-01, base `287681f`)
+
+security BLOCK-UNTIL INC9N-SEC-F1 (HIGH, pre-existing: the sidecar `documents[].name` chooses where
+"generate office" writes — `..`, drive-absolute and UNC names reproduced); code OK (CR-F1 relative
+workspace, CR-F2 three drifting containment copies, CR-F3 FLAKE-3 diagnosed as a test race, MEDIUM);
+ux PASS-WITH-NOTICES. Disclosure: the security reviewer's harness once let a real `resolve()` through to
+a link whose target named a non-existent host (`SPYHOST`), which may have caused one name lookup.
+Two questions were put to the operator; both took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| V1 · INC9N-UX-F2 | `C:\outside\x.pdf` refused with "use C:\… or a relative path" reads as a contradiction | Segunda frase fija | A path refused for lying outside the workspace toasts `attachment must be inside the workspace: use a relative path` (at add and at open); the U1 sentence stays for UNC, `/x`, `C:x` and devices |
+| V2 · INC9N-UX-F1 | The factory says "template file not found" for a template that exists outside the workspace | Decir la causa y la salida | It says `template outside the workspace: import it with i`, derived from the text without touching the disk |
