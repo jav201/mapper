@@ -15,3 +15,13 @@ también la UI"), B-71. Three questions were put to the operator; each took the 
 Rules for every EN increment: requirement text that quotes Spanish copy is amended by a dated A-1NN
 note (never rewritten); a sealed arm that pins a Spanish string changes its LABEL only and is declared;
 wording is plain operator English, matching the existing English sentences (U1, V1, V2, W1, W2, X1, Y1).
+
+## Round 2 — after the Inc-X3 review (2026-10-02)
+
+X3 review: OK, no HIGH (X3-REV-F1 test gap folded into EN-1). Two pre-existing UX items, now visible
+because attachments open, were put to the operator; both took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| Z1 · X3-REV-F2 | Opening an attachment toggles its chip's selected look | Que no alterne | Attachment chips only open; they never toggle `selected`. Routed to EN-4 (`widgets/components.py`) |
+| Z2 · X3-REV-F3 | With an attachment chip focused the hint says `↵ open card` | «↵ open attachment» | A focus-aware hint: `↵ open attachment` while an `insp-att-*` chip has focus. Routed to EN-2 (inspector); if it needs `keymap`/`app`, to EN-5/EN-6 |
