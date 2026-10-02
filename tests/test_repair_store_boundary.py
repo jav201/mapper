@@ -160,28 +160,28 @@ def _container_poisonable() -> list[str]:
 # Asserted TOTAL over the derived census below, so a new position cannot quietly
 # skip the check.
 _EXPECTED_REFUSAL = {
-    "fields.value": "campo ilegible: A.E",
-    "node.title": "campo ilegible: A.title",
-    "node.state": "campo ilegible: A.state",
-    "node.meta": "campo ilegible: A.meta",
-    "node.notes": "campo ilegible: A.notes",
-    "attachment.kind": "campo ilegible: A.att[0].kind",
-    "attachment.path": "campo ilegible: A.att[0].path",
-    "attachment.caption": "campo ilegible: A.att[0].caption",
-    "schema.key": "campo ilegible: schema[0].key",
-    "schema.label": "campo ilegible: schema[0].label",
-    "schema.kind": "campo ilegible: schema[0].kind",
-    "document.name": "campo ilegible: document[0].name",
-    "document.source": "campo ilegible: document[0].source",
-    "document.path": "campo ilegible: document[0].path",
-    "document.kind": "campo ilegible: document[0].kind",
-    "document.tags.key": "campo ilegible: document[0].tags[b'hi']",
-    "document.tags.value": "campo ilegible: document[0].tags.t",
-    "document.inherited.key": "campo ilegible: document[0].inherited[b'hi']",
-    "document.inherited.value": "campo ilegible: document[0].inherited.t",
+    "fields.value": "unreadable field: A.E",
+    "node.title": "unreadable field: A.title",
+    "node.state": "unreadable field: A.state",
+    "node.meta": "unreadable field: A.meta",
+    "node.notes": "unreadable field: A.notes",
+    "attachment.kind": "unreadable field: A.att[0].kind",
+    "attachment.path": "unreadable field: A.att[0].path",
+    "attachment.caption": "unreadable field: A.att[0].caption",
+    "schema.key": "unreadable field: schema[0].key",
+    "schema.label": "unreadable field: schema[0].label",
+    "schema.kind": "unreadable field: schema[0].kind",
+    "document.name": "unreadable field: document[0].name",
+    "document.source": "unreadable field: document[0].source",
+    "document.path": "unreadable field: document[0].path",
+    "document.kind": "unreadable field: document[0].kind",
+    "document.tags.key": "unreadable field: document[0].tags[b'hi']",
+    "document.tags.value": "unreadable field: document[0].tags.t",
+    "document.inherited.key": "unreadable field: document[0].inherited[b'hi']",
+    "document.inherited.value": "unreadable field: document[0].inherited.t",
     # The two key positions, refused with the hashable non-scalar `b"hi"`.
-    "node.id": "campo ilegible: node.id[b'hi']",
-    "fields.key": "campo ilegible: A.key[b'hi']",
+    "node.id": "unreadable field: node.id[b'hi']",
+    "fields.key": "unreadable field: A.key[b'hi']",
 }
 
 
@@ -444,7 +444,7 @@ _MALFORMED_SHAPES = {
 _MALFORMED_ITEM_LISTS = {
     "attachment-item-is-a-scalar": (
         lambda d: d["nodes"]["A"].__setitem__("attachments", [{"kind": "img"}, 7]),
-        ["campo ilegible: A.attachments[1]"],
+        ["unreadable field: A.attachments[1]"],
         True,  # a well-formed sibling exists and must survive
     ),
     "attachment-item-is-a-string": (
@@ -453,12 +453,12 @@ _MALFORMED_ITEM_LISTS = {
         ),
         # TWO malformed entries at DISTINCT indices: without G4's index these two
         # records would be byte-identical and this arm could not tell them apart.
-        ["campo ilegible: A.attachments[1]", "campo ilegible: A.attachments[2]"],
+        ["unreadable field: A.attachments[1]", "unreadable field: A.attachments[2]"],
         True,
     ),
     "attachments-is-a-scalar": (
         lambda d: d["nodes"]["A"].__setitem__("attachments", "junk"),
-        ["campo ilegible: A.attachments"],
+        ["unreadable field: A.attachments"],
         # The WHOLE list is malformed, so there is no well-formed sibling to
         # survive.  Asserting one here would demand behaviour the input makes
         # impossible -- a predicate that false-fails correct code (C-53).
@@ -526,18 +526,18 @@ def test_at_p02c_a_key_position_refuses_a_hashable_non_scalar(tmp_path, position
 _COLLISIONS = {
     "field-keys-coerce-together": (
         lambda d: d["nodes"]["A"].__setitem__("fields", {1: "from-int", "1": "from-str"}),
-        "campo duplicado: A.'1' <- '1'",
+        "duplicate field: A.'1' <- '1'",
     ),
     # BOTH ids must be present: `1` alone coerces to `"1"`, which collides with
     # nothing in a fixture whose nodes are `A` and `B`.  My first version asserted
     # a record the input could not produce.
     "node-ids-coerce-together": (
         lambda d: d["nodes"].update({1: {"title": "g-int"}, "1": {"title": "g-str"}}),
-        "nodo duplicado: '1' <- '1'",
+        "duplicate node: '1' <- '1'",
     ),
     "node-ids-both-refused-collapse-onto-empty": (
         lambda d: d["nodes"].update({b"h1": {"title": "g1"}, b"h2": {"title": "g2"}}),
-        "nodo duplicado: '' <- b'h2'",
+        "duplicate node: '' <- b'h2'",
     ),
     # G3: the ungated sibling of the two above.  Note this fires WITHOUT any
     # coercion, which is declared as a deliberate superset in `_graph_from_sidecar`.
@@ -548,11 +548,11 @@ _COLLISIONS = {
         lambda d: d["documents"].extend(
             [{"name": "1", "source": "s2"}, {"name": 1, "source": "s3"}]
         ),
-        "documento duplicado: '1' <- 1",
+        "duplicate document: '1' <- 1",
     ),
     "document-names-are-plainly-identical": (
         lambda d: d["documents"].append({"name": "d1", "source": "s2"}),
-        "documento duplicado: 'd1' <- 'd1'",
+        "duplicate document: 'd1' <- 'd1'",
     ),
 }
 
@@ -629,7 +629,7 @@ def test_at_p02g_a_non_mapping_str_map_is_refused_and_recorded(
         f"{field_name}/{case}: a non-mapping must be REFUSED, not coerced to a "
         f"repr; got {getattr(doc, field_name)!r}"
     )
-    assert f"campo ilegible: document[0].{field_name}" in graph.load_warnings, (
+    assert f"unreadable field: document[0].{field_name}" in graph.load_warnings, (
         f"{field_name}/{case}: the refusal was SILENT; got {graph.load_warnings!r}"
     )
 
@@ -646,7 +646,7 @@ def test_at_p02h_a_str_map_key_collision_is_recorded(tmp_path, field_name):
     sidecar = copy.deepcopy(BASE_SIDECAR)
     sidecar["documents"][0][field_name] = {1: "from-int", "1": "from-str"}
     graph = _write(tmp_path, sidecar).load("m")
-    expected = f"campo duplicado: document[0].{field_name}.'1' <- '1'"
+    expected = f"duplicate field: document[0].{field_name}.'1' <- '1'"
     assert expected in graph.load_warnings, (
         f"{field_name}: expected the exact record {expected!r}; "
         f"got {graph.load_warnings!r}"

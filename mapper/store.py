@@ -42,26 +42,26 @@ def check_map_id(map_id: str) -> None:
     it, so the UI, a CSV "save as" name and a file-derived `map:` link share it.
     """
     if not isinstance(map_id, str) or not map_id.strip():
-        raise MapIdError("el nombre del mapa está vacío")
+        raise MapIdError("the map name is empty")
     if len(map_id) > MAX_MAP_ID_LEN:
-        raise MapIdError(f"el nombre del mapa es demasiado largo (máximo {MAX_MAP_ID_LEN} caracteres)")
+        raise MapIdError(f"the map name is too long (maximum {MAX_MAP_ID_LEN} characters)")
     if "/" in map_id or "\\" in map_id or ":" in map_id:
         raise MapIdError(
-            "el nombre del mapa no puede contener separadores de ruta (/ \\) "
-            "ni letra de unidad (:)")
+            "the map name cannot contain path separators (/ \\) "
+            "or a drive letter (:)")
     if any(ord(c) < 32 or c in _INVALID_CHARS for c in map_id):
         raise MapIdError(
-            "el nombre del mapa contiene caracteres no válidos en Windows "
-            '(< > " | ? * o de control)')
+            "the map name contains characters that are not valid on Windows "
+            '(< > " | ? * or control characters)')
     if any(0xD800 <= ord(c) <= 0xDFFF for c in map_id):
-        raise MapIdError("el nombre del mapa contiene caracteres que no se pueden guardar en un archivo")
+        raise MapIdError("the map name contains characters that cannot be saved to a file")
     if map_id.split(".", 1)[0].rstrip().upper() in _RESERVED_NAMES:
         raise MapIdError(
-            "el nombre del mapa usa un nombre reservado de Windows (CON, NUL, COM1...)")
+            "the map name uses a reserved Windows name (CON, NUL, COM1...)")
     # Separators are refused above, so `..` means the parent only when the id IS
     # dots; every dot-only id ends in a dot and dies here.
     if map_id != map_id.rstrip(" .") or map_id != map_id.lstrip(" "):
-        raise MapIdError("el nombre del mapa no puede empezar con espacio ni terminar en punto o espacio")
+        raise MapIdError("the map name cannot start with a space or end with a dot or a space")
 
 
 def _text_fields(cls: type) -> tuple[str, ...]:
@@ -144,7 +144,7 @@ def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
         return plain(_normalize_newlines(str(value)))
     if isinstance(value, (date, datetime)):
         return value.isoformat()
-    _warn(graph, f"campo ilegible: {node_id}.{key}")
+    _warn(graph, f"unreadable field: {node_id}.{key}")
     return ""
 
 
@@ -219,7 +219,7 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
     produced HIGH-1.
     """
     if not isinstance(value, dict):
-        _warn(graph, f"campo ilegible: {owner}.{key}")
+        _warn(graph, f"unreadable field: {owner}.{key}")
         return {}
     out: dict[str, str] = {}
     for raw_key, raw_value in value.items():
@@ -227,7 +227,7 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
         if ckey in out:
             _warn(
                 graph,
-                f"campo duplicado: {owner}.{key}.{ckey!r} <- {raw_key!r}"
+                f"duplicate field: {owner}.{key}.{ckey!r} <- {raw_key!r}"
             )
         out[ckey] = _coerce_field(graph, owner, f"{key}.{raw_key}", raw_value)
     return out
@@ -244,7 +244,7 @@ _ATTACHMENT_KEYS = {f.name for f in fields(Attachment)}
 # other unbounded.
 #
 # PER RECORD, because a coordinate is not automatically short: `owner` is a node
-# id read from the sidecar, so `adjunto sin campos: {owner}.{key}[{i}]` carries
+# id read from the sidecar, so `attachment without fields: {owner}.{key}[{i}]` carries
 # a value even though it reads like a position. MEASURED, and this is the defect
 # `Inc-REPAIR` S-E's own security review found the stage INTRODUCING: a 100k
 # character node id with 20,000 aliased attachment entries produced 2.0 GB of
@@ -268,7 +268,7 @@ def _warn(graph: Graph, record: str) -> None:
     if len(graph.load_warnings) >= _MAX_RECORDS:
         if len(graph.load_warnings) == _MAX_RECORDS:
             graph.load_warnings.append(
-                f"… y más registros omitidos (límite {_MAX_RECORDS})"
+                f"… and more entries omitted (limit {_MAX_RECORDS})"
             )
         return
     if len(record) > _RECORD_CHARS:
@@ -347,7 +347,7 @@ def _mappings(
     field does not silently start being refused.
     """
     if not isinstance(entries, list):
-        _warn(graph, f"campo ilegible: {owner}.{key}")
+        _warn(graph, f"unreadable field: {owner}.{key}")
         return []
     out = []
     for i, entry in enumerate(entries):
@@ -360,25 +360,25 @@ def _mappings(
             # lost and a PHANTOM WAS INVENTED, which is the silent-loss class
             # this function exists to end, inverted.  The docstring below still
             # claimed the class was closed; it was closed for scalars only.
-            _warn(graph, f"adjunto sin campos: {owner}.{key}[{i}]")
+            _warn(graph, f"attachment without fields: {owner}.{key}[{i}]")
         else:
             # The index is part of the record.  Without it n malformed entries
             # emit n byte-identical lines that cannot be told apart -- the same
             # diagnostic defect F7 fixed for field keys (review G4).
-            _warn(graph, f"campo ilegible: {owner}.{key}[{i}]")
+            _warn(graph, f"unreadable field: {owner}.{key}[{i}]")
     return out
 
 
 TEMPLATES: dict[str, dict[str, Any]] = {
     "legacy-audit": {
         "schema": [
-            {"key": "D", "label": "documento", "required": True, "kind": "text"},
-            {"key": "O", "label": "dueño", "required": True, "kind": "text"},
-            {"key": "E", "label": "estado", "required": True, "kind": "text"},
-            {"key": "C", "label": "criticidad", "required": False, "kind": "text"},
-            {"key": "N", "label": "notas", "required": False, "kind": "text"},
+            {"key": "D", "label": "document", "required": True, "kind": "text"},
+            {"key": "O", "label": "owner", "required": True, "kind": "text"},
+            {"key": "E", "label": "state", "required": True, "kind": "text"},
+            {"key": "C", "label": "criticality", "required": False, "kind": "text"},
+            {"key": "N", "label": "notes", "required": False, "kind": "text"},
         ],
-        "seed_title": "auditoría legacy",
+        "seed_title": "legacy audit",
     }
 }
 
@@ -521,7 +521,7 @@ class MapStore:
         # (whole-branch QA, HIGH-1).  They now go through `_coerce_str_map`.
         graph.schema = [
             SchemaField(
-                # The owner carries the index: `campo ilegible: schema.key` cannot
+                # The owner carries the index: `unreadable field: schema.key` cannot
                 # be traced back to which entry produced it (Inc-1 review, F7).
                 **_coerce_text_fields(graph, f"schema[{i}]", SchemaField, f),
                 required=f.get("required", False),
@@ -562,7 +562,7 @@ class MapStore:
                 #
                 # THE MESSAGE REPORTING THE REFUSAL WAS PERFORMING THE
                 # MATERIALISATION THE REFUSAL PREVENTED.  The per-key coercion
-                # worked -- `campo ilegible: document[i].name` is emitted two
+                # worked -- `unreadable field: document[i].name` is emitted two
                 # lines up and `doc.name` is already `''` -- and then this line
                 # reached past it to the raw value.  A defence is only as good as
                 # the diagnostic that announces it.
@@ -573,7 +573,7 @@ class MapStore:
                 coordinate = f"document[{i}].name"
                 _warn(
                     graph,
-                    f"documento duplicado: {_raw_origin(doc.name, coordinate)} "
+                    f"duplicate document: {_raw_origin(doc.name, coordinate)} "
                     f"<- {_raw_origin(d.get('name'), coordinate)}"
                 )
             documents[doc.name] = doc
@@ -594,7 +594,7 @@ class MapStore:
                 # Two raw ids coerced to one string; without this the second node's
                 # ficha silently overwrites the first's.  The raw origin is carried
                 # for the same reason as the field-key record above (review G2).
-                _warn(graph, f"nodo duplicado: {nid!r} <- {raw_nid!r}")
+                _warn(graph, f"duplicate node: {nid!r} <- {raw_nid!r}")
             seen_ids.add(nid)
             if nid not in graph.nodes:
                 # A SIDECAR ID THE `.mmd` NEVER DEFINED (`B-29`, `AT-049`).  It
@@ -606,7 +606,7 @@ class MapStore:
                 # silence mattered because `LLR-N13.1.5`'s containment arm, which
                 # `AT-025b` drives, cannot see a damaged sidecar the store does
                 # not report.
-                _warn(graph, f"nodo fantasma: {nid!r}")
+                _warn(graph, f"ghost node: {nid!r}")
                 graph.add_node(Node(id=nid))
             node = graph.nodes[nid]
             text_attrs = _text_attributes()
@@ -614,7 +614,7 @@ class MapStore:
             if not isinstance(raw_fields, dict):
                 # LLR-R03.5: a malformed field never denies the map.  A non-dict
                 # `fields` is a hand-edited shape `_build_sidecar` cannot produce.
-                _warn(graph, f"campo ilegible: {nid}.fields")
+                _warn(graph, f"unreadable field: {nid}.fields")
                 raw_fields = {}
             # The KEY is a text position too, and it was raw: only the value went
             # through the ladder.  Built as a loop rather than a comprehension so a
@@ -633,7 +633,7 @@ class MapStore:
                     # WHICH keys collided (review G2).
                     _warn(
                         graph,
-                        f"campo duplicado: {nid}.{ckey!r} <- {key!r}"
+                        f"duplicate field: {nid}.{ckey!r} <- {key!r}"
                     )
                 coerced_fields[ckey] = _coerce_field(graph, nid, str(key), value)
             node.ficha = Ficha(
@@ -687,7 +687,7 @@ class MapStore:
             # directory -- and the string reaches the `load_or_notice` toast, so
             # it was operator-visible and screenshot-visible.  The map id is what
             # the operator asked for and the only part they can act on.
-            raise MapStoreError(f"no existe el mapa {map_id!r}")
+            raise MapStoreError(f"map does not exist: {map_id!r}")
         try:
             # These reads sat OUTSIDE every net, so invalid UTF-8 in either file
             # raised a bare `UnicodeDecodeError` straight out of `load`, and an
@@ -700,7 +700,7 @@ class MapStore:
             )
         except (OSError, UnicodeDecodeError) as exc:
             raise MapStoreError(
-                f"no se pudo leer {map_id}: {type(exc).__name__}"
+                f"could not read {map_id}: {type(exc).__name__}"
             ) from exc
         try:
             sidecar = yaml.safe_load(yml_text) or {}
@@ -723,7 +723,7 @@ class MapStore:
             # operator through the same sink as every other load failure instead
             # of escaping as an untyped ValueError.
             raise MapStoreError(
-                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible"
+                f"could not read the card of {map_id}: {yml_path.name} unreadable"
             ) from exc
         from .mermaid import CYCLE_ARROW, MermaidError
 
@@ -731,13 +731,13 @@ class MapStore:
             # A top-level list or scalar reached `.get` and raised a bare
             # `AttributeError` out of `load`.  S-11's family.
             raise MapStoreError(
-                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible"
+                f"could not read the card of {map_id}: {yml_path.name} unreadable"
             )
         try:
             graph = self._graph_from_sidecar(mmd_text, sidecar)
         except MermaidError as exc:
             raise MapStoreError(
-                f"el mapa tiene un ciclo: {CYCLE_ARROW.join(exc.cycle)}"
+                f"the map has a cycle: {CYCLE_ARROW.join(exc.cycle)}"
             ) from exc
         except MapStoreError:
             raise
@@ -762,7 +762,7 @@ class MapStore:
             # `_graph_from_sidecar` is permanently indistinguishable from a
             # malformed file.  The path is never interpolated; the type name is.
             raise MapStoreError(
-                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible "
+                f"could not read the card of {map_id}: {yml_path.name} unreadable "
                 f"({type(exc).__name__})"
             ) from exc
         # `G6-C-F8`(b): a two-phase `save()` still has a window between its two
@@ -778,7 +778,7 @@ class MapStore:
         # every other malformed field. The map id only -- no path.
         recorded_hash = sidecar.get("_mmd_hash")
         if recorded_hash is not None and recorded_hash != self._text_hash(mmd_text, ""):
-            _warn(graph, f"mapa desincronizado: {map_id}")
+            _warn(graph, f"map out of sync: {map_id}")
         try:
             self._reindex(map_id, mmd_text, yml_text, graph)
         except MapStoreError:
@@ -789,7 +789,7 @@ class MapStore:
             # the operator.  The type name is diagnostic without leaking one, and
             # the full chain survives on `__cause__` (Inc-1 review, F8).
             raise MapStoreError(
-                f"no se pudo indexar {map_id}: {type(exc).__name__}"
+                f"could not index {map_id}: {type(exc).__name__}"
             ) from exc
         return graph
 
@@ -820,7 +820,7 @@ class MapStore:
         # file at least loaded, so the asymmetry was worse than the defect.
         cycle = graph.find_cycle()
         if cycle is not None:
-            raise MapStoreError(f"el mapa tiene un ciclo: {CYCLE_ARROW.join(cycle)}")
+            raise MapStoreError(f"the map has a cycle: {CYCLE_ARROW.join(cycle)}")
 
         mmd_text = dump(graph)
         sidecar = self._build_sidecar(graph)
@@ -856,7 +856,7 @@ class MapStore:
             self.workspace / f"{map_id}_nodos.yml"
         ).exists():
             raise MapIdError(
-                f"ya existe el mapa {plain(map_id)!r}; elige otro nombre (no se sobrescribe)")
+                f"map {plain(map_id)!r} already exists; choose another name (nothing is overwritten)")
 
     def create(self, map_id: str, graph: Graph) -> None:
         """Write a NEW map.  Unlike `save`, which replaces by design, this refuses
@@ -867,10 +867,10 @@ class MapStore:
     def create_seed(self, map_id: str) -> Graph:
         """Create a new map with a small demo tree so it is immediately navigable."""
         graph = Graph()
-        root = Node(id="root", ficha=Ficha(title=map_id, meta="nuevo mapa"))
+        root = Node(id="root", ficha=Ficha(title=map_id, meta="new map"))
         graph.add_node(root)
-        child_a = Node(id="n1", ficha=Ficha(title="primer hijo", meta="presiona l"))
-        child_b = Node(id="n2", ficha=Ficha(title="segundo hijo", meta="navega con j/k"))
+        child_a = Node(id="n1", ficha=Ficha(title="first child", meta="press l"))
+        child_b = Node(id="n2", ficha=Ficha(title="second child", meta="navigate with j/k"))
         graph.add_node(child_a)
         graph.add_node(child_b)
         graph.add_edge(Edge(parent_id="root", child_id="n1"))

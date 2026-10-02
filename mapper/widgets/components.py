@@ -289,7 +289,7 @@ class DsSpinner(Static):
 
     _FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
-    def __init__(self, frame: int = 0, label: str = "cargando…", disabled: bool = False,
+    def __init__(self, frame: int = 0, label: str = "loading…", disabled: bool = False,
                  **kwargs) -> None:
         super().__init__(**kwargs)
         self.frame = frame
@@ -323,7 +323,7 @@ class DsTextField(_DsBase):
             super().__init__()
             self.value = value
 
-    def __init__(self, value: str = "", placeholder: str = "nombre del mapa…",
+    def __init__(self, value: str = "", placeholder: str = "map name…",
                  **kwargs) -> None:
         super().__init__(**kwargs)
         self.value = value
@@ -411,10 +411,12 @@ class DsChip(_DsBase):
         def control(self) -> "DsChip":
             return self.chip
 
-    def __init__(self, label: str, selected: bool = False, **kwargs) -> None:
+    def __init__(self, label: str, selected: bool = False, toggle: bool = True, **kwargs) -> None:
         super().__init__(**kwargs)
         self.chip_label = label
         self.selected = selected
+        # `Z1`: a chip that only opens something (an attachment) never flips `selected`.
+        self.toggle = toggle
 
     def render(self):
         state = self._state()
@@ -436,7 +438,8 @@ class DsChip(_DsBase):
     def action_activate(self) -> None:
         if self.disabled:
             return
-        self.selected = not self.selected
+        if self.toggle:
+            self.selected = not self.selected
         self.post_message(self.Changed(self, self.selected))
         self.refresh()
 

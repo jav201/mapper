@@ -131,7 +131,7 @@ def test_tc_r17_a_container_field_becomes_empty_and_is_recorded(tmp_path, raw):
     store, map_id = write_map(tmp_path, nodes)
     graph = store.load(map_id)
     assert graph.nodes["root"].ficha.fields["D"] == ""
-    assert "campo ilegible: root.D" in graph.load_warnings
+    assert "unreadable field: root.D" in graph.load_warnings
 
 
 def test_tc_r18_a_non_dict_fields_block_does_not_deny_the_map(tmp_path):
@@ -144,7 +144,7 @@ def test_tc_r18_a_non_dict_fields_block_does_not_deny_the_map(tmp_path):
     store, map_id = write_map(tmp_path, nodes)
     graph = store.load(map_id)
     assert graph.nodes["root"].ficha.fields == {}
-    assert "campo ilegible: root.fields" in graph.load_warnings
+    assert "unreadable field: root.fields" in graph.load_warnings
     assert set(graph.nodes) == {"root", "a"}
 
 
@@ -159,8 +159,8 @@ def test_tc_r19_each_malformed_field_gets_one_spanish_warning(tmp_path):
     store, map_id = write_map(tmp_path, nodes)
     graph = store.load(map_id)
     assert sorted(graph.load_warnings) == [
-        "campo ilegible: a.O",
-        "campo ilegible: root.D",
+        "unreadable field: a.O",
+        "unreadable field: root.D",
     ]
 
 
@@ -255,7 +255,7 @@ def test_at_r08_the_operator_is_told_which_node_and_which_field(tmp_path):
     store, map_id = write_map(tmp_path, nodes)
     graph = store.load(map_id)
 
-    assert graph.load_warnings == ["campo ilegible: a.O"]
+    assert graph.load_warnings == ["unreadable field: a.O"]
     assert "a" in graph.load_warnings[0] and "O" in graph.load_warnings[0]
 
 
@@ -373,7 +373,7 @@ async def test_tc_r20_the_map_screen_tells_the_operator_about_a_malformed_field(
         await pilot.pause()
         await pilot.pause()
 
-        hits = [(m, kw) for m, kw in notices if "campo ilegible: root.D" in m]
+        hits = [(m, kw) for m, kw in notices if "unreadable field: root.D" in m]
         assert hits, notices
         # ... and the map still opened (LLR-R03.5): this is a notice, not an error.
         assert isinstance(app.screen, MapScreen)
@@ -400,7 +400,7 @@ async def test_tc_r20b_a_well_formed_map_produces_no_such_notice(tmp_path):
         await pilot.pause()
         await pilot.pause()
 
-        assert not any("campo ilegible" in n for n in notices), notices
+        assert not any("unreadable field" in n for n in notices), notices
         # The positive control for this absence (C-55): the same harness on the
         # same screen DOES capture the notice in TC-R20, so a zero here is a
         # measurement rather than a probe that cannot fire.
@@ -422,7 +422,7 @@ async def test_tc_r20c_the_home_screen_tells_the_operator_too(tmp_path):
         app.push_screen(HomeScreen())
         await pilot.pause()
 
-        hits = [(m, kw) for m, kw in notices if "campo ilegible: a.O" in m]
+        hits = [(m, kw) for m, kw in notices if "unreadable field: a.O" in m]
         assert hits, notices
         # The markup defense at the OTHER sink, armed independently (F3).  The two
         # sinks are separate call sites, so one assertion cannot cover both.
@@ -448,7 +448,7 @@ def test_tc_r27_save_refuses_a_cyclic_graph_with_the_load_message(tmp_path):
     store = MapStore(tmp_path)
     with pytest.raises(MapStoreError) as exc:
         store.save("poison", cyclic_graph())
-    assert "el mapa tiene un ciclo" in str(exc.value)
+    assert "the map has a cycle" in str(exc.value)
     for nid in ("a", "b", "c"):
         assert nid in str(exc.value)
 
@@ -695,7 +695,7 @@ def test_tc_r37_an_unparseable_sidecar_is_refused_in_spanish_not_raised_raw(tmp_
         store.load("m")
 
     message = str(caught.value)
-    assert "no se pudo leer la ficha" in message, message
+    assert "could not read the card" in message, message
     assert "m_nodos.yml" in message, message
     # The cause is preserved, so the underlying limit is still diagnosable.
     assert isinstance(caught.value.__cause__, ValueError)

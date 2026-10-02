@@ -39,7 +39,7 @@ def _graph(title: str) -> Graph:
 @red("f1")
 async def test_seed2_f1_opening_a_real_map_named_new_leaves_it_byte_identical(tmp_path):
     """The home row select pushes `MapScreen("new")`, which `on_mount` treated as a
-    "make a fresh map" sentinel: both files were replaced by `root[nuevo mapa]`, no toast.
+    "make a fresh map" sentinel: both files were replaced by `root[new map]`, no toast.
 
     RED on `a4f8b42`: sha256 of the `.mmd` and the sidecar change on open."""
     ws = tmp_path / "ws"

@@ -31,9 +31,10 @@ _REQUIREMENTS = (
     pathlib.Path(__file__).resolve().parent.parent / ".dev-flow"
     / "2026-08-26-ui-next-batch-02" / "01-requirements.md"
 )
-_LLR_HEADING = "##### LLR-N13.1.5"
+# EN-4: the string is now declared in English by amendment A-132 (the LLR text is a dated record, not rewritten).
+_LLR_HEADING = "### `A-132`"
 _CARD_STATE_LINE = re.compile(
-    r"Declared card state \(Spanish, the string that ships\):\*\*\s*`([^`]+)`"
+    r"Declared card state \(English, the string that ships\):\*\*\s*`([^`]+)`"
 )
 
 
@@ -49,9 +50,9 @@ def _declared_card_state_string() -> str:
     """
     text = _REQUIREMENTS.read_bytes().decode("utf-8")
     start = text.index(_LLR_HEADING)
-    end = text.index("#####", start + len(_LLR_HEADING))
-    match = _CARD_STATE_LINE.search(text[start:end])
-    assert match, "LLR-N13.1.5's declared card state line is missing or moved"
+    end = text.find("\n### ", start + len(_LLR_HEADING))
+    match = _CARD_STATE_LINE.search(text[start:] if end < 0 else text[start:end])
+    assert match, "A-132's declared card state line is missing or moved"
     return match.group(1)
 
 
@@ -196,7 +197,7 @@ def test_tc_r07_store_load_surfaces_the_cycle_as_a_spanish_map_store_error(tmp_s
     with pytest.raises(MapStoreError) as excinfo:
         tmp_store.load("ciclico")
 
-    assert str(excinfo.value) == f"el mapa tiene un ciclo: a{ARROW}b{ARROW}c{ARROW}a"
+    assert str(excinfo.value) == f"the map has a cycle: a{ARROW}b{ARROW}c{ARROW}a"
 
 
 # ---------------------------------------------------------------- LLR-R01.4
@@ -288,7 +289,7 @@ async def test_tc_r09_home_screen_notices_a_refused_map_and_still_lists_the_rest
 @pytest.mark.parametrize(
     "raised",
     [
-        MapStoreError("el mapa tiene un ciclo: a → b → a"),
+        MapStoreError("the map has a cycle: a → b → a"),
         RuntimeError("algo inesperado"),
         KeyError("root"),
         TypeError("'int' object has no attribute 'strip'"),
@@ -405,7 +406,7 @@ async def test_at_r01_opening_a_cyclic_map_refuses_it_without_killing_the_app(
         await pilot.pause()
 
         assert isinstance(app.screen, MapScreen)
-        assert any("error cargando mapa" in n and "ciclo" in n for n in notices), notices
+        assert any("error cargando mapa" in n and "cycle" in n for n in notices), notices
         assert any(f"a{ARROW}b{ARROW}c{ARROW}a" in n for n in notices), notices
 
         # Still usable: the screen paints and answers a keypress.
@@ -424,7 +425,7 @@ def test_at_r02_the_message_names_the_actual_cycle_not_a_fixed_string(tmp_store)
     with pytest.raises(MapStoreError) as second:
         tmp_store.load("dos")
 
-    prefix = "el mapa tiene un ciclo: "
+    prefix = "the map has a cycle: "
     one, two = str(first.value), str(second.value)
     assert one != two
     # Read the path back out of each message rather than searching for a
