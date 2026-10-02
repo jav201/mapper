@@ -402,9 +402,14 @@ class DsChip(_DsBase):
     """Tag chip."""
 
     class Changed(Message):
-        def __init__(self, selected: bool) -> None:
+        def __init__(self, chip: "DsChip", selected: bool) -> None:
             super().__init__()
+            self.chip = chip
             self.selected = selected
+
+        @property
+        def control(self) -> "DsChip":
+            return self.chip
 
     def __init__(self, label: str, selected: bool = False, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -432,7 +437,7 @@ class DsChip(_DsBase):
         if self.disabled:
             return
         self.selected = not self.selected
-        self.post_message(self.Changed(self.selected))
+        self.post_message(self.Changed(self, self.selected))
         self.refresh()
 
     def on_key(self, event) -> None:

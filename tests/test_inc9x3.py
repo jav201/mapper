@@ -21,7 +21,7 @@ from tests.test_attachments import RecordingLauncher, _open, _seed
 from tests.test_inc9f import NARROW, SIZE
 from tests.test_inc9m import _env
 
-OPEN_STEPS: set[str] = {"chip"}
+OPEN_STEPS: set[str] = set()
 
 V1 = "attachment must be inside the workspace: use a relative path"
 URL = "https://example.com/acta"
