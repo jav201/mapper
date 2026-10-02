@@ -20,9 +20,9 @@ class EditorScreen(ModalScreen[str | None]):
     """Modal editor for a document template source; returns source or None."""
 
     BINDINGS = [
-        ("ctrl+s", "save", "Guardar"),
-        ("escape", "cancel", "Cancelar"),
-        ("tab", "toggle_preview", "Prever"),
+        ("ctrl+s", "save", "Save"),
+        ("escape", "cancel", "Cancel"),
+        ("tab", "toggle_preview", "Preview"),
     ]
 
     CSS = """
@@ -80,7 +80,7 @@ class EditorScreen(ModalScreen[str | None]):
             TextArea(text=self.source, language="markdown", id="editor-textarea"),
             Static(self._render_preview(self.source), id="editor-preview"),
             Static(self._detected_line(self.source), id="editor-detected"),
-            Static("ctrl+s salvar  ·  esc cancelar  ·  tab prever", id="editor-hints"),
+            Static("ctrl+s save  ·  esc cancel  ·  tab preview", id="editor-hints"),
             id="editor-dialog",
         )
 
@@ -92,13 +92,13 @@ class EditorScreen(ModalScreen[str | None]):
 
     def _detected_line(self, source: str) -> Text:
         tags = self._detected_tags(source)
-        parts: list[tuple[str, str]] = [("detectados: ", darkside.MUT)]
+        parts: list[tuple[str, str]] = [("detected: ", darkside.MUT)]
         for i, tag in enumerate(tags):
             if i > 0:
                 parts.append((", ", darkside.MUT))
             parts.append((escape(tag), darkside.INK))
         if not tags:
-            parts.append(("ninguno", darkside.MUT))
+            parts.append(("none", darkside.MUT))
         return Text.assemble(*parts)
 
     def _render_preview(self, source: str) -> Text:

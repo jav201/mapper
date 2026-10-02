@@ -185,7 +185,7 @@ CONFORMING_SEVERITY = {
     # file-derived. The CLASSIFICATION is unchanged -- this is still the ALERT
     # hue on a missing-fields list -- only the coercion moved.
     ("mapper/screens/coverage.py", '(darkside.plain(",".join(missing)), darkside.ALERT)'),
-    ("mapper/screens/factory.py", '("no se puede dibujar: el mapa tiene un ciclo", darkside.ALERT)'),
+    ("mapper/screens/factory.py", '("cannot draw: the map has a cycle", darkside.ALERT)'),
     ("mapper/screens/factory.py", 'return Text.assemble((self._missing_text(reason), darkside.ALERT))'),
     ("mapper/screens/factory.py", 'parts.append((escape(f"{{{{{key}}}}}"), darkside.ALERT))'),
     ("mapper/views/lane.py", '"risk": darkside.WARN,'),

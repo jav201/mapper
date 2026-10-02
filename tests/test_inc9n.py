@@ -219,7 +219,7 @@ async def test_inc9n_f1_pin_a_workspace_relative_document_still_previews(tmp_pat
         for _ in range(4):
             await pilot.pause()
         frame = _flat(screen)
-        assert "hola" in frame and "archivo de plantilla no encontrado" not in frame, frame
+        assert "hola" in frame and "template file not found" not in frame, frame
         got = screen._office_path(screen.graph.documents["plantilla"])
         assert got is not None and got.is_file()
 
@@ -300,7 +300,7 @@ async def test_inc9n_f2_the_csv_prompt_requires_a_file_not_a_directory(tmp_path,
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / "d.csv"))
-        assert toasts == ["archivo no encontrado: d.csv"], toasts
+        assert toasts == ["file not found: d.csv"], toasts
 
 
 @red("f2")
@@ -313,7 +313,7 @@ async def test_inc9n_f2_the_office_prompt_requires_a_file_not_a_directory(tmp_pa
         app.push_screen(FactoryScreen(_doc_graph("x.docx"), process_name="demo"))
         await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / "t.docx"))
-        assert toasts == ["archivo no encontrado: t.docx"], toasts
+        assert toasts == ["file not found: t.docx"], toasts
 
 
 @red("f2")
@@ -393,7 +393,7 @@ async def test_inc9n_u1_pin_a_missing_accepted_path_keeps_naming_its_file(surfac
             app.push_screen(FactoryScreen(_doc_graph("x.docx"), process_name="demo"))
             await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / f"missing.{ext}"))
-        assert toasts == [f"archivo no encontrado: missing.{ext}"], toasts
+        assert toasts == [f"file not found: missing.{ext}"], toasts
 
 
 @red("u1")

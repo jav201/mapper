@@ -31,7 +31,7 @@ _TAG_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
 
 # `V2` (Round 11): the template exists as a path, but outside the workspace; derived from the text alone.
 TEMPLATE_OUTSIDE = "template outside the workspace: import it with i"
-TEMPLATE_MISSING = "archivo de plantilla no encontrado"
+TEMPLATE_MISSING = "template file not found"
 # `W1` (Round 12): the generate refusal says where to rename the document; a separate sentence for the node id.
 # Neither names anything typed.
 DOC_NAME_NOT_A_FILE_NAME = "document name cannot be a file name: rename it in the map's _nodos.yml (documents)"
@@ -171,7 +171,7 @@ class FactoryScreen(Screen):
     def __init__(
         self,
         graph: Graph,
-        process_name: str = "proceso",
+        process_name: str = "process",
         node_id: str | None = None,
         document_name: str | None = None,
         map_id: str | None = None,
@@ -284,7 +284,7 @@ class FactoryScreen(Screen):
             return self._tree_text()
         except ValueError:
             return Text.assemble(
-                ("no se puede dibujar: el mapa tiene un ciclo", darkside.ALERT)
+                ("cannot draw: the map has a cycle", darkside.ALERT)
             )
 
     def _tree_text(self) -> Text:
@@ -357,7 +357,7 @@ class FactoryScreen(Screen):
     def _preview(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
         if node is None or not self.document_name:
-            return Text.assemble(("sin documento", darkside.MUT))
+            return Text.assemble(("no document", darkside.MUT))
         doc = self.graph.resolve_document(self.document_name, node)
 
         if self._is_office(doc):
@@ -398,7 +398,7 @@ class FactoryScreen(Screen):
             pos = end
         if pos < len(doc.source):
             parts.append((escape(doc.source[pos:]), darkside.INK))
-        return Text.assemble(*parts) if parts else Text.assemble(("(vacío)", darkside.MUT))
+        return Text.assemble(*parts) if parts else Text.assemble(("(empty)", darkside.MUT))
 
     def _tags_table(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
@@ -418,7 +418,7 @@ class FactoryScreen(Screen):
                 parts.append((f"{{{{{escape(key)}}}}}  ", darkside.ACCENT))
                 parts.append((f"{escape(local) or '-'}  ", darkside.INK))
                 parts.append((f"{escape(inherited) or '-'}\n", darkside.MUT))
-            return Text.assemble(*parts) if parts else Text.assemble(("(sin tags)", darkside.MUT))
+            return Text.assemble(*parts) if parts else Text.assemble(("(no tags)", darkside.MUT))
 
         parts: list[tuple[str, str]] = []
         for key in sorted(set(doc.tags) | set(_TAG_RE.findall(doc.source))):
@@ -438,7 +438,7 @@ class FactoryScreen(Screen):
         self.query_one("#factory-tree", Static).update(self._tree_lines())
         preview = self.query_one("#factory-preview", Static)
         preview.update(Text.assemble(
-            (self.document_name or "documento", f"bold {darkside.INK}"), "\n\n",
+            (self.document_name or "document", f"bold {darkside.INK}"), "\n\n",
             self._preview(), "\n\n",
             ("tags", f"bold {darkside.MUT}"), "\n",
             self._tags_table(),
@@ -516,11 +516,11 @@ class FactoryScreen(Screen):
             # resolves to the user profile, and a toast is painted and logged.
             name = Path(path_str).name
             if not source.is_file():
-                self.notify(darkside.plain(f"archivo no encontrado: {name}"), severity="error", markup=False)
+                self.notify(darkside.plain(f"file not found: {name}"), severity="error", markup=False)
                 return
             kind = source.suffix.lower().lstrip(".")
             if kind not in {"docx", "pptx", "xlsx"}:
-                self.notify("solo .docx / .pptx / .xlsx", severity="error")
+                self.notify("only .docx / .pptx / .xlsx", severity="error")
                 return
             store = self.app.store  # type: ignore[attr-defined]
             # `INC9O-CR-F2`: the target is judged by the one rule (a `templates` junction is not followed); the
@@ -538,11 +538,11 @@ class FactoryScreen(Screen):
                 # `INC9BC-SEC-F4`: the file's name and the exception TYPE, never
                 # `str(exc)` (an `OSError` embeds the absolute path).
                 self.notify(
-                    darkside.plain(f"no se pudo importar {name}: {type(exc).__name__}"),
+                    darkside.plain(f"could not import {name}: {type(exc).__name__}"),
                     severity="error", markup=False)
                 return
             # `G6-C-F1`: `rel` carries `source.name`, itself carrying whatever
-            # the operator typed at the "ruta del archivo office" prompt.
+            # the operator typed at the "office file path" prompt.
             rel = darkside.plain(target.relative_to(Path(store.workspace).resolve()).as_posix())
             self.graph.documents[self.document_name] = Document(
                 name=self.document_name,
@@ -552,10 +552,10 @@ class FactoryScreen(Screen):
             )
             self._persist()
             self._refresh()
-            self.notify(darkside.plain(f"plantilla importada: {rel}"), markup=False)
+            self.notify(darkside.plain(f"template imported: {rel}"), markup=False)
 
         self.app.push_screen(
-            _PromptScreen("ruta del archivo office", "C:\\path\\to\\template.docx"),
+            _PromptScreen("office file path", "C:\\path\\to\\template.docx"),
             callback=on_path,
         )
 
@@ -565,7 +565,7 @@ class FactoryScreen(Screen):
             return
         doc = self.graph.resolve_document(self.document_name, node)
         if not self._is_office(doc):
-            self.notify("el documento actual no es office")
+            self.notify("the current document is not an office file")
             return
         path, reason = self._template(doc)
         if path is None or not path.exists():
@@ -601,10 +601,10 @@ class FactoryScreen(Screen):
             # `INC9-SEC-F1`: the workspace-relative name and the exception TYPE, never the
             # workspace's absolute path or `str(exc)` (`_save_or_toast`'s rule).
             shown = target.relative_to(Path(store.workspace).resolve()).as_posix()
-            self.notify(darkside.plain(f"generado: {shown}"), markup=False)
+            self.notify(darkside.plain(f"generated: {shown}"), markup=False)
         except Exception as exc:
             self.notify(
-                darkside.plain(f"no se pudo generar: {type(exc).__name__}"),
+                darkside.plain(f"could not generate: {type(exc).__name__}"),
                 severity="error", markup=False)
 
     def action_start_node(self) -> None:

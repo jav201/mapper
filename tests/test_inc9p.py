@@ -39,7 +39,7 @@ OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 
-MISSING = "archivo de plantilla no encontrado"
+MISSING = "template file not found"
 # Inc-9q (X1, Round 13): one hard-link sentence per site; Inc-9p had a single, non-ruled sentence.
 HARD_TEMPLATE = "template has several hard links: replace it with a plain copy"
 HARD_OUTPUT = "output file has several hard links: delete or rename it"
@@ -324,7 +324,7 @@ async def test_inc9p_w2_the_factory_preview_and_generate_say_the_link_sentence(s
 ])
 async def test_inc9p_w2_pin_the_other_template_refusals_say_u1_or_not_found(doc_path, expected, tmp_path, monkeypatch):
     """Inc-9q (X2): a template the path rule refuses (allow-list, normalised) says U1; only a missing template
-    keeps `archivo de plantilla no encontrado`.  (Inc-9p declared the old text for all of them.)"""
+    keeps `template file not found`.  (Inc-9p declared the old text for all of them.)"""
     _env(monkeypatch, tmp_path)
     app = MapperApp(tmp_path)
     toasts = _toasts(app)
@@ -457,7 +457,7 @@ async def test_inc9p_sec_f2_generate_writes_a_sibling_and_replaces_it_onto_the_t
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         _, toasts = await _generate(app, pilot, _doc_graph("docs/t.docx"))
-        assert toasts == ["generado: plantilla-root.docx"], toasts
+        assert toasts == ["generated: plantilla-root.docx"], toasts
     assert len(spy.calls) == 1, spy.calls
     src, dst = spy.calls[0]
     assert pathlib.Path(dst).name == "plantilla-root.docx" and src != dst
@@ -480,7 +480,7 @@ async def test_inc9p_sec_f2_a_failed_generate_leaves_no_temporary_file(tmp_path,
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         _, toasts = await _generate(app, pilot, _doc_graph("docs/t.docx"))
-        assert toasts == ["no se pudo generar: OSError"], toasts
+        assert toasts == ["could not generate: OSError"], toasts
     assert _ws_tree(ws) == ["docs", "docs\\t.docx"], _ws_tree(ws)
 
 
@@ -554,7 +554,7 @@ async def test_inc9p_sec_f3_pin_an_accented_name_still_generates(tmp_path, monke
             await pilot.pause()
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [f"generado: {name}-root.docx"], toasts
+        assert toasts == [f"generated: {name}-root.docx"], toasts
     assert (ws / f"{name}-root.docx").is_file()
 
 
@@ -614,7 +614,7 @@ async def test_inc9p_cr_f2_pin_a_plain_import_copies_into_templates(tmp_path, mo
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         toasts = await _import(app, pilot, src)
-        assert "plantilla importada: templates/t.docx" in toasts, toasts
+        assert "template imported: templates/t.docx" in toasts, toasts
     assert (ws / "templates" / "t.docx").read_bytes() == src.read_bytes()
     assert _ws_tree(ws) == ["templates", "templates\\t.docx"], _ws_tree(ws)
 
@@ -657,7 +657,7 @@ async def test_inc9p_cr_f5_a_name_starting_with_a_tilde_or_dash_generates_inside
             await pilot.pause()
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [f"generado: {name}-root.docx"], toasts
+        assert toasts == [f"generated: {name}-root.docx"], toasts
     assert (ws / f"{name}-root.docx").is_file()
 
 

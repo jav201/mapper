@@ -82,6 +82,12 @@ async def test_inc9x3_a_key_on_a_file_chip_opens_the_resolved_inside_path(key, s
             await pilot.pause()
         assert launcher.calls == [str((tmp_path / "docs" / "x.pdf").resolve())], launcher.calls
         assert "abierto" in _strip(screen) and "plan" in _strip(screen), _strip(screen)
+        # `X3-REV-F1`: the same chip opens again; a `control` that answers only once cannot pass this.
+        await pilot.press(key)
+        for _ in range(3):
+            await pilot.pause()
+        resolved = str((tmp_path / "docs" / "x.pdf").resolve())
+        assert launcher.calls == [resolved, resolved], launcher.calls
 
 
 @red("chip")
