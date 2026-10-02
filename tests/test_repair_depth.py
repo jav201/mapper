@@ -99,9 +99,16 @@ GOLDEN_SIZES = ((140, 45), (80, 24), (140, 8), (300, 120))
 # matches the pin's).  Layered: `árbol legacy` -> `atlas . legacy tree`;
 # Radial: `mapa mental` -> `mind map`.  The four Outline keys are unmoved: its
 # header already spelled `outline`, and were NOT re-captured.
+# EN-3: the eight Layered and Outline digests below were RE-DERIVED when the views' labels became English; the four
+# Radial digests did not move.  Both sides were rendered by this file's own helpers (`_legacy_graph`, `_fingerprint`,
+# `selected_id="fin"`): the base tree's digests equal the ones pinned before this change, so the harness reads the same
+# thing.  Each render was cut into (substring, style) segments; with only `sin acta -> no record` (the card chip),
+# `nodos -> nodes`, `sin acta -> no record` (the collapsed-branch note) and `fuera de vista -> out of view` (the overflow
+# declaration) applied to the base segments, the two segment lists are identical at all twelve keys.  The card chip is
+# padded to the same width, so no cell moved; the declaration is 3 cells shorter and the branch note 1 cell longer.
 MASTER_LEGACY_DIGESTS = {
-    ("LayeredRenderer", 140, 45): "f7b8be1fd4ee5229af6f254558b465065ceb87b3f5b6aaa6f59297e89f016588",
-    ("LayeredRenderer", 80, 24): "1b70f1152dbb6cbf35ecb190da1fbc8d2a512b8525c66bff6ee448c52f04d6fc",
+    ("LayeredRenderer", 140, 45): "d8d5d54f9ba7d524bc105e6fb621fc6026aa3bbbfc35c2d95a646f19c0af6a56",
+    ("LayeredRenderer", 80, 24): "03a21c9a99b9f21c6df63c319676631d9dee69e320f61b270febb08185e8cee9",
     # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-3.  REASON: this
     # is the only one of the four `LayeredRenderer` sizes at which `legacy` has
     # an unpainted node (4 of 8; the other three paint 8 of 8), so it is the only
@@ -118,10 +125,10 @@ MASTER_LEGACY_DIGESTS = {
     # predicted GREEN, verified GREEN and NOT re-captured.  Re-capturing a
     # predicted-green digest is a gate failure: a red pin is evidence, a
     # re-captured pin is a claim.
-    ("LayeredRenderer", 140, 8): "a0bd757b4703659274af1bac500fc10d11dfd90eae1942eff0d339a511177a57",
-    ("LayeredRenderer", 300, 120): "da670df87a118b46917be6b4e892425e522ceb8e50fcaa5972eb6ce40a6e1c4b",
-    ("OutlineRenderer", 140, 45): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
-    ("OutlineRenderer", 80, 24): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
+    ("LayeredRenderer", 140, 8): "fa94ea4ae679013f78dcee01a8a65474a3f90b45d344e6a4e92d9ad38c26e730",
+    ("LayeredRenderer", 300, 120): "1dcaeda1e72402087b5a9f9ca32de9fcad56f65a9bc976459a9890f8eb4c2f10",
+    ("OutlineRenderer", 140, 45): "2479d5522cba412b1efbf6bd02b934ed36a8c97c22cf77a15385338b25617269",
+    ("OutlineRenderer", 80, 24): "2479d5522cba412b1efbf6bd02b934ed36a8c97c22cf77a15385338b25617269",
     # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-B55a.  REASON:
     # `B-55` landed, so `OutlineRenderer` now DECLARES the nodes it hides, and
     # this is the only Outline key at which `legacy` has an unpainted node -- the
@@ -147,8 +154,8 @@ MASTER_LEGACY_DIGESTS = {
     # behaviour this digests (`H1` refined: a declaration must not spend content
     # and INFORM NOTHING).  Deliberately NOT blessed before that ruling -- pinning
     # a frame an open question may still change pins the wrong frame.
-    ("OutlineRenderer", 140, 8): "85060bae8a69a793169ae8aeec31ac7535773868acdf810264965f8c739fd51e",
-    ("OutlineRenderer", 300, 120): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
+    ("OutlineRenderer", 140, 8): "e17d812c554d2686daac1fad4d6cabbd265ca7f2e1991d910f155b5431c098b0",
+    ("OutlineRenderer", 300, 120): "2479d5522cba412b1efbf6bd02b934ed36a8c97c22cf77a15385338b25617269",
     # The four RadialRenderer keys below were RE-BASELINED in
     # 2026-08-26-ui-next-batch-02 Inc-1, and the move is CORRECT behaviour, not
     # a regression: `Canvas.rows()` now composes the `dots` and `bgs` layers it
@@ -186,10 +193,9 @@ MASTER_FACTORY_TREE_DIGEST = (
     "9ffadc425a42d976af8a0898e7967b71e8e839e4bb60c44bd4a6e3880dff9af4"
 )
 
-# Spanish UI fragments, built from code points so this file stays ASCII and a
-# mangled accent cannot pass unnoticed (same discipline as test_repair_cycles).
-OMITTED = "Se omiti" + chr(0xF3)          # "Se omitió"
-OVER_BOUND = "supera el l" + chr(0xED) + "mite"   # "supera el límite"
+# The over-bound notice's fragments (English since EN-3): one names the bound, one names the omission.
+OMITTED = "not drawn"
+OVER_BOUND = "exceeds the"
 CYCLE_NOTICE = "the map has a cycle"
 FACTORY_CYCLE_NOTICE = "the map has a cycle"  # the factory tree's sentence; the rail's is the same since EN-2
 GUARD_MESSAGE = "cycle through"

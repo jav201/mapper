@@ -50,7 +50,7 @@ def overflow_phrase(hidden: int) -> str:
     `layered` lead with two spaces inside a header, the strip trails one.  That
     is layout, not wording, and it is the wording that had to stop drifting.
     """
-    return f"{OVERFLOW_TOKEN} {hidden} fuera de vista"
+    return f"{OVERFLOW_TOKEN} {hidden} out of view"
 FOLD_PILL_TOKEN = "▸"
 
 # The coverage percentage `header_rows` prices the meter at.  Any value does:
@@ -182,8 +182,8 @@ def _degraded(n: int, legacy: bool) -> Text:
     out.append(_view_label(legacy), style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
-        f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
-        "Se omitió el dibujo del árbol completo (fichas, aristas y cobertura).",
+        f"map of {n} nodes exceeds the {MAX_RENDER_NODES}-node limit; "
+        "the full tree (cards, edges and coverage) was not drawn.",
         style=darkside.WARN,
     )
     return out
@@ -443,7 +443,7 @@ def _header_line(
         header.append(" " * max(0, avail - 48))
         header.append(darkside.step_meter(filled, 5))
     header.append(" " * max(0, avail - 30))
-    header.append(f"{len(graph.nodes)} nodos", style=darkside.MUT)
+    header.append(f"{len(graph.nodes)} nodes", style=darkside.MUT)
     # HLR-N06.3 — the declaration, and it is an identity: the numeral is
     # `len(graph.nodes) - |painted|` over the set THIS pass computed, never a
     # fold count added to a viewport count.  LLR-N06.3.3 is the `if`: while
@@ -613,7 +613,7 @@ class LayeredRenderer:
             if legacy:
                 # row 2: document chip
                 doc = node.ficha.fields.get("D", "")
-                doc_txt = f"◫ {doc}" if doc else "◫ sin acta"
+                doc_txt = f"◫ {doc}" if doc else "◫ no record"
                 doc_style = darkside.INK if doc else darkside.ALERT
                 cv.text(cx + 1, y + 1, _fit(doc_txt, card_w - 2), doc_style)
                 # row 3: schema letters
@@ -676,7 +676,7 @@ class LayeredRenderer:
         if removed_ids:
             gy = tree_bottom + 1 - geo.pan_y
             cv.text(0, gy, "─" * avail, darkside.STEP)
-            cv.text(1, gy + 1, "eliminados", darkside.MUT)
+            cv.text(1, gy + 1, "removed", darkside.MUT)
             gx = 12
             for nid in sorted(removed_ids):
                 title = removed_titles.get(nid, nid)

@@ -97,8 +97,8 @@ def _degraded(n: int) -> Text:
     out.append(f" · {darkside.VIEW_NAMES['radial']}", style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
-        f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
-        "Se omitió el dibujo radial completo (nodos, aristas y etiquetas).",
+        f"map of {n} nodes exceeds the {MAX_RENDER_NODES}-node limit; "
+        "the full radial drawing (nodes, edges and labels) was not drawn.",
         style=darkside.WARN,
     )
     return out
