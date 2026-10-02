@@ -1,9 +1,10 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
 Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app`.  `github` may import
-`osopen.safe_local_path`; `screens` that name plus `confine_reason`, `refusal_sentence`, `hard_linked`, `is_link` and the two sentence
-constants `PATH_NOT_SUPPORTED`, `PATH_THROUGH_LINK` (Inc-9q, `A-125`; Inc-9p's `PATH_OUTSIDE_WORKSPACE` is no longer
-imported by a screen, and `lexically_outside` is gone): none of them launches anything.  Derived from the modules' own ASTs, so
+`osopen.safe_local_path`; `screens` that name plus `confine_reason`, `refusal_sentence`, `hard_linked`, `is_link` and the sentence
+constant `PATH_NOT_SUPPORTED` (Inc-9q, `A-125`; Inc-9p's `PATH_OUTSIDE_WORKSPACE` is no longer
+imported by a screen, and `lexically_outside` is gone; Inc-9r, `A-126`: `PATH_THROUGH_LINK` is gone too, generate
+maps its refusals through `refusal_sentence`): none of them launches anything.  Derived from the modules' own ASTs, so
 a new caller fails the test instead of passing a hand-listed expectation.
 """
 from __future__ import annotations
@@ -77,7 +78,7 @@ def _osopen_imports(tree: ast.AST):
 ALLOWED_OUTSIDE_APP = {
     "github.py": {"safe_local_path"},
     "screens/factory.py": {"safe_local_path", "confine_reason", "refusal_sentence", "hard_linked", "is_link",
-                           "PATH_NOT_SUPPORTED", "PATH_THROUGH_LINK"},
+                           "PATH_NOT_SUPPORTED"},
 }
 
 
@@ -141,7 +142,7 @@ def test_the_architecture_map_says_what_the_modules_import():
     osopen_row = _row(section, "osopen")
     assert "`osopen.safe_local_path`" in github_row and "`design`" in github_row, github_row
     for name in ("safe_local_path", "confine_reason", "refusal_sentence", "hard_linked", "is_link",
-                 "PATH_NOT_SUPPORTED", "PATH_THROUGH_LINK"):
+                 "PATH_NOT_SUPPORTED"):
         assert f"`osopen.{name}`" in screens_row, (name, screens_row)
     assert "`osopen.PATH_OUTSIDE_WORKSPACE`" not in screens_row, screens_row
     assert "`open_external` is referenced only from `app`" in osopen_row, osopen_row
