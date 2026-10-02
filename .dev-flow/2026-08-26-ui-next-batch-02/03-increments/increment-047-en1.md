@@ -92,3 +92,7 @@ C1..C4 are killed ONLY by the census arm: no existing test pins the osopen words
 - Left for EN-5 (declared): `app.py:1044` `archivo no encontrado: {name}` (the csv prompt; pinned in `test_inc9m` and `test_inc9n`); `app.py:3456` `abierto`; `app.py:1265` `iniciando` / `leyendo ramas` / `calculando métricas` / `listo`; the tests that pin them (`test_inc9x3`, `test_inc9f`, `test_inc9h`, `test_inc9i`) and the `test_app.py` fake-callback `listo`.
 - Unmeasured: no rendered editor or factory screen was captured in this increment (the editor labels have no test beyond the census); POSIX; the source files outside EN-1.
 - Suggested next: EN-2 (`coverage`, `settings`, `inspector`, `rail`).
+
+## Full-lane result
+
+`2653 passed, 24 deselected, 3 xfailed` (0 failed) in 1650 s (27 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `f31480e` (the first lane, on `0e20cc6`, is the 7-failure run above), temp HOME, run as the last step. Baseline 2648/0; the delta is the 5 new `test_en1.py` items (the `test_inc9x3` assertion adds no item).
