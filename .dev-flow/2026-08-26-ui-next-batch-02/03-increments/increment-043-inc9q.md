@@ -140,3 +140,7 @@ The 87-column width is covered by the `NARROW` params of the CR-F3 and X2 arms, 
 - `40b33e6` the arms, strict xfail.
 - `3eb6263` the implementation (3 source files, tests, `ARCHITECTURE.md`).
 - the simplification of `_write_via_sibling`, `A-125` and this record (below).
+
+## Full-lane result
+
+`2570 passed, 24 deselected, 3 xfailed` (0 failed) in 1267 s (21 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `0c95883`, run AFTER the record was final except this section. Baseline 2510/0; the delta is the new `test_inc9q.py` arms (60). The 3 xfailed are pre-existing. After this section was appended only this `.md` changed; `tests/test_no_operator_paths.py` was re-run alone and the lane was NOT re-run in full.
