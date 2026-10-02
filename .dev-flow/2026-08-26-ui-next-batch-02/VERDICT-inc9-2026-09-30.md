@@ -250,3 +250,22 @@ Coordinator rulings for the next increment: the import's unreadable-target sente
 `templates folder could not be checked: use a real folder named templates inside the workspace`
 (INC9P-CR-F3); an attachment that is a hard link at open time gets
 `attachment has several hard links: replace it with a plain copy` (INC9P-SEC-F3, same pattern as X1).
+
+---
+
+# Round 14 — Inc-9q reviews (2026-10-02, base `67732a0`)
+
+security PASS (first round of the Inc-9 line with no HIGH/MEDIUM; two LOW: INC9Q-SEC-F1 MAX_PATH counted
+in code points not UTF-16 units, F2 preview reads a hard-linked template generate refuses). code
+BLOCK-UNTIL INC9Q-CR-F1 (HIGH: the lexical tail chosen for step 4 dropped the base's final-resolve
+backstop — with a simulated lstat not-found on a real junction the head launches an outside file the
+base refused, and an arm asserts the weak result); CR-F2/F3 MEDIUM (generate's inline mapping blames the
+document name for a long-path `unreadable`; the MAX_PATH rule over-refuses when long paths are enabled).
+ux PASS-WITH-NOTICES (X1, X2 discharged). One question was put to the operator; it took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| Y1 · INC9Q-UX-F1 | A path with `:` is refused with U1, which does not name the cause | Frase propia | `path not supported: ":" is not allowed in a file name` — fixed, echoes nothing; needs its own reason code |
+
+Coordinator ruling (INC9Q-CR-F1): keep the walked-prefix result AND ask the OS what the consumer will
+reach; refuse as `link` when the two disagree, and as `outside` when the walked result leaves the workspace.
