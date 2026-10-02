@@ -10841,3 +10841,21 @@ links are junctions or symlinks to a LOCAL directory under a temp path, and spie
 **Trace.** Standalone, like `A-113`..`A-126`. Carried by `tests/test_inc9s.py` and the record.
 
 **What is not claimed.** Windows only; nothing was run on POSIX. The `Cs` refusal is on the text; whether the Windows API accepts any lone surrogate in a name is not claimed either way. `hard_linked` as a pseudo-reason in `_missing_text` (`INC9R-CR-F2`) stays in `B-81`. The other `B-79` and `B-80` residuals are untouched.
+
+### `A-128` -- an attachment chip opens with real keys and a real click (`Inc-X3`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc9-2026-09-30.md` Round 13, **X3** ("a small increment right after the Inc-9 line closes, with a real-key test"), and the Inc-9p ux review finding `INC9P-UX-F1`. The record is `increment-046-x3.md`.
+
+**Statement.** Standalone; amends no earlier decision.
+
+1. **The defect (pre-existing since about `e359148`).** In the map inspector `tab` reaches an attachment chip (`insp-att-N`), but `enter`, `space` and a click did nothing: no toast, nothing opened.
+2. **Cause (confirmed by reading `DsChip`, `FichaInspector` and Textual 8.2.8).** `DsChip.action_activate` posts `DsChip.Changed(selected)`, which carried no widget. `FichaInspector.on_ds_chip_changed` reads `event.control`; `textual.message.Message.control` is a property that returns `None` unless a subclass defines it, so `hasattr(event, "control")` is True and the value is `None`, `widget_id` is `""`, the `insp-att-` prefix test fails and the handler returns silently. Every earlier arm posted `FichaInspector.AttachmentActivated` by hand, which skips that hop.
+3. **Fix (1 source file).** `DsChip.Changed` takes the chip, stores it as `chip`, and defines `control` to return it (the convention Textual's own messages follow). `DsChip.action_activate` posts `Changed(self, self.selected)`. `FichaInspector` is unchanged.
+4. **Not changed.** The open-time path policy (`_path_refusal` / `open_external` / `confine`) is untouched; its sentences (`V1`, `U1`) and the launcher injection are as sealed. Activating a chip still toggles its `selected` flag, as before.
+5. **Arms** (`tests/test_inc9x3.py`, 14 items): real `tab`/`enter`/`space`/`I` or a real click, never a posted `AttachmentActivated`; the launcher is a recording stub in every arm. At 87 columns `I` is pressed first because the inspector is hidden there.
+
+**Sealed-arm changes.** None.
+
+**Trace.** Standalone, like `A-113`..`A-127`. Carried by `tests/test_inc9x3.py` and the record.
+
+**What is not claimed.** Windows only; nothing was run on POSIX. The final hop to the operating system (MAN-01) is not exercised: the launcher is stubbed. Terminal mouse input is Pilot's synthetic click, not a real terminal's.
