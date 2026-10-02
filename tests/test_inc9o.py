@@ -295,8 +295,7 @@ def test_inc9o_confine_fails_closed_when_a_component_cannot_be_inspected(tmp_pat
 # ---------------------------------------------------------------------------
 # `open_external` and the factory use the same rule (the three copies are gone)
 
-@red("walk")
-@pytest.mark.parametrize("leads_out", [True, False])
+@pytest.mark.parametrize("leads_out", [True, pytest.param(False, marks=_red_mark("walk"))])
 def test_inc9o_open_external_refuses_a_link_inside_the_workspace(leads_out, tmp_path):
     """Whether the link leads outside (the old `resolve()` caught it) or stays inside (only the walk does)."""
     ws = tmp_path / "ws"
@@ -415,7 +414,6 @@ async def test_inc9o_v1_opening_an_outside_file_toasts_the_workspace_sentence(ta
         assert launcher.calls == []
 
 
-@red("v1")
 @pytest.mark.parametrize("size", [SIZE, NARROW])
 async def test_inc9o_v1_opening_a_unc_file_keeps_the_allow_list_sentence(size, tmp_path, monkeypatch):
     _env(monkeypatch, tmp_path)
@@ -443,7 +441,8 @@ async def test_inc9o_v1_opening_a_file_behind_a_link_toasts_the_workspace_senten
         assert launcher.calls == []
 
 
-@pytest.mark.parametrize("home_inside", [True, pytest.param(False, marks=_red_mark("v1"))])
+@pytest.mark.parametrize("home_inside", [pytest.param(True, marks=_red_mark("confine")),
+                                         pytest.param(False, marks=_red_mark("v1"))])
 async def test_inc9o_a_tilde_is_judged_the_same_at_add_and_at_open(home_inside, tmp_path, monkeypatch):
     ws = tmp_path / "ws"
     (ws / "docs").mkdir(parents=True)
@@ -571,7 +570,6 @@ async def test_inc9o_v2_pin_every_other_missing_template_keeps_the_existing_text
     assert spy.hits == [], spy.hits
 
 
-@red("v2")
 async def test_inc9o_v2_a_template_behind_a_link_is_not_called_outside(tmp_path, monkeypatch):
     """Not decided by text: a link is refused by the walk, and the existing text is kept (V2 is lexical)."""
     _env(monkeypatch, tmp_path)
