@@ -176,3 +176,7 @@ The CR-F2 toast is the render of a simulated failure (`os.lstat` raising `Permis
 
 - `b2fa9aa` the arms, strict xfail.
 - the implementation (3 source files, tests, `ARCHITECTURE.md`), then `A-126` and this record.
+
+## Full-lane result
+
+`2621 passed, 24 deselected, 3 xfailed` (0 failed) in 1334 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `857cf0b`, run AFTER the record was final except this section, with a temp HOME and a git identity from the environment. Baseline 2570/0; the delta is the new `test_inc9r.py` arms and the added `sub/l:$I30` params. The 3 xfailed are pre-existing. **A first lane run on the same head failed 5 `test_github` tests** (`git commit` exit 128, "Author identity unknown"): my own environment error (a temp HOME with no git identity), not code; the lane was re-run in full with the identity variables and is the result above. After this section was appended only this `.md` changed; the lane was NOT re-run.
