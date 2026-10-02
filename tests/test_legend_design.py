@@ -78,7 +78,7 @@ KEY_GLYPHS = frozenset(
 
 
 #: X2's non-ASCII half: the separators the catalogue found painted AS TEXT
-#: (`mapa · 36n`, a clipped title's `…`, the sala's `—`).  Named, not a
+#: (`map · 36n`, a clipped title's `…`, the sala's `—`).  Named, not a
 #: category: `P*` as a whole would also have excused a `•` or a `‹` that a
 #: renderer started using as a mark (`INC8-F-CR-F2`).
 SEPARATORS = frozenset("·…—")
@@ -269,7 +269,7 @@ _ON_BOTH = [(factory, f"{factory.__name__}-{label}", keys)
             for factory in (legacy_map, concept_map) for label, keys in _WALKS]
 #: `INC8-D3-F1`: the selection on a node missing its record (`rrhh1`, the
 #: legacy fixture's second `rrhh` leaf).  No state above selected one, so the
-#: inspector's `<field>  requerido` in `ALERT` -- painted by EVERY map view --
+#: inspector's `<field>  required` in `ALERT` -- painted by EVERY map view --
 #: was never seen, and the census read red as the atlas's alone.  Legacy
 #: only: the concept fixture has no schema, so nothing is required there.
 _MISSING_RECORD = (legacy_map, "legacy_map-missing-record", ("l", "j", "l", "j"))
@@ -492,7 +492,7 @@ def has_a_job(hex_value: str | None) -> bool:
 def colour_jobs(painted) -> set[tuple[str, str]]:
     """Verdict `F1`'s census rule, written ONCE: `(hue, kind)` for every hue
     with a job a view paints.  A hue in the foreground of a LETTER is painted
-    on `words` (the count's `sin acta`, the inspector's `requerido`); any
+    on `words` (the count's `sin acta`, the inspector's `required`); any
     other foreground -- a glyph, a numeral -- and every background fill is
     painted on `marks`."""
     out: set[tuple[str, str]] = set()

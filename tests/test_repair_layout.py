@@ -22,7 +22,7 @@ An UNCLIPPED composited read measures 10, not 11, because `MapScreen`'s keybar
 shows through `background: #000000 70%` and donates the word `cobertura`.  It
 would therefore pass a fix that still hid a binding.  `AT-R14` is the guard that
 keeps the clip honest, and it compares WHOLE ROWS rather than substrings —
-`cobertura 100%` is painted outside the dialog while `cobertura` is a legitimate
+`coverage 100%` is painted outside the dialog while `cobertura` is a legitimate
 binding label, so a substring comparison collides.
 """
 from __future__ import annotations
@@ -361,7 +361,7 @@ async def test_at_r14_the_oracle_is_clipped_to_the_help_dialog(tmp_path):
           still hides a binding;
       (d) no row painted outside the region may appear in the clipped read.
 
-    Whole rows, never substrings: `cobertura 100%` is painted outside the dialog
+    Whole rows, never substrings: `coverage 100%` is painted outside the dialog
     while `cobertura` is a legitimate binding label, so a substring test collides.
     """
     app = MapperApp(tmp_path)

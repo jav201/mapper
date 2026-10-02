@@ -171,12 +171,15 @@ MASTER_LEGACY_DIGESTS = {
 # wrongly is `collapsed`, and that is what is varied here.  Captured from
 # `rail.py` and `factory.py` as they stand on `master`; both were byte-identical
 # to `master` in the tree this increment started from.
+# EN-2: the digests are of the rail with its labels in English (`map`, `missing`, `territory`, `coverage`).  The
+# master renders were re-read segment by segment (text and style) against these with only those four words
+# mapped back: identical.  Structure, spans and styles are the master's.
 MASTER_RAIL_DIGESTS = {
-    (): "cf3cddd273ec0ef1418fca99eed2108a796a81d4fc420d57d56d602f232d8443",
-    ("fin",): "7e237f6166867a067445bc949929be884c8c9ab0ffdf5f8a8ec7ac505e399e8d",
-    ("fin", "rrhh"): "ab0d3e14a91e325a9d6ddce91dcde03762cbe60a450e6d17ae6a49efcb68e8ae",
-    ("erp",): "b528ab941f62298182159152a653eccfbe4437c87fc0b0a365185c4c6f7517d6",
-    ("inv", "fin", "rrhh"): "58d9452cf3c00361e4f1d7b334c570173029471e1281c85af336978e681f7283",
+    (): "d7546f9e2f60339c15a709fe581473f662b5cec4400a80a8286e5e3b957757b1",
+    ("fin",): "43452787993117230a232f729e7af084de5b87d5fe643691566260665635d4fe",
+    ("fin", "rrhh"): "7b3744c2f50ce8de1e9f96e2d61f2e81aa2080b76578a4ee13c7369d567250e3",
+    ("erp",): "9461ff65710687613abb655ccccd691f5e12cd6921e9420bddfc04ca90ab1097",
+    ("inv", "fin", "rrhh"): "1c0b814470a712063c8cde8ad1c582ed7a968c1311f93ac90aa31a7d228c4a5a",
 }
 
 MASTER_FACTORY_TREE_DIGEST = (
@@ -187,8 +190,8 @@ MASTER_FACTORY_TREE_DIGEST = (
 # mangled accent cannot pass unnoticed (same discipline as test_repair_cycles).
 OMITTED = "Se omiti" + chr(0xF3)          # "Se omitió"
 OVER_BOUND = "supera el l" + chr(0xED) + "mite"   # "supera el límite"
-CYCLE_NOTICE = "el mapa tiene un ciclo"
-FACTORY_CYCLE_NOTICE = "the map has a cycle"  # the rail's sentence is EN-2's
+CYCLE_NOTICE = "the map has a cycle"
+FACTORY_CYCLE_NOTICE = "the map has a cycle"  # the factory tree's sentence; the rail's is the same since EN-2
 GUARD_MESSAGE = "cycle through"
 
 
@@ -1237,9 +1240,9 @@ def test_tc_r30_the_indent_cap_cannot_change_a_rendered_row(tmp_path):
     assert len(rows) == 41, f"expected a 41-row chain, got {len(rows)}"
 
     width = RAIL_WIDTH - 4
-    # The header is two lines ("mapa · Nn · M faltan" plus a blank), so the first
+    # The header is two lines ("map · Nn · M missing" plus a blank), so the first
     # node row starts at index 2.  Asserted rather than assumed.
-    assert rendered[0].startswith("mapa"), rendered[0]
+    assert rendered[0].startswith("map " + chr(0xB7)), rendered[0]
     offset = 2
 
     checked = 0
@@ -1719,7 +1722,7 @@ def test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating(shape):
 
     text = rail.render()
     assert CYCLE_NOTICE in text.plain, text.plain
-    assert chr(0xF3) not in CYCLE_NOTICE  # the notice needs no accent to survive
+    assert chr(0xF3) not in text.plain  # the notice needs no accent to survive
 
 
 @pytest.mark.parametrize("shape", sorted(REACHABLE_CYCLE_SHAPES))

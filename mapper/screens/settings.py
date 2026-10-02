@@ -79,13 +79,13 @@ class SettingsScreen(Screen):
             yield _StateRow("switch", lambda: DsSwitch(True))
             yield _StateRow("stepper", lambda: DsStepper(3, min_value=0, max_value=9))
             yield _StateRow("slider", lambda: DsSlider(0.55))
-            yield _StateRow("segmented", lambda: DsSegmented(["luna", "marea", "noche"], 0))
+            yield _StateRow("segmented", lambda: DsSegmented(["moon", "tide", "night"], 0))
             yield _StateRow("progress", lambda: DsProgress(3, 5))
-            yield _StateRow("spinner", lambda: DsSpinner(0, "cargando…"))
-            yield _StateRow("text field", lambda: DsTextField("sistema-leg"))
+            yield _StateRow("spinner", lambda: DsSpinner(0, "loading…"))
+            yield _StateRow("text field", lambda: DsTextField("system-leg"))
             yield _StateRow("pagination", lambda: DsPagination(2, 5))
             yield _StateRow("tag chip", lambda: DsChip(label="legacy"))
-        yield HintLine("tab recorre componentes — el foco es el bloque sólido", "tab")
+        yield HintLine("tab walks the components — focus is the solid block", "tab")
         from mapper.app import keybar_groups
 
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))

@@ -124,7 +124,7 @@ async def test_at_n04d_complete_map_coverage_report_is_not_a_selectable_row(tmp_
         report = app.screen
         assert report.complete
         assert not report.query_one("#coverage-table").display
-        assert "todo completo" in report.query_one("#coverage-empty").render().plain
+        assert "all complete" in report.query_one("#coverage-empty").render().plain
 
 
 # ---------------------------------------------------------------------------

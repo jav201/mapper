@@ -152,7 +152,7 @@ async def test_at_n01d_required_and_empty_is_flagged(tmp_path):
             return [
                 s.render().plain
                 for s in inspector.query(".insp-label")
-                if "requerido" in s.render().plain
+                if "required" in s.render().plain
             ]
 
         before = flagged()

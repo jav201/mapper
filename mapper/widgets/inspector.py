@@ -18,12 +18,18 @@ from textual.message import Message
 from textual.widgets import Input, Static
 
 from mapper import darkside
+from mapper.keymap import SCOPE_MAP, hint_pair
 from mapper.model import Ficha, Graph, Node, SchemaField
+from mapper.widgets.chrome import HintLine, KeyBar
 from mapper.widgets.components import DsChip, DsProgress, DsSegmented
 
-# The four states a ficha may carry, and the Spanish words shown for them.
+# The four states a ficha may carry, and the words shown for them.
 STATE_VALUES = ["ok", "risk", "late", "blocked"]
-STATE_LABELS = ["ok", "riesgo", "tarde", "bloq"]
+STATE_LABELS = ["ok", "risk", "late", "blocked"]
+
+# `Z2`: the word beside `↵` while an attachment chip holds focus.  The seat's own word
+# for the key is `open card`, which is true everywhere except on a chip.
+ATTACHMENT_OPEN_LABEL = "open attachment"
 
 # Fixed column the inspector occupies beside the canvas.  The canvas subtracts it
 # when sizing its render, so the two cannot overlap.
@@ -40,7 +46,7 @@ class FieldInput(Input):
     is not.
     """
 
-    BINDINGS = [Binding("escape", "leave_field", "salir del campo")]
+    BINDINGS = [Binding("escape", "leave_field", "leave the field")]
 
     class Left(Message):
         """The operator stepped out of a field without abandoning the value."""
@@ -70,6 +76,9 @@ class FichaInspector(Vertical):
         self.node: Node | None = None
         self.schema: list[SchemaField] = []
         self._pending_focus: str | None = None
+        # `Z2`: what the hint line and the key bar said before a chip took focus, as
+        # (hint, groups) -- each None when that surface was not touched.
+        self._chip_override: tuple[str | None, list | None] | None = None
 
     # -- rendering ---------------------------------------------------------
     # No `compose`: the form's shape depends on the selected node's schema, so
@@ -88,6 +97,9 @@ class FichaInspector(Vertical):
         focus_was_elsewhere = screen is not None and (
             screen.focused is None or screen.focused not in self.children
         )
+        # The chip that held focus is about to be removed; nothing else would put the
+        # words back.
+        self._restore_open_words()
         # Removal must be awaited before mounting: Textual only schedules the
         # removal otherwise, so the new rows collide with the outgoing ones on
         # their ids.
@@ -111,7 +123,7 @@ class FichaInspector(Vertical):
 
     def _rows(self) -> list:
         if self.node is None:
-            return [Static(self._muted("  (selecciona un nodo)"), id="insp-empty")]
+            return [Static(self._muted("  (select a node)"), id="insp-empty")]
 
         ficha = self.node.ficha
         missing_keys = {f.key for f in ficha.missing_required(self.schema)}
@@ -119,9 +131,9 @@ class FichaInspector(Vertical):
 
         rows: list = [
             Static(self._header(ficha), id="insp-header"),
-            Static(self._label("título"), classes="insp-label"),
+            Static(self._label("title"), classes="insp-label"),
             FieldInput(value=darkside.plain(ficha.title), id="insp-title"),
-            Static(self._label("estado"), classes="insp-label"),
+            Static(self._label("state"), classes="insp-label"),
             DsSegmented(STATE_LABELS, active=active, id="insp-state"),
         ]
         for field in self.schema:
@@ -142,9 +154,9 @@ class FichaInspector(Vertical):
 
         have, req = ficha.required_coverage(self.schema)
         rows += [
-            Static(self._label("notas"), classes="insp-label"),
+            Static(self._label("notes"), classes="insp-label"),
             FieldInput(value=darkside.plain(ficha.notes), id="insp-notes"),
-            Static(self._label("adjuntos"), classes="insp-label"),
+            Static(self._label("attachments"), classes="insp-label"),
         ]
         for i, att in enumerate(ficha.attachments):
             # Show the TARGET that would actually be opened, not only the caption:
@@ -168,19 +180,19 @@ class FichaInspector(Vertical):
             )
         rows.append(
             Static(
-                darkside.Text.assemble(("+ agregar adjunto", darkside.ACCENT)),
+                darkside.Text.assemble(("+ add attachment", darkside.ACCENT)),
                 id="insp-att-add",
             )
         )
         rows += [
-            Static(self._label("cobertura"), classes="insp-label"),
+            Static(self._label("coverage"), classes="insp-label"),
             DsProgress(have, max(req, 1), id="insp-coverage"),
         ]
         return rows
 
     def _header(self, ficha: Ficha) -> darkside.Text:
         return darkside.Text.assemble(
-            ("ficha\n", darkside.MUT),
+            ("card\n", darkside.MUT),
             (darkside.plain(ficha.title or (self.node.id if self.node else "")),
              f"bold {darkside.INK}"),
         )
@@ -189,7 +201,7 @@ class FichaInspector(Vertical):
         if required_missing:
             return darkside.Text.assemble(
                 (darkside.plain(text), darkside.ALERT),
-                ("  requerido", darkside.ALERT),
+                ("  required", darkside.ALERT),
             )
         return darkside.Text.assemble((darkside.plain(text), darkside.MUT))
 
@@ -251,6 +263,59 @@ class FichaInspector(Vertical):
         except ValueError:
             return
         self.post_message(self.AttachmentActivated(self.node.id, index))
+
+    # -- the word beside `↵` on a chip (`Z2`) ------------------------------
+    # The hint line and the key bar belong to the screen, which writes them from the
+    # seat.  This borrows both while a chip has focus and hands back what it found:
+    # it only swaps the seat's `open card` for `open attachment` inside text that
+    # already carries it, and puts the old text back only if nobody has rewritten it.
+    @staticmethod
+    def _is_chip(widget) -> bool:
+        return (getattr(widget, "id", None) or "").startswith("insp-att-") and isinstance(widget, DsChip)
+
+    def on_descendant_focus(self, event) -> None:
+        if self._is_chip(event.widget):
+            self._announce_open_attachment()
+
+    def on_descendant_blur(self, event) -> None:
+        if self._is_chip(event.widget):
+            self._restore_open_words()
+
+    def _announce_open_attachment(self) -> None:
+        self._restore_open_words()
+        old_pair = hint_pair(SCOPE_MAP, "open_ficha")
+        glyph, old_label = old_pair.split(" ", 1)
+        saved_hint: str | None = None
+        saved_groups: list | None = None
+        for line in self.screen.query(HintLine):
+            if old_pair in line.text:
+                saved_hint = line.text
+                line.set_hint(line.text.replace(old_pair, f"{glyph} {ATTACHMENT_OPEN_LABEL}"), line.key)
+        for bar in self.screen.query(KeyBar):
+            groups = [
+                (header, [(g, ATTACHMENT_OPEN_LABEL if (g, word) == (glyph, old_label) else word) for g, word in pairs])
+                for header, pairs in bar.groups
+            ]
+            if groups != bar.groups:
+                saved_groups = bar.groups
+                bar.set_groups(groups)
+        self._chip_override = (saved_hint, saved_groups)
+
+    def _restore_open_words(self) -> None:
+        if self._chip_override is None:
+            return
+        saved_hint, saved_groups = self._chip_override
+        self._chip_override = None
+        glyph = hint_pair(SCOPE_MAP, "open_ficha").split(" ", 1)[0]
+        ours = f"{glyph} {ATTACHMENT_OPEN_LABEL}"
+        if saved_hint is not None:
+            for line in self.screen.query(HintLine):
+                if ours in line.text:
+                    line.set_hint(saved_hint, line.key)
+        if saved_groups is not None:
+            for bar in self.screen.query(KeyBar):
+                if any(word == ATTACHMENT_OPEN_LABEL for _, pairs in bar.groups for _, word in pairs):
+                    bar.set_groups(saved_groups)
 
     def request_add_attachment(self) -> None:
         if self.node is not None:

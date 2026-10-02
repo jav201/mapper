@@ -18,9 +18,9 @@ class CoverageScreen(ModalScreen[str | None]):
     """
 
     BINDINGS = [
-        ("enter", "select", "Seleccionar"),
-        ("escape", "dismiss", "Cerrar"),
-        ("q", "dismiss", "Cerrar"),
+        ("enter", "select", "Select"),
+        ("escape", "dismiss", "Close"),
+        ("q", "dismiss", "Close"),
     ]
 
     CSS = """
@@ -76,7 +76,7 @@ class CoverageScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         table = self.query_one("#coverage-table", DataTable)
         table.clear()
-        table.add_columns("▐", "nodo", "faltantes", "cobertura")
+        table.add_columns("▐", "node", "missing", "coverage")
 
         for node in self._incomplete_nodes():
             have, req = node.ficha.required_coverage(self.graph.schema)
@@ -125,8 +125,8 @@ class CoverageScreen(ModalScreen[str | None]):
             table.display = False
             self.query_one("#coverage-empty", Static).update(
                 Text.assemble(
-                    ("  todo completo. ", f"bold {darkside.INK}"),
-                    ("no falta ningún campo requerido.", darkside.MUT),
+                    ("  all complete. ", f"bold {darkside.INK}"),
+                    ("no required field is missing.", darkside.MUT),
                 )
             )
 
