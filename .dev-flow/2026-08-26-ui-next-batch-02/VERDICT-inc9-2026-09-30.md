@@ -212,3 +212,19 @@ Two questions were put to the operator; both took the recommended option.
 |---|---|---|---|
 | V1 · INC9N-UX-F2 | `C:\outside\x.pdf` refused with "use C:\… or a relative path" reads as a contradiction | Segunda frase fija | A path refused for lying outside the workspace toasts `attachment must be inside the workspace: use a relative path` (at add and at open); the U1 sentence stays for UNC, `/x`, `C:x` and devices |
 | V2 · INC9N-UX-F1 | The factory says "template file not found" for a template that exists outside the workspace | Decir la causa y la salida | It says `template outside the workspace: import it with i`, derived from the text without touching the disk |
+
+---
+
+# Round 12 — Inc-9o reviews (2026-10-01, base `66dd6e5`)
+
+security BLOCK-UNTIL INC9O-SEC-F1 (HIGH: a dot/space-only or trailing-space path component makes the
+walk stop early, so `resolve()` follows a link before it is refused — measured with local junctions;
+INC9N-SEC-F1 itself verified closed; F2 hard-link write-through, F3 invisible characters in generated
+names, F4 test spy blind to `ntpath._getfinalpathname`, all LOW). ux PASS-WITH-NOTICES (V1, V2
+discharged). The code review was still running. Two questions were put to the operator; both took the
+recommended option. The security reviewer stated in writing that no network-target link was created.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| W1 · INC9O-UX-F1 | The generate refusal does not say where to rename the document | Decir dónde | `document name cannot be a file name: rename it in the map's _nodos.yml (documents)`; a separate sentence when the node id is the cause |
+| W2 · INC9O-UX-F2 | A path through a link inside the workspace is told "must be inside the workspace" | Frase propia | `path goes through a link: use a real folder inside the workspace`, for attachments and templates |
