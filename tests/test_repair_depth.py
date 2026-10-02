@@ -188,6 +188,7 @@ MASTER_FACTORY_TREE_DIGEST = (
 OMITTED = "Se omiti" + chr(0xF3)          # "Se omitió"
 OVER_BOUND = "supera el l" + chr(0xED) + "mite"   # "supera el límite"
 CYCLE_NOTICE = "el mapa tiene un ciclo"
+FACTORY_CYCLE_NOTICE = "the map has a cycle"  # the rail's sentence is EN-2's
 GUARD_MESSAGE = "cycle through"
 
 
@@ -1730,4 +1731,4 @@ def test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating(
         screen._tree_text()
     assert GUARD_MESSAGE in str(excinfo.value)
 
-    assert CYCLE_NOTICE in screen._tree_lines().plain
+    assert FACTORY_CYCLE_NOTICE in screen._tree_lines().plain

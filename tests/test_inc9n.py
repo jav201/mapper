@@ -300,7 +300,7 @@ async def test_inc9n_f2_the_csv_prompt_requires_a_file_not_a_directory(tmp_path,
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / "d.csv"))
-        assert toasts == ["file not found: d.csv"], toasts
+        assert toasts == ["archivo no encontrado: d.csv"], toasts
 
 
 @red("f2")
@@ -393,7 +393,9 @@ async def test_inc9n_u1_pin_a_missing_accepted_path_keeps_naming_its_file(surfac
             app.push_screen(FactoryScreen(_doc_graph("x.docx"), process_name="demo"))
             await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / f"missing.{ext}"))
-        assert toasts == [f"file not found: missing.{ext}"], toasts
+        # the csv prompt is `app.py`'s own sentence (EN-5); the office prompt is the factory's (EN-1)
+        word = "archivo no encontrado" if surface == "csv" else "file not found"
+        assert toasts == [f"{word}: missing.{ext}"], toasts
 
 
 @red("u1")
