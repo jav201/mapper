@@ -28,6 +28,7 @@ Decisions (declared):
 - `_office_path` now returns the RESOLVED path (what is judged is what is read); the preview line shows it.
 - Attachment OPEN for a refused text toasts U1 from `app` (before `open_external`), because `open_external` returns the same `destino inválido` word for a non-string and for a refused text.
   A `file` attachment that the helper accepts but that is outside the workspace keeps `fuera del espacio de trabajo: <text>`; a missing one keeps `no se pudo abrir: <text>` (unchanged).
+- The U1 sentence is passed as `darkside.plain(PATH_NOT_SUPPORTED)` at its four notify sites: the first full lane failed `test_inc9::test_llr_n06_2_5_notify_sites_are_coerced` (a dynamic notify message must go through `plain()`), fixed in `3117b0c`; `plain` leaves the sentence unchanged (the U1 arms compare it byte for byte).
 - The unreachable `if local is None: raise GitHubError(_UNSUPPORTED)` in `fetch` exists only to drop the Optional `.resolve()` (`CR-F8`); an AST arm pins that the chained form is gone.
 
 ## 2. Sealed-arm changes
@@ -74,8 +75,8 @@ GREEN on the fix commits: all of them pass. The first RED run (before the juncti
 
 ## 4. Mutant table
 
-Harness `mutate9n.py` in the session scratchpad, outside the repo, on a detached `git worktree` of `f06f6b6` in `%TEMP%`; sha256 pinned before (`osopen.py` `c72ace66920d45cd...`, `github.py` `faa6c3116fd4c838...`,
-`app.py` `8186c59e73660a08...`, `factory.py` `f6e9efdce4c80013...`, `ARCHITECTURE.md` `ea6696fb8e6cdf97...`), byte-level I/O in each file's own line ending (`github.py` LF in the checkout is handled by detection),
+Harness `mutate9n.py` in the session scratchpad, outside the repo, on a detached `git worktree` of `3117b0c` in `%TEMP%`; sha256 pinned before (`osopen.py` `c72ace66920d45cd...`, `github.py` `faa6c3116fd4c838...`,
+`app.py` `9d0bf8a457df3f58...`, `factory.py` `2ad2818fa53f048a...`, `ARCHITECTURE.md` `ea6696fb8e6cdf97...`), byte-level I/O in each file's own line ending (`github.py` LF in the checkout is handled by detection),
 `old` must occur exactly once, the verdict printed before the file is restored, the pin re-checked after: **pins re-checked: OK**. `<LF>` is a line break. Run `-x`, `-k` as in the harness; arms = `test_inc9n`,
 `test_inc9m`, `test_arch_osopen_callers`. Backslashes are as in the file. No mutant was run with an arm that could reach a real `resolve()` of a UNC or device path (the `A7`-style "drop the helper from the add
 check" mutant was NOT run for that reason, see "Not measured").
@@ -92,13 +93,13 @@ check" mutant was NOT run for that reason, see "Not measured").
 | G2 | progress reaches total | github | `                if progress:<LF>                    progress(idx, total, "calculando métricas")<LF>                continue` -> `                continue` | RED | `cr_f5...[branches0]` |
 | G3 | `source_kind` is the decision | github | `    return _classify(spec)<LF><LF><LF>def painted_repo` -> `    return "gh"<LF><LF><LF>def painted_repo` | RED | `cr_f8_source_kind...` |
 | G4 | no `.resolve()` on an Optional | github | the four-line `local = ...; if local is None: raise ...; cwd = local.resolve()` -> `            cwd = safe_local_path(self.repo).resolve()` | RED (AST arm only: behaviourally equivalent) | `cr_f8_fetch_does_not_call_resolve_on_an_optional` |
-| A1 | CSV refusal is the U1 sentence | app | `self.notify(PATH_NOT_SUPPORTED, severity="error", markup=False)` -> `self.notify("archivo no encontrado", severity="error", markup=False)` | RED | `u1_a_refused_text...[csv-\\h\s\x.csv-size0]` |
+| A1 | CSV refusal is the U1 sentence | app | `self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="error", markup=False)` -> `self.notify("archivo no encontrado", severity="error", markup=False)` | RED | `u1_a_refused_text...[csv-\\h\s\x.csv-size0]` |
 | A2 | CSV prompt needs a file | app | `            if not path.is_file():` -> `            if not path.exists():` | RED | `f2_the_csv_prompt_requires_a_file_not_a_directory` |
 | A3 | CSV placeholder accepted by the grammar | app | `"C:\\path\\to\\nodes.csv"` -> `"/ruta/a/nodos.csv"` | RED | `u1_the_prompt_placeholder...[csv]` |
 | A4 | open: a refused text gets U1 | app | `        if att.kind == "file" and safe_local_path(att.path) is None:` -> `        if False:` | RED | `u1_opening_a_refused_file_attachment...` |
 | A5 | add validates | app | `            if kind == "file" and not _is_workspace_file_target(target, self.store.workspace):` -> `            if False:` | RED | `u2_adding...[\\h\s\x.pdf-size0]` |
 | A6 | add confines to the workspace | app | `        return (workspace / local).resolve().is_relative_to(Path(workspace).resolve())` -> `        return True` | RED | `u2_adding...[C:\outside-ws\x.pdf-size0]` |
-| A7 | add toasts the U1 sentence | app | the add refusal `self.notify(PATH_NOT_SUPPORTED, severity="warning", markup=False)<LF>                return<LF>            self._push_snapshot()` -> the same with `"archivo no encontrado"` | RED | `u2_adding...[\\h\s\x.pdf-size0]` |
+| A7 | add toasts the U1 sentence | app | the add refusal `self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="warning", markup=False)<LF>                return<LF>            self._push_snapshot()` -> the same with `"archivo no encontrado"` | RED | `u2_adding...[\\h\s\x.pdf-size0]` |
 | A8 | the badge of a local folder is `local` | app | `            return "local" if github.source_kind(self.repo) == "local" else "github"` -> `            return "github"` | RED | `test_inc9m::cr_f3_pin_a_local_git_directory_is_local` (the pins first; the painted arm was not reached with `-x`) |
 | A9 | a real ellipsis | app | `"path not supported: use C:\\… or a relative path"` -> `"path not supported: use C:\\... or a relative path"` | RED | `u1_a_refused_text...[csv-...]` |
 | A10 | the badge does not read `_classify` | app | `github.source_kind(self.repo)` -> `github._classify(self.repo)` | RED | `cr_f8_source_kind...` |
@@ -106,7 +107,7 @@ check" mutant was NOT run for that reason, see "Not measured").
 | F2 | lexical containment before `resolve` | factory | `        if not Path(os.path.normpath(joined)).is_relative_to(os.path.normpath(workspace)):<LF>            return None<LF>` -> (removed) | RED | `f1_a_hostile_sidecar...[C:\outside\a.docx-size0]` |
 | F3 | containment after `resolve` (junction) | factory | `            if not resolved.is_relative_to(workspace.resolve()):<LF>                return None<LF>` -> `            pass<LF>` | RED | `f1_a_junction_inside_the_workspace...` |
 | F4 | office prompt needs a file | factory | `            if not source.is_file():` -> `            if not source.exists():` | RED | `f2_the_office_prompt_requires_a_file_not_a_directory` |
-| F5 | office refusal is the U1 sentence | factory | `self.notify(PATH_NOT_SUPPORTED, severity="error", markup=False)` -> `self.notify("archivo no encontrado", severity="error", markup=False)` | RED | `u1_a_refused_text...[office-\\h\s\x.docx-size0]` |
+| F5 | office refusal is the U1 sentence | factory | `self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="error", markup=False)` -> `self.notify("archivo no encontrado", severity="error", markup=False)` | RED | `u1_a_refused_text...[office-\\h\s\x.docx-size0]` |
 | F6 | office placeholder accepted by the grammar | factory | `"C:\\path\\to\\template.docx"` -> `"/ruta/a/plantilla.docx"` | RED | `u1_the_prompt_placeholder...[office]` |
 | R1 | only `app` references the launcher | factory | `from mapper.osopen import safe_local_path` -> `from mapper.osopen import open_external, safe_local_path` | RED | `test_the_launcher_names_appear_only_in_app_and_osopen` |
 | R2 | the architecture map says the ban | ARCHITECTURE.md | `` `open_external` is referenced only from `app` `` -> `only `app` may launch an OS handler` | RED | `test_the_architecture_map_says_what_the_modules_import` |
@@ -189,9 +190,14 @@ carried two F401 at `73c2670`; they are removed in `0faec7f`.
 
 ## Commits
 
-`0faec7f` arms (strict xfail) · `effe32e` four sources + `ARCHITECTURE.md` + `A-122` + `OPEN_STEPS` emptied · `f06f6b6` junction arm + `A-122` wording · docs commit (this record) · docs commit (the full-lane result).
+`0faec7f` arms (strict xfail) · `effe32e` four sources + `ARCHITECTURE.md` + `A-122` + `OPEN_STEPS` emptied · `f06f6b6` junction arm + `A-122` wording · `6471156` this record + the correction note on 039 · `3117b0c` the U1 sentence through `darkside.plain` (census fix) · docs commit (the full-lane result).
 No push; `state.json` untouched.
 
 ## Full-lane result
 
-(pending)
+1 failed, 2344 passed, 24 deselected, 3 xfailed in 1570.52s (26:10), `-rf`, on `3117b0c`'s tree (the record and the lane result are docs commits after it; `test_no_operator_paths` reads `.dev-flow`).
+Baseline 2221/0 plus 117 (`test_inc9n`) + 3 (`test_arch_osopen_callers`) + 4 (the painted-badge arm of `test_inc9m` grew from 2 to 6 cases) = 2345 run = 2344 passed + the 1 flake below. The 3 xfailed are the pre-existing ones.
+
+- The one failure is the known flake FLAKE-3, `tests/test_palette.py::test_at_n03b_selecting_a_palette_entry_executes_it`: it passed 3 of 3 in isolation straight after (1.4 s each). It is not touched by this increment.
+- This is the SECOND full-lane run, not a retry of a flake: the FIRST (on `6471156`, 2344 passed, 1 failed in 1527.91s) failed for real on `test_inc9.py::test_llr_n06_2_5_notify_sites_are_coerced` (see Decisions); that was fixed in `3117b0c`, the 28 mutants and the ruff difference were re-run on it
+  (28 RED, ruff new = none), and the lane was run again from the start, uninterrupted.
