@@ -32,7 +32,8 @@ from tests.test_attachments import RecordingLauncher, _open, _seed
 from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9m import _env, _flat, _no_fs, _norm, _open_prompt, _stub_gh
 
-OPEN_STEPS: set[str] = set()
+# Inc-9q (X2): the hostile-document arms whose sentence changed from "not found" to U1 were committed RED first.
+OPEN_STEPS: set[str] = {"x2"}
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 
@@ -137,7 +138,7 @@ def _toasts(app):
     return toasts
 
 
-_HOSTILE_FRAMES = [pytest.param(d, marks=_red_mark("f1") + (_red_mark("v2") if d == "C:\\outside\\a.docx" else []))
+_HOSTILE_FRAMES = [pytest.param(d, marks=_red_mark("f1") + (_red_mark("v2") if d == "C:\\outside\\a.docx" else _red_mark("x2")))
                    for d in HOSTILE_DOCS]
 
 
@@ -156,8 +157,9 @@ async def test_inc9n_f1_a_hostile_sidecar_document_is_never_stat_ed_and_the_scre
         for _ in range(4):
             await pilot.pause()
         assert app.is_running and app.screen is screen
-        # Inc-9o (`V2`): a path outside the workspace says so; every other refusal keeps the old text.
-        expected = V2 if doc_path == "C:\\outside\\a.docx" else "archivo de plantilla no encontrado"
+        # Inc-9o (`V2`): a path outside the workspace says so.  Inc-9q (X2, operator-ruled): every other
+        # hostile text is refused by the path rule and says U1, not 'not found'.
+        expected = V2 if doc_path == "C:\\outside\\a.docx" else U1
         assert expected in _flat(screen), _flat(screen)
         assert screen._office_path(screen.graph.documents["plantilla"]) is None
         screen.action_generate_office()

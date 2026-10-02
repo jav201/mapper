@@ -34,7 +34,8 @@ from tests.test_inc9m import _env, _flat, _no_fs, _norm
 from tests.test_inc9n import U1, _add_attachment, _make_docx, _toasts
 
 # Inc-9p: the arms whose expected sentence changed (`W1`, `W2`) were committed RED first, keyed by step.
-OPEN_STEPS: set[str] = set()
+# Inc-9q (X2): the three sealed V2 pins whose sentence changed to U1 were committed RED first.
+OPEN_STEPS: set[str] = {"x2"}
 
 PKG = pathlib.Path(osopen.__file__).parent
 
@@ -435,8 +436,9 @@ async def test_inc9o_v1_opening_a_unc_file_keeps_the_allow_list_sentence(size, t
 
 
 @red("w2")
-async def test_inc9o_v1_opening_a_file_behind_a_link_toasts_the_workspace_sentence(tmp_path, monkeypatch):
-    """Inc-9p (`W2`): a path through a link has its own sentence, no longer V1."""
+async def test_inc9o_v1_opening_a_file_behind_a_link_toasts_the_link_sentence(tmp_path, monkeypatch):
+    """Inc-9p (`W2`): a path through a link has its own sentence, no longer V1.  Inc-9q (`INC9P-CR-F8`): the
+    test name said 'workspace sentence' for a W2 assertion; a label change only."""
     _env(monkeypatch, tmp_path)
     ws = tmp_path / "ws"
     ws.mkdir()
@@ -564,8 +566,16 @@ async def test_inc9o_v2_a_dot_dot_template_outside_the_workspace_says_so(tmp_pat
         assert V2 in _flat(screen), _flat(screen)
 
 
-@pytest.mark.parametrize("doc_path", ["\\\\h\\s\\a.docx", "//h/s/a.docx", "con", "docs/missing.docx"])
-async def test_inc9o_v2_pin_every_other_missing_template_keeps_the_existing_text(doc_path, tmp_path, monkeypatch):
+@pytest.mark.parametrize("doc_path,expected", [
+    pytest.param("\\\\h\\s\\a.docx", U1, marks=_red_mark("x2")),
+    pytest.param("//h/s/a.docx", U1, marks=_red_mark("x2")),
+    pytest.param("con", U1, marks=_red_mark("x2")),
+    ("docs/missing.docx", MISSING),
+])
+async def test_inc9o_v2_pin_every_other_missing_template_keeps_the_existing_text(
+        doc_path, expected, tmp_path, monkeypatch):
+    """Inc-9q (X2, operator-ruled sealed-arm change): UNC, `//h/s` and `con` expect U1 now (the path rule
+    refused them: 'not found' was a lie); only a template that is missing keeps `MISSING`."""
     _env(monkeypatch, tmp_path)
     spy = _Forms(monkeypatch, ["\\\\h\\s\\a.docx", "//h/s/a.docx"])
     app = MapperApp(tmp_path)
@@ -576,10 +586,10 @@ async def test_inc9o_v2_pin_every_other_missing_template_keeps_the_existing_text
         app.push_screen(screen)
         for _ in range(4):
             await pilot.pause()
-        assert MISSING in _flat(screen) and V2 not in _flat(screen), _flat(screen)
+        assert expected in _flat(screen) and V2 not in _flat(screen), _flat(screen)
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == [MISSING], toasts
+        assert toasts == [expected], toasts
     assert spy.hits == [], spy.hits
 
 
