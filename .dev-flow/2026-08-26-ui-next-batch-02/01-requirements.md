@@ -10732,3 +10732,28 @@ puts the helper in `osopen` and has all three import it, so the map and the code
 test is `PureWindowsPath.is_reserved()` of Python 3.12 per component; a name it does not know is not refused. A relative text with a `:` inside (`CC:\x`) is still accepted (`A-121`). No real
 UNC, `\??\UNC`, console or COM device was ever opened: spies refuse and record, and `preview_csv` is stubbed where a device name is typed. Nothing was measured against a live SMB share,
 a live `gh`, a real clone, or another terminal than Textual's headless driver.
+
+### `A-123` -- the Inc-9n review fixes: one containment helper, the document name, V1, V2, FLAKE-3 (`Inc-9o`), dated 2026-10-01
+
+**Authority.** The operator's V1 and V2 (Round 11 of `VERDICT-inc9-2026-09-30.md`) and the coordinator's rulings for `INC9N-SEC-F1`..`F3`, `INC9N-CR-F1`..`F5`. The record is `increment-041-inc9o.md`.
+
+**Statement.** Amends `A-122`; the rest of `A-122` stands.
+
+1. **`confine(text, workspace) -> Path | None`** in `mapper/osopen.py` is the ONLY containment (`INC9N-CR-F2`). `open_external` (file branch), the attachment add and open checks in `app`, and `FactoryScreen._office_path` call it; the three copies
+   are deleted. In order: (1) `safe_local_path`, which expands `~` for every caller (add and open now agree: `open_external` did not expand it before); (2) lexical containment with no stat, by path parts after `os.path.abspath` and a case fold
+   (`ws2` is not inside `ws`; a relative workspace is judged by its absolute form, `INC9N-CR-F1`); (3) a walk from the workspace down with `os.lstat`, refusing a symlink or any reparse point before anything below it is touched
+   (`INC9N-SEC-F3`); (4) only then `resolve()` and a last `is_relative_to`, `OSError` and `ValueError` caught. **Policy: a link inside the workspace is not followed.** The workspace root itself may be a link; only what lies under it is walked.
+2. **`lexically_outside(text, workspace) -> bool`** (a fifth name, beside the four the ruling listed; declared): `safe_local_path` accepts the text and step (2) refuses it. It is the same step as `confine`'s, not a second rule, and it is what `V2` needs.
+3. **`INC9N-SEC-F1` (HIGH).** `generate office` writes `<document name>-<node id><suffix>`; both names must pass `store.check_map_id` (no `/ \ :`, controls, reserved device, edge dot or space; `store.py` untouched), and the target goes through `confine` before any write.
+   A refusal toasts the fixed `document name cannot be used as a file name` and writes nothing. The `generado:` toast names the workspace-relative result.
+4. **`V1`.** `attachment must be inside the workspace: use a relative path` when `safe_local_path` accepts the text and `confine` refuses it, at add time and at open time; `U1` stays for allow-list refusals. Both sentences, `PATH_NOT_SUPPORTED` and
+   `PATH_OUTSIDE_WORKSPACE`, live in `osopen.py` (`INC9N-CR-F4`); `app` and `screens` import them from there.
+5. **`V2`.** When `_office_path` is None because the path lies outside the workspace by text, the factory preview and the generate toast say `template outside the workspace: import it with i`; any other None keeps `archivo de plantilla no encontrado`.
+6. **`FLAKE-3` (`INC9N-CR-F3`), test hygiene.** The two palette arms poll `palette._items` (at most 20 pauses) instead of one `pilot.pause()`; the assertions are unchanged. It was a test race, not a user race.
+7. **`INC9N-CR-F5`.** Sibling-prefix negative cases on `confine`. **`ARCHITECTURE.md` section 3** lists the four `screens` -> `app` back-edges that exist (`factory.py` x3, `settings.py` x1) and the names `screens` may import from `osopen`.
+
+**Trace.** Standalone, like `A-113`..`A-122`. Carried by `tests/test_inc9o.py`, `tests/test_arch_osopen_callers.py` and the sealed-arm changes in `increment-041-inc9o.md`.
+
+**What is not claimed.** Windows only; nothing was run on POSIX. A file under a cloud-sync folder that carries a reparse attribute (OneDrive placeholders and similar) is refused by the walk like any link; not measured. A hard link is not a reparse point
+and is not detected. Between the walk and the write there is a window in which a component could be replaced by a link (a race, not closed). No real UNC, `\??\UNC`, console or COM device and no link to a network target was ever created or opened:
+links are junctions or symlinks to a LOCAL directory under a temp path, and spies refuse and record before the real call.
