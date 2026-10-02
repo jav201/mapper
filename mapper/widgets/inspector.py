@@ -167,6 +167,7 @@ class FichaInspector(Vertical):
                     label=darkside.plain(f"{att.kind} · {att.caption or att.path}"),
                     id=f"insp-att-{i}",
                     classes="insp-attachment",
+                    toggle=False,
                 )
             )
             rows.append(

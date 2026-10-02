@@ -666,13 +666,13 @@ DAMAGED_MAP_GLYPH = "\u2298"
 
 DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
     ('V1', "▐", 'map node', 'STEP'),
-    ('V2', "▐ nómina", 'search match', 'INK on STEP'),
+    ('V2', "▐ payroll", 'search match', 'INK on STEP'),
     ('V23', "▐ erp", 'selected node', 'bold GROUND on ACCENT'),
     ('V24', "▐ erp", 'selected, focus elsewhere', 'INK on PANEL'),
     ('V3', "▐", 'folded branch, 23 inside', 'WARN'),
     ('V3', "▸ inv +23", 'folded branch, 23 inside', 'MUT'),
-    ('V25', "◫ ACTA-7", "the node's record", 'INK'),
-    ('V26', "◫ sin acta", 'missing record', 'ALERT'),
+    ('V25', "◫ REC-7", "the node's record", 'INK'),
+    ('V26', "◫ no record", 'missing record', 'ALERT'),
     ('V27', "D", 'field initial, filled', 'MUT'),
     ('V27', "✓", 'field initial, filled', 'INK'),
     ('V28', "D", 'field initial, pending', 'MUT'),
@@ -688,7 +688,7 @@ DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
     ('V43', "●", 'node on the selected path', 'ACCENT on PANEL'),
     ('V44', "◆", 'map root', 'ACCENT on PANEL'),
     ('V30', "◆", 'view header', 'INK'),
-    ('V31', "▽ 35 fuera de vista", 'nodes off screen', 'INK'),
+    ('V31', "▽ 35 out of view", 'nodes off screen', 'INK'),
     ('V45', "⇲15", 'true depth, indent capped', 'MUT'),
     ('V33', "▾", 'open branch', 'MUT'),
     ('V34', "▸", 'folded branch, in the rail', 'MUT'),
@@ -704,11 +704,11 @@ DECLARED_VOCABULARY: tuple[tuple[str, str, str, str], ...] = (
     ('V19', "█", 'nodes with / without record', 'INK'),
     ('V19', "█", 'nodes with / without record', 'WARN'),
     ('V19', "░", 'nodes with / without record', 'WORDMARK'),
-    ('V20', "▲ 2 vencen hoy", 'records due today', 'WARN on PANEL'),
+    ('V20', "▲ 2 due today", 'records due today', 'WARN on PANEL'),
     ('V22', DAMAGED_MAP_GLYPH, 'damaged map — unreadable', 'INK on PANEL'),
     ('V40', "▁▂▃", 'activity, last 14 days', 'WORDMARK on PANEL'),
     ('V40', "▅▇█", 'activity, last 14 days', 'MUT on PANEL'),
-    ('V41', "↩ retomar", 'back to your last session', 'bold GROUND on ACCENT'),
+    ('V41', "↩ resume", 'back to your last session', 'bold GROUND on ACCENT'),
 )
 
 #: `01b` Amendment 2(b): a glyph may be a SET of codepoints.  A member listed
@@ -850,11 +850,11 @@ def resolve_style(declared: str) -> str:
             raise ValueError(f"resolve_style: undeclared style word {word!r} in {declared!r}")
     return " ".join(out)
 
-#: `LLR-N13.1.5`'s DECLARED CARD STATE -- the Spanish string that ships.
+#: `LLR-N13.1.5`'s DECLARED CARD STATE -- the string that ships.
 #: The `\u21b5` is load-bearing: `#D28` escalates this seat from `MUT` to `INK`
 #: BECAUSE the copy invites an ACTION, so a card without the invitation would
 #: take the escalated style while deleting the reason for it.
-DAMAGED_MAP_STATE = "mapa da\u00f1ado \u2014 \u21b5 ver por qu\u00e9"
+DAMAGED_MAP_STATE = "damaged map \u2014 \u21b5 see why"
 
 #: THE PENDING-PROJECTION LIST IS GONE, and its removal is the point: the
 #: compound-row projection was RULED (`A-103`), so `V19` and `V21` are no

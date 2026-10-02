@@ -10979,3 +10979,79 @@ Appended; `A-129` is not rewritten. `A-129`'s table remaps `archivo no encontrad
 **Trace.** Standalone, like `A-113`..`A-130`. Carried by `tests/test_en3.py` (a census of the four files' non-docstring literals, and the lane arm) and by the relabelled pins in the record.
 
 **What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. Widths are measured at 118 and 87 columns on the legacy fixture and at the sweep sizes named in the record, not at every width.
+
+### `A-132` -- English strings in the store, the legend and the components (`Inc-EN-4`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2, `Z1`) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING (`B-71`). The record is `increment-050-en4.md`.
+
+**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below **as produced by `store.py`, `darkside.py` or `widgets/components.py`**, the string it quotes is now the English one. The same words painted by `app.py` (`EN-5`), `keymap.py` (`EN-6`) or `screens/palette.py` (`EN-6`) stay as that file has them until its own increment. Only the words change; no condition, rule, key or row order moves. `check_map_id` accepts and refuses exactly what it did, and each message echoes exactly what it echoed.
+
+**`store.py` -- `MapIdError` sentences (text only).**
+
+| Old | New |
+|---|---|
+| `el nombre del mapa está vacío` | `the map name is empty` |
+| `... es demasiado largo (máximo N caracteres)` | `the map name is too long (maximum N characters)` |
+| `... no puede contener separadores de ruta (/ \) ni letra de unidad (:)` | `the map name cannot contain path separators (/ \) or a drive letter (:)` |
+| `... contiene caracteres no válidos en Windows (< > " \| ? * o de control)` | `the map name contains characters that are not valid on Windows (< > " \| ? * or control characters)` |
+| `... contiene caracteres que no se pueden guardar en un archivo` | `the map name contains characters that cannot be saved to a file` |
+| `... usa un nombre reservado de Windows (CON, NUL, COM1...)` | `the map name uses a reserved Windows name (CON, NUL, COM1...)` |
+| `... no puede empezar con espacio ni terminar en punto o espacio` | `the map name cannot start with a space or end with a dot or a space` |
+| `ya existe el mapa 'X'; elige otro nombre (no se sobrescribe)` | `map 'X' already exists; choose another name (nothing is overwritten)` |
+
+**`store.py` -- load, repair and refusal notices.**
+
+| Old | New |
+|---|---|
+| `campo ilegible:` / `campo duplicado:` | `unreadable field:` / `duplicate field:` |
+| `adjunto sin campos:` | `attachment without fields:` |
+| `documento duplicado:` | `duplicate document:` |
+| `nodo duplicado:` / `nodo fantasma:` | `duplicate node:` / `ghost node:` |
+| `... y más registros omitidos (límite N)` | `... and more entries omitted (limit N)` |
+| `no existe el mapa 'X'` | `map does not exist: 'X'` |
+| `no se pudo leer X: Tipo` | `could not read X: Tipo` (the exception type name is unchanged) |
+| `no se pudo leer la ficha de X: f.yml ilegible` | `could not read the card of X: f.yml unreadable` (with the same optional ` (Tipo)` suffix) |
+| `el mapa tiene un ciclo: a -> b` | `the map has a cycle: a -> b` |
+| `mapa desincronizado: X` | `map out of sync: X` |
+| `no se pudo indexar X: Tipo` | `could not index X: Tipo` |
+
+**`store.py` -- seed content (`EN-Q2`).** Written to disk when a map is created, so a map created before this increment keeps its Spanish text; nothing is migrated.
+
+| Old | New |
+|---|---|
+| root `meta` `nuevo mapa` | `new map` |
+| `primer hijo` / `presiona l` | `first child` / `press l` |
+| `segundo hijo` / `navega con j/k` | `second child` / `navigate with j/k` |
+| `legacy-audit` schema labels `documento`, `dueño`, `estado`, `criticidad`, `notas` | `document`, `owner`, `state`, `criticality`, `notes` |
+| `legacy-audit` seed title `auditoría legacy` | `legacy audit` |
+
+Not changed: the keys of the schema (`D O E C N`), the template id `legacy-audit`, and the on-disk sidecar name `<id>_nodos.yml` (a file-name format; renaming it would orphan every saved map). `app.py` prefixes some of these messages (`no se pudo cargar X: <store message>`); only the store half changes here, the prefix is `EN-5`.
+
+**`darkside.py` -- legend samples and the damaged-map card.**
+
+| Old | New |
+|---|---|
+| `V2` sample `▐ nómina` | `▐ payroll` |
+| `V25` sample `◫ ACTA-7` | `◫ REC-7` |
+| `V26` sample `◫ sin acta` | `◫ no record` (the term is `record`, `A-131`) |
+| `V31` sample `▽ 35 fuera de vista` | `▽ 35 out of view` |
+| `V20` sample `▲ 2 vencen hoy` | `▲ 2 due today` |
+| `V41` sample `↩ retomar` | `↩ resume` |
+
+**Declared card state (English, the string that ships):** `damaged map — ↵ see why`
+
+The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1.5` declared the Spanish string; this line replaces it and is what `tests/test_repair_cycles.py` reads.
+
+**`widgets/components.py`.** `DsSpinner` default label `cargando…` -> `loading…`; `DsTextField` default placeholder `nombre del mapa…` -> `map name…`.
+
+**`Z1` (operator).** An attachment chip only opens; it never toggles `selected`. `DsChip` takes `toggle: bool = True`; the inspector builds its `insp-att-*` chips with `toggle=False`. Activating such a chip still posts `DsChip.Changed` (the inspector listens to it to open the attachment) with `selected` unchanged, so the look does not change. Every other chip (the settings demo chip) keeps toggling. This is why `widgets/inspector.py` is the 4th source file of the increment.
+
+**Quoted by an earlier requirement.** `01-requirements.md` and `01b-ux-decisions.md` quote the Spanish samples and messages above (for example `01b` rows `V2`, `V20`, `V25`, `V26`, `V31`, `V41`); as produced by these files they now read as the tables say. The older text is a dated record and is not edited; `tests/test_vocabulary_declaration.py` carries the declared relabel as an explicit one-to-one map.
+
+**Not changed (declared).** `app.py` (`EN-5`), `keymap.py` and `screens/palette.py` (`EN-6`), the `?` rule (`EN-7`); docstrings and comments in the three files that quote Spanish words (not user-facing).
+
+**Width.** Every legend sample is shorter or at most one cell longer (`◫ no record` is 11 cells against 10, inside the eleven the atlas allows); measured in the record, section 4.
+
+**Trace.** Standalone, like `A-113`..`A-131`. Carried by `tests/test_en4.py` (a census of the three files' non-docstring literals, the `MapIdError` sentences, the seed content and the `Z1` arms) and by the relabelled pins in the record.
+
+**What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. Maps already on disk keep their Spanish seed text.

@@ -734,7 +734,7 @@ def test_g6c_f8b_failure_between_replaces_is_warned_on_next_load(
     monkeypatch.undo()
 
     reloaded = tmp_store.load("torn2")
-    assert any("desincronizado" in w for w in reloaded.load_warnings), (
+    assert any("out of sync" in w for w in reloaded.load_warnings), (
         f"no mismatch warning: {reloaded.load_warnings}"
     )
     assert "torn2" in "; ".join(reloaded.load_warnings)

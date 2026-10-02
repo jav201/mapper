@@ -102,7 +102,7 @@ def test_at049_a_phantom_sidecar_id_records_a_load_warning(tmp_path):
     # per phantom, which cannot see an implementation that names EVERY id.
     named = {
         w.split("'")[1] for w in graph.load_warnings
-        if w.startswith("nodo fantasma:")
+        if w.startswith("ghost node:")
     }
     assert named == {"fantasma", "segundo_fantasma"}, (
         f"the named phantoms are {named}; the sidecar's phantoms are "
@@ -262,7 +262,7 @@ def test_b48_a_mapping_without_attachment_keys_is_refused_not_invented(tmp_path)
         "none of the attachment keys. Neither entry in this fixture names kind, "
         f"path or caption. Warnings: {graph.load_warnings}"
     )
-    assert any("adjunto sin campos" in w for w in graph.load_warnings), (
+    assert any("attachment without fields" in w for w in graph.load_warnings), (
         f"the mapping was dropped without a record: {graph.load_warnings}"
     )
 
@@ -274,7 +274,7 @@ def test_b48_a_mapping_without_attachment_keys_is_refused_not_invented(tmp_path)
 def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
     """THE MESSAGE REPORTING THE REFUSAL MUST NOT PERFORM THE MATERIALISATION.
 
-    The per-key coercion DOES refuse an alias-amplified value -- `campo ilegible:
+    The per-key coercion DOES refuse an alias-amplified value -- `unreadable field:
     document[0].name` is emitted and the name is coerced to `''`. The duplicate
     branch then interpolates the RAW, UNCOERCED value with `!r`, which
     materialises the very structure the refusal prevented.
@@ -291,7 +291,7 @@ def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
     a cheap fixture, which is why five is the level driven.
 
     That 522,311 decomposes, and I checked it rather than inheriting it: the
-    materialised duplicate record is 522,247 chars and the two `campo ilegible:
+    materialised duplicate record is 522,247 chars and the two `unreadable field:
     document[i].name` records are 32 each. Only the SECOND half of the duplicate
     record was ever raw -- `doc.name` is the value the per-key coercion already
     replaced with `''` -- so interpolating both halves raw reproduces a defect
@@ -310,7 +310,7 @@ def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
     # POSITIVE CONTROL FIRST. This arm is a pure UPPER bound, so deleting the
     # diagnostic entirely is a green way to pass it -- fired and confirmed by
     # the code review. The record must exist before its size is judged.
-    assert any(w.startswith("documento duplicado:") for w in graph.load_warnings), (
+    assert any(w.startswith("duplicate document:") for w in graph.load_warnings), (
         f"the duplicate record is missing entirely: {graph.load_warnings}"
     )
     assert total < 2_000, (
@@ -361,7 +361,7 @@ def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
     """
     graph = _write(tmp_path, scalar_amplified()).load("m")
 
-    assert any(w.startswith("documento duplicado:") for w in graph.load_warnings), (
+    assert any(w.startswith("duplicate document:") for w in graph.load_warnings), (
         f"the duplicate record is missing entirely: {graph.load_warnings[:2]}"
     )
     total = sum(len(w) for w in graph.load_warnings)
@@ -393,7 +393,7 @@ def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
 def attachment_amplified(id_len: int = 1_000, aliases: int = 400) -> str:
     """A long node id reused across many aliased attachment entries.
 
-    THE STAGE'S OWN FIX INTRODUCED THIS LINE. `adjunto sin campos:
+    THE STAGE'S OWN FIX INTRODUCED THIS LINE. `attachment without fields:
     {owner}.{key}[{i}]` reads like a coordinate and carries a VALUE -- `owner` is
     the node id, read from the sidecar. The security review measured the
     unbounded form at 2.0 GB of records in 0.84 s, 9,092x amplification: 26x
@@ -431,7 +431,7 @@ def test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too(tmp_path):
     """
     graph = _write(tmp_path, attachment_amplified()).load("m")
 
-    assert any("adjunto sin campos" in w for w in graph.load_warnings), (
+    assert any("attachment without fields" in w for w in graph.load_warnings), (
         f"the refusal record is missing entirely: {graph.load_warnings[:2]}"
     )
     total = sum(len(w) for w in graph.load_warnings)

@@ -289,6 +289,19 @@ def _retired_ids() -> set[str]:
     return set(_RETIRED.findall(log))
 
 
+# EN-4 (`A-132`): the legend's SAMPLES are English now; `01b` is a dated record and keeps the Spanish it was written
+# with.  Each old sample maps to exactly one new one, so a sample that drifts back to Spanish, or to anything else,
+# still fails the equality below -- the map only bridges the declared relabel, it does not loosen the comparison.
+EN4_SAMPLES = {
+    "▐ nómina": "▐ payroll",
+    "◫ ACTA-7": "◫ REC-7",
+    "◫ sin acta": "◫ no record",
+    "▽ 35 fuera de vista": "▽ 35 out of view",
+    "▲ 2 vencen hoy": "▲ 2 due today",
+    "↩ retomar": "↩ resume",
+}
+
+
 def derived_members() -> tuple[set[tuple[str, str, str, str]], dict[str, set[tuple[int, int]]]]:
     """`LLR-N16.2.1`'s instrument, run: `01b` §3.1-3.4 -> the declared members.
 
@@ -302,6 +315,7 @@ def derived_members() -> tuple[set[tuple[str, str, str, str]], dict[str, set[tup
         if "DEFERRED(#D7)" in glyph_cell + label_cell + style_cell:
             continue
         for style, sample in sample_by_style(glyph_cell, style_cell).items():
+            sample = EN4_SAMPLES.get(sample, sample)
             owner = members.setdefault((sample or "", _unwrap(label_cell), style), vid)
             for lo, hi in _RANGE.findall(glyph_cell):
                 ranges.setdefault(owner, set()).add((int(lo, 16), int(hi, 16)))

@@ -43,7 +43,7 @@ def test_store_missing_map_raises(tmp_store):
 def test_store_create_from_template(tmp_store):
     graph = tmp_store.create_from_template("legacy", "legacy-audit")
     assert graph.root_id == "root"
-    assert graph.nodes["root"].ficha.title == "auditoría legacy"
+    assert graph.nodes["root"].ficha.title == "legacy audit"
     keys = {f.key for f in graph.schema}
     assert {"D", "O", "E"} <= keys
     assert "C" in keys
