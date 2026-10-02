@@ -35,7 +35,7 @@ from tests.test_inc9o import (
 )
 
 # Inc-9q: the arms whose expected sentence changed (X1, X2) were committed RED first, keyed by step.
-OPEN_STEPS: set[str] = {"x1", "x2"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 

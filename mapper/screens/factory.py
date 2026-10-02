@@ -21,7 +21,7 @@ from mapper import darkside, office
 from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
 from mapper.osopen import (
-    PATH_NOT_SUPPORTED, PATH_OUTSIDE_WORKSPACE, PATH_THROUGH_LINK, confine_reason, safe_local_path,
+    PATH_NOT_SUPPORTED, PATH_THROUGH_LINK, confine_reason, hard_linked, is_link, refusal_sentence, safe_local_path,
 )
 from mapper.store import MapIdError, check_map_id
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
@@ -36,8 +36,10 @@ TEMPLATE_MISSING = "archivo de plantilla no encontrado"
 # Neither names anything typed.
 DOC_NAME_NOT_A_FILE_NAME = "document name cannot be a file name: rename it in the map's _nodos.yml (documents)"
 NODE_ID_NOT_A_FILE_NAME = "node id cannot be a file name: rename the node"
-# Not operator-ruled copy (declared in A-124): a template or target with several hard links is refused.
-HARD_LINKED = "file has several hard links: use a plain file"
+# `X1` (Round 13): one hard-link sentence per site.
+TEMPLATE_HARD_LINKED = "template has several hard links: replace it with a plain copy"
+OUTPUT_HARD_LINKED = "output file has several hard links: delete or rename it"
+IMPORT_HARD_LINKED = "templates file has several hard links: delete or rename it"
 # `INC9O-SEC-F3`: a name is not a file name when it carries a format, line/paragraph separator or private-use char.
 _INVISIBLE = {"Cf", "Zl", "Zp", "Co"}
 
@@ -50,22 +52,22 @@ def _plain_file_name(value: str) -> bool:
     return not any(unicodedata.category(ch) in _INVISIBLE for ch in value)
 
 
-def _hard_linked(path: Path) -> bool:
-    """`INC9O-SEC-F2`: a file that another name also points to; writing it would write the other name too."""
-    try:
-        return path.lstat().st_nlink > 1
-    except OSError:
-        return False
-
-
 def _write_via_sibling(target: Path, write: Callable[[Path], object]) -> None:
     """`INC9O-SEC-F2`: write a temporary sibling in the same directory, then `os.replace` it onto *target*, so a
-    hard link at *target* is broken instead of written through.  The sibling is removed when anything fails."""
+    hard link at *target* is broken instead of written through.  The sibling is removed when anything fails.
+
+    `INC9P-SEC-F2`: right after `mkstemp` the parent is inspected again; one that became a link or reparse point
+    since (it was not one before) is refused before anything is written.  This NARROWS the window between the
+    caller's walk and the write; it does not close it (the parent can still be swapped after this check).  The
+    atomic write also drops the target's metadata (owner, ACL, attributes): the new file is a fresh temp file."""
     target.parent.mkdir(parents=True, exist_ok=True)
+    was_link = is_link(target.parent.lstat())
     fd, name = tempfile.mkstemp(dir=target.parent, prefix=".tmp-", suffix=target.suffix)
     os.close(fd)
     tmp = Path(name)
     try:
+        if not was_link and is_link(target.parent.lstat()):
+            raise ParentIsALink(target.parent.name)
         write(tmp)
         os.replace(tmp, target)
     except BaseException:
@@ -73,14 +75,8 @@ def _write_via_sibling(target: Path, write: Callable[[Path], object]) -> None:
         raise
 
 
-def _import_refusal(reason: str) -> str:
-    """The fixed sentence for an import target `confine_reason` refused: `W2` for a link, `U1` for the
-    allow-list and a normalised name, `V1` for the rest (`A-124`)."""
-    if reason == "link":
-        return PATH_THROUGH_LINK
-    if reason in ("allow_list", "normalised"):
-        return PATH_NOT_SUPPORTED
-    return PATH_OUTSIDE_WORKSPACE
+class ParentIsALink(OSError):
+    """The target's folder was replaced by a link after the walk (`INC9P-SEC-F2`)."""
 
 
 def factory_hint() -> str:
@@ -333,22 +329,24 @@ class FactoryScreen(Screen):
     def _is_office(self, doc: Document) -> bool:
         return doc.kind in {"docx", "pptx", "xlsx"}
 
-    def _office_path(self, doc: Document) -> Path | None:
+    def _template(self, doc: Document) -> tuple[Path | None, str]:
         """`INC9M-SEC-F1`: `doc.path` comes from the sidecar of a map that may have been shared, so it is
-        judged like typed text, by the one rule (`osopen.confine`): allow-list, lexical containment, no
-        links followed, then `resolve()`.  A refused path is never stat'ed."""
+        judged like typed text, by the one rule (`osopen.confine_reason`): allow-list, normalised components,
+        lexical containment, a walk that follows no link, then `resolve()`.  Returns the rule's tuple, asked
+        once; an empty path is `(None, "missing")`."""
         if not doc.path:
-            return None
-        return confine_reason(doc.path, Path(self.app.store.workspace))[0]  # type: ignore[attr-defined]
+            return None, "missing"
+        return confine_reason(doc.path, Path(self.app.store.workspace))  # type: ignore[attr-defined]
 
-    def _missing_text(self, doc: Document) -> str:
-        """`V2` / `W2`: say why the template is not there when the cause is a link on its way (`W2`) or its
-        location (`V2`, decided by text, no stat); every other cause keeps the old text (`A-124`)."""
-        if not doc.path:
-            return TEMPLATE_MISSING
-        reason = confine_reason(doc.path, Path(self.app.store.workspace))[1]  # type: ignore[attr-defined]
-        if reason == "link":
-            return PATH_THROUGH_LINK
+    def _office_path(self, doc: Document) -> Path | None:
+        return self._template(doc)[0]
+
+    def _missing_text(self, reason: str) -> str:
+        """The sentence for a template that cannot be used, from the REASON `_template` gave: `W2` (a link),
+        `U1` (`X2`: the path rule refused it: allow-list or normalised) and `V2` (outside the workspace, decided
+        by text); only a missing or unreadable template (or one that is not there) says 'not found'."""
+        if reason in ("link", "allow_list", "normalised"):
+            return refusal_sentence(reason)
         if reason == "outside":
             return TEMPLATE_OUTSIDE
         return TEMPLATE_MISSING
@@ -360,9 +358,9 @@ class FactoryScreen(Screen):
         doc = self.graph.resolve_document(self.document_name, node)
 
         if self._is_office(doc):
-            path = self._office_path(doc)
+            path, reason = self._template(doc)
             if path is None or not path.exists():
-                return Text.assemble((self._missing_text(doc), darkside.ALERT))
+                return Text.assemble((self._missing_text(reason), darkside.ALERT))
             preview = office.extract_preview_text(path)
             # Show a resolved preview by replacing tags in the plain text.
             for key, value in doc.tags.items():
@@ -523,10 +521,10 @@ class FactoryScreen(Screen):
             # `./` makes a `~` or `-` file name a plain relative name.
             target, reason = confine_reason(f"./templates/{source.name}", Path(store.workspace))
             if target is None:
-                self.notify(darkside.plain(_import_refusal(reason)), severity="error", markup=False)
+                self.notify(darkside.plain(refusal_sentence(reason, surface="import")), severity="error", markup=False)
                 return
-            if _hard_linked(target):
-                self.notify(darkside.plain(HARD_LINKED), severity="error", markup=False)
+            if hard_linked(target):
+                self.notify(darkside.plain(IMPORT_HARD_LINKED), severity="error", markup=False)
                 return
             try:
                 _write_via_sibling(target, lambda tmp: shutil.copy2(source, tmp))
@@ -563,9 +561,9 @@ class FactoryScreen(Screen):
         if not self._is_office(doc):
             self.notify("el documento actual no es office")
             return
-        path = self._office_path(doc)
+        path, reason = self._template(doc)
         if path is None or not path.exists():
-            self.notify(darkside.plain(self._missing_text(doc)), severity="error", markup=False)
+            self.notify(darkside.plain(self._missing_text(reason)), severity="error", markup=False)
             return
         store = self.app.store  # type: ignore[attr-defined]
         # `INC9N-SEC-F1`: the sidecar chooses `document_name` and the node id, and together they are the
@@ -586,8 +584,11 @@ class FactoryScreen(Screen):
             sentence = PATH_THROUGH_LINK if reason == "link" else DOC_NAME_NOT_A_FILE_NAME
             self.notify(darkside.plain(sentence), severity="error", markup=False)
             return
-        if _hard_linked(path) or _hard_linked(target):
-            self.notify(darkside.plain(HARD_LINKED), severity="error", markup=False)
+        if hard_linked(path):
+            self.notify(darkside.plain(TEMPLATE_HARD_LINKED), severity="error", markup=False)
+            return
+        if hard_linked(target):
+            self.notify(darkside.plain(OUTPUT_HARD_LINKED), severity="error", markup=False)
             return
         try:
             _write_via_sibling(target, lambda tmp: office.resolve(path, doc.tags, tmp))

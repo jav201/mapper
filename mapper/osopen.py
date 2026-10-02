@@ -52,6 +52,15 @@ PATH_NOT_SUPPORTED = "path not supported: use C:\\\u2026 or a relative path"
 PATH_OUTSIDE_WORKSPACE = "attachment must be inside the workspace: use a relative path"
 # `W2` (Round 12): the third sentence, for a path that goes through a link or reparse point inside the workspace.
 PATH_THROUGH_LINK = "path goes through a link: use a real folder inside the workspace"
+# `INC9P-CR-F3` (Round 13): the import's own sentence when the `templates` folder could not be inspected.
+PATH_TEMPLATES_UNCHECKED = (
+    "templates folder could not be checked: use a real folder named templates inside the workspace")
+# `INC9P-SEC-F3` (Round 13, same pattern as X1): an attachment that is a hard link when it is opened.
+ATTACHMENT_HARD_LINKED = "attachment has several hard links: replace it with a plain copy"
+
+# A not-found past this many characters cannot be trusted: without long-path support `lstat` fails on a path
+# this long whether or not the component exists, so the walk would stop before a link it never saw.
+_MAX_PATH = 260
 
 
 _DRIVE = re.compile(r"[A-Za-z]:")
@@ -100,15 +109,35 @@ def _lexically_inside(local: Path, workspace: Path) -> str | None:
     return None
 
 
-def lexically_outside(text: str, workspace: Path) -> bool:
-    """True when `confine_reason` refuses *text* as `outside` (`V2`, `INC9O-CR-F1`): the one step 2, not a
-    second rule.  A refused text (allow-list, normalised) is not 'outside': it is unsupported."""
-    return confine_reason(text, workspace)[1] == "outside"
-
-
-def _is_link(info: os.stat_result) -> bool:
+def is_link(info: os.stat_result) -> bool:
+    """A symlink or any reparse point (junction, mount point), from an `lstat` result."""
     return stat.S_ISLNK(info.st_mode) or bool(
         getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT)
+
+
+def hard_linked(path: Path) -> bool:
+    """`INC9P-SEC-F3`: True when *path* has several names (`st_nlink > 1`): writing or opening it would reach the
+    other name too.  Fails closed: only a file that is not found is False; any other error counts as linked."""
+    try:
+        return path.lstat().st_nlink > 1
+    except FileNotFoundError:
+        return False
+    except OSError:
+        return True
+
+
+def refusal_sentence(reason: str, *, surface: str = "attachment") -> str:
+    """`INC9P-CR-F1`: the ONE reason -> sentence mapping for a path `confine_reason` refused.  `link` is `W2`,
+    `allow_list` and `normalised` are `U1`, everything else is `V1`; an `unreadable` import target (*surface*
+    `import`) has its own sentence (`INC9P-CR-F3`).  The factory template keeps its own mapping for `V2`, `W1`
+    and the missing-template text, and calls this for the common reasons."""
+    if reason == "link":
+        return PATH_THROUGH_LINK
+    if reason in ("allow_list", "normalised"):
+        return PATH_NOT_SUPPORTED
+    if reason == "unreadable" and surface == "import":
+        return PATH_TEMPLATES_UNCHECKED
+    return PATH_OUTSIDE_WORKSPACE
 
 
 def confine_reason(text: str, workspace: Path) -> tuple[Path | None, str]:
@@ -116,39 +145,54 @@ def confine_reason(text: str, workspace: Path) -> tuple[Path | None, str]:
 
     Reasons: `allow_list` (`safe_local_path` refused), `normalised` (a component Windows rewrites), `outside`
     (lexically, or after `resolve()`), `link` (a symlink or reparse point under the workspace), `unreadable`
-    (a component could not be inspected, or `resolve()` failed).
+    (a component could not be inspected, a not-found past MAX_PATH, or `resolve()` failed).
 
     In order: (1) `safe_local_path` (the closed allow-list; it expands `~` for every caller, so add and open
-    agree); (1b) `INC9O-SEC-F1`: refuse, on the text and before ANY filesystem call, a component other than
-    `.` and `..` that ends in a dot or a space (`...`, `. .`, `d `, `d. .`): Windows normalises it, so the walk
-    below would stop early and `resolve()` would follow a link behind it; (2) lexical containment, no stat;
-    (3) a walk from the workspace down with `os.lstat`, refusing a symlink or any reparse point (junction,
-    mount point) BEFORE anything below it is touched; (4) only then `resolve()` and a last `is_relative_to`.
-    Policy: links inside the workspace are not followed.  The workspace root itself may be a link; only what
-    lies under it is walked.
+    agree); (1b) `INC9O-SEC-F1` / `INC9P-SEC-F1`: refuse, on the text and before ANY filesystem call, a
+    component other than `.` and `..` that ends in a dot or a space (`...`, `. .`, `d `, `d. .`), and a `:` in
+    any component but the drive anchor (`lnk:$I30`, `lnk::$BITMAP`, `JLINKN~1:$I30`): Windows normalises the
+    first and reads the second as a stream, so `lstat` raises not-found, the walk stops and `resolve()` would
+    follow a link behind it; (2) lexical containment (no filesystem call); (3) a walk from the workspace down
+    with `os.lstat`, refusing a symlink or any reparse point (junction, mount point) BEFORE anything below it is
+    touched; a not-found at MAX_PATH or beyond is `unreadable` (`INC9P-SEC-F4`); (4) only then `resolve()` and
+    a last `is_relative_to`.  When the walk stopped on a not-found component, the OS resolves only the WALKED
+    prefix and the remaining parts are appended lexically: it is never asked about a tail the walk did not
+    inspect (defence in depth).  Policy: links inside the workspace are not followed.  The workspace root itself
+    may be a link; only what lies under it is walked.
     """
     local = safe_local_path(text)
     if local is None:
         return None, "allow_list"
-    if any(part not in (".", "..") and part != part.rstrip(" .") for part in local.parts):
+    components = local.parts[1:] if local.anchor else local.parts
+    if any(":" in part for part in components) or any(
+            part not in (".", "..") and part != part.rstrip(" .") for part in local.parts):
         return None, "normalised"
     joined = _lexically_inside(local, workspace)
     if joined is None:
         return None, "outside"
     root = Path(os.path.abspath(workspace))
-    current = root
-    for part in Path(joined).parts[len(root.parts):]:
-        current = current / part
+    parts = Path(joined).parts[len(root.parts):]
+    walked = root
+    tail: tuple[str, ...] = ()
+    for index, part in enumerate(parts):
+        current = walked / part
         try:
             info = os.lstat(current)
         except (FileNotFoundError, NotADirectoryError):
+            if len(os.fspath(current)) >= _MAX_PATH:
+                return None, "unreadable"
+            tail = parts[index:]
             break
         except (OSError, ValueError):
             return None, "unreadable"
-        if _is_link(info):
+        if is_link(info):
             return None, "link"
+        walked = current
     try:
-        resolved = (Path(workspace) / local).resolve()
+        if tail:
+            resolved = walked.resolve().joinpath(*tail)
+        else:
+            resolved = (Path(workspace) / local).resolve()
         if not resolved.is_relative_to(Path(workspace).resolve()):
             return None, "outside"
     except (OSError, ValueError):
@@ -232,6 +276,9 @@ def open_external(
         return REFUSED_OUTSIDE
     if not resolved.is_file():
         return REFUSED_ERROR
+    # `INC9P-SEC-F3`: a file with several names is not opened; the status IS the sentence (it names nothing).
+    if hard_linked(resolved):
+        return ATTACHMENT_HARD_LINKED
     try:
         launch(str(resolved))
     except (OSError, ValueError):

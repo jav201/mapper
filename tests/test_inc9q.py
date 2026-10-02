@@ -38,7 +38,7 @@ from tests.test_inc9n import U1, _make_docx, _toasts
 from tests.test_inc9o import V1, W2, _activate, _doc_graph, _link, _tree
 from tests.test_inc9p import MISSING, _generate, _import, _Replace, _ws_tree
 
-OPEN_STEPS: set[str] = {"colon", "maxpath", "tail", "f3", "f2", "cr1", "cr4", "cr5"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 
@@ -553,3 +553,23 @@ def test_inc9q_cr_f7_pin_the_normalised_check_runs_before_the_lexical_one(tmp_pa
     ws.mkdir()
     assert osopen.confine_reason("..\\d \\x.pdf", ws) == (None, "normalised")
     assert osopen.confine_reason("..\\x.pdf", ws) == (None, "outside")
+
+
+def test_inc9q_sec_f4_the_resolved_walked_prefix_is_the_last_check_for_a_missing_file(tmp_path, monkeypatch):
+    """Counterpart of the sealed `test_inc9o_confine_judges_what_resolve_returns_as_a_last_check` for a file that
+    does not exist: the walked prefix is what `resolve()` is asked about, and a prefix that resolves outside the
+    workspace is refused."""
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    real = pathlib.Path.resolve
+    calls: list[str] = []
+
+    def resolve(self, *a, **kw):
+        calls.append(self.name)
+        return elsewhere if len(calls) == 1 else real(self, *a, **kw)
+
+    monkeypatch.setattr(pathlib.Path, "resolve", resolve)
+    assert osopen.confine_reason("a.pdf", ws) == (None, "outside")
+    assert calls[0] == "ws", calls
