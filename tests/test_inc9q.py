@@ -336,7 +336,7 @@ async def test_inc9q_sec_f2_a_folder_swapped_for_a_junction_after_mkstemp_is_ref
         await pilot.pause()
         toasts = await _import(app, pilot, src)
     assert swap.swapped
-    assert len(toasts) == 1 and toasts[0].startswith("no se pudo importar t.docx: "), toasts
+    assert len(toasts) == 1 and toasts[0].startswith("could not import t.docx: "), toasts
     assert _tree(outside) == [], _tree(outside)
     assert replaced.calls == [], replaced.calls
     assert not (ws / "templates-moved" / "t.docx").exists()
@@ -353,7 +353,7 @@ async def test_inc9q_sec_f2_pin_a_workspace_that_is_itself_a_link_still_generate
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         _, toasts = await _generate(app, pilot, _doc_graph("docs/t.docx"))
-        assert toasts == ["generado: plantilla-root.docx"], toasts
+        assert toasts == ["generated: plantilla-root.docx"], toasts
     assert (real / "plantilla-root.docx").is_file()
 
 
@@ -486,7 +486,7 @@ async def test_inc9q_cr_f2_pin_a_failing_office_resolve_toasts_the_type_and_leav
         await pilot.pause()
         before = _ws_tree(ws)
         _, toasts = await _generate(app, pilot, _doc_graph("docs/t.docx"))
-        assert toasts == ["no se pudo generar: RuntimeError"], toasts
+        assert toasts == ["could not generate: RuntimeError"], toasts
     assert _ws_tree(ws) == before == ["docs", "docs\\t.docx"], _ws_tree(ws)
     assert not [t for t in _tree(ws) if ".tmp-" in t]
 

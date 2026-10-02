@@ -304,8 +304,8 @@ def test_inc9c_sec_f1_every_leak_exception_is_still_real():
 def test_inc9c_sec_f1_the_leak_predicate_discriminates():
     def leaks(src):
         return _leaky_interpolations(ast.parse(src, mode="eval").body)
-    assert leaks("darkside.plain(f'no se pudo: {e}')") == ["e"]
-    assert leaks("f'generado: {target}'") == ["target"]
+    assert leaks("darkside.plain(f'could not generate: {e}')") == ["e"]
+    assert leaks("f'generated: {target}'") == ["target"]
     assert leaks("darkside.plain(str(exc))") == ["str(exc)"]
     assert leaks("f'x {darkside.plain(str(e))}'") == ["str(e)"]
     assert leaks("f'x {self.store.workspace}'") == ["self.store.workspace"]

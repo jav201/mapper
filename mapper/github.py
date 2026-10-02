@@ -390,13 +390,13 @@ def _build_graph_from_git(
     tags = _tags(cwd)
 
     graph = Graph()
-    root_meta = f"ramas {len(branches)} · tags {len(tags)} · default {default}"
+    root_meta = f"branches {len(branches)} · tags {len(tags)} · default {default}"
     root = Node(id=display_name, ficha=Ficha(title=display_name, meta=root_meta))
     graph.add_node(root)
 
     total = len(branches[:50])
     if progress:
-        progress(0, total, "leyendo ramas")
+        progress(0, total, "reading branches")
 
     for idx, bname in enumerate(branches[:50], 1):
         ahead, behind = _ahead_behind(cwd, default, bname)
@@ -453,7 +453,7 @@ def _build_graph_from_git(
         graph.add_edge(Edge(parent_id=display_name, child_id=node.id))
 
     if progress:
-        progress(total, total, "listo")
+        progress(total, total, "ready")
 
     return graph
 
@@ -526,14 +526,14 @@ class GitHubConnector:
 
         total = len(branches)
         if progress:
-            progress(0, total, "leyendo ramas")
+            progress(0, total, "reading branches")
 
         for idx, branch in enumerate(branches, 1):
             bname = branch["name"]
             if bname in (".", ".."):
                 # `INC9M-CR-F5`: a skipped branch still counts, so progress reaches the total.
                 if progress:
-                    progress(idx, total, "calculando métricas")
+                    progress(idx, total, "computing metrics")
                 continue
             qname = quote(bname, safe="")
             # ahead/behind against default branch
@@ -595,7 +595,7 @@ class GitHubConnector:
             graph.add_node(node)
             graph.add_edge(Edge(parent_id=self.repo, child_id=bname))
             if progress:
-                progress(idx, total, "calculando métricas")
+                progress(idx, total, "computing metrics")
 
         for idx, tag in enumerate(tags, 1):
             tname = tag.get("name", f"tag-{idx}")

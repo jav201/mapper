@@ -45,7 +45,7 @@ V2 = "template outside the workspace: import it with i"
 W1_DOC = "document name cannot be a file name: rename it in the map's _nodos.yml (documents)"
 W1_NODE = "node id cannot be a file name: rename the node"
 W2 = "path goes through a link: use a real folder inside the workspace"
-MISSING = "archivo de plantilla no encontrado"
+MISSING = "template file not found"
 
 
 def red(step: str):
@@ -702,7 +702,7 @@ async def test_inc9o_sec_f1_pin_a_normal_name_still_generates_inside_the_workspa
             await pilot.pause()
         screen.action_generate_office()
         await pilot.pause()
-        assert toasts == ["generado: plantilla-root.docx"], toasts
+        assert toasts == ["generated: plantilla-root.docx"], toasts
     assert (ws / "plantilla-root.docx").is_file()
 
 

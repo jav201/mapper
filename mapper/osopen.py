@@ -39,12 +39,12 @@ ALLOWED_SCHEMES = ("http", "https")
 
 # Status words.  The caller shows these; this module never raises for anything
 # reachable from a `yaml.safe_load` of a sidecar.
-OK = "abierto"
-REFUSED_KIND = "tipo no abrible"
-REFUSED_TYPE = "destino inválido"
-REFUSED_SCHEME = "esquema no permitido"
-REFUSED_OUTSIDE = "fuera del espacio de trabajo"
-REFUSED_ERROR = "no se pudo abrir"
+OK = "opened"
+REFUSED_KIND = "cannot open this type"
+REFUSED_TYPE = "invalid target"
+REFUSED_SCHEME = "scheme not allowed"
+REFUSED_OUTSIDE = "outside the workspace"
+REFUSED_ERROR = "could not open"
 
 # `U1` (Round 10): the one sentence for a typed or stored path outside the allow-list; it names nothing.
 # `V1` (Round 11): the second sentence, for a path the allow-list accepts but the workspace does not
