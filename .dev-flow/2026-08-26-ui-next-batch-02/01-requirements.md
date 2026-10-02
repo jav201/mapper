@@ -10905,3 +10905,41 @@ links are junctions or symlinks to a LOCAL directory under a temp path, and spie
 **Trace.** Standalone, like `A-113`..`A-128`. Carried by `tests/test_en1.py` (a census of the four files' non-docstring literals) and by the relabelled pins in the record.
 
 **What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general.
+
+### `A-130` -- English strings in the coverage report, the components sheet, the inspector and the rail (`Inc-EN-2`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` (EN-Q1; Round 2, `Z2`) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING (`B-71`). The record is `increment-048-en2.md`.
+
+**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below, the string it quotes is now the English one. Only the words change; no condition, geometry, style, key or row order is touched.
+
+| Where | Old | New |
+|---|---|---|
+| `screens/coverage` binding labels | `Seleccionar` / `Cerrar` (two keys) | `Select` / `Close` |
+| `screens/coverage` columns | `nodo` / `faltantes` / `cobertura` | `node` / `missing` / `coverage` |
+| `screens/coverage` empty report | `todo completo.` / `no falta ningún campo requerido.` | `all complete.` / `no required field is missing.` |
+| `screens/settings` hint | `tab recorre componentes — el foco es el bloque sólido` | `tab walks the components — focus is the solid block` |
+| `screens/settings` demo values | `luna` / `marea` / `noche` | `moon` / `tide` / `night` |
+| | `cargando…` / `sistema-leg` | `loading…` / `system-leg` |
+| `widgets/inspector` field binding label | `salir del campo` | `leave the field` |
+| `widgets/inspector` empty panel | `(selecciona un nodo)` | `(select a node)` |
+| `widgets/inspector` header and row labels | `ficha` | `card` |
+| | `título` / `estado` / `notas` / `adjuntos` / `cobertura` | `title` / `state` / `notes` / `attachments` / `coverage` |
+| | `+ agregar adjunto` | `+ add attachment` |
+| | `requerido` (after a missing required field) | `required` |
+| `widgets/inspector` state segments | `ok` / `riesgo` / `tarde` / `bloq` | `ok` / `risk` / `late` / `blocked` |
+| `widgets/rail` | `no se puede dibujar:` + line break + `el mapa tiene un ciclo` | `cannot draw:` + line break + `the map has a cycle` |
+| | `(mapa vacío)` | `(empty map)` |
+| | `mapa · {n}n · {m} faltan` | `map · {n}n · {m} missing` |
+| | `territorio` / `cobertura {pct}%` | `territory` / `coverage {pct}%` |
+
+**Quoted by an earlier requirement: none verbatim.** `01-requirements.md` was searched for every old string above. Lines that look close and were checked, not amended: the `cobertura` binding label at the `AT-R12`/`AT-R14` lines (the key bar's word, `keymap.py`, `EN-6`); `siguiente faltante` (`keymap.py`); `territorio sin explorar` at the `V4`/`V4a` lines (the legend's row copy in `darkside.py`, `EN-4`; the rail's `territorio` caption is a different string); `borde del territorio` (`app.py`, `EN-5`); `E:riesgo` and the state words `obsoleto`/`estable`/`riesgo` (query data, not copy). The Spanish text of this amendment's old column is pinned only by tests, listed in `increment-048-en2.md` section 3.
+
+**`Z2` (`X3-REV-F3`).** While an attachment chip (`insp-att-*`) holds focus, the hint line and the key bar read `↵ open attachment` in place of the seat's `↵ open card`; on blur the seat's words are restored. Done inside `widgets/inspector` (`FichaInspector.on_descendant_focus` / `on_descendant_blur`), reading the seat's own row through `hint_pair`; `keymap.py` and `app.py` are unchanged, and the seat still says `open card`.
+
+**Not changed (declared).** `app.py` keeps its Spanish `cobertura completa` / `no falta ningún campo requerido` toast, `cobertura {pct} %`, `adjuntos`, `riesgo` / `bloqueado` (`EN-5`); the key bar's `cobertura` (`EN-6`); `components.py`'s `cargando…` default (`EN-4`).
+
+**Sealed-arm changes.** Label changes only, no assertion weakened, listed in `increment-048-en2.md` section 3.
+
+**Trace.** Standalone, like `A-113`..`A-129`. Carried by `tests/test_en2.py` (a census of the four files' non-docstring literals, and the `Z2` arms) and by the relabelled pins in the record.
+
+**What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. `Z2` is measured on the map screen at 140 and 87 columns, not on every surface that could host the inspector.

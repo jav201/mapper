@@ -39,3 +39,7 @@ def test_legacy_renderer_shows_per_card_coverage():
     # The strip is gone: its two distinctive strings must not come back here.
     assert "selecciona un nodo" not in text.plain
     assert "cobertura" not in text.plain
+    # EN-2: the inspector's words are English now; the Spanish pins above stay (the renderer is not EN-2's) and these two
+    # keep the same guarantee against the inspector's current copy.
+    assert "select a node" not in text.plain
+    assert "coverage" not in text.plain

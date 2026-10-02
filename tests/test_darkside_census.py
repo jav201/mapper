@@ -218,7 +218,7 @@ CONFORMING_SEVERITY = {
     ("mapper/views/outline.py", "style = darkside.WARN if missing else darkside.MUT"),
     ("mapper/views/radial.py", "style=darkside.WARN,"),
     ("mapper/widgets/inspector.py", "(darkside.plain(text), darkside.ALERT),"),
-    ("mapper/widgets/inspector.py", '("  requerido", darkside.ALERT),'),
+    ("mapper/widgets/inspector.py", '("  required", darkside.ALERT),'),
     ("mapper/widgets/rail.py", "darkside.ALERT,"),
     ("mapper/widgets/rail.py", 'parts.append((f"{missing:>3}", darkside.WARN))'),
 }

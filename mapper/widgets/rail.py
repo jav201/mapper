@@ -192,14 +192,14 @@ class OutlineRail(Static):
         except ValueError:
             return darkside.Text.assemble(
                 (
-                    "  no se puede dibujar:\n  el mapa tiene un ciclo",
+                    "  cannot draw:\n  the map has a cycle",
                     darkside.ALERT,
                 )
             )
 
     def _body(self):
         if self.graph.root_id is None:
-            return darkside.Text.assemble(("  (mapa vacío)", darkside.MUT))
+            return darkside.Text.assemble(("  (empty map)", darkside.MUT))
 
         index = self._child_index()
         rows = self._rows(index)
@@ -212,7 +212,7 @@ class OutlineRail(Static):
         total_missing = totals.get(self.graph.root_id, 0)
         parts.append(
             (
-                f"mapa · {len(self.graph.nodes)}n · {total_missing} faltan\n\n",
+                f"map · {len(self.graph.nodes)}n · {total_missing} missing\n\n",
                 darkside.MUT,
             )
         )
@@ -251,7 +251,7 @@ class OutlineRail(Static):
                 parts.append(("   ", ""))
             parts.append(("\n", ""))
 
-        parts.append(("\nterritorio\n", darkside.WORDMARK))
+        parts.append(("\nterritory\n", darkside.WORDMARK))
         parts.extend(self._lattice())
         return darkside.Text.assemble(*parts)
 
@@ -270,7 +270,7 @@ class OutlineRail(Static):
                 parts.append(("\n", ""))
         have, req = self.graph.coverage()
         pct = round(have / req * 100) if req else 100
-        parts.append((f"\n\ncobertura {pct}%", darkside.MUT))
+        parts.append((f"\n\ncoverage {pct}%", darkside.MUT))
         return parts
 
     def on_click(self) -> None:
