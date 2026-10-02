@@ -206,3 +206,13 @@ Not measured: terminals other than Textual's headless driver; widths other than 
 
 `e781be2` arms (strict xfail) · `b518c09` four RED keys corrected · `e56662d` three sources + `ARCHITECTURE.md` + test files with `OPEN_STEPS` emptied + FLAKE-3 · docs commit (`A-123`, this record, the full-lane result).
 No push; `state.json` untouched.
+
+## Full-lane result
+
+**2427 passed, 24 deselected, 3 xfailed in 1530.76s (25:30), `-rf`, 0 failed**, on `ed9ce49`'s tree (the record update that follows is a docs commit; `test_no_operator_paths` reads `.dev-flow`). Baseline 2344 + 81 (`test_inc9o`) + 1 (the back-edge arm
+of `test_arch_osopen_callers`) + 1 (the allowed-names arm grew into a keyed test: the rename kept the count) = 2427 as run. The 3 xfailed are the pre-existing ones. Neither known flake (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`) nor FLAKE-3 failed in this run.
+
+- This is the SECOND full-lane run, not a retry of a flake: the FIRST (1 failed, 2426 passed, 1555.69s) failed for real on `test_darkside_census::test_hue_census_every_severity_and_busy_site_is_classified` (the census keys on the source text of a severity site; V2 changed
+  the `archivo de plantilla no encontrado` line). Fixed in `ed9ce49` (section 2), and the lane was run again from the start, uninterrupted.
+- Scratch worktrees (`wt-base-9o`, `wt-mut-9o`, `wt-red-9o`) were removed after checking they equalled their commit or held only the copied test files; none remains (`git worktree list`).
+
