@@ -32,7 +32,7 @@ from tests.test_attachments import RecordingLauncher, _open, _seed
 from tests.test_inc9f import NARROW, SIZE, _Run  # noqa: F401
 from tests.test_inc9m import _env, _flat, _no_fs, _norm, _open_prompt, _stub_gh
 
-OPEN_STEPS: set[str] = {"w2"}  # Inc-9p: the one arm whose sentence changed, RED first
+OPEN_STEPS: set[str] = set()
 
 REPO_ROOT = pathlib.Path(github.__file__).parent
 

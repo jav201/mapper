@@ -45,7 +45,8 @@ from .mermaid import dump as dump_mermaid, slugify
 from .model import Attachment, Document, Edge, Ficha, Graph, Node
 from .motion import pulse_cursor
 from .osopen import (
-    OK as OSOPEN_OK, PATH_NOT_SUPPORTED, PATH_OUTSIDE_WORKSPACE, confine, open_external, safe_local_path,
+    OK as OSOPEN_OK, PATH_NOT_SUPPORTED, PATH_OUTSIDE_WORKSPACE, PATH_THROUGH_LINK, confine_reason, open_external,
+    safe_local_path,
 )
 from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
 from .search import SearchIndex
@@ -313,12 +314,16 @@ class NavigationModel:
 
 def _path_refusal(text: str, workspace: Path) -> str | None:
     """The fixed sentence for a `file` attachment text that may not be stored or opened, else None:
-    `U1` when the allow-list refuses it, `V1` when the allow-list accepts it and `confine` does not."""
-    if safe_local_path(text) is None:
+    `U1` when the allow-list refuses it or a component is one Windows normalises, `W2` when it goes through a
+    link, `V1` for the rest (outside the workspace; an unreadable component is declared as V1, `A-124`)."""
+    path, reason = confine_reason(text, workspace)
+    if path is not None:
+        return None
+    if reason == "link":
+        return PATH_THROUGH_LINK
+    if reason in ("allow_list", "normalised"):
         return PATH_NOT_SUPPORTED
-    if confine(text, workspace) is None:
-        return PATH_OUTSIDE_WORKSPACE
-    return None
+    return PATH_OUTSIDE_WORKSPACE
 
 
 class _PromptScreen(ModalScreen[str | None]):

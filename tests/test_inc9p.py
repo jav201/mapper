@@ -34,7 +34,7 @@ from tests.test_inc9o import (
     V1, V2, W1_DOC, W1_NODE, W2, _activate, _doc_graph, _Forms, _link, _tree,
 )
 
-OPEN_STEPS: set[str] = {"norm", "reason", "w2", "hard", "unicode", "equiv", "tilde", "import"}
+OPEN_STEPS: set[str] = set()
 
 PKG = pathlib.Path(osopen.__file__).parent
 

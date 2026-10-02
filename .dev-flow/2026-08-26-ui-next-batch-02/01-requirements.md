@@ -10757,3 +10757,27 @@ a live `gh`, a real clone, or another terminal than Textual's headless driver.
 **What is not claimed.** Windows only; nothing was run on POSIX. A file under a cloud-sync folder that carries a reparse attribute (OneDrive placeholders and similar) is refused by the walk like any link; not measured. A hard link is not a reparse point
 and is not detected. Between the walk and the write there is a window in which a component could be replaced by a link (a race, not closed). No real UNC, `\??\UNC`, console or COM device and no link to a network target was ever created or opened:
 links are junctions or symlinks to a LOCAL directory under a temp path, and spies refuse and record before the real call.
+
+### `A-124` -- the Inc-9o review fixes: normalised components, hard links, invisible names, `confine_reason`, W1, W2 (`Inc-9p`), dated 2026-10-01
+
+**Authority.** The operator's W1 and W2 (Round 12 of `VERDICT-inc9-2026-09-30.md`) and the coordinator's rulings for `INC9O-SEC-F1`..`F4` and `INC9O-CR-F1`..`F6`. The record is `increment-042-inc9p.md`.
+
+**Statement.** Amends `A-123`; the rest of `A-123` stands.
+
+1. **`INC9O-SEC-F1` (HIGH).** `confine` refuses, on the text and before any filesystem call, any component of the expanded path other than `.` and `..` that differs from its `rstrip(" .")` (`...`, `. .`, `..  `, `d `, `d. .`). Windows normalises such a component, so the walk stopped early and `resolve()` followed a link behind it (measured with local junctions, including from the factory preview on render). The `.` exemption is unreachable (pathlib never yields it); declared.
+2. **`confine_reason(text, workspace) -> tuple[Path | None, str]`** is now the rule and `confine` is `confine_reason(...)[0]`. Reasons: `ok`, `allow_list`, `outside`, `link`, `normalised`, `unreadable`. `lexically_outside` is `confine_reason(...)[1] == "outside"` (`INC9O-CR-F1`); a text refused by the allow-list or as normalised is not 'outside'.
+3. **`W2`.** `path goes through a link: use a real folder inside the workspace` (`osopen.PATH_THROUGH_LINK`) for reason `link`: attachment add and open, the factory template preview and generate, and the import. Attachments: `allow_list` and `normalised` -> U1, `outside` and `unreadable` -> V1, `link` -> W2.
+   **Declared deviation, factory template:** the preview and the generate toast keep `archivo de plantilla no encontrado` for `allow_list`, `normalised` and `unreadable` (the sealed Inc-9o V2 pin has UNC and `con` there, and V1 says "attachment"); `outside` -> V2, `link` -> W2. One line to change if the operator wants U1 there.
+   **Import:** `link` -> W2, `allow_list` and `normalised` -> U1, the rest -> V1 (as the coordinator's text; V1 says "attachment").
+4. **`W1`.** The generate refusal is `document name cannot be a file name: rename it in the map's _nodos.yml (documents)` when the document name is the cause, and `node id cannot be a file name: rename the node` when the node id is. Neither names anything typed. A composed name that `confine_reason` refuses for a link says W2; any other cause says the document sentence (declared).
+5. **`INC9O-SEC-F2` (LOW).** Generate and import write a temporary sibling in the target's directory (`tempfile.mkstemp`) and `os.replace` it onto the target, removing the sibling on failure; a template or a target whose `lstat().st_nlink > 1` is refused. **The hard-link sentence `file has several hard links: use a plain file` is not operator-ruled copy** and is declared for the coordinator.
+6. **`INC9O-SEC-F3` (LOW).** A document name or node id containing a Unicode category `Cf`, `Zl`, `Zp` or `Co` is refused by `factory` before the name is composed (`store.py` untouched). Includes U+200D (a `Cf`); declared.
+7. **`INC9O-SEC-F4` (LOW, test oracle).** The spies (`_no_fs`, `_Walk`, `_Forms`) also patch `ntpath._getfinalpathname`, which `realpath` binds by name.
+8. **`INC9O-CR-F2`.** `action_import_office` confines `./templates/<name>` and writes with the same sibling + replace; it no longer follows a `templates` junction.
+9. **`INC9O-CR-F5`.** The composed generate name is passed as `./<name>`; so that this works, `safe_local_path` expands `~` only when the TEXT starts with `~` (pathlib drops a leading `./`, so `./~x` was expanded). Effect for every caller: `./~x` and `.\~x` are literal relative names; `~`, `~/x` and `~user` expand as before.
+10. **`INC9O-CR-F6`.** `tests/test_palette.py` waits for and asserts a non-empty `palette._items` before it sets the empty query.
+11. **`INC9O-CR-F3`, declared (no code):** a different 8.3 form of a drive-absolute path inside the workspace is judged by `resolve()` and reads as `outside` -> V1. **`INC9O-CR-F4`, declared (no code):** an unreadable component (`lstat` fails other than not-found) or a `resolve()` error reads as `unreadable` -> V1 for attachments.
+
+**Trace.** Standalone, like `A-113`..`A-123`. Carried by `tests/test_inc9p.py` and the sealed-arm changes in `increment-042-inc9p.md`.
+
+**What is not claimed.** Windows only; nothing was run on POSIX. A hard link is detected only on the write target and the template, not on an attachment that is opened. A race between the walk and the write is not closed. `mkstemp` creates the sibling with the default temp-file mode; permission carry-over from an overwritten target is not measured. No real UNC, `\??\UNC`, console or COM device and no link to a network target was created or opened: links are junctions or symlinks to a LOCAL directory under a temp path, and `os.link` hard links between two temp files.
