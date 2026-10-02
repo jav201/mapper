@@ -30,7 +30,7 @@ Tests: `tests/test_en1.py` (new, 5 items); labels relabelled in seven files (sec
 
 ## 2. Files modified
 
-Source (4, the cap): `mapper/osopen.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/screens/editor.py`. Tests: `tests/test_en1.py` (new); relabelled `test_darkside_census`, `test_inc9c`, `test_inc9m`, `test_inc9n`, `test_inc9o`, `test_inc9p`, `test_inc9q`; `test_inc9x3` (one new assertion, no relabel). Docs: `01-requirements.md` (append `A-129`), this file. `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `e9648db`, `9603110`, then the records.
+Source (4, the cap): `mapper/osopen.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/screens/editor.py`. Tests: `tests/test_en1.py` (new); relabelled `test_darkside_census`, `test_inc9c`, `test_inc9n`, `test_inc9o`, `test_inc9p`, `test_inc9q`, `test_repair_depth`; `test_inc9x3` (one new assertion, no relabel). Docs: `01-requirements.md` (append `A-129`), this file. `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `e9648db`, `9603110`, then the records.
 
 ## 3. Sealed-arm label changes (labels only; no assertion weakened)
 
@@ -40,8 +40,9 @@ Each is a literal substitution of the pinned text; the comparison (`==`, `in`, `
 |---|---|---|
 | `test_darkside_census.py:188` | hue-census site key | `no se puede dibujar: el mapa tiene un ciclo` -> `cannot draw: the map has a cycle` |
 | `test_inc9c.py:307-308` | leak-detector snippets (analysed, not mutated) | `darkside.plain(f'no se pudo: {e}')` -> `darkside.plain(f'could not generate: {e}')`; `f'generado: {target}'` -> `f'generated: {target}'` |
-| `test_inc9m.py` (4 sites) | U1 never sits beside the name sentence; a missing accepted path names its file | `archivo no encontrado` -> `file not found` (3 `not in`); `archivo no encontrado: missing.csv` -> `file not found: missing.csv` |
-| `test_inc9n.py` (4 sites) | `U1` pin; the missing sentence is not painted | `archivo de plantilla no encontrado` -> `template file not found`; `archivo no encontrado: d.csv` / `t.docx` / `missing.{ext}` -> `file not found: …` |
+| `test_inc9m.py` | NONE (see the full-lane correction below) | the csv prompt's `archivo no encontrado` is `app.py:1044`'s literal (EN-5) |
+| `test_inc9n.py` (3 sites) | the missing sentence is not painted; the office prompt names its file | `archivo de plantilla no encontrado` -> `template file not found`; office `archivo no encontrado: t.docx` -> `file not found: t.docx`; the parametrized `missing.{ext}` pin picks the word by surface (`csv`: unchanged Spanish, `office`: `file not found`) |
+| `test_repair_depth.py` | the factory tree notice (`test_tc_r32_the_factory_tree_…`) | new constant `FACTORY_CYCLE_NOTICE = "the map has a cycle"` used at that one assert; `CYCLE_NOTICE` (the rail's, EN-2) unchanged |
 | `test_inc9o.py` (2 sites) | `MISSING`; the generate toast | `MISSING` -> `template file not found`; `generado: plantilla-root.docx` -> `generated: plantilla-root.docx` |
 | `test_inc9p.py` (7 sites) | `MISSING`; generate toasts; import toast; one docstring | `template file not found`; `generated: …` (3); `could not generate: OSError`; `template imported: templates/t.docx` |
 | `test_inc9q.py` (3 sites) | import failure; generate toasts | `could not import t.docx: `; `generated: plantilla-root.docx`; `could not generate: RuntimeError` |
@@ -63,7 +64,7 @@ Pins found by grep that were NOT relabelled, and why:
 
 | # | Exact text -> mutant | Killed by |
 |---|---|---|
-| M1 | `f"file not found: {name}"` -> `f"archivo no encontrado: {name}"` (factory) | `test_inc9n`: 6 failed |
+| M1 | `f"file not found: {name}"` -> `f"archivo no encontrado: {name}"` (factory) | `test_inc9n`: 3 failed (the office-surface pins only; re-run after the correction below) |
 | M2 | `f"generated: {shown}"` -> `f"generado: {shown}"` | `test_inc9p`: 4 failed |
 | M3 | `f"could not generate: {type` -> `f"no se pudo generar: {type` | `test_inc9q`: 1 failed (CR-F2) |
 | M4 | `"cannot draw: the map has a cycle"` -> the Spanish sentence | `test_darkside_census`: 1 failed |
@@ -76,6 +77,8 @@ Pins found by grep that were NOT relabelled, and why:
 
 C1..C4 are killed ONLY by the census arm: no existing test pins the osopen words or the editor labels, which is why the census arm exists.
 
+**Full-lane correction (found by the first full lane, 7 failed).** My grep-driven relabel had two errors, both fixed in the commit after `0e20cc6`: (a) the csv import prompt's `archivo no encontrado: {name}` is `app.py:1044`'s own literal, not the factory's, so the csv pins in `test_inc9m` (4 sites) and `test_inc9n` (`d.csv`, and the csv half of `missing.{ext}`) went back to Spanish (a negative `not in` pin on the English word would have been vacuous); (b) `test_repair_depth` pinned `el mapa tiene un ciclo`, a fragment my grep pattern missed. The first M1 run counted 6 kills of which 3 were the csv pins, which do not depend on the factory; the 3 above are the honest count. First full lane on `0e20cc6`: `7 failed, 2646 passed, 24 deselected, 3 xfailed`.
+
 ## 5. Test results
 
 - Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `2f80142` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
@@ -86,6 +89,6 @@ C1..C4 are killed ONLY by the census arm: no existing test pins the osopen words
 ## 6. Risks, unmeasured, next
 
 - Risks: (1) until EN-5 the UI mixes languages in two places: the attachment toast `abierto` and the connect-repo stage list. (2) The census word list is explicit and finite (about 45 words plus accents); a Spanish word not on it passes. (3) `github.py` progress labels are stored but never painted today; if EN-5 paints them they are already English.
-- Left for EN-5 (declared): `app.py:3456` `abierto`; `app.py:1265` `iniciando` / `leyendo ramas` / `calculando métricas` / `listo`; the tests that pin them (`test_inc9x3`, `test_inc9f`, `test_inc9h`, `test_inc9i`) and the `test_app.py` fake-callback `listo`.
+- Left for EN-5 (declared): `app.py:1044` `archivo no encontrado: {name}` (the csv prompt; pinned in `test_inc9m` and `test_inc9n`); `app.py:3456` `abierto`; `app.py:1265` `iniciando` / `leyendo ramas` / `calculando métricas` / `listo`; the tests that pin them (`test_inc9x3`, `test_inc9f`, `test_inc9h`, `test_inc9i`) and the `test_app.py` fake-callback `listo`.
 - Unmeasured: no rendered editor or factory screen was captured in this increment (the editor labels have no test beyond the census); POSIX; the source files outside EN-1.
 - Suggested next: EN-2 (`coverage`, `settings`, `inspector`, `rail`).
