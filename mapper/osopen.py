@@ -23,6 +23,7 @@ import re
 import stat
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path, PureWindowsPath
 from typing import Callable
 from urllib.parse import urlparse
@@ -71,7 +72,7 @@ _LONG_PREFIX = "\\\\?\\"
 
 
 def _utf16_units(text: str) -> int:
-    return len(text.encode("utf-16-le")) // 2
+    return len(text.encode("utf-16-le", "surrogatepass")) // 2
 
 
 _DRIVE = re.compile(r"[A-Za-z]:")
@@ -81,7 +82,8 @@ def safe_local_path(text: str) -> Path | None:
     r"""`S1` applied to a typed LOCAL path: a closed allow-list, decided on strings before any
     filesystem call, so no SMB or NTLM lookup and no NT-namespace path is ever probed.
 
-    Refused (None): an empty text, a NUL, a leading `-`; a `~` that cannot be expanded; a DOS device
+    Refused (None): an empty text, a NUL, a leading `-`; a `~` that cannot be expanded; a lone surrogate (category Cs,
+    `INC9R-SEC-F3`: nothing can be asked of the filesystem for it); a DOS device
     name (`con`, `nul`, `conin$`, `com1`, `aux`, `lpt1`...) in ANY component, with an extension, trailing
     dots or spaces, in any case; and everything that is not (a) drive-absolute (a letter drive and a
     root, as `C:\x`) or (b) relative (no drive and no root).  That covers UNC, `\\?\`, `\\.\`, `\??\`,
@@ -89,6 +91,8 @@ def safe_local_path(text: str) -> Path | None:
     then.
     """
     if not isinstance(text, str) or not text or "\x00" in text or text.startswith("-"):
+        return None
+    if any(unicodedata.category(ch) == "Cs" for ch in text):
         return None
     try:
         # `INC9O-CR-F5`: only a text that STARTS with `~` is expanded; `./~x` is a plain relative name (pathlib
