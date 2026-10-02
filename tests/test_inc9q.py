@@ -33,12 +33,13 @@ from mapper.model import Attachment
 from mapper.screens import factory as factory_module
 from mapper.screens.factory import FactoryScreen
 from tests.test_inc9f import NARROW, SIZE
-from tests.test_inc9m import _env, _flat, _no_fs, _nt
+from tests.test_inc9m import _env, _flat, _no_fs
 from tests.test_inc9n import U1, _make_docx, _toasts
 from tests.test_inc9o import V1, W2, _activate, _doc_graph, _link, _tree
 from tests.test_inc9p import MISSING, _generate, _import, _Replace, _ws_tree
 
-OPEN_STEPS: set[str] = set()
+# Inc-9r: the arms whose expectation changed (Y1 `r_colon`, CR-F1 `r_backstop`) are committed RED first, keyed by step.
+OPEN_STEPS: set[str] = {"r_colon", "r_backstop"}
 
 PKG = pathlib.Path(osopen.__file__).parent
 
@@ -70,16 +71,20 @@ STREAM_FORMS = [
     ("lnk::$DATA", "lnk"),
     ("lnk::$INDEX_ALLOCATION", "lnk"),
     ("JLINKN~1:$I30", "jlinkname"),
+    # Inc-9r (CR-F4): a single-letter junction.  At the top level `l:$I30` is a drive-relative path to pathlib and
+    # `safe_local_path` refuses it (`allow_list`, see the pin below); one level down it is a component, and step 1b
+    # refuses it.
+    ("sub/l:$I30", "sub/l"),
 ]
 
 
-@red("colon")
+@red("r_colon")
 @pytest.mark.parametrize("tail", ["/x.pdf", ""])
 @pytest.mark.parametrize("form,junction", STREAM_FORMS)
 @pytest.mark.parametrize("where", ["outside", "inside"])
 def test_inc9q_sec_f1_a_stream_suffix_on_a_link_component_is_refused_before_any_filesystem_call(
         where, form, junction, tail, tmp_path, monkeypatch):
-    """Measured on the base: an inside junction was returned `ok`.  Now the TEXT is refused as `normalised`,
+    """Measured on the base: an inside junction was returned `ok`.  Now the TEXT is refused as `colon` (Y1),
     with zero `os.stat`, `os.lstat`, `Path.resolve`, `nt._getfinalpathname` or `ntpath._getfinalpathname` call, so
     nothing reaches the link target either way."""
     ws = tmp_path / "ws"
@@ -92,7 +97,7 @@ def test_inc9q_sec_f1_a_stream_suffix_on_a_link_component_is_refused_before_any_
     with _no_fs(monkeypatch) as hits:
         got = osopen.confine_reason(text, ws)
         assert osopen.confine(text, ws) is None
-    assert got == (None, "normalised"), got
+    assert got == (None, "colon"), got
     assert hits == [], hits
 
 
@@ -135,39 +140,20 @@ def test_inc9q_sec_f1_pin_ordinary_paths_still_work(tmp_path):
 # ---------------------------------------------------------------------------
 # INC9P-SEC-F1 (b) / SEC-F4: the OS never resolves a tail the walk did not inspect
 
-class _Reach:
-    """Records (and lets through) every call that could resolve a path mentioning *needle*."""
-
-    def __init__(self, monkeypatch, needle):
-        self.hits: list[str] = []
-        self.needle = needle.lower()
-        for owner, name in ((os, "stat"), (pathlib.Path, "resolve"), (pathlib.Path, "stat"),
-                            (os.path, "realpath"), (os.path, "exists"), (pathlib.Path, "exists"),
-                            (pathlib.Path, "is_file")):
-            monkeypatch.setattr(owner, name, self._wrap(f"{owner.__name__}.{name}", getattr(owner, name)))
-        for mod in (_nt(), sys.modules.get("ntpath")):
-            if mod is not None and hasattr(mod, "_getfinalpathname"):
-                monkeypatch.setattr(mod, "_getfinalpathname",
-                                    self._wrap(f"{mod.__name__}._getfinalpathname", mod._getfinalpathname))
-
-    def _wrap(self, name, real):
-        def probe(first, *a, **kw):
-            if isinstance(first, (str, os.PathLike)) and self.needle in os.fspath(first).lower():
-                self.hits.append(f"{name}({os.fspath(first)})")
-            return real(first, *a, **kw)
-        return probe
-
-
-@red("tail")
-def test_inc9q_sec_f4_the_unwalked_tail_is_appended_not_resolved(tmp_path, monkeypatch):
-    """Implemented: after the walk stops on a not-found component, only the WALKED prefix is resolved and the
-    remaining parts are appended lexically.  `lstat` is made to lie about `lnk` (a class of form this increment
-    did not think of); the OS must still never be asked about `lnk`."""
+@red("r_backstop")
+@pytest.mark.parametrize("tail", ["x.pdf", "new.pdf"])
+@pytest.mark.parametrize("where", ["outside", "inside"])
+def test_inc9q_sec_f4_the_unwalked_tail_is_appended_not_resolved(where, tail, tmp_path, monkeypatch):
+    """Inc-9r (INC9Q-CR-F1) replaced the Inc-9q body, which asserted a proxy (the OS is never asked about `lnk`)
+    and so accepted `ok` for a link the walk had been lied to about.  The property is that nothing behind the link
+    is reachable: `lstat` is made to report `lnk` as not found, and the result must still be a refusal and
+    nothing may be launched."""
     ws = tmp_path / "ws"
-    ws.mkdir()
-    (tmp_path / "outside").mkdir()
-    (tmp_path / "outside" / "x.pdf").write_bytes(b"1")
-    _link("junction", ws / "lnk", tmp_path / "outside")
+    (ws / "real").mkdir(parents=True)
+    target = tmp_path / "outside" if where == "outside" else ws / "real"
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "x.pdf").write_bytes(b"1")
+    _link("junction", ws / "lnk", target)
     real = os.lstat
 
     def lying(path, *a, **kw):
@@ -176,10 +162,12 @@ def test_inc9q_sec_f4_the_unwalked_tail_is_appended_not_resolved(tmp_path, monke
         return real(path, *a, **kw)
 
     monkeypatch.setattr(os, "lstat", lying)
-    reach = _Reach(monkeypatch, "lnk")
-    got, why = osopen.confine_reason("lnk/x.pdf", ws)
-    assert reach.hits == [], reach.hits
-    assert why == "ok" and got == ws.resolve() / "lnk" / "x.pdf", (got, why)
+    text = "lnk/" + tail
+    got, why = osopen.confine_reason(text, ws)
+    assert got is None and why in (("link", "outside") if where == "outside" else ("link",)), (got, why)
+    launched: list[str] = []
+    assert osopen.open_external("file", text, workspace=ws, launcher=launched.append) != osopen.OK
+    assert launched == []
 
 
 def test_inc9q_sec_f4_pin_a_missing_tail_is_the_walked_prefix_plus_the_tail(tmp_path):
