@@ -111,3 +111,8 @@ Lane history, declared: the first (targeted) lane above is not the gate. The ful
 ## Correction note (EN-8, 2026-10-02)
 
 Appended; nothing above was rewritten. `EN5-REV-F1`: mutants Q1 (drop `darkside.plain` from `connected: {count} nodes`) and Q2 (drop it from `file not found: {name}`) are recorded as "equivalent" and "SURVIVED all existing tests". Both are killed by the notify census, `tests/test_inc9.py::test_llr_n06_2_5_notify_sites_are_coerced` (every dynamic `notify` message must go through `plain()`); `EN-8` re-ran both (KILLED, that test). Q1 is behaviourally equivalent (an `int`) and structurally caught; Q2 is also pinned behaviourally by the arm this increment added. `EN5-REV-F4`: the `MapIdError` "already exists" sentence and full-sentence comparison are now driven in `tests/test_en4.py`.
+
+## Back-reference (Gate-1, 2026-10-03)
+
+Appended; nothing above was rewritten. The uncertainty in section 7 about `EN2-REV-F1` is settled. The finding was the code comment on the restore at the top of `_rebuild` (the one that said nothing else would put the words back), not the inspector comment this increment changed on a guess. It was reworded in `EN-8`, as recorded in the correction notes of `increment-048-en2.md` (EN-8 note, relabelled `EN2-REV-F1` by the EN-9 note). The inspector comment change here stays as a harmless wording fix; it was not the finding.
+
