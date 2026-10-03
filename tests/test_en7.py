@@ -62,6 +62,10 @@ async def test_question_mark_in_the_connect_repo_field_types_and_ends_the_value(
 @pytest.mark.parametrize("field_id", ["insp-title", "insp-notes", "insp-field-D"])
 @pytest.mark.asyncio
 async def test_question_mark_in_an_inspector_field_appends_and_keeps_the_content(tmp_path, size, field_id):
+    """At 118 the inspector is on screen: a path the operator can take (`Tab`, a click).  At 87 it is not (the
+    field has a 0x0 region): the 87 params are a PROGRAMMATIC-FOCUS control, they say what `focus()` does to a field
+    nobody can see, not that an operator can reach it (`EN7-REV-F4`; `B-82` records the live path to it).  The
+    region assertion below pins which of the two each param is."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         await pilot.pause()
@@ -71,6 +75,7 @@ async def test_question_mark_in_an_inspector_field_appends_and_keeps_the_content
         app.store.save(map_id, graph)
         screen = await _open_map(app, pilot, map_id)
         field = screen.query_one(f"#{field_id}", FieldInput)
+        assert (field.region.area > 0) == (size == SIZES[0]), (size, field.region)
         before = field.value
         assert before, "the probe needs a field that holds something to lose"
         field.focus()
