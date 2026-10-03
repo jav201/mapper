@@ -296,11 +296,11 @@ async def test_the_declaration_and_the_legend_survive_the_clip(tmp_path, size):
         strip = screen.query_one("#map-minimap")
         painted = " ".join(" ".join(rows_in(screen, strip.region)).split())
 
-        assert "ramas sin mostrar" in painted, (
+        assert "branches not shown" in painted, (
             f"at {size} the remainder declaration is not on the frame; the "
             "strip declares nothing while claiming to declare the remainder"
         )
-        assert "sin datos" in painted, (
+        assert "no data" in painted, (
             f"at {size} the coverage legend is not on the frame; the operator "
             "reads the glyphs with no key, on a strip that reports full height"
         )
@@ -350,7 +350,7 @@ async def test_the_CELL_BUDGET_is_the_bound_that_binds(tmp_path):
         # A budget that drops entries without counting them, or declares a
         # remainder it did not drop, breaks this whatever its constants say.
         drawn = len(re.findall(r"rama \d+", painted))
-        declared = re.search(r"\+(\d+) ramas sin mostrar", painted)
+        declared = re.search(r"\+(\d+) branches not shown", painted)
         assert declared, (
             "the strip drops branches and declares no remainder; every branch "
             "must be drawn or declared"
@@ -410,7 +410,7 @@ async def test_a_small_map_declares_NOTHING_because_it_drops_nothing(tmp_path):
 
         strip = screen.query_one("#map-minimap")
         painted = " ".join(" ".join(rows_in(screen, strip.region)).split())
-        assert "ramas sin mostrar" not in painted, (
+        assert "branches not shown" not in painted, (
             "a three-branch map declares a remainder it did not need to drop; "
             "the declaration's reserve is being charged when there is nothing "
             "to declare"

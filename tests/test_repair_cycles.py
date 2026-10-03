@@ -248,7 +248,7 @@ async def test_tc_r08_refresh_canvas_survives_any_renderer_exception(tmp_path, e
         assert app.screen is screen
         # ... and the canvas carries the Spanish notice rather than a picture.
         painted = screen.query_one("#map-canvas", Static).render().plain
-        assert "no se pudo dibujar el mapa" in painted
+        assert "could not draw the map" in painted
 
 
 async def test_tc_r09_home_screen_notices_a_refused_map_and_still_lists_the_rest(
@@ -277,7 +277,7 @@ async def test_tc_r09_home_screen_notices_a_refused_map_and_still_lists_the_rest
 
         # The operator is told, in Spanish, which map and which cycle.
         assert any(
-            "no se pudo cargar ciclico" in n
+            "could not load ciclico" in n
             and f"a{ARROW}b{ARROW}c{ARROW}a" in n
             for n in notices
         ), notices
@@ -345,7 +345,7 @@ async def test_tc_r09b_the_home_sink_is_scoped_to_the_class_not_to_this_batch(
         # The screen survives whatever came out of the load ...
         assert isinstance(app.screen, HomeScreen)
         # ... and the operator is told, in Spanish, which map failed.
-        hits = [(m, kw) for m, kw in notices if "no se pudo cargar sano" in m]
+        hits = [(m, kw) for m, kw in notices if "could not load sano" in m]
         assert hits, (raised, notices)
         # `hits` is asserted non-empty BEFORE the `all(...)`, because `all()` over
         # an empty list is True and would certify the defense of a sink that never
@@ -384,7 +384,7 @@ async def test_tc_r08b_import_preview_survives_a_cyclic_csv(tmp_path):
 
         assert isinstance(app.screen, _ImportPreviewScreen)
         painted = app.screen.query_one("#import-preview-canvas", Static).render().plain
-        assert "no se pudo dibujar la vista previa" in painted
+        assert "could not draw the preview" in painted
 
 
 # ------------------------------------------------------- AT-R01 / R02 / R03
@@ -406,7 +406,7 @@ async def test_at_r01_opening_a_cyclic_map_refuses_it_without_killing_the_app(
         await pilot.pause()
 
         assert isinstance(app.screen, MapScreen)
-        assert any("error cargando mapa" in n and "cycle" in n for n in notices), notices
+        assert any("error loading map" in n and "cycle" in n for n in notices), notices
         assert any(f"a{ARROW}b{ARROW}c{ARROW}a" in n for n in notices), notices
 
         # Still usable: the screen paints and answers a keypress.

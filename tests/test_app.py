@@ -16,7 +16,7 @@ async def test_plug_repo_url_flow(tmp_path, monkeypatch):
 
     def fake_fetch(self, progress=None):
         if progress:
-            progress(1, 1, "listo")
+            progress(1, 1, "ready")
         return fake_graph
 
     monkeypatch.setattr("mapper.app.GitHubConnector.fetch", fake_fetch)
@@ -104,7 +104,7 @@ async def test_repo_screen_two_pane_renders(tmp_path, monkeypatch):
 
     def fake_fetch(self, progress=None):
         if progress:
-            progress(1, 1, "listo")
+            progress(1, 1, "ready")
         return fake_graph
 
     monkeypatch.setattr("mapper.app.GitHubConnector.fetch", fake_fetch)
@@ -554,7 +554,7 @@ async def test_home_screen_renders_hero_when_maps_exist(tmp_path):
         screen = app.screen
         hero = screen.query_one("#home-hero", Static)
         assert hero is not None
-        assert "nodos sin acta" in hero.render().plain
+        assert "nodes with no record" in hero.render().plain
 
 
 async def test_settings_screen_canary_mounts(tmp_path):

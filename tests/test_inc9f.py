@@ -436,7 +436,7 @@ async def test_inc9f_m2_the_stage_panel_paints_the_failure_after_the_toast_expir
         frame = "\n".join(_frame_rows(screen))
     assert "host not found" in painted, painted
     assert keymap.hint_pair(keymap.SCOPE_REPO, "home") in painted, painted
-    assert "listo" not in painted, f"a failed clone still reads 'listo': {painted}"
+    assert "ready" not in painted, f"a failed clone still reads 'ready': {painted}"
     assert "100%" not in frame and "0%" not in frame, frame
 
 

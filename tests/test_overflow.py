@@ -731,6 +731,10 @@ async def test_a_region_too_short_for_a_body_row_declares_nothing_painted(tmp_pa
     short, tall = [], []
     for term_w, term_h in (
         (31, 18), (50, 14), (100, 10), (60, 12), (80, 11),
+        # `EN-5`: the minimap strip is one row shorter in English at 100 columns, so the canvas at
+        # (100, 10) is 3 rows and no longer the short region; (100, 9), (80, 10), (60, 11) and (50, 12)
+        # are the sizes that are (found by sweeping the heights, not by editing until green).
+        (100, 9), (80, 10), (60, 11), (50, 12),
         (50, 20), (80, 24), (100, 30), (118, 34),
         # THE `B-61` BAND — canvas width 20..34, where the header takes three or
         # four rows.  Each of these five was measured over-declaring before the

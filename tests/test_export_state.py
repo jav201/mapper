@@ -355,7 +355,7 @@ async def test_the_refusal_TELLS_the_operator_and_names_the_way_forward(tmp_path
         assert len(notices) == 1, f"expected exactly one refusal notice, got {notices}"
         message = notices[0]
 
-    assert "celdas" in message, f"the refusal does not say how big the map is: {message!r}"
+    assert "cells" in message, f"the refusal does not say how big the map is: {message!r}"
     assert str(MapScreen.EXPORT_MAX_CELLS) in message, (
         f"the refusal does not name the limit it is enforcing: {message!r}"
     )
@@ -438,7 +438,7 @@ async def test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind(tmp_path):
     # the product (`N anterior`, the settings rail, two keymap labels), so an
     # arm keyed on it alone would be one refactor away from passing for a
     # reason that has nothing to do with staleness.
-    assert "no corresponde a esta exportación" in message, (
+    assert "does not match this export" in message, (
         f"the refusal names the file but never says it is STALE, which is the "
         f"whole finding -- an undeclared old artifact at the expected path: {message!r}"
     )
@@ -524,7 +524,7 @@ async def test_a_refusal_on_a_FIRST_export_claims_no_stale_file(tmp_path):
         message = notices[0]
         assert not path.exists(), "a refused first export wrote a file"
 
-    assert "no corresponde a esta exportación" not in message, (
+    assert "does not match this export" not in message, (
         f"the refusal claims a previous export exists when none does: {message!r}"
     )
 
@@ -694,7 +694,7 @@ async def test_a_large_export_DECLARES_the_wait_before_it_freezes_the_pump(
         # notice" would be green for a map that was refused outright.
         assert path.exists(), "the fixture did not export at all"
 
-    declared = [n for n in notices if "celdas" in n and "tardar" in n]
+    declared = [n for n in notices if "cells" in n and "take a moment" in n]
     if expect_notice:
         assert declared, (
             f"a {fan}-wide export froze the pump without announcing itself: {notices}"

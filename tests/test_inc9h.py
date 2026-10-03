@@ -219,7 +219,7 @@ async def test_inc9h_p1_a_fresh_connect_paints_no_cached_copy_line(tmp_path, mon
     got = await _connect(tmp_path, monkeypatch, "host", size, stale=False)
     assert "cached copy" not in got["painted"] and "▲" not in got["painted"], got["painted"]
     assert "cached copy" not in got["frame"], got["frame"]
-    assert "listo" in got["painted"], got["painted"]
+    assert "ready" in got["painted"], got["painted"]
 
 
 @red("repo")
@@ -240,7 +240,7 @@ async def test_inc9h_p2_a_stale_connect_fires_one_warning_with_the_count_and_the
 async def test_inc9h_p2_a_fresh_connect_still_fires_only_the_connected_toast(
         tmp_path, monkeypatch, size):
     got = await _connect(tmp_path, monkeypatch, "host", size, stale=False)
-    assert [m for m, _ in got["toasts"]] == [f"conectado: {got['nodes']} nodos"], got["toasts"]
+    assert [m for m, _ in got["toasts"]] == [f"connected: {got['nodes']} nodes"], got["toasts"]
 
 
 # ---------------------------------------------------------------------------

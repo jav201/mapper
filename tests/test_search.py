@@ -2008,9 +2008,9 @@ async def test_at_023_e1b_and_e1c_are_painted_differently(tmp_path):
         # The declared strings, spelled here ON PURPOSE.  This table is the
         # specification (`UX-Q3-b`, `E1b`, `E1c`) and its whole value is that it
         # is not derived from the code it checks.
-        e1b_title, e1b_body = "sin búsqueda activa", "no hay coincidencias que recorrer"
-        e1c_title = "0 coincidencias"
-        e1c_body = "«" + ABSENT_QUERY + "» no aparece en este mapa"
+        e1b_title, e1b_body = "no active search", "no matches to step through"
+        e1c_title = "0 matches"
+        e1c_body = "«" + ABSENT_QUERY + "» is not in this map"
 
         assert e1b_title in e1b and e1b_body in e1b, e1b
         assert e1c_title in e1c and e1c_body in e1c, e1c
@@ -2071,7 +2071,7 @@ async def test_at_023_e1c_routes_the_operators_query_through_plain(tmp_path):
         await pilot.press("n")
         await pilot.pause()
         painted = toast_text(screen)
-        assert "0 coincidencias" in painted, painted
+        assert "0 matches" in painted, painted
         assert chr(0x202E) not in painted, "the override reached the painted toast"
         assert "«" + darkside.plain(hostile) + "»" in painted, painted
 
@@ -2128,7 +2128,7 @@ async def test_at_051_M_on_a_complete_map_says_so(tmp_path):
         assert screen._incomplete_order() == []
         await pilot.press("M")
         await pilot.pause()
-        assert "cobertura completa" in toast_text(screen)
+        assert "coverage complete" in toast_text(screen)
 
 
 async def test_at_051b_the_rebind_is_declared_exactly_once(tmp_path):
@@ -2203,7 +2203,7 @@ async def test_at_053_esc_clears_a_live_search_and_stays_on_the_map(tmp_path):
         await submit(pilot, QUERY)
         assert COUNT_RE.search(count_region_text(screen)), "no count line to clear"
         assert hit_image(screen) != "", "nothing carries the hit style to begin with"
-        assert "limpiar" in hint_text(screen), hint_text(screen)
+        assert "clear" in hint_text(screen), hint_text(screen)
 
         await pilot.press("escape")
         await pilot.pause()
@@ -2239,13 +2239,13 @@ async def test_p052_2_the_hint_line_reads_its_glyphs_from_the_seat(tmp_path):
 
         # (a) the shipped seat, the declared string.
         await submit(pilot, QUERY)
-        assert hint_text(screen) == "n siguiente · N anterior · esc limpiar"
-        assert "n siguiente" in hint_rows(screen), hint_rows(screen)
+        assert hint_text(screen) == "n next · N previous · esc clear"
+        assert "n next" in hint_rows(screen), hint_rows(screen)
 
         # ... and the empty-result variant, on the same surface.
         await submit(pilot, ABSENT_QUERY)
-        assert hint_text(screen) == "sin coincidencias · esc limpiar"
-        assert "sin coincidencias" in hint_rows(screen), hint_rows(screen)
+        assert hint_text(screen) == "no matches · esc clear"
+        assert "no matches" in hint_rows(screen), hint_rows(screen)
 
         # (b) move the SEAT, and the painted hint must move with it.
         moved = [
@@ -2259,12 +2259,12 @@ async def test_p052_2_the_hint_line_reads_its_glyphs_from_the_seat(tmp_path):
         keymap.KEYMAP = moved
         try:
             await submit(pilot, QUERY)
-            assert hint_text(screen).startswith("» siguiente · "), hint_text(screen)
+            assert hint_text(screen).startswith("» next · "), hint_text(screen)
         finally:
             keymap.KEYMAP = original
 
         await submit(pilot, QUERY)
-        assert hint_text(screen) == "n siguiente · N anterior · esc limpiar"
+        assert hint_text(screen) == "n next · N previous · esc clear"
 
 
 def test_cd6a_the_walk_reads_exactly_one_resolution():
@@ -2385,16 +2385,16 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
         assert SearchIndex(graph).query(QUERY), "the query matches nothing anyway"
 
         await submit(pilot, QUERY)
-        assert hint_text(screen) != "sin coincidencias · esc limpiar", hint_text(screen)
+        assert hint_text(screen) != "no matches · esc clear", hint_text(screen)
 
         await pilot.press("n")   # consumes the one-time declaration
         await pilot.pause()
         await pilot.press("n")
         await pilot.pause()
         painted = toast_text(screen)
-        assert "0 coincidencias" not in painted, painted
-        assert "no aparece en este mapa" not in painted, painted
-        assert "sin búsqueda activa" not in painted, painted
+        assert "0 matches" not in painted, painted
+        assert "is not in this map" not in painted, painted
+        assert "no active search" not in painted, painted
         assert str(len(graph.nodes) - 1) in painted, painted
         # `LLR-N07.3.4` OWNS THIS COPY NOW, and it reconciled the label.  The
         # toast used to say `búsqueda sin evaluar`, which the count region above
@@ -2402,7 +2402,7 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
         # graph size and the region paints the whole-graph figure.  What is
         # suspended is the thing the key asked for.
         assert "sin evaluar" not in painted, painted
-        assert "recorrido suspendido" in painted, painted
+        assert "walk suspended" in painted, painted
 
 
 async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monkeypatch):
@@ -2471,7 +2471,7 @@ async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monk
         assert str(tally) in joined, (width, tally, joined)
         assert SEARCH_SUSPENDED_NOTICE in joined, (width, joined)
         # ... and the chord that still works is on the row with them.
-        assert "limpiar" in joined, (width, joined)
+        assert "clear" in joined, (width, joined)
 
         # THE HOSTILE QUERY COSTS AT MOST ONE EXTRA ROW, and the bound is `+1`
         # rather than `0` because that is what was MEASURED, not because a
@@ -2566,7 +2566,7 @@ async def test_a_line_bearing_query_does_not_take_the_frame(tmp_path, monkeypatc
     assert SEARCH_SUSPENDED_NOTICE in joined, joined
     # The recovery affordance is the one that must survive: this is the exact
     # string that left the frame in the measurement above.
-    assert "limpiar" in joined, joined
+    assert "clear" in joined, joined
 
 
 async def test_at_055_esc_means_one_thing_at_every_graph_size(tmp_path, monkeypatch):
@@ -2672,15 +2672,15 @@ async def test_the_hint_line_promises_esc_at_every_graph_size(tmp_path, monkeypa
 
         # Below the bound, unchanged from `Inc-4b`.
         await submit(pilot, QUERY)
-        assert hint_text(screen) == "n siguiente · N anterior · esc limpiar"
+        assert hint_text(screen) == "n next · N previous · esc clear"
 
         # Above it, the affordance is still promised and the state is named.
         monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         await submit(pilot, QUERY)
         assert screen._search_order() is None, "the bound was not reached"
         promised = hint_text(screen)
-        assert "limpiar" in promised, promised
+        assert "clear" in promised, promised
         assert SEARCH_SUSPENDED_NOTICE in promised, promised
-        assert "sin coincidencias" not in promised, promised
+        assert "no matches" not in promised, promised
         # It is PAINTED, not merely set: the strip is the surface `#D38` is about.
-        assert "limpiar" in hint_rows(screen), hint_rows(screen)
+        assert "clear" in hint_rows(screen), hint_rows(screen)

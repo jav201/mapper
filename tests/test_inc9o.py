@@ -399,7 +399,7 @@ async def test_inc9o_v1_pin_a_relative_workspace_file_is_stored(tmp_path, monkey
         assert toasts == [] or (U1 not in toasts and V1 not in toasts), toasts
         stored = MapStore(tmp_path).load("att").nodes["nom"].ficha.attachments
         assert [(a.kind, a.path) for a in stored] == [("file", "docs/x.pdf")]
-        assert "adjunto agregado" in _flat(app.screen)
+        assert "attachment added" in _flat(app.screen)
 
 
 async def _activate(app, pilot, attachments, size=SIZE):

@@ -245,7 +245,7 @@ async def test_g6c_each_unguarded_save_site_degrades_to_a_toast(tmp_path, site):
             f"{site}: the forced save failure crashed the session"
         )
         assert notices, f"{site}: no toast was shown when store.save raised"
-        assert any("no se pudo guardar" in n for n, _ in notices), (
+        assert any("could not save" in n for n, _ in notices), (
             f"{site}: the toast did not name the save failure — {notices}"
         )
 
@@ -299,7 +299,7 @@ async def test_g6c_f1_factory_persist_degrades_to_a_toast_and_survives(tmp_path)
             "the forced save failure crashed the factory screen"
         )
         assert notices, "no toast was shown when store.save raised"
-        assert any("no se pudo guardar" in n for n, _ in notices)
+        assert any("could not save" in n for n, _ in notices)
 
 
 async def test_g6c_f2_save_failure_toast_names_no_path_or_username(tmp_path):

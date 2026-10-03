@@ -726,8 +726,8 @@ async def test_at_013_folding_a_leaf_is_refused_out_loud(tmp_path):
             assert pill_counts(canvas_rows(screen)) == [], leaf
             notices = list(app._notifications)
             assert len(notices) == notices_before + 1, leaf
-            assert notices[-1].title == "nada que plegar"
-            assert notices[-1].message == "este nodo no tiene descendientes"
+            assert notices[-1].title == "nothing to fold"
+            assert notices[-1].message == "this node has no descendants"
 
 
 @pytest.mark.asyncio
@@ -1089,7 +1089,7 @@ async def test_at_046_the_walk_opens_a_folded_hit_and_says_so(
                 name, screen.query_one(HintLine).text
             )
         hint_region = rows_in(screen, screen.query_one(HintLine).region)
-        assert any("abrió" in row for row in hint_region), hint_region
+        assert any("opened" in row for row in hint_region), hint_region
 
 
 @pytest.mark.parametrize(
@@ -1266,11 +1266,11 @@ async def test_the_opened_branch_name_cannot_push_esc_limpiar_off_the_frame(
         # The controls: the branch really was opened, and the hint really does
         # name it, so the affordance check below is not green by inaction.
         assert "b" not in screen.folded, "nothing was opened; the hint has no prefix"
-        assert "abrió" in screen.query_one(HintLine).text
+        assert "opened" in screen.query_one(HintLine).text
 
         hint_region = screen.query_one(HintLine).region
         frame = " ".join(rows_in(screen, hint_region))
-        assert "limpiar" in frame, (hint_region.height, frame[:120])
+        assert "clear" in frame, (hint_region.height, frame[:120])
         assert hint_region.height == 1, (
             f"the hint line wrapped to {hint_region.height} rows on a "
             f"{_HOSTILE_TITLE_LEN}-character branch title, and every row it "

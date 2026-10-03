@@ -20,9 +20,9 @@ class EditorScreen(ModalScreen[str | None]):
     """Modal editor for a document template source; returns source or None."""
 
     BINDINGS = [
-        ("ctrl+s", "save", "Save"),
-        ("escape", "cancel", "Cancel"),
-        ("tab", "toggle_preview", "Preview"),
+        ("ctrl+s", "save", "save"),
+        ("escape", "cancel", "cancel"),
+        ("tab", "toggle_preview", "preview"),
     ]
 
     CSS = """

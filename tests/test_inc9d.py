@@ -394,7 +394,7 @@ async def test_inc9d_ux_f13_the_recents_header_is_one_row_after_three_returns(tm
         table = app.screen.query_one("#home-recents", DataTable)
         labels = [c.label.plain for c in table.columns.values()]
         painted = "\n".join(_frame_rows(app.screen))
-    assert labels == ["▐ name", "kind", "nodos", "docs"], labels
+    assert labels == ["▐ name", "kind", "nodes", "docs"], labels
     assert painted.count("▐ name") == 1, painted.count("▐ name")
 
 

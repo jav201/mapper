@@ -326,7 +326,7 @@ async def test_inc9m_sec_f2_import_csv_survives_a_tilde_nosuchuser_and_paints_no
         frame = _flat(app.screen)
         assert "secret-token" not in frame and "nosuchuser" not in frame, frame
         assert not any("secret-token" in t or "nosuchuser" in t for t in toasts), toasts
-        assert U1 in toasts and "archivo no encontrado" not in toasts, toasts
+        assert U1 in toasts and "file not found" not in toasts, toasts
 
 
 @red("u1")
@@ -344,7 +344,7 @@ async def test_inc9m_sec_f2_import_office_survives_a_tilde_nosuchuser_and_paints
         frame = _flat(app.screen)
         assert "secret-token" not in frame and "nosuchuser" not in frame, frame
         assert not any("secret-token" in t or "nosuchuser" in t for t in toasts), toasts
-        assert U1 in toasts and "archivo no encontrado" not in toasts, toasts
+        assert U1 in toasts and "file not found" not in toasts, toasts
 
 
 @red("u1")
@@ -361,7 +361,7 @@ async def test_inc9m_sec_f2_a_typed_unc_path_causes_no_filesystem_call(tmp_path,
             await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", f"\\\\h\\s\\x.{ext}")
         assert app.is_running
-        assert U1 in toasts and "archivo no encontrado" not in toasts, toasts
+        assert U1 in toasts and "file not found" not in toasts, toasts
         assert not any("x." + ext in t for t in toasts), toasts
     assert spy.hits == [], spy.hits
 
@@ -372,7 +372,7 @@ async def test_inc9m_sec_f2_pin_a_missing_drive_absolute_csv_still_names_its_fil
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / "missing.csv"))
-        assert app.is_running and "archivo no encontrado: missing.csv" in toasts, toasts
+        assert app.is_running and "file not found: missing.csv" in toasts, toasts
 
 
 # ---------------------------------------------------------------------------
