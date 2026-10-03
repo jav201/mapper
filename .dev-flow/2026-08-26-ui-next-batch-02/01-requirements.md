@@ -11166,3 +11166,17 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 **Trace.** `tests/test_en6.py`: order and fit at 118 and 87 with a real `ctrl+p`, a relabelled-seat sentinel (labels and glyphs), the single-binding arm, the arrow / page / `↵` arm, and the typing-and-cursor arm.
 
 **What is not claimed.** `pageup` / `pagedown` are not seat rows and not advertised; no legend or help screen is built for the palette scope (its seat rows are read only by the palette's own `BINDINGS` and footer, by grep), so no legend count pin moved.
+
+### `A-135` -- `?` is a character in every text field (`Inc-EN-7`, `T3`, `EN-Q3`, `B-72`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc9-2026-09-30.md` Round 9 `T3` (`INC9K-UX-F2`), `VERDICT-inc-en-2026-10-02.md` `EN-Q3`, and `BACKLOG` `B-72`. The record is `increment-053-en7.md`.
+
+**Supersedes** `INC9-UX-F2` (a `?` typed in the connect-repo field opens the legend). That was an operator-ruled behaviour, now reversed by an operator ruling; it is not a label change.
+
+**Statement.** One rule: in every text field (the connect-repo field, the inspector fields, search, the prompts, the palette box) the key `?` inserts the character `?`. Outside a text field `?` opens the legend of the view; the palette's `legend` action opens it from anywhere. Mechanism: no screen raises `help` to priority (`screen_bindings` loses its `priority_actions` parameter; `PlugRepoScreen` loses its priority binding, its `action_help` and `_RepoInput`'s release of `?`); the seat's `?` row stays non-priority, so a focused `Input` consumes the key first.
+
+**`B-72`.** `FieldInput` is built with `select_on_focus=False`. Focusing an inspector field puts the cursor at the end of the value instead of selecting it, so no single printable key (`?` included) replaces the whole title. Chosen over "select-all only after a deliberate edit gesture" because the code has no such gesture to hang it on: `Tab` and the screen's own `focus_field` both call `focus()`, and a flag would be a new state for one widget. **`B-36` is NOT closed**: blur still commits the field's value unconditionally, so a character typed into a field still saves on blur. With select-all gone, the typed character is appended to the value rather than replacing it.
+
+**Copy.** The legend footer reads `? outside text fields opens this` / `legend; inside a field it types ?` (the select-all sentence is removed). `01b` §3.6 is amended and dated.
+
+**Pins.** `test_inc9c` `INC9-UX-F2` arm inverted (declared in the record); `test_vocabulary_declaration` footer pin follows `01b` §3.6.

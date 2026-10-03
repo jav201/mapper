@@ -465,6 +465,7 @@ section *Round 4*; the record is `increment-022`, section *Design pass 4*).
 | §3.1/§3.2, the reveal margin | fixed an off-by-one: the card's box has one trailing painted column that is never drawn (the title row's own fit leaves it blank), so `REVEAL_MARGIN_CELLS` was landing 3 blank columns short of the panel on an ordinary card and only 1 at the map's own right edge. The margin is now counted on the COMPOSITED FRAME, not the geometry, and is honoured everywhere: at the true right edge the docked reveal's legal range widens by the margin itself, withdrawing the "no blank space past the content" exception `A-109` gave that case (see `A-109`'s dated addendum in `01-requirements.md`) | `H3` |
 | §3.2 | while the host's rail is hidden (`R`, or auto-hidden below the auto-hide width), the legend omits the rows the rail alone paints (`V33`, `V34`, `V35`, `V21a`, `V21b` — `darkside.RAIL_VOCABULARY`, derived from this section's own **Source** column). `V36`-`V39` and `V32` stay, because their source is the always-visible coverage strip (`app.py`'s `#map-minimap`), not the rail widget | `H4` |
 | §3.6 | footer reworded to `? explains the view you are in, outside text fields` (was `? always explains the view you are in`), now two lines — the old wording over-promised what a focused text field does with `?` (`B-36`/`B-72`) | `H1` |
+| §3.6 | footer reworded again, 2026-10-02: `? outside text fields opens this legend; inside a field it types ?` (two lines). The select-all sentence is gone: focus no longer selects an inspector field's value (`B-72`) | `T3`, `EN-Q3`, `A-135` |
 
 **Correction, 2026-09-29 (Inc-8 follow-ups, `INC8-FU-F4`).** The row above for `§3.1/§3.2, the
 reveal margin` says the card's box "has one trailing painted column that is never drawn" — that is
@@ -499,7 +500,7 @@ Every string below is what the legend paints; `tests/test_vocabulary_declaration
   (the vocabulary comes first in both layouts, verdict `E1`)
 - Own-scope group title: `in this legend` (verdict `E3`, which ratified `A5`)
 - Own-scope group words, by action: `close` (`esc`, `q`) · `scroll` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `top/bottom` (`home`, `end`)
-- Footer, two lines: `? explains the view you are in,` · `outside text fields`
+- Footer, two lines: `? outside text fields opens this` · `legend; inside a field it types ?` (amended 2026-10-02 by T3, EN-Q3, A-135; the earlier wording is kept in the change table below)
 - Reserved chord line: `??` + `opens the full field guide`
 - Sample column (layout, not copy): 12 cells in the modal, so a sample up to 11 cells (`▐ ▸ inv +23`,
   `◫ sin acta`) shares its label's row; 8 cells docked, so the longest label fits the docked row (round 3)

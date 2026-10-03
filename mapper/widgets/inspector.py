@@ -44,9 +44,16 @@ class FieldInput(Input):
     A widget-level binding claims the key first, so `escape` means "leave the
     field, keep the value" while a field is focused, and "leave the map" when one
     is not.
+
+    Focus does not select the value (`B-72`): Textual's default selects it all, so
+    the first printable key -- `?` included -- replaced the whole title and saved it.
     """
 
     BINDINGS = [Binding("escape", "leave_field", "leave the field")]
+
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("select_on_focus", False)
+        super().__init__(*args, **kwargs)
 
     class Left(Message):
         """The operator stepped out of a field without abandoning the value."""
