@@ -256,6 +256,9 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("escape", "esc", "home", "back", "settings", priority=True),
     # -- app (available on every screen) ------------------------------------
     KeyBinding("ctrl+p", "ctrl+p", "palette", "palette", "app"),
+    # Not priority, on purpose (`T3`, `EN-Q3`): a focused `Input` consumes `?` before a
+    # non-priority binding is asked, so `?` types in every text field and opens the
+    # legend everywhere else.  A priority row would take the key from the field.
     KeyBinding("question_mark", "?", "help", "legend", "app"),
 ]
 

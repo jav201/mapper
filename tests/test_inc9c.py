@@ -569,7 +569,11 @@ def test_inc9c_k3_the_repo_surfaces_no_longer_advertise_a_dead_enter():
 # INC9-UX-F2 / F3 / F10 / F11
 
 @red("ux")
-async def test_inc9c_ux_f2_a_real_question_mark_in_the_repo_field_opens_the_legend(tmp_path):
+async def test_inc9c_ux_f2_a_real_question_mark_in_the_repo_field_types_it(tmp_path):
+    # `EN-Q3` / `A-135`, an operator-ruled behaviour change (not a label change): this arm
+    # asserted that `?` OPENED the legend from the connect-repo field (`INC9-UX-F2`).  The
+    # operator ruled that in every text field `?` is a character, so it now asserts that
+    # the legend does NOT open and the field ends with `?`.  Outside fields `?` is unchanged.
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
@@ -584,14 +588,8 @@ async def test_inc9c_ux_f2_a_real_question_mark_in_the_repo_field_opens_the_lege
         await pilot.press("question_mark")
         await pilot.pause()
         await pilot.pause()
-        legend = app.screen
-        assert isinstance(legend, HelpScreen), f"`?` in the field opened {type(legend).__name__}"
-        title = _rows_in(legend, legend.query_one("#help-title").region)
-        assert any("legend · connect repo" in r for r in title), title
-        await pilot.press("escape")
-        await pilot.pause()
-        assert isinstance(app.screen, PlugRepoScreen)
-        assert app.screen.query_one("#repo-input", Input).value == "owner/na"
+        assert isinstance(app.screen, PlugRepoScreen), f"`?` in the field opened {type(app.screen).__name__}"
+        assert app.screen.query_one("#repo-input", Input).value == "owner/na?"
 
 
 def _visible(screen, widget) -> bool:

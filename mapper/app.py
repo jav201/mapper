@@ -192,19 +192,14 @@ _HINT_NAME_OVERHEAD = 23
 _HINT_NAME_MIN_CELLS = 8
 
 
-def screen_bindings(scope: str, priority_actions: tuple[str, ...] = ()) -> list[Binding]:
+def screen_bindings(scope: str) -> list[Binding]:
     """Generate a screen's `BINDINGS` from the one keymap seat (US-N03).
 
     Screens never hand-write a binding list: the seat is the single source, so the
     keys a screen binds and the keys the palette and help advertise cannot drift.
-
-    `priority_actions` raises named actions to priority on THIS screen only --
-    for a screen whose text field would otherwise swallow the key (`INC9-UX-F2`:
-    `?` typed into the connect-repo field).  The seat's own `priority` column, and
-    so every other screen, is untouched.
     """
     return [
-        Binding(key, action, label, priority=priority or action in priority_actions)
+        Binding(key, action, label, priority=priority)
         for key, action, label, priority in textual_bindings(scope)
     ]
 
@@ -1138,37 +1133,19 @@ class _ImportPreviewScreen(Screen):
         self.app.action_palette()
 
 
-class _RepoInput(Input):
-    """The owner/name field, which lets `?` through to the legend (`INC9-UX-F2`).
-
-    Textual removes a key from the binding chain while a focused widget reports it
-    would CONSUME it (`check_consume_key`), and an `Input` consumes every printable
-    character -- priority or not.  So the screen's priority `?` binding was never
-    even consulted.  `?` is not valid in owner/name, and a pasted URL is a paste,
-    not a key event, so giving it up costs the field nothing.
-    """
-
-    def check_consume_key(self, key: str, character: str | None) -> bool:
-        if key == "question_mark":
-            return False
-        return super().check_consume_key(key, character)
-
-
 class PlugRepoScreen(Screen):
     """Input screen for plugging a GitHub repo."""
 
     KEY_SCOPE = SCOPE_PLUG
     # `K4`: the legend's title reads the SCREEN's name, not the scope id.
     legend_view = "connect repo"
-    # `INC9-UX-F2`: the screen's only widget is a text field, which swallowed `?`;
-    # `?` never appears in owner/name or a pasted URL (a paste is not a key).
-    BINDINGS = screen_bindings(SCOPE_PLUG, priority_actions=("help",))
+    BINDINGS = screen_bindings(SCOPE_PLUG)
 
     def compose(self) -> ComposeResult:
         yield TabStrip("p", crumb=["connect repo"])
         yield Vertical(
             Label("connect repo", id="repo-title"),
-            _RepoInput(placeholder="owner/name or github URL", id="repo-input"),
+            Input(placeholder="owner/name or github URL", id="repo-input"),
             id="repo-dialog",
         )
         yield HintLine("enter owner/name, a URL or a local path and press ↵", "↵")
@@ -1204,12 +1181,6 @@ class PlugRepoScreen(Screen):
 
     def action_palette(self) -> None:
         self.app.action_palette()
-
-    def action_help(self) -> None:
-        # A priority binding runs on THIS screen or not at all (the app's own
-        # `?` is not priority, so the priority pass never reaches it): the screen
-        # answers, and the legend still opens on this screen's scope (`B-18`).
-        self.app.action_help()
 
 
 class RepoScreen(Screen):
