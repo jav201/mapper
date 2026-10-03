@@ -11214,3 +11214,17 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 
 **Not claimed.** `darkside.keybar` folds a long bar into `... +N  ? all keys` with a hard-coded `?` (`help_key`); connect-repo's bar is two short groups and never folds at 87 or 118, so that path is not reached here. At a width where it would fold, the marker would still say `?`; not measured.
 
+**Correction (dated 2026-10-03, Gate-1, `EN9-REV-F1`).** Appended; the mechanism above is not rewritten. "It still fires once focus has left the field" over-claims. Measured: Tab, shift+Tab and a click all keep focus on `#repo-input`; only `app.set_focus(None)` clears it. The connect-repo `question_mark` binding is therefore reachable only programmatically today. The dispatch decision is unchanged.
+
+### `A-138` -- Gate-1: test-stability fixes and the carry cleanup (`FLAKE-1`, `FLAKE-4`, `EN9-REV-F1`..`F3`), dated 2026-10-03
+
+**Authority.** The Inc-EN closure block of `state.json` (`FLAKES`, `CARRIES`). The record is `increment-056-gate1.md`. No product behaviour changes; the only source edit is a docstring.
+
+**FLAKE-1 -- a test race, not a user race.** `MapScreen.on_mount` schedules `_park_focus` (`set_focus(None)`) with `call_after_refresh`. `test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region` focused `#insp-title` after one `pilot.pause()`; when the park had not yet run, it ran after the focus and blurred the field (`assert '' == 'inspector'`, focus `None` for good, stale widget ruled out). The park is the intended arrival behaviour (a focused `Input` would eat the map's single-letter keys); a user cannot Tab into a field inside the first frame, so no source change is owed. The test now waits (bounded, 40 pauses) for the park, focuses, and waits for `app.focused is title`; the assertion is unchanged.
+
+**FLAKE-4 -- a test race, not a user race.** `test_inc9c_ux_f3_components_scroll_and_every_tab_stop_is_on_screen` read visibility after one pause while the grid's scroll-into-view was still settling (measured 1 to 3 extra pauses, fractional `scroll_y`). A bounded poll (`_until_visible`, 40 pauses) on the same observable now precedes the unchanged assertions; a widget that never becomes visible still fails.
+
+**Carries closed.** `EN9-REV-F1` (the connect-repo `?` binding is reachable only programmatically today: Tab, shift+Tab and a click keep focus on `#repo-input`; docstring of `keymap.textual_bindings` reworded, correction appended to `A-137` and record 055), `EN9-REV-F2` (record 055 stale clause), `EN9-REV-F3` (unit arm: no `?` row from `groups_for_keybar` with the app group first; kills "scope taken from the first group"), record 051 back-reference (`EN2-REV-F1` was settled by `EN-8`).
+
+**Not claimed.** Both flake rates are low (about 1% and 0.3% to 5% depending on load), so the before/after pytest-level counts alone cannot show a drop; the evidence is the diagnosis plus the mutants in the record. `FLAKE-3` was closed earlier. `B-36` and the mixed author identities are not touched.
+

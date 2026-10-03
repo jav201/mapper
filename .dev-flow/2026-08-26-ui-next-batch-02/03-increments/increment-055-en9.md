@@ -69,3 +69,14 @@ M1-M4 and M8 were run on the final tree (`keymap.py` sha256 `848d243d...` pinned
 - NOT measured: a real terminal's key encoding for `?`; POSIX; the legend of connect-repo at widths other than 118 and 87.
 - Pre-existing, recorded: `B-82` (coverage and editor modals have no legend route), `B-83` (`M` at 87 focuses a hidden field).
 - Suggested next: EN-10 as the coordinator routes it; `B-36` (blur commits unconditionally) remains the follow-on design item.
+
+## Correction notes (Gate-1, 2026-10-03)
+
+Appended; nothing above was rewritten.
+
+`EN9-REV-F1` (over-claim in section 1): the bullet on `textual_bindings` says the connect-repo `?` binding "still fires once focus has left the field". Measured at Gate-1: Tab, shift+Tab and a click all leave focus on `#repo-input`; only `app.set_focus(None)` clears it. Read the claim as: the binding is reachable only programmatically today (the test `test_hlr_n16_1_every_help_route_carries_its_scope[PlugRepoScreen]` presses `?` after `set_focus(None)`). The dispatch decision stands (`E4` ruled the listing, not dispatch); only the reach was over-stated. The `keymap.textual_bindings` docstring was reworded to match.
+
+`EN9-REV-F2` (stale clause in section 1): the first bullet ends "The legend and the screen `BINDINGS` read it". Drop "and the screen `BINDINGS`": the legend reads `bindings_for`; the screen `BINDINGS` read `textual_bindings`, which does not filter (the next bullet says so).
+
+`EN9-REV-F3` (pin): a unit arm now asserts `groups_for_keybar` returns no `?` row for `['app', 'plug']` (app group first) and for `['plug', 'app']`, with positive controls. It kills the mutant "scope taken from the first group" (see `increment-056-gate1.md`).
+
