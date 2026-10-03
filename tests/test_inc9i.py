@@ -203,9 +203,9 @@ async def test_inc9i_cr_f3_a_fresh_connect_after_a_stale_one_paints_no_cached_co
         assert second is not first
         panel = _panel(second)
         assert second.stale == "", second.stale
-        assert "cached copy" not in panel and "▲" not in panel and "listo" in panel, panel
+        assert "cached copy" not in panel and "▲" not in panel and "ready" in panel, panel
         assert [t for t in toasts if "cached copy" in t] == [], toasts
-        assert any(t.startswith("conectado: ") for t in toasts), toasts
+        assert any(t.startswith("connected: ") for t in toasts), toasts
 
 
 # ---------------------------------------------------------------------------

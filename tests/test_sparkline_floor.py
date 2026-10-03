@@ -57,7 +57,7 @@ FLOOR_GLYPH = "▁"  # bars[0]
 MID_GLYPH = "▃"  # bars[4]
 MAX_GLYPH = "█"  # bars[9]
 
-_CAPTION = "actividad 14d  "
+_CAPTION = "activity 14d  "
 
 
 def _touch(path, day: date) -> None:
@@ -74,7 +74,7 @@ def _touch(path, day: date) -> None:
 
 
 def _bars(store) -> str:
-    """The 14 sparkline glyphs, with the "actividad 14d  " caption stripped."""
+    """The 14 sparkline glyphs, with the "activity 14d  " caption stripped."""
     text = HomeScreen()._sparkline_text(store)
     plain = text.plain
     assert plain.startswith(_CAPTION), plain

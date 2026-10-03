@@ -153,7 +153,7 @@ async def test_at_n05a_archiving_a_subtree_asks_first_and_a_refusal_preserves_it
         await pilot.pause()
         assert isinstance(app.screen, _ConfirmScreen), "x destroyed a subtree unconfirmed"
         # The message must say how much goes: `b` takes `b1` with it.
-        assert "descendiente" in app.screen.message
+        assert "descendant" in app.screen.message
 
         await pilot.press("n")
         await pilot.pause()
@@ -232,7 +232,7 @@ async def test_at_n05d_undo_on_an_empty_stack_reports_and_does_not_raise(tmp_pat
         screen.action_undo()
         await pilot.pause()
 
-        assert notes and "nada que deshacer" in notes[0]
+        assert notes and "nothing to undo" in notes[0]
         assert (tmp_path / f"{map_id}.mmd").read_bytes() == before
 
 

@@ -23,7 +23,7 @@ from mapper.model import Ficha, Graph, Node, SchemaField
 from mapper.widgets.chrome import HintLine, KeyBar
 from mapper.widgets.components import DsChip, DsProgress, DsSegmented
 
-# The four states a ficha may carry, and the words shown for them.
+# The four states a ficha may carry: the stored value, and the word shown for it (the same four words).
 STATE_VALUES = ["ok", "risk", "late", "blocked"]
 STATE_LABELS = ["ok", "risk", "late", "blocked"]
 

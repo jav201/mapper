@@ -98,12 +98,12 @@ async def test_sec_h2_a_message_cannot_bind_a_clickable_action(tmp_path):
     app = MapperApp(tmp_path)
     async with app.run_test(size=(118, 34)) as pilot:
         await pilot.pause()
-        app.push_screen(_ConfirmScreen(f"¿archivar «{CLICK_PAYLOAD}»?"))
+        app.push_screen(_ConfirmScreen(f"archive «{CLICK_PAYLOAD}»?"))
         await pilot.pause()
         painted = _painted(_label_of(app.screen))
 
         # Positive control first: the arm is looking at the right widget.
-        assert "archivar" in painted, (
+        assert "archive" in painted, (
             f"the arm is not reading the confirmation label at all: {painted!r}"
         )
         assert "[@click=screen.confirm]" in painted, (

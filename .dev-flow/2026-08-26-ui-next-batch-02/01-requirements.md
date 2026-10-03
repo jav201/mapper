@@ -11055,3 +11055,102 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 **Trace.** Standalone, like `A-113`..`A-131`. Carried by `tests/test_en4.py` (a census of the three files' non-docstring literals, the `MapIdError` sentences, the seed content and the `Z1` arms) and by the relabelled pins in the record.
 
 **What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. Maps already on disk keep their Spanish seed text.
+
+
+### `A-133` -- English strings in `app.py`, and the two carries it closes (`Inc-EN-5`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING (`B-71`). The record is `increment-051-en5.md`.
+
+**Statement.** Standalone; amends no earlier decision and rewrites no earlier amendment. Wherever an earlier requirement or amendment quotes one of the Spanish strings below **as painted by `mapper/app.py`**, the string it quotes is now the English one. The same words painted by another file (`keymap.py`, `screens/palette.py`; `EN-6`) stay as that file has them. This amendment is scoped to `app.py` sites. It also **closes two carries**: the `A-129` correction note (the CSV prompt's `archivo no encontrado: {name}` is `app.py`'s and now reads `file not found: {name}`), and the `Inc-X3` carry (the attachment-open toast `abierto` reads `opened`). The terms follow `A-130`..`A-132`; the term for `acta` is **`record`** (`A-131`): `no record`, `with record`.
+
+**Unchanged on purpose.** The fixed refusal sentences `U1`, `V1`, `V2`, `W1`, `W2`, `X1`, `Y1` and the `refusal_sentence` mapping; every `darkside.plain` site; the `(unrecognised URL)` and redaction behaviour; what each message echoes (no typed text is echoed where it was not). The guillemets around a quoted name (`«x»`) are quotation marks and stay.
+
+**Toasts and notices.**
+
+| Old | New |
+|---|---|
+| `no se pudo guardar 'X': Tipo` / `no se pudo crear el mapa 'X': Tipo` | `could not save 'X': Type` / `could not create the map 'X': Type` |
+| `no se pudo cargar X: ...` (home) / `error cargando mapa: ...` (map) | `could not load X: ...` / `error loading map: ...` |
+| `no se pudo leer CSV 'x.csv': Tipo` / `archivo no encontrado: x.csv` (the CSV prompt) | `could not read CSV 'x.csv': Type` / `file not found: x.csv` |
+| `no hay plantillas disponibles` | `no templates available` |
+| `conectado: N nodos` / `error inesperado: Tipo` | `connected: N nodes` / `unexpected error: Type` |
+| `guardado` / `abierto` / `archivado` / `exportado` | `saved` / `opened` / `archived` / `exported` |
+| `adjunto agregado` / `adjunto quitado` | `attachment added` / `attachment removed` |
+| `nada que deshacer` / `deshacer` + `estado restaurado` | `nothing to undo` / `undo` + `state restored` |
+| `nada que plegar` + `este nodo no tiene descendientes` | `nothing to fold` + `this node has no descendants` |
+| `diff oculto` / `sin diff disponible (¿está el mapa en git?)` | `diff hidden` / `no diff available (is the map in git?)` |
+| `cobertura completa` + `no falta ningún campo requerido` | `coverage complete` + `no required field is missing` |
+| `selecciona un nodo primero` | `select a node first` |
+| `no se puede editar con focus activo (presiona f para salir)` | `cannot edit while focus is active (press f to leave)` |
+| `exportando N celdas; puede tardar un momento.` | `exporting N cells; this may take a moment.` |
+| `mapa demasiado grande para exportar: N celdas, límite M. Enfoca un subárbol con f y exporta esa vista.` | `map too large to export: N cells, limit M. Focus a subtree with f and export that view.` |
+| ` No se escribió nada: el archivo X no corresponde a esta exportación.` | ` Nothing was written: the file X does not match this export.` |
+| `exportación fallida: Tipo` | `export failed: Type` |
+
+**Search** (one constants block, `app.py` top; the tests derive from the constants where they did before).
+
+| Old | New |
+|---|---|
+| `coincidencias en el mapa` (`SEARCH_COUNT_SUBJECT`) | `matches in the map` |
+| `búsqueda` (`SEARCH_ACTIVE_LABEL`) | `search` |
+| `resaltado y recorrido suspendidos` (`SEARCH_SUSPENDED_NOTICE`) | `highlighting and walk suspended` |
+| `esc limpiar` / `n siguiente · N anterior` / `sin coincidencias` | `esc clear` / `n next · N previous` / `no matches` |
+| `{label} ahora en {glyph}` / `· abrió «rama»` | `{label} now on {glyph}` / `· opened «rama»` |
+| `sin búsqueda activa` + `no hay coincidencias que recorrer` | `no active search` + `no matches to step through` |
+| `recorrido suspendido` + `el mapa supera el límite de N nodos` | `walk suspended` + `the map exceeds the limit of N nodes` |
+| `0 coincidencias` + `«q» no aparece en este mapa` | `0 matches` + `«q» is not in this map` |
+| placeholder `/buscar` | `/search` |
+| the gap hint `completa «campo» · ↵ save · esc leave field` | `fill in «campo» · ↵ save · esc leave field` |
+
+**Home, the ficha modal and the minimap.**
+
+| Old | New |
+|---|---|
+| hero `nodos sin acta` / `▲ N vencen hoy` | `nodes with no record` / `▲ N due today` |
+| microbar `con acta` / `sin acta` / `cobertura P %` / `actividad 14d` | `with record` / `no record` / `coverage P %` / `activity 14d` |
+| resume `↩ retomar` + `última sesión` | `↩ resume` + `last session` (the `EN-4` legend sample `↩ resume`) |
+| recents header `nodos` / archived note `N mapa archivado — u restaura` | `nodes` / `N archived map — u restores` |
+| door notes `abre un mapa reciente` / `conecta un repositorio` / `crea un nuevo mapa` / `mapa desde plantilla` / `CSV / TSV de nodos` / `documentos de proceso` | `opens a recent map` / `connects a repository` / `creates a new map` / `map from a template` / `CSV / TSV of nodes` / `process documents` |
+| factory demo `proceso demo` / `paso uno` / document `plantilla` = `hola {{nombre}}` | `demo process` / `step one` / document `template` = `hello {{name}}` (`EN-Q2` spirit) |
+| template picker `▐ plantilla` / `descripción` / `(sin plantillas)` | `▐ template` / `description` / `(no templates)` |
+| ficha modal `estado` / `cobertura` / `documento` / `sin acta` / `dueño` / `creado` / `enlace` / `(↵ abre el mapa)` / `notas` / `campos` / `adjuntos` | `state` / `coverage` / `document` / `no record` / `owner` / `created` / `link` / `(↵ opens the map)` / `notes` / `fields` / `attachments` |
+| minimap `cobertura` / `+N ramas sin mostrar` / `completa` `media` `baja` `sin datos` | `coverage` / `+N branches not shown` / `complete` `medium` `low` `no data` |
+| `borde del territorio` | `edge of the territory` |
+| `esta vista no se desplaza · navega con j/k/h/l` (`PAN_INERT_HINT`) | `this view does not scroll · navigate with j/k/h/l` |
+| `declaración no disponible` / `no se pudo dibujar el mapa` / `no se pudo dibujar la vista previa` | `declaration not available` / `could not draw the map` / `could not draw the preview` |
+
+**Repo screen.**
+
+| Old | New |
+|---|---|
+| stages `iniciando` / `leyendo ramas` / `calculando métricas` / `listo` | `starting` / `reading branches` / `computing metrics` / `ready` (the last three are `EN-1`'s words) |
+| `(no hay ramas cargadas)` / `N ramas · M releases` / group `ramas` / `sin datos` | `(no branches loaded)` / `N branches · M releases` / `branches` / `no data` |
+| ages `hoy` / `ayer` / `hace N d` / `hace N sem` / `hace N mes` | `today` / `yesterday` / `N d ago` / `N wk ago` / `N mo ago` |
+| legend tail ` hoy   (30 días)` / `bloqueado` / `riesgo` | ` today   (30 days)` / `blocked` / `risk` (the inspector's `A-130` words) |
+| `conectando… esto puede tardar unos segundos` | `connecting… this may take a few seconds` |
+| placeholder `owner/name o URL de github` / hint `ingresa owner/name, URL o ruta local y presiona ↵` | `owner/name or github URL` / `enter owner/name, a URL or a local path and press ↵` |
+
+**Prompts, placeholders and confirmations.**
+
+| Old | New |
+|---|---|
+| `nombre del mapa` / `ruta del CSV / TSV` / `guardar como` | `map name` / `CSV / TSV path` / `save as` |
+| `ruta o url del adjunto` + `docs/acta.pdf` | `attachment path or url` + `docs/record.pdf` |
+| `nombre del hijo` + `nuevo hijo` / `mi-nuevo-mapa` | `child name` + `new child` / `my-new-map` |
+| `¿archivar «X»?` / `¿archivar «X» y sus N descendientes?` | `archive «X»?` / `archive «X» and its N descendants?` |
+| `¿archivar la raíz «X» y sus N descendientes? esto reemplazará la raíz del mapa.` | `archive the root «X» and its N descendants? this will replace the root of the map.` |
+| `no se puede archivar todo el mapa: quedaría vacío. archiva una rama, o elimina el mapa desde inicio.` | `cannot archive the whole map: it would be empty. archive a branch, or delete the map from home.` |
+| binding labels `Sí` / `No` / `Cancelar` (lowercase, as the keymap's) | `yes` / `no` / `cancel` |
+| `screens/editor` binding labels `Save` / `Cancel` / `Preview` (`EN1-REV-F4`) | `save` / `cancel` / `preview` |
+
+**Internal names.** The home metrics dict keys `con_acta` / `sin_acta` / `vencen` became `with_record` / `no_record` / `due`, so that no string literal of `app.py` is Spanish. Local variable names (`sin_acta`, `vencen`) are identifiers, not copy, and stay (the hue census pins source lines that name them).
+
+**Width.** The English words are mostly shorter or equal. The minimap caption `  coverage   ` is 13 cells against 14 and its legend 32 against 33 (the reserved budgets 14 and 37 stand); the declaration `+N branches not shown   ` is at most 26 cells with three digits (budget 26). The hero caption `nodes with no record` is 20 cells against 14 and `▲ N due today` 13 against 14; the home microbar is 71 cells against 68 (two-digit counts), so it wraps from one cell-count wider than before (below 71 columns, was 68). Measured in the record, section 4.
+
+**Not changed (declared).** `keymap.py` and `screens/palette.py` (`EN-6`); `?` in text fields (`EN-7`); the pluralisation of `1 descendants` (the Spanish had the same shape); the quotation marks `«»`; docstrings and comments that quote Spanish words (not user-facing).
+
+**Sealed-arm changes.** Label changes, and one geometry sweep widened, listed in `increment-051-en5.md` section 3.
+
+**Trace.** Standalone, like `A-113`..`A-132`. Carried by `tests/test_en5.py` (a census of `app.py`'s non-docstring literals, binding-label arms, the hero, door, repo and archive arms, and the CSV-toast coercion arm) and by the relabelled pins in the record.
+
+**What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. The long sentences were read, not measured, at every width.

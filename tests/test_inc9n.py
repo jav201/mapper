@@ -300,7 +300,7 @@ async def test_inc9n_f2_the_csv_prompt_requires_a_file_not_a_directory(tmp_path,
     async with app.run_test(size=SIZE) as pilot:
         await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / "d.csv"))
-        assert toasts == ["archivo no encontrado: d.csv"], toasts
+        assert toasts == ["file not found: d.csv"], toasts
 
 
 @red("f2")
@@ -394,7 +394,7 @@ async def test_inc9n_u1_pin_a_missing_accepted_path_keeps_naming_its_file(surfac
             await pilot.pause()
         toasts = await _open_prompt(app, pilot, "i", str(tmp_path / f"missing.{ext}"))
         # the csv prompt is `app.py`'s own sentence (EN-5); the office prompt is the factory's (EN-1)
-        word = "archivo no encontrado" if surface == "csv" else "file not found"
+        word = "file not found"
         assert toasts == [f"{word}: missing.{ext}"], toasts
 
 
@@ -511,7 +511,7 @@ async def test_inc9n_u2_adding_a_non_local_file_stores_nothing_and_toasts_the_se
         assert toasts == [expected], toasts
         assert screen.graph.nodes["nom"].ficha.attachments == []
         assert MapStore(ws).load("att").nodes["nom"].ficha.attachments == []
-        assert "adjunto agregado" not in _flat(app.screen)
+        assert "attachment added" not in _flat(app.screen)
 
 
 @pytest.mark.parametrize("typed,kind", [("docs/x.pdf", "file"), ("https://example.com/acta", "url")])
@@ -524,7 +524,7 @@ async def test_inc9n_u2_pin_a_workspace_file_and_a_url_are_stored(typed, kind, t
         assert toasts == [] or U1 not in toasts, toasts
         stored = MapStore(tmp_path).load("att").nodes["nom"].ficha.attachments
         assert [(a.kind, a.path) for a in stored] == [(kind, typed)], stored
-        assert "adjunto agregado" in _flat(app.screen)
+        assert "attachment added" in _flat(app.screen)
 
 
 async def test_inc9n_u2_pin_a_drive_absolute_file_inside_the_workspace_is_stored(tmp_path, monkeypatch):

@@ -172,14 +172,14 @@ def _assert_hue_set_is_exactly_the_declared_tokens(sources):
 
 CONFORMING_SEVERITY = {
     ("mapper/app.py", "number_style = darkside.INK if sin_acta == 0 and vencen == 0 else darkside.WARN"),
-    ("mapper/app.py", 'lines.append(f"▲ {vencen} vencen hoy", darkside.WARN)'),
-    ("mapper/app.py", '("sin acta ", darkside.WARN), (f"{sin} ", darkside.WARN),'),
+    ("mapper/app.py", 'lines.append(f"▲ {vencen} due today", darkside.WARN)'),
+    ("mapper/app.py", '("no record ", darkside.WARN), (f"{sin} ", darkside.WARN),'),
     ("mapper/app.py", 'darkside.microbar(sin, total, fill=darkside.WARN), ("    ", ""),'),
     ("mapper/app.py", 'text.append(f"{marker} {stage}", darkside.PULSE if self.loading else darkside.INK)'),
-    ("mapper/app.py", 'return Text.assemble(("● ", darkside.ALERT), ("bloqueado", darkside.ALERT))'),
-    ("mapper/app.py", 'return Text.assemble(("● ", darkside.WARN), ("riesgo", darkside.WARN))'),
+    ("mapper/app.py", 'return Text.assemble(("● ", darkside.ALERT), ("blocked", darkside.ALERT))'),
+    ("mapper/app.py", 'return Text.assemble(("● ", darkside.WARN), ("risk", darkside.WARN))'),
     ("mapper/app.py", 'return ("░", darkside.WARN)'),
-    ("mapper/app.py", '("░", darkside.WARN), (" baja ", darkside.MUT),'),
+    ("mapper/app.py", '("░", darkside.WARN), (" low ", darkside.MUT),'),
     # `escape` -> `darkside.plain` at `Inc-REPAIR` S-E: `escape` guards Rich
     # markup and coerces nothing else, and both values at this site are
     # file-derived. The CLASSIFICATION is unchanged -- this is still the ALERT

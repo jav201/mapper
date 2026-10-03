@@ -103,7 +103,7 @@ COUNT_REGION_ID = "map-pagination"
 # move the other way and it is gone.  This one never stops being true while the
 # view is on screen, and wording it as a passing state would be the `UI-AT058`
 # failure (text that invites the operator to wait out a permanent condition).
-PAN_INERT_HINT = "esta vista no se desplaza · navega con j/k/h/l"
+PAN_INERT_HINT = "this view does not scroll · navigate with j/k/h/l"
 
 # WHAT the count line counts, in the operator's words, spelled ONCE.  The strip
 # also paints a page numeral (`1/8`) and an off-canvas numeral, so a bare
@@ -111,7 +111,7 @@ PAN_INERT_HINT = "esta vista no se desplaza · navega con j/k/h/l"
 # by an implementer's wording choice.  Naming the subject is the requirement
 # (`AT-052`), and a single declaration is what makes the test a DERIVATION of
 # the shipped string rather than a second copy of it that drifts.
-SEARCH_COUNT_SUBJECT = "coincidencias en el mapa"
+SEARCH_COUNT_SUBJECT = "matches in the map"
 
 # `LLR-N07.3.4` — what the count region says while a query is live, spelled ONCE
 # each.  The region declares the query at EVERY graph size now, so these strings
@@ -124,8 +124,8 @@ SEARCH_COUNT_SUBJECT = "coincidencias en el mapa"
 # naming only the highlighting leaves the operator to discover the other half by
 # pressing `n` and getting a toast.  That is the same hidden state one surface
 # over, which is the defect this clause exists to close.
-SEARCH_ACTIVE_LABEL = "búsqueda"
-SEARCH_SUSPENDED_NOTICE = "resaltado y recorrido suspendidos"
+SEARCH_ACTIVE_LABEL = "search"
+SEARCH_SUSPENDED_NOTICE = "highlighting and walk suspended"
 
 # THE ECHOED QUERY IS OPERATOR TEXT: unbounded in length, and the count region
 # SUPERSEDED BY `Inc-STRIPS`: `#map-pagination` now carries `max-height: 3;
@@ -259,7 +259,7 @@ def _save_or_toast(
         if _refusal_toast(screen, e):
             return False
         screen.notify(
-            f"no se pudo guardar {darkside.plain(map_id)!r}: "
+            f"could not save {darkside.plain(map_id)!r}: "
             f"{darkside.plain(type(e).__name__)}",
             severity="error",
             markup=False,
@@ -374,10 +374,10 @@ class _ConfirmScreen(ModalScreen[bool]):
     """Simple yes/no confirmation modal."""
 
     BINDINGS = [
-        ("y", "confirm", "Sí"),
-        ("n", "dismiss", "No"),
-        ("escape", "dismiss", "No"),
-        ("q", "dismiss", "No"),
+        ("y", "confirm", "yes"),
+        ("n", "dismiss", "no"),
+        ("escape", "dismiss", "no"),
+        ("q", "dismiss", "no"),
     ]
 
     def __init__(self, message: str) -> None:
@@ -441,12 +441,12 @@ class _TemplateScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         table = self.query_one("#template-table", DataTable)
         table.clear()
-        table.add_columns("▐ plantilla", "descripción")
+        table.add_columns("▐ template", "description")
         for key, data in TEMPLATES.items():
             desc = data.get("seed_title", key)
             table.add_row(escape(key), escape(desc), key=key)
         if table.row_count == 0:
-            table.add_row("(sin plantillas)", "", key="")
+            table.add_row("(no templates)", "", key="")
 
     def action_dismiss(self) -> None:
         self.dismiss(None)
@@ -487,41 +487,41 @@ class _FichaScreen(ModalScreen[None]):
             text.append(escape(ficha.meta), style=darkside.MUT)
             text.append("\n")
         if ficha.state:
-            text.append("estado ", style=darkside.MUT)
+            text.append("state ", style=darkside.MUT)
             text.append(escape(ficha.state), style=darkside.INK)
             text.append("\n")
 
         have, req = ficha.required_coverage(self.graph.schema)
         if req:
-            text.append("cobertura ", style=darkside.MUT)
+            text.append("coverage ", style=darkside.MUT)
             text.append_text(darkside.step_meter(have, req))
             text.append("\n")
 
         doc = ficha.fields.get("D", "")
-        text.append("documento ", style=darkside.MUT)
-        text.append(escape(doc) if doc else "sin acta",
+        text.append("document ", style=darkside.MUT)
+        text.append(escape(doc) if doc else "no record",
                     style=darkside.INK if doc else darkside.ALERT)
         text.append("\n")
-        text.append("dueño ", style=darkside.MUT)
+        text.append("owner ", style=darkside.MUT)
         text.append(escape(ficha.fields.get("O", "—")), style=darkside.INK)
         text.append("\n")
-        text.append("creado ", style=darkside.MUT)
+        text.append("created ", style=darkside.MUT)
         text.append(escape(ficha.fields.get("Y", "—")), style=darkside.INK)
         text.append("\n")
 
         linked = self.node.linked_map_id()
         if linked:
-            text.append("enlace ", style=darkside.MUT)
+            text.append("link ", style=darkside.MUT)
             text.append(escape(linked), style=darkside.ACCENT)
-            text.append("  (↵ abre el mapa)", style=darkside.MUT)
+            text.append("  (↵ opens the map)", style=darkside.MUT)
             text.append("\n")
 
         if ficha.notes:
-            text.append("\nnotas\n", style=darkside.MUT)
+            text.append("\nnotes\n", style=darkside.MUT)
             text.append(escape(ficha.notes), style=darkside.INK)
 
         if ficha.fields:
-            text.append("\ncampos\n", style=darkside.MUT)
+            text.append("\nfields\n", style=darkside.MUT)
             for key, value in ficha.fields.items():
                 if key in {"D", "O", "Y", "map"}:
                     continue
@@ -530,7 +530,7 @@ class _FichaScreen(ModalScreen[None]):
                 text.append("\n")
 
         if ficha.attachments:
-            text.append("\nadjuntos\n", style=darkside.MUT)
+            text.append("\nattachments\n", style=darkside.MUT)
             for att in ficha.attachments:
                 text.append(f"  {escape(att.caption or att.path)}\n", style=darkside.INK)
 
@@ -543,12 +543,12 @@ class _FichaScreen(ModalScreen[None]):
 class ConstructScreen(ModalScreen[str | None]):
     """Ask for a new map name and return it."""
 
-    BINDINGS = [("escape", "cancel", "Cancelar")]
+    BINDINGS = [("escape", "cancel", "cancel")]
 
     def compose(self) -> ComposeResult:
         yield Vertical(
             Static("new map", id="construct-label"),
-            Input(placeholder="mi-nuevo-mapa", id="construct-input"),
+            Input(placeholder="my-new-map", id="construct-input"),
             Static("", id="construct-hints"),
             id="construct-dialog",
         )
@@ -614,10 +614,10 @@ class HomeScreen(Screen):
 
     def _map_metrics(self, graph: Graph) -> dict[str, int]:
         total = len(graph.nodes)
-        con_acta = sum(1 for n in graph.nodes.values() if n.ficha.fields.get("D", "").strip())
-        sin_acta = total - con_acta
+        with_record = sum(1 for n in graph.nodes.values() if n.ficha.fields.get("D", "").strip())
+        no_record = total - with_record
         today = date.today().isoformat()
-        vencen = sum(
+        due = sum(
             1 for n in graph.nodes.values()
             if n.ficha.fields.get("due", "").strip() == today
         )
@@ -625,37 +625,37 @@ class HomeScreen(Screen):
         pct = int(100 * have / max(1, req))
         return {
             "total": total,
-            "con_acta": con_acta,
-            "sin_acta": sin_acta,
-            "vencen": vencen,
+            "with_record": with_record,
+            "no_record": no_record,
+            "due": due,
             "coverage": pct,
         }
 
     def _hero_text(self, map_name: str, metrics: dict[str, int]) -> Text:
-        sin_acta = metrics["sin_acta"]
-        vencen = metrics["vencen"]
+        sin_acta = metrics["no_record"]
+        vencen = metrics["due"]
         # calm board: count in INK with no WARN line
         number_style = darkside.INK if sin_acta == 0 and vencen == 0 else darkside.WARN
         lines = Text()
         lines.append(darkside.draw_number(str(sin_acta), number_style))
         lines.append("\n", "")
-        lines.append("nodos sin acta\n", darkside.MUT)
+        lines.append("nodes with no record\n", darkside.MUT)
         lines.append(escape(map_name) + "\n", darkside.INK)
         if vencen > 0:
-            lines.append(f"▲ {vencen} vencen hoy", darkside.WARN)
+            lines.append(f"▲ {vencen} due today", darkside.WARN)
         return lines
 
     def _microbar_text(self, metrics: dict[str, int]) -> Text:
         total = max(1, metrics["total"])
-        con = metrics["con_acta"]
-        sin = metrics["sin_acta"]
+        con = metrics["with_record"]
+        sin = metrics["no_record"]
         pct = metrics["coverage"]
         return Text.assemble(
-            ("  con acta ", darkside.MUT), (f"{con} ", darkside.MUT),
+            ("  with record ", darkside.MUT), (f"{con} ", darkside.MUT),
             darkside.microbar(con, total), ("    ", ""),
-            ("sin acta ", darkside.WARN), (f"{sin} ", darkside.WARN),
+            ("no record ", darkside.WARN), (f"{sin} ", darkside.WARN),
             darkside.microbar(sin, total, fill=darkside.WARN), ("    ", ""),
-            (f"cobertura {pct} %", darkside.INK),
+            (f"coverage {pct} %", darkside.INK),
         )
 
     def _sparkline_text(self, store: MapStore) -> Text:
@@ -679,7 +679,7 @@ class HomeScreen(Screen):
         # below must not divide by it.
         max_count = max_count or 1
         bars = "▁▂▂▃▃▄▅▆▇█"
-        parts: list[tuple[str, str]] = [("actividad 14d  ", darkside.MUT)]
+        parts: list[tuple[str, str]] = [("activity 14d  ", darkside.MUT)]
         for c in counts:
             idx = min(len(bars) - 1, int(c / max_count * (len(bars) - 1)))
             # sparkline stays in the dim tier — never INK or ACCENT
@@ -708,7 +708,7 @@ class HomeScreen(Screen):
                     broken.append(name)
                     damaged.add(name)
                     self.notify(
-                        f"no se pudo cargar {darkside.plain(name)}: {darkside.plain(str(exc))}",
+                        f"could not load {darkside.plain(name)}: {darkside.plain(str(exc))}",
                         severity="error",
                         markup=False,
                     )
@@ -814,12 +814,12 @@ class HomeScreen(Screen):
             node_name = node.ficha.title if node else node_id
             resume.update(
                 Text.assemble(
-                    (" ↩ retomar ", f"bold {darkside.GROUND} on {darkside.ACCENT}"),
+                    (" ↩ resume ", f"bold {darkside.GROUND} on {darkside.ACCENT}"),
                     (" ", ""),
                     (escape(map_id), darkside.INK),
                     (" / ", darkside.MUT),
                     (escape(node_name), darkside.MUT),
-                    ("   última sesión", darkside.MUT),
+                    ("   last session", darkside.MUT),
                 )
             )
             self.query_one("#home-resume-box", GroupBox).display = True
@@ -831,7 +831,7 @@ class HomeScreen(Screen):
         # `INC9BC-UX-F13`: `clear()` keeps the columns, so each return to home
         # added the four again (24 after three returns).
         table.clear(columns=True)
-        table.add_columns("▐ name", "kind", "nodos", "docs")
+        table.add_columns("▐ name", "kind", "nodes", "docs")
 
         archived = self.query_one("#home-archived", Static)
         if not mmd_files:
@@ -846,7 +846,7 @@ class HomeScreen(Screen):
         archived_count = 0  # placeholder until archive feature lands
         if archived_count:
             archived.update(
-                Text.assemble((f"  ({archived_count} mapa archivado — u restaura)", darkside.MUT))
+                Text.assemble((f"  ({archived_count} archived map — u restores)", darkside.MUT))
             )
             archived.display = True
         else:
@@ -910,12 +910,12 @@ class HomeScreen(Screen):
 
     #: What each door does, in prose (Inc-EN's); the KEY and its NAME come from the seat.
     _DOOR_NOTES = {
-        "c": "abre un mapa reciente",
-        "p": "conecta un repositorio",
-        "n": "crea un nuevo mapa",
-        "t": "mapa desde plantilla",
-        "i": "CSV / TSV de nodos",
-        "f": "documentos de proceso",
+        "c": "opens a recent map",
+        "p": "connects a repository",
+        "n": "creates a new map",
+        "t": "map from a template",
+        "i": "CSV / TSV of nodes",
+        "f": "process documents",
     }
 
     def _empty_text(self) -> Text:
@@ -965,10 +965,10 @@ class HomeScreen(Screen):
 
     def action_factory(self) -> None:
         demo = Graph()
-        demo.add_node(Node(id="root", ficha=Ficha(title="proceso demo")))
-        demo.add_node(Node(id="n1", ficha=Ficha(title="paso uno")))
+        demo.add_node(Node(id="root", ficha=Ficha(title="demo process")))
+        demo.add_node(Node(id="n1", ficha=Ficha(title="step one")))
         demo.add_edge(Edge("root", "n1"))
-        demo.documents["plantilla"] = Document(name="plantilla", source="hola {{nombre}}")
+        demo.documents["template"] = Document(name="template", source="hello {{name}}")
         self.app.push_screen(FactoryScreen(demo, process_name="demo"))
 
     def action_settings(self) -> None:
@@ -993,7 +993,7 @@ class HomeScreen(Screen):
                 # `INC9-SEC-F1`: the map's name and the exception TYPE, never
                 # `str(e)` -- an `OSError` embeds the absolute path (`_save_or_toast`).
                 self.notify(
-                    darkside.plain(f"no se pudo crear el mapa {name!r}: {type(e).__name__}"),
+                    darkside.plain(f"could not create the map {name!r}: {type(e).__name__}"),
                     severity="error", markup=False)
 
         self.app.push_screen(ConstructScreen(), callback=on_name)
@@ -1011,19 +1011,19 @@ class HomeScreen(Screen):
                 if _refusal_toast(self, e):
                     return
                 self.notify(
-                    darkside.plain(f"no se pudo crear el mapa {name!r}: {type(e).__name__}"),
+                    darkside.plain(f"could not create the map {name!r}: {type(e).__name__}"),
                     severity="error", markup=False)
 
         def on_template(template_id: str | None) -> None:
             if template_id is None:
                 return
             self.app.push_screen(
-                _PromptScreen("nombre del mapa", f"{template_id}-map"),
+                _PromptScreen("map name", f"{template_id}-map"),
                 callback=lambda name: on_pick((name, template_id)) if name else None,
             )
 
         if not TEMPLATES:
-            self.notify("no hay plantillas disponibles")
+            self.notify("no templates available")
             return
         self.app.push_screen(_TemplateScreen(), callback=on_template)
 
@@ -1041,19 +1041,19 @@ class HomeScreen(Screen):
             if not path.is_file():
                 # `INC9-SEC-F1`: the file's name, never the path the operator's
                 # `~` expanded to.
-                self.notify(darkside.plain(f"archivo no encontrado: {path.name}"), severity="error", markup=False)
+                self.notify(darkside.plain(f"file not found: {path.name}"), severity="error", markup=False)
                 return
             try:
                 preview = preview_csv(path)
             except Exception as e:
                 self.notify(
-                    darkside.plain(f"no se pudo leer CSV {path.name!r}: {type(e).__name__}"),
+                    darkside.plain(f"could not read CSV {path.name!r}: {type(e).__name__}"),
                     severity="error", markup=False)
                 return
             self.app.push_screen(_ImportPreviewScreen(preview, path))
 
         self.app.push_screen(
-            _PromptScreen("ruta del CSV / TSV", "C:\\path\\to\\nodes.csv"),
+            _PromptScreen("CSV / TSV path", "C:\\path\\to\\nodes.csv"),
             callback=on_path,
         )
 
@@ -1108,7 +1108,7 @@ class _ImportPreviewScreen(Screen):
             )
         except Exception as exc:
             text = darkside.Text.assemble(
-                (" no se pudo dibujar la vista previa\n\n", f"bold {darkside.INK}"),
+                (" could not draw the preview\n\n", f"bold {darkside.INK}"),
                 (f" {darkside.plain(str(exc))}", darkside.MUT),
             )
         canvas.update(text)
@@ -1127,7 +1127,7 @@ class _ImportPreviewScreen(Screen):
             self.app.push_screen(MapScreen(name))
 
         self.app.push_screen(
-            _PromptScreen("guardar como", self.source_path.stem),
+            _PromptScreen("save as", self.source_path.stem),
             callback=on_name,
         )
 
@@ -1168,10 +1168,10 @@ class PlugRepoScreen(Screen):
         yield TabStrip("p", crumb=["connect repo"])
         yield Vertical(
             Label("connect repo", id="repo-title"),
-            _RepoInput(placeholder="owner/name o URL de github", id="repo-input"),
+            _RepoInput(placeholder="owner/name or github URL", id="repo-input"),
             id="repo-dialog",
         )
-        yield HintLine("ingresa owner/name, URL o ruta local y presiona ↵", "↵")
+        yield HintLine("enter owner/name, a URL or a local path and press ↵", "↵")
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
@@ -1262,7 +1262,7 @@ class RepoScreen(Screen):
                 (self.failure + "\n", darkside.INK),
                 (hint_pair(SCOPE_REPO, "home"), darkside.MUT),
             )
-        stages = ["iniciando", "leyendo ramas", "calculando métricas", "listo"]
+        stages = ["starting", "reading branches", "computing metrics", "ready"]
         if self.loading:
             current = min(2, int(3 * self.progress_current / max(1, self.progress_total)))
         else:
@@ -1327,9 +1327,9 @@ class RepoScreen(Screen):
 
     def _state_indicator(self, state: str) -> Text:
         if state == "blocked":
-            return Text.assemble(("● ", darkside.ALERT), ("bloqueado", darkside.ALERT))
+            return Text.assemble(("● ", darkside.ALERT), ("blocked", darkside.ALERT))
         if state == "risk":
-            return Text.assemble(("● ", darkside.WARN), ("riesgo", darkside.WARN))
+            return Text.assemble(("● ", darkside.WARN), ("risk", darkside.WARN))
         return Text.assemble(("● ", darkside.INK), ("ok", darkside.MUT))
 
     def _source_kind(self) -> str:
@@ -1360,7 +1360,7 @@ class RepoScreen(Screen):
 
     def _render_table(self) -> Text:
         if not self.graph.nodes:
-            return Text("(no hay ramas cargadas)", style=darkside.MUT)
+            return Text("(no branches loaded)", style=darkside.MUT)
 
         root_id = self.graph.root_id or ""
         items: list[tuple[str, Node]] = []
@@ -1376,7 +1376,7 @@ class RepoScreen(Screen):
         # Source honesty badge + counts
         lines.append("  ")
         lines.append_text(self._source_badge())
-        lines.append(f"   {len(branches)} ramas · {len(releases)} releases\n", darkside.MUT)
+        lines.append(f"   {len(branches)} branches · {len(releases)} releases\n", darkside.MUT)
         lines.append("\n", "")
 
         def render_group(title: str, nodes: list[tuple[str, Node]], glyph: str,
@@ -1392,21 +1392,21 @@ class RepoScreen(Screen):
                 note_parts: list[str] = []
                 if age >= 0:
                     if age == 0:
-                        note_parts.append("hoy")
+                        note_parts.append("today")
                     elif age == 1:
-                        note_parts.append("ayer")
+                        note_parts.append("yesterday")
                     elif age < 7:
-                        note_parts.append(f"hace {age} d")
+                        note_parts.append(f"{age} d ago")
                     elif age < 30:
-                        note_parts.append(f"hace {age // 7} sem")
+                        note_parts.append(f"{age // 7} wk ago")
                     else:
-                        note_parts.append(f"hace {age // 30} mes")
+                        note_parts.append(f"{age // 30} mo ago")
                 meta = node.ficha.meta or ""
                 if meta and meta != "release":
                     note_parts.append(meta)
                 if node.ficha.notes and node.ficha.notes != "CI: unknown":
                     note_parts.append(node.ficha.notes)
-                note = " · ".join(note_parts) or "sin datos"
+                note = " · ".join(note_parts) or "no data"
                 row = self._time_row(name, max(0, age), glyph, style, note)
                 # selection marker
                 marker = "▶ " if idx == self.selected_index else "  "
@@ -1417,7 +1417,7 @@ class RepoScreen(Screen):
 
         order = {"release": 0, "hotfix": 1, "branch": 2}
         branches.sort(key=lambda item: (order.get(self._branch_kind(item[0]), 2), item[0]))
-        render_group("ramas", branches, "●", darkside.INK)
+        render_group("branches", branches, "●", darkside.INK)
         render_group("releases", releases, "◆", darkside.INK)
 
         lines.append("  ")
@@ -1426,7 +1426,7 @@ class RepoScreen(Screen):
         lines.append("◆", darkside.INK)
         lines.append(" release   ", darkside.MUT)
         lines.append("╎", darkside.WORDMARK)
-        lines.append(" hoy   (30 días)\n", darkside.MUT)
+        lines.append(" today   (30 days)\n", darkside.MUT)
         return lines
 
     def _refresh_table(self) -> None:
@@ -1457,7 +1457,7 @@ class RepoScreen(Screen):
         self.loading = True
         self._refresh_sidebar()
         table = self.query_one("#repo-table", Static)
-        table.update(Text("  conectando… esto puede tardar unos segundos", style=darkside.MUT))
+        table.update(Text("  connecting… this may take a few seconds", style=darkside.MUT))
         try:
             worker = self.fetch_graph()
             self.graph = await worker.wait()
@@ -1472,7 +1472,7 @@ class RepoScreen(Screen):
                         f"{hint_pair(SCOPE_REPO, 'home')} to retry"),
                     severity="warning", markup=False)
             else:
-                self.notify(darkside.plain(f"conectado: {count} nodos"), markup=False)
+                self.notify(darkside.plain(f"connected: {count} nodes"), markup=False)
         except Exception as exc:
             # `INC9BC-SEC-F3`: the worker does not exit the app (`exit_on_error`),
             # so its failure arrives here wrapped, and `GitHubError` is reachable.
@@ -1481,7 +1481,7 @@ class RepoScreen(Screen):
             if isinstance(exc, GitHubError):
                 self.failure = darkside.plain(str(exc))
             else:
-                self.failure = darkside.plain(f"error inesperado: {type(exc).__name__}")
+                self.failure = darkside.plain(f"unexpected error: {type(exc).__name__}")
             self.notify(darkside.plain(self.failure), severity="error", markup=False)
             self.graph = Graph()
         self.loading = False
@@ -1617,7 +1617,7 @@ class MapScreen(Screen):
             FichaInspector(id="map-inspector"),
             id="map-body",
         )
-        yield Input(placeholder="/buscar", id="search-input")
+        yield Input(placeholder="/search", id="search-input")
         yield Static("", id=COUNT_REGION_ID)
         yield Static("", id="map-toast")
         yield HintLine(map_hint())
@@ -1653,7 +1653,7 @@ class MapScreen(Screen):
             self._notice_load_warnings(self.base_graph)
         except Exception as e:
             self.notify(
-                f"error cargando mapa: {darkside.plain(str(e))}",
+                f"error loading map: {darkside.plain(str(e))}",
                 severity="error",
                 markup=False,
             )
@@ -1754,8 +1754,8 @@ class MapScreen(Screen):
             # nothing; the product already answers "nothing to do" out loud
             # elsewhere (`next_gap` toasts `cobertura completa`).
             self.notify(
-                "este nodo no tiene descendientes",
-                title="nada que plegar",
+                "this node has no descendants",
+                title="nothing to fold",
                 severity="information",
                 markup=False,
             )
@@ -2075,7 +2075,7 @@ class MapScreen(Screen):
             # graph before this guard: one `L` press and `app.is_running` went
             # False.  A frame that cannot be laid out cannot be panned, so the
             # answer is the one the edge already has a declaration for.
-            self.query_one(HintLine).set_hint("borde del territorio")
+            self.query_one(HintLine).set_hint("edge of the territory")
             return
         nx = self._clamp_pan(self.pan_x + dx * self.PAN_STEP_X, extent_x, span_x)
         ny = self._clamp_pan(self.pan_y + dy * self.PAN_STEP_Y, extent_y, span_y)
@@ -2084,7 +2084,7 @@ class MapScreen(Screen):
             # is indistinguishable from a keyboard that stopped working, and
             # blank space past the content is indistinguishable from "the map
             # has nothing there" -- the exact confusion US-N06 exists to remove.
-            self.query_one(HintLine).set_hint("borde del territorio")
+            self.query_one(HintLine).set_hint("edge of the territory")
             return
         self.pan_x, self.pan_y = nx, ny
         # CLEARED ON SUCCESS, and the omission was a real misdescription rather
@@ -2700,7 +2700,7 @@ class MapScreen(Screen):
     def _minimap_text(self, width: int) -> Text:
         if self.graph.root_id is None:
             return Text("")
-        parts: list[tuple[str, str]] = [("  cobertura   ", darkside.MUT)]
+        parts: list[tuple[str, str]] = [("  coverage   ", darkside.MUT)]
         children = self.graph.children_of(self.graph.root_id)
         limit = self._minimap_entry_limit(width, len(children))
         for cid in children[:limit]:
@@ -2730,12 +2730,12 @@ class MapScreen(Screen):
             # inherits `Screen`'s ground today, where `MUT` would clear the
             # floor; `INK` clears on either ground, so the token stays legible
             # if this strip is ever given a `PANEL` background.
-            parts.append((f"+{undrawn} ramas sin mostrar   ", darkside.INK))
+            parts.append((f"+{undrawn} branches not shown   ", darkside.INK))
         parts.extend([
-            ("█", darkside.INK), (" completa ", darkside.MUT),
-            ("▒", darkside.MUT), (" media ", darkside.MUT),
-            ("░", darkside.WARN), (" baja ", darkside.MUT),
-            ("╱", darkside.WORDMARK), (" sin datos", darkside.MUT),
+            ("█", darkside.INK), (" complete ", darkside.MUT),
+            ("▒", darkside.MUT), (" medium ", darkside.MUT),
+            ("░", darkside.WARN), (" low ", darkside.MUT),
+            ("╱", darkside.WORDMARK), (" no data", darkside.MUT),
         ])
         return darkside.Text.assemble(*parts)
 
@@ -2890,7 +2890,7 @@ class MapScreen(Screen):
         head = f"{SEARCH_ACTIVE_LABEL}: «"
         tail = (
             f"» · {self._whole_graph_tally()} {SEARCH_COUNT_SUBJECT} · "
-            f"{self._seat_glyph('back_or_home')} limpiar · "
+            f"{self._seat_glyph('back_or_home')} clear · "
             f"{SEARCH_SUSPENDED_NOTICE}  "
         )
         return darkside.Text(
@@ -3045,7 +3045,7 @@ class MapScreen(Screen):
         try:
             hidden = self._unpainted_ids()
         except LookupError:
-            text.append("declaración no disponible ", style=darkside.INK)
+            text.append("declaration not available ", style=darkside.INK)
             return text
         if hidden:
             # ONE SPELLING, consumed rather than repeated (`F7`).  This copy
@@ -3279,7 +3279,7 @@ class MapScreen(Screen):
         except Exception as exc:
             state = self._view_state(w, h)
             text = darkside.Text.assemble(
-                (" no se pudo dibujar el mapa\n\n", f"bold {darkside.INK}"),
+                (" could not draw the map\n\n", f"bold {darkside.INK}"),
                 (f" {darkside.plain(str(exc))}", darkside.MUT),
             )
         canvas.update(text)
@@ -3402,7 +3402,7 @@ class MapScreen(Screen):
             return
         self.base_graph = self.graph
         self.refresh_canvas()
-        self._event_toast("guardado", darkside.plain(node.ficha.title or node.id))
+        self._event_toast("saved", darkside.plain(node.ficha.title or node.id))
 
     @staticmethod
     def _ficha_value(ficha: Ficha, field: str) -> str:
@@ -3453,7 +3453,7 @@ class MapScreen(Screen):
         # of showing the real target at the exact moment it matters.
         shown = darkside.plain(att.path)
         if status == OSOPEN_OK:
-            self._event_toast("abierto", darkside.plain(att.caption or att.path))
+            self._event_toast("opened", darkside.plain(att.caption or att.path))
         elif status == ATTACHMENT_HARD_LINKED:
             # `INC9P-SEC-F3`: the status is the fixed sentence; it names nothing, so the path is not appended.
             self.notify(darkside.plain(status), severity="warning", markup=False)
@@ -3486,10 +3486,10 @@ class MapScreen(Screen):
                 return
             self.base_graph = self.graph
             self.refresh_canvas()
-            self._event_toast("adjunto agregado", darkside.plain(target))
+            self._event_toast("attachment added", darkside.plain(target))
 
         self.app.push_screen(
-            _PromptScreen("ruta o url del adjunto", "docs/acta.pdf"), callback=on_target
+            _PromptScreen("attachment path or url", "docs/record.pdf"), callback=on_target
         )
 
     def on_ficha_inspector_attachment_remove_requested(
@@ -3508,7 +3508,7 @@ class MapScreen(Screen):
         self.base_graph = self.graph
         self.refresh_canvas()
         self._event_toast(
-            "adjunto quitado", darkside.plain(removed.caption or removed.path)
+            "attachment removed", darkside.plain(removed.caption or removed.path)
         )
 
     def action_add_attachment(self) -> None:
@@ -3543,7 +3543,7 @@ class MapScreen(Screen):
 
     def _pop_snapshot(self) -> None:
         if not self._snapshots:
-            self.notify("nada que deshacer")
+            self.notify("nothing to undo")
             return
         import yaml
 
@@ -3557,7 +3557,7 @@ class MapScreen(Screen):
         if not _save_or_toast(self, self.store, self.map_id, self.graph):
             return
         self.refresh_canvas()
-        self._event_toast("deshacer", "estado restaurado")
+        self._event_toast("undo", "state restored")
 
     def action_next_sibling(self) -> None:
         nxt = self.nav.next_sibling()
@@ -3663,7 +3663,7 @@ class MapScreen(Screen):
         acted on -- the same "one resolution per frame" rule `_search_order`'s
         memo exists to enforce, applied one surface up.
         """
-        clear = f"{self._seat_glyph('back_or_home')} limpiar"
+        clear = f"{self._seat_glyph('back_or_home')} clear"
         if hits is None:
             # Above the renderer's bound.  `sin coincidencias` here would be the
             # lying affordance one surface over from the one `_count_line`
@@ -3673,10 +3673,10 @@ class MapScreen(Screen):
             # already uses, and `esc` is promised because `esc` now works here.
             return f"{SEARCH_SUSPENDED_NOTICE} · {clear}"
         if not hits:
-            return f"sin coincidencias · {clear}"
+            return f"no matches · {clear}"
         return (
-            f"{self._seat_glyph('next_hit')} siguiente · "
-            f"{self._seat_glyph('prev_hit')} anterior · {clear}"
+            f"{self._seat_glyph('next_hit')} next · "
+            f"{self._seat_glyph('prev_hit')} previous · {clear}"
         )
 
     def _search_is_live(self) -> bool:
@@ -3720,7 +3720,7 @@ class MapScreen(Screen):
         """
         self._event_toast(
             f"{self._seat_glyph('next_hit')} · {self._seat_label('next_hit')}",
-            f"{self._seat_label('next_gap')} ahora en {self._seat_glyph('next_gap')}",
+            f"{self._seat_label('next_gap')} now on {self._seat_glyph('next_gap')}",
         )
 
     def _walk_toast(self, declaring: bool, label: str, detail: str) -> None:
@@ -3822,7 +3822,7 @@ class MapScreen(Screen):
             return hint
         # `fit` truncates to display CELLS and re-coerces; its padding is
         # stripped because this sits inside quotes, not in a column.
-        return f"{hint} · abrió «{darkside.fit(names, room).rstrip()}»"
+        return f"{hint} · opened «{darkside.fit(names, room).rstrip()}»"
 
     def _walk_hits(self, step: int) -> None:
         """Move the selection to the next (or previous) match, wrapping both ways.
@@ -3863,8 +3863,8 @@ class MapScreen(Screen):
             # increment a second producer lands.
             self._walk_toast(
                 declaring,
-                "sin búsqueda activa",
-                "no hay coincidencias que recorrer",
+                "no active search",
+                "no matches to step through",
             )
             return
         if hits is None:
@@ -3888,8 +3888,8 @@ class MapScreen(Screen):
             # pins by AST to a single resolution source.
             self._walk_toast(
                 declaring,
-                "recorrido suspendido",
-                f"el mapa supera el límite de {MAX_RENDER_NODES} nodos",
+                "walk suspended",
+                f"the map exceeds the limit of {MAX_RENDER_NODES} nodes",
             )
             return
         if not hits:
@@ -3900,8 +3900,8 @@ class MapScreen(Screen):
             # override reverses the toast's own sentence.
             self._walk_toast(
                 declaring,
-                "0 coincidencias",
-                f"«{darkside.plain(self.query_text)}» no aparece en este mapa",
+                "0 matches",
+                f"«{darkside.plain(self.query_text)}» is not in this map",
             )
             return
         if self.nav.cursor in hits:
@@ -3990,13 +3990,13 @@ class MapScreen(Screen):
         if self.diff_active:
             self.diff_active = False
             self.refresh_canvas()
-            self.notify("diff oculto")
+            self.notify("diff hidden")
             return
         if self.store is None:
             return
         diff = git_diff(self.map_id, self.store)
         if diff is None:
-            self.notify("sin diff disponible (¿está el mapa en git?)")
+            self.notify("no diff available (is the map in git?)")
             return
         self.diff = diff
         self.diff_active = True
@@ -4059,7 +4059,7 @@ class MapScreen(Screen):
                 # `↵` is what commits, not ctrl+s — MapScreen binds no ctrl+s at
                 # all, and advertising a key that does nothing on the primary flow
                 # is the exact defect US-N03 exists to remove.
-                f"completa «{missing[0].label}» · ↵ save · esc leave field", "↵"
+                f"fill in «{missing[0].label}» · ↵ save · esc leave field", "↵"
             )
         return True
 
@@ -4071,7 +4071,7 @@ class MapScreen(Screen):
         """
         order = self._incomplete_order()
         if not order:
-            self._event_toast("cobertura completa", "no falta ningún campo requerido")
+            self._event_toast("coverage complete", "no required field is missing")
             return
         if self.nav.cursor in order:
             idx = (order.index(self.nav.cursor) + 1) % len(order)
@@ -4117,14 +4117,14 @@ class MapScreen(Screen):
                 # still costs seconds on a short terminal, and a TUI that stops
                 # answering with no indication reads as hung rather than busy.
                 self.notify(
-                    darkside.plain(f"exportando {cells} celdas; puede tardar un momento."),
+                    darkside.plain(f"exporting {cells} cells; this may take a moment."),
                     markup=False,
                 )
                 await asyncio.sleep(self.EXPORT_DECLARE_PAUSE)
             text = renderer.render(self.graph, state)
             path = self.store.workspace / f"{self.map_id}.svg"
             save_svg(text, path)
-            self._event_toast("exportado", path.name)
+            self._event_toast("exported", path.name)
         except ExportTooLarge as too_large:
             # A REFUSAL, AND IT NAMES THE ROUTE FORWARD.  Nothing is written --
             # see `_export_view_state` for why a partial artifact is the one
@@ -4179,18 +4179,18 @@ class MapScreen(Screen):
             stale = ""
             if path.is_file():
                 stale = (
-                    f" No se escribió nada: el archivo {path.name} no corresponde "
-                    "a esta exportación."
+                    f" Nothing was written: the file {path.name} does not match "
+                    "this export."
                 )
             self.notify(
-                darkside.plain(f"mapa demasiado grande para exportar: {too_large.cells} celdas, "
-                f"límite {too_large.limit}. Enfoca un subárbol con f y exporta esa vista."
+                darkside.plain(f"map too large to export: {too_large.cells} cells, "
+                f"limit {too_large.limit}. Focus a subtree with f and export that view."
                 f"{stale}"),
                 severity="warning",
                 markup=False,
             )
         except Exception as e:
-            self.notify(darkside.plain(f"exportación fallida: {type(e).__name__}"), severity="error", markup=False)
+            self.notify(darkside.plain(f"export failed: {type(e).__name__}"), severity="error", markup=False)
 
     #: How many times `_export_view_state` may grow the canvas looking for the
     #: size at which the whole map fits.  MEASURED, not guessed, and measured by
@@ -4556,13 +4556,13 @@ class MapScreen(Screen):
     def _guard_focus_mutation(self) -> bool:
         """Return True if a structural mutation should proceed."""
         if self.focus_active:
-            self.notify("no se puede editar con focus activo (presiona f para salir)")
+            self.notify("cannot edit while focus is active (press f to leave)")
             return False
         return True
 
     def action_add_child(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes:
-            self.notify("selecciona un nodo primero")
+            self.notify("select a node first")
             return
         if not self._guard_focus_mutation():
             return
@@ -4589,12 +4589,12 @@ class MapScreen(Screen):
             self.nav.cursor = nid
             self.refresh_canvas()
 
-        self.app.push_screen(_PromptScreen("nombre del hijo", "nuevo hijo"), callback=on_title)
+        self.app.push_screen(_PromptScreen("child name", "new child"), callback=on_title)
 
     def action_open_documents(self) -> None:
         node_id = self.nav.cursor
         if node_id is None or node_id not in self.graph.nodes:
-            self.notify("selecciona un nodo primero")
+            self.notify("select a node first")
             return
         doc_name = self.graph.document_names()[0] if self.graph.document_names() else ""
         self.app.push_screen(
@@ -4624,7 +4624,7 @@ class MapScreen(Screen):
             self.base_graph = self.graph
             self.nav.cursor = self.graph.root_id
             self.refresh_canvas()
-            self._event_toast("archivado", darkside.plain(node.ficha.title or node.id))
+            self._event_toast("archived", darkside.plain(node.ficha.title or node.id))
 
         # Every archive is confirmed, root or not.  A non-root subtree used to be
         # destroyed with no prompt at all, and `x` sits next to the navigation
@@ -4647,21 +4647,21 @@ class MapScreen(Screen):
         # in-memory undo stack that dies with the process.  Refuse instead.
         if count >= len(self.graph.nodes):
             self.notify(
-                "no se puede archivar todo el mapa: quedaría vacío. "
-                "archiva una rama, o elimina el mapa desde inicio.",
+                "cannot archive the whole map: it would be empty. "
+                "archive a branch, or delete the map from home.",
                 severity="warning",
                 markup=False,
             )
             return
         if self.nav.cursor == self.graph.root_id:
             message = (
-                f"¿archivar la raíz «{name}» y sus {count - 1} descendientes? "
-                "esto reemplazará la raíz del mapa."
+                f"archive the root «{name}» and its {count - 1} descendants? "
+                "this will replace the root of the map."
             )
         elif count > 1:
-            message = f"¿archivar «{name}» y sus {count - 1} descendientes?"
+            message = f"archive «{name}» and its {count - 1} descendants?"
         else:
-            message = f"¿archivar «{name}»?"
+            message = f"archive «{name}»?"
         self.app.push_screen(_ConfirmScreen(message), callback=do_archive)
 
     def _subtree_size(self, root_id: str | None) -> int:

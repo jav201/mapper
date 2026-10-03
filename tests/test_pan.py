@@ -183,7 +183,7 @@ async def test_a_layout_that_cannot_be_drawn_does_not_kill_the_app(tmp_path):
 
         # The degradation is DECLARED, not silent: the canvas says so, and the
         # strip declares nothing rather than a number it could not compute.
-        assert "no se pudo dibujar el mapa" in " ".join(canvas_rows(screen))
+        assert "could not draw the map" in " ".join(canvas_rows(screen))
         assert screen._unpainted_ids() is None  # noqa: SLF001
 
         for key in ("L", "H", "J", "K", "j", "z"):
@@ -361,7 +361,7 @@ async def test_at_012_pan_is_bounded_at_both_edges_and_declares_the_edge(tmp_pat
         await pilot.pause()
         assert screen.pan_x == 0
         assert canvas_rows(screen) == before
-        assert "borde del territorio" in _hint(screen)
+        assert "edge of the territory" in _hint(screen)
 
         # BOUNDARY 2 — panning RIGHT past the last column that shows content.
         presses = max_pan // MapScreen.PAN_STEP_X + 1
@@ -376,7 +376,7 @@ async def test_at_012_pan_is_bounded_at_both_edges_and_declares_the_edge(tmp_pat
         await pilot.pause()
         assert screen.pan_x == max_pan
         assert canvas_rows(screen) == exhausted
-        assert "borde del territorio" in _hint(screen)
+        assert "edge of the territory" in _hint(screen)
 
 
 @pytest.mark.asyncio
@@ -395,7 +395,7 @@ async def test_at_012_the_vertical_chords_are_bounded_the_same_way(tmp_path):
         await pilot.press("K")
         await pilot.pause()
         assert screen.pan_y == 0
-        assert "borde del territorio" in _hint(screen)
+        assert "edge of the territory" in _hint(screen)
 
         for _ in range(max_pan // MapScreen.PAN_STEP_Y + 1):
             await pilot.press("J")
@@ -405,7 +405,7 @@ async def test_at_012_the_vertical_chords_are_bounded_the_same_way(tmp_path):
         await pilot.press("J")
         await pilot.pause()
         assert canvas_rows(screen) == bottom
-        assert "borde del territorio" in _hint(screen)
+        assert "edge of the territory" in _hint(screen)
 
 
 @pytest.mark.asyncio
@@ -478,7 +478,7 @@ async def test_the_edge_hint_does_not_latch_across_a_live_pan(tmp_path):
         await pilot.press("K")
         await pilot.pause()
         assert screen.pan_y == 0
-        assert "borde del territorio" in _hint(screen)
+        assert "edge of the territory" in _hint(screen)
 
         # Then a LIVE pan on the other side of the same axis.
         await pilot.press("J")
@@ -486,7 +486,7 @@ async def test_the_edge_hint_does_not_latch_across_a_live_pan(tmp_path):
         assert screen.pan_y == MapScreen.PAN_STEP_Y, (
             "the follow-up press was itself a no-op; this arm proves nothing"
         )
-        assert "borde del territorio" not in _hint(screen), (
+        assert "edge of the territory" not in _hint(screen), (
             f"the edge hint survived a live pan: {_hint(screen)!r}"
         )
 
