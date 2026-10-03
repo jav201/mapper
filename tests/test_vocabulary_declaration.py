@@ -290,38 +290,57 @@ def _retired_ids() -> set[str]:
 
 
 # EN-4 (`A-132`): the legend's SAMPLES are English now; `01b` is a dated record and keeps the Spanish it was written
-# with.  Each old sample maps to exactly one new one, so a sample that drifts back to Spanish, or to anything else,
-# still fails the equality below -- the map only bridges the declared relabel, it does not loosen the comparison.
-EN4_SAMPLES = {
-    "▐ nómina": "▐ payroll",
-    "◫ ACTA-7": "◫ REC-7",
-    "◫ sin acta": "◫ no record",
-    "▽ 35 fuera de vista": "▽ 35 out of view",
-    "▲ 2 vencen hoy": "▲ 2 due today",
-    "↩ retomar": "↩ resume",
-}
+# with.  The old -> new map is READ from `A-132`'s `darkside.py` table in `01-requirements.md` (`EN4-REV-F1`: the
+# hand-written dict this replaced was a second transcription that could drift from the amendment without a test
+# noticing).  Each old sample maps to exactly one new one, so a sample that drifts back to Spanish, or to anything
+# else, still fails the equality below -- the map only bridges the declared relabel, it does not loosen the comparison.
+REQUIREMENTS = UX.parent / "01-requirements.md"
+A132_ROW = re.compile(r"^\| `V\d+[a-z]?` sample `([^`]+)` \| `([^`]+)`", re.M)
 
 
-def derived_members() -> tuple[set[tuple[str, str, str, str]], dict[str, set[tuple[int, int]]]]:
+def en4_samples() -> dict[str, str]:
+    text = REQUIREMENTS.read_bytes().decode("utf-8")
+    start = text.index("### `A-132`")
+    end = text.find("\n### ", start + 1)
+    block = text[start:end if end >= 0 else len(text)]
+    block = block[block.index("**`darkside.py` -- legend samples"):]
+    return {old: new for old, new in A132_ROW.findall(block)}
+
+
+def derived_members(applied: set[str] | None = None) -> tuple[set[tuple[str, str, str, str]], dict[str, set[tuple[int, int]]]]:
     """`LLR-N16.2.1`'s instrument, run: `01b` §3.1-3.4 -> the declared members.
 
     One member per distinct triple (`A-103`), the first id naming it keeps it
     (`V4a` collapses into `V4`), `DEFERRED(#D7)` rows contribute nothing, and a
-    row's ranges attach to the member it collapsed into.
+    row's ranges attach to the member it collapsed into.  `applied`, when given, collects the `A-132` samples that
+    were swapped for their English spelling.
     """
+    samples = en4_samples()
     members: dict[tuple[str, str, str], str] = {}
     ranges: dict[str, set[tuple[int, int]]] = {}
     for vid, glyph_cell, label_cell, style_cell in derived_rows():
         if "DEFERRED(#D7)" in glyph_cell + label_cell + style_cell:
             continue
         for style, sample in sample_by_style(glyph_cell, style_cell).items():
-            sample = EN4_SAMPLES.get(sample, sample)
+            if applied is not None and sample in samples:
+                applied.add(sample)
+            sample = samples.get(sample, sample)
             owner = members.setdefault((sample or "", _unwrap(label_cell), style), vid)
             for lo, hi in _RANGE.findall(glyph_cell):
                 ranges.setdefault(owner, set()).add((int(lo, 16), int(hi, 16)))
             for chars in _GLYPH_SET.findall(glyph_cell):
                 ranges.setdefault(owner, set()).update((ord(c), ord(c)) for c in chars)
     return {(vid, g, lab, st) for (g, lab, st), vid in members.items()}, ranges
+
+
+def test_en4_the_relabel_map_is_the_six_rows_of_a132_and_every_row_was_applied():
+    """`EN4-REV-F1`: the map is derived, it has exactly the six declared rows, and each one met a sample in `01b`."""
+    samples = en4_samples()
+    assert len(samples) == 6, samples
+    assert all(old != new for old, new in samples.items()), samples
+    applied: set[str] = set()
+    derived_members(applied)
+    assert applied == set(samples), f"A-132 rows never applied to a derived sample: {sorted(set(samples) - applied)}"
 
 
 def test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document():

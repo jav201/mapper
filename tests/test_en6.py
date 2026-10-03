@@ -1,7 +1,7 @@
 """Inc-EN-6 -- the palette footer advertises the arrows (`N2`, `INC9F-UX-F4`).
 
 Authority: `VERDICT-inc9-2026-09-30.md` Round 4 N2 and `VERDICT-inc-en-2026-10-02.md` (EN-6).  The footer reads
-`↑↓ move   ↵ run   esc close`; every word and glyph is the seat's own, so a relabelled seat must reach the footer.
+`↑↓ move · ↵ run · esc close` (E3 of Round 3 gave the pairs a middle dot); every word and glyph is the seat's own, so a relabelled seat must reach the footer.
 """
 from __future__ import annotations
 
@@ -80,7 +80,19 @@ def test_the_two_arrow_rows_share_one_word_and_are_each_bound_once():
 
 
 @pytest.mark.asyncio
-async def test_the_arrows_move_the_lit_row_and_enter_runs_it(tmp_path):
+async def test_the_arrows_move_the_lit_row_and_enter_runs_it(tmp_path, monkeypatch):
+    """`EN6-REV-F2`: the arrows must reach the SEAT BINDINGS.  The index moving is not enough: an `on_key` that forwards
+    `up`/`down` itself (and stops the event) moves the row too, and leaves the seat rows as decoration.  So the two
+    actions are recorded."""
+    fired: list[str] = []
+    for name in ("action_move_up", "action_move_down"):
+        original = getattr(CommandPalette, name)
+
+        def spy(self, _original=original, _name=name):
+            fired.append(_name)
+            return _original(self)
+
+        monkeypatch.setattr(CommandPalette, name, spy)
     app = MapperApp(tmp_path)
     async with app.run_test(size=SIZES[0]) as pilot:
         await pilot.pause()
@@ -90,9 +102,11 @@ async def test_the_arrows_move_the_lit_row_and_enter_runs_it(tmp_path):
         await pilot.press("down", "down")
         await pilot.pause()
         assert lv.index == 2
+        assert fired == ["action_move_down", "action_move_down"], fired
         await pilot.press("up")
         await pilot.pause()
         assert lv.index == 1
+        assert fired[-1] == "action_move_up" and len(fired) == 3, fired
         await pilot.press("up", "up", "up")
         await pilot.pause()
         assert lv.index == 0, "the lit row stops at the first"
@@ -102,9 +116,12 @@ async def test_the_arrows_move_the_lit_row_and_enter_runs_it(tmp_path):
         assert app.screen is pal, "an arrow never closes the palette"
         assert pal.query_one("#palette-input", Input).has_focus
         lit = pal._items[lv.index]  # noqa: SLF001
+        dismissed: list[object] = []
+        monkeypatch.setattr(pal, "dismiss", lambda value=None: dismissed.append(value))
         await pilot.press("enter")
         await pilot.pause()
-        assert app.screen is not pal, (lit.action,)
+        # `EN6-REV-F3`: what `enter` hands back is the LIT action, not merely "something closed the palette".
+        assert dismissed == [lit.action], (dismissed, lit.action)
 
 
 @pytest.mark.asyncio

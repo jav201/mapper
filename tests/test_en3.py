@@ -68,12 +68,12 @@ def test_scanner_sees_what_it_claims():
     """Oracle control: the scan flags a planted word, a planted accent and an f-string part, and passes English."""
     assert spanish_hits("x = '(sin ramas)'") != []
     assert spanish_hits("x = ' fuera de vista'") != []
-    assert spanish_hits("x = '▫ sin acta'") != []
+    assert spanish_hits("x = '◫ sin acta'") != []
     assert spanish_hits("x = f'mapa de {n} nodos'") != []
     assert spanish_hits("x = 'límite'") != []
     assert spanish_hits("x = '(ninguna etiqueta)'") != []
     assert spanish_hits("x = 'delta porter lasso unity'") == []  # whole words only: no substring hits
-    assert spanish_hits("x = '(no branches)'\ny = ' out of view'\nz = '▫ no record'") == []
+    assert spanish_hits("x = '(no branches)'\ny = ' out of view'\nz = '◫ no record'") == []
     assert spanish_hits('def f():\n    """sin ramas del mapa"""\n') == []
 
 

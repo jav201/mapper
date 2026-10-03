@@ -648,7 +648,7 @@ async def test_llr_n13_1_5_the_card_carries_the_DECLARED_state_string(tmp_path):
     declared = _declared_card_state_string()
     assert declared == darkside.DAMAGED_MAP_STATE, (
         f"darkside.DAMAGED_MAP_STATE is {darkside.DAMAGED_MAP_STATE!r} but "
-        f"01-requirements.md's LLR-N13.1.5 declares {declared!r}"
+        f"01-requirements.md's A-132 declares {declared!r}"
     )
     assert declared in painted, (
         f"the card does not carry the declared state {declared!r}: {painted!r}"

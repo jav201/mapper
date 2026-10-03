@@ -40,6 +40,7 @@ con de del el en es la las los para por se un una
 baja demasiado desde datos dentro falta
 activa activo aparece archivados corresponde edita editar esta este nada ningun oculto puede quedaria raiz recorrer
 reemplazara requerido resaltado restaurado salir selecciona primero supera tarda tardar
+que su sus al lo
 """.split())
 
 #: Dict keys and ids are not copy; none today.
@@ -101,6 +102,9 @@ def test_scanner_sees_what_it_claims():
     assert spanish_hits("x = 'selecciona un nodo primero'") != []
     assert spanish_hits("x = 'esta vista no se desplaza'") != []
     assert spanish_hits("x = 'raíz'") != []
+    for word in ("que", "su", "sus", "al", "lo"):  # `EN5-REV-F4`: function words the first list missed
+        assert spanish_hits(f"x = '{word}'") != [], word
+    assert spanish_hits("x = 'y'") == []  # `y` is a key literal (the confirm binding), not copy: NOT on the list
     assert spanish_hits("x = 'delta porter lasso unity'") == []  # whole words only: no substring hits
     assert spanish_hits("x = 'file not found: a.csv'\ny = 'no matches'\nz = 'nodes'") == []
     assert spanish_hits('def f():\n    """no se pudo guardar"""\n') == []
