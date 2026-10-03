@@ -68,3 +68,15 @@ Mutants:
 - NOT measured: a deterministic delay for the FLAKE-4 grid animation (M2 is a rate); the fixed tests on a quiet machine beyond the runs above; POSIX.
 - The load was shared with other agents' work and varied during the session; the before/after rows were not taken in one controlled interleaving.
 - Suggested next: the whole-branch gates the closure block lists.
+
+## 7. Full default lane x3 (last step)
+
+On `c2cafec` (all code and tests; this docs commit follows), sequential, uninterrupted, nothing else of mine running, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables, default basetemp:
+
+| Run | Result | Time |
+|---|---|---|
+| 1 | `2769 passed, 24 deselected, 3 xfailed` (0 failed), exit 0 | 1363.28 s |
+| 2 | `2769 passed, 24 deselected, 3 xfailed` (0 failed), exit 0 | 1441.14 s |
+| 3 | `2769 passed, 24 deselected, 3 xfailed` (0 failed), exit 0 | 1389.01 s |
+
+Baseline 2768; the +1 is the new `EN9-REV-F3` arm. Other agents' work (reviewers in their own worktrees) shared the machine, so the timings vary. No lane was discarded.
