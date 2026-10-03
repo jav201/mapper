@@ -268,20 +268,40 @@ KEYMAP: list[KeyBinding] = [
 # screens and the tests read one source instead of each passing a flag.
 MODAL_SCOPES = (SCOPE_PALETTE, SCOPE_HELP)
 
+# `E4`: a scope whose only focusable control is a text field.  The app-scope
+# actions named here still exist there (the palette runs them), but the KEY that
+# binds them is a printable character the field consumes first, so the key bar and
+# the legend must not list a chord that only ever types.
+TEXT_ONLY_SCOPES: dict[str, tuple[str, ...]] = {
+    SCOPE_PLUG: ("help",),
+}
 
-def bindings_for(scope: str, *, include_app: bool | None = None) -> list[KeyBinding]:
-    """Every binding the given scope offers.
 
-    App-scope bindings are reachable from every ordinary screen, so they are
-    included — that is what makes "help shows exactly the keys that work here"
-    true rather than aspirational.  Modal scopes are the exception.
-    """
+def _typed_not_bound(binding: KeyBinding, scope: str) -> bool:
+    """True when *scope*'s text field swallows *binding*'s key (`E4`)."""
+    return binding.scope == SCOPE_APP and binding.action in TEXT_ONLY_SCOPES.get(scope, ())
+
+
+def _scope_rows(scope: str, include_app: bool | None) -> list[KeyBinding]:
     if include_app is None:
         include_app = scope not in MODAL_SCOPES
     wanted = {scope}
     if include_app and scope != SCOPE_APP:
         wanted.add(SCOPE_APP)
     return [b for b in KEYMAP if b.scope in wanted]
+
+
+def bindings_for(scope: str, *, include_app: bool | None = None) -> list[KeyBinding]:
+    """Every binding the given scope offers.
+
+    App-scope bindings are reachable from every ordinary screen, so they are
+    included — that is what makes "help shows exactly the keys that work here"
+    true rather than aspirational.  Modal scopes are the exception, and so is a
+    text-only scope's typed key (`E4`): the connect-repo field consumes `?`, so the
+    row is not offered here.  The palette reads `_scope_rows` instead: its legend
+    action still runs from that screen.
+    """
+    return [b for b in _scope_rows(scope, include_app) if not _typed_not_bound(b, scope)]
 
 
 def textual_bindings(
@@ -306,11 +326,16 @@ def groups_for_keybar(
     Each tuple is (header, [(glyph, label), ...]) in the requested order, the
     header being what the operator reads (`group_header`), not the group id.
     The keybar shows the *glyph*, never the Textual key name — nobody presses a
-    key called "question_mark".
+    key called "question_mark".  When the groups name exactly one concrete scope
+    that is text-only (`E4`), the rows its field swallows are left out.
     """
+    own = {GROUP_SCOPE[g] for g in active_groups} - {SCOPE_APP}
+    scope = own.pop() if len(own) == 1 else None
     group_bindings: dict[str, list[tuple[str, str]]] = {}
     for binding in KEYMAP:
         if binding.group not in active_groups:
+            continue
+        if scope is not None and _typed_not_bound(binding, scope):
             continue
         group_bindings.setdefault(binding.group, []).append(
             (binding.glyph, binding.label)
@@ -342,7 +367,7 @@ def label_for(scope: str, action: str) -> str:
 
 def palette_items(query: str, scope: str = SCOPE_APP) -> list[KeyBinding]:
     """Fuzzy-filter the bindings reachable from *scope* by glyph, label and action."""
-    candidates = bindings_for(scope)
+    candidates = _scope_rows(scope, None)
     q = query.lower().strip()
     if not q:
         return candidates
