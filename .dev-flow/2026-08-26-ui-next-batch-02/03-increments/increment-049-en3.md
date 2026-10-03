@@ -104,3 +104,7 @@ The two pins that DO depend on the shorter declaration (section 3b) are at 20..3
 `2667 passed, 24 deselected, 3 xfailed` in 1724.7 s (28 min 45 s), `python -B -m pytest -rf -q -W error::SyntaxWarning`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `7afc185` (the last code and test change), run as the last step. Baseline 2660 passed + 1 failed (the `test_inc9c` ux_f3 flake) = 2661; the delta is the 6 new `test_en3.py` items (2661 + 6 = 2667). The flake did not fail this time.
 
 Lane history, declared: a first full lane on `c36ea34` ended `1 failed, 2666 passed` -- `test_a3_census::test_tc_a3_the_census_cardinalities_are_PINNED` (derived 65 arg-ful `.render(...)` call sites against a pinned 64): the `test_en3.py` lane arm is the +1. It was re-run alone after the fix and passed (15 of 15 in that file). The pin and its ledger entry are in section 3; the lane above was then re-run in full from a fresh output file, nothing else of mine running. That first lane's one failure was not a flake and is not waved away.
+
+## Correction note (EN-8, 2026-10-02)
+
+Appended; nothing above was rewritten. `EN3-REV-F1`: section 4 is titled "Width checks" and speaks of "the two reference widths". What was rendered is two widths at four frames (118x34, 118x12, 87x30, 87x12), plus the pin sweep of section 3b at widths 24 to 37. No width between 37 and 87, or above 118, was rendered; "all 72 identical" holds for those frames only.

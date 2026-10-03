@@ -69,3 +69,7 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 - NOT measured: widths other than 118 and 87 (the dialog is a fixed 80, the footer 44); the footer from a map-opened palette (the string is scope-independent, but the render was taken from home); POSIX.
 - Left for later: `EN-7` (`?` in text fields).
 - Suggested next: `EN-7`.
+
+## Correction note (EN-8, 2026-10-02)
+
+Appended; nothing above was rewritten. `EN6-REV-F1`: the dispatch paragraph ("the search box binds neither arrow") and the first risk ("if a future Textual gives `Input` an `up`/`down` binding, the box would eat them") are not accurate. `Input` already inherits `up` / `down` bindings (`scroll_up` / `scroll_down`, from `ScrollableContainer`, Textual 8.2.8); they raise `SkipAction` because a one-line `Input` cannot scroll, so the keys fall through to the palette's seat bindings. The risk is that an `Input` that becomes vertically scrollable, or a Textual that drops the `SkipAction` path, would eat the arrows. `tests/test_en6.py` now records that `action_move_up` / `action_move_down` fire (`EN6-REV-F2`) and that `enter` dismisses with the lit action (`EN6-REV-F3`). The `palette.py` comment was reworded the same way. `EN6-REV-F4`: the footer separators are ` · ` (`A-136`, `E3`), superseding the three-space sentence of `A-134`.
