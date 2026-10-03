@@ -163,3 +163,49 @@ async def test_a_relabelled_seat_row_is_listed_where_it_works_and_absent_where_i
     else:
         assert "ZZ" not in bar and "zz-legend" not in bar, bar
         assert "zz-legend" in palette_rows, palette_rows
+
+
+# -- EN8-REV-F6 / F7 (folded into EN-9) ------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("empty", ["", None])
+@pytest.mark.asyncio
+async def test_the_ficha_modal_shows_a_dash_for_an_empty_owner_and_created(tmp_path, empty):
+    from mapper.app import _FichaScreen
+    from mapper.model import Ficha, Graph, Node
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZES[0]) as pilot:
+        await pilot.pause()
+        fields = {} if empty is None else {"O": empty, "Y": empty}
+        node = Node(id="a", ficha=Ficha(title="alfa", fields=fields))
+        graph = Graph()
+        graph.add_node(node)
+        app.push_screen(_FichaScreen(node, graph))
+        await _settle(pilot)
+        text = app.screen.query_one("#ficha-content", Static).content.plain
+    assert "owner —\n" in text and "created —\n" in text, text
+
+
+@pytest.mark.asyncio
+async def test_the_ficha_modal_still_shows_a_set_owner(tmp_path):
+    from mapper.app import _FichaScreen
+    from mapper.model import Ficha, Graph, Node
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZES[0]) as pilot:
+        await pilot.pause()
+        node = Node(id="a", ficha=Ficha(title="alfa", fields={"O": "ana", "Y": "2026"}))
+        graph = Graph()
+        graph.add_node(node)
+        app.push_screen(_FichaScreen(node, graph))
+        await _settle(pilot)
+        text = app.screen.query_one("#ficha-content", Static).content.plain
+    assert "owner ana\n" in text and "created 2026\n" in text, text
+
+
+def test_every_coverage_binding_label_is_lowercase():
+    from mapper.screens.coverage import CoverageScreen
+
+    labels = [b[2] for b in CoverageScreen.BINDINGS]
+    assert labels == ["select", "close", "close"], labels
+    assert all(label == label.lower() for label in labels), labels

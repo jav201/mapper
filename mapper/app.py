@@ -498,10 +498,10 @@ class _FichaScreen(ModalScreen[None]):
                     style=darkside.INK if doc else darkside.ALERT)
         text.append("\n")
         text.append("owner ", style=darkside.MUT)
-        text.append(escape(ficha.fields.get("O", "—")), style=darkside.INK)
+        text.append(escape(ficha.fields.get("O") or "—"), style=darkside.INK)
         text.append("\n")
         text.append("created ", style=darkside.MUT)
-        text.append(escape(ficha.fields.get("Y", "—")), style=darkside.INK)
+        text.append(escape(ficha.fields.get("Y") or "—"), style=darkside.INK)
         text.append("\n")
 
         linked = self.node.linked_map_id()
