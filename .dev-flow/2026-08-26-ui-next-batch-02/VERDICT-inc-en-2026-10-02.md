@@ -42,3 +42,18 @@ Routed to EN-8 (cleanup, no new features): E1–E3; EN5-REV-F2 arms for the six 
 `plain` sites; EN5-REV-F3..F7 (EN2-REV-F1 comment, census words, `record` in the ficha modal, singular
 `descendant`, the vacuous `test_inc9m` pin); `Cancel`/`Close` lowercase; `declaration not available`
 reworded; EN6-REV-F1..F3; EN4-REV-F1..F5; EN3-REV-F1/F3; EN2-REV-F2/F3 record notes; EN1-REV leftovers.
+
+## Round 4 — after the EN-7 review (2026-10-03)
+
+EN-7 review: OK (no HIGH; EN7-REV-F1 the connect-repo key bar still advertises `? legend` although its
+only control is the text field, so `?` always types there; F2 A-135 over-claims "the palette's legend
+action opens it from anywhere" — coverage and editor modals have no palette, pre-existing; F3/F4 LOW).
+One question was put to the operator; it took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| E4 · EN7-REV-F1 | Connect-repo advertises `? legend` where `?` can only type | Quitar «? legend» ahí | On a screen whose only focusable control is a text field, the key bar and the legend do not list `?`; `ctrl+p palette` (already on the bar) reaches the legend |
+
+Routed to EN-9 (micro): E4; EN7-REV-F2 (amend A-135 to "every seat-migrated screen", backlog the
+coverage/editor modals that reach no legend); F3 (record correction: no prompt pre-fills a value);
+F4 (the 87-column inspector arms assert the field is displayed, or are labelled programmatic).
