@@ -55,7 +55,12 @@ M1-M4 and M8 were run on the final tree (`keymap.py` sha256 `848d243d...` pinned
 
 ## 5. Test results
 
-LANE_PENDING
+- Full default lane, once, uninterrupted, last step, on `3fef871` (all code and tests; this docs commit follows): `2768 passed, 24 deselected, 3 xfailed` (0 failed) in 1343.48 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE (real backslashes), git identity from environment variables. Baseline 2746 plus the 22 items of `test_en9.py`. FLAKE-1 and FLAKE-4 did not occur.
+- Lane history, declared, none counted: (1) a lane started on `c7008db` was killed by me when the coordinator's EN-8 items arrived (its source was about to change). (2) The next lane, on `c7008db`, ended `2 failed, 2762 passed`: `test_inc9::test_llr_n16_1_1_the_screen_set_is_derived_and_large_enough` and `test_every_derived_help_screen_has_an_opener`, because the first draft also dropped connect-repo's `question_mark` binding (section 1). Fixed by keeping the binding. (3) The next, on `9feff3e`, ended `1 failed, 2767 passed`: `test_keymap::test_at_n03f_bound_keys_match_the_seat_exactly[plug]` (a bound key the seat no longer lists); the arm was relabelled (section 2). Not flakes: both were mine.
+- Affected suites run alone before each lane: `test_en9`, `test_en7`, `test_inc9`, `test_keymap`, `test_palette`, `test_key_dispatch`, `test_help_scope`.
+- Ruff 0.8.4, programmatic set difference on (file, code, message) between `9105abc` in a scratch worktree (removed) and this tree over the 7 changed source and test files: 1 and 1, new: none, fixed: none.
+- Cf characters (U+2011 included) in every changed file: 0; account-name grep: 0. `git ls-files --eol`: 390 `i/lf`, 1 `i/none`, 0 `i/crlf`. No `prototypes/`, `mapper.db`, `fixtures/.mapper`, `fixtures/mapper.db` or `state.json` staged. No `git stash`. The EN-8 reviewer's worktree under `%TEMP%` was not touched (still listed).
+- Declared slip: eight of the nine commits before this one carry the repository's configured author identity (`jav201`), not an environment one: the identity variables were exported per shell call and were missing in most commit calls. Only `3fef871` uses the environment identity. No file content is affected; the instruction named a temp HOME and an identity via env, and the commits do not fully honour the second half.
 
 ## 6. Risks, unmeasured, next
 
