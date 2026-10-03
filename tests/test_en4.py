@@ -31,6 +31,7 @@ adjunto adjuntos auditoria campo campos caracteres ciclo criticidad cargando dem
 duplicado dueno elige empezar espacio estado existe fantasma ficha hijo hoy ilegible indexar largo leer letra
 maximo navega notas nomina nuevo omitidos otro presiona primer pudo punto registros reservado retomar ruta
 segundo separadores sobrescribe terminar unidad validos vencen ver vacio ya
+que su sus al lo
 """.split())
 
 #: Windows device names are not Spanish: `CON` is the console (`store._RESERVED_NAMES`).
@@ -93,28 +94,36 @@ def test_scanner_sees_what_it_claims():
     assert spanish_hits("x = '_nodos.yml'") == []  # the sidecar file-name format, exact literal only
     assert spanish_hits("x = '_nodos.yml!'") != []
     assert spanish_hits("x = 'con'") != []  # the device exemption is the upper-case token only
+    for word in ("que", "su", "sus", "al", "lo"):  # `EN4-REV-F5`: function words the first list missed
+        assert spanish_hits(f"x = '{word}'") != [], word
     assert spanish_hits("x = 'owner'\ny = 'legacy audit'\nz = '◫ no record'") == []
     assert spanish_hits('def f():\n    """campo ilegible del mapa"""\n') == []
 
 
-def test_map_id_messages_read_in_english_and_echo_nothing_new():
-    """The seven `MapIdError` sentences, driven through `check_map_id` (the rule itself is unchanged)."""
-    from mapper.store import MapIdError, check_map_id
+def test_map_id_messages_read_in_english_and_echo_nothing_new(tmp_path):
+    """The `MapIdError` sentences, driven through `check_map_id` and `check_new_map_id` and compared WHOLE
+    (`EN4-REV-F5`: a prefix match passes a sentence whose tail is still Spanish).  The rule itself is unchanged."""
+    from mapper.store import MapIdError, MapStore, check_map_id
 
     cases = {
         "": "the map name is empty",
         "x" * 101: "the map name is too long (maximum 100 characters)",
-        "zq/zq": "the map name cannot contain path separators",
-        "zq?zq": "the map name contains characters that are not valid on Windows",
+        "zq/zq": "the map name cannot contain path separators (/ \\) or a drive letter (:)",
+        "zq?zq": 'the map name contains characters that are not valid on Windows (< > " | ? * or control characters)',
         "a\udc80b": "the map name contains characters that cannot be saved to a file",
-        "NUL": "the map name uses a reserved Windows name",
+        "NUL": "the map name uses a reserved Windows name (CON, NUL, COM1...)",
         " zqzq": "the map name cannot start with a space or end with a dot or a space",
     }
+    store = MapStore(tmp_path)
+    store.create_seed("taken")
+    with pytest.raises(MapIdError) as taken:
+        store.check_new_map_id("taken")
+    assert str(taken.value) == "map 'taken' already exists; choose another name (nothing is overwritten)", str(taken.value)
     for map_id, want in cases.items():
         with pytest.raises(MapIdError) as exc:
             check_map_id(map_id)
         text = str(exc.value)
-        assert want in text, (map_id, text)
+        assert text == want, (map_id, text)
         assert not ACCENTED.search(text), text
         if "zq" in map_id:
             assert map_id not in text, (map_id, text)  # nothing of the rejected id is echoed
