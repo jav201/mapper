@@ -241,5 +241,5 @@ async def test_the_painted_legend_ends_with_the_rule(tmp_path, size):
         pane.scroll_to(y=pane.max_scroll_y, animate=False)
         await _settle(pilot)
         footer = legend.query_one("#help-footer")
-        text = footer.render().plain
+        text = footer.content.plain
     assert " ".join(row.strip() for row in text.splitlines()) == RULE, text
