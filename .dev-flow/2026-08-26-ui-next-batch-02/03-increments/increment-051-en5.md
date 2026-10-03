@@ -107,3 +107,7 @@ D1 and Y1 (the ficha modal labels, the `saved` toast) have no pin except the cen
 `2686 passed, 24 deselected, 3 xfailed` (0 failed) in 1749.9 s (29 min 9 s), `python -B -m pytest -rf -q -W error::SyntaxWarning -p no:cacheprovider`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `cb53c57` (the last code and test change), run as the last step before this record. Baseline 2677; the delta is the 9 new `test_en5.py` items (2677 + 9 = 2686). FLAKE-1 and FLAKE-4 did not appear.
 
 Lane history, declared: the first (targeted) lane above is not the gate. The full lane was started once and not interrupted. The `A-133` legend figure (35 cells against 37; the first draft said 32 against 33) was corrected in a docs-only commit after the lane, together with this record.
+
+## Correction note (EN-8, 2026-10-02)
+
+Appended; nothing above was rewritten. `EN5-REV-F1`: mutants Q1 (drop `darkside.plain` from `connected: {count} nodes`) and Q2 (drop it from `file not found: {name}`) are recorded as "equivalent" and "SURVIVED all existing tests". Both are killed by the notify census, `tests/test_inc9.py::test_llr_n06_2_5_notify_sites_are_coerced` (every dynamic `notify` message must go through `plain()`); `EN-8` re-ran both (KILLED, that test). Q1 is behaviourally equivalent (an `int`) and structurally caught; Q2 is also pinned behaviourally by the arm this increment added. `EN5-REV-F4`: the `MapIdError` "already exists" sentence and full-sentence comparison are now driven in `tests/test_en4.py`.

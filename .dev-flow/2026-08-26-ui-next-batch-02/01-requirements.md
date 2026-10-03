@@ -11180,3 +11180,22 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 **Copy.** The legend footer reads `? outside text fields opens this` / `legend; inside a field it types ?` (the select-all sentence is removed). `01b` §3.6 is amended and dated.
 
 **Pins.** `test_inc9c` `INC9-UX-F2` arm inverted (declared in the record); `test_vocabulary_declaration` footer pin follows `01b` §3.6.
+
+### `A-136` -- Inc-EN-8: operator wording rulings and copy carries (`E1`-`E3`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` Round 3 (`E1`, `E2`, `E3`) and its EN-8 routing paragraph. The record is `increment-054-en8.md`.
+
+**Statement.** Standalone; adds no feature, key, row or condition. It supersedes only the words below. Where an earlier requirement or amendment quotes the old words, the new ones are what ships.
+
+| Source | Old | New |
+|---|---|---|
+| `E1` (`app.py`, both pan-edge sites) | `edge of the territory` | `edge of the map` (the rail keeps `territory`) |
+| `E2` (`app.py`, export refusal) | ` Nothing was written: the file X.svg does not match this export.` | ` Nothing was written; X.svg on disk is from an earlier export.` (same interpolation, coercion and leading space) |
+| `E3` (`screens/palette.py`, supersedes the separator sentence of `A-134`) | ` N/M actions   ↑↓ move   ↵ run   esc close` | ` N/M actions   ↑↓ move · ↵ run · esc close` (three spaces after the count, ` · ` between pairs; every word and glyph still the seat's) |
+| ficha modal, field `D` | `document <value>` / `document no record` | `record <value>` / `record —` (the empty value matches `owner —` and `created —`; `no record` stays the term elsewhere, `A-131`) |
+| archive confirmation | `... and its 1 descendants?` | `... and its 1 descendant?` (root and non-root; other counts stay plural) |
+| `_PromptScreen`, `_TemplateScreen`, `_FichaScreen`, `CoverageScreen` binding labels | `Cancel` / `Close` | `cancel` / `close` |
+| strip beside the canvas when the hidden-node declaration is unavailable | `declaration not available` | `hidden-node count unavailable` |
+| home door note for `from template` | `map from a template` | `start with preset fields` |
+
+**Not claimed.** `CoverageScreen`'s `Select` binding label is not in the ruling and is unchanged. The `E2` sentence says where the file comes from; the `CR17-F4` comment in `app.py` (no claim about authorship is licensed by `is_file()`) is kept and now says the claim is the operator's ruling.
