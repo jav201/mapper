@@ -152,7 +152,7 @@ def test_the_home_door_notes_read_in_english():
         "c": "opens a recent map",
         "p": "connects a repository",
         "n": "creates a new map",
-        "t": "map from a template",
+        "t": "start with preset fields",
         "i": "CSV / TSV of nodes",
         "f": "process documents",
     }
@@ -215,7 +215,7 @@ async def test_archiving_reads_in_english_and_names_the_whole_map_refusal(tmp_pa
         screen.nav.cursor = "b"
         await pilot.press("x")
         await pilot.pause()
-        assert app.screen.message == "archive «beta» and its 1 descendants?"
+        assert app.screen.message == "archive «beta» and its 1 descendant?"
         await pilot.press("n")
         await pilot.pause()
         screen.nav.cursor = "root"

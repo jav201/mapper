@@ -3,8 +3,8 @@ user- and file-controlled sites (`EN5-REV-F2`).
 
 Authority: `VERDICT-inc-en-2026-10-02.md` Rounds 1-3 (E1, E2, E3 and the EN-8 routing paragraph) and `A-136`.
 
-Two kinds of arm live here.  `@red` arms pin NEW wording: they were committed `xfail(strict=True)` and measured RED on
-`9198edf`; the source commit removes the marker.  The `plain` arms are PINS: they are green on the base because the
+Two kinds of arm live here.  The wording arms (E1-E3, items 4-8) were committed `xfail(strict=True)` and measured RED on
+`9198edf` (12 failed, with `--runxfail`); the source commit removed the marker.  The `plain` arms are PINS: they are green on the base because the
 `darkside.plain` calls exist there, and each one exists to kill the mutant that drops that call (recorded in the
 increment record).  Control and bidi characters are written as escapes only.
 """
@@ -27,9 +27,6 @@ from tests.test_pan import CONTEXT_OF_USE, _hint, _open_pan_map
 RLO = "\u202e"
 FFFD = "\ufffd"
 
-red = pytest.mark.xfail(strict=True, reason="EN-8 wording: RED on 9198edf, GREEN with the source commit")
-
-
 def _tree(*titles: str) -> Graph:
     """root -> n1 -> n2 ..., one node per title after the root."""
     graph = Graph()
@@ -43,7 +40,6 @@ def _tree(*titles: str) -> Graph:
 
 
 # -- E1: the pan-edge notice ----------------------------------------------------------------------------------------
-@red
 @pytest.mark.asyncio
 async def test_e1_the_pan_edge_notice_reads_edge_of_the_map(tmp_path):
     app = MapperApp(tmp_path)
@@ -56,7 +52,6 @@ async def test_e1_the_pan_edge_notice_reads_edge_of_the_map(tmp_path):
         assert "edge of the map" in hint and "territory" not in hint, hint
 
 
-@red
 @pytest.mark.asyncio
 async def test_e1_the_unlaid_out_graph_site_says_it_too(tmp_path, monkeypatch):
     """The second site: `pan_extent` raising (a cyclic graph) answers with the same declaration."""
@@ -76,7 +71,6 @@ async def test_e1_the_unlaid_out_graph_site_says_it_too(tmp_path, monkeypatch):
 
 
 # -- E2: the export stale-file sentence -----------------------------------------------------------------------------
-@red
 @pytest.mark.asyncio
 async def test_e2_a_refused_export_says_where_the_old_file_comes_from(tmp_path):
     notices: list[str] = []
@@ -101,7 +95,6 @@ async def test_e2_a_refused_export_says_where_the_old_file_comes_from(tmp_path):
 
 
 # -- E3: the palette footer ----------------------------------------------------------------------------------------
-@red
 @pytest.mark.parametrize("size", [(118, 34), (87, 34)])
 @pytest.mark.asyncio
 async def test_e3_the_footer_is_the_counts_then_the_three_pairs_joined_by_a_middle_dot(tmp_path, size):
@@ -134,14 +127,12 @@ async def _ficha_text(tmp_path, record: str | None) -> str:
         return app.screen.query_one("#ficha-content", Static).content.plain
 
 
-@red
 @pytest.mark.asyncio
 async def test_item4_the_ficha_modal_labels_the_document_field_record(tmp_path):
     with_record = await _ficha_text(tmp_path, "REC-7")
     assert "record REC-7\n" in with_record and "document" not in with_record, with_record
 
 
-@red
 @pytest.mark.asyncio
 async def test_item4_an_empty_record_reads_like_owner_and_created_not_record_no_record(tmp_path):
     without = await _ficha_text(tmp_path, None)
@@ -166,7 +157,6 @@ async def _confirm_message(tmp_path, graph: Graph, cursor: str) -> str:
         return app.screen.message
 
 
-@red
 @pytest.mark.asyncio
 async def test_item5_one_descendant_is_singular_for_a_branch(tmp_path):
     graph = _tree("alfa", "beta")
@@ -174,7 +164,6 @@ async def test_item5_one_descendant_is_singular_for_a_branch(tmp_path):
     assert message == "archive «alfa» and its 1 descendant?", message
 
 
-@red
 @pytest.mark.asyncio
 async def test_item5_one_descendant_is_singular_for_the_root(tmp_path):
     graph = _tree("alfa")
@@ -200,7 +189,6 @@ async def test_item5_more_than_one_stays_plural(tmp_path):
 
 
 # -- item 6: binding labels are lowercase --------------------------------------------------------------------------
-@red
 def test_item6_cancel_and_close_labels_are_lowercase():
     assert [b[2] for b in _PromptScreen.BINDINGS] == ["cancel"]
     assert [b[2] for b in _TemplateScreen.BINDINGS] == ["close", "close"]
@@ -210,7 +198,6 @@ def test_item6_cancel_and_close_labels_are_lowercase():
 
 
 # -- item 7: the broken declaration --------------------------------------------------------------------------------
-@red
 @pytest.mark.asyncio
 async def test_item7_a_broken_declaration_says_the_hidden_node_count_is_unavailable(tmp_path, monkeypatch):
     app = MapperApp(tmp_path)
@@ -229,7 +216,6 @@ async def test_item7_a_broken_declaration_says_the_hidden_node_count_is_unavaila
 
 
 # -- item 8: the door note -----------------------------------------------------------------------------------------
-@red
 def test_item8_the_template_door_says_what_it_does_not_what_it_is_called():
     from mapper.app import HomeScreen
 
