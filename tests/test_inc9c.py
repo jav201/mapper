@@ -597,6 +597,21 @@ def _visible(screen, widget) -> bool:
     return geo.clip.intersection(geo.region) == geo.region and geo.region.height > 0
 
 
+async def _until_visible(pilot, screen, tries=40):
+    """FLAKE-4 (a test race, not a user race): focusing a widget scrolls it into
+    view on later turns, and tabbing from the last stop back to the first scrolls
+    the grid up by several rows while the compositor settles.  Reading visibility
+    after one `pause()` sometimes caught that scroll half done (~2.5%/run under
+    load).  Poll the observable -- the focused widget's region inside the clip --
+    for at most `tries` pauses and leave the judging to the caller's unchanged
+    assertion; a widget that never becomes visible still returns False."""
+    for _ in range(tries):
+        if _visible(screen, pilot.app.focused):
+            return True
+        await pilot.pause()
+    return _visible(screen, pilot.app.focused)
+
+
 @red("ux")
 @pytest.mark.parametrize("size", [(118, 34), (87, 34)])
 async def test_inc9c_ux_f3_components_scroll_and_every_tab_stop_is_on_screen(tmp_path, size):
@@ -611,12 +626,14 @@ async def test_inc9c_ux_f3_components_scroll_and_every_tab_stop_is_on_screen(tmp
         chain = list(screen.focus_chain)
         assert isinstance(grid, VerticalScroll), type(grid).__name__
         assert len(chain) >= 10, chain
+        await _until_visible(pilot, screen)
         assert app.focused in chain and _visible(screen, app.focused), (
             "focus starts off screen", screen.find_widget(app.focused).region)
         hidden = []
         for step in range(len(chain)):
             await pilot.press("tab")
             await pilot.pause()
+            await _until_visible(pilot, screen)
             if not _visible(screen, app.focused):
                 hidden.append((step, type(app.focused).__name__))
     assert hidden == [], f"tab stops off screen at {size}: {hidden}"

@@ -268,6 +268,24 @@ def test_groups_for_keybar_order_and_glyphs():
     assert not any(k == "enter" for k, _ in nav_pairs)
 
 
+def test_groups_for_keybar_drops_the_typed_help_key_whatever_the_group_order():
+    """`EN9-REV-F3`: the connect-repo scope is found from the groups' scopes, so
+    the app group coming FIRST must not change which scope the filter sees.
+
+    A text-only scope's field swallows `?` (`E4`); the key bar must not list it.
+    Taking the scope from the first group would read it as the app scope and
+    leave the row in -- the mutant this arm exists to kill.  The positive
+    control below keeps the arm from passing because `?` vanished altogether.
+    """
+    def rows(order):
+        return [(g, k) for g, pairs in groups_for_keybar(order) for k, _ in pairs]
+
+    for order in (["plug", "app"], ["app", "plug"]):
+        assert not any(k == "?" for _, k in rows(order)), order
+    assert any(k == "?" for _, k in rows(["nav", "app"])), "`?` is listed where no field swallows it"
+    assert any(k == "?" for _, k in rows(["app"])), "`?` is listed on the app group alone"
+
+
 def test_palette_items_filters_by_scope_and_query():
     map_items = palette_items("", keymap.SCOPE_MAP)
     assert all(b.scope in {keymap.SCOPE_MAP, keymap.SCOPE_APP} for b in map_items)

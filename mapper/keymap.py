@@ -311,8 +311,10 @@ def textual_bindings(
 
     Returned as plain tuples so this module stays free of Textual; the screen
     converts them into `Binding` objects.  A text-only scope keeps its typed key
-    here (`E4`): the binding is dispatch, not a listing, and it still fires once
-    focus has left the field.  Only `bindings_for` (the legend) and the key bar
+    here (`E4`): the binding is dispatch, not a listing.  The field swallows the
+    typed key, and focus does not leave the field by Tab, shift+Tab or a click
+    (measured), so the binding is reachable only programmatically today
+    (`app.set_focus(None)`).  Only `bindings_for` (the legend) and the key bar
     stop advertising it.
     """
     return [

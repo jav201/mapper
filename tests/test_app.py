@@ -265,10 +265,25 @@ async def test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region(tm
         await pilot.pause()
         screen = app.screen
 
+        # FLAKE-1 (a test race, not a user race): `MapScreen.on_mount` schedules
+        # `_park_focus` with `call_after_refresh`, which runs `set_focus(None)` a
+        # turn or more after the first pause.  Under load a single pause sometimes
+        # returned before it ran, so the park blurred the field this test had
+        # just focused (`assert '' == 'inspector'`, ~1 run in 100 measured).  Wait
+        # for the arrival park to have happened (nothing focused), bounded, then
+        # focus the nested widget; the assertion below judges what it settled on.
+        for _ in range(40):
+            if app.focused is None:
+                break
+            await pilot.pause()
+
         title = screen.query_one("#insp-title")
         assert title.id != "map-inspector", "the probe needs a nested widget, not the region itself"
         title.focus()
-        await pilot.pause()
+        for _ in range(40):
+            if app.focused is title:
+                break
+            await pilot.pause()
         assert screen._focus_owner() == "inspector"
 
 
