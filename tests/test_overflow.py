@@ -504,8 +504,8 @@ def test_llr_n06_3_1_the_charge_band_over_node_count_and_width(tmp_path):
     # AND THE BAND REACHES 32 at the top of the legal node range, which is the
     # bound the oldest pin recorded as `w <= 30`.  Derived, not quoted.
     # (EN-3: it read 34 and 35 while the declaration said `fuera de vista`;
-    # `out of view` is three cells shorter, so the header wraps three widths
-    # sooner.  Re-derived by sweeping `w` over 28..39 on both sides: the Spanish
+    # `out of view` is three cells shorter, so the header wraps two widths
+    # sooner (34 -> 32).  Re-derived by sweeping `w` over 28..39 on both sides: the Spanish
     # tree gave 3 rows up to 34, this tree gives 3 rows up to 32.)
     huge = _balanced(11999)
     assert header_rows(huge, 32, 32) == 3, header_rows(huge, 32, 32)

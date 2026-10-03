@@ -18,7 +18,7 @@ class CoverageScreen(ModalScreen[str | None]):
     """
 
     BINDINGS = [
-        ("enter", "select", "Select"),
+        ("enter", "select", "select"),
         ("escape", "dismiss", "close"),
         ("q", "dismiss", "close"),
     ]
