@@ -108,3 +108,7 @@ Lane history, declared: a first full lane on `c36ea34` ended `1 failed, 2666 pas
 ## Correction note (EN-8, 2026-10-02)
 
 Appended; nothing above was rewritten. `EN3-REV-F1`: section 4 is titled "Width checks" and speaks of "the two reference widths". What was rendered is two widths at four frames (118x34, 118x12, 87x30, 87x12), plus the pin sweep of section 3b at widths 24 to 37. No width between 37 and 87, or above 118, was rendered; "all 72 identical" holds for those frames only.
+
+## Correction note (EN-9, 2026-10-03)
+
+Appended; nothing above was rewritten. `EN8-REV-F2`: the comment in `tests/test_overflow.py` (lines 507-508) said `out of view` makes the header wrap "three widths sooner". The measured band is 34 to 32, two widths. The comment now reads "two widths sooner (34 -> 32)". The comment near line 1766 is a different measurement and was left alone. `EN3-REV-F1` is now closed by this comment fix together with the EN-8 note above.

@@ -100,3 +100,5 @@ C1..C4 are killed ONLY by the census arm: no existing test pins the osopen words
 ## Correction note (EN-8, 2026-10-02)
 
 Appended; nothing above was rewritten. Scope note: the `EN1-REV` finding text was not in the EN-8 brief, so this note records only what was checked against the tree. (1) The editor labels in section 1 (`Save` / `Cancel` / `Preview`) are superseded: `EN-5` lowercased them (`save` / `cancel` / `preview`, `EN1-REV-F4`) and `tests/test_en5.py::test_the_editor_binding_labels_are_lowercase` pins them, so the claim in section 4 that no test other than the census arm pins the editor labels (C3) no longer holds for the lowercase labels. (2) The `Cancel` / `Close` labels left in `app.py` and `screens/coverage.py` were lowercased in `EN-8` (`A-136`).
+
+`EN8-REV-F5` (EN-9, 2026-10-03): `EN1-REV-F1` and `EN1-REV-F2` were closed in EN-2 (record 048, section 5b, and the `A-129` correction note). `EN1-REV-F3` (the mixed-language screen) is superseded by EN-4 to EN-6, as the census arms show.
