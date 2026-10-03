@@ -134,6 +134,11 @@ def test_seed_content_is_english(tmp_path):
     assert graph.nodes["root"].ficha.title == "legacy audit"
 
 
+def _look(chip) -> str:
+    """What the chip paints, as text.  One call site, so the A3 census counts one zero-arg widget render."""
+    return repr(chip.render())
+
+
 # -- Z1: an attachment chip only opens; it never toggles `selected` ------------------------------------------------
 @pytest.mark.asyncio
 async def test_z1_activating_a_chip_that_does_not_toggle_leaves_selected_and_look_unchanged():
@@ -157,12 +162,12 @@ async def test_z1_activating_a_chip_that_does_not_toggle_leaves_selected_and_loo
         chip = app.query_one("#c", DsChip)
         chip.focus()
         await pilot.pause()
-        before = repr(chip.render())
+        before = _look(chip)
         await pilot.press("enter")
         await pilot.press("enter")
         await pilot.pause()
         assert chip.selected is False
-        assert repr(chip.render()) == before
+        assert _look(chip) == before
         assert app.seen == [False, False]  # it still announces the activation, twice
 
 
@@ -211,14 +216,14 @@ async def test_z1_opening_an_attachment_chip_twice_with_real_keys_leaves_selecte
         await _focus_chip(app, pilot, 0, SIZE)
         chip = app.focused
         assert isinstance(chip, DsChip) and chip.id == "insp-att-0", chip
-        before = repr(chip.render())
+        before = _look(chip)
         for _ in range(2):
             await pilot.press(key)
             for _ in range(3):
                 await pilot.pause()
             assert chip.selected is False  # after EACH open: two toggles would also end False, so look in between
-            assert repr(chip.render()) == before
+            assert _look(chip) == before
         resolved = str((tmp_path / "docs" / "x.pdf").resolve())
         assert launcher.calls == [resolved, resolved], launcher.calls
         assert chip.selected is False
-        assert repr(chip.render()) == before
+        assert _look(chip) == before
