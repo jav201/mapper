@@ -140,6 +140,13 @@ def test_at_n03f_bound_keys_match_the_seat_exactly(scope):
     inherited = set(owner.__mro__[1]._merged_bindings.key_to_bindings)
     bound = set(owner._merged_bindings.key_to_bindings) - inherited
     expected = {b.key for b in keymap.bindings_for(scope)}
+    # `E4` (Inc-EN-9): a text-only scope still BINDS the key its field swallows (it fires once focus has left
+    # the field) but no longer LISTS it.  The extra keys are derived from the seat's own declaration, so a
+    # bound key outside that declaration still reddens this arm.
+    expected |= {
+        b.key for b in keymap.KEYMAP
+        if b.scope == keymap.SCOPE_APP and b.action in keymap.TEXT_ONLY_SCOPES.get(scope, ())
+    }
     assert bound == expected, (
         f"{owner.__name__} binds {bound - expected} that the seat does not declare, "
         f"and is missing {expected - bound} that it does"
