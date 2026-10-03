@@ -662,6 +662,8 @@ DECLARED_ADDED = frozenset({
     ("factory", "i", "import_office"), ("factory", "g", "generate_office"),
     ("factory", "q", "home"), ("factory", "escape", "home"),
     ("settings", "q", "home"), ("settings", "escape", "home"),
+    # Inc-EN-6 (`N2`): the palette's arrows, read by its footer as `↑↓ move`.
+    ("palette", "up", "move_up"), ("palette", "down", "move_down"),
 })
 #: Group headers renamed to English (`A-112` st. 2); no key changes scope.
 DECLARED_REGROUPED = frozenset({("lista", "list"), ("lista", "exit"), ("salir", "leave")})

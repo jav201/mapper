@@ -148,12 +148,16 @@ class CommandPalette(ModalScreen[str | None]):
             list_view.index = 0
         total = len(palette_items("", self.scope))
         # The footer's key words are the seat's own palette rows (`K3`).
+        up_key, move_word = hint_pair(SCOPE_PALETTE, "move_up").split(" ", 1)
+        down_key = hint_pair(SCOPE_PALETTE, "move_down").split(" ", 1)[0]
         run_key, run_word = hint_pair(SCOPE_PALETTE, "run_selected").split(" ", 1)
         close_key, close_word = hint_pair(SCOPE_PALETTE, "dismiss_none").split(" ", 1)
         self.query_one("#palette-count", Static).update(
             Text.assemble(
                 (f" {len(self._items)}/{total} actions", darkside.MUT),
-                ("   " + run_key, darkside.ACCENT),
+                ("   " + up_key + down_key, darkside.ACCENT),
+                (f" {move_word}   ", darkside.MUT),
+                (run_key, darkside.ACCENT),
                 (f" {run_word}   ", darkside.MUT),
                 (close_key, darkside.ACCENT),
                 (f" {close_word}", darkside.MUT),
@@ -161,24 +165,30 @@ class CommandPalette(ModalScreen[str | None]):
         )
 
     def on_key(self, event: events.Key) -> None:
-        # The search box holds focus, so the list never sees the arrows: forward
-        # them, and leave the box focused so typing keeps filtering.
-        if event.key not in ("up", "down", "pageup", "pagedown"):
+        # The search box holds focus, so the list never sees the page keys: forward
+        # them, and leave the box focused so typing keeps filtering.  The arrows are
+        # seat rows (`move_up` / `move_down`): the box binds neither, so they reach
+        # the screen's `BINDINGS` and need no forwarding here.
+        if event.key not in ("pageup", "pagedown"):
             return
         event.stop()
         event.prevent_default()
         list_view = self.query_one("#palette-list", ListView)
+        step = max(1, list_view.size.height - 1)
+        self._move(-step if event.key == "pageup" else step)
+
+    def _move(self, delta: int) -> None:
+        list_view = self.query_one("#palette-list", ListView)
         if not self._items:
             return
-        step = max(1, list_view.size.height - 1)
-        current = list_view.index or 0
-        target = {
-            "up": current - 1,
-            "down": current + 1,
-            "pageup": current - step,
-            "pagedown": current + step,
-        }[event.key]
+        target = (list_view.index or 0) + delta
         list_view.index = max(0, min(len(self._items) - 1, target))
+
+    def action_move_up(self) -> None:
+        self._move(-1)
+
+    def action_move_down(self) -> None:
+        self._move(1)
 
     async def on_input_changed(self, event: Input.Changed) -> None:
         await self._refresh_list(event.value)

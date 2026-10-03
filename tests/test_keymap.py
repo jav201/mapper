@@ -64,7 +64,9 @@ EXPECTED_PER_SCOPE = {
     keymap.SCOPE_REPO: 3,
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,
-    keymap.SCOPE_PALETTE: 2,
+    # 2 -> 4: Inc-EN-6 (`N2`) declares the palette's `up` / `down` (`move_up` / `move_down`), so the
+    # footer's `↑↓ move` is the seat's.
+    keymap.SCOPE_PALETTE: 4,
     # 2 -> 8: Inc-8 / HLR-N16.4 declares the legend's six scroll keys.
     keymap.SCOPE_HELP: 8,
     keymap.SCOPE_APP: 2,
