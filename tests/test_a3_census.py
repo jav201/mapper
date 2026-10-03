@@ -332,9 +332,15 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       seam had to come with a painted-result assertion rather than
     #       replacing a live oracle with no oracle.  A zero-arg Textual WIDGET
     #       render, correctly outside the A3.
-    assert len(sites["zeroarg"]) == 35, (
+    #
+    # 35 -> 36 at `Inc-EN-4`, ONE site:
+    #   +1  `tests/test_en4.py::_look` reads what a `DsChip` paints so the `Z1`
+    #       arms can assert the look did not change.  A zero-arg Textual WIDGET
+    #       render, correctly outside the A3; the three `Z1` arms share the one
+    #       helper so they add one site, not five.
+    assert len(sites["zeroarg"]) == 36, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "35; a DROP means widget sites were wrongly swept into the A3"
+        "36; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -448,8 +454,8 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     # working rather than two independent failures; `HERMETIC-1` is the second,
     # and it reddened a THIRD arm with them -- the untracked-source guard, which
     # caught the new test file before it could be invisible to all of these.
-    assert len(zeroarg) == 35, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 35. A floor was "
+    assert len(zeroarg) == 36, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 36. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
