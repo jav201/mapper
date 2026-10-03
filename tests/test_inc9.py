@@ -92,8 +92,10 @@ def test_llr_n16_1_2_every_help_screen_declares_a_scope():
     undeclared = sorted(name for name, cls in HELP_SCREENS.items()
                         if getattr(cls, "KEY_SCOPE", None) not in declared)
     assert undeclared == [], f"help screens with no declared seat scope: {undeclared}"
+    # 3 until `E4` (Inc-EN-9): connect-repo no longer lists `?`, so its scope offers `esc` and `ctrl+p`.  Two
+    # still says "the seat did not leave the scope empty"; a scope at 0 or 1 row is what this arm exists to catch.
     thin = {name: len(bindings_for(cls.KEY_SCOPE)) for name, cls in HELP_SCREENS.items()
-            if len(bindings_for(cls.KEY_SCOPE)) < 3}
+            if len(bindings_for(cls.KEY_SCOPE)) < 2}
     assert thin == {}, f"a declared scope the seat leaves (nearly) empty: {thin}"
 
 

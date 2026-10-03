@@ -131,7 +131,7 @@ async def test_other_screens_still_list_the_question_mark_and_it_opens_the_legen
     # A long bar folds its tail into `... +N  ? all keys` (`darkside.keybar`); either spelling is the `?` row.
     assert re.search(r"\? (legend|all keys)", bar), bar
     assert opened == "HelpScreen", opened
-    assert "legend" in text, text
+    assert re.search(r"^\s+\? +legend", text, re.M), text
 
 
 # -- derivation: the seat decides, not a painted string ----------------------------------------------------------
@@ -209,3 +209,10 @@ def test_every_coverage_binding_label_is_lowercase():
     labels = [b[2] for b in CoverageScreen.BINDINGS]
     assert labels == ["select", "close", "close"], labels
     assert all(label == label.lower() for label in labels), labels
+
+
+def test_the_connect_repo_screen_still_binds_the_question_mark_it_no_longer_lists():
+    """`E4` changes what is LISTED, not what dispatches: the binding fires once focus has left the field
+    (`test_inc9.test_hlr_n16_1_every_help_route_carries_its_scope[PlugRepoScreen]` presses it for real)."""
+    assert "question_mark" in {b.key for b in PlugRepoScreen.BINDINGS}
+    assert all(b.action != "help" for b in keymap.bindings_for(keymap.SCOPE_PLUG))
