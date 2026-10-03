@@ -11154,3 +11154,15 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 **Trace.** Standalone, like `A-113`..`A-132`. Carried by `tests/test_en5.py` (a census of `app.py`'s non-docstring literals, binding-label arms, the hero, door, repo and archive arms, and the CSV-toast coercion arm) and by the relabelled pins in the record.
 
 **What is not claimed.** The census word list is explicit and finite; it does not detect Spanish in general. The long sentences were read, not measured, at every width.
+
+### `A-134` -- The palette footer advertises the arrows (`Inc-EN-6`, `N2`), dated 2026-10-02
+
+**Authority.** `VERDICT-inc9-2026-09-30.md` Round 4 `N2` (`INC9F-UX-F4`) and `VERDICT-inc-en-2026-10-02.md` (`EN-6`). The record is `increment-052-en6.md`.
+
+**Statement.** Standalone; amends no earlier decision. The palette seat (`SCOPE_PALETTE`) gains two rows, `up` (`move_up`, glyph `↑`) and `down` (`move_down`, glyph `↓`), both with the word `move`. The footer paints the seat's `↑↓ move` pair first, then `↵ run`, then `esc close`: ` N/M actions   ↑↓ move   ↵ run   esc close`. The separator is the footer's existing three spaces (the verdict's ` · ` is read as the order, not the separator). The arrows dispatch through the palette's `BINDINGS` to `action_move_up` / `action_move_down`; `on_key` forwards only `pageup` / `pagedown`. Typing, the cursor keys and `↵` in the search box are unchanged.
+
+**Pins relabelled.** Palette seat count 2 to 4 (`test_keymap`), the full seat table (`test_key_dispatch`) and the Inc-9 declared-added set (`test_inc9`): each gains exactly the two rows.
+
+**Trace.** `tests/test_en6.py`: order and fit at 118 and 87 with a real `ctrl+p`, a relabelled-seat sentinel (labels and glyphs), the single-binding arm, the arrow / page / `↵` arm, and the typing-and-cursor arm.
+
+**What is not claimed.** `pageup` / `pagedown` are not seat rows and not advertised; no legend or help screen is built for the palette scope (its seat rows are read only by the palette's own `BINDINGS` and footer, by grep), so no legend count pin moved.
