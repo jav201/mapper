@@ -142,14 +142,16 @@ async def test_item4_an_empty_record_reads_like_owner_and_created_not_record_no_
 
 
 # -- item 5: the singular ------------------------------------------------------------------------------------------
-async def _confirm_message(tmp_path, graph: Graph, cursor: str) -> str:
+async def _confirm_message(tmp_path, graph: Graph, cursor: str, raw_title: str | None = None) -> str:
+    """`raw_title` is put on the cursor's node IN MEMORY after the map loads: the store coerces on its own way in, so a
+    title saved and reloaded would never reach the confirmation raw and the source site would go unexercised."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=(118, 34)) as pilot:
         await pilot.pause()
         app.store.save("m", graph)
         screen = await open_map(app, pilot, "m")
-        for node in graph.nodes.values():
-            screen.graph.nodes.setdefault(node.id, node)
+        if raw_title is not None:
+            screen.graph.nodes[cursor].ficha.title = raw_title
         screen.nav.cursor = cursor
         await pilot.press("x")
         await pilot.pause()
@@ -232,7 +234,7 @@ def _coerced(text: str, *, where: str) -> None:
 
 @pytest.mark.asyncio
 async def test_plain_site_1_the_archive_confirmation_name(tmp_path):
-    message = await _confirm_message(tmp_path, _tree("a" + RLO + "b"), "n1")
+    message = await _confirm_message(tmp_path, _tree("alfa"), "n1", raw_title="a" + RLO + "b")
     _coerced(message, where="archive confirmation")
     assert message == f"archive «a{FFFD}b»?", message
 
