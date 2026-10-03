@@ -108,3 +108,9 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 - Risk: `record —` is shown in the alert style; if the operator wanted the plain `no record` words there, it is a one-line change.
 - NOT measured: the ficha modal and the palette at widths other than 118 (the footer is the same 44 cells as before; the fit arm in `test_en6` still runs at 118 and 87); the export toast as a painted widget (text only); `Select` and any other capitalised binding label outside the ruling; POSIX.
 - Suggested next: `EN-7` review items from the coordinator, then close the Inc-EN line.
+
+## Full-lane result
+
+`2746 passed, 24 deselected, 3 xfailed` (0 failed) in 1308 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, uninterrupted, last step, on `8952a2a` (all code and tests; this note follows). Baseline 2725 plus 21 new items (`test_en8.py` 20, `test_vocabulary_declaration.py` 1). Temp HOME and USERPROFILE, git identity from environment, no network. FLAKE-1 and FLAKE-4 did not occur.
+
+Lane history, declared: a first full lane ended `1 failed, 2745 passed` (`test_inc9d::test_inc9d_sec_f1_a_missing_tilde_path_paints_no_profile_path`, "path not supported"). It re-failed alone three times and passed once my USERPROFILE was written correctly: my env file had lost the backslashes of the temp profile path, so `~` expansion produced an unsupported path. An environment fault of mine, not code and not a flake; that lane is not counted. The counted lane is the one above.
