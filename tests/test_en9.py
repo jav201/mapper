@@ -148,7 +148,7 @@ def _relabelled():
 
 
 @pytest.mark.parametrize("size", SIZES)
-@pytest.mark.parametrize("where", ["plug", "settings"])
+@pytest.mark.parametrize("where", [pytest.param("plug", marks=RED), "settings"])
 @pytest.mark.asyncio
 async def test_a_relabelled_seat_row_is_listed_where_it_works_and_absent_where_it_only_types(
     tmp_path, monkeypatch, size, where
