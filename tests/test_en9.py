@@ -3,8 +3,8 @@
 Authority: `VERDICT-inc-en-2026-10-02.md` Round 4 (`E4`), `A-137`.  On connect-repo the only focusable control is
 the text field, so `?` always types there (`A-135`): the key bar and the legend must not list a chord that cannot
 fire.  `ctrl+p palette` stays on the bar and the palette's `legend` action still opens the legend.  Every arm presses
-real keys at 118 and 87 columns.  The arms marked RED were committed `xfail(strict=True)` and measured RED on
-`9105abc` (with `--runxfail`); the source commit removed the marker.
+real keys at 118 and 87 columns.  The connect-repo arms were committed `xfail(strict=True)` and measured RED on
+`9105abc` (7 failed with `--runxfail`); the source commit removed the marker.
 """
 from __future__ import annotations
 
@@ -25,7 +25,6 @@ from mapper.widgets.chrome import KeyBar
 from tests.test_repair_layout import _open_map, _tree
 
 SIZES = [(118, 34), (87, 34)]
-RED = pytest.mark.xfail(strict=True, reason="E4: the connect-repo bar and legend still list `?`")
 
 
 async def _settle(pilot):
@@ -76,7 +75,6 @@ async def _legend_from_the_palette(app, pilot):
 
 # -- connect-repo: the chord that only types is not listed ---------------------------------------------------------
 
-@RED
 @pytest.mark.parametrize("size", SIZES)
 @pytest.mark.asyncio
 async def test_the_connect_repo_bar_does_not_list_the_question_mark(tmp_path, size):
@@ -93,7 +91,6 @@ async def test_the_connect_repo_bar_does_not_list_the_question_mark(tmp_path, si
     assert typed == "?", "the key the bar no longer lists is the key that types"
 
 
-@RED
 @pytest.mark.parametrize("size", SIZES)
 @pytest.mark.asyncio
 async def test_the_legend_opened_from_the_palette_on_connect_repo_does_not_list_the_question_mark(tmp_path, size):
@@ -106,7 +103,6 @@ async def test_the_legend_opened_from_the_palette_on_connect_repo_does_not_list_
     assert re.search(r"^\s+\? +legend", text, re.M) is None, text
 
 
-@RED
 def test_bindings_for_a_text_only_scope_offers_only_keys_that_work():
     rows = keymap.bindings_for(keymap.SCOPE_PLUG)
     assert [b.glyph for b in rows if b.scope == keymap.SCOPE_APP] == ["ctrl+p"], rows
@@ -148,7 +144,7 @@ def _relabelled():
 
 
 @pytest.mark.parametrize("size", SIZES)
-@pytest.mark.parametrize("where", [pytest.param("plug", marks=RED), "settings"])
+@pytest.mark.parametrize("where", ["plug", "settings"])
 @pytest.mark.asyncio
 async def test_a_relabelled_seat_row_is_listed_where_it_works_and_absent_where_it_only_types(
     tmp_path, monkeypatch, size, where
