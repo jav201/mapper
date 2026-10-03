@@ -11145,7 +11145,7 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 
 **Internal names.** The home metrics dict keys `con_acta` / `sin_acta` / `vencen` became `with_record` / `no_record` / `due`, so that no string literal of `app.py` is Spanish. Local variable names (`sin_acta`, `vencen`) are identifiers, not copy, and stay (the hue census pins source lines that name them).
 
-**Width.** The English words are mostly shorter or equal. The minimap caption `  coverage   ` is 13 cells against 14 and its legend 32 against 33 (the reserved budgets 14 and 37 stand); the declaration `+N branches not shown   ` is at most 26 cells with three digits (budget 26). The hero caption `nodes with no record` is 20 cells against 14 and `▲ N due today` 13 against 14; the home microbar is 71 cells against 68 (two-digit counts), so it wraps from one cell-count wider than before (below 71 columns, was 68). Measured in the record, section 4.
+**Width.** The English words are mostly shorter or equal. The minimap caption `  coverage   ` is 13 cells against 14 and its legend 35 against 37 (the reserved budgets 14 and 37 stand); the declaration `+N branches not shown   ` is at most 26 cells with three digits (budget 26). The hero caption `nodes with no record` is 20 cells against 14 and `▲ N due today` 13 against 14; the home microbar is 71 cells against 68 (two-digit counts), so it wraps from one cell-count wider than before (below 71 columns, was 68). Measured in the record, section 4.
 
 **Not changed (declared).** `keymap.py` and `screens/palette.py` (`EN-6`); `?` in text fields (`EN-7`); the pluralisation of `1 descendants` (the Spanish had the same shape); the quotation marks `«»`; docstrings and comments that quote Spanish words (not user-facing).
 
