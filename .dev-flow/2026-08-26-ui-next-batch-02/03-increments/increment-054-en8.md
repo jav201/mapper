@@ -114,3 +114,7 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 `2746 passed, 24 deselected, 3 xfailed` (0 failed) in 1308 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, uninterrupted, last step, on `8952a2a` (all code and tests; this note follows). Baseline 2725 plus 21 new items (`test_en8.py` 20, `test_vocabulary_declaration.py` 1). Temp HOME and USERPROFILE, git identity from environment, no network. FLAKE-1 and FLAKE-4 did not occur.
 
 Lane history, declared: a first full lane ended `1 failed, 2745 passed` (`test_inc9d::test_inc9d_sec_f1_a_missing_tilde_path_paints_no_profile_path`, "path not supported"). It re-failed alone three times and passed once my USERPROFILE was written correctly: my env file had lost the backslashes of the temp profile path, so `~` expansion produced an unsupported path. An environment fault of mine, not code and not a flake; that lane is not counted. The counted lane is the one above.
+
+## Correction note (EN-9, 2026-10-03)
+
+Appended; nothing above was rewritten. `EN8-REV-F4`: section 5's `plain()` mutants are of two kinds. S1, S5a, S5b and S6 are **defensive (no current raw path)**: the store coerces on the way in, or the text comes from a source that cannot hold a control character today, so the arm injects the raw value in memory to exercise a path no operator can reach yet. S2, S3 and S4 are **live input**: typed text or a user-supplied path reaches the site raw. Read the kill counts with that split; all seven were killed either way.

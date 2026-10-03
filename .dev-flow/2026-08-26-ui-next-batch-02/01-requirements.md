@@ -11181,6 +11181,8 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 
 **Pins.** `test_inc9c` `INC9-UX-F2` arm inverted (declared in the record); `test_vocabulary_declaration` footer pin follows `01b` §3.6.
 
+**Correction (dated 2026-10-03, `Inc-EN-9`, `EN7-REV-F2`).** Appended; the statement above is not rewritten. "The palette's `legend` action opens it from anywhere" over-claims. The palette's `legend` action reaches the legend from every *seat-migrated* screen (home, map, factory, repo, connect-repo, import, components). The coverage and editor modals (`UNMIGRATED_SCREENS`) have no palette and no `?` route to the legend. That is pre-existing, not introduced here; it is `B-82`. Where the key bar and the legend list `?` on connect-repo is `A-137`.
+
 ### `A-136` -- Inc-EN-8: operator wording rulings and copy carries (`E1`-`E3`), dated 2026-10-02
 
 **Authority.** `VERDICT-inc-en-2026-10-02.md` Round 3 (`E1`, `E2`, `E3`) and its EN-8 routing paragraph. The record is `increment-054-en8.md`.
@@ -11199,3 +11201,16 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 | home door note for `from template` | `map from a template` | `start with preset fields` |
 
 **Not claimed.** `CoverageScreen`'s `Select` binding label is not in the ruling and is unchanged. The `E2` sentence says where the file comes from; the `CR17-F4` comment in `app.py` (no claim about authorship is licensed by `is_file()`) is kept and now says the claim is the operator's ruling.
+
+### `A-137` -- `?` is not listed where the only control is a text field (`Inc-EN-9`, `E4`, `EN7-REV-F1`), dated 2026-10-03
+
+**Authority.** `VERDICT-inc-en-2026-10-02.md` Round 4 (`E4`; operator answer "Quitar «? legend» ahi"). The record is `increment-055-en9.md`.
+
+**Statement.** On a screen whose only focusable control is a text field, the key bar and the legend do not list `?`, because `?` always types there (`A-135`). Today that is connect-repo (scope `plug`). `ctrl+p palette` stays on its bar, and the palette's `legend` action still opens the legend from it (and still lists `legend`).
+
+**Mechanism (scoped).** `keymap.TEXT_ONLY_SCOPES` maps a scope to the app-scope actions its field swallows (`plug`: `help`). `bindings_for` (the legend, the screen `BINDINGS`) and `groups_for_keybar` (the bar) omit those rows for that scope; `palette_items` does not, so the palette keeps the action. Seat-derived: no painted string was edited, and a relabelled `?` row proves it (listed on components, absent on connect-repo). Other scopes are untouched: home, map, factory, repo and components still list `?`.
+
+**Folded in from the EN-8 review (all inside this increment).** `EN8-REV-F1`: four records had flipped to CRLF in the index at `8952a2a`; restored to LF in a dedicated commit, `git diff --ignore-cr-at-eol` empty. `EN8-REV-F2`: the `test_overflow.py` comment says "two widths sooner (34 -> 32)" (note in record 049). `EN8-REV-F3`, `F4`, `F5`: correction notes in records 048, 054 and 047. `EN8-REV-F6`: the ficha modal paints `owner —` and `created —` for an EMPTY value too (`fields.get("O") or "—"`; it painted a blank for `O=""`). `EN8-REV-F7`: the coverage modal's `Select` binding label is `select`, so every label is lowercase. None adds a feature, key or row.
+
+**Not claimed.** `darkside.keybar` folds a long bar into `... +N  ? all keys` with a hard-coded `?` (`help_key`); connect-repo's bar is two short groups and never folds at 87 or 118, so that path is not reached here. At a width where it would fold, the marker would still say `?`; not measured.
+

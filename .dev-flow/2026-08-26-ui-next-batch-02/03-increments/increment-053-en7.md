@@ -70,3 +70,7 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 - Prompts keep Textual's select-on-focus (`save as` has a default name that typing replaces); `?` there replaces the default like any key. Not changed: outside the `B-72` ruling.
 - NOT measured: widths other than 118 and 87; a pasted `?`; a real terminal's key encoding for `?` (Pilot sends `question_mark`); POSIX.
 - Suggested next: `B-36` (dirty-since-focus flag), the follow-on design item.
+
+## Correction note (EN-9, 2026-10-03)
+
+Appended; nothing above was rewritten. `EN7-REV-F3`: section 7's risk "Prompts keep Textual's select-on-focus (`save as` has a default name that typing replaces)" is wrong. No prompt pre-fills a value: every prompt gives its `Input` a `placeholder=`, not a `value=`, so there is nothing to select on focus and select-on-focus is moot for prompts. The `test_question_mark_in_a_prompt_types` arm still holds (`?` is typed into the box); the `_PromptScreen("save as", "x")` fixture in it passes `"x"` as the placeholder, not as a pre-filled default. `EN7-REV-F2`: "the palette's legend action opens it from anywhere" (`A-135`) is corrected in `01-requirements.md` (every seat-migrated screen; `B-82`). `EN7-REV-F4`: the 87-column inspector arms are now pinned as a programmatic-focus control (region assertion), see `increment-055-en9.md`; the live path to a hidden field is `B-83`. `EN7-REV-F1` is closed by `A-137`.

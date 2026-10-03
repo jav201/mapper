@@ -124,3 +124,7 @@ Lane history, declared: earlier launches in this session were invalid and not co
 ## Correction note (EN-8, 2026-10-02)
 
 Appended; nothing above was rewritten. `EN2-REV-F2` (risk wording): the unmeasured bullet says `_rebuild` restores first, and the code comment said nothing else would put the words back. The `EN-5` review measured that the chip's blur also restores them; the restore at the top of `_rebuild` is kept so the result does not depend on Textual posting a blur for a removed widget. The comment was reworded in `EN-8`. `EN2-REV-F3` (widths): the evidence paragraph says "both 140 and 87 columns" and the unmeasured bullet "measured at 87 and 140 only". The arms run at `SIZE = (118, 34)` and `NARROW = (87, 34)` (`tests/test_inc9f.py:46-47`, imported by `tests/test_en2.py`); 140 was never run. Read both places as 118 and 87.
+
+## Correction note (EN-9, 2026-10-03)
+
+Appended; nothing above was rewritten. `EN8-REV-F3`: (1) the EN-8 note above labels its first paragraph `EN2-REV-F2`; that paragraph is about the `_rebuild` restore and is `EN2-REV-F1`. (2) Risk (3) in section 6 is restated correctly: a screen hint written while a chip has focus replaces our words at once (the restore guard only protects a line that still carries them). So under a still-focused chip the line may show the seat's `↵ open card`, not `↵ open attachment`. Nothing lingers; the "words then stay until the next hint write" sentence is wrong.
