@@ -25,3 +25,20 @@ because attachments open, were put to the operator; both took the recommended op
 |---|---|---|---|
 | Z1 · X3-REV-F2 | Opening an attachment toggles its chip's selected look | Que no alterne | Attachment chips only open; they never toggle `selected`. Routed to EN-4 (`widgets/components.py`) |
 | Z2 · X3-REV-F3 | With an attachment chip focused the hint says `↵ open card` | «↵ open attachment» | A focus-aware hint: `↵ open attachment` while an `insp-att-*` chip has focus. Routed to EN-2 (inspector); if it needs `keymap`/`app`, to EN-5/EN-6 |
+
+## Round 3 — after the EN-5 and EN-6 reviews (2026-10-02)
+
+EN-5 review: OK (no HIGH; EN5-REV-F2: 18 unpinned `darkside.plain` sites in `app.py`, six on
+user- or file-controlled text). EN-6 review: OK (EN6-REV-F2: no test pins that the arrows reach the seat
+binding). Three wording questions were put to the operator; each took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| E1 · EN5-REV copy | `edge of the territory` (literal) vs `edge of the map` | edge of the map | The pan-edge notice reads `edge of the map`; `territory` stays only in the rail |
+| E2 · EN5-REV copy | Export stale-file sentence | Decir de dónde viene | `Nothing was written; X.svg on disk is from an earlier export.` |
+| E3 · EN6-REV-F4 | Palette footer separators (N2 wrote ` · `) | Con « · » como en N2 | ` N/M actions   ↑↓ move · ↵ run · esc close` |
+
+Routed to EN-8 (cleanup, no new features): E1–E3; EN5-REV-F2 arms for the six user/file-controlled
+`plain` sites; EN5-REV-F3..F7 (EN2-REV-F1 comment, census words, `record` in the ficha modal, singular
+`descendant`, the vacuous `test_inc9m` pin); `Cancel`/`Close` lowercase; `declaration not available`
+reworded; EN6-REV-F1..F3; EN4-REV-F1..F5; EN3-REV-F1/F3; EN2-REV-F2/F3 record notes; EN1-REV leftovers.
