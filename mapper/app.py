@@ -320,7 +320,7 @@ def _path_refusal(text: str, workspace: Path) -> str | None:
 class _PromptScreen(ModalScreen[str | None]):
     """Simple darkside modal that returns a single text value."""
 
-    BINDINGS = [("escape", "cancel", "Cancel")]
+    BINDINGS = [("escape", "cancel", "cancel")]
 
     def __init__(self, title: str, placeholder: str = "") -> None:
         super().__init__()
@@ -424,7 +424,7 @@ class _ConfirmScreen(ModalScreen[bool]):
 class _TemplateScreen(ModalScreen[str | None]):
     """Modal that lets the user pick a map template."""
 
-    BINDINGS = [("escape", "dismiss", "Close"), ("q", "dismiss", "Close")]
+    BINDINGS = [("escape", "dismiss", "close"), ("q", "dismiss", "close")]
 
     def compose(self) -> ComposeResult:
         yield Vertical(
@@ -463,7 +463,7 @@ class _TemplateScreen(ModalScreen[str | None]):
 class _FichaScreen(ModalScreen[None]):
     """Modal that shows the selected node's ficha details."""
 
-    BINDINGS = [("escape", "dismiss", "Close"), ("q", "dismiss", "Close")]
+    BINDINGS = [("escape", "dismiss", "close"), ("q", "dismiss", "close")]
 
     def __init__(self, node: Node, graph: Graph) -> None:
         super().__init__()
@@ -493,8 +493,8 @@ class _FichaScreen(ModalScreen[None]):
             text.append("\n")
 
         doc = ficha.fields.get("D", "")
-        text.append("document ", style=darkside.MUT)
-        text.append(escape(doc) if doc else "no record",
+        text.append("record ", style=darkside.MUT)
+        text.append(escape(doc) if doc else "—",
                     style=darkside.INK if doc else darkside.ALERT)
         text.append("\n")
         text.append("owner ", style=darkside.MUT)
@@ -908,7 +908,7 @@ class HomeScreen(Screen):
         "c": "opens a recent map",
         "p": "connects a repository",
         "n": "creates a new map",
-        "t": "map from a template",
+        "t": "start with preset fields",
         "i": "CSV / TSV of nodes",
         "f": "process documents",
     }
@@ -2046,7 +2046,7 @@ class MapScreen(Screen):
             # graph before this guard: one `L` press and `app.is_running` went
             # False.  A frame that cannot be laid out cannot be panned, so the
             # answer is the one the edge already has a declaration for.
-            self.query_one(HintLine).set_hint("edge of the territory")
+            self.query_one(HintLine).set_hint("edge of the map")
             return
         nx = self._clamp_pan(self.pan_x + dx * self.PAN_STEP_X, extent_x, span_x)
         ny = self._clamp_pan(self.pan_y + dy * self.PAN_STEP_Y, extent_y, span_y)
@@ -2055,7 +2055,7 @@ class MapScreen(Screen):
             # is indistinguishable from a keyboard that stopped working, and
             # blank space past the content is indistinguishable from "the map
             # has nothing there" -- the exact confusion US-N06 exists to remove.
-            self.query_one(HintLine).set_hint("edge of the territory")
+            self.query_one(HintLine).set_hint("edge of the map")
             return
         self.pan_x, self.pan_y = nx, ny
         # CLEARED ON SUCCESS, and the omission was a real misdescription rather
@@ -3016,7 +3016,7 @@ class MapScreen(Screen):
         try:
             hidden = self._unpainted_ids()
         except LookupError:
-            text.append("declaration not available ", style=darkside.INK)
+            text.append("hidden-node count unavailable ", style=darkside.INK)
             return text
         if hidden:
             # ONE SPELLING, consumed rather than repeated (`F7`).  This copy
@@ -4146,12 +4146,13 @@ class MapScreen(Screen):
             # claim about its author is made. What the operator actually needs
             # is that NOTHING WAS WRITTEN and what is there is not this export,
             # and both of those are true whoever put it there.
+            # `E2` (operator, 2026-10-02) then asked the sentence to say where the file comes from, so it now does:
+            # that claim is the operator's ruling, not something `is_file()` licenses.
             path = self.store.workspace / f"{self.map_id}.svg"
             stale = ""
             if path.is_file():
                 stale = (
-                    f" Nothing was written: the file {path.name} does not match "
-                    "this export."
+                    f" Nothing was written; {path.name} on disk is from an earlier export."
                 )
             self.notify(
                 darkside.plain(f"map too large to export: {too_large.cells} cells, "
@@ -4624,13 +4625,14 @@ class MapScreen(Screen):
                 markup=False,
             )
             return
+        descendants = f"{count - 1} descendant" if count == 2 else f"{count - 1} descendants"
         if self.nav.cursor == self.graph.root_id:
             message = (
-                f"archive the root «{name}» and its {count - 1} descendants? "
+                f"archive the root «{name}» and its {descendants}? "
                 "this will replace the root of the map."
             )
         elif count > 1:
-            message = f"archive «{name}» and its {count - 1} descendants?"
+            message = f"archive «{name}» and its {descendants}?"
         else:
             message = f"archive «{name}»?"
         self.app.push_screen(_ConfirmScreen(message), callback=do_archive)

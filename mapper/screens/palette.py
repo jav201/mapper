@@ -156,9 +156,9 @@ class CommandPalette(ModalScreen[str | None]):
             Text.assemble(
                 (f" {len(self._items)}/{total} actions", darkside.MUT),
                 ("   " + up_key + down_key, darkside.ACCENT),
-                (f" {move_word}   ", darkside.MUT),
+                (f" {move_word} · ", darkside.MUT),
                 (run_key, darkside.ACCENT),
-                (f" {run_word}   ", darkside.MUT),
+                (f" {run_word} · ", darkside.MUT),
                 (close_key, darkside.ACCENT),
                 (f" {close_word}", darkside.MUT),
             )
@@ -167,8 +167,10 @@ class CommandPalette(ModalScreen[str | None]):
     def on_key(self, event: events.Key) -> None:
         # The search box holds focus, so the list never sees the page keys: forward
         # them, and leave the box focused so typing keeps filtering.  The arrows are
-        # seat rows (`move_up` / `move_down`): the box binds neither, so they reach
-        # the screen's `BINDINGS` and need no forwarding here.
+        # seat rows (`move_up` / `move_down`).  The box does inherit `up` / `down`
+        # bindings (`scroll_up` / `scroll_down`), but a one-line `Input` cannot
+        # scroll, so they raise `SkipAction` and the keys fall through to the
+        # screen's `BINDINGS`: no forwarding is needed here.
         if event.key not in ("pageup", "pagedown"):
             return
         event.stop()

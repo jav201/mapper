@@ -104,8 +104,9 @@ class FichaInspector(Vertical):
         focus_was_elsewhere = screen is not None and (
             screen.focused is None or screen.focused not in self.children
         )
-        # The chip that held focus is about to be removed; nothing else would put the
-        # words back.
+        # The chip that held focus is about to be removed.  Its blur also restores the
+        # words (measured), but restoring first keeps this independent of Textual
+        # posting a blur for a removed widget.
         self._restore_open_words()
         # Removal must be awaited before mounting: Textual only schedules the
         # removal otherwise, so the new rows collide with the outgoing ones on

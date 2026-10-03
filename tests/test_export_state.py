@@ -438,7 +438,7 @@ async def test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind(tmp_path):
     # the product (`N anterior`, the settings rail, two keymap labels), so an
     # arm keyed on it alone would be one refactor away from passing for a
     # reason that has nothing to do with staleness.
-    assert "does not match this export" in message, (
+    assert "on disk is from an earlier export" in message, (
         f"the refusal names the file but never says it is STALE, which is the "
         f"whole finding -- an undeclared old artifact at the expected path: {message!r}"
     )
@@ -524,7 +524,7 @@ async def test_a_refusal_on_a_FIRST_export_claims_no_stale_file(tmp_path):
         message = notices[0]
         assert not path.exists(), "a refused first export wrote a file"
 
-    assert "does not match this export" not in message, (
+    assert "from an earlier export" not in message, (
         f"the refusal claims a previous export exists when none does: {message!r}"
     )
 
