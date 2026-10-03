@@ -8,7 +8,8 @@ Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `9105a
 
 Design chosen (seat-derived, no painted string edited): `keymap.TEXT_ONLY_SCOPES = {SCOPE_PLUG: ("help",)}` maps a scope to the app-scope actions its field swallows.
 
-- `bindings_for` omits them for that scope. The legend and the screen `BINDINGS` read it, so "help shows exactly the keys that work here" is true again (the screen's dead `?` binding on connect-repo is gone too).
+- `bindings_for` omits them for that scope. The legend and the screen `BINDINGS` read it, so "help shows exactly the keys that work here" is true again.
+- `textual_bindings` (the screen's `BINDINGS`) does NOT filter: connect-repo keeps its `question_mark` binding. The listing changes, the dispatch does not. A first draft filtered it too; the full lane then failed `test_inc9` twice (the derived help-screen set dropped to 6 and `PlugRepoScreen` became an unmatched opener), which exposed that the binding still fires once focus has left the field (`test_hlr_n16_1_every_help_route_carries_its_scope[PlugRepoScreen]` presses it for real). Changing dispatch was not what `E4` ruled, so the binding stays. That lane is not counted.
 - `groups_for_keybar` omits them from the bar. It takes no scope today, so it derives the scope from the groups it is given: exactly one non-app scope among them. No call site changed (`app.py`, `factory.py`, `settings.py` call it as before).
 - `palette_items` reads a private `_scope_rows` that does not filter, so the palette keeps `legend` on connect-repo. Chosen over an exclusion list in `app.py`: the rule lives in the seat, next to the rows it describes.
 
@@ -25,7 +26,9 @@ Rendered key bar of connect-repo (read from `KeyBar.content.plain`), before and 
 
 ## 2. Files modified
 
-Source (3): `mapper/keymap.py`, `mapper/app.py` (two lines, `F6`), `mapper/screens/coverage.py` (one label, `F7`). Tests: `tests/test_en9.py` (new, 21 items), `tests/test_en7.py` (docstring and region pin), `tests/test_overflow.py` (comment). Docs: `01-requirements.md` (`A-137`, `A-135` correction), `BACKLOG.md` (`B-82`, `B-83`), correction notes on records 047, 048, 049, 053, 054, this file. `state.json`, `prototypes/`, `mapper.db`, `fixtures/.mapper`, `fixtures/mapper.db` not touched.
+**Sealed pin touched, declared:** `test_llr_n16_1_2_every_help_screen_declares_a_scope` required each help screen's scope to offer at least 3 rows through `bindings_for`; connect-repo now offers 2 (`esc`, `ctrl+p`), so the floor is 2, with a comment naming `E4`. The arm still catches an empty or one-row scope.
+
+Source (3): `mapper/keymap.py`, `mapper/app.py` (two lines, `F6`), `mapper/screens/coverage.py` (one label, `F7`). Tests: `tests/test_en9.py` (new, 22 items), `tests/test_en7.py` (docstring and region pin), `tests/test_overflow.py` (comment), `tests/test_inc9.py` (one sealed pin relabelled, below). Docs: `01-requirements.md` (`A-137`, `A-135` correction), `BACKLOG.md` (`B-82`, `B-83`), correction notes on records 047, 048, 049, 053, 054, this file. `state.json`, `prototypes/`, `mapper.db`, `fixtures/.mapper`, `fixtures/mapper.db` not touched.
 
 ## 3. How to test
 
@@ -39,15 +42,16 @@ Mutants (harness in `%TEMP%`, outside the repo; byte-level read and write; sha25
 
 | # | Mutant | Result | Killed by |
 |---|---|---|---|
-| M1 | exclusion removed (`TEXT_ONLY_SCOPES = {}`) | KILLED (7 failed) | the bar arms x2, the legend arms x2, `bindings_for`, sentinel plug x2 |
-| M2 | exclusion widened to every scope | KILLED (18 failed) | the other-screens arm (all 8), the settings sentinel x2, and the EN-7 legend arms |
+| M1 | exclusion removed (`TEXT_ONLY_SCOPES = {}`) | KILLED (8 failed) | the bar arms x2, the legend arms x2, `bindings_for`, sentinel plug x2, the binding pin |
+| M2 | exclusion widened to every scope | KILLED (10 failed) | the other-screens arm (the legend-row regex; home, map, factory, repo at both widths), the settings sentinel x2. Declared: a first version of that arm asserted `"legend" in text`, which the legend footer satisfies on its own; M2 then died only on the short-bar screens (repo, settings). The arm now matches the `?  legend` key row |
 | M3 | bar filter keyed on the painted glyph `?` instead of the seat action | KILLED (4 failed) | the relabelled-seat sentinel (plug x2); the repo arm x2 (the glyph filter also hid `?` on repo, a wider-scope effect). The bar arm alone does NOT kill it |
 | M4 | palette reads `bindings_for` | KILLED (7 failed) | `bindings_for` arm, palette-opened legend arms, EN-7 palette-legend arms |
+| M8 | `textual_bindings` reads the filtered rows (the first draft) | KILLED (3 failed) | the binding pin, and the two `test_inc9` derivation arms the lane had caught |
 | M5 | `F6`: owner `get("O", "—")` | KILLED | `test_the_ficha_modal_shows_a_dash_for_an_empty_owner_and_created[]` |
 | M6 | `F6`: created `get("Y", "—")` | KILLED | same |
 | M7 | `F7`: `Select` back | KILLED | `test_every_coverage_binding_label_is_lowercase` |
 
-7 run, 7 killed, 0 survived.
+M1-M4 and M8 were run on the final tree (`keymap.py` sha256 `848d243d...` pinned, restored `True`). 8 run, 8 killed, 0 survived.
 
 ## 5. Test results
 

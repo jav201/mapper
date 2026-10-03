@@ -310,11 +310,14 @@ def textual_bindings(
     """`(key, action, label, priority)` tuples for a screen's `BINDINGS`.
 
     Returned as plain tuples so this module stays free of Textual; the screen
-    converts them into `Binding` objects.
+    converts them into `Binding` objects.  A text-only scope keeps its typed key
+    here (`E4`): the binding is dispatch, not a listing, and it still fires once
+    focus has left the field.  Only `bindings_for` (the legend) and the key bar
+    stop advertising it.
     """
     return [
         (b.key, b.action, b.label, b.priority)
-        for b in bindings_for(scope, include_app=include_app)
+        for b in _scope_rows(scope, include_app)
     ]
 
 
