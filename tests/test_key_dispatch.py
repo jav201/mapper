@@ -108,6 +108,9 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("map", "u"): ("undo", "undo", "u", "node", False),
     ("map", "x"): ("archive", "archive node", "x", "node", False),
     ("map", "z"): ("collapse_branch", "fold/unfold", "z", "view", False),
+    # Inc-EN-6 (`N2`): the arrows the footer advertises as `↑↓ move`.
+    ("palette", "up"): ("move_up", "move", "↑", "palette", False),
+    ("palette", "down"): ("move_down", "move", "↓", "palette", False),
     ("palette", "enter"): ("run_selected", "run", "↵", "palette", False),
     ("palette", "escape"): ("dismiss_none", "close", "esc", "palette", False),
     ("plug", "escape"): ("home", "back", "esc", "plug", True),

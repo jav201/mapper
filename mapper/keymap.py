@@ -216,6 +216,10 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("s", "s", "save", "save map", "import"),
     KeyBinding("escape", "esc", "home", "back", "import"),
     # -- palette (modal) ----------------------------------------------------
+    # The footer reads these two as one `↑↓ move` pair.  Both rows carry the one
+    # word, so the pair never reads two ways.
+    KeyBinding("up", "↑", "move_up", "move", "palette"),
+    KeyBinding("down", "↓", "move_down", "move", "palette"),
     KeyBinding("enter", "↵", "run_selected", "run", "palette"),
     KeyBinding("escape", "esc", "dismiss_none", "close", "palette"),
     # -- help (modal) -------------------------------------------------------
