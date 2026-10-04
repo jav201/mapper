@@ -14,3 +14,13 @@ recommended option.
 | M1 | What is fixed before merge (Gate-2)? | Bloqueo + medios | PR-QA-F1, PR-QA-F3, BRANCH-SEC-F3, BRANCH-SEC-F4/PR-QA-F4, PR-QA-F5 in one increment with its review; LOW findings go to BACKLOG |
 | M2 | How is the branch merged into `master`? | Squash merge | One clean commit on `master`; the intermediate commits (operator paths, personal email) do not enter `master`'s history |
 | M3 | The remote branch after the squash | Decidir después del merge | `origin/feat/ui-next-batch-02` is left untouched until a later explicit decision; deleting it is irreversible |
+
+## Round 2 — after the Gate-2 review (2026-10-03, base `8b7dee5`)
+
+Gate-2 review: PASS (no HIGH; PR-QA-F1 verified; every repo-local program-execution vector closed;
+GATE2-REV-F1 MEDIUM, F2–F4 LOW). Two questions were put to the operator; both took the recommended option.
+
+| id | Question | Answer (verbatim label) | What it rules |
+|---|---|---|---|
+| M4 · GATE2-REV-F1 | Fix the `I`-toggle stale edge hint before the merge? | Al backlog, mergear ya | Recorded as B-95; F2–F4 as B-96/B-97 |
+| M5 | Final confirmation: squash-merge `feat/ui-next-batch-02` into `master` and push | Sí, squash merge y push | One squash commit on `master` (operator's noreply identity), verified before push: tree identical to the branch tip, no account name / personal email, full lane green on the master tree. The remote branch stays untouched (M3) |
