@@ -28,7 +28,7 @@ from mapper.store import MapStore
 from mapper.widgets.chrome import HintLine
 from tests.inc3_support import open_map, pan_graph, rows_in
 
-OPEN_STEPS: set[str] = {"f1", "f3", "sec3", "f4", "f5"}
+OPEN_STEPS: set[str] = set()
 
 SIZE = (118, 34)
 NARROW = (87, 34)

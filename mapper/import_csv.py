@@ -23,7 +23,7 @@ def preview_csv(path: Path) -> Graph:
 
     Columns:
       - ``id`` becomes the node id. When empty, a slug of ``title`` or an
-        auto-generated ``fila-N`` id is used so the row is not dropped.
+        auto-generated ``row-N`` id is used so the row is not dropped.
       - ``title`` becomes the node title; falls back to id.
       - ``parent`` is an id reference to the parent row.
       - ``depth`` is an integer indentation level used when ``parent`` is absent.
@@ -53,7 +53,7 @@ def preview_csv(path: Path) -> Graph:
         title = (row.get("title") or "").strip()
         if not raw_id:
             auto_counter += 1
-            raw_id = title or f"fila-{auto_counter}"
+            raw_id = title or f"row-{auto_counter}"
         nid = slugify(raw_id)
 
         title = title if title else raw_id

@@ -11228,3 +11228,17 @@ The `↵` is still load-bearing (`#D28`): the copy invites an action. `LLR-N13.1
 
 **Not claimed.** Both flake rates are low (about 1% and 0.3% to 5% depending on load), so the before/after pytest-level counts alone cannot show a drop; the evidence is the diagnosis plus the mutants in the record. `FLAKE-3` was closed earlier. `B-36` and the mixed author identities are not touched.
 
+
+### `A-139` -- Gate-2: the pre-merge fixes of the whole-branch gates (`PR-QA-F1`, `PR-QA-F3`, `BRANCH-SEC-F3`, `BRANCH-SEC-F4`/`PR-QA-F4`, `PR-QA-F5`), dated 2026-10-03
+
+**Authority.** `VERDICT-merge-2026-10-03.md`, ruling `M1` (the blocker plus the MEDIUM findings; the LOW ones go to `BACKLOG.md`, `B-84`..`B-94`). The record is `increment-057-gate2.md`.
+
+**`PR-QA-F1` (blocker).** `HomeScreen.action_table_down`/`action_table_up` called `DataTable.cursor_down`/`cursor_up`, which do not exist (Textual 8.2.8 has `action_cursor_down`/`action_cursor_up`); `j`/`k` stopped the app with one map or more. Both now call the actions. No other call site in the tree.
+
+**`PR-QA-F3`.** After a successful pan the hint was set to `""`, and `_clear_pan_hint` cleared only the inert hint, so `edge of the map` outlived a view change. Both now restore the screen's resting hint (`_resting_hint`: the live search's hint while a query is live, else `map_hint()`); `_clear_pan_hint` covers both pan hints and runs on `R` as well as `o`/`r`. A hint another handler declared is left alone.
+
+**`BRANCH-SEC-F3`.** `_run_git` passes `-c log.showSignature=false -c core.fsmonitor=false` before every subcommand, and `git log` carries `--no-show-signature`. `_git_env` is unchanged. Assessed and not pinned: `diff.external`, `core.pager`, `core.sshCommand`, `remote.<n>.uploadpack` (`B-94`).
+
+**`BRANCH-SEC-F4`/`PR-QA-F4`.** The factory preview names the template by its workspace-relative path (as generate does) and coerces each extracted line with `darkside.plain`.
+
+**`PR-QA-F5`.** The generated CSV id is `row-N` (was `fila-N`). The `? ` orphan prefix is not changed (`B-93`).
