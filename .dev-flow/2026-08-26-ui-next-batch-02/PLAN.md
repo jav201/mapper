@@ -244,6 +244,10 @@ size**, since the size is the thing the suite was blind to.
 | D10 | 2026-08-26 | **Q-3 answered: option (a).** Search takes `n` / `N`; `next_gap` moves `n → M`. New seat rows: `map/n → next_hit "siguiente coincidencia" (nav)` · `map/N → prev_hit "coincidencia anterior" (nav)` · `map/M → next_gap "siguiente faltante" (view)` | Executed over `KEYMAP`: the collision is a **semantics** problem, not scarcity — free lowercase in map scope is `b c i p s t v w y`, every uppercase except `A I R X` is free, and `duplicate_chords()` returns `[]`. **Option (c), the state-dependent chord, was rejected because it cannot survive the whole-seat pin:** under (c) `map/n` has no constant `label`, leaving only two exits — pin a placeholder, which stops pinning the displayed string and is *verbatim narrowing #2 from post-mortem §2.4c* (the one under which swapping the `u`/`z` labels kept all 245 tests green), or make the spec state-dependent, which is no longer set equality. It also breaks one-declaration-four-readers, since `groups_for_keybar` returns `binding.label` straight from the seat. `M` chosen because `m` is already `cobertura` and walks the same tree order — `m` opens the report, `M` walks it; the seat already carries two genuine shift-pairs (`a`/`A`, `x`/`X`). **Condition:** the seat-spec diff is exactly one changed row plus two added rows, reviewed row-by-row at DDR. |
 | D11 | 2026-08-26 | **Q-6 answered: an unresolvable lens query is never executed.** `Z:algo` → canvas **unchanged**, chip ` Z ? sin definir ` in ALERT, line `el mapa no define el campo «Z» · campos: …` with the field list **derived from `graph.schema`**. `E:inexistente` → figure-ground **applied**, chip in MUT, line `0 nodos · ningún nodo tiene estado = inexistente` | Executing an unresolvable query would dim the entire canvas and paint **identically** to a zero-match result. Distinguishing *"the map has no such field"* from *"nothing matches"* is the difference the story exists to make. |
 | D12 | 2026-08-26 | **S-8 folded into scope — a third shipped defect: `?` hides ten of its own bindings** | See the block below. |
+| D32 | 2026-08-28 | **Inc-1 CLOSED and pushed (`4eaba35`).** `code-reviewer` BLOCK on 1 HIGH → fixed → confirmation pass *"the HIGH is discharged, no HIGH survives"*; `security-reviewer` signed off. 4 source files (the declared cap); 6 battery rounds; 154 arms | Four unplanned defects, two of them **in the sealed spec**: `WARN`'s job made `LLR-S06.3.5`'s own threshold unsatisfiable by any implementation (`A-78`); the C0 range row omitted `U+000D`, so adopting it verbatim **narrowed** shipped coverage (`A-80`); `radial` sliced titles raw into the exported SVG; and `AT-009` derived its oracle from the constant it was testing, staying green while 19 invisible code points reached the artifact (`A-87`). The confirmation pass additionally caught a **fabricated measurement in production source** — a probe that constructed the theme it then observed — and a "fix" of mine that repaired nothing |
+| **D33** | 2026-08-28 | **`B-47` folded into `Inc-3`; `LLR-COERCE.2` widened from one named truncator to every renderer feeding an operator-visible sink (`A-89`)** | **Coordinator ruling — recorded as such, NOT as operator approval.** The batch's coercion guarantee held only in radial view while `LayeredRenderer` is the **default**; measured, a hostile title through layered or outline writes an SVG that is not well-formed XML. **The narrowing lived in the `Touched symbols` line, not in the Statement**, which was already general — the transferable lesson. `Inc-3` declares a 5-file breach; the renderer set is **derived**, never hand-listed, because a hand-listed set is the defect class this batch has already paid for twice |
+| **D34** | 2026-08-28 | **`B-46` gets its own increment, `Inc-CONFIRM`, with `Inc-REPAIR` and before `Inc-7` (`A-90`)** | **Coordinator ruling.** `_ConfirmScreen` renders a ficha title through a markup-parsing sink while composing the dialog that **gates subtree archival** — the newly-reachable-destructive-action class, and the fix is the `darkside.plain` the same function already applies seven lines above. Two acceptance arms, one per failure mode (crash · action-span injection), because they fail independently and one arm would let the other ship. Named rather than numbered so no substring scan collides it |
+| **D35** | 2026-08-28 | **Pace calibrated, not uniform (`A-91`)** | **Coordinator ruling.** Full protocol (review + confirmation pass + battery) retained for `Inc-2`, `Inc-3`, `Inc-REPAIR`, `Inc-CONFIRM`, `Inc-7` — anything touching a data path, a destructive action, the A3 contract or a security sink. Lighter protocol (single review, no confirmation pass) permitted for a presentational increment **only while** the review returns zero HIGH and no data path is touched; **any HIGH restores the full protocol for that increment**. Batteries are never skipped, only sized. Recorded so the post-mortem can judge the trade — Inc-1 is the control, and its confirmation pass returned 7 MEDIUM + 6 LOW |
 
 ### S-8 — the help overlay silently truncates, and it hides exactly the keys this batch adds
 
@@ -782,3 +786,152 @@ question before stating the number.
 | **D23** | **Validator pinned to committed `4fdefdd`** for every measurement in this batch | The canon file is being rewritten by a concurrent session; an unpinned tool makes every figure unreproducible |
 | **D24** | `~/.claude` left **untouched** — not committed, not reverted, not stashed | C-44: committing another session's work in progress is its own defect |
 | **D25** | **No tree edits while any lens ran** | The corpus records a phantom gate-blocking finding produced by exactly one concurrent read of an artifact mid-write |
+
+---
+
+## 16 · RE-SCOPE — 2026-08-27, operator decision (option A)
+
+### 16.1 — Why the batch was re-scoped rather than folded as briefed
+
+The resumed session's briefing named **six** remaining items for amendment set 3. The RIDER-1
+reconciliation (`02g-lens-reconciliation.md`) executed all four lenses' own condition ledgers
+against the tree and measured the live set at **≈39 of 51 union items**, of which **≈11 require
+design rulings**, plus **4 newly raised findings** and **2 live security defects on `master`**.
+
+**This is C-43 at batch level: the authorization to spend the final PDR iteration rested on a
+premise about remaining scope that executes FALSE.** Three of the briefed six were also wrong in
+detail — the orphan ATs are **six** not three; the legend census is **23**, and striking the
+byte-identical `V4` duplicate takes it to **22**, so "correct 21 to 23" would be wrong twice; and
+`S-17`, `UX-3` and `S-18` sit in this PLAN's own §15.4 twelve-blocker table while appearing in the
+briefed list not at all.
+
+The structural cause is mechanical: `git log --oneline -- .../01-requirements.md` returns **one
+commit** (`8675151`). The requirements document has not been edited since the lenses wrote their
+verdicts, so every requirement-side finding is frozen exactly where its lens left it. Only code
+moved, and the repair batch touched only `mapper/store.py`, `docs/ARCHITECTURE.md` and five test
+files. **All 11 discharges are that shipped code**; no lens condition was closed by a document fold.
+
+Rather than spend the final iteration (soft cap 3) on a set five times the briefed size, the batch
+was stopped and referred. **The operator chose option A — re-scope.**
+
+### 16.2 — The cut
+
+| Cut to the follow-on design batch | Why |
+|---|---|
+| **US-N14 «lente»** (§3.7) | Its two blocker-class UX conditions are design rulings, not document edits: `HLR-N14.3`'s two threshold clauses cannot both be satisfied, and the near-miss **destroys operator data**; and the story has **no declared entry chord**, so no acceptance can drive its real gesture |
+| **`S-18` render work-budget, PAIRED with `S-19`** | `S-19` is `S-18`'s **PRECONDITION**, not its sibling. Measured on the 51-node/410-edge shape: Layered **1283 ms**, Outline **337 ms**, **Radial 142 ms — UNDER the 250 ms budget**. So `k = 0` on Radial and threshold 4 cannot distinguish a correct implementation from a missing one. **The follow-on batch's fixture must NAME ITS RENDERER**, or S-18 is untestable by construction |
+
+The cut removes ≈7 of the ≈11 design rulings (`UX2-C-01`, `UX2-C-02`, `S-18`, `S-19`, `P2-C8`,
+security `C-3`, and part of `UX2-C-06`), leaving iteration 3 to target **US-N06 · US-N07 · US-N13 ·
+US-N16 · palette v2**.
+
+**Nothing is deleted.** The deferred text stays in place, marked, so the follow-on batch inherits
+the work rather than re-deriving it.
+
+### 16.3 — Decisions taken in this pass (recorded, not asked)
+
+| # | Decision | Why |
+|---|---|---|
+| **D26** | **The strict rule is adopted: a code fix never discharges a missing requirement** | It is what keeps `S-17` visible. `mapper/store.py` cites `LLR-STO.1.1` normatively in **five docstrings**, and that identifier has no statement, threshold, `TC`, `AT` or traceability row anywhere. The shipped fix made the hole *harder* to notice, because the tree now looks like the requirement is being obeyed. Under this rule the architect lens is **14 of 14 LIVE**, not 12 |
+| **D27** | **`B-29` and `B-30` ride INSIDE this batch** as one small repair increment, with requirement stubs in amendment set 3 | Operator rider 1, orchestrator's call. Measured: `B-30` is one line with **zero** tests asserting the message text; `B-29` is ~3 lines and **only one** test asserts `load_warnings == []`, while the real fixture yields 0 warnings and no phantom. Both are shipped defects with mechanical fixes, not design rulings, so they do not burden the PDR. **Both are newly reachable with zero operator action** — US-N13's sala loads every map on mount |
+| **D28** | **`B-29`'s guard ships with a SYNTHETIC fixture** | The guard is a **no-op on the current tree**: no fixture carries a sidecar id absent from its `.mmd`, so a mutation of the guard changes nothing today and the suite stays green either way. C-55 limb 2 — the case the tree lacks must be constructed, or the guard is untested however green the suite |
+| **D29** | **The A3 census is settled by AST and stated as question + instrument + SHA** | Four generations of this number were wrong because *"blast radius"* names three different sets. **Generation five was produced during the reconciliation itself, by the orchestrator**: a grep returned 24 sites, the 24th being `renderer.render(...)` inside a **docstring** at `mapper/widgets/rail.py:180`. Settled: **23 arg-ful sites / 10 files / 6 definitions** at `3fe0e4b`. A grep cannot tell a call from a mention of a call |
+| **D30** | **Amendment set 3 is authored in TWO SEQUENTIAL passes on `01-requirements.md`, never in parallel lanes** | C-52 condition 2: two lanes may not edit the same file, not even different regions. `PLAN.md` and `state.json` are disjoint and were taken concurrently |
+| **D31** | **PR #7 (the reconciliation ledger) merged docs-only before the fold** | Landed evidence, no gated verdict involved. An unmerged evidence branch is the un-landed-record defect (C-44) this project keeps naming |
+
+### 16.4 — The fixture-corruption incident, recorded as a live demonstration
+
+During the UX lens audit, a probe pointed `MapperApp` at the real `fixtures/` directory. The
+inspector's commit-on-blur **wrote through**: `fixtures/legacy.mmd` and `fixtures/legacy_nodos.yml`
+were modified on disk, turning `erp[Sistema ERP Legacy]` into `erp[n]`.
+
+Restored read-only via `git show HEAD:<path>` (a mutating `git checkout` was correctly refused under
+the audit's no-mutating-git instruction) and **verified by sha256 against HEAD — both MATCH**. The
+first probe's output was discarded; every later probe ran in a temp directory.
+
+**A single keystroke, with no confirmation and no explicit edit gesture, permanently replaced an
+acta reference in a tracked file.** This is the strongest available evidence for `UX2-C-01`,
+obtained by accident, on the real store. **It travels with US-N14 to the follow-on design batch**,
+which is where the confirmation-affordance ruling lives. Carried as a batch risk, not merely as an
+incident log.
+
+---
+
+## 17 · Inc-4 PRE-gate and the C-21 SPLIT — 2026-08-29
+
+### 17.1 — Where we are
+
+Inc-1/2/3 closed and committed (`4eaba35`, `fe50799`, `bdc4b6a`, recorded at `5f4816c`). The Inc-4
+pre-gate ran two independent lenses before a line of code was written, and **both changed the plan**.
+`Inc-4` is **struck and split** into `Inc-4a` (search core) and `Inc-4b` (seat and walk). `Inc-4a` is
+in implementation.
+
+### 17.2 — Why the cut moved (C-21, not preference)
+
+`C-21` fires when a gate amendment **adds, splits or redefines** an `AT-NNN` after the cut is set.
+Both happened here:
+
+- **`AT-024` REMOVED** from Inc-4. Its owner `LLR-N07.2.2b` is `Inc-5`'s. Executed over the derived
+  renderer set, **five of six renderers are query-insensitive today**, so `AT-024` executes RED in
+  Inc-4 for reasons no file in its budget can change.
+- **Three sealed `shall` clauses carried NO acceptance id** — the one-time rebind declaration,
+  `esc limpiar`, and `C-D6a`. A fourth, `UX-Q3-a`, never reached any LLR and is **deferred with a
+  carry**.
+
+Deferring the three owed ids was considered and **rejected** (`#D36`): shipping a sealed `shall` with
+no acceptance is the conditional-close defect wearing a scheduling excuse. The split pays for them.
+
+### 17.3 — The five findings that drove it
+
+| # | Finding | Verdict |
+|---|---|---|
+| 1 | `views/state.py` owed by `LLR-N07.1.1` and named by no cut | **A-97's exact recurrence**, one increment later, same file |
+| 2 | `qlower` pre-state is **9**, not the sealed 4; addresses all decayed | threshold restated 9 → 0, predicate is an **AST walk**, not a grep |
+| 3 | A **third** call site at `layered.py:600` — the fold pill's hit tail, Inc-3's surface, written after this spec sealed | new **`LLR-N07.1.3`**; `TC-026b` non-negotiable |
+| 4 | `TC-026`'s second clause **implemented nowhere** — the pill's count is unpinned | inherited Inc-3 gap; Inc-4a is where it turns dangerous |
+| 5 | `AT-052`'s observation surface **named nowhere** in the sealed text | `#D37` — `#map-pagination`, declared once |
+
+### 17.4 — Decisions taken in this pass (recorded, not asked)
+
+`#D36` split · `#D37` count region + C-D6a closed **structurally** (a single `active_hits` attribute
+with no `or` fallback, asserted by AST — refusing a green-before-code invariant, which is the
+vacuous-check defect) · `#D38` `esc` implements the behaviour rather than changing the string ·
+`#D39` `ViewState.query` removed, and **the A3 pre-authorization is UNSPENT and stays unspent** so no
+later increment inherits it.
+
+### 17.5 — Two errors of my own, recorded rather than folded in quietly
+
+1. **My `state.query` census was incomplete.** I swept `mapper/` and stopped; the architect found a
+   fourth reader at `tests/test_app.py:448`, the sole causal break. Verified and adopted.
+2. **I nearly inherited an obligation that is not this batch's.** `docs/ARCHITECTURE.md:159`'s
+   neighbouring row reads *"`open_external` … new, **Inc-4** owns it. Security-reviewed before Inc-4
+   signs off."* It is already shipped at `mapper/osopen.py:57` and owned by the **previous** batch.
+   A bare `Inc-N` does not resolve without a batch — `#D25` §1's ambiguity finding, generalised from
+   `Dn` ids to increment ids. Backlog `B-34` extended.
+
+### 17.6 — Carried, not fixed here
+
+- ⚠ **`AT-005` / `AT-006` have no node on disk**, while closed Inc-1's packet claims them "all
+  passed". Their substance is probably in the `test_hue_census_*` nodes, but those carry the
+  **functional** ids only, so the behavioural id → node edge does not exist and `C-18` is
+  unverifiable for both. **Routed to the whole-branch adversarial QA pass**, whose remit is exactly
+  "dual traceability intact". Not repaired inside Inc-4 — `#D26` says a code fix never discharges a
+  missing requirement, and re-opening a committed increment is scope creep.
+- `V16`: `~/.claude` and `~/.claude/skills` carry **uncommitted changes**. Reported as found; C-44
+  forbids sweeping up another session's work in a shared config repo.
+- A one-row Inc-CONFIRM table inside amendment `A-90` duplicates §5.4's row. They agree today.
+  Pre-existing; Inc-CONFIRM's to reconcile.
+- `UX-Q3-a` (committed vs editing tone) — deferred, no LLR ever stated it.
+- Two `Inc-5` defects found while measuring: `LLR-N07.2.2b`'s threshold is **false on a correct
+  implementation** (`text_differs=False, spans_differ=True`), and its derived renderer set sweeps in
+  a `Protocol` that raises on instantiation.
+
+## Record — commit attribution transition
+
+From **`9a773e4`** (Inc-CRUMB's source commit) onward, commits carry
+`Co-Authored-By: Claude Opus 5 (1M context)` in place of `Claude Fable 5`. The authoring session's
+harness guidance explicitly replaces earlier attribution guidance, and honest attribution of the
+session that actually wrote the code outranks cosmetic trailer consistency. Commits up to and
+including `57fb403` keep Fable 5. **No history was rewritten** — force-pushing to normalise a
+trailer is force-push-for-cosmetics. The split is deliberate, and this line is why it reads that
+way. Coordinator ruling 2026-09-10.

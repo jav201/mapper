@@ -152,7 +152,7 @@ async def test_at_n01d_required_and_empty_is_flagged(tmp_path):
             return [
                 s.render().plain
                 for s in inspector.query(".insp-label")
-                if "requerido" in s.render().plain
+                if "required" in s.render().plain
             ]
 
         before = flagged()
@@ -274,7 +274,7 @@ async def test_llr_n01_6_hintline_can_change_after_mount(tmp_path):
         await pilot.pause()
         screen = await _open(app, pilot, _seed(app))
         hint = screen.query_one(HintLine)
-        assert "navega" in hint.render().plain
+        assert "j/k/h/l move" in hint.render().plain
 
         hint.set_hint("completa «dueño» y la ficha queda cerrada", "ctrl+s")
         await pilot.pause()

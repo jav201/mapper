@@ -13,6 +13,16 @@ from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
 
 
+async def _until(pilot, ready, tries=20):
+    """`INC9N-CR-F3` (FLAKE-3, a test race, not a user race): `Input.value = ...` is applied by a message the
+    palette handles on a later turn, so one `pause()` sometimes asserts before it ran.  Poll the observable
+    (`palette._items`), at most `tries` pauses, and let the unchanged assertion judge what it settled on."""
+    for _ in range(tries):
+        if ready():
+            return
+        await pilot.pause()
+
+
 def _seed(app, map_id="palette-test"):
     g = Graph()
     g.add_node(Node(id="root", ficha=Ficha(title="Root")))
@@ -77,8 +87,9 @@ async def test_at_n03b_selecting_a_palette_entry_executes_it(tmp_path):
         palette = app.screen
         assert isinstance(palette, CommandPalette)
 
-        palette.query_one("#palette-input").value = "cobertura"
-        await pilot.pause()
+        # `A-112`: the seat's label for `coverage` is English since Inc-9.
+        palette.query_one("#palette-input").value = "coverage"
+        await _until(pilot, lambda: [b.action for b in palette._items] == ["coverage"])
         assert [b.action for b in palette._items] == ["coverage"], (
             "the query must narrow to exactly one entry for this test to be exact"
         )
@@ -86,7 +97,7 @@ async def test_at_n03b_selecting_a_palette_entry_executes_it(tmp_path):
         await pilot.press("enter")
         await pilot.pause()
         assert isinstance(app.screen, CoverageScreen), (
-            "selecting 'cobertura' must execute action_coverage, not merely close the palette"
+            "selecting 'coverage' must execute action_coverage, not merely close the palette"
         )
 
 
@@ -94,7 +105,7 @@ async def test_at_n03d_help_shows_exactly_the_active_scope(tmp_path):
     """AT-N03d — `?` shows the keys that work here, and none that do not.
 
     RED mutation: render the whole KEYMAP instead of `bindings_for(self.scope)`;
-    "consultar mapas" then appears in a map's help and the absence assertion fails.
+    the home door's label then appears in a map's help and the absence assertion fails.
     """
     app = MapperApp(tmp_path)
     async with app.run_test() as pilot:
@@ -110,7 +121,10 @@ async def test_at_n03d_help_shows_exactly_the_active_scope(tmp_path):
         shown = help_screen.query_one("#help-content").render().plain
         for binding in keymap.bindings_for(keymap.SCOPE_MAP):
             assert binding.label in shown, f"{binding.label} works here but help hides it"
-        assert "consultar mapas" not in shown, "help advertises a key that does nothing here"
+        # Read from the seat (`A-112`): a typed label went vacuous the day the
+        # seat's copy changed language.
+        door = next(b.label for b in keymap.KEYMAP if b.action == "consult")
+        assert door not in shown, "help advertises a key that does nothing here"
 
 
 async def test_palette_empty_query_dispatches_nothing(tmp_path):
@@ -127,8 +141,10 @@ async def test_palette_empty_query_dispatches_nothing(tmp_path):
         await pilot.press("ctrl+p")
         await pilot.pause()
         palette = app.screen
+        await _until(pilot, lambda: bool(palette._items))
+        assert palette._items, "the palette offered nothing before the query: the empty result below would be vacuous"
         palette.query_one("#palette-input").value = "zzzzznotacommand"
-        await pilot.pause()
+        await _until(pilot, lambda: palette._items == [])
         assert palette._items == []
         await pilot.press("enter")
         await pilot.pause()

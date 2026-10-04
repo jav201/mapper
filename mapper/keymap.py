@@ -8,7 +8,7 @@ accident (LLR-N03.1):
 ``key``     the Textual key name — what actually binds (``enter``, ``slash``).
 ``glyph``   the display form the operator reads (``↵``, ``/``).
 ``action``  the ``action_*`` method stem — what actually dispatches.
-``label``   Spanish prose — what the palette and help show.
+``label``   English prose — what the palette and help show (`A-112`).
 
 This module has no Textual dependency: it returns plain tuples and the screen turns
 them into ``Binding`` objects.  The dependency ban in ``docs/ARCHITECTURE.md`` §3
@@ -31,39 +31,89 @@ SCOPE_IMPORT = "import"
 SCOPE_PALETTE = "palette"
 SCOPE_HELP = "help"
 SCOPE_APP = "app"
+# LLR-N16.1.2 / `#D9`: the last two screens that bind the help chord.
+SCOPE_FACTORY = "factory"
+SCOPE_SETTINGS = "settings"
 
 # Screens whose bindings are NOT yet in this seat.  This is not decoration: it is
 # the exception list the conformance tests quantify over, so a screen leaving the
 # seat, or a new `tab` binding appearing on one of these, reddens a test instead of
 # passing unnoticed.
 UNMIGRATED_SCREENS = (
-    "FactoryScreen",
     "EditorScreen",
-    "SettingsScreen",
     "CoverageScreen",
 )
 
 # The only screens permitted to bind `tab`, and solely because they are not in the
 # seat yet.  `tab` belongs to focus traversal: a screen-level `tab` binding was
-# measured to produce 0 focus moves in 9 presses (LLR-N06.5).
-TAB_BINDING_EXCEPTIONS = ("SettingsScreen", "EditorScreen")
+# measured to produce 0 focus moves in 9 presses (LLR-N06.5).  `SettingsScreen`
+# left at Inc-9: `C-D9a`'s probe, with a working positive control, measured the
+# pre-drop bindings HOLDING focus on one target for all 9 presses, against 8
+# transitions once they were gone.  The drop was a REPAIR, not a neutral edit
+# (`tests/test_inc9.py`, `INC9-CR-F3`).
+TAB_BINDING_EXCEPTIONS = ("EditorScreen",)
 
 # Every group maps to exactly one scope.  Written down because Inc-1 generates
-# `BINDINGS` from it: an undeclared group is a key nobody owns.
+# `BINDINGS` from it: an undeclared group is a key nobody owns.  The order is the
+# key bar's order (`bar_group_order`), and the legend paints the same order.
+# `L3`: on home the doors (`open`) come BEFORE `maps`, in the bar and the legend.
 GROUP_SCOPE: dict[str, str] = {
     "doors": SCOPE_HOME,
-    "lista": SCOPE_HOME,
+    "list": SCOPE_HOME,
+    "exit": SCOPE_HOME,
     "nav": SCOPE_MAP,
     "node": SCOPE_MAP,
     "view": SCOPE_MAP,
-    "salir": SCOPE_MAP,
+    "leave": SCOPE_MAP,
     "repo": SCOPE_REPO,
     "plug": SCOPE_PLUG,
     "import": SCOPE_IMPORT,
+    # Before `app`: `keybar_groups` paints a scope's groups in THIS order, and
+    # the app-wide group closes every bar (`INC9-F6`, seen in the renders).
+    "tree": SCOPE_FACTORY,
+    "document": SCOPE_FACTORY,
+    "factory": SCOPE_FACTORY,
+    "settings": SCOPE_SETTINGS,
     "palette": SCOPE_PALETTE,
     "help": SCOPE_HELP,
     "app": SCOPE_APP,
 }
+
+# What each group is CALLED where the operator reads it: the key bar, the legend
+# and the palette (`K1`, `K4`).  The group id above is the seat's own handle and
+# names exactly one scope; the header is prose and two scopes may share one word
+# (`nav` on the map and `tree` in the factory are both `move`).
+GROUP_HEADER: dict[str, str] = {
+    "list": "maps",
+    "doors": "open",
+    "exit": "exit",
+    "nav": "move",
+    "node": "node",
+    "view": "view",
+    "leave": "leave",
+    "repo": "repo",
+    "plug": "connect repo",
+    "import": "import",
+    "tree": "move",
+    "document": "document",
+    "factory": "factory",
+    "settings": "components",
+    "palette": "palette",
+    "help": "help",
+    "app": "global",
+}
+
+
+def group_header(group: str) -> str:
+    """The header painted for *group* (key bar, legend, palette)."""
+    return GROUP_HEADER[group]
+
+
+def bar_group_order(scope: str) -> list[str]:
+    """The group ids a *scope* paints, in the key bar's order: the scope's own
+    groups in `GROUP_SCOPE` order, then the app-wide group that closes every bar.
+    The legend reads this too (`INC9-UX-F10`), so the two cannot disagree."""
+    return [g for g, s in GROUP_SCOPE.items() if s in (scope, SCOPE_APP)]
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,68 +136,130 @@ class KeyBinding:
 # the binding's scope — asserted at import time by tests/test_keymap.py.
 KEYMAP: list[KeyBinding] = [
     # -- home ---------------------------------------------------------------
-    KeyBinding("c", "c", "consult", "consultar mapas", "doors"),
-    KeyBinding("p", "p", "plug", "conectar repo", "doors"),
-    KeyBinding("n", "n", "construct", "construir mapa", "doors"),
-    KeyBinding("t", "t", "template", "desde plantilla", "doors"),
-    KeyBinding("i", "i", "import_csv", "importar csv", "doors"),
-    KeyBinding("f", "f", "factory", "fábrica", "doors"),
-    KeyBinding("r", "r", "resume", "retomar último", "doors"),
-    KeyBinding("s", "s", "settings", "componentes", "doors"),
-    KeyBinding("j", "j", "table_down", "bajar", "lista"),
-    KeyBinding("k", "k", "table_up", "subir", "lista"),
-    KeyBinding("q", "q", "quit", "salir", "lista"),
+    KeyBinding("c", "c", "consult", "browse maps", "doors"),
+    KeyBinding("p", "p", "plug", "connect repo", "doors"),
+    KeyBinding("n", "n", "construct", "build map", "doors"),
+    KeyBinding("t", "t", "template", "from template", "doors"),
+    KeyBinding("i", "i", "import_csv", "import csv", "doors"),
+    KeyBinding("f", "f", "factory", "factory", "doors"),
+    KeyBinding("r", "r", "resume", "resume last", "doors"),
+    KeyBinding("s", "s", "settings", "components", "doors"),
+    KeyBinding("j", "j", "table_down", "next map", "list"),
+    KeyBinding("k", "k", "table_up", "previous map", "list"),
+    # `INC9-UX-F11`: the home key bar has always said `↵ open`; the recents table
+    # answers it only while it holds focus, so the seat declares it and the
+    # screen answers it from anywhere on the screen.
+    KeyBinding("enter", "↵", "open_selected", "open map", "list"),
+    # Not a list action: it leaves the application.
+    KeyBinding("q", "q", "quit", "quit", "exit"),
     # -- map · navigation ---------------------------------------------------
-    KeyBinding("j", "j", "next_sibling", "siguiente", "nav"),
-    KeyBinding("k", "k", "prev_sibling", "anterior", "nav"),
-    KeyBinding("h", "h", "parent", "padre", "nav"),
-    KeyBinding("l", "l", "child", "hijo", "nav"),
-    KeyBinding("enter", "↵", "open_ficha", "abrir ficha", "nav"),
-    KeyBinding("slash", "/", "search", "buscar", "nav"),
+    KeyBinding("j", "j", "next_sibling", "next sibling", "nav"),
+    KeyBinding("k", "k", "prev_sibling", "previous sibling", "nav"),
+    KeyBinding("h", "h", "parent", "parent", "nav"),
+    KeyBinding("l", "l", "child", "child", "nav"),
+    KeyBinding("enter", "↵", "open_ficha", "open card", "nav"),
+    KeyBinding("slash", "/", "search", "search", "nav"),
+    # US-N07 `#D5b`.  `n` walks the live *coincidencias* set and `N` walks it
+    # backwards, in `nav` beside the `/` that produces the set.  `n` used to be
+    # `next_gap`, which moves to `M` in the `view` block below: the walk is the
+    # chord an operator reaches for several times per search, the coverage
+    # worklist is reached for once, and only one of the two can own the letter
+    # its Spanish label starts with.  Both labels are true in EVERY state, so the
+    # seat stays a static set and the whole-seat pin stays set equality (`#D10`).
+    KeyBinding("n", "n", "next_hit", "next match", "nav"),
+    KeyBinding("N", "N", "prev_hit", "previous match", "nav"),
     # -- map · node ---------------------------------------------------------
-    KeyBinding("a", "a", "add_child", "agregar hijo", "node"),
-    KeyBinding("d", "d", "open_documents", "documentos", "node"),
-    KeyBinding("x", "x", "archive", "archivar", "node"),
-    KeyBinding("u", "u", "undo", "deshacer", "node"),
-    KeyBinding("A", "A", "add_attachment", "agregar adjunto", "node"),
-    KeyBinding("X", "X", "remove_attachment", "quitar adjunto", "node"),
+    KeyBinding("a", "a", "add_child", "add child", "node"),
+    KeyBinding("d", "d", "open_documents", "documents", "node"),
+    KeyBinding("x", "x", "archive", "archive node", "node"),
+    KeyBinding("u", "u", "undo", "undo", "node"),
+    KeyBinding("A", "A", "add_attachment", "add attachment", "node"),
+    KeyBinding("X", "X", "remove_attachment", "remove attachment", "node"),
     # -- map · view ---------------------------------------------------------
-    KeyBinding("f", "f", "toggle_focus", "alternar foco", "view"),
-    KeyBinding("o", "o", "toggle_outline", "alternar outline", "view"),
-    KeyBinding("r", "r", "toggle_radial", "alternar radial", "view"),
-    KeyBinding("e", "e", "export_svg", "exportar svg", "view"),
-    KeyBinding("equals_sign", "=", "toggle_diff", "alternar diff", "view"),
-    KeyBinding("m", "m", "coverage", "cobertura", "view"),
-    KeyBinding("n", "n", "next_gap", "siguiente faltante", "view"),
-    KeyBinding("R", "R", "toggle_rail", "mostrar/ocultar rail", "view"),
-    KeyBinding("I", "I", "toggle_inspector", "mostrar/ocultar ficha", "view"),
-    KeyBinding("g", "g", "focus_rail", "ir al rail", "view"),
-    KeyBinding("z", "z", "collapse_branch", "plegar rama", "view"),
+    KeyBinding("f", "f", "toggle_focus", "focus branch", "view"),
+    KeyBinding("o", "o", "toggle_outline", "toggle outline", "view"),
+    KeyBinding("r", "r", "toggle_radial", "toggle mind map", "view"),
+    KeyBinding("e", "e", "export_svg", "export svg", "view"),
+    KeyBinding("equals_sign", "=", "toggle_diff", "show/hide diff", "view"),
+    KeyBinding("m", "m", "coverage", "coverage report", "view"),
+    # Relocated from `n` by `#D5b`.  Uppercase because the shifted-pair
+    # precedent is already in this seat (`A`/`X` beside `a`/`x`, `HJKL` beside
+    # `hjkl`) and `M` was free: of the uppercase letters only `A`, `H`, `I`,
+    # `J`, `K`, `L`, `R` and `X` were taken before this row.
+    KeyBinding("M", "M", "next_gap", "next incomplete", "view"),
+    KeyBinding("R", "R", "toggle_rail", "show/hide rail", "view"),
+    KeyBinding("I", "I", "toggle_inspector", "show/hide card", "view"),
+    KeyBinding("g", "g", "focus_rail", "go to rail", "view"),
+    KeyBinding("z", "z", "collapse_branch", "fold/unfold", "view"),
+    # US-N06 pan.  `hjkl` already navigates the tree in this scope and `⇧hjkl`
+    # moves the window over it — the shifted-pair precedent is already in the
+    # seat (`A`/`X` beside `a`/`x`).  Executed at `ea1fbf9` and re-derived at
+    # `954f8f3`: all four arrive as their own `event.key`, and of the uppercase
+    # letters only `A`, `I`, `R` and `X` were taken.
+    KeyBinding("H", "H", "pan_left", "pan left", "view"),
+    KeyBinding("J", "J", "pan_down", "pan down", "view"),
+    KeyBinding("K", "K", "pan_up", "pan up", "view"),
+    KeyBinding("L", "L", "pan_right", "pan right", "view"),
     # -- map · leaving ------------------------------------------------------
-    KeyBinding("q", "q", "home", "inicio", "salir"),
-    KeyBinding("escape", "esc", "back_or_home", "volver", "salir"),
+    KeyBinding("q", "q", "home", "home", "leave"),
+    KeyBinding("escape", "esc", "back_or_home", "back", "leave"),
     # -- repo ---------------------------------------------------------------
-    KeyBinding("j", "j", "next_sibling", "siguiente", "repo", priority=True),
-    KeyBinding("k", "k", "prev_sibling", "anterior", "repo", priority=True),
-    KeyBinding("q", "q", "home", "inicio", "repo", priority=True),
+    KeyBinding("j", "j", "next_sibling", "next branch", "repo", priority=True),
+    KeyBinding("k", "k", "prev_sibling", "previous branch", "repo", priority=True),
+    # It lands on the connect-repo screen, not home.
+    KeyBinding("q", "q", "home", "back", "repo", priority=True),
     # -- plug repo ----------------------------------------------------------
     # `escape` stays priority here: the screen's only widget is a text input the
     # operator must be able to abandon mid-typing.
-    KeyBinding("escape", "esc", "home", "volver", "plug", priority=True),
+    KeyBinding("escape", "esc", "home", "back", "plug", priority=True),
     # -- import preview -----------------------------------------------------
-    KeyBinding("s", "s", "save", "guardar mapa", "import"),
-    KeyBinding("escape", "esc", "home", "volver", "import"),
+    KeyBinding("s", "s", "save", "save map", "import"),
+    KeyBinding("escape", "esc", "home", "back", "import"),
     # -- palette (modal) ----------------------------------------------------
-    KeyBinding("enter", "↵", "run_selected", "ejecutar", "palette"),
-    KeyBinding("escape", "esc", "dismiss_none", "cerrar", "palette"),
+    # The footer reads these two as one `↑↓ move` pair.  Both rows carry the one
+    # word, so the pair never reads two ways.
+    KeyBinding("up", "↑", "move_up", "move", "palette"),
+    KeyBinding("down", "↓", "move_down", "move", "palette"),
+    KeyBinding("enter", "↵", "run_selected", "run", "palette"),
+    KeyBinding("escape", "esc", "dismiss_none", "close", "palette"),
     # -- help (modal) -------------------------------------------------------
     # Its own scope: borrowing the palette's bound `enter -> run_selected`, a
     # method HelpScreen does not define, which was a silent no-op.
-    KeyBinding("escape", "esc", "dismiss_none", "cerrar", "help"),
-    KeyBinding("q", "q", "dismiss_none", "cerrar", "help"),
+    KeyBinding("escape", "esc", "dismiss_none", "close", "help"),
+    KeyBinding("q", "q", "dismiss_none", "close", "help"),
+    # HLR-N16.4: every key that has an effect inside the legend is declared in
+    # it.  These six already scrolled the pane, undeclared, while the new
+    # vocabulary sections land below the fold.
+    KeyBinding("up", "↑", "legend_up", "scroll up", "help"),
+    KeyBinding("down", "↓", "legend_down", "scroll down", "help"),
+    KeyBinding("pageup", "pageup", "legend_page_up", "page up", "help"),
+    KeyBinding("pagedown", "pagedown", "legend_page_down", "page down", "help"),
+    KeyBinding("home", "home", "legend_home", "to top", "help"),
+    KeyBinding("end", "end", "legend_end", "to bottom", "help"),
+    # -- factory (LLR-N16.1.2, `#D9`) ----------------------------------------
+    # Migrated from the screen's own list with `priority` kept: every one of
+    # its bindings was `priority=True`, and the migration changes no dispatch.
+    KeyBinding("j", "j", "next_sibling", "next sibling", "tree", priority=True),
+    KeyBinding("k", "k", "prev_sibling", "previous sibling", "tree", priority=True),
+    KeyBinding("h", "h", "parent", "parent", "tree", priority=True),
+    KeyBinding("l", "l", "child", "child", "tree", priority=True),
+    KeyBinding("0", "0", "start_node", "back to start", "tree", priority=True),
+    KeyBinding("d", "d", "edit_doc", "edit document", "document", priority=True),
+    KeyBinding("i", "i", "import_office", "import office file", "document", priority=True),
+    KeyBinding("g", "g", "generate_office", "generate office file", "document", priority=True),
+    KeyBinding("q", "q", "home", "back", "factory", priority=True),
+    KeyBinding("escape", "esc", "home", "back", "factory", priority=True),
+    # -- settings (LLR-N16.1.2, `#D9`) ---------------------------------------
+    # No `tab`/`shift+tab` rows: the screen only re-declared Textual's own
+    # traversal, and `C-D9a` measured dropping them neutral.
+    KeyBinding("q", "q", "home", "back", "settings", priority=True),
+    KeyBinding("escape", "esc", "home", "back", "settings", priority=True),
     # -- app (available on every screen) ------------------------------------
-    KeyBinding("ctrl+p", "ctrl+p", "palette", "paleta de acciones", "app"),
-    KeyBinding("question_mark", "?", "help", "ayuda", "app"),
+    KeyBinding("ctrl+p", "ctrl+p", "palette", "palette", "app"),
+    # Not priority, on purpose (`T3`, `EN-Q3`): a focused `Input` consumes `?` before a
+    # non-priority binding is asked, so `?` types in every text field and opens the
+    # legend everywhere else.  A priority row would take the key from the field.
+    KeyBinding("question_mark", "?", "help", "legend", "app"),
 ]
 
 
@@ -156,14 +268,21 @@ KEYMAP: list[KeyBinding] = [
 # screens and the tests read one source instead of each passing a flag.
 MODAL_SCOPES = (SCOPE_PALETTE, SCOPE_HELP)
 
+# `E4`: a scope whose only focusable control is a text field.  The app-scope
+# actions named here still exist there (the palette runs them), but the KEY that
+# binds them is a printable character the field consumes first, so the key bar and
+# the legend must not list a chord that only ever types.
+TEXT_ONLY_SCOPES: dict[str, tuple[str, ...]] = {
+    SCOPE_PLUG: ("help",),
+}
 
-def bindings_for(scope: str, *, include_app: bool | None = None) -> list[KeyBinding]:
-    """Every binding the given scope offers.
 
-    App-scope bindings are reachable from every ordinary screen, so they are
-    included — that is what makes "help shows exactly the keys that work here"
-    true rather than aspirational.  Modal scopes are the exception.
-    """
+def _typed_not_bound(binding: KeyBinding, scope: str) -> bool:
+    """True when *scope*'s text field swallows *binding*'s key (`E4`)."""
+    return binding.scope == SCOPE_APP and binding.action in TEXT_ONLY_SCOPES.get(scope, ())
+
+
+def _scope_rows(scope: str, include_app: bool | None) -> list[KeyBinding]:
     if include_app is None:
         include_app = scope not in MODAL_SCOPES
     wanted = {scope}
@@ -172,17 +291,35 @@ def bindings_for(scope: str, *, include_app: bool | None = None) -> list[KeyBind
     return [b for b in KEYMAP if b.scope in wanted]
 
 
+def bindings_for(scope: str, *, include_app: bool | None = None) -> list[KeyBinding]:
+    """Every binding the given scope offers.
+
+    App-scope bindings are reachable from every ordinary screen, so they are
+    included — that is what makes "help shows exactly the keys that work here"
+    true rather than aspirational.  Modal scopes are the exception, and so is a
+    text-only scope's typed key (`E4`): the connect-repo field consumes `?`, so the
+    row is not offered here.  The palette reads `_scope_rows` instead: its legend
+    action still runs from that screen.
+    """
+    return [b for b in _scope_rows(scope, include_app) if not _typed_not_bound(b, scope)]
+
+
 def textual_bindings(
     scope: str, *, include_app: bool | None = None
 ) -> list[tuple[str, str, str, bool]]:
     """`(key, action, label, priority)` tuples for a screen's `BINDINGS`.
 
     Returned as plain tuples so this module stays free of Textual; the screen
-    converts them into `Binding` objects.
+    converts them into `Binding` objects.  A text-only scope keeps its typed key
+    here (`E4`): the binding is dispatch, not a listing.  The field swallows the
+    typed key, and focus does not leave the field by Tab, shift+Tab or a click
+    (measured), so the binding is reachable only programmatically today
+    (`app.set_focus(None)`).  Only `bindings_for` (the legend) and the key bar
+    stop advertising it.
     """
     return [
         (b.key, b.action, b.label, b.priority)
-        for b in bindings_for(scope, include_app=include_app)
+        for b in _scope_rows(scope, include_app)
     ]
 
 
@@ -191,23 +328,51 @@ def groups_for_keybar(
 ) -> list[tuple[str, list[tuple[str, str]]]]:
     """Return keybindings grouped for `darkside.keybar`.
 
-    Each tuple is (group_name, [(glyph, label), ...]) in the requested order.
+    Each tuple is (header, [(glyph, label), ...]) in the requested order, the
+    header being what the operator reads (`group_header`), not the group id.
     The keybar shows the *glyph*, never the Textual key name — nobody presses a
-    key called "question_mark".
+    key called "question_mark".  When the groups name exactly one concrete scope
+    that is text-only (`E4`), the rows its field swallows are left out.
     """
+    own = {GROUP_SCOPE[g] for g in active_groups} - {SCOPE_APP}
+    scope = own.pop() if len(own) == 1 else None
     group_bindings: dict[str, list[tuple[str, str]]] = {}
     for binding in KEYMAP:
         if binding.group not in active_groups:
             continue
+        if scope is not None and _typed_not_bound(binding, scope):
+            continue
         group_bindings.setdefault(binding.group, []).append(
             (binding.glyph, binding.label)
         )
-    return [(name, group_bindings.get(name, [])) for name in active_groups]
+    return [(group_header(name), group_bindings.get(name, [])) for name in active_groups]
+
+
+def hint_pair(scope: str, action: str, key: str | None = None) -> str:
+    """`"glyph label"` of the ONE seat row *scope* binds to *action* (narrowed by
+    *key* when an action has two chords, as `home` does in the factory).
+
+    Key hints painted outside the key bar -- a screen's hint line, a modal's
+    footer -- are built from this, so the word beside a key is the seat's word
+    (`K3`): the same key never reads two ways on one screen.
+    """
+    rows = [
+        b for b in KEYMAP
+        if b.scope == scope and b.action == action and (key is None or b.key == key)
+    ]
+    if len(rows) != 1:
+        raise KeyError((scope, action, key, len(rows)))
+    return f"{rows[0].glyph} {rows[0].label}"
+
+
+def label_for(scope: str, action: str) -> str:
+    """The label of the one seat row *scope* binds to *action*."""
+    return hint_pair(scope, action).split(" ", 1)[1]
 
 
 def palette_items(query: str, scope: str = SCOPE_APP) -> list[KeyBinding]:
     """Fuzzy-filter the bindings reachable from *scope* by glyph, label and action."""
-    candidates = bindings_for(scope)
+    candidates = _scope_rows(scope, None)
     q = query.lower().strip()
     if not q:
         return candidates

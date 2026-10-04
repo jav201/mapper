@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import math
 
+from rich.console import Console
 from rich.text import Text
 
 from mapper import darkside
 from mapper.canvas import Canvas
 from mapper.model import Graph
+from mapper.views.layered import overflow_phrase
+from mapper.views.state import ViewState
 
 
 # Achromatic branch tints — KMBlue is reserved for the active path.
@@ -15,7 +18,7 @@ from mapper.model import Graph
 # nearly invisible as text on the black canvas.
 _GREYS = (
     darkside.INK,
-    "#a3a3a3",
+    darkside.ASH,
     darkside.MUT,
 )
 
@@ -91,170 +94,357 @@ def _degraded(n: int) -> Text:
     out = Text()
     out.append("◆ ", style=darkside.INK)
     out.append("mapper", style=darkside.WORDMARK)
-    out.append(" · mapa mental", style=darkside.MUT)
+    out.append(f" · {darkside.VIEW_NAMES['radial']}", style=darkside.MUT)
     out.append(chr(10) * 2)
     out.append(
-        f"mapa de {n} nodos: supera el límite de {MAX_RENDER_NODES} nodos. "
-        "Se omitió el dibujo radial completo (nodos, aristas y etiquetas).",
+        f"map of {n} nodes exceeds the {MAX_RENDER_NODES}-node limit; "
+        "the full radial drawing (nodes, edges and labels) was not drawn.",
         style=darkside.WARN,
     )
     return out
 
 
+def _header_line(unpainted: int) -> Text:
+    """THIS renderer's first line: the wordmark, plus the overflow declaration.
+
+    Factored out of `_paint` so `header_rows` prices the SAME line the canvas
+    paints.  A second spelling of it in the charge function is the shape this
+    batch has already paid for twice -- `DECL-118-TWICE` names it directly:
+    ANYTHING SPELLED TWICE WILL DRIFT, DERIVE IT.  The charge and the paint now
+    have one source, so a header that grows cannot leave the charge behind.
+    """
+    header = Text()
+    header.append("◆ ", style=darkside.INK)
+    header.append("mapper", style=darkside.WORDMARK)
+    header.append(f" · {darkside.VIEW_NAMES['radial']}", style=darkside.MUT)
+    if unpainted:
+        header.append(f"  {overflow_phrase(unpainted)}", style=darkside.INK)
+    return header
+
+
+def header_rows(graph: Graph, w: int, wrap_w: int) -> int:
+    """PHYSICAL rows THIS renderer's first line occupies at `wrap_w`.
+
+    CLOSES THE DECLARED RESIDUE.  Until `S-D`, `MapScreen._header_rows_for`
+    charged radial with `layered.header_rows` as an EXPLICIT fallback -- stated
+    in that method and pinned by an arm, so this fix reddens the arm rather than
+    closing the hole silently.  The two headers are not the same line: layered's
+    is a wordmark plus a coverage meter plus an overflow declaration, this one is
+    `◆ mapper · mind map` plus the same declaration.  Every overcharged row is
+    a body row the region could have shown and the renderer was never told about.
+
+    RENDERED, NOT DIVIDED (`B-61`).  The same `Console.render_lines` instrument
+    `outline.header_rows` and `_fit` use.  A `ceil(cells / w)` formula prices the
+    line short of the wrap the widget actually performs, because Rich
+    WORD-WRAPS -- and a formula standing in for a measurement is precisely the
+    defect `B-61` records, twice already in this batch.  Measured, this header
+    takes TWO physical rows at 24x20 and 30x16, so returning the 1 a narrow
+    sweep happens to show would be wrong as well as unmeasured.
+
+    THE WORST CASE IS CHARGED, NOT THE CURRENT ONE, matching
+    `layered.header_rows`.  The line's length depends on `unpainted`, so pricing
+    today's value would make the charge vary with what the frame happened to
+    show.  `unpainted = len(graph.nodes)` is the longest the declaration can get,
+    and charging it is what makes the number stable across a repaint.
+
+    NO FIXED-POINT LOOP IS NEEDED HERE, and the reason is structural rather than
+    incidental: `painted` is computed in `_paint` BEFORE the header exists and
+    takes no input from it, so there is no feedback edge.  `outline` needs its
+    loop because its declaration is spent from the same budget its body is
+    fitted into; this one is not.
+
+    `graph` and `w` are used and unused respectively, and the signature still
+    matches `layered.header_rows` and `outline.header_rows` exactly so
+    `_canvas_size` can dispatch on the renderer without special-casing a shape.
+    """
+    console = Console(width=max(1, wrap_w))
+    line = _header_line(len(graph.nodes))
+    return max(1, len(console.render_lines(line, pad=False)))
+
+
+def _paint(graph: Graph, state: ViewState) -> tuple[Text, frozenset[str]]:
+    """Render the map AND report which nodes survived onto the canvas.
+
+    THE ONE PASS BOTH `render` AND `painted_ids` CONSUME, for the reason
+    `outline` shares its row pass: two passes would be two definitions of
+    "painted", and `B-60` is exactly what that costs -- the canvas and the strip
+    declaring different totals for the same frame.
+    """
+    selected_id, w, h = state.selected_id, state.w, state.h
+    # RESOLVED ids, decided by `mapper.search` (HLR-N07.1).  This renderer
+    # evaluates no query predicate of its own -- it never sees the query.
+    hits = state.hits
+    if graph.root_id is None:
+        return Text("(no map loaded)"), frozenset()
+    if len(graph.nodes) > MAX_RENDER_NODES:
+        return _degraded(len(graph.nodes)), frozenset()
+
+    inner = w - 2
+    body_h = h - 4
+    cv = Canvas(
+        inner, body_h,
+        tones=darkside.tone_set(), fallback=darkside.MUT,
+    )
+
+    cx0, cy0 = max(10, inner // 5), body_h // 2
+    pos: dict[str, tuple[int, int]] = {}
+    branch_of: dict[str, str] = {}
+    index = _child_index(graph)
+    parents = _parent_index(graph)
+    # Runs before place and tag, so those two never meet a cyclic graph.
+    leaves = _leaf_counts(index, [graph.root_id, *graph.nodes, *index])
+
+    def place(nid: str, level: int, a0: float, a1: float) -> None:
+        stack = [(nid, level, a0, a1)]
+        while stack:
+            cur, lv, lo, hi = stack.pop()
+            a = (lo + hi) / 2
+            r = lv * max(10, inner // 4)
+            squash = min(0.55, max(0.3, cy0 / max(1, r)))
+            x = max(0, min(inner - 1, int(cx0 + r * math.cos(a))))
+            y = max(0, min(body_h - 1, int(cy0 + r * math.sin(a) * squash)))
+            pos[cur] = (x, y)
+            kids = index.get(cur)
+            if not kids:
+                continue
+            total = sum(leaves[c] for c in kids) or 1
+            acc = lo
+            spans = []
+            for c in kids:
+                frac = leaves[c] / total
+                spans.append((c, lv + 1, acc, acc + frac * (hi - lo)))
+                acc += frac * (hi - lo)
+            # Reversed, so the LIFO stack still visits children left to right.
+            stack.extend(reversed(spans))
+
+    # Place root
+    pos[graph.root_id] = (cx0, cy0)
+    children = index.get(graph.root_id, [])
+    total = sum(leaves[c] for c in children) or 1
+    span = 1.75
+    acc = -span / 2
+    for i, ch in enumerate(children):
+        frac = leaves[ch] / total
+        branch_of[ch] = _GREYS[i % len(_GREYS)]
+        place(ch, 1, acc, acc + frac * span)
+        acc += frac * span
+
+    # Compute active path from root to selected node.
+    on_path: set[str] = set()
+    if selected_id and selected_id in graph.nodes:
+        current = selected_id
+        while current is not None:
+            on_path.add(current)
+            current = parents.get(current)
+
+    # Assign an achromatic grey tint to each top-level branch.
+    for i, ch in enumerate(children):
+        branch_of[ch] = _GREYS[i % len(_GREYS)]
+
+    def tag(nid: str, grey: str) -> None:
+        stack = [nid]
+        while stack:
+            cur = stack.pop()
+            branch_of[cur] = grey
+            stack.extend(index.get(cur, ()))
+
+    for i, ch in enumerate(children):
+        tag(ch, _GREYS[i % len(_GREYS)])
+    branch_of[graph.root_id] = darkside.INK
+
+    # Draw edges as simple lines in dot space.
+    for nid in graph.nodes:
+        parent = parents.get(nid)
+        if parent is None or parent not in pos or nid not in pos:
+            continue
+        x0, y0 = pos[parent]
+        x1, y1 = pos[nid]
+        if nid in on_path and parent in on_path:
+            hue = darkside.ACCENT
+        else:
+            hue = branch_of.get(nid, darkside.MUT)
+        # Draw a few dots along the line.
+        steps = max(1, int(math.hypot(x1 - x0, y1 - y0) * 4))
+        for s in range(steps + 1):
+            t = s / steps
+            dx = x0 + (x1 - x0) * t
+            dy = y0 + (y1 - y0) * t
+            cv.dots[(int(dx * 2), int(dy * 4))] = hue
+
+    # THE CELL-OWNERSHIP LEDGER. `Canvas.put` is LAST-WRITE-WINS and records
+    # no owner, so a later pill silently overwrites an earlier one's cells.
+    # Deriving the painted set from `pos` -- which nodes were PLACED -- is
+    # therefore `M-N06.3-b`: measured at 30x6 on `legacy`, the canvas region is
+    # ZERO rows, the replay paints 0 of 8 and placement claims all 8 -- it
+    # over-declares by EIGHT of eight, because placement says where a pill was
+    # WRITTEN and not whether it SURVIVED. (The "6 of 8" that stood here was a
+    # stale carry of a DIFFERENT quantity under a different predicate -- the
+    # architect's partly-overwritten pill count, not the over-declaration.)
+    # These two dicts replay the writes so the question can be answered from
+    # what is still on the canvas.
+    owners: dict[tuple[int, int], str] = {}
+    title_cells: dict[str, list[tuple[int, int]]] = {}
+    # Draw nodes as pills.
+    for nid in graph.nodes:
+        if nid not in pos:
+            continue
+        x, y = pos[nid]
+        node = graph.nodes[nid]
+        sel = nid == selected_id
+        # Coerce BEFORE slicing.  The title is file-derived and this is the
+        # only place it enters the canvas; `save_svg` then snapshots those
+        # bytes to a file that leaves the machine, where the terminal's own
+        # escaping does not travel with it.
+        title = darkside.plain(node.ficha.title)[:18]
+        cw = len(title) + 3
+        x = max(0, min(inner - cw, x - cw // 2))
+        y = max(0, min(body_h - 1, y))
+        pill_bg = darkside.PANEL
+        for j in range(cw):
+            cv.bgs[(x + j, y)] = pill_bg
+        block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
+        for j, ch in enumerate(" " + title):
+            if sel:
+                style = block
+            elif nid in hits:
+                # Selection is painted ON TOP of a hit, as in the layered
+                # renderer -- which paints the hit style for EVERY cell of
+                # the title, and so does this.
+                #
+                # An earlier revision guarded this with `and j`, to "keep the
+                # leading pad cell out of the highlight".  That conjunct was
+                # DEAD and the claim was false: cell `j == 0` is `(x, y)`,
+                # and the marker `put` below overwrites it unconditionally
+                # for every node, hit or not.  Measured over 225
+                # configurations, dropping the conjunct leaves the emitted
+                # spans byte-identical -- so it guarded nothing and diverged
+                # from `layered` for no reason.
+                style = f"{darkside.INK} on {darkside.STEP}"
+            elif j == 0:
+                style = ""
+            elif nid in on_path:
+                style = darkside.ACCENT
+            else:
+                style = branch_of.get(nid, darkside.MUT)
+            cv.put(x + j, y, ch, style)
+            # ONLY IF THE PUT LANDED. `Canvas.put` refuses a cell outside its
+            # bounds, and `body_h` can be ZERO OR NEGATIVE. Measured: at a
+            # 50x16 terminal `_canvas_size` hands this renderer h=4, so `h - 4`
+            # is 0; at 30x16 it hands h=3 and `body_h` is -1. Either way the
+            # canvas holds no rows at all. (The 30x16/h=4 pairing that stood
+            # here was wrong -- right defect, wrong size.) Recording ownership unconditionally
+            # credited nodes with cells the canvas never accepted, and the frame
+            # then showed none of them: measured, `alm` declared painted at five
+            # sizes on `legacy` while the region was blank below the header.
+            #
+            # Membership is an EXACT test rather than a copy of `put`'s
+            # condition: `ch` here is always a single character, so bounds are
+            # the only refusal, and an out-of-bounds cell cannot have been stored
+            # by any earlier node either. Re-spelling the condition is the thing
+            # that would drift.
+            if j:
+                # THE DEMAND IS RECORDED UNCONDITIONALLY, AND THE ORDER HERE IS
+                # THE WHOLE POINT. Gating this append too -- as the first version
+                # did -- meant a title cell clipped by the CANVAS EDGE never
+                # entered the requirement set at all, so `all(...)` never
+                # examined it. The node was not failed; its requirement was
+                # quietly REDUCED to the cells that happened to fit, and it was
+                # then declared painted with its last character shorn off.
+                #
+                # Measured at `legacy` 20x30, where `inner` is 18 and the root
+                # pill needs 21: the frame showed `◆Sistema ERP Legac` and `erp`
+                # was declared PAINTED. Over-declaration in the dangerous
+                # direction -- `LLR-N06.3.3` makes that absence from the hidden
+                # set a positive claim the operator can read it.
+                #
+                # The ledger caught PILL-ON-PILL clipping all along; it was
+                # CANVAS-EDGE clipping it excused.
+                title_cells.setdefault(nid, []).append((x + j, y))
+            if (x + j, y) not in cv.cells:
+                continue
+            owners[(x + j, y)] = nid
+        marker = "◆" if nid == graph.root_id else "●"
+        if sel:
+            marker_style = block
+        elif nid in on_path:
+            marker_style = darkside.ACCENT
+        elif nid == graph.root_id:
+            marker_style = darkside.INK
+        else:
+            marker_style = branch_of.get(nid, darkside.MUT)
+        cv.put(x, y, marker, marker_style)
+        if (x, y) in cv.cells:
+            owners[(x, y)] = nid
+
+    # RADIAL'S PAINTED PREDICATE, STATED HERE AND NOT BORROWED (`02m` 7.3).
+    # A node is painted when EVERY cell of its title image is still owned by
+    # it after the replay -- i.e. the operator can read the whole label.
+    # Outline's predicate (the full title sought in the frame) does not
+    # transfer: radial TRUNCATES to 18 cells, so a full-title trace
+    # under-counts -- measured 0 of 8 at five sizes where the frame plainly
+    # shows pills. Layered's does not transfer either: it anchors on card
+    # columns radial has no equivalent of.
+    #
+    # A cell outside the canvas is dropped by `put`, so it never enters
+    # `owners` and the node fails this test. That sentence has been false TWICE
+    # and is now true, and both corrections are worth keeping: first the ledger
+    # recorded unconditionally while the comment described `put`'s behaviour;
+    # then the gate was raised one line too high, so a clipped cell never entered
+    # the REQUIREMENT set either and the node's demand was quietly reduced to the
+    # cells that fit. The demand is now recorded unconditionally and only
+    # OWNERSHIP is gated, which is what makes the sentence hold.
+    painted = frozenset(
+        nid for nid, cells in title_cells.items()
+        if cells and all(owners.get(c) == nid for c in cells)
+    )
+
+    lines = [Text()]
+    # BOTH DECLARING SURFACES, not just the strip (`LLR-N06.3.5`).  A canvas that
+    # hides nodes and says nothing is not merely unhelpful: `LLR-N06.3.3` makes
+    # silence mean *nothing is hidden*, so it asserts a smaller map than the one
+    # the operator opened.
+    #
+    # The SENTENCE is consumed from `layered.overflow_phrase`, never re-spelled
+    # (`F7`).  Radial is the renderer that would have made it a FOURTH copy.
+    #
+    # No fixed-point loop is needed here, and the REASON matters because the one
+    # that stood here was false. It claimed "the header can never evict a body
+    # row" -- but the header renders into a wrapping `Static` and MEASURED
+    # occupies two physical rows at 24x20 and 30x16. That is `B-61` again, the
+    # same formula-for-a-measurement `app.py` already records failing once.
+    #
+    # The conclusion survives on a STRONGER ground: `painted` is computed ABOVE,
+    # before this header exists, and takes NO INPUT from it. There is no feedback
+    # edge, so no fixed point is possible in principle -- not merely unreached in
+    # practice. `outline` needs its loop because its declaration is spent from
+    # the same budget its body is fitted into; this one is not.
+    unpainted = len(graph.nodes) - len(painted)
+    lines[0] = _header_line(unpainted)
+    lines.extend(cv.rows())
+
+    result = Text()
+    for i, row in enumerate(lines[:h]):
+        if i:
+            result.append("\n")
+        result.append(row)
+    return result, painted
+
+
+def painted_ids(graph: Graph, state: ViewState) -> frozenset[str]:
+    """The ids this renderer's own geometry says reached the canvas.
+
+    A module-level PURE function, deliberately not an `IRenderer` member, for
+    the reason `layered.painted_ids` records: the Protocol is
+    `runtime_checkable`, so a second member would flip every shipped renderer to
+    `isinstance -> False`, and a side-channel attribute set by `render` is
+    cross-contaminated by the export call site, which renders the same
+    long-lived renderer at a different size.
+    """
+    return _paint(graph, state)[1]
+
+
 class RadialRenderer:
     """Render a Graph as a radial mind map."""
 
-    def render(
-        self,
-        graph: Graph,
-        selected_id: str | None = None,
-        w: int = 80,
-        h: int = 24,
-        **kwargs,
-    ) -> Text:
-        if graph.root_id is None:
-            return Text("(no map loaded)")
-        if len(graph.nodes) > MAX_RENDER_NODES:
-            return _degraded(len(graph.nodes))
-
-        inner = w - 2
-        body_h = h - 4
-        cv = Canvas(inner, body_h)
-        cv.dots = {}
-        cv.bgs = {}
-
-        cx0, cy0 = max(10, inner // 5), body_h // 2
-        pos: dict[str, tuple[int, int]] = {}
-        branch_of: dict[str, str] = {}
-        index = _child_index(graph)
-        parents = _parent_index(graph)
-        # Runs before place and tag, so those two never meet a cyclic graph.
-        leaves = _leaf_counts(index, [graph.root_id, *graph.nodes, *index])
-
-        def place(nid: str, level: int, a0: float, a1: float) -> None:
-            stack = [(nid, level, a0, a1)]
-            while stack:
-                cur, lv, lo, hi = stack.pop()
-                a = (lo + hi) / 2
-                r = lv * max(10, inner // 4)
-                squash = min(0.55, max(0.3, cy0 / max(1, r)))
-                x = max(0, min(inner - 1, int(cx0 + r * math.cos(a))))
-                y = max(0, min(body_h - 1, int(cy0 + r * math.sin(a) * squash)))
-                pos[cur] = (x, y)
-                kids = index.get(cur)
-                if not kids:
-                    continue
-                total = sum(leaves[c] for c in kids) or 1
-                acc = lo
-                spans = []
-                for c in kids:
-                    frac = leaves[c] / total
-                    spans.append((c, lv + 1, acc, acc + frac * (hi - lo)))
-                    acc += frac * (hi - lo)
-                # Reversed, so the LIFO stack still visits children left to right.
-                stack.extend(reversed(spans))
-
-        # Place root
-        pos[graph.root_id] = (cx0, cy0)
-        children = index.get(graph.root_id, [])
-        total = sum(leaves[c] for c in children) or 1
-        span = 1.75
-        acc = -span / 2
-        for i, ch in enumerate(children):
-            frac = leaves[ch] / total
-            branch_of[ch] = _GREYS[i % len(_GREYS)]
-            place(ch, 1, acc, acc + frac * span)
-            acc += frac * span
-
-        # Compute active path from root to selected node.
-        on_path: set[str] = set()
-        if selected_id and selected_id in graph.nodes:
-            current = selected_id
-            while current is not None:
-                on_path.add(current)
-                current = parents.get(current)
-
-        # Assign an achromatic grey tint to each top-level branch.
-        for i, ch in enumerate(children):
-            branch_of[ch] = _GREYS[i % len(_GREYS)]
-
-        def tag(nid: str, grey: str) -> None:
-            stack = [nid]
-            while stack:
-                cur = stack.pop()
-                branch_of[cur] = grey
-                stack.extend(index.get(cur, ()))
-
-        for i, ch in enumerate(children):
-            tag(ch, _GREYS[i % len(_GREYS)])
-        branch_of[graph.root_id] = darkside.INK
-
-        # Draw edges as simple lines in dot space.
-        for nid in graph.nodes:
-            parent = parents.get(nid)
-            if parent is None or parent not in pos or nid not in pos:
-                continue
-            x0, y0 = pos[parent]
-            x1, y1 = pos[nid]
-            if nid in on_path and parent in on_path:
-                hue = darkside.ACCENT
-            else:
-                hue = branch_of.get(nid, darkside.MUT)
-            # Draw a few dots along the line.
-            steps = max(1, int(math.hypot(x1 - x0, y1 - y0) * 4))
-            for s in range(steps + 1):
-                t = s / steps
-                dx = x0 + (x1 - x0) * t
-                dy = y0 + (y1 - y0) * t
-                cv.dots[(int(dx * 2), int(dy * 4))] = hue
-
-        # Draw nodes as pills.
-        for nid in graph.nodes:
-            if nid not in pos:
-                continue
-            x, y = pos[nid]
-            node = graph.nodes[nid]
-            sel = nid == selected_id
-            title = node.ficha.title[:18]
-            cw = len(title) + 3
-            x = max(0, min(inner - cw, x - cw // 2))
-            y = max(0, min(body_h - 1, y))
-            pill_bg = darkside.PANEL
-            for j in range(cw):
-                cv.bgs[(x + j, y)] = pill_bg
-            block = f"bold {darkside.GROUND} on {darkside.ACCENT}"
-            for j, ch in enumerate(" " + title):
-                if sel:
-                    style = block
-                elif j == 0:
-                    style = ""
-                elif nid in on_path:
-                    style = darkside.ACCENT
-                else:
-                    style = branch_of.get(nid, darkside.MUT)
-                cv.put(x + j, y, ch, style)
-            marker = "◆" if nid == graph.root_id else "●"
-            if sel:
-                marker_style = block
-            elif nid in on_path:
-                marker_style = darkside.ACCENT
-            elif nid == graph.root_id:
-                marker_style = darkside.INK
-            else:
-                marker_style = branch_of.get(nid, darkside.MUT)
-            cv.put(x, y, marker, marker_style)
-
-        lines = [Text()]
-        header = Text()
-        header.append("◆ ", style=darkside.INK)
-        header.append("mapper", style=darkside.WORDMARK)
-        header.append(" · mapa mental", style=darkside.MUT)
-        lines[0] = header
-        lines.extend(cv.rows())
-
-        result = Text()
-        for i, row in enumerate(lines[:h]):
-            if i:
-                result.append("\n")
-            result.append(row)
-        return result
+    def render(self, graph: Graph, state: ViewState) -> Text:
+        return _paint(graph, state)[0]

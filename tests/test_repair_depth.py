@@ -37,6 +37,7 @@ from mapper import darkside
 from mapper.app import MapperApp, MapScreen
 from mapper.mermaid import parse
 from mapper.model import Document, Edge, Ficha, Graph, Node
+from mapper.views.state import ViewState
 from mapper.screens.factory import FactoryScreen
 from mapper.store import MapStore
 from mapper.views import LayeredRenderer, OutlineRenderer, RadialRenderer
@@ -90,19 +91,86 @@ FACTORY_TREE_BOUND_SECONDS = 8.0
 # reproduces the one that produced them.
 GOLDEN_SIZES = ((140, 45), (80, 24), (140, 8), (300, 120))
 
+# Inc-9b (A-112 "Split"): the Layered and Radial keys were RE-CAPTURED for the
+# header's English name, and ONLY for it.  Bounded BEFORE the re-capture, against
+# `git show 77200b8:` of both renderers: at every one of the eight keys exactly
+# ONE row differs -- row 0, the header -- the row count is unchanged, and the
+# old copy of the renderer reproduces the digest that was pinned (so the method
+# matches the pin's).  Layered: `árbol legacy` -> `atlas . legacy tree`;
+# Radial: `mapa mental` -> `mind map`.  The four Outline keys are unmoved: its
+# header already spelled `outline`, and were NOT re-captured.
+# EN-3: the eight Layered and Outline digests below were RE-DERIVED when the views' labels became English; the four
+# Radial digests did not move.  Both sides were rendered by this file's own helpers (`_legacy_graph`, `_fingerprint`,
+# `selected_id="fin"`): the base tree's digests equal the ones pinned before this change, so the harness reads the same
+# thing.  Each render was cut into (substring, style) segments; with only `sin acta -> no record` (the card chip),
+# `nodos -> nodes`, `sin acta -> no record` (the collapsed-branch note) and `fuera de vista -> out of view` (the overflow
+# declaration) applied to the base segments, the two segment lists are identical at all twelve keys.  The card chip is
+# padded to the same width, so no cell moved; the declaration is 3 cells shorter and the branch note 1 cell longer.
 MASTER_LEGACY_DIGESTS = {
-    ("LayeredRenderer", 140, 45): "a76157aa1fe1c5da5cfc6dfc1ede7bf32b0a06b41245476840664cea7ee09ca9",
-    ("LayeredRenderer", 80, 24): "5a519c0c42a831f2d23ba4074932787a413db2c0d3648d3f9cae6c9d432c0aec",
-    ("LayeredRenderer", 140, 8): "8383658991105a00895d489bfcc3aa709bc66f444d00a34e1b605e0114e0c976",
-    ("LayeredRenderer", 300, 120): "e133509b464d85d5d34256468c9832abc014699ab581283ae91ee939779bd320",
-    ("OutlineRenderer", 140, 45): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
-    ("OutlineRenderer", 80, 24): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
-    ("OutlineRenderer", 140, 8): "5ec6a1051d11fbbb213efadc4f7efafa5487512cbd9fd597b971b4b0b24a022f",
-    ("OutlineRenderer", 300, 120): "2d71af9ac6817c2441d152ba2fb1758e9b75789ce2bac2975fd1cff5f980d201",
-    ("RadialRenderer", 140, 45): "b44357e5a057041da634de33ccda30b3e982fc9e55619ac7d09bb582dc26f857",
-    ("RadialRenderer", 80, 24): "6238cb3ccb0c60a9c2679c144808ad35fa8ac614f3c2f7ea2412df16cad36b79",
-    ("RadialRenderer", 140, 8): "25a768627fe7e656c3cb2932b04cc6a318c33822118ecaa391869ae78840171d",
-    ("RadialRenderer", 300, 120): "ad716cb2c7ab764cc0f3d794705379fb24e9b4dc07bd97242433706411e07b6d",
+    ("LayeredRenderer", 140, 45): "d8d5d54f9ba7d524bc105e6fb621fc6026aa3bbbfc35c2d95a646f19c0af6a56",
+    ("LayeredRenderer", 80, 24): "03a21c9a99b9f21c6df63c319676631d9dee69e320f61b270febb08185e8cee9",
+    # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-3.  REASON: this
+    # is the only one of the four `LayeredRenderer` sizes at which `legacy` has
+    # an unpainted node (4 of 8; the other three paint 8 of 8), so it is the only
+    # one at which `HLR-N06.3`'s overflow declaration is painted at all.  The
+    # move is the requirement landing, not a regression.
+    #
+    # BOUNDED, and the bound was measured BEFORE the re-capture rather than
+    # asserted after it: diffed row by row against `git show HEAD:` of the
+    # renderer, ONE row differs -- row 0, the header -- its old text is a prefix
+    # of its new text, the added suffix is exactly `  ▽ 4 fuera de vista`, and
+    # the span delta is one new INK span over that suffix plus the offset shift
+    # it forces on the spans after it.  The other three Layered keys, all four
+    # Outline keys, all four Radial keys and all five rail digests were
+    # predicted GREEN, verified GREEN and NOT re-captured.  Re-capturing a
+    # predicted-green digest is a gate failure: a red pin is evidence, a
+    # re-captured pin is a claim.
+    ("LayeredRenderer", 140, 8): "fa94ea4ae679013f78dcee01a8a65474a3f90b45d344e6a4e92d9ad38c26e730",
+    ("LayeredRenderer", 300, 120): "1dcaeda1e72402087b5a9f9ca32de9fcad56f65a9bc976459a9890f8eb4c2f10",
+    ("OutlineRenderer", 140, 45): "2479d5522cba412b1efbf6bd02b934ed36a8c97c22cf77a15385338b25617269",
+    ("OutlineRenderer", 80, 24): "2479d5522cba412b1efbf6bd02b934ed36a8c97c22cf77a15385338b25617269",
+    # RE-CAPTURED, ONE KEY, in 2026-08-26-ui-next-batch-02 Inc-B55a.  REASON:
+    # `B-55` landed, so `OutlineRenderer` now DECLARES the nodes it hides, and
+    # this is the only Outline key at which `legacy` has an unpainted node -- the
+    # other three paint the whole map, so the declaration has nothing to say.
+    # The move is the requirement landing, not a regression.
+    #
+    # BOUNDED, AND THE BOUND WAS MEASURED BEFORE THE RE-CAPTURE, against
+    # `git show HEAD:mapper/views/outline.py` rather than a working copy: ONE
+    # row differs -- row 0, the header -- the row count is unchanged, the old
+    # row 0 is a PREFIX of the new one, and the added suffix is exactly
+    # `  ▽ 1 fuera de vista`.  The other three Outline keys were predicted GREEN,
+    # verified byte-identical and NOT re-captured: a red pin is evidence, a
+    # re-captured pin is a claim.
+    #
+    # The first attempt at this bless hashed `render().plain` and produced a
+    # digest matching NEITHER side, because this pin fingerprints
+    # `(plain, spans)` and renders with `fin` SELECTED.  A bless computed by a
+    # different method than the pin uses is a number that LOOKS like evidence and
+    # is not.  Recomputed with `_fingerprint`'s own definition, it reproduces the
+    # suite's value independently.
+    #
+    # Blessed under the coordinator ruling of 2026-09-10 that settled the
+    # behaviour this digests (`H1` refined: a declaration must not spend content
+    # and INFORM NOTHING).  Deliberately NOT blessed before that ruling -- pinning
+    # a frame an open question may still change pins the wrong frame.
+    ("OutlineRenderer", 140, 8): "e17d812c554d2686daac1fad4d6cabbd265ca7f2e1991d910f155b5431c098b0",
+    ("OutlineRenderer", 300, 120): "2479d5522cba412b1efbf6bd02b934ed36a8c97c22cf77a15385338b25617269",
+    # The four RadialRenderer keys below were RE-BASELINED in
+    # 2026-08-26-ui-next-batch-02 Inc-1, and the move is CORRECT behaviour, not
+    # a regression: `Canvas.rows()` now composes the `dots` and `bgs` layers it
+    # used to discard, and RadialRenderer is the only renderer in the tree that
+    # writes them (measured: exactly two `.dots` sites, both in radial.py;
+    # LayeredRenderer's dots are 0 and OutlineRenderer builds no Canvas).  The
+    # predicted-red set was derived BEFORE the change and matched exactly: all
+    # four Radial keys moved, all eight Layered/Outline keys held byte-identical
+    # and were NOT recaptured.  Re-capturing a predicted-green digest is a gate
+    # failure, because it silently drops the guard on a renderer that must not
+    # move -- which is what a wholesale re-capture of this dictionary does.
+    ("RadialRenderer", 140, 45): "51f923479d5369c6687bb1eb0d537902e9942911e85473cd390bd9bf8b59c188",
+    ("RadialRenderer", 80, 24): "9d07cbdb1010219a7788a75125f50659b0522468583b0766e2c4d9a802f36a65",
+    ("RadialRenderer", 140, 8): "5311cb7738b2f6b38434444a8c92cb893d6d8e194ffd5f0df6ee26e8dbaa0feb",
+    ("RadialRenderer", 300, 120): "642c28d2ac4e29be6e7315967016309937060be63e3549a7d06b3eff87b2f9ce",
 }
 
 # The same arm for this increment's two files.  `OutlineRail.render` takes no
@@ -110,23 +178,26 @@ MASTER_LEGACY_DIGESTS = {
 # wrongly is `collapsed`, and that is what is varied here.  Captured from
 # `rail.py` and `factory.py` as they stand on `master`; both were byte-identical
 # to `master` in the tree this increment started from.
+# EN-2: the digests are of the rail with its labels in English (`map`, `missing`, `territory`, `coverage`).  The
+# master renders were re-read segment by segment (text and style) against these with only those four words
+# mapped back: identical.  Structure, spans and styles are the master's.
 MASTER_RAIL_DIGESTS = {
-    (): "cf3cddd273ec0ef1418fca99eed2108a796a81d4fc420d57d56d602f232d8443",
-    ("fin",): "7e237f6166867a067445bc949929be884c8c9ab0ffdf5f8a8ec7ac505e399e8d",
-    ("fin", "rrhh"): "ab0d3e14a91e325a9d6ddce91dcde03762cbe60a450e6d17ae6a49efcb68e8ae",
-    ("erp",): "b528ab941f62298182159152a653eccfbe4437c87fc0b0a365185c4c6f7517d6",
-    ("inv", "fin", "rrhh"): "58d9452cf3c00361e4f1d7b334c570173029471e1281c85af336978e681f7283",
+    (): "d7546f9e2f60339c15a709fe581473f662b5cec4400a80a8286e5e3b957757b1",
+    ("fin",): "43452787993117230a232f729e7af084de5b87d5fe643691566260665635d4fe",
+    ("fin", "rrhh"): "7b3744c2f50ce8de1e9f96e2d61f2e81aa2080b76578a4ee13c7369d567250e3",
+    ("erp",): "9461ff65710687613abb655ccccd691f5e12cd6921e9420bddfc04ca90ab1097",
+    ("inv", "fin", "rrhh"): "1c0b814470a712063c8cde8ad1c582ed7a968c1311f93ac90aa31a7d228c4a5a",
 }
 
 MASTER_FACTORY_TREE_DIGEST = (
     "9ffadc425a42d976af8a0898e7967b71e8e839e4bb60c44bd4a6e3880dff9af4"
 )
 
-# Spanish UI fragments, built from code points so this file stays ASCII and a
-# mangled accent cannot pass unnoticed (same discipline as test_repair_cycles).
-OMITTED = "Se omiti" + chr(0xF3)          # "Se omitió"
-OVER_BOUND = "supera el l" + chr(0xED) + "mite"   # "supera el límite"
-CYCLE_NOTICE = "el mapa tiene un ciclo"
+# The over-bound notice's fragments (English since EN-3): one names the bound, one names the omission.
+OMITTED = "not drawn"
+OVER_BOUND = "exceeds the"
+CYCLE_NOTICE = "the map has a cycle"
+FACTORY_CYCLE_NOTICE = "the map has a cycle"  # the factory tree's sentence; the rail's is the same since EN-2
 GUARD_MESSAGE = "cycle through"
 
 
@@ -580,7 +651,7 @@ def test_at_r04_a_deep_acyclic_chain_renders_through_the_shipped_surface(name, r
     assert len(graph.nodes) == DEEP + 1
 
     started = time.perf_counter()
-    text = renderer().render(graph, selected_id="n0", w=80, h=24)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=80, h=24))
     elapsed = time.perf_counter() - started
 
     assert text.plain.strip(), f"{name} produced nothing"
@@ -601,7 +672,7 @@ def test_at_r04_depth_safety_does_not_depend_on_the_recursion_limit(name, render
     previous = sys.getrecursionlimit()
     sys.setrecursionlimit(_stack_depth() + headroom)
     try:
-        text = renderer().render(graph, selected_id="n0", w=80, h=24)
+        text = renderer().render(graph, ViewState(selected_id="n0", w=80, h=24))
     finally:
         sys.setrecursionlimit(previous)
     assert text.plain.strip(), f"{name} produced nothing under a pinned limit"
@@ -628,7 +699,7 @@ def test_at_r04_a_render_never_nests_deeper_than_the_declared_call_depth(
     """
     graph = _chain(DEEP)
     text, peak = _peak_call_depth(
-        lambda: renderer().render(graph, selected_id="n0", w=80, h=24)
+        lambda: renderer().render(graph, ViewState(selected_id="n0", w=80, h=24))
     )
     assert text.plain.strip(), f"{name} produced nothing"
     assert peak <= MAX_CALL_DEPTH, f"{name} nested {peak} frames deep"
@@ -672,6 +743,18 @@ DISCONNECTED_COMPONENT_OUTCOMES = {
 }
 
 
+# THE ARM'S OWN REGRESSION MODE IS A HANG, so it is given a timeout.  The
+# elapsed-time clause below is checked AFTER the render returns, which means it
+# cannot see the failure it was written for: delete the cycle guard and the
+# traversal never returns, `pytest.raises` never exits, and the assertion is
+# never reached.  In CI that is a wedged run rather than a red report.  The
+# ceiling is `RENDER_BOUND_SECONDS * 15` -- not a second budget, just far enough
+# above the 2 s bound that a loaded machine cannot trip it while an unbounded
+# loop certainly does.
+CYCLE_GUARD_TIMEOUT_SECONDS = RENDER_BOUND_SECONDS * 15
+
+
+@pytest.mark.timeout(CYCLE_GUARD_TIMEOUT_SECONDS)
 @pytest.mark.parametrize("shape", sorted(REACHABLE_CYCLE_SHAPES))
 @pytest.mark.parametrize("name,renderer", RENDERERS)
 def test_tc_r12_a_cyclic_graph_raises_the_guard_and_names_it(name, renderer, shape):
@@ -694,7 +777,7 @@ def test_tc_r12_a_cyclic_graph_raises_the_guard_and_names_it(name, renderer, sha
 
     started = time.perf_counter()
     with pytest.raises(ValueError) as excinfo:
-        renderer().render(graph, selected_id=root, w=80, h=24)
+        renderer().render(graph, ViewState(selected_id=root, w=80, h=24))
     elapsed = time.perf_counter() - started
 
     assert not isinstance(excinfo.value, RecursionError)
@@ -704,6 +787,7 @@ def test_tc_r12_a_cyclic_graph_raises_the_guard_and_names_it(name, renderer, sha
     assert elapsed < RENDER_BOUND_SECONDS, f"{name} took {elapsed:.3f}s to give up"
 
 
+@pytest.mark.timeout(CYCLE_GUARD_TIMEOUT_SECONDS)
 @pytest.mark.parametrize("name,renderer", RENDERERS)
 def test_tc_r12_a_cycle_the_renderer_never_visits_is_asserted_not_absorbed(
     name, renderer
@@ -719,7 +803,7 @@ def test_tc_r12_a_cycle_the_renderer_never_visits_is_asserted_not_absorbed(
 
     started = time.perf_counter()
     try:
-        text = renderer().render(graph, selected_id=root, w=80, h=24)
+        text = renderer().render(graph, ViewState(selected_id=root, w=80, h=24))
         outcome = "rendered"
     except Exception as exc:  # noqa: BLE001 - the identity is the assertion
         assert not isinstance(exc, RecursionError), f"{name} recursed on a cycle"
@@ -746,7 +830,7 @@ def test_at_r05_a_3000_node_tree_renders_within_the_declared_bound(name, rendere
     assert len(graph.nodes) == 3000
 
     started = time.perf_counter()
-    text = renderer().render(graph, selected_id="n0", w=140, h=45)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=140, h=45))
     elapsed = time.perf_counter() - started
 
     assert text.plain.strip(), f"{name} produced nothing"
@@ -776,7 +860,7 @@ def test_tc_r14_a_map_past_the_bound_degrades_in_spanish_and_does_not_raise(
     bound = radial_mod.MAX_RENDER_NODES
     graph = _balanced(bound + 1)
 
-    text = renderer().render(graph, selected_id="n0", w=140, h=45)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=140, h=45))
 
     assert str(bound + 1) in text.plain
     assert str(bound) in text.plain
@@ -789,7 +873,7 @@ def test_tc_r14_a_map_at_the_bound_still_draws(name, renderer):
     """The discriminating negative: a bound that degrades everything is not a fix."""
     graph = _balanced(radial_mod.MAX_RENDER_NODES)
 
-    text = renderer().render(graph, selected_id="n0", w=140, h=45)
+    text = renderer().render(graph, ViewState(selected_id="n0", w=140, h=45))
 
     assert OMITTED not in text.plain
     assert text.plain.strip()
@@ -811,7 +895,7 @@ def test_c53_legacy_fixture_renders_identically_to_master(name, renderer, w, h, 
     function of `h`.  One pinned size cannot see it move.
     """
     graph = _legacy_graph(tmp_path)
-    text = renderer().render(graph, selected_id="fin", w=w, h=h)
+    text = renderer().render(graph, ViewState(selected_id="fin", w=w, h=h))
     assert _fingerprint(text) == MASTER_LEGACY_DIGESTS[(renderer.__name__, w, h)]
 
 
@@ -838,7 +922,7 @@ def _shipped_visible_rows(rail: OutlineRail) -> list[tuple[str, int]]:
 
     def walk(nid: str, depth: int) -> None:
         rows.append((nid, depth))
-        if nid in rail.collapsed:
+        if nid in rail.folded:
             return
         for child in rail.graph.children_of(nid):
             walk(child, depth + 1)
@@ -946,7 +1030,7 @@ def test_tc_r30_visible_rows_agrees_with_the_shipped_recursive_implementation(tm
         rail = OutlineRail()
         rail.graph = graph
         for collapsed in _collapsed_configurations(graph):
-            rail.collapsed = set(collapsed)
+            rail.folded = frozenset(collapsed)
             compared += 1
             assert rail.visible_rows() == _shipped_visible_rows(rail), (
                 f"{label}: the iterative visible_rows disagrees with the "
@@ -1052,7 +1136,7 @@ def test_c53_the_rail_renders_legacy_identically_to_master(collapsed, tmp_path):
     rail = OutlineRail()
     rail.graph = _legacy_graph(tmp_path)
     rail.cursor = "fin"
-    rail.collapsed = set(collapsed)
+    rail.folded = frozenset(collapsed)
     assert _fingerprint(rail.render()) == MASTER_RAIL_DIGESTS[collapsed]
 
 
@@ -1155,16 +1239,16 @@ def test_tc_r30_the_indent_cap_cannot_change_a_rendered_row(tmp_path):
     """
     graph = _chain(40)
     rail = OutlineRail()
-    rail.show(graph, graph.root_id)
+    rail.show(graph, graph.root_id, frozenset())
     rendered = rail.render().plain.split("\n")
 
     rows = rail.visible_rows()
     assert len(rows) == 41, f"expected a 41-row chain, got {len(rows)}"
 
     width = RAIL_WIDTH - 4
-    # The header is two lines ("mapa · Nn · M faltan" plus a blank), so the first
+    # The header is two lines ("map · Nn · M missing" plus a blank), so the first
     # node row starts at index 2.  Asserted rather than assumed.
-    assert rendered[0].startswith("mapa"), rendered[0]
+    assert rendered[0].startswith("map " + chr(0xB7)), rendered[0]
     offset = 2
 
     checked = 0
@@ -1644,7 +1728,7 @@ def test_tc_r32_the_rail_paints_a_spanish_notice_instead_of_propagating(shape):
 
     text = rail.render()
     assert CYCLE_NOTICE in text.plain, text.plain
-    assert chr(0xF3) not in CYCLE_NOTICE  # the notice needs no accent to survive
+    assert chr(0xF3) not in text.plain  # the notice needs no accent to survive
 
 
 @pytest.mark.parametrize("shape", sorted(REACHABLE_CYCLE_SHAPES))
@@ -1656,4 +1740,4 @@ def test_tc_r32_the_factory_tree_paints_a_spanish_notice_instead_of_propagating(
         screen._tree_text()
     assert GUARD_MESSAGE in str(excinfo.value)
 
-    assert CYCLE_NOTICE in screen._tree_lines().plain
+    assert FACTORY_CYCLE_NOTICE in screen._tree_lines().plain

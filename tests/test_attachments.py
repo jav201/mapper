@@ -403,7 +403,8 @@ async def test_at_n02d_a_refused_attachment_is_reported_not_silently_dropped(tmp
 
         assert launcher.calls == [], "a traversal target reached the launcher"
         assert notes, "the refusal was silent"
-        assert osopen.REFUSED_OUTSIDE in notes[0]
+        # Inc-9o (`V1`, Round 11): the app's refusal of an outside path is the fixed sentence, not the status word.
+        assert notes == ["attachment must be inside the workspace: use a relative path"], notes
 
 
 async def test_llr_n02_10_the_inspector_shows_the_real_target(tmp_path):

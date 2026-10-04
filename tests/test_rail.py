@@ -63,18 +63,24 @@ async def test_rail_lists_the_tree_and_counts_missing_per_branch(tmp_path):
 
 
 async def test_rail_collapses_a_branch(tmp_path):
-    """Collapsing hides descendants but keeps the branch's count visible."""
+    """Collapsing hides descendants but keeps the branch's count visible.
+
+    LLR-N06.2.1 moved the fold set off this widget, so the rail is HANDED a
+    folded set through `show` instead of mutating one of its own.  The behaviour
+    asserted is unchanged, which is the point: the rail still renders fold, it
+    just no longer owns it.
+    """
     app = MapperApp(tmp_path)
     async with app.run_test() as pilot:
         await pilot.pause()
         screen = await _open(app, pilot, _tree(app))
         rail = screen.query_one("#map-rail", OutlineRail)
 
-        rail.toggle("fin")
+        rail.show(rail.graph, rail.cursor, frozenset({"fin"}))
         assert [nid for nid, _ in rail.visible_rows()] == ["root", "fin", "rrhh"]
         # The hidden child's gap is still counted on the collapsed parent.
         assert rail.subtree_missing("fin") == 1
-        rail.toggle("fin")
+        rail.show(rail.graph, rail.cursor, frozenset())
         assert [nid for nid, _ in rail.visible_rows()] == ["root", "fin", "cont", "rrhh"]
 
 
@@ -176,12 +182,19 @@ def test_at_n03e_keybar_truncation_names_what_is_hidden():
 
     narrow = darkside.keybar(groups, width=40)
     assert narrow.cell_len <= 40, "the bar must fit the width it was given"
-    assert "?" in narrow.plain and "todas" in narrow.plain
+    # `INC9-CR-F5`: the old pin (`KEYBAR_MORE in narrow.plain`) passed on an empty
+    # string.  The word is non-empty and the tail is EXACT (`K1`: `? all keys`).
+    assert darkside.KEYBAR_MORE.strip()
+    assert narrow.plain.endswith("  ? all keys"), narrow.plain
+    assert narrow.plain.endswith(f"  ? {darkside.KEYBAR_MORE}")
 
     # The count must be REAL: hidden + shown == total.
     marker = narrow.plain.split("… +")[1]
     hidden = int(marker.split()[0])
-    shown = sum(1 for _, bindings in groups for key, _ in bindings if f"{key} " in narrow.plain)
+    # Counted in the bar's body only: the marker's own words (`all keys`) contain
+    # `l ` and would be taken for the `l` key (`INC9C`: the word is a hidden input).
+    body = narrow.plain.split("… +")[0]
+    shown = sum(1 for _, bindings in groups for key, _ in bindings if f"{key} " in body)
     assert hidden > 0
     assert hidden + shown == total, f"marker claims {hidden} hidden, but {shown} of {total} shown"
 

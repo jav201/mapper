@@ -1,8 +1,13 @@
 """Document factory screen for process-template editing."""
 from __future__ import annotations
 
+import os
 import re
+import shutil
+import tempfile
+import unicodedata
 from pathlib import Path
+from typing import Callable
 
 from rich.markup import escape
 from rich.text import Text
@@ -13,11 +18,75 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from mapper import darkside, office
+from mapper.keymap import SCOPE_FACTORY, groups_for_keybar, hint_pair, textual_bindings
 from mapper.model import Document, Graph, Node
+from mapper.osopen import (
+    PATH_NOT_SUPPORTED, confine_reason, hard_linked, is_link, refusal_sentence, safe_local_path,
+)
+from mapper.store import MapIdError, check_map_id
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
 
 _TAG_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
+# `V2` (Round 11): the template exists as a path, but outside the workspace; derived from the text alone.
+TEMPLATE_OUTSIDE = "template outside the workspace: import it with i"
+TEMPLATE_MISSING = "template file not found"
+# `W1` (Round 12): the generate refusal says where to rename the document; a separate sentence for the node id.
+# Neither names anything typed.
+DOC_NAME_NOT_A_FILE_NAME = "document name cannot be a file name: rename it in the map's _nodos.yml (documents)"
+NODE_ID_NOT_A_FILE_NAME = "node id cannot be a file name: rename the node"
+# `X1` (Round 13): one hard-link sentence per site.
+TEMPLATE_HARD_LINKED = "template has several hard links: replace it with a plain copy"
+OUTPUT_HARD_LINKED = "output file has several hard links: delete or rename it"
+IMPORT_HARD_LINKED = "templates file has several hard links: delete or rename it"
+# `INC9O-SEC-F3`: a name is not a file name when it carries a format, line/paragraph separator or private-use char.
+_INVISIBLE = {"Cf", "Zl", "Zp", "Co"}
+
+
+def _plain_file_name(value: str) -> bool:
+    try:
+        check_map_id(value)
+    except MapIdError:
+        return False
+    return not any(unicodedata.category(ch) in _INVISIBLE for ch in value)
+
+
+def _write_via_sibling(target: Path, write: Callable[[Path], object]) -> None:
+    """`INC9O-SEC-F2`: write a temporary sibling in the same directory, then `os.replace` it onto *target*, so a
+    hard link at *target* is broken instead of written through.  The sibling is removed when anything fails.
+
+    `INC9P-SEC-F2`: right after `mkstemp` the parent is inspected again; one that became a link or reparse point
+    since is refused before anything is written (`target` comes from `confine_reason`, i.e. resolved, so its parent is
+    never a link unless it was swapped).  This NARROWS the window between the
+    caller's walk and the write; it does not close it (the parent can still be swapped after this check).  The
+    atomic write also drops the target's metadata (owner, ACL, attributes): the new file is a fresh temp file."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(dir=target.parent, prefix=".tmp-", suffix=target.suffix)
+    os.close(fd)
+    tmp = Path(name)
+    try:
+        if is_link(target.parent.lstat()):
+            raise ParentIsALink(target.parent.name)
+        write(tmp)
+        os.replace(tmp, target)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
+
+
+class ParentIsALink(OSError):
+    """The target's folder was replaced by a link after the walk (`INC9P-SEC-F2`)."""
+
+
+def factory_hint() -> str:
+    """The hint line under the tree: the three document actions, every word beside
+    a key the seat's (`K3`).  The movement, `0` and `q` keys are not repeated: the
+    key bar beside it lists them (`L4`).  A function, not a constant, so a test
+    that relabels the seat can rebuild it (`INC9BC-CR-F2`)."""
+    return " · ".join(
+        hint_pair(SCOPE_FACTORY, action)
+        for action in ("edit_doc", "import_office", "generate_office"))
 
 
 class _Nav:
@@ -62,19 +131,13 @@ class _Nav:
 class FactoryScreen(Screen):
     """Factory mode: resolve documents against a process tree."""
 
+    # LLR-N16.1.2 / `#D9`: generated from the seat, like every migrated screen.
+    # The app-scope `palette` and `help` rows dispatch to the App, which opens
+    # both on THIS scope (B-18: the screen used to open them unscoped).
+    KEY_SCOPE = SCOPE_FACTORY
     BINDINGS = [
-        Binding("j", "next_sibling", "Siguiente", priority=True),
-        Binding("k", "prev_sibling", "Anterior", priority=True),
-        Binding("h", "parent", "Padre", priority=True),
-        Binding("l", "child", "Hijo", priority=True),
-        Binding("d", "edit_doc", "Editar doc", priority=True),
-        Binding("i", "import_office", "Importar office", priority=True),
-        Binding("g", "generate_office", "Generar", priority=True),
-        Binding("0", "start_node", "Inicio", priority=True),
-        Binding("q", "home", "Salir", priority=True),
-        Binding("escape", "home", "Salir", priority=True),
-        Binding("ctrl+p", "palette", "Paleta", priority=True),
-        Binding("?", "help", "Ayuda", priority=True),
+        Binding(key, action, label, priority=priority)
+        for key, action, label, priority in textual_bindings(SCOPE_FACTORY)
     ]
 
     CSS = """
@@ -101,14 +164,14 @@ class FactoryScreen(Screen):
         background: #1783ff;
         color: #000000;
     }
-    .factory-tag { color: #1783ff; }
+    .factory-tag { color: #737373; }
     .factory-missing { color: #ff4f42; }
     """
 
     def __init__(
         self,
         graph: Graph,
-        process_name: str = "proceso",
+        process_name: str = "process",
         node_id: str | None = None,
         document_name: str | None = None,
         map_id: str | None = None,
@@ -131,26 +194,29 @@ class FactoryScreen(Screen):
         with Horizontal(id="factory-body"):
             yield Static(id="factory-tree")
             yield Static(id="factory-preview")
-        yield HintLine("j/k/h/l navega · d edita · i importa · g genera · 0 inicio · q salir")
-        yield KeyBar(
-            [
-                ("nav", [("j/k", "sig/ant"), ("h/l", "padre/hijo"), ("0", "inicio")]),
-                ("doc", [("d", "editar"), ("i", "importar"), ("g", "generar")]),
-                ("app", [("ctrl+p", "paleta"), ("?", "ayuda"), ("q/esc", "salir")]),
-            ]
-        )
+        yield HintLine(factory_hint())
+        from mapper.app import keybar_groups
+
+        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
         self._refresh()
 
     def _persist(self) -> None:
-        """Persist graph changes to disk when we belong to a saved map."""
+        """Persist graph changes to disk when we belong to a saved map.
+
+        `G6-C-F1`: guarded the same way every `mapper/app.py` site is
+        (`_save_or_toast`) — an unguarded raise here used to escape
+        `action_edit_doc`/`action_import_office` uncaught.
+        """
         if not self.map_id:
             return
         store = getattr(self.app, "store", None)
         if store is None:
             return
-        store.save(self.map_id, self.graph)
+        from mapper.app import _save_or_toast
+
+        _save_or_toast(self, store, self.map_id, self.graph)
 
     def _step_meter(self) -> Text:
         total = max(1, self._max_depth() + 1)
@@ -218,7 +284,7 @@ class FactoryScreen(Screen):
             return self._tree_text()
         except ValueError:
             return Text.assemble(
-                ("no se puede dibujar: el mapa tiene un ciclo", darkside.ALERT)
+                ("cannot draw: the map has a cycle", darkside.ALERT)
             )
 
     def _tree_text(self) -> Text:
@@ -263,25 +329,44 @@ class FactoryScreen(Screen):
     def _is_office(self, doc: Document) -> bool:
         return doc.kind in {"docx", "pptx", "xlsx"}
 
-    def _office_path(self, doc: Document) -> Path | None:
+    def _template(self, doc: Document) -> tuple[Path | None, str]:
+        """`INC9M-SEC-F1`: `doc.path` comes from the sidecar of a map that may have been shared, so it is
+        judged like typed text, by the one rule (`osopen.confine_reason`): allow-list, normalised components,
+        lexical containment, a walk that follows no link, then `resolve()`.  Returns the rule's tuple, asked
+        once; an empty path is `(None, "missing")`."""
         if not doc.path:
-            return None
-        store = self.app.store  # type: ignore[attr-defined]
-        candidate = Path(doc.path)
-        if candidate.is_absolute():
-            return candidate
-        return store.workspace / candidate
+            return None, "missing"
+        return confine_reason(doc.path, Path(self.app.store.workspace))  # type: ignore[attr-defined]
+
+    def _office_path(self, doc: Document) -> Path | None:
+        return self._template(doc)[0]
+
+    def _missing_text(self, reason: str) -> str:
+        """The sentence for a template that cannot be used, from the REASON `_template` gave: `W2` (a link),
+        `Y1` (a colon), `U1` (`X2`: the path rule refused it: allow-list or normalised) and `V2` (outside the
+        workspace, decided by text); only a missing or unreadable template (or one that is not there) says 'not
+        found'."""
+        if reason in ("link", "colon", "allow_list", "normalised"):
+            return refusal_sentence(reason)
+        if reason == "hard_linked":
+            return TEMPLATE_HARD_LINKED
+        if reason == "outside":
+            return TEMPLATE_OUTSIDE
+        return TEMPLATE_MISSING
 
     def _preview(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
         if node is None or not self.document_name:
-            return Text.assemble(("sin documento", darkside.MUT))
+            return Text.assemble(("no document", darkside.MUT))
         doc = self.graph.resolve_document(self.document_name, node)
 
         if self._is_office(doc):
-            path = self._office_path(doc)
+            path, reason = self._template(doc)
+            # `INC9Q-SEC-F2`: the preview does not read what generate refuses (X1, as generate says it).
+            if path is not None and hard_linked(path):
+                path, reason = None, "hard_linked"
             if path is None or not path.exists():
-                return Text.assemble(("archivo de plantilla no encontrado", darkside.ALERT))
+                return Text.assemble((self._missing_text(reason), darkside.ALERT))
             preview = office.extract_preview_text(path)
             # Show a resolved preview by replacing tags in the plain text.
             for key, value in doc.tags.items():
@@ -289,10 +374,13 @@ class FactoryScreen(Screen):
             lines = [line.strip() for line in preview.splitlines() if line.strip()]
             text = Text()
             text.append(f"[{doc.kind}] ", style=darkside.ACCENT)
-            text.append(escape(str(path)), style=darkside.MUT)
+            # `BRANCH-SEC-F4`: the workspace-relative path, as generate says it; the resolved absolute
+            # one carries the drive and the profile folder.
+            shown = darkside.plain(path.relative_to(Path(self.app.store.workspace).resolve()).as_posix())
+            text.append(escape(shown), style=darkside.MUT)
             text.append("\n", style="")
             for line in lines[:12]:
-                text.append(escape(line[:120]), style=darkside.INK)
+                text.append(escape(darkside.plain(line[:120])), style=darkside.INK)
                 text.append("\n", style="")
             if len(lines) > 12:
                 text.append("…", style=darkside.MUT)
@@ -313,7 +401,7 @@ class FactoryScreen(Screen):
             pos = end
         if pos < len(doc.source):
             parts.append((escape(doc.source[pos:]), darkside.INK))
-        return Text.assemble(*parts) if parts else Text.assemble(("(vacío)", darkside.MUT))
+        return Text.assemble(*parts) if parts else Text.assemble(("(empty)", darkside.MUT))
 
     def _tags_table(self) -> Text:
         node = self.graph.nodes.get(self.nav.cursor or "")
@@ -333,7 +421,7 @@ class FactoryScreen(Screen):
                 parts.append((f"{{{{{escape(key)}}}}}  ", darkside.ACCENT))
                 parts.append((f"{escape(local) or '-'}  ", darkside.INK))
                 parts.append((f"{escape(inherited) or '-'}\n", darkside.MUT))
-            return Text.assemble(*parts) if parts else Text.assemble(("(sin tags)", darkside.MUT))
+            return Text.assemble(*parts) if parts else Text.assemble(("(no tags)", darkside.MUT))
 
         parts: list[tuple[str, str]] = []
         for key in sorted(set(doc.tags) | set(_TAG_RE.findall(doc.source))):
@@ -353,7 +441,7 @@ class FactoryScreen(Screen):
         self.query_one("#factory-tree", Static).update(self._tree_lines())
         preview = self.query_one("#factory-preview", Static)
         preview.update(Text.assemble(
-            (self.document_name or "documento", f"bold {darkside.INK}"), "\n\n",
+            (self.document_name or "document", f"bold {darkside.INK}"), "\n\n",
             self._preview(), "\n\n",
             ("tags", f"bold {darkside.MUT}"), "\n",
             self._tags_table(),
@@ -398,6 +486,9 @@ class FactoryScreen(Screen):
         def on_save(source: str | None) -> None:
             if source is None:
                 return
+            # `G6-C-F1`: `EditorScreen` hands back raw operator text — coerced
+            # here, at graph entry, the same as every other A-111 mutation site.
+            source = darkside.plain(source)
             if self.document_name in self.graph.documents:
                 self.graph.documents[self.document_name].source = source
                 self.graph.documents[self.document_name].kind = "text"
@@ -418,21 +509,44 @@ class FactoryScreen(Screen):
         def on_path(path_str: str | None) -> None:
             if path_str is None:
                 return
-            source = Path(path_str).expanduser()
-            if not source.exists():
-                self.notify(f"archivo no encontrado: {source}", severity="error", markup=False)
+            source = safe_local_path(path_str)
+            if source is None:
+                # `INC9L-SEC-F2`: outside the allow-list: not looked at, and not named.
+                # `U1`: the one fixed sentence, as the CSV prompt's.
+                self.notify(darkside.plain(PATH_NOT_SUPPORTED), severity="error", markup=False)
+                return
+            # `INC9BC-SEC-F1`: the NAME as typed, never the expansion -- `~`
+            # resolves to the user profile, and a toast is painted and logged.
+            name = Path(path_str).name
+            if not source.is_file():
+                self.notify(darkside.plain(f"file not found: {name}"), severity="error", markup=False)
                 return
             kind = source.suffix.lower().lstrip(".")
             if kind not in {"docx", "pptx", "xlsx"}:
-                self.notify("solo .docx / .pptx / .xlsx", severity="error")
+                self.notify("only .docx / .pptx / .xlsx", severity="error")
                 return
             store = self.app.store  # type: ignore[attr-defined]
-            target = store.workspace / "templates" / source.name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            import shutil
-
-            shutil.copy2(source, target)
-            rel = target.relative_to(store.workspace).as_posix()
+            # `INC9O-CR-F2`: the target is judged by the one rule (a `templates` junction is not followed); the
+            # `./` makes a `~` or `-` file name a plain relative name.
+            target, reason = confine_reason(f"./templates/{source.name}", Path(store.workspace))
+            if target is None:
+                self.notify(darkside.plain(refusal_sentence(reason, surface="import")), severity="error", markup=False)
+                return
+            if hard_linked(target):
+                self.notify(darkside.plain(IMPORT_HARD_LINKED), severity="error", markup=False)
+                return
+            try:
+                _write_via_sibling(target, lambda tmp: shutil.copy2(source, tmp))
+            except Exception as exc:
+                # `INC9BC-SEC-F4`: the file's name and the exception TYPE, never
+                # `str(exc)` (an `OSError` embeds the absolute path).
+                self.notify(
+                    darkside.plain(f"could not import {name}: {type(exc).__name__}"),
+                    severity="error", markup=False)
+                return
+            # `G6-C-F1`: `rel` carries `source.name`, itself carrying whatever
+            # the operator typed at the "office file path" prompt.
+            rel = darkside.plain(target.relative_to(Path(store.workspace).resolve()).as_posix())
             self.graph.documents[self.document_name] = Document(
                 name=self.document_name,
                 path=rel,
@@ -441,10 +555,10 @@ class FactoryScreen(Screen):
             )
             self._persist()
             self._refresh()
-            self.notify(f"plantilla importada: {rel}", markup=False)
+            self.notify(darkside.plain(f"template imported: {rel}"), markup=False)
 
         self.app.push_screen(
-            _PromptScreen("ruta del archivo office", "/ruta/a/plantilla.docx"),
+            _PromptScreen("office file path", "C:\\path\\to\\template.docx"),
             callback=on_path,
         )
 
@@ -454,20 +568,47 @@ class FactoryScreen(Screen):
             return
         doc = self.graph.resolve_document(self.document_name, node)
         if not self._is_office(doc):
-            self.notify("el documento actual no es office")
+            self.notify("the current document is not an office file")
             return
-        path = self._office_path(doc)
+        path, reason = self._template(doc)
         if path is None or not path.exists():
-            self.notify("archivo de plantilla no encontrado", severity="error")
+            self.notify(darkside.plain(self._missing_text(reason)), severity="error", markup=False)
             return
         store = self.app.store  # type: ignore[attr-defined]
+        # `INC9N-SEC-F1`: the sidecar chooses `document_name` and the node id, and together they are the
+        # output FILE NAME.  Each must be a plain file name (no separator, drive letter, control, reserved
+        # device or edge dot/space: `check_map_id`'s rules) and the result is confined to the workspace
+        # before anything is written.
         suffix = Path(doc.path).suffix or ".docx"
-        target = store.workspace / f"{self.document_name}-{node.id}{suffix}"
+        if not _plain_file_name(self.document_name):
+            self.notify(darkside.plain(DOC_NAME_NOT_A_FILE_NAME), severity="error", markup=False)
+            return
+        if not _plain_file_name(node.id):
+            self.notify(darkside.plain(NODE_ID_NOT_A_FILE_NAME), severity="error", markup=False)
+            return
+        # `INC9O-CR-F5`: the `./` makes a name that starts with `~` or `-` (which `check_map_id` accepts) a
+        # plain relative name for the allow-list.
+        target, reason = confine_reason(f"./{self.document_name}-{node.id}{suffix}", Path(store.workspace))
+        if target is None:
+            # `INC9Q-CR-F2`: the one mapping, with its own surface; only a `check_map_id` failure (above) is W1.
+            self.notify(darkside.plain(refusal_sentence(reason, surface="generate")), severity="error", markup=False)
+            return
+        if hard_linked(path):
+            self.notify(darkside.plain(TEMPLATE_HARD_LINKED), severity="error", markup=False)
+            return
+        if hard_linked(target):
+            self.notify(darkside.plain(OUTPUT_HARD_LINKED), severity="error", markup=False)
+            return
         try:
-            office.resolve(path, doc.tags, target)
-            self.notify(f"generado: {target}", markup=False)
+            _write_via_sibling(target, lambda tmp: office.resolve(path, doc.tags, tmp))
+            # `INC9-SEC-F1`: the workspace-relative name and the exception TYPE, never the
+            # workspace's absolute path or `str(exc)` (`_save_or_toast`'s rule).
+            shown = target.relative_to(Path(store.workspace).resolve()).as_posix()
+            self.notify(darkside.plain(f"generated: {shown}"), markup=False)
         except Exception as exc:
-            self.notify(f"no se pudo generar: {exc}", severity="error", markup=False)
+            self.notify(
+                darkside.plain(f"could not generate: {type(exc).__name__}"),
+                severity="error", markup=False)
 
     def action_start_node(self) -> None:
         """Return to the node that was selected when the factory opened."""
@@ -477,13 +618,3 @@ class FactoryScreen(Screen):
 
     def action_home(self) -> None:
         self.app.pop_screen()
-
-    def action_palette(self) -> None:
-        from mapper.screens.palette import CommandPalette
-
-        self.app.push_screen(CommandPalette())
-
-    def action_help(self) -> None:
-        from mapper.screens.help import HelpScreen
-
-        self.app.push_screen(HelpScreen())

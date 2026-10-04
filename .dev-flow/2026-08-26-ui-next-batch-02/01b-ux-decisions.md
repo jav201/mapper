@@ -262,85 +262,248 @@ moment a map has a different schema — C-31's family.
 
 ## DECISION 3 — the glyph vocabulary (US-N16's legend content)
 
-Complete and exact. Strings marked **(proto)** are reused verbatim from the generators; the citation
-is the source of record. Tokens are the names in `mapper/darkside.py` (`GROUND #000000`,
-`PANEL #121212`, `STEP #262626`, `INK #f5f5f5`, `MUT #737373`, `ACCENT #1783ff`, `WARN #ffd230`,
-`ALERT #ff4f42`, `WORDMARK #3a3a3a`) plus the three that land in this batch.
+**REWRITTEN 2026-09-28 FROM RENDERS OF THE SHIPPED PRODUCT** (Inc-8 design pass, operator verdict
+`D2` in `VERDICT-inc8-legend-2026-09-28.md`: *"derivar el vocabulario de lo que el producto pinta
+hoy; 01b se reescribe desde renders reales"*). Until this rewrite §3.1–§3.4 were transcribed from the
+round-9/10 prototype generators, and several rows described forms no renderer paints (`INC8-F2`,
+`UX-F3`). Every row below is a form the catalogue instrument found **painted** by the shipped
+product, cited to the renderer line that paints it. The instrument, its exclusion rule and the full
+harvest table are in `03-increments/increment-022-inc8-legend.md`, section *Design pass*.
 
-### 3.1 · Canvas vocabulary — the atlas view
+Tokens are the names in `mapper/darkside.py` (`GROUND #000000`, `PANEL #121212`, `STEP #262626`,
+`INK #f5f5f5`, `ASH #a3a3a3`, `MUT #737373`, `ACCENT #1783ff`, `WARN #ffd230`, `ALERT #ff4f42`,
+`WORDMARK #3a3a3a`) plus `SAGE`, `TEAL` and `VIOLET`. A style with no `on` clause matches the glyph on
+any ground (the rail, the strips and the canvas paint on `GROUND`; the inspector, cards and pills on
+`PANEL`).
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V1 | ` rrhh ` (node title, leading and trailing space, on a card) | `rama abierta` | `INK on PANEL` | **(proto)** `ui_next2/generate.py:610-611` |
-| V2 | ` nómina ` (node title on a card) | `coincidencia de búsqueda` | `bold GROUND on WARN` | **(proto)** `:612-613` |
-| V3 | `▸ <rama> +N` — e.g. `▸ inv +23` | `rama plegada (23 dentro)` | `MUT on PANEL` | **(proto)** `:614-615` |
-| V4 | `∙ ∙ ∙` | `territorio sin explorar` | `WORDMARK` | **(proto)** `:616-617` |
-| V5 | `▔▔▔▔` (under the selected node, its full width) | `nodo seleccionado` | `ACCENT` | **(proto)** `:618-619`, `ui_next/generate.py:430` |
-| V6 | `┌─┐` | `minimapa: tu ventana en el todo` | `ACCENT` | **(proto)** `:620-621` |
+The **Views** column names the legend(s) that paint the row, with the one name per view the legend
+title uses (verdict `D5`, in English since the 2026-09-29 language ruling): `atlas`, `outline`,
+`mind map`, `home` — `darkside.VIEW_NAMES`, assumption `A6`, operator question `INC8-D2-Q1`.
+`LLR-N16.2.1`'s instrument reads the first four columns; `darkside.LEGEND_VIEWS` is checked against
+the fifth.
 
-**Braille edge dust — the one item the prototype legend does not itemise.** The generators paint two
-distinct braille populations and the legend collapses them into V4, which under-declares. Specified
-here as two rows, because they mean different things:
+**Every label is English** (operator language ruling, 2026-09-29: *"Todo en inglés, también la UI"*).
+Each row keeps the meaning its Spanish label had, including the corrected meanings of `V19`, `V21a`,
+`V21b` and `V31` (verdict `E6`). A **sample** is the form the view paints, so where a renderer still
+paints Spanish (`◫ sin acta`, `▽ 35 fuera de vista`, `▲ 2 vencen hoy`, `↩ retomar`) the sample keeps
+it until that renderer moves to English (`Inc-EN`, `B-71`).
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V4a | `∙ ∙ ∙` (scattered braille, `U+2800`–`U+28FF`) | `territorio sin explorar` | `WORDMARK` | `ui_next/generate.py:406-411` |
-| V4b | braille run tracing a path between two cards | `enlace entre nodos` | `MUT`; the path to the selected node in `ACCENT` | `ui_next/generate.py:412-416`, edge styles `MUT` / `ACCENT` at `:394-401` |
+**Change log — every pre-rewrite row, and what became of it.** Ids of forms that survive are
+reused so traces stay valid; a retired id is never reused. Retired rows are removed from the tables
+below (the instrument reads the tables), and recorded here with their reason.
 
-### 3.2 · Declared-overflow and viewport indicators
+| Old | Was | Now | Reason |
+|---|---|---|---|
+| `V1` | ` rrhh ` card title, `INK on PANEL`, *rama abierta* | `V1` `▐`, `STEP`, *nodo del mapa* | the card survives; its painted mark is its left edge. *Rama abierta* is the rail's `▾` (`V33`) |
+| `V2` | ` nómina ` card, `bold GROUND on WARN` | `V2` `▐ nómina`, `INK on STEP` | the hit card survives in the livery the renderer paints |
+| `V3` | `▸ inv +23`, `MUT on PANEL` | `V3` `▐` `WARN` + `▸ inv +23` `MUT` | the pill survives; the renderer paints it with a `WARN` bar |
+| `V4` | `∙ ∙ ∙`, `WORDMARK`, *territorio sin explorar* | **RETIRED** | no renderer paints a dust field on the atlas canvas. The `∙` the operator kept (`Q1·Q2`) is painted as the rail's lit territory dot, which is `V21a`'s form; see `INC8-D-Q2` |
+| `V4a` | scattered braille, `WORDMARK` | **RETIRED** | collapsed into `V4` (Amendment 2(b)); the atlas paints no braille |
+| `V4b` | braille path between cards, `MUT` / `ACCENT`, atlas | `V4b`, `mapa mental`, own sample | verdict `D3`, `Q1·Q2`: braille leaves the atlas; radial paints it in the branch greys and `ACCENT` |
+| `V5` | `▔▔▔▔`, `ACCENT`, *nodo seleccionado* | **RETIRED** | no renderer paints an underline; the selection is a block (`V23`, `V24`) |
+| `V6` | `┌─┐`, *minimapa: tu ventana* | **RETIRED** | no viewport box is painted |
+| `V7` | `plegadas: … — 41 nodos` | **RETIRED** | prototype caption; the overflow declaration the product paints is `V31` |
+| `V8` | `minimapa · 128 nodos` | **RETIRED** | prototype caption; not painted |
+| `V9` | viewport rectangle in the minimap | **RETIRED** | no viewport box is painted |
+| `V10` | `▓ ▒ ░` density cells | **RETIRED** | `▓` is not painted; the strip under the tabs paints branch coverage (`V36`–`V39`) |
+| `V11`–`V16` | lens rows | **DEFERRED(#D7)** marker added | verdict `Q4`: US-N14 is deferred whole (`#D23`); the marker is the one the instrument reads |
+| `V17` | `⇄ enlazado`, `VIOLET` | **RETIRED** | no renderer paints a cross-map link |
+| `V18` | `◍ del repo` | unchanged, **DEFERRED(#D7)** | already out of this batch |
+| `V19` | microbar, `SAGE` / `INK` / `WORDMARK` | `V19` microbar, `INK` / `WARN` / `WORDMARK` | the sala paints a con-acta bar and a sin-acta bar; `SAGE` is painted nowhere (`Q8` keeps the `█ █ ░` sample) |
+| `V20` | legend chip `▲ vence` | `V20` `▲ 2 vencen hoy` | the chip is not painted; the hero line is |
+| `V21` | `∙` in a card thumbnail, lit / unlit | split into `V21a` (lit `∙`) and `V21b` (unlit `·`) | no card thumbnail is painted; the rail's territory lattice paints the same lit / unlit pair in the same two styles |
+| `V22` | `⊘` damaged card | unchanged | verdict `Q7` |
+| — | — | `V23`–`V44` new | forms the catalogue found painted with no row |
 
-| # | Glyph / line, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V7 | `plegadas: inventarios · ventas — 41 nodos` | overflow declaration; the `N` **shall** reconcile with the sum of the `+N` in every painted pill | `WORDMARK` | **(proto)** `ui_next/generate.py:485` |
-| V8 | `minimapa · 128 nodos` | minimap caption; `N` = total nodes in the graph | `WORDMARK` | **(proto)** `:449` |
-| V9 | `┌──┐ │ │ └──┘` rectangle inside the minimap | viewport — the part of the territory now on screen | `ACCENT on PANEL` | **(proto)** `:442-448` |
-| V10 | `▓` `▒` `░` density cells inside the minimap | territory density | `WORDMARK on PANEL` | **(proto)** `:437-441` |
+**Change log — design pass 2, 2026-09-29** (operator verdict round 2 and the language ruling,
+`VERDICT-inc8-legend-2026-09-28.md`; the record is `increment-022`, section *Design pass 2*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| every row | label rewritten in English, same meaning; the label column is no longer "Spanish label" | language ruling |
+| Views column | `esquema` → `outline`, `mapa mental` → `mind map`, `sala` → `home` | language ruling; `D5`; `A6` / `INC8-D2-Q1` |
+| `V27` | sample `✓` → `D✓`, label `field initial · ✓ filled` — the schema letters get their explanation | `E6`, `INC8-F-UX-F7` |
+| `V35` | label `pending fields here and below` | `E6`, `INC8-F-UX-F6` |
+| `V45` | **new**: the outline's depth mark `⇲N`, painted in `MUT` once a row is deeper than half the canvas can indent (depth 15 and past at 118 columns) | `INC8-F-UX-F4` |
+| `V29` | the glyph set narrows from the whole box-drawing block (`U+2500`–`U+257F`) to the eleven wires the canvas paints | `INC8-F-CR-F3` |
+| §3.5 | derived from what the views paint: `SAGE`, `TEAL`, `VIOLET` left (painted by no view); `ALERT` gained its second job, the missing-record mark | `E4` |
+| §3.6 | English copy; the own-scope group `in this legend` is named; the vocabulary section comes first | `E1`, `E3`, language ruling |
+
+**Change log — design pass 3, 2026-09-29** (operator verdict round 3 and its width principle,
+`VERDICT-inc8-legend-2026-09-28.md`; the record is `increment-022`, section *Design pass 3*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| `V27`, `V28` | each row is a schema letter and its mark, painted ADJACENT: the letter in `MUT`, the view's grey for it (`views/layered.py:628-629`), the mark in its own tone. `V28`'s sample becomes `D░`, label `field initial · ░ pending` | `Q7` |
+| `V42`, `V43`, `V44`, `V40` | the ground they are painted on is declared (`on PANEL`): the census finds each ONLY on `PANEL` (radial's node pills, the home's cards), so a sample on `GROUND` misdescribed them. A member painted on both grounds (`V19`, `V32`, `V4b`) stays bare and is sampled on `GROUND` | `INC8-P2-UX-F6` |
+| `V42` | `node, grey of its branch` | copy |
+| `V37`, `V38` | `… recorded` | copy |
+| `V19` | `nodes with / without record` | copy |
+| `V34` | `folded branch, left list` — distinguished from `V3`, the atlas's folded-branch pill | copy |
+| §3.5 | per view; one row per job; `C3` new; red painted by the three map views | `F1`, `INC8-D3-F1` |
+| §3.6 | `what the colours mean`; one footer line; the close hint only in the own-scope group; `scroll` for `↑ ↓` | copy |
+
+### 3.1 · Canvas vocabulary — the three map views
+
+| # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V1 | `▐` (the left edge of a card) | `map node` | `STEP` | atlas | `views/layered.py:595-602` |
+| V2 | `▐ nómina` (a card in hit livery) | `search match` | `INK on STEP` | atlas | `views/layered.py:596-597` |
+| V23 | `▐ erp` (the selected card, focus on the canvas) | `selected node` | `bold GROUND on ACCENT` | atlas | `views/layered.py:744-749` |
+| V24 | `▐ erp` (the selected card, focus in another region) | `selected, focus elsewhere` | `INK on PANEL` | atlas | `views/layered.py:746-749` |
+| V3 | `▐` bar and `▸ inv +23` pill | `folded branch, 23 inside` | bar `WARN`; pill `MUT` | atlas | `views/layered.py:666-667` |
+| V25 | `◫ ACTA-7` (a legacy card's document chip) | `the node's record` | `INK` | atlas | `views/layered.py:611-614` |
+| V26 | `◫ sin acta` | `missing record` | `ALERT` | atlas | `views/layered.py:612-613`; `ALERT`'s second job, §3.5 |
+| V27 | `D` letter `✓` mark (a schema letter and its filled mark, adjacent) | `field initial, filled` | letter `MUT`; mark `INK` | atlas | `views/layered.py:628-631` |
+| V28 | `D` letter `░` mark (a schema letter and its pending mark, adjacent) | `field initial, pending` | letter `MUT`; mark `STEP` | atlas | `views/layered.py:628-631` |
+| V29 | `┬─┐` (box-drawing wires; glyph set `─│┌┐└┘├┤┬┴┼`, exactly the canvas's `_GLYPH` table) | `link between nodes` | `INK` | atlas | `views/layered.py:640-642`, `canvas.py:10-27` |
+| V4b | `⣉⡉⠉` (a braille edge, `U+2800`–`U+28FF`) | `link; blue: path to selected` | `INK`, `ASH` or `MUT` by branch; `ACCENT` on the path to the selected node | mind map | `views/radial.py:259-272`, `canvas.py:167-182` |
+| V42 | `●` (a node's marker, on its label's pill) | `node, grey of its branch` | `INK on PANEL`, `ASH on PANEL` or `MUT on PANEL` by branch | mind map | `views/radial.py:366-375`; the pill's ground `:302-304` |
+| V43 | `●` on the path to the selected node | `node on the selected path` | `ACCENT on PANEL` | mind map | `views/radial.py:369-370`; the pill's ground `:302-304` |
+| V44 | `◆` (the root's marker) | `map root` | `ACCENT on PANEL` | mind map | `views/radial.py:366-370`; the pill's ground `:302-304` |
+| V30 | `◆` before `mapper` in the header | `view header` | `INK` | atlas · outline · mind map | `views/layered.py:432`, `views/outline.py:92`, `views/radial.py:117` |
+| V31 | `▽ 35 fuera de vista` | `nodes off screen` | `INK` | atlas · outline · mind map | `views/layered.py:451-454`, `views/outline.py:334`, `views/radial.py:121`, `app.py:2592` |
+| V45 | `⇲15` (the true level, where the outline caps a deep row's indent) | `true depth, indent capped` | `MUT` | outline | `views/outline.py:24`, `:55`, `:219`, `:261`, `:264` |
+
+### 3.2 · Map chrome shared by the three map views — rail, strips, ficha
+
+| # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V33 | `▾` in the rail | `open branch` | `MUT` | atlas · outline · mind map | `widgets/rail.py:228` |
+| V34 | `▸` in the rail | `folded branch, in the rail` | `MUT` | atlas · outline · mind map | `widgets/rail.py:226` |
+| V35 | `3` beside a rail row | `pending fields here and below` | `WARN` | atlas · outline · mind map | `widgets/rail.py:248-249` |
+| V21a | `∙` in the rail's territory lattice | `node with a complete card` | `MUT` | atlas · outline · mind map | `widgets/rail.py:267-268` |
+| V21b | `·` in the rail's territory lattice | `node with pending fields` | `WORDMARK` | atlas · outline · mind map | `widgets/rail.py:267-268` |
+| V36 | `█` beside a branch name in the coverage strip | `branch with all its records` | `INK` | atlas · outline · mind map | `app.py:2166-2167` |
+| V37 | `▒` beside a branch name in the coverage strip | `branch: half or more recorded` | `MUT` | atlas · outline · mind map | `app.py:2168-2169` |
+| V38 | `░` beside a branch name in the coverage strip | `branch: under half recorded` | `WARN` | atlas · outline · mind map | `app.py:2170` |
+| V39 | `╱` in the coverage strip's own key | `branch with no data` | `WORDMARK` | atlas · outline · mind map | `app.py:2163-2164`, `app.py:2276` |
+| V32 | `▰` full and `▱` empty | `progress meter` | full `INK`; empty `STEP` | atlas · outline · mind map | `darkside.py:375-387`; used at `views/layered.py:440`, `app.py:2565`, `widgets/components.py:279` |
 
 ### 3.3 · Lens vocabulary — figure-ground
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V11 | `▐` (left bar of a matched card) | `coincide con la lente` | `WARN on PANEL` | **(proto)** `ui_next2/generate.py:341` |
-| V12 | bare title, no card, no chrome | `fuera de la lente` | `WORDMARK` | **(proto)** `:348` |
-| V13 | `╎` | `enlace atenuado` | `STEP` | **(proto)** `:333-336` |
-| V14 | `ficha completa ✓` | `sin campos pendientes` | `SAGE on PANEL` | **(proto)** `:345-346` |
-| V15 | `faltan campos ░` | `ficha incompleta` | `MUT on PANEL` | **(proto)** `:345-346` |
-| V16 | `∗` | `lente de campos` | `ACCENT` | **(proto)** `:312` |
+**Deferred whole with US-N14 (`#D23`); every row carries the `DEFERRED(#D7)` marker the instrument
+removes (verdict `Q4`), so no legend paints them. The rows stay so the lens batch starts from them.**
+
+| # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V11 | `▐` (left bar of a matched card) | `matches the lens` | `WARN on PANEL` **DEFERRED(#D7)** | — | **(proto)** `ui_next2/generate.py:341` |
+| V12 | bare title, no card, no chrome | `outside the lens` | `WORDMARK` **DEFERRED(#D7)** | — | **(proto)** `:348` |
+| V13 | `╎` | `dimmed link` | `STEP` **DEFERRED(#D7)** | — | **(proto)** `:333-336` |
+| V14 | `ficha completa ✓` | `no pending fields` | `SAGE on PANEL` **DEFERRED(#D7)** | — | **(proto)** `:345-346` |
+| V15 | `faltan campos ░` | `incomplete card` | `MUT on PANEL` **DEFERRED(#D7)** | — | **(proto)** `:345-346` |
+| V16 | `∗` | `field lens` | `ACCENT` **DEFERRED(#D7)** | — | **(proto)** `:312` |
 
 ### 3.4 · Sala (home) vocabulary
 
-| # | Glyph, exactly | Spanish label, exactly | Painted in | Source |
-|---|---|---|---|---|
-| V17 | `⇄ N` and legend chip `⇄ enlazado` | `enlaza mapas` | `VIOLET on PANEL` | **(proto)** `ui_next2/generate.py:134`, `:145` |
-| V18 | `◍ github` and legend chip `◍ del repo` | `procedencia repo` | `TEAL on PANEL` | **(proto)** `:136`, `:146` |
-| V19 | `█` filled cells / `░` empty cells, 10 wide | coverage microbar | filled `SAGE` when coverage ≥ 90 %, else `INK`; empty `WORDMARK` | **(proto)** `:126-128`; legend chip `█ cerrada` at `:147` |
-| V20 | `▲ N vencen` and legend chip `▲ vence` | `actas vencidas` | `WARN on PANEL` | **(proto)** `:132`, `:148` |
-| V21 | `∙` in the card thumbnail | lit `= nodo con acta`, unlit `= sin acta` | lit `MUT on PANEL`, unlit `WORDMARK on PANEL` | **(proto)** `:100-101` |
+| # | Glyph, exactly | Label, exactly | Painted in | Views | Source |
+|---|---|---|---|---|---|
+| V18 | `◍ github` and legend chip `◍ del repo` | `came from the repo` | `TEAL on PANEL` **DEFERRED(#D7)** | — | **(proto)** `ui_next2/generate.py:136`, `:146` |
+| V19 | `█` con acta, `█` sin acta, `░` resto | `nodes with / without record` | con `INK`; sin `WARN`; resto `WORDMARK` | home | `app.py:553-559`, `darkside.py:424-432` |
+| V20 | `▲ 2 vencen hoy` | `records due today` | `WARN on PANEL` | home | `app.py:546-547` |
+| V22 | `⊘` before `mapa dañado — ↵ ver por qué` on that map's card | `damaged map — unreadable` | `INK on PANEL` | home | `app.py:790-791`; **derived**, Amendment 1 (2026-09-19); style fixed by `PRED-VIS RESOLVED` / `#D28` |
+| V40 | `▁▂▃` baja and `▅▇█` alta (bars, `U+2581`–`U+2588`) | `activity, last 14 days` | baja `WORDMARK on PANEL`; alta `MUT on PANEL` | home | `app.py:583-589`; the card's ground `app.py:4342` |
+| V41 | `↩ retomar` | `back to your last session` | `bold GROUND on ACCENT` | home | `app.py:714-721` |
 
-### 3.5 · Colours with a job — the palette-v2 rows
+### 3.5 · Colours with a job — derived from what the views paint
 
-Verbatim from `ui_next2/generate.py:623-630`. Each row is a `█` swatch plus the label.
+**DERIVED 2026-09-29 the way §3.1–§3.4 are** (verdict `E4`: *"derivar §3.5 de lo que se pinta, como
+§3.1–3.4, y dar al rojo su segundo empleo «falta el acta»"*). Until design pass 2 this table was
+transcribed from the round-10 prototype (`ui_next2/generate.py:623-630`). A colour **has a job** when
+it is a hue: a token off the grey ramp (`GROUND`, `PANEL`, `STEP`, `INK`, `ASH`, `MUT`, `WORDMARK`
+carry surfaces and text, not a meaning). Each row is a `█` swatch plus the label.
 
-| Swatch | Spanish label, exactly | Token | Hex |
-|---|---|---|---|
-| `█` | `azul — donde puedes actuar` | `ACCENT` | `#1783ff` |
-| `█` | `ámbar — atención / vence` | `WARN` | `#ffd230` |
-| `█` | `sage — completo / vigente` | **`SAGE`** | `#2fbf71` |
-| `█` | `teal — vino del repo` | **`TEAL`** | `#22b8cf` |
-| `█` | `violeta — enlaza mapas` | **`VIOLET`** | `#9775fa` |
+**PER VIEW since 2026-09-29, and one row per JOB** (verdict `F1`: *"colores por vista (cada leyenda
+muestra solo los colores que su vista pinta) y el ámbar declara también «faltantes, como conteo»"*).
+Each legend paints only the rows its **Views** cell names, and a colour with two jobs has two rows.
+The census reads every painted cell of each view outside the app chrome, over the states the D2 arm
+drives, and sorts each hue by what it is painted on: **words** when it is the foreground of a letter,
+**marks** otherwise (any other glyph, a numeral, and every background fill). A row is painted by a view
+when that view paints its hue on something its **Painted on** cell names; the view's rows are exactly
+those, and every (hue, words/marks) the view paints has a row. The per-view arm is
+`tests/test_legend_design.py::test_f1_each_legend_paints_the_colour_rows_its_view_paints`.
 
-`ALERT #ff4f42` is **deliberately absent** from this list and is the only token DECISION 2 assigns to
-the malformed-query chip. If ALERT acquires a second job it must acquire a row here too.
+| # | Swatch | Label, exactly | Token | Hex | Painted on | Views | Painted by |
+|---|---|---|---|---|---|---|---|
+| C1 | `█` | `blue — where you can act` | `ACCENT` | `#1783ff` | marks · words | atlas · outline · mind map · home | the selection (`V23`, `views/layered.py:745`; `views/outline.py:253`, `:275`; the rail cursor, `widgets/rail.py:241`), radial's selected path (`V4b`, `V43`, `V44`), `↩ retomar` (`V41`, `app.py:717`), the inspector's `+ agregar adjunto` (`widgets/inspector.py:171`) |
+| C2 | `█` | `amber — attention · missing count` | `WARN` | `#ffd230` | marks · words | atlas · outline · mind map · home | the fold bar (`V3`), rail counts (`V35`), coverage (`V38`), the home's due and missing bars (`V19`, `V20`) and its hero numeral (`app.py:540-542`); the outline's branch note `N nodos · M sin acta` (`views/outline.py:270-273`); the home's `sin acta N` beside its bar (`app.py:558`) and `▲ 2 vencen hoy` (`V20`, `app.py:547`) |
+| C4 | `█` | `red — required, missing` | `ALERT` | `#ff4f42` | marks · words | atlas · outline · mind map | `◫ sin acta` on an atlas card (`V26`, `views/layered.py:612-613`); the inspector's `<field>  requerido` for the selected node's missing fields (`widgets/inspector.py:188-193`), which every map view shows |
+
+**Change log — design pass 3** (verdict `F1`). Rows gained ids (`C1`–`C4`), a **Painted on** and a
+**Views** column. `WARN` gained its second job as its own row, `C3` (*missing items, as a count*), painted
+by the outline and the home only. `ALERT`'s row is painted by the three map views, **not the atlas
+alone**: the inspector paints `<field>  requerido` in `ALERT` for any selected node missing a required
+field, and the census now drives a state that selects one (`INC8-D3-F1`). The row's old citation,
+`app.py:406-407`, was the `↵` ficha peek, a separate modal screen, not the inspector; it is replaced
+by `widgets/inspector.py:188-193`.
+
+**Change log.** `SAGE` (`sage — completo / vigente`), `TEAL` (`teal — vino del repo`) and `VIOLET`
+(`violeta — enlaza mapas`) **left the table**: the catalogue finds each painted by none of the four
+views (`INC8-D-Q3`). The tokens stay declared in `darkside` for the batches that give them a painted
+form. **`ALERT` joined the table with its second job**, the missing-record mark (`E4`, which closes
+`INC8-D-Q1`). Its first job, DECISION 2's malformed-query chip, is unchanged; that chip belongs to the
+deferred lens and is painted by none of these views, so this row names the job the views paint.
+
+**Change log — design pass 4, 2026-09-29** (operator verdict round 4, `VERDICT-inc8-legend-2026-09-28.md`
+section *Round 4*; the record is `increment-022`, section *Design pass 4*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| `C4` | label `red — required, missing` (was `red — missing record`) — the mark still covers both the atlas's `◫ sin acta` and the inspector's `<field>  requerido` | `G3` |
+| `C2`, `C3` | **merged into ONE row, `C2`.** `C3`'s id retires; `C2`'s label becomes `amber — attention · missing count` (was `amber — attention / due`), its **Painted on** cell widens to `marks · words` (the union of the two retired cells), and its **Views** cell is unchanged (`C2` already named all four views before the merge, so the merged row is still declared on every view that paints amber) | `G4` |
+| `V34` | `folded branch, in the rail` (was `folded branch, left list`) | `G5` |
+| `V28` | `field initial, pending` (was `field initial · ░ pending`) | `G5` |
+| §3.1, `V26` | the revealed atlas card keeps a 2-column margin from the docked panel's left edge, declared as one constant (`mapper/app.py::MapScreen.REVEAL_MARGIN_CELLS`) | `G5` |
+
+**Change log — closing pass (Round 5), 2026-09-29** (operator verdict round 5,
+`VERDICT-inc8-legend-2026-09-28.md` section *Round 5 — closing questions*; the record is
+`increment-022`, section *Closing pass*).
+
+| Row(s) | Change | Authority |
+|---|---|---|
+| `V27` | `field initial, filled` (was `field initial · ✓ filled`) — matches `V28`'s comma-separated wording exactly | `H4`'s companion copy item |
+| §3.1/§3.2, the reveal margin | fixed an off-by-one: the card's box has one trailing painted column that is never drawn (the title row's own fit leaves it blank), so `REVEAL_MARGIN_CELLS` was landing 3 blank columns short of the panel on an ordinary card and only 1 at the map's own right edge. The margin is now counted on the COMPOSITED FRAME, not the geometry, and is honoured everywhere: at the true right edge the docked reveal's legal range widens by the margin itself, withdrawing the "no blank space past the content" exception `A-109` gave that case (see `A-109`'s dated addendum in `01-requirements.md`) | `H3` |
+| §3.2 | while the host's rail is hidden (`R`, or auto-hidden below the auto-hide width), the legend omits the rows the rail alone paints (`V33`, `V34`, `V35`, `V21a`, `V21b` — `darkside.RAIL_VOCABULARY`, derived from this section's own **Source** column). `V36`-`V39` and `V32` stay, because their source is the always-visible coverage strip (`app.py`'s `#map-minimap`), not the rail widget | `H4` |
+| §3.6 | footer reworded to `? explains the view you are in, outside text fields` (was `? always explains the view you are in`), now two lines — the old wording over-promised what a focused text field does with `?` (`B-36`/`B-72`) | `H1` |
+| §3.6 | footer reworded again, 2026-10-02: `? outside text fields opens this legend; inside a field it types ?` (two lines). The select-all sentence is gone: focus no longer selects an inspector field's value (`B-72`) | `T3`, `EN-Q3`, `A-135` |
+
+**Correction, 2026-09-29 (Inc-8 follow-ups, `INC8-FU-F4`).** The row above for `§3.1/§3.2, the
+reveal margin` says the card's box "has one trailing painted column that is never drawn" — that is
+self-contradictory as written (a column that is never drawn is not painted; the correct claim is the
+opposite of what the words say). What is true: the box is `card_w` columns wide, but the title
+row's own fit reaches only `card_w - 1` of them when the row carries no diff chip — the box's own
+LAST column is declared WIDTH, not painted ink, in that case. `_pan_revealing_selection`'s `right`
+is one column PAST the last column this call treats as painted, not that column itself (the same
+correction made in `A-109`'s own dated addendum in `01-requirements.md` and in
+`03-increments/increment-022-inc8-legend.md`'s *Closing pass* section). `INC8-FU-F1` (this pass)
+also found the "never drawn" half is a NON-diff-mode fact only: a card carrying a diff chip (`=`)
+DOES paint that same box's last column, WARN — which is why the fix now reads whether the selected
+card carries one before deciding which column is the true last painted one.
+
+**Correction, 2026-09-29 (Inc-8 follow-ups, `INC8-FU-F5c`).** The `V27` row's own **Authority**
+cell, above, reads `` `H4`'s companion copy item `` — wrong: `H4` is round 5's rail-visibility
+ruling (it governs the §3.2 row two below it) and rules nothing about `V27`'s label. `V27`'s copy
+change carries no operator verdict of its own; it is the coordinator's alignment of `V27`'s wording
+with `V28`'s, which design pass 4's `G5` already ratified as comma-separated
+(`VERDICT-inc8-legend-2026-09-28.md`, Round 5's closing paragraph: *"the coordinator aligns V27's
+copy with the operator's G5 wording for V28"*). The correct authority is `G5`, read alongside the
+coordinator's own alignment, not `H4`.
 
 ### 3.6 · Legend framing copy
 
-Verbatim, `ui_next2/generate.py:599-634`:
+In English since the 2026-09-29 language ruling (first transcribed from `ui_next2/generate.py:599-634`).
+Every string below is what the legend paints; `tests/test_vocabulary_declaration.py` walks this list.
 
-- Panel title: `leyenda · atlas` — the second word is the **view name**, not a constant.
-- Top-right: `? cierra`
-- Section headers, in order: `teclas de esta vista` · `vocabulario de esta vista` · `colores con empleo`
-- Footer, two lines: `cada vista tiene SU leyenda — ` / `misma tecla, contenido de la vista`
-- Reserved chord line: `??` + `abre la guía de campo completa`
+- Panel title: `legend · atlas` — the second word is the **view name**, not a constant.
+- Top-right: nothing — the close hint is painted once, in the own-scope group (round 3).
+- Section headers, in order: `what this view paints` · `what the colours mean` · `keys in this view`
+  (the vocabulary comes first in both layouts, verdict `E1`)
+- Own-scope group title: `in this legend` (verdict `E3`, which ratified `A5`)
+- Own-scope group words, by action: `close` (`esc`, `q`) · `scroll` (`↑`, `↓`) · `page` (`pageup`, `pagedown`) · `top/bottom` (`home`, `end`)
+- Footer, two lines: `? outside text fields opens this` · `legend; inside a field it types ?` (amended 2026-10-02 by T3, EN-Q3, A-135; the earlier wording is kept in the change table below)
+- Reserved chord line: `??` + `opens the full field guide`
+- Sample column (layout, not copy): 12 cells in the modal, so a sample up to 11 cells (`▐ ▸ inv +23`,
+  `◫ sin acta`) shares its label's row; 8 cells docked, so the longest label fits the docked row (round 3)
 
 ### 3.7 · ⚠ Two conflicts between the prototype legend and the shipped seat
 
@@ -370,11 +533,21 @@ This constrains DECISION 3's deliverable directly, so it is stated here as well 
   VERDICT: DOES NOT FIT — short by 20 rows
 ```
 
-The vocabulary specified above is **21 rows** (V1–V21), not the prototype's 6, which makes the
-shortfall larger than the number above, not smaller. **US-N16 cannot paint one flat panel.** It needs
+The vocabulary specified above is **substantially larger than the prototype's 6** — the exact row
+count is DERIVED from the table above by `LLR-N16.2.1`, never written as a literal here (amendment
+`A-45`; see the note below) — which makes the shortfall larger than the number above, not smaller.
+**US-N16 cannot paint one flat panel.** It needs
 a scrolling container or a two-pane/tabbed legend, and whichever is chosen, the set-equality
 criterion must assert over the panel's **content**, not over what happens to be visible — otherwise
 the assertion passes on a clipped panel, which is what ships today (§5, step 6).
+
+> **⚠ Why no literal count appears here (amendment `A-45`, routed from the RIDER-1 reconciliation).**
+> This line previously read *"**21 rows** (V1–V21)"*. It was the **fourth** live site of a stale
+> literal, and the correction is not the obvious one: the table above carries **23** labels, but `V4`
+> and `V4a` are byte-identical in glyph, label and style, so striking the duplicate takes it to
+> **22**. *"Correct 21 to 23"* would therefore have been wrong **twice**. The count is now derived by
+> `LLR-N16.2.1` over distinct `(glyph, label, style)` triples, and no literal is maintained by hand
+> anywhere — a hand-maintained census is a defect, including in a requirements table (`P-18`).
 
 ---
 
@@ -680,3 +853,125 @@ Stated in writing rather than left to inference.
    looks like **if** it ships, and that specification is inert if Q-5 rules it out.
 7. **No product code was written or modified.** `mapper/**`, `tests/**` and `prototypes/**` are
    untouched. All probes ran from a scratchpad directory outside the repository.
+
+---
+
+## Amendment 1 — DECISION 3 §3.4 gains a damaged-map row. 2026-09-19.
+
+**Authority.** Coordinator ruling 2026-09-19, on a block raised while opening `Inc-7`. Amends a
+sealed PDR artifact through the amendment path, with the derivation that forced it recorded below.
+
+### The derivation that forced this row
+
+`LLR-N13.1.5`'s `PRED-VIS RESOLVED` requires the damaged-map card glyph to be **a member of
+`declared_vocabulary`, asserted at run time**, and states that the codepoint *"is drawn from the
+declared vocabulary by the increment that paints it"*. `declared_vocabulary` is derived, by
+`LLR-N16.2.1`'s own instrument, from DECISION 3 §3.1–§3.4 as the set of distinct
+`(glyph, label, painted-in style)` triples minus `DEFERRED(#D7)` rows.
+
+**Derived mechanically at `8ba326a`: 21 rows, `V1`–`V21`. Rows whose meaning is a damaged or
+unreadable map: ZERO.** §3.4 (Sala) is `V17` *enlaza mapas*, `V18` *procedencia repo*, `V19`
+coverage microbar, `V20` *actas vencidas*, `V21` *nodo con acta*. None of the other sixteen carries
+that meaning either.
+
+So the clause was **unsatisfiable as written**: `Inc-7` was required to draw a glyph from a set with
+no member of the needed meaning. **Reuse was ruled out rather than overlooked** — a glyph that says
+one thing and means another is the lying-affordance class this batch exists to remove, and `⚠` in
+particular would duplicate `V20`'s *warning* reading.
+
+> **HOW THIS SURVIVED RATIFICATION, recorded because it is a finding about ratification rather than
+> about this row.** The clause is coherent on its face: it names a set, a membership test and a
+> run-time assertion, and every reviewer who read it read something well-formed. **The defect is
+> invisible from reading the clause and visible only from DERIVING the set the clause points at** —
+> the gap is between two artifacts, in neither of them. A clause that quantifies over a derived set
+> is not checked until someone runs the derivation, and "it reads correctly" is not that.
+> **Generalised: a requirement that points at a derived set owes its derivation AT RATIFICATION
+> TIME, not at implementation time**, because implementation is where the cost of the gap is paid
+> and ratification is where it is cheap.
+
+### The row
+
+**The row is inserted INTO §3.4's table as `V22`, not appended here.** That placement is
+load-bearing rather than tidy: `declared_vocabulary` is derived from §3.1–§3.4, so a row
+living in an amendment section at the end of the file would be invisible to the very instrument
+this amendment exists to satisfy. Caught by re-running the derivation after writing it.
+
+**The style is not a choice.** `PRED-VIS RESOLVED` fixes it at `INK on PANEL` and forbids spending a
+colour token, because `SAGE`, `TEAL` and `VIOLET` are each already jobbed in §3.4/§3.5 and `ALERT` is
+free only by an accident of this batch's scope. Measured: `INK on PANEL` = **17.18 : 1** against
+`#D28`'s 4.5 : 1 floor.
+
+**The codepoint is DERIVED, and the filters are mechanical.** Candidates had to be (i) legal at the
+fixed style — satisfied identically by all, so not the discriminating filter; (ii) **exactly one
+terminal cell**, because this batch budgets in cells and a wide glyph shifts every column on the
+card; (iii) **not already carrying a meaning** among the 21; (iv) **not emoji-presentation**, since
+those render double-width in many terminals whatever `cell_len` reports; and (v) **free of a meaning
+collision** with an existing row. Fourteen survived (i)–(iii); **two survived all five** — `⊘`
+U+2298 CIRCLED DIVISION SLASH and `⦸` U+29B8 CIRCLED REVERSE SOLIDUS, which are visually
+near-identical. `⊘` ships on font coverage.
+
+Rejected with reasons, so the next reader does not re-litigate them: `⚠` duplicates `V20`'s warning
+reading **and** carries an emoji presentation; `✗`/`✘` read as the antonym of `V14` `✓ ficha
+completa` and therefore as `V15` *ficha incompleta*; `▨` sits in `V10`'s `▓▒░` density family; `ⓧ`
+reads into `V18` `◍`'s circled-provenance family; `☠`, `⁉`, `‼`, `⁇` are emoji-presentation; `⌒`,
+`⨯`, `↯` carry no failure meaning.
+
+**The aesthetic half is NOT settled here and is queued for the operator**, under the standing rule
+that a TUI design change gets a prototype round with real renders and his verdict. `⊘` ships now so
+the defect closes; `⊘` against `⦸` (and `✗` with its stated caveat) goes to that round alongside the
+`UX-F7b` selection tone. **Shipping a legal glyph now does not pre-empt that verdict** — the defect
+and the look are separable, exactly as they were for the tone.
+
+### Consequence for `LLR-N16.2.1`, stated rather than left to be discovered
+
+`declared_vocabulary` becomes **22 rows**. `LLR-N16.2.1` asserts **set equality** against it, so the
+legend must paint this row too. That consequence is the reason this is an amendment to a sealed
+artifact rather than an implementation detail, and it is the same consequence the requirement
+already anticipates for colour rows.
+
+---
+
+## Amendment 2 — the `#D7` marker, and a glyph may be a SET. 2026-09-19.
+
+**Authority.** Coordinator rulings 2026-09-19, on two conflicts surfaced while deriving
+`declared_vocabulary` for `Inc-8`.
+
+### (a) `DEFERRED(#D7)` is written onto `V18`'s row — the marker was always intended and never written
+
+`LLR-N16.2.1`'s instrument says to *"remove every triple whose row carries the `DEFERRED(#D7)`
+marker"*, and `01-requirements.md` §5.2 states that `V18` *"carries the `DEFERRED(#D7)` marker"*.
+**Measured: it did not, and no row in this document did.** The only occurrence of the string
+`DEFERRED` anywhere in `01b` was inside Amendment 1, quoting the instrument.
+
+> **SO THE REMOVAL STEP HAS BEEN INERT SINCE IT WAS AUTHORED, AND IS LIVE FOR THE FIRST TIME WITH
+> THIS AMENDMENT.** Nothing was removed by it, ever, and no derivation that relied on it was correct.
+> Every count downstream must be re-derived rather than adjusted, because a step that previously
+> removed nothing now removes a row.
+
+**This is the third instance in this batch of the same failure: the gap between two artifacts, in
+neither of them.** The exclusion lived as prose in `01-requirements.md`; the instrument that must act
+on it reads `01b`; each document was internally coherent and the join was empty. The first instance
+was `PRED-VIS` requiring a member of a set that had none; the second was `project every row onto the
+triple` being silently ambiguous. **Three makes it this project's characteristic failure rather than
+a run of bad luck.**
+
+### (b) A glyph may be a SET of codepoints, not only a single character
+
+`V4` and `V4a` **collapse to one member** — but **not** for the reason
+`01-requirements.md` §5.2 gives, and that reason is struck with attribution.
+
+**STRUCK:** *"`V4` and `V4a` are **byte-identical in glyph, label and style**"*. Measured, `V4`'s
+glyph cell is ``` `∙ ∙ ∙` ``` and `V4a`'s is ``` `∙ ∙ ∙` (scattered braille, `U+2800`–`U+28FF`) ```.
+**They are not byte-identical, and a dedupe resting on a false premise cannot be executed
+mechanically** — which is why the derivation refused to perform it rather than fudging the match.
+
+**WHAT REPLACES IT, and it changes the model rather than patching the claim.** They are one painted
+**FORM**: a braille field is a single visual device whose codepoint varies with the data, and
+*"scattered braille, `U+2800`–`U+28FF`"* is that device written as a **range**. So the vocabulary
+admits a glyph that is a **set of codepoints** — some members are a single character, some are a
+range used as one device.
+
+**Membership then reads mechanically:** *the painted codepoint is in the declared glyph set for that
+meaning.* This is consistent with the ruled projection and required no change to it — **a form is a
+triple, and nothing in "triple" ever required the glyph to be one character.** The singleton case is
+simply the range of size one.

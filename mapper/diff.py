@@ -7,6 +7,7 @@ from pathlib import Path
 
 import yaml
 
+from .github import _git_env
 from .model import Graph, SchemaField
 from .store import MapStore
 
@@ -40,6 +41,8 @@ def git_diff(map_id: str, store: MapStore) -> DiffResult | None:
                 text=True,
                 encoding="utf-8",
                 check=True,
+                # `INC9G-SEC-F5`: the one environment every `git` call here runs in.
+                env=_git_env(),
             )
             return result.stdout
         except (subprocess.CalledProcessError, FileNotFoundError, OSError):

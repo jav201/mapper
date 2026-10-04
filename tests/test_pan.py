@@ -1,0 +1,840 @@
+"""HLR-N06.1 — pan moves the window and is bounded.
+
+`TC-030`, `TC-031`, `AT-011`, `AT-012`.  The acceptances press the REAL `H` and
+`L`, never `action_*`: `QA-B-10`'s rule is that a chord-agnostic requirement is
+legitimate and a chord-agnostic acceptance test is not, and `AT-012` asserting
+the `borde del territorio` declaration against a key nobody had named is what
+made that a defect rather than an untidiness.
+"""
+from __future__ import annotations
+
+import re
+from html import unescape
+
+import pytest
+
+from mapper.app import PAN_INERT_HINT, MapScreen, MapperApp
+from mapper.model import Edge, Ficha, Graph, Node
+from mapper.views.layered import LayeredRenderer, _tree_layout, pan_extent
+from mapper.views.state import ViewState
+from mapper.widgets.chrome import HintLine
+from tests.inc3_support import canvas_rows, install, open_map, pan_graph, rows_in
+
+# The declared context of use.  `run_test()` defaults to 80x24, where
+# `_apply_region_visibility` auto-hides BOTH the rail and the inspector, so a
+# reading taken there describes a screen the operator does not have (B-54).
+#
+# `height_offset` IS DELIBERATELY NOT IMPORTED HERE, and the unused import that
+# used to be was a real signal rather than untidiness.  Its job is to convert a
+# terminal height into a renderer height when a test needs a NAMED renderer
+# size; every arm in this module instead reads `screen._canvas_size()` back off
+# the mounted screen and derives its press counts from `pan_extent` at that
+# size, which is the stronger form of the same discipline -- it measures the
+# achieved geometry rather than computing a size it hopes it got.  Nothing here
+# needs the helper, so it is not imported.
+CONTEXT_OF_USE = (118, 34)
+
+
+def _hint(screen) -> str:
+    """The hint line as PAINTED, not as stored — HLR-N06.1 says paint."""
+    return " ".join(rows_in(screen, screen.query_one(HintLine).region))
+
+
+# --------------------------------------------------------------------------
+# LLR-N06.1.2 — the clamp
+
+
+@pytest.mark.parametrize(
+    "offset,extent,span,expected",
+    [
+        # Both far extremes.
+        (-10 ** 6, 300, 100, 0),
+        (10 ** 6, 300, 100, 200),
+        # Inside the range, and both of its endpoints.
+        (0, 300, 100, 0),
+        (200, 300, 100, 200),
+        (137, 300, 100, 137),
+        # E < W: a map SMALLER than the canvas has a legal range of exactly one
+        # position.  An off-by-one here is how the map jumps off screen on a
+        # small graph, and a bare `extent - span` would be negative.
+        (5, 40, 100, 0),
+        (-5, 40, 100, 0),
+        # E == W: the other single-position case.
+        (5, 100, 100, 0),
+        (0, 100, 100, 0),
+    ],
+)
+def test_tc_030_the_pan_clamp_holds_over_the_declared_range(
+    offset, extent, span, expected
+):
+    """LLR-N06.1.2 — `[0, max(0, E - W)]` for every input, over 9 of them."""
+    result = MapScreen._clamp_pan(offset, extent, span)
+    assert result == expected
+    assert 0 <= result <= max(0, extent - span)
+
+
+def test_tc_030_the_clamp_is_not_the_identity(tmp_path):
+    """The discriminating negative: a clamp that returns its input passes every
+    in-range row above.  Two of the nine rows are out of range on purpose, and
+    this states that as a property rather than trusting the table to have them.
+    """
+    out_of_range = [(-10 ** 6, 300, 100), (10 ** 6, 300, 100), (5, 40, 100)]
+    changed = [
+        (o, e, s) for o, e, s in out_of_range
+        if MapScreen._clamp_pan(o, e, s) != o
+    ]
+    assert len(changed) == 3
+
+
+# --------------------------------------------------------------------------
+# LLR-N06.1.1 — the offsets travel in the view state
+
+
+def test_tc_031_pan_translates_the_drawing_origin(tmp_path):
+    """Two renders at two offsets differ, and the OUTPUT SHAPE does not.
+
+    The shape clause is the one that reddens the plausible wrong fix: shifting
+    by slicing the rendered rows changes the row or the cell count, which is a
+    map that shrinks as you pan rather than a window that moves over it.
+    """
+    # NOT `legacy`: measured, its extent at w=50 is 45 against a span of 48, so
+    # it fits, `pan_extent` is 0 in both axes and this arm would compare a frame
+    # with itself and pass.  The guard below is what found that.
+    graph = pan_graph()
+    state = ViewState(w=50, h=20)
+    (extent_x, span_x), _ = pan_extent(graph, state)
+    assert extent_x > span_x, (
+        f"extent {extent_x} fits in span {span_x}; there is nothing to pan and "
+        f"this arm would compare a frame with itself"
+    )
+
+    still = LayeredRenderer().render(graph, state)
+    panned = LayeredRenderer().render(graph, ViewState(w=50, h=20, pan_x=8))
+    assert still.plain != panned.plain
+
+    a, b = still.plain.split("\n"), panned.plain.split("\n")
+    assert len(a) == len(b)
+    # Row 0 is the header, which is not part of the map plane and does not pan.
+    assert [len(r) for r in a[1:]] == [len(r) for r in b[1:]]
+
+    # The renderer holds no pan state of its own: rendering the un-panned state
+    # again after a panned render returns the first image byte for byte.
+    assert LayeredRenderer().render(graph, state).plain == still.plain
+
+
+def test_tc_031_the_renderer_is_a_pure_function_of_graph_and_state(tmp_path):
+    """LLR-N06.1.1's acceptance criterion, executed on ONE long-lived renderer.
+
+    `MapScreen` holds one renderer (`app.py`) and calls `render` from the canvas
+    repaint and from the SVG export at DIFFERENT sizes.  A renderer that kept
+    pan — or a painted set — as a side effect would let one `e` press poison the
+    other call site; measured, that shape made the indicator declare `0 hidden`
+    on a canvas hiding 7.
+    """
+    graph = install(tmp_path, "legacy")
+    renderer = LayeredRenderer()
+    small = renderer.render(graph, ViewState(w=30, h=6)).plain
+    renderer.render(graph, ViewState(w=140, h=45, pan_x=20, folded=frozenset({"fin"})))
+    assert renderer.render(graph, ViewState(w=30, h=6)).plain == small
+
+
+# --------------------------------------------------------------------------
+# AT-011 / AT-012 — the real chords, through the shipped screen
+
+
+@pytest.mark.asyncio
+async def test_a_layout_that_cannot_be_drawn_does_not_kill_the_app(tmp_path):
+    """The sink guard, over the calls Inc-3 added OUTSIDE it.
+
+    `refresh_canvas`'s try/except says it is "scoped to the sink, not to the
+    exception types known today", because it runs inside the message pump and an
+    escape there kills the app with the operator's unsaved edits in it.  Inc-3
+    added two `_tree_layout`-reaching calls and put both outside it --
+    `_reclamp_pan` and `_pagination_text` -> `painted_ids` -- and `_pan` reaches
+    `pan_extent` with no guard at all.  Executed on a cyclic graph before the
+    repair, one `L` press took `app.is_running` to False.
+
+    NOT REACHABLE THROUGH THE SHIPPED LOADERS TODAY, and that is stated rather
+    than glossed: `mermaid.parse` rejects multi-parent, and `store.load` and
+    `store.save` both reject cycles through `find_cycle`.  This is a
+    defence-in-depth arm, and the guard's own comment is the argument for it.
+    The graph is therefore installed directly on the mounted screen, which is
+    the only way to reach the state the guard exists for.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        cyclic = Graph()
+        for i in range(4):
+            cyclic.add_node(Node(id=f"n{i}", ficha=Ficha(title=f"N{i}", meta="m")))
+        for i in range(4):
+            cyclic.add_edge(Edge(parent_id=f"n{i}", child_id=f"n{(i + 1) % 4}"))
+        # The fixture is asserted: a graph that lays out fine proves nothing.
+        with pytest.raises(ValueError):
+            _tree_layout(cyclic, 14, 3, frozenset())
+        screen.graph = cyclic
+
+        # The repaint itself must not escape -- this is the call that runs in
+        # the message pump.
+        screen.refresh_canvas()
+        await pilot.pause()
+
+        # The degradation is DECLARED, not silent: the canvas says so, and the
+        # strip declares nothing rather than a number it could not compute.
+        assert "could not draw the map" in " ".join(canvas_rows(screen))
+        assert screen._unpainted_ids() is None  # noqa: SLF001
+
+        for key in ("L", "H", "J", "K", "j", "z"):
+            await pilot.press(key)
+            await pilot.pause()
+            assert app.is_running, f"the {key!r} key killed the app on a cyclic graph"
+
+
+@pytest.mark.asyncio
+async def test_a_dangling_edge_does_not_escape_refresh_canvas(tmp_path):
+    """The SIBLING SINK, which sat outside the same guard.
+
+    `refresh_canvas`'s `try` closes before the minimap is written, so
+    `_minimap_text` and `_branch_coverage_glyph` — which index
+    `self.graph.nodes[...]` with ids taken straight from `children_of` — raised
+    from inside the message pump with nothing catching them.  The asymmetry was
+    the finding: `_unpainted_ids` has its own try/except and the minimap had
+    none, in the same method, for the same class of failure the cycle guard
+    beside this arm was added for.
+
+    REACHABILITY IS STATED HONESTLY: "could not construct from a file", not
+    "unreachable".  `mermaid.parse` calls `_ensure_node` for BOTH edge endpoints
+    and `MapStore.load` routes a cycle to `MapStoreError`, so no `.mmd`/`.yml`
+    pair was found that produces a dangling edge — the same defence-in-depth
+    footing as the cycle arm.
+
+    SCOPED TO `refresh_canvas`, AND THE SCOPE IS ITSELF A FINDING.  Measured on
+    this fixture: `_minimap_text()` and `_branch_coverage_glyph()` both raise
+    `KeyError`, `OutlineRail.show()` does NOT — but the rail then raises the
+    same `KeyError` from inside its own `render()`, at COMPOSITOR paint time,
+    which is a different path and one no guard in `refresh_canvas` can reach.
+    So this arm asserts what this increment fixed (the method does not let the
+    exception escape) and does not assert that the frame survives, because it
+    does not.  `mapper/widgets/rail.py` is outside this increment's fix set;
+    the rail's unguarded `render` is recorded as a CARRY.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        dangling = Graph()
+        dangling.add_node(Node(id="root", ficha=Ficha(title="raiz", meta="m")))
+        dangling.add_node(Node(id="hijo", ficha=Ficha(title="hijo", meta="m")))
+        dangling.add_edge(Edge(parent_id="root", child_id="hijo"))
+        dangling.edges.append(Edge(parent_id="root", child_id="fantasma"))
+        assert "fantasma" not in dangling.nodes
+        screen.graph = dangling
+
+        # THE FIXTURE IS ASSERTED AT THE SINK: without this the arm below is
+        # `refresh_canvas` on an ordinary graph, which never needed a guard.
+        with pytest.raises(KeyError):
+            # `Inc-STRIPS` gave this a width: the strip budgets its entries
+            # against the row it actually has, so the caller supplies it. The
+            # value is immaterial to this arm -- what is asserted is that the
+            # dangling edge still raises AT THIS SINK, which is what makes the
+            # guard below a guard rather than a no-op.
+            screen._minimap_text(118)  # noqa: SLF001
+        with pytest.raises(KeyError):
+            screen._branch_coverage_glyph("root")  # noqa: SLF001
+
+        # THE GUARD, AND IT IS THE WHOLE ASSERTION.  Un-guarded, this call
+        # raises `KeyError` straight out of the message pump — where an escape
+        # kills the app with the operator's unsaved edits in it.  Guarded, the
+        # coverage strip degrades to empty and the method completes.
+        #
+        # NOTHING IS READ OFF THE COMPOSITED FRAME HERE, and that is forced
+        # rather than preferred: compositing calls `OutlineRail.render`, which
+        # raises the same `KeyError` at PAINT time (the carry above), so a
+        # `frame_rows` read would fail on the rail's defect instead of measuring
+        # this one.  The `pytest.raises` clauses above are what keep this
+        # non-vacuous: they prove the sink really does raise on this fixture.
+        screen.refresh_canvas()
+
+
+@pytest.mark.asyncio
+async def test_the_pan_fixture_overflows_both_axes_at_the_declared_context(tmp_path):
+    """`pan_graph`'s docstring claim, ASSERTED at the size it names.
+
+    A shared fixture whose docstring states a measured property it does not have
+    is how a driver ends up exercising a no-op while looking like it exercised
+    the feature -- the defect class this increment already caught once in
+    itself.  So the claim is executed here rather than described there.
+
+    THE UNIT IS THE TERMINAL.  At a 118x34 terminal the rail and the inspector
+    take 60 columns between them, so the canvas the fixture has to overflow is
+    58x25; measured here, `max_pan_x = 49` and `max_pan_y = 10`.  Handed to the
+    renderer at `w = 118` the same fixture has `max_pan_x = 0`, because
+    `_geometry` shrinks `card_w` until the leaves fit `avail` and a canvas that
+    wide never reaches the floor.  Both readings are true of different things,
+    and the negative one is asserted below so the distinction cannot be lost
+    again by someone re-measuring at the renderer.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        w, h = screen._canvas_size()  # noqa: SLF001
+        assert (w, h) < CONTEXT_OF_USE, (
+            f"the canvas is {(w, h)} at a {CONTEXT_OF_USE} terminal; the side "
+            f"regions are not taking their columns and this arm is measuring "
+            f"the wrong frame"
+        )
+        (extent_x, span_x), (extent_y, span_y) = pan_extent(
+            screen.graph, screen._view_state(w, h)  # noqa: SLF001
+        )
+        assert extent_x - span_x > 0, (w, h, extent_x, span_x)
+        assert extent_y - span_y > 0, (w, h, extent_y, span_y)
+
+    # The NEGATIVE reading, on the renderer rather than the terminal: at
+    # `w = 118` horizontal pan is dead, and `H`/`L` are inert.  Recorded as an
+    # executed number so "the fixture does not overflow at 118x34" cannot come
+    # back as a finding without the unit attached to it.
+    (rx, rsx), _ry = pan_extent(pan_graph(), ViewState(w=118, h=34))
+    assert rx - rsx <= 0, (rx, rsx)
+
+
+async def _open_pan_map(app, pilot):
+    app.store.save("pan", pan_graph())
+    screen = await open_map(app, pilot, "pan")
+    await pilot.pause()
+    return screen
+
+
+@pytest.mark.asyncio
+async def test_at_011_the_real_pan_chord_moves_the_painted_window(tmp_path):
+    """AT-011 — one press of the real `L`, and the painted range changes.
+
+    Read from the COMPOSITED frame clipped to the canvas region, never from
+    `render().plain`: the question is what the operator sees.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        w, h = screen._canvas_size()
+        (extent_x, span_x), _ = pan_extent(screen.graph, screen._view_state(w, h))
+        assert extent_x > span_x, (
+            f"the fixture does not overflow at {CONTEXT_OF_USE}: extent "
+            f"{extent_x} vs span {span_x}, so a pan cannot change anything"
+        )
+
+        before = canvas_rows(screen)
+        await pilot.press("L")
+        await pilot.pause()
+        after = canvas_rows(screen)
+
+        assert screen.pan_x == MapScreen.PAN_STEP_X
+        assert after != before
+        assert len(after) == len(before)
+        assert {len(r) for r in after} == {len(r) for r in before}
+
+
+@pytest.mark.asyncio
+async def test_at_012_pan_is_bounded_at_both_edges_and_declares_the_edge(tmp_path):
+    """AT-012 — both boundaries, the real keys, and the painted declaration.
+
+    The press count `K` is DERIVED from the layout extent and the canvas width
+    at run time, never hard-coded — a typed count is a count that stops
+    exhausting the extent the day the fixture changes.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        w, h = screen._canvas_size()
+        (extent_x, span_x), _ = pan_extent(screen.graph, screen._view_state(w, h))
+        max_pan = max(0, extent_x - span_x)
+        assert max_pan > 0
+
+        # BOUNDARY 1 — panning LEFT at column 0.
+        assert screen.pan_x == 0
+        before = canvas_rows(screen)
+        await pilot.press("H")
+        await pilot.pause()
+        assert screen.pan_x == 0
+        assert canvas_rows(screen) == before
+        assert "edge of the map" in _hint(screen)
+
+        # BOUNDARY 2 — panning RIGHT past the last column that shows content.
+        presses = max_pan // MapScreen.PAN_STEP_X + 1
+        assert presses >= 2, presses
+        for _ in range(presses):
+            await pilot.press("L")
+            await pilot.pause()
+        assert screen.pan_x == max_pan
+
+        exhausted = canvas_rows(screen)
+        await pilot.press("L")
+        await pilot.pause()
+        assert screen.pan_x == max_pan
+        assert canvas_rows(screen) == exhausted
+        assert "edge of the map" in _hint(screen)
+
+
+@pytest.mark.asyncio
+async def test_at_012_the_vertical_chords_are_bounded_the_same_way(tmp_path):
+    """The other axis, because `J`/`K` are two of the four rows this seat adds
+    and a pan that is bounded in one axis only loses the map in the other."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        w, h = screen._canvas_size()
+        _x, (extent_y, span_y) = pan_extent(screen.graph, screen._view_state(w, h))
+        max_pan = max(0, extent_y - span_y)
+        assert max_pan > 0, (extent_y, span_y)
+
+        await pilot.press("K")
+        await pilot.pause()
+        assert screen.pan_y == 0
+        assert "edge of the map" in _hint(screen)
+
+        for _ in range(max_pan // MapScreen.PAN_STEP_Y + 1):
+            await pilot.press("J")
+            await pilot.pause()
+        assert screen.pan_y == max_pan
+        bottom = canvas_rows(screen)
+        await pilot.press("J")
+        await pilot.pause()
+        assert canvas_rows(screen) == bottom
+        assert "edge of the map" in _hint(screen)
+
+
+@pytest.mark.asyncio
+async def test_a_live_J_press_changes_what_the_canvas_paints(tmp_path):
+    """The VERTICAL axis needs a CONTENT oracle, and it had none.
+
+    WRITTEN BECAUSE A MUTANT SURVIVED ALL 789 TESTS.  Drop `- self.pan_y` from
+    `_Geometry.place` and `J`/`K` become a complete product no-op: the attribute
+    moves, the frame does not, and the suite is green.  The identity
+    `declared == traced` cannot see it — `render` and `painted_ids` share
+    `place`, so a LOCKSTEP edit moves both sides together — and neither can
+    `oracle_traced`, which is row-scan-invariant under `pan_y` by construction
+    (its docstring states that as a strength; it is also this blind spot).  The
+    same lockstep edit on `pan_x` IS caught, because the oracle consumes
+    `pan_x` explicitly.  So the one bug class the identity cannot see was, on
+    this axis, the one the oracle could not see either.
+
+    The bounded arm above cannot substitute: it asserts the frame is UNCHANGED
+    at the edges, which a pan that never moves anything satisfies trivially.
+    This asserts the positive — one LIVE press, and the rows the operator sees
+    are different rows.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        w, h = screen._canvas_size()
+        _x, (extent_y, span_y) = pan_extent(screen.graph, screen._view_state(w, h))
+        assert extent_y - span_y >= MapScreen.PAN_STEP_Y, (
+            f"the fixture has {max(0, extent_y - span_y)} rows of vertical "
+            f"travel at {CONTEXT_OF_USE}; one press cannot move the window and "
+            f"this arm would be vacuous"
+        )
+
+        before = canvas_rows(screen)
+        await pilot.press("J")
+        await pilot.pause()
+        after = canvas_rows(screen)
+
+        assert screen.pan_y == MapScreen.PAN_STEP_Y, screen.pan_y
+        # THE CONTENT, not the attribute.  This is the clause the lockstep
+        # mutant fails and every other vertical arm passes.
+        assert after != before, (
+            "`J` moved `pan_y` and the painted canvas is byte-identical; the "
+            "vertical pan is a no-op the operator cannot see"
+        )
+        # The frame is still the same SHAPE — a pan translates the window, it
+        # does not resize or reflow it.
+        assert len(after) == len(before)
+        assert {len(r) for r in after} == {len(r) for r in before}
+
+
+@pytest.mark.asyncio
+async def test_the_edge_hint_does_not_latch_across_a_live_pan(tmp_path):
+    """`borde del territorio` is CLEARED on a successful pan.
+
+    It was set on a no-op and cleared by nothing, so it latched on the first
+    press that hit an edge and then sat there describing every later LIVE pan as
+    an edge the operator had not reached.  On the shipped maps that is the
+    normal case rather than an unlucky one: swept over the shipped fixtures,
+    horizontal pan is live at exactly one terminal width, so `H`/`L` are almost
+    always no-ops — the hint latches immediately and then misdescribes `J`.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        # LATCH IT on a genuine no-op: `K` at the top edge.
+        await pilot.press("K")
+        await pilot.pause()
+        assert screen.pan_y == 0
+        assert "edge of the map" in _hint(screen)
+
+        # Then a LIVE pan on the other side of the same axis.
+        await pilot.press("J")
+        await pilot.pause()
+        assert screen.pan_y == MapScreen.PAN_STEP_Y, (
+            "the follow-up press was itself a no-op; this arm proves nothing"
+        )
+        assert "edge of the map" not in _hint(screen), (
+            f"the edge hint survived a live pan: {_hint(screen)!r}"
+        )
+
+
+# ==========================================================================
+# PAN-1 — a view that does not CONSUME pan must not have pan ADVERTISED or
+# ADVANCED on its behalf.
+#
+# EVERY ARM HERE DRIVES `pan_graph`, AND THAT IS LOAD-BEARING RATHER THAN
+# CONVENIENT. On the shipped maps `H`/`L` are no-ops at every width but one --
+# `app.py` records that measurement in `_pan` itself -- so an arm built on
+# `legacy` or `anidado` would assert "pan did not move" in a view where pan
+# never moves anyway, and would pass identically against the defect and against
+# the fix. Green by construction is the failure this whole increment is about.
+#
+# So each arm carries a POSITIVE CONTROL in the same body: the same key in
+# LAYERED must move the offsets. Without it the arm cannot tell INERT from THE
+# FIXTURE NEVER PANNED.
+
+
+# THE REAL CHORD FOR EACH VIEW, because `_clear_pan_hint` lives in
+# `action_toggle_outline` / `action_toggle_radial` and assigning the mode flags
+# BYPASSES both. An arm that switches views by `screen.outline_mode = True` is
+# not exercising the seam this increment added -- it is exercising a state
+# assignment that happens to repaint. `QA-B-10`'s rule, one surface over: a
+# chord-agnostic requirement is legitimate; a chord-agnostic acceptance is not.
+VIEW_KEY = {"outline_mode": "o", "radial_mode": "r"}
+
+
+async def _pan_is_live(screen) -> bool:
+    """Does layered pan actually move on this screen, at this size?"""
+    w, h = screen._canvas_size()
+    (extent_x, span_x), _ = pan_extent(screen.graph, screen._view_state(w, h))
+    return extent_x > span_x
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("flag", ("outline_mode", "radial_mode"))
+async def test_pan1_a_pan_key_is_inert_AND_DECLARED_in_a_non_panning_view(
+    tmp_path, flag
+):
+    """The key does nothing, and the strip SAYS SO. Both halves, or neither.
+
+    This is the arm that kills a mutant reverting `_consumes_pan` to "everything
+    pans": under that mutant the offsets move and the hint never appears, and
+    both assertions below fire.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        # POSITIVE CONTROL, FIRST. If layered does not move here, nothing below
+        # distinguishes the fix from a fixture that cannot pan.
+        assert await _pan_is_live(screen), (
+            "layered pan is dead on this fixture at this size, so an 'it did "
+            "not move' assertion below would be green by construction"
+        )
+        await pilot.press("L")
+        await pilot.pause()
+        assert screen.pan_x == MapScreen.PAN_STEP_X, (
+            "the control press did not move layered's pan; the arm cannot tell "
+            "inert from never-panned"
+        )
+
+        await pilot.press(VIEW_KEY[flag])
+        await pilot.pause()
+        assert getattr(screen, flag), f"{VIEW_KEY[flag]!r} did not enter {flag}"
+
+        held = (screen.pan_x, screen.pan_y)
+        await pilot.press("L")
+        await pilot.press("J")
+        await pilot.pause()
+
+        assert (screen.pan_x, screen.pan_y) == held, (
+            f"{flag}: a pan key ADVANCED the offsets in a view that does not "
+            f"consume them -- {held} -> {(screen.pan_x, screen.pan_y)}. That is "
+            "PAN-1 exactly: the app moves state the picture never reflects"
+        )
+        assert PAN_INERT_HINT in _hint(screen), (
+            f"{flag}: the pan key was inert and said NOTHING. Inert-and-silent "
+            "is indistinguishable from a broken keyboard, which is the "
+            f"confusion US-N06 exists to remove. Hint was {_hint(screen)!r}"
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("flag", ("outline_mode", "radial_mode"))
+async def test_pan1_a_view_excursion_does_not_DISCARD_the_operators_pan(
+    tmp_path, flag
+):
+    """The round trip, and NO PAN KEY IS PRESSED in the non-panning view.
+
+    A first version of `_reclamp_pan`'s non-consumer branch ZEROED the offsets
+    rather than declining to clamp them. `refresh_canvas` calls it on every
+    repaint, so merely visiting outline or radial threw the operator's pan away
+    -- no key pressed, nothing declared, offsets gone. That is the family this
+    requirement exists to close, one seam over: PAN-1's charge is "the app held
+    a pan the picture never reflected", and zeroing shipped "the app discarded a
+    pan the operator set, without saying so".
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        assert await _pan_is_live(screen), "layered pan is dead; arm is vacuous"
+
+        await pilot.press("L")
+        await pilot.press("L")
+        await pilot.pause()
+        panned = (screen.pan_x, screen.pan_y)
+        assert panned != (0, 0), (
+            "the control presses did not pan, so a round trip cannot show a loss"
+        )
+
+        await pilot.press(VIEW_KEY[flag])       # out, through the real action
+        await pilot.pause()
+        assert getattr(screen, flag), f"{VIEW_KEY[flag]!r} did not enter {flag}"
+
+        await pilot.press(VIEW_KEY[flag])       # and back, the same way
+        await pilot.pause()
+        assert not getattr(screen, flag), f"{VIEW_KEY[flag]!r} did not leave {flag}"
+
+        assert (screen.pan_x, screen.pan_y) == panned, (
+            f"{flag}: a view excursion DISCARDED the pan the operator set -- "
+            f"{panned} -> {(screen.pan_x, screen.pan_y)}, with no key pressed "
+            "and nothing declared"
+        )
+
+
+@pytest.mark.asyncio
+async def test_pan1_the_inert_hint_does_not_LATCH_into_a_view_where_pan_is_live(
+    tmp_path,
+):
+    """The hint is a statement ABOUT THE VIEW, so it dies with the view.
+
+    `_pan`'s own clear is reachable only on a SUCCESSFUL pan, which a
+    non-panning view never performs -- so without a clear at the toggle seam the
+    hint latches and then sits in LAYERED, where it is not stale but FALSE.
+    `app.py` already records this exact shape one branch down, for the edge hint.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        assert await _pan_is_live(screen), "layered pan is dead; arm is vacuous"
+
+        await pilot.press("r")                       # into radial
+        await pilot.pause()
+        await pilot.press("L")                       # inert, declares
+        await pilot.pause()
+        assert PAN_INERT_HINT in _hint(screen), (
+            "the hint never appeared, so this arm cannot show it failing to "
+            f"clear. Hint was {_hint(screen)!r}"
+        )
+
+        await pilot.press("r")                       # back to layered
+        await pilot.pause()
+
+        assert PAN_INERT_HINT not in _hint(screen), (
+            "the inert-pan hint LATCHED into layered, where pan IS live -- the "
+            f"strip is asserting something false about the view it is in: "
+            f"{_hint(screen)!r}"
+        )
+
+
+def test_pan1_an_unregistered_renderer_RAISES_rather_than_defaulting():
+    """`False` is a LEGITIMATE answer here, so it may not double as "I have
+    never heard of this renderer" (`A-98`, ruling `02j`).
+
+    THE BRANCH EXISTED AND NOTHING COULD SEE IT. `_consumes_pan` was corrected
+    to raise rather than fall through to `False`, and a mutant reverting exactly
+    that -- `raise` back to `return False` -- SURVIVED the whole suite. It was
+    the only new branch in this increment the suite could not distinguish from
+    its own defect, which is `measured != pinned` recurring inside the increment
+    that minted the phrase.
+
+    The shape is copied deliberately from the sibling seam's arm,
+    `test_an_unregistered_renderer_RAISES_rather_than_defaulting` in
+    `tests/test_canvas_header_charge.py`: this module's own convention, applied
+    to the third dispatch rather than re-invented for it.
+    """
+    from mapper.app import MapScreen as _MapScreen
+
+    screen = _MapScreen("test")
+    with pytest.raises(LookupError):
+        screen._consumes_pan(object())
+
+
+# --------------------------------------------------------------------------
+# B-68 — the exported artifact does not encode the operator's scroll position
+
+
+async def _export_bytes(screen, pilot) -> bytes:
+    """Press the REAL `e` and read the file it wrote.
+
+    The real chord, not `action_export_svg`, for the reason stated at the top of
+    this module: a chord-agnostic acceptance is not acceptable here, and `e` is
+    the whole of how the operator reaches this.  And the bytes come from DISK --
+    the artifact is the deliverable, so the arm re-reads what was written rather
+    than asserting against the `Text` on the way in.
+    """
+    path = screen.store.workspace / f"{screen.map_id}.svg"
+    # A STALE ARTIFACT MUST NOT BE READABLE AS A FRESH ONE.  `action_export_svg`
+    # swallows every failure into a toast, so without this unlink a second press
+    # that does NOTHING AT ALL leaves the first press's file in place and the
+    # invariance assertion compares a file against itself.  Measured: a mutant
+    # raising at every non-zero pan -- the exact condition `B-68` is about --
+    # left BOTH acceptance arms green.  An invariant arm must assert its trigger
+    # actually occurred, and this one has two: the pan moved, AND an artifact
+    # was produced at that pan.
+    #
+    # Unlinking rather than checking mtime or size: Windows mtime granularity is
+    # coarse enough to alias two presses, and a correct re-write is
+    # byte-identical here BY CONSTRUCTION, so neither could tell a fresh
+    # artifact from a stale one.  Absence is the only signal that fails closed.
+    if path.exists():
+        path.unlink()
+    await pilot.press("e")
+    await pilot.pause()
+    assert path.exists(), "the `e` chord produced no artifact -- the export failed"
+    return path.read_bytes()
+
+
+_SVG_CELL = re.compile(
+    r'<text[^>]*?x="([0-9.]+)"[^>]*?clip-path="url\(#[^)]*?-line-(\d+)\)"[^>]*?>(.*?)</text>',
+    re.S,
+)
+
+
+def _svg_emitted_text(svg: bytes) -> str:
+    """The exported SVG's text layer, reassembled into lines.
+
+    `C-42`: assert the EMITTED form, never the form a human reads.  Rich writes
+    ONE `<text>` element per style run, and in a card-heavy picture those runs
+    are per character -- so a literal search for `"rama 5"` returns 0 matches
+    on an artifact that plainly contains it.  Measured: `"rama"` occurs 8 times
+    once the runs are reassembled and 0 times before.
+
+    The runs are re-joined per `line-N` clip path, ordered by `x`.  Padding
+    spaces are NOT emitted as runs, so the reassembled line reads `rama5`, and
+    callers compare with whitespace stripped from both sides rather than
+    pretending the artifact carries a space it does not.
+    """
+    lines: dict[int, list[tuple[float, str]]] = {}
+    for x, line_no, content in _SVG_CELL.findall(svg.decode("utf-8", errors="replace")):
+        lines.setdefault(int(line_no), []).append((float(x), unescape(content)))
+    return "\n".join(
+        "".join(run for _, run in sorted(lines[n])) for n in sorted(lines)
+    )
+
+
+def _squash(text: str) -> str:
+    """Drop whitespace, so a title compares against the emitted run sequence."""
+    return "".join(text.split())
+
+
+@pytest.mark.asyncio
+async def test_b68_the_export_is_invariant_under_the_operators_pan(tmp_path):
+    """`B-68`: an export is a standalone artifact, so it renders the FULL EXTENT.
+
+    The defect: `action_export_svg` read `pan_x`/`pan_y` through `_view_state`
+    and sized the render from the TERMINAL, while `layered._geometry` shrinks
+    `card_w` at that wider width until the tree fits -- collapsing `max_pan_x`
+    to 0.  So an offset perfectly legal on the canvas was out of range for the
+    export and shifted content off the artifact's left edge.  Measured on this
+    fixture before the fix: 47,263 bytes at pan (0,0) against 16,718 at the
+    reachable pan (49,10), roughly 65% of the map missing from a file handed to
+    a third party who cannot tell.
+
+    THE ASSERTION IS INVARIANCE, NOT SIZE.  Asserting "the export got bigger"
+    would pass on a fix that merely clamped the pan to the export's own
+    geometry -- which still encodes a scroll position, and is the weaker fix the
+    ruling rejected.  Byte-equality across two genuinely different pans is the
+    only predicate that distinguishes "the state was removed" from "the state
+    was bounded".
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+
+        # POSITIVE CONTROL. If pan cannot move on this fixture at this size,
+        # "the two exports are identical" is true by construction and the arm
+        # proves nothing (`measured != pinned`).
+        assert await _pan_is_live(screen), (
+            "layered pan is dead on this fixture at this size, so an export "
+            "invariance assertion would be green whatever the export does"
+        )
+
+        at_origin = await _export_bytes(screen, pilot)
+
+        # Drive the pan to the far edge with the REAL chords, then assert it
+        # actually moved -- otherwise the second export is the first one again.
+        for _ in range(60):
+            await pilot.press("L")
+        for _ in range(30):
+            await pilot.press("J")
+        await pilot.pause()
+        assert (screen.pan_x, screen.pan_y) != (0, 0), (
+            "the pan chords did not move the view, so this arm is comparing an "
+            "export against itself"
+        )
+
+        at_edge = await _export_bytes(screen, pilot)
+
+    assert at_edge == at_origin, (
+        "the exported SVG changed when the operator panned: "
+        f"{len(at_origin)} bytes at the origin against {len(at_edge)} bytes at "
+        f"pan {(screen.pan_x, screen.pan_y)}. An export must not encode where "
+        "the session was looking."
+    )
+
+
+@pytest.mark.asyncio
+async def test_b68_the_export_carries_nodes_the_viewport_could_not_hold(tmp_path):
+    """The other half: invariance alone is satisfiable by exporting NOTHING.
+
+    Two identical empty artifacts are byte-equal, so the arm above cannot tell
+    a full-extent export from a broken one.  This one asserts the artifact
+    actually carries a node that the canvas at this size cannot paint -- which
+    is the content `B-68` was losing.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+        await pilot.pause()
+        screen = await _open_pan_map(app, pilot)
+        assert await _pan_is_live(screen), "fixture does not overflow; nothing is off-screen"
+
+        painted = _squash("\n".join(canvas_rows(screen)))
+        off_screen = [
+            node.ficha.title
+            for node in screen.graph.nodes.values()
+            if node.ficha.title and _squash(node.ficha.title) not in painted
+        ]
+        assert off_screen, (
+            "every node is already on screen, so 'the export carries what the "
+            "viewport could not' is unfalsifiable on this fixture"
+        )
+
+        emitted = _squash(_svg_emitted_text(await _export_bytes(screen, pilot)))
+
+    # The instrument must be able to find something, or "nothing is missing" is
+    # a statement about a failed parse rather than about the artifact.
+    assert emitted, "the SVG text layer reassembled to nothing -- the reader is broken"
+
+    missing = [title for title in off_screen if _squash(title) not in emitted]
+    assert not missing, (
+        f"the export dropped {len(missing)} of {len(off_screen)} nodes that the "
+        f"viewport could not hold: {missing[:5]}"
+    )

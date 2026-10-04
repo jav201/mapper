@@ -1,7 +1,6 @@
 """Coverage report screen for incomplete required fields."""
 from __future__ import annotations
 
-from rich.markup import escape
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.containers import Vertical
@@ -19,9 +18,9 @@ class CoverageScreen(ModalScreen[str | None]):
     """
 
     BINDINGS = [
-        ("enter", "select", "Seleccionar"),
-        ("escape", "dismiss", "Cerrar"),
-        ("q", "dismiss", "Cerrar"),
+        ("enter", "select", "select"),
+        ("escape", "dismiss", "close"),
+        ("q", "dismiss", "close"),
     ]
 
     CSS = """
@@ -68,7 +67,7 @@ class CoverageScreen(ModalScreen[str | None]):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("cobertura incompleta", id="coverage-title"),
+            Static("coverage", id="coverage-title"),
             DataTable(id="coverage-table", cursor_type="row"),
             Static("", id="coverage-empty"),
             id="coverage-dialog",
@@ -77,15 +76,44 @@ class CoverageScreen(ModalScreen[str | None]):
     def on_mount(self) -> None:
         table = self.query_one("#coverage-table", DataTable)
         table.clear()
-        table.add_columns("▐", "nodo", "faltantes", "cobertura")
+        table.add_columns("▐", "node", "missing", "coverage")
 
         for node in self._incomplete_nodes():
             have, req = node.ficha.required_coverage(self.graph.schema)
             missing = self._missing_keys(node.ficha, self.graph.schema)
             table.add_row(
                 Text.assemble(("▐", darkside.MUT)),
-                escape(node.ficha.title or node.id),
-                Text.assemble((escape(",".join(missing)), darkside.ALERT)),
+                # `darkside.plain`, NOT `escape` (`Inc-REPAIR` S-E).  `escape`
+                # guards Rich MARKUP and coerces nothing else: this batch
+                # measured at `Inc-CRUMB` that four producers reached the frame
+                # under `escape` alone, passing control characters, bidi
+                # overrides and zero-width joiners untouched.  Both values here
+                # are file-derived -- the title from the sidecar, the missing
+                # keys from its schema -- and this table is a sink they reach
+                # directly.
+                #
+                # WRAPPED IN `Text`, AND THAT IS NOT COSMETIC. `plain` does not
+                # escape markup, and its docstring justifies that by saying the
+                # result is "placed into `Text` objects with explicit styles, and
+                # `Text` does not parse markup". THE PREMISE WAS FALSE AT THIS
+                # LINE: a bare `str` handed to `DataTable.add_row` reaches
+                # Textual's `default_cell_formatter`, which sets
+                # `possible_markup = True` for any `str` and returns
+                # `Text.from_markup(content)`. Measured: a sidecar title of
+                # `[red]rojo[/red] and [link=file:///...]click[/link]` rendered
+                # with the markup INTERPRETED -- arbitrary style and a live link
+                # target -- where `escape` had made it inert.
+                #
+                # So the swap traded a control-character hole for a markup hole
+                # at this cell, and the line below was safe all along because
+                # `Text.assemble` yields a `Text` the formatter returns
+                # untouched. One comment justified two call sites that are not
+                # alike. Passing a `Text` makes the docstring's premise true
+                # here too, and renders identically.
+                Text(darkside.plain(node.ficha.title or node.id)),
+                Text.assemble(
+                    (darkside.plain(",".join(missing)), darkside.ALERT)
+                ),
                 darkside.step_meter(have, req),
                 key=node.id,
             )
@@ -97,8 +125,8 @@ class CoverageScreen(ModalScreen[str | None]):
             table.display = False
             self.query_one("#coverage-empty", Static).update(
                 Text.assemble(
-                    ("  todo completo. ", f"bold {darkside.INK}"),
-                    ("no falta ningún campo requerido.", darkside.MUT),
+                    ("  all complete. ", f"bold {darkside.INK}"),
+                    ("no required field is missing.", darkside.MUT),
                 )
             )
 

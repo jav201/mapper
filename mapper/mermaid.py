@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 
+from .darkside import plain
 from .model import Edge, Graph, Node
 
 
@@ -87,7 +88,11 @@ def parse(src: str) -> Graph:
             child_to_parent[cid] = pid
             children_by_parent.setdefault(pid, []).append(cid)
             if edge_label:
-                edge_labels[(pid, cid)] = _unescape_mermaid(edge_label)
+                # `G6-C-F5`: `Edge.label` is a ficha-adjacent text position that
+                # `A-111`'s ladder never reached -- it enters the graph here,
+                # straight from the `.mmd` text, not through `_coerce_field`.
+                # Same rule, same site as every other graph-entry coercion.
+                edge_labels[(pid, cid)] = plain(_unescape_mermaid(edge_label))
             if root_id is None:
                 root_id = pid
             continue

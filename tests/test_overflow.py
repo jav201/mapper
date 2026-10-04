@@ -1,0 +1,2052 @@
+"""HLR-N06.3 — nothing is hidden without being declared, and it reconciles.
+
+`TC-034` .. `TC-038`, `AT-015`, `AT-016`.  Every acceptance here is ONE on-disk
+node driving one whole chain (C-18): "covered by the combination of X and Y" is
+an unrealized claim, not a coverage argument.
+"""
+from __future__ import annotations
+
+import re
+
+import pytest
+from rich.color import EIGHT_BIT_PALETTE, Color, ColorSystem
+from rich.console import Console
+
+from tests.inc3_support import (
+    rows_in,
+    canvas_rows,
+    hidden_under,
+    height_offset,
+    install,
+    naive_hidden_sum,
+    open_map,
+    oracle_traced,
+)
+from mapper import darkside
+# `MapScreen` is no longer imported: every reference to it was
+# `MapScreen.HEADER_ROWS`, and that constant is gone -- the header's height is
+# now MEASURED per call by `layered.header_rows`, which this module imports
+# instead and pins directly against the rendered line.
+from mapper.app import MapperApp
+from mapper.model import Graph
+from mapper.views.layered import (
+    FOLD_PILL_TOKEN,
+    OVERFLOW_TOKEN,
+    LayeredRenderer,
+    header_rows,
+    painted_ids,
+)
+from mapper.views.outline import painted_ids as outline_painted_ids
+from mapper.views.radial import painted_ids as radial_painted_ids
+from mapper.views.state import ViewState
+# The balanced builder, imported rather than re-typed: `HEADER_ROWS` now has to
+# be measured over node count, and a second copy of a graph builder is a copy
+# that drifts.
+from tests.test_repair_depth import _balanced
+
+# The four configurations `HLR-N06.3` pins, plus two this increment ADDS and the
+# reason it adds them, which is a correction to `A-98` rather than belt-and-
+# braces.  `A-98` states that `(30, 6)` discriminates the dropped-column mutant
+# `MUT-B`.  Re-measured on `legacy` at all four pinned rows, it does NOT: at
+# `(30, 6)` the ROW bound alone already excludes every node but `erp`, so the
+# column bound cannot change the answer and `MUT-B` is green on all four.  The
+# column bound first bites at `(30, 12)`, where three rows of cards are on
+# screen and the two right-hand ones are past the right edge.  Dropping either
+# extra row lets `MUT-B` ship.
+#
+# The fourth component is the PAN, and it is the row the acceptance was missing
+# entirely.  `02j`'s risk row 5 says `painted_ids` must consume the same pan
+# offsets `render` does, or the declared set is correct only for a canvas that
+# has never moved -- and every configuration here used to be un-panned, so a
+# future edit to `geo.place` would have been caught by no acceptance arm.  The
+# offsets are chosen where `legacy` has live travel in BOTH axes (measured at
+# 30x12: `max_pan_x = 17`, `max_pan_y = 2`), and `_drive` asserts the pan it
+# achieved rather than the pan it asked for.
+PINNED_CONFIGURATIONS = (
+    (50, 12, (), (0, 0)),          # nothing hidden
+    (50, 12, ("erp",), (0, 0)),    # hidden by fold only
+    (30, 6, (), (0, 0)),           # hidden by viewport only
+    (30, 6, ("erp",), (0, 0)),     # hidden by both
+)
+ADDED_CONFIGURATIONS = (
+    (30, 12, (), (0, 0)),          # where the COLUMN bound is live — reddens MUT-B
+    (30, 12, ("erp",), (0, 0)),
+    (30, 12, (), (8, 2)),          # hidden by a PANNED viewport — both axes live
+)
+CONFIGURATIONS = PINNED_CONFIGURATIONS + ADDED_CONFIGURATIONS
+
+# The header wraps, so a per-row regex either misses the numeral or binds it to
+# the wrong label (QA-N-06).  The rows are joined before this is applied.
+_DECLARED = re.compile(
+    re.escape(OVERFLOW_TOKEN) + r"\s*(\d+)\s+out\s+of\s+view"
+)
+_PILL = re.compile(re.escape(FOLD_PILL_TOKEN) + r".*?\+(\d+)")
+
+
+def _declared_total(rows: list[str]) -> int | None:
+    """Parse the indicator's numeral out of the painted canvas.
+
+    Rows are JOINED first: at 100x30 the header renders as two rows with the
+    count numeral on one and its label on the next.
+
+    AND THE WHITESPACE BETWEEN THE WORDS IS `\\s+`, NOT A LITERAL SPACE, which
+    is the difference between reading the frame and reading a frame that happens
+    not to have wrapped.  A row is padded to the region width, so joining two
+    rows puts the padding INSIDE the sentence: at a 30-column pagination strip
+    the declaration paints as `... out of ` / `view ...` and the joined text
+    carries two spaces.  With a literal space this helper returned `None` on a
+    strip that was declaring the right number all along -- i.e. it reported the
+    requirement's unwanted behaviour on correct output, which would have been
+    read as a defect in the product rather than in the parse.
+    """
+    match = _DECLARED.search(" ".join(rows))
+    return int(match.group(1)) if match else None
+
+
+async def _drive(tmp_path, w, h, folded, pan=(0, 0)):
+    """Mount `MapScreen` so the renderer receives EXACTLY `(w, h)`, and prove it.
+
+    The terminal height is derived from a measured offset rather than typed, and
+    the achieved configuration is asserted -- so a screen that silently rendered
+    at some other size fails here instead of quietly answering a question nobody
+    asked.  THE PAN IS ASSERTED THE SAME WAY: `refresh_canvas` re-clamps into
+    the legal range, so a row asking for travel the layout does not have would
+    otherwise run un-panned while looking like it exercised pan.
+    """
+    install(tmp_path, "legacy")
+    offset = await height_offset(tmp_path, "legacy", w)
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(w, h + offset)) as pilot:
+        await pilot.pause()
+        screen = await open_map(app, pilot, "legacy")
+        # THE FIXTURE IS ASSERTED, not assumed.  Without the `install` above,
+        # `MapScreen` catches the load failure and mounts a ONE-NODE graph
+        # titled "error" -- on which every predicate below is trivially green.
+        # Measured: this arm was passing on that graph until the sibling
+        # `TC-038` arm's own vacuity guard exposed it.
+        assert sorted(screen.graph.nodes) == [
+            "alm", "cont", "erp", "fin", "inv", "nom", "pres", "rrhh"
+        ], sorted(screen.graph.nodes)
+        screen.folded = frozenset(folded)
+        screen.pan_x, screen.pan_y = pan
+        screen.refresh_canvas()
+        await pilot.pause()
+        achieved = screen._canvas_size()  # noqa: SLF001
+        assert achieved == (w, h), (
+            f"asked for renderer size {(w, h)} and got {achieved}; the "
+            f"configuration under test is not the one the table names"
+        )
+        assert (screen.pan_x, screen.pan_y) == pan, (
+            f"asked for pan {pan} and the clamp left {(screen.pan_x, screen.pan_y)}; "
+            f"this row does not exercise the pan it names"
+        )
+        rows = canvas_rows(screen)
+        declared = painted_ids(screen.graph, screen._view_state(w, h))  # noqa: SLF001
+        traced = oracle_traced(screen.graph, folded, w, rows, pan_x=screen.pan_x)
+        return screen, rows, declared, traced
+
+
+# --------------------------------------------------------------------------
+# LLR-N06.3.1 — one set difference, never a sum
+
+
+def test_tc_034_the_unpainted_set_is_a_difference_not_a_sum(tmp_path):
+    """The `anidado` fixture's whole reason for existing.
+
+    `FOLD = {ops, log}` with `log` nested INSIDE the folded `ops`: the naive rule
+    contributes `log -> [alm, flo]` and `ops -> [alm, comp, flo, log]` and
+    declares 6, while the graph only hides 4.  It double-counts exactly `alm`
+    and `flo`, inflation 2 — a number that cannot be right and that no
+    non-overlapping fixture can catch.
+
+    `legacy` is PROVABLY unfalsifiable here: over all 7 of its non-empty fold
+    configurations the two rules never disagree, which the sibling arm below
+    executes rather than asserts.
+    """
+    graph = install(tmp_path, "anidado")
+    assert len(graph.nodes) == 7, "the fixture did not round-trip through MapStore"
+    folded = frozenset({"ops", "log"})
+
+    hidden = hidden_under(graph, folded)
+    assert sorted(hidden) == ["alm", "comp", "flo", "log"]
+    assert len(hidden) == 4
+    assert naive_hidden_sum(graph, folded) == 6
+    assert naive_hidden_sum(graph, folded) != len(hidden), (
+        "the two rules agree on this fixture, so the acceptance cannot fail"
+    )
+
+    # And the product computes the difference, not the sum.
+    state = ViewState(w=140, h=45, folded=folded)
+    unpainted = frozenset(graph.nodes) - painted_ids(graph, state)
+    assert unpainted == hidden
+    assert len(unpainted) < naive_hidden_sum(graph, folded)
+
+
+def test_tc_035_the_positive_control_a_fold_where_naive_equals_painted(tmp_path):
+    """PDR `#D11`. Without this the negative control is green by construction.
+
+    A probe that can only ever report "the naive rule is wrong" is not measuring
+    the rule, it is asserting a conclusion.  `FOLD = {log}` on the SAME fixture
+    has no nesting, so the two rules agree — and the same instrument that
+    returned 6 != 4 above returns 2 == 2 here.
+    """
+    graph = install(tmp_path, "anidado")
+    folded = frozenset({"log"})
+
+    hidden = hidden_under(graph, folded)
+    assert sorted(hidden) == ["alm", "flo"]
+    assert naive_hidden_sum(graph, folded) == len(hidden) == 2, (
+        "the positive control does not reproduce: the instrument cannot return "
+        "the other answer, so its negative verdict proves nothing"
+    )
+    state = ViewState(w=140, h=45, folded=folded)
+    assert frozenset(graph.nodes) - painted_ids(graph, state) == hidden
+
+
+def test_tc_036_the_legacy_fixture_cannot_falsify_this_llr(tmp_path):
+    """Executed exhaustively, because `02a` argued it and `M-6` quoted 3 rows.
+
+    All 7 non-empty fold configurations of `legacy`: **0** where the naive sum
+    differs from the true hidden union.  An acceptance that ran only on `legacy`
+    could not fail, whatever the implementation did — which is why `anidado`
+    is a gate condition and not a nicety.
+    """
+    graph = install(tmp_path, "legacy")
+    # The root is excluded, and that exclusion is the requirement's own framing:
+    # its sole nesting candidate IS the root, and folding a whole map away is
+    # "a degenerate case, not the story's".  Derived, not typed.
+    internal = sorted(
+        {edge.parent_id for edge in graph.edges} - {graph.root_id}
+    )
+    assert internal, "no foldable branch derived; the sweep would be vacuous"
+
+    def sweep(branches):
+        agree = disagree = 0
+        for mask in range(1, 1 << len(branches)):
+            folded = frozenset(
+                nid for i, nid in enumerate(branches) if mask >> i & 1
+            )
+            if naive_hidden_sum(graph, folded) == len(hidden_under(graph, folded)):
+                agree += 1
+            else:
+                disagree += 1
+        return agree, disagree
+
+    agree, disagree = sweep(internal)
+    assert agree + disagree == 7, (agree, disagree)
+    assert disagree == 0, (
+        "legacy would falsify this LLR after all; the anidado fixture's whole "
+        "argument rests on it not being able to"
+    )
+    # POSITIVE CONTROL for the sweep itself: the same instrument DOES find
+    # disagreements once the root is admitted (folding `erp` and a child
+    # double-counts that child's descendants), so a 0 above is a measurement
+    # and not an instrument that can only ever answer 0.
+    _agree_all, disagree_all = sweep(sorted({e.parent_id for e in graph.edges}))
+    assert disagree_all > 0
+
+
+# --------------------------------------------------------------------------
+# LLR-N06.3.3 — the zero case, and LLR-N06.3.1's header-row measurement
+
+
+def test_tc_037_no_indicator_while_every_node_is_painted(tmp_path):
+    """LLR-N06.3.3 — 0 occurrences of the leading token.
+
+    An indicator permanently reading zero trains the operator to ignore it,
+    which is the same failure as not having one.  Driven on the 6-node M-1 shape
+    at 140x45, where the canvas is wide enough that nothing is hidden — the
+    positive control being the sibling arm, which finds the token when it should.
+    """
+    graph = install(tmp_path, "legacy")
+    state = ViewState(w=140, h=45)
+    assert painted_ids(graph, state) == frozenset(graph.nodes), (
+        "nothing is hidden at this size, or the arm below is vacuous"
+    )
+    painted = LayeredRenderer().render(graph, state).plain
+    assert OVERFLOW_TOKEN not in painted
+
+    # The control: the same token IS painted where nodes really are hidden.
+    tight = ViewState(w=140, h=8)
+    assert painted_ids(graph, tight) != frozenset(graph.nodes)
+    assert OVERFLOW_TOKEN in LayeredRenderer().render(graph, tight).plain
+
+
+def _header_rows_in_frame(screen) -> int | None:
+    """Rows the header's first LOGICAL line occupies IN THE COMPOSITED FRAME.
+
+    THE INSTRUMENT, AND IT IS DELIBERATELY NOT THE PRODUCT'S.  The pin this
+    serves used to compute `-(-len(header) // (w - 2))` — `header_rows`'s own
+    arithmetic, re-typed — and call the result a measurement.  Two sides that
+    share a formula cannot disagree about it: that helper could not fail on a
+    wrong divisor (both used `w - 2`), on word-wrap (neither wrapped) or on a
+    wide character (both used `len`).  Swapping only the helper for a real
+    render, product untouched, reddened 27 of the 520 cells it was declaring
+    green.  That is the same discipline failure that produced `B-61` — a formula
+    asserted rather than measured — relocated into the arm that was supposed to
+    catch it.
+
+    So this reads the rows Textual actually PAINTED into the canvas region and
+    asks how many of them the header consumed.  It goes through the compositor,
+    so it fails on a wrong divisor, on word-wrap and on a wide character alike.
+    Rows are re-joined and their whitespace collapsed because a wrap breaks the
+    line at a space and pads what is left of the row.
+
+    `None` when the region is SHORTER than the wrapped header: the frame has
+    clipped the evidence and there is nothing left to measure.  Reported by the
+    caller rather than skipped, so a sweep cannot go green by becoming blind.
+    """
+    w, h = screen._canvas_size()  # noqa: SLF001
+    line = screen._current_renderer().render(  # noqa: SLF001
+        screen.graph, screen._view_state(w, h)  # noqa: SLF001
+    ).plain.split("\n")[0]
+    target = re.sub(r"\s+", " ", line).strip()
+    rows = canvas_rows(screen)
+    for k in range(1, len(rows) + 1):
+        for joiner in (" ", ""):
+            if re.sub(r"\s+", " ", joiner.join(rows[:k])).strip() == target:
+                return k
+    return None
+
+
+# Contiguous across the whole `B-61` band at a height that leaves the region
+# tall enough to hold the header, plus the sizes the carry and the reviews
+# named by transcript.  The unit is the TERMINAL, and the canvas region is
+# derived from it by the real layout — which is the entire point of driving the
+# app instead of the renderer.
+_HEADER_TERMS = tuple((w, 30) for w in range(20, 41)) + (
+    (28, 17), (30, 20), (31, 16), (50, 20), (80, 24), (140, 45),
+)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("map_id", ("legacy", "anidado"))
+async def test_llr_n06_3_1_the_charged_header_height_is_the_composited_one(
+    tmp_path, map_id
+):
+    """`header_rows` replaces `HEADER_ROWS = 2`, pinned against the FRAME.
+
+    THE CONSTANT WAS NOT A MEASUREMENT, it was one fixture's number at one width
+    band.  Both of the header's paddings are clamped at 0, so below `avail = 48`
+    the line is a fixed core plus the `▽ N` declaration — 55 cells on `legacy`
+    at every narrow width — and that wraps to three physical rows across the
+    band and four at the floor, where `_canvas_size` floors `w` at 20.
+
+    AND THE REPLACEMENT WAS NOT A MEASUREMENT EITHER, until this round.  It
+    charged `ceil(len / (w - 2))`, which is not the wrap the widget performs:
+    Rich WORD-WRAPS, so a line `ceil` prices at 2 rows can occupy 3.  Measured
+    over a 943-configuration terminal sweep on `legacy`, the arithmetic charge
+    was short of the real wrap at 23 of them — under-charging, which is `B-61`.
+    So the product renders the line, and this arm measures the answer OFF THE
+    COMPOSITED FRAME rather than re-deriving it.
+
+    EQUALITY, NOT AN INEQUALITY, AND THAT IS THE UPGRADE.  The previous pin
+    asserted only `charged >= measured`, because wrapping everything at `w - 2`
+    over-charged wherever the region was actually `w` wide.  It is: measured
+    here, `#map-canvas` carries no padding and no border — asserted below rather
+    than read off the stylesheet — so its content width is its REGION width,
+    which is `_canvas_width()` at 724 of the 943 configurations and
+    `_canvas_width() - 2` at the other 219.  The screen now passes the measured
+    width, and the charge matches the frame exactly at every configuration the
+    frame can show, on both fixtures.  Equality is worth having because an
+    over-charge is not free: at a short region it costs the operator the only
+    body row there was.
+
+    THE SHORT REGIONS ARE COUNTED, NOT SKIPPED.  Where the region is shorter
+    than the wrapped header the frame has clipped the evidence, so there is no
+    measurement to compare against — and the charge cannot be observed there
+    either, because `_canvas_size` takes the same short-region branch whatever
+    it is.  Those are counted and the count is bounded, so this arm cannot pass
+    by having gone blind.
+    """
+    install(tmp_path, map_id)
+    checked, clipped, seen = 0, 0, set()
+    for term in _HEADER_TERMS:
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=term) as pilot:
+            await pilot.pause()
+            screen = await open_map(app, pilot, map_id)
+            for _ in range(3):
+                await pilot.pause()
+            canvas = screen.query_one("#map-canvas")
+            # NO PADDING AND NO BORDER, asserted.  This is the fact the old
+            # divisor rationale got wrong, and it is cheaper to pin than to
+            # re-read `#map-canvas`'s rules every time the stylesheet moves.
+            assert canvas.content_size.width == canvas.region.width, (
+                f"{term}: content width {canvas.content_size.width} is not the "
+                f"region width {canvas.region.width}; `#map-canvas` has grown "
+                f"padding or a border and the wrap width is no longer the region"
+            )
+            charged = screen._header_rows(canvas.content_size.width)  # noqa: SLF001
+            _w, h = screen._canvas_size()  # noqa: SLF001
+            measured = _header_rows_in_frame(screen)
+            if measured is None:
+                assert canvas.region.height <= charged, (
+                    f"{term}: the frame could not show the header in a region "
+                    f"{canvas.region.height} rows tall against a charge of "
+                    f"{charged} -- the header is wider than the charge admits"
+                )
+                clipped += 1
+                continue
+            assert charged == measured, (
+                f"{map_id} {term}: charged {charged} physical header rows "
+                f"against {measured} in the composited frame (region "
+                f"{canvas.region.width}x{canvas.region.height})"
+            )
+            # AND THE SCREEN CONSUMED THE SAME NUMBER.  Pinning `header_rows`
+            # alone leaves the WIRING free: `_canvas_size` could hand it a
+            # guessed width and this arm would never know, because it asks the
+            # helper itself.  Measured -- a mutant passing `w - 2` there
+            # survived the equality above and dies here.  `render` emits
+            # `1 + (h - 1)` logical lines and the frame spends `measured`
+            # physical rows on the first, so the body budget `row_limit = h - 1`
+            # is exactly what the frame left.
+            if canvas.region.height > measured:
+                assert h - 1 == canvas.region.height - measured, (
+                    f"{map_id} {term}: `_canvas_size` gave the renderer "
+                    f"row_limit {h - 1} into the {canvas.region.height - measured} "
+                    f"body rows the frame actually left (region height "
+                    f"{canvas.region.height}, header {measured})"
+                )
+            else:
+                assert h == 1, (
+                    f"{map_id} {term}: the header fills the region, so no body "
+                    f"row is paintable and h must be 1; got {h}"
+                )
+            checked += 1
+            seen.add(measured)
+
+    # NON-VACUOUS ON BOTH AXES: most configurations really were measured, and
+    # the band really does contain headers taller than the two rows the deleted
+    # constant assumed.  Without this, a change that clipped every region would
+    # leave the arm green on nothing.
+    assert clipped <= len(_HEADER_TERMS) // 3, (
+        f"{clipped} of {len(_HEADER_TERMS)} configurations clipped the header; "
+        "this arm has gone blind"
+    )
+    assert checked >= 2 * len(_HEADER_TERMS) // 3, checked
+    assert {2, 3} <= seen, sorted(seen)
+
+
+def test_llr_n06_3_1_the_charge_band_over_node_count_and_width(tmp_path):
+    """The SHAPE of the charge across `(n, w, wrap_w)` — a characterization.
+
+    THIS ARM DOES NOT VERIFY THE CHARGE, and saying so is the point.  Its
+    predecessor claimed to, by comparing `header_rows` against a re-typed copy
+    of `header_rows`; the verification now lives one arm up, against the
+    composited frame, where the two sides do not share a computation.  What a
+    grid buys that the frame cannot is REACH: `_balanced(11999)` sits just under
+    `MAX_RENDER_NODES` and no terminal can composite it, so the node-count axis
+    is only visible here.
+
+    THE GRID IS DENSE ON BOTH AXES ON PURPOSE.  The pin this line descends from
+    sampled `n` at 8, 10, 40, 100, 1000 and `w` at 20, 30, 50, …, and recorded
+    its own sample gaps as facts: "3 rows at w=30 from n>=40" (the true
+    threshold is a WIDTH shift, visible only because the grid jumped 10→40) and
+    "w <= 30" (the band reaches 34 near `MAX_RENDER_NODES`, invisible because
+    the grid jumped 30→50).  Every bound below is DERIVED from the grid.
+
+    `wrap_w` IS SWEPT OVER BOTH MEASURED VALUES, `w` and `w - 2`, because those
+    are the two the canvas region actually takes — 724 and 219 of 943
+    configurations respectively — and a grid that fixed it at one of them would
+    be pinning half the product.
+    """
+    graph = install(tmp_path, "legacy")
+
+    grid = []
+    for n in (8, 10, 11, 13, 14, 20, 39, 40, 100, 1000):
+        probe = graph if n == 8 else _balanced(n)
+        for w in list(range(20, 41)) + [50, 58, 80, 140, 300]:
+            for wrap in (w, w - 2):    # the two widths the region is measured at
+                grid.append((n, w, wrap, header_rows(probe, w, wrap)))
+    assert len(grid) == 10 * 26 * 2 == 520, len(grid)
+
+    charged_by_w = {}
+    for _n, w, _wrap, charged in grid:
+        charged_by_w.setdefault(w, set()).add(charged)
+
+    # THE DELETED CONSTANT IS REFUTED by the same grid, on the record: a charge
+    # above 2 exists, so `HEADER_ROWS = 2` was wrong and not merely imprecise.
+    assert {c for *_s, c in grid} == {2, 3, 4}, sorted({c for *_s, c in grid})
+    assert 3 in charged_by_w[21] and 4 in charged_by_w[20], (
+        charged_by_w[20], charged_by_w[21]
+    )
+
+    # THE BAND, DERIVED.  `w >= 37` is two rows at every node count the renderer
+    # will draw and at both wrap widths; below 23 it is never two.  (Inc-9b:
+    # the band read `w >= 35` while the legacy header named the map `arbol
+    # legacy`; `atlas . legacy tree` is seven cells longer, so the header wraps
+    # two widths later.  Re-derived from the grid, not typed from the old one.)
+    assert all(
+        charged_by_w[w] == {2}
+        for w in (37, 38, 39, 40, 50, 58, 80, 140, 300)
+    ), {w: charged_by_w[w] for w in charged_by_w if w >= 37}
+    assert all(2 not in charged_by_w[w] for w in range(20, 23)), {
+        w: charged_by_w[w] for w in range(20, 23)
+    }
+    # The node-count axis is real ON ITS OWN, at a width where the small graph
+    # is already down to two rows — the half the old grid's 30→50 jump could
+    # not see.  (`w = 35` since Inc-9b; it was 31.)
+    assert charged_by_w[35] == {2, 3}, charged_by_w[35]
+    # `INC9BC-CR-F5`: one width further still straddles: the band's edge is
+    # `w >= 37`, so 36 is the last width where the node count matters.
+    assert charged_by_w[36] == {2, 3}, charged_by_w[36]
+
+    # MONOTONE IN THE WRAP WIDTH: a narrower wrap can only cost more rows.  This
+    # is what makes a measured region width safe to trust — if the measurement
+    # is ever a little narrow, the charge errs towards over-charging, and
+    # over-charging is the direction that keeps `row_limit` honest.
+    for n, w, wrap, charged in grid:
+        if wrap == w:
+            narrow = header_rows(graph if n == 8 else _balanced(n), w, w - 2)
+            assert narrow >= charged, (n, w, narrow, charged)
+
+    # AND THE BAND REACHES 32 at the top of the legal node range, which is the
+    # bound the oldest pin recorded as `w <= 30`.  Derived, not quoted.
+    # (EN-3: it read 34 and 35 while the declaration said `fuera de vista`;
+    # `out of view` is three cells shorter, so the header wraps two widths
+    # sooner (34 -> 32).  Re-derived by sweeping `w` over 28..39 on both sides: the Spanish
+    # tree gave 3 rows up to 34, this tree gives 3 rows up to 32.)
+    huge = _balanced(11999)
+    assert header_rows(huge, 32, 32) == 3, header_rows(huge, 32, 32)
+    assert header_rows(huge, 33, 33) == 2, header_rows(huge, 33, 33)
+
+
+@pytest.mark.asyncio
+async def test_b56_the_declaration_is_right_on_the_first_look_with_no_repaint(tmp_path):
+    """`B-56` CLOSED, pinned on the path that used to be wrong — no repaint.
+
+    Every other arm in this module calls `refresh_canvas()` before it measures,
+    which is what hid this: `on_mount` paints before the compositor has given
+    the canvas its region, so the declaration described a frame that did not
+    exist.  Measured, that was not a stale numeral but an ABSENT one -- at
+    `legacy` 50x20 and 60x20 the strip said nothing at all while half the map
+    was off screen, and `LLR-N06.3.3` makes absence MEAN "nothing is hidden".
+    Nor did it heal at the first keypress: at the root `j` is a no-op, so
+    nothing repaints, and a reader who only LOOKS at the map never clears it.
+
+    So this arm presses nothing and repaints nothing.  It is green only because
+    `on_mount` schedules `_declare_after_layout`.
+
+    BOTH DECLARING SURFACES, WHICH IS `B-60` CLOSED RATHER THAN CARRIED.  The
+    carry said the canvas HEADER could still under-declare on the first frame
+    while "the strip -- the surface the operator reads -- is correct", and that
+    every repaint reconciles them.  Measured at exactly these four sizes, the
+    header numeral was ABSENT, not stale, while four nodes were hidden -- and
+    `LLR-N06.3.3` makes absence MEAN "nothing is hidden", so the surface with
+    the map on it was declaring the opposite of the truth.  Measured over nine
+    keys, `j`/`k`/`h`/the arrows/`tab` did not heal it; only `l` and `o` did.
+    So the canvas is asserted here beside the strip, on the same first look.
+
+    AND THE SIZE LIST IS NOT THE COVERAGE ARGUMENT — the arm below is.  Four
+    sizes closed the four instances this was measured at and left the mechanism
+    open one band over; `test_b60_the_declaration_follows_the_region_to_its_settle`
+    carries the sizes where it recurred, on both fixtures.
+    """
+    install(tmp_path, "legacy")
+    checked = 0
+    for term in ((50, 20), (60, 20), (40, 20), (30, 20)):
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=term) as pilot:
+            await pilot.pause()
+            screen = await open_map(app, pilot, "legacy")
+            for _ in range(3):
+                await pilot.pause()
+            assert len(screen.graph.nodes) == 8
+            hidden = screen._unpainted_ids()  # noqa: SLF001
+            assert hidden, f"{term} hides nothing; this size cannot falsify the arm"
+            strip = " ".join(
+                rows_in(screen, screen.query_one("#map-pagination").region)
+            )
+            assert _declared_total([strip]) == len(hidden), (
+                f"{term}: the strip declares {_declared_total([strip])} on a "
+                f"first look that is hiding {len(hidden)}"
+            )
+            assert _declared_total(canvas_rows(screen)) == len(hidden), (
+                f"{term}: the canvas header declares "
+                f"{_declared_total(canvas_rows(screen))} on a first look that "
+                f"is hiding {len(hidden)}; `None` here means the numeral is "
+                f"ABSENT, which LLR-N06.3.3 makes mean 'nothing is hidden'"
+            )
+            checked += 1
+    assert checked == 4
+
+
+# The band where the first look diverged AFTER `_declare_after_layout` was
+# added, one fixture each side of the slash.  Not a wider sample of the same
+# thing: at these sizes `_apply_region_visibility` reflows the body row, so the
+# canvas region is still moving when the post-mount callback fires.
+_SETTLE_TERMS = {
+    "legacy": ((31, 16), (32, 16), (34, 15), (35, 14)),
+    "anidado": ((34, 14), (35, 14)),
+}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("map_id", ("legacy", "anidado"))
+async def test_b60_the_declaration_follows_the_region_to_its_settle(tmp_path, map_id):
+    """`B-60`'s RESIDUAL — the region settles after the callback that declares.
+
+    `_declare_after_layout` fires on the first `call_after_refresh`, and at
+    these widths that is too early: `_apply_region_visibility`'s show/hide is
+    still reflowing the body row.  Instrumented at (31,16) on `legacy`, the
+    passes saw a 31x1 region and then a 29x2 one, so `_canvas_size` took the
+    short-region branch, returned `h = 1` and declared nothing painted — and the
+    region then SETTLED at 31x3 with nothing left to recompute it.  Both
+    declaring surfaces kept a numeral computed for a frame that no longer
+    existed: the strip read 8 against a truth of 7.
+
+    A SCREEN RESIZE IS NOT A CANVAS RESIZE, which is why `on_resize` alone does
+    not close it.  Traced, the screen's resize arrives BEFORE the row reflows
+    and the canvas region moves twice more afterwards without another.  So the
+    declaration re-schedules itself while the region keeps changing and stops
+    when it does not, and `on_resize` covers the case that had no handler at all
+    — an operator resizing the terminal after mount.
+
+    BOTH SURFACES, AND BOTH FIXTURES.  The strip and the canvas were each needed
+    to see it: at (34,15) on `legacy` the canvas numeral was ABSENT while the
+    strip was merely stale, and `LLR-N06.3.3` makes absence MEAN "nothing is
+    hidden".  `anidado` carries its own two sizes so this cannot be read as a
+    `legacy` quirk.
+
+    It presses nothing and repaints nothing, exactly like `B-56` above: a
+    `refresh_canvas()` here would repaint away the very claim.
+    """
+    install(tmp_path, map_id)
+    checked = 0
+    for term in _SETTLE_TERMS[map_id]:
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=term) as pilot:
+            await pilot.pause()
+            screen = await open_map(app, pilot, map_id)
+            for _ in range(3):
+                await pilot.pause()
+            hidden = screen._unpainted_ids()  # noqa: SLF001
+            assert hidden, f"{term} hides nothing; this size cannot falsify the arm"
+            strip = " ".join(
+                rows_in(screen, screen.query_one("#map-pagination").region)
+            )
+            assert _declared_total([strip]) == len(hidden), (
+                f"{map_id} {term}: the strip declares {_declared_total([strip])} "
+                f"on a first look that is hiding {len(hidden)}"
+            )
+            assert _declared_total(canvas_rows(screen)) == len(hidden), (
+                f"{map_id} {term}: the canvas header declares "
+                f"{_declared_total(canvas_rows(screen))} on a first look that is "
+                f"hiding {len(hidden)}; `None` here means the numeral is ABSENT, "
+                f"which LLR-N06.3.3 makes mean 'nothing is hidden'"
+            )
+            checked += 1
+    assert checked == len(_SETTLE_TERMS[map_id])
+
+
+@pytest.mark.asyncio
+async def test_b60_resizing_the_terminal_re_declares_without_a_keypress(tmp_path):
+    """The other half of `B-60`: the operator resizes, and nobody presses a key.
+
+    `MapScreen` had NO resize handler at all — grep-confirmed — so every
+    declaration was computed for whichever frame existed at mount.  Drag a
+    terminal from a size where the whole map fits to one where it does not and
+    both declaring surfaces keep saying "nothing is hidden", which
+    `LLR-N06.3.3` makes a statement rather than a silence.  Ordinary navigation
+    does not heal it either: measured over nine keys, only `l` and `o`
+    reconcile, and at the root `j` is a no-op.
+
+    So this presses nothing.  It resizes, waits for the layout, and asks the
+    two surfaces what they say.  The FIRST size is asserted to hide nothing, so
+    the arm cannot pass by having been in the hidden state all along.
+
+    THE WIDTH IS HELD CONSTANT, AND THAT IS A BOUND ON THIS ARM RATHER THAN A
+    CONVENIENCE.  `_apply_region_visibility` runs in `on_mount` and on an
+    explicit toggle, and NOWHERE ELSE -- so shrinking the terminal across the
+    auto-collapse threshold does not re-evaluate it.  Measured: from (140,45) to
+    (50,20) the rail and the inspector stay shown, `_chrome_width()` is 60
+    columns of a 50-column terminal, and the canvas region collapses to ONE
+    column, where mounting at (50,20) directly collapses both and gives 50.
+    That is a separate defect on the same path, pre-existing (there was no
+    resize handler at all) and NOT closed here: re-running the visibility pass
+    on resize shows and hides focusable regions, which is where `LLR-CNV.3.1`
+    and `B-50` placed the keyboard.  It is carried, and this arm changes only
+    the height so it measures re-declaration and not that.
+    """
+    install(tmp_path, "legacy")
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        screen = await open_map(app, pilot, "legacy")
+        for _ in range(3):
+            await pilot.pause()
+        assert len(screen.graph.nodes) == 8
+        # THE CONTROL: at this size nothing is hidden, so a stale numeral here
+        # is indistinguishable from a correct one and the resize is the whole
+        # measurement.
+        assert not screen._unpainted_ids(), "the starting size already hides nodes"  # noqa: SLF001
+
+        await pilot.resize_terminal(140, 14)
+        for _ in range(4):
+            await pilot.pause()
+
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        assert hidden, "the resize hid nothing; this arm cannot falsify anything"
+        strip = " ".join(rows_in(screen, screen.query_one("#map-pagination").region))
+        assert _declared_total([strip]) == len(hidden), (
+            f"after a resize the strip declares {_declared_total([strip])} "
+            f"against {len(hidden)} hidden, with no key pressed"
+        )
+        assert _declared_total(canvas_rows(screen)) == len(hidden), (
+            f"after a resize the canvas header declares "
+            f"{_declared_total(canvas_rows(screen))} against {len(hidden)} "
+            f"hidden; `None` means the numeral is ABSENT, which LLR-N06.3.3 "
+            f"makes mean 'nothing is hidden'"
+        )
+
+
+@pytest.mark.asyncio
+async def test_a_region_too_short_for_a_body_row_declares_nothing_painted(tmp_path):
+    """`_canvas_size`'s short-region branch, ON THE HEIGHT AXIS — the real one.
+
+    WRITTEN BECAUSE THE CARRY BOUNDED THE WRONG AXIS.  The recorded note said
+    the affected band was "exactly 20..29 columns of canvas".  It is not a width
+    band at all: the branch is selected by `region.height <= header rows`, and
+    the failure reproduced at (50, 14) and (100, 10) — ordinary geometries far
+    outside that band — as well as at (31, 18).  The old code returned
+    `h = region.height` there, so `row_limit = h - 1` believed canvas row 0
+    survived when the two-row header had eaten the whole region: all 8 nodes
+    hidden, the indicator declaring 7.
+
+    AND THE WIDTH AXIS IS BACK IN THE SWEEP, because correcting the axis was
+    over-corrected into dropping it.  The fix that closed the height case priced
+    the header with a CONSTANT 2, so the same over-declaration recurred at every
+    width where the header wraps further: at terminal (28,17) the renderer
+    declared `erp` on a frame carrying zero card marks and the strip read 7
+    against a truth of 8 (`B-61`).  These rows were RED on the shipped tree
+    before `header_rows` replaced the constant — they are the regression, not
+    belt-and-braces.
+
+    Swept over BOTH axes, through the real screen, and the identity
+    `declared == traced` is asserted at every size — including the sizes where
+    the region is genuinely too short, which is where it used to break.
+    """
+    install(tmp_path, "legacy")
+    short, tall = [], []
+    for term_w, term_h in (
+        (31, 18), (50, 14), (100, 10), (60, 12), (80, 11),
+        # `EN-5`: the minimap strip is one row shorter in English at 100 columns, so the canvas at
+        # (100, 10) is 3 rows and no longer the short region; (100, 9), (80, 10), (60, 11) and (50, 12)
+        # are the sizes that are (found by sweeping the heights, not by editing until green).
+        (100, 9), (80, 10), (60, 11), (50, 12),
+        (50, 20), (80, 24), (100, 30), (118, 34),
+        # THE `B-61` BAND — canvas width 20..34, where the header takes three or
+        # four rows.  Each of these five was measured over-declaring before the
+        # fix; (28,17) is the transcript quoted above.
+        (20, 24), (22, 30), (26, 19), (28, 17), (28, 30), (34, 22),
+    ):
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(term_w, term_h)) as pilot:
+            await pilot.pause()
+            screen = await open_map(app, pilot, "legacy")
+            screen.refresh_canvas()
+            await pilot.pause()
+            assert len(screen.graph.nodes) == 8
+            region_h = screen.query_one("#map-canvas").region.height
+            w, h = screen._canvas_size()  # noqa: SLF001
+            declared = painted_ids(screen.graph, screen._view_state(w, h))  # noqa: SLF001
+            traced = oracle_traced(
+                screen.graph, (), w, canvas_rows(screen), pan_x=screen.pan_x
+            )
+            # THE IDENTITY, at every size in the sweep.  This is the assertion
+            # the old branch broke, and it breaks again the moment the
+            # short-region case starts over-declaring.
+            assert declared == traced, (
+                f"terminal {(term_w, term_h)}: region.height={region_h}, "
+                f"canvas={(w, h)} declares {sorted(declared - traced)} with no "
+                f"trace and traces {sorted(traced - declared)} undeclared"
+            )
+            # The SCREEN's helper, with the region's own content width: the
+            # wrap width is measured, never guessed (see `_header_rows`).
+            charged = screen._header_rows(  # noqa: SLF001
+                screen.query_one("#map-canvas").content_size.width
+            )
+            (short if region_h <= charged else tall).append(
+                (term_w, term_h, region_h, len(declared), charged)
+            )
+
+    # NON-VACUITY, on three halves now: the sweep must actually contain the
+    # branch it was written for, it must contain sizes that paint something — a
+    # sweep of nothing-painted cases would satisfy the identity trivially — and
+    # it must contain sizes where the header costs MORE than two rows, which is
+    # the band the identity used to break in.
+    assert short, f"no size in the sweep reaches the short-region branch: {tall}"
+    assert all(painted == 0 for *_size, painted, _c in short), short
+    assert any(painted > 0 for *_size, painted, _c in tall), tall
+    assert any(charged > 2 for *_size, _p, charged in short + tall), short + tall
+    assert any(
+        charged > 2 and painted > 0 for *_size, painted, charged in tall
+    ), tall
+
+
+@pytest.mark.asyncio
+async def test_the_canvas_is_charged_every_row_the_header_leaves(tmp_path):
+    """`row_limit` == region rows − header rows.  The OTHER side of the identity.
+
+    WRITTEN BECAUSE A MUTANT SURVIVED THE WHOLE SUITE.  `declared == traced` is
+    structurally one-sided: `h` feeds the render AND the declaration, so a
+    `_canvas_size` that under-sizes by a row shrinks both together and every
+    arm above stays green while a card the region could show disappears.
+    Measured: `region.height - header_rows(...)` in place of
+    `region.height - (rows - 1)` permanently discards one body row — at (31,16)
+    the only visible card vanishes — and the full suite passed with it.
+
+    So this pins the OTHER direction: the frame the renderer is given is as tall
+    as the region allows.  Nothing else in the suite says the canvas may not
+    quietly waste rows, and a declaration that is honest about a frame smaller
+    than the region is still the wrong frame.
+
+    The equality is `row_limit == region.height - charged`, and `charged` is
+    `header_rows` rather than a literal — the same measurement `_canvas_size`
+    consumes, so this cannot pass by both sides sharing a wrong constant: the
+    arm above already pins `header_rows` against the rendered line.
+    """
+    install(tmp_path, "legacy")
+    checked = []
+    for term in ((80, 24), (118, 34), (50, 20), (60, 18), (28, 30), (22, 30)):
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=term) as pilot:
+            await pilot.pause()
+            screen = await open_map(app, pilot, "legacy")
+            screen.refresh_canvas()
+            await pilot.pause()
+            assert len(screen.graph.nodes) == 8
+            canvas = screen.query_one("#map-canvas")
+            region_h = canvas.region.height
+            _w, h = screen._canvas_size()  # noqa: SLF001
+            # Through the SCREEN's helper, so the wrap width is the measured one
+            # `_canvas_size` itself prices with.  Calling `header_rows` here with
+            # a guessed width would re-open exactly the divisor question this
+            # round closed.
+            charged = screen._header_rows(canvas.content_size.width)  # noqa: SLF001
+            if region_h <= charged:      # the short branch has its own arm
+                continue
+            # `render` emits `1 + (h - 1)` LOGICAL lines and the widget spends
+            # `charged` PHYSICAL rows on the first, so the body budget is
+            # `region_h - charged` and `row_limit` is `h - 1`.
+            assert h - 1 == region_h - charged, (
+                f"{term}: canvas h={h} gives row_limit {h - 1} into a region of "
+                f"{region_h} rows whose header costs {charged}; the canvas is "
+                f"{region_h - charged - (h - 1)} rows away from full utilisation"
+            )
+            checked.append((term, region_h, charged, h))
+    # NON-VACUITY: the sweep must reach the tall branch at all, and it must
+    # contain a size where the header costs more than two rows — otherwise a
+    # constant 2 would satisfy this arm.
+    assert len(checked) >= 4, checked
+    assert any(charged > 2 for *_s, charged, _h in checked), checked
+
+
+@pytest.mark.asyncio
+async def test_the_paint_site_differences_one_set_on_a_PARTIAL_overlap(tmp_path):
+    """`LLR-N06.3.1` at the PAINT SITE, on the state where a sum is wrong.
+
+    WRITTEN BECAUSE A MUTANT SURVIVED ALL TWELVE ARMS OF THIS MODULE.  `TC-039`
+    drives the paint site but at 140x45, where the viewport hides nothing, so a
+    sum that over-counts only when viewport-hidden ∩ fold-hidden is PARTIAL is
+    invisible to it; `AT-015` reads the renderer-written header rather than the
+    strip; `TC-038` and the `B-56` arm run unfolded.  Measured, such a sum
+    paints `▽ 15 fuera de vista` on an eight-node map at `legacy` 30x12 with
+    `erp` folded, with `tests/test_overflow.py` 12 of 12 green.
+
+    So: `anidado` at the NESTED fold `{ops, log}` — `TC-039`'s own state — driven
+    at 50x15 instead of 140x45, read through the STRIP, with the truth taken
+    from the composited frame by the oracle and never from the helper under
+    test.  The size was found by sweeping 56 sizes × 3 folds on `anidado` and 30
+    × 4 on `legacy` for the state where BOTH causes bite at once; on these two
+    shallow shipped maps it is a narrow band, which is itself why no arm was
+    standing on it.
+
+    THE ROW COUNT IS THE MAP HINT'S (Inc-9d).  This was 50x16 while the resting
+    hint (`siguiente ▸ navega con j/k/h/l · ...`, 54 cells) WRAPPED at 50 columns
+    and took a second row.  The English hint is 49 cells and fits one, so the same
+    canvas height is one row less of screen: 50x15.  Re-swept over widths 44-52 and
+    heights 14-18: the overlap state holds at height <= 15 at every width tried,
+    and at 16 only where the hint still wraps (width <= 48).
+
+    THE OVERLAP IS ASSERTED, NOT ASSUMED, on all three clauses that make the row
+    discriminating: a fold hides something, the VIEWPORT independently hides
+    something, and the naive combination of the two disagrees with the truth.
+    Without the third this is `TC-035`'s positive control again.
+    """
+    install(tmp_path, "anidado")
+    folded = ("ops", "log")
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(50, 15)) as pilot:
+        await pilot.pause()
+        screen = await open_map(app, pilot, "anidado")
+        screen.folded = frozenset(folded)
+        screen.refresh_canvas()
+        for _ in range(3):
+            await pilot.pause()
+        graph = screen.graph
+        assert len(graph.nodes) == 7, sorted(graph.nodes)
+
+        w, h = screen._canvas_size()  # noqa: SLF001
+        rows = canvas_rows(screen)
+        traced = oracle_traced(graph, folded, w, rows, pan_x=screen.pan_x)
+        declared = painted_ids(graph, screen._view_state(w, h))  # noqa: SLF001
+        assert declared == traced, (sorted(declared), sorted(traced))
+        truth = len(graph.nodes) - len(traced)
+
+        fold_hidden = hidden_under(graph, folded)
+        view_hidden = frozenset(graph.nodes) - traced - fold_hidden
+        assert fold_hidden, "no fold hides anything; the row is unfolded"
+        assert view_hidden, (
+            "the viewport hides nothing beyond the fold; this row cannot reach "
+            "the overlap state and is TC-039 at another size"
+        )
+        naive = naive_hidden_sum(graph, folded) + len(view_hidden)
+        assert naive != truth, (
+            f"the naive sum reads {naive} and the truth is {truth}; they agree "
+            f"at this row, so it cannot discriminate a sum from a difference"
+        )
+
+        strip = " ".join(
+            rows_in(screen, screen.query_one("#map-pagination").region)
+        )
+        assert _declared_total([strip]) == truth, (
+            f"the strip declares {_declared_total([strip])} on a frame that "
+            f"traces {sorted(traced)} of {len(graph.nodes)}"
+        )
+        # And the two declaring surfaces still agree at this configuration.
+        assert _declared_total(rows) == truth
+
+
+@pytest.mark.asyncio
+async def test_tc_039_the_screen_helper_differences_one_set_on_the_overlap_case(tmp_path):
+    """`LLR-N06.3.1` AT THE SCREEN, which `TC-034` does not reach.
+
+    WRITTEN BECAUSE A MUTANT SURVIVED.  `TC-034` asserts the property against
+    `painted_ids`, one layer below `MapScreen._unpainted_ids`; the battery arm
+    that made the SCREEN add a fold count to a viewport count stayed GREEN,
+    because the only surface reading that helper is painted from the same helper
+    and both sides of the comparison moved together.  An inert predicate gets
+    rewritten, not re-argued.
+
+    Driven on `anidado` at `FOLD = {ops, log}` -- `log` nested inside the folded
+    `ops` -- where the naive sum is 6 and the truth is 4.
+
+    AND IT WAS STILL ONE LAYER TOO LOW.  The rewrite above reads
+    `_unpainted_ids()`, a SET-returning helper; `LLR-N06.3.1` forbids a SUM, and
+    a sum can only be expressed where a COUNT is taken, which is
+    `_pagination_text`.  Mutating exactly there -- `len(unpainted) +
+    naive_hidden_sum(...)` -- paints a strip reading `6 fuera de vista` against
+    a truth of 4 while all ten tests in this module pass.  So the arm now reads
+    the PAINTED STRIP too, on the same state, and the second assertion names the
+    number the mutant paints rather than only the number it should.
+    """
+    install(tmp_path, "anidado")
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        screen = await open_map(app, pilot, "anidado")
+        assert len(screen.graph.nodes) == 7
+        screen.folded = frozenset({"ops", "log"})
+        screen.refresh_canvas()
+        await pilot.pause()
+
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        truth = hidden_under(screen.graph, screen.folded)
+        naive = naive_hidden_sum(screen.graph, screen.folded)
+        assert naive == 6 and len(truth) == 4, (naive, sorted(truth))
+        assert hidden == truth, sorted(hidden ^ truth)
+        assert len(hidden) < naive, (
+            "the screen declares the naive sum; every node both folded AND "
+            "off-screen is being counted twice"
+        )
+
+        # THE PAINTED SURFACE, on the same state — the layer the mutant lives
+        # on.  Nothing is hidden by the VIEWPORT at 140x45, so every node the
+        # strip declares is hidden by the fold, and the two rules differ by 2.
+        strip = " ".join(
+            rows_in(screen, screen.query_one("#map-pagination").region)
+        )
+        assert _declared_total([strip]) == len(truth) == 4, strip
+        assert f"{naive} out of view" not in strip, (
+            f"the strip declares the naive sum {naive}; the truth is {len(truth)}"
+        )
+
+
+@pytest.mark.asyncio
+async def test_tc_040_a_pill_nested_inside_another_fold_is_not_painted(tmp_path):
+    """`LLR-N06.3.2` through the PILLS, on the nesting case.
+
+    WRITTEN BECAUSE A MUTANT SURVIVED.  The battery arm that painted a pill for
+    every id in `folded`, nested ones included, stayed GREEN: `TC-034` and
+    `TC-035` read `painted_ids` without rendering, and `AT-014`'s folds are all
+    siblings, so nothing exercised a nested fold on the painted surface.
+
+    This is the transcript `LLR-N06.3.2` says `TC-032` shall re-run through the
+    real renderer once the fold mechanism ships: ONE painted pill, reading 4,
+    equal to the true hidden union -- not two pills summing to 6.
+    """
+    graph = install(tmp_path, "anidado")
+    folded = frozenset({"ops", "log"})
+    painted = LayeredRenderer().render(
+        graph, ViewState(w=140, h=45, folded=folded)
+    ).plain
+
+    counts = [int(m.group(1)) for m in _PILL.finditer(" ".join(painted.split("\n")))]
+    assert counts == [4], counts
+    assert sum(counts) == len(hidden_under(graph, folded)) == 4
+    assert sum(counts) != naive_hidden_sum(graph, folded)
+    # And the pill names the branch it is standing in for.
+    assert "Operaciones" in painted
+    # `log` is inside the fold, so neither its card nor a pill for it is painted.
+    assert "Logistica" not in painted
+
+
+@pytest.mark.asyncio
+async def test_tc_038_both_declaring_surfaces_read_one_truth(tmp_path):
+    """The canvas and the pagination strip declare the SAME numeral, ON A FIRST LOOK.
+
+    Two surfaces, one computation: both come off `painted_ids` for the state the
+    canvas was just rendered with.  Two surfaces with two computations is how
+    they start disagreeing, which is `LLR-N06.2.1`'s lesson one widget over.
+
+    THE DOCSTRING USED TO SAY "always" AND THE BODY REPAINTED FIRST, which is
+    the property this arm now actually holds without help.  It called
+    `refresh_canvas()` before measuring and carried a comment saying the residual
+    was "one frame" that "any repaint reconciles"; remove that line on the tree
+    as it stood and this arm failed `assert 4 == 7`, because only the STRIP was
+    recomputed after layout and the canvas header kept its pre-layout numeral
+    (`B-60`).  Measured over nine keys, only `l` and `o` healed it — `j`, `k`,
+    `h`, the arrows and `tab` did not — so "any repaint" was false too.
+    `_declare_after_layout` now repaints BOTH declaring surfaces, so THIS ARM
+    PRESSES NOTHING AND REPAINTS NOTHING before it measures, and is green only
+    because that scheduling exists.
+
+    And `_unpainted_ids()` returns `None` -- not an empty set -- in a view that
+    declares nothing, so the strip keeps its reserved-affordance content instead
+    of claiming `0 hidden` on a canvas that is hiding several.
+
+    THIS ARM RUNS UNFOLDED, and that is why it could not see the naive-sum
+    mutant: on `legacy` with no fold the naive rule and the true rule coincide.
+    The nested-fold case is driven through the painted strip in `TC-039` and at
+    a partial overlap in the arm above, which are the arms that have the nesting.
+    """
+    install(tmp_path, "legacy")
+    offset = await height_offset(tmp_path, "legacy", 50)
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(50, 6 + offset)) as pilot:
+        await pilot.pause()
+        screen = await open_map(app, pilot, "legacy")
+        for _ in range(3):
+            await pilot.pause()
+        assert len(screen.graph.nodes) == 8
+
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        assert hidden, "nothing is hidden at this size; the arm would be vacuous"
+        strip = " ".join(
+            rows_in(screen, screen.query_one("#map-pagination").region)
+        )
+        assert _declared_total([strip]) == len(hidden)
+        assert _declared_total(canvas_rows(screen)) == len(hidden)
+
+        # OUTLINE DECLARES TOO, SINCE `Inc-B55a`.  This tail used to assert the
+        # opposite -- that outline answered `None` -- and that was the `B-55`
+        # hole faithfully recorded: measured at 30x6 on `legacy`, outline traced
+        # 5 of 8 and declared none of the 3 it hid.  This arm's own property is
+        # "both declaring surfaces read one truth", so the moment a second view
+        # declares, the property is owed in that view too.
+        await pilot.press("o")
+        await pilot.pause()
+        assert screen.outline_mode
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        assert hidden is not None, (
+            "outline declares since Inc-B55a; `None` here means the dispatch "
+            "lost its entry"
+        )
+        assert hidden, "nothing is hidden in outline at this size; vacuous"
+        strip = " ".join(
+            rows_in(screen, screen.query_one("#map-pagination").region)
+        )
+        assert _declared_total([strip]) == len(hidden)
+        assert strip.strip(), "the strip lost its reserved-affordance content"
+
+        # RADIAL DECLARES TOO, SINCE `Inc-B55b`, through a cell-ownership replay
+        # rather than a filter over `place()`.  This tail has now moved TWICE --
+        # it asserted outline declared nothing until `Inc-B55a`, then radial
+        # until `Inc-B55b` -- and each move was a deliberate edit rather than a
+        # drift, because the arm goes red the moment the set changes under it.
+        #
+        # NO SHIPPED VIEW DECLARES NOTHING ANY MORE.  `B-55` is closed across all
+        # three, so this arm asserts the property it was really about -- both
+        # surfaces reading one truth -- in every view rather than in two of them
+        # with a silent third.
+        await pilot.press("o")
+        await pilot.press("r")
+        await pilot.pause()
+        assert screen.radial_mode
+        hidden = screen._unpainted_ids()  # noqa: SLF001
+        assert hidden is not None, "radial declares since Inc-B55b"
+        strip = " ".join(
+            rows_in(screen, screen.query_one("#map-pagination").region)
+        )
+        if hidden:
+            assert _declared_total([strip]) == len(hidden)
+        assert strip.strip(), "the strip lost its reserved-affordance content"
+
+
+# --------------------------------------------------------------------------
+# AT-015 / AT-016 — the acceptance, over every configuration
+
+
+def _contrast(fg: str, bg: str) -> float:
+    def luminance(colour: str) -> float:
+        triplet = Color.parse(colour).get_truecolor()
+        channels = []
+        for raw in (triplet.red, triplet.green, triplet.blue):
+            value = raw / 255
+            channels.append(
+                value / 12.92 if value <= 0.03928
+                else ((value + 0.055) / 1.055) ** 2.4
+            )
+        r, g, b = channels
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+    first, second = luminance(fg), luminance(bg)
+    lighter, darker = max(first, second), min(first, second)
+    return (lighter + 0.05) / (darker + 0.05)
+
+
+@pytest.mark.asyncio
+async def test_at_015_the_declared_total_reconciles_at_every_configuration(tmp_path):
+    """AT-015 — `PRED-1` and `PRED-4`, plus the two empty cases.
+
+    THE CONFIGURATION COUNT IS ASSERTED, not left to whoever runs the test.
+    Measured at `(50, 12, ())` — the first row of the table — two of the three
+    named mutants are green on all three set predicates, so an acceptance that
+    ran only the first row could not fail on them.
+    """
+    driven = []
+    for w, h, folded, pan in CONFIGURATIONS:
+        screen, rows, declared, _traced = await _drive(tmp_path, w, h, folded, pan)
+        driven.append((w, h, folded, pan))
+
+        total = _declared_total(rows)
+        expected = len(screen.graph.nodes) - len(declared)
+        if expected == 0:
+            assert total is None, (
+                f"{(w, h, folded, pan)}: an indicator painted while nothing is hidden"
+            )
+        else:
+            # PRED-1 reconciliation.
+            assert total == expected, (w, h, folded, pan, total, expected)
+
+        # PRED-4 legibility.  The declaration carries the whole story's promise
+        # and was assigned `WORDMARK`, which measures 1.85 : 1 against GROUND at
+        # both rungs and collapses INTO the ground on the WINDOWS rung.  Every
+        # other predicate can be green on a frame the operator cannot read.
+        assert _contrast(darkside.INK, darkside.GROUND) >= 4.5
+        assert darkside.INK != darkside.GROUND
+        eight_bit = EIGHT_BIT_PALETTE[
+            Color.parse(darkside.INK).downgrade(ColorSystem.EIGHT_BIT).number
+        ].hex
+        assert _contrast(eight_bit, darkside.GROUND) >= 4.5, eight_bit
+
+    assert set(PINNED_CONFIGURATIONS) <= set(driven), (
+        "a configuration the requirement PINS was not driven"
+    )
+    assert len(driven) == len(CONFIGURATIONS) == 7, driven
+    assert any(pan != (0, 0) for *_rest, pan in driven), (
+        "no configuration pans; the pan x overflow identity has no acceptance"
+    )
+
+    # E3, the genuinely empty case: a 0-node graph mounts, declares nothing and
+    # paints no pill.  Distinct from the zero-hidden case above, which the parked
+    # entry conflated with it.
+    empty = Graph()
+    assert painted_ids(empty, ViewState(w=80, h=24)) == frozenset()
+    painted = LayeredRenderer().render(empty, ViewState(w=80, h=24)).plain
+    assert painted == "(no map loaded)"
+    assert OVERFLOW_TOKEN not in painted and FOLD_PILL_TOKEN not in painted
+
+
+@pytest.mark.asyncio
+async def test_at_016_the_declared_set_equals_the_traced_set(tmp_path):
+    """AT-016 — `PRED-2 ∧ PRED-3`, i.e. SET EQUALITY, over every configuration.
+
+    `PRED-2` alone is green on the pure-deletion mutant: `all()` over an empty
+    set is `True`, so a renderer declaring NOTHING painted passes it — which is
+    precisely the shipped pre-state.  `PRED-3` costs nothing (`traced` is already
+    computed) and catches both that and the plausible weakening that omits
+    exactly the nodes a fold would hide.
+    """
+    driven = []
+    outcomes = []
+    for w, h, folded, pan in CONFIGURATIONS:
+        screen, _rows, declared, traced = await _drive(tmp_path, w, h, folded, pan)
+        driven.append((w, h, folded, pan))
+        outcomes.append((len(declared), len(screen.graph.nodes) - len(declared)))
+        assert declared <= traced, (
+            f"PRED-2 soundness: {(w, h, folded, pan)} declares "
+            f"{sorted(declared - traced)} painted with no trace in the frame"
+        )
+        assert traced <= declared, (
+            f"PRED-3 completeness: {(w, h, folded, pan)} paints "
+            f"{sorted(traced - declared)} and declares them hidden"
+        )
+
+    assert set(PINNED_CONFIGURATIONS) <= set(driven)
+    assert len(driven) == len(CONFIGURATIONS) == 7, driven
+    # NON-DEGENERACY, ASSERTED OVER THE OUTCOMES, and the previous form of this
+    # guard could not do its own job: it re-checked that the literal
+    # `CONFIGURATIONS` table has distinct rows -- which is a property of the
+    # table, visible by reading it -- while `driven` is appended purely from the
+    # loop variables.  Forcing all seven configurations to identical RESULTS
+    # still passed it.  The stated purpose was "all agreeing on 8-of-8 would be
+    # copies of one case", so that is what is measured now.
+    assert len(set(outcomes)) >= 3, outcomes
+    assert any(hidden == 0 for _painted, hidden in outcomes), outcomes
+    assert any(hidden > 0 for _painted, hidden in outcomes), outcomes
+
+
+# ---------------------------------------------------------------------------
+# AT-058 / TC-091 -- LLR-N06.3.6: a declaration that BROKE is not a view that
+# declares nothing.
+#
+# `02n` named this and declined to place it; the coordinator placed it. It is
+# sequenced FIRST inside Inc-B55a because `Inc-B55` is what makes the seam
+# reachable by more than one renderer, and a seam that swallows "declaration
+# broken" into "declares nothing" would swallow AT-056 and AT-057 themselves --
+# both arms would go green over a broken feature.
+
+
+class _UnregisteredRenderer:
+    """A renderer the screen has no declaration entry for.
+
+    Deliberately NOT one of the three the screen builds: the defect under test
+    is what happens to a renderer nobody remembered to register, which is the
+    state every future renderer starts in.
+    """
+
+    def render(self, graph, state):  # pragma: no cover - never reached
+        raise AssertionError("render must not be reached by this arm")
+
+
+@pytest.mark.asyncio
+async def test_at058_an_unregistered_renderer_raises_rather_than_declaring_nothing(tmp_path):
+    """The resolution is OUTSIDE the guard, and this is what that buys.
+
+    Pre-fix, `_unpainted_ids` answered `None` for every view that was not
+    `layered` -- measured at four sizes, including one hiding 7 of 8 nodes. So
+    "this view declares nothing", "this is not the declaring view" and "the
+    declaration is broken" were ONE value, and `LLR-N06.3.3` makes that value
+    mean *nothing is hidden*.
+
+    `frozenset()` is a LEGITIMATE return for the caller -- both degraded render
+    paths produce one -- so an unregistered renderer must not be able to answer
+    with it either. It raises.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+
+        with pytest.raises(LookupError) as caught:
+            screen._painted_ids_for(_UnregisteredRenderer())  # noqa: SLF001
+        assert "_UnregisteredRenderer" in str(caught.value), (
+            "the diagnostic must NAME the renderer that has no entry; a bare "
+            "LookupError sends the next reader hunting"
+        )
+
+        # The three the screen actually builds all RESOLVE -- none of them can
+        # reach the raise. Two declare; `radial` resolves to the EXPLICIT `None`
+        # that means "declares nothing by design", which is the remaining B-55
+        # hole stated rather than omitted.
+        #
+        # This started as three `None`s and narrowed to one as `Inc-B55a` landed
+        # outline's declaration. It is written as identity against the imported
+        # functions, so wiring a view to the WRONG view's painted_ids fails here
+        # rather than silently declaring another geometry's set.
+        assert screen._painted_ids_for(screen.renderer) is painted_ids  # noqa: SLF001
+        assert screen._painted_ids_for(  # noqa: SLF001
+            screen.outline_renderer) is outline_painted_ids
+        assert screen._painted_ids_for(  # noqa: SLF001
+            screen.radial_renderer) is radial_painted_ids
+
+
+@pytest.mark.asyncio
+async def test_at058_a_layout_failure_still_degrades_to_absent(tmp_path):
+    """The other half, and the reason the guard still exists at all.
+
+    `painted_ids` shares `_geometry` with `render`, so it raises on exactly the
+    frames the canvas cannot draw -- and `_unpainted_ids` is called from
+    `refresh_canvas`, inside the message pump. Letting that escape turns a
+    contained, declared degradation into a dead app.
+
+    A layout failure is DATA-dependent and `None` is honest for it. A missing
+    declaration is a CODE defect, deterministic on every frame. The two must not
+    share an observable, which is what the arm above pins.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(80, 24)) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+
+        def _boom(graph, state):
+            raise RuntimeError("the frame was never laid out")
+
+        original = screen._painted_ids_for  # noqa: SLF001
+        screen._painted_ids_for = lambda renderer: _boom  # noqa: SLF001
+        try:
+            assert screen._unpainted_ids() is None, (  # noqa: SLF001
+                "a layout failure must degrade to `None`, not escape the "
+                "message pump"
+            )
+            # And the app is still alive: a repaint through the same seam does
+            # not raise.
+            screen.refresh_canvas()
+            await pilot.pause()
+        finally:
+            screen._painted_ids_for = original  # noqa: SLF001
+
+        # Restored, the declaring view still declares -- the arm above must not
+        # leave the screen in a state where AT-056/AT-057 would pass vacuously.
+        assert screen._unpainted_ids() is not None  # noqa: SLF001
+
+
+@pytest.mark.asyncio
+async def test_at058_broken_absent_and_declaring_are_three_different_frames(tmp_path):
+    """`broken` must not paint the same strip as SILENCE.
+
+    RELABELLED AFTER THE CODE REVIEW, because the name overstated it. This was
+    written as a three-state arm -- declaring / absent / broken -- and its real
+    content is a TWO-state guard. `_pagination_text` has no `None` branch; it has
+    `if hidden:`, which is equally false for `None` and for an empty
+    `frozenset()`. Fired: a mutant returning `frozenset()` where `_unpainted_ids`
+    returns `None` passes the whole suite. So `absent` and `nothing-hidden` share
+    one strip BY DESIGN, and `len({...}) == 3` below holds because `declaring`
+    hides something -- not because `absent` has an identity of its own.
+
+    The load-bearing distinction is `broken != silence`, and that one is real.
+
+    The simulation is kept and declared. `B-55` is closed across all three views,
+    so no shipped view occupies the absent state; a stub renderer routed through
+    the real `_painted_ids_for` would hit the RAISE, not the `None` branch. What
+    is simulated is the dispatch; what is exercised for real is `_unpainted_ids`'s
+    `is None` path and `_pagination_text`'s `if hidden:`. Deleting the arm would
+    let the seam's contract rot unobserved until some future view declares
+    nothing again.
+
+    Giving `None` its own words would kill that mutant, but that is a change to
+    `LLR-N06.3.3`'s meaning of silence -- a requirements call, carried, not made
+    here.
+
+    Three states, and pre-fix TWO of them were the same strip:
+
+      declaring  layered with nodes hidden   -> the overflow token and a count
+      absent     a view that declares nothing -> no token, by design
+      broken     no declaration registered    -> pre-fix, ALSO no token
+
+    `LLR-N06.3.3` makes "no token" mean *nothing is hidden*, so `broken` was
+    indistinguishable from `absent` AND read as a positive claim. This asserts
+    all three strips differ.
+
+    The raise is caught at this seam rather than allowed out: `_pagination_text`
+    runs inside the message pump and `TC-R08` requires `refresh_canvas` to
+    survive any renderer exception. Loud-and-dead is not the trade; loud-and-
+    DISTINCT is.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(30, 16)) as pilot:
+        await pilot.pause()
+        app.store.save("legacy", install(tmp_path, "legacy"))
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+
+        declaring = screen._pagination_text().plain  # noqa: SLF001
+
+        # THE "ABSENT" CASE NO LONGER HAS A SHIPPED OCCUPANT, and that is the
+        # finding rather than an inconvenience. This line was `outline`, then
+        # `radial`, and `Inc-B55b` closed the last of them: every view the
+        # screen builds now declares. "A view that declares nothing" is vacant.
+        #
+        # It is SIMULATED rather than dropped, because the property is about the
+        # SEAM and not about which views happen to occupy its states today. A
+        # future view that declares nothing by design gets an explicit `None`
+        # entry, exactly as outline and radial had, and this is what its strip
+        # must look like -- distinct from both a declaring view's and a broken
+        # one's.
+        original_for = screen._painted_ids_for  # noqa: SLF001
+        screen._painted_ids_for = lambda r: None  # noqa: SLF001
+        try:
+            absent = screen._pagination_text().plain  # noqa: SLF001
+        finally:
+            screen._painted_ids_for = original_for  # noqa: SLF001
+
+        original = screen._painted_ids_for  # noqa: SLF001
+        screen._painted_ids_for = lambda r: (_ for _ in ()).throw(  # noqa: SLF001
+            LookupError("no painted_ids declared for Forgotten"))
+        try:
+            broken = screen._pagination_text().plain  # noqa: SLF001
+            # And the pump survives it -- TC-R08's property, at this seam.
+            screen.refresh_canvas()
+            await pilot.pause()
+        finally:
+            screen._painted_ids_for = original  # noqa: SLF001
+
+        assert OVERFLOW_TOKEN in declaring, (
+            "the fixture must actually hide something at 30x16 or this arm "
+            f"compares three copies of silence. Got: {declaring!r}"
+        )
+        assert OVERFLOW_TOKEN not in absent
+        assert OVERFLOW_TOKEN not in broken
+        assert broken != absent, (
+            "a BROKEN declaration paints the same strip as a view that declares "
+            "nothing -- the collision AT-058 exists to break"
+        )
+        assert declaring != absent and declaring != broken
+        # THREE distinct strings, but only TWO distinct STATES: `absent` differs
+        # from `declaring` because something is hidden, not because silence is
+        # distinguishable from nothing-to-say. See the docstring.
+        assert len({declaring, absent, broken}) == 3
+
+
+# ---------------------------------------------------------------------------
+# P1 -- the invariant behind LLR-N06.3.4's stale-write mechanism.
+#
+# 02o's law, generalized from the KeyBar mirror: AT REST, EVERY REGION AND ITS
+# CONTENT WERE PRODUCED FROM THE SAME GEOMETRY.
+#
+# WHY AN INVARIANT AND NOT A GAP ASSERTION. 02o measured that closing B-55 --
+# giving outline a painted_ids -- INCIDENTALLY closes this defect's trigger: the
+# strip keeps its overflow token, never unwraps from two rows to one, and the
+# region never moves. So an arm that presses `o` and asserts "nothing was lost"
+# would pass after B-55 lands WITHOUT this defect being fixed. P1 does not
+# depend on the trigger: it compares what the widget HOLDS against what the
+# CURRENT geometry would produce, in any view, at any size.
+#
+# THE MECHANISM, for the reader who finds this arm red: refresh_canvas paints
+# the canvas (app.py :2370) and updates the strip LAST (:2425). In outline the
+# strip loses its overflow token, its line goes 36 cells -> 17, it unwraps 2
+# rows -> 1 at terminal width <= 34, #map-pagination is content-height and
+# #map-body is 1fr -- so the canvas region GAINS a row after the canvas was
+# already painted, and nothing re-renders.
+
+# (terminal, presses) -- `o` once is layered->outline, twice is the RETURN trip.
+# 02o measured the return trip is WORSE: layered content written at outline's
+# larger `h` into a region that then SHRINKS, overflowing by one physical row --
+# clipped content, not blank rows. Same invariant, both directions (P4).
+P1_CASES = [
+    ((24, 20), 1), ((30, 16), 1), ((32, 16), 1), ((34, 14), 1),
+    ((24, 20), 2), ((30, 16), 2), ((32, 16), 2), ((34, 14), 2),
+    # HONEST negative controls (02o §6). NOT the seven zero-gap sizes: (28,14)
+    # reflows exactly like the loss sizes and is masked by the
+    # `region.height <= rows` clamp, and (60,20)/(80,24)/(118,34) are saturated
+    # by an 8-node fixture and cannot tell a fixed system from a broken one.
+    ((35, 14), 1), ((40, 16), 1), ((50, 16), 1),
+]
+
+
+@pytest.mark.parametrize("size,presses", P1_CASES,
+                         ids=lambda v: f"{v[0]}x{v[1]}" if isinstance(v, tuple) else f"o{v}")
+@pytest.mark.asyncio
+async def test_p1_at_rest_region_and_content_share_one_geometry(tmp_path, size, presses):
+    """What the canvas HOLDS must equal what its CURRENT geometry produces.
+
+    This is the general form of the law `Inc-CRUMB` found from the other end.
+    There, a widget kept an auto-height computed from a render it had already
+    replaced. Here, a widget keeps content rendered against a layout it has
+    since outgrown. An arm on the painted text alone passes the first; an arm on
+    the geometry alone passes the second. P1 catches both.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, "legacy")
+        app.store.save("legacy", graph)
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+        for _ in range(presses):
+            await pilot.press("o")
+            await pilot.pause()
+
+        canvas = screen.query_one("#map-canvas")
+        held = canvas.render()
+        held_txt = held.plain if hasattr(held, "plain") else str(held)
+        w, h = screen._canvas_size()  # noqa: SLF001
+        expected = screen._current_renderer().render(  # noqa: SLF001
+            screen.graph, screen._view_state(w, h)).plain  # noqa: SLF001
+
+        # NON-DEGENERACY FIRST: a view that rendered nothing would satisfy the
+        # equality with two empty strings.
+        assert expected.strip(), (
+            f"at {size} after {presses} press(es) the renderer produces nothing; "
+            "the equality below would compare two empty frames"
+        )
+        assert held_txt == expected, (
+            f"at {size} after {presses} press(es) the canvas holds content "
+            f"rendered against a geometry that is no longer current: holds "
+            f"{len(held_txt.splitlines())} line(s), the region now asks for "
+            f"{len(expected.splitlines())}. The region moved after the canvas "
+            "was painted and nothing re-rendered."
+        )
+
+
+# ---------------------------------------------------------------------------
+# AT-056 / TC-089 -- LLR-N06.3.4: the number outline shows matches what the
+# operator cannot see.
+#
+# Acceptance is PHYS-3 + PHYS-4 only. PHYS-1/PHYS-2 are the pinned pilot arm
+# below: they are a rendering-correctness property of one module, strong as
+# regression but pressing a claim the operator cannot state. What the operator
+# CAN state is "the number it shows me matches what I cannot see".
+
+# BOTH fixtures are normative. `legacy` alone was blind: with the settle fix in,
+# a 144-combination sweep found nine cases where a node's title is held by the
+# canvas and absent from the composited frame -- every one of them on `anidado`.
+AT056_FIXTURES = ["legacy", "anidado"]
+# Clipping sizes, then the two controls. (50,16) says do not over-cut; (80,24)
+# says do not declare at zero.
+AT056_SIZES = [(30, 16), (32, 16), (24, 20), (50, 16), (80, 24)]
+
+
+def _frame_hidden(screen, graph) -> set[str]:
+    """The hidden set DERIVED FROM THE FRAME, never from `painted_ids`.
+
+    `C-31`: asking the product for the number and then checking it against the
+    same number asserts an identity between a value and itself. This reads the
+    composited canvas region and asks which node titles are absent from it.
+
+    Outline's painted trace, per `LLR-N06.3.4`'s `PHYS-3`: the node's title as
+    `render` emits it -- `darkside.plain` of the ficha title -- whitespace
+    collapsed, sought in the whitespace-collapsed JOIN of the region rows.
+    Joined rather than per-row because outline word-wraps, so a title can be
+    split across two physical rows and is still painted.
+    """
+    painted = " ".join(" ".join(canvas_rows(screen)).split())
+    hidden = set()
+    for nid, node in graph.nodes.items():
+        trace = " ".join(darkside.plain(node.ficha.title).split())
+        if trace and trace not in painted:
+            hidden.add(nid)
+    return hidden
+
+
+@pytest.mark.parametrize("fixture", AT056_FIXTURES)
+@pytest.mark.parametrize("size", AT056_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_at056_outline_declares_what_the_cut_hid(tmp_path, fixture, size):
+    """`PHYS-3` and `PHYS-4`, read off the composited frame.
+
+    Pre-`Inc-B55a` this could not even be evaluated: `_unpainted_ids` returned
+    `None` for outline at every size, so the view declared nothing while hiding
+    up to 7 of 8 nodes.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, fixture)
+        app.store.save(fixture, graph)
+        screen = await open_map(app, pilot, fixture)
+        await pilot.pause()
+        await pilot.press("o")
+        await pilot.pause()
+        assert screen.outline_mode
+
+        declared = screen._unpainted_ids()  # noqa: SLF001
+        assert declared is not None, "outline declares since Inc-B55a"
+        frame_hidden = _frame_hidden(screen, screen.graph)
+        total = len(screen.graph.nodes)
+
+        if size == (80, 24):
+            # `LLR-N06.3.3`'s zero form, asserted in the inverted direction so a
+            # renderer that hides everything cannot pass it by accident.
+            assert len(declared) == 0, (
+                f"{fixture} at {size} declares {len(declared)} hidden on a frame "
+                "that shows the whole map"
+            )
+            assert OVERFLOW_TOKEN not in " ".join(canvas_rows(screen))
+            return
+
+        # PHYS-4 FIRST: without it, PHYS-3 is satisfiable by `0 == 0` on a frame
+        # that hides nothing.
+        assert len(declared) >= 1, (
+            f"{fixture} at {size} declares nothing hidden; the equality below "
+            "would be `0 == 0`"
+        )
+        # THE UPPER BOUND WAS `< total` AND RULING A REFUTED IT.  Declaring ALL
+        # nodes hidden is now CORRECT where the header's own declaration takes
+        # the last row -- measured at (30,16) and (32,16).  A blanket bound
+        # would have been a false-fail on ratified behaviour (`C-53`).
+        #
+        # IT IS A TRADE, NOT A STRENGTHENING, AND CALLING IT ONE WAS WRONG.  The
+        # code review measured what the trade costs: a one-row OVER-CUT (`_fit`'s
+        # budget test `>` becoming `>=`) is caught by the old `< total` bound at
+        # `anidado (32,16)` -- a size this arm drives -- and is GREEN under the
+        # conditional below, because an over-cut moves the declaration and the
+        # frame TOGETHER and `PHYS-3` cannot see it.  Control 13 lets an author
+        # strengthen his own acceptance unreviewed; it does not cover a trade,
+        # and this was a trade.
+        #
+        # THE COST IS PAID RATHER THAN ARGUED AWAY:
+        # `test_outline_cuts_at_the_rows_the_canvas_shows` -- the `PHYS-1`/
+        # `PHYS-2` pilot arm `LLR-N06.3.4` ratified and which had never been
+        # written -- catches that over-cut RED, and the under-cut too, which
+        # previously only a golden hash caught.
+        #
+        # What the conditional below still does is separate the legitimate
+        # all-hidden frame from the `lines[:0]` mutant: painting nothing is
+        # allowed ONLY while the canvas is visibly saying so.  A `_fit` returning
+        # an empty list drops the header too, declares everything hidden, paints
+        # NO token, and fails here.
+        if len(declared) == total:
+            assert OVERFLOW_TOKEN in " ".join(canvas_rows(screen)), (
+                f"{fixture} at {size} paints no node and declares all {total} "
+                "hidden WITHOUT saying so on the canvas; a frame that shows "
+                "nothing and states nothing is the lines[:0] shape"
+            )
+        # PHYS-3.
+        assert declared == frozenset(frame_hidden), (
+            f"{fixture} at {size}: the declaration and the frame disagree.\n"
+            f"  declared hidden but PAINTED: {sorted(declared - frame_hidden)}\n"
+            f"  painted nowhere but DECLARED VISIBLE: "
+            f"{sorted(frame_hidden - declared)}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# AT-057 / TC-090 -- LLR-N06.3.5: both declaring surfaces speak, agree, and are
+# right.
+#
+# The FIRST draft of this row was "equal counts, zero disagreements" and `02n`
+# rejected it as GREEN ON THE SHIPPED PRE-STATE: at (35,14) on `legacy` in
+# outline, 7 of 8 nodes were hidden and BOTH surfaces were silent, so the
+# threshold was satisfied by universal silence. AGREE-1 is the clause that
+# fixes that, and it is the clause the pre-state fails.
+
+# The key that reaches each declaring view. DERIVED against
+# `painted_ids_exporters()` below, so a view that gains a declaration without
+# gaining an arm goes red rather than being silently unmeasured.
+_DECLARING_VIEW_KEYS = {
+    "mapper.views.layered": None,   # the default view; no chord
+    "mapper.views.outline": "o",
+    # RADIAL JOINED AT `Inc-B55b`, and the guard below is what made that a
+    # DECISION rather than a drift: it fired the moment `radial` gained a
+    # declaration, naming the view that had gained one without an arm.
+    "mapper.views.radial": "r",
+}
+AT057_SIZES = [(35, 14), (30, 16), (80, 24)]
+
+
+def _frame_hidden_for(module: str, screen) -> set[str]:
+    """The frame-derived hidden set UNDER THE VIEW'S OWN painted predicate.
+
+    `02m` §7: `B-55` would otherwise ship three different definitions of
+    "painted" behind one operator-facing numeral, which is the failure
+    `views/state.py` records already shipping once for "hit". So the predicate is
+    per view, and an unstated one RAISES rather than borrowing a neighbour's.
+
+    The first draft of this arm used outline's full-title predicate for BOTH
+    views and reddened layered at three sizes -- correctly. Layered TRUNCATES
+    titles into cards, so a full-title trace is 0 of 8 at every width; its
+    normative predicate is the clipped image found AT THE COLUMNS ITS CARD
+    OCCUPIES, which `oracle_traced` already implements. Outline WORD-WRAPS
+    instead of truncating, so a title survives a wrap whole and the joined
+    full-title read is right there and wrong for layered.
+    """
+    graph = screen.graph
+    if module == "mapper.views.outline":
+        return _frame_hidden(screen, graph)
+    if module == "mapper.views.radial":
+        # RADIAL'S OWN PREDICATE, and the guard below refused to let it borrow
+        # one -- which is how this line came to be written deliberately rather
+        # than by defaulting. Radial paints PILLS and TRUNCATES the title to 18
+        # cells (`radial.py`'s pill loop), so the emitted image is
+        # `plain(title)[:18]`, not the full title.
+        #
+        # THE TRUNCATION IS UNTESTED BY THESE FIXTURES. The claim that stood here
+        # -- "the full-title read traces 0 of 8" -- was REFUTED by the code
+        # review: computed both ways at 12 combinations the two oracles agree at
+        # every one, because no fixture title exceeds 18 characters (the longest
+        # is exactly 18). So `[:18]` is the RIGHT predicate and an UNEXERCISED
+        # one, and the 0-of-8 figure is struck -- it was measured under outline's
+        # geometry, not radial's. Carried: a >18-character fixture title would
+        # exercise it, and until one exists a mutant dropping the `[:18]` from
+        # either the renderer or this oracle survives.
+        painted = " ".join(" ".join(canvas_rows(screen)).split())
+        return {
+            nid for nid, node in graph.nodes.items()
+            if (img := " ".join(darkside.plain(node.ficha.title)[:18].split()))
+            and img not in painted
+        }
+    if module == "mapper.views.layered":
+        w, _h = screen._canvas_size()  # noqa: SLF001
+        traced = oracle_traced(
+            graph, screen.folded, w, canvas_rows(screen), screen.pan_x
+        )
+        return set(graph.nodes) - set(traced)
+    raise AssertionError(
+        f"no painted predicate stated for {module}; AGREE-3 cannot borrow "
+        "another view's geometry (02m §7.3)"
+    )
+
+
+@pytest.mark.parametrize("module", sorted(_DECLARING_VIEW_KEYS))
+@pytest.mark.parametrize("size", AT057_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_at057_both_surfaces_declare_when_a_view_hides(tmp_path, module, size):
+    """`AGREE-1`, `AGREE-2` and `AGREE-3` over every view that declares.
+
+    Silence on both surfaces is NOT agreement: `LLR-N06.3.3` makes silence mean
+    *nothing is hidden*, so two silent surfaces over a frame that hides nodes are
+    two surfaces agreeing on a falsehood.
+    """
+    from tests.test_inc3_census import painted_ids_exporters
+
+    # The quantifier, stated so it cannot drift.
+    assert painted_ids_exporters() == set(_DECLARING_VIEW_KEYS), (
+        "a view gained or lost a declaration without this arm being updated; "
+        f"exporters={sorted(painted_ids_exporters())} "
+        f"driven={sorted(_DECLARING_VIEW_KEYS)}"
+    )
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, "legacy")
+        app.store.save("legacy", graph)
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+        key = _DECLARING_VIEW_KEYS[module]
+        if key:
+            await pilot.press(key)
+            await pilot.pause()
+
+        canvas = " ".join(canvas_rows(screen))
+        strip = " ".join(rows_in(screen, screen.query_one("#map-pagination").region))
+        frame_hidden = _frame_hidden_for(module, screen)
+
+        if not frame_hidden:
+            # The zero control: both surfaces correctly silent.
+            assert OVERFLOW_TOKEN not in canvas and OVERFLOW_TOKEN not in strip
+            return
+
+        # AGREE-1 -- the clause the shipped pre-state failed.
+        assert OVERFLOW_TOKEN in canvas, (
+            f"{module} at {size} hides {len(frame_hidden)} node(s) and the CANVAS "
+            "header says nothing; LLR-N06.3.3 makes that mean nothing is hidden"
+        )
+        assert OVERFLOW_TOKEN in strip, (
+            f"{module} at {size} hides {len(frame_hidden)} node(s) and the STRIP "
+            "says nothing"
+        )
+        # AGREE-2 -- equal. Rows are JOINED before parsing: the header wraps, and
+        # a per-row regex either misses the numeral or binds it to the wrong
+        # label (QA-N-06).
+        on_canvas = _declared_total(canvas_rows(screen))
+        on_strip = _declared_total([strip])
+        assert on_canvas == on_strip, (
+            f"{module} at {size}: canvas says {on_canvas}, strip says {on_strip}"
+        )
+        # AGREE-3 -- RIGHT, not merely equal. Two surfaces fed from one
+        # computation agree by construction; equality alone is green when both
+        # are equally wrong.
+        assert on_canvas == len(frame_hidden), (
+            f"{module} at {size}: both surfaces say {on_canvas}, the frame hides "
+            f"{len(frame_hidden)}"
+        )
+
+
+# EN-3: the last two sizes read (32, 16) and (34, 14) while the outline declaration said `fuera de vista`.  The arm
+# needs a width at which the REAL outline strip wraps to two rows (so the one-row stub hands the canvas a row back);
+# `out of view` is three cells shorter, so that wrap now ends three widths sooner.  Measured over w 24..37 at h 14, 16
+# and 20 on both trees: the Spanish tree moved the region up to w = 34, this tree up to w = 31.  The two sizes moved by
+# the same three cells; (24, 20) and (30, 16) are unchanged.
+@pytest.mark.parametrize("size", [(24, 20), (30, 16), (29, 16), (31, 14)],
+                         ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_p1_survives_a_strip_reflow_after_the_canvas_is_painted(tmp_path, size):
+    """`P1` WITH THE TRIGGER SUPPLIED -- the arm the parametrised one is not.
+
+    THE ARM ABOVE IS TRUE AND CANNOT FAIL, and the code review proved it:
+    deleting the settle arming from `refresh_canvas` entirely leaves the whole
+    suite green, all eleven of its cases included. Instrumented, the region
+    never moves after `refresh_canvas` paints at any of the four loss sizes --
+    because `outline` now DECLARES, so the strip keeps its token, never unwraps
+    from two rows to one, and never hands the canvas a row back. Closing `B-55`
+    closed this defect's own trigger.
+
+    That was foreseen -- the other arm's header says "closing B-55 incidentally
+    closes this defect's trigger" -- and then the wrong conclusion was drawn
+    from it. Trigger-independence made the arm SURVIVE `B-55`; it did not make
+    it DISCRIMINATE. An invariant that holds for an unrelated reason has no
+    power. So this arm supplies the trigger instead of hoping for it.
+
+    The stub restores the pre-`B-55` condition exactly: a one-row strip, which
+    is what `#map-pagination` rendered when outline declared nothing (17 cells
+    against layered's 36). `#map-pagination` is content-height and `#map-body`
+    is `1fr`, so the strip shrinking hands the canvas a row -- AFTER
+    `refresh_canvas` has already painted it.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, "legacy")
+        app.store.save("legacy", graph)
+        screen = await open_map(app, pilot, "legacy")
+        await pilot.pause()
+        await pilot.press("o")
+        await pilot.pause()
+
+        canvas = screen.query_one("#map-canvas")
+        before = canvas.region.height
+        # THE TRIGGER. A one-row strip, the shape outline produced before it
+        # declared. Patched on the instance, so the production seam is untouched.
+        screen._pagination_text = lambda: darkside.Text("z")  # noqa: SLF001
+        screen.refresh_canvas()
+        await pilot.pause()
+
+        assert canvas.region.height != before, (
+            f"at {size} the strip stub did not move the canvas region "
+            f"({before} -> {canvas.region.height}); this arm would then be "
+            "asserting P1 on a frame whose geometry never changed, which is "
+            "exactly the vacuity it exists to repair"
+        )
+
+        held = canvas.render()
+        held_txt = held.plain if hasattr(held, "plain") else str(held)
+        w, h = screen._canvas_size()  # noqa: SLF001
+        expected = screen._current_renderer().render(  # noqa: SLF001
+            screen.graph, screen._view_state(w, h)).plain  # noqa: SLF001
+        assert expected.strip(), "the renderer produces nothing; degenerate"
+        assert held_txt == expected, (
+            f"at {size} the canvas holds content rendered against a geometry "
+            f"that is no longer current: holds {len(held_txt.splitlines())} "
+            f"line(s), the region now asks for {len(expected.splitlines())}. "
+            "The region moved after the canvas was painted and nothing "
+            "re-rendered."
+        )
+
+
+@pytest.mark.parametrize("fixture", AT056_FIXTURES)
+@pytest.mark.parametrize("size", AT056_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_outline_cuts_at_the_rows_the_canvas_shows(tmp_path, fixture, size):
+    """`PHYS-1` and `PHYS-2` -- the PINNED PILOT ARM, not acceptance.
+
+    `LLR-N06.3.4` demotes these from `AT-056` because they press a claim the
+    operator cannot state ("outline priced its cut in physical rows"), and pins
+    them HERE so the demotion does not become a deletion. **It had become one:**
+    the row said the arm existed and no such arm was on disk, which the code
+    review found. A ratified clause with no node is `AT-005`/`AT-006`'s shape.
+
+    These are the clauses that catch a MIS-SIZED cut, and the acceptance cannot:
+      * over-cut (`_fit` budget `>` -> `>=`) leaves declaration and frame moving
+        TOGETHER, so `PHYS-3` stays green while a row is silently lost.
+      * under-cut (emitting more than fits) was caught only by a golden hash --
+        content painted into a void, which is `B-55`'s own original shape.
+    """
+    from mapper.views import outline as _outline
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, fixture)
+        app.store.save(fixture, graph)
+        screen = await open_map(app, pilot, fixture)
+        await pilot.pause()
+        await pilot.press("o")
+        await pilot.pause()
+
+        region = screen.query_one("#map-canvas").region
+        w, h = screen._canvas_size()  # noqa: SLF001
+        state = screen._view_state(w, h)  # noqa: SLF001
+        rows, short_circuit = _outline._rows(graph, state)  # noqa: SLF001
+        assert short_circuit is None, "fixture past the render bound; degenerate"
+        kept = _outline._fit_declared(rows, w, h)  # noqa: SLF001
+        assert kept, "the fit kept nothing at all; PHYS-2 would be vacuous"
+
+        # PHYS-1 -- nothing emitted that the canvas cannot show. Read off the
+        # composited frame, joined across wrapped rows, because outline wraps.
+        painted = " ".join(" ".join(canvas_rows(screen)).split())
+        for _nid, line in kept:
+            trace = " ".join(line.plain.split())
+            assert trace in painted, (
+                f"{fixture} at {size}: outline emitted a line the frame does "
+                f"not show: {trace[:60]!r}"
+            )
+
+        # PHYS-2 -- the cut is MAXIMAL, not merely safe, measured against the
+        # budget the renderer was GIVEN. The gap between that budget and
+        # `region.height` is layered's header charge levied in outline -- a
+        # separate defect, measured and routed to Inc-REPAIR, not this arm's.
+        console = Console(width=max(1, w), no_color=True)
+
+        def phys(seq):
+            return sum(max(1, len(console.render_lines(t, pad=False)))
+                       for _n, t in seq)
+
+        assert phys(kept) <= h, (
+            f"{fixture} at {size}: the cut emits {phys(kept)} physical rows "
+            f"into a budget of {h} -- content painted into a void"
+        )
+        if len(kept) < len(rows):
+            one_more = [*kept, rows[len(kept)]]
+            assert phys(one_more) > h, (
+                f"{fixture} at {size}: one MORE line would still have fitted "
+                f"({phys(one_more)} rows into {h}); the cut is short of maximal "
+                "and a node was hidden that the canvas had room for"
+            )
+        assert region.height >= 1
+
+
+# ---------------------------------------------------------------------------
+# AT-059 / TC-092 -- LLR-N06.3.7: radial declares what the canvas lost.
+
+# `(20,30)` IS HERE BECAUSE ITS ABSENCE LET A DEFECT REACH THE GATE GREEN.
+# `inner` is 18 there and `legacy`'s root pill needs 21, so the title is clipped
+# by the CANVAS EDGE -- the one clipping mode the ownership ledger excused rather
+# than failed. Every other size in this table samples pill-on-pill overlap, which
+# it always caught. A parametrization that samples one failure mode tests one
+# failure mode.
+AT059_SIZES = [(20, 30), (24, 20), (30, 16), (50, 16), (80, 24), (118, 34)]
+
+
+@pytest.mark.parametrize("fixture", AT056_FIXTURES)
+@pytest.mark.parametrize("size", AT059_SIZES, ids=lambda s: f"{s[0]}x{s[1]}")
+@pytest.mark.asyncio
+async def test_at059_radial_declares_what_the_canvas_lost(tmp_path, fixture, size):
+    """The declared set equals the frame's, under RADIAL's own predicate.
+
+    The construction under test is a CELL-OWNERSHIP REPLAY. `Canvas.put` is
+    last-write-wins and records no owner, so a later pill silently overwrites an
+    earlier one's cells; `pos` says where a pill was WRITTEN, not whether it
+    SURVIVED. Deriving the declaration from placement is `M-N06.3-b`, measured
+    wrong by 6 of 8 at 30x6 -- it names nodes the operator cannot see.
+
+    The oracle is the composited frame, never `painted_ids` (`C-31`), and it uses
+    radial's emitted image `plain(title)[:18]` rather than the full title,
+    because radial TRUNCATES. That distinction is not cosmetic: the full-title
+    read traces 0 of 8 at five sizes where the frame plainly shows pills.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, fixture)
+        app.store.save(fixture, graph)
+        screen = await open_map(app, pilot, fixture)
+        await pilot.pause()
+        await pilot.press("r")
+        await pilot.pause()
+        assert screen.radial_mode
+
+        declared = screen._unpainted_ids()  # noqa: SLF001
+        assert declared is not None, "radial declares since Inc-B55b"
+        frame_hidden = _frame_hidden_for("mapper.views.radial", screen)
+        total = len(screen.graph.nodes)
+
+        # NON-DEGENERACY FIRST, in the direction the size makes true, so the
+        # equality below can never be `0 == 0` by accident.
+        if frame_hidden:
+            assert 1 <= len(frame_hidden) <= total
+        else:
+            assert len(declared) == 0, (
+                f"{fixture} at {size} declares {len(declared)} hidden on a frame "
+                "that shows every pill"
+            )
+
+        assert declared == frozenset(frame_hidden), (
+            f"{fixture} at {size}: declaration and frame disagree.\n"
+            f"  declared hidden but PAINTED: {sorted(declared - frame_hidden)}\n"
+            f"  painted nowhere but DECLARED VISIBLE: "
+            f"{sorted(frame_hidden - declared)}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# AT-059, the TRUNCATION arm -- on its own fixture, because neither normative
+# fixture exercises it.
+#
+# `LLR-N06.3.7` states radial's predicate as the node's image `plain(title)[:18]`.
+# The code review found that claim RIGHT and UNTESTED: no title in `legacy` or
+# `anidado` exceeds 18 characters (the longest is exactly 18), so the truncated
+# and full-title oracles agree everywhere and a mutant dropping the `[:18]` from
+# either the renderer or the oracle SURVIVES the whole suite.
+#
+# `fixtures/truncado` exists only for this. A DEDICATED fixture rather than a
+# longer title in `legacy`: moving an existing fixture's world would ripple
+# through the golden digests, the census pins and every arm that drives it, to
+# test one predicate. Nothing else reads this map.
+TRUNCATION_FIXTURE = "truncado"
+# Long enough that `[:18]` bites: 46 characters.
+LONG_TITLE = "Plataforma de Integracion Continua Corporativa"
+
+
+@pytest.mark.asyncio
+async def test_at059_radial_truncates_its_title_image_at_eighteen_cells(tmp_path):
+    """The `[:18]` in radial's predicate, exercised rather than asserted.
+
+    Drives a title of 46 characters at a width wide enough that nothing is
+    clipped by the canvas edge, so the ONLY reason the full title is absent from
+    the frame is the renderer's own truncation.
+
+    Both halves are pinned: the frame must carry the truncated image and must NOT
+    carry the full one. Asserting only the first would pass on a renderer that
+    stopped truncating, which is exactly the mutant that survived before.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        graph = install(tmp_path, TRUNCATION_FIXTURE)
+        app.store.save(TRUNCATION_FIXTURE, graph)
+        screen = await open_map(app, pilot, TRUNCATION_FIXTURE)
+        await pilot.pause()
+        await pilot.press("r")
+        await pilot.pause()
+        assert screen.radial_mode
+
+        painted = " ".join(" ".join(canvas_rows(screen)).split())
+        image = LONG_TITLE[:18]
+        assert len(LONG_TITLE) > 18, "the fixture stopped exercising truncation"
+
+        assert image in painted, (
+            f"radial did not paint the truncated image {image!r}; the frame "
+            f"carries {painted[:80]!r}"
+        )
+        assert LONG_TITLE not in painted, (
+            "radial painted the FULL title on a frame with room for it -- the "
+            "renderer is no longer truncating, and the predicate's `[:18]` is "
+            "now a lie about what it emits"
+        )
+
+        # And the declaration agrees with the frame under that image. The node
+        # IS painted here, so this also pins that truncation alone does not make
+        # a node count as hidden.
+        declared = screen._unpainted_ids()  # noqa: SLF001
+        assert declared is not None
+        assert "raiz" not in declared, (
+            "the root's title is truncated but VISIBLE; declaring it hidden "
+            "would confuse `truncated` with `not painted`"
+        )
+
+        # AND THE ORACLE'S OWN `[:18]`, which the assertions above do not reach.
+        # Fired: a mutant dropping the truncation from `_frame_hidden_for`
+        # SURVIVED everything above, because those read the frame directly. On
+        # this fixture the un-truncated oracle hunts a 46-character title that
+        # the renderer never emits, calls the root hidden, and disagrees with the
+        # declaration -- so this line is what kills it.
+        #
+        # Both halves of the predicate now have a witness: the renderer's
+        # truncation and the oracle's must agree about what radial EMITS, or the
+        # 16-of-16 agreement elsewhere is agreement between two copies of the
+        # same mistake.
+        assert screen._unpainted_ids() == frozenset(  # noqa: SLF001
+            _frame_hidden_for("mapper.views.radial", screen)
+        ), (
+            "on a truncating fixture the declaration and the frame oracle "
+            "disagree; one of them is not using radial's emitted image"
+        )

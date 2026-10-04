@@ -1,0 +1,52 @@
+schema: []
+documents: []
+nodes:
+  raiz:
+    title: Plataforma
+    state: ''
+    meta: nivel raiz
+    notes: ''
+    fields: {}
+    attachments: []
+  ops:
+    title: Operaciones
+    state: ''
+    meta: nivel ops
+    notes: ''
+    fields: {}
+    attachments: []
+  fin:
+    title: Finanzas
+    state: ''
+    meta: nivel fin
+    notes: ''
+    fields: {}
+    attachments: []
+  log:
+    title: Logistica
+    state: ''
+    meta: nivel log
+    notes: ''
+    fields: {}
+    attachments: []
+  comp:
+    title: Compras
+    state: ''
+    meta: nivel comp
+    notes: ''
+    fields: {}
+    attachments: []
+  alm:
+    title: Almacenes
+    state: ''
+    meta: nivel alm
+    notes: ''
+    fields: {}
+    attachments: []
+  flo:
+    title: Flota
+    state: ''
+    meta: nivel flo
+    notes: ''
+    fields: {}
+    attachments: []
