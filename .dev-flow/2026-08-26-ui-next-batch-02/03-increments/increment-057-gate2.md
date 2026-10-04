@@ -13,7 +13,7 @@ Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `0133c
 
 ## 2. Files modified
 
-Source (4): `mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/import_csv.py`. Tests (1, new): `tests/test_gate2.py` (28 items). Docs (3): `.dev-flow/BACKLOG.md`, `01-requirements.md` (`A-139`), this record. Not staged or touched: `prototypes/`, `mapper.db`, `fixtures/.mapper/`, `fixtures/mapper.db`, `state.json`. Commits: `9f9c2a9` (arms, strict xfail), `111f775` (helper byte I/O), `a63922b` (fixes, `OPEN_STEPS` emptied, docs), then this record. Identity `gate2 <gate2@example.invalid>`; every message ends with the Co-Authored-By line; index line endings LF (`git ls-files --eol`: `i/lf` for all touched files; two files are `w/crlf` in the working tree, as before, and `autocrlf` normalises them).
+Source (4): `mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/import_csv.py`. Tests (1 new, 3 edited): `tests/test_gate2.py` (28 items); `tests/test_inc9f.py` (new helper `_after_pins`, used by the `_Mirror` fake), `tests/test_inc9h.py` (one assertion through the helper), `tests/test_search.py` (six `_PASS_FREE_READERS` entries with reasons). Docs (4): `.dev-flow/BACKLOG.md`, `01-requirements.md` (`A-139`), `docs/ARCHITECTURE.md` (one line number, `factory.py:504` -> `507`), this record. Not staged or touched: `prototypes/`, `mapper.db`, `fixtures/.mapper/`, `fixtures/mapper.db`, `state.json`. Commits: `9f9c2a9` (arms, strict xfail), `111f775` (helper byte I/O), `a63922b` (fixes, `OPEN_STEPS` emptied, docs), `c7d281b` (record), `f88e0b6` (test and doc follow-ups from the first lane, section 7), then this final docs commit. Identity `gate2 <gate2@example.invalid>`; every message ends with the Co-Authored-By line; index line endings LF (`git ls-files --eol`: `i/lf` for all touched files; two files are `w/crlf` in the working tree, as before, and `autocrlf` normalises them).
 
 ## 3. How to test
 
@@ -73,7 +73,7 @@ On the base the first line was blank and the third still read `edge of the map`.
 
 ## 6. Test results, risks, unmeasured, next
 
-- Ruff: `ruff check .` base `0133cfb` 27, head 27; programmatic multiset difference over (path, code, message) EMPTY (both directions).
+- Ruff: `ruff check .` base `0133cfb` 26 (programmatic, in a scratch worktree), head `f88e0b6` 27; the multiset difference was ONE new finding, `F401` for an unused `import os` in `tests/test_gate2.py`; removed in the final docs commit, after which the difference is empty (checked on that file; the other files are unchanged since). The lanes below ran with the unused import still present: a deleted import cannot change a result, and `tests/test_gate2.py` was re-run green after the deletion (28 passed); no third full lane was run.
 - `-W error::SyntaxWarning`: the four source files and the test file compile clean.
 - Full default lane x2 (sequential, uninterrupted, `-rf`, the last step): section 7.
 - Risks: `_pan` now restores `map_hint()` where it blanked, so a status hint another handler set before a pan is replaced on the first good pan (it was blanked before; same loss, better text). `action_toggle_rail` now clears a pan hint; `action_toggle_inspector` does not (the verdict named `R`; the inspector has the same width effect: not changed, say if wanted).
@@ -82,4 +82,19 @@ On the base the first line was blank and the third still read `edge of the map`.
 
 ## 7. Full default lane x2 (last step)
 
-(appended below)
+**The first lane did not pass, and is recorded.** On `c7d281b` (the fixes, before the follow-ups) the first full default lane ran **46 failed, 2751 passed** (`lane` discarded, never counted as a pass). Causes, each measured:
+
+- 44 tests in `test_inc9f/g/h/i`: the `_Mirror` fake of `test_inc9f.py` matched `argv[3:6] == ["config", "--get", "remote.origin.url"]`, and `test_inc9h` matched `fetches[0][3:]`; the `-c` pins now sit at index 3, so the fake no longer answered `config --get` and a second connect re-cloned (1 + 6 + 19 + 18 tests). Fix: `_after_pins(argv)` skips leading `-c key=value` pairs; the subcommand has no fixed index any more, which is the cost of `-c` over an environment variable (`GIT_CONFIG_COUNT` would keep argv but is ignored silently by git older than 2.31, i.e. the pin would vanish quietly; chosen against).
+- `test_arch_osopen_callers` (1): `docs/ARCHITECTURE.md` lists `factory.py` back-edge line numbers; the preview edit moved one (`504` -> `507`). Line number updated.
+- `test_search::test_every_reader_of_the_resolution_is_inside_a_paint_pass` (1): `_resting_hint` reads `_search_order`, so it and its callers became pass-free readers of the resolution. Registered with a stated reason (the order is keyed on graph and query, which a pan and a view toggle cannot change; the same argument as `_walk_hits`). Alternative considered and not taken: storing the last search hint on the screen, which adds state to avoid one registration.
+
+I had run only `tests/test_gate2.py` before that lane; the lesson is to run the neighbouring suites (`-k` on the changed names) before the first full lane.
+
+**Result, on `f88e0b6`** (all code and tests of this increment; the final docs commit follows), sequential, uninterrupted, nothing else of mine running, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables, default basetemp:
+
+| Run | Result | Time |
+|---|---|---|
+| 1 | `2797 passed, 24 deselected, 3 xfailed` (0 failed), exit 0 | 1439.02 s |
+| 2 | `2797 passed, 24 deselected, 3 xfailed` (0 failed), exit 0 | 1495.90 s |
+
+Baseline 2769; the +28 are the new `tests/test_gate2.py` items. Other agents' work may have shared the machine; the timings vary.
