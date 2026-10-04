@@ -287,6 +287,15 @@ async def test_inc9f_f1_a_dash_url_typed_into_connect_repo_is_a_toast(tmp_path, 
 # ---------------------------------------------------------------------------
 # Item 2 -- R3-CR-F7: reconnecting a mirror
 
+def _after_pins(argv):
+    """The argv after `git -C <path>` and the `-c key=value` pins `_run_git` puts before the subcommand
+    (Gate-2, `BRANCH-SEC-F3`): the subcommand no longer sits at a fixed index."""
+    rest = list(argv)[3:]
+    while rest[:1] == ["-c"]:
+        rest = rest[2:]
+    return rest
+
+
 class _Mirror(_Run):
     """`git clone --mirror` as git does it, measured on a local bare repository: the
     target is a BARE repository (`HEAD` is a file, there is no `.git`), and a second
@@ -308,7 +317,7 @@ class _Mirror(_Run):
             target.mkdir(parents=True)
             (target / "HEAD").write_text("ref: refs/heads/main\n")
             self.origin[str(target)] = argv[-2]
-        elif list(argv)[3:6] == ["config", "--get", "remote.origin.url"]:
+        elif _after_pins(argv)[:3] == ["config", "--get", "remote.origin.url"]:
             url = self.origin.get(argv[2])
             if url is None:
                 return subprocess.CompletedProcess(argv, 1, "", "")
