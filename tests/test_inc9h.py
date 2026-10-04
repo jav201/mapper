@@ -27,7 +27,7 @@ from mapper.model import Graph
 from mapper.store import MapStore
 from mapper.widgets.chrome import HintLine
 from tests.test_inc9f import (  # noqa: F401  (hermetic is a fixture)
-    NARROW, SIZE, _Mirror, _Run, _open_palette, _sentinel_seat, hermetic,
+    NARROW, SIZE, _Mirror, _Run, _after_pins, _open_palette, _sentinel_seat, hermetic,
 )
 from tests.test_inc9g import (
     URL_A, _assert_row_keeps_its_colours, _assert_row_legible, _bare_with_branch,
@@ -368,7 +368,7 @@ def test_inc9h_sec_f2_the_refresh_is_fetch_prune_all(tmp_path, monkeypatch):
     _ensure_cloned(URL_A, cache)
     _ensure_cloned(URL_A, cache)
     fetches = [argv for argv, _ in run.calls if "fetch" in argv]
-    assert len(fetches) == 1 and fetches[0][3:] == ["fetch", "--prune", "--all"], fetches
+    assert len(fetches) == 1 and _after_pins(fetches[0]) == ["fetch", "--prune", "--all"], fetches
 
 
 @pytest.mark.network

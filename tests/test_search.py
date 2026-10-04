@@ -1510,6 +1510,17 @@ _PASS_FREE_READERS = {
     "action_next_hit": "wrapper over `_walk_hits`",
     "action_prev_hit": "wrapper over `_walk_hits`",
     "on_input_submitted": "reads the order of the frame `refresh_canvas` painted on the line above",
+    # Gate-2 (`PR-QA-F3`): after a pan, and when a view change drops a pan hint, the hint line goes back to
+    # what the screen says at rest, which is the live search's hint while a query is live.  That hint reads
+    # the order, and the order is keyed on the graph object and the query text alone: neither a pan nor
+    # `o` / `r` / `R` touches either, so the memo of the frame on screen is the correct input, not a stale
+    # one (the same argument as `_walk_hits`).  Each caller below repaints after it.
+    "_resting_hint": "the hint at rest reads the order of the frame ON SCREEN; the order is keyed on graph+query, which a pan or a view toggle cannot change",
+    "_clear_pan_hint": "restores the resting hint; see `_resting_hint`",
+    "action_toggle_outline": "wrapper that clears a pan hint before it repaints; see `_resting_hint`",
+    "action_toggle_radial": "wrapper that clears a pan hint before it repaints; see `_resting_hint`",
+    "action_toggle_rail": "wrapper that clears a pan hint before it repaints; see `_resting_hint`",
+    "action_focus_rail": "reaches `_resting_hint` only through `action_toggle_rail`; see that entry",
     # ROUND 3 (`Inc-4c`) REMOVED TWO ROWS FROM HERE, and the removal is the
     # receipt that this arm is pinned in BOTH directions rather than only
     # against growth.  Round 2 added `_search_is_live` and `action_back_or_home`
