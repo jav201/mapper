@@ -32,21 +32,19 @@ class OutlineRail(Static):
         super().__init__(**kwargs)
         self.graph = Graph()
         self.cursor: str | None = None
-        self.collapsed: set[str] = set()
+        # RENDERED, NOT OWNED (LLR-N06.2.1).  The rail used to hold a
+        # `collapsed` set and a `toggle` that mutated it, which made fold state
+        # live inside a widget `_apply_region_visibility` auto-hides below 118
+        # columns -- so the canvas could not read it and the two surfaces could
+        # disagree about what was folded.  `MapScreen` owns the set now; this
+        # attribute is only the last value it was handed.
+        self.folded: frozenset[str] = frozenset()
 
-    def show(self, graph: Graph, cursor: str | None) -> None:
+    def show(self, graph: Graph, cursor: str | None,
+             folded: frozenset[str]) -> None:
         self.graph = graph
         self.cursor = cursor
-        self.refresh()
-
-    def toggle(self, node_id: str | None) -> None:
-        """Collapse or expand a branch."""
-        if node_id is None:
-            return
-        if node_id in self.collapsed:
-            self.collapsed.discard(node_id)
-        else:
-            self.collapsed.add(node_id)
+        self.folded = folded
         self.refresh()
 
     # -- structure ---------------------------------------------------------
@@ -82,7 +80,7 @@ class OutlineRail(Static):
             if nid in visiting:
                 raise ValueError(f"cycle through {nid}: the graph is not a tree")
             rows.append((nid, depth))
-            if nid in self.collapsed:
+            if nid in self.folded:
                 continue
             children = index.get(nid)
             if not children:
@@ -194,14 +192,14 @@ class OutlineRail(Static):
         except ValueError:
             return darkside.Text.assemble(
                 (
-                    "  no se puede dibujar:\n  el mapa tiene un ciclo",
+                    "  cannot draw:\n  the map has a cycle",
                     darkside.ALERT,
                 )
             )
 
     def _body(self):
         if self.graph.root_id is None:
-            return darkside.Text.assemble(("  (mapa vacío)", darkside.MUT))
+            return darkside.Text.assemble(("  (empty map)", darkside.MUT))
 
         index = self._child_index()
         rows = self._rows(index)
@@ -214,7 +212,7 @@ class OutlineRail(Static):
         total_missing = totals.get(self.graph.root_id, 0)
         parts.append(
             (
-                f"mapa · {len(self.graph.nodes)}n · {total_missing} faltan\n\n",
+                f"map · {len(self.graph.nodes)}n · {total_missing} missing\n\n",
                 darkside.MUT,
             )
         )
@@ -224,7 +222,7 @@ class OutlineRail(Static):
             has_children = bool(index.get(nid))
             if not has_children:
                 marker = "  "
-            elif nid in self.collapsed:
+            elif nid in self.folded:
                 marker = "▸ "
             else:
                 marker = "▾ "
@@ -253,7 +251,7 @@ class OutlineRail(Static):
                 parts.append(("   ", ""))
             parts.append(("\n", ""))
 
-        parts.append(("\nterritorio\n", darkside.WORDMARK))
+        parts.append(("\nterritory\n", darkside.WORDMARK))
         parts.extend(self._lattice())
         return darkside.Text.assemble(*parts)
 
@@ -272,7 +270,7 @@ class OutlineRail(Static):
                 parts.append(("\n", ""))
         have, req = self.graph.coverage()
         pct = round(have / req * 100) if req else 100
-        parts.append((f"\n\ncobertura {pct}%", darkside.MUT))
+        parts.append((f"\n\ncoverage {pct}%", darkside.MUT))
         return parts
 
     def on_click(self) -> None:

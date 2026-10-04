@@ -184,7 +184,7 @@ And correct the comment at `store.py:419-420` to say what is true: *callers catc
 
 ```
 OPERATOR SEES:
-[Errno 13] Permission denied: 'C:\\Users\\jjgh8\\AppData\\Local\\Temp\\leak2_fv_p8q2r\\m_nodos.yml'
+[Errno 13] Permission denied: 'C:\\Users\\<operator>\\AppData\\Local\\Temp\\leak2_fv_p8q2r\\m_nodos.yml'
 contains user home dir name? True
 ```
 

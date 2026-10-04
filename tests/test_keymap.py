@@ -23,8 +23,10 @@ from mapper.app import (
     _ImportPreviewScreen,
 )
 from mapper.keymap import GROUP_SCOPE, KEYMAP, bindings_for, groups_for_keybar, palette_items
+from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
+from mapper.screens.settings import SettingsScreen
 
 # Which class owns each scope's actions.  App-scope actions live on the App and are
 # reachable from every screen by fall-through.
@@ -37,6 +39,9 @@ SCOPE_OWNER = {
     keymap.SCOPE_PALETTE: CommandPalette,
     keymap.SCOPE_HELP: HelpScreen,
     keymap.SCOPE_APP: MapperApp,
+    # Inc-9 (`#D9`, LLR-N16.1.2): the last two help screens join the seat.
+    keymap.SCOPE_FACTORY: FactoryScreen,
+    keymap.SCOPE_SETTINGS: SettingsScreen,
 }
 
 # Per-scope sizes, pinned EXACTLY.  A `>=` fence leaves slack, and slack is
@@ -46,14 +51,30 @@ SCOPE_OWNER = {
 # only signal was a passing-test count that nothing asserted.  Changing the seat
 # must now be a deliberate edit here.
 EXPECTED_PER_SCOPE = {
-    keymap.SCOPE_HOME: 11,
-    keymap.SCOPE_MAP: 25,
+    # 11 -> 12: Inc-9c declares `enter` on home (`INC9-UX-F11`).
+    keymap.SCOPE_HOME: 12,
+    # 25 -> 29: Inc-3 adds the four US-N06 pan chords `H` `J` `K` `L` to the
+    # `view` group.  Updated deliberately, in the same edit as the seat rows.
+    # 29 -> 31: Inc-4b's `#D5b` adds `N` (`prev_hit`, `nav`) and `M`
+    # (`next_gap`, relocated off `n`, `view`).  `n` itself is REBOUND, not
+    # added, so it moves the count by nothing -- which is exactly why a size
+    # fence cannot be the whole seat pin, and `test_key_dispatch.py`'s full-tuple
+    # table plus `test_inc4_census.py`'s row diff are.
+    keymap.SCOPE_MAP: 31,
     keymap.SCOPE_REPO: 3,
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,
-    keymap.SCOPE_PALETTE: 2,
-    keymap.SCOPE_HELP: 2,
+    # 2 -> 4: Inc-EN-6 (`N2`) declares the palette's `up` / `down` (`move_up` / `move_down`), so the
+    # footer's `↑↓ move` is the seat's.
+    keymap.SCOPE_PALETTE: 4,
+    # 2 -> 8: Inc-8 / HLR-N16.4 declares the legend's six scroll keys.
+    keymap.SCOPE_HELP: 8,
     keymap.SCOPE_APP: 2,
+    # Inc-9 (`#D9`): the factory's ten own bindings and the sheet's two, moved
+    # out of each screen's hand-written list; `tab`/`shift+tab` are not rows
+    # (`C-D9a`).  Updated in the same edit as the seat rows.
+    keymap.SCOPE_FACTORY: 10,
+    keymap.SCOPE_SETTINGS: 2,
 }
 
 # Derived from the live module, never hand-listed (control C-31).
@@ -119,6 +140,13 @@ def test_at_n03f_bound_keys_match_the_seat_exactly(scope):
     inherited = set(owner.__mro__[1]._merged_bindings.key_to_bindings)
     bound = set(owner._merged_bindings.key_to_bindings) - inherited
     expected = {b.key for b in keymap.bindings_for(scope)}
+    # `E4` (Inc-EN-9): a text-only scope still BINDS the key its field swallows (it fires once focus has left
+    # the field) but no longer LISTS it.  The extra keys are derived from the seat's own declaration, so a
+    # bound key outside that declaration still reddens this arm.
+    expected |= {
+        b.key for b in keymap.KEYMAP
+        if b.scope == keymap.SCOPE_APP and b.action in keymap.TEXT_ONLY_SCOPES.get(scope, ())
+    }
     assert bound == expected, (
         f"{owner.__name__} binds {bound - expected} that the seat does not declare, "
         f"and is missing {expected - bound} that it does"
@@ -130,6 +158,7 @@ def test_glyph_is_a_plausible_display_form_of_its_key():
     display = {
         "enter": "↵", "escape": "esc", "slash": "/",
         "equals_sign": "=", "question_mark": "?",
+        "up": "↑", "down": "↓",
     }
     for b in ALL_BINDINGS:
         expected = display.get(b.key, b.key)
@@ -229,18 +258,38 @@ def test_bindings_for_includes_app_scope_but_not_other_screens():
 
 def test_groups_for_keybar_order_and_glyphs():
     groups = groups_for_keybar(["nav", "app"])
-    assert [g[0] for g in groups] == ["nav", "app"]
+    # `K1`: the header is what the operator reads, not the group id.
+    assert [g[0] for g in groups] == ["move", "global"]
     nav_pairs = groups[0][1]
-    assert ("j", "siguiente") in nav_pairs
+    # `A-112`: English labels since Inc-9.
+    assert ("j", "next sibling") in nav_pairs
     # The keybar shows the glyph, never the Textual key name.
-    assert ("↵", "abrir ficha") in nav_pairs
+    assert ("↵", "open card") in nav_pairs
     assert not any(k == "enter" for k, _ in nav_pairs)
+
+
+def test_groups_for_keybar_drops_the_typed_help_key_whatever_the_group_order():
+    """`EN9-REV-F3`: the connect-repo scope is found from the groups' scopes, so
+    the app group coming FIRST must not change which scope the filter sees.
+
+    A text-only scope's field swallows `?` (`E4`); the key bar must not list it.
+    Taking the scope from the first group would read it as the app scope and
+    leave the row in -- the mutant this arm exists to kill.  The positive
+    control below keeps the arm from passing because `?` vanished altogether.
+    """
+    def rows(order):
+        return [(g, k) for g, pairs in groups_for_keybar(order) for k, _ in pairs]
+
+    for order in (["plug", "app"], ["app", "plug"]):
+        assert not any(k == "?" for _, k in rows(order)), order
+    assert any(k == "?" for _, k in rows(["nav", "app"])), "`?` is listed where no field swallows it"
+    assert any(k == "?" for _, k in rows(["app"])), "`?` is listed on the app group alone"
 
 
 def test_palette_items_filters_by_scope_and_query():
     map_items = palette_items("", keymap.SCOPE_MAP)
     assert all(b.scope in {keymap.SCOPE_MAP, keymap.SCOPE_APP} for b in map_items)
-    hits = palette_items("cobertura", keymap.SCOPE_MAP)
+    hits = palette_items("coverage", keymap.SCOPE_MAP)
     assert [b.action for b in hits] == ["coverage"]
     # A query matching nothing returns nothing rather than everything.
     assert palette_items("zzzzz", keymap.SCOPE_MAP) == []

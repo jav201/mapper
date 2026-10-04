@@ -78,7 +78,7 @@ traversal now carries an active-path guard and raises instead of looping. That i
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 
 # the gate run
 PYTHONUTF8=1 python -m pytest -q -p no:randomly > out.txt 2>&1
@@ -218,7 +218,7 @@ the node bound, headroom for a loaded machine.
 | Field | Value |
 |---|---|
 | Mutation applied | ten arms, one at a time — see the matrix |
-| Where it ran | **my own tree**, `C:/Users/jjgh8/Github/mapper`, files under `mapper/views/` only |
+| Where it ran | **my own tree**, `C:/Users/<operator>/Github/mapper`, files under `mapper/views/` only |
 | Restore proven by | **sha256 of the file returned to its pre-mutation value**, asserted in the harness after every arm; every arm printed `<sha> == <sha>` |
 | Bytecode cache | every arm run with `PYTHONDONTWRITEBYTECODE=1` |
 | Arms resolved at baseline | **28** — printed by the harness as `BASELINE: 28 nodes, 28 passed` before the first mutation. The node pattern is `^tests[/\\]\S+?::\S+? (PASSED\|FAILED\|ERROR)`, which resolves parametrized ids; 28 is the full collected count of the file, so no arm was invisible |

@@ -112,7 +112,7 @@ name. Scope call confirmed before implementation.
 ## 3 · How to test
 
 ```bash
-cd C:/Users/jjgh8/Github/mapper
+cd C:/Users/<operator>/Github/mapper
 
 # the gate run
 PYTHONUTF8=1 timeout 600 python -m pytest -q -p no:randomly > out.txt 2>&1

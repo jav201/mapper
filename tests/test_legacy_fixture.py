@@ -2,6 +2,7 @@
 from pathlib import Path
 
 from mapper.model import SchemaField
+from mapper.views.state import ViewState
 from mapper.store import MapStore
 from mapper.views.layered import LayeredRenderer
 
@@ -32,9 +33,13 @@ def test_legacy_renderer_shows_per_card_coverage():
     store = MapStore(Path(__file__).parent.parent / "fixtures")
     graph = store.load("legacy")
     renderer = LayeredRenderer()
-    text = renderer.render(graph, selected_id="erp", w=120, h=40)
+    text = renderer.render(graph, ViewState(selected_id="erp", w=120, h=40))
     assert "SIN ACTA" not in text.plain or "ACTA-2011-034" in text.plain
     assert "D✓" in text.plain or "D░" in text.plain
     # The strip is gone: its two distinctive strings must not come back here.
     assert "selecciona un nodo" not in text.plain
     assert "cobertura" not in text.plain
+    # EN-2: the inspector's words are English now; the Spanish pins above stay (the renderer is not EN-2's) and these two
+    # keep the same guarantee against the inspector's current copy.
+    assert "select a node" not in text.plain
+    assert "coverage" not in text.plain

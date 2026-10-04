@@ -1,7 +1,7 @@
 // Verify prototypes/ui_components/out/index.html renders clean:
 // reports console errors + pageerrors, screenshots each figure.
 const { createRequire } = require('module');
-const req = createRequire('C:/Users/jjgh8/.vscode/extensions/danielsanmedium.dscodegpt-3.24.48/standalone/node_modules/patchright/index.js');
+const req = createRequire('C:/Users/<operator>/.vscode/extensions/danielsanmedium.dscodegpt-3.24.48/standalone/node_modules/patchright/index.js');
 const { chromium } = req('patchright');
 
 (async () => {
@@ -11,7 +11,7 @@ const { chromium } = req('patchright');
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
 
-  const url = 'file:///C:/Users/jjgh8/Github/mapper/prototypes/ui_components/out/index.html';
+  const url = 'file:///C:/Users/<operator>/Github/mapper/prototypes/ui_components/out/index.html';
   await page.goto(url, { waitUntil: 'load' });
   await page.waitForTimeout(400);
 

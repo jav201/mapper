@@ -156,6 +156,27 @@ def test_the_checker_can_see_its_corpus():
     # (C-39), and the first draft of this line said 10 and did exactly that.
     assert len(_CITATION.findall(text)) >= 5, "no path:line citations parsed"
     assert len(_TEST_NAME.findall(text)) >= 10, "no test identifiers parsed"
+
+
+def test_the_flow_state_file_parses():
+    """`.dev-flow/state.json` is what the NEXT session reads to orient itself.
+
+    An unparseable one asserts nothing at all, which is the C-44 shape this
+    project keeps naming -- work that looks recorded and is not.  Added after a
+    missing comma shipped in a commit: the file was edited by hand, the edit was
+    not re-parsed, and nothing in the suite could contradict it.
+
+    Asserts the shape the flow actually reads, not merely that the bytes are
+    JSON, so a file that parses while having lost its batch identity still
+    reddens.
+    """
+    import json
+
+    state = REPO / ".dev-flow" / "state.json"
+    assert state.exists(), "the flow state file is gone"
+    data = json.loads(state.read_text(encoding="utf-8"))
+    for key in ("project", "batch_id", "current_station", "phase_status"):
+        assert key in data, f"state.json lost its {key!r} key"
     # The SOURCE half of the corpus needs its own floor, and this is the one that
     # was missing: `mapper/` is where three of the four false claims actually
     # lived.  Without it, a rename could reduce the widened corpus to nothing and

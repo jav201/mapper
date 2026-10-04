@@ -1,7 +1,7 @@
 ==============================================================================
 INCREMENT 4 MUTATION BATTERY
-repo    : C:\Users\jjgh8\Github\mapper
-harness : C:\Users\jjgh8\AppData\Local\Temp\claude\C--Users-jjgh8-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery4.py   (OUTSIDE the repo it mutates)
+repo    : C:\Users\<operator>\Github\mapper
+harness : C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\battery4.py   (OUTSIDE the repo it mutates)
 started : 2026-08-27 08:06:15
 ==============================================================================
 
@@ -118,9 +118,9 @@ ARM L8  [plausible-weaker]  test_repair_layout.py
   proves: THE ORACLE UNCLIPPED — read the whole frame instead of the dialog's region. AT-R14 must redden; if it does not, every AT-R12 result is worthless
   mutation applied (hash moved off pristine): True
   resolved: 425 (expected 425)   exit=1   91.4s
-  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-19487' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+  tail    : task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-19487' coro=<sleep.<locals>.wait() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<operator>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
 Task was destroyed but it is pending!
-task: <Task cancelling name='Task-19487' coro=<sleep.<locals>.wait() running at C:\Users\jjgh8\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\jjgh8\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+task: <Task cancelling name='Task-19487' coro=<sleep.<locals>.wait() running at C:\Users\<operator>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<operator>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
   RED node-verdicts: 1
     RED  tests/test_repair_layout.py::test_at_r14_the_oracle_is_clipped_to_the_help_dialog  -> FAILED
   restore: all files sha256-verified back to pre-mutation bytes

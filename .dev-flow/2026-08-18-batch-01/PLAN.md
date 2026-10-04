@@ -92,7 +92,7 @@ Mermaid diagrams.
   only titles; US-014 added — nodes carry files/URLs/images as attachments
   (references, never payloads). Both READY; requirements doc updated.
 - 2026-08-21 · Phase-0 gate approved on operator instruction
-  "Vamos a implementar desde aquí: C:/Users/jjgh8/Github/mapper/HANDOFF.md";
+  "Vamos a implementar desde aquí: C:/Users/<operator>/Github/mapper/HANDOFF.md";
   all 14 user stories remain READY; batch proceeds to Phase 1 (HLR/LLR).
 - 2026-08-21 · Phase 1 derivation complete: 35 HLRs, 47 LLRs, 28 TC, 14 AT;
   traceability matrix populated; awaiting Phase-1 gate approval to enter

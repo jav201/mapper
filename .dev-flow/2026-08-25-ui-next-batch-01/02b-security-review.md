@@ -89,7 +89,7 @@ target                                               urlsplit.scheme    verdict
 'https://example.com@evil.example.com/'              'https'            launched  <== LAUNCHED
 'https://аpple.com/'                                 'https'            launched  <== LAUNCHED   (cyrillic а)
 'http://127.0.0.1:8080/admin/delete'                 'http'             launched  <== LAUNCHED
-'https://example.com/‮exe.acta'                      'https'            launched  <== LAUNCHED   (U+202E)
+'https://example.com/<U+202E>exe.acta'                      'https'            launched  <== LAUNCHED   (U+202E)
 ```
 
 **The allowlist refuses the right things, and it refuses them for the right reason.** This is worth
@@ -117,24 +117,24 @@ RTL-override targets all launch. The inspector shows `Attachment.caption`; the l
 
 Stated plainly, as asked: **`.exists()` is a usability control. It is not a security control.** It
 answers "will the launch fail?", not "should this launch?". Executed, with workspace
-`C:\Users\jjgh8\Github\mapper\maps`:
+`C:\Users\<operator>\Github\mapper\maps`:
 
 ```
 inside workspace              -> resolve='...\mapper\maps\legacy.mmd'                launched  <== LAUNCHED
-traversal via ..              -> resolve='C:\Users\jjgh8\.gitconfig'                 launched  <== LAUNCHED
+traversal via ..              -> resolve='C:\Users\<operator>\.gitconfig'                 launched  <== LAUNCHED
 absolute, outside ws, EXISTS  -> resolve='C:\Windows\System32\calc.exe'              launched  <== LAUNCHED
 powershell.exe                -> resolve='...\WindowsPowerShell\v1.0\powershell.exe' launched  <== LAUNCHED
 NTFS alternate data stream    -> resolve='...\maps\legacy.mmd:$DATA'                 refused: missing
 UNC                           -> resolve='\\evil.example.com\share\payload.lnk'      refused: missing
-empty string                  -> resolve='C:\Users\jjgh8\Github\mapper'              launched  <== LAUNCHED
-"." (a directory)             -> resolve='C:\Users\jjgh8\Github\mapper'              launched  <== LAUNCHED
+empty string                  -> resolve='C:\Users\<operator>\Github\mapper'              launched  <== LAUNCHED
+"." (a directory)             -> resolve='C:\Users\<operator>\Github\mapper'              launched  <== LAUNCHED
 ```
 
 Containment test on the same paths:
 
 ```
 C:\Windows\System32\calc.exe                    is_relative_to(workspace) = False
-C:\Users\jjgh8\Github\mapper\pyproject.toml     is_relative_to(workspace) = False
+C:\Users\<operator>\Github\mapper\pyproject.toml     is_relative_to(workspace) = False
 ```
 
 Three things follow.
@@ -416,7 +416,7 @@ new render site, and neither the markup sentence nor the fixture mentions it.
   `.hta`, `.scr`, `.msi`, `.reg` execute. On POSIX, `xdg-open` on a `.desktop` file runs its `Exec=`.
 - **Where.** `PDR-design-proposal.md:94-96` (§D3, `file` branch) and `01-requirements.md:108-109`
   (LLR-N02.4/.5), against `docs/ARCHITECTURE.md:36`, `:147`, `:287`.
-- **Evidence.** §2.3 — traversal via `..` resolved to `C:\Users\jjgh8\.gitconfig` and launched;
+- **Evidence.** §2.3 — traversal via `..` resolved to `C:\Users\<operator>\.gitconfig` and launched;
   `C:\Windows\System32\calc.exe` launched; `powershell.exe` launched. `is_relative_to(workspace)`
   is `False` for both and is never consulted, because the signature has no `workspace`.
 - **Why it matters.** `docs/ARCHITECTURE.md:36` already requires "path confinement under the
@@ -484,7 +484,7 @@ new render site, and neither the markup sentence nor the fixture mentions it.
 - **Where.** `PDR-design-proposal.md:92-93`; `01-requirements.md:109` (LLR-N02.5).
 - **Evidence.** §2.2 — `https://user:pass@evil.example.com/`,
   `https://example.com@evil.example.com/`, `https://аpple.com/` (Cyrillic `а`) and
-  `https://example.com/‮exe.acta` (U+202E) all launched.
+  `https://example.com/<U+202E>exe.acta` (U+202E) all launched.
 - **Why it matters.** The operator reads `Attachment.caption`; the launcher opens `Attachment.path`;
   a hostile map controls both independently. Credential-bearing URLs are also handed to the browser
   and land in its history. Not a blocker — the browser is the thing that opens, and the operator can
@@ -664,11 +664,11 @@ only through `kind == "file"`, confined under the workspace root; no shell."*
 |---|---|---|
 | Each finding has what · where · why · recommendation | ✓ | §4 — every F-B/F-M carries all four; minors carry where + evidence and map to a numbered condition |
 | Each finding has a severity rating | ✓ | 2 `blocker`, 6 `major`, 6 `minor` — §4 headings and the minors table |
-| No secret values appear in this output | ✓ | No credential, token or key was read or emitted. `C:\Users\jjgh8\.gitconfig` appears as a **resolved path** in probe output — its contents were never read |
+| No secret values appear in this output | ✓ | No credential, token or key was read or emitted. `C:\Users\<operator>\.gitconfig` appears as a **resolved path** in probe output — its contents were never read |
 | Verdict is explicit | ✓ | §0 — `approved with conditions` |
 | New tool/integration: scope and blast radius addressed | ✓ | §2 — `osopen` is the new external-action surface. Scope: OS default-application launch. Blast radius as designed: **any file on the operator's disk, executed by association** (§2.3, probed). Reversibility: none — a launch cannot be undone. Human-in-the-loop: the `↵` keystroke is the approval, which is why target/display honesty (C-11) matters. Data flow: for `kind == "url"`, the target host learns the operator's IP and any userinfo embedded by the map author — flag for LFPDPPP where a client map is involved |
 | Findings backed by an executed probe rather than reasoning | ✓ | §2.2, §2.3, §2.4 (osopen contract, verbatim, recording launcher) · §3.2, §3.3, §3.4, §3.5, §3.6 (markup/ANSI sinks under textual 8.2.8) · F-m4 (yaml amplification) |
-| No code changed; `prototypes/` untouched | ✓ | Probes ran from the session scratchpad against the installed package; no file under `C:\Users\jjgh8\Github\mapper\mapper\` or `prototypes\` was written |
+| No code changed; `prototypes/` untouched | ✓ | Probes ran from the session scratchpad against the installed package; no file under `C:\Users\<operator>\Github\mapper\mapper\` or `prototypes\` was written |
 
 ### Probe scripts
 

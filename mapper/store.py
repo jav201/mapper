@@ -4,18 +4,64 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-from dataclasses import MISSING
+from dataclasses import MISSING, fields
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, get_type_hints
 
 import yaml
 
+from .darkside import plain
 from .model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
 
 
 class MapStoreError(Exception):
     pass
+
+
+class MapIdError(MapStoreError):
+    """A map id the store refuses.  The message is authored text that names the
+    RULE and never the typed name or a path, so a UI may show it verbatim."""
+
+
+#: Windows device names: `CON.mmd` is the console, whatever follows the dot.
+_RESERVED_NAMES = frozenset(
+    {"CON", "PRN", "AUX", "NUL"}
+    | {f"{d}{n}" for d in ("COM", "LPT") for n in "123456789¹²³"}
+    | {"CONIN$", "CONOUT$", "CLOCK$"}
+)
+_INVALID_CHARS = frozenset('<>"|?*')
+#: `<id>_nodos.yml` plus a temp suffix must fit MAX_PATH (260) beside the workspace.
+MAX_MAP_ID_LEN = 100
+
+
+def check_map_id(map_id: str) -> None:
+    """Refuse a map id that does not name a file inside the workspace (`A-113`).
+
+    The ONE place the rule lives; every read and write of a map id goes through
+    it, so the UI, a CSV "save as" name and a file-derived `map:` link share it.
+    """
+    if not isinstance(map_id, str) or not map_id.strip():
+        raise MapIdError("the map name is empty")
+    if len(map_id) > MAX_MAP_ID_LEN:
+        raise MapIdError(f"the map name is too long (maximum {MAX_MAP_ID_LEN} characters)")
+    if "/" in map_id or "\\" in map_id or ":" in map_id:
+        raise MapIdError(
+            "the map name cannot contain path separators (/ \\) "
+            "or a drive letter (:)")
+    if any(ord(c) < 32 or c in _INVALID_CHARS for c in map_id):
+        raise MapIdError(
+            "the map name contains characters that are not valid on Windows "
+            '(< > " | ? * or control characters)')
+    if any(0xD800 <= ord(c) <= 0xDFFF for c in map_id):
+        raise MapIdError("the map name contains characters that cannot be saved to a file")
+    if map_id.split(".", 1)[0].rstrip().upper() in _RESERVED_NAMES:
+        raise MapIdError(
+            "the map name uses a reserved Windows name (CON, NUL, COM1...)")
+    # Separators are refused above, so `..` means the parent only when the id IS
+    # dots; every dot-only id ends in a dot and dies here.
+    if map_id != map_id.rstrip(" .") or map_id != map_id.lstrip(" "):
+        raise MapIdError("the map name cannot start with a space or end with a dot or a space")
 
 
 def _text_fields(cls: type) -> tuple[str, ...]:
@@ -49,6 +95,30 @@ def _text_attributes() -> tuple[str, ...]:
 _SCALARS = (str, int, float, bool)
 
 
+def _normalize_newlines(value: str) -> str:
+    """CRLF/CR to LF, at the STORAGE coercion boundary only.
+
+    `G6-C-F7`: `plain()` maps `\\r` (U+000D, in `COERCION_RANGES`'s C0 row) to
+    U+FFFD -- correct for a lone `\\r` reaching a paint sink, where a bare
+    carriage return would move the cursor rather than render, but this is the
+    LOAD path, not paint. A note pasted on Windows and saved carries real
+    `\\r\\n` line endings; before `A-111` widened `_coerce_field` to call
+    `plain()` at all, that round-tripped byte-for-byte. After it, the SAME
+    file corrupts on its very first load: `"line1\\r\\nline2"` becomes
+    `"line1\\ufffd\\nline2"`, permanently, with no warning -- a regression
+    `A-111` introduced, not a pre-existing defect.
+
+    Fixed HERE, not in `plain()`: `plain()` is the one shared rule paint sites
+    also call (`mapper/widgets/inspector.py`), and a paint-side single-row
+    budget genuinely cannot afford a literal newline (see `plain`'s own
+    `fit`-adjacent comment in `darkside.py`) -- changing `plain()` itself
+    would silently change what every paint call site renders. Normalizing
+    newlines is `_coerce_field`'s own business: it is the one place that
+    knows a value is entering STORAGE, not a fixed-width cell.
+    """
+    return value.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
     """Return `value` as text, or `""` when it cannot faithfully become text.
 
@@ -56,16 +126,25 @@ def _coerce_field(graph: Graph, node_id: str, key: str, value: Any) -> str:
     (LLR-R03.2).  A container must NOT coerce: `str({})` is `"{}"`, a truthy
     string, so `coverage()` would go on counting the malformed field as
     documented and the miscount would survive its own fix.
+
+    `A-111` widens `LLR-STO.1.1`'s type-coercion ladder, at this site, to also
+    route the result through `darkside.plain()`'s declared `COERCION_RANGES`
+    table.  Type coercion alone lets a lone surrogate (already a `str`) pass
+    threshold 1 untouched and reach `_reindex`'s sqlite3 bind raw
+    (`INC8-P3-SEC-F1`).  Reusing `plain()` rather than a second table.
+
+    `G6-C-F7` widens it again, ahead of `plain()`, to normalize line endings
+    first -- see `_normalize_newlines`.
     """
     if isinstance(value, str):
-        return value
+        return plain(_normalize_newlines(value))
     if value is None:
         return ""
     if isinstance(value, _SCALARS):
-        return str(value)
+        return plain(_normalize_newlines(str(value)))
     if isinstance(value, (date, datetime)):
         return value.isoformat()
-    graph.load_warnings.append(f"campo ilegible: {node_id}.{key}")
+    _warn(graph, f"unreadable field: {node_id}.{key}")
     return ""
 
 
@@ -140,17 +219,101 @@ def _coerce_str_map(graph: Graph, owner: str, key: str, value: Any) -> dict[str,
     produced HIGH-1.
     """
     if not isinstance(value, dict):
-        graph.load_warnings.append(f"campo ilegible: {owner}.{key}")
+        _warn(graph, f"unreadable field: {owner}.{key}")
         return {}
     out: dict[str, str] = {}
     for raw_key, raw_value in value.items():
         ckey = _coerce_field(graph, owner, f"{key}[{raw_key!r}]", raw_key)
         if ckey in out:
-            graph.load_warnings.append(
-                f"campo duplicado: {owner}.{key}.{ckey!r} <- {raw_key!r}"
+            _warn(
+                graph,
+                f"duplicate field: {owner}.{key}.{ckey!r} <- {raw_key!r}"
             )
         out[ckey] = _coerce_field(graph, owner, f"{key}.{raw_key}", raw_value)
     return out
+
+
+# The keys an attachment can carry, DERIVED from the dataclass rather than
+# spelled -- a fourth field added to `Attachment` must not silently start being
+# refused here (`B-48`).
+_ATTACHMENT_KEYS = {f.name for f in fields(Attachment)}
+
+
+# A load record is a DIAGNOSTIC, not a transcript. Two bounds, because the
+# amplification has two free variables and bounding either alone leaves the
+# other unbounded.
+#
+# PER RECORD, because a coordinate is not automatically short: `owner` is a node
+# id read from the sidecar, so `attachment without fields: {owner}.{key}[{i}]` carries
+# a value even though it reads like a position. MEASURED, and this is the defect
+# `Inc-REPAIR` S-E's own security review found the stage INTRODUCING: a 100k
+# character node id with 20,000 aliased attachment entries produced 2.0 GB of
+# warnings in 0.84 s -- 9,092x amplification, 26x larger than the alias bomb
+# this stage was repairing and 60x CHEAPER, so nothing times out.
+#
+# PER LIST, because record COUNT is the other free variable and it is
+# file-linear: 5 bytes of sidecar buys another record. The list is joined and
+# coerced into an operator toast, so the ceiling has to exist before the join,
+# not at it.
+_RECORD_CHARS = 200
+_MAX_RECORDS = 200
+
+
+def _warn(graph: Graph, record: str) -> None:
+    """Append a bounded load record, and stop appending once the list is full.
+
+    Every producer in this module routes through here, so a twelfth cannot
+    reintroduce the class by spelling its own `append`.
+    """
+    if len(graph.load_warnings) >= _MAX_RECORDS:
+        if len(graph.load_warnings) == _MAX_RECORDS:
+            graph.load_warnings.append(
+                f"… and more entries omitted (limit {_MAX_RECORDS})"
+            )
+        return
+    if len(record) > _RECORD_CHARS:
+        record = f"{record[:_RECORD_CHARS]}…"
+    graph.load_warnings.append(record)
+
+
+# The longest raw origin a diagnostic may show before it names a coordinate
+# instead.  Generous enough for any id an operator would recognise.
+_ORIGIN_CHARS = 120
+
+
+def _raw_origin(value: Any, coordinate: str) -> str:
+    """The raw value when it is SAFE to show, the coordinate when it is not.
+
+    `AT-P02d` requires the duplicate record to carry the RAW ORIGIN, so a
+    coercion-induced collision (`"1"` against `1`) can be told from a plain one.
+    `LLR-N13.1.7` requires the record not to MATERIALISE an alias-amplified
+    structure. Both hold, because the diagnostic is only ever meaningful for a
+    SCALAR: the operator can act on `1` or `b'h2'`, and a nested list tells them
+    nothing they could not read from the coordinate.
+
+    So a scalar is shown and anything else names its position instead. Measured
+    on the shipped tree, the unbounded form loaded two alias-amplified document
+    names in 54 SECONDS at nine levels -- the message reporting the refusal
+    performing the materialisation the refusal prevented.
+    A TYPE BOUND IS NOT A LENGTH BOUND, and the first version of this helper
+    had only the type. Fired by the code review: a 57 KB sidecar reusing ONE
+    anchor across 200 duplicate document names produced 19.9 MB of warnings in
+    0.081 SECONDS -- 348x amplification, and CHEAPER than the alias bomb it was
+    written to stop, so nothing times out. `load_warnings` are not inert: they
+    are joined and coerced into an operator toast (`app.py:548`), so a megabyte
+    of them is a per-character `translate` on the way to the screen.
+
+    A megabyte `str` is the same materialisation defect wearing an allowed type.
+    """
+    if isinstance(value, (str, bytes, int, float, bool)) or value is None:
+        shown = repr(value)
+        if len(shown) <= _ORIGIN_CHARS:
+            return shown
+        # TRUNCATED, NOT DROPPED: `AT-P02d` needs the origin distinguishable
+        # (`"1"` against `1`), and its two document cases are far under this
+        # bound, so the distinction and the pin both survive.
+        return f"{shown[:_ORIGIN_CHARS]}… ({coordinate})"
+    return coordinate
 
 
 def _mappings(
@@ -173,32 +336,49 @@ def _mappings(
     finding asked for -- and would take three arms off the net's counterfactual.
     Measured (review Q1): schema/document item-scalars are denied typed; only
     attachments carried the silent-loss class.
+
+    AND THE CLASS WAS CLOSED FOR SCALARS ONLY, which this docstring did not say
+    until `Inc-REPAIR` S-E (`B-48`).  A MAPPING carrying none of the attachment
+    keys passed the `isinstance(entry, dict)` test above and was materialised
+    into an `Attachment` with empty kind, path and caption -- so nothing was
+    lost and a PHANTOM WAS INVENTED, unwarned, while a scalar beside it was
+    correctly refused with a coordinate.  Type is not content.  The refusal is
+    now keyed on `_ATTACHMENT_KEYS`, derived from the dataclass so a fourth
+    field does not silently start being refused.
     """
     if not isinstance(entries, list):
-        graph.load_warnings.append(f"campo ilegible: {owner}.{key}")
+        _warn(graph, f"unreadable field: {owner}.{key}")
         return []
     out = []
     for i, entry in enumerate(entries):
-        if isinstance(entry, dict):
+        if isinstance(entry, dict) and _ATTACHMENT_KEYS & set(entry):
             out.append(entry)
+        elif isinstance(entry, dict):
+            # TYPE IS NOT CONTENT (`B-48`).  A mapping carrying NONE of the
+            # attachment keys used to be accepted here and materialised into an
+            # `Attachment` with empty kind, path and caption -- so nothing was
+            # lost and a PHANTOM WAS INVENTED, which is the silent-loss class
+            # this function exists to end, inverted.  The docstring below still
+            # claimed the class was closed; it was closed for scalars only.
+            _warn(graph, f"attachment without fields: {owner}.{key}[{i}]")
         else:
             # The index is part of the record.  Without it n malformed entries
             # emit n byte-identical lines that cannot be told apart -- the same
             # diagnostic defect F7 fixed for field keys (review G4).
-            graph.load_warnings.append(f"campo ilegible: {owner}.{key}[{i}]")
+            _warn(graph, f"unreadable field: {owner}.{key}[{i}]")
     return out
 
 
 TEMPLATES: dict[str, dict[str, Any]] = {
     "legacy-audit": {
         "schema": [
-            {"key": "D", "label": "documento", "required": True, "kind": "text"},
-            {"key": "O", "label": "dueño", "required": True, "kind": "text"},
-            {"key": "E", "label": "estado", "required": True, "kind": "text"},
-            {"key": "C", "label": "criticidad", "required": False, "kind": "text"},
-            {"key": "N", "label": "notas", "required": False, "kind": "text"},
+            {"key": "D", "label": "document", "required": True, "kind": "text"},
+            {"key": "O", "label": "owner", "required": True, "kind": "text"},
+            {"key": "E", "label": "state", "required": True, "kind": "text"},
+            {"key": "C", "label": "criticality", "required": False, "kind": "text"},
+            {"key": "N", "label": "notes", "required": False, "kind": "text"},
         ],
-        "seed_title": "auditoría legacy",
+        "seed_title": "legacy audit",
     }
 }
 
@@ -341,7 +521,7 @@ class MapStore:
         # (whole-branch QA, HIGH-1).  They now go through `_coerce_str_map`.
         graph.schema = [
             SchemaField(
-                # The owner carries the index: `campo ilegible: schema.key` cannot
+                # The owner carries the index: `unreadable field: schema.key` cannot
                 # be traced back to which entry produced it (Inc-1 review, F7).
                 **_coerce_text_fields(graph, f"schema[{i}]", SchemaField, f),
                 required=f.get("required", False),
@@ -369,8 +549,32 @@ class MapStore:
                 # involved.  That second case was a silent overwrite before this
                 # line and is a STRICT SUPERSET of what the requirement asked for.
                 # Declared rather than left to be discovered (review G3).
-                graph.load_warnings.append(
-                    f"documento duplicado: {doc.name!r} <- {d.get('name')!r}"
+                # THE COORDINATE, NEVER THE VALUE (`LLR-N13.1.7`).  This line
+                # used to interpolate `d.get('name')!r` -- the RAW, UNCOERCED
+                # sidecar value -- and that is the one diagnostic in this module
+                # that read data of unbounded size.  Measured: two `documents`
+                # sharing a 9-level alias-amplified `name` loaded in 54 SECONDS
+                # and emitted a 5.2-GIGABYTE warning; the same sidecar at 5
+                # levels emitted 522,311 characters in 25 ms, and at 8 levels
+                # 522 MB in 5.2 s. (The first version of this comment paired the
+                # 9-level TIME with the 8-level SIZE -- two true numbers from
+                # different rows.)
+                #
+                # THE MESSAGE REPORTING THE REFUSAL WAS PERFORMING THE
+                # MATERIALISATION THE REFUSAL PREVENTED.  The per-key coercion
+                # worked -- `unreadable field: document[i].name` is emitted two
+                # lines up and `doc.name` is already `''` -- and then this line
+                # reached past it to the raw value.  A defence is only as good as
+                # the diagnostic that announces it.
+                # BOTH HALVES BOUNDED. `doc.name!r` was unbounded too: for a
+                # `str` the coerced name IS the same string, so each warning
+                # measured twice the payload. Being an Attribute rather than a
+                # Call, no AST arm shaped around `{call()!r}` could see it.
+                coordinate = f"document[{i}].name"
+                _warn(
+                    graph,
+                    f"duplicate document: {_raw_origin(doc.name, coordinate)} "
+                    f"<- {_raw_origin(d.get('name'), coordinate)}"
                 )
             documents[doc.name] = doc
         graph.documents = documents
@@ -381,11 +585,6 @@ class MapStore:
             # passed through the field ladder.  Coercing it normalises the key TYPE
             # so `graph.nodes`, which is keyed by `str`, cannot be handed an int.
             #
-            # It does NOT remove a phantom node: a sidecar id matching no parsed
-            # node is still added alongside the parsed ones and still moves
-            # `coverage()`'s denominator.  That is outside this batch's fence, and
-            # saying otherwise here would be a false record in the evidence
-            # (Inc-1 review, F4 -- the previous comment claimed the repair).
             # The raw id is in the label: two distinct refused ids both coerce to
             # `""` and previously emitted two byte-identical records, which is the
             # defect F7/G4 fixed everywhere EXCEPT here -- limb 2 of that fix never
@@ -395,9 +594,19 @@ class MapStore:
                 # Two raw ids coerced to one string; without this the second node's
                 # ficha silently overwrites the first's.  The raw origin is carried
                 # for the same reason as the field-key record above (review G2).
-                graph.load_warnings.append(f"nodo duplicado: {nid!r} <- {raw_nid!r}")
+                _warn(graph, f"duplicate node: {nid!r} <- {raw_nid!r}")
             seen_ids.add(nid)
             if nid not in graph.nodes:
+                # A SIDECAR ID THE `.mmd` NEVER DEFINED (`B-29`, `AT-049`).  It
+                # is still added -- removing it would change the meaning of the
+                # coverage values, which `LLR-REPAIR.1` explicitly forbids -- but
+                # it is no longer SILENT.  The comment above used to say the
+                # phantom "is still added ... That is outside this batch's
+                # fence"; the fence moved when `Inc-REPAIR` opened, and the
+                # silence mattered because `LLR-N13.1.5`'s containment arm, which
+                # `AT-025b` drives, cannot see a damaged sidecar the store does
+                # not report.
+                _warn(graph, f"ghost node: {nid!r}")
                 graph.add_node(Node(id=nid))
             node = graph.nodes[nid]
             text_attrs = _text_attributes()
@@ -405,7 +614,7 @@ class MapStore:
             if not isinstance(raw_fields, dict):
                 # LLR-R03.5: a malformed field never denies the map.  A non-dict
                 # `fields` is a hand-edited shape `_build_sidecar` cannot produce.
-                graph.load_warnings.append(f"campo ilegible: {nid}.fields")
+                _warn(graph, f"unreadable field: {nid}.fields")
                 raw_fields = {}
             # The KEY is a text position too, and it was raw: only the value went
             # through the ladder.  Built as a loop rather than a comprehension so a
@@ -422,8 +631,9 @@ class MapStore:
                     # Both coordinates AND the raw origin: a refused key coerces to
                     # `""`, so `{nid}.{ckey}` alone renders as `A.` and cannot say
                     # WHICH keys collided (review G2).
-                    graph.load_warnings.append(
-                        f"campo duplicado: {nid}.{ckey!r} <- {key!r}"
+                    _warn(
+                        graph,
+                        f"duplicate field: {nid}.{ckey!r} <- {key!r}"
                     )
                 coerced_fields[ckey] = _coerce_field(graph, nid, str(key), value)
             node.ficha = Ficha(
@@ -447,13 +657,37 @@ class MapStore:
                     )
                 ],
             )
+        # `G6-C-F6`: an "orphan" node -- one `mermaid.parse` (via `graph =
+        # parse(mmd_text)` above) materialised from the `.mmd` alone, because
+        # the sidecar carries no entry for it -- never enters the loop above,
+        # so its `Ficha` (title set raw by `mermaid.parse`; every other field
+        # at its default) skipped every coercion `A-111` added. A bidi mark or
+        # a lone surrogate in an mmd-only node's label reached the graph, and
+        # `_reindex`'s sqlite3 bind, uncoerced. `fields`/`attachments` are left
+        # alone: `mermaid.parse` never populates either, so there is nothing
+        # there to coerce.
+        for nid, node in graph.nodes.items():
+            if nid in seen_ids:
+                continue
+            node.ficha = Ficha(
+                **{
+                    attr: _coerce_field(graph, nid, attr, getattr(node.ficha, attr))
+                    for attr in _text_attributes()
+                }
+            )
         return graph
 
     def load(self, map_id: str) -> Graph:
+        check_map_id(map_id)
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
         if not mmd_path.exists():
-            raise MapStoreError(f"Map not found: {mmd_path}")
+            # THE MAP, NOT THE FILESYSTEM (`B-30`, `AT-050`).  This carried
+            # `{mmd_path}` -- an absolute path including the operator's home
+            # directory -- and the string reaches the `load_or_notice` toast, so
+            # it was operator-visible and screenshot-visible.  The map id is what
+            # the operator asked for and the only part they can act on.
+            raise MapStoreError(f"map does not exist: {map_id!r}")
         try:
             # These reads sat OUTSIDE every net, so invalid UTF-8 in either file
             # raised a bare `UnicodeDecodeError` straight out of `load`, and an
@@ -466,7 +700,7 @@ class MapStore:
             )
         except (OSError, UnicodeDecodeError) as exc:
             raise MapStoreError(
-                f"no se pudo leer {map_id}: {type(exc).__name__}"
+                f"could not read {map_id}: {type(exc).__name__}"
             ) from exc
         try:
             sidecar = yaml.safe_load(yml_text) or {}
@@ -489,7 +723,7 @@ class MapStore:
             # operator through the same sink as every other load failure instead
             # of escaping as an untyped ValueError.
             raise MapStoreError(
-                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible"
+                f"could not read the card of {map_id}: {yml_path.name} unreadable"
             ) from exc
         from .mermaid import CYCLE_ARROW, MermaidError
 
@@ -497,13 +731,13 @@ class MapStore:
             # A top-level list or scalar reached `.get` and raised a bare
             # `AttributeError` out of `load`.  S-11's family.
             raise MapStoreError(
-                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible"
+                f"could not read the card of {map_id}: {yml_path.name} unreadable"
             )
         try:
             graph = self._graph_from_sidecar(mmd_text, sidecar)
         except MermaidError as exc:
             raise MapStoreError(
-                f"el mapa tiene un ciclo: {CYCLE_ARROW.join(exc.cycle)}"
+                f"the map has a cycle: {CYCLE_ARROW.join(exc.cycle)}"
             ) from exc
         except MapStoreError:
             raise
@@ -528,9 +762,23 @@ class MapStore:
             # `_graph_from_sidecar` is permanently indistinguishable from a
             # malformed file.  The path is never interpolated; the type name is.
             raise MapStoreError(
-                f"no se pudo leer la ficha de {map_id}: {yml_path.name} ilegible "
+                f"could not read the card of {map_id}: {yml_path.name} unreadable "
                 f"({type(exc).__name__})"
             ) from exc
+        # `G6-C-F8`(b): a two-phase `save()` still has a window between its two
+        # `replace()` calls -- a crash there leaves `.mmd` replaced and
+        # `_nodos.yml` stale (or the reverse). Detected by comparing the mmd
+        # fingerprint THIS sidecar was saved alongside (`save()` records it as
+        # `_mmd_hash`) against the mmd actually on disk right now: a mismatch
+        # means the pair was never written together. Old sidecars carry no
+        # `_mmd_hash` at all (`None`), so this is silent on every file saved
+        # before this fix -- no false positive on a legacy map. LLR-R03.5: the
+        # map still loads (the stale sidecar is still legible), so this is a
+        # load_warning, not a denial, the same shape `_warn` already gives
+        # every other malformed field. The map id only -- no path.
+        recorded_hash = sidecar.get("_mmd_hash")
+        if recorded_hash is not None and recorded_hash != self._text_hash(mmd_text, ""):
+            _warn(graph, f"map out of sync: {map_id}")
         try:
             self._reindex(map_id, mmd_text, yml_text, graph)
         except MapStoreError:
@@ -541,17 +789,25 @@ class MapStore:
             # the operator.  The type name is diagnostic without leaking one, and
             # the full chain survives on `__cause__` (Inc-1 review, F8).
             raise MapStoreError(
-                f"no se pudo indexar {map_id}: {type(exc).__name__}"
+                f"could not index {map_id}: {type(exc).__name__}"
             ) from exc
         return graph
 
-    def _atomic_write(self, path: Path, text: str) -> None:
-        """Write `text` to `path` atomically via a temp file + rename."""
+    def _write_tmp(self, path: Path, text: str) -> Path:
+        """Write `text` to `path`'s own `.tmp` sibling; return that sibling.
+
+        Split from the replace step (`G6-C-F8`(a)) so `save()` can write BOTH
+        temp files before either original is touched -- a single-file
+        "write, then immediately replace" helper is exactly what made the
+        previous two-call sequence torn: replacing `.mmd` was already
+        irreversible by the time `_nodos.yml`'s OWN write could still fail.
+        """
         tmp = path.with_suffix(path.suffix + ".tmp")
         tmp.write_text(text, encoding="utf-8")
-        tmp.replace(path)
+        return tmp
 
     def save(self, map_id: str, graph: Graph) -> None:
+        check_map_id(map_id)
         mmd_path = self.workspace / f"{map_id}.mmd"
         yml_path = self.workspace / f"{map_id}_nodos.yml"
         from .mermaid import CYCLE_ARROW, dump
@@ -564,27 +820,62 @@ class MapStore:
         # file at least loaded, so the asymmetry was worse than the defect.
         cycle = graph.find_cycle()
         if cycle is not None:
-            raise MapStoreError(f"el mapa tiene un ciclo: {CYCLE_ARROW.join(cycle)}")
+            raise MapStoreError(f"the map has a cycle: {CYCLE_ARROW.join(cycle)}")
 
         mmd_text = dump(graph)
         sidecar = self._build_sidecar(graph)
+        # `G6-C-F8`(b): fingerprint the mmd THIS sidecar is written alongside,
+        # so a later `load()` can tell a torn write (one file replaced, the
+        # other stale) from a clean pair -- see the mismatch check in `load()`.
+        # Reuses `_text_hash`, already the module's one hashing routine (it
+        # fingerprints a pair for `_reindex`'s cache-invalidation check),
+        # rather than adding a second hash function for the same purpose. The
+        # second argument is `""`: only the mmd side needs a fingerprint here,
+        # because the yml file itself is the thing carrying it.
+        sidecar["_mmd_hash"] = self._text_hash(mmd_text, "")
         yml_text = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
-        self._atomic_write(mmd_path, mmd_text)
-        self._atomic_write(yml_path, yml_text)
+
+        # `G6-C-F8`(a): two-phase write.  Both temp files are written FIRST;
+        # only once both writes succeed does either original get replaced, and
+        # the mmd replace always precedes the yml replace. A failure while
+        # writing either temp file (full disk, permissions) leaves BOTH
+        # originals untouched -- the previous version wrote-and-replaced
+        # `.mmd`, then wrote-and-replaced `_nodos.yml` as two fully independent
+        # steps, so a failure in the SECOND file's write left the FIRST file
+        # already replaced and the second stale on disk after one failed save.
+        mmd_tmp = self._write_tmp(mmd_path, mmd_text)
+        yml_tmp = self._write_tmp(yml_path, yml_text)
+        mmd_tmp.replace(mmd_path)
+        yml_tmp.replace(yml_path)
         self._reindex(map_id, mmd_text, yml_text, graph)
+
+    def check_new_map_id(self, map_id: str) -> None:
+        """`check_map_id`, plus: nothing may already be there (`A-113`)."""
+        check_map_id(map_id)
+        if (self.workspace / f"{map_id}.mmd").exists() or (
+            self.workspace / f"{map_id}_nodos.yml"
+        ).exists():
+            raise MapIdError(
+                f"map {plain(map_id)!r} already exists; choose another name (nothing is overwritten)")
+
+    def create(self, map_id: str, graph: Graph) -> None:
+        """Write a NEW map.  Unlike `save`, which replaces by design, this refuses
+        an id that is taken: one keystroke must never overwrite a map."""
+        self.check_new_map_id(map_id)
+        self.save(map_id, graph)
 
     def create_seed(self, map_id: str) -> Graph:
         """Create a new map with a small demo tree so it is immediately navigable."""
         graph = Graph()
-        root = Node(id="root", ficha=Ficha(title=map_id, meta="nuevo mapa"))
+        root = Node(id="root", ficha=Ficha(title=map_id, meta="new map"))
         graph.add_node(root)
-        child_a = Node(id="n1", ficha=Ficha(title="primer hijo", meta="presiona l"))
-        child_b = Node(id="n2", ficha=Ficha(title="segundo hijo", meta="navega con j/k"))
+        child_a = Node(id="n1", ficha=Ficha(title="first child", meta="press l"))
+        child_b = Node(id="n2", ficha=Ficha(title="second child", meta="navigate with j/k"))
         graph.add_node(child_a)
         graph.add_node(child_b)
         graph.add_edge(Edge(parent_id="root", child_id="n1"))
         graph.add_edge(Edge(parent_id="root", child_id="n2"))
-        self.save(map_id, graph)
+        self.create(map_id, graph)
         return graph
 
     def create_from_template(self, map_id: str, template_id: str) -> Graph:
@@ -608,7 +899,7 @@ class MapStore:
             ficha=Ficha(title=template.get("seed_title", map_id)),
         )
         graph.add_node(root)
-        self.save(map_id, graph)
+        self.create(map_id, graph)
         return graph
 
     def _state_path(self) -> Path:

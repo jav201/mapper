@@ -10,6 +10,9 @@ unnoticed.
 """
 from __future__ import annotations
 
+import pathlib
+import re
+
 import pytest
 from textual.widgets import Static
 
@@ -23,6 +26,34 @@ ARROW = chr(0x2192)
 CYCLE_MMD = "graph TD\n    a[A] --> b[B]\n    b --> c[C]\n    c --> a\n"
 OTHER_CYCLE_MMD = "graph TD\n    x[X] --> y[Y]\n    y --> x\n"
 ACYCLIC_MMD = "graph TD\n    root[Root] --> a[A]\n    a --> b[B]\n    root --> c[C]\n"
+
+_REQUIREMENTS = (
+    pathlib.Path(__file__).resolve().parent.parent / ".dev-flow"
+    / "2026-08-26-ui-next-batch-02" / "01-requirements.md"
+)
+# EN-4: the string is now declared in English by amendment A-132 (the LLR text is a dated record, not rewritten).
+_LLR_HEADING = "### `A-132`"
+_CARD_STATE_LINE = re.compile(
+    r"Declared card state \(English, the string that ships\):\*\*\s*`([^`]+)`"
+)
+
+
+def _declared_card_state_string() -> str:
+    """`CR-F1`: derive the declared card string from the REQUIREMENT, not from
+    `darkside.DAMAGED_MAP_STATE`.
+
+    The previous arm compared the painted card to the constant it is supposed
+    to be checking, so a wrong constant and a wrong card always agreed with
+    each other and the suite stayed green even with `mapa` missing. Reading
+    the requirement itself gives the arm something outside the module to
+    disagree with.
+    """
+    text = _REQUIREMENTS.read_bytes().decode("utf-8")
+    start = text.index(_LLR_HEADING)
+    end = text.find("\n### ", start + len(_LLR_HEADING))
+    match = _CARD_STATE_LINE.search(text[start:] if end < 0 else text[start:end])
+    assert match, "A-132's declared card state line is missing or moved"
+    return match.group(1)
 
 
 def _diamond() -> Graph:
@@ -166,7 +197,7 @@ def test_tc_r07_store_load_surfaces_the_cycle_as_a_spanish_map_store_error(tmp_s
     with pytest.raises(MapStoreError) as excinfo:
         tmp_store.load("ciclico")
 
-    assert str(excinfo.value) == f"el mapa tiene un ciclo: a{ARROW}b{ARROW}c{ARROW}a"
+    assert str(excinfo.value) == f"the map has a cycle: a{ARROW}b{ARROW}c{ARROW}a"
 
 
 # ---------------------------------------------------------------- LLR-R01.4
@@ -217,7 +248,7 @@ async def test_tc_r08_refresh_canvas_survives_any_renderer_exception(tmp_path, e
         assert app.screen is screen
         # ... and the canvas carries the Spanish notice rather than a picture.
         painted = screen.query_one("#map-canvas", Static).render().plain
-        assert "no se pudo dibujar el mapa" in painted
+        assert "could not draw the map" in painted
 
 
 async def test_tc_r09_home_screen_notices_a_refused_map_and_still_lists_the_rest(
@@ -246,7 +277,7 @@ async def test_tc_r09_home_screen_notices_a_refused_map_and_still_lists_the_rest
 
         # The operator is told, in Spanish, which map and which cycle.
         assert any(
-            "no se pudo cargar ciclico" in n
+            "could not load ciclico" in n
             and f"a{ARROW}b{ARROW}c{ARROW}a" in n
             for n in notices
         ), notices
@@ -258,7 +289,7 @@ async def test_tc_r09_home_screen_notices_a_refused_map_and_still_lists_the_rest
 @pytest.mark.parametrize(
     "raised",
     [
-        MapStoreError("el mapa tiene un ciclo: a → b → a"),
+        MapStoreError("the map has a cycle: a → b → a"),
         RuntimeError("algo inesperado"),
         KeyError("root"),
         TypeError("'int' object has no attribute 'strip'"),
@@ -314,7 +345,7 @@ async def test_tc_r09b_the_home_sink_is_scoped_to_the_class_not_to_this_batch(
         # The screen survives whatever came out of the load ...
         assert isinstance(app.screen, HomeScreen)
         # ... and the operator is told, in Spanish, which map failed.
-        hits = [(m, kw) for m, kw in notices if "no se pudo cargar sano" in m]
+        hits = [(m, kw) for m, kw in notices if "could not load sano" in m]
         assert hits, (raised, notices)
         # `hits` is asserted non-empty BEFORE the `all(...)`, because `all()` over
         # an empty list is True and would certify the defense of a sink that never
@@ -353,7 +384,7 @@ async def test_tc_r08b_import_preview_survives_a_cyclic_csv(tmp_path):
 
         assert isinstance(app.screen, _ImportPreviewScreen)
         painted = app.screen.query_one("#import-preview-canvas", Static).render().plain
-        assert "no se pudo dibujar la vista previa" in painted
+        assert "could not draw the preview" in painted
 
 
 # ------------------------------------------------------- AT-R01 / R02 / R03
@@ -375,7 +406,7 @@ async def test_at_r01_opening_a_cyclic_map_refuses_it_without_killing_the_app(
         await pilot.pause()
 
         assert isinstance(app.screen, MapScreen)
-        assert any("error cargando mapa" in n and "ciclo" in n for n in notices), notices
+        assert any("error loading map" in n and "cycle" in n for n in notices), notices
         assert any(f"a{ARROW}b{ARROW}c{ARROW}a" in n for n in notices), notices
 
         # Still usable: the screen paints and answers a keypress.
@@ -394,7 +425,7 @@ def test_at_r02_the_message_names_the_actual_cycle_not_a_fixed_string(tmp_store)
     with pytest.raises(MapStoreError) as second:
         tmp_store.load("dos")
 
-    prefix = "el mapa tiene un ciclo: "
+    prefix = "the map has a cycle: "
     one, two = str(first.value), str(second.value)
     assert one != two
     # Read the path back out of each message rather than searching for a
@@ -450,3 +481,271 @@ def test_at_r03b_a_diamond_is_not_called_a_cycle(tmp_path):
         parse(dump(diamond))
     assert not isinstance(excinfo.value, MermaidError)
     assert "multiple parents" in str(excinfo.value)
+
+
+# --------------------------------------------------------------------------
+# LLR-N13.1.5 / PRED-VIS — the damaged card is not a lie, and the difference is
+# carried by a DECLARED GLYPH rather than by the string alone.
+
+
+def _cells(table, key: str) -> list[str]:
+    """The painted cells of one row, as text."""
+    out = []
+    for col in table.columns:
+        cell = table.get_cell(key, col)
+        out.append(cell.plain if hasattr(cell, "plain") else str(cell))
+    return out
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_a_broken_map_is_distinguishable_from_a_healthy_EMPTY_one(
+    tmp_path,
+):
+    """`PRED-VIS`'s own reproduction, turned into the arm that refuses it.
+
+    The requirement reproduces the defect exactly: `roto` and `sano_vacio` paint
+    `['...', ' concept ', '0', '0']` BYTE-IDENTICALLY, and the only thing
+    separating them is a TRANSIENT toast against a PERMANENT card. The parked
+    inequality threshold passes on that frame the moment the string lands, which
+    is why the clause needs the visual limb or it certifies the defect.
+
+    `sano_vacio` IS THE CONTROL AND IT IS NOT OPTIONAL: a healthy map with zero
+    nodes is the one frame where the old `concept, 0, 0` substitution was
+    indistinguishable from a real load. An arm comparing `roto` against a
+    NON-empty healthy map would pass on the unfixed tree.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        (store.workspace / "sano_vacio.mmd").write_text("graph TD\n", encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        table = app.screen.query_one("#home-recents")
+
+        # Containment: one broken map costs ONE card, not the screen.
+        assert {"roto", "sano_vacio"} <= {str(k.value) for k in table.rows}
+
+        roto = _cells(table, "roto")
+        sano = _cells(table, "sano_vacio")
+
+    # The name column differs trivially; the clause is about the REST.
+    assert roto[1:] != sano[1:], (
+        f"the broken map paints the same non-name cells as a healthy EMPTY map: "
+        f"{roto} vs {sano}. That is the defect PRED-VIS reproduces."
+    )
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_the_damaged_card_carries_a_DECLARED_glyph(tmp_path):
+    """`PRED-VIS`'s membership clause, asserted at run time as it requires.
+
+    Without this, `Inc-7` could paint a bare `!` and every arm stays green --
+    `LLR-N16.2.1` asserts what the LEGEND paints, not what the CARD paints. The
+    glyph is therefore checked against `darkside.DECLARED_VOCABULARY`, which is
+    `01b` section 3.4's `V22` and not a literal chosen here.
+    """
+    from mapper import darkside
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        (app.store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        roto = _cells(app.screen.query_one("#home-recents"), "roto")
+
+    painted = "".join(roto)
+    declared = {g for _vid, g, _label, _style in darkside.DECLARED_VOCABULARY if g}
+    carried = {g for g in declared if g in painted}
+    assert carried, (
+        f"the damaged card carries no glyph from the declared vocabulary: {roto!r}. "
+        f"A card that differs only in text differs only to someone already reading it."
+    )
+    assert darkside.DAMAGED_MAP_GLYPH in painted, (
+        f"the damaged card does not carry V22 ({darkside.DAMAGED_MAP_GLYPH!r}): {roto!r}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_a_LOAD_WARNING_also_reaches_the_card(tmp_path, monkeypatch):
+    """`A-102`: the second condition, and it is the one that vanishes.
+
+    `LLR-N13.1.5` identifies a damaged map by the load path RAISING *or*
+    RECORDING A LOAD WARNING. Only the raise used to reach the card; a load
+    warning returned the graph and notified through a TRANSIENT toast while the
+    card is PERMANENT, so after the toast cleared there was no trace at all.
+
+    A clause satisfied for one condition and green for the other is not
+    satisfied.
+    """
+    from mapper import darkside
+    from mapper.store import MapStore
+
+    real_load = MapStore.load
+
+    def load_with_warning(self, name):
+        graph = real_load(self, name)
+        if name == "avisado":
+            graph.load_warnings.append("un aviso de carga")
+        return graph
+
+    monkeypatch.setattr(MapStore, "load", load_with_warning)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        (app.store.workspace / "avisado.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        (app.store.workspace / "sano.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        table = app.screen.query_one("#home-recents")
+        avisado = _cells(table, "avisado")
+        sano = _cells(table, "sano")
+
+    # The positive control: the identically-shaped map WITHOUT a warning is
+    # painted as healthy, so the difference is the warning and not the fixture.
+    assert darkside.DAMAGED_MAP_GLYPH not in "".join(sano), (
+        f"the control map is painted damaged; the fixture, not the warning, "
+        f"is doing the work: {sano!r}"
+    )
+    assert darkside.DAMAGED_MAP_GLYPH in "".join(avisado), (
+        f"a map that recorded a LOAD WARNING is painted as healthy: {avisado!r}. "
+        f"The warning was a transient toast; the card is permanent."
+    )
+
+
+@pytest.mark.asyncio
+async def test_llr_n13_1_5_the_card_carries_the_DECLARED_state_string(tmp_path):
+    """`F1`: the third limb of the threshold, which shipped unasserted.
+
+    `LLR-N13.1.5` declares the card state as a STRING THAT SHIPS, and
+    `PRED-VIS` adds the glyph limb ON TOP OF it -- not instead of it. The first
+    implementation painted ` ⊘ dañado `, a third string in neither `01b` nor the
+    LLR, and no arm asked for the declared one.
+
+    THE `↵` IS LOAD-BEARING AND THAT IS WHY THIS ARM EXISTS. `#D28` escalates
+    this seat from `MUT` to `INK` BECAUSE the copy invites an action; a card
+    without the invitation takes the escalated style while deleting the
+    justification for it. So the arm checks the invitation, not merely the word.
+    """
+    from mapper import darkside
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        (app.store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        painted = "".join(_cells(app.screen.query_one("#home-recents"), "roto"))
+
+    declared = _declared_card_state_string()
+    assert declared == darkside.DAMAGED_MAP_STATE, (
+        f"darkside.DAMAGED_MAP_STATE is {darkside.DAMAGED_MAP_STATE!r} but "
+        f"01-requirements.md's A-132 declares {declared!r}"
+    )
+    assert declared in painted, (
+        f"the card does not carry the declared state {declared!r}: {painted!r}"
+    )
+    assert chr(0x21B5) in painted, (
+        f"the card carries no invitation, so #D28's INK escalation has no "
+        f"justification on it: {painted!r}"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("surface", ["hero", "resume"])
+async def test_llr_n13_1_5_no_OTHER_surface_paints_a_damaged_map_as_healthy(
+    tmp_path, surface
+):
+    """`F2`: the clause is about the SCREEN, not about one widget on it.
+
+    The recents loop was fixed and the hero was not, so a map the system could
+    not READ was given a hero showing `0 nodos` in `INK` -- the calm tone --
+    measured BYTE-IDENTICAL to a healthy EMPTY map's hero. `resume` is the same
+    shape and invites the operator straight back into the unreadable map.
+
+    Both branches are named in `LLR-N13.1.5`'s Touched symbols; fixing one and
+    not the others is what half-satisfying a clause looks like.
+    """
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        store.record_session("roto", "a")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        screen = app.screen
+        box = screen.query_one(
+            "#home-hero-box" if surface == "hero" else "#home-resume-box"
+        )
+        shown = box.display
+        # The card must still be there: the map is declared, not hidden.
+        rows = {str(k.value) for k in screen.query_one("#home-recents").rows}
+
+    assert "roto" in rows, "the damaged map lost its card; containment is the point"
+    assert not shown, (
+        f"the {surface} surface presents a map the system could not read as if "
+        f"it were usable; there is no honest {surface} for an unreadable map"
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("surface", ["hero", "resume"])
+async def test_inc7_cr_r2_f1_the_A102_guard_hides_a_LOAD_WARNING_map_too(
+    tmp_path, monkeypatch, surface
+):
+    """`INC7-CR-R2-F1`: the `not in damaged` guard on the hero path
+    (`app.py:648`) and the resume path (`app.py:705`) is untested for HALF of
+    `A-102` -- removing either clause independently left the suite green.
+
+    `test_llr_n13_1_5_no_OTHER_surface_paints_a_damaged_map_as_healthy` drives
+    both surfaces through `roto`, a map whose LOAD RAISES. For that fixture
+    `load_or_notice` returns `None`, so `graph is not None` is already False
+    and the `not in damaged` clause never executes -- deleting it changes
+    nothing there. A map that LOADS but records a load WARNING (`A-102`'s
+    other condition) still returns a graph, so it is `damaged` ONLY through
+    the clause this arm exists to protect.
+    """
+    from mapper.store import MapStore
+
+    real_load = MapStore.load
+
+    def load_with_warning(self, name):
+        graph = real_load(self, name)
+        if name == "avisado":
+            graph.load_warnings.append("un aviso de carga")
+        return graph
+
+    monkeypatch.setattr(MapStore, "load", load_with_warning)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "avisado.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        store.record_session("avisado", "root")
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        screen = app.screen
+        box = screen.query_one(
+            "#home-hero-box" if surface == "hero" else "#home-resume-box"
+        )
+        shown = box.display
+        rows = {str(k.value) for k in screen.query_one("#home-recents").rows}
+
+    assert "avisado" in rows, "the load-warned map lost its card"
+    assert not shown, (
+        f"the {surface} surface presents a map that loaded with a WARNING as "
+        f"if it were usable; A-102 names the load-warning path as damaged too, "
+        f"not only the raising path"
+    )

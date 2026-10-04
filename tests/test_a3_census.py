@@ -1,0 +1,620 @@
+"""The A3 census — LLR-N07.2.2a.
+
+The migration's whole risk is that it HALF-lands: the six signatures change, the
+suite goes green, and call sites still pass the old shape, so two contracts are
+live at once.  So the gate is SET EQUALITY on both sides of the protocol, never
+a floor, and never on definitions alone.
+
+INSTRUMENT: `ast`, not `grep`.  `.render` names TWO different protocols in this
+tree -- Textual's `Widget.render()`, which takes no arguments and MUST NOT be
+migrated, and the map renderer, which takes arguments and must.  A line-oriented
+count answers neither question.  Executed at `3fe0e4b`, a grep returned 24 sites
+where the AST returned 23; the extra was a mention of `renderer.render(...)`
+inside a docstring.  Only a parse separates a call from its own encoding.
+"""
+import ast
+import inspect
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from mapper.views.state import IRenderer, ViewState
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def tracked(*globs) -> list[str]:
+    """`git ls-files`, which lists only TRACKED paths.
+
+    That is a real hole and it is guarded rather than hidden: a renderer file
+    that has not been `git add`ed is invisible to every census below, so a new
+    renderer could escape threshold 1 entirely.  Measured -- the census working
+    at all depended on `state.py` having been staged, an undeclared
+    precondition.  `test_tc_a3_no_source_file_is_invisible_to_the_census`
+    turns that into a red arm.
+    """
+    out = subprocess.run(["git", "ls-files", *globs], cwd=REPO,
+                         capture_output=True, text=True, check=True)
+    return out.stdout.split()
+
+
+def test_tc_a3_no_source_file_is_invisible_to_the_census():
+    """A census cannot be a safety net over files it cannot see.
+
+    Sweeps `tests/` as well as `mapper/`, because threshold 3 sweeps both: an
+    untracked TEST file carrying an old-shape call site was invisible while the
+    mapper-only version of this arm stayed green.  The precondition was live at
+    the time -- this very file was untracked.
+    """
+    for root in ("mapper", "tests"):
+        seen = set(tracked(f"{root}/*.py", f"{root}/**/*.py"))
+        on_disk = {
+            p.relative_to(REPO).as_posix()
+            for p in (REPO / root).rglob("*.py")
+            if "__pycache__" not in p.parts
+        }
+        assert on_disk <= seen, (
+            f"untracked {root}/ source is invisible to the A3 census: "
+            f"{sorted(on_disk - seen)} -- stage it, or the gate is not a gate"
+        )
+
+
+def _parse(rel: str) -> ast.Module:
+    return ast.parse((REPO / rel).read_text(encoding="utf-8"))
+
+
+def render_definitions() -> dict[tuple[str, int], ast.FunctionDef]:
+    """Every `def render` under `mapper/views/` — the migration's definition side."""
+    found = {}
+    for rel in tracked("mapper/views/*.py"):
+        for node in ast.walk(_parse(rel)):
+            # `AsyncFunctionDef` too: an `async def render` is a definition the
+            # migration would have to cover and a `FunctionDef`-only walk cannot
+            # see it.
+            if (isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    and node.name == "render"):
+                found[(rel, node.lineno)] = node
+    return found
+
+
+def render_call_sites() -> dict[str, list[tuple[str, int]]]:
+    """`.render(...)` calls, split by whether they pass arguments.
+
+    The split IS the census: arg-ful sites invoke the map-renderer protocol and
+    must migrate; zero-arg sites are Textual widgets and must not.
+    """
+    argful, zeroarg = [], []
+    for rel in tracked("mapper/*.py", "mapper/**/*.py", "tests/*.py", "tests/**/*.py"):
+        for node in ast.walk(_parse(rel)):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "render"):
+                (argful if (node.args or node.keywords) else zeroarg).append(
+                    (rel, node.lineno))
+    return {"argful": argful, "zeroarg": zeroarg}
+
+
+# --------------------------------------------------------------------------
+
+
+def test_tc_a3_the_derived_sets_are_non_empty_before_anything_is_evaluated():
+    """A census that passes on an empty input set is not a census."""
+    assert render_definitions(), "no render definition derived"
+    sites = render_call_sites()
+    assert sites["argful"], "no arg-ful call site derived"
+    assert sites["zeroarg"], "no zero-arg site derived -- the split cannot be exercised"
+
+
+def test_tc_a3_the_census_cardinalities_are_PINNED():
+    """EQUALITY, not a floor -- and the numbers live here, not only in prose.
+
+    `LLR-N07.2.2a` states its thresholds as set equality "never a floor", and
+    `A-32` abolished floors for exactly this reason: a derivation that gains or
+    loses members sits comfortably above one.
+
+    These figures were published as 27 and 6 in the increment packet AND in the
+    module map, and both were wrong -- measured before this increment's own
+    AT-010 arms added five more call sites, then asserted as the post-state.
+    Unpinned, nothing in the suite could contradict them; pinned, a drift is a
+    red arm instead of a stale sentence nobody re-derives.
+
+    The pin earned itself immediately, and has now caught the same drift THREE
+    times: written at 32, red within the minute when the export-focus fix added
+    two sites; red again at 34 when the diff-coverage arm added one.  Every one
+    of those would have been a silently stale number in a document.  That is the
+    whole argument for pinning a count rather than narrating it.
+    """
+    sites = render_call_sites()
+    # 35 -> 50 in Inc-3: its four new test modules drive the renderer directly
+    # at the AT configurations.  Updated deliberately, with the module map.  It
+    # moved twice inside the increment -- 49, then 50 when the battery's two
+    # surviving mutants forced two more arms -- which is the pin working.
+    #
+    # 50 -> 51 -> 49 in the Inc-3 FIX round, both directions in one edit and
+    # both deliberate.  The pan-fixture arm and the short-region sweep each add
+    # a site; the `HEADER_ROWS` pin loses two, because parametrising it over
+    # node count as well as width folded its two inline renders into one
+    # `_header_rows` helper.  A fourth catch for this pin, and the first in the
+    # direction a floor could never have seen.
+    #
+    # 49 -> 52 in the SECOND fix round, and the three are itemised because a
+    # bumped pin with an unitemised reason is a pin that has stopped working:
+    #   +1  `mapper/app.py` `_declare_after_layout` now RENDERS.  This is the
+    #       priced cost of closing `B-60` rather than re-recording it: the
+    #       canvas header's own numeral is written by `render`, so recomputing
+    #       only the strip left the two declaring surfaces contradicting each
+    #       other on the first frame at ordinary sizes.  The alternative,
+    #       `call_after_refresh(refresh_canvas)`, reddens the `LLR-CNV.3.1`
+    #       focus arm; this one costs exactly this pin.
+    #   +2  `tests/test_inc3_census.py`'s A-89 arm renders the fixture with and
+    #       without a `DiffResult` to prove the diff state changes what is
+    #       painted -- the non-vacuity guard on the two diff-only coercion
+    #       sinks (`layered.py:449` and `:520`) whose mutants used to survive.
+    #
+    # 52 -> 57 in Inc-4a, and this pin CAUGHT A REVERSE-CENSUS HIT THE PRE-GATE
+    # DID NOT DECLARE.  Inc-4a's own C-26 sweep named one downstream test
+    # (`test_darkside_census.py`'s hue census, which pins the pill tail line's
+    # literal source text); it did not name this one, and this arm is where the
+    # second hit surfaced.  Itemised, because a bumped pin with an unitemised
+    # reason is a pin that has stopped working:
+    #   +3  `tests/test_layered.py`'s `AT-021` arm renders the SAME graph three
+    #       times -- an empty hit set, an injected id, and a second injected id
+    #       -- because "the renderer paints what it was handed" is unfalsifiable
+    #       from one render: a single frame cannot distinguish the hit style
+    #       landing on the named node from it landing on any node.
+    #   +2  `tests/test_fold.py`'s `TC-026b` rename arm renders a folded branch
+    #       with an injected hit set and again with an empty one, which is the
+    #       pair that proves the pill's tail is query-driven rather than a
+    #       constant.
+    #
+    # 57 -> 58 in Inc-4b, AND THIS PIN CAUGHT IT.  The increment's reverse census
+    # swept the seat's readers -- `test_key_dispatch.py`, `test_keymap.py`,
+    # `test_inc3_census.py` -- and did not name this one, because the new site has
+    # nothing to do with the seat.  Itemised, because a bumped pin with an
+    # unitemised reason is a pin that has stopped working:
+    #   +1  `tests/test_search.py`'s `AT-053` arm renders the screen's own view
+    #       state to read the HIT STYLE off the returned `Text`'s spans, before
+    #       and after the real `escape`.  "`esc` clears the search" has to mean
+    #       no node is still painted as a match, and a substring probe cannot tell
+    #       "this node is a hit" from "some node's title contains those letters" --
+    #       the spans are the only channel that carries the claim.
+    #
+    # 58 -> 59 in Inc-5, AND THIS PIN CAUGHT IT TOO -- twice in two increments,
+    # which is the argument for keeping it rather than for softening it to a
+    # floor.  Itemised on the same terms:
+    #   +1  `tests/test_views_hits.py::_spans_at` renders each member of the
+    #       DERIVED renderer set to read `AT-024`'s observable off the returned
+    #       `Text`'s spans.  ONE call site, not six: the arms parametrise over
+    #       the derived class set and share this single helper, so this count
+    #       does NOT move when a seventh renderer joins -- which is the whole
+    #       point of deriving the set instead of listing it.
+    #
+    # 59 -> 60 in Inc-B55a, AND THE PIN CAUGHT IT A FOURTH TIME.  Itemised:
+    #   +1  `tests/test_overflow.py::test_p1_at_rest_region_and_content_share_
+    #       one_geometry` renders the CURRENT renderer at the CURRENT
+    #       `_canvas_size()` to compare against what the canvas widget holds.
+    #       That comparison IS the arm -- `P1`, the invariant that a region and
+    #       its content were produced from the same geometry -- so the site
+    #       cannot be shared with an existing helper without the helper
+    #       deciding the geometry the arm exists to check.
+    #
+    # 60 -> 61 in Inc-B55a's code-review round: the forced-trigger `P1` arm
+    # (`test_p1_survives_a_strip_reflow_after_the_canvas_is_painted`) renders
+    # the current renderer at the current `_canvas_size()` AFTER stubbing the
+    # strip to force a region reflow.  It cannot share the other `P1` arm's site:
+    # that arm is the one the code review proved CANNOT FAIL, and this one exists
+    # precisely because it supplies the trigger the other one waits for.
+    #
+    # 61 -> 62 in `S-B(+C)`, ONE site and it is itemised, because this pin's own
+    # docstring says a bumped pin with an unitemised reason is a pin that has
+    # stopped working:
+    #   +1  `tests/test_canvas_header_charge.py::_first_line_rows` renders each
+    #       renderer to measure the PHYSICAL rows its own first line occupies.
+    #       That measurement is the arm: defect 2 is `_canvas_size` charging
+    #       layered's header in every view, and the only honest comparand for a
+    #       charge is the line the renderer actually paints.  It cannot share an
+    #       existing site -- every other arg-ful site renders to check CONTENT,
+    #       while this one renders to price GEOMETRY, and a helper that returned
+    #       a finished picture would have already spent the width this arm is
+    #       measuring at.
+    #       Derived mechanically, not counted by eye: exactly one `.render(`
+    #       appears in that module.
+    #
+    # 62 -> 61 at `Inc-CONFIRM` `B-68`, and this is the pin's FIRST DECREASE.
+    # Itemised on the same terms, because a pin that only explains growth is
+    # half a pin:
+    #   -1  `tests/test_app.py::test_b50_the_export_carries_the_diff_the_canvas_
+    #       is_showing` no longer replaces `_current_renderer` with an anonymous
+    #       `Spy` whose `render` forwarded to the real one -- that forward was
+    #       the arg-ful site.  `B-68` made the export ask `_consumes_pan` to
+    #       classify whatever `_current_renderer` returns, and that dispatch is
+    #       identity-based and raises on an unregistered object, so the double
+    #       had to stop being one.  It now patches the REAL renderer's `render`,
+    #       which forwards through a captured bound method rather than through
+    #       an attribute call -- invisible to this census by construction, which
+    #       is correct: no renderer-protocol call site was removed, a test
+    #       double stopped impersonating one.  The arm's assertions are
+    #       unchanged and it still kills the `diff=None` mutant.
+    #
+    # 61 -> 62 in the SAME increment, at its review round.  The round trip is
+    # itemised in both directions rather than netted away: a history reading
+    # 62 -> 62 would hide that two different sites moved opposite ways.
+    #   +1  `tests/test_app.py::test_an_export_never_encodes_where_the_keyboard_
+    #       was` renders a THIRD comparand, at `selected_id=None`.  The export
+    #       ruling widened to make the CURSOR transient as well as the keyboard
+    #       owner, so this arm's non-vacuity check now needs three mutually
+    #       distinguishable tones where two used to do: without the unselected
+    #       render, "the export carries no selection" cannot be told from "the
+    #       export carries a focused one".  It cannot share either existing
+    #       site, because those two ARE the pair it must be distinguished from.
+    #
+    # 62 -> 63 in the same increment's second review round:
+    #   +1  `tests/test_export_state.py::test_no_rendered_row_is_folded_in_the_
+    #       artifact` renders the map at its own grown extent and drives the
+    #       result through `save_svg`, to assert every rendered row arrives
+    #       WHOLE in the artifact.  It cannot share a site with any existing
+    #       arm: the geometry it renders at IS its subject -- that width is what
+    #       sizes the export console -- so a helper choosing the geometry would
+    #       be choosing the very thing the arm exists to check.
+    #
+    # 63 -> 64 at `Inc-CONFIRM`'s re-ruled fix round:
+    #   +1  `tests/test_export_state.py::test_a_live_search_and_a_moved_cursor_
+    #       do_not_reach_the_artifact` renders the CANVAS's own state -- session
+    #       and all -- immediately before and after a live search, as the
+    #       POSITIVE CONTROL for a byte-invariance assertion over the artifact.
+    #       It cannot share a site with any export arm: every one of those
+    #       renders the NEUTRALISED state, and this one exists precisely to
+    #       prove the un-neutralised state MOVES the picture.  Without it, "the
+    #       two exports are byte-equal" would be green if the session state were
+    #       inert, which is the vacuity the arm was written to refuse.
+    #
+    # 64 -> 65 at `Inc-EN-3`:
+    #   +1  `tests/test_en3.py::test_hybrid_lane_with_no_branches_says_so_in_english`
+    #       renders a repo with no branches through `HybridLaneRenderer` and reads
+    #       the painted `(no branches)`.  It cannot share a site with another arm:
+    #       no other test drives that renderer on a root-only graph, and the
+    #       string it reads is the one the census arm can only see in the AST.
+    assert len(sites["argful"]) == 65, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 65; "
+        "update the pin AND the module map together, or one of them is stale"
+    )
+    # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
+    # a zero-arg Textual widget site that must NOT be swept into the A3.
+    #
+    # 26 -> 27 in Inc-B55a: the same `P1` arm calls `canvas.render()` to read
+    # what the widget HOLDS.  A zero-arg Textual widget site, correctly outside
+    # the A3 -- it is not a renderer invocation, it is the widget being asked
+    # what it is currently painting.
+    #
+    # 27 -> 28 in Inc-B55a's code-review round: the same forced-trigger arm asks
+    # `canvas.render()` what the widget HOLDS after the reflow.  A zero-arg
+    # Textual widget site, correctly outside the A3.
+    #
+    # 28 -> 29 at `Inc-REPAIR` S-A: `SEC-F1`'s arm asks a freshly constructed
+    # `TabStrip` what it HOLDS, because the defect is in the constructor's render
+    # and the composited frame cannot see it -- `on_resize` supersedes the
+    # content before paint. Same shape as the site above, one widget over.
+    #
+    # 29 -> 30 in S-A's review round: the arm that pins `on_mount` as
+    # LOAD-BEARING asks the same question in a world where `on_resize` has been
+    # removed. It cannot share the site above -- that one measures a constructor
+    # with the resize still available, and this one measures what survives
+    # without it.
+    #
+    # 30 -> 32 in `S-B(+C)`, TWO sites and both itemised:
+    #   +2  `tests/test_agree_floor.py::_frame` reads BOTH declaring surfaces off
+    #       the composited frame -- `canvas.render()` and `strip.render()`.  Two
+    #       sites rather than one because `LLR-N06.3.5` is a statement ABOUT
+    #       those two surfaces differing, so an arm reading them through a shared
+    #       helper would have to decide which one it was reading and would stop
+    #       being able to see them disagree.  Both are zero-arg WIDGET renders
+    #       and must stay out of the A3 -- which is what this pin protects.
+    #
+    # 32 -> 34 in `S-D`, TWO sites, and they are the RADIAL twins of the two
+    # above:
+    #   +2  `tests/test_agree_floor.py::_radial_frame` reads the same two
+    #       declaring surfaces with the RADIAL renderer selected, for the
+    #       workstream that VERIFIES radial never reaches the floor.  It does not
+    #       share `_frame`: that helper selects `outline_mode` and derives its
+    #       truth from `outline.painted_ids`, and parameterising one helper over
+    #       the renderer would make the radial arms and their OUTLINE CONTROL
+    #       read the same code path -- which is how a control stops being
+    #       independent of the thing it controls (`C-60`).  Both are zero-arg
+    #       WIDGET renders and must stay out of the A3.
+    #
+    # 34 -> 35 at `Inc-CONFIRM` `HERMETIC-1`, ONE site, itemised on the same
+    # terms this pin's own docstring sets:
+    #   +1  `tests/test_app.py::test_repo_screen_two_pane_renders` asks the
+    #       `#repo-table` widget what it HOLDS, to assert the fetched branch was
+    #       actually painted.  The arm used to drive the real `gh` CLI and then
+    #       assert only that the widget EXISTS -- an assertion that passed
+    #       whether or not the fetch produced anything, which is why mocking the
+    #       seam had to come with a painted-result assertion rather than
+    #       replacing a live oracle with no oracle.  A zero-arg Textual WIDGET
+    #       render, correctly outside the A3.
+    #
+    # 35 -> 36 at `Inc-EN-4`, ONE site:
+    #   +1  `tests/test_en4.py::_look` reads what a `DsChip` paints so the `Z1`
+    #       arms can assert the look did not change.  A zero-arg Textual WIDGET
+    #       render, correctly outside the A3; the three `Z1` arms share the one
+    #       helper so they add one site, not five.
+    assert len(sites["zeroarg"]) == 36, (
+        f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
+        "36; a DROP means widget sites were wrongly swept into the A3"
+    )
+    assert len(render_definitions()) == 7, (
+        f"derived {len(render_definitions())} definitions against a pinned 7 = "
+        "six renderers plus `IRenderer.render` itself, which lives under "
+        "mapper/views/ and is correctly swept in: the Protocol must satisfy the "
+        "shape it declares"
+    )
+
+
+def test_tc_a3_the_instrument_can_tell_a_call_from_a_mention_of_a_call():
+    """The positive control for the choice of AST over grep.
+
+    A docstring naming `renderer.render(...)` is text, not a call, and a grep
+    counts it.  This asserts the instrument does not -- which is the property
+    the whole census rests on.
+    """
+    src = 'def f():\n    """calls renderer.render(graph, state) internally."""\n    return 1\n'
+    calls = [n for n in ast.walk(ast.parse(src))
+             if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+             and n.func.attr == "render"]
+    assert calls == []
+    assert "renderer.render(" in src, "the fixture must contain the text a grep would match"
+
+    real = "renderer.render(graph, state)\n"
+    calls = [n for n in ast.walk(ast.parse(real))
+             if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+             and n.func.attr == "render"]
+    assert len(calls) == 1, "the instrument must still see a real call"
+
+
+def test_llr_n07_2_2a_every_definition_takes_graph_and_state():
+    """Threshold 1: the migrated set EQUALS the derived definition set.
+
+    Not `>= 6`.  The naive `grep -rn "def render" mapper/` returns 17, of which
+    11 are Textual widgets that must NOT be migrated -- so a census that swept
+    them in would pass a floor comfortably while being wrong by eleven.
+    """
+    defs = render_definitions()
+    unmigrated = {
+        f"{rel}:{ln}": [a.arg for a in node.args.args]
+        for (rel, ln), node in defs.items()
+        if [a.arg for a in node.args.args] != ["self", "graph", "state"]
+    }
+    assert unmigrated == {}
+
+
+def test_llr_n07_2_2a_no_definition_keeps_kwargs_or_the_explicit_query():
+    """Threshold 2: `**kwargs` == 0 across the set, and `query` left with them.
+
+    Five of the six declared `**kwargs` and silently dropped `query` on the
+    floor; the sixth took `query` explicitly.  Both shapes are gone.
+    """
+    offenders = {}
+    for (rel, ln), node in render_definitions().items():
+        if node.args.kwarg is not None:
+            offenders[f"{rel}:{ln}"] = f"**{node.args.kwarg.arg}"
+        stale = {a.arg for a in node.args.args} & {"query", "with_header", "diff",
+                                                   "selected_id", "w", "h"}
+        if stale:
+            offenders[f"{rel}:{ln}"] = f"stale parameters {sorted(stale)}"
+    assert offenders == {}
+
+
+def test_llr_n07_2_2a_zero_call_sites_of_the_old_shape_survive():
+    """Threshold 3 — THE CLAUSE THAT WAS MISSING ENTIRELY.
+
+    Gating on definitions only is the named weaker variant: all six signatures
+    change, the suite is green, and every call site still passes the old shape.
+    The migration half-lands and two contracts are live at once.
+    """
+    old_shape = {"selected_id", "w", "h", "query", "with_header", "diff"}
+    offenders = []
+    for rel in tracked("mapper/*.py", "mapper/**/*.py", "tests/*.py", "tests/**/*.py"):
+        for node in ast.walk(_parse(rel)):
+            if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "render"):
+                continue
+            names = {k.arg for k in node.keywords}
+            if names & old_shape:
+                offenders.append(f"{rel}:{node.lineno} old-shape keyword")
+            elif None in names:
+                # `render(g, **opts)` -- the keyword names are not statically
+                # knowable, so this site is UNAUDITABLE by this census and is
+                # banned rather than silently passed over.
+                offenders.append(f"{rel}:{node.lineno} ** splat is unauditable")
+            elif any(isinstance(a, ast.Starred) for a in node.args):
+                # `render(*opts)` -- the same argument on the positional side:
+                # the arity is not statically knowable either.
+                offenders.append(f"{rel}:{node.lineno} * splat is unauditable")
+            elif len(node.args) > 2:
+                # `render(g, sel, w, h)` carries no keywords at all, so a
+                # keyword-only check sees nothing.
+                offenders.append(f"{rel}:{node.lineno} positional old shape")
+    assert offenders == []
+
+
+def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
+    """The false-failure arm: Textual's zero-arg `render()` must be untouched.
+
+    A census that migrated these would break every widget in the app, and a
+    floor-based gate could not tell the difference.
+    """
+    zeroarg = render_call_sites()["zeroarg"]
+    # 25 -> 26 in Inc-3, 26 -> 27 and 27 -> 28 in Inc-B55a, 28 -> 29 at
+    # Inc-REPAIR S-A, 30 -> 32 at S-B(+C), 32 -> 34 at S-D, 34 -> 35 at
+    # Inc-CONFIRM `HERMETIC-1` -- the same sites the cardinality pin above
+    # itemises.  The two pins move TOGETHER by construction: they read the same
+    # derivation, so a change that updated one and not the other is a red arm
+    # rather than a quiet divergence.  S-D is the first increment to move them
+    # where BOTH reds appeared in one lane run, which is that construction
+    # working rather than two independent failures; `HERMETIC-1` is the second,
+    # and it reddened a THIRD arm with them -- the untracked-source guard, which
+    # caught the new test file before it could be invisible to all of these.
+    assert len(zeroarg) == 36, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 36. A floor was "
+        "used here first, in the one requirement that abolished floors: at `>= 20` "
+        "five widget sites could be wrongly migrated with the arm still green"
+    )
+
+
+# --------------------------------------------------------------------------
+# LLR-N07.2.3 — the two new types, and the interface's first mechanical guard
+
+
+def renderer_classes():
+    """Every class in `mapper/views/` that defines `render` — DERIVED.
+
+    Iterating the protocol's satisfiers rather than a hand-listed roster is what
+    makes a seventh renderer covered without anyone remembering to add it.
+    """
+    import importlib
+    found = []
+    for rel in tracked("mapper/views/*.py"):
+        mod_name = rel[:-3].replace("/", ".")
+        mod = importlib.import_module(mod_name)
+        for name in dir(mod):
+            obj = getattr(mod, name)
+            if (isinstance(obj, type) and obj.__module__ == mod_name
+                    and hasattr(obj, "render")
+                    # The Protocol itself defines `render` and cannot be
+                    # instantiated; it is the contract, not a satisfier of it.
+                    and not getattr(obj, "_is_protocol", False)):
+                found.append(obj)
+    return found
+
+
+def test_llr_n07_2_3_view_state_constructs_with_no_arguments():
+    """Threshold 1. Reddens `M-N07.2.3-b`: required fields.
+
+    With required fields every current test passes, and the NEXT increment
+    adding a field breaks every existing construction -- whose natural repair is
+    to pass the argument everywhere, converting the additive property into an
+    A3 per field.
+    """
+    import dataclasses
+
+    state = ViewState()
+    assert state.selected_id is None and state.w == 80 and state.h == 24
+    without_default = [
+        f.name for f in dataclasses.fields(ViewState)
+        if f.default is dataclasses.MISSING
+        and f.default_factory is dataclasses.MISSING
+    ]
+    assert without_default == []
+
+
+def test_llr_n07_2_3_view_state_is_frozen():
+    """Constructed OUTSIDE the raises block, and the exception type is exact.
+
+    Built inside it, making any field required would satisfy the assertion with
+    the `TypeError` from CONSTRUCTION -- the arm would go green while proving
+    nothing about frozen-ness. `Exception` is likewise broader than the property.
+    """
+    import dataclasses
+
+    state = ViewState()
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        state.selected_id = "x"
+
+
+def test_llr_n07_2_3_every_renderer_satisfies_the_protocol():
+    """Threshold 2 — a STRUCTURAL guard, and vacuous on its own.
+
+    `runtime_checkable` makes `isinstance` check MEMBER PRESENCE ONLY, never
+    signatures.  All six renderers had a `render` attribute before the
+    migration, so this assertion is green on the unmigrated tree and proves
+    nothing about the contract.  It catches a renderer that stops being one;
+    the signature clause below is what makes the pair discriminating.
+    """
+    classes = renderer_classes()
+    assert classes, "the derived renderer set is empty; the clause would be vacuous"
+    assert all(isinstance(cls(), IRenderer) for cls in classes)
+
+
+def test_llr_n07_2_3_every_renderer_signature_equals_graph_and_state():
+    """Threshold 3 — the clause that reddens `M-N07.2.3-a`.
+
+    Shipping the `isinstance` assertion alone is green on `master` with zero
+    code changed.  This is derived with `inspect.signature`, not by eye.
+    """
+    classes = renderer_classes()
+    assert classes
+    wrong = {
+        cls.__name__: list(inspect.signature(cls.render).parameters)
+        for cls in classes
+        if list(inspect.signature(cls.render).parameters) != ["self", "graph", "state"]
+    }
+    assert wrong == {}
+
+
+def test_llr_cnv_3_1_the_two_focus_owner_rosters_cannot_drift():
+    """`FOCUS_OWNERS` declares the domain; `_FOCUS_REGIONS` re-types it.
+
+    Two independent lists of the same vocabulary is the shape that agrees on the
+    day it is written and drifts the first time one is edited.  `FOCUS_OWNERS`
+    has no production reader, so nothing else links them.
+    """
+    from mapper.app import MapScreen
+    from mapper.views.state import FOCUS_OWNERS
+
+    declared = set(FOCUS_OWNERS)
+    used = {owner for _, owner in MapScreen._FOCUS_REGIONS}
+    assert used <= declared, f"regions name owners outside the domain: {used - declared}"
+    assert "" in declared, "the unknown owner must be a declared value"
+
+
+def test_llr_n07_2_3_the_headless_boundary_still_holds():
+    """A `ViewState` importing Textual would put the app's state model inside
+    the headless boundary and make `export` untestable without an event loop.
+
+    The check is over IMPORT NODES, not a substring.  A substring search matches
+    this module's own docstring saying it imports no Textual -- measured, it
+    false-failed on exactly that -- because a substring cannot tell a value from
+    a mention of it.  The positive control below is what says the AST form can
+    still see a real import.
+    """
+    def imports_textual(rel: str) -> bool:
+        for node in ast.walk(_parse(rel)):
+            if isinstance(node, ast.Import):
+                if any(a.name.split(".")[0] == "textual" for a in node.names):
+                    return True
+            elif isinstance(node, ast.ImportFrom):
+                if (node.module or "").split(".")[0] == "textual":
+                    return True
+        return False
+
+    # Positive control: the probe must be able to report a non-absence.
+    probe = ast.parse("from textual.widgets import Static\n")
+    assert any(isinstance(n, ast.ImportFrom) and (n.module or "").startswith("textual")
+               for n in ast.walk(probe))
+    # Negative control: prose naming textual is not an import.
+    assert not any(
+        isinstance(n, (ast.Import, ast.ImportFrom))
+        for n in ast.walk(ast.parse('"""imports no textual."""\n'))
+    )
+
+    offenders = [rel for rel in tracked("mapper/views/*.py") if imports_textual(rel)]
+    assert offenders == []
+
+
+def test_b44_the_module_map_pins_the_canvas_signature_against_the_real_one():
+    """`B-44`: the map row was prose, and prose cannot observe a signature.
+
+    `test_repair_map_truth.py` pins the `canvas` row as a substring and imports
+    nothing, so it stayed green while the constructor gained two parameters.
+    This asserts the row against `inspect.signature` instead.
+    """
+    from mapper.canvas import Canvas
+
+    params = list(inspect.signature(Canvas.__init__).parameters)
+    assert params == ["self", "w", "h", "tones", "fallback"]
+    row = next(
+        line for line in (REPO / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8").splitlines()
+        if line.startswith("| `canvas` |")
+    )
+    for name in params[1:]:
+        assert name in row, f"the map's canvas row does not mention {name!r}"

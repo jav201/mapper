@@ -22,7 +22,7 @@ An UNCLIPPED composited read measures 10, not 11, because `MapScreen`'s keybar
 shows through `background: #000000 70%` and donates the word `cobertura`.  It
 would therefore pass a fix that still hid a binding.  `AT-R14` is the guard that
 keeps the clip honest, and it compares WHOLE ROWS rather than substrings —
-`cobertura 100%` is painted outside the dialog while `cobertura` is a legitimate
+`coverage 100%` is painted outside the dialog while `cobertura` is a legitimate
 binding label, so a substring comparison collides.
 """
 from __future__ import annotations
@@ -32,7 +32,7 @@ import pytest
 from mapper.app import MapperApp, MapScreen
 from mapper.keymap import SCOPE_HOME, SCOPE_MAP, bindings_for
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
-from mapper.screens.help import HelpScreen
+from mapper.screens.help import LEGEND_DOCK_MIN_VIEW_CELLS, LEGEND_DOCKED_CELLS, HelpScreen
 from mapper.widgets.inspector import INSPECTOR_WIDTH
 from mapper.widgets.rail import RAIL_WIDTH
 
@@ -361,7 +361,7 @@ async def test_at_r14_the_oracle_is_clipped_to_the_help_dialog(tmp_path):
           still hides a binding;
       (d) no row painted outside the region may appear in the clipped read.
 
-    Whole rows, never substrings: `cobertura 100%` is painted outside the dialog
+    Whole rows, never substrings: `coverage 100%` is painted outside the dialog
     while `cobertura` is a legitimate binding label, so a substring test collides.
     """
     app = MapperApp(tmp_path)
@@ -471,15 +471,37 @@ def test_tc_r26_no_foreign_scope_binding_reaches_the_panel():
     assert not intruders, f"the map legend presents bindings from other scopes: {intruders}"
 
 
+#: `A-108`: the widest terminal the legend is still MODAL at over a map opened
+#: there (its rail auto-hidden, so the view starts at column 0) -- derived
+#: from Inc-8 verdict `F9`'s panel and minimum, never re-typed.
+MODAL_WIDTH = LEGEND_DOCKED_CELLS + LEGEND_DOCK_MIN_VIEW_CELLS - 1
+
+
 @pytest.mark.parametrize(
     "size,expected,governed_by",
-    [((140, 45), 28, "max-height"), ((100, 24), 21, "height: 90%")],
-    ids=["cap-governs", "percentage-governs"],
+    [((MODAL_WIDTH, 45), 28, "max-height"), ((MODAL_WIDTH, 24), 21, "height: 90%"),
+     ((140, 45), 45, "docked height: 100% (A-107)")],
+    ids=["cap-governs", "percentage-governs", "docked-full-height"],
 )
 async def test_tc_r36_the_dialog_height_is_governed_by_a_named_declaration(
     tmp_path, size, expected, governed_by
 ):
     """Which of the dialog's two height declarations governs, at each size.
+
+    AMENDED 2026-09-29 by `A-107` (`01-requirements.md`), for the DOCKED layout
+    only.  Inc-8's operator verdict `E1` docks the legend as a narrow panel,
+    full height; `140x45` is docked, so the cap cannot govern there any more
+    and that size now pins the exemption itself (`100%`, 45 rows).  The modal
+    keeps this arm's original bound, re-measured at a modal width with the
+    same 45 rows, where `90%` would give 40 -- so `L5`'s question ("does
+    `max-height` govern on a tall terminal?") is still asked of the layout
+    that still has the cap.
+
+    AMENDED AGAIN 2026-09-29 by `A-108`: verdict `F9` derives the dock
+    threshold, and `100` columns (`A-107`'s modal width) now docks.  The two
+    modal nodes move to `MODAL_WIDTH`, the widest modal width, with the same
+    row counts and the same expected heights; nothing is loosened.  Both
+    modal nodes assert the layout they measure.
 
     Written in response to review finding `F2`, and written this way on purpose.
     The battery arm `L5` — raise `max-height` until today's 27 bindings fit —
@@ -505,6 +527,7 @@ async def test_tc_r36_the_dialog_height_is_governed_by_a_named_declaration(
         await pilot.pause()
         await pilot.pause()
         dialog = app.screen.query_one("#help-dialog")
+        assert app.screen.docked is ("docked" in governed_by), (size, app.screen.docked)
         assert dialog.region.height == expected, (
             f"at {size[0]}x{size[1]} the dialog is {dialog.region.height} rows, "
             f"expected {expected} governed by {governed_by}"

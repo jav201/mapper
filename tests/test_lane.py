@@ -1,5 +1,6 @@
 """Tests for lane renderer."""
 from mapper.model import Edge, Ficha, Graph, Node
+from mapper.views.state import ViewState
 from mapper.views.lane import HybridLaneRenderer, LaneRenderer, RailTimelineRenderer
 
 
@@ -12,7 +13,7 @@ def test_lane_renderer():
     g.add_edge(Edge("repo", "feat"))
 
     renderer = LaneRenderer()
-    text = renderer.render(g, selected_id="feat", w=60, h=20)
+    text = renderer.render(g, ViewState(selected_id="feat", w=60, h=20))
     assert "main" in text.plain
     assert "feat" in text.plain
     assert "+3/-1" in text.plain
@@ -27,7 +28,7 @@ def test_rail_timeline_renderer():
     g.add_edge(Edge("repo", "feat"))
 
     renderer = RailTimelineRenderer()
-    text = renderer.render(g, selected_id="feat", w=80, h=24)
+    text = renderer.render(g, ViewState(selected_id="feat", w=80, h=24))
     assert "feature/auth" in text.plain
     assert "+4/-2" in text.plain
     assert "run" in text.plain or "pending" in text.plain
@@ -42,7 +43,7 @@ def test_hybrid_lane_renderer():
     g.add_edge(Edge("repo", "hotfix"))
 
     renderer = HybridLaneRenderer()
-    text = renderer.render(g, selected_id="hotfix", w=80, h=20)
+    text = renderer.render(g, ViewState(selected_id="hotfix", w=80, h=20))
     assert "hotfix/db" in text.plain
     assert "+1" in text.plain
     assert "fail" in text.plain
