@@ -249,9 +249,10 @@ def _forged_signature_repo(root: Path) -> tuple[Path, Path]:
     program.chmod(program.stat().st_mode | stat.S_IEXEC)
 
     def git(*args: str, stdin: str | None = None) -> str:
-        done = subprocess.run(["git", "-C", str(repo), *args], input=stdin, capture_output=True, text=True,
-                              encoding="utf-8", check=True)
-        return done.stdout.strip()
+        # Bytes in, bytes out: text mode would turn the commit's LF into CRLF on Windows.
+        done = subprocess.run(["git", "-C", str(repo), *args], input=None if stdin is None else stdin.encode(),
+                              capture_output=True, check=True)
+        return done.stdout.decode().strip()
 
     git("init", "-q", "-b", "master")
     tree = git("hash-object", "-t", "tree", "-w", "--stdin", stdin="")
