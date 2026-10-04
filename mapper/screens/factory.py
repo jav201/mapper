@@ -374,10 +374,13 @@ class FactoryScreen(Screen):
             lines = [line.strip() for line in preview.splitlines() if line.strip()]
             text = Text()
             text.append(f"[{doc.kind}] ", style=darkside.ACCENT)
-            text.append(escape(str(path)), style=darkside.MUT)
+            # `BRANCH-SEC-F4`: the workspace-relative path, as generate says it; the resolved absolute
+            # one carries the drive and the profile folder.
+            shown = darkside.plain(path.relative_to(Path(self.app.store.workspace).resolve()).as_posix())
+            text.append(escape(shown), style=darkside.MUT)
             text.append("\n", style="")
             for line in lines[:12]:
-                text.append(escape(line[:120]), style=darkside.INK)
+                text.append(escape(darkside.plain(line[:120])), style=darkside.INK)
                 text.append("\n", style="")
             if len(lines) > 12:
                 text.append("…", style=darkside.MUT)

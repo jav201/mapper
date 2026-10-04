@@ -176,6 +176,15 @@ def _git_env() -> dict[str, str]:
     return {**os.environ, "LC_ALL": "C", "GIT_TERMINAL_PROMPT": "0"}
 
 
+# `BRANCH-SEC-F3`: a repository's OWN `.git/config` is the repository's author's text.  `log.showSignature`
+# with `gpg.program` makes `git log` run that program on a commit carrying a `gpgsig` header (measured:
+# a marker file appeared), and `core.fsmonitor` names a program git runs when it refreshes the index.
+# `-c` outranks the repo's file.  Assessed and NOT pinned: `diff.external` and `core.pager` (no `diff`
+# and no pager, no TTY), `core.sshCommand` (no remote operation reads a local repo; a mirror fetch
+# needs the user's own), `remote.<n>.uploadpack` (per-remote key; only a mirror this module made).
+_GIT_PINS = ["-c", "log.showSignature=false", "-c", "core.fsmonitor=false"]
+
+
 def _run_git(
     cwd: Path,
     args: list[str],
@@ -184,7 +193,7 @@ def _run_git(
 ) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(
-            ["git", "-C", str(cwd)] + args,
+            ["git", "-C", str(cwd)] + _GIT_PINS + args,
             capture_output=True,
             text=True,
             check=check,
@@ -251,7 +260,7 @@ def _ahead_behind(cwd: Path, base: str, branch: str) -> tuple[int, int]:
 def _last_commit_info(cwd: Path, branch: str) -> dict[str, str]:
     """Return author and date for the latest commit on branch."""
     fmt = "%an|%aI|%s"
-    result = _run_git(cwd, ["log", "-1", f"--format={fmt}", "--end-of-options", branch], check=False)
+    result = _run_git(cwd, ["log", "-1", "--no-show-signature", f"--format={fmt}", "--end-of-options", branch], check=False)
     info = {"author": "", "date": "", "subject": ""}
     if result.returncode != 0 or not result.stdout:
         return info

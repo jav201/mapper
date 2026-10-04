@@ -104,6 +104,7 @@ COUNT_REGION_ID = "map-pagination"
 # view is on screen, and wording it as a passing state would be the `UI-AT058`
 # failure (text that invites the operator to wait out a permanent condition).
 PAN_INERT_HINT = "this view does not scroll · navigate with j/k/h/l"
+PAN_EDGE_HINT = "edge of the map"
 
 # WHAT the count line counts, in the operator's words, spelled ONCE.  The strip
 # also paints a page numeral (`1/8`) and an off-canvas numeral, so a bare
@@ -942,12 +943,12 @@ class HomeScreen(Screen):
     def action_table_down(self) -> None:
         table = self.query_one("#home-recents", DataTable)
         if table.display and table.cursor_row is not None:
-            table.cursor_down()
+            table.action_cursor_down()
 
     def action_table_up(self) -> None:
         table = self.query_one("#home-recents", DataTable)
         if table.display and table.cursor_row is not None:
-            table.cursor_up()
+            table.action_cursor_up()
 
     def action_resume(self) -> None:
         store: MapStore = self.app.store  # type: ignore[attr-defined]
@@ -1690,6 +1691,7 @@ class MapScreen(Screen):
         self._regions_pinned = True
         self.rail_hidden = not self.rail_hidden
         self._apply_region_visibility()
+        self._clear_pan_hint()
         self.refresh_canvas()
 
     def action_toggle_inspector(self) -> None:
@@ -2046,7 +2048,7 @@ class MapScreen(Screen):
             # graph before this guard: one `L` press and `app.is_running` went
             # False.  A frame that cannot be laid out cannot be panned, so the
             # answer is the one the edge already has a declaration for.
-            self.query_one(HintLine).set_hint("edge of the map")
+            self.query_one(HintLine).set_hint(PAN_EDGE_HINT)
             return
         nx = self._clamp_pan(self.pan_x + dx * self.PAN_STEP_X, extent_x, span_x)
         ny = self._clamp_pan(self.pan_y + dy * self.PAN_STEP_Y, extent_y, span_y)
@@ -2055,7 +2057,7 @@ class MapScreen(Screen):
             # is indistinguishable from a keyboard that stopped working, and
             # blank space past the content is indistinguishable from "the map
             # has nothing there" -- the exact confusion US-N06 exists to remove.
-            self.query_one(HintLine).set_hint("edge of the map")
+            self.query_one(HintLine).set_hint(PAN_EDGE_HINT)
             return
         self.pan_x, self.pan_y = nx, ny
         # CLEARED ON SUCCESS, and the omission was a real misdescription rather
@@ -2063,7 +2065,7 @@ class MapScreen(Screen):
         # so on the shipped maps -- where `H`/`L` are no-ops at every width but
         # one -- it latched on the first sideways press and then sat there
         # describing every LIVE `J`/`K` as an edge the operator had not reached.
-        self.query_one(HintLine).set_hint("")
+        self.query_one(HintLine).set_hint(self._resting_hint())
         self.refresh_canvas()
 
     def action_pan_left(self) -> None:
@@ -3954,8 +3956,16 @@ class MapScreen(Screen):
         wrote, with no styling or wrapping in between.
         """
         hint = self.query_one(HintLine)
-        if hint.text == PAN_INERT_HINT:
-            hint.set_hint("")
+        if hint.text in (PAN_INERT_HINT, PAN_EDGE_HINT):
+            hint.set_hint(self._resting_hint())
+
+    def _resting_hint(self) -> str:
+        """What the hint line says when no handler has declared anything: the live search's hint while a
+        query is live, else the map's.  `_pan` and `_clear_pan_hint` restore THIS, never a blank
+        (`PR-QA-F3`: a blank hint after a pan is a map that stopped saying what the keys are)."""
+        if self._search_is_live():
+            return self._search_hint(self._search_order())
+        return map_hint()
 
     def action_toggle_diff(self) -> None:
         if self.diff_active:
