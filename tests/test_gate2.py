@@ -9,7 +9,6 @@ or a real file launcher.  Control and bidi characters are `\\u` escapes (this fi
 """
 from __future__ import annotations
 
-import os
 import stat
 import subprocess
 import zipfile
