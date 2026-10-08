@@ -52,7 +52,7 @@
     }
   ],
   "current_station": "P6",
-  "phase_status": "in-progress",
+  "phase_status": "awaiting-sync",
   "p3_progress": {
     "cut": "Inc-1 -> Inc-2 -> Inc-3 -> Inc-4a -> Inc-4b -> Inc-4c -> Inc-5 -> Inc-W1 -> Inc-STRIPS -> Inc-CRUMB -> Inc-B55 -> Inc-REPAIR -> Inc-CONFIRM -> Inc-7 -> Inc-8 -> Inc-9",
     "cut_amendments": [
@@ -2856,6 +2856,11 @@
       "station": "P5",
       "date": "2026-10-08",
       "decision": "P5 close batch with carry-over: 23 open items (05-postmortem.md); operator 2026-10-08 chose to waive sealed-record validator blocks (V59/V56/V53/V1) and fix V22/V61, landing by PR"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-08",
+      "decision": "P6 approved by the orchestrator under the operator's delegation of 2026-10-08 ('Revisa, haz el merge y continuemos'); the operator's own reading of the close records is still owed; landed by PR #8"
     }
   ],
   "coordinator_rulings": [
