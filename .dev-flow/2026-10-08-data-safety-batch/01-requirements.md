@@ -60,7 +60,7 @@
 |----|------------|--------|------------|
 | US-001 | As the operator using mapper, I want an inspector edit to require an explicit save gesture, so that one stray keystroke cannot durably overwrite a map and its sidecar without my intent. | B-36 (UX2-C-01) | REFINE |
 | US-002 | As the maintainer, I want the shipped behaviours — a doubled `?` opens no second legend, and an unsummarisable map declares itself on its own card — guarded by their declared on-disk acceptance nodes, so a future regression cannot ship silently. | B-100 | READY |
-| US-003 | As the maintainer, I want every declared acceptance id reconciled to an on-disk node or retired, so the traceability record matches what the suite actually guards. | B-101 | REFINE |
+| US-003 | As the maintainer, I want every declared acceptance id reconciled to an on-disk node or retired, so the traceability record matches what the suite actually guards. | B-101 | READY |
 | US-004 | As the maintainer, I want the legend paint-race flake understood and deflaked, so the whole-branch gate is not invalidated by a poisoned instrument. | B-98 (FLAKE-2) | SPIKE |
 
 #### Refinement log (one block per story)
@@ -87,7 +87,7 @@
 - **Feasibility (E, S):** implementation path = grep each id's definition in `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md`, then grep `tests/` for a realising node. Findings: `AT-041` / `AT-042` are realised under other names (`test_at_r12_pressing_help_presents_every_map_binding` `tests/test_repair_layout.py:274`; `test_tc_r25` / `test_tc_r26` `:441` / `:456`; and the Inc-8 nodes at `tests/test_help_scope.py:139,147,327`); `AT-033` / `AT-034` / `AT-035` are NOT on disk and `tests/test_lens.py` does not exist (`ls tests/test_lens.py` → no such file). dependencies/unknowns = one factual discrepancy (below). fits one batch? yes.
 - **Evaluability (T) — behavioral, black-box:** *(Definitional/inspectional — no shipped surface is involved; this is traceability work, not behaviour.)* "When the maintainer greps `tests/` for each declared AT id, each id is either resolved to a named on-disk node or retired with a ledger entry."
 - **Open questions:** B-101 attributes `AT-033` / `AT-034` / `AT-035` to **US-N13**, but the canonical traceability table (`.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6089-6090`) assigns them to **US-N14**, which is DEFERRED (`#D23`). Their absence is therefore expected, not a defect. Which attribution is correct, and does the disposition become "retire the ids" rather than "realise them"?
-- **Classification:** `REFINE` — the B-101 story-id attribution contradicts the canonical doc for 3 of the 5 ids; the operator must settle that before the reconciliation can be specified.
+- **Classification:** `READY` (orchestrator ruling at the P0 gate, 2026-10-08, under the standing autonomous authorization) — the canonical record settles the attribution: `AT-033`/`AT-034`/`AT-035` belong to `~~US-N14~~ DEFERRED` (`.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6090`, `#D23`), so they are RETIRED from this batch's obligation and travel with US-N14; `AT-041`/`AT-042` are reconciled to their existing nodes (`tests/test_repair_layout.py:274`, `:441`, `:456`). The B-101 row is corrected in `.dev-flow/BACKLOG.md`.
 
 **US-004 — the legend paint-race flake (`B-98` / `FLAKE-2`)**
 - **INVEST:** I ✓ · N ✓ · V ✓ · E ✗ · S ✓ · T ✓
@@ -188,6 +188,9 @@
 ### 6.1 Extended glossary
 ### 6.2 Relevant design decisions
 ### 6.3 Open risks
+
+- **Security scan (`devflow-scan-spec.py`, 2026-10-08): `security_required: true`, flag `escape`.** The one match is §2.6 US-002's feasibility line, where `escape` names the Esc key of the legend seat, not input sanitisation. Recorded as C6 FIRED by the scanner (triggers only raise). The batch's security questions: (1) US-001 changes WHEN the inspector writes the map and its sidecar — the write path must stay atomic and confined (B-75 check-then-write, `MapStore._write_tmp` hard-link B-84 are adjacent, not in scope); (2) no new parser, network or secret surface. The `security-reviewer` lens runs at PDR over US-001's write path.
+- **US-001 depends on an operator verdict** on a prototype round (standing rule 2026-09-04); P0 stays open for US-001 until it arrives.
 ### 6.4 Phase-1 reconciliation log — moved to the ledger (§7)
 
 ### 6.5 Requirement amendments — moved to the ledger (§7)
