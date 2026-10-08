@@ -16,5 +16,8 @@ Measured on the prototype (sha256 of `.mmd` and `.yml` against the start state, 
 | R2 | Which fields go through the draft | Every inspector field, including the `state` segmented control (the prototype still committed it immediately) | A model with one exception teaches the operator that some edits are instant, which brings the stray-write back |
 | R3 | What `u` undoes | One `ctrl+s` as one step (all fields it wrote) | Undo granularity matches the save gesture the operator made |
 | R4 | Modal keys | `s` save · `d` discard · `esc` stay | As prototyped; `esc` keeps its app-wide meaning of "back out, change nothing" |
+| R5 | What `u` does while a draft is pending | `u` undoes the last SAVE and leaves the pending draft untouched | Undo acts on what was written; the draft is not written yet, and `esc`/discard already govern it (architect recommendation, ARQ 2026-10-08) |
+| R6 | Following a link to another map | Counts as an exit: the `save · discard · stay` modal opens first | Same rule for every exit (R1); a link is the one exit R1 did not name |
+| R7 | What `↵` does in a field | Keeps the draft and leaves the field (no write); the hint `↵ save` (`mapper/app.py:4043`) is rewritten to name `ctrl+s` | `↵` must not be a second save gesture, or the stray-write class returns through it |
 
 These rulings are recorded in `PLAN.md` (Key decisions) and `state.json` `decisions_log`, and travel to the post-mortem and the vault at sync. The operator may overturn any of them.

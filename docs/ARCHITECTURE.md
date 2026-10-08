@@ -15,8 +15,17 @@
 
 | Field | Value |
 |---|---|
-| Last amended by | `2026-08-27-repair-batch-02` |
-| Date | `2026-08-27` |
+| Last amended by | `2026-10-08-data-safety-batch` (ARQ) |
+| Date | `2026-10-08` |
+
+> **Amendment `2026-10-08-data-safety-batch` (ARQ, US-001 ← B-36, model C "draft + explicit save").**
+> **No module boundary moves and no dependency edge is added** (§3 is unchanged). What moves is one
+> **interface** (trigger A3): the inspector stops posting `FichaInspector.FieldCommitted` and instead
+> holds a per-node draft that `MapScreen` reads and persists on `ctrl+s` or on the `save` answer of a
+> new `save · discard · stay` modal. Every row below that describes that surface is written as a
+> **commitment** (*planned, Inc-N*), not in the present tense, because none of it exists on disk at
+> this amendment. §6 carries this batch's worksheet; the `2026-08-25-ui-next-batch-01` worksheet it
+> replaces is superseded and lives in git history.
 
 > **Amendment `2026-08-27-repair-batch-02` (`HLR-MAP.1`).** The `2026-08-26-ui-next-batch-02` ARQ was
 > approved with this map amended, and **the amendment was never landed** — its `PLAN.md` §7 recorded
@@ -78,8 +87,8 @@ file is classified by path prefix, so the A-family triggers can be evaluated by 
 | `osopen` | `mapper/osopen.py` | **The OS-handler boundary.** Validates an attachment target and hands it to the platform opener. | `open_external(kind: str, target: str, *, workspace: Path, launcher=None) -> str`; returns a status word, never raises for input reachable from `yaml.safe_load`. | **Strict.** No `model`, no `store`, no `app`, no Textual, no Rich, no reading of `_nodos.yml`, no attachment *discovery*, no UI feedback, and no `shell=True`. It receives one already-extracted string plus the workspace root, validates it, opens it or raises. Deciding *which* attachment to open is `app`'s job; deciding *how to report the failure* is `app`'s job. |
 | `keymap` | `mapper/keymap.py` | **The single seat for key chords.** One table, read by three consumers. | `KeyBinding(key, action, group)`, `KEYMAP: list[KeyBinding]`, `groups_for_keybar(...)`, `palette_items(query)`. | **Zero dependencies — not even Rich or Textual.** No styling, no widget, no `Binding` objects, no dispatch. It is data; the readers (keybar, palette, help, screen `BINDINGS`) do the shaping. |
 | `design` | `mapper/darkside.py` | Darkside design system: palette tokens, glyph vocabulary, and **Rich-only** renderable builders (tab strip, keybar, panels). | `GROUND`/`PANEL`/`INK`/`ACCENT`/… tokens; `tab_strip`, `keybar`, `moon`, panel builders returning `rich.Text` / `rich.Panel`. | **Any Textual import** (that ban is the reason this is not merged into `widgets` — see R-006); `model`, `store`, app state. |
-| `widgets` | `mapper/widgets/*.py`, `mapper/motion.py` | Textual widgets built on `design`: chrome (`TabStrip`, `KeyBar`, `HintLine`, `GroupBox`), the nine `Ds*` interaction components, the editable ficha inspector, the outline rail, and shared motion helpers. | `TabStrip`, `KeyBar`, `HintLine`, `GroupBox`, `Ds*` components, `FichaInspector`, `OutlineRail`; state changes leave as Textual `Message`s. | **Persistence and orchestration.** A widget never imports `store`, `views`, `screens`, `app` or `osopen`; it never saves a ficha and never launches an OS handler. It emits a message and `app` decides. |
-| `screens` | `mapper/screens/*.py` | Full-screen and modal Textual screens that compose widgets into a task: palette, help, coverage, editor, factory, settings. | `CommandPalette`, `HelpScreen`, `CoverageScreen`, `EditorScreen`, `FactoryScreen`, `SettingsScreen`. | The `App` object and its lifecycle; domain logic; persistence internals. **`screens` must not import `app`** — see the recorded violation in §3. |
+| `widgets` | `mapper/widgets/*.py`, `mapper/motion.py` | Textual widgets built on `design`: chrome (`TabStrip`, `KeyBar`, `HintLine`, `GroupBox`), the nine `Ds*` interaction components, the editable ficha inspector, the outline rail, and shared motion helpers. | `TabStrip`, `KeyBar`, `HintLine`, `GroupBox`, `Ds*` components, `FichaInspector`, `OutlineRail`; state changes leave as Textual `Message`s. *(Planned, `2026-10-08-data-safety-batch` Inc-1: `FichaInspector` also holds the **per-node draft** of unsaved ficha edits and exposes it read-only — see §4. That is the one sanctioned exception to "changes leave as messages": the screen PULLS the draft at the moment it saves, because only the save's result may clear it.)* | **Persistence and orchestration.** A widget never imports `store`, `views`, `screens`, `app` or `osopen`; it never saves a ficha and never launches an OS handler. It emits a message and `app` decides. **Holding a draft is not persisting one:** the inspector never writes it, never snapshots it for undo, never decides when an exit must ask about it, and never puts it on disk on its own (ruling R1). |
+| `screens` | `mapper/screens/*.py` | Full-screen and modal Textual screens that compose widgets into a task: palette, help, coverage, editor, factory, settings. | `CommandPalette`, `HelpScreen`, `CoverageScreen`, `EditorScreen`, `FactoryScreen`, `SettingsScreen`. *(Planned, `2026-10-08-data-safety-batch` Inc-1: `DraftGuardScreen` in `mapper/screens/draft_guard.py` — see §4.)* | The `App` object and its lifecycle; domain logic; persistence internals. **`screens` must not import `app`** — see the recorded violation in §3. |
 | `app` | `mapper/app.py` | The `App` object, the top-level screens still living in it (`HomeScreen`, `MapScreen`, `RepoScreen`, `PlugRepoScreen`, `_ImportPreviewScreen`) and their modals, plus all cross-module orchestration and persistence calls. | `MapperApp`, `HomeScreen`, `MapScreen`, `RepoScreen`; wires every module together. | Domain logic, persistence internals, drawing. |
 
 **Staleness rule — the map checks itself.** A touched file that falls under **no** declared module means
@@ -92,9 +101,16 @@ document, not an ambiguity to be resolved case by case.
   so a single `mapper/*.py` glob would silently swallow `views/`, `screens/` and `widgets/` and every
   double-claim check would pass vacuously. Top-level files are therefore each named literally, and only
   the three package directories use a glob. Changing this is how the check stops working.
-- **`mapper/app.py` is 1709 lines and holds eleven screen classes.** That is recorded here as a fact, not
-  as an aspiration: it is the single reason this batch has no parallel lanes (§6), and the boundary move
-  that would fix it is R-009.
+- **`mapper/app.py` is 4957 lines and holds ten `*Screen` classes** *(re-executed `2026-10-08`: `wc -l
+  mapper/app.py` → 4957; `grep -c "^class .*Screen" mapper/app.py` → 10. The previous figure, 1709 lines /
+  eleven classes, was measured in `2026-08-25` and had gone stale)*. That is recorded here as a fact, not
+  as an aspiration: it is the single reason most batches have no parallel product lanes (§6), and the
+  boundary move that would fix it is R-009.
+- **Paths outside `mapper/` are not modules and are classified by FILE, not by prefix.** `tests/`,
+  `docs/`, `.dev-flow/`, `fixtures/` and `prototypes/` carry no module row on purpose: they own no
+  runtime boundary, so the staleness rule above does not fire on them. The parallelisation rule (§6)
+  still applies to them at file granularity — two lanes editing the same test file collide exactly as
+  two lanes editing the same source file do.
 
 ---
 
@@ -155,10 +171,13 @@ deliberately — see R-011.
 | Darkside tokens + renderables | `design` | `views`, `screens`, `widgets`, `app` | Colour tokens; builders returning `rich.Text` / `rich.Panel` | yes for this batch — four consumers, no lane owns it |
 | `Ds*` interaction components | `widgets` | `screens`, `widgets` (inspector) | Nine `Static`-based components, three states each, changes emitted as `Message` | **yes for this batch.** Inc-2 builds the inspector *from* them; it must not change their signatures. |
 | `KeyBar` / `HintLine` / `TabStrip` chrome | `widgets` | `screens`, `app` | `set_groups(...)`, `set_crumb(...)`, (new) `HintLine` setter | **NO — Inc-2 owns it.** HintLine gains a setter and the keybar gains visible truncation. No other lane edits `widgets/chrome.py`. |
-| `KEYMAP` seat | `keymap` | `screens`, `widgets`, `app` | `KEYMAP: list[KeyBinding]`, `groups_for_keybar(...)`, `palette_items(q)` | **NO — Inc-1 owns it.** It becomes the single source from which screens generate `BINDINGS`. No other lane edits `mapper/keymap.py`. |
+| `KEYMAP` seat | `keymap` | `screens`, `widgets`, `app` | `KEYMAP: list[KeyBinding]`, `groups_for_keybar(...)`, `palette_items(q)` | **NO — Inc-1 owns it.** It becomes the single source from which screens generate `BINDINGS`. No other lane edits `mapper/keymap.py`. *(`2026-10-08-data-safety-batch`: in motion again, **Inc-1 owns it** — planned rows: `ctrl+s` → `save_draft` in the map scope, and a new modal scope `draft` (`s` save · `d` discard · `escape` stay, ruling R4) added to `MODAL_SCOPES` so the guard does not inherit `ctrl+p` / `?`. The whole-seat pin `tests/test_key_dispatch.py:137` moves with it.)* |
 | **`ViewState` parameter object** · **PRESENT** | `views` | `app` | `mapper/views/state.py` declares `ViewState`, a **frozen** dataclass in which **every field carries a default**, plus `FOCUS_OWNERS`; and `IRenderer` as a `runtime_checkable` Protocol with `render(self, graph: Graph, state: ViewState) -> Text`. Initial roster: `selected_id`, `w`, `h`, `focus_owner`, `query`, `diff` | **LANDED 2026-08-28 in `2026-08-26-ui-next-batch-02` Inc-2** — the batch's headline A3, pre-authorised at intake. Every `render` definition under `mapper/views/` and every arg-ful call site migrated in one increment; `**kwargs` occurrences across the definition set are **0**. **The cardinalities are PINNED in `tests/test_a3_census.py`, deliberately not narrated here** — they were first published as 27 and 6, both measured before the increment had finished writing its own tests, and both wrong. A number in this row cannot be contradicted by the suite; a pinned one can. **Adding a defaulted field here is additive and never re-opens the A3** — only the first migration was one, which is what keeps four later increments out of A3 territory. `with_header` is deliberately NOT a field: it was a parameter no caller ever passed, so it is now unconditional in code. `query` is **transitional** and is replaced by a resolved `hits` set in Inc-4, where "what matches" gains a single owner. The module imports no Textual, so `views` stays headless and `export` stays testable without an event loop. |
 | **`Canvas` `dots` / `bgs` layers** · **PRESENT** | `canvas` | `views` | `Canvas(w, h, tones=(), fallback="")` declares `dots` and `bgs` as empty mappings; `rows()` composes both in the declared precedence — an explicit cell outranks a wire, a wire outranks a braille dot, and a `bgs` background applies to whichever glyph won **unless that glyph's style declares its own background or is one the background cannot be composed onto — then the glyph keeps its style and the layer background is dropped**; out-of-bounds writes are dropped, not raised; a layer value outside `tones` paints `fallback` | **LANDED 2026-08-28 in `2026-08-26-ui-next-batch-02` Inc-1** — the batch's **second** A3, distinct from the `ViewState` row above. `RadialRenderer`'s two instance monkey-patches are deleted, asserted gone by a derived census. **`canvas` still depends on nothing:** the tone policy is INJECTED at construction rather than imported, because §3 declares this module's dependencies as `—`; the guard itself lives in `rows()`, the one place all four layers converge, which is what defeats a write-time setter (that would miss `radial.py`'s direct `cv.dots[...] = hue` assignment). Trigger **B4**'s consequence is asserted on the written artifact: `export.save_svg`'s bytes now carry the braille, and the four `RadialRenderer` byte-identity pins were re-baselined one at a time while all eight `Layered`/`Outline` pins held. |
 | `open_external` | `osopen` | `app` **only** | `open_external(kind, target, *, workspace, launcher=None) -> str`; returns a status word | **NO — new, Inc-4 owns it.** Security-reviewed before Inc-4 signs off. |
+| `FichaInspector.FieldCommitted` · **PRESENT, to be REMOVED** | `widgets` | `app` (`MapScreen.on_ficha_inspector_field_committed`, `mapper/app.py:3344`) and three test files (`tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`) — census `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests`, 2026-10-08 | `FieldCommitted(node_id, field, value)`, posted on blur, on `↵`, and on every `state` segment change (`mapper/widgets/inspector.py:347-373`) | **NO — `2026-10-08-data-safety-batch` Inc-1 removes it**, producer and consumer in the same increment. It is the immediate-write path B-36 is about; leaving the class or its handler alive leaves a second save path one `post_message` away. The three test files are re-pointed to the draft + `ctrl+s` path (trigger B1). |
+| **`FichaInspector` draft surface** · *planned* | `widgets` | `app` (`MapScreen`) **only** | Read-only to the consumer: `draft_node_id -> str \| None`, `draft_values() -> dict[str, str]` (a copy; keys are schema keys or the pseudo-keys `title` / `notes` / `state`), `has_draft() -> bool`, `clear_draft() -> None`. One node's draft at a time, in memory, for the life of the widget (= the life of its `MapScreen`). A field is dirty iff its value differs from the value the form SHOWED for it (`darkside.plain(stored)`), so opening a node never makes it dirty by itself. Every field goes through it, `state` included (ruling R2). | **NO — new, Inc-1 owns it.** Frozen at PDR once Inc-1's design is approved; Inc-2 consumes it read-only. |
+| **`DraftGuardScreen`** · *planned* | `screens` | `app` (`MapScreen`, `MapperApp`) | `DraftGuardScreen(title: str)` → `ModalScreen[str]`, dismissed with exactly one of `"save"`, `"discard"`, `"stay"`; keys from the `draft` seat scope. Renders the node title with `markup=False` (the `SEC-H2` sink rule `_ConfirmScreen` already follows, `mapper/app.py:385-401`). Imports `design` and `keymap` only. | **NO — new, Inc-1 owns it.** |
 
 - **Changing one of these is trigger A3** — it fires ARQ, PDR *and* DDR, and it is never done inside a lane.
 - A **frozen** interface is one the current batch committed to at PDR: no lane touches it; the work returns
@@ -205,6 +224,9 @@ have to become true for the decision to be re-opened.
 | R-009 | **`screens` is split from `app` in the map, but `mapper/app.py` is NOT split in this batch.** | Extract `MapScreen` (and the four sibling screens and five modals) out of the 1709-line `app.py` into `mapper/screens/*.py` now, as an Inc-0. | Cost/benefit. The extraction is the *only* move that would give this batch file-level lanes (§6), but it is a large, purely-structural diff across every increment's blast radius, landing before any of them can start, with no user-visible outcome and no acceptance test of its own. **Re-open it when:** a batch has ≥3 increments that touch `app.py` for genuinely unrelated reasons *and* the batch has slack for a no-outcome increment — or when a merge conflict in `app.py` actually costs more than the extraction would. Both are plausible by batch 3. |
 | R-010 | **`IRenderer.render` stays frozen through this batch**; the rail computes its own tree from `Graph`. | Extend `render` to return a structured tree (or add a `render_tree`) so the rail can reuse `OutlineRenderer`'s layout logic. | Batch 2 (pan/fold/minimap/braille) already has to reopen the renderer contract. Bundling the rail's needs into *that* conversation is cheap; bundling it into *this* batch is an A3 change mid-flight. Some tree-walk duplication between the rail and `OutlineRenderer` is the accepted price for one batch. |
 | R-011 | **`DiffResult` stays in `diff`**, keeping the transitive `views → diff → store` import path, for one more batch. | Move the `DiffResult` dataclass to `model` and leave `diff.py` as the pure git adapter. | The fix is small and correct, but its file (`views/layered.py`) sits inside Inc-2's lane this batch, so taking it now widens a lane for an unrelated reason. Re-open at the start of any batch that does not touch `views/layered.py` — it should be a standalone two-file increment. |
+| R-012 | **The per-node draft of model C lives in `FichaInspector`** (`widgets`), not in `MapScreen` and not in a new module. *(`2026-10-08-data-safety-batch`.)* | (a) `MapScreen` owns the draft and the inspector posts a message per keystroke — doubles the traffic, changes `show()`'s signature, splits "what is dirty" from "how dirty is painted" across two modules, and grows a 4957-line file. (b) A new pure module (`mapper/draft.py`) — a ~30-line dict with a node id does not earn a module, an A1 boundary or a source file out of a 4-file budget. | A second surface needs the same draft (the documents editor, a second inspector, a draft that must outlive the screen) — then the value object moves out of the widget into `model` or its own module, and that is an A1. |
+| R-013 | **`FieldCommitted` is removed, not reshaped; `MapScreen` pulls the draft synchronously on save.** *(`2026-10-08-data-safety-batch`.)* | Reshape it into a `SaveRequested(node_id, values)` message. A posted message is fire-and-forget: it cannot carry the save's result back, yet the draft may be cleared **only if `_save_or_toast` succeeded**, and the modal's `save → then leave` needs the save finished before the exit runs. A message would need a second message back and an ordering argument; a method call needs neither. | Textual gains a request/response message primitive, or the save becomes asynchronous (then both paths need the same completion handshake anyway). |
+| R-014 | **The `save · discard · stay` modal is a new file in `screens`** (`mapper/screens/draft_guard.py`), binding its keys from the seat, not another literal-`BINDINGS` modal inside `app.py`. *(`2026-10-08-data-safety-batch`.)* | Add it next to `_ConfirmScreen` in `app.py` — zero new files, but it grows the file R-009 wants smaller, and a literal `BINDINGS` list is a key the legend and the seat pins cannot see (`#D9` migrated factory and settings off literal lists for that reason). | The 4-source-file budget for Inc-1 cannot absorb the new file — then it moves into `app.py` and this row is reversed with that reason. |
 
 ---
 
@@ -214,68 +236,41 @@ Two increments are parallelisable when **`modules(A) ∩ modules(B) = { }`**, **
 same domain on **different layers** (UI/UX vs functional) *and* the interface between them is frozen and
 neither lane touches it.
 
-### Current batch — `2026-08-25-ui-next-batch-01` (variant A «taller», five P1 stories)
+### Current batch — `2026-10-08-data-safety-batch` (B-36 model C + acceptance debt + FLAKE-2)
 
-*(The `2026-08-18-batch-01` worksheet is superseded and removed; it described a module cut that no longer
-matches the tree.)*
+*(The `2026-08-25-ui-next-batch-01` worksheet is superseded and removed; it is in git history. Its
+risks A-3 — "define the commit point explicitly; do not add `save_field` to `MapStore`" — and A-6 —
+"where undo state lives" — are the two this batch answers: the commit point is `ctrl+s` or the modal's
+`save`, the write stays the whole-graph `MapStore.save(map_id, graph)`, and undo stays the per-map stack
+on `MapperApp.undo_stacks` (`mapper/app.py:3503`, `:4902`).)*
 
-| Lane | Modules | Layer | Files it owns | Disjoint from the others? |
-|---|---|---|---|---|
-| Inc-1 · US-N03 keymap seat + executing palette + scoped help | `keymap`, `screens`, `app` | UI/UX | `mapper/keymap.py`, `mapper/screens/palette.py`, `mapper/screens/help.py`, `mapper/app.py` | **No** — `app` |
-| Inc-2 · US-N01 taller recompose + editable inspector | `widgets`, `views`, `app` | UI/UX | `mapper/widgets/inspector.py` *(new)*, `mapper/widgets/chrome.py`, `mapper/views/layered.py`, `mapper/app.py` | **No** — `app` |
-| Inc-3 · rail + coverage lattice | `widgets`, `app` | UI/UX | `mapper/widgets/rail.py` *(new)*, `mapper/app.py` | **No** — `app`, `widgets` |
-| Inc-4 · US-N02 attachments | `osopen`, `widgets`, `app` | functional + UI/UX | `mapper/osopen.py` *(new)*, `mapper/widgets/inspector.py`, `mapper/app.py` | **No** — `app`, `widgets` |
-| Inc-5 · US-N04 coverage worklist | `screens`, `widgets`, `app` | UI/UX | `mapper/screens/coverage.py`, `mapper/widgets/inspector.py`, `mapper/app.py` | **No** — `app`, `widgets`, `screens` |
-| Inc-6 · US-N05 confirm-before-destroy + app-level undo | `app` | functional + UI/UX | `mapper/app.py` | **No** — `app` |
-
-**Verdict: 0 of the 15 pairs are parallelisable. `modules(A) ∩ modules(B) ⊇ {app}` for every pair,
-without exception.** There is no lane to manufacture here and the worksheet does not pretend otherwise.
+| Lane | Story | Modules | Layer | Files it owns (source · tests) | Source files |
+|---|---|---|---|---|---|
+| Inc-1 · draft + `ctrl+s` + node-change guard | US-001 | `widgets`, `keymap`, `screens`, `app` | functional + UI/UX | `mapper/widgets/inspector.py`, `mapper/keymap.py`, `mapper/screens/draft_guard.py` *(new)*, `mapper/app.py` · `tests/test_inspector.py`, `tests/test_g6_store_surrogates.py`, `tests/test_worklist_safety.py`, `tests/test_key_dispatch.py`, a new draft-save test file | **4** (at the cap) |
+| Inc-2 · leave-screen and quit guards | US-001 | `app` | functional + UI/UX | `mapper/app.py` · the new draft-save test file | **1** |
+| Inc-3 · FLAKE-2 deflake | US-004 | — (tests only) | test | `tests/test_help_scope.py` (`:93`, `:365`), `tests/test_en7.py` (`:246`), `tests/test_repair_layout.py` (`:118`) | 0 |
+| Inc-4 · AT-044 node + AT reconciliation | US-002, US-003 | — (tests + records) | test / traceability | a NEW test file for AT-044 (not `tests/test_help_scope.py` — see the re-cut below); the batch ledger and `.dev-flow/BACKLOG.md` for AT-025b, AT-041/042 (reconciled) and AT-033/034/035 (retired) | 0 |
 
 | Pair | Intersection | Parallel? |
 |---|---|---|
-| 1–2 | `{app}` | no |
-| 1–3 | `{app}` | no |
-| 1–4 | `{app}` | no |
-| 1–5 | `{app, screens}` | no |
-| 1–6 | `{app}` | no |
-| 2–3 | `{app, widgets}` | no |
-| 2–4 | `{app, widgets}` | no — **plus a file collision on `widgets/inspector.py`** |
-| 2–5 | `{app, widgets}` | no — **plus a file collision on `widgets/inspector.py`** |
-| 2–6 | `{app}` | no |
-| 3–4 | `{app, widgets}` | no |
-| 3–5 | `{app, widgets}` | no |
-| 3–6 | `{app}` | no |
-| 4–5 | `{app, widgets}` | no — **plus a file collision on `widgets/inspector.py`** |
-| 4–6 | `{app}` | no |
-| 5–6 | `{app}` | no |
+| 1–2 | `{app}` + file `mapper/app.py` + the draft-save test file | **no** — and Inc-2 consumes the draft surface Inc-1 creates: an ordering dependency, not just a conflict |
+| 1–3 | `{}` by module; files disjoint **if** Inc-1's census finds no inspector-commit oracle in `tests/test_help_scope.py`, `tests/test_en7.py` or `tests/test_repair_layout.py` (`planned` at PDR) | yes, conditionally |
+| 1–4 | `{}`; files disjoint | yes |
+| 2–3 | `{}`; files disjoint | yes |
+| 2–4 | `{}`; files disjoint | yes |
+| 3–4 | `{}` by module; **file collision on `tests/test_help_scope.py` as the stories are written** (US-002 places the AT-044 node there; US-004 edits `:93` and `:365`) | **yes, only after the re-cut**: AT-044 goes in its own test file and US-003's reconciliation is written to the ledger, not into test docstrings |
 
-**Two of these are ordering dependencies, not merely conflicts.** `mapper/widgets/inspector.py` does not
-exist yet: Inc-2 creates it, Inc-4 and Inc-5 extend it. Inc-4 and Inc-5 therefore **cannot start** before
-Inc-2 lands — re-cutting cannot fix that, only sequencing can. Likewise Inc-1 must land first: once
-`keymap` is the single source from which every screen generates `BINDINGS`, any increment that adds a key
-(Inc-3's rail toggle, Inc-4's open-attachment, Inc-5's jump-to-node, Inc-6's confirm) is editing the seat
-Inc-1 owns.
+**Verdict: the product lane is one serial chain, Inc-1 → Inc-2; the two test-only lanes are disjoint
+from it and from each other after one re-cut.** Merit order still decides what goes first, and it says
+**Inc-3 first**: FLAKE-2 sits in the help-scope file the whole-branch gate runs, and a poisoned
+instrument invalidates every gate that follows it, Inc-1's included (P-05).
 
-**Recommended execution: one serial chain, `Inc-1 → Inc-2 → Inc-3 → Inc-4 → Inc-5 → Inc-6`.** Inc-6 is
-the only lane whose module set is a strict singleton (`{app}`) and whose diff is small and self-contained;
-it is the one that could be resequenced freely if a gate stalls.
-
-**What would change the verdict — and what would not.** Splitting `screens` out of `app` in *this
-document* changed nothing, because the binding constraint is a single 1709-line **file**, not a module
-label: `mapper/app.py` holds `MapperApp`, `HomeScreen`, `MapScreen`, `RepoScreen`, `PlugRepoScreen`,
-`_ImportPreviewScreen` and five modals. Every increment above reaches into it.
-
-- **Extracting `MapScreen` and its siblings into `mapper/screens/*.py` (R-009)** would give the lanes
-  *distinct files* — a real reduction in merge pain. It would **not** make them parallel under the stated
-  rule, because they would then all intersect on `screens` instead of on `app`. Honest framing: it buys
-  conflict-freedom, not concurrency.
-- **The only move that yields true module-level disjointness** is making the rail and the inspector
-  self-contained widgets that own their own state and communicate with the app purely through Textual
-  `Message`s — which §3 already mandates. Even then `app.py` must mount them, so the lanes converge on a
-  handful of lines. At this size that is a serial chain wearing a costume.
-
-Recording it this way is the point: the worksheet's job is to tell the truth about whether lanes exist,
-and this batch's truth is that they do not.
+**Why US-001 is two increments and not one.** All four source files are needed for the first safe
+state — the draft, the key that saves it, and the guard that stops a node change from walking away from
+it — so Inc-1 sits at the cap. The other two exits (leaving the map screen; quitting) touch only
+`mapper/app.py` and reuse the modal unchanged, so they cut cleanly into Inc-2. The intermediate state
+between the two never writes a stray keystroke to disk (B-36 is closed at Inc-1); what it can still do
+is drop an unsaved draft on `q` / `esc` / `ctrl+q` without asking, which Inc-2 closes before merge.
 
 If the intersection is **not** empty there are exactly two exits, and both are explicit decisions:
 
@@ -290,15 +285,10 @@ with a delay — both lanes advance and meet the conflict at integration, the mo
 
 ### Architectural risks this cut hands to the requirements phase
 
-*(Recorded here because each one is a boundary question that a story can violate by accident, and three of
-them would force a frozen-interface change if a story is written carelessly.)*
-
 | # | Risk | Where it bites | What requirements must settle |
 |---|---|---|---|
-| A-1 | **Rail built from a renderer instead of from `Graph`.** `IRenderer.render -> Text` cannot yield a collapsible tree with per-branch counts. | Inc-3 | Write the rail story against `Graph`, never against `OutlineRenderer`. A story phrased "the rail reuses the outline view" is an **A3 frozen-interface change and out of scope** — it returns to the trunk. |
-| A-2 | **Missing-field computation duplicated** across the rail's coverage lattice (Inc-3) and the coverage worklist (Inc-5); `screens/coverage.py` already computes it from `Graph` + `SchemaField`. | Inc-3, Inc-5 | Name one owner for a `missing_fields(node, schema)` helper in `model`. Adding a function to `model` is **additive, not a frozen-interface change** — but two lanes writing it independently is how the two views drift apart and disagree about what "complete" means. |
-| A-3 | **The editable inspector has no write path of its own** — §3 bans `widgets → store`. Persistence is `MapStore.save(map_id, graph, sidecar)`, a **whole-graph** write over the frozen interface. | Inc-2 | Define the commit point explicitly (on field blur / on confirm / on explicit save). Per-keystroke saving rewrites `.mmd` + `_nodos.yml` on every character. **Do not add `save_field` to `MapStore`** — that is A3. If the answer needs a partial write, it comes back to the trunk. |
-| A-4 | **`osopen` receives untrusted, file-derived text.** Attachment targets come out of `_nodos.yml`, which is user- or repo-supplied. Launching an OS handler on it is program execution driven by document content. | Inc-4 | Acceptance criteria must cover the *rejections*, not only the happy path: scheme allowlist (`http`/`https` for `url` only), `file` targets confined under the workspace root **whether or not they exist**, no shell invocation, and a visible non-fatal error for anything rejected. **`security-reviewer` signs off before Inc-4 closes.** This is the batch's real attack surface. |
-| A-5 | **The seat already depends on an unwritten scoping rule.** `mapper/keymap.py` binds five chords twice: `f` → `fábrica[doors]` / `alternar foco[view]`; `j`,`k`,`↵`,`esc` → a `nav`/`edit` action *and* a `palette` action. Four are clearly deliberate (the `palette` group is a modal scope), which is exactly the problem: **the group→scope mapping that makes them safe is nowhere declared.** Harmless while the keybar only *displays* the table; a silent shadowing bug the moment screens generate `BINDINGS` from it. `f` is the one that is not obviously safe — `doors` and `view` are both non-modal. | Inc-1 | Write the group→scope mapping down, and state the collision rule: a duplicate chord *within one active scope* is an error, not last-wins. Resolve `f` explicitly (confirm `doors` and `view` are never co-active, or rebind one). A test should assert the seat has no intra-scope duplicates — otherwise this recurs every time a lane adds a key. |
-| A-6 | **App-level undo changes where undo state lives.** `MapScreen.action_undo` exists today at screen level (`mapper/app.py:1544`); "app-level" means the state moves to `MapperApp` to survive screen pops. | Inc-6 | Settle whether undo is an in-memory `Graph` snapshot or a store-level revert, and whether it must undo a destroy that already reached `store.save`. Also settle the depth (single-step vs stack) — the story says "undo", which is not a specification. |
-| A-7 | **Known `screens → app` back-edge** at `mapper/screens/factory.py:343`. Inc-1 touches both modules, so it is the tempting place to fix it. | Inc-1 | Fixing it (move `_PromptScreen` to `mapper/screens/prompt.py`) is **scope-add** and needs approval; leaving it is acceptable for this batch. What is not acceptable is fixing it silently inside a US-N03 increment. |
+| A-8 | **Textual 8.2.8 dispatches every `on_*` handler across the MRO** (measured by the B-36 prototype, which had to neutralise `FichaInspector.on_input_blurred` / `on_input_submitted` and `MapScreen.on_ficha_inspector_field_committed` to stop double commits). A subclass override does not replace a base handler; both run. | Inc-1 | The change is made **in place** in `FichaInspector` and `MapScreen`; no subclass, no monkey-patch. An AT asserts the blur path writes nothing (sha256 of `.mmd` + `_nodos.yml` before/after), so a surviving base handler reddens it. |
+| A-9 | **`refresh_canvas` re-points and rebuilds the inspector on every refresh** (`mapper/app.py:3281`, the only `.show(` call on it). A draft held only in widget values is wiped by the next repaint. | Inc-1 | The draft is overlaid when rows are BUILT (`_rows`), not re-applied after a rebuild; the node-change guard sits at that one re-pointing site, before `show()` is called, so every cursor move (j/k/h/l, rail, `n`/`N`, `M`, worklist jump, add child) is guarded by construction rather than by enumeration. |
+| A-10 | **A failed save must not leave the draft in the in-memory graph.** Today's handler mutates `self.graph` before `_save_or_toast`; on failure the mutation stays, and the next structural save (`a`, `x`, `A`, `X`, `u`) would write it — a second save path, the defect class itself. | Inc-1 | On a failed save the graph is restored and the draft is kept; the modal's `save` then behaves as `stay`. One `_push_snapshot()` per successful save, so `u` undoes one `ctrl+s` (ruling R3). |
+| A-11 | **Exits that are not on the ruling's list.** `ctrl+q` is live on every screen (`MapperApp._merge_bindings()` → `ctrl+c`, `ctrl+p`, `ctrl+q`, `question_mark`; Textual's `ctrl+q` is `priority=True`); following a link pushes a second `MapScreen` (`mapper/app.py:3566`); `u` replaces the graph under a pending draft; a terminal kill cannot ask anything. | Inc-1, Inc-2 | Quit guards every `MapScreen` on `screen_stack`, not only the top one, and is not re-entrant (a second `ctrl+q` while the guard is up does not stack a second modal). Whether link-follow and `u` count as exits is a UX ruling for PDR; ARQ's recommendation is that link-follow is guarded (a lower screen saving a stale graph over a linked edit is the risk) and that `u` leaves the draft alone. A killed terminal loses the draft by design (R1). |
+| A-12 | **The modal paints a file-derived title.** | Inc-1 | `markup=False` at the sink, as `_ConfirmScreen` does (`SEC-H2`); the `security-reviewer` lens at PDR covers it with the write path (`01-requirements.md` §6.3). |
