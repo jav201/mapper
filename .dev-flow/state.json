@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P2",
+  "current_station": "P1",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -81,7 +81,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 2,
+    "P1": 3,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -176,6 +176,11 @@
       "station": "P1",
       "date": "2026-10-08",
       "decision": "P1 iteration 2 approved (self-approved): round-2 dispositions applied by deepseek-v4-pro (first run hung 1 h with no output and was killed; rerun under a 40-min watchdog succeeded); failure-case table verified by the orchestrator; validator 0 block"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-08",
+      "decision": "P2 round 3 iterate-to-refine at the P1 soft cap (iteration 3); root cause: disk-hash failure classification unsound; operator ruling 'Simplificar y seguir (Recomendado)': one rule, reload from disk + keep draft re-diffed, reload failure restores in memory, no writes from failure handling"
     }
   ],
   "standing_authorization": {
