@@ -65,8 +65,8 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 | US-001 | REFINE | design ruling (save affordance) pending; prototype round + operator verdict before implementation (standing rule 2026-09-04) |
 | US-002 | READY | write AT-044 test (doubled `?`); reconcile AT-025b → existing `LLR-N13.1.5` nodes in `tests/test_repair_cycles.py` |
 | US-003 | READY | orchestrator ruling at P0: AT-033/034/035 RETIRED here (they belong to deferred US-N14, `#D23`); AT-041/042 reconciled to `test_at_r12…` / `test_tc_r25…` / `test_tc_r26…` |
-| US-004 | SPIKE | FLAKE-2 mechanism is a hypothesis (framework key `left` vs seat-declared own-scope group); needs reproduction |
-| P0 | open — US-002/US-003 READY, US-004 SPIKE running, US-001 waits on the operator's prototype verdict | trigger evaluation recorded; C6 fired by the scanner (`escape` = the Esc key) |
+| US-004 | READY | spike done (tester agent): race in the test's own `scroll_to` setup (`immediate=False`), not reflow; test-side fix at 4 sites; regression RED 2/2 → GREEN 2/2 under an injected delay |
+| P0 | open — US-002/003/004 READY; US-001 waits on the operator's prototype verdict (gallery published 2026-10-08) | trigger evaluation recorded; C6 fired by the scanner |
 
 ## Roadmap + increment plan
 
@@ -80,6 +80,7 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 | 2026-10-08 | US-002: reconcile AT-025b to the existing `LLR-N13.1.5` nodes, no new node | the behaviour is already pinned by five nodes (`tests/test_repair_cycles.py:501…664`); a duplicate node adds maintenance, not coverage |
 | 2026-10-08 | P0 stays open for US-001 until the operator's prototype verdict; US-004 spike runs now | standing rule 2026-09-04 (prototype round before TUI design); keeps the batch moving without deciding the operator's design question |
 | 2026-10-08 | `owner` omitted from `state.json` | A-110 forbids profile paths in tracked files; the project rule wins over the flow convention; `V40` NOTICEs it |
+| 2026-10-08 | US-004 READY with a test-side fix at four `scroll_to` sites | the spike measured the race and refuted the reflow hypothesis; widening to the sibling sites closes the class, not the instance |
 | 2026-10-08 | C6 recorded as fired | the spec scanner flagged `escape`; triggers only raise, even on a word-level false positive |
 
 ## Risks / watch-items

@@ -61,7 +61,7 @@
 | US-001 | As the operator using mapper, I want an inspector edit to require an explicit save gesture, so that one stray keystroke cannot durably overwrite a map and its sidecar without my intent. | B-36 (UX2-C-01) | REFINE |
 | US-002 | As the maintainer, I want the shipped behaviours — a doubled `?` opens no second legend, and an unsummarisable map declares itself on its own card — guarded by their declared on-disk acceptance nodes, so a future regression cannot ship silently. | B-100 | READY |
 | US-003 | As the maintainer, I want every declared acceptance id reconciled to an on-disk node or retired, so the traceability record matches what the suite actually guards. | B-101 | READY |
-| US-004 | As the maintainer, I want the legend paint-race flake understood and deflaked, so the whole-branch gate is not invalidated by a poisoned instrument. | B-98 (FLAKE-2) | SPIKE |
+| US-004 | As the maintainer, I want the legend paint-race flake understood and deflaked, so the whole-branch gate is not invalidated by a poisoned instrument. | B-98 (FLAKE-2) | READY |
 
 #### Refinement log (one block per story)
 
@@ -95,7 +95,7 @@
 - **Feasibility (E, S):** implementation path = UNESTABLISHED — the mechanism is a hypothesis, not a finding. Test at `tests/test_help_scope.py:327-390`. Hypothesis (see §2.7 P-4): `effective` is read by pressing every key in a live-derived `universe` (`test_help_scope.py:349-352`) and comparing `(pane.scroll_offset, screen_stack, screen, focused)` before/after (`:367-373`); `left` enters `universe` via the `VerticalScroll` pane's framework bindings (`mapper/screens/help.py:73-75`, `overflow-y: auto` at `help.py:51`) but is not a `SCOPE_HELP` declaration, so it can be `effective` (a horizontal-scroll reflow race) yet never `painted` (`:383-384`). fits one batch? needs a spike / reproduction first.
 - **Evaluability (T) — behavioral, black-box:** "When the legend own-keys test is run N times under full-lane load, the maintainer observes a deterministic pass and a written record of which mechanism was removed."
 - **Open questions:** the mechanism is unconfirmed; needs reproduction under the load condition that flaked it (full lane).
-- **Classification:** `SPIKE` — the root cause is a hypothesis; an exploratory reproduction precedes any fix.
+- **Classification:** `READY` after the spike (2026-10-08, `spike/FLAKE-2-spike.md`). The intake's reflow hypothesis is REFUTED. Finding: the test's own setup `pane.scroll_to(y=max//2, animate=False)` (`tests/test_help_scope.py:365`) defaults to `immediate=False` in Textual 8.2.8 (verified by `inspect.signature`), so the scroll can land inside the NEXT key's measurement window and an inert key (`left`) reads as effective. Reproduced 1/90 and 3/120 under CPU load; forced RED 2/2 by delaying only that queued scroll. Fix is test-side: `immediate=True` plus a settle assertion before sampling `before`. Same pattern at `tests/test_help_scope.py:93`, `tests/test_en7.py:246`, `tests/test_repair_layout.py:118` — in scope. Product is correct.
 
 ### 2.7 Premise evaluation (C-43) — MANDATORY, one row per premise
 
