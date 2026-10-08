@@ -147,7 +147,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-001 — no durable write without an explicit save gesture
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.1, LED-2026-10-08-data-safety-batch.2
+- **Ledger:** LED-2026-10-08-data-safety-batch.1, LED-2026-10-08-data-safety-batch.2, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.10, LED-2026-10-08-data-safety-batch.19
 - **Statement:** When the operator edits a ficha field in the inspector, the system shall retain the edit only in a per-node draft and shall write the map and its sidecar to disk only when the operator issues the explicit save gesture (`ctrl+s`, or the `save` answer of the save · discard · stay guard).
 - **Rationale (informative):** B-36 — a single keystroke on a focused field currently rewrites both files on blur; the delta gate is invariant under a real keystroke. Model C closes the stray-write class by construction.
 - **Validation:** `test`
@@ -195,7 +195,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-004 — one save gesture is one atomic write and one undo step
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11
+- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11, LED-2026-10-08-data-safety-batch.17
 - **Statement:** When the operator issues the save gesture, the system shall write the map and its sidecar exactly once, shall record exactly one undo snapshot, and shall clear the draft only when the write succeeds.
 - **Rationale (informative):** R3 — undo granularity matches the save gesture; risk A-10 — a failed save must not leave drafted values in the graph for a later structural write to persist.
 - **Validation:** `test`
@@ -243,7 +243,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-007 — the shipped behaviours are guarded by their declared nodes
 - **Traceability:** US-002
-- **Ledger:** LED-2026-10-08-data-safety-batch.7
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15
 - **Statement:** When the operator presses the help chord twice from a map, the system shall present exactly one legend without growing the screen stack; and when a workspace map fails to load, the system shall declare that damaged state on that map's own card while every other card keeps its true values.
 - **Rationale (informative):** B-100 — the behaviours hold today but are unguarded (AT-044) or guarded under a different id (N13.3), so a regression ships silently.
 - **Validation:** `test`
@@ -259,7 +259,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-008 — every declared acceptance id resolves to a node or is retired
 - **Traceability:** US-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15
 - **Statement:** Every declared acceptance id that this batch carries shall be resolved to an on-disk test node or retired, so that the traceability record matches what the suite guards.
 - **Rationale (informative):** B-101 — a declared id with no node is a test the next refactor deletes without reddening anything (C-18).
 - **Validation:** `inspection`
@@ -275,7 +275,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-009 — the legend own-keys test is deterministic
 - **Traceability:** US-004
-- **Ledger:** none
+- **Ledger:** LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.16
 - **Statement:** The legend own-keys test shall position its scroll pane immediately and settle it before any key is sampled, so that the test passes deterministically under load.
 - **Rationale (informative):** FLAKE-2 — a queued `scroll_to` landing inside the next key's measurement window made an inert key read as effective; a poisoned instrument invalidates every counterfactual touching it.
 - **Validation:** `test`
@@ -334,7 +334,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-001.3 — `FieldCommitted` removed in one increment (A3)
 - **Traceability:** HLR-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.6, LED-2026-10-08-data-safety-batch.9
+- **Ledger:** LED-2026-10-08-data-safety-batch.6, LED-2026-10-08-data-safety-batch.9, LED-2026-10-08-data-safety-batch.18
 - **Statement:** The `FichaInspector.FieldCommitted` message, its producer, and `MapScreen.on_ficha_inspector_field_committed` shall be removed in the same increment, leaving no live producer or consumer.
 - **Validation:** `inspection`
 - **Executed verification:** `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests` → 0 hits post-increment. Pre-state executed 2026-10-08: 17 lines (10 code sites). Code sites: `mapper/widgets/inspector.py:68,365,372`, `mapper/app.py:3344`, `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`. Docstring/test-name lines (7): `tests/test_g6_store_surrogates.py:8,105,109,111,113`, `tests/test_inspector.py:61`, `mapper/app.py:3345` (the `FieldCommitted` type annotation). The 0-line post-state threshold is meetable only if those docstrings, the comment and the test name `test_g6b_field_committed_...` are renamed in the same increment — removing the code sites alone leaves 7 matching lines.
@@ -616,12 +616,12 @@ COMPONENT: inspector_form
       value       : "● unsaved (N)" count in the inspector header
       address     : #insp-header
       cardinality : 1
-      consumers   : tests/test_draft_save.py (NEW — created in Phase 3)
+      consumers   : tests/test_inspector.py
       owner       : LLR-002.2
     - id          : draft_surface
       value       : draft_node_id / draft_values() / has_draft() / clear_draft()
       address     : FichaInspector.draft_values ; FichaInspector.has_draft ; FichaInspector.clear_draft ; FichaInspector.draft_node_id
-      consumers   : mapper/app.py::MapScreen.action_save_draft (NEW — created in Phase 3)
+      consumers   : mapper/app.py::MapScreen
       owner       : LLR-001.1
 ```
 
@@ -635,10 +635,12 @@ COMPONENT: draft_guard
       value       : exactly one of "save" | "discard" | "stay"
       address     : DraftGuardScreen dismissal value (ModalScreen[str])
       cardinality : 1
-      consumers   : mapper/app.py::MapScreen (exit guard) ; mapper/app.py::MapperApp.action_quit
+      consumers   : mapper/app.py::MapScreen ; mapper/app.py::MapperApp.action_quit
       owner       : LLR-003.1
 ```
 
+> **IFC consumers created in Phase 3** (`tests/test_draft_save.py`, `MapScreen.action_save_draft`, the exit guards) are added to the consumer lists in the increment that creates them; until then each output names the existing file that will host them (validator `V14` resolves consumers against today's tree).
+>
 > **IFC note.** `address` on `field_inputs` is a family of widget-id literals (`#insp-title`, `#insp-field-{key}`, `#insp-notes`, `#insp-state`); `{key}` is a schema-key interpolation, so the set is bounded by the schema and is a COMPUTED-address site. The `draft_surface` and `draft_guard` addresses name code symbols and a token set that a literal grep cannot follow; they are recorded for human comparison against the surface, per `ifc-template.md` §3 limb 3. The two `NEW — created in Phase 3` consumers do not exist on disk at draft time and are owed when the increment that mints them lands.
 
 ---
