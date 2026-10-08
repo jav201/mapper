@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P1",
+  "current_station": "P2",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -171,6 +171,11 @@
       "station": "P2",
       "date": "2026-10-08",
       "decision": "P2 round 2 iterate-to-refine: 0 blockers, 6 majors (save-failure cases indistinguishable -> classify by disk hashes; first-replace failure -> case a; AT-010/015 counterfactuals; AT-013 unreachable -> Layer A; AT-015 orphan; US-004 exception); dispositions in 02-review.md Round 2"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-08",
+      "decision": "P1 iteration 2 approved (self-approved): round-2 dispositions applied by deepseek-v4-pro (first run hung 1 h with no output and was killed; rerun under a 40-min watchdog succeeded); failure-case table verified by the orchestrator; validator 0 block"
     }
   ],
   "standing_authorization": {
