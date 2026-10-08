@@ -83,50 +83,57 @@
 - **Evidence:** ruling R5 in `VERDICT-b36-prototype-2026-10-08.md`; `mapper/app.py:3517-3533` (`_pop_snapshot`).
 
 ### LED-2026-10-08-data-safety-batch.12 — M4 — §2.1–2.5 real content replaces the template guidance
-- **Requirement:** §2 (product description)
+- **Requirement:** HLR-001, HLR-007, HLR-008, HLR-009
 - **Date:** 2026-10-08
 - **What changed:** §2.1–2.5 now carry real content (product perspective, functions, single-operator users, constraints Textual 8.2.8 / Windows / 4-source-file cap / English UI, assumptions).
 - **Why:** the fields held only italic template guidance; the constraints (Textual 8.2.8 `immediate=False`, Windows, the 4-source-file cap) are load-bearing for US-004 and were unstated. Finding M4.
 - **Evidence:** P-6, P-7; ARQ increments Inc-1…Inc-4.
 
 ### LED-2026-10-08-data-safety-batch.13 — M4b — AT-041 reconciled; AT-042 partially realised
-- **Requirement:** HLR-008, LLR-008.1, §2.6 US-003
+- **Requirement:** HLR-008, LLR-008.1
 - **Date:** 2026-10-08
 - **What changed:** AT-041 is reconciled to `tests/test_repair_layout.py:274` (`test_at_r12_pressing_help_presents_every_map_binding`); AT-042 is recorded PARTIALLY realised — its largest-set arm via `test_tc_r25` (`:441`, parametrised MAP/HOME), with the smallest-set (`app`) and no-scope-screen arms owed as new nodes in this batch; the wrong `tests/test_help_scope.py:139,147` citation is removed from §2.6 US-003.
 - **Why:** `test_tc_r25` is parametrised `SCOPE_MAP`/`SCOPE_HOME` only, so it never drives `app` (2 rows); `test_tc_r26` is the foreign-scope negative, so AT-042's smallest-set and no-scope arms have no on-disk node; lines 139/147 are view-naming nodes, not AT-041/042 realisations. Finding M4b.
 - **Evidence:** `tests/test_repair_layout.py:440-441,456`; AT-042's predicates at `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:4900-4904`.
 
 ### LED-2026-10-08-data-safety-batch.14 — m1 — `US-N14 (DEFERRED)` label
-- **Requirement:** §2.6 US-003
+- **Requirement:** HLR-008
 - **Date:** 2026-10-08
 - **What changed:** `~~US-N14~~` → `US-N14 (DEFERRED)`.
 - **Why:** the struck-id form `~~US-N14~~` is the deferral marker, not the live label; the live contract uses `US-N14 (DEFERRED)`. Finding m1.
 - **Evidence:** canonical traceability table `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6090`.
 
 ### LED-2026-10-08-data-safety-batch.15 — m2 — ledger seed line removed
-- **Requirement:** §7
+- **Requirement:** HLR-001, HLR-007, HLR-008, HLR-009
 - **Date:** 2026-10-08
 - **What changed:** removed the "_No entries yet._" seed line from §7's fence.
 - **Why:** the ledger now carries entries (LED-…1…7), so the seed line is stale and misleading. Finding m2.
 - **Evidence:** `01-requirements-ledger.md` (LED-…1…7).
 
 ### LED-2026-10-08-data-safety-batch.16 — m3 — US-004 feasibility rewritten to the measured mechanism
-- **Requirement:** §2.6 US-004
+- **Requirement:** HLR-009
 - **Date:** 2026-10-08
 - **What changed:** the feasibility block is rewritten from the refuted reflow hypothesis to the measured mechanism (`scroll_to` default `immediate=False` at `tests/test_help_scope.py:365`; fix `immediate=True` + settle assertion; four sites), and E ✗ → E ✓.
 - **Why:** the intake's reflow hypothesis was refuted by the spike, yet the feasibility still stated it and left E ✗. Finding m3.
 - **Evidence:** `spike/FLAKE-2-spike.md`; P-6, P-7; `tests/test_help_scope.py:365,367,371`.
 
 ### LED-2026-10-08-data-safety-batch.17 — m5 — scan note records both P0 and P1 flags
-- **Requirement:** §6.3
+- **Requirement:** HLR-004
 - **Date:** 2026-10-08
 - **What changed:** the scan note now records both the P0 flag (`escape`) and the P1 flags (`token`, `form`, `escape`), all ordinary vocabulary, recorded anyway.
 - **Why:** the note had collapsed to the P1 result and dropped the P0 `escape` flag. Finding m5.
 - **Evidence:** scan runs 2026-10-08.
 
 ### LED-2026-10-08-data-safety-batch.18 — m6 — Inc-1 regression obligations noted in §5
-- **Requirement:** §5
+- **Requirement:** LLR-001.3
 - **Date:** 2026-10-08
 - **What changed:** added an out-of-LLR note in §5: the reverse-census re-point of the three test files that post `FieldCommitted` (`tests/test_inspector.py`, `tests/test_g6_store_surrogates.py`, `tests/test_worklist_safety.py`) and the whole-seat pin `tests/test_key_dispatch.py:137` are owed in Inc-1.
 - **Why:** those test-side re-points are regression obligations of the A3 removal and the seat change, but they are not LLRs, so they were invisible to the validation strategy. Finding m6.
 - **Evidence:** `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`, `tests/test_key_dispatch.py:137`.
+
+### LED-2026-10-08-data-safety-batch.19 — pre-gate correction of ledger pairings (validator V26)
+- **Requirement:** HLR-001
+- **Date:** 2026-10-08
+- **What changed:** the **Requirement** field of entries .12–.18 was re-pointed from section names (§2, §5, §6.3, the ledger itself) and story rows (US-003, US-004 are table rows, not headings) to the HLR/LLR headings that carry them, and each of those requirements now lists the entry in its **Ledger** field.
+- **Why:** V26 pairs requirement HEADINGS with entries in both directions; an entry naming a section pairs with nothing. Done the same day, before the P1 gate closed, by the orchestrator; no entry's content changed.
+- **Evidence:** `devflow-validate.py --brief` V26 before (2 BLOCK) and after.
