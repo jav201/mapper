@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P1",
+  "current_station": "P2",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -181,6 +181,11 @@
       "station": "P2",
       "date": "2026-10-08",
       "decision": "P2 round 3 iterate-to-refine at the P1 soft cap (iteration 3); root cause: disk-hash failure classification unsound; operator ruling 'Simplificar y seguir (Recomendado)': one rule, reload from disk + keep draft re-diffed, reload failure restores in memory, no writes from failure handling"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-08",
+      "decision": "P1 iteration 3 approved (self-approved, at the soft cap per the operator's 'Simplificar y seguir'): one failed-save rule; applied by the orchestrator after two DeepSeek hangs; validator 0 block"
     }
   ],
   "standing_authorization": {
