@@ -312,3 +312,66 @@
 - **What changed:** the re-pointed tests (`tests/test_g6_store_surrogates.py:150,176,203,331`, `tests/test_inspector.py:103,162`, `tests/test_worklist_safety.py:254`) must drive typing + `ctrl+s` through the pilot, not post messages; listed in §5.
 - **Why:** a re-pointed test that posts a message bypasses the draft and would not test the shipped surface.
 - **Evidence:** §5 Inc-1 obligations.
+
+### LED-2026-10-08-data-safety-batch.45 — R2-N1 — failed save classifies by disk state, not by exception
+- **Requirement:** HLR-001, HLR-003, HLR-004, LLR-001.4, LLR-003.2, LLR-003.3, LLR-003.4, LLR-003.6, LLR-004.1, LLR-004.2
+- **Date:** 2026-10-08
+- **What changed:** the failed-save resolution (LLR-004.2) is re-classified by DISK state, not by which phase of `MapStore.save` raised: the sha256 of `.mmd` and `_nodos.yml` is taken before the save and re-taken on failure, and the three cases are (a) both unchanged → restore the graph, pop the snapshot, keep the draft, guard `stay`, error toast; (b) both changed → committed: keep the snapshot, clear the draft, warning toast, guard proceeds as `save`; (c) exactly one changed → reload from disk, keep the draft re-diffed against the reloaded values, keep the snapshot, guard `stay`, warning toast naming `ctrl+s` to repair, and if the reload raises, keep the in-memory graph and draft and refuse structural writes until a successful `ctrl+s`. LLR-001.4 stops mandating `_save_or_toast` for the draft save (its bool cannot distinguish the three cases). Reconciled HLR-004's acceptance and boundary, AT-002 (split into AT-002a/002b/002c), LLR-004.1's boundary and statement, the `save`-that-fails boundary rows of LLR-003.2–003.6, and the same wording in HLR-001's and HLR-003's boundary catalogs.
+- **Why:** `save()` raises raw exceptions from every phase and `_save_or_toast` returns a bool (`app.py:229-258`), so no caller can tell "nothing on disk" from "committed" from "torn pair"; several places still said every failure keeps the draft and leaves no undo step. Disk state is the ground truth a caller can measure.
+- **Evidence:** `mapper/store.py:809` (`save`), `:846-847` (`_write_tmp`), `:848-849` (the two replaces), `:850`/`:926` (`_reindex`); `mapper/app.py:229-258` (`_save_or_toast`); `docs/ARCHITECTURE.md` R-013 rationale amended.
+
+### LED-2026-10-08-data-safety-batch.46 — R2-N2 — `mmd_tmp.replace` raising is case (a)
+- **Requirement:** LLR-004.2
+- **Date:** 2026-10-08
+- **What changed:** a raise from `mmd_tmp.replace` (`store.py:848-849` — an antivirus or sync client holding the file on Windows) fits no phase of the old classification; under the disk rule it is case (a), because neither original changed.
+- **Why:** the old "before the first replace" phrasing covered only failures before `_write_tmp`; a replace itself raising leaves both originals untouched and must resolve the same as any other nothing-on-disk failure.
+- **Evidence:** `mapper/store.py:848-849`.
+
+### LED-2026-10-08-data-safety-batch.47 — R2-QA-M1 — AT-010/AT-015 RED name their mutations
+- **Requirement:** HLR-001, HLR-003
+- **Date:** 2026-10-08
+- **What changed:** AT-010's RED is restated against "draft updated on blur/submit only" (that mutation would save without the typed text), and AT-015's RED is restated against "title built without `plain()`" (that mutation lets ESC through), replacing the unbound-key / raw-ESC descriptions that were not discriminating counterfactuals.
+- **Why:** a RED that names an unbound key or the shipped `markup=False` behaviour is a state, not a counterfactual the test can redden on.
+- **Evidence:** §3.1 AT-010, AT-015 rows.
+
+### LED-2026-10-08-data-safety-batch.48 — R2-QA-M2 — AT-013 is a Layer-A injection test; AT-005/014 one row per key
+- **Requirement:** HLR-003, LLR-003.5
+- **Date:** 2026-10-08
+- **What changed:** AT-013 is re-declared a Layer-A injection test of LLR-003.5's defensive invariant (the lower `MapScreen`'s draft is reachable only by injecting it once R6 guards links, so it is not a black-box surface test); AT-005 is split into AT-005a (`q`) and AT-005b (`esc`), and AT-014 into AT-014a–AT-014d (`a`/`x`/`A`/`X`), each with its own RED.
+- **Why:** a compound AT (two/four keys) is several tests wearing one id; a precondition unreachable through the shipped surface cannot be an acceptance test of that surface.
+- **Evidence:** §3.1 AT-005a/005b, AT-013, AT-014a–014d rows; `mapper/app.py:4937-4938` (`action_quit`), `:3566` (`action_open_ficha`).
+
+### LED-2026-10-08-data-safety-batch.49 — R2-QA-M3 — AT-015 listed under HLR-003; US-004's Layer-B exception declared
+- **Requirement:** HLR-003, HLR-009
+- **Date:** 2026-10-08
+- **What changed:** AT-015 is listed in HLR-003's acceptance line (it was orphaned — defined in §3.1 but claimed by no HLR); §5.1 declares US-004's Layer-B exception (AT-008 accepts the determinism of the test instrument, not product behaviour) beside US-003's.
+- **Why:** an acceptance id no HLR claims is invisible to the two-layer trace; US-004's exception was undeclared where US-003's was.
+- **Evidence:** HLR-003 acceptance line; §5.1 Layer-B note.
+
+### LED-2026-10-08-data-safety-batch.50 — R2-ARCH-NEW-2 — markers update without remounting; draft entries keyed to the sending node
+- **Requirement:** LLR-001.2, LLR-002.2
+- **Date:** 2026-10-08
+- **What changed:** LLR-002.2 requires the dirty markers and the header to update without remounting the focused field (a per-keystroke `show()` → `_rebuild` remount destroys the focused `Input` and leaves a stale `Input.Changed`); LLR-001.2 requires each draft entry to be keyed to the node of the input that sent the change, never the re-pointed node.
+- **Why:** a per-keystroke draft painted through a full remount would drop focus on every key, and a stale `Input.Changed` arriving after a re-point could write another node's draft.
+- **Evidence:** `mapper/widgets/inspector.py` `_rows` overlay (LLR-002.1); the `Input.Changed` producer (ARCH-B1).
+
+### LED-2026-10-08-data-safety-batch.51 — R2-ARCH-NEW-3 — the no-scope arm's expected set is stated and probed
+- **Requirement:** LLR-008.3
+- **Date:** 2026-10-08
+- **What changed:** LLR-008.3 states the no-scope screen's expected set: it falls through the `HelpScreen` default (`scope=SCOPE_APP`, `mapper/screens/help.py:288`), so it presents `bindings_for(SCOPE_APP)` — 2 rows (`ctrl+p` palette, `?` legend), identical to the smallest-set arm; the two arms differ only by constructor path, not by expected set.
+- **Why:** "a screen that declares no scope" was ambiguous about what it presents.
+- **Evidence:** probe `python -c "from mapper.keymap import bindings_for, SCOPE_APP; print(bindings_for(SCOPE_APP))"` → 2 rows, `[('ctrl+p','palette'), ('?','legend')]` (2026-10-08); `mapper/screens/help.py:288`.
+
+### LED-2026-10-08-data-safety-batch.52 — R2-N3/N4/N5 — draft/snapshot in (c), pop scoped to (a), stale `.tmp` residual
+- **Requirement:** LLR-004.2
+- **Date:** 2026-10-08
+- **What changed:** the draft and snapshot are kept in case (c) and the snapshot pop is scoped to case (a), folded into R2-N1's disk classification; the stale `.tmp` file left by a failed `_write_tmp` is recorded as a residual (overwritten by the next save).
+- **Why:** these three minor findings are all consequences of the same re-classification and needed no separate rule.
+- **Evidence:** LLR-004.2's table and residual note; `mapper/store.py:805-807` (`_write_tmp`).
+
+### LED-2026-10-08-data-safety-batch.53 — R2-minors — shipped-surface keys, RED mutations, §6.3 wording, residual
+- **Requirement:** HLR-003, HLR-004, HLR-005, HLR-006, LLR-003.1, LLR-007.1, LLR-009.2
+- **Date:** 2026-10-08
+- **What changed:** HLR-004/005/006 "Shipped surface" lines re-keyed to keys, screens and files (no `action_save_draft`/`undo_stacks`/`on_input_submitted`/`DsSegmented`); LLR-007.1's control names the mutation it reddens on (binding `?` in the help seat) instead of "absent node"; LLR-009.2's threshold drops "RED before, GREEN after" for one node (the committed arm is GREEN, its RED is the counterfactual); AT-009 gains focus-out and the `● unsaved (N)` observable; AT-011 names the link key (`↵`); AT-012/013 name the exit outcome; AT-015's observation is a scan of the rendered title for 0x1B; §6.3 "atomic" reworded; the typed-ahead `d` residual stated (§6.3 A-13); `plain` re-cited at `darkside.py:550`.
+- **Why:** surfaces still named internals; a control that says "absent node" names no counterfactual; one committed node cannot be both RED and GREEN; and the remaining minors were stale citations and wording.
+- **Evidence:** `mapper/darkside.py:550` (`def plain`); `mapper/keymap.py:269` (`MODAL_SCOPES`); `spike/red_green_flake2.py`.
