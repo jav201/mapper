@@ -58,19 +58,19 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 ## 2. Overall description
 
 ### 2.1 Product perspective
-*(How the change fits into the larger system.)*
+mapper is a single terminal TUI for editing `.mmd` mind-maps and their `_nodos.yml` sidecar. This batch closes the stray-write class in the inspector (draft + explicit save) and hardens the help-legend tests against flakes and traceability drift; US-002/003/004 carry no product behaviour change.
 
 ### 2.2 Product functions
-*(High-level list of functional capabilities.)*
+Draft-and-explicit-save editing of inspector fields; a visible unsaved state; a save · discard · stay guard on every exit; one atomic write and one undo step per save; `↵` keeps the draft; every field (including `state`) routes through the draft; legend-node reconciliation; the deflake of the own-keys test.
 
 ### 2.3 User characteristics
-*(Roles, permissions, expected experience levels.)*
+A single operator of the terminal mapping tool (the author/maintainer), keyboard-first. No roles, permissions, or multi-user surface.
 
 ### 2.4 Constraints
-*(Technological, regulatory, business.)*
+Textual 8.2.8 (its `Widget.scroll_to` defaults `immediate=False`, which drives US-004); Windows; the 4-source-file-per-increment cap; English UI.
 
 ### 2.5 Assumptions and dependencies
-*(What we take for granted. If an assumption fails, the batch is invalidated.)*
+The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14 carries AT-033/034/035 out of scope; US-004's fix is test-side only (the product is correct); the keymap seat and the draft surface are the only code surfaces touched.
 
 ### 2.6 Source user stories
 
@@ -102,15 +102,15 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 **US-003 — reconcile the five node-less acceptance ids (`B-101`)**
 - **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✗
 - **Functionality (V, N):** user = the maintainer · outcome = each declared-but-node-less AT id is resolved to an on-disk node or retired · why = the traceability record must match what the suite guards (C-18); a declared id with no node is a test the next refactor deletes without reddening anything · out of scope = changing behaviour.
-- **Feasibility (E, S):** implementation path = grep each id's definition in `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md`, then grep `tests/` for a realising node. Findings: `AT-041` / `AT-042` are realised under other names (`test_at_r12_pressing_help_presents_every_map_binding` `tests/test_repair_layout.py:274`; `test_tc_r25` / `test_tc_r26` `:441` / `:456`; and the Inc-8 nodes at `tests/test_help_scope.py:139,147,327`); `AT-033` / `AT-034` / `AT-035` are NOT on disk and `tests/test_lens.py` does not exist (`ls tests/test_lens.py` → no such file). dependencies/unknowns = one factual discrepancy (below). fits one batch? yes.
+- **Feasibility (E, S):** implementation path = grep each id's definition in `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md`, then grep `tests/` for a realising node. Findings: `AT-041` / `AT-042` are realised under other names (`test_at_r12_pressing_help_presents_every_map_binding` `tests/test_repair_layout.py:274`; `test_tc_r25` / `test_tc_r26` `:441` / `:456`; and the Inc-8 node at `tests/test_help_scope.py:327`); `AT-033` / `AT-034` / `AT-035` are NOT on disk and `tests/test_lens.py` does not exist (`ls tests/test_lens.py` → no such file). dependencies/unknowns = one factual discrepancy (below). fits one batch? yes.
 - **Evaluability (T) — behavioral, black-box:** *(Definitional/inspectional — no shipped surface is involved; this is traceability work, not behaviour.)* "When the maintainer greps `tests/` for each declared AT id, each id is either resolved to a named on-disk node or retired with a ledger entry."
 - **Open questions:** B-101 attributes `AT-033` / `AT-034` / `AT-035` to **US-N13**, but the canonical traceability table (`.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6089-6090`) assigns them to **US-N14**, which is DEFERRED (`#D23`). Their absence is therefore expected, not a defect. Which attribution is correct, and does the disposition become "retire the ids" rather than "realise them"?
-- **Classification:** `READY` (orchestrator ruling at the P0 gate, 2026-10-08, under the standing autonomous authorization) — the canonical record settles the attribution: `AT-033`/`AT-034`/`AT-035` belong to `~~US-N14~~ DEFERRED` (`.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6090`, `#D23`), so they are RETIRED from this batch's obligation and travel with US-N14; `AT-041`/`AT-042` are reconciled to their existing nodes (`tests/test_repair_layout.py:274`, `:441`, `:456`). The B-101 row is corrected in `.dev-flow/BACKLOG.md`.
+- **Classification:** `READY` (orchestrator ruling at the P0 gate, 2026-10-08, under the standing autonomous authorization) — the canonical record settles the attribution: `AT-033`/`AT-034`/`AT-035` belong to `US-N14 (DEFERRED)` (`.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6090`, `#D23`), so they are RETIRED from this batch's obligation and travel with US-N14; `AT-041` is reconciled to `tests/test_repair_layout.py:274` and `AT-042` is partially realised (`:441`, `:456`, with its smallest-set and no-scope arms owed as new nodes). The B-101 row is corrected in `.dev-flow/BACKLOG.md`.
 
 **US-004 — the legend paint-race flake (`B-98` / `FLAKE-2`)**
-- **INVEST:** I ✓ · N ✓ · V ✓ · E ✗ · S ✓ · T ✓
+- **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
 - **Functionality (V, N):** user = the maintainer · outcome = the flaky legend own-keys test is understood and made deterministic · why = a flaky test is a poisoned instrument (P-05) that invalidates every counterfactual touching it, and the whole-branch gate is the next place it fires · out of scope = product behaviour (B-98: a paint race, not a logic failure).
-- **Feasibility (E, S):** implementation path = UNESTABLISHED — the mechanism is a hypothesis, not a finding. Test at `tests/test_help_scope.py:327-390`. Hypothesis (see §2.7 P-4): `effective` is read by pressing every key in a live-derived `universe` (`test_help_scope.py:349-352`) and comparing `(pane.scroll_offset, screen_stack, screen, focused)` before/after (`:367-373`); `left` enters `universe` via the `VerticalScroll` pane's framework bindings (`mapper/screens/help.py:73-75`, `overflow-y: auto` at `help.py:51`) but is not a `SCOPE_HELP` declaration, so it can be `effective` (a horizontal-scroll reflow race) yet never `painted` (`:383-384`). fits one batch? needs a spike / reproduction first.
+- **Feasibility (E, S):** implementation path = test-side, measured. The test's own setup `pane.scroll_to(y=pane.max_scroll_y // 2, animate=False)` (`tests/test_help_scope.py:365`) defaults to `immediate=False` in Textual 8.2.8 (P-6), so the scroll is queued and can land inside the next key's measurement window (`before`/`after` at `:367`/`:371`), making an inert key read as `effective`. Fix = `immediate=True` at all four `scroll_to` sites (`tests/test_help_scope.py:93`, `:365`; `tests/test_en7.py:246`; `tests/test_repair_layout.py:118`, P-7) plus a settle assertion before sampling. fits one batch? yes — test-only, no product change.
 - **Evaluability (T) — behavioral, black-box:** "When the legend own-keys test is run N times under full-lane load, the maintainer observes a deterministic pass and a written record of which mechanism was removed."
 - **Open questions:** the mechanism is unconfirmed; needs reproduction under the load condition that flaked it (full lane).
 - **Classification:** `READY` after the spike (2026-10-08, `spike/FLAKE-2-spike.md`). The intake's reflow hypothesis is REFUTED. Finding: the test's own setup `pane.scroll_to(y=max//2, animate=False)` (`tests/test_help_scope.py:365`) defaults to `immediate=False` in Textual 8.2.8 (verified by `inspect.signature`), so the scroll can land inside the NEXT key's measurement window and an inert key (`left`) reads as effective. Reproduced 1/90 and 3/120 under CPU load; forced RED 2/2 by delaying only that queued scroll. Fix is test-side: `immediate=True` plus a settle assertion before sampling `before`. Same pattern at `tests/test_help_scope.py:93`, `tests/test_en7.py:246`, `tests/test_repair_layout.py:118` — in scope. Product is correct.
@@ -179,7 +179,7 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 
 ### HLR-003 — every exit asks before dropping a draft
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.4
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.8
 - **Statement:** When the operator leaves the edited node or the map screen while a draft is pending — by changing node, leaving the map screen, following a link, or quitting — the system shall present the save · discard · stay guard and shall proceed only on its answer.
 - **Rationale (informative):** R1 — one rule for every exit; R6 — following a link is the exit R1 did not name.
 - **Validation:** `test`
@@ -187,15 +187,15 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 - **Numeric pass threshold:** exit code 0; every exit path presents the guard exactly once.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
-  - **Observable outcome:** after an edit, changing node, pressing `q`/`esc`, following a link, or pressing `ctrl+q` presents the guard; `discard` drops the draft and proceeds; `stay` aborts the exit; `save` writes then proceeds.
+  - **Observable outcome:** after an edit, changing node, pressing `q`/`esc`, following a link, or pressing `ctrl+q` presents the guard; `discard` (`d`) drops the draft and proceeds; `stay` (`esc`) aborts the exit; `save` (`s`) writes then proceeds.
   - **Shipped surface:** the `DraftGuardScreen` modal, reached from `MapScreen` and `MapperApp`.
-  - **Acceptance test(s):** AT-004, AT-005
+  - **Acceptance test(s):** AT-004 (node change / leave map screen), AT-005 (quit / follow a link)
   - **Boundary catalog (QC-3):** ☑ empty — no draft ⇒ no guard, the exit proceeds; ☑ boundary — a draft pending on a lower `MapScreen` under a pushed screen is still guarded at quit; ☐ invalid ☑ error — a failing `save` behaves as `stay`.
   - **Negative control:** on today's code AT-004/AT-005 go RED: node change, `q`/`esc`, link-follow and `ctrl+q` proceed without presenting any guard (`app.py:3281`, `:3566`, `:4683-4684`, `:4719`, `:4937`). Executed RED owed at Phase 3.
 
 ### HLR-004 — one save gesture is one atomic write and one undo step
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.3
+- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11
 - **Statement:** When the operator issues the save gesture, the system shall write the map and its sidecar exactly once, shall record exactly one undo snapshot, and shall clear the draft only when the write succeeds.
 - **Rationale (informative):** R3 — undo granularity matches the save gesture; risk A-10 — a failed save must not leave drafted values in the graph for a later structural write to persist.
 - **Validation:** `test`
@@ -205,7 +205,7 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** `ctrl+s` rewrites both files once, and `u` restores the state before that save (all fields together); on a failing store the draft stays pending and no undo step is recorded.
   - **Shipped surface:** `MapScreen.action_save_draft` + the per-map undo stack on `MapperApp.undo_stacks`.
-  - **Acceptance test(s):** AT-002
+  - **Acceptance test(s):** AT-002, AT-009
   - **Boundary catalog (QC-3):** ☑ empty — `ctrl+s` with no draft is a no-op; ☑ boundary — a multi-field draft is one save, one undo step; ☐ invalid ☑ error — a failing store keeps the draft and leaves no undo step.
   - **Negative control:** on today's code AT-002 goes RED: `ctrl+s` is not bound (the seat has no `save_draft` row), and no draft exists to save. Executed RED owed at Phase 3.
 
@@ -259,7 +259,7 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 
 ### HLR-008 — every declared acceptance id resolves to a node or is retired
 - **Traceability:** US-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.7
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13
 - **Statement:** Every declared acceptance id that this batch carries shall be resolved to an on-disk test node or retired, so that the traceability record matches what the suite guards.
 - **Rationale (informative):** B-101 — a declared id with no node is a test the next refactor deletes without reddening anything (C-18).
 - **Validation:** `inspection`
@@ -269,7 +269,7 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** the maintainer greps `tests/` for each declared AT id and finds each one resolved to a named node or retired (definitional/inspectional — no shipped surface).
   - **Shipped surface:** the traceability record (`.dev-flow/BACKLOG.md` and this batch's ledger).
-  - **Acceptance test(s):** AT-041, AT-042 (reconciled); AT-033, AT-034, AT-035 (retired)
+  - **Acceptance test(s):** AT-041 (reconciled), AT-042 (partially realised — two arms owed as new nodes); AT-033, AT-034, AT-035 (retired)
   - **Boundary catalog (QC-3):** none — inspection (structural review of the traceability record, no input class applies).
   - **Negative control:** none — inspection (no executed arm); the observable condition is the absence each grep records. The reconciliation is a match between an id and an existing node, verified by grep at draft time.
 
@@ -288,6 +288,22 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
   - **Acceptance test(s):** AT-008
   - **Boundary catalog (QC-3):** ☑ empty — the pane already at the target offset (scroll is a no-op); ☑ boundary — the mid-range position `max_scroll_y // 2` the fixture delays; ☐ invalid ☑ error — a scroll that never lands (the settle assertion fails loud).
   - **Negative control:** AT-008 goes RED on the current code by construction — the spike's deterministic RED/GREEN (`red_green_flake2.py`) fails 2/2 on the current step (`work but not painted: ['ctrl+pagedown','left','right']`) and passes 2/2 with `immediate=True`. Executed in the spike, 2026-10-08; the regression arm is minted at Phase 3.
+
+### 3.1 Black-box acceptance tests (Layer B)
+
+AT ids in this contract are batch-local: they restart at 001 per batch, and ids from other batches (`AT-025b`, `AT-033/034/035`, `AT-041/042`, `AT-044`) are cited with their batch path `.dev-flow/2026-08-26-ui-next-batch-02/`.
+
+| id | story | surface | stimulus | assertion | RED today |
+|----|-------|---------|----------|-----------|-----------|
+| AT-001 | US-001 | `MapScreen` inspector + the `ctrl+s` seat row | one stray key, then blur + cursor change | the `.mmd` and `_nodos.yml` are byte-identical to before and the field shows unsaved | yes — blur writes both files on a real keystroke |
+| AT-002 | US-001 | `MapScreen.action_save_draft` + the per-map undo stack | `ctrl+s` after an edit | the files are UNCHANGED before `ctrl+s` and written ONCE after; `u` restores the pre-save state; a failing store keeps the draft and records no undo step | yes — `ctrl+s` is unbound, no draft exists |
+| AT-003 | US-001 | `FichaInspector` header + per-field rows | edit one field, then a second | the header shows `● unsaved (1)` then `● unsaved (2)` and each edited field carries a marker | yes — no unsaved count, no markers |
+| AT-004 | US-001 | `DraftGuardScreen` | **node change / leave map screen** (`q`/`esc`) with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — cursor change and pop run with no guard |
+| AT-005 | US-001 | `DraftGuardScreen` | **quit (`ctrl+q`) / follow a link** with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — quit exits and link-push run with no guard |
+| AT-006 | US-001 | `FichaInspector` (`on_input_submitted`) + the `HintLine` | `↵` in a dirty field | the files are unchanged, focus leaves the field, and the hint names `ctrl+s` | yes — `↵` writes, hint reads `↵ save` |
+| AT-007 | US-001 | `FichaInspector` `DsSegmented` | change the `state` segment | the field marks unsaved and nothing writes until `ctrl+s` | yes — `state` posts `FieldCommitted` immediately |
+| AT-008 | US-004 | the own-keys test (`tests/test_help_scope.py:328`) | the injected-delay fixture — a delayed positioning `scroll_to` that lands inside the next key's measurement window | the loop reports no `work but not painted` (`effective == painted`) and passes deterministically under load | yes — fails 2/2 under the fixture |
+| AT-009 | US-001 | the per-map undo stack (`u`) | `u` with a pending draft after a save | the last save is undone and the draft's VALUES remain (only the dirty markers are recomputed) | yes — `_pop_snapshot` replaces `self.graph` wholesale, discarding any draft |
 
 ---
 
@@ -318,10 +334,10 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 
 ### LLR-001.3 — `FieldCommitted` removed in one increment (A3)
 - **Traceability:** HLR-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.6
+- **Ledger:** LED-2026-10-08-data-safety-batch.6, LED-2026-10-08-data-safety-batch.9
 - **Statement:** The `FichaInspector.FieldCommitted` message, its producer, and `MapScreen.on_ficha_inspector_field_committed` shall be removed in the same increment, leaving no live producer or consumer.
 - **Validation:** `inspection`
-- **Executed verification:** `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests` → 0 hits post-increment. Pre-state executed 2026-10-08: 10 references across `mapper/widgets/inspector.py:68,365,372`, `mapper/app.py:3344`, `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`.
+- **Executed verification:** `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests` → 0 hits post-increment. Pre-state executed 2026-10-08: 17 lines (10 code sites). Code sites: `mapper/widgets/inspector.py:68,365,372`, `mapper/app.py:3344`, `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`. Docstring/test-name lines (7): `tests/test_g6_store_surrogates.py:8,105,109,111,113`, `tests/test_inspector.py:61`, `mapper/app.py:3345` (the `FieldCommitted` type annotation). The 0-line post-state threshold is meetable only if those docstrings, the comment and the test name `test_g6b_field_committed_...` are renamed in the same increment — removing the code sites alone leaves 7 matching lines.
 - **Numeric pass threshold:** 0 references post-increment.
 - **Negative control:** none — inspection (structural review); the observable condition is the absence the census greps for.
 - **Boundary catalog:** none — inspection.
@@ -358,8 +374,8 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 
 ### LLR-003.1 — the guard modal returns one of three answers
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.4
-- **Statement:** The `DraftGuardScreen` (new, `mapper/screens/draft_guard.py`) shall dismiss with exactly one of `save`, `discard`, or `stay`, bound from the `draft` modal scope, and shall paint its title with `markup=False`.
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.8
+- **Statement:** The `DraftGuardScreen` (new, `mapper/screens/draft_guard.py`) shall dismiss with exactly one of `save` (`s`), `discard` (`d`), or `stay` (`esc`), bound from the `draft` modal scope, and shall paint its title with `markup=False`.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k modal` (provisional; `DraftGuardScreen` is `NEW — created in Phase 3`).
 - **Numeric pass threshold:** exit code 0; the modal returns exactly the token for the key pressed.
@@ -428,8 +444,8 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 
 ### LLR-004.3 — `u` undoes the last save and leaves the draft
 - **Traceability:** HLR-004
-- **Ledger:** LED-2026-10-08-data-safety-batch.3
-- **Statement:** While a draft is pending, `u` shall undo the last save and leave the pending draft untouched, re-diffing it against the restored values.
+- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11
+- **Statement:** While a draft is pending, `u` shall undo the last save and leave the pending draft's values untouched, recomputing only the dirty markers against the restored stored values.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k undo` (provisional until Phase 3).
 - **Numeric pass threshold:** exit code 0; after `u`, the restored values are re-diffed and the pending draft survives.
@@ -508,11 +524,11 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 
 ### LLR-008.1 — AT-041/AT-042 reconcile to their on-disk nodes
 - **Traceability:** HLR-008
-- **Ledger:** LED-2026-10-08-data-safety-batch.7
-- **Statement:** AT-041 and AT-042 shall be reconciled to their on-disk nodes (`tests/test_repair_layout.py:274` `test_at_r12_pressing_help_presents_every_map_binding`, `:441` `test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions`, `:456` `test_tc_r26_no_foreign_scope_binding_reaches_the_panel`).
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13
+- **Statement:** AT-041 shall be reconciled to its on-disk node `tests/test_repair_layout.py:274` (`test_at_r12_pressing_help_presents_every_map_binding`). AT-042 is PARTIALLY realised: its largest-set arm (`map`, 27 rows) is covered by `tests/test_repair_layout.py:441` (`test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions`, parametrised `SCOPE_MAP` and `SCOPE_HOME`), but its smallest-set arm (`app`, 2 rows) and its screen-that-declares-no-scope arm have no node — `test_tc_r25` never drives `app`, and `test_tc_r26` (`:456`, `test_tc_r26_no_foreign_scope_binding_reaches_the_panel`) is the foreign-scope negative, not a no-scope arm; those two arms shall be realised as new nodes in this batch.
 - **Validation:** `inspection`
-- **Executed verification:** the nodes exist at the cited lines (verified by grep, 2026-10-08); the reconciliation is recorded in `.dev-flow/BACKLOG.md` and the traceability matrix.
-- **Numeric pass threshold:** AT-041 and AT-042 each resolve to a cited node by id in the Atlas.
+- **Executed verification:** the nodes exist at the cited lines (verified by grep, 2026-10-08); `test_tc_r25` is parametrised `SCOPE_MAP`/`SCOPE_HOME` only (no `app` arm, `tests/test_repair_layout.py:440`) and `test_tc_r26` asserts the foreign-scope negative (`:456`), so neither covers AT-042's smallest-set or no-scope arm; the reconciliation is recorded in `.dev-flow/BACKLOG.md` and the traceability matrix, and the two missing arms are owed as new nodes.
+- **Numeric pass threshold:** AT-041 resolves to a cited node by id in the Atlas; AT-042's three arms each resolve to a node by id — the two missing arms (smallest set `app`, no-scope screen) realised as new nodes in this batch.
 - **Negative control:** none — inspection; a reconciliation of an existing id to an existing node has no executed RED side.
 - **Boundary catalog:** none — inspection.
 
@@ -640,11 +656,13 @@ COMPONENT: draft_guard
 | HLR-001…006 (US-001) | A | `test` (unit/integration) | LLR-001.x…LLR-006.x, each with an executed verification and a numeric threshold |
 | HLR-001…006 (US-001) | B | acceptance | AT-001…AT-007 through the shipped inspector surface |
 | HLR-007 (US-002) | A + B | `test` (e2e) + `inspection` | LLR-007.1 (new AT-044 node) + LLR-007.2 (reconcile AT-025b); AT-044, AT-025b |
-| HLR-008 (US-003) | A | `inspection` | LLR-008.1/008.2 reconcile/retire ids against the on-disk suite; AT-041/042 reconciled, AT-033/034/035 retired |
+| HLR-008 (US-003) | A | `inspection` | LLR-008.1/008.2 reconcile/retire ids against the on-disk suite; AT-041 reconciled, AT-042 partially realised (two arms owed), AT-033/034/035 retired |
 | HLR-009 (US-004) | A + B | `test` (integration) | LLR-009.1/009.2 deflake + injected-delay regression; AT-008 |
 
 - **Layer A default:** every LLR validated by `test`/`analysis` names its exact executed verification (a pytest node id) and a numeric pass threshold; `inspection` LLRs name the file/line and the observable condition.
 - **Layer B:** every user story has ≥1 `AT-NNN` observing its outcome through the shipped surface — with the exception of US-003, whose acceptance is definitional/inspectional (a reconciliation of ids to nodes, no shipped surface), as declared in its refinement block.
+
+> **Out-of-LLR regression obligations (Inc-1):** the reverse-census re-point of the three test files that post `FieldCommitted` — `tests/test_inspector.py`, `tests/test_g6_store_surrogates.py`, `tests/test_worklist_safety.py` — and the whole-seat pin `tests/test_key_dispatch.py:137` (`test_at_n03h_the_whole_seat_matches_its_specification`, which must absorb the new `ctrl+s` row and the `draft` scope) are owed in Inc-1 as regression obligations, not as new LLRs.
 
 ### 5.2 Batch acceptance criteria
 - 100% of LLRs have an assigned validation method; every `test`/`analysis` LLR carries an executed verification and a numeric pass threshold.
@@ -669,7 +687,7 @@ COMPONENT: draft_guard
 
 ### 6.3 Open risks
 
-- **Security scan (`devflow-scan-spec.py`, re-run 2026-10-08, rule 7): exit 1 → `security_required: true`, flags `token`, `form`, `escape`.** All three are ordinary vocabulary, declared per C-53 and never reworded: `token` is the guard modal's dismissal token (`save`/`discard`/`stay`, LLR-003.1) and the `draft_guard` `choice` output; `form` is the inspector form / "the value the form showed" (HLR-002, LLR-002.1, §1.3); `escape` is the Esc key of the guard (`esc` stay) and the legend seat. None names a sensitive surface. The batch's security questions: (1) US-001 changes WHEN the inspector writes the map and its sidecar — the write path must stay atomic and confined (B-75 check-then-write, `MapStore._write_tmp` hard-link B-84 are adjacent, not in scope); (2) no new parser, network or secret surface. The `security-reviewer` lens runs at PDR over US-001's write path.
+- **Security scan (`devflow-scan-spec.py`): the P0 scan (2026-10-08) flagged `escape`; the P1 scan (re-run 2026-10-08, rule 7) exit 1 → `security_required: true`, flagged `token`, `form`, `escape`.** All three are ordinary vocabulary, recorded anyway and declared per C-53, never reworded: `token` is the guard modal's dismissal token (`save`/`discard`/`stay`, LLR-003.1) and the `draft_guard` `choice` output; `form` is the inspector form / "the value the form showed" (HLR-002, LLR-002.1, §1.3); `escape` is the Esc key of the guard (`esc` stay) and the legend seat. None names a sensitive surface. The batch's security questions: (1) US-001 changes WHEN the inspector writes the map and its sidecar — the write path must stay atomic and confined (B-75 check-then-write, `MapStore._write_tmp` hard-link B-84 are adjacent, not in scope); (2) no new parser, network or secret surface. The `security-reviewer` lens runs at PDR over US-001's write path.
 - **US-001 depends on an operator verdict** on a prototype round (standing rule 2026-09-04); P0 stays open for US-001 until it arrives — delivered 2026-10-08 ("C").
 - **A-8** (a base `on_*` handler survives and double-commits): the change is in-place, no subclass; the sha256 AT on `.mmd` + `_nodos.yml` reddens a surviving base handler.
 - **A-9** (the draft is wiped by the per-repaint rebuild): overlay in `_rows` and guard at `app.py:3281`.
@@ -693,8 +711,4 @@ The fence below is the ledger's seed: `devflow-init.py` writes it to `01-require
 > contract is `01-requirements.md`; this file records how it came to say what it says.
 > Every entry names the requirement it amends; every requirement names its entries. `V26`
 > compares the two sets of pairs both ways.
-
-_No entries yet. The first amendment to the live contract writes the first one, in the
-shape the field guide's §7 shows (`req-template.md` in the guide directory init prints), and nothing
-above this line is ever edited._
 ```

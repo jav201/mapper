@@ -53,3 +53,80 @@
 - **What changed:** US-002/003 are derived as "write one new node (AT-044) and reconcile already-declared ids to already-existing nodes", not as new test work.
 - **Why:** an id that names an on-disk node guarding the behaviour it declares is a traceability reconciliation — matching the record to the suite — not new code. AT-025b's behaviour is already tested under `LLR-N13.1.5`; AT-041/042 are realised under other names; AT-033/034/035 belong to the deferred US-N14 and are retired, not realised. Minting dedicated nodes for those would duplicate arms and re-open C-18's drift.
 - **Evidence:** `tests/test_repair_cycles.py:501,543,575,624,664` (LLR-N13.1.5); `tests/test_repair_layout.py:274,441,456` (AT-041/042); the canonical attribution `AT-033/034/035 → US-N14` (`#D23`, deferred) settled at the P0 gate, `.dev-flow/BACKLOG.md`.
+
+### LED-2026-10-08-data-safety-batch.8 — B1 — R4's modal keys named in LLR-003.1 and HLR-003
+- **Requirement:** HLR-003, LLR-003.1
+- **Date:** 2026-10-08
+- **What changed:** LLR-003.1's statement and HLR-003's observable outcome now name the guard's keys — `s` save, `d` discard, `esc` stay — bound from the `draft` modal scope.
+- **Why:** ruling R4 fixed the keys, but LLR-003.1 named only the three outcome tokens and HLR-003's observable outcome named only the outcomes; a reviewer could not read WHICH key produced WHICH answer. Finding B1 (R4 missing).
+- **Evidence:** ruling R4 in `VERDICT-b36-prototype-2026-10-08.md`; the `draft` modal scope.
+
+### LED-2026-10-08-data-safety-batch.9 — M1 — FieldCommitted census is 17 lines, not 10 references
+- **Requirement:** LLR-001.3
+- **Date:** 2026-10-08
+- **What changed:** the LLR-001.3 pre-state census is restated as 17 grep lines (10 code sites + 7 docstring/test-name lines); the docstrings, the comment and the test name `test_g6b_field_committed_...` must be renamed in the same increment.
+- **Why:** the earlier "10 references" listed only code sites; the grep returns 17 lines, so the 0-line post-state threshold is unmet unless the 7 non-code matches are renamed too. Finding M1.
+- **Evidence:** `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests` (2026-10-08): 17 lines.
+
+### LED-2026-10-08-data-safety-batch.10 — M2 — §3.1 AT table added; AT-004/005 split by exit
+- **Requirement:** §3 (HLR-001…009 acceptance layer)
+- **Date:** 2026-10-08
+- **What changed:** added the §3.1 AT table (id·story·surface·stimulus·assertion·RED today); AT-004/005 each name their exits (node change / leave map screen vs quit / follow a link); AT-002 asserts files-unchanged-before-`ctrl+s` AND written-once-after; AT-008 states its injected-delay predicate; AT ids declared batch-local.
+- **Why:** the acceptance ids had no single view of stimulus/assertion/RED side, and AT-004/005 did not say which exits each covered. Finding M2.
+- **Evidence:** each HLR's observable outcome and negative control.
+
+### LED-2026-10-08-data-safety-batch.11 — M3 — R5 undo-while-dirty stated as AT-009; LLR-004.3 wording
+- **Requirement:** HLR-004, LLR-004.3
+- **Date:** 2026-10-08
+- **What changed:** added AT-009 (with a pending draft, `u` undoes the last save and the draft's values remain); LLR-004.3 now says the draft's values are untouched, only the dirty markers recomputed against the restored stored values.
+- **Why:** R5 says undo acts on what was written, not on the draft; the earlier wording ("re-diffing it against the restored values") implied the draft itself was re-diffed. Finding M3 (R5).
+- **Evidence:** ruling R5 in `VERDICT-b36-prototype-2026-10-08.md`; `mapper/app.py:3517-3533` (`_pop_snapshot`).
+
+### LED-2026-10-08-data-safety-batch.12 — M4 — §2.1–2.5 real content replaces the template guidance
+- **Requirement:** §2 (product description)
+- **Date:** 2026-10-08
+- **What changed:** §2.1–2.5 now carry real content (product perspective, functions, single-operator users, constraints Textual 8.2.8 / Windows / 4-source-file cap / English UI, assumptions).
+- **Why:** the fields held only italic template guidance; the constraints (Textual 8.2.8 `immediate=False`, Windows, the 4-source-file cap) are load-bearing for US-004 and were unstated. Finding M4.
+- **Evidence:** P-6, P-7; ARQ increments Inc-1…Inc-4.
+
+### LED-2026-10-08-data-safety-batch.13 — M4b — AT-041 reconciled; AT-042 partially realised
+- **Requirement:** HLR-008, LLR-008.1, §2.6 US-003
+- **Date:** 2026-10-08
+- **What changed:** AT-041 is reconciled to `tests/test_repair_layout.py:274` (`test_at_r12_pressing_help_presents_every_map_binding`); AT-042 is recorded PARTIALLY realised — its largest-set arm via `test_tc_r25` (`:441`, parametrised MAP/HOME), with the smallest-set (`app`) and no-scope-screen arms owed as new nodes in this batch; the wrong `tests/test_help_scope.py:139,147` citation is removed from §2.6 US-003.
+- **Why:** `test_tc_r25` is parametrised `SCOPE_MAP`/`SCOPE_HOME` only, so it never drives `app` (2 rows); `test_tc_r26` is the foreign-scope negative, so AT-042's smallest-set and no-scope arms have no on-disk node; lines 139/147 are view-naming nodes, not AT-041/042 realisations. Finding M4b.
+- **Evidence:** `tests/test_repair_layout.py:440-441,456`; AT-042's predicates at `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:4900-4904`.
+
+### LED-2026-10-08-data-safety-batch.14 — m1 — `US-N14 (DEFERRED)` label
+- **Requirement:** §2.6 US-003
+- **Date:** 2026-10-08
+- **What changed:** `~~US-N14~~` → `US-N14 (DEFERRED)`.
+- **Why:** the struck-id form `~~US-N14~~` is the deferral marker, not the live label; the live contract uses `US-N14 (DEFERRED)`. Finding m1.
+- **Evidence:** canonical traceability table `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6090`.
+
+### LED-2026-10-08-data-safety-batch.15 — m2 — ledger seed line removed
+- **Requirement:** §7
+- **Date:** 2026-10-08
+- **What changed:** removed the "_No entries yet._" seed line from §7's fence.
+- **Why:** the ledger now carries entries (LED-…1…7), so the seed line is stale and misleading. Finding m2.
+- **Evidence:** `01-requirements-ledger.md` (LED-…1…7).
+
+### LED-2026-10-08-data-safety-batch.16 — m3 — US-004 feasibility rewritten to the measured mechanism
+- **Requirement:** §2.6 US-004
+- **Date:** 2026-10-08
+- **What changed:** the feasibility block is rewritten from the refuted reflow hypothesis to the measured mechanism (`scroll_to` default `immediate=False` at `tests/test_help_scope.py:365`; fix `immediate=True` + settle assertion; four sites), and E ✗ → E ✓.
+- **Why:** the intake's reflow hypothesis was refuted by the spike, yet the feasibility still stated it and left E ✗. Finding m3.
+- **Evidence:** `spike/FLAKE-2-spike.md`; P-6, P-7; `tests/test_help_scope.py:365,367,371`.
+
+### LED-2026-10-08-data-safety-batch.17 — m5 — scan note records both P0 and P1 flags
+- **Requirement:** §6.3
+- **Date:** 2026-10-08
+- **What changed:** the scan note now records both the P0 flag (`escape`) and the P1 flags (`token`, `form`, `escape`), all ordinary vocabulary, recorded anyway.
+- **Why:** the note had collapsed to the P1 result and dropped the P0 `escape` flag. Finding m5.
+- **Evidence:** scan runs 2026-10-08.
+
+### LED-2026-10-08-data-safety-batch.18 — m6 — Inc-1 regression obligations noted in §5
+- **Requirement:** §5
+- **Date:** 2026-10-08
+- **What changed:** added an out-of-LLR note in §5: the reverse-census re-point of the three test files that post `FieldCommitted` (`tests/test_inspector.py`, `tests/test_g6_store_surrogates.py`, `tests/test_worklist_safety.py`) and the whole-seat pin `tests/test_key_dispatch.py:137` are owed in Inc-1.
+- **Why:** those test-side re-points are regression obligations of the A3 removal and the seat change, but they are not LLRs, so they were invisible to the validation strategy. Finding m6.
+- **Evidence:** `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`, `tests/test_key_dispatch.py:137`.
