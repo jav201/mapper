@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "ARQ",
+  "current_station": "P1",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -146,6 +146,11 @@
       "station": "P0",
       "date": "2026-10-08",
       "decision": "P0 approved (self-approved under the standing autonomous authorization): US-001 READY on operator verdict 'C' (VERDICT-b36-prototype-2026-10-08.md, rulings R1-R4), US-002/US-003/US-004 READY; triggers A2,A3,B1,C6,D1,E1,E2 fired"
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-08",
+      "decision": "ARQ approved (self-approved under the standing authorization): approve-map, no boundary move, one interface change (FieldCommitted removed, A3), new mapper/screens/draft_guard.py, increments Inc-1..Inc-4 under the 4-file cap (02-arq-architect.md); orchestrator rulings R5-R7 on the architect's open points"
     }
   ],
   "standing_authorization": {
