@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P1",
+  "current_station": "P2",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -161,6 +161,11 @@
       "station": "P2",
       "date": "2026-10-08",
       "decision": "P2 iterate-to-refine: 4 blockers (ARCH-B1 draft only on blur, ARCH-B2/QA-B2 ATs name internals + no observation, QA-B1 US-002/003 rows), 10 majors incl. SEC-M1 failed-save divergence, SEC-M2 ESC through markup=False; dispositions in 02-review.md"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-08",
+      "decision": "P1 iteration 1 approved (self-approved): every P2 disposition applied by deepseek-v4-pro, spot-verified by the orchestrator (no internal symbols in the AT table, keymap and store citations correct), validator exit 0; 27 LLR, 15 batch-local AT"
     }
   ],
   "standing_authorization": {
