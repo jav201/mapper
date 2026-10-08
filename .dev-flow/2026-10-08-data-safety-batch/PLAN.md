@@ -20,9 +20,9 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | Project | mapper |
 | Batch | 2026-10-08-data-safety-batch |
 | Objective | Data safety and verification debt: B-36 (one keystroke durably overwrites a map and its sidecar) plus the unrealised acceptance tests B-100/B-101 and the legend paint flake B-98 |
-| Standing authorization | <none — every gate is asked, or: <the commission, quoted or cited> (runtime cannot prompt)> |
-| First gate | <the first gate run's exit code and what its `V7` line reported> |
-| Premises / RC-1 | <the verified `origin/main` tip, or: no origin — RC-1 not possible, local tip <sha>; each premise the batch rests on> |
+| Standing authorization | Asked 2026-10-08. Operator, verbatim: autonomy and merge "Autónomo + merge (Recomendado)"; decision recording "Confirmado"; scope "B-36 + ATs + flake (Recomendado)"; mode "full (Recomendado)". Merge only after a clean final PR-level `qa-reviewer` pass; a HIGH finding blocks; TUI design still needs the operator's prototype verdict. |
+| First gate | `devflow-validate.py --brief` at rollover (606510f): exit 0, 0 block; `V7` identical to the rev100 manifest; NOTICEs `V27` (empty log) and `V40` (`owner` omitted by A-110) |
+| Premises / RC-1 | RC-1: `git fetch origin`; `origin/master` = `07dd930` (2026-10-08) = merge-base of `feat/data-safety-batch`. RC-2: `git ls-remote --exit-code --heads origin` exit 0, newest commit 2026-10-08. Premises: §2.7 of `01-requirements.md` |
 
 ## Triggers
 
@@ -43,12 +43,12 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 | C3 | not fired | no external integration; the batch touches inspector/app/store/tests only |
 | C4 | not fired | no new sensitive-data (credential/PII) surface; ficha persistence is pre-existing |
 | C5 | not fired | no DB |
-| C6 | not fired | no new input-parsing/validation surface; the commit-affordance change is UX (family D), not a new parser |
+| C6 | fired (scanner) | `python devflow-scan-spec.py .dev-flow/2026-10-08-data-safety-batch/01-requirements.md` → `flags: escape`, `security_required: true`; the match is the Esc key in §2.6, recorded anyway (triggers only raise); questions answered in `01-requirements.md` §6.3 |
 | C7 | not fired | no network exposure |
 | C8 | not fired | no new rendering of file-derived text into markup/ANSI/HTML sinks |
-| D | fired | US-001 changes what the operator sees and touches (the inspector's save affordance); the batch objective itself names the UX change → prototype round per the standing operator rule (2026-09-04) |
-| E | fired | 4 stories (≥3); B-36 is a live data-loss defect (high risk declared at intake) |
-| F | not fired | installed flow `2026-10-04-rev100` manifest matches (orchestrator verified V7); backlog refreshed `2026-10-08` (`.dev-flow/BACKLOG.md:9`) |
+| D1 | fired | US-001 changes what the operator sees and touches (the inspector's save affordance); the batch objective itself names the UX change → prototype round per the standing operator rule (2026-09-04) |
+| E1, E2 | fired | 4 stories (≥3); B-36 is a live data-loss defect (high risk declared at intake) |
+| F1, F2 | not fired | installed flow `2026-10-04-rev100` manifest matches (orchestrator verified V7); backlog refreshed `2026-10-08` (`.dev-flow/BACKLOG.md:9`) |
 
 ## Where we are
 
@@ -64,9 +64,9 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 |---|---|---|
 | US-001 | REFINE | design ruling (save affordance) pending; prototype round + operator verdict before implementation (standing rule 2026-09-04) |
 | US-002 | READY | write AT-044 test (doubled `?`); reconcile AT-025b → existing `LLR-N13.1.5` nodes in `tests/test_repair_cycles.py` |
-| US-003 | REFINE | B-101 mis-attributes AT-033/034/035 to US-N13 (they are US-N14, deferred); AT-041/042 already realised under AT-R12 / TC-R25 / TC-R26 names |
+| US-003 | READY | orchestrator ruling at P0: AT-033/034/035 RETIRED here (they belong to deferred US-N14, `#D23`); AT-041/042 reconciled to `test_at_r12…` / `test_tc_r25…` / `test_tc_r26…` |
 | US-004 | SPIKE | FLAKE-2 mechanism is a hypothesis (framework key `left` vs seat-declared own-scope group); needs reproduction |
-| P0 | in progress — intake drafted, awaiting orchestrator gate | §2.6/§2.7/§2.8 drafted; Triggers table filled; gate decision owed |
+| P0 | open — US-002/US-003 READY, US-004 SPIKE running, US-001 waits on the operator's prototype verdict | trigger evaluation recorded; C6 fired by the scanner (`escape` = the Esc key) |
 
 ## Roadmap + increment plan
 
@@ -76,7 +76,11 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 | Date | Decision | Why |
 |---|---|---|
-| 2026-10-08 | <decision> | <reason> |
+| 2026-10-08 | US-003 READY: AT-033/034/035 retired to US-N14, AT-041/042 reconciled | the canonical record (`…ui-next-batch-02/01-requirements.md:6090`) marks US-N14 deferred; the B-101 attribution was the orchestrator's own error at close |
+| 2026-10-08 | US-002: reconcile AT-025b to the existing `LLR-N13.1.5` nodes, no new node | the behaviour is already pinned by five nodes (`tests/test_repair_cycles.py:501…664`); a duplicate node adds maintenance, not coverage |
+| 2026-10-08 | P0 stays open for US-001 until the operator's prototype verdict; US-004 spike runs now | standing rule 2026-09-04 (prototype round before TUI design); keeps the batch moving without deciding the operator's design question |
+| 2026-10-08 | `owner` omitted from `state.json` | A-110 forbids profile paths in tracked files; the project rule wins over the flow convention; `V40` NOTICEs it |
+| 2026-10-08 | C6 recorded as fired | the spec scanner flagged `escape`; triggers only raise, even on a word-level false positive |
 
 ## Risks / watch-items
 
