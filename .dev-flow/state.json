@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P2",
+  "current_station": "P1",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -81,7 +81,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -156,6 +156,11 @@
       "station": "P1",
       "date": "2026-10-08",
       "decision": "P1 approved (self-approved under the standing authorization): 4 US, 9 HLR, 25 LLR, AT-001..AT-009 batch-local; drafted by deepseek-v4-pro, qa-reviewer ACCEPT-WITH-FIXES (1 BLOCKER R4 missing, 4 MAJOR, 6 MINOR) all applied and re-verified by the orchestrator"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-08",
+      "decision": "P2 iterate-to-refine: 4 blockers (ARCH-B1 draft only on blur, ARCH-B2/QA-B2 ATs name internals + no observation, QA-B1 US-002/003 rows), 10 majors incl. SEC-M1 failed-save divergence, SEC-M2 ESC through markup=False; dispositions in 02-review.md"
     }
   ],
   "standing_authorization": {
