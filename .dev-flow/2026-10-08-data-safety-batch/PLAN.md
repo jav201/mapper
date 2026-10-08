@@ -30,7 +30,25 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 | Id | Verdict | Probe output |
 |---|---|---|
-| <A1 / B1 / …> | <fired / not fired> | <the probe run and what it printed> |
+| A1 | not fired | no new module or boundary move; planned edits are to existing `mapper/widgets/inspector.py`, `mapper/app.py` and `tests/*` (judged — no module-map probe exists) |
+| A2 | fired | the batch spans ≥2 modules: `mapper/widgets/inspector.py` + `mapper/app.py` (US-001) and `tests/` (US-002/003/004) |
+| A3 | fired (judged, design-contingent) | US-001's candidate remedies alter the inspector→screen commit path — `FieldCommitted` (`mapper/widgets/inspector.py:365`) is consumed by `mapper/app.py:3344`; remedy (a) introduces a new `Input.Changed` message. The interface change is why US-001 is REFINE |
+| A4 | not fired | no parallel increments planned at intake; the batch runs one lane |
+| B1 | fired | `grep -rl "FieldCommitted" tests/` → `tests/test_inspector.py`, `tests/test_g6_store_surrogates.py`, `tests/test_worklist_safety.py`; `grep -rl "on_ficha_inspector_field_committed" tests/` → `test_inspector.py`, `test_g6_store_surrogates.py` — tests not owned by US-001's story |
+| B2 | not fired | no file moves planned |
+| B3 | not fired | `ls tests/goldens` → no such directory; `find . -name "*.golden"` → 0 files |
+| B4 | not fired | no new artifact-producing change; US-001 changes WHEN `_save_or_toast` runs, not the `.mmd`/sidecar format |
+| C1 | not fired | no auth change |
+| C2 | not fired | no secrets handling |
+| C3 | not fired | no external integration; the batch touches inspector/app/store/tests only |
+| C4 | not fired | no new sensitive-data (credential/PII) surface; ficha persistence is pre-existing |
+| C5 | not fired | no DB |
+| C6 | not fired | no new input-parsing/validation surface; the commit-affordance change is UX (family D), not a new parser |
+| C7 | not fired | no network exposure |
+| C8 | not fired | no new rendering of file-derived text into markup/ANSI/HTML sinks |
+| D | fired | US-001 changes what the operator sees and touches (the inspector's save affordance); the batch objective itself names the UX change → prototype round per the standing operator rule (2026-09-04) |
+| E | fired | 4 stories (≥3); B-36 is a live data-loss defect (high risk declared at intake) |
+| F | not fired | installed flow `2026-10-04-rev100` manifest matches (orchestrator verified V7); backlog refreshed `2026-10-08` (`.dev-flow/BACKLOG.md:9`) |
 
 ## Where we are
 
@@ -44,7 +62,11 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 | Story / station | Status | Notes |
 |---|---|---|
-| <US-NNN / station> | <status> | <notes> |
+| US-001 | REFINE | design ruling (save affordance) pending; prototype round + operator verdict before implementation (standing rule 2026-09-04) |
+| US-002 | READY | write AT-044 test (doubled `?`); reconcile AT-025b → existing `LLR-N13.1.5` nodes in `tests/test_repair_cycles.py` |
+| US-003 | REFINE | B-101 mis-attributes AT-033/034/035 to US-N13 (they are US-N14, deferred); AT-041/042 already realised under AT-R12 / TC-R25 / TC-R26 names |
+| US-004 | SPIKE | FLAKE-2 mechanism is a hypothesis (framework key `left` vs seat-declared own-scope group); needs reproduction |
+| P0 | in progress — intake drafted, awaiting orchestrator gate | §2.6/§2.7/§2.8 drafted; Triggers table filled; gate decision owed |
 
 ## Roadmap + increment plan
 
