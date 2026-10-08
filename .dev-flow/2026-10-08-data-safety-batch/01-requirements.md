@@ -23,7 +23,7 @@ This document states the requirements for batch `2026-10-08-data-safety-batch` o
 
 ### 1.2 Scope
 In scope:
-- **US-001** — the inspector's draft-and-explicit-save model (operator verdict "C" on B-36): no durable write without `ctrl+s`, a visible unsaved state, a `save · discard · stay` guard on every exit, atomic save semantics, `↵`-keeps-draft, and full field coverage including `state`.
+- **US-001** — the inspector's draft-and-explicit-save model (operator verdict "C" on B-36): no durable write without `ctrl+s`, a visible unsaved state, a `save · discard · stay` guard on every exit, a two-phase whole-graph write with torn-pair detection, `↵`-keeps-draft, and full field coverage including `state`.
 - **US-002** — realise the AT-044 node (a doubled `?` opens no second legend) and reconcile AT-025b to the existing `LLR-N13.1.5` damaged-card nodes.
 - **US-003** — reconcile AT-041/AT-042 to their on-disk nodes and retire AT-033/034/035 (they travel with the deferred US-N14).
 - **US-004** — deflake the legend own-keys paint race (FLAKE-2) by making the four `scroll_to` call sites immediate and settled.
@@ -61,7 +61,7 @@ Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33),
 mapper is a single terminal TUI for editing `.mmd` mind-maps and their `_nodos.yml` sidecar. This batch closes the stray-write class in the inspector (draft + explicit save) and hardens the help-legend tests against flakes and traceability drift; US-002/003/004 carry no product behaviour change.
 
 ### 2.2 Product functions
-Draft-and-explicit-save editing of inspector fields; a visible unsaved state; a save · discard · stay guard on every exit; one atomic write and one undo step per save; `↵` keeps the draft; every field (including `state`) routes through the draft; legend-node reconciliation; the deflake of the own-keys test.
+Draft-and-explicit-save editing of inspector fields; a visible unsaved state; a save · discard · stay guard on every exit; one whole-graph write and one undo step per save; `↵` keeps the draft; every field (including `state`) routes through the draft; legend-node reconciliation; the deflake of the own-keys test.
 
 ### 2.3 User characteristics
 A single operator of the terminal mapping tool (the author/maintainer), keyboard-first. No roles, permissions, or multi-user surface.
@@ -147,17 +147,17 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-001 — no durable write without an explicit save gesture
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.1, LED-2026-10-08-data-safety-batch.2, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.10, LED-2026-10-08-data-safety-batch.19
-- **Statement:** When the operator edits a ficha field in the inspector, the system shall retain the edit only in a per-node draft and shall write the map and its sidecar to disk only when the operator issues the explicit save gesture (`ctrl+s`, or the `save` answer of the save · discard · stay guard).
+- **Ledger:** LED-2026-10-08-data-safety-batch.1, LED-2026-10-08-data-safety-batch.2, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.10, LED-2026-10-08-data-safety-batch.19, LED-2026-10-08-data-safety-batch.20
+- **Statement:** When the operator edits a ficha field in the inspector, the system shall retain the edit only in a per-node draft, shall update that draft on every `Input.Changed` (each keystroke), and shall write the map and its sidecar to disk only when the operator issues the explicit save gesture (`ctrl+s`, or the `save` answer of the save · discard · stay guard).
 - **Rationale (informative):** B-36 — a single keystroke on a focused field currently rewrites both files on blur; the delta gate is invariant under a real keystroke. Model C closes the stray-write class by construction.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py` (provisional file; the node is minted at Phase 3 — V-5).
 - **Numeric pass threshold:** exit code 0; every AT node green.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
-  - **Observable outcome:** after one stray key, a blur and a cursor change, the map's `.mmd` and `_nodos.yml` are byte-identical to before and the inspector shows the field unsaved; after `ctrl+s`, both files are written.
-  - **Shipped surface:** `MapScreen` inspector + the `ctrl+s` seat row (map scope).
-  - **Acceptance test(s):** AT-001
+  - **Observable outcome:** after one stray key, a blur and a cursor change, the map's `.mmd` and `_nodos.yml` are byte-identical to before and the inspector shows the field unsaved; after `ctrl+s`, both files are written; and typing in a field then pressing `ctrl+s` without leaving the field writes the typed text.
+  - **Shipped surface:** the map screen's inspector and the `ctrl+s` key.
+  - **Acceptance test(s):** AT-001, AT-010
   - **Boundary catalog (QC-3):** ☑ empty — a node with no edits has no draft, so `ctrl+s` writes nothing; ☑ boundary — an edit returned to the shown value leaves the draft (no write); ☑ invalid — a value `darkside.plain` alters (a lone surrogate) is coerced before the write; ☑ error — a failing store leaves the draft pending.
   - **Negative control:** on today's code AT-001 goes RED: `on_input_blurred` (`inspector.py:351`) → `_commit` → `FieldCommitted` → `on_ficha_inspector_field_committed` (`app.py:3344`) writes both files on a real keystroke, so the sha256 differs. The executed RED counterfactual (C-40) is owed at Phase 3 when the node is minted.
 
@@ -179,24 +179,24 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-003 — every exit asks before dropping a draft
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.8
-- **Statement:** When the operator leaves the edited node or the map screen while a draft is pending — by changing node, leaving the map screen, following a link, or quitting — the system shall present the save · discard · stay guard and shall proceed only on its answer.
-- **Rationale (informative):** R1 — one rule for every exit; R6 — following a link is the exit R1 did not name.
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.8, LED-2026-10-08-data-safety-batch.26, LED-2026-10-08-data-safety-batch.31, LED-2026-10-08-data-safety-batch.36, LED-2026-10-08-data-safety-batch.41
+- **Statement:** When the operator leaves the edited node or the map screen while a draft is pending — by changing node, leaving the map screen, following a link, quitting, or issuing a structural write (`a` add child, `x` archive, `A` add attachment, `X` remove attachment) — the system shall present the save · discard · stay guard before proceeding and shall proceed only on its answer. A killed terminal or crash is not an exit: the draft is lost by design and nothing is written (R1).
+- **Rationale (informative):** R1 — one rule for every exit; R6 — following a link is the exit R1 did not name. ARCH-M3 — a structural write with a pending draft would otherwise apply the write after the draft's node changed, so the guard must open before the write, not after. R1 — a killed terminal writes nothing, so no guard is owed there.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k guard` (provisional; Phase 3).
 - **Numeric pass threshold:** exit code 0; every exit path presents the guard exactly once.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
-  - **Observable outcome:** after an edit, changing node, pressing `q`/`esc`, following a link, or pressing `ctrl+q` presents the guard; `discard` (`d`) drops the draft and proceeds; `stay` (`esc`) aborts the exit; `save` (`s`) writes then proceeds.
-  - **Shipped surface:** the `DraftGuardScreen` modal, reached from `MapScreen` and `MapperApp`.
-  - **Acceptance test(s):** AT-004 (node change / leave map screen), AT-005 (quit / follow a link)
-  - **Boundary catalog (QC-3):** ☑ empty — no draft ⇒ no guard, the exit proceeds; ☑ boundary — a draft pending on a lower `MapScreen` under a pushed screen is still guarded at quit; ☐ invalid ☑ error — a failing `save` behaves as `stay`.
-  - **Negative control:** on today's code AT-004/AT-005 go RED: node change, `q`/`esc`, link-follow and `ctrl+q` proceed without presenting any guard (`app.py:3281`, `:3566`, `:4683-4684`, `:4719`, `:4937`). Executed RED owed at Phase 3.
+  - **Observable outcome:** after an edit, changing node, pressing `q`/`esc`, following a link, pressing `ctrl+q`, or issuing a structural write (`a`/`x`/`A`/`X`) presents the guard; `discard` (`d`) drops the draft and proceeds; `stay` (`esc`) aborts the exit; `save` (`s`) writes then proceeds.
+  - **Shipped surface:** the save · discard · stay guard modal, reached from the map screen and the app.
+  - **Acceptance test(s):** AT-004 (node change), AT-005 (leave map screen), AT-011 (follow a link), AT-012 (quit), AT-013 (quit with a lower map screen holding a draft), AT-014 (structural write)
+  - **Boundary catalog (QC-3):** ☑ empty — no draft ⇒ no guard, the exit proceeds; ☑ boundary — a draft pending on a lower map screen under a pushed screen is still guarded at quit; ☐ invalid ☑ error — a failing `save` behaves as `stay`.
+  - **Negative control:** on today's code AT-004/AT-005/AT-011/AT-012/AT-013/AT-014 go RED: node change, `q`/`esc`, link-follow, `ctrl+q` and the structural writes proceed without presenting any guard. Executed RED owed at Phase 3.
 
-### HLR-004 — one save gesture is one atomic write and one undo step
+### HLR-004 — one save gesture is one whole-graph write and one undo step
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11, LED-2026-10-08-data-safety-batch.17
-- **Statement:** When the operator issues the save gesture, the system shall write the map and its sidecar exactly once, shall record exactly one undo snapshot, and shall clear the draft only when the write succeeds.
+- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11, LED-2026-10-08-data-safety-batch.17, LED-2026-10-08-data-safety-batch.21, LED-2026-10-08-data-safety-batch.23, LED-2026-10-08-data-safety-batch.33, LED-2026-10-08-data-safety-batch.34, LED-2026-10-08-data-safety-batch.42, LED-2026-10-08-data-safety-batch.43
+- **Statement:** When the operator issues the save gesture, the system shall write the map and its sidecar exactly once through the two-phase whole-graph `MapStore.save` (which detects a torn write), shall record exactly one undo snapshot, and shall clear the draft only when the write succeeds.
 - **Rationale (informative):** R3 — undo granularity matches the save gesture; risk A-10 — a failed save must not leave drafted values in the graph for a later structural write to persist.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k save` (provisional; Phase 3).
@@ -227,8 +227,8 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-006 — every field, including `state`, routes through the draft
 - **Traceability:** US-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.2
-- **Statement:** While editing any inspector field, the system shall route every field value — the `state` segment included — through the draft, and shall commit no field immediately.
+- **Ledger:** LED-2026-10-08-data-safety-batch.2, LED-2026-10-08-data-safety-batch.39
+- **Statement:** While editing any inspector field, the system shall route every field value — the `state` segment included — through the draft, and shall commit no field immediately. Attachment chips are not inspector fields (their edits route through prompts, not the form), so they are excluded from the draft (ARQ D5).
 - **Rationale (informative):** R2 — a model with one exception teaches the operator that some edits are instant, which brings the stray-write back.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k state` (provisional; Phase 3).
@@ -243,7 +243,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-007 — the shipped behaviours are guarded by their declared nodes
 - **Traceability:** US-002
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.30
 - **Statement:** When the operator presses the help chord twice from a map, the system shall present exactly one legend without growing the screen stack; and when a workspace map fails to load, the system shall declare that damaged state on that map's own card while every other card keeps its true values.
 - **Rationale (informative):** B-100 — the behaviours hold today but are unguarded (AT-044) or guarded under a different id (N13.3), so a regression ships silently.
 - **Validation:** `test`
@@ -255,11 +255,11 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
   - **Shipped surface:** the help legend (`HelpScreen`) and the home card table.
   - **Acceptance test(s):** AT-044, AT-025b
   - **Boundary catalog (QC-3):** ☑ empty — a single `?` opens exactly one legend (no-op second); ☑ boundary — the second `?` while the legend is already up; ☐ invalid ☑ error — the damaged-card declaration for a map that raises or records a load warning.
-  - **Negative control:** AT-044 goes RED today only as an absent node (no on-disk node realises it — grep `doubled` in `tests/` → 0 hits); the behaviour itself holds (P-2). AT-025b is already green under `LLR-N13.1.5` (P-3), so its reconciliation has no executed RED side — declared, and the absence of a RED side is why it is written as a reconciliation, not a new node (LED-…7).
+  - **Negative control:** AT-044 goes RED today only as an absent node (no on-disk node realises it — grep `doubled` in `tests/` → 0 hits); the behaviour itself holds (P-2). The mutation the node must redden on is binding `?` in the help seat (or letting the help legend inherit the app chord), which opens a second legend. AT-025b is already green under `LLR-N13.1.5` (P-3), so its reconciliation has no executed RED side — declared, and the absence of a RED side is why it is written as a reconciliation, not a new node (LED-…7).
 
 ### HLR-008 — every declared acceptance id resolves to a node or is retired
 - **Traceability:** US-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.28
 - **Statement:** Every declared acceptance id that this batch carries shall be resolved to an on-disk test node or retired, so that the traceability record matches what the suite guards.
 - **Rationale (informative):** B-101 — a declared id with no node is a test the next refactor deletes without reddening anything (C-18).
 - **Validation:** `inspection`
@@ -275,35 +275,46 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-009 — the legend own-keys test is deterministic
 - **Traceability:** US-004
-- **Ledger:** LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.16
+- **Ledger:** LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.16, LED-2026-10-08-data-safety-batch.32
 - **Statement:** The legend own-keys test shall position its scroll pane immediately and settle it before any key is sampled, so that the test passes deterministically under load.
 - **Rationale (informative):** FLAKE-2 — a queued `scroll_to` landing inside the next key's measurement window made an inert key read as effective; a poisoned instrument invalidates every counterfactual touching it.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys` (provisional until the fix lands; the four sites are reconciled at Phase 4).
-- **Numeric pass threshold:** exit code 0; the injected-delay regression arm passes deterministically (no `work but not painted`).
+- **Numeric pass threshold:** exit code 0; the injected-delay regression arm is GREEN (its RED is the executed counterfactual `spike/red_green_flake2.py` 2/2, not a second run of the same committed node — a single committed node cannot be both RED and GREEN).
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** the own-keys test, run under the spike's late-landing fixture, fails on the current code and passes with `immediate=True` and a settle assertion.
   - **Shipped surface:** the test itself (`tests/test_help_scope.py:328` and its three sibling `scroll_to` sites).
-  - **Acceptance test(s):** AT-008
+  - **Acceptance test(s):** AT-008 (a test-instrument check — the acceptance is of the instrument's determinism, not of product behaviour)
   - **Boundary catalog (QC-3):** ☑ empty — the pane already at the target offset (scroll is a no-op); ☑ boundary — the mid-range position `max_scroll_y // 2` the fixture delays; ☐ invalid ☑ error — a scroll that never lands (the settle assertion fails loud).
-  - **Negative control:** AT-008 goes RED on the current code by construction — the spike's deterministic RED/GREEN (`red_green_flake2.py`) fails 2/2 on the current step (`work but not painted: ['ctrl+pagedown','left','right']`) and passes 2/2 with `immediate=True`. Executed in the spike, 2026-10-08; the regression arm is minted at Phase 3.
+  - **Negative control:** AT-008's RED is recorded as an executed counterfactual, not a committed RED/GREEN pair: `spike/red_green_flake2.py` fails 2/2 on the current step (`work but not painted: ['ctrl+pagedown','left','right']`) and passes 2/2 with `immediate=True`. Executed in the spike, 2026-10-08; the regression arm is minted at Phase 3.
 
 ### 3.1 Black-box acceptance tests (Layer B)
 
-AT ids in this contract are batch-local: they restart at 001 per batch, and ids from other batches (`AT-025b`, `AT-033/034/035`, `AT-041/042`, `AT-044`) are cited with their batch path `.dev-flow/2026-08-26-ui-next-batch-02/`.
+AT ids in this contract are batch-local: they restart at 001 per batch, and ids from other batches (`AT-025b`, `AT-033`/`AT-034`/`AT-035`, `AT-041`/`AT-042`, `AT-044`) are cited with their batch path `.dev-flow/2026-08-26-ui-next-batch-02/`. Surfaces name keys, screens and files only — no internal symbol names. The observation method for every AT is stated once in §5.1 (`obs`): a Textual `App.run_test` pilot pressing real keys; sha256 of the map's `.mmd` and `_nodos.yml` before and after the scenario; "written once" = the hash pair changes exactly once.
 
 | id | story | surface | stimulus | assertion | RED today |
 |----|-------|---------|----------|-----------|-----------|
-| AT-001 | US-001 | `MapScreen` inspector + the `ctrl+s` seat row | one stray key, then blur + cursor change | the `.mmd` and `_nodos.yml` are byte-identical to before and the field shows unsaved | yes — blur writes both files on a real keystroke |
-| AT-002 | US-001 | `MapScreen.action_save_draft` + the per-map undo stack | `ctrl+s` after an edit | the files are UNCHANGED before `ctrl+s` and written ONCE after; `u` restores the pre-save state; a failing store keeps the draft and records no undo step | yes — `ctrl+s` is unbound, no draft exists |
-| AT-003 | US-001 | `FichaInspector` header + per-field rows | edit one field, then a second | the header shows `● unsaved (1)` then `● unsaved (2)` and each edited field carries a marker | yes — no unsaved count, no markers |
-| AT-004 | US-001 | `DraftGuardScreen` | **node change / leave map screen** (`q`/`esc`) with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — cursor change and pop run with no guard |
-| AT-005 | US-001 | `DraftGuardScreen` | **quit (`ctrl+q`) / follow a link** with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — quit exits and link-push run with no guard |
-| AT-006 | US-001 | `FichaInspector` (`on_input_submitted`) + the `HintLine` | `↵` in a dirty field | the files are unchanged, focus leaves the field, and the hint names `ctrl+s` | yes — `↵` writes, hint reads `↵ save` |
-| AT-007 | US-001 | `FichaInspector` `DsSegmented` | change the `state` segment | the field marks unsaved and nothing writes until `ctrl+s` | yes — `state` posts `FieldCommitted` immediately |
-| AT-008 | US-004 | the own-keys test (`tests/test_help_scope.py:328`) | the injected-delay fixture — a delayed positioning `scroll_to` that lands inside the next key's measurement window | the loop reports no `work but not painted` (`effective == painted`) and passes deterministically under load | yes — fails 2/2 under the fixture |
-| AT-009 | US-001 | the per-map undo stack (`u`) | `u` with a pending draft after a save | the last save is undone and the draft's VALUES remain (only the dirty markers are recomputed) | yes — `_pop_snapshot` replaces `self.graph` wholesale, discarding any draft |
+| AT-001 | US-001 | the map screen inspector and the `ctrl+s` key | one stray key, then blur + cursor change | the `.mmd` and `_nodos.yml` are byte-identical to before and the field shows unsaved | yes — blur writes both files on a real keystroke (sha256 differs) |
+| AT-002 | US-001 | the `ctrl+s` key, the map's `.mmd`/`_nodos.yml` files, and the `u` undo key | `ctrl+s` after an edit; then `u`; and a failing store (injected by monkeypatching the screen's store `save`, precedent `tests/test_g6_store_surrogates.py`) | the files are UNCHANGED before `ctrl+s` and written ONCE after; `u` restores the pre-save state; a failing store keeps the draft and records no undo step | yes — `ctrl+s` is unbound, no draft exists |
+| AT-003 | US-001 | the inspector header and its field rows | edit one field, then a second | the header shows `● unsaved (1)` then `● unsaved (2)` and each edited field carries a marker | yes — no unsaved count, no markers |
+| AT-004 | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) | node change with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — changing node runs with no guard |
+| AT-005 | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) | leaving the map screen (`q`/`esc`) with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — `q`/`esc` leave the map with no guard |
+| AT-006 | US-001 | the inspector's `↵` key and the hint line | `↵` in a dirty field | the files are unchanged, focus leaves the field, and the hint names `ctrl+s` | yes — `↵` writes, the hint reads `↵ save` |
+| AT-007 | US-001 | the `state` segment in the inspector | change the `state` segment | the field marks unsaved and nothing writes until `ctrl+s` | yes — a `state` change writes immediately |
+| AT-008 | US-004 | the own-keys test file `tests/test_help_scope.py:328` | the injected-delay fixture — a delayed positioning `scroll_to` that lands inside the next key's measurement window | the loop reports no `work but not painted` (`effective == painted`) and passes deterministically | yes — fails 2/2 under the fixture (recorded executed counterfactual `spike/red_green_flake2.py`) |
+| AT-009 | US-001 | the `u` undo key | `u` with a pending draft after a save | the last save is undone and the draft's VALUES remain (only the dirty markers are recomputed against the restored stored values) | yes — today there is no draft; after `u` the markers are not recomputed against the restored values |
+| AT-010 | US-001 | the map screen inspector and the `ctrl+s` key | type in a field, then press `ctrl+s` without leaving the field | the typed text is in both `.mmd` and `_nodos.yml` | yes — `ctrl+s` is unbound, the typed text is not saved |
+| AT-011 | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) | following a link to another map with a pending draft | the guard presents before the push; `save`/`discard` proceed, `stay` aborts | yes — opening a linked map pushes with no guard |
+| AT-012 | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) | quitting (`ctrl+q`) with a pending draft | the guard presents once; `save`/`discard` proceed, `stay` aborts | yes — `ctrl+q` exits with no guard |
+| AT-013 | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) | quitting with a lower (non-top) map screen holding a pending draft | the lower screen's draft is guarded before exit | yes — quitting walks no lower screen's draft |
+| AT-014 | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) and the map's `.mmd`/`_nodos.yml` files | a structural write (`a`/`x`/`A`/`X`) with a pending draft | the guard presents before the write, and the draft's values never reach either file through the structural write | yes — `a`/`x`/`A`/`X` write immediately with no guard |
+| AT-015 | US-001 | the guard modal title | a map id or node title carrying an ESC (0x1B) payload | the title is painted literally, no control effect reaches the terminal | yes — `markup=False`'s content strip passes ESC, so the payload reaches the terminal |
+| AT-044 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-002 | the help legend (the `?` chord) | press the help chord (`?`) twice from a map | exactly one legend; the screen stack does not grow | yes — only as an absent node today; the mutation it must redden on is binding `?` in the help seat (or letting the legend inherit the app chord), which opens a second legend |
+| AT-025b (.dev-flow/2026-08-26-ui-next-batch-02/) | US-002 | the home card table | open a workspace holding a map that fails to load | that map's card declares the damaged state; every other card keeps its true values | none — already green under the existing damaged-card nodes (reconciliation, no executed RED) |
+| AT-041 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record (`tests/test_repair_layout.py:274`) — inspection · reconciliation | reconcile the declared id to its on-disk node | resolves to `test_at_r12_pressing_help_presents_every_map_binding` | none — inspection (reconciliation, no executed arm) |
+| AT-042 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record (`tests/test_repair_layout.py:441`) — inspection · reconciliation; two new nodes (LLR-008.3) | reconcile the largest-set arm; realise the smallest-set (`app`) and no-scope-screen arms as new nodes | the largest-set arm resolves to `test_tc_r25`; the two missing arms are new nodes | none for the reconciliation; the two new arms go RED as absent nodes today |
+| AT-033, AT-034, AT-035 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record — inspection · retired | retire the three ids with a ledger entry | the three ids carry no obligation in this batch's Atlas | none — inspection (retired; ids absent by design) |
 
 ---
 
@@ -322,20 +333,20 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 - **Negative control:** none — the draft surface does not exist today (`grep -rn "draft_values\|has_draft\|clear_draft" mapper/widgets/inspector.py` → 0 hits), so the RED side is owed when the surface is minted at Phase 3.
 - **Boundary catalog:** ☑ empty — a node with no edits ⇒ `has_draft()` false; ☑ boundary — editing a field back to the shown value clears it from the draft; ☐ invalid ☐ error.
 
-### LLR-001.2 — text fields update the draft and post nothing
+### LLR-001.2 — text fields update the draft on every keystroke and post nothing
 - **Traceability:** HLR-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.6
-- **Statement:** When an inspector text field blurs or is submitted, the `FichaInspector` shall update the draft and shall post no `FieldCommitted`.
+- **Ledger:** LED-2026-10-08-data-safety-batch.6, LED-2026-10-08-data-safety-batch.20
+- **Statement:** When an inspector text field changes, blurs, or is submitted, the `FichaInspector` shall update the draft on every `Input.Changed` (each keystroke) and shall post no `FieldCommitted`.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_inspector.py -k draft` (provisional until Phase 3).
-- **Numeric pass threshold:** exit code 0; blur and submit produce no `FieldCommitted` message and no file write.
+- **Numeric pass threshold:** exit code 0; blur, submit and each keystroke produce no `FieldCommitted` message and no file write, and the draft holds the value typed so far.
 - **Negative control:** on today's code the current behaviour (blur/submit posts `FieldCommitted`, `inspector.py:347-365`) is the RED side; the assertion is inverted once the draft lands.
 - **Boundary catalog:** ☑ empty — blur with no edit changes nothing; ☑ boundary — blur after editing back to the shown value leaves no dirty field; ☐ invalid ☐ error.
 
 ### LLR-001.3 — `FieldCommitted` removed in one increment (A3)
 - **Traceability:** HLR-001
-- **Ledger:** LED-2026-10-08-data-safety-batch.6, LED-2026-10-08-data-safety-batch.9, LED-2026-10-08-data-safety-batch.18
-- **Statement:** The `FichaInspector.FieldCommitted` message, its producer, and `MapScreen.on_ficha_inspector_field_committed` shall be removed in the same increment, leaving no live producer or consumer.
+- **Ledger:** LED-2026-10-08-data-safety-batch.6, LED-2026-10-08-data-safety-batch.9, LED-2026-10-08-data-safety-batch.18, LED-2026-10-08-data-safety-batch.29, LED-2026-10-08-data-safety-batch.40, LED-2026-10-08-data-safety-batch.44
+- **Statement:** The `FichaInspector.FieldCommitted` message, its producer, and `MapScreen.on_ficha_inspector_field_committed` shall be removed in the same increment, leaving no live producer or consumer; and the seven docstring/test-name lines that mention `FieldCommitted` (`tests/test_g6_store_surrogates.py:8,105,109,111,113`, `tests/test_inspector.py:61`, `mapper/app.py:3345`) shall be renamed in the same increment.
 - **Validation:** `inspection`
 - **Executed verification:** `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests` → 0 hits post-increment. Pre-state executed 2026-10-08: 17 lines (10 code sites). Code sites: `mapper/widgets/inspector.py:68,365,372`, `mapper/app.py:3344`, `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254`. Docstring/test-name lines (7): `tests/test_g6_store_surrogates.py:8,105,109,111,113`, `tests/test_inspector.py:61`, `mapper/app.py:3345` (the `FieldCommitted` type annotation). The 0-line post-state threshold is meetable only if those docstrings, the comment and the test name `test_g6b_field_committed_...` are renamed in the same increment — removing the code sites alone leaves 7 matching lines.
 - **Numeric pass threshold:** 0 references post-increment.
@@ -344,8 +355,8 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-001.4 — `ctrl+s` pulls the draft and saves once
 - **Traceability:** HLR-001
-- **Ledger:** none
-- **Statement:** When the operator presses `ctrl+s`, `MapScreen.action_save_draft` shall read `inspector.draft_values()` and persist the applied draft through `_save_or_toast` exactly once.
+- **Ledger:** LED-2026-10-08-data-safety-batch.27
+- **Statement:** The `KEYMAP` seat shall gain a map-scope row binding `ctrl+s` to `save_draft` (glyph `ctrl+s`, label `save`), and when the operator presses `ctrl+s`, `MapScreen.action_save_draft` shall read `inspector.draft_values()` and persist the applied draft through `_save_or_toast` exactly once.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k save` (provisional; `action_save_draft` is `NEW — created in Phase 3`, and the `ctrl+s → save_draft` seat row is `NEW — created in Phase 3`).
 - **Numeric pass threshold:** exit code 0; one `ctrl+s` issues one `store.save` call.
@@ -354,8 +365,8 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-002.1 — dirty means differs from the shown value
 - **Traceability:** HLR-002
-- **Ledger:** none
-- **Statement:** A field shall be dirty when its draft value differs from the value the form showed for it (`darkside.plain(stored)`), and the `FichaInspector` shall overlay the draft when it builds `_rows`.
+- **Ledger:** LED-2026-10-08-data-safety-batch.38
+- **Statement:** A field shall be dirty when its draft value differs from the value the form showed for it (`darkside.plain(stored)`), and the `FichaInspector` shall overlay the draft when it builds `_rows`. For the `state` segment the shown value is `STATE_VALUES[active]`, where `active = STATE_VALUES.index(ficha.state) if ficha.state in STATE_VALUES else 0` — a node whose stored state is unknown shows `ok` (index 0) and is not dirty.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_inspector.py -k dirty` (provisional until Phase 3).
 - **Numeric pass threshold:** exit code 0; a node whose `plain()`-coerced title equals the stored title is not dirty on open.
@@ -374,13 +385,13 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-003.1 — the guard modal returns one of three answers
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.8
-- **Statement:** The `DraftGuardScreen` (new, `mapper/screens/draft_guard.py`) shall dismiss with exactly one of `save` (`s`), `discard` (`d`), or `stay` (`esc`), bound from the `draft` modal scope, and shall paint its title with `markup=False`.
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.8, LED-2026-10-08-data-safety-batch.24, LED-2026-10-08-data-safety-batch.27, LED-2026-10-08-data-safety-batch.37
+- **Statement:** The `DraftGuardScreen` (new, `mapper/screens/draft_guard.py`) shall dismiss with exactly one of `save` (`s`), `discard` (`d`), or `stay` (`esc`), bound from a new `draft` modal scope (`SCOPE_DRAFT = "draft"`, `GROUP_SCOPE["draft"] = SCOPE_DRAFT`, `MODAL_SCOPES` widened to include `SCOPE_DRAFT`), and shall paint a title composed of `darkside.plain(<map id>)` plus `darkside.plain(<node title as stored>)` with `markup=False` — the title names the map the operator is about to leave, and `plain()` strips every control character (`darkside.py:517-547`) that `markup=False`'s `Content` strip leaves in (which drops BEL/BS/VT/FF/CR only, `textual/content.py:56-62`, so ESC passes).
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k modal` (provisional; `DraftGuardScreen` is `NEW — created in Phase 3`).
 - **Numeric pass threshold:** exit code 0; the modal returns exactly the token for the key pressed.
-- **Negative control:** the hostile-title case (a title carrying `[@click=…]`) is the RED side: `markup=False` must render it literally, no parse, no click-binding (SEC-H2; `_ConfirmScreen` precedent `app.py:384-401`). Executed RED owed at Phase 3.
-- **Boundary catalog:** ☑ empty — no title; ☑ boundary — a title with markup brackets; ☐ invalid ☑ error — a title carrying a lone surrogate is `plain()`-coerced.
+- **Negative control:** the hostile-title case is the RED side, two payloads: (1) a title carrying `[@click=…]` must render literally — no parse, no click-binding (SEC-H2; `_ConfirmScreen` precedent `app.py:384-401`); (2) an ESC (0x1B) payload must reach the terminal with no control effect — `plain()` coerces it, `markup=False` alone would not. Executed RED owed at Phase 3.
+- **Boundary catalog:** ☑ empty — no title; ☑ boundary — a title with markup brackets; ☑ boundary — a title carrying an ESC (0x1B) payload; ☐ invalid ☑ error — a title carrying a lone surrogate is `plain()`-coerced.
 
 ### LLR-003.2 — the node-change guard sits at the one re-pointing site
 - **Traceability:** HLR-003
@@ -404,23 +415,33 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-003.4 — following a link is guarded
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.4
-- **Statement:** When following a link pushes a second `MapScreen`, the system shall present the guard first when a draft is pending.
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.25
+- **Statement:** When following a link pushes a second `MapScreen`, the system shall present the guard first when a draft is pending. The link guard is unconditional (R6), never deferred.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k link` (provisional until Phase 3).
 - **Numeric pass threshold:** exit code 0; opening a linked map with a pending draft presents the guard before the push.
-- **Negative control:** on today's code `action_open_ficha` pushes the linked `MapScreen` with no guard (`app.py:3566`). Executed RED owed at Phase 3. (PDR/UX to rule the guard-on-link decision, per ARQ §D3.)
+- **Negative control:** on today's code `action_open_ficha` pushes the linked `MapScreen` with no guard (`app.py:3566`). Executed RED owed at Phase 3.
 - **Boundary catalog:** ☑ empty — no draft ⇒ the push proceeds; ☑ boundary — a link to the same map; ☐ invalid ☑ error — `save` that fails behaves as `stay`.
 
 ### LLR-003.5 — quitting guards every pending map screen
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.4
-- **Statement:** `MapperApp.action_quit` shall walk the screen stack, guard every `MapScreen` with a pending draft, and shall not be re-entrant.
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.31
+- **Statement:** `MapperApp.action_quit` shall walk the screen stack, guard every `MapScreen` with a pending draft — a lower (non-top) `MapScreen` under a pushed screen included — and shall not be re-entrant.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k quit` (provisional until Phase 3).
 - **Numeric pass threshold:** exit code 0; a second `ctrl+q` while the guard is up does not stack a second modal.
 - **Negative control:** on today's code `MapperApp.action_quit` (`app.py:4937-4938`) exits immediately with no guard. Executed RED owed at Phase 3.
 - **Boundary catalog:** ☑ empty — no draft on any screen ⇒ quit proceeds; ☑ boundary — a draft on a lower (non-top) `MapScreen` is still guarded; ☐ invalid ☐ error.
+
+### LLR-003.6 — a structural write with a pending draft opens the guard first
+- **Traceability:** HLR-003
+- **Ledger:** LED-2026-10-08-data-safety-batch.26, LED-2026-10-08-data-safety-batch.36
+- **Statement:** Before any structural write — `action_add_child` (`a`), `action_archive` (`x`), `action_add_attachment` (`A`), `action_remove_attachment` (`X`) — the `MapScreen` shall present the guard when a draft is pending and shall run the write only on `save` or `discard`; on `stay` the write is aborted. The draft is never in `self.graph` until saved, so the guard must open before the write, not after it.
+- **Validation:** `test (integration)`
+- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k structural` (provisional until Phase 3).
+- **Numeric pass threshold:** exit code 0; a structural write with a pending draft presents the guard, and the draft's values never reach the `.mmd`/`_nodos.yml` files through the write.
+- **Negative control:** on today's code `action_add_child` (`app.py:4545`), `action_archive` (`app.py:4592`), `action_add_attachment` (`app.py:3487`) and `action_remove_attachment` (`app.py:3490`) write the whole graph immediately with no guard. Executed RED owed at Phase 3.
+- **Boundary catalog:** ☑ empty — no draft ⇒ the write proceeds unguarded; ☑ boundary — a structural write that removes the draft's node; ☐ invalid ☑ error — `save` that fails behaves as `stay`.
 
 ### LLR-004.1 — one snapshot and one write per save
 - **Traceability:** HLR-004
@@ -432,25 +453,25 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 - **Negative control:** on today's code the field-commit path pushes a snapshot per field (`app.py:3362` inside the per-commit handler), so a multi-field edit is RED against "one snapshot". Executed RED owed at Phase 3.
 - **Boundary catalog:** ☑ empty — `ctrl+s` with no draft pushes nothing; ☑ boundary — a multi-field draft is one snapshot; ☐ invalid ☑ error — a failed save pops the pushed snapshot (no residual step).
 
-### LLR-004.2 — success clears the draft; failure keeps it
+### LLR-004.2 — success clears the draft; failure resolves by where it fell
 - **Traceability:** HLR-004
-- **Ledger:** none
-- **Statement:** On a successful save the system shall set `base_graph`, call `inspector.clear_draft()`, and toast; on a failed save it shall restore the graph, pop the pushed snapshot, and keep the draft.
+- **Ledger:** LED-2026-10-08-data-safety-batch.23
+- **Statement:** On a successful save the system shall set `base_graph`, call `inspector.clear_draft()`, and toast. On a failed save the system shall resolve the failure by where it fell in `MapStore.save`'s two-phase write (`store.py:809`): (a) failure before the first replace — `dump`/`_build_sidecar`/`_text_hash`/`safe_dump` (`store.py:825-836`) or `_write_tmp` (`:846-847`) raises — leaves both originals untouched, so the system shall restore the graph, pop the pushed snapshot, and keep the draft; (b) failure after both replaces — `_reindex` (`:850`, def `:926`) raises — leaves both files written, so the system shall treat the save as committed, clear the draft, and warn; (c) failure between the replaces — `mmd_tmp.replace` (`:848`) succeeds and `yml_tmp.replace` (`:849`) raises — leaves a torn pair, so the system shall reload from disk (which detects the `_mmd_hash` mismatch) and warn.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k failure` (provisional until Phase 3).
-- **Numeric pass threshold:** exit code 0; a failing store leaves `has_draft()` true and the graph unchanged.
+- **Numeric pass threshold:** exit code 0; case (a) leaves `has_draft()` true and the graph unchanged; case (b) clears the draft; case (c) reloads from disk and warns.
 - **Negative control:** on today's code a failed save mutates `self.graph` before `_save_or_toast` and leaves the mutation in place (`app.py:3362-3375`), which a later structural save would write (risk A-10) — the RED side. Executed RED owed at Phase 3.
-- **Boundary catalog:** ☑ empty — `ctrl+s` with no draft is a no-op; ☑ boundary — a partial multi-field draft; ☐ invalid ☑ error — a store that raises mid-write.
+- **Boundary catalog:** ☑ empty — `ctrl+s` with no draft is a no-op; ☑ boundary — a partial multi-field draft; ☑ boundary — a store that raises before the first replace; ☑ boundary — a store that raises between the replaces (torn pair); ☐ invalid ☑ error — a store that raises after both replaces (`_reindex`).
 
 ### LLR-004.3 — `u` undoes the last save and leaves the draft
 - **Traceability:** HLR-004
-- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11
+- **Ledger:** LED-2026-10-08-data-safety-batch.3, LED-2026-10-08-data-safety-batch.11, LED-2026-10-08-data-safety-batch.33, LED-2026-10-08-data-safety-batch.35
 - **Statement:** While a draft is pending, `u` shall undo the last save and leave the pending draft's values untouched, recomputing only the dirty markers against the restored stored values.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k undo` (provisional until Phase 3).
-- **Numeric pass threshold:** exit code 0; after `u`, the restored values are re-diffed and the pending draft survives.
-- **Negative control:** on today's code `u` (`_pop_snapshot`, `app.py:3517-3533`) replaces `self.graph` wholesale, so a pending draft (which today does not exist) would be silently discarded — the RED side for a draft model. Executed RED owed at Phase 3.
-- **Boundary catalog:** ☑ empty — `u` with no snapshot toasts "nothing to undo"; ☑ boundary — `u` where the cursor's node disappears fires the node-change guard; ☐ invalid ☐ error.
+- **Numeric pass threshold:** exit code 0; after `u`, the restored values are re-diffed against the restored stored values and the pending draft survives.
+- **Negative control:** the control is the dirty-marker re-diff, not the absent draft: after `u` restores the graph, each field's marker must be recomputed against the value the restored form shows — a mutation that leaves the markers diffed against the pre-`u` values goes RED. Today `u` (`_pop_snapshot`, `app.py:3517-3533`) replaces `self.graph` wholesale with no marker re-diff. Executed RED owed at Phase 3.
+- **Boundary catalog:** ☑ empty — `u` with no snapshot toasts "nothing to undo"; ☑ boundary — `u` where the cursor's node disappears fires the node-change guard; ☐ invalid ☐ error — a failed `u` while a draft is pending is a residual (risk A-10): it restores the graph but leaves the draft unresolved, recorded rather than mitigated.
 
 ### LLR-004.4 — the write stays whole-graph
 - **Traceability:** HLR-004
@@ -522,15 +543,25 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 - **Negative control:** none — the behaviour is already green under `LLR-N13.1.5` (P-3); a reconciliation of an existing id to an existing node has no executed RED side (declared).
 - **Boundary catalog:** none — inspection.
 
-### LLR-008.1 — AT-041/AT-042 reconcile to their on-disk nodes
+### LLR-008.1 — AT-041 and AT-042's largest-set arm reconcile to their on-disk nodes
 - **Traceability:** HLR-008
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13
-- **Statement:** AT-041 shall be reconciled to its on-disk node `tests/test_repair_layout.py:274` (`test_at_r12_pressing_help_presents_every_map_binding`). AT-042 is PARTIALLY realised: its largest-set arm (`map`, 27 rows) is covered by `tests/test_repair_layout.py:441` (`test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions`, parametrised `SCOPE_MAP` and `SCOPE_HOME`), but its smallest-set arm (`app`, 2 rows) and its screen-that-declares-no-scope arm have no node — `test_tc_r25` never drives `app`, and `test_tc_r26` (`:456`, `test_tc_r26_no_foreign_scope_binding_reaches_the_panel`) is the foreign-scope negative, not a no-scope arm; those two arms shall be realised as new nodes in this batch.
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.28
+- **Statement:** AT-041 shall be reconciled to its on-disk node `tests/test_repair_layout.py:274` (`test_at_r12_pressing_help_presents_every_map_binding`). AT-042's largest-set arm (`map`, 27 rows) shall be reconciled to `tests/test_repair_layout.py:441` (`test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions`, parametrised `SCOPE_MAP` and `SCOPE_HOME`). The two missing arms of AT-042 — the smallest-set arm (`app`, 2 rows) and the screen-that-declares-no-scope arm — have no on-disk node and are realised as new nodes under LLR-008.3.
 - **Validation:** `inspection`
-- **Executed verification:** the nodes exist at the cited lines (verified by grep, 2026-10-08); `test_tc_r25` is parametrised `SCOPE_MAP`/`SCOPE_HOME` only (no `app` arm, `tests/test_repair_layout.py:440`) and `test_tc_r26` asserts the foreign-scope negative (`:456`), so neither covers AT-042's smallest-set or no-scope arm; the reconciliation is recorded in `.dev-flow/BACKLOG.md` and the traceability matrix, and the two missing arms are owed as new nodes.
-- **Numeric pass threshold:** AT-041 resolves to a cited node by id in the Atlas; AT-042's three arms each resolve to a node by id — the two missing arms (smallest set `app`, no-scope screen) realised as new nodes in this batch.
+- **Executed verification:** the nodes exist at the cited lines (verified by grep, 2026-10-08); `test_tc_r25` is parametrised `SCOPE_MAP`/`SCOPE_HOME` only (no `app` arm, `tests/test_repair_layout.py:440`) and `test_tc_r26` asserts the foreign-scope negative (`:456`), so neither covers AT-042's smallest-set or no-scope arm; the reconciliation is recorded in `.dev-flow/BACKLOG.md` and the traceability matrix.
+- **Numeric pass threshold:** AT-041 resolves to a cited node by id in the Atlas; AT-042's largest-set arm resolves to a cited node by id.
 - **Negative control:** none — inspection; a reconciliation of an existing id to an existing node has no executed RED side.
 - **Boundary catalog:** none — inspection.
+
+### LLR-008.3 — AT-042's smallest-set and no-scope-screen arms are new nodes
+- **Traceability:** HLR-008
+- **Ledger:** LED-2026-10-08-data-safety-batch.28
+- **Statement:** Two new test nodes shall realise AT-042's missing arms: one driving the smallest set (app scope, 2 rows) through the keymap set equality, and one driving a screen that declares no scope, each asserting the presented set equals the keymap set in both directions.
+- **Validation:** `test (e2e)`
+- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_repair_layout.py -k tc_r25` (provisional until the two parametrised arms are added to `test_tc_r25`, `tests/test_repair_layout.py:441`).
+- **Numeric pass threshold:** exit code 0; the `app` (2-row) arm and the no-scope-screen arm each pass.
+- **Negative control:** the two arms go RED today only as absent nodes (no `app` arm exists in `test_tc_r25`, `tests/test_repair_layout.py:440`); the behaviour holds (P-2), so the arms are new coverage, not a fix. Executed RED owed at Phase 3.
+- **Boundary catalog:** ☑ empty — the presented set is empty for a screen with no bindings; ☑ boundary — the smallest set (`app`, 2 rows) against the largest (`map`, 27 rows); ☐ invalid ☐ error.
 
 ### LLR-008.2 — AT-033/034/035 are retired
 - **Traceability:** HLR-008
@@ -653,18 +684,20 @@ COMPONENT: draft_guard
 > - **Layer A — white-box / functional (`TC-NNN`):** validates the HLR/LLR mechanism (the HOW). Methods: `test`, `inspection`, `analysis`.
 > - **Layer B — black-box / behavioral acceptance (`AT-NNN`):** validates the user story's outcome through the shipped surface (the WHAT). Method: `acceptance`.
 
+> **Observation method (`obs`) — stated once, referenced by every AT:** each AT is observed through a Textual `App.run_test` pilot that presses the real keys (typing, `ctrl+s`, `↵`, `q`/`esc`, `ctrl+q`, the guard's `s`/`d`/`esc`), never through posted messages or direct setters; the map's `.mmd` and `_nodos.yml` are hashed (sha256) before and after the scenario; "written once" = the hash pair changes exactly once across the scenario. Failing-store arms inject the failure by monkeypatching the screen's store `save` (precedent `tests/test_g6_store_surrogates.py`).
+
 | Requirement | Layer | Method | Verification |
 |---|---|---|---|
 | HLR-001…006 (US-001) | A | `test` (unit/integration) | LLR-001.x…LLR-006.x, each with an executed verification and a numeric threshold |
-| HLR-001…006 (US-001) | B | acceptance | AT-001…AT-007 through the shipped inspector surface |
+| HLR-001…006 (US-001) | B | acceptance | AT-001…AT-007, AT-009…AT-015 through the shipped inspector surface and the `.mmd`/`_nodos.yml` files (`obs`) |
 | HLR-007 (US-002) | A + B | `test` (e2e) + `inspection` | LLR-007.1 (new AT-044 node) + LLR-007.2 (reconcile AT-025b); AT-044, AT-025b |
-| HLR-008 (US-003) | A | `inspection` | LLR-008.1/008.2 reconcile/retire ids against the on-disk suite; AT-041 reconciled, AT-042 partially realised (two arms owed), AT-033/034/035 retired |
+| HLR-008 (US-003) | A | `inspection` + `test` (e2e) | LLR-008.1/008.2 reconcile/retire ids (inspection); LLR-008.3 mints AT-042's two new arms (test); AT-041 reconciled, AT-042's largest-set arm reconciled + two arms owed, AT-033/034/035 retired |
 | HLR-009 (US-004) | A + B | `test` (integration) | LLR-009.1/009.2 deflake + injected-delay regression; AT-008 |
 
 - **Layer A default:** every LLR validated by `test`/`analysis` names its exact executed verification (a pytest node id) and a numeric pass threshold; `inspection` LLRs name the file/line and the observable condition.
 - **Layer B:** every user story has ≥1 `AT-NNN` observing its outcome through the shipped surface — with the exception of US-003, whose acceptance is definitional/inspectional (a reconciliation of ids to nodes, no shipped surface), as declared in its refinement block.
 
-> **Out-of-LLR regression obligations (Inc-1):** the reverse-census re-point of the three test files that post `FieldCommitted` — `tests/test_inspector.py`, `tests/test_g6_store_surrogates.py`, `tests/test_worklist_safety.py` — and the whole-seat pin `tests/test_key_dispatch.py:137` (`test_at_n03h_the_whole_seat_matches_its_specification`, which must absorb the new `ctrl+s` row and the `draft` scope) are owed in Inc-1 as regression obligations, not as new LLRs.
+> **Out-of-LLR regression obligations (Inc-1):** (a) the reverse-census re-point of the three test files that post `FieldCommitted` — `tests/test_inspector.py:103,162`, `tests/test_g6_store_surrogates.py:133,152,176`, `tests/test_worklist_safety.py:254` — re-pointed to drive typing + `ctrl+s` through the pilot (never a posted message), including `tests/test_g6_store_surrogates.py:150,203,331`; (b) the whole-seat pin `tests/test_key_dispatch.py:137` (`test_at_n03h_the_whole_seat_matches_its_specification`), which must absorb the new map-scope `ctrl+s` row and the `draft` scope; (c) the keymap census pins `tests/test_keymap.py:34-44,63,87-95,298` and `tests/test_inc9.py:695-703,707`, which the new keymap symbols (`SCOPE_DRAFT = "draft"`, `GROUP_SCOPE["draft"] = SCOPE_DRAFT`, `MODAL_SCOPES` widened, the map-scope `ctrl+s` row) redden; and (d) the ARQ D2 persistence-oracle census candidates `tests/test_en7.py:62-80,182`, `tests/test_app.py:31`, `tests/test_fold.py:1016,1253`, `tests/test_inc9d.py:124-487` (`↵` on inspector fields), whose "type, `↵`/blur, file changed" oracles the draft model re-points. All are owed in Inc-1 as regression obligations, not as new LLRs.
 
 ### 5.2 Batch acceptance criteria
 - 100% of LLRs have an assigned validation method; every `test`/`analysis` LLR carries an executed verification and a numeric pass threshold.
@@ -689,12 +722,13 @@ COMPONENT: draft_guard
 
 ### 6.3 Open risks
 
-- **Security scan (`devflow-scan-spec.py`): the P0 scan (2026-10-08) flagged `escape`; the P1 scan (re-run 2026-10-08, rule 7) exit 1 → `security_required: true`, flagged `token`, `form`, `escape`.** All three are ordinary vocabulary, recorded anyway and declared per C-53, never reworded: `token` is the guard modal's dismissal token (`save`/`discard`/`stay`, LLR-003.1) and the `draft_guard` `choice` output; `form` is the inspector form / "the value the form showed" (HLR-002, LLR-002.1, §1.3); `escape` is the Esc key of the guard (`esc` stay) and the legend seat. None names a sensitive surface. The batch's security questions: (1) US-001 changes WHEN the inspector writes the map and its sidecar — the write path must stay atomic and confined (B-75 check-then-write, `MapStore._write_tmp` hard-link B-84 are adjacent, not in scope); (2) no new parser, network or secret surface. The `security-reviewer` lens runs at PDR over US-001's write path.
+- **Security scan (`devflow-scan-spec.py`): the P0 scan (2026-10-08) flagged `escape`; the P1 scan (re-run 2026-10-08, rule 7) exit 1 → `security_required: true`, flagged `token`, `form`, `escape`; the P1-iteration-1 scan (re-run 2026-10-08) flags `token`, `hash`, `form`, `escape`.** All four are ordinary vocabulary, recorded anyway and declared per C-53, never reworded: `token` is the guard modal's dismissal token (`save`/`discard`/`stay`, LLR-003.1) and the `draft_guard` `choice` output; `hash` is the sha256 observation method (§5.1 `obs` — the `.mmd`/`_nodos.yml` hash pair); `form` is the inspector form / "the value the form showed" (HLR-002, LLR-002.1, §1.3); `escape` is the Esc key of the guard (`esc` stay), the legend seat, and the ESC-payload negative (AT-015). None names a sensitive surface. The batch's security questions: (1) US-001 changes WHEN the inspector writes the map and its sidecar — the write path must stay atomic and confined (B-75 check-then-write, `MapStore._write_tmp` hard-link B-84 are adjacent, not in scope); (2) no new parser, network or secret surface. The `security-reviewer` lens runs at PDR over US-001's write path.
 - **US-001 depends on an operator verdict** on a prototype round (standing rule 2026-09-04); P0 stays open for US-001 until it arrives — delivered 2026-10-08 ("C").
 - **A-8** (a base `on_*` handler survives and double-commits): the change is in-place, no subclass; the sha256 AT on `.mmd` + `_nodos.yml` reddens a surviving base handler.
 - **A-9** (the draft is wiped by the per-repaint rebuild): overlay in `_rows` and guard at `app.py:3281`.
-- **A-10** (a failed save leaves drafted values in `self.graph`): restore graph + pop snapshot on failure (LLR-004.2).
-- **A-12** (the modal paints a file-derived title): `markup=False` (LLR-003.1).
+- **A-10** (a failed save leaves drafted values in `self.graph`): the three-case resolution (LLR-004.2) — before the first replace restores the graph, after both replaces clears the draft and warns, between the replaces reloads from disk — so no drafted value survives in `self.graph` to be written by a later structural save.
+- **A-11** (a killed terminal or crash while a draft is pending): not an exit — loss is accepted by design (R1, the draft is never persisted on its own) and nothing is written. Excluded explicitly, not mitigated.
+- **A-12** (the modal paints a file-derived title): title composed of `darkside.plain(map_id)` + `darkside.plain(node title)` with `markup=False` (LLR-003.1); `plain()` strips the control characters (ESC included) that `markup=False`'s content strip leaves in.
 
 ### 6.4 Phase-1 reconciliation log — moved to the ledger (§7)
 
