@@ -65,3 +65,22 @@
 - **architect:** ✓ derivation, ✓ keywords, ✓ reverse census (C-26) table, ✓ requirement-defect classification per finding.
 - **qa-reviewer:** ✓ testability, ✗ two-layer (QA-B1/B2), ✓ supersession census, ✓ falsifiability per AT.
 - **security-reviewer:** ✓ what/where/why/fix per finding, ✓ severity, ✓ no secrets or user paths, ✓ explicit verdict, n/a new tools.
+
+---
+
+## Round 2 (HEAD `8783526`, after P1 iteration 1)
+
+- **Gate:** `iterate-to-refine` → Phase 1 (iteration 2). Round-1 ids: architect 12/12 discharged; security 3/3 majors discharged (m1, m4 partial); qa all discharged (m2 partial).
+- **Findings:** 0 blocker · 6 major · 13 minor.
+
+| ID | Reviewer | Severity | What | Disposition (orchestrator) |
+|---|---|---|---|---|
+| R2-N1 = R2-ARCH-NEW-1 | security, architect | major | The three save-failure cases cannot be told apart (`save()` raises raw exceptions from every phase; `_save_or_toast` returns a bool, `app.py:229-258`); four places still say every failure keeps the draft and leaves no undo step | Classify by DISK, not by exception: sha256 of `.mmd` and `_nodos.yml` taken before the save and re-taken on failure. (a) both unchanged → restore graph, pop snapshot, keep draft, guard = stay, error toast. (b) both changed → committed: keep snapshot, clear draft, warning toast, guard proceeds as `save`. (c) exactly one changed → reload from disk, keep the draft re-diffed against the reloaded values, keep snapshot, guard = stay, warning toast naming `ctrl+s` to repair; if the reload raises → keep in-memory graph and draft, refuse structural writes until a successful `ctrl+s`, warn. LLR-001.4 stops mandating `_save_or_toast` for the draft save. Reconcile HLR-004 acceptance, AT-002, LLR-004.1 boundary, LLR-003.2–003.6 `save` rows; amend ARQ R-013's rationale in `docs/ARCHITECTURE.md` |
+| R2-N2 | security | major | `mmd_tmp.replace` raising (antivirus / sync client on Windows) fits no case | Falls in (a) by the disk rule (both originals untouched) |
+| R2-QA-M1 | qa | major | AT-010, AT-015 lack a discriminating counterfactual | AT-010 must redden under "draft updated on blur/submit only"; AT-015 must redden under "title without `plain()`" |
+| R2-QA-M2 | qa | major | AT-013's precondition (a lower `MapScreen` holding a draft at quit) is unreachable through the surface once R6 guards links; AT-005/AT-014 compound | AT-013 → Layer-A injection test of LLR-003.5 (defensive invariant), declared as such; AT-005 and AT-014 one row per key, each with its own RED |
+| R2-QA-M3 | qa | major | AT-015 orphaned from HLR-003; US-004's Layer-B exception undeclared | List AT-015 under HLR-003; declare US-004's exception beside US-003's in §5.1 |
+| R2-ARCH-NEW-2 | architect | minor (design, PDR) | Per-keystroke draft vs `show()` → `_rebuild` remount: focused `Input` destroyed per keystroke; stale `Input.Changed` after re-point | LLR-002.2: markers update without remounting the focused field; LLR-001.2: each draft entry keyed to the node of the input that sent the change |
+| R2-ARCH-NEW-3 | architect | minor | LLR-008.3 no-scope arm ambiguous | State the expected set, verified against today's behaviour |
+| R2-N3/N4/N5 | security | minor | Draft and snapshot in (c); pop scoped to (a); stale `.tmp` | Covered by R2-N1's disposition; stale `.tmp` recorded as a residual (overwritten by the next save) |
+| R2-minors | qa, security, architect | minor | HLR "Shipped surface" lines still name internals (`:207`, `:223`, `:239`); LLR-007.1 control says "absent node"; LLR-009.2 "RED before, GREEN after" for one node; AT-009 lacks focus-out and the `● unsaved (N)` observable; AT-002 not split; AT-011 names no link key; AT-012/013 "exit proceeds" observation; AT-015 observation = scan of rendered output for 0x1B; §6.3 "atomic" wording; typed-ahead `d` residual; `plain` cited at `darkside.py:517-547` (real `:550`) | Apply all |
