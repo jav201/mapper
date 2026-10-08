@@ -137,3 +137,178 @@
 - **What changed:** the **Requirement** field of entries .12–.18 was re-pointed from section names (§2, §5, §6.3, the ledger itself) and story rows (US-003, US-004 are table rows, not headings) to the HLR/LLR headings that carry them, and each of those requirements now lists the entry in its **Ledger** field.
 - **Why:** V26 pairs requirement HEADINGS with entries in both directions; an entry naming a section pairs with nothing. Done the same day, before the P1 gate closed, by the orchestrator; no entry's content changed.
 - **Evidence:** `devflow-validate.py --brief` V26 before (2 BLOCK) and after.
+
+### LED-2026-10-08-data-safety-batch.20 — ARCH-B1 — the draft updates on every `Input.Changed`
+- **Requirement:** HLR-001, LLR-001.2
+- **Date:** 2026-10-08
+- **What changed:** HLR-001 and LLR-001.2 now require the draft to update on every `Input.Changed` (each keystroke), not only on blur/submit; added AT-010 (type in a field then `ctrl+s` without leaving it ⇒ the typed text is in both files).
+- **Why:** `ctrl+s` reaches the screen while focus is still in the field (`Input.BINDINGS` has no `ctrl+s` under Textual 8.2.8), so a draft that updated only on blur would save without the typed text and hide `● unsaved` until blur; the approved prototype drafted on every keystroke.
+- **Evidence:** `mapper/widgets/inspector.py:351-352` (`on_input_blurred` → `_commit`), `:347-349` (`on_input_submitted` → `_commit`); `mapper/keymap.py:137-263` (no `ctrl+s` seat row).
+
+### LED-2026-10-08-data-safety-batch.21 — ARCH-B2/QA-B2 — AT surfaces re-keyed; observation stated once
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** every §3.1 AT surface is now keys, screens and files only (no internal symbol names); the observation method is stated once in §5.1 (`obs` — Textual `App.run_test` pilot pressing real keys; sha256 of `.mmd` and `_nodos.yml` before/after; "written once" = the hash pair changes exactly once) and referenced per AT; each AT keeps a RED-today cell.
+- **Why:** the AT table named internals (`action_save_draft`, `on_input_submitted`, `_pop_snapshot`, `undo_stacks`) and no observation method, so the WHAT was written against the HOW.
+- **Evidence:** §3.1 table; §5.1 observation block.
+
+### LED-2026-10-08-data-safety-batch.22 — QA-B1 — §3.1 rows for US-002/US-003
+- **Requirement:** HLR-007, HLR-008
+- **Date:** 2026-10-08
+- **What changed:** added §3.1 rows for AT-044 and AT-025b (US-002) and for US-003's ids (AT-041, AT-042, AT-033/034/035), declared `inspection — reconciliation` except AT-042's two new arms (LLR-008.3).
+- **Why:** US-002 had no §3.1 rows for AT-044/AT-025b, and US-003's ids had no rows at all.
+- **Evidence:** §3.1 table; `tests/test_repair_layout.py:274,441,456`.
+
+### LED-2026-10-08-data-safety-batch.23 — SEC-M1 — failed save resolves by where it fell
+- **Requirement:** HLR-004, LLR-004.2
+- **Date:** 2026-10-08
+- **What changed:** the failed-save requirement is split into three cases by where the failure falls in `MapStore.save`'s two-phase write: (a) before the first replace → nothing on disk, keep the draft; (b) after both replaces (e.g. `_reindex`) → treat as saved, clear the draft, warn; (c) between the replaces (torn pair) → reload from disk and warn.
+- **Why:** a raise after the replaces leaves new data on disk while the old spec restored memory and kept the draft, so the next structural save silently reverted the committed write.
+- **Evidence:** `mapper/store.py:809` (`save`), `:825-836` (`dump`/`_build_sidecar`/`_text_hash`/`safe_dump`), `:846-847` (`_write_tmp`), `:848-849` (the two replaces), `:850` (`_reindex` call), `:926` (`_reindex` def).
+
+### LED-2026-10-08-data-safety-batch.24 — SEC-M2 — guard title is `plain()`-composed, ESC negative added
+- **Requirement:** LLR-003.1
+- **Date:** 2026-10-08
+- **What changed:** the guard title is composed of `darkside.plain(<map id>)` + `darkside.plain(<node title as stored>)`, painted `markup=False`; added the ESC-payload negative (AT-015).
+- **Why:** `markup=False` builds `Content(text)`, which strips BEL/BS/VT/FF/CR only (`textual/content.py:56-62`); ESC (0x1B) passes, so a file-derived title can reach the terminal with a control effect. `plain()` strips every control code (`darkside.py:517-547`, C0 includes 0x1B).
+- **Evidence:** `textual/content.py:56-62` (`_STRIP_CONTROL_CODES = [7, 8, 11, 12, 13]` — no 0x1B); `mapper/darkside.py:517-547` (`COERCION_RANGES` C0 `0x000B-0x001F`).
+
+### LED-2026-10-08-data-safety-batch.25 — SEC-M3 — the link guard is unconditional
+- **Requirement:** LLR-003.4
+- **Date:** 2026-10-08
+- **What changed:** LLR-003.4 states the link guard is unconditional (R6), never deferred; the PDR/UX deferral is removed.
+- **Why:** R6 already rules the link guard unconditional; the deferral would let a quit walk save a stale lower screen.
+- **Evidence:** ruling R6 in `VERDICT-b36-prototype-2026-10-08.md`; `mapper/app.py:3566` (`action_open_ficha` pushes a second `MapScreen`).
+
+### LED-2026-10-08-data-safety-batch.26 — ARCH-M3 — structural writes open the guard first
+- **Requirement:** HLR-003, LLR-003.6
+- **Date:** 2026-10-08
+- **What changed:** any structural write (`a` add child, `x` archive, `A` add attachment, `X` remove attachment) with a pending draft opens the guard first; new LLR-003.6 and AT-014.
+- **Why:** no rule covered a draft whose node a structural write removes; with `a` the guard would fire after the write, which is too late.
+- **Evidence:** `mapper/keymap.py:172,174,176,177` (the four seat rows); `mapper/app.py:4545` (`action_add_child`), `:4592` (`action_archive`), `:3487` (`action_add_attachment`), `:3490` (`action_remove_attachment`).
+
+### LED-2026-10-08-data-safety-batch.27 — ARCH-M4/QA-M4 — keymap symbols declared, pins listed
+- **Requirement:** LLR-001.4, LLR-003.1
+- **Date:** 2026-10-08
+- **What changed:** declared the keymap symbols touched — `SCOPE_DRAFT = "draft"`, `GROUP_SCOPE["draft"] = SCOPE_DRAFT`, `MODAL_SCOPES` widened to include `SCOPE_DRAFT`, and the map-scope `ctrl+s` row — and listed the census pins as Inc-1 obligations in §5.
+- **Why:** the keymap symbols touched were undeclared, and the census missed the whole-seat and per-scope pins.
+- **Evidence:** `mapper/keymap.py:60-80` (`GROUP_SCOPE`), `:269` (`MODAL_SCOPES`), `:137-263` (`KEYMAP`); pins `tests/test_keymap.py:34-44,63,87-95,298`, `tests/test_inc9.py:695-703,707`.
+
+### LED-2026-10-08-data-safety-batch.28 — ARCH-M5 — AT-042's two arms are a test LLR
+- **Requirement:** HLR-008, LLR-008.1, LLR-008.3
+- **Date:** 2026-10-08
+- **What changed:** LLR-008.1 is now inspection-only (AT-041 and AT-042's largest-set arm reconcile); AT-042's two missing arms moved to a new test LLR-008.3 with command, threshold, negative control and target file.
+- **Why:** LLR-008.1 asked for two new nodes but was labelled `inspection`, which cannot carry a test node.
+- **Evidence:** `tests/test_repair_layout.py:440-441` (`test_tc_r25` parametrised MAP/HOME only), `:456` (`test_tc_r26` foreign-scope negative).
+
+### LED-2026-10-08-data-safety-batch.29 — ARCH-M6 — ARQ D2 candidates listed as Inc-1 obligations
+- **Requirement:** LLR-001.3
+- **Date:** 2026-10-08
+- **What changed:** added the ARQ D2 persistence-oracle census candidates to the §5 Inc-1 regression obligations.
+- **Why:** the candidates were dropped from the census, so the draft model's re-point of their `↵`-on-inspector-field oracles was invisible.
+- **Evidence:** `tests/test_en7.py:62-80,182`, `tests/test_app.py:31`, `tests/test_fold.py:1016,1253`, `tests/test_inc9d.py:124-487`.
+
+### LED-2026-10-08-data-safety-batch.30 — QA-M1 — AT-044's RED names its mutation
+- **Requirement:** HLR-007
+- **Date:** 2026-10-08
+- **What changed:** AT-044's RED names the mutation it must redden on: binding `?` in the help seat, or letting the help legend inherit the app chord, either of which opens a second legend.
+- **Why:** the RED was an absent node, not a counterfactual.
+- **Evidence:** `mapper/keymap.py:269` (`MODAL_SCOPES = (SCOPE_PALETTE, SCOPE_HELP)`), `:228-238` (the help seat has no `question_mark`).
+
+### LED-2026-10-08-data-safety-batch.31 — QA-M2 — one AT per exit; lower-screen quit AT added
+- **Requirement:** HLR-003, LLR-003.5
+- **Date:** 2026-10-08
+- **What changed:** AT-004/005 split into one AT per exit (AT-004 node change, AT-005 leave map screen, AT-011 follow a link, AT-012 quit), and added AT-013 for quitting with a lower map screen holding a draft.
+- **Why:** AT-004/005 were compound (two exits each), and no AT covered quit with a lower `MapScreen` holding a draft.
+- **Evidence:** §3.1 table; `mapper/app.py:4937-4938` (`action_quit` exits immediately).
+
+### LED-2026-10-08-data-safety-batch.32 — QA-M3 — deflake threshold re-stated; AT-008 re-labelled
+- **Requirement:** HLR-009
+- **Date:** 2026-10-08
+- **What changed:** HLR-009's threshold is now "the injected-delay arm GREEN, its RED an executed counterfactual"; AT-008 is re-labelled a test-instrument check (the acceptance is of the instrument's determinism, not product behaviour).
+- **Why:** a single-run threshold cannot show a deflake, and one committed test cannot be both RED and GREEN.
+- **Evidence:** `spike/red_green_flake2.py` — RED 2/2 on the current step, GREEN 2/2 with `immediate=True` (spike, 2026-10-08).
+
+### LED-2026-10-08-data-safety-batch.33 — QA-M5/ARCH-m12 — AT-009 RED re-stated against the re-diff
+- **Requirement:** HLR-004, LLR-004.3
+- **Date:** 2026-10-08
+- **What changed:** AT-009 and LLR-004.3's RED re-stated against the dirty-marker re-diff after `u` (markers recomputed against the restored stored values), not against the hypothetical absent draft.
+- **Why:** the RED reason was hypothetical (the draft does not exist today, so "discards the draft" could not redden).
+- **Evidence:** `mapper/app.py:3517-3533` (`_pop_snapshot` replaces `self.graph` wholesale, no marker re-diff).
+
+### LED-2026-10-08-data-safety-batch.34 — SEC-m1 — "atomic" reworded
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** "atomic" in §1.2, §2.2 and the HLR-004 title reworded to "two-phase whole-graph write with torn-pair detection" / "whole-graph write".
+- **Why:** "atomic" overstates the store, which does a two-phase write with torn detection and no fsync.
+- **Evidence:** `mapper/store.py:846-850` (two temp writes, then two replaces, then `_reindex`).
+
+### LED-2026-10-08-data-safety-batch.35 — SEC-m2 — failed `u` while a draft is pending is residual A-10
+- **Requirement:** LLR-004.3
+- **Date:** 2026-10-08
+- **What changed:** recorded a failed `u` while a draft is pending as a residual (risk A-10) in LLR-004.3's boundary catalog.
+- **Why:** the case was unspecified.
+- **Evidence:** `mapper/app.py:3517-3533`.
+
+### LED-2026-10-08-data-safety-batch.36 — SEC-m3 — structural-write draft-exclusion folded into AT-014
+- **Requirement:** HLR-003, LLR-003.6
+- **Date:** 2026-10-08
+- **What changed:** folded "structural writes leave draft values out of the file" into ARCH-M3's AT-014.
+- **Why:** no AT asserted structural writes leave draft values out of the files.
+- **Evidence:** AT-014 in §3.1.
+
+### LED-2026-10-08-data-safety-batch.37 — SEC-m4 — the guard names the map
+- **Requirement:** LLR-003.1
+- **Date:** 2026-10-08
+- **What changed:** the guard title names the map (`darkside.plain(map_id)` + `darkside.plain(node title)`); a typed-ahead `d` discard is accepted as a residual (loses a draft, never writes).
+- **Why:** the guard should name the map the operator is about to leave; a typed-ahead `d` can discard.
+- **Evidence:** LLR-003.1 statement.
+
+### LED-2026-10-08-data-safety-batch.38 — ARCH-m8 — `state` shown value is `STATE_VALUES[active]`
+- **Requirement:** LLR-002.1
+- **Date:** 2026-10-08
+- **What changed:** LLR-002.1 states the shown value of `state` is `STATE_VALUES[active]`, where `active` is the stored state's index or 0 for an unknown state.
+- **Why:** "shown value = `plain(stored)`" was wrong for `state`, whose unknown value renders as index 0 (`ok`).
+- **Evidence:** `mapper/widgets/inspector.py:27` (`STATE_VALUES`), `:138` (`active = STATE_VALUES.index(...) if ... else 0`).
+
+### LED-2026-10-08-data-safety-batch.39 — ARCH-m9 — attachment chips excluded from the draft
+- **Requirement:** HLR-006
+- **Date:** 2026-10-08
+- **What changed:** HLR-006 states attachment chips are not inspector fields (their edits route through prompts) and are excluded from the draft (ARQ D5).
+- **Why:** chips are in the inspector but excluded from the draft model.
+- **Evidence:** ARQ §D5; `mapper/widgets/inspector.py:169-195` (attachment chips).
+
+### LED-2026-10-08-data-safety-batch.40 — ARCH-m10/QA-m3 — the seven renames are required
+- **Requirement:** LLR-001.3
+- **Date:** 2026-10-08
+- **What changed:** LLR-001.3's statement now requires the seven docstring/test-name lines that mention `FieldCommitted` to be renamed in the same increment.
+- **Why:** the statement did not require the renames its 0-reference threshold needs.
+- **Evidence:** `tests/test_g6_store_surrogates.py:8,105,109,111,113`, `tests/test_inspector.py:61`, `mapper/app.py:3345`.
+
+### LED-2026-10-08-data-safety-batch.41 — ARCH-m11 — A-11 added; crash/kill excluded
+- **Requirement:** HLR-003
+- **Date:** 2026-10-08
+- **What changed:** added A-11 to §6.3 and excluded a killed terminal/crash from "every exit" in HLR-003 (R1: loss accepted, nothing written).
+- **Why:** "every exit" did not exclude a killed terminal, which no guard can cover.
+- **Evidence:** §6.3 A-11; HLR-003 statement.
+
+### LED-2026-10-08-data-safety-batch.42 — QA-m1 — §5.1 Layer-B row includes AT-009
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** the §5.1 Layer-B row for US-001 now includes AT-009 (and the new AT-010…AT-015).
+- **Why:** the row stopped at AT-007 and omitted AT-009.
+- **Evidence:** §5.1 table.
+
+### LED-2026-10-08-data-safety-batch.43 — QA-m2 — AT-002's failing-store arm names its injection
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** AT-002's failing-store arm now names its injection method — monkeypatching the screen's store `save` (precedent `tests/test_g6_store_surrogates.py`).
+- **Why:** the arm needed an injection method to be executable.
+- **Evidence:** `mapper/app.py:252-253` (`write = store.create if new else store.save`); precedent `tests/test_g6_store_surrogates.py`.
+
+### LED-2026-10-08-data-safety-batch.44 — QA note — re-pointed tests drive typing + `ctrl+s`
+- **Requirement:** LLR-001.3
+- **Date:** 2026-10-08
+- **What changed:** the re-pointed tests (`tests/test_g6_store_surrogates.py:150,176,203,331`, `tests/test_inspector.py:103,162`, `tests/test_worklist_safety.py:254`) must drive typing + `ctrl+s` through the pilot, not post messages; listed in §5.
+- **Why:** a re-pointed test that posts a message bypasses the draft and would not test the shipped surface.
+- **Evidence:** §5 Inc-1 obligations.
