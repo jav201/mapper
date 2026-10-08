@@ -58,7 +58,7 @@
 
 | ID | User Story | Source | DoR status |
 |----|------------|--------|------------|
-| US-001 | As the operator using mapper, I want an inspector edit to require an explicit save gesture, so that one stray keystroke cannot durably overwrite a map and its sidecar without my intent. | B-36 (UX2-C-01) | REFINE |
+| US-001 | As the operator using mapper, I want an inspector edit to require an explicit save gesture, so that one stray keystroke cannot durably overwrite a map and its sidecar without my intent. | B-36 (UX2-C-01) | READY |
 | US-002 | As the maintainer, I want the shipped behaviours — a doubled `?` opens no second legend, and an unsummarisable map declares itself on its own card — guarded by their declared on-disk acceptance nodes, so a future regression cannot ship silently. | B-100 | READY |
 | US-003 | As the maintainer, I want every declared acceptance id reconciled to an on-disk node or retired, so the traceability record matches what the suite actually guards. | B-101 | READY |
 | US-004 | As the maintainer, I want the legend paint-race flake understood and deflaked, so the whole-branch gate is not invalidated by a poisoned instrument. | B-98 (FLAKE-2) | READY |
@@ -71,7 +71,7 @@
 - **Feasibility (E, S):** implementation path = located. `mapper/widgets/inspector.py:351-352` `on_input_blurred` calls `_commit(event.input)`; `_commit` (`inspector.py:354-365`) posts `FieldCommitted(..., widget.value)` regardless of delta; `mapper/app.py:3344-3378` `on_ficha_inspector_field_committed` carries a delta gate at `app.py:3357-3359` that is invariant under the defect (a real keystroke changes the value); persistence via `_save_or_toast` (`app.py:229`). `select_on_focus=False` already landed (`inspector.py:55`, the B-72 half). Candidate remedies (B-36): a dirty-since-focus flag (`Input.Changed`), or dropping `on_input_blurred` and keeping the shipped `on_input_submitted` (`inspector.py:347-349`). dependencies/unknowns = the DESIGN choice of which gesture, not the mechanism. fits one batch? yes — small code surface (inspector + its screen handler).
 - **Evaluability (T) — behavioral, black-box:** "When the operator focuses a ficha field, types exactly one key, then blurs without submitting, the user observes that the map and its sidecar are NOT rewritten on disk and no saved toast appears until an explicit save gesture."
 - **Open questions:** which affordance (submit-only vs dirty-since-focus flag vs confirm-on-blur), and whether it applies to every field or only text fields. This is a TUI design ruling: per the standing operator rule (2026-09-04), a prototype round with real renders and the operator's verdict is required BEFORE implementation.
-- **Classification:** `REFINE` — the data-loss defect is live and reproduced, but the remedy is a TUI affordance design that has not been ruled; a prototype round precedes implementation.
+- **Classification:** `READY` — operator verdict 2026-10-08: **"C"** (draft + explicit save, `VERDICT-b36-prototype-2026-10-08.md`), with orchestrator rulings R1–R4 on draft lifetime, field coverage, undo granularity and modal keys. Behaviour-level criterion: when the operator presses one stray key in a focused inspector field and then moves focus or selects another node, the map's `.mmd` and `.yml` are byte-identical to before and the inspector shows the field as unsaved; when they press `ctrl+s`, both files are written once.
 
 **US-002 — realise AT-044 and locate the N13.3 card node (`B-100`)**
 - **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓

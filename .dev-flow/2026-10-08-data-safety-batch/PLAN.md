@@ -62,11 +62,11 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 | Story / station | Status | Notes |
 |---|---|---|
-| US-001 | REFINE | design ruling (save affordance) pending; prototype round + operator verdict before implementation (standing rule 2026-09-04) |
+| US-001 | READY | operator verdict "C" (draft + `ctrl+s`), 2026-10-08; rulings R1–R4 in `VERDICT-b36-prototype-2026-10-08.md` |
 | US-002 | READY | write AT-044 test (doubled `?`); reconcile AT-025b → existing `LLR-N13.1.5` nodes in `tests/test_repair_cycles.py` |
 | US-003 | READY | orchestrator ruling at P0: AT-033/034/035 RETIRED here (they belong to deferred US-N14, `#D23`); AT-041/042 reconciled to `test_at_r12…` / `test_tc_r25…` / `test_tc_r26…` |
 | US-004 | READY | spike done (tester agent): race in the test's own `scroll_to` setup (`immediate=False`), not reflow; test-side fix at 4 sites; regression RED 2/2 → GREEN 2/2 under an injected delay |
-| P0 | open — US-002/003/004 READY; US-001 waits on the operator's prototype verdict (gallery published 2026-10-08) | trigger evaluation recorded; C6 fired by the scanner |
+| P0 | closed 2026-10-08 — all four stories READY | gate self-approved under the standing authorization |
 
 ## Roadmap + increment plan
 
@@ -81,6 +81,7 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 | 2026-10-08 | P0 stays open for US-001 until the operator's prototype verdict; US-004 spike runs now | standing rule 2026-09-04 (prototype round before TUI design); keeps the batch moving without deciding the operator's design question |
 | 2026-10-08 | `owner` omitted from `state.json` | A-110 forbids profile paths in tracked files; the project rule wins over the flow convention; `V40` NOTICEs it |
 | 2026-10-08 | US-004 READY with a test-side fix at four `scroll_to` sites | the spike measured the race and refuted the reflow hypothesis; widening to the sibling sites closes the class, not the instance |
+| 2026-10-08 | US-001 rulings R1–R4 (draft per node for the map screen's life, all fields incl. `state`, `u` undoes one save, modal `s/d/esc`) | the operator chose C; these are the four points the prototype left open (`VERDICT-b36-prototype-2026-10-08.md`) |
 | 2026-10-08 | C6 recorded as fired | the spec scanner flagged `escape`; triggers only raise, even on a word-level false positive |
 
 ## Risks / watch-items
