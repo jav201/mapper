@@ -375,3 +375,34 @@
 - **What changed:** HLR-004/005/006 "Shipped surface" lines re-keyed to keys, screens and files (no `action_save_draft`/`undo_stacks`/`on_input_submitted`/`DsSegmented`); LLR-007.1's control names the mutation it reddens on (binding `?` in the help seat) instead of "absent node"; LLR-009.2's threshold drops "RED before, GREEN after" for one node (the committed arm is GREEN, its RED is the counterfactual); AT-009 gains focus-out and the `● unsaved (N)` observable; AT-011 names the link key (`↵`); AT-012/013 name the exit outcome; AT-015's observation is a scan of the rendered title for 0x1B; §6.3 "atomic" reworded; the typed-ahead `d` residual stated (§6.3 A-13); `plain` re-cited at `darkside.py:550`.
 - **Why:** surfaces still named internals; a control that says "absent node" names no counterfactual; one committed node cannot be both RED and GREEN; and the remaining minors were stale citations and wording.
 - **Evidence:** `mapper/darkside.py:550` (`def plain`); `mapper/keymap.py:269` (`MODAL_SCOPES`); `spike/red_green_flake2.py`.
+
+### LED-2026-10-08-data-safety-batch.54 — R3-SAVE — one failure rule replaces the three-case disk table
+- **Requirement:** HLR-004, LLR-004.1, LLR-004.2, LLR-001.4
+- **Date:** 2026-10-08
+- **What changed:** LLR-004.2 now reloads the map from disk on any failed save, keeps the draft re-diffed against the reloaded values, discards the pushed snapshot in memory and never writes; a raising reload restores the pre-save graph in memory. HLR-004, LLR-004.1, LLR-001.4 and A-10 reconciled; the guard rows of LLR-003.2–003.6 now read "reload, then `stay`".
+- **Why:** Round 3 found the disk-hash classification unsound (identical-byte `.mmd` rewrites, external edits, a pop that writes, a lock with no exit); the operator ruled "Simplificar y seguir (Recomendado)" at the P1 soft cap.
+- **Evidence:** `mapper/app.py:1623` (`store.load` entry), `mapper/store.py:698-700` (missing sidecar), `mapper/mermaid.py:131-155` (dump writes edges and titles only), `mapper/app.py:3530` (`_pop_snapshot` writes).
+
+
+### LED-2026-10-08-data-safety-batch.55 — R3-SAVE (guard rows) — every guard's failing `save` reloads, then `stay`
+- **Requirement:** HLR-003, LLR-003.2, LLR-003.3, LLR-003.4, LLR-003.5, LLR-003.6
+- **Date:** 2026-10-08
+- **What changed:** The error boxes of LLR-003.2/.3/.4/.6 and the previously unchecked one of LLR-003.5 now apply LLR-004.2's single rule.
+- **Why:** R3-SAVE removed the "committed" case the old wording depended on; LLR-003.5's failing save at quit was unspecified (ARCH-R3-3).
+- **Evidence:** 02-review.md Round 3.
+
+
+### LED-2026-10-08-data-safety-batch.56 — R3-QA-M1 — the fault-injection ATs collapse into one declared Layer-A arm
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** AT-002a/b/c become one AT-002a, declared a Layer-A fault-injection test with two arms (zero files written, both files written) and two named mutations; AT-002b and AT-002c are retired with the three-case table.
+- **Why:** The rows named internal store symbols (blocker (d)) and the cases they encoded no longer exist.
+- **Evidence:** 02-review.md Round 3.
+
+
+### LED-2026-10-08-data-safety-batch.57 — R3-QA-M2 / R3-minors — one named mutation per guard AT; observations; surfaces
+- **Requirement:** HLR-002, HLR-003, HLR-007
+- **Date:** 2026-10-08
+- **What changed:** AT-004, AT-005a/b, AT-011, AT-012, AT-014a–d name the mutation that reddens them; AT-005 observes `len(app.screen_stack)`, AT-012 `app.is_running`; §5.1 lists AT-002a/AT-013 as Layer-A; HLR-002 and HLR-007 surfaces no longer name internal classes.
+- **Why:** "Feature absent" is not a counterfactual (C-40); surfaces must name keys, screens and files.
+- **Evidence:** 02-review.md Round 3.
