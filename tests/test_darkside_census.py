@@ -219,6 +219,15 @@ CONFORMING_SEVERITY = {
     ("mapper/views/radial.py", "style=darkside.WARN,"),
     ("mapper/widgets/inspector.py", "(darkside.plain(text), darkside.ALERT),"),
     ("mapper/widgets/inspector.py", '("  required", darkside.ALERT),'),
+    # Data-safety batch (2026-10-08) Inc-1b, US-001.  The card draft's `● unsaved
+    # (N)` header and per-field `●`: an edit the operator still owes a save is
+    # pending work, WARN's declared job; one constant is the one site.
+    ("mapper/widgets/inspector.py", "UNSAVED_STYLE = darkside.WARN"),
+    # The same draft, said on the hint line while the card is hidden: the
+    # operator ruled ALERT for it (R8, "rojo para alertar que hay contenido no
+    # guardado") -- leaving now would lose it, so it is painted as the item that
+    # cannot proceed as it stands.
+    ("mapper/app.py", "visual = darkside.Text.assemble((self.draft_prefix, darkside.ALERT), visual)"),
     ("mapper/widgets/rail.py", "darkside.ALERT,"),
     ("mapper/widgets/rail.py", 'parts.append((f"{missing:>3}", darkside.WARN))'),
 }
@@ -290,7 +299,10 @@ def test_hue_census_every_severity_and_busy_site_is_classified():
     sites = _sites(tracked_sources(), ADJUDICATED)
     # 36 -> 38 in Inc-3: the fold pill's WARN bar and its WARN hit count, both
     # judged and registered in CONFORMING_SEVERITY above.
-    assert len(sites) == 38, f"derived {len(sites)} severity/busy lines, expected 38"
+    # 38 -> 40 in data-safety Inc-1b (2026-10-08): the unsaved-draft WARN style
+    # (pending) and the hidden-card hint prefix in ALERT (operator ruling R8),
+    # both judged and registered above.
+    assert len(sites) == 40, f"derived {len(sites)} severity/busy lines, expected 40"
 
     unclassified = [
         (path, line) for path, line, _ in sites

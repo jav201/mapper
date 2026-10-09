@@ -87,6 +87,9 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("map", "N"): ("prev_hit", "previous match", "N", "nav", False),
     ("map", "R"): ("toggle_rail", "show/hide rail", "R", "view", False),
     ("map", "X"): ("remove_attachment", "remove attachment", "X", "node", False),
+    # Data-safety batch (2026-10-08) Inc-1b: the card draft's save (LLR-001.4),
+    # not `priority` (a focused inspector field binds no `ctrl+s`).
+    ("map", "ctrl+s"): ("save_draft", "save", "ctrl+s", "node", False),
     ("map", "a"): ("add_child", "add child", "a", "node", False),
     ("map", "d"): ("open_documents", "documents", "d", "node", False),
     ("map", "e"): ("export_svg", "export svg", "e", "view", False),

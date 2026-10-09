@@ -178,6 +178,10 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("u", "u", "undo", "undo", "node"),
     KeyBinding("A", "A", "add_attachment", "add attachment", "node"),
     KeyBinding("X", "X", "remove_attachment", "remove attachment", "node"),
+    # Data-safety batch (2026-10-08) Inc-1b: the one save gesture of the card draft
+    # (US-001, LLR-001.4).  Not `priority`: a focused inspector `Input` binds no
+    # `ctrl+s`, so the key reaches the screen from inside a field.
+    KeyBinding("ctrl+s", "ctrl+s", "save_draft", "save", "node"),
     # -- map · view ---------------------------------------------------------
     KeyBinding("f", "f", "toggle_focus", "focus branch", "view"),
     KeyBinding("o", "o", "toggle_outline", "toggle outline", "view"),
