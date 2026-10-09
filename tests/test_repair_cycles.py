@@ -749,3 +749,78 @@ async def test_inc7_cr_r2_f1_the_A102_guard_hides_a_LOAD_WARNING_map_too(
         f"if it were usable; A-102 names the load-warning path as damaged too, "
         f"not only the raising path"
     )
+
+
+# --------------------------------------------------------------------------
+# AT-025b — one joined node: a damaged map declares itself AND the healthy
+# cards keep their true values, in a single run of the real app.
+
+
+@pytest.mark.asyncio
+async def test_at_025b_a_damaged_map_declares_itself_and_the_others_keep_their_values(
+    tmp_path,
+):
+    """AT-025b: the sala tells the operator which map failed AND stays honest
+    about the maps that did not.
+
+    The five `test_llr_n13_1_5_*` arms above each prove ONE limb — the glyph,
+    the state string, the load-warning path, the other surfaces — but no arm
+    joins them: AT-025b is the condition that ONE broken card must not cost
+    the truth of the others.  So this arm seeds one map that fails to load
+    (`roto`, a directed cycle) next to two healthy maps with DIFFERENT node
+    counts, and asserts in a single run that (1) the damaged card carries the
+    declared glyph and state string from `darkside`, and (2) each healthy card
+    still paints its OWN true node count and none of them is painted damaged.
+    """
+    from mapper import darkside
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(140, 45)) as pilot:
+        await pilot.pause()
+        store = app.store
+        (store.workspace / "roto.mmd").write_text(CYCLE_MMD, encoding="utf-8")
+        # ACYCLIC_MMD has 4 nodes (root, a, b, c); sano_uno has exactly 1.
+        (store.workspace / "sano_cuatro.mmd").write_text(ACYCLIC_MMD, encoding="utf-8")
+        (store.workspace / "sano_uno.mmd").write_text(
+            "graph TD\n    solo[Solo]\n", encoding="utf-8"
+        )
+        app.notify = lambda msg, **kw: None
+        app.push_screen(HomeScreen())
+        await pilot.pause()
+        table = app.screen.query_one("#home-recents")
+
+        names = {str(k.value) for k in table.rows}
+        assert {"roto", "sano_cuatro", "sano_uno"} <= names, (
+            f"the sala is missing a seeded map: {names}"
+        )
+        roto = _cells(table, "roto")
+        sano_cuatro = _cells(table, "sano_cuatro")
+        sano_uno = _cells(table, "sano_uno")
+
+    # (1) The damaged map's card DECLARES the damaged state: glyph AND string.
+    painted_roto = "".join(roto)
+    assert darkside.DAMAGED_MAP_GLYPH in painted_roto, (
+        f"the damaged card carries no declared glyph "
+        f"({darkside.DAMAGED_MAP_GLYPH!r}): {roto!r}"
+    )
+    assert darkside.DAMAGED_MAP_STATE in painted_roto, (
+        f"the damaged card carries no declared state string "
+        f"({darkside.DAMAGED_MAP_STATE!r}): {roto!r}"
+    )
+
+    # (2) Every healthy card keeps its TRUE values and is not painted damaged.
+    for name, cells, true_nodes in (
+        ("sano_cuatro", sano_cuatro, 4),
+        ("sano_uno", sano_uno, 1),
+    ):
+        painted = "".join(cells)
+        assert darkside.DAMAGED_MAP_GLYPH not in painted, (
+            f"the healthy map {name!r} is painted damaged: {cells!r}"
+        )
+        assert darkside.DAMAGED_MAP_STATE not in painted, (
+            f"the healthy map {name!r} carries the damaged state: {cells!r}"
+        )
+        assert cells[2] == str(true_nodes), (
+            f"the healthy map {name!r} lost its true node count "
+            f"(wants {true_nodes}): {cells!r}"
+        )
