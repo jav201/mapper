@@ -465,3 +465,26 @@
 - **What changed:** LLR-007.1's negative control and §3.1's AT-044 "RED today" cell now name the mutation that actually opens a second legend — making the app-scope `question_mark → help` binding `priority=True` — instead of "bind `?` in the help seat" / "drop `SCOPE_HELP` from `MODAL_SCOPES`".
 - **Why:** executed at Inc-4: both design-named mutations leave the node GREEN, because `HelpScreen` defines no `action_help` (the binding dispatches to a missing method and returns False) and the modal binding chain (`_modal_binding_chain`) cuts the app off. A `priority=True` app chord is checked from the App down (`_check_bindings(priority=True)` uses `_binding_chain`, not `_modal_binding_chain`), so it reaches `MapperApp.action_help` and stacks a second legend. This is the existing defect class `test_no_screen_binds_the_question_mark_at_priority` guards (the `?` row is deliberately non-priority, `mapper/keymap.py:268-271`).
 - **Evidence:** `03-increments/inc4-reconciliation-proposal.md` §3 — mutation battery, hash-restored.
+
+### LED-2026-10-08-data-safety-batch.66 — DDR D2 — records aligned with the shipped code
+- **Requirement:** LLR-004.2, HLR-007
+- **Date:** 2026-10-09
+- **What changed:** LLR-004.2's reload-failure toast now quotes the shipped text `could not reload · draft kept · leaving needs d (discard)` (PDR C8); HLR-007's negative control names the `priority=True` mutation (ledger .65); the design's step 6, sequence diagram, TC-004.2b and §5.3 row follow the same text, and `UNSAVED_STYLE` reads ALERT (operator R8).
+- **Why:** DDR architect lens: the records had drifted from the code after Inc-1c (C8 wording, R8 colour) and Inc-4 (AT-044 mutation).
+- **Evidence:** design/DDR-2026-10-08-data-safety-batch.md §B.
+
+
+### LED-2026-10-08-data-safety-batch.67 — DDR D4 — AT-025b gets one joined node; AT-042 is a declared multi-arm reconciliation
+- **Requirement:** HLR-007, HLR-008, LLR-007.2, LLR-008.3
+- **Date:** 2026-10-09
+- **What changed:** AT-025b is realised by ONE node, `tests/test_repair_cycles.py::test_at_025b_a_damaged_map_declares_itself_and_the_others_keep_their_values` (damaged card declares glyph + state; every healthy card keeps its own node count). AT-042 stays realised by the arms `test_tc_r25[map,home,app]` + `test_tc_r25b_a_screen_declaring_no_scope_presents_the_app_set` — the contract's AT row names those arms explicitly, and each arm is mutation-killed (packet 004).
+- **Why:** C-18 asks for exactly one node per AT; the qa and architect DDR lenses flagged both. AT-025b had only five partial nodes, so a joined node was written (Kimi unit, RED: the damaged branch painted healthy fails it). AT-042's predicates are three different scope sets by design, so its arms are declared rather than merged.
+- **Evidence:** evidence in packet increment-006.md.
+
+
+### LED-2026-10-08-data-safety-batch.68 — DDR D1 / PDR C14 — the three LLR boundary arms realised
+- **Requirement:** LLR-003.3, LLR-003.4, LLR-003.6
+- **Date:** 2026-10-09
+- **What changed:** `tests/test_ddr_esc_search.py` (esc with a live search clears it and opens no guard), `tests/test_ddr_same_map_link.py` (a link to the SAME map is guarded, s/d/esc), `tests/test_ddr_archive_own.py` (archiving the draft's own node, save and discard arms), each with an executed RED.
+- **Why:** The PDR discharge log had marked C14 discharged while these arms were missing; the DDR architect lens re-read the artifacts and caught it.
+- **Evidence:** packet increment-006.md.
