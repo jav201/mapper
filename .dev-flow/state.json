@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P5",
+  "current_station": "P6",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -211,6 +211,11 @@
       "station": "P4",
       "date": "2026-10-09",
       "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on cab8181 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-09",
+      "decision": "P5 close with carry-over: post-mortem assembled from Kimi units; residuals B-102/B-103 to the backlog; B-36 shipped"
     }
   ],
   "standing_authorization": {
