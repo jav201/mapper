@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from mapper.app import MapperApp
+from mapper.app import MapperApp, MapScreen
 from mapper.model import Attachment, Edge, Ficha, Graph, Node, SchemaField
 from tests.test_draft_save import (
     _answer,
@@ -22,6 +22,7 @@ from tests.test_draft_save import (
     _open,
     _press,
     _seed_map,
+    _title_source,
     _type_into,
 )
 
@@ -251,3 +252,35 @@ async def test_at_014_structural_write_opens_the_guard_first_attachments(tmp_pat
         await _answer(app, pilot, "escape")
         assert _hashes(tmp_path, map_id) == before
         assert _inspector(screen).draft_values() == {"title": "alfax"}
+
+
+async def test_at_013_quit_walks_a_lower_map_screen_draft(tmp_path):
+    """AT-013 (LLR-003.5, Layer-A injection): the quit walk reaches a draft on a
+    map screen BELOW the top -- a state the keyboard alone cannot build once
+    links are guarded.  Seed two maps, open the first and draft on it, then push
+    a second `MapScreen` directly on top (the injection): the lower screen holds
+    a draft and the top one does not.  `ctrl+q` asks once, the guard names the
+    LOWER map, and `stay` keeps the app running with the lower draft pending."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        first = _seed_map(app, "lower")
+        second = _seed_map(app, "upper")
+        lower = await _open(app, pilot, first)
+        await _type_into(pilot, lower, "insp-title", "x")
+        await _press(pilot, "escape")
+
+        app.push_screen(MapScreen(second))
+        await pilot.pause()
+
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+
+        source = _title_source(app)
+        assert source.endswith(f"» · {first}"), source
+        assert f"· {second}" not in source, source
+        await _answer(app, pilot, "escape")
+
+        assert app._exit is False
+        assert app.is_running
+        assert _inspector(lower).has_draft()
