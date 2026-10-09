@@ -114,3 +114,73 @@ async def test_at_011_following_a_link_is_guarded(tmp_path, answer):
             assert _inspector(screen).draft_values() == {"title": "alfax"}
         else:
             assert len(app.screen_stack) == depth + 1
+
+
+@pytest.mark.parametrize("answer", ["s", "d", "escape"])
+async def test_at_012_quit_is_guarded(tmp_path, answer):
+    """AT-012 (LLR-003.5): `ctrl+q` over a draft asks once.  `save`/`discard`
+    request the exit (`app._exit` turns True and `app.is_running` False); `stay`
+    leaves the app running with the draft still pending.
+
+    The exit oracle is `app._exit` (set synchronously inside the message pump that
+    `pilot.press` drains) plus `app.is_running`; both read deterministically
+    inside the `run_test` block."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        screen = await _open(app, pilot, map_id)
+        await _type_into(pilot, screen, "insp-title", "x")
+        await _press(pilot, "escape")
+
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+        await _answer(app, pilot, answer)
+
+        if answer == "escape":
+            assert app._exit is False
+            assert app.is_running
+            assert _inspector(screen).draft_values() == {"title": "alfax"}
+        else:
+            assert app._exit is True
+            assert not app.is_running
+
+
+async def test_llr_003_5_a_second_ctrl_q_stacks_no_second_guard(tmp_path):
+    """LLR-003.5: a second `ctrl+q` while the quit walk is up asks nothing more."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        screen = await _open(app, pilot, map_id)
+        await _type_into(pilot, screen, "insp-title", "x")
+        await _press(pilot, "escape")
+
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+        await _answer(app, pilot, "escape")
+
+
+async def test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge(tmp_path):
+    """PDR C1: `ctrl+q` over a draft whose node-change guard is already up must
+    not hang the quit walk.  The walk ends immediately (the operator answers the
+    open guard first), and a later `ctrl+q` still asks."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        screen = await _open(app, pilot, map_id)
+        await _type_into(pilot, screen, "insp-title", "x")
+        await _press(pilot, "escape")
+        await _press(pilot, "j")
+        assert _guards(app) == 1
+
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+        await _answer(app, pilot, "escape")
+
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+        await _answer(app, pilot, "escape")

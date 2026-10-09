@@ -3446,6 +3446,10 @@ class MapScreen(Screen):
             markup=False,
         )
 
+    def has_pending_draft(self) -> bool:
+        """Whether this map holds a draft the operator has not saved or dropped."""
+        return self.query_one("#map-inspector", FichaInspector).has_draft()
+
     def _guard_draft(self, proceed, *, on_hold=None) -> None:
         """The ONE decision point for leaving a draft (R-014, LLR-003.2).
 
@@ -5124,6 +5128,9 @@ class MapperApp(App):
         # silently and make an archived subtree unrecoverable.
         self.undo_stacks: dict[str, list[bytes]] = {}
         self.attachment_launcher = None
+        # US-001 (LLR-003.5): set while a quit-walk over draft-bearing map screens
+        # is in flight, so a second `ctrl+q` never starts (and stacks) a second walk.
+        self._quit_walk_open = False
 
     def on_mount(self) -> None:
         self.push_screen(HomeScreen())
@@ -5158,7 +5165,40 @@ class MapperApp(App):
         ))
 
     def action_quit(self) -> None:
-        self.exit()
+        # US-001 (LLR-003.5): quitting walks every map screen with a draft and
+        # guards each one before the app exits.  A second `ctrl+q` while the walk
+        # is up does nothing.  `pending` is the draft-bearing map screens, top of
+        # the stack first; each guard's `proceed` advances to the next, the last
+        # one exits, and `on_hold` (stay or a failed save) ends the walk.
+        if self._quit_walk_open:
+            return
+        self._quit_walk_open = True
+        pending = [
+            s
+            for s in reversed(self.screen_stack)
+            if isinstance(s, MapScreen) and s.has_pending_draft()
+        ]
+
+        def end_walk() -> None:
+            self._quit_walk_open = False
+
+        def step(index: int) -> None:
+            if index >= len(pending):
+                self.exit()
+                return
+            screen = pending[index]
+            # PDR C1: a guard already open on this screen (a cursor move asked
+            # first) makes `_guard_draft` return without calling anything.  Ending
+            # the walk here keeps the operator answering the open guard first.
+            if screen._draft_guard_open:
+                end_walk()
+                return
+            screen._guard_draft(
+                proceed=lambda: step(index + 1),
+                on_hold=end_walk,
+            )
+
+        step(0)
 
 
 def main() -> None:
