@@ -1,0 +1,46 @@
+sha256 before tests/test_inspector.py 47309865964b3b299014da151876e969e726b41885d478bd8be79575d5805b0d
+sha256 before tests/test_g6_store_surrogates.py e01dd0fbec4ab0901d7eba4724864b8292ea364f6953cf344edde3783596e0d2
+sha256 before tests/test_worklist_safety.py 5bc9f75fe27c3816854f9a7aadd97f4beb8321c941150077b8429178c3d3697d
+sha256 before tests/test_keymap.py 3be783f6354b5226993be197c7f9c9c25b2fedd99855005511622ce305a61480
+sha256 before tests/test_key_dispatch.py a4b0246b010afd2bc33e9041c38ca90b430c66172021a7119f14f4e4401ac001
+sha256 before tests/test_inc4_census.py e294358eae15983b63378772c17eca7f0fad83b6a25ed67c3e73228613be0c1c
+sha256 before tests/test_darkside_census.py 4ec7d487be1143534613d4253f6e31815020fccf883a6fe7a9615d79bb8e7ca2
+sha256 before tests/test_data_safety_census.py aee7ae4a88fd44a95cb14a96fb1486469162a62b531ea40fcdc4b7084e55c44d
+applied: the edited existing tests = 554314f blobs
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+FAILED tests/test_inspector.py::test_at_n01a_editing_a_schema_field_persists_to_disk
+FAILED tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[0-ok]
+FAILED tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[1-risk]
+FAILED tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[2-late]
+FAILED tests/test_inspector.py::test_at_n01b_state_persists_for_every_value[3-blocked]
+FAILED tests/test_inspector.py::test_at_n01d_required_and_empty_is_flagged - ...
+FAILED tests/test_g6_store_surrogates.py::test_g6b_field_committed_with_a_surrogate_title_does_not_crash
+FAILED tests/test_g6_store_surrogates.py::test_g6c_each_unguarded_save_site_degrades_to_a_toast[field_commit]
+FAILED tests/test_g6_store_surrogates.py::test_g6c_each_unguarded_save_site_degrades_to_a_toast[undo]
+FAILED tests/test_g6_store_surrogates.py::test_g6c_f2_save_failure_toast_names_no_path_or_username
+FAILED tests/test_worklist_safety.py::test_llr_n05_6_an_edit_is_undoable_and_undo_is_per_map
+FAILED tests/test_keymap.py::test_keymap_completeness_guard - AssertionError:...
+FAILED tests/test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification
+FAILED tests/test_inc4_census.py::test_cd25a_the_seat_diff_is_exactly_the_three_rows_inc4b_declares
+FAILED tests/test_darkside_census.py::test_hue_census_every_severity_and_busy_site_is_classified
+FAILED tests/test_inc9.py::test_cd25a_the_seat_diff_is_exactly_what_inc9_declares
+summary: ======================= 16 failed, 271 passed in 40.58s =======================
+sha256 after  tests/test_inspector.py 47309865964b3b299014da151876e969e726b41885d478bd8be79575d5805b0d  restored: True
+sha256 after  tests/test_g6_store_surrogates.py e01dd0fbec4ab0901d7eba4724864b8292ea364f6953cf344edde3783596e0d2  restored: True
+sha256 after  tests/test_worklist_safety.py 5bc9f75fe27c3816854f9a7aadd97f4beb8321c941150077b8429178c3d3697d  restored: True
+sha256 after  tests/test_keymap.py 3be783f6354b5226993be197c7f9c9c25b2fedd99855005511622ce305a61480  restored: True
+sha256 after  tests/test_key_dispatch.py a4b0246b010afd2bc33e9041c38ca90b430c66172021a7119f14f4e4401ac001  restored: True
+sha256 after  tests/test_inc4_census.py e294358eae15983b63378772c17eca7f0fad83b6a25ed67c3e73228613be0c1c  restored: True
+sha256 after  tests/test_darkside_census.py 4ec7d487be1143534613d4253f6e31815020fccf883a6fe7a9615d79bb8e7ca2  restored: True
+sha256 after  tests/test_data_safety_census.py aee7ae4a88fd44a95cb14a96fb1486469162a62b531ea40fcdc4b7084e55c44d  restored: True

@@ -8,7 +8,7 @@ place that pins those rows against the live `KEYMAP` in both directions, so a
 subtracted row can never be a row that is not there.
 
 Inc-1a declares the three `draft` rows.  Inc-1b adds `("map", "ctrl+s",
-"save_draft")` to this set in the same edit as the seat row.
+"save_draft")`, in the same edit as the seat row.
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ DATA_SAFETY_ADDED = frozenset({
     ("draft", "s", "save"),
     ("draft", "d", "discard"),
     ("draft", "escape", "stay"),
+    ("map", "ctrl+s", "save_draft"),
 })
 
 
@@ -54,3 +55,14 @@ def test_the_draft_group_is_declared_before_app_and_headed_unsaved():
     assert keymap.group_header("draft") == "unsaved"
     assert list(keymap.GROUP_SCOPE)[-1] == "app"
     assert keymap.bar_group_order(keymap.SCOPE_MAP)[-1] == "app"
+
+
+def test_the_map_scope_gains_exactly_the_save_row():
+    """LLR-001.4: one map-scope row, `ctrl+s` -> `save_draft`, labelled `save`, in
+    the `node` group and not `priority`; declared here equals measured."""
+    declared = {row for row in DATA_SAFETY_ADDED if row[0] == keymap.SCOPE_MAP}
+    assert declared == {("map", "ctrl+s", "save_draft")}
+    rows = [b for b in keymap.bindings_for(keymap.SCOPE_MAP, include_app=False) if b.action == "save_draft"]
+    assert [(b.key, b.glyph, b.label, b.group, b.priority) for b in rows] == [
+        ("ctrl+s", "ctrl+s", "save", "node", False)
+    ]

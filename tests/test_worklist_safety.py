@@ -251,7 +251,15 @@ async def test_llr_n05_6_an_edit_is_undoable_and_undo_is_per_map(tmp_path):
         screen = await _open(app, pilot, map_id)
         inspector = screen.query_one("#map-inspector", FichaInspector)
 
-        inspector.post_message(FichaInspector.FieldCommitted("a", "O", "carmen"))
+        # Data-safety batch Inc-1b: typed into the real field and saved with
+        # `ctrl+s` (one save = one undo step), then the field is left.  The
+        # cursor is put on `a`, the node the posted message used to name.
+        screen.nav.cursor = "a"
+        screen.refresh_canvas()
+        await pilot.pause()
+        inspector.focus_field("O")
+        await pilot.pause()
+        await pilot.press(*"carmen", "ctrl+s", "escape")
         await pilot.pause()
         assert MapStore(tmp_path).load(map_id).nodes["a"].ficha.fields["O"] == "carmen"
 

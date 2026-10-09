@@ -63,7 +63,9 @@ EXPECTED_PER_SCOPE = {
     # added, so it moves the count by nothing -- which is exactly why a size
     # fence cannot be the whole seat pin, and `test_key_dispatch.py`'s full-tuple
     # table plus `test_inc4_census.py`'s row diff are.
-    keymap.SCOPE_MAP: 31,
+    # 31 -> 32 (2026-10-08): data-safety Inc-1b adds `ctrl+s` (`save_draft`,
+    # `node`), the card draft's one save gesture (LLR-001.4).
+    keymap.SCOPE_MAP: 32,
     keymap.SCOPE_REPO: 3,
     keymap.SCOPE_PLUG: 1,
     keymap.SCOPE_IMPORT: 2,

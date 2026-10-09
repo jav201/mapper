@@ -5,8 +5,10 @@ Three RED arms, per `.dev-flow/2026-08-26-ui-next-batch-02/03-increments/
 increment-024-g6-store-surrogates.md`:
 
 (a) a sidecar with a YAML-escaped lone surrogate loads clean (store-level).
-(b) the real `FichaInspector.FieldCommitted` event with a surrogate title does
-    not crash a mounted `MapScreen`.
+(b) a surrogate title typed into the real inspector field and saved with
+    `ctrl+s` does not crash a mounted `MapScreen` (re-pointed at the data-safety
+    batch, 2026-10-08 Inc-1b: the inspector no longer posts a commit message;
+    edits live in a draft until `ctrl+s`).
 (c) each of the 6 unguarded `store.save()` call sites degrades to a toast when
     `store.save` is forced to raise, parametrized by call site and driven
     through its real action.
@@ -102,24 +104,24 @@ def test_g6a_load_coerces_a_sidecar_lone_surrogate_title_instead_of_denying_the_
 
 
 # ---------------------------------------------------------------------------
-# (b) mutation-side: the real FieldCommitted event, on a mounted MapScreen
+# (b) mutation-side: a real typed edit and `ctrl+s`, on a mounted MapScreen
 # ---------------------------------------------------------------------------
 
 
-async def test_g6b_field_committed_with_a_surrogate_title_does_not_crash(tmp_path):
-    """A broken paste lands a lone surrogate in the title Input; on submit the
-    inspector posts the real `FieldCommitted` event with that raw value.
+async def test_g6b_draft_save_with_a_surrogate_title_does_not_crash(tmp_path):
+    """A broken paste lands a lone surrogate in the title Input (inserted into
+    the real widget, so a real `Input.Changed` puts it in the draft); `ctrl+s`
+    then saves that raw value.
 
-    Today `on_ficha_inspector_field_committed` assigns `event.value` to
-    `node.ficha.title` unchanged and calls `self.store.save(...)` unguarded;
-    the surrogate reaches `_atomic_write`'s `Path.write_text(...,
-    encoding="utf-8")` and raises an uncaught `UnicodeEncodeError`, which
-    escapes the message handler and crashes the session.
+    Before G6 the raw value reached `node.ficha.title` unchanged and the save
+    ran unguarded; the surrogate reached `_atomic_write`'s `Path.write_text(...,
+    encoding="utf-8")` and raised an uncaught `UnicodeEncodeError`, which
+    escaped the message handler and crashed the session.
 
-    After the fix the value is coerced before it ever reaches the graph, the
+    After the fix the value is coerced before it ever reaches a graph, the
     save succeeds, and the file on disk still re-loads cleanly.
 
-    RED mutation: drop the coercion at the `title` assignment; this arm
+    RED mutation: drop the coercion in `MapScreen._apply_field`; this arm
     reddens with an uncaught `UnicodeEncodeError` escaping `pilot.pause()`.
     """
     app = MapperApp(tmp_path)
@@ -127,11 +129,12 @@ async def test_g6b_field_committed_with_a_surrogate_title_does_not_crash(tmp_pat
         await pilot.pause()
         map_id = _seed(app)
         screen = await _open(app, pilot, map_id)
-        inspector = screen.query_one("#map-inspector", FichaInspector)
 
-        inspector.post_message(
-            FichaInspector.FieldCommitted("a", "title", LONE_SURROGATE)
-        )
+        title = screen.query_one("#insp-title")
+        title.focus()
+        await pilot.pause()
+        title.insert_text_at_cursor(LONE_SURROGATE)
+        await pilot.press("ctrl+s")
         await pilot.pause()
 
         assert isinstance(app.screen, MapScreen), "the surrogate crashed the session"
@@ -147,10 +150,19 @@ async def test_g6b_field_committed_with_a_surrogate_title_does_not_crash(tmp_pat
 # ---------------------------------------------------------------------------
 
 
-async def _drive_field_commit(app, pilot, screen):
-    inspector = screen.query_one("#map-inspector", FichaInspector)
-    inspector.post_message(FichaInspector.FieldCommitted("a", "title", "nuevo"))
+async def _type_title_and_save(pilot, screen, text):
+    """The inspector edit as the operator makes it (data-safety Inc-1b): replace
+    the title by typing, `ctrl+s`, then leave the field."""
+    screen.query_one("#insp-title").focus()
     await pilot.pause()
+    await pilot.press("ctrl+u", *text, "ctrl+s")
+    await pilot.pause()
+    await pilot.press("escape")
+    await pilot.pause()
+
+
+async def _drive_draft_save(app, pilot, screen):
+    await _type_title_and_save(pilot, screen, "nuevo")
 
 
 async def _drive_attachment_add(app, pilot, screen):
@@ -172,9 +184,7 @@ async def _drive_undo(app, pilot, screen):
     # A snapshot must exist before `u` has anything to restore.  Pushed with
     # the REAL store (before the monkeypatch below installs the raising one),
     # so this setup edit itself must succeed.
-    inspector = screen.query_one("#map-inspector", FichaInspector)
-    inspector.post_message(FichaInspector.FieldCommitted("a", "title", "editado"))
-    await pilot.pause()
+    await _type_title_and_save(pilot, screen, "editado")
 
 
 async def _drive_undo_after_setup(app, pilot, screen):
@@ -200,7 +210,7 @@ async def _drive_archive(app, pilot, screen):
 
 
 SITES = {
-    "field_commit": (False, _drive_field_commit),
+    "draft_save": (False, _drive_draft_save),
     "attachment_add": (False, _drive_attachment_add),
     "attachment_remove": (True, _drive_attachment_remove),
     "undo": (False, _drive_undo_after_setup),
@@ -212,8 +222,8 @@ SITES = {
 @pytest.mark.parametrize("site", sorted(SITES))
 async def test_g6c_each_unguarded_save_site_degrades_to_a_toast(tmp_path, site):
     """Force `store.save` to raise at each of the 6 call sites named in
-    `INC8-P3-SEC-F1` (field commit, attachment add, attachment remove, undo,
-    add-child, archive).  Today none of them guards the call, so the raise
+    `INC8-P3-SEC-F1` (field commit -- the draft save since data-safety Inc-1b --,
+    attachment add, attachment remove, undo, add-child, archive).  Today none of them guards the call, so the raise
     escapes the message handler and crashes the session.
 
     RED mutation: remove the `try`/`except` this fix adds around any one of
@@ -328,10 +338,13 @@ async def test_g6c_f2_save_failure_toast_names_no_path_or_username(tmp_path):
 
         screen.store.save = exploding_save
 
-        await _drive_field_commit(app, pilot, screen)
+        await _drive_draft_save(app, pilot, screen)
 
         assert notices, "no toast was shown when store.save raised"
-        toast = notices[-1][0]
+        # By content, not position: since Inc-1b a failed draft save is followed
+        # by its own "draft kept" notice, so the save-failure toast is no longer
+        # the last one.  The assertions below are unchanged.
+        toast = next(n for n, _ in notices if "could not save" in n)
         assert "\\Users\\" not in toast, f"the toast leaked a path: {toast!r}"
         assert fake_path not in toast, f"the toast leaked the fake path: {toast!r}"
         assert raw_message not in toast, f"the toast leaked str(e): {toast!r}"
