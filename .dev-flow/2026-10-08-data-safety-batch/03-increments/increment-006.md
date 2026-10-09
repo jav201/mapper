@@ -48,6 +48,14 @@ Source files: **0**.
 - Full default lane: run at the Phase-4 gate on the integrated tree (`04-validation.md`).
 - **Ledger:** 2915 collected − 0 + 8 (`esc_search` 1, `same_map_link` 3, `archive_own` 2, `at_025b` 1, `tc_009_1` 1) = **2923** — executed `--collect-only`: `2923/2947 tests collected (24 deselected)`. ✓
 
+
+### Evidence files — bytes at a declared home, verbatim, hash-verified (C-59)
+
+| Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
+|---|---|---|
+| Kimi unit reports K1–K5 (RED, sha256 restores) | `.dev-flow/2026-10-08-data-safety-batch/evidence/ddr-kimi-units.transcript` | `d7b0a58ae234806d1860373d3be81076c91e546451b9f52a94fd0f8ef8b31bc1` |
+| Phase-4 gate run (the full lane over these nodes) | `.dev-flow/2026-10-08-data-safety-batch/evidence/p4-gate-run.transcript` | `4ee5ebdcea0fa2b1217a6c304c44382a820400a3c9236712efb1da6af5198c90` |
+
 ## 4b · Independent review
 DDR lenses (`architect`, `qa-reviewer`) set these conditions; their discharge is re-read at the Phase-4 gate.
 
