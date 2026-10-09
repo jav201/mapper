@@ -76,7 +76,7 @@ from .views.radial import (
     painted_ids as radial_painted_ids,
 )
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
-from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
+from .widgets.inspector import INSPECTOR_WIDTH, FieldInput, FichaInspector
 from .widgets.rail import RAIL_WIDTH, OutlineRail
 
 
@@ -2352,6 +2352,10 @@ class MapScreen(Screen):
         whenever the `ViewState` it would paint -- `focus_owner` included --
         already equals the one last painted (`P1`)."""
         self._declare_after_layout()
+        if isinstance(event.widget, FieldInput):
+            # U2: while a field holds the keyboard, typing drafts and `j` types,
+            # so the map-navigation hint lies.  Name the save key instead.
+            self.query_one(HintLine).set_hint(self._field_hint(), self._seat_glyph("save_draft"))
 
     def on_descendant_blur(self, event: events.DescendantBlur) -> None:
         """The other half of `H2`: a field can blur to NOTHING (the
@@ -2360,6 +2364,8 @@ class MapScreen(Screen):
         this the tone would stay on "focus elsewhere" after the keyboard had
         already left every region."""
         self._declare_after_layout()
+        if isinstance(event.widget, FieldInput):
+            self.query_one(HintLine).set_hint(self._resting_hint())
 
     def _current_renderer(self):
         if self.outline_mode:
@@ -3815,6 +3821,15 @@ class MapScreen(Screen):
     def _seat_label(self, action: str) -> str:
         row = self._seat_row(action)
         return row.label if row else ""
+
+    def _field_hint(self) -> str:
+        """The hint while an inspector field holds the keyboard (U2).
+
+        Typing drafts the field and `j` types a letter, so the map-navigation
+        hint would lie; this names the save key from the seat instead
+        (LLR-005.2)."""
+        save = self._seat_glyph("save_draft")
+        return f"type to draft · {save} {self._seat_label('save_draft')} · esc leave field"
 
     def _search_hint(self, hits: tuple[str, ...] | None) -> str:
         """`UX-Q3-b`'s hint for a live search, glyphs READ FROM THE SEAT.

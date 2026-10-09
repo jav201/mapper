@@ -8,7 +8,10 @@ pending draft has while the card is gone (PDR C6 / R8).
 """
 from __future__ import annotations
 
+from textual.widgets import Input
+
 from mapper.app import MapperApp
+from mapper.widgets.chrome import HintLine
 from tests.test_draft_save import (
     _hint_text_and_prefix_style,
     _open,
@@ -28,3 +31,25 @@ async def test_inc1c_c6_prefix_appears_when_the_card_hides_again(tmp_path):
         await _press(pilot, "enter")
         text, _ = _hint_text_and_prefix_style(screen)
         assert text.lstrip().startswith("● unsaved (1)"), text
+
+
+async def test_inc1c_tab_into_a_field_names_ctrl_s(tmp_path):
+    """U2: tabbing into an inspector field swaps the map-navigation hint for the
+    draft hint, which names `ctrl+s` and stops promising `↵ open card` while `j`
+    types a letter."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 36)) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        screen = await _open(app, pilot, map_id)
+        for _ in range(12):
+            if isinstance(app.focused, Input):
+                break
+            await pilot.press("tab")
+            await pilot.pause()
+        focused = app.focused
+        assert isinstance(focused, Input), focused
+        assert str(getattr(focused, "id", "") or "").startswith("insp-"), focused
+        hint = screen.query_one(HintLine).text
+        assert "ctrl+s save" in hint, hint
+        assert "↵ open card" not in hint, hint
