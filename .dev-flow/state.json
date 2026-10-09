@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P3",
+  "current_station": "DDR",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -196,6 +196,11 @@
       "station": "PDR",
       "date": "2026-10-08",
       "decision": "PDR approved with conditions C1-C14 (architect, qa-reviewer, ux-reviewer; 0 blockers); C4/C5 discharged at seal; operator ruled R8 (hint-line unsaved mark in ALERT red) — 'Marca en la línea de pista (Recomendado)' + 'Usa código de colores, como el rojo'; R9 guard title"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-09",
+      "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (fc5141b); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
     }
   ],
   "standing_authorization": {
