@@ -413,3 +413,34 @@
 - **What changed:** LLR-004.2's reload re-establishes the view by the screen's own load path (nav rebuilt, load warnings surfaced, focus cleared, cursor kept or moved to root), drops a draft entry whose node is gone with a warning, and scopes "no write" to the map files (the index rebuild is a cache refresh); §5.1's obs paragraph names AT-002a's two arms; AT-011 observes stack depth; AT-009 names its mutation; AT-013 leaves the Layer-B list; residuals A-14 and A-15 recorded.
 - **Why:** P2 round 4 (architect and security majors converged: swapping `self.graph` alone leaves `NavigationModel`, focus and load warnings stale; qa major: stale three-case text). Applied by the orchestrator under the operator's ruling at the cap.
 - **Evidence:** `mapper/app.py:1622-1636`, `:270-271`, `:3528-3529`, `:3912-3914`; `mapper/store.py:783`, `:926-965`.
+
+### LED-2026-10-08-data-safety-batch.59 — PDR Q-1 — focus mode writes the whole map
+- **Requirement:** LLR-004.4
+- **Date:** 2026-10-08
+- **What changed:** LLR-004.4 now states that under focus mode the save writes the whole map, never the focused subgraph; planned node TC-004.4 in the design proposal.
+- **Why:** The PDR design pass executed a probe on this tree: an inspector edit under focus (`f`) writes only the focused subtree as the whole map (on-disk nodes after the edit: ['a']) — a present data-loss path on the code this batch rewrites. Orchestrator ruling at PDR (standing authorization): accept it under HLR-004.
+- **Evidence:** design/design-proposal.md R-1 and TC-004.4; `mapper/app.py:3912-3914` (focus sets `self.graph` to a subgraph).
+
+
+### LED-2026-10-08-data-safety-batch.60 — PDR Q-3 — AT-009's stimulus restated
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** AT-009 now edits two fields, saves, re-edits both (one returned to its saved value), leaves the field with `esc`, then presses `u`.
+- **Why:** As written the stimulus could not produce `● unsaved (1)` (the draft is empty after `ctrl+s`; a `u` typed in a focused field is a keystroke).
+- **Evidence:** design/design-proposal.md §5 AT-009 row.
+
+
+### LED-2026-10-08-data-safety-batch.61 — PDR Q-4 — LLR-004.3's vanished-node boundary follows LLR-004.2
+- **Requirement:** LLR-004.3
+- **Date:** 2026-10-08
+- **What changed:** A `u` that removes the cursor's node moves the cursor to the root and drops a draft entry on the vanished node with a warning; no guard opens.
+- **Why:** The earlier boundary ("fires the node-change guard") contradicted LLR-004.2's later drop-with-warning rule and could stack a guard.
+- **Evidence:** LLR-004.2 statement; design/design-proposal.md Q-4.
+
+
+### LED-2026-10-08-data-safety-batch.62 — PDR Q-5 — IFC and selector housekeeping
+- **Requirement:** HLR-001, HLR-004
+- **Date:** 2026-10-08
+- **What changed:** The IFC nodes name per-keystroke drafting and the reload rule; a note says `-k` selectors are provisional and packets cite node ids.
+- **Why:** The IFC still named the rejected blur/submit drafting and the disk-classified save; `-k` also matches module names (shown with `--collect-only`).
+- **Evidence:** design/design-proposal.md Q-5.
