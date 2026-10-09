@@ -4904,7 +4904,7 @@ class MapScreen(Screen):
         self._pop_snapshot()
 
     def action_home(self) -> None:
-        self.app.pop_screen()
+        self._guard_draft(self.app.pop_screen)
 
     def action_back_or_home(self) -> None:
         """`esc` clears a live search; with none live it leaves the map (`#D38`).
@@ -4939,7 +4939,7 @@ class MapScreen(Screen):
             self.refresh_canvas()
             self.query_one(HintLine).set_hint(map_hint())
             return
-        self.app.pop_screen()
+        self._guard_draft(self.app.pop_screen)
 
     def action_palette(self) -> None:
         self.app.action_palette()
