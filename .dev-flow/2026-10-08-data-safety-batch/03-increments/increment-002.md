@@ -24,8 +24,8 @@ The `save · discard · stay` guard modal exists and is bound from a new `draft`
 
 | File | Kind | Traces to | Change |
 |---|---|---|---|
-| `mapper/keymap.py` | source | US-001, HLR-003, LLR-003.1, design 1a.1, R4 | `SCOPE_DRAFT`; `GROUP_SCOPE["draft"]` before `"app"`; `GROUP_HEADER["draft"] = "unsaved"`; `MODAL_SCOPES` + `SCOPE_DRAFT`; rows `s`/`d`/`esc` -> `save`/`discard`/`stay`, no `priority` |
-| `mapper/screens/draft_guard.py` | source | US-001, HLR-003, LLR-003.1, design 1a.2, R4, R9 | new `DraftGuardScreen(ModalScreen[str])` |
+| `mapper/keymap.py` | source | HLR-003, LLR-003.1, design 1a.1, R4 | `SCOPE_DRAFT`; `GROUP_SCOPE["draft"]` before `"app"`; `GROUP_HEADER["draft"] = "unsaved"`; `MODAL_SCOPES` + `SCOPE_DRAFT`; rows `s`/`d`/`esc` -> `save`/`discard`/`stay`, no `priority` |
+| `mapper/screens/draft_guard.py` | source | HLR-003, LLR-003.1, design 1a.2, R4, R9 | new `DraftGuardScreen(ModalScreen[str])` |
 | `mapper/screens/__init__.py` | source | HLR-003, design 1a.3 | import + `__all__` |
 | `tests/test_draft_save.py` | test | LLR-003.1, TC-003.1, AT-015 (modal part), C13, E-1, E-5 | new, 13 nodes |
 | `tests/test_data_safety_census.py` | test | LLR-003.1, E-7, design §5.3 | new, 4 nodes; `DATA_SAFETY_ADDED` (3 rows) |
