@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P4",
+  "current_station": "P5",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -206,6 +206,11 @@
       "station": "DDR",
       "date": "2026-10-09",
       "decision": "DDR approved with conditions D1-D5 (architect + qa-reviewer), all discharged 2026-10-09: C14 boundary arms, AT-025b joined node, TC-009.1, records aligned, operator smoke attributed (human:Javier); tests drafted by five Kimi units; external V7 (flow bundle SKILL.md vs manifest) recorded, not this project's"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-09",
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on cab8181 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
     }
   ],
   "standing_authorization": {
