@@ -444,3 +444,10 @@
 - **What changed:** The IFC nodes name per-keystroke drafting and the reload rule; a note says `-k` selectors are provisional and packets cite node ids.
 - **Why:** The IFC still named the rejected blur/submit drafting and the disk-classified save; `-k` also matches module names (shown with `--collect-only`).
 - **Evidence:** design/design-proposal.md Q-5.
+
+### LED-2026-10-08-data-safety-batch.63 — PDR condition C4 — AT-009 wording; US-001 summary
+- **Requirement:** HLR-004
+- **Date:** 2026-10-08
+- **What changed:** AT-009 returns one field to its PRE-save value (so the no-re-diff mutation reddens it); the §1 US-001 summary names the reload rule instead of torn-pair detection.
+- **Why:** PDR architect MINOR-4 — read literally, "returned to its saved value" left the node unable to fail; the summary still described the retired failure model.
+- **Evidence:** design/design-proposal.md §5 AT-009 row.
