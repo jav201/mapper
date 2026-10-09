@@ -115,9 +115,11 @@ async def _painted_bindings(app, pilot) -> str:
         seen.update(_rows_in(app.screen, dialog.region))
         if pane.scroll_offset.y >= pane.max_scroll_y:
             break
-        pane.scroll_to(y=pane.scroll_offset.y + max(1, pane.region.height - 1), animate=False)
+        target = pane.scroll_offset.y + max(1, pane.region.height - 1)
+        pane.scroll_to(y=target, animate=False, immediate=True)
         await pilot.pause()
         await pilot.pause()
+        assert pane.scroll_offset.y == min(target, pane.max_scroll_y), "the bindings scroll did not land"
     else:  # pragma: no cover - a scroll that never terminates is a defect
         pytest.fail("the bindings pane never reached the bottom of its scroll range")
     return "\n".join(sorted(seen))

@@ -1,0 +1,20 @@
+=== S1-imm: _effective_keys: drop immediate=True (settle assert kept)
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated 00b39e0c382e2153f1ae5fb874262ba8f72e230bdc23bbeed1732a7c511b31d9  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] FAILED [ 14%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] FAILED [ 28%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] FAILED [ 42%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size0] PASSED [ 57%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size1] PASSED [ 71%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size2] PASSED [ 85%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window PASSED [100%]
+        (`work but not painted`) or the settle assertion fails."""
+E           AssertionError: the positioning scroll did not land
+        (`work but not painted`) or the settle assertion fails."""
+E           AssertionError: the positioning scroll did not land
+        (`work but not painted`) or the settle assertion fails."""
+E           AssertionError: the positioning scroll did not land
+summary: ======================== 3 failed, 4 passed in 20.99s =========================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+

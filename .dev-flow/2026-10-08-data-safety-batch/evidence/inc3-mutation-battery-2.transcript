@@ -1,0 +1,11 @@
+=== S4-guard-inv: en7: invert the target>0 guard (proves it can fire)
+file tests/test_en7.py
+sha256 before a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da
+sha256 mutated 01933603b5cfa8e7c285e8cbc708f0a868a55538ad98c1a02aa66c38bb944c85  (changed: True)
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size0] FAILED [ 25%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size1] FAILED [ 50%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size0] FAILED [ 75%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size1] FAILED [100%]
+summary: ============================== 4 failed in 1.38s ==============================
+sha256 after restore a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da  restored: True
+
