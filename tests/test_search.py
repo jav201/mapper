@@ -1517,6 +1517,7 @@ _PASS_FREE_READERS = {
     # one (the same argument as `_walk_hits`).  Each caller below repaints after it.
     "_resting_hint": "the hint at rest reads the order of the frame ON SCREEN; the order is keyed on graph+query, which a pan or a view toggle cannot change",
     "_clear_pan_hint": "restores the resting hint; see `_resting_hint`",
+    "on_descendant_blur": "data-safety Inc-1c U2: restores the resting hint when an inspector field loses focus; see `_resting_hint`",
     "action_toggle_outline": "wrapper that clears a pan hint before it repaints; see `_resting_hint`",
     "action_toggle_radial": "wrapper that clears a pan hint before it repaints; see `_resting_hint`",
     "action_toggle_rail": "wrapper that clears a pan hint before it repaints; see `_resting_hint`",
