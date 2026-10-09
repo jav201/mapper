@@ -11,7 +11,7 @@
 
 ## 🔑 At a glance (read first)
 
-- **Outcome:** closed with carry-over — P4 `PASS-WITH-NOTES` (gate `2920 passed / 0 failed / 3 xfailed` on `cab8181`, `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`); batch at P5 `in-progress` (`.dev-flow/state.json:68-69`). P1 needed 3 iterations (soft cap).
+- **Outcome:** closed with carry-over — P4 `PASS-WITH-NOTES` (gate `2920 passed / 0 failed / 3 xfailed` on `cab8181`, `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`); batch closed at P6 after the final PR-level qa-reviewer pass (MERGE).dev-flow/state.json:68-69`). P1 needed 3 iterations (soft cap).
 - **Top 3:** ① prototype-first US-001 (operator verdict C) gave the batch a validated design before requirements — zero design churn after P0 (`.dev-flow/2026-10-08-data-safety-batch/VERDICT-b36-prototype-2026-10-08.md:5-9`). ② the round-2 save-failure disposition (disk-hash classification) was itself unsound and cost an extra full P1/P2 cycle (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:93`). ③ root cause of the cap: failure-case semantics over-specified against an incompletely understood store (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:90-98`).
 - **New control this batch:** none named in the artifacts; nearest candidate is the mutation-battery driver running `python -u` after an interrupted battery left a mutant applied (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-003.md:270`).
 - **Open items → next batch:** 3 accepted residuals (A-13 typed-ahead `d`, A-14 saved-but-raised, A-15 double index failure) + F5 + external V7 (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:261-265`) — biggest: A-15 (disk/edit divergence after a double `_reindex` failure).
@@ -68,7 +68,7 @@
 - Operator rulings at the cap (`Simplificar y seguir`, `Aplicar y verificar ligero`) converged the phase faster than another full review round would have — but the light verification traded per-lens review depth for speed, leaving A-14/A-15 as recorded residuals (`.dev-flow/state.json:183-193`).
 
 ### Product findings
-- Focus-mode data loss found at PDR: an inspector edit under focus mode writes only the focused subtree as the whole map (probe on the real tree: on-disk nodes after the edit `['a']`). Accepted under HLR-004 as "save writes the whole map"; planned node TC-004.4 (`.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md:417-422`; `mapper/app.py:3912-3914`).
+- Focus-mode data loss found at PDR: an inspector edit under focus mode writes only the focused subtree as the whole map (probe on the real tree: on-disk nodes after the edit `['a']`). Accepted under HLR-004 as "save writes the whole map"; planned node TC-004.4 (`.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md:417-422`; ``MapScreen._save_draft` (`mapper/app.py:3524`) and ledger `.59``).
 - Z2 hint-borrow interference: leaving a field re-announced an attachment chip's `open attachment`, because the chip swap works inside the resting hint the U2 field hint had replaced; U2's borrow and the chip's borrow now coordinate through the screen's blur handler, with a hand-back rule for future borrowers (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-005.md:18,80`; fix commit `5ad158e`).
 - The interrupted Inc-1b battery left mutant `A-prefix-always` applied to `mapper/app.py` while the visible-card assertion still passed — a passing test over a mutated product; restored byte-identically (digest match) and closed with a new visible-card arm (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-003.md:270`).
 - Save-failure handling: the shipped model is one rule (reload from disk = truth, keep draft re-diffed, undo stack untouched, reload-failure restores in memory with a refusal to write); residual A-14 (edit on disk with no undo step) and A-15 (double `_reindex` failure leaves disk ahead of memory) accepted and recorded (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:98`; `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:262-263`).
@@ -103,11 +103,11 @@ Commands run (read-only) from the worktree root:
 
 - `git status --short` → ` M .dev-flow/BACKLOG.md` — the only tracked modification in the primary checkout. Verified as **this batch's own close edit**: the diff adds the "Last refresh 2026-10-09" line and rows B-102/B-103, which exist only in the worktree, not in `HEAD` (`git show HEAD:.dev-flow/BACKLOG.md` has no B-102/B-103). Must land in the orchestrator's close commit.
 - `git worktree list` → 19 worktrees; 18 under `%TEMP%`. Of those, 17 are this batch's (see table); `%TEMP%\mapper-ds-p4` is a leftover from the **previous** batch's P6 vault sync — it holds branch `docs/ui-next-02-synced`, whose tip 5762947 ("batch ui-next-02 synced to the Obsidian vault") sits on bb8328f (PR #8 merge, already in `previous_batch` at `.dev-flow/state.json:228-237`). Flagged FOUND, not this batch's work.
-- `git log --oneline 07dd930..HEAD` → 40 commits, all landed on `feat/data-safety-batch` (HEAD a513190). No unpushed-dependency check failed: the branch carries the whole increment/DDR/PDR/P4 chain.
+- `git log --oneline 07dd930..HEAD` → 68 commits at the close (60 first-parent), all landed on `feat/data-safety-batch`. No unpushed-dependency check failed: the branch carries the whole increment/DDR/PDR/P4 chain.
 
 | Repo | File(s) | Terminal state | Landing / backlog ref |
 |------|---------|----------------|-----------------------|
-| mapper (primary worktree) | `.dev-flow/BACKLOG.md` | 📋 uncommitted — batch's close edit (B-102/B-103 + refresh line) | close commit at P6, with this postmortem |
+| mapper (primary worktree) | `.dev-flow/BACKLOG.md` | ✅ committed + landed | `de40d6e` (B-36/B-98 DONE, B-102/B-103 added, refresh line) |
 | mapper (temp worktrees) | — | 🗑️ cleanup candidates — worktrees removable after close | `git worktree remove` for each batch worktree below |
 | flow bundle (external) | `SKILL.md` vs manifest drift | 📋 recorded external (V7) | `design/DDR-2026-10-08-data-safety-batch.md:93` |
 

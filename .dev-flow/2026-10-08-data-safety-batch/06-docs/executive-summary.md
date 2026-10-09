@@ -28,7 +28,7 @@ One stray keystroke on a focused inspector field durably overwrote the map **and
 
 ## Outcomes / results
 
-- **Quality gate:** 2920 tests passed, 0 failed (3 expected-fails), run time ~25 minutes on the final commit — recorded as `PASS-WITH-NOTES` (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`).
+- **Quality gate:** 2920 tests passed, 0 failed (3 expected-fails), run time ~25 minutes on `cab8181` — later commits change records only, no product code — recorded as `PASS-WITH-NOTES` (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`).
 - **Requirements:** all 36 (9 high-level + 27 low-level) verified; every acceptance scenario exercised through the real interface with real keystrokes (`04-validation.md:11-13`).
 - **Operator hands-on check passed** in the real terminal on 2026-10-09: saving worked, the exit guard appeared on quit (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:253`).
 - **All four backlog items closed:** B-36, B-98, B-100, B-101 marked DONE (`.dev-flow/BACKLOG.md:165,208,210,211`).
@@ -36,6 +36,6 @@ One stray keystroke on a focused inspector field durably overwrote the map **and
 
 ## Next steps
 
-- Merge the batch (standing operator authorization, with the independent review already clean per `.dev-flow/state.json:226`).
+- Merge the batch (standing operator authorization, after the final PR-level `qa-reviewer` pass came back clean (MERGE, 2026-10-09)).
 - Follow-on design batch: the deferred `US-N14` scope and the newly logged `B-102`/`B-103` items (`.dev-flow/BACKLOG.md:9`).
 - Watch the first real-world usage for any hint-line or guard friction; the design keeps one rule for every exit, so adjustment is a single point of change.
