@@ -3573,6 +3573,7 @@ class MapScreen(Screen):
         event.stop()
         self.set_focus(None)
         self.query_one(HintLine).set_hint(map_hint())
+        self._paint_draft_hint()
 
     # -- attachments (US-N02) ----------------------------------------------
     def on_ficha_inspector_attachment_activated(
