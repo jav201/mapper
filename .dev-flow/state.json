@@ -221,6 +221,12 @@
       "station": "P6",
       "date": "2026-10-09",
       "decision": "P6 approved (self-approved under the standing authorization): final PR-level qa-reviewer MERGE (0 HIGH; M1/M2 and L1-L4 applied); docs in 06-docs; merge to master by PR"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-09",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-08-data-safety-batch/ (17 artifacts + README index); PDR and DDR records to vault:mapper/design/"
     }
   ],
   "standing_authorization": {
@@ -267,6 +273,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-08T00:00:00"
 }
