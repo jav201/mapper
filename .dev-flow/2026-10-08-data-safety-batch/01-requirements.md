@@ -243,7 +243,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-007 — the shipped behaviours are guarded by their declared nodes
 - **Traceability:** US-002
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.30, LED-2026-10-08-data-safety-batch.57, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.65
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.30, LED-2026-10-08-data-safety-batch.57, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.65, LED-2026-10-08-data-safety-batch.66, LED-2026-10-08-data-safety-batch.67
 - **Statement:** When the operator presses the help chord twice from a map, the system shall present exactly one legend without growing the screen stack; and when a workspace map fails to load, the system shall declare that damaged state on that map's own card while every other card keeps its true values.
 - **Rationale (informative):** B-100 — the behaviours hold today but are unguarded (AT-044) or guarded under a different id (N13.3), so a regression ships silently.
 - **Validation:** `test`
@@ -255,11 +255,11 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
   - **Shipped surface:** the help legend (the `?` chord) and the home card table.
   - **Acceptance test(s):** AT-044, AT-025b
   - **Boundary catalog (QC-3):** ☑ empty — a single `?` opens exactly one legend (no-op second); ☑ boundary — the second `?` while the legend is already up; ☐ invalid ☑ error — the damaged-card declaration for a map that raises or records a load warning.
-  - **Negative control:** AT-044 goes RED today only as an absent node (no on-disk node realises it — grep `doubled` in `tests/` → 0 hits); the behaviour itself holds (P-2). The mutation the node must redden on is binding `?` in the help seat (or letting the help legend inherit the app chord), which opens a second legend. AT-025b is already green under `LLR-N13.1.5` (P-3), so its reconciliation has no executed RED side — declared, and the absence of a RED side is why it is written as a reconciliation, not a new node (LED-…7).
+  - **Negative control:** AT-044 goes RED today only as an absent node (no on-disk node realises it — grep `doubled` in `tests/` → 0 hits); the behaviour itself holds (P-2). The mutation the node reddens on is making the app-scope `?` binding `priority=True` (ledger .65; the two mutations named at P1 are inert), which opens a second legend. AT-025b is already green under `LLR-N13.1.5` (P-3), so its reconciliation has no executed RED side — declared, and the absence of a RED side is why it is written as a reconciliation, not a new node (LED-…7).
 
 ### HLR-008 — every declared acceptance id resolves to a node or is retired
 - **Traceability:** US-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.64
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.67
 - **Statement:** Every declared acceptance id that this batch carries shall be resolved to an on-disk test node or retired, so that the traceability record matches what the suite guards.
 - **Rationale (informative):** B-101 — a declared id with no node is a test the next refactor deletes without reddening anything (C-18).
 - **Validation:** `inspection`
@@ -410,7 +410,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-003.3 — leaving the map screen is guarded
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.55
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.55, LED-2026-10-08-data-safety-batch.68
 - **Statement:** `MapScreen.action_home` and the pop branch of `MapScreen.action_back_or_home` shall present the guard when a draft is pending and shall pop only on `save` or `discard`.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k leave` (provisional until Phase 3).
@@ -420,7 +420,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-003.4 — following a link is guarded
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.25, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.55
+- **Ledger:** LED-2026-10-08-data-safety-batch.4, LED-2026-10-08-data-safety-batch.25, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.55, LED-2026-10-08-data-safety-batch.68
 - **Statement:** When following a link pushes a second `MapScreen`, the system shall present the guard first when a draft is pending. The link guard is unconditional (R6), never deferred.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k link` (provisional until Phase 3).
@@ -440,7 +440,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-003.6 — a structural write with a pending draft opens the guard first
 - **Traceability:** HLR-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.26, LED-2026-10-08-data-safety-batch.36, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.55
+- **Ledger:** LED-2026-10-08-data-safety-batch.26, LED-2026-10-08-data-safety-batch.36, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.55, LED-2026-10-08-data-safety-batch.68
 - **Statement:** Before any structural write — `action_add_child` (`a`), `action_archive` (`x`), `action_add_attachment` (`A`), `action_remove_attachment` (`X`) — the `MapScreen` shall present the guard when a draft is pending and shall run the write only on `save` or `discard`; on `stay` the write is aborted. The draft is never in `self.graph` until saved, so the guard must open before the write, not after it.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k structural` (provisional until Phase 3).
@@ -460,8 +460,8 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-004.2 — success clears the draft; a failure reloads from disk and keeps what did not reach it
 - **Traceability:** HLR-004
-- **Ledger:** LED-2026-10-08-data-safety-batch.23, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.46, LED-2026-10-08-data-safety-batch.52, LED-2026-10-08-data-safety-batch.54, LED-2026-10-08-data-safety-batch.58
-- **Statement:** On a successful save the system shall set `base_graph`, call `inspector.clear_draft()`, and toast. On a failed save the system shall reload the map from disk through `MapStore.load` (the entry `MapScreen` already uses, `mapper/app.py:1623`; a missing sidecar loads as `{}`, `mapper/store.py:698-700`), re-establish the view exactly as the screen's own load path does (`mapper/app.py:1622-1636`: `base_graph` and `self.graph` set to the reloaded graph, `_notice_load_warnings` surfaced, `self.nav` rebuilt as a new `NavigationModel`; `focus_active` cleared, since a focused view is a subgraph of `base_graph`, `app.py:3912-3914`; the cursor kept when its node still exists, otherwise moved to the root as `_pop_snapshot` does, `app.py:3528-3529`), discard the snapshot pushed for this save in memory, keep the draft and re-diff it against the reloaded values (LLR-002.1), hold any guard at `stay`, and toast an error naming `ctrl+s`. If the reload itself raises, the system shall restore the pre-save graph and view in memory by the same re-establishment, with no store call, keep the draft, and toast an error telling the operator to leave and reopen the map. A draft entry whose node no longer exists in the reloaded graph shall be dropped with a warning naming the field, and no second guard shall open while one is held at `stay`. Failure handling shall perform no write to the map's `.mmd` or `_nodos.yml`; the reload's rebuild of the derived index (`MapStore.load` → `_reindex`, `mapper/store.py:783`, `:926-965`) is a cache refresh, not an operator-visible write.
+- **Ledger:** LED-2026-10-08-data-safety-batch.23, LED-2026-10-08-data-safety-batch.45, LED-2026-10-08-data-safety-batch.46, LED-2026-10-08-data-safety-batch.52, LED-2026-10-08-data-safety-batch.54, LED-2026-10-08-data-safety-batch.58, LED-2026-10-08-data-safety-batch.66
+- **Statement:** On a successful save the system shall set `base_graph`, call `inspector.clear_draft()`, and toast. On a failed save the system shall reload the map from disk through `MapStore.load` (the entry `MapScreen` already uses, `mapper/app.py:1623`; a missing sidecar loads as `{}`, `mapper/store.py:698-700`), re-establish the view exactly as the screen's own load path does (`mapper/app.py:1622-1636`: `base_graph` and `self.graph` set to the reloaded graph, `_notice_load_warnings` surfaced, `self.nav` rebuilt as a new `NavigationModel`; `focus_active` cleared, since a focused view is a subgraph of `base_graph`, `app.py:3912-3914`; the cursor kept when its node still exists, otherwise moved to the root as `_pop_snapshot` does, `app.py:3528-3529`), discard the snapshot pushed for this save in memory, keep the draft and re-diff it against the reloaded values (LLR-002.1), hold any guard at `stay`, and toast an error naming `ctrl+s`. If the reload itself raises, the system shall restore the pre-save graph and view in memory by the same re-establishment, with no store call, keep the draft, and toast the error `could not reload · draft kept · leaving needs d (discard)` (PDR C8). A draft entry whose node no longer exists in the reloaded graph shall be dropped with a warning naming the field, and no second guard shall open while one is held at `stay`. Failure handling shall perform no write to the map's `.mmd` or `_nodos.yml`; the reload's rebuild of the derived index (`MapStore.load` → `_reindex`, `mapper/store.py:783`, `:926-965`) is a cache refresh, not an operator-visible write.
 - **Rationale (informative):** disk is the truth after any failure. A field whose value reached disk re-diffs as clean on its own and a field whose value did not stays dirty, so no phase classification is needed.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py -k failure` (provisional until Phase 3); the fault-injection seam (AT-002a) makes the store's save raise after writing zero files and after writing both files.
@@ -541,7 +541,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-007.2 — AT-025b reconciles to the `LLR-N13.1.5` nodes
 - **Traceability:** HLR-007
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.64
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.67
 - **Statement:** AT-025b shall be reconciled to the existing `LLR-N13.1.5` nodes (`tests/test_repair_cycles.py:501,543,575,624,664`) with no new node.
 - **Validation:** `inspection`
 - **Executed verification:** the nodes exist and assert the damaged-card declaration (`tests/test_repair_cycles.py:501,543,575,624,664`); the reconciliation is a mapping recorded in `.dev-flow/BACKLOG.md` and the traceability matrix.
@@ -561,7 +561,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-008.3 — AT-042's smallest-set and no-scope-screen arms are new nodes
 - **Traceability:** HLR-008
-- **Ledger:** LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.51, LED-2026-10-08-data-safety-batch.64
+- **Ledger:** LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.51, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.67
 - **Statement:** Two new test nodes shall realise AT-042's missing arms: one driving the smallest set (app scope, 2 rows) through the keymap set equality, and one driving a screen that declares no scope. The no-scope screen falls through the `HelpScreen` default (`scope=SCOPE_APP`, `mapper/screens/help.py:288`), so its presented set is `bindings_for(SCOPE_APP)` — the same 2 rows (`ctrl+p` palette, `?` legend) as the smallest-set arm; the two arms differ only by the constructor path (no scope argument vs the explicit `SCOPE_APP`), not by a different expected set. Verified by probe: `bindings_for('app')` = 2 rows (2026-10-08). Each node asserts the presented set equals the keymap set in both directions.
 - **Validation:** `test (e2e)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_repair_layout.py -k tc_r25` (provisional until the two parametrised arms are added to `test_tc_r25`, `tests/test_repair_layout.py:441`).

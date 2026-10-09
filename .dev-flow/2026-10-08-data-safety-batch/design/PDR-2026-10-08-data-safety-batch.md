@@ -115,4 +115,4 @@ Unresolved operator-owned items: none (R8 ruled by the operator 2026-10-08).
 | C11 | ✅ Inc-1b | E-6 denylist oracle |
 | C12 | ✅ Inc-3 | per-site delayed-scroll arms or declared survivors (packet 001) |
 | C13 | ✅ Inc-1a + Inc-1b | AT-015 executed RED with `plain()` dropped; oracle reads `Static.content` |
-| C14 | ✅ | arms realised across Inc-1a…Inc-2; **operator real-terminal smoke 2026-10-09**: `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard; operator, verbatim: "Todod funcionó, continuemos." |
+| C14 | ✅ (corrected at DDR) | the first log entry claimed discharge while three boundary arms were missing (caught by the DDR architect lens); now realised: `tests/test_ddr_esc_search.py`, `tests/test_ddr_same_map_link.py`, `tests/test_ddr_archive_own.py` (ledger .68); E-2 third mode and AT-012 observable in Inc-1b/Inc-2 packets; **operator real-terminal smoke 2026-10-09** (`human:Javier`): `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard — verbatim "Todod funcionó, continuemos." |
