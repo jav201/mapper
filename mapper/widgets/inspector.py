@@ -31,9 +31,8 @@ STATE_LABELS = ["ok", "risk", "late", "blocked"]
 # for the key is `open card`, which is true everywhere except on a chip.
 ATTACHMENT_OPEN_LABEL = "open attachment"
 
-# The per-field dirty label's `●`.  WARN's declared job is "pending" (`darkside`
-# docstring), which is exactly what an unsaved draft is (design 1b.7).  The header
-# marker `● unsaved (N)` is painted ALERT instead (R8), so the two are not one style.
+# The one style of the unsaved state: the header's `● unsaved (N)` and each dirty
+# label's `●`, painted ALERT -- operator ruling R8: red alerts unsaved content.
 UNSAVED_STYLE = darkside.ALERT
 
 # Fixed column the inspector occupies beside the canvas.  The canvas subtracts it

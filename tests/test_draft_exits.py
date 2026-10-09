@@ -284,3 +284,56 @@ async def test_at_013_quit_walks_a_lower_map_screen_draft(tmp_path):
         assert app._exit is False
         assert app.is_running
         assert _inspector(lower).has_draft()
+
+
+@pytest.mark.parametrize("answer", ["d", "s"])
+async def test_llr_003_5_quit_walk_chains_two_drafts(tmp_path, answer):
+    """LLR-003.5 (U11, F1): the quit walk chains across TWO draft-bearing map
+    screens, top of the stack first.  A draft on the lower map alone stops the
+    walk once (AT-013); a draft on both must stop it twice, asking the SECOND
+    (top) map first and only then the FIRST (lower) one, before the app exits.
+
+    `save` writes BOTH maps on disk; `discard` writes neither.  The exit oracle
+    is the same pair AT-012 uses (`app._exit` + `app.is_running`)."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        first = _seed_map(app, "lower")
+        second = _seed_map(app, "upper")
+        lower = await _open(app, pilot, first)
+        await _type_into(pilot, lower, "insp-title", "x")
+        await _press(pilot, "escape")
+
+        app.push_screen(MapScreen(second))
+        await pilot.pause()
+        top = app.screen
+        top.nav.cursor = "a"
+        top.refresh_canvas()
+        await pilot.pause()
+        await _type_into(pilot, top, "insp-title", "x")
+        await _press(pilot, "escape")
+
+        before_lower = _hashes(tmp_path, first)
+        before_upper = _hashes(tmp_path, second)
+
+        await _press(pilot, "ctrl+q")
+        assert _guards(app) == 1
+        source = _title_source(app)
+        assert source.endswith(f"» · {second}"), source
+        assert f"· {first}" not in source, source
+        await _answer(app, pilot, answer)
+
+        assert _guards(app) == 1
+        source = _title_source(app)
+        assert source.endswith(f"» · {first}"), source
+        await _answer(app, pilot, answer)
+
+        assert app._exit is True
+        assert not app.is_running
+
+        if answer == "s":
+            assert _hashes(tmp_path, first) != before_lower
+            assert _hashes(tmp_path, second) != before_upper
+        else:
+            assert _hashes(tmp_path, first) == before_lower
+            assert _hashes(tmp_path, second) == before_upper
