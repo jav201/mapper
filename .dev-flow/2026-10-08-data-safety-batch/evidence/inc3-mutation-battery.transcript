@@ -1,0 +1,211 @@
+=== S1-both: _effective_keys: drop immediate=True AND the settle assert (the original FLAKE-2 step)
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated aff57017dcade75fadebc15fcb1ae669ff5ce5078658d56d6ceaf6e162a8f250  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] FAILED [ 14%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] FAILED [ 28%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] FAILED [ 42%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size0] PASSED [ 57%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size1] PASSED [ 71%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size2] PASSED [ 85%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window PASSED [100%]
+        (`work but not painted`) or the settle assertion fails."""
+            f"work but not painted: {sorted(effective - painted)}; "
+E       AssertionError: work but not painted: []; painted but inert: ['end', 'home', 'pagedown', 'pageup']
+        (`work but not painted`) or the settle assertion fails."""
+            f"work but not painted: {sorted(effective - painted)}; "
+E       AssertionError: work but not painted: []; painted but inert: ['end', 'home', 'pagedown', 'pageup']
+        (`work but not painted`) or the settle assertion fails."""
+            f"work but not painted: {sorted(effective - painted)}; "
+E       AssertionError: work but not painted: ['right']; painted but inert: ['home', 'pagedown', 'pageup']
+summary: ======================== 3 failed, 4 passed in 29.09s =========================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S1-assert: _effective_keys: drop the settle assert only
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated cac068b47e96101af942354419b73bf19a885dac51e069cb35cfdcbdf70b43cf  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] PASSED [ 14%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] PASSED [ 28%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] PASSED [ 42%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size0] PASSED [ 57%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size1] PASSED [ 71%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size2] PASSED [ 85%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window PASSED [100%]
+summary: ============================= 7 passed in 35.90s ==============================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S1-halfwin: _effective_keys: close the late window (equivalent while immediate holds)
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated 9bc20433ba797b7d0e279691f08f7a9d6d7e532ab49148a323ea897f5d2bc572  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] PASSED [ 14%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] PASSED [ 28%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] PASSED [ 42%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size0] PASSED [ 57%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size1] PASSED [ 71%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size2] PASSED [ 85%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window PASSED [100%]
+summary: ============================= 7 passed in 36.35s ==============================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== F-off: fixture: never delays
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated 535d02f6fbb29b96c1fb2544a851dde00546d521dc8f961076754460f3a71c1d  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] PASSED [ 25%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] PASSED [ 50%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] PASSED [ 75%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window FAILED [100%]
+E           AssertionError: the fixture did not delay the queued scroll
+summary: ======================== 1 failed, 3 passed in 18.33s =========================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== F-zero: fixture: delay 0.15 -> 0.0
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated 7fdee84e2cba15ba8924fcfb41c8d6354ee645ae950887c2cdf00bd10c8258c7  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] PASSED [ 25%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] PASSED [ 50%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] PASSED [ 75%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window FAILED [100%]
+summary: ======================== 1 failed, 3 passed in 19.97s =========================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== F-always: fixture: delays regardless of the window
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated 89bd75440cb656c046f51530ffa5d3dfb18774ddba1aa0e19faf59f070cb7554  (changed: True)
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0] FAILED [ 14%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size1] FAILED [ 28%]
+tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size2] FAILED [ 42%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size0] PASSED [ 57%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size1] PASSED [ 71%]
+tests/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size2] PASSED [ 85%]
+tests/test_help_scope.py::test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window FAILED [100%]
+        (`work but not painted`) or the settle assertion fails."""
+            f"work but not painted: {sorted(effective - painted)}; "
+E       AssertionError: work but not painted: ['left']; painted but inert: ['down', 'home', 'pagedown', 'up']
+        (`work but not painted`) or the settle assertion fails."""
+            f"work but not painted: {sorted(effective - painted)}; "
+E       AssertionError: work but not painted: ['left']; painted but inert: ['down', 'home', 'pagedown', 'up']
+        (`work but not painted`) or the settle assertion fails."""
+            f"work but not painted: {sorted(effective - painted)}; "
+E       AssertionError: work but not painted: ['left']; painted but inert: ['down', 'home', 'pagedown', 'up']
+summary: ======================== 4 failed, 3 passed in 34.91s =========================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S2-imm: _harvest: drop immediate=True
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated baa8988a0a2d3c8ed571e08cb4a99caa2b88e9e10c692d156b9e594fb2c2f801  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_harvest_scroll_lands_before_it_is_read_under_a_late_scroll FAILED [100%]
+E           AssertionError: the harvest scroll did not land
+summary: ============================== 1 failed in 1.08s ==============================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S2-both: _harvest: drop immediate=True AND settle assert
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated fd67a34b42242352fd044721c82e298d1131116e3e313994c8b9b5e8d936d15f  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_harvest_scroll_lands_before_it_is_read_under_a_late_scroll PASSED [100%]
+summary: ============================== 1 passed in 1.32s ==============================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S2-assert: _harvest: drop settle assert only
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated e30557b0bae9406ae027d4f617b519039fed1444e51175ea9279ac43a4708d4f  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_harvest_scroll_lands_before_it_is_read_under_a_late_scroll PASSED [100%]
+summary: ============================== 1 passed in 0.99s ==============================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S2-min: _harvest: settle assert without the min() clamp
+file tests/test_help_scope.py
+sha256 before 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094
+sha256 mutated 7d0c566c75b74f09483f1a90210125eebbc2571ea27be1fadab110607f58b51a  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_harvest_scroll_lands_before_it_is_read_under_a_late_scroll FAILED [100%]
+E           AssertionError: the harvest scroll did not land
+summary: ============================== 1 failed in 1.07s ==============================
+sha256 after restore 33020b287ab3963336dbc48301eb2b5d015dd1df9cab6c67c27597c4ce2a5094  restored: True
+
+=== S3-imm: _painted_bindings: drop immediate=True
+file tests/test_repair_layout.py
+sha256 before f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59
+sha256 mutated 7845c54f66b7cd97ac93497bdda9226dba056b14b2eed10d8345b8d416770da2  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_bindings_scroll_lands_before_it_is_read_under_a_late_scroll FAILED [100%]
+E           AssertionError: the bindings scroll did not land
+summary: ============================== 1 failed in 1.02s ==============================
+sha256 after restore f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59  restored: True
+
+=== S3-both: _painted_bindings: drop immediate=True AND settle assert
+file tests/test_repair_layout.py
+sha256 before f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59
+sha256 mutated de3dfd33b5c6b219c7e4fd5f8b1b2fe22836626840a7d4c31e161c6701f2555e  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_bindings_scroll_lands_before_it_is_read_under_a_late_scroll PASSED [100%]
+summary: ============================== 1 passed in 1.27s ==============================
+sha256 after restore f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59  restored: True
+
+=== S3-assert: _painted_bindings: drop settle assert only
+file tests/test_repair_layout.py
+sha256 before f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59
+sha256 mutated e43cc4162dbab0a884f2b25a3af210d86e7184309030a906bece4a0d280c7bd6  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_bindings_scroll_lands_before_it_is_read_under_a_late_scroll PASSED [100%]
+summary: ============================== 1 passed in 1.00s ==============================
+sha256 after restore f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59  restored: True
+
+=== S3-min: _painted_bindings: settle assert without the min() clamp
+file tests/test_repair_layout.py
+sha256 before f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59
+sha256 mutated 8824355d48aeb51e638ba7e337139e2b6999ba8ea337a45fd93e1a3d6db71171  (changed: True)
+tests/test_help_scope.py::test_llr_009_1_the_bindings_scroll_lands_before_it_is_read_under_a_late_scroll FAILED [100%]
+E           AssertionError: the bindings scroll did not land
+summary: ============================== 1 failed in 1.08s ==============================
+sha256 after restore f6cd73aacfe9ed9a06fa706c2fbbfeaa3800b2a85004c29d8b269b3299affb59  restored: True
+
+=== S4-imm: en7: drop immediate=True
+file tests/test_en7.py
+sha256 before a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da
+sha256 mutated b27983b8c5eb6682cc5339029cb72b09847b234ea5298809ea0e62afa141e16a  (changed: True)
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size0] FAILED [ 25%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size1] FAILED [ 50%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size0] PASSED [ 75%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size1] PASSED [100%]
+E           AssertionError: the legend did not scroll to its end
+E           AssertionError: the legend did not scroll to its end
+summary: ========================= 2 failed, 2 passed in 1.78s =========================
+sha256 after restore a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da  restored: True
+
+=== S4-both: en7: drop immediate=True AND settle assert
+file tests/test_en7.py
+sha256 before a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da
+sha256 mutated a75e093b7808d4345b50199eec8e592db585572fc65656fb02fb21d3752042be  (changed: True)
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size0] PASSED [ 25%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size1] PASSED [ 50%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size0] PASSED [ 75%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size1] PASSED [100%]
+summary: ============================== 4 passed in 1.59s ==============================
+sha256 after restore a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da  restored: True
+
+=== S4-assert: en7: drop settle assert only
+file tests/test_en7.py
+sha256 before a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da
+sha256 mutated b342f4c5b02211e2576e7407a76c20bbfad3e222d63140d12a9e83e41076c26c  (changed: True)
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size0] PASSED [ 25%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size1] PASSED [ 50%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size0] PASSED [ 75%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size1] PASSED [100%]
+summary: ============================== 4 passed in 1.67s ==============================
+sha256 after restore a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da  restored: True
+
+=== S4-guard: en7: drop the target>0 guard
+file tests/test_en7.py
+sha256 before a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da
+sha256 mutated c97bd1712eada8a77c0892c4db949841c43bcddba9872dd96ad59363fd617c87  (changed: True)
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size0] PASSED [ 25%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size1] PASSED [ 50%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size0] PASSED [ 75%]
+tests/test_en7.py::test_the_painted_legend_ends_with_the_rule[size1] PASSED [100%]
+summary: ============================== 4 passed in 1.67s ==============================
+sha256 after restore a6853ba512defb3c47eb1be1ac8940c93ff15cacefdcc8ec621dbcff8ea193da  restored: True
+

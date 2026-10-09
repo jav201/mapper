@@ -1,0 +1,72 @@
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+.................................xxx.................................... [ 15%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 25%]
+........................................................................ [ 28%]
+........................................................................ [ 30%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+........................................................................ [ 46%]
+........................................................................ [ 48%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 61%]
+........................................................................ [ 64%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+........................................................................ [ 71%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+.............................................................F.......... [ 87%]
+........................................................................ [ 89%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+........................................................................ [100%]
+================================== FAILURES ===================================
+_______ test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped _______
+
+    def test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped():
+        """AT-P07 -- `B3` is FIRED, and the record says WHY the first probe was wrong.
+    
+        C-48: a non-activation is evidence, so a FALSE non-activation is a defect in
+        the evidence. Flipping the verdict without recording the reason would leave the
+        next batch free to re-run the same `ls tests/goldens` probe and reach the same
+        wrong answer.
+        """
+        triggers = _triggers()
+>       assert "B3" in triggers["fired"], "B3 is not recorded as fired"
+E       AssertionError: B3 is not recorded as fired
+E       assert 'B3' in ['A2', 'A3', 'B1', 'C6', 'D1', 'E1', ...]
+
+tests\test_repair_golden_census.py:141: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_repair_golden_census.py::test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped
+1 failed, 2804 passed, 24 deselected, 3 xfailed in 1432.01s (0:23:52)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-390097' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-390097' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-390384' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-390384' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+EXIT_CODE=1
