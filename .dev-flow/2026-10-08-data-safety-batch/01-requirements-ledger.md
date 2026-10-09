@@ -451,3 +451,17 @@
 - **What changed:** AT-009 returns one field to its PRE-save value (so the no-re-diff mutation reddens it); the §1 US-001 summary names the reload rule instead of torn-pair detection.
 - **Why:** PDR architect MINOR-4 — read literally, "returned to its saved value" left the node unable to fail; the summary still described the retired failure model.
 - **Evidence:** design/design-proposal.md §5 AT-009 row.
+
+### LED-2026-10-08-data-safety-batch.64 — Inc-4 — AT-044 and AT-042's two arms realised on disk
+- **Requirement:** HLR-007, HLR-008, LLR-007.1, LLR-007.2, LLR-008.1, LLR-008.2, LLR-008.3
+- **Date:** 2026-10-08
+- **What changed:** AT-044 is realised as `tests/test_double_question_mark.py::test_at_044_a_doubled_question_mark_opens_one_legend`; AT-042's smallest-set arm is realised as `tests/test_repair_layout.py::test_tc_r25_...[app]` and its no-scope arm as `test_tc_r25b_a_screen_declaring_no_scope_presents_the_app_set`. AT-041 and AT-042's largest-set arm reconcile to `test_at_r12_pressing_help_presents_every_map_binding` and `test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions` respectively; AT-025b reconciles to the five `LLR-N13.1.5` nodes; AT-033/034/035 are retired and travel with US-N14 (`#D23`).
+- **Why:** C-18 — every declared acceptance id now resolves to a named on-disk node or a retirement, so a future refactor that deletes a node reddens the traceability record. The two new AT-042 arms were absent nodes (the design's `LLR-008.3`), and AT-044 had no node of its own.
+- **Evidence:** grep-verified `def` lines — `tests/test_repair_cycles.py:501,543,575,624,664`, `tests/test_repair_layout.py:276` (`test_at_r12…`), `tests/test_repair_layout.py:451` (`test_tc_r25`), `tests/test_repair_layout.py:468` (`test_tc_r25b`); the increment's RED battery (see `03-increments/inc4-reconciliation-proposal.md` §3).
+
+### LED-2026-10-08-data-safety-batch.65 — Inc-4 RED — AT-044's discriminating mutation is `priority=True`, not the design's two
+- **Requirement:** LLR-007.1, HLR-007
+- **Date:** 2026-10-08
+- **What changed:** LLR-007.1's negative control and §3.1's AT-044 "RED today" cell now name the mutation that actually opens a second legend — making the app-scope `question_mark → help` binding `priority=True` — instead of "bind `?` in the help seat" / "drop `SCOPE_HELP` from `MODAL_SCOPES`".
+- **Why:** executed at Inc-4: both design-named mutations leave the node GREEN, because `HelpScreen` defines no `action_help` (the binding dispatches to a missing method and returns False) and the modal binding chain (`_modal_binding_chain`) cuts the app off. A `priority=True` app chord is checked from the App down (`_check_bindings(priority=True)` uses `_binding_chain`, not `_modal_binding_chain`), so it reaches `MapperApp.action_help` and stacks a second legend. This is the existing defect class `test_no_screen_binds_the_question_mark_at_priority` guards (the `?` row is deliberately non-priority, `mapper/keymap.py:268-271`).
+- **Evidence:** `03-increments/inc4-reconciliation-proposal.md` §3 — mutation battery, hash-restored.
