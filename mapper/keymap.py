@@ -30,6 +30,7 @@ SCOPE_PLUG = "plug"
 SCOPE_IMPORT = "import"
 SCOPE_PALETTE = "palette"
 SCOPE_HELP = "help"
+SCOPE_DRAFT = "draft"
 SCOPE_APP = "app"
 # LLR-N16.1.2 / `#D9`: the last two screens that bind the help chord.
 SCOPE_FACTORY = "factory"
@@ -76,6 +77,7 @@ GROUP_SCOPE: dict[str, str] = {
     "settings": SCOPE_SETTINGS,
     "palette": SCOPE_PALETTE,
     "help": SCOPE_HELP,
+    "draft": SCOPE_DRAFT,
     "app": SCOPE_APP,
 }
 
@@ -100,6 +102,7 @@ GROUP_HEADER: dict[str, str] = {
     "settings": "components",
     "palette": "palette",
     "help": "help",
+    "draft": "unsaved",
     "app": "global",
 }
 
@@ -236,6 +239,12 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("pagedown", "pagedown", "legend_page_down", "page down", "help"),
     KeyBinding("home", "home", "legend_home", "to top", "help"),
     KeyBinding("end", "end", "legend_end", "to bottom", "help"),
+    # -- draft guard (modal) ------------------------------------------------
+    # US-001 / LLR-003.1: the three answers to "this card has unsaved edits".
+    # No `priority`, and modal (below): the guard inherits no app chord.
+    KeyBinding("s", "s", "save", "save", "draft"),
+    KeyBinding("d", "d", "discard", "discard", "draft"),
+    KeyBinding("escape", "esc", "stay", "stay", "draft"),
     # -- factory (LLR-N16.1.2, `#D9`) ----------------------------------------
     # Migrated from the screen's own list with `priority` kept: every one of
     # its bindings was `priority=True`, and the migration changes no dispatch.
@@ -266,7 +275,7 @@ KEYMAP: list[KeyBinding] = [
 # Modal scopes do NOT inherit the app-wide chords: a modal that rebound `ctrl+p`
 # would reopen the palette on top of itself.  Declared here, in the seat, so the
 # screens and the tests read one source instead of each passing a flag.
-MODAL_SCOPES = (SCOPE_PALETTE, SCOPE_HELP)
+MODAL_SCOPES = (SCOPE_PALETTE, SCOPE_HELP, SCOPE_DRAFT)
 
 # `E4`: a scope whose only focusable control is a text field.  The app-scope
 # actions named here still exist there (the palette runs them), but the KEY that

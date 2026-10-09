@@ -1,0 +1,138 @@
+=== K-d-swap: seat: the d row's action swapped to stay
+file mapper/keymap.py
+sha256 before 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 mutated 61c7245cf9c562ab285bc24f4482ce5cff3eada8b11e591caa6339f5c235b20b  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_returns_the_token_for_each_key[d-discard]
+FAILED tests/test_draft_save.py::test_llr_003_1_the_screen_bindings_are_generated_from_the_seat
+FAILED tests/test_data_safety_census.py::test_every_declared_row_is_in_the_live_seat
+FAILED tests/test_data_safety_census.py::test_the_draft_scope_is_exactly_the_declared_rows
+FAILED tests/test_data_safety_census.py::test_the_draft_scope_is_modal_and_borrows_no_chord
+FAILED tests/test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification
+summary: ======================= 6 failed, 146 passed in 16.37s ========================
+sha256 after restore 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+
+=== K-modal-off: seat: draft dropped from MODAL_SCOPES
+file mapper/keymap.py
+sha256 before 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 mutated 8ea5d245e1b03aac84ffc4a065f94c62bd73ecd4eb958bf2347a981fac18fbb7  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_the_hint_row_is_read_from_the_draft_seat
+FAILED tests/test_draft_save.py::test_llr_003_1_the_screen_bindings_are_generated_from_the_seat
+FAILED tests/test_data_safety_census.py::test_the_draft_scope_is_modal_and_borrows_no_chord
+summary: ======================= 3 failed, 149 passed in 16.29s ========================
+sha256 after restore 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+
+=== K-priority: seat: the esc row made priority
+file mapper/keymap.py
+sha256 before 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 mutated 62004c4807d4584fda114515bf247e6a57fa22c410e9de645f89a52a5058fd34  (changed: True)
+FAILED tests/test_data_safety_census.py::test_the_draft_scope_is_modal_and_borrows_no_chord
+FAILED tests/test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification
+summary: ======================= 2 failed, 150 passed in 16.36s ========================
+sha256 after restore 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+
+=== K-order: seat: draft group declared after app
+file mapper/keymap.py
+sha256 before 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 mutated 52ff653302cd5c5fdb1a5b2d6e59edf5dace086605c710486f02bc748345f6ad  (changed: True)
+FAILED tests/test_data_safety_census.py::test_the_draft_group_is_declared_before_app_and_headed_unsaved
+summary: ======================= 1 failed, 151 passed in 16.50s ========================
+sha256 after restore 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+
+=== K-header: seat: GROUP_HEADER draft renamed
+file mapper/keymap.py
+sha256 before 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 mutated 3b977c3664c9ab6158d216a636d6e6b271cdc5b71f65a18d30585de2b55c02f1  (changed: True)
+FAILED tests/test_data_safety_census.py::test_the_draft_group_is_declared_before_app_and_headed_unsaved
+summary: ======================= 1 failed, 151 passed in 16.27s ========================
+sha256 after restore 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+
+=== K-glyph: seat: esc glyph spelled out
+file mapper/keymap.py
+sha256 before 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 mutated 42db17347ae30bf890c13bffd84b4d03005ddd3a9d9ee2cb2e140f7fece50a35  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_the_hint_row_is_read_from_the_draft_seat
+FAILED tests/test_draft_save.py::test_llr_003_1_the_hint_follows_the_seat_not_a_literal
+FAILED tests/test_keymap.py::test_glyph_is_a_plausible_display_form_of_its_key
+FAILED tests/test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification
+summary: ======================= 4 failed, 148 passed in 16.08s ========================
+sha256 after restore 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+
+=== G-markup: sink: markup=False dropped from the title Static
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated d1f04ff5a0e58b446f553ebef71bbbd94a06b1082fefa1fa06b896ef97dfc786  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_a_markup_payload_in_the_title_is_painted_literally
+summary: ======================= 1 failed, 151 passed in 16.47s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-plain-title: sink: plain dropped from the node title
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 459ad4d7fb0e8a220d628f240415a3204261a1daf6d0ff4d41f78e665fde1a44  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[esc]
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[surrogate]
+summary: ======================= 2 failed, 150 passed in 16.19s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-plain-map: sink: plain dropped from the map id
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 141623736e46abcdd26c897844035af28cdd7a7ed47c620dfa9b939df55ee3bc  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[esc]
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[surrogate]
+summary: ======================= 2 failed, 150 passed in 16.46s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-no-map: title: map id never shown
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 6a01946d5d91999c98e4e2a56e2e3fac9fac5b2a2ca79aa0c20736d6647c2baf  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_the_title_follows_the_ruled_wording
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[esc]
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[click-markup]
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_title_is_literal_and_plain[surrogate]
+summary: ======================= 4 failed, 148 passed in 16.47s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-save-token: action_save returns discard
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 72727ab1df4787e9866554dfe29c3e88c4f1af5dc92a657dcbb124f5a28c8d91  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_returns_the_token_for_each_key[s-save]
+summary: ======================= 1 failed, 151 passed in 16.45s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-stay-token: action_stay returns save
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 223d16e6bd1cd9a039e10e5517c48b392c73a988b05fe5aeda56cded8b473ecb  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_modal_returns_the_token_for_each_key[escape-stay]
+summary: ======================= 1 failed, 151 passed in 16.63s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-hint-key: hint: key name instead of the seat glyph
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated f161faca3d1afcbf06c507a537fdf99a82e222160b6ebf11c0c693b1c10d91e0  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_the_hint_row_is_read_from_the_draft_seat
+FAILED tests/test_draft_save.py::test_llr_003_1_the_hint_follows_the_seat_not_a_literal
+summary: ======================= 2 failed, 150 passed in 16.57s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-hint-literal: hint: a literal with today's wording (provenance mutant)
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 0395e225e9273771700d68d2485154d17863b1e64515555071be0c4d545609f8  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_the_hint_follows_the_seat_not_a_literal
+summary: ======================= 1 failed, 151 passed in 16.52s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
+=== G-bindings-literal: BINDINGS: the app chords inherited into the guard
+file mapper/screens/draft_guard.py
+sha256 before f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+sha256 mutated 58c35e3132b840d84c6a117db6a3e52c4110d005e5903aab688f8b13ee69face  (changed: True)
+FAILED tests/test_draft_save.py::test_llr_003_1_the_screen_bindings_are_generated_from_the_seat
+FAILED tests/test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[draft]
+summary: ======================= 2 failed, 150 passed in 16.50s ========================
+sha256 after restore f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True
+
