@@ -6,8 +6,8 @@
 
 | Field | Value |
 |---|---|
-| Gate record | `python devflow-validate.py --brief <repo root>` exit 1 · 38 block — the external `V7` (the installed flow bundle's `SKILL.md` vs its manifest, rev101 work outside this batch; recorded in the DDR) · 2026-10-09. Product gate: `2920 passed / 0 failed / 3 xfailed` on `cab8181` (`04-validation.md`) |
-| Gated tree | `cc5063b91a669638fc1fdbd6e1545a4500b2b35f` · dirty — `.dev-flow/2026-10-08-data-safety-batch/05-postmortem.md` (this close record itself) |
+| Gate record | `python devflow-validate.py --brief <repo root>` with the branch's upstream pointed at `origin/master` for the run (the batch branch tracks its own remote, which made `V59` misread its own commits as rebased-in; restored after) → exit 1 · **1 block**, the external `V7` (the installed flow bundle's `SKILL.md` vs its manifest — rev101 work outside this batch, recorded in the DDR) · 2026-10-09. An earlier close attempt recorded "38 block — the external V7", which was WRONG: 36 were the owed canon fold-back (`V22`, now folded, 36 rows) and 1 a missing §2 row (`V59`, added). Product gate: `2920 passed / 0 failed / 3 xfailed` on `cab8181` (`04-validation.md`). |
+| Gated tree | `393b8f909bbe0d92ba3cd17d40f60b5d181aebad` · dirty — `.dev-flow/2026-10-08-data-safety-batch/05-postmortem.md` (this close record itself) |
 
 ## 🔑 At a glance (read first)
 
