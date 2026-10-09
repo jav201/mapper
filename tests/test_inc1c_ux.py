@@ -15,6 +15,7 @@ from mapper import darkside
 from mapper.app import MapperApp
 from mapper.widgets.chrome import HintLine
 from tests.test_draft_save import (
+    _capture_notices,
     _hint_text_and_prefix_style,
     _inspector,
     _open,
@@ -91,3 +92,26 @@ async def test_inc1c_tab_into_a_field_names_ctrl_s(tmp_path):
         hint = screen.query_one(HintLine).text
         assert "ctrl+s save" in hint, hint
         assert "↵ open card" not in hint, hint
+
+
+async def test_inc1c_a_failed_save_shows_one_toast(tmp_path):
+    """UX-1 M2: a failed draft save shows ONE error toast, `could not save · draft
+    kept · ctrl+s to retry`, with no raw exception text (`disk` is the OSError's own
+    message and must not leak into the toast)."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 36)) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        screen = await _open(app, pilot, map_id)
+        await _type_into(pilot, screen, "insp-title", "x")
+        notices = _capture_notices(app)
+
+        def failing_save(_map_id, _graph):
+            raise OSError("disk")
+
+        screen.store.save = failing_save
+        await _press(pilot, "ctrl+s")
+
+        errors = [n for n, kw in notices if kw.get("severity") == "error"]
+        assert errors == ["could not save 'ds' (OSError) · draft kept · ctrl+s to retry"], notices
+        assert "disk" not in errors[0]

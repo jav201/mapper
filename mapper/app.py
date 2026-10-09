@@ -260,12 +260,23 @@ def _refusal_toast(screen: Screen, exc: Exception) -> bool:
 
 
 def _save_or_toast(
-    screen: Screen, store: "MapStore", map_id: str, graph: Graph, *, new: bool = False
+    screen: Screen,
+    store: "MapStore",
+    map_id: str,
+    graph: Graph,
+    *,
+    new: bool = False,
+    toast: bool = True,
 ) -> bool:
     """Guard a `store.save()` call: on any raise, toast and return `False`.
 
     `new=True` writes through `store.create`, which refuses an id that is taken
     (`A-113`); the CSV "save as" is a creation, an edit of an open map is not.
+
+    `toast=False` suppresses both toasts; the caller then emits its own single
+    notice.  `_save_draft` uses it so a failed draft save shows ONE toast
+    (`could not save '<map>' (<ErrorType>) · draft kept · <save> to retry`) instead of this one plus
+    a second.
 
     The ONE guarded call site every other `store.save()` call routes through
     (`G6-C-F2`/`G6-C-F3`) — a screen calls this instead of writing its own
@@ -285,14 +296,16 @@ def _save_or_toast(
         write = store.create if new else store.save
         write(map_id, graph)
     except Exception as e:  # noqa: BLE001 -- deliberately generic, see A-111.
-        if _refusal_toast(screen, e):
-            return False
-        screen.notify(
-            f"could not save {darkside.plain(map_id)!r}: "
-            f"{darkside.plain(type(e).__name__)}",
-            severity="error",
-            markup=False,
-        )
+        screen._last_save_error = type(e).__name__
+        if toast:
+            if _refusal_toast(screen, e):
+                return False
+            screen.notify(
+                f"could not save {darkside.plain(map_id)!r}: "
+                f"{darkside.plain(type(e).__name__)}",
+                severity="error",
+                markup=False,
+            )
         return False
     return True
 
@@ -3519,7 +3532,7 @@ class MapScreen(Screen):
         candidate = copy.deepcopy(self.base_graph)
         for field, value in draft.items():
             self._apply_field(candidate.nodes[node_id].ficha, field, value)
-        if _save_or_toast(self, self.store, self.map_id, candidate):
+        if _save_or_toast(self, self.store, self.map_id, candidate, toast=False):
             # The focused view, if any, shares these `Node` objects.
             node = self.base_graph.nodes[node_id]
             for field, value in draft.items():
@@ -3536,7 +3549,11 @@ class MapScreen(Screen):
         cursor = self.nav.cursor
         try:
             graph = self.store.load(self.map_id)
-            message = f"draft kept · {self._seat_glyph('save_draft')} to retry"
+            error = darkside.plain(getattr(self, "_last_save_error", "") or "error")
+            message = (
+                f"could not save {darkside.plain(self.map_id)!r} ({error}) · draft kept · "
+                f"{self._seat_glyph('save_draft')} to retry"
+            )
         except Exception:  # noqa: BLE001 -- any reload failure keeps the pre-save map.
             # `base_graph` was never touched by this save (the draft went onto a
             # copy), so re-establishing it IS the pre-save graph.  No store call.

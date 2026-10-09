@@ -754,8 +754,9 @@ async def test_llr_004_2_a_save_failure_names_ctrl_s_to_retry(tmp_path):
         _failing_save(screen, after="zero")
         await _press(pilot, "ctrl+s")
         messages = [n for n, _ in notices]
-        assert any(n.startswith("could not save") for n in messages), messages
-        assert messages[-1] == "draft kept · ctrl+s to retry"
+        # Inc-1c U4: ONE toast -- map id and error type, never str(e); names the retry key.
+        assert messages[-1] == f"could not save {map_id!r} (OSError) · draft kept · ctrl+s to retry", messages
+        assert sum(1 for n in messages if n.startswith("could not save")) == 1, messages
         assert notices[-1][1].get("severity") == "error"
 
 
