@@ -24,9 +24,9 @@ The legend own-keys test no longer races a queued scroll. The four `scroll_to(..
 
 | File | Kind | Traces to | Change |
 |---|---|---|---|
-| `tests/test_help_scope.py` | test | US-004, HLR-009, LLR-009.1, LLR-009.2, AT-008 | `delay_deferred_scroll` fixture + `late_scroll()`; `_harvest` (was `:93`) immediate + settle assert; `_effective_keys` / `_painted_own_keys` lifted from the n16_4 node (was `:365`), node now calls them; new nodes: `test_at_008_…` x3 sizes, fixture RED-proof node, `_harvest` arm, `_painted_bindings` arm |
-| `tests/test_repair_layout.py` | test | US-004, HLR-009, LLR-009.1 | `_painted_bindings` (was `:118`) immediate + settle assert |
-| `tests/test_en7.py` | test | US-004, HLR-009, LLR-009.1 | body of `test_the_painted_legend_ends_with_the_rule` (was `:246`) lifted to `_footer_text_at_the_end` with immediate + settle assert + `target > 0` guard; new `…_under_a_late_scroll` arm x2 sizes |
+| `tests/test_help_scope.py` | test | HLR-009, LLR-009.1, LLR-009.2, AT-008 | `delay_deferred_scroll` fixture + `late_scroll()`; `_harvest` (was `:93`) immediate + settle assert; `_effective_keys` / `_painted_own_keys` lifted from the n16_4 node (was `:365`), node now calls them; new nodes: `test_at_008_…` x3 sizes, fixture RED-proof node, `_harvest` arm, `_painted_bindings` arm |
+| `tests/test_repair_layout.py` | test | HLR-009, LLR-009.1 | `_painted_bindings` (was `:118`) immediate + settle assert |
+| `tests/test_en7.py` | test | HLR-009, LLR-009.1 | body of `test_the_painted_legend_ends_with_the_rule` (was `:246`) lifted to `_footer_text_at_the_end` with immediate + settle assert + `target > 0` guard; new `…_under_a_late_scroll` arm x2 sizes |
 | `.gitattributes` | config | HLR-009 | `.dev-flow/*/evidence/** -text` so stored evidence keeps its bytes (template, §Evidence files) |
 | `.dev-flow/2026-10-08-data-safety-batch/evidence/*` (5 files) | doc | | transcripts + the mutation driver `inc3-mutate.py` |
 | `.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-001.md` | doc | | this packet |
