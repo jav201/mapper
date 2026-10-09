@@ -4770,6 +4770,9 @@ class MapScreen(Screen):
         return True
 
     def action_add_child(self) -> None:
+        self._guard_draft(self._add_child)
+
+    def _add_child(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes:
             self.notify("select a node first")
             return
@@ -4817,6 +4820,9 @@ class MapScreen(Screen):
         )
 
     def action_archive(self) -> None:
+        self._guard_draft(self._archive)
+
+    def _archive(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes or self.store is None:
             return
         if not self._guard_focus_mutation():
