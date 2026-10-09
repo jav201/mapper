@@ -87,3 +87,12 @@ Every unit reverted ONLY its product change, ran its new nodes, recorded the fai
 
 ## 7 · Suggested next task
 `code-reviewer` on this increment, then the DDR and the final PR-level `qa-reviewer` pass over the whole branch.
+
+## Addendum (orchestrator, 2026-10-09) — independent review
+
+- **§4b `code-reviewer`:** OK to advance · no HIGH; quit walk, hint-line borrow, moved bodies (AST-equivalent) and the single toast verified; C1/U4/Z2 mutants re-run and killed; ledger 2913 collected ✓.
+- **F1 (MEDIUM) fixed — U11** (deepseek-v4-pro unit): `test_llr_003_5_quit_walk_chains_two_drafts[d,s]` — two pending screens, the second guard names the lower map, `s` writes both maps, `d` neither; RED: `proceed=self.exit` → 2 failed, `mapper/app.py` sha256 restored. Ledger +2 → 2915 collected.
+- **F2 (MEDIUM) fixed:** `tests/test_en2.py`'s scope arm now requires `ctrl+s save` on a focused text field and `open card` on any other widget (no disjunction).
+- **F3 (LOW) fixed:** `inspector.py`'s `UNSAVED_STYLE` comment matches the code (ALERT, R8).
+- **F4 (LOW) not applicable:** the seat holds no row for leaving a field; the pre-existing `M`-path hint writes `esc` the same way.
+- **F5 (LOW) recorded:** `toast=False` also suppresses `_refusal_toast`'s authored `MapIdError` text on a draft save — unreachable on an already-open map; noted, not changed.

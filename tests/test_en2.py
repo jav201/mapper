@@ -166,4 +166,7 @@ async def test_z2_another_field_focus_leaves_open_card_alone(tmp_path, monkeypat
             hint = screen.query_one(HintLine).text
             if not focused.startswith("insp-att-"):
                 assert "open attachment" not in hint, (app.focused, hint)
-                assert f"{ENTER} open card" in hint or "ctrl+s save" in hint, (app.focused, hint)
+                if type(app.focused).__name__ == "FieldInput":
+                    assert "ctrl+s save" in hint, (app.focused, hint)
+                else:
+                    assert f"{ENTER} open card" in hint, (app.focused, hint)
