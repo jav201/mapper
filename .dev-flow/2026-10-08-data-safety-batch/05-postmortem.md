@@ -6,8 +6,8 @@
 
 | Field | Value |
 |---|---|
-| Gate record | pending — filled by the orchestrator at the close gate |
-| Gated tree | pending — filled by the orchestrator at the close gate |
+| Gate record | `python devflow-validate.py --brief <repo root>` exit 1 · 38 block — the external `V7` (the installed flow bundle's `SKILL.md` vs its manifest, rev101 work outside this batch; recorded in the DDR) · 2026-10-09. Product gate: `2920 passed / 0 failed / 3 xfailed` on `cab8181` (`04-validation.md`) |
+| Gated tree | `cc5063b91a669638fc1fdbd6e1545a4500b2b35f` · dirty — `.dev-flow/2026-10-08-data-safety-batch/05-postmortem.md` (this close record itself) |
 
 ## 🔑 At a glance (read first)
 

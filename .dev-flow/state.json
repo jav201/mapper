@@ -66,7 +66,7 @@
   ],
   "guided": false,
   "current_station": "P6",
-  "phase_status": "in-progress",
+  "phase_status": "approved",
   "stations_active": [
     "P0",
     "ARQ",
@@ -216,6 +216,11 @@
       "station": "P5",
       "date": "2026-10-09",
       "decision": "P5 close with carry-over: post-mortem assembled from Kimi units; residuals B-102/B-103 to the backlog; B-36 shipped"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-09",
+      "decision": "P6 approved (self-approved under the standing authorization): final PR-level qa-reviewer MERGE (0 HIGH; M1/M2 and L1-L4 applied); docs in 06-docs; merge to master by PR"
     }
   ],
   "standing_authorization": {
