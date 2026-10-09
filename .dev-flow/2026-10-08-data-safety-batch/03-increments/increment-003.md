@@ -318,3 +318,9 @@ Touched files: `297 passed` before the fixes of this run; after them the default
 | 14 | Emitted-form assertion declared | all | ✓ | 2 artifacts |
 | 15 | Independent review names somebody | all | ⚠ | ABSENT, owed |
 | 16 | Evidence files declared with stored digests | all | ✓ | 12 files |
+
+## Addendum (orchestrator, 2026-10-09) — independent reviews at the Inc-1b gate
+
+- **§4b `code-reviewer`:** OK to advance · no HIGH; LOW F1 (1b.5 deviation: `inspector.py:750` defers `action_leave_field` via `call_later` — the synchronous call is broken, shown by mutant `I-enter-direct`; recorded here as a deviation), F2 (`g6c[field_commit]` → `g6c[draft_save]` is a second rename; net count unchanged), F3 (load-warning toasts repeat on the reload-failure arm — recommendation, not acted on); 4 mutants re-run and killed; `I-raw-state` is a NAMED kill (`test_llr_002_1_…unknown_state`, 0.5 s), not a crash; final `app.py` sha256 `97ad3e64…`.
+- **UX-1 `ux-reviewer`:** approve-with-conditions — executed with the real pilot at 87/118. M1: C6 prefix missing after `M` → edit → `↵`/`esc` at 87 until the next repaint. M2: focusing a field with `tab` never names `ctrl+s`. Minors: header `● unsaved` is WARN amber while the hint prefix is ALERT red; a failed save shows two error toasts, the first with the raw `OSError`. Orchestrator ruling: M1, M2, the header colour (→ `ALERT`, operator R8 "rojo para alertar que hay contenido no guardado") and the single toast are fixed in **Inc-1c** before Inc-2.
+- **C14:** the operator's real-terminal `ctrl+s`/`ctrl+q` smoke is still owed.

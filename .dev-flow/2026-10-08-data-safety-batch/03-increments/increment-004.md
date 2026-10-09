@@ -57,3 +57,6 @@ The two inert design mutations are recorded (ledger `.65`) rather than dropped: 
 
 ## 7 · Suggested next task
 Integrate with Inc-1b, then Inc-2 in small DeepSeek units.
+
+## Addendum (orchestrator, 2026-10-09)
+- **§4b `code-reviewer`:** OK to advance · no findings; AT-044 and AT-042 arms sound; merged ledger 2890 = 2887 + 3 (collection, executed).
