@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "PDR",
+  "current_station": "P3",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -191,6 +191,11 @@
       "station": "P2",
       "date": "2026-10-08",
       "decision": "P2 approved after 4 rounds + light verification (operator ruling 'Aplicar y verificar ligero'): 0 blockers; round-4 fixes CONFIRMED by one reviewer for all three lenses; residuals A-14/A-15 recorded; P1 iterations 3 (soft cap reached, operator ruled 'Simplificar y seguir')"
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-08",
+      "decision": "PDR approved with conditions C1-C14 (architect, qa-reviewer, ux-reviewer; 0 blockers); C4/C5 discharged at seal; operator ruled R8 (hint-line unsaved mark in ALERT red) — 'Marca en la línea de pista (Recomendado)' + 'Usa código de colores, como el rojo'; R9 guard title"
     }
   ],
   "standing_authorization": {
