@@ -241,3 +241,11 @@ Orchestrator ruling on the `test_at_p07` state.json failure, then `code-reviewer
 | 14 | Emitted-form assertion declared | all | ✓ | none — with the path-scrub note |
 | 15 | Independent review names somebody | all | ⚠ | ABSENT, owed |
 | 16 | Evidence files declared with stored digests | all | ✓ | 5 files; index-blob re-check listed in §6 |
+
+## Addendum (orchestrator, 2026-10-08) — the one lane failure, fixed in this increment
+
+- **Failure:** `tests/test_repair_golden_census.py::test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped` read `.dev-flow/state.json`, which is single-slot and was rolled over to this batch at `606510f` (triggers reset). The test pins **ui-next-batch-02's** trigger record (B3 fired + its correction), so it was coupled to whichever batch is active — a defect exposed, not caused, by the rollover.
+- **Fix (test-side, 1 line + comment):** `STATE` now reads `.dev-flow/2026-08-26-ui-next-batch-02/state-snapshot-at-close.json`, the archive the rollover wrote (B3 in `fired`, correction `B3` present).
+- **RED → GREEN:** pointing back at `.dev-flow/state.json` → `1 failed, 6 passed`; with the archive → `7 passed` (the file, orchestrator run).
+- **Traces to:** HLR-009 (US-004 — the default lane is the gate instrument this story keeps trustworthy).
+- **Ledger:** rewrite-in-place, count unchanged (2808).
