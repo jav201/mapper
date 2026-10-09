@@ -249,3 +249,10 @@ Orchestrator ruling on the `test_at_p07` state.json failure, then `code-reviewer
 - **RED → GREEN:** pointing back at `.dev-flow/state.json` → `1 failed, 6 passed`; with the archive → `7 passed` (the file, orchestrator run).
 - **Traces to:** HLR-009 (US-004 — the default lane is the gate instrument this story keeps trustworthy).
 - **Ledger:** rewrite-in-place, count unchanged (2808).
+
+## Addendum 2 (orchestrator, 2026-10-08) — code-review F1/F2 and §4b
+
+- **§4b independent review:** `code-reviewer` · OK to advance (notes: F1, F2 MEDIUM; F3 LOW) · no HIGH findings — RED counterfactual, 4 mutation verdicts and the archive equivalence re-run by the reviewer (`executed`).
+- **F1 (packet stale):** this addendum supersedes §4's "not fixed here" and §6's open ruling for `tests/test_repair_golden_census.py` (fixed in `80635a1`, Traces to HLR-009). The evidence and packet rows trace `n/a — records, not product or test code`.
+- **F2 (node name):** AT-008 is realised by `tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll`; the design proposal and the contract now name that node.
+- **F3 (LOW, not acted on):** the fixture is imported across modules; moving it to `conftest.py` is optional.
