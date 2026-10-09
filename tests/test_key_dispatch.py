@@ -87,6 +87,9 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("map", "N"): ("prev_hit", "previous match", "N", "nav", False),
     ("map", "R"): ("toggle_rail", "show/hide rail", "R", "view", False),
     ("map", "X"): ("remove_attachment", "remove attachment", "X", "node", False),
+    # Data-safety batch (2026-10-08) Inc-1b: the card draft's save (LLR-001.4),
+    # not `priority` (a focused inspector field binds no `ctrl+s`).
+    ("map", "ctrl+s"): ("save_draft", "save", "ctrl+s", "node", False),
     ("map", "a"): ("add_child", "add child", "a", "node", False),
     ("map", "d"): ("open_documents", "documents", "d", "node", False),
     ("map", "e"): ("export_svg", "export svg", "e", "view", False),
@@ -131,13 +134,18 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("factory", "escape"): ("home", "back", "esc", "factory", True),
     ("settings", "q"): ("home", "back", "q", "settings", True),
     ("settings", "escape"): ("home", "back", "esc", "settings", True),
+    # Data-safety batch (2026-10-08) Inc-1a: the draft guard's three answers
+    # (LLR-003.1), a modal scope with no `priority` and no app chord.
+    ("draft", "s"): ("save", "save", "s", "draft", False),
+    ("draft", "d"): ("discard", "discard", "d", "draft", False),
+    ("draft", "escape"): ("stay", "stay", "esc", "draft", False),
 }
 
 
 def test_at_n03h_the_whole_seat_matches_its_specification():
     """AT-N03h — every (scope, key) maps to its promised tuple, all six fields.
 
-    Set equality over all 48 entries, so a drift in ANY field of ANY scope fails,
+    Set equality over every entry, so a drift in ANY field of ANY scope fails,
     and so does an added or removed binding.
 
     `priority` is pinned too, because it is a real dispatch field: dropping

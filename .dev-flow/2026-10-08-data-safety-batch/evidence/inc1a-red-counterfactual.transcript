@@ -1,0 +1,15 @@
+sha256 before mapper/keymap.py 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23
+sha256 before mapper/screens/__init__.py 35b2dcd14c050465fb796ba4d4e9a1bfad0931b23cbd04222753c27833dd66cd
+sha256 before mapper/screens/draft_guard.py f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e
+applied: keymap.py and screens/__init__.py = HEAD blobs; draft_guard.py moved aside
+FAILED tests/test_data_safety_census.py::test_every_declared_row_is_in_the_live_seat
+FAILED tests/test_data_safety_census.py::test_the_draft_scope_is_exactly_the_declared_rows
+FAILED tests/test_data_safety_census.py::test_the_draft_scope_is_modal_and_borrows_no_chord
+FAILED tests/test_data_safety_census.py::test_the_draft_group_is_declared_before_app_and_headed_unsaved
+FAILED tests/test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification
+ERROR tests/test_draft_save.py
+ERROR tests/test_keymap.py
+summary: =================== 5 failed, 32 passed, 2 errors in 15.21s ===================
+sha256 after  mapper/keymap.py 8555441e0f14be59a2866f7c4e14ce987aa3c5e4243cf4b6e289dd5be0df7e23  restored: True
+sha256 after  mapper/screens/__init__.py 35b2dcd14c050465fb796ba4d4e9a1bfad0931b23cbd04222753c27833dd66cd  restored: True
+sha256 after  mapper/screens/draft_guard.py f7488025e595f3cfd4d2725980c17fbeb7fe4355ed70bd957eab02e3191a656e  restored: True

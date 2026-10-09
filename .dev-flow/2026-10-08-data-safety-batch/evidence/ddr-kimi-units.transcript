@@ -1,0 +1,240 @@
+===== K1 esc-search (Kimi kimi-for-coding unit; final report tail) =====
+color', 'focus', 'dark'}))
+
+tests\test_ddr_esc_search.py:49: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_ddr_esc_search.py::test_llr_003_3_esc_with_a_live_search_clears_it_and_opens_no_guard
+1 failed in 1.52s
+RED confirmed: a guard opens (`assert 1 == 0`). Now restore byte-identically from backup and verify sha256.
+
+• RED confirmed — a guard opens. Restoring `mapper/app.py` byte-identically and verifying:873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py
+873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py
+
+
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 1.73s
+• Unit K1 complete.
+
+  **Files changed**
+  - `tests/test_ddr_esc_search.py` (new) — only file touched; `mapper/app.py` was modified temporarily for RED and restored byte-identically.
+
+  **New test node id**
+  - `tests/test_ddr_esc_search.py::test_llr_003_3_esc_with_a_live_search_clears_it_and_opens_no_guard`
+
+  **GREEN** (product intact, after restore):
+  ```
+  python -m pytest tests/test_ddr_esc_search.py -p no:cacheprovider -q
+  .                                                                        [100%]
+  1 passed in 1.73s
+  ```
+
+  **RED** (temp change in `MapScreen.action_back_or_home` routing the search-clear through `self._guard_draft(...)`):
+  ```
+  python -m pytest tests/test_ddr_esc_search.py -p no:cacheprovider -q
+  E           assert 1 == 0   # a DraftGuardScreen opened
+  FAILED tests/test_ddr_esc_search.py::test_llr_003_3_esc_with_a_live_search_clears_it_and_opens_no_guard
+  1 failed in 1.52s
+  ```
+
+  **sha256 restore check** (`mapper/app.py`, before vs after restore):
+  ```
+  873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb  (both)
+  ```
+
+  The test drives real keys via `MapperApp(tmp_path)` + `run_test(size=(140, 40))` + `pilot.press`, reuses `_seed_map/_open/_type_into/_press/_guards/_hashes/_inspector/_header` from `tests/test_draft_save.py`, and asserts: no guard opens (`_guards(app) == 0`), the search is no longer live (`_search_is_live()` False, `query_text == ""`), the map screen is still on top (`app.screen is screen`), nothing was written (hash pair unchanged), and the draft is still pending (`draft_values() == {"title": "alfax"}`).
+
+To resume this session: kimi -r session_1fe457e5-c8a2-4efe-b09a-bb393c84340e
+exit=0
+
+
+===== K2 same-map-link (Kimi kimi-for-coding unit; final report tail) =====
+me_map_link.py::test_llr_003_4_a_link_to_the_same_map_is_guarded[escape]
+3 failed in 3.02s
+RED confirmed: `_guards == 0` — push happened without the guard. Now restore byte-identically and re-run GREEN.
+
+• RED confirmed (guard never opens, push happens unguarded). Restoring the product file and re-running:873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py
+873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py.k2bak
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...                                                                      [100%]
+3 passed in 2.65s
+
+
+• All done. Also verify no leftover: `git status` to confirm only the new test file is changed. Actually the rules say no git mutations but `git status` is read-only — fine.?? tests/test_ddr_same_map_link.py
+
+
+• Unit K2 complete.
+
+  **Files changed**
+  - `tests/test_ddr_same_map_link.py` (new) — only file touched; no product change needed (`mapper/app.py:3799` already routes same-map links through `_guard_draft`, verified by the RED arm).
+
+  **New test node ids** (parametrised `["s","d","escape"]`)
+  - `tests/test_ddr_same_map_link.py::test_llr_003_4_a_link_to_the_same_map_is_guarded[s|d|escape]`
+
+  **GREEN** (product intact)
+  ```
+  $ python -m pytest tests/test_ddr_same_map_link.py -p no:cacheprovider -q
+  ...                                                                      [100%]
+  3 passed in 2.65s
+  ```
+
+  **RED** (`action_open_ficha` temporarily pushed without `_guard_draft`)
+  ```
+  E  assert 0 = _guards(...)        # guard never opened, push went through
+  tests\test_ddr_same_map_link.py:51: AssertionError
+  FAILED ...[s] / [d] / [escape]  — 3 failed in 3.02s
+  ```
+
+  **sha256 restore check** (before = after, byte-identical)
+  ```
+  873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py   (pre-RED)
+  873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py   (restored)
+  ```
+
+  Test flow: seeds map `ds` with node `a` linking back to `ds` itself (via `_seed_map` + `fields["map"]`), drafts the title, presses `enter`; asserts exactly one guard is up and no push happened yet; after `s`/`d` a second `MapScreen` for the same id sits on top (depth + 1), after `escape` depth is unchanged and the draft (`{"title": "alfax"}`) is still pending. `git status` shows only the new test file.
+
+To resume this session: kimi -r session_1c29af20-7ec4-4584-9121-399c64b6e4f7
+exit=0
+
+
+===== K3 archive-own (Kimi kimi-for-coding unit; final report tail) =====
+1.47s ==============================
+RED confirmed: both params fail at `assert _guards(app) == 1` — no guard opened. Restore byte-identically and verify sha256, then re-run GREEN.
+
+• RED confirmed (no guard opens). Restoring `mapper/app.py` byte-identically and re-verifying.873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py
+
+
+collecting ... collected 2 items
+
+tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[save] PASSED [ 50%]
+tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[discard] PASSED [100%]
+
+============================== 2 passed in 2.68s ==============================
+• Unit K3 complete.
+
+  **Files changed**
+  - `tests/test_ddr_archive_own.py` (new) — only file touched; `mapper/app.py` restored byte-identically after the RED mutation.
+
+  **New test node ids**
+  - `tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[save]`
+  - `tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[discard]`
+
+  **What it pins** — cursor on non-root node `a`, title drafted, `x` pressed:
+  - one guard opens, both file hashes unchanged until answered (`_guard_draft` is the decision point, not re-implemented)
+  - after `s`/`d`: no second guard (`_guards == 0` after pauses); answering resolves into the archive arm's own `_ConfirmScreen`; `y` archives
+  - `a` gone from `screen.graph`, cursor on an existing node, draft no longer pending, hashes changed, store loads the map cleanly with nodes `{root, b}` (the drafted title is not required to survive — exactly one archive's worth of change)
+
+  **GREEN output**
+  ```
+  tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[save] PASSED
+  tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[discard] PASSED
+  2 passed in 2.68s
+  ```
+
+  **RED output** (temporarily `action_archive` → `self._archive()`, guard bypassed)
+  ```
+  >           assert _guards(app) == 1
+  E           AssertionError: assert 0 == 1
+  FAILED tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[save]
+  FAILED tests/test_ddr_archive_own.py::test_llr_003_6_archiving_the_drafts_own_node[discard]
+  2 failed in 1.47s
+  ```
+
+  **sha256 restore check** — before mutation, after restore: identical
+  ```
+  873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py
+  ```
+
+To resume this session: kimi -r session_d2fb632e-e41d-4285-b9e1-ef96de890953
+exit=0
+
+
+===== U12→Kimi AT-025b (Kimi kimi-for-coding unit; final report tail) =====
+nd it reproduces the exact defect (`['roto', ' concept ', '0', '0']`). Now restore byte-identically and verify sha256.
+
+• RED confirmed. Restoring `app.py` byte-identically and re-verifying.873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py
+
+
+tests\test_repair_cycles.py .                                            [100%]
+
+============================== 1 passed in 0.28s ==============================
+• Done. Print the required summary: files changed, test node id, GREEN output, RED output, sha256 restore check.
+
+• Unit U12 complete.
+
+  **Files changed**
+  - `tests/test_repair_cycles.py` — appended one test at the end (no product change; `mapper/app.py` was only touched transiently for the RED proof and restored)
+
+  **New test node id**
+  - `tests/test_repair_cycles.py::test_at_025b_a_damaged_map_declares_itself_and_the_others_keep_their_values`
+
+  **What it does**
+  Seeds one damaged map (`roto`, a directed cycle that fails to load) plus two healthy maps with different node counts (`sano_cuatro` = 4 nodes from `ACYCLIC_MMD`, `sano_uno` = 1 node), drives `MapperApp(tmp_path)` with `run_test(size=(140, 45))` + `pilot.pause()` and reaches `#home-recents` via `push_screen(HomeScreen())` like the existing `test_llr_n13_1_5_*` arms (reusing their `_cells` helper). In one run it asserts: the damaged card carries `darkside.DAMAGED_MAP_GLYPH` (`⊘`) and `darkside.DAMAGED_MAP_STATE` (`damaged map — ↵ see why`), and each healthy card shows its own true node count (`4`, `1`) with neither the glyph nor the state string.
+
+  **GREEN output** (after restore)
+  ```
+  tests\test_repair_cycles.py .                                            [100%]
+  ============================== 1 passed in 0.28s ===============================
+  ```
+
+  **RED output** (damaged branch at `mapper/app.py:933-937` temporarily painted ` concept `/`0`/`0`)
+  ```
+  E       AssertionError: the damaged card carries no declared glyph ('\u2298'): ['roto', ' concept ', '0', '0']
+  tests\test_repair_cycles.py:802: AssertionError
+  FAILED tests/test_repair_cycles.py::test_at_025b_a_damaged_map_declares_itself_and_the_others_keep_their_values
+  ```
+
+  **sha256 restore check**
+  - Before mutation: `873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py`
+  - After restore: `873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb *mapper/app.py` — byte-identical.
+
+To resume this session: kimi -r session_42c2c73a-48eb-4a46-b107-8356c2ad6334
+exit=0
+
+
+===== U13→Kimi TC-009.1 (Kimi kimi-for-coding unit; final report tail) =====
+68e8 *tests/test_help_scope.py
+dbb0a7bd117df415b919c61ee44ba1945d267f4f7cad010156cfb9c48d4a68e8 */tmp/test_help_scope.py.bak
+
+
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+....                                                                     [100%]
+4 passed in 18.34s
+• All done. This is a single small unit, already complete — no todo list needed. Print the summary as required.
+
+• Unit U13 complete. Summary:
+
+  **Files changed**
+  - `tests/test_help_scope.py` — appended one test at the end (no product change)
+
+  **New test node id**
+  - `tests/test_help_scope.py::test_tc_009_1_settle_assertion_fails_loud_when_the_scroll_never_lands`
+
+  The test monkeypatches `textual.widget.Widget._scroll_to` to a no-op, then runs the AT-008 sequence for one size (`_legend_from_map` → `_effective_keys`) and asserts `pytest.raises(AssertionError, match="positioning scroll did not land")`. Patch point verified against Textual 8.2.8 source: `scroll_to(..., immediate=True)` calls `self._scroll_to(...)` synchronously, so the no-op blocks the settle.
+
+  **GREEN** (new test + AT-008 node together):
+  ```
+  $ python -m pytest tests/test_help_scope.py::test_tc_009_1_... tests/test_help_scope.py::test_at_008_... -p no:cacheprovider -q
+  ....                                                                     [100%]
+  4 passed in 18.34s
+  ```
+
+  **RED** (settle assertion line temporarily deleted from `_effective_keys`):
+  ```
+  $ python -m pytest tests/test_help_scope.py::test_tc_009_1_... -p no:cacheprovider -q
+  E   Failed: DID NOT RAISE <class 'AssertionError'>
+  tests\test_help_scope.py:924: Failed
+  FAILED ... 1 failed in 3.56s
+  ```
+
+  **sha256 restore check** (before delete / backup / after restore — all identical):
+  ```
+  dbb0a7bd117df415b919c61ee44ba1945d267f4f7cad010156cfb9c48d4a68e8 *tests/test_help_scope.py
+  ```
+
+To resume this session: kimi -r session_0571dfcf-2d99-444a-b005-543f26c67a11
+exit=0

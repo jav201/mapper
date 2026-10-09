@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import json
 import re
 from dataclasses import replace
@@ -27,6 +28,7 @@ from .github import GitHubConnector, GitHubError, painted_repo
 from .import_csv import preview_csv
 from .keymap import (
     SCOPE_APP,
+    SCOPE_DRAFT,
     SCOPE_HOME,
     SCOPE_IMPORT,
     SCOPE_MAP,
@@ -48,7 +50,9 @@ from .osopen import (
     ATTACHMENT_HARD_LINKED, OK as OSOPEN_OK, PATH_NOT_SUPPORTED, confine_reason, open_external, refusal_sentence,
     safe_local_path,
 )
-from .screens import CommandPalette, CoverageScreen, FactoryScreen, HelpScreen, SettingsScreen
+from .screens import (
+    CommandPalette, CoverageScreen, DraftGuardScreen, FactoryScreen, HelpScreen, SettingsScreen,
+)
 from .search import SearchIndex
 from .store import TEMPLATES, MapIdError, MapStore, MapStoreError
 from .views.layered import (
@@ -72,7 +76,7 @@ from .views.radial import (
     painted_ids as radial_painted_ids,
 )
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
-from .widgets.inspector import INSPECTOR_WIDTH, FichaInspector
+from .widgets.inspector import INSPECTOR_WIDTH, FieldInput, FichaInspector
 from .widgets.rail import RAIL_WIDTH, OutlineRail
 
 
@@ -158,6 +162,35 @@ def map_hint() -> str:
         f"{hint_pair(SCOPE_MAP, 'search')}"
     )
 
+
+class MapHintLine(HintLine):
+    """The map's hint line, able to carry the unsaved-draft prefix (R8, PDR C6).
+
+    While the card is hidden a pending draft has no other surface, so the line
+    leads with `● unsaved (N) · ctrl+s save` in ALERT (the operator's ruling).
+    The prefix is part of the PAINT, not of `text`: every `set_hint` the screen
+    issues for its own reasons keeps it, so the line says the draft exists for as
+    long as it does.
+    """
+
+    draft_prefix = ""
+
+    def set_hint(self, text: str, key: str | None = None) -> None:
+        super().set_hint(text, key)
+        self._paint_prefix()
+
+    def set_draft_prefix(self, prefix: str) -> None:
+        if prefix != self.draft_prefix:
+            self.draft_prefix = prefix
+            self._paint_prefix()
+
+    def _paint_prefix(self) -> None:
+        visual = darkside.hint_line(self.text, self.key)
+        if self.draft_prefix:
+            visual = darkside.Text.assemble((self.draft_prefix, darkside.ALERT), visual)
+        self.update(visual)
+
+
 # The home hint (`M1`): `↵` opens the selected map, and the doors are still the way
 # to start.  The word beside `↵` is the seat's (`K3`), so a function, like `map_hint`.
 # `N1`: with no recent map `↵` does nothing, so the hint does not offer it.
@@ -227,12 +260,23 @@ def _refusal_toast(screen: Screen, exc: Exception) -> bool:
 
 
 def _save_or_toast(
-    screen: Screen, store: "MapStore", map_id: str, graph: Graph, *, new: bool = False
+    screen: Screen,
+    store: "MapStore",
+    map_id: str,
+    graph: Graph,
+    *,
+    new: bool = False,
+    toast: bool = True,
 ) -> bool:
     """Guard a `store.save()` call: on any raise, toast and return `False`.
 
     `new=True` writes through `store.create`, which refuses an id that is taken
     (`A-113`); the CSV "save as" is a creation, an edit of an open map is not.
+
+    `toast=False` suppresses both toasts; the caller then emits its own single
+    notice.  `_save_draft` uses it so a failed draft save shows ONE toast
+    (`could not save '<map>' (<ErrorType>) · draft kept · <save> to retry`) instead of this one plus
+    a second.
 
     The ONE guarded call site every other `store.save()` call routes through
     (`G6-C-F2`/`G6-C-F3`) — a screen calls this instead of writing its own
@@ -252,14 +296,16 @@ def _save_or_toast(
         write = store.create if new else store.save
         write(map_id, graph)
     except Exception as e:  # noqa: BLE001 -- deliberately generic, see A-111.
-        if _refusal_toast(screen, e):
-            return False
-        screen.notify(
-            f"could not save {darkside.plain(map_id)!r}: "
-            f"{darkside.plain(type(e).__name__)}",
-            severity="error",
-            markup=False,
-        )
+        screen._last_save_error = type(e).__name__
+        if toast:
+            if _refusal_toast(screen, e):
+                return False
+            screen.notify(
+                f"could not save {darkside.plain(map_id)!r}: "
+                f"{darkside.plain(type(e).__name__)}",
+                severity="error",
+                markup=False,
+            )
         return False
     return True
 
@@ -1575,6 +1621,9 @@ class MapScreen(Screen):
         # opens and by every test in a run, and the acceptance reads the frame
         # twice rather than reading this field.
         self._rebind_declared = False
+        # US-001 (LLR-003.2): set while a draft guard this screen pushed is up,
+        # so a second exit never stacks a second guard.
+        self._draft_guard_open = False
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
@@ -1592,7 +1641,7 @@ class MapScreen(Screen):
         yield Input(placeholder="/search", id="search-input")
         yield Static("", id=COUNT_REGION_ID)
         yield Static("", id="map-toast")
-        yield HintLine(map_hint())
+        yield MapHintLine(map_hint())
         # The keybar reads the same seat the bindings are generated from, so it
         # cannot advertise a key the screen does not bind (US-N03).
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
@@ -1612,6 +1661,21 @@ class MapScreen(Screen):
             markup=False,
         )
 
+    def _establish_graph(self, graph: Graph, *, cursor: str | None) -> None:
+        """Make *graph* the screen's map: the ONE load path (design 1b.9).
+
+        `on_mount` and a failed save's reload both come through here, so the
+        reload re-establishes the view exactly as opening the map does
+        (LLR-004.2): the whole map, focus cleared (a focused view is a subgraph),
+        load warnings surfaced, a fresh navigation, the cursor kept if its node
+        still exists and the root otherwise.
+        """
+        self.base_graph = self.graph = graph
+        self.focus_active = False
+        self._notice_load_warnings(graph)
+        self.nav = NavigationModel(graph)
+        self.nav.cursor = cursor if cursor in graph.nodes else graph.root_id
+
     def on_mount(self) -> None:
         self.store = self.app.store  # type: ignore[attr-defined]
         search = self.query_one("#search-input", Input)
@@ -1620,20 +1684,16 @@ class MapScreen(Screen):
         self.focus()
 
         try:
-            self.base_graph = self.store.load(self.map_id)
-            self.graph = self.base_graph
-            self._notice_load_warnings(self.base_graph)
+            self._establish_graph(self.store.load(self.map_id), cursor=None)
         except Exception as e:
+            error_graph = Graph()
+            error_graph.add_node(Node(id="root", ficha=Ficha(title="error")))
+            self._establish_graph(error_graph, cursor=None)
             self.notify(
                 f"error loading map: {darkside.plain(str(e))}",
                 severity="error",
                 markup=False,
             )
-            self.graph = Graph()
-            self.graph.add_node(Node(id="root", ficha=Ficha(title="error")))
-            self.base_graph = self.graph
-
-        self.nav = NavigationModel(self.graph)
 
         # Resume cursor from last session if it points into this map.
         if self.store is not None:
@@ -2305,6 +2365,10 @@ class MapScreen(Screen):
         whenever the `ViewState` it would paint -- `focus_owner` included --
         already equals the one last painted (`P1`)."""
         self._declare_after_layout()
+        if isinstance(event.widget, FieldInput):
+            # U2: while a field holds the keyboard, typing drafts and `j` types,
+            # so the map-navigation hint lies.  Name the save key instead.
+            self.query_one(HintLine).set_hint(self._field_hint(), self._seat_glyph("save_draft"))
 
     def on_descendant_blur(self, event: events.DescendantBlur) -> None:
         """The other half of `H2`: a field can blur to NOTHING (the
@@ -2313,6 +2377,17 @@ class MapScreen(Screen):
         this the tone would stay on "focus elsewhere" after the keyboard had
         already left every region."""
         self._declare_after_layout()
+        if isinstance(event.widget, FieldInput):
+            # The field's draft hint (Inc-1c U2) is a borrow: hand the resting hint back.
+            # If the keyboard landed on another field, that field already set its own
+            # hint; if it landed on an attachment chip, the chip's `open attachment`
+            # swap (`Z2`) needs the resting text to swap inside, so re-announce it.
+            focused = self.app.focused
+            if isinstance(focused, FieldInput):
+                return
+            self.query_one(HintLine).set_hint(self._resting_hint())
+            if FichaInspector._is_chip(focused):
+                self.query_one("#map-inspector", FichaInspector)._announce_open_attachment()
 
     def _current_renderer(self):
         if self.outline_mode:
@@ -3230,6 +3305,17 @@ class MapScreen(Screen):
         )
 
     def refresh_canvas(self) -> None:
+        # US-001, LLR-003.2: the node-change guard, at the ONE re-pointing site
+        # every cursor mover ends in, and FIRST -- before the canvas, the crumb,
+        # the rail or the inspector repaint -- so `stay` needs no repaint and the
+        # inspector is never re-pointed under a draft (A-9).
+        self._drop_orphan_draft()
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        if inspector.has_draft() and self.nav.cursor != inspector.draft_node_id:
+            target = self.nav.cursor
+            self.nav.cursor = inspector.draft_node_id
+            inspector.focus_after_rebuild(None)
+            self._guard_draft(lambda: self._repoint(target))
         self._open_paint_pass()
         canvas = self.query_one("#map-canvas", Static)
         renderer = self._current_renderer()
@@ -3340,58 +3426,190 @@ class MapScreen(Screen):
         # so a settled layout costs exactly one no-op pass.
         self._declared_for = None
         self.call_after_refresh(self._declare_after_layout)
+        self._paint_draft_hint()
 
-    def on_ficha_inspector_field_committed(
-        self, event: FichaInspector.FieldCommitted
-    ) -> None:
-        """Persist an inspector edit.
+    # -- the card draft: save, guard, failure (US-001) ---------------------
+    # The inspector holds the draft; this screen, which owns the graph and the
+    # store, is the only thing that writes it.  `widgets -> store` is banned.
 
-        The widget cannot write: `widgets -> store` is banned, so it reports what
-        the operator did and this screen — which owns the graph and the store —
-        decides what that costs.
+    def _paint_draft_hint(self) -> None:
+        """R8 / PDR C6: with the card hidden, the hint line carries the draft."""
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        prefix = ""
+        if self.inspector_hidden and inspector.has_draft():
+            count = len(inspector.draft_values())
+            prefix = f"● unsaved ({count}) · {hint_pair(SCOPE_MAP, 'save_draft')} · "
+        self.query_one(MapHintLine).set_draft_prefix(prefix)
+
+    def _drop_orphan_draft(self) -> None:
+        """A draft whose node no longer exists cannot be saved or guarded: drop it,
+        and say which fields were lost (LLR-004.2).  No guard opens for it."""
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        if not inspector.has_draft() or inspector.draft_node_id in self.base_graph.nodes:
+            return
+        fields = ", ".join(sorted(inspector.draft_values()))
+        inspector.clear_draft()
+        self.notify(
+            f"unsaved draft dropped · its card no longer exists · {darkside.plain(fields)}",
+            severity="warning",
+            markup=False,
+        )
+
+    def has_pending_draft(self) -> bool:
+        """Whether this map holds a draft the operator has not saved or dropped."""
+        return self.query_one("#map-inspector", FichaInspector).has_draft()
+
+    def _guard_draft(self, proceed, *, on_hold=None) -> None:
+        """The ONE decision point for leaving a draft (R-014, LLR-003.2).
+
+        No draft: *proceed* now.  A guard already up: nothing (no second modal).
+        Otherwise ask `save · discard · stay`; *proceed* runs only after `save`
+        reached disk or after `discard`, and *on_hold* runs on `stay` or on a
+        failed save (the guard holds at `stay`, LLR-004.2).
         """
-        event.stop()
-        node = self.graph.nodes.get(event.node_id)
-        if node is None or self.store is None:
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        if not inspector.has_draft():
+            proceed()
             return
-        current = self._ficha_value(node.ficha, event.field)
-        if current == event.value:
+        if self._draft_guard_open:
             return
-        # Snapshot BEFORE mutating, so `u` reverts this edit rather than an
-        # unrelated earlier structural change.
-        self._push_snapshot()
-        # `A-111`: coerced with `plain()`'s rule before it ever reaches the
-        # graph — a broken paste must not carry a lone surrogate to `save()`.
-        value = darkside.plain(event.value)
-        if event.field == "title":
-            node.ficha.title = value
-        elif event.field == "notes":
-            node.ficha.notes = value
-        elif event.field == "state":
-            node.ficha.state = value
-        else:
-            node.ficha.fields[event.field] = value
-        if not _save_or_toast(self, self.store, self.map_id, self.graph):
-            return
-        self.base_graph = self.graph
+        self._draft_guard_open = True
+        node = self.base_graph.nodes.get(inspector.draft_node_id or "")
+        title = node.ficha.title if node else ""
+
+        def answered(choice: str | None) -> None:
+            self._draft_guard_open = False
+            if choice == "save":
+                if self._save_draft():
+                    proceed()
+                elif on_hold is not None:
+                    on_hold()
+            elif choice == "discard":
+                inspector.clear_draft()
+                proceed()
+            elif on_hold is not None:
+                on_hold()
+
+        self.app.push_screen(DraftGuardScreen(title, self.map_id), answered)
+
+    def _repoint(self, target: str | None) -> None:
+        """Move the cursor to *target* once the guard answered (PDR C2)."""
+        if target not in self.graph.nodes:
+            target = self.graph.root_id
+        self.nav.cursor = target
         self.refresh_canvas()
-        self._event_toast("saved", darkside.plain(node.ficha.title or node.id))
 
     @staticmethod
-    def _ficha_value(ficha: Ficha, field: str) -> str:
+    def _apply_field(ficha: Ficha, field: str, value: str) -> None:
+        """Write one drafted value onto *ficha*.
+
+        `A-111`: coerced with `plain()`'s rule before it reaches a graph -- a
+        broken paste must not carry a lone surrogate to `save()`.  `field` is a
+        schema key or one of the pseudo-keys `title` / `notes` / `state`, which
+        live on the `Ficha` itself rather than in `fields`.
+        """
+        value = darkside.plain(value)
         if field == "title":
-            return ficha.title
-        if field == "notes":
-            return ficha.notes
-        if field == "state":
-            return ficha.state
-        return ficha.fields.get(field, "")
+            ficha.title = value
+        elif field == "notes":
+            ficha.notes = value
+        elif field == "state":
+            ficha.state = value
+        else:
+            ficha.fields[field] = value
+
+    def action_save_draft(self) -> None:
+        self._save_draft()
+
+    def _save_draft(self) -> bool:
+        """Write the draft: one snapshot, one whole-graph write (LLR-001.4, 004.1).
+
+        Copy-apply-write: the draft is applied to a COPY of the whole map
+        (`base_graph`, never a focused subgraph -- R-1, LLR-004.4), so the
+        in-memory graph never holds a value that is not on disk (A-10).
+
+        On a failure, disk is the truth: the undo stack is restored exactly, the
+        map is reloaded through the screen's own load path, and the draft is
+        re-diffed against it, so a value that reached disk turns clean and the
+        rest stay drafted (LLR-004.2).  Nothing on that path writes the map.
+        """
+        self._drop_orphan_draft()
+        inspector = self.query_one("#map-inspector", FichaInspector)
+        draft = inspector.draft_values()
+        node_id = inspector.draft_node_id
+        if not draft:
+            return True
+        refocus = self._focused_field_id(inspector)
+        saved_stack = list(self._snapshots)
+        self._push_snapshot(self.base_graph)
+        candidate = copy.deepcopy(self.base_graph)
+        for field, value in draft.items():
+            self._apply_field(candidate.nodes[node_id].ficha, field, value)
+        if _save_or_toast(self, self.store, self.map_id, candidate, toast=False):
+            # The focused view, if any, shares these `Node` objects.
+            node = self.base_graph.nodes[node_id]
+            for field, value in draft.items():
+                self._apply_field(node.ficha, field, value)
+            inspector.clear_draft()
+            self.refresh_canvas()
+            self._refocus_field(inspector, refocus)
+            self._event_toast("saved", darkside.plain(node.ficha.title or node.id))
+            return True
+
+        # `_push_snapshot` may have evicted the oldest entry at `UNDO_DEPTH`, so
+        # the stack is restored whole, never popped.
+        self._snapshots[:] = saved_stack
+        cursor = self.nav.cursor
+        try:
+            graph = self.store.load(self.map_id)
+            error = darkside.plain(getattr(self, "_last_save_error", "") or "error")
+            message = (
+                f"could not save {darkside.plain(self.map_id)!r} ({error}) · draft kept · "
+                f"{self._seat_glyph('save_draft')} to retry"
+            )
+        except Exception:  # noqa: BLE001 -- any reload failure keeps the pre-save map.
+            # `base_graph` was never touched by this save (the draft went onto a
+            # copy), so re-establishing it IS the pre-save graph.  No store call.
+            graph = self.base_graph
+            discard = next(b for b in bindings_for(SCOPE_DRAFT) if b.action == "discard")
+            message = f"could not reload · draft kept · leaving needs {discard.glyph} ({discard.label})"
+        self._establish_graph(graph, cursor=cursor)
+        self.refresh_canvas()
+        if self.nav.cursor == node_id:
+            self._refocus_field(inspector, refocus)
+        self.notify(darkside.plain(message), severity="error", markup=False)
+        return False
+
+    @staticmethod
+    def _focused_field_id(inspector: FichaInspector) -> str | None:
+        """The id of the inspector field holding focus, if one does."""
+        focused = inspector.screen.focused
+        if isinstance(focused, Input) and focused.parent is inspector:
+            return focused.id
+        return None
+
+    @staticmethod
+    def _refocus_field(inspector: FichaInspector, widget_id: str | None) -> None:
+        """PDR C7: after `ctrl+s` from inside a field, typing continues there.
+
+        Queued on the inspector AFTER the rebuild `refresh_canvas` queued, so it
+        focuses the remounted field, not the removed one.
+        """
+        if widget_id is None:
+            return
+
+        def restore_focus() -> None:
+            for field in inspector.query(f"#{widget_id}"):
+                field.focus()
+
+        inspector.call_next(restore_focus)
 
     def on_field_input_left(self, event) -> None:
         """`escape` inside a field returns focus to the map, keeping the value."""
         event.stop()
         self.set_focus(None)
         self.query_one(HintLine).set_hint(map_hint())
+        self._paint_draft_hint()
 
     # -- attachments (US-N02) ----------------------------------------------
     def on_ficha_inspector_attachment_activated(
@@ -3437,7 +3655,11 @@ class MapScreen(Screen):
         self, event: FichaInspector.AttachmentAddRequested
     ) -> None:
         event.stop()
-        node = self.graph.nodes.get(event.node_id)
+        node_id = event.node_id
+        self._guard_draft(lambda: self._add_attachment(node_id))
+
+    def _add_attachment(self, node_id: str) -> None:
+        node = self.graph.nodes.get(node_id)
         if node is None or self.store is None:
             return
 
@@ -3469,12 +3691,17 @@ class MapScreen(Screen):
         self, event: FichaInspector.AttachmentRemoveRequested
     ) -> None:
         event.stop()
-        node = self.graph.nodes.get(event.node_id)
+        node_id = event.node_id
+        index = event.index
+        self._guard_draft(lambda: self._remove_attachment(node_id, index))
+
+    def _remove_attachment(self, node_id: str, index: int) -> None:
+        node = self.graph.nodes.get(node_id)
         if node is None or self.store is None:
             return
-        if not 0 <= event.index < len(node.ficha.attachments):
+        if not 0 <= index < len(node.ficha.attachments):
             return
-        removed = node.ficha.attachments.pop(event.index)
+        removed = node.ficha.attachments.pop(index)
         self._push_snapshot()
         if not _save_or_toast(self, self.store, self.map_id, self.graph):
             return
@@ -3502,11 +3729,17 @@ class MapScreen(Screen):
         """
         return self.app.undo_stacks.setdefault(self.map_id, [])
 
-    def _push_snapshot(self) -> None:
+    def _push_snapshot(self, graph: Graph | None = None) -> None:
+        """Push *graph* (default: the graph on show) onto this map's undo stack.
+
+        The draft save passes `base_graph`: under focus the graph on show is a
+        subtree, and undoing a save must restore the whole map (R-1).
+        """
         if self.store is None:
             return
-        mmd = dump_mermaid(self.graph)
-        sidecar = self.store._build_sidecar(self.graph)
+        graph = self.graph if graph is None else graph
+        mmd = dump_mermaid(graph)
+        sidecar = self.store._build_sidecar(graph)
         import yaml
 
         yml = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
@@ -3563,7 +3796,7 @@ class MapScreen(Screen):
         linked = node.linked_map_id()
         if linked:
             crumb_back = self._current_crumb() + [node.ficha.title or node.id]
-            self.app.push_screen(MapScreen(linked, source_crumb=crumb_back))
+            self._guard_draft(lambda: self.app.push_screen(MapScreen(linked, source_crumb=crumb_back)))
             return
         self.app.push_screen(_FichaScreen(node, self.graph))
 
@@ -3627,6 +3860,15 @@ class MapScreen(Screen):
     def _seat_label(self, action: str) -> str:
         row = self._seat_row(action)
         return row.label if row else ""
+
+    def _field_hint(self) -> str:
+        """The hint while an inspector field holds the keyboard (U2).
+
+        Typing drafts the field and `j` types a letter, so the map-navigation
+        hint would lie; this names the save key from the seat instead
+        (LLR-005.2)."""
+        save = self._seat_glyph("save_draft")
+        return f"type to draft · {save} {self._seat_label('save_draft')} · esc leave field"
 
     def _search_hint(self, hits: tuple[str, ...] | None) -> str:
         """`UX-Q3-b`'s hint for a live search, glyphs READ FROM THE SEAT.
@@ -4036,11 +4278,14 @@ class MapScreen(Screen):
         inspector.focus_after_rebuild(missing[0].key if missing else None)
         self.refresh_canvas()
         if missing:
+            # The save key is READ FROM THE SEAT (LLR-005.2): `↵` keeps the draft
+            # and leaves the field (R7), so naming it here would advertise a save
+            # that does not happen -- the defect US-N03 exists to remove.
+            save = self._seat_glyph("save_draft")
             self.query_one(HintLine).set_hint(
-                # `↵` is what commits, not ctrl+s — MapScreen binds no ctrl+s at
-                # all, and advertising a key that does nothing on the primary flow
-                # is the exact defect US-N03 exists to remove.
-                f"fill in «{missing[0].label}» · ↵ save · esc leave field", "↵"
+                f"fill in «{missing[0].label}» · {save} {self._seat_label('save_draft')}"
+                " · esc leave field",
+                save,
             )
         return True
 
@@ -4543,6 +4788,9 @@ class MapScreen(Screen):
         return True
 
     def action_add_child(self) -> None:
+        self._guard_draft(self._add_child)
+
+    def _add_child(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes:
             self.notify("select a node first")
             return
@@ -4590,6 +4838,9 @@ class MapScreen(Screen):
         )
 
     def action_archive(self) -> None:
+        self._guard_draft(self._archive)
+
+    def _archive(self) -> None:
         if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes or self.store is None:
             return
         if not self._guard_focus_mutation():
@@ -4681,7 +4932,7 @@ class MapScreen(Screen):
         self._pop_snapshot()
 
     def action_home(self) -> None:
-        self.app.pop_screen()
+        self._guard_draft(self.app.pop_screen)
 
     def action_back_or_home(self) -> None:
         """`esc` clears a live search; with none live it leaves the map (`#D38`).
@@ -4716,7 +4967,7 @@ class MapScreen(Screen):
             self.refresh_canvas()
             self.query_one(HintLine).set_hint(map_hint())
             return
-        self.app.pop_screen()
+        self._guard_draft(self.app.pop_screen)
 
     def action_palette(self) -> None:
         self.app.action_palette()
@@ -4901,6 +5152,9 @@ class MapperApp(App):
         # silently and make an archived subtree unrecoverable.
         self.undo_stacks: dict[str, list[bytes]] = {}
         self.attachment_launcher = None
+        # US-001 (LLR-003.5): set while a quit-walk over draft-bearing map screens
+        # is in flight, so a second `ctrl+q` never starts (and stacks) a second walk.
+        self._quit_walk_open = False
 
     def on_mount(self) -> None:
         self.push_screen(HomeScreen())
@@ -4935,7 +5189,40 @@ class MapperApp(App):
         ))
 
     def action_quit(self) -> None:
-        self.exit()
+        # US-001 (LLR-003.5): quitting walks every map screen with a draft and
+        # guards each one before the app exits.  A second `ctrl+q` while the walk
+        # is up does nothing.  `pending` is the draft-bearing map screens, top of
+        # the stack first; each guard's `proceed` advances to the next, the last
+        # one exits, and `on_hold` (stay or a failed save) ends the walk.
+        if self._quit_walk_open:
+            return
+        self._quit_walk_open = True
+        pending = [
+            s
+            for s in reversed(self.screen_stack)
+            if isinstance(s, MapScreen) and s.has_pending_draft()
+        ]
+
+        def end_walk() -> None:
+            self._quit_walk_open = False
+
+        def step(index: int) -> None:
+            if index >= len(pending):
+                self.exit()
+                return
+            screen = pending[index]
+            # PDR C1: a guard already open on this screen (a cursor move asked
+            # first) makes `_guard_draft` return without calling anything.  Ending
+            # the walk here keeps the operator answering the open guard first.
+            if screen._draft_guard_open:
+                end_walk()
+                return
+            screen._guard_draft(
+                proceed=lambda: step(index + 1),
+                on_hold=end_walk,
+            )
+
+        step(0)
 
 
 def main() -> None:

@@ -22,7 +22,9 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 DEPTH_TESTS = REPO / "tests" / "test_repair_depth.py"
-STATE = REPO / ".dev-flow" / "state.json"
+# AT-P07 pins ui-next-batch-02's trigger record. `state.json` is single-slot and is
+# rolled over when a batch closes, so the record is read from that batch's archive.
+STATE = REPO / ".dev-flow" / "2026-08-26-ui-next-batch-02" / "state-snapshot-at-close.json"
 
 
 def _literal(name: str):

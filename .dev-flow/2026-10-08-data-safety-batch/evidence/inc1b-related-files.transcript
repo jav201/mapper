@@ -1,0 +1,21 @@
+# Inc-1b touched + related files, final code; python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider <files>
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+........................................................................ [ 44%]
+........................................................................ [ 55%]
+...............................................................xxx...... [ 66%]
+........................................................................ [ 77%]
+........................................................................ [ 88%]
+........................................................................ [ 99%]
+.                                                                        [100%]
+646 passed, 2 deselected, 3 xfailed in 766.67s (0:12:46)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-186880' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-186880' coro=<sleep.<locals>.wait() done, defined at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:110> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+EXIT_CODE=0

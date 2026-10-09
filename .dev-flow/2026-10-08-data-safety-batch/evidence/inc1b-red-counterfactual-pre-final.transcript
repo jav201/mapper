@@ -1,0 +1,79 @@
+sha256 before mapper/widgets/inspector.py bd24c09b645ffc1f3f0880a24bd89d8982e5dc6b6c94321303b36006a5236b1a
+sha256 before mapper/app.py f37b33f575e7f2fd001a57b37aa22e9746a9d0976b7df87268b74b5a8bdde5c1
+sha256 before mapper/keymap.py dc3f513a21e0ff0847d94a4dfc07990aad02a596d58f99200bd07caa8b9b26af
+applied: inspector.py, app.py, keymap.py = 554314f blobs
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+ERROR    asyncio:base_events.py:1820 Task was destroyed but it is pending!
+FAILED tests/test_draft_save.py::test_at_001_a_stray_key_then_blur_and_cursor_change_writes_nothing
+FAILED tests/test_draft_save.py::test_at_002_ctrl_s_writes_once_and_u_restores_the_pre_save_state
+FAILED tests/test_draft_save.py::test_at_002a_failed_save_reloads_from_disk[zero_files]
+FAILED tests/test_draft_save.py::test_at_002a_failed_save_reloads_from_disk[both_files]
+FAILED tests/test_draft_save.py::test_at_003_header_counts_unsaved_fields_and_marks_each
+FAILED tests/test_draft_save.py::test_at_004_node_change_with_a_draft_presents_the_guard[s-save]
+FAILED tests/test_draft_save.py::test_at_004_node_change_with_a_draft_presents_the_guard[d-discard]
+FAILED tests/test_draft_save.py::test_at_004_node_change_with_a_draft_presents_the_guard[escape-stay]
+FAILED tests/test_draft_save.py::test_at_006_enter_keeps_the_draft_leaves_the_field_and_the_hint_names_ctrl_s
+FAILED tests/test_draft_save.py::test_at_007_state_segment_routes_through_the_draft
+FAILED tests/test_draft_save.py::test_at_009_undo_leaves_the_draft_and_recomputes_the_markers
+FAILED tests/test_draft_save.py::test_at_010_ctrl_s_inside_the_field_saves_the_typed_text
+FAILED tests/test_draft_save.py::test_c7_focus_returns_to_the_edited_field_after_ctrl_s
+FAILED tests/test_draft_save.py::test_at_015_guard_title_carries_no_escape_byte[esc]
+FAILED tests/test_draft_save.py::test_at_015_guard_title_carries_no_escape_byte[click-markup]
+FAILED tests/test_draft_save.py::test_llr_001_4_one_ctrl_s_is_one_store_save
+FAILED tests/test_draft_save.py::test_llr_003_2_node_change_guard_holds_the_inspector_on_the_draft_node
+FAILED tests/test_draft_save.py::test_llr_003_2_a_second_mover_while_the_guard_is_up_stacks_no_second_guard
+FAILED tests/test_draft_save.py::test_llr_003_2_a_move_onto_the_same_node_needs_no_guard
+FAILED tests/test_draft_save.py::test_llr_004_1_one_snapshot_and_one_write_per_multi_field_save
+FAILED tests/test_draft_save.py::test_llr_004_2_reload_raises_restores_the_pre_save_graph_without_a_write
+FAILED tests/test_draft_save.py::test_llr_004_2_a_save_failure_names_ctrl_s_to_retry
+FAILED tests/test_draft_save.py::test_llr_004_2_a_draft_on_a_vanished_node_is_dropped_with_a_warning
+FAILED tests/test_draft_save.py::test_llr_004_2_failure_clears_focus_and_rebuilds_nav
+FAILED tests/test_draft_save.py::test_llr_004_3_undo_with_an_empty_stack_keeps_the_draft
+FAILED tests/test_draft_save.py::test_llr_004_4_ctrl_s_under_focus_writes_the_whole_map
+FAILED tests/test_draft_save.py::test_llr_005_2_fill_in_hint_reads_the_save_glyph_from_the_seat
+FAILED tests/test_draft_save.py::test_layer0_apply_field_coerces_and_routes[title]
+FAILED tests/test_draft_save.py::test_layer0_apply_field_coerces_and_routes[notes]
+FAILED tests/test_draft_save.py::test_layer0_apply_field_coerces_and_routes[state]
+FAILED tests/test_draft_save.py::test_layer0_apply_field_coerces_and_routes[D]
+FAILED tests/test_draft_save.py::test_c6_a_hidden_card_hands_the_draft_to_the_hint_line_in_alert[87]
+FAILED tests/test_draft_save.py::test_c6_a_hidden_card_hands_the_draft_to_the_hint_line_in_alert[118]
+FAILED tests/test_draft_save.py::test_c6_a_hidden_card_hands_the_draft_to_the_hint_line_in_alert[140]
+FAILED tests/test_inspector.py::test_at_n01a_editing_a_schema_field_persists_to_disk
+FAILED tests/test_inspector.py::test_at_n01d_required_and_empty_is_flagged - ...
+FAILED tests/test_inspector.py::test_llr_001_1_draft_surface_is_a_copy_and_clears
+FAILED tests/test_inspector.py::test_llr_001_2_draft_updates_on_every_keystroke_and_posts_no_save
+FAILED tests/test_inspector.py::test_llr_001_2_a_stale_change_from_a_re_pointed_input_is_dropped
+FAILED tests/test_inspector.py::test_llr_002_1_dirty_is_against_the_shown_value_plain_alters_title
+FAILED tests/test_inspector.py::test_llr_002_1_dirty_is_against_the_shown_value_unknown_state
+FAILED tests/test_inspector.py::test_llr_002_2_markers_update_without_remounting_the_focused_field
+FAILED tests/test_inspector.py::test_llr_005_1_enter_leaves_the_field_and_keeps_the_draft
+FAILED tests/test_inspector.py::test_llr_006_1_state_change_updates_the_draft_and_writes_nothing
+FAILED tests/test_inspector.py::test_llr_006_2_every_editable_surface_has_a_draft_key[title]
+FAILED tests/test_inspector.py::test_llr_006_2_every_editable_surface_has_a_draft_key[notes]
+FAILED tests/test_inspector.py::test_llr_006_2_every_editable_surface_has_a_draft_key[D]
+FAILED tests/test_inspector.py::test_llr_006_2_every_editable_surface_has_a_draft_key[state]
+FAILED tests/test_inspector.py::test_layer0_put_draft_branches[stale] - Attri...
+FAILED tests/test_inspector.py::test_layer0_put_draft_branches[equal_to_shown]
+FAILED tests/test_inspector.py::test_layer0_put_draft_branches[set] - Attribu...
+FAILED tests/test_data_safety_census.py::test_every_declared_row_is_in_the_live_seat
+FAILED tests/test_data_safety_census.py::test_the_map_scope_gains_exactly_the_save_row
+FAILED tests/test_g6_store_surrogates.py::test_g6b_draft_save_with_a_surrogate_title_does_not_crash
+FAILED tests/test_keymap.py::test_keymap_completeness_guard - AssertionError:...
+FAILED tests/test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification
+FAILED tests/test_darkside_census.py::test_hue_census_every_severity_and_busy_site_is_classified
+summary: ================== 57 failed, 238 passed in 73.85s (0:01:13) ==================
+sha256 after  mapper/widgets/inspector.py bd24c09b645ffc1f3f0880a24bd89d8982e5dc6b6c94321303b36006a5236b1a  restored: True
+sha256 after  mapper/app.py f37b33f575e7f2fd001a57b37aa22e9746a9d0976b7df87268b74b5a8bdde5c1  restored: True
+sha256 after  mapper/keymap.py dc3f513a21e0ff0847d94a4dfc07990aad02a596d58f99200bd07caa8b9b26af  restored: True

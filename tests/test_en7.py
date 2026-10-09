@@ -21,6 +21,7 @@ from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
 from mapper.widgets.inspector import FieldInput
+from tests.test_help_scope import delay_deferred_scroll, late_scroll  # noqa: F401
 from tests.test_repair_layout import _open_map, _tree
 
 SIZES = [(118, 34), (87, 34)]
@@ -233,6 +234,22 @@ def test_the_footer_states_the_rule_and_fits_the_docked_row():
 @pytest.mark.parametrize("size", SIZES)
 @pytest.mark.asyncio
 async def test_the_painted_legend_ends_with_the_rule(tmp_path, size):
+    text = await _footer_text_at_the_end(tmp_path, size)
+    assert " ".join(row.strip() for row in text.splitlines()) == RULE, text
+
+
+@pytest.mark.parametrize("size", SIZES)
+@pytest.mark.asyncio
+async def test_the_painted_legend_ends_with_the_rule_under_a_late_scroll(
+        tmp_path, size, delay_deferred_scroll):
+    """C12 / LLR-009.1 site `test_en7.py`: with the queued scroll landing 150 ms
+    late, revert `immediate=True` and the settle assertion fails."""
+    with late_scroll():
+        text = await _footer_text_at_the_end(tmp_path, size)
+    assert " ".join(row.strip() for row in text.splitlines()) == RULE, text
+
+
+async def _footer_text_at_the_end(tmp_path, size) -> str:
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         await pilot.pause()
@@ -243,8 +260,10 @@ async def test_the_painted_legend_ends_with_the_rule(tmp_path, size):
         legend = app.screen
         assert isinstance(legend, HelpScreen)
         pane = legend.query_one("#help-bindings")
-        pane.scroll_to(y=pane.max_scroll_y, animate=False)
+        target = pane.max_scroll_y
+        assert target > 0, "the legend fits; the scroll below would be a no-op"
+        pane.scroll_to(y=target, animate=False, immediate=True)
         await _settle(pilot)
+        assert pane.scroll_offset.y == target, "the legend did not scroll to its end"
         footer = legend.query_one("#help-footer")
-        text = footer.content.plain
-    assert " ".join(row.strip() for row in text.splitlines()) == RULE, text
+        return footer.content.plain

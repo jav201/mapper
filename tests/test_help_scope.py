@@ -8,11 +8,14 @@ never read as legend content.
 """
 from __future__ import annotations
 
+import contextlib
+
 import pytest
 from rich.cells import cell_len
 from rich.style import Style
 from rich.text import Text
 from textual.app import App
+from textual.widget import Widget
 
 from mapper import darkside, keymap
 from mapper.app import MapperApp
@@ -27,7 +30,7 @@ from mapper.screens.help import (
     vocabulary_for,
 )
 from tests.test_overflow import _contrast
-from tests.test_repair_layout import NARROW_SIZE, WIDE_SIZES, _open_map, _rows_in, _tree
+from tests.test_repair_layout import NARROW_SIZE, WIDE_SIZES, _open_map, _painted_bindings, _rows_in, _tree
 
 SIZE = WIDE_SIZES[0]
 #: Verdict `F9` moved the dock threshold, so `NARROW_SIZE` (100 columns, the
@@ -37,6 +40,39 @@ SIZE = WIDE_SIZES[0]
 MODAL_SIZE = (help_screen.LEGEND_DOCKED_CELLS + help_screen.LEGEND_DOCK_MIN_VIEW_CELLS - 1,
               NARROW_SIZE[1])
 LAYOUT_SIZES = [SIZE, NARROW_SIZE, MODAL_SIZE]
+
+
+#: `US-004` / `FLAKE-2`.  `Widget.scroll_to` defaults to `immediate=False`, which
+#: queues `_scroll_to` with `call_after_refresh`; on a loaded machine that call
+#: can land AFTER the next sample.  This flag + fixture emulate the load: while
+#: `late_scroll()` is open, ONLY a queued `_scroll_to` is made to land 150 ms late.
+_LATE = {"on": False}
+
+
+@contextlib.contextmanager
+def late_scroll():
+    """Open the window in which a queued `_scroll_to` lands late (a no-op unless
+    the `delay_deferred_scroll` fixture is installed)."""
+    _LATE["on"] = True
+    try:
+        yield
+    finally:
+        _LATE["on"] = False
+
+
+@pytest.fixture
+def delay_deferred_scroll(monkeypatch):
+    """Route a queued `_scroll_to` through `set_timer(0.15, ...)`, but only while
+    `late_scroll()` is open, so the product's own key-driven scrolls stay
+    untouched.  Adapted from `spike/red_green_flake2.py`."""
+    original = Widget.call_after_refresh
+
+    def late(self, callback, *args, **kwargs):
+        if _LATE["on"] and getattr(callback, "__name__", "") == "_scroll_to":
+            return self.set_timer(0.15, lambda: callback(*args, **kwargs))
+        return original(self, callback, *args, **kwargs)
+
+    monkeypatch.setattr(Widget, "call_after_refresh", late)
 
 
 async def _legend_from_map(app, pilot, *view_keys: str):
@@ -90,9 +126,11 @@ async def _harvest(app, pilot, reader, region_id: str = "#help-dialog"):
         out.extend(reader(screen, region))
         if pane.scroll_offset.y >= pane.max_scroll_y:
             return out
-        pane.scroll_to(y=pane.scroll_offset.y + max(1, pane.region.height - 1), animate=False)
+        target = pane.scroll_offset.y + max(1, pane.region.height - 1)
+        pane.scroll_to(y=target, animate=False, immediate=True)
         await pilot.pause()
         await pilot.pause()
+        assert pane.scroll_offset.y == min(target, pane.max_scroll_y), "the harvest scroll did not land"
     pytest.fail("the legend pane never reached the bottom of its scroll range")
 
 
@@ -324,6 +362,57 @@ def test_inc8_p2_cr_f9_a_key_row_never_reads_as_an_own_scope_item():
         b.key for b in bindings_for(SCOPE_HELP)}
 
 
+async def _effective_keys(app, pilot, screen) -> set[str]:
+    """Press every key of the legend's derived universe from the MIDDLE of the
+    scroll range and return those with a MEASURED effect.  The one loop both
+    `test_hlr_n16_4_legend_declares_its_own_keys` and its injected-delay arm run,
+    so reverting `immediate=True` here reddens the arm (`LLR-009.2`)."""
+    framework = set(App._merged_bindings.key_to_bindings)  # noqa: SLF001
+    universe = {key for _node, bmap in screen._modal_binding_chain  # noqa: SLF001
+                for key in bmap.key_to_bindings}
+    universe |= {key for _node, bmap in screen._binding_chain  # noqa: SLF001
+                 for key, bs in bmap.key_to_bindings.items() if any(b.priority for b in bs)}
+    universe -= framework
+    declared = {b.key for b in bindings_for(SCOPE_HELP)}
+    assert declared <= universe, "a declared key is not even bound"
+
+    effective = set()
+    for key in sorted(universe):
+        if not isinstance(app.screen, HelpScreen):
+            await pilot.press("question_mark")
+            await pilot.pause()
+            await pilot.pause()
+        pane = app.screen.query_one("#help-bindings")
+        assert pane.max_scroll_y > 2, "the legend fits; nothing here could scroll"
+        target = pane.max_scroll_y // 2
+        with late_scroll():
+            pane.scroll_to(y=target, animate=False, immediate=True)
+        await pilot.pause()
+        assert pane.scroll_offset.y == target, "the positioning scroll did not land"
+        before = (pane.scroll_offset, len(app.screen_stack), app.screen, app.focused)
+        await pilot.press(key)
+        await pilot.pause()
+        await pilot.pause()
+        after = (pane.scroll_offset, len(app.screen_stack), app.screen, app.focused)
+        if after != before:
+            effective.add(key)
+    return effective
+
+
+async def _painted_own_keys(app, pilot) -> set[str]:
+    if not isinstance(app.screen, HelpScreen):
+        await pilot.press("question_mark")
+        await pilot.pause()
+        await pilot.pause()
+    # `INC8-P2-CR-F9`: read from the own-scope GROUP alone.  Until round
+    # 3 the title also painted `esc close`, so `esc` was proved by the
+    # title and a group that lost it stayed green.  The group sits
+    # outside the scrolling pane, so one read is all of it.
+    screen = app.screen
+    rows = _rows_in(screen, screen.query_one("#help-own-scope").region)
+    return _painted_help_keys(rows)
+
+
 @pytest.mark.parametrize("size", LAYOUT_SIZES)
 async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
     """Keys with a MEASURED effect == keys the legend actually PAINTS.
@@ -345,49 +434,80 @@ async def test_hlr_n16_4_legend_declares_its_own_keys(tmp_path, size):
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         screen = await _legend_from_map(app, pilot)
-        framework = set(App._merged_bindings.key_to_bindings)  # noqa: SLF001
-        universe = {key for _node, bmap in screen._modal_binding_chain  # noqa: SLF001
-                    for key in bmap.key_to_bindings}
-        universe |= {key for _node, bmap in screen._binding_chain  # noqa: SLF001
-                     for key, bs in bmap.key_to_bindings.items() if any(b.priority for b in bs)}
-        universe -= framework
-        declared = {b.key for b in bindings_for(SCOPE_HELP)}
-        assert declared <= universe, "a declared key is not even bound"
+        effective = await _effective_keys(app, pilot, screen)
+        painted = await _painted_own_keys(app, pilot)
 
-        effective = set()
-        for key in sorted(universe):
-            if not isinstance(app.screen, HelpScreen):
-                await pilot.press("question_mark")
-                await pilot.pause()
-                await pilot.pause()
-            pane = app.screen.query_one("#help-bindings")
-            assert pane.max_scroll_y > 2, "the legend fits; nothing here could scroll"
-            pane.scroll_to(y=pane.max_scroll_y // 2, animate=False)
-            await pilot.pause()
-            before = (pane.scroll_offset, len(app.screen_stack), app.screen, app.focused)
-            await pilot.press(key)
-            await pilot.pause()
-            await pilot.pause()
-            after = (pane.scroll_offset, len(app.screen_stack), app.screen, app.focused)
-            if after != before:
-                effective.add(key)
-
-        if not isinstance(app.screen, HelpScreen):
-            await pilot.press("question_mark")
-            await pilot.pause()
-            await pilot.pause()
-        # `INC8-P2-CR-F9`: read from the own-scope GROUP alone.  Until round
-        # 3 the title also painted `esc close`, so `esc` was proved by the
-        # title and a group that lost it stayed green.  The group sits
-        # outside the scrolling pane, so one read is all of it.
-        screen = app.screen
-        rows = _rows_in(screen, screen.query_one("#help-own-scope").region)
-
-    painted = _painted_help_keys(rows)
     assert effective == painted, (
         f"work but not painted: {sorted(effective - painted)}; "
         f"painted but inert: {sorted(painted - effective)}"
     )
+
+
+@pytest.mark.parametrize("size", LAYOUT_SIZES)
+async def test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll(
+        tmp_path, size, delay_deferred_scroll):
+    """AT-008 / LLR-009.2 (`FLAKE-2`).  The same loop as the own-keys node, with
+    the positioning scroll's queued call landing 150 ms late.  Revert
+    `immediate=True` in `_effective_keys` and an inert key reads as effective
+    (`work but not painted`) or the settle assertion fails."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=size) as pilot:
+        screen = await _legend_from_map(app, pilot)
+        effective = await _effective_keys(app, pilot, screen)
+        painted = await _painted_own_keys(app, pilot)
+    assert effective == painted, (
+        f"work but not painted: {sorted(effective - painted)}; "
+        f"painted but inert: {sorted(painted - effective)}"
+    )
+
+
+async def test_the_delay_fixture_delays_a_queued_scroll_only_inside_the_window(
+        tmp_path, delay_deferred_scroll):
+    """Instrument RED-proof for `delay_deferred_scroll`: a NON-immediate
+    `scroll_to` inside `late_scroll()` has not landed after two pauses and does
+    land later; outside the window it lands as usual.  Without this the arm
+    above could pass because nothing was ever delayed."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await _legend_from_map(app, pilot)
+        pane = app.screen.query_one("#help-bindings")
+        target = pane.max_scroll_y // 2
+        assert target > 0
+        with late_scroll():
+            pane.scroll_to(y=target, animate=False)
+        await pilot.pause()
+        assert pane.scroll_offset.y == 0, "the fixture did not delay the queued scroll"
+        await pilot.pause(0.4)
+        assert pane.scroll_offset.y == target, "the delayed scroll never landed"
+        pane.scroll_to(y=0, animate=False)
+        await pilot.pause()
+        await pilot.pause()
+        assert pane.scroll_offset.y == 0, "outside the window the scroll must not be delayed"
+
+
+async def test_llr_009_1_the_harvest_scroll_lands_before_it_is_read_under_a_late_scroll(
+        tmp_path, delay_deferred_scroll):
+    """C12 / LLR-009.1 site `_harvest`: revert `immediate=True` there and the
+    settle assertion fails while the scroll is delayed."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await _legend_from_map(app, pilot)
+        assert app.screen.query_one("#help-bindings").max_scroll_y > 2
+        with late_scroll():
+            seen = await _harvest(app, pilot, _rows_in)
+    assert seen
+
+
+async def test_llr_009_1_the_bindings_scroll_lands_before_it_is_read_under_a_late_scroll(
+        tmp_path, delay_deferred_scroll):
+    """C12 / LLR-009.1 site `tests/test_repair_layout.py::_painted_bindings`."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await _legend_from_map(app, pilot)
+        assert app.screen.query_one("#help-bindings").max_scroll_y > 2
+        with late_scroll():
+            painted = await _painted_bindings(app, pilot)
+    assert all(b.label in painted for b in bindings_for(SCOPE_MAP))
 
 
 @pytest.mark.parametrize("size", LAYOUT_SIZES)
@@ -785,3 +905,22 @@ def test_inc8_p3_cr_f3_shown_cells_is_what_fit_actually_paints(s):
     honest about double-width glyphs too."""
     big = 100
     assert darkside.shown_cells(s) == cell_len(darkside.fit(s, big).rstrip())
+
+
+# ---------------------------------------------------------------------------
+# TC-009.1 -- the settle assertion fails loud when the scroll never lands
+
+async def test_tc_009_1_settle_assertion_fails_loud_when_the_scroll_never_lands(
+        tmp_path, monkeypatch):
+    """DDR / TC-009.1 (site `_effective_keys`).  With `Widget._scroll_to` a
+    no-op, the positioning scroll can never land, and the helper's settle
+    assertion -- `the positioning scroll did not land` -- must fire on the
+    first key instead of sampling a pane that never moved.  Nothing else in
+    the AT-008 sequence is touched: the same `_legend_from_map` +
+    `_effective_keys` path, one size."""
+    monkeypatch.setattr(Widget, "_scroll_to", lambda self, *args, **kwargs: None)
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        screen = await _legend_from_map(app, pilot)
+        with pytest.raises(AssertionError, match="positioning scroll did not land"):
+            await _effective_keys(app, pilot, screen)

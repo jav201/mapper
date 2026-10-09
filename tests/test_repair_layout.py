@@ -30,7 +30,7 @@ from __future__ import annotations
 import pytest
 
 from mapper.app import MapperApp, MapScreen
-from mapper.keymap import SCOPE_HOME, SCOPE_MAP, bindings_for
+from mapper.keymap import SCOPE_APP, SCOPE_HOME, SCOPE_MAP, bindings_for
 from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from mapper.screens.help import LEGEND_DOCK_MIN_VIEW_CELLS, LEGEND_DOCKED_CELLS, HelpScreen
 from mapper.widgets.inspector import INSPECTOR_WIDTH
@@ -115,9 +115,11 @@ async def _painted_bindings(app, pilot) -> str:
         seen.update(_rows_in(app.screen, dialog.region))
         if pane.scroll_offset.y >= pane.max_scroll_y:
             break
-        pane.scroll_to(y=pane.scroll_offset.y + max(1, pane.region.height - 1), animate=False)
+        target = pane.scroll_offset.y + max(1, pane.region.height - 1)
+        pane.scroll_to(y=target, animate=False, immediate=True)
         await pilot.pause()
         await pilot.pause()
+        assert pane.scroll_offset.y == min(target, pane.max_scroll_y), "the bindings scroll did not land"
     else:  # pragma: no cover - a scroll that never terminates is a defect
         pytest.fail("the bindings pane never reached the bottom of its scroll range")
     return "\n".join(sorted(seen))
@@ -270,6 +272,7 @@ async def test_tc_r24_the_bindings_region_is_scrollable(tmp_path):
         assert pane.max_scroll_y > 0, "the bindings region cannot be scrolled"
 
 
+# AT-041 (`.dev-flow/2026-08-26-ui-next-batch-02/`, reconciled in 2026-10-08-data-safety-batch Inc-4): realised by this node.
 @pytest.mark.parametrize("size", [*WIDE_SIZES, NARROW_SIZE])
 async def test_at_r12_pressing_help_presents_every_map_binding(tmp_path, size):
     """AT-R12 — press the real `?`; every binding of the active scope is reachable.
@@ -415,7 +418,9 @@ async def test_tc_r23_the_declared_rail_width_is_the_width_actually_painted(tmp_
         assert screen.query_one("#map-rail").region.width == RAIL_WIDTH
 
 
-def _rendered_pairs(scope: str) -> set[tuple[str, str]]:
+def _rendered_pairs(
+    scope: str | None = None, *, screen: HelpScreen | None = None
+) -> set[tuple[str, str]]:
     """(glyph, label) pairs the panel's own body renders, parsed from its Text.
 
     Read from the rendered content rather than from painted pixels ON PURPOSE:
@@ -424,8 +429,14 @@ def _rendered_pairs(scope: str) -> set[tuple[str, str]]:
     each name three different bindings in different scopes, so a foreign row is
     not always distinguishable from a wanted one once it is text on a screen.
     The black-box layer (`AT-R12`) owns reachability; this layer owns the set.
+
+    `screen`, when given, is used as-is — a ready-made `HelpScreen` — so the
+    no-scope arm (`TC-R25b`) can pass `HelpScreen()` and exercise the
+    constructor's own default rather than a scope the test chose.  Otherwise one
+    is built for `scope`.
     """
-    screen = HelpScreen(scope)
+    if screen is None:
+        screen = HelpScreen(scope)
     pairs: set[tuple[str, str]] = set()
     for line in screen._render_keymap().plain.splitlines():  # noqa: SLF001
         if not line.startswith("  "):
@@ -437,7 +448,7 @@ def _rendered_pairs(scope: str) -> set[tuple[str, str]]:
     return pairs
 
 
-@pytest.mark.parametrize("scope", [SCOPE_MAP, SCOPE_HOME])
+@pytest.mark.parametrize("scope", [SCOPE_MAP, SCOPE_HOME, SCOPE_APP])
 def test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions(scope):
     """LLR-R05.2 — SET EQUALITY, derived from `keymap`, never hand-listed.
 
@@ -447,10 +458,29 @@ def test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions(scope
 
     The expected side is built from `bindings_for(scope)`; dropping a member from
     the keymap reddens it, and so does presenting one binding too many.
+
+    `SCOPE_APP` is AT-042's smallest-set arm (2 rows) — `LLR-008.3`.
     """
     expected = {(b.glyph, b.label) for b in bindings_for(scope)}
     assert expected, f"bindings_for({scope!r}) is empty; the comparison would be vacuous"
     assert _rendered_pairs(scope) == expected
+
+
+def test_tc_r25b_a_screen_declaring_no_scope_presents_the_app_set():
+    """LLR-008.3 — AT-042's no-scope arm.
+
+    A screen that declares no scope falls through the `HelpScreen` default
+    (`scope=SCOPE_APP`, `mapper/screens/help.py:288`), so its presented set is
+    `bindings_for(SCOPE_APP)` — the same 2 rows (`ctrl+p` palette, `?` legend)
+    as the explicit `SCOPE_APP` arm of `TC-R25`.  The two arms differ only by the
+    constructor path (no scope argument vs the explicit `SCOPE_APP`), never by
+    the expected set.  Building the screen here — rather than passing a scope to
+    `_rendered_pairs` — is the point: the assertion must read the default the
+    constructor supplies, not a default this test re-typed.
+    """
+    expected = {(b.glyph, b.label) for b in bindings_for(SCOPE_APP)}
+    assert expected, "bindings_for(SCOPE_APP) is empty; the comparison would be vacuous"
+    assert _rendered_pairs(screen=HelpScreen()) == expected
 
 
 def test_tc_r26_no_foreign_scope_binding_reaches_the_panel():

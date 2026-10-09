@@ -29,6 +29,7 @@ from mapper.app import MapperApp
 from mapper.keymap import bindings_for
 from mapper.model import Graph
 from mapper.screens.help import LEGEND_TITLE, HelpScreen
+from tests.test_data_safety_census import DATA_SAFETY_ADDED
 from tests.test_help_scope import _harvest
 from tests.test_repair_layout import WIDE_SIZES, _open_map, _rows_in, _tree
 
@@ -365,6 +366,7 @@ def test_llr_n06_2_5_the_census_reads_a_message_keyword():
 
 #: The declared English vocabulary of the chrome (`A-112`).  Adding a word is
 #: a deliberate edit in the commit that paints it.
+#: Data-safety Inc-1a adds the draft guard's `discard draft stay unsaved`.
 CHROME_LEXICON = frozenset("""
     add all app archive attachment back bottom branch browse build card child choose
     close command component components connect coverage csv default details diff disabled
@@ -374,6 +376,7 @@ CHROME_LEXICON = frozenset("""
     parent plug previous quit rail remove repo report repository resume right left run
     save scroll search settings show sibling start svg template to toggle top tree undo
     unfold up view
+    discard draft stay unsaved
 """.split())
 
 #: Screen headers allowed to stay non-English, owned by the increment that
@@ -695,6 +698,11 @@ def test_cd25_the_pinned_entry_seat_is_not_vacuous():
 
 def test_cd25a_the_seat_diff_is_exactly_what_inc9_declares():
     before, after = _entry_projection(), _projection(keymap.KEYMAP)
+    # The data-safety batch (2026-10-08) adds rows after Inc-9; this node stays a
+    # statement about Inc-9, so those rows are subtracted by the one census that
+    # declares them (`tests/test_data_safety_census.py`, E-7) instead of widening
+    # `DECLARED_ADDED`.
+    after = {row for row in after if row[:3] not in DATA_SAFETY_ADDED}
     assert before - after == set(), f"a row was lost or rebound: {sorted(before - after)}"
     assert {row[:3] for row in after - before} == DECLARED_ADDED
     old = {(row[0], row[1]): row[5] for row in ENTRY_ROWS}
