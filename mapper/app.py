@@ -3774,7 +3774,7 @@ class MapScreen(Screen):
         linked = node.linked_map_id()
         if linked:
             crumb_back = self._current_crumb() + [node.ficha.title or node.id]
-            self.app.push_screen(MapScreen(linked, source_crumb=crumb_back))
+            self._guard_draft(lambda: self.app.push_screen(MapScreen(linked, source_crumb=crumb_back)))
             return
         self.app.push_screen(_FichaScreen(node, self.graph))
 
