@@ -219,10 +219,11 @@ CONFORMING_SEVERITY = {
     ("mapper/views/radial.py", "style=darkside.WARN,"),
     ("mapper/widgets/inspector.py", "(darkside.plain(text), darkside.ALERT),"),
     ("mapper/widgets/inspector.py", '("  required", darkside.ALERT),'),
-    # Data-safety batch (2026-10-08) Inc-1b, US-001.  The card draft's `● unsaved
-    # (N)` header and per-field `●`: an edit the operator still owes a save is
-    # pending work, WARN's declared job; one constant is the one site.
-    ("mapper/widgets/inspector.py", "UNSAVED_STYLE = darkside.WARN"),
+    # Data-safety batch (2026-10-08) Inc-1b, US-001; re-ruled Inc-1c (2026-10-09).  The
+    # card draft's `● unsaved (N)` header and per-field `●` are painted ALERT: the
+    # operator ruled red for unsaved content (R8, "rojo para alertar que hay contenido
+    # no guardado"), one signal on every surface; one constant is the one site.
+    ("mapper/widgets/inspector.py", "UNSAVED_STYLE = darkside.ALERT"),
     # The same draft, said on the hint line while the card is hidden: the
     # operator ruled ALERT for it (R8, "rojo para alertar que hay contenido no
     # guardado") -- leaving now would lose it, so it is painted as the item that
