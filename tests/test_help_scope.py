@@ -905,3 +905,22 @@ def test_inc8_p3_cr_f3_shown_cells_is_what_fit_actually_paints(s):
     honest about double-width glyphs too."""
     big = 100
     assert darkside.shown_cells(s) == cell_len(darkside.fit(s, big).rstrip())
+
+
+# ---------------------------------------------------------------------------
+# TC-009.1 -- the settle assertion fails loud when the scroll never lands
+
+async def test_tc_009_1_settle_assertion_fails_loud_when_the_scroll_never_lands(
+        tmp_path, monkeypatch):
+    """DDR / TC-009.1 (site `_effective_keys`).  With `Widget._scroll_to` a
+    no-op, the positioning scroll can never land, and the helper's settle
+    assertion -- `the positioning scroll did not land` -- must fire on the
+    first key instead of sampling a pane that never moved.  Nothing else in
+    the AT-008 sequence is touched: the same `_legend_from_map` +
+    `_effective_keys` path, one size."""
+    monkeypatch.setattr(Widget, "_scroll_to", lambda self, *args, **kwargs: None)
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        screen = await _legend_from_map(app, pilot)
+        with pytest.raises(AssertionError, match="positioning scroll did not land"):
+            await _effective_keys(app, pilot, screen)
