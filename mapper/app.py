@@ -3646,7 +3646,11 @@ class MapScreen(Screen):
         self, event: FichaInspector.AttachmentAddRequested
     ) -> None:
         event.stop()
-        node = self.graph.nodes.get(event.node_id)
+        node_id = event.node_id
+        self._guard_draft(lambda: self._add_attachment(node_id))
+
+    def _add_attachment(self, node_id: str) -> None:
+        node = self.graph.nodes.get(node_id)
         if node is None or self.store is None:
             return
 
@@ -3678,12 +3682,17 @@ class MapScreen(Screen):
         self, event: FichaInspector.AttachmentRemoveRequested
     ) -> None:
         event.stop()
-        node = self.graph.nodes.get(event.node_id)
+        node_id = event.node_id
+        index = event.index
+        self._guard_draft(lambda: self._remove_attachment(node_id, index))
+
+    def _remove_attachment(self, node_id: str, index: int) -> None:
+        node = self.graph.nodes.get(node_id)
         if node is None or self.store is None:
             return
-        if not 0 <= event.index < len(node.ficha.attachments):
+        if not 0 <= index < len(node.ficha.attachments):
             return
-        removed = node.ficha.attachments.pop(event.index)
+        removed = node.ficha.attachments.pop(index)
         self._push_snapshot()
         if not _save_or_toast(self, self.store, self.map_id, self.graph):
             return
