@@ -46,7 +46,7 @@ Source files: **0**.
 ## 4 · Test results
 - File level (orchestrator): each new file green; `tests/test_repair_cycles.py` 34 passed; `tests/test_help_scope.py` 51 passed.
 - Full default lane: run at the Phase-4 gate on the integrated tree (`04-validation.md`).
-- **Ledger:** 2915 + 9 (1 + 3 + 2 + 1 + 1, plus `same_map_link` ×3 counted above → 1+3+2+1+1 = 8 functions / 9 collected incl. parametrisation) — reconciled against the gate's collected count.
+- **Ledger:** 2915 collected − 0 + 8 (`esc_search` 1, `same_map_link` 3, `archive_own` 2, `at_025b` 1, `tc_009_1` 1) = **2923** — executed `--collect-only`: `2923/2947 tests collected (24 deselected)`. ✓
 
 ## 4b · Independent review
 DDR lenses (`architect`, `qa-reviewer`) set these conditions; their discharge is re-read at the Phase-4 gate.
