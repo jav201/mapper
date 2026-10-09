@@ -1,0 +1,480 @@
+===== U1 (deepseek-v4-pro unit; final report tail) =====
+activated(
+     self, event: FichaInspector.AttachmentActivated
+
+
+$ python -c "import hashlib; print(hashlib.sha256(open('mapper/app.py','rb').read()).hexdigest())"
+4468f3183dbd37c9761bff27dfac8c166163d7c426de49b4cb80862e84d2c26b
+
+$ python -m pytest tests/test_inc1c_ux.py -p no:cacheprovider -v 2>&1 | tail -8
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 1 item
+
+tests/test_inc1c_ux.py::test_inc1c_c6_prefix_appears_when_the_card_hides_again PASSED [100%]
+
+============================== 1 passed in 0.87s ==============================
+
+$ git status --short && echo "=== DIFF app.py ===" && git diff mapper/app.py
+M mapper/app.py
+?? tests/test_inc1c_ux.py
+=== DIFF app.py ===
+diff --git a/mapper/app.py b/mapper/app.py
+index 393d196..d150096 100644
+--- a/mapper/app.py
++++ b/mapper/app.py
+@@ -3573,6 +3573,7 @@ class MapScreen(Screen):
+         event.stop()
+         self.set_focus(None)
+         self.query_one(HintLine).set_hint(map_hint())
++        self._paint_draft_hint()
+ 
+     # -- attachments (US-N02) ----------------------------------------------
+     def on_ficha_inspector_attachment_activated(
+
+Done.
+
+**Files changed**
+- `mapper/app.py` — one line: `self._paint_draft_hint()` added at the end of `on_field_input_left` (the ↵/esc "leave field" handler), so the hidden-card draft prefix is repainted the moment the card hides with a pending draft.
+- `tests/test_inc1c_ux.py` — new file.
+
+**New test node id**
+- `tests/test_inc1c_ux.py::test_inc1c_c6_prefix_appears_when_the_card_hides_again`
+
+**GREEN output**
+```
+tests/test_inc1c_ux.py::test_inc1c_c6_prefix_appears_when_the_card_hides_again PASSED [100%]
+============================== 1 passed in 0.87s ==============================
+```
+
+**RED output** (after reverting only the product line)
+```
+tests/test_inc1c_ux.py::test_inc1c_c6_prefix_appears_when_the_card_hides_again FAILED [100%]
+E  AssertionError: next ▸ j/k/h/l move · ↵ open card · / search
+E  assert False
+1 failed in 0.85s
+```
+
+**sha256 restore check**
+- before revert: `4468f3183dbd37c9761bff27dfac8c166163d7c426de49b4cb80862e84d2c26b`
+- after restore: `4468f3183dbd37c9761bff27dfac8c166163d7c426de49b4cb80862e84d2c26b` (match)
+
+Regression: `tests/test_draft_save.py` still 50 passed. Note: the unit's "add it in `_apply_region_visibility`" hint is a no-op here — every call site is already followed by `refresh_canvas`, which already repaints the hint before the draft exists; the real fix belongs at field-leave.
+exit=0
+
+
+===== U2 (deepseek-v4-pro unit; final report tail) =====
+one(HintLine).text)
+input = 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search', final = False
+E       UnicodeEncodeError: 'charmap' codec can't encode character '\u21b5' in position 15: character maps to <undefined>
+..\..\..\..\anaconda3\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+FAILED tests/test_en2.py::test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back[size0]
+1 failed in 0.91s
+
+$ cd "<USERPROFILE>/AppData/Local/Temp/mapper-inc2" && python - <<'EOF'
+import io, re, pathlib
+p = pathlib.Path("mapper/app.py")
+s = p.read_text(encoding="utf-8")
+s = s.replace('print("FOCUS_DEBUG", getattr(event.widget, "id", None), type(event.widget).__name__, self.query_one(HintLine).text)',
+              'print("FOCUS_DEBUG", getattr(event.widget, "id", None), type(event.widget).__name__, ascii(self.query_one(HintLine).text))')
+s = s.replace('print("BLUR_DEBUG", getattr(event.widget, "id", None), type(event.widget).__name__, self.query_one(HintLine).text)',
+              'print("BLUR_DEBUG", getattr(event.widget, "id", None), type(event.widget).__name__, ascii(self.query_one(HintLine).text))')
+p.write_text(s, encoding="utf-8")
+print("done")
+EOF
+done
+
+$ python -m pytest "tests/test_en2.py::test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back[size0]" -p no:cacheprovider -q -s 2>&1 | grep -E "DEBUG" | head -80
+FOCUS_DEBUG map-rail OutlineRail 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+BLUR_DEBUG map-rail OutlineRail 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+FOCUS_DEBUG map-rail OutlineRail 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+BLUR_DEBUG map-rail OutlineRail 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+FOCUS_DEBUG insp-title FieldInput 'type to draft \xb7 ctrl+s save \xb7 esc leave field'
+BLUR_DEBUG insp-title FieldInput 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+FOCUS_DEBUG insp-state DsSegmented 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+BLUR_DEBUG insp-state DsSegmented 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+FOCUS_DEBUG insp-field-D FieldInput 'type to draft \xb7 ctrl+s save \xb7 esc leave field'
+BLUR_DEBUG insp-field-D FieldInput 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+FOCUS_DEBUG insp-notes FieldInput 'type to draft \xb7 ctrl+s save \xb7 esc leave field'
+BLUR_DEBUG insp-notes FieldInput 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+FOCUS_DEBUG insp-att-0 DsChip 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search'
+
+exit=124
+
+
+===== U3 (deepseek-v4-pro unit; final report tail) =====
+map_id = _seed_map(app)
+            screen = await _open(app, pilot, map_id)
+            await _type_into(pilot, screen, "insp-title", "x")
+            text, style = _header_text_and_style(screen)
+            assert "\u25cf unsaved (1)" in text, text
+            assert style is not None
+>           assert style.color.get_truecolor().hex.lower() == darkside.ALERT.lower()
+E           AssertionError: assert '#ffd230' == '#ff4f42'
+E             
+E             - #ff4f42
+E             + #ffd230
+
+tests\test_inc1c_ux.py:71: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_inc1c_ux.py::test_inc1c_unsaved_header_is_painted_in_alert
+1 failed in 0.59s
+
+$ cp /tmp/inspector.py.green mapper/widgets/inspector.py && sha256sum mapper/widgets/inspector.py
+1948d64d8e280b6a06e62845a1a362227a5eacf29cabad8f385cab983f8a838a *mapper/widgets/inspector.py
+
+$ python -m pytest tests/test_inc1c_ux.py -p no:cacheprovider -q 2>&1
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...                                                                      [100%]
+3 passed in 1.64s
+
+## Done
+
+**Files changed**
+- `mapper/widgets/inspector.py` — header marker `● unsaved (N)` now `darkside.ALERT` (line 228); the per-field `●` stays `UNSAVED_STYLE` (WARN), a separate code path (`_label`, line 247) I left untouched.
+- `tests/test_inc1c_ux.py` — appended node `test_inc1c_unsaved_header_is_painted_in_alert` + a `_header_text_and_style` helper.
+
+**New test node id**
+- `tests/test_inc1c_ux.py::test_inc1c_unsaved_header_is_painted_in_alert`
+
+**GREEN** (full file): `3 passed in 1.64s`
+
+**RED** (product change reverted → `UNSAVED_STYLE`): `AssertionError: assert '#ffd230' == '#ff4f42'` — `1 failed in 0.59s`
+
+**sha256 restore check**: `1948d64d8e280b6a06e62845a1a362227a5eacf29cabad8f385cab983f8a838a` — identical before/after revert (GREEN → copy → RED → restore → GREEN).
+exit=0
+
+
+===== U4 (deepseek-v4-pro unit; final report tail) =====
+t 'g6' in 'could not save � draft kept � ctrl+s to retry'
+
+tests\test_g6_store_surrogates.py:352: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_g6_store_surrogates.py::test_g6c_f2_save_failure_toast_names_no_path_or_username
+1 failed in 1.14s
+
+$ git status --short && echo "---DIFF---" && git diff --stat
+M mapper/app.py
+ M tests/test_inc1c_ux.py
+---DIFF---
+warning: in the working copy of 'mapper/app.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_inc1c_ux.py', LF will be replaced by CRLF the next time Git touches it
+ mapper/app.py          | 34 +++++++++++++++++++++++-----------
+ tests/test_inc1c_ux.py | 24 ++++++++++++++++++++++++
+ 2 files changed, 47 insertions(+), 11 deletions(-)
+
+## Unit U4 done
+
+**Files changed**
+- `mapper/app.py` — `_save_or_toast` gained a `toast=False` kwarg (suppresses both toasts); `_save_draft` now calls it with `toast=False` and emits ONE toast: `could not save · draft kept · ctrl+s to retry` (glyph read via `_seat_glyph("save_draft")`). Reload-failure toast (PDR C8) untouched.
+- `tests/test_inc1c_ux.py` — appended `test_inc1c_a_failed_save_shows_one_toast`.
+
+**New test node id**
+- `tests/test_inc1c_ux.py::test_inc1c_a_failed_save_shows_one_toast`
+
+**GREEN** (after change):
+```
+python -m pytest tests/test_inc1c_ux.py -p no:cacheprovider -q
+....  [100%]  →  4 passed in 2.52s
+```
+
+**RED** (product change reverted, test kept):
+```
+python -m pytest tests/test_inc1c_ux.py::test_inc1c_a_failed_save_shows_one_toast -p no:cacheprovider -q
+AssertionError: [("could not save 'ds': OSError", ...), ('draft kept · ctrl+s to retry', ...)]
+→  1 failed
+```
+
+**sha256 restore check**
+```
+c04425b6258d9520bfb67031c9beaef38f316c7913138d4cc1fd6de1e049a0c6  (before revert)
+c04425b6258d9520bfb67031c9beaef38f316c7913138d4cc1fd6de1e049a0c6  (after restore)  → identical
+```
+
+**Conflict / risk (must flag):** the single-toast change breaks two existing tests I was not allowed to touch:
+- `tests/test_draft_save.py::test_llr_004_2_a_save_failure_names_ctrl_s_to_retry` (asserts old second toast `draft kept · ctrl+s to retry`)
+- `tests/test_g6_store_surrogates.py::test_g6c_f2_save_failure_toast_names_no_path_or_username` (asserts the `could not save 'g6': OSError` toast still names the map id + exception type)
+
+Both now fail. They need a coordinated update in a sibling unit (they assert the two-toast behavior UX-1 M2 is replacing).
+exit=0
+
+
+===== U5 (deepseek-v4-pro unit; final report tail) =====
+lot, "escape")
+            depth = len(app.screen_stack)
+    
+            await _press(pilot, "escape")
+>           assert _guards(app) == 1
+E           AssertionError: assert 0 == 1
+E            +  where 0 = _guards(MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}))
+
+tests\test_draft_exits.py:67: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_draft_exits.py::test_at_005a_leave_with_q_is_guarded[s] - A...
+FAILED tests/test_draft_exits.py::test_at_005a_leave_with_q_is_guarded[d] - A...
+FAILED tests/test_draft_exits.py::test_at_005a_leave_with_q_is_guarded[escape]
+FAILED tests/test_draft_exits.py::test_at_005b_leave_with_esc_is_guarded[s]
+FAILED tests/test_draft_exits.py::test_at_005b_leave_with_esc_is_guarded[d]
+FAILED tests/test_draft_exits.py::test_at_005b_leave_with_esc_is_guarded[escape]
+6 failed in 3.58s
+
+$ cp /tmp/app.py.bak mapper/app.py && sha256sum mapper/app.py
+722378dd9f9209a8da70570af7642f97778299b4368c85a88af7bce6cd9cc67c *mapper/app.py
+
+$ python -m pytest tests/test_draft_exits.py -p no:cacheprovider -q
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+......                                                                   [100%]
+6 passed in 4.82s
+
+Done.
+
+**Files changed**
+- `mapper/app.py` — `MapScreen.action_home` and the pop branch of `MapScreen.action_back_or_home` now call `self._guard_draft(self.app.pop_screen)` (search-clearing branch untouched).
+- `tests/test_draft_exits.py` — created.
+
+**New test node ids**
+- `test_at_005a_leave_with_q_is_guarded[s|d|escape]`
+- `test_at_005b_leave_with_esc_is_guarded[s|d|escape]`
+
+**GREEN** — `6 passed` (with product change).
+**RED** — `6 failed`, each at `assert _guards(app) == 1` (`0 == 1`), after reverting the two app.py edits.
+**sha256 restore check** — before `722378dd…cc67c`, after restore `722378dd…cc67c` (identical).
+exit=0
+
+
+===== U6 (deepseek-v4-pro unit; final report tail) =====
+fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...                                                                      [100%]
+3 passed in 2.86s
+
+$ python -m pytest tests/test_draft_exits.py -p no:cacheprovider -q 2>&1 | tail -8
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.........                                                                [100%]
+9 passed in 7.44s
+
+Done.
+
+## Files changed
+- `mapper/app.py:3777` — link branch in `action_open_ficha` now wraps the push in `self._guard_draft(...)`.
+- `tests/test_draft_exits.py` — appended `_seed_linked` helper + `test_at_011_following_a_link_is_guarded`.
+
+## New test node ids
+- `tests/test_draft_exits.py::test_at_011_following_a_link_is_guarded[s]`
+- `tests/test_draft_exits.py::test_at_011_following_a_link_is_guarded[d]`
+- `tests/test_draft_exits.py::test_at_011_following_a_link_is_guarded[escape]`
+
+## GREEN (post-restore)
+```
+3 passed in 2.86s
+```
+
+## RED (product change reverted)
+```
+FAILED ...::test_at_011_following_a_link_is_guarded[s]  AssertionError: assert 0 == 1
+FAILED ...::test_at_011_following_a_link_is_guarded[d]  AssertionError: assert 0 == 1
+FAILED ...::test_at_011_following_a_link_is_guarded[escape]  AssertionError: assert 0 == 1
+3 failed in 2.64s
+```
+
+## sha256 restore check
+- before: `8ff2f4fa684a777d82371402883aa02d2620ab073e92e2fffe1d14d48acbae6e`
+- after:  `8ff2f4fa684a777d82371402883aa02d2620ab073e92e2fffe1d14d48acbae6e` — identical.
+
+Full file suite also green (`9 passed`).
+exit=0
+
+
+===== U7 (deepseek-v4-pro unit; final report tail) =====
+ous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..................................................                       [100%]
+50 passed in 40.34s
+
+$ git status --short && git diff --stat
+M mapper/app.py
+ M tests/test_draft_exits.py
+warning: in the working copy of 'mapper/app.py', LF will be replaced by CRLF the next time Git touches it
+ mapper/app.py             | 42 +++++++++++++++++++++++++++-
+ tests/test_draft_exits.py | 70 +++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 111 insertions(+), 1 deletion(-)
+warning: in the working copy of 'tests/test_draft_exits.py', LF will be replaced by CRLF the next time Git touches it
+
+$ rm -f /tmp/scratch_exit_test.py /tmp/scratch_cq_test.py /tmp/app_green.py
+(no output)
+
+Done. Unit U7 complete.
+
+**Files changed**
+- `mapper/app.py` — added `MapScreen.has_pending_draft()`, added `_quit_walk_open = False` to `MapperApp.__init__`, rewrote `MapperApp.action_quit` to walk draft-bearing map screens.
+- `tests/test_draft_exits.py` — appended 5 test cases (3 parametrized + 2).
+
+**New test node ids**
+- `tests/test_draft_exits.py::test_at_012_quit_is_guarded[s]`
+- `tests/test_draft_exits.py::test_at_012_quit_is_guarded[d]`
+- `tests/test_draft_exits.py::test_at_012_quit_is_guarded[escape]`
+- `tests/test_draft_exits.py::test_llr_003_5_a_second_ctrl_q_stacks_no_second_guard`
+- `tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge`
+
+**GREEN** — `python -m pytest tests/test_draft_exits.py -p no:cacheprovider -q` → `14 passed in 11.28s` (also `test_draft_save.py` → `50 passed`, no regressions).
+
+**RED** (exit oracle: `app._exit` + `app.is_running`, deterministic inside `run_test`)
+- Revert whole `action_quit` → 4 failed (`test_at_012_quit_is_guarded[s/d/escape]` incl. the stay arm, `test_llr_003_5_a...`).
+- Revert only the C1 branch (`if screen._draft_guard_open: end_walk(); return`) → `test_pdr_c1...` failed (`_guards 0 == 1`).
+
+**sha256 restore check** — `mapper/app.py` sha256 `62219b1a0336844f1dae4971185f146333df39561adf143110c3a54c26ae4a5c` before RED, after restore identical (GREEN re-run `14 passed`).
+exit=0
+
+
+===== U8 (deepseek-v4-pro unit; final report tail) =====
+
+            await _type_into(pilot, screen, "insp-title", "x")
+            await _press(pilot, "escape")
+            before = _hashes(tmp_path, map_id)
+    
+            await _press(pilot, key)
+>           assert _guards(app) == 1
+E           AssertionError: assert 0 == 1
+E            +  where 0 = _guards(MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}))
+
+tests\test_draft_exits.py:206: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first[at_014a]
+FAILED tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first[at_014b]
+2 failed in 1.27s
+
+RED confirmed. Restoring the fixed version byte-identically:
+$ cp /tmp/app_fixed.py mapper/app.py && sha256sum mapper/app.py
+35cd15790170e1608bec79e243e51a01826ce83279133a193d538041502d1da9 *mapper/app.py
+
+$ python -m pytest tests/test_draft_exits.py -p no:cacheprovider -q 2>&1 | tail -5
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+................                                                         [100%]
+16 passed in 13.31s
+
+Unit U8 done.
+
+**Files changed**
+- `mapper/app.py`: `action_add_child` → `self._guard_draft(self._add_child)`; `action_archive` → `self._guard_draft(self._archive)`. Bodies moved unchanged into `_add_child()` / `_archive()`.
+- `tests/test_draft_exits.py`: appended `test_at_014_structural_write_opens_the_guard_first` (param `["a","x"]`), imported `_hashes`.
+
+**New test node ids**
+- `tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first[at_014a]`
+- `tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first[at_014b]`
+
+**GREEN** (full `test_draft_exits.py`): `16 passed in 13.31s`
+
+**RED** (reverted product change, single file): both params `AssertionError: assert 0 == 1` (`_guards(app) == 1` fails — no guard opens) — `2 failed in 1.27s`
+
+**sha256 restore check**: `35cd1579…d1da9` before and after revert/restore — identical.
+
+No commit made (orchestrator commits).
+exit=0
+
+
+===== U9 (deepseek-v4-pro unit; final report tail) =====
+t test summary info ===========================
+FAILED tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first_attachments[at_014c]
+FAILED tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first_attachments[at_014d]
+2 failed in 2.17s
+
+$ cp /tmp/u9_app_modified.py mapper/app.py && sha256sum mapper/app.py && cat /tmp/u9_app_sha.txt
+49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6 *mapper/app.py
+49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6 *mapper/app.py
+
+$ python -m pytest -p no:cacheprovider tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first_attachments -q 2>&1 | tail -5
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..                                                                       [100%]
+2 passed in 2.02s
+
+Unit complete.
+
+**Files changed**
+- `mapper/app.py` — split the two attachment handlers into `_add_attachment(node_id)` / `_remove_attachment(node_id, index)`, reading `node_id`/`index` from the message before `self._guard_draft(...)`. Handlers now call `self._guard_draft(lambda: self._add_attachment(node_id))` and `..._remove_attachment(node_id, index)`.
+- `tests/test_draft_exits.py` — added `Attachment` import, `_tab_to` helper, and the parametrised test.
+
+**New test node ids**
+- `tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first_attachments[at_014c]`
+- `tests/test_draft_exits.py::test_at_014_structural_write_opens_the_guard_first_attachments[at_014d]`
+
+**GREEN output**
+```
+2 passed in 2.02s
+```
+
+**RED output** (after reverting only `mapper/app.py`)
+```
+>           assert _guards(app) == 1
+E           AssertionError: assert 0 == 1
+FAILED ...at_014c
+FAILED ...at_014d
+2 failed in 2.17s
+```
+
+**sha256 restore check**
+- before revert: `49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6`
+- after restore:  `49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6` (identical)
+
+Regression check: `tests/test_attachments.py` (29 passed) and `tests/test_draft_exits.py` (18 passed) both green.
+exit=0
+
+
+===== U10 (deepseek-v4-pro unit; final report tail) =====
+est_draft_exits.py::test_at_013_quit_walks_a_lower_map_screen_draft -p no:cacheprovider -q 2>&1 | tail -5
+49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6 *mapper/app.py
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 1.17s
+
+$ python -m pytest tests/test_draft_exits.py -p no:cacheprovider -q 2>&1 | tail -8
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...................                                                      [100%]
+19 passed in 15.75s
+
+Done. Summary:
+
+**Files changed** (test only, no product change):
+- `tests/test_draft_exits.py` — appended `test_at_013_quit_walks_a_lower_map_screen_draft`; added `MapScreen` and `_title_source` to imports.
+
+**New test node id:**
+- `tests/test_draft_exits.py::test_at_013_quit_walks_a_lower_map_screen_draft`
+
+**GREEN:**
+```
+python -m pytest tests/test_draft_exits.py::test_at_013_quit_walks_a_lower_map_screen_draft -p no:cacheprovider -q
+1 passed in 1.13s
+```
+
+**RED** (product change: `reversed(self.screen_stack)` → `[self.screen]` in `MapperApp.action_quit`):
+```
+1 failed in 0.88s
+E   AssertionError: assert 0 == 1   (assert _guards(app) == 1)
+```
+
+**sha256 restore check:** `mapper/app.py` before = `49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6`, after restore = `49897d57e438f56fc55653b4ea29aa6a24ea91a6de67d63adb440371f8c1bac6` (identical). Re-ran GREEN: `1 passed`.
+
+Full `test_draft_exits.py`: `19 passed`.
+exit=0
+
