@@ -99,3 +99,11 @@
 | R3-QA-M1 | qa | major | AT-002 fault-injection rows name internals | Declare the fault-injection seam as an explicit, named Layer-A exception (like AT-013); one arm suffices now: "store raises during save → disk reloaded, draft keeps exactly the fields that did not reach disk" with a test that injects a raise after writing zero and after writing both files |
 | R3-QA-M2 | qa | major | AT-005a/b, AT-009, AT-011, AT-012, AT-014a–d say only "feature absent" | One named mutation per row: AT-014 guard opened after the write; AT-005 `stay` falls through and pops the screen; AT-011 the push runs before the guard answers; AT-009 markers not recomputed after `u`; AT-012 quit proceeds on `stay` |
 | R3-minors | qa, architect | minor | §5.1 lists AT-013 under Layer B; AT-012/AT-005 observation (app not running / screen-stack depth); HLR surfaces still name `FichaInspector` (`:175`), `HelpScreen` (`:255`); HLR-004 "only when the write succeeds" | Apply all; observations stated as `app.is_running` false / `len(app.screen_stack)` |
+
+---
+
+## Round 4 (HEAD `b3827c0`, after P1 iteration 3)
+
+- **Gate:** all three lenses `iterate-to-refine` with **0 blockers**; one converging major (architect + security: the reload swaps `self.graph` only, leaving `NavigationModel`, focus and load warnings stale; a draft on a vanished node unspecified) and one qa major (stale three-case text in §5.1), plus minors (write scope vs index rebuild, AT-011 observation, AT-009 label, AT-013 in the Layer-B list) and two residuals.
+- **Operator ruling 2026-10-08, verbatim:** "Aplicar y verificar ligero (Recomendado)" — the orchestrator applies the fixes, ONE reviewer confirms them, then PDR.
+- **Applied** (ledger `.58`): LLR-004.2 re-establishes the view by the screen's own load path; drafts on vanished nodes dropped with a warning; "no write" scoped to the map files; §5.1, AT-011, AT-009, AT-013 wording; residuals A-14 (a save on disk without an undo step) and A-15 (double index failure) recorded.
