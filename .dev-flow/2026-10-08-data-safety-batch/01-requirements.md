@@ -25,7 +25,7 @@ This document states the requirements for batch `2026-10-08-data-safety-batch` o
 In scope:
 - **US-001** — the inspector's draft-and-explicit-save model (operator verdict "C" on B-36): no durable write without `ctrl+s`, a visible unsaved state, a `save · discard · stay` guard on every exit, a two-phase whole-graph write, and a reload from disk on any failed save, `↵`-keeps-draft, and full field coverage including `state`.
 - **US-002** — realise the AT-044 node (a doubled `?` opens no second legend) and reconcile AT-025b to the existing `LLR-N13.1.5` damaged-card nodes.
-- **US-003** — reconcile AT-041/AT-042 to their on-disk nodes and retire AT-033/034/035 (they travel with the deferred US-N14).
+- **US-003** — reconcile AT-041/AT-042 to their on-disk nodes and retire `AT-033`/034/035 (they travel with the deferred US-N14).
 - **US-004** — deflake the legend own-keys paint race (FLAKE-2) by making the four `scroll_to` call sites immediate and settled.
 
 Out of scope: the «lente» feature (US-N14), the render-budget redesign (B-33), the inspector-adjacent B-31/B-32 findings, and the `R-009` `app.py` boundary move. No product behaviour change for US-002/003/004.
@@ -70,7 +70,7 @@ A single operator of the terminal mapping tool (the author/maintainer), keyboard
 Textual 8.2.8 (its `Widget.scroll_to` defaults `immediate=False`, which drives US-004); Windows; the 4-source-file-per-increment cap; English UI.
 
 ### 2.5 Assumptions and dependencies
-The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14 carries AT-033/034/035 out of scope; US-004's fix is test-side only (the product is correct); the keymap seat and the draft surface are the only code surfaces touched.
+The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14 carries `AT-033`/034/035 out of scope; US-004's fix is test-side only (the product is correct); the keymap seat and the draft surface are the only code surfaces touched.
 
 ### 2.6 Source user stories
 
@@ -243,7 +243,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-007 — the shipped behaviours are guarded by their declared nodes
 - **Traceability:** US-002
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.30, LED-2026-10-08-data-safety-batch.57
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.30, LED-2026-10-08-data-safety-batch.57, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.65
 - **Statement:** When the operator presses the help chord twice from a map, the system shall present exactly one legend without growing the screen stack; and when a workspace map fails to load, the system shall declare that damaged state on that map's own card while every other card keeps its true values.
 - **Rationale (informative):** B-100 — the behaviours hold today but are unguarded (AT-044) or guarded under a different id (N13.3), so a regression ships silently.
 - **Validation:** `test`
@@ -259,17 +259,17 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 
 ### HLR-008 — every declared acceptance id resolves to a node or is retired
 - **Traceability:** US-003
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.28
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.12, LED-2026-10-08-data-safety-batch.14, LED-2026-10-08-data-safety-batch.15, LED-2026-10-08-data-safety-batch.22, LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.64
 - **Statement:** Every declared acceptance id that this batch carries shall be resolved to an on-disk test node or retired, so that the traceability record matches what the suite guards.
 - **Rationale (informative):** B-101 — a declared id with no node is a test the next refactor deletes without reddening anything (C-18).
 - **Validation:** `inspection`
 - **Executed verification:** grep each id's definition in `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md` and grep `tests/` for a realising node; the observable condition is the reconciliation list below.
-- **Numeric pass threshold:** every id in {AT-041, AT-042, AT-033, AT-034, AT-035} is either resolved or retired with a ledger entry.
+- **Numeric pass threshold:** every id in {AT-041, AT-042, `AT-033`, `AT-034`, `AT-035`} is either resolved or retired with a ledger entry.
 - **Priority:** medium
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** the maintainer greps `tests/` for each declared AT id and finds each one resolved to a named node or retired (definitional/inspectional — no shipped surface).
   - **Shipped surface:** the traceability record (`.dev-flow/BACKLOG.md` and this batch's ledger).
-  - **Acceptance test(s):** AT-041 (reconciled), AT-042 (partially realised — two arms owed as new nodes); AT-033, AT-034, AT-035 (retired)
+  - **Acceptance test(s):** AT-041 (reconciled), AT-042 (partially realised — two arms owed as new nodes); `AT-033`, `AT-034`, `AT-035` (retired)
   - **Boundary catalog (QC-3):** none — inspection (structural review of the traceability record, no input class applies).
   - **Negative control:** none — inspection (no executed arm); the observable condition is the absence each grep records. The reconciliation is a match between an id and an existing node, verified by grep at draft time.
 
@@ -315,11 +315,11 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 | AT-014c | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) and the map's `.mmd`/`_nodos.yml` files | an add-attachment write (`A`) with a pending draft | the guard presents before the write, and the draft's values never reach either file through the write | yes — `A` writes immediately with no guard; mutation "guard opened after the write" changes the hash pair before the answer |
 | AT-014d | US-001 | the save · discard · stay guard modal (keys `s`/`d`/`esc`) and the map's `.mmd`/`_nodos.yml` files | a remove-attachment write (`X`) with a pending draft | the guard presents before the write, and the draft's values never reach either file through the write | yes — `X` writes immediately with no guard; mutation "guard opened after the write" changes the hash pair before the answer |
 | AT-015 | US-001 | the guard modal title | a map id or node title carrying an ESC (0x1B) payload | the rendered title is scanned and carries no 0x1B byte (the payload is coerced), so no control effect reaches the terminal | yes — a title built with `markup=False` alone (without `plain()`) passes ESC, so AT-015 reddens on that mutation |
-| AT-044 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-002 | the help legend (the `?` chord) | press the help chord (`?`) twice from a map | exactly one legend; the screen stack does not grow | yes — only as an absent node today; the mutation it must redden on is binding `?` in the help seat (or letting the legend inherit the app chord), which opens a second legend |
+| AT-044 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-002 | the help legend (the `?` chord) | press the help chord (`?`) twice from a map | exactly one legend; the screen stack does not grow | yes — only as an absent node today; the mutation it reddens on is making the app-scope `?` binding `priority=True`, which makes the app chord reachable from the modal legend and opens a second legend (the design's two named mutations were executed at Inc-4 and are inert) |
 | AT-025b (.dev-flow/2026-08-26-ui-next-batch-02/) | US-002 | the home card table | open a workspace holding a map that fails to load | that map's card declares the damaged state; every other card keeps its true values | none — already green under the existing damaged-card nodes (reconciliation, no executed RED) |
 | AT-041 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record (`tests/test_repair_layout.py:274`) — inspection · reconciliation | reconcile the declared id to its on-disk node | resolves to `test_at_r12_pressing_help_presents_every_map_binding` | none — inspection (reconciliation, no executed arm) |
-| AT-042 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record (`tests/test_repair_layout.py:441`) — inspection · reconciliation; two new nodes (LLR-008.3) | reconcile the largest-set arm; realise the smallest-set (`app`) and no-scope-screen arms as new nodes | the largest-set arm resolves to `test_tc_r25`; the two missing arms are new nodes | none for the reconciliation; the two new arms go RED as absent nodes today |
-| AT-033, AT-034, AT-035 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record — inspection · retired | retire the three ids with a ledger entry | the three ids carry no obligation in this batch's Atlas | none — inspection (retired; ids absent by design) |
+| AT-042 (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record (`tests/test_repair_layout.py:441`) — inspection · reconciliation; two new nodes (LLR-008.3) | reconcile the largest-set arm; realise the smallest-set (`app`) and no-scope-screen arms as new nodes | the largest-set arm resolves to `test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions`; the smallest-set arm is `test_tc_r25_…[app]` and the no-scope arm is `test_tc_r25b_a_screen_declaring_no_scope_presents_the_app_set` | none for the reconciliation; each new arm is killed by a mutation aimed at `HelpScreen` (PDR C14): the no-scope arm by changing its default `scope=SCOPE_APP` (`mapper/screens/help.py:288`), the `[app]` arm by forcing `self.scope` to a non-app constant |
+| `AT-033`, `AT-034`, `AT-035` (.dev-flow/2026-08-26-ui-next-batch-02/) | US-003 | the traceability record — inspection · retired | retire the three ids with a ledger entry | the three ids carry no obligation in this batch's Atlas | none — inspection (retired; ids absent by design) |
 
 ---
 
@@ -531,7 +531,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-007.1 — the doubled-`?` node realises AT-044
 - **Traceability:** HLR-007
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.53
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.53, LED-2026-10-08-data-safety-batch.64, LED-2026-10-08-data-safety-batch.65
 - **Statement:** A test node shall press `question_mark` twice from a map and assert the screen stack does not grow.
 - **Validation:** `test (e2e)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_double_question_mark.py` (provisional; the file is `NEW — created in Phase 3`, placed in its own file per the ARQ §5 re-cut).
@@ -541,7 +541,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-007.2 — AT-025b reconciles to the `LLR-N13.1.5` nodes
 - **Traceability:** HLR-007
-- **Ledger:** LED-2026-10-08-data-safety-batch.7
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.64
 - **Statement:** AT-025b shall be reconciled to the existing `LLR-N13.1.5` nodes (`tests/test_repair_cycles.py:501,543,575,624,664`) with no new node.
 - **Validation:** `inspection`
 - **Executed verification:** the nodes exist and assert the damaged-card declaration (`tests/test_repair_cycles.py:501,543,575,624,664`); the reconciliation is a mapping recorded in `.dev-flow/BACKLOG.md` and the traceability matrix.
@@ -551,7 +551,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-008.1 — AT-041 and AT-042's largest-set arm reconcile to their on-disk nodes
 - **Traceability:** HLR-008
-- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.28
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.13, LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.64
 - **Statement:** AT-041 shall be reconciled to its on-disk node `tests/test_repair_layout.py:274` (`test_at_r12_pressing_help_presents_every_map_binding`). AT-042's largest-set arm (`map`, 27 rows) shall be reconciled to `tests/test_repair_layout.py:441` (`test_tc_r25_the_presented_set_equals_the_keymap_set_in_both_directions`, parametrised `SCOPE_MAP` and `SCOPE_HOME`). The two missing arms of AT-042 — the smallest-set arm (`app`, 2 rows) and the screen-that-declares-no-scope arm — have no on-disk node and are realised as new nodes under LLR-008.3.
 - **Validation:** `inspection`
 - **Executed verification:** the nodes exist at the cited lines (verified by grep, 2026-10-08); `test_tc_r25` is parametrised `SCOPE_MAP`/`SCOPE_HOME` only (no `app` arm, `tests/test_repair_layout.py:440`) and `test_tc_r26` asserts the foreign-scope negative (`:456`), so neither covers AT-042's smallest-set or no-scope arm; the reconciliation is recorded in `.dev-flow/BACKLOG.md` and the traceability matrix.
@@ -561,7 +561,7 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 
 ### LLR-008.3 — AT-042's smallest-set and no-scope-screen arms are new nodes
 - **Traceability:** HLR-008
-- **Ledger:** LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.51
+- **Ledger:** LED-2026-10-08-data-safety-batch.28, LED-2026-10-08-data-safety-batch.51, LED-2026-10-08-data-safety-batch.64
 - **Statement:** Two new test nodes shall realise AT-042's missing arms: one driving the smallest set (app scope, 2 rows) through the keymap set equality, and one driving a screen that declares no scope. The no-scope screen falls through the `HelpScreen` default (`scope=SCOPE_APP`, `mapper/screens/help.py:288`), so its presented set is `bindings_for(SCOPE_APP)` — the same 2 rows (`ctrl+p` palette, `?` legend) as the smallest-set arm; the two arms differ only by the constructor path (no scope argument vs the explicit `SCOPE_APP`), not by a different expected set. Verified by probe: `bindings_for('app')` = 2 rows (2026-10-08). Each node asserts the presented set equals the keymap set in both directions.
 - **Validation:** `test (e2e)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_repair_layout.py -k tc_r25` (provisional until the two parametrised arms are added to `test_tc_r25`, `tests/test_repair_layout.py:441`).
@@ -569,10 +569,10 @@ AT ids in this contract are batch-local: they restart at 001 per batch, and ids 
 - **Negative control:** the two arms go RED today only as absent nodes (no `app` arm exists in `test_tc_r25`, `tests/test_repair_layout.py:440`); the behaviour holds (P-2), so the arms are new coverage, not a fix. Executed RED owed at Phase 3.
 - **Boundary catalog:** ☑ empty — a scope whose `bindings_for` returns nothing presents no rows (unreached by any shipped screen: the no-scope screen still presents the app's 2 rows); ☑ boundary — the smallest set (`app`, 2 rows) against the largest (`map`, 27 rows); ☐ invalid ☐ error.
 
-### LLR-008.2 — AT-033/034/035 are retired
+### LLR-008.2 — `AT-033`/034/035 are retired
 - **Traceability:** HLR-008
-- **Ledger:** LED-2026-10-08-data-safety-batch.7
-- **Statement:** AT-033, AT-034 and AT-035 shall be retired with a ledger entry, travelling with the deferred US-N14 (`#D23`).
+- **Ledger:** LED-2026-10-08-data-safety-batch.7, LED-2026-10-08-data-safety-batch.64
+- **Statement:** `AT-033`, `AT-034` and `AT-035` shall be retired with a ledger entry, travelling with the deferred US-N14 (`#D23`).
 - **Validation:** `inspection`
 - **Executed verification:** the canonical attribution `.dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md:6089-6090` assigns the three ids to US-N14 (deferred); the retirement is recorded in `.dev-flow/BACKLOG.md`.
 - **Numeric pass threshold:** the three ids carry no obligation in this batch's Atlas.
@@ -699,7 +699,7 @@ COMPONENT: draft_guard
 | HLR-001…006 (US-001) | A | `test` (unit/integration) | LLR-001.x…LLR-006.x, each with an executed verification and a numeric threshold |
 | HLR-001…006 (US-001) | B | acceptance | AT-001…AT-007, AT-009…AT-015 (with AT-005a/005b, AT-014a–014d split per key); AT-002a and AT-013 are declared Layer-A injection tests and are verified under Layer A through the shipped inspector surface and the `.mmd`/`_nodos.yml` files (`obs`) |
 | HLR-007 (US-002) | A + B | `test` (e2e) + `inspection` | LLR-007.1 (new AT-044 node) + LLR-007.2 (reconcile AT-025b); AT-044, AT-025b |
-| HLR-008 (US-003) | A | `inspection` + `test` (e2e) | LLR-008.1/008.2 reconcile/retire ids (inspection); LLR-008.3 mints AT-042's two new arms (test); AT-041 reconciled, AT-042's largest-set arm reconciled + two arms owed, AT-033/034/035 retired |
+| HLR-008 (US-003) | A | `inspection` + `test` (e2e) | LLR-008.1/008.2 reconcile/retire ids (inspection); LLR-008.3 mints AT-042's two new arms (test); AT-041 reconciled, AT-042's largest-set arm reconciled + two arms owed, `AT-033`/034/035 retired |
 | HLR-009 (US-004) | A + B | `test` (integration) | LLR-009.1/009.2 deflake + injected-delay regression; AT-008 |
 
 - **Layer A default:** every LLR validated by `test`/`analysis` names its exact executed verification (a pytest node id) and a numeric pass threshold; `inspection` LLRs name the file/line and the observable condition.
