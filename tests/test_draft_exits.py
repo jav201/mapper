@@ -17,6 +17,7 @@ from mapper.model import Edge, Ficha, Graph, Node, SchemaField
 from tests.test_draft_save import (
     _answer,
     _guards,
+    _hashes,
     _inspector,
     _open,
     _press,
@@ -184,3 +185,26 @@ async def test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge(tmp_path):
         await _press(pilot, "ctrl+q")
         assert _guards(app) == 1
         await _answer(app, pilot, "escape")
+
+
+@pytest.mark.parametrize("key", ["a", "x"], ids=["at_014a", "at_014b"])
+async def test_at_014_structural_write_opens_the_guard_first(tmp_path, key):
+    """AT-014a/AT-014b (LLR-003.6): add-child (`a`) and archive (`x`) are
+    structural writes, so over a pending draft they must ask before touching
+    anything.  The guard opens and nothing is written until it is answered; `stay`
+    leaves the files byte-identical and the draft pending."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        screen = await _open(app, pilot, map_id)
+        await _type_into(pilot, screen, "insp-title", "x")
+        await _press(pilot, "escape")
+        before = _hashes(tmp_path, map_id)
+
+        await _press(pilot, key)
+        assert _guards(app) == 1
+        assert _hashes(tmp_path, map_id) == before
+        await _answer(app, pilot, "escape")
+        assert _hashes(tmp_path, map_id) == before
+        assert _inspector(screen).draft_values() == {"title": "alfax"}
