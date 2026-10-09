@@ -1,9 +1,9 @@
 """The editable ficha inspector — variant A «taller»'s right-hand panel.
 
 This widget owns no persistence.  `docs/ARCHITECTURE.md` §3 bans `widgets → store`,
-so an edit here is posted as a message and the owning screen — which holds the
-graph and the store — decides what to write.  That keeps the whole-graph write on
-the one object entitled to make it.
+so an edit here only updates this widget's per-node draft (US-001, HLR-001): the
+owning screen — which holds the graph and the store — reads the draft on `ctrl+s`
+and makes the one whole-graph write.  Nothing here ever asks for a save.
 
 Every value it renders comes from `_nodos.yml`, i.e. from a file a human edits by
 hand and that may arrive with a cloned map.  So every such value passes through
@@ -31,6 +31,10 @@ STATE_LABELS = ["ok", "risk", "late", "blocked"]
 # for the key is `open card`, which is true everywhere except on a chip.
 ATTACHMENT_OPEN_LABEL = "open attachment"
 
+# The one style of the unsaved state: the header's `● unsaved (N)` and each dirty
+# label's `●`, painted ALERT -- operator ruling R8: red alerts unsaved content.
+UNSAVED_STYLE = darkside.ALERT
+
 # Fixed column the inspector occupies beside the canvas.  The canvas subtracts it
 # when sizing its render, so the two cannot overlap.
 INSPECTOR_WIDTH = 36
@@ -51,9 +55,12 @@ class FieldInput(Input):
 
     BINDINGS = [Binding("escape", "leave_field", "leave the field")]
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, node_id: str | None = None, **kwargs) -> None:
         kwargs.setdefault("select_on_focus", False)
         super().__init__(*args, **kwargs)
+        # The node this input was built for, so a change that arrives after the
+        # inspector re-pointed can be recognised as stale (LLR-001.2).
+        self.node_id = node_id
 
     class Left(Message):
         """The operator stepped out of a field without abandoning the value."""
@@ -65,19 +72,6 @@ class FieldInput(Input):
 class FichaInspector(Vertical):
     """Editable form for the selected node's ficha."""
 
-    class FieldCommitted(Message):
-        """A ficha value was committed and the screen should persist it.
-
-        `field` is a schema key, or one of the pseudo-keys `title` / `notes` /
-        `state`, which live on the `Ficha` itself rather than in `fields`.
-        """
-
-        def __init__(self, node_id: str, field: str, value: str) -> None:
-            super().__init__()
-            self.node_id = node_id
-            self.field = field
-            self.value = value
-
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.node: Node | None = None
@@ -86,6 +80,14 @@ class FichaInspector(Vertical):
         # `Z2`: what the hint line and the key bar said before a chip took focus, as
         # (hint, groups) -- each None when that surface was not touched.
         self._chip_override: tuple[str | None, list | None] | None = None
+        # The draft (LLR-001.1): DIRTY entries only, keyed by a schema key or one
+        # of the pseudo-keys `title` / `notes` / `state`.  In memory, never saved
+        # from here.
+        self._draft_node_id: str | None = None
+        self._draft: dict[str, str] = {}
+        # field -> (its label Static, the label text, required-and-missing), so the
+        # dirty markers repaint in place without a remount (LLR-002.2).
+        self._labels: dict[str, tuple[Static, str, bool]] = {}
 
     # -- rendering ---------------------------------------------------------
     # No `compose`: the form's shape depends on the selected node's schema, so
@@ -93,9 +95,16 @@ class FichaInspector(Vertical):
     # collide with the ids `_rebuild` mounts.
 
     def show(self, node: Node | None, graph: Graph) -> None:
-        """Rebuild the form for *node*."""
+        """Rebuild the form for *node*.
+
+        Re-showing the draft's node re-diffs the draft against the values it now
+        stores: after a reload or an undo, a value that reached disk turns clean by
+        itself and the others stay (design 1b.8, LLR-004.2, LLR-004.3).
+        """
         self.node = node
         self.schema = list(graph.schema)
+        if node is not None and node.id == self._draft_node_id:
+            self._draft = {f: v for f, v in self._draft.items() if v != self._shown_value(f)}
         if self.is_mounted:
             self.call_next(self._rebuild)
 
@@ -134,36 +143,48 @@ class FichaInspector(Vertical):
             return [Static(self._muted("  (select a node)"), id="insp-empty")]
 
         ficha = self.node.ficha
+        node_id = self.node.id
         missing_keys = {f.key for f in ficha.missing_required(self.schema)}
-        active = STATE_VALUES.index(ficha.state) if ficha.state in STATE_VALUES else 0
+        # The draft overlays what the form shows, so a rebuild never wipes it (A-9).
+        draft = self._draft if node_id == self._draft_node_id else {}
+        self._labels = {}
+        active = STATE_VALUES.index(draft.get("state", self._shown_value("state")))
 
         rows: list = [
             Static(self._header(ficha), id="insp-header"),
-            Static(self._label("title"), classes="insp-label"),
-            FieldInput(value=darkside.plain(ficha.title), id="insp-title"),
-            Static(self._label("state"), classes="insp-label"),
+            self._label_row("title", "title"),
+            FieldInput(
+                value=draft.get("title", darkside.plain(ficha.title)),
+                id="insp-title",
+                node_id=node_id,
+            ),
+            self._label_row("state", "state"),
             DsSegmented(STATE_LABELS, active=active, id="insp-state"),
         ]
         for field in self.schema:
             # The row is labelled with the schema's own label, never the key
             # letter — the whole point of LLR-N01.2.
             rows.append(
-                Static(
-                    self._label(field.label, required_missing=field.key in missing_keys),
-                    classes="insp-label",
+                self._label_row(
+                    field.key, field.label, required_missing=field.key in missing_keys
                 )
             )
             rows.append(
                 FieldInput(
-                    value=darkside.plain(ficha.fields.get(field.key, "")),
+                    value=draft.get(field.key, darkside.plain(ficha.fields.get(field.key, ""))),
                     id=f"insp-field-{field.key}",
+                    node_id=node_id,
                 )
             )
 
         have, req = ficha.required_coverage(self.schema)
         rows += [
-            Static(self._label("notes"), classes="insp-label"),
-            FieldInput(value=darkside.plain(ficha.notes), id="insp-notes"),
+            self._label_row("notes", "notes"),
+            FieldInput(
+                value=draft.get("notes", darkside.plain(ficha.notes)),
+                id="insp-notes",
+                node_id=node_id,
+            ),
             Static(self._label("attachments"), classes="insp-label"),
         ]
         for i, att in enumerate(ficha.attachments):
@@ -200,19 +221,128 @@ class FichaInspector(Vertical):
         return rows
 
     def _header(self, ficha: Ficha) -> darkside.Text:
-        return darkside.Text.assemble(
-            ("card\n", darkside.MUT),
-            (darkside.plain(ficha.title or (self.node.id if self.node else "")),
-             f"bold {darkside.INK}"),
+        header = darkside.Text.assemble(("card", darkside.MUT))
+        count = self._dirty_count()
+        if count:
+            header.append(f"  ● unsaved ({count})", UNSAVED_STYLE)
+        header.append("\n")
+        header.append(
+            darkside.plain(ficha.title or (self.node.id if self.node else "")),
+            f"bold {darkside.INK}",
         )
+        return header
 
-    def _label(self, text: str, *, required_missing: bool = False) -> darkside.Text:
+    def _label(
+        self, text: str, *, required_missing: bool = False, dirty: bool = False
+    ) -> darkside.Text:
         if required_missing:
-            return darkside.Text.assemble(
+            label = darkside.Text.assemble(
                 (darkside.plain(text), darkside.ALERT),
                 ("  required", darkside.ALERT),
             )
-        return darkside.Text.assemble((darkside.plain(text), darkside.MUT))
+        else:
+            label = darkside.Text.assemble((darkside.plain(text), darkside.MUT))
+        if dirty:
+            label.append("  ●", UNSAVED_STYLE)
+        return label
+
+    def _label_row(self, field: str, text: str, *, required_missing: bool = False) -> Static:
+        """A field's label, kept by reference so its `●` repaints in place."""
+        label = Static(
+            self._label(text, required_missing=required_missing, dirty=field in self._shown_draft()),
+            classes="insp-label",
+        )
+        self._labels[field] = (label, text, required_missing)
+        return label
+
+    def _shown_draft(self) -> dict[str, str]:
+        """The draft entries that belong to the node on show (none for any other)."""
+        if self.node is None or self.node.id != self._draft_node_id:
+            return {}
+        return self._draft
+
+    def _dirty_count(self) -> int:
+        return len(self._shown_draft())
+
+    def _paint_dirty(self) -> None:
+        """Repaint the header count and the label markers WITHOUT a rebuild.
+
+        A rebuild remounts every row, which would destroy the field being typed
+        in on every keystroke (LLR-002.2).
+        """
+        if self.node is None:
+            return
+        for header in self.query("#insp-header"):
+            header.update(self._header(self.node.ficha))
+        draft = self._shown_draft()
+        for field, (label, text, required_missing) in self._labels.items():
+            label.update(
+                self._label(text, required_missing=required_missing, dirty=field in draft)
+            )
+
+    # -- the draft (US-001, LLR-001.1, frozen surface I-1) -----------------
+    @property
+    def draft_node_id(self) -> str | None:
+        return self._draft_node_id
+
+    def draft_values(self) -> dict[str, str]:
+        """A copy of the dirty entries: mutating it never changes the draft."""
+        return dict(self._draft)
+
+    def has_draft(self) -> bool:
+        return bool(self._draft)
+
+    def clear_draft(self) -> None:
+        self._draft = {}
+        self._draft_node_id = None
+        self._paint_dirty()
+
+    @staticmethod
+    def _field_of(widget) -> str | None:
+        """The draft key an inspector input edits, or `None` for any other widget."""
+        widget_id = getattr(widget, "id", None) or ""
+        if widget_id == "insp-title":
+            return "title"
+        if widget_id == "insp-notes":
+            return "notes"
+        if widget_id.startswith("insp-field-"):
+            return widget_id[len("insp-field-") :]
+        return None
+
+    def _shown_value(self, field: str) -> str:
+        """What the form shows for *field* when nothing is drafted (LLR-002.1).
+
+        Dirty is measured against THIS, not against the stored value: a stored
+        title that `plain()` alters is shown coerced, and an unknown stored state
+        is shown as `ok`, so neither opens dirty.
+        """
+        ficha = self.node.ficha
+        if field == "state":
+            return ficha.state if ficha.state in STATE_VALUES else STATE_VALUES[0]
+        if field == "title":
+            return darkside.plain(ficha.title)
+        if field == "notes":
+            return darkside.plain(ficha.notes)
+        return darkside.plain(ficha.fields.get(field, ""))
+
+    def _put_draft(self, node_id: str | None, field: str, value: str) -> None:
+        """Record one field's value in the draft: the one mutator of the draft.
+
+        A change from an input built for another node is stale (the inspector
+        re-pointed before it was handled) and is dropped, so it cannot land in
+        this node's draft (LLR-001.2).  A value equal to the shown one is not
+        dirty, so it leaves the draft.  Also the declared Layer-A test seam (E-3).
+        """
+        if self.node is None or node_id != self.node.id:
+            return
+        if value == self._shown_value(field):
+            self._draft.pop(field, None)
+        else:
+            self._draft[field] = value
+        # The draft belongs to a node only while it holds something, so
+        # `draft_node_id` is `None` exactly when there is no draft.
+        self._draft_node_id = node_id if self._draft else None
+        self._paint_dirty()
 
     @staticmethod
     def _muted(text: str) -> darkside.Text:
@@ -344,30 +474,30 @@ class FichaInspector(Vertical):
             return
         self.post_message(self.AttachmentRemoveRequested(self.node.id, index))
 
-    def on_input_submitted(self, event: Input.Submitted) -> None:
+    # Edited IN PLACE, never overridden in a subclass: Textual dispatches every
+    # `on_*` handler along the MRO, so a base handler would stay alive (A-8).
+    def on_input_changed(self, event: Input.Changed) -> None:
+        """Every keystroke updates the draft; nothing is written (LLR-001.2)."""
+        field = self._field_of(event.input)
+        if field is None:
+            return
         event.stop()
-        self._commit(event.input)
+        self._put_draft(getattr(event.input, "node_id", None), field, event.value)
 
-    def on_input_blurred(self, event: Input.Blurred) -> None:
-        self._commit(event.input)
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        """`↵` leaves the field the way `esc` does and keeps the draft (R7, LLR-005.1).
 
-    def _commit(self, widget: Input) -> None:
-        if self.node is None or not widget.id:
-            return
-        if widget.id == "insp-title":
-            field = "title"
-        elif widget.id == "insp-notes":
-            field = "notes"
-        elif widget.id.startswith("insp-field-"):
-            field = widget.id[len("insp-field-") :]
-        else:
-            return
-        self.post_message(self.FieldCommitted(self.node.id, field, widget.value))
+        Run on the INPUT's own queue, not called from here: a message posted while
+        this handler runs carries the inspector as its sender, and Textual stops a
+        bubbling message at its sender (measured), so `Left` would never reach the
+        screen that releases the focus.
+        """
+        event.stop()
+        event.input.call_later(event.input.action_leave_field)
 
     def on_ds_segmented_changed(self, event: DsSegmented.Changed) -> None:
+        """The `state` segment drafts like every other field (R2, LLR-006.1)."""
         if self.node is None:
             return
         event.stop()
-        self.post_message(
-            self.FieldCommitted(self.node.id, "state", STATE_VALUES[event.index])
-        )
+        self._put_draft(self.node.id, "state", STATE_VALUES[event.index])

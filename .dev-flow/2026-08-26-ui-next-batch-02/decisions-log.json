@@ -1,0 +1,105 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-08-26",
+    "decision": "approved",
+    "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
+  },
+  {
+    "station": "P0",
+    "date": "2026-08-26",
+    "decision": "scope-add ratified",
+    "notes": "S-7 (off-screen canvas) folded as a precondition of US-N06. SUPERSEDED at un-park: shipped by the repair batch."
+  },
+  {
+    "station": "ARQ",
+    "date": "2026-08-27",
+    "decision": "approved -- architecture module map proposed (ARCHITECTURE-proposed-at-ARQ.md, commit 8675151); the batch proceeded to P1/PDR on it",
+    "notes": "RETROACTIVE: entry written 2026-10-08 at batch close because the ARQ gate decision was never logged (validator V61). Date is the artifact's commit date, not the logging date."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-26",
+    "decision": "BLOCKED - iterate to P1",
+    "notes": "architect approved-with-conditions (20 sealed decisions, cut 7 -> 9). qa BLOCKED: 10 blockers / 14 majors / 11 minors. security BLOCKED: 3 blockers / 6 majors / 5 minors. Batch PARKED by operator decision so a repair batch could ship S-01/S-02/S-07/S-08 first."
+  },
+  {
+    "station": "P0",
+    "date": "2026-08-27",
+    "decision": "un-parked",
+    "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-27",
+    "decision": "REJECTED - iterate-to-refine to P1 (amendment set 3)",
+    "notes": "Second pass, four lenses in parallel over the 41-amendment fold. architect REJECTED (6 blockers); security BLOCKED (S-16 S-17 S-18); qa approved-with-conditions (8, and 2 of its own source findings were DROPPED by the fold); ux approved-with-conditions (10, two blocker-class). A rejection returns to design: no increment opens. PDR is now at iteration 2 of the soft cap 3. Flags ruled: (a) LLR-N06.2.5 gets a cross-cutting home, sealed #D21, on an EXECUTABLE criterion -- the 15 uncoerced notify sites are app.py(11)+screens/factory.py(4) while Inc-3's set is 4-of-4 without factory.py, so the mis-parenting is an undeclared source-budget breach, not a smell. (b) the map-canvas braille promise is deferred AND the prose amended, sealed #D22, but mis-located by the flag: section 3.4 never mentions braille; the live promise is at :107, :113, :3343. Resume re-verification: fast 413 passed/16 deselected, slow 16 passed/413 deselected, 429 collected, both exit 0; ruff 29; git status byte-identical before and after the battery."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-27",
+    "decision": "orchestrator verifications of lens blockers",
+    "notes": "S-16 INDEPENDENTLY REPRODUCED on a third harness with a positive control: _coerce_field covers 2 of 5 file-derived families; attachment path, schema key/label and the node id are raw; an int attachment path loads with warnings=0 then raises TypeError in search_hits, an int node id yields a phantom duplicate node. Therefore S-02 is LIVE and un-park decision D18's SATISFIED-EXTERNALLY strike is WRONG. S-17 CONFIRMED by grep: LLR-STO.1.1 has 24 occurrences, all prose, zero headings. ARQ-1 CONFIRMED: docs/ARCHITECTURE.md was never amended -- :58 and :136 still declare the old frozen render signature and R-010 still says it stays frozen -- so PLAN section 7's 'map amended' is false against disk (C-44, work that never landed). GOLD-1 CORRECTED: 12 pinned digests derived, not the 18 reported; RadialRenderer pinned at all four sizes, so Inc-1 reddens 4 by construction."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-27",
+    "decision": "RIDER-1 reconciliation executed; batch STOPPED before iteration 3",
+    "notes": "Four parallel read-only lens audits against the lenses' OWN condition ledgers, never the amendment table. 51 union items: ~39 LIVE, 11 discharged -- all 11 by the repair batch's shipped code, none by a document fold. 01-requirements.md has ONE commit (8675151) and has not been edited since the verdicts. Briefed scope executed FALSE (6 named vs ~39 live), so the batch was referred to the operator rather than spending the final iteration. Artifact: 02g-lens-reconciliation.md, merged as PR #7."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-27",
+    "decision": "operator option A -- RE-SCOPE",
+    "notes": "US-N14 «lente» and the S-18 work-budget (paired with S-19 as its precondition) cut to a follow-on design batch. Removes ~7 of ~11 design rulings. Iteration 3 targets US-N06/N07/N13/N16 + palette v2. Nothing deleted -- deferred text stays marked in place. See PLAN.md section 16."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-27",
+    "decision": "D26-D31 recorded",
+    "notes": "D26 strict rule (a code fix never discharges a missing requirement) -- architect lens is 14/14 LIVE under it. D27 B-29/B-30 ride inside this batch as one repair increment. D28 B-29's guard ships with a synthetic fixture because it is a no-op on the current tree (C-55 limb 2). D29 A3 census settled by AST -- the orchestrator produced generation five by grep during the reconciliation itself. D30 amendment set 3 authored in two SEQUENTIAL passes (C-52: no two lanes on one file). D31 PR #7 merged docs-only before the fold."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-08-27",
+    "decision": "approved — SEALED",
+    "notes": "PDR iteration 3 (final) PASSED. All four lenses `approved with conditions`; security lifted its pass-2 block; architect moved 14/14 from LIVE to DISCHARGED. All 12 fold conditions discharged and verified by re-reading the artifact. Decisions issued: #D25 (the three-row seat-diff figure is a regression PIN on Inc-4's diff, not a per-increment budget -- no breach, Inc-3 unblocked), #D26 (the legend scrolls; tabbed redesign deferred B-35), #D27 (the damaged sala card takes a declared glyph; ALERT is not spent -- C-55 limb 2), #D28 (operator-ruled: the 4.5:1 contrast floor STANDS and the token changes; V7/V8 and the card glyph take INK; MUT is legal for readable text only on GROUND; decorative marks exempt). Corrections landed against the orchestrator's own rulings: the abolished cap survived at three sites (the batch's fourth false oracle, and the first created by the fix for a previous one); C-D25a named a vacated increment and had no oracle; and section 5's 'minimal alternative' was FALSE -- already implemented at app.py:1393-1395 and invariant under the defect, proven by two lenses executing it. CARRIED BY DECISION: B-36, UX2-C-01, a known live durable-data-loss defect on master, first scope item of the follow-on batch ahead of lente. Baseline 630+17=647, ruff 29, fixtures clean. Sealed at PDR-addendum-3.md section 8. Implementation NOT started -- commissioned as a fresh session."
+  },
+  {
+    "station": "P3",
+    "date": "2026-08-29",
+    "decision": "Inc-4 PRE-gate: two independent lenses returned; C-21 FIRES, cut is stale",
+    "notes": "architect 02k: trigger A3 does NOT fire (a3_census 15/15 green on the removed tree; render's signature byte-identical; the standing pre-authorization is UNSPENT because it authorises EXTENDING render). Remove ViewState.query in Inc-4. It FALSIFIED the orchestrator's own census: a 4th reader at tests/test_app.py:448, the sole causal break. Pill formula len(_descendants & state.hits) correct but an UNOBSERVED behaviour change (+4 1 -> +4 4); nothing pins it; TC-026's 2nd clause implemented NOWHERE. Requires new LLR-N07.1.3 + TC-026b. qa 02l: 9 of 11 ATs buildable. AT-024 UNBUILDABLE in Inc-4 (owner LLR-N07.2.2b is Inc-5; executed 5/6 renderers query-insensitive). AT-052's observation surface is NAMED NOWHERE in the sealed text. FOUR sealed `shall` clauses carry NO acceptance id: the one-time rebind declaration, `esc limpiar`, C-D6a, UX-Q3-a. C-D6a is STRUCTURALLY VACUOUS in Inc-4 (no lens exists -> M-N07.3-a is reddened by nothing). `esc limpiar` paints a hint for behaviour that does not exist: action_back_or_home pops the screen unconditionally. LLR-N07.3.1's self-guard would be VACUOUS on legacy under BOTH working queries (carlos and riesgo each give tree_order == dict_order). AT-022's wrap arm undrivable on carlos (1 hit). E1c's body is a coercion sink: RLO survives Text.assemble. test_inc3_census::test_cd25a goes RED BY CONSTRUCTION (map seat 31 -> 33). C-21: the AT set changed (one removed, three owed) AFTER the cut was set, so the cut is STALE and must be re-derived BEFORE Phase 3 proceeds. Split of Inc-4 referred to the operator -- it would amend the SOLE-authority cut in 01-requirements.md 5.4, which is beyond a recorded autonomous decision."
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-08",
+    "decision": "P3 closed: implementation line (Inc-1 .. Inc-EN-9, whole-branch gates) merged to master as squash 46e190b on 2026-10-03 (operator M2/M5); logged at close 2026-10-08"
+  },
+  {
+    "station": "DDR",
+    "date": "2026-10-08",
+    "decision": "DDR not held as a separate gate or artifact; the nearest evidence is the whole-branch Gate-1, Gate-2 and security sign-off before merge (VERDICT-merge-2026-10-03.md). Disclosed as a process gap in 05-postmortem; logged at close 2026-10-08"
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-08",
+    "decision": "P4 PASS-WITH-NOTES (04-validation.md): one gate run 2797 passed / 0 failed on 46e190b by the orchestrator; drafted by deepseek-v4-pro, evaluated by qa-reviewer; notes FLAKE-2 (B-98), INC9G-R8 (B-99), ledger not closed"
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-08",
+    "decision": "P5 close batch with carry-over: 23 open items (05-postmortem.md); operator 2026-10-08 chose to waive sealed-record validator blocks (V59/V56/V53/V1) and fix V22/V61, landing by PR"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-08",
+    "decision": "P6 approved by the orchestrator under the operator's delegation of 2026-10-08 ('Revisa, haz el merge y continuemos'); the operator's own reading of the close records is still owed; landed by PR #8"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-08",
+    "decision": "synced-to-obsidian",
+    "notes": "vault:mapper/dev-flow-batches/2026-08-26-ui-next-batch-02/ (40 artifacts + README index). Correction: the P5 entry's '23 open items' is 24 in the final post-mortem (B-101 added after it)."
+  }
+]

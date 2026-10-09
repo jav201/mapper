@@ -1,0 +1,134 @@
+<USERPROFILE>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+...................................FFF.................................. [ 12%]
+........................................................................ [ 14%]
+....................................xxx................................. [ 17%]
+........................................................................ [ 19%]
+........................................................................ [ 22%]
+........................................................................ [ 24%]
+........................................................................ [ 27%]
+........................................................................ [ 29%]
+........................................................................ [ 32%]
+........................................................................ [ 34%]
+........................................................................ [ 37%]
+........................................................................ [ 39%]
+........................................................................ [ 42%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 51%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 64%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+........................................................................ [ 71%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+........................................................................ [ 98%]
+.................................                                        [100%]
+================================== FAILURES ===================================
+_ test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back[size0] _
+
+size = (118, 34)
+tmp_path = WindowsPath('<USERPROFILE>/AppData/Local/Temp/pytest-of-<operator>/pytest-17311/test_z2_a_focused_chip_says_op0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002708C830E30>
+
+    @pytest.mark.parametrize("size", [SIZE, NARROW])
+    async def test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back(
+            size, tmp_path, monkeypatch):
+        _env(monkeypatch, tmp_path)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=size) as pilot:
+            await pilot.pause()
+            screen = await _open(app, pilot, _seed(app, CHIPS))
+            before_hint = screen.query_one(HintLine).text
+            before_bar = _bar_pairs(screen)
+            assert before_hint == map_hint() and (ENTER, "open card") in before_bar
+            await _focus_chip(app, pilot, 0, size)
+            await pilot.pause()
+            hint = screen.query_one(HintLine).text
+>           assert f"{ENTER} open attachment" in hint and "open card" not in hint, hint
+E           AssertionError: j/k/h/l move \xb7 \u21b5 open card \xb7 / search
+E           assert ('\u21b5 open attachment' in 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search')
+
+tests\test_en2.py:131: AssertionError
+_ test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back[size1] _
+
+size = (87, 34)
+tmp_path = WindowsPath('<USERPROFILE>/AppData/Local/Temp/pytest-of-<operator>/pytest-17311/test_z2_a_focused_chip_says_op1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002708CB773E0>
+
+    @pytest.mark.parametrize("size", [SIZE, NARROW])
+    async def test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back(
+            size, tmp_path, monkeypatch):
+        _env(monkeypatch, tmp_path)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=size) as pilot:
+            await pilot.pause()
+            screen = await _open(app, pilot, _seed(app, CHIPS))
+            before_hint = screen.query_one(HintLine).text
+            before_bar = _bar_pairs(screen)
+            assert before_hint == map_hint() and (ENTER, "open card") in before_bar
+            await _focus_chip(app, pilot, 0, size)
+            await pilot.pause()
+            hint = screen.query_one(HintLine).text
+>           assert f"{ENTER} open attachment" in hint and "open card" not in hint, hint
+E           AssertionError: j/k/h/l move \xb7 \u21b5 open card \xb7 / search
+E           assert ('\u21b5 open attachment' in 'j/k/h/l move \xb7 \u21b5 open card \xb7 / search')
+
+tests\test_en2.py:131: AssertionError
+_____________ test_z2_another_field_focus_leaves_open_card_alone ______________
+
+tmp_path = WindowsPath('<USERPROFILE>/AppData/Local/Temp/pytest-of-<operator>/pytest-17311/test_z2_another_field_focus_le0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002708CEB4E30>
+
+    async def test_z2_another_field_focus_leaves_open_card_alone(tmp_path, monkeypatch):
+        _env(monkeypatch, tmp_path)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await pilot.pause()
+            screen = await _open(app, pilot, _seed(app, CHIPS))
+            for _ in range(12):
+                await pilot.press("tab")
+                await pilot.pause()
+>               assert f"{ENTER} open card" in screen.query_one(HintLine).text or str(
+                    getattr(app.focused, "id", "") or "").startswith("insp-att-"), app.focused
+E               AssertionError: FieldInput(id='insp-title', classes='-valid')
+E               assert ('\u21b5 open card' in 'type to draft \xb7 ctrl+s save \xb7 esc leave field' or False)
+E                +  where 'type to draft � ctrl+s save � esc leave field' = MapHintLine().text
+E                +    where MapHintLine() = query_one(HintLine)
+E                +      where query_one = MapScreen().query_one
+E                +  and   False = <built-in method startswith of str object at 0x000002708A8D9530>('insp-att-')
+E                +    where <built-in method startswith of str object at 0x000002708A8D9530> = 'insp-title'.startswith
+E                +      where 'insp-title' = str(('insp-title'))
+E                +        where 'insp-title' = getattr(FieldInput(id='insp-title', classes='-valid'), 'id', '')
+E                +          where FieldInput(id='insp-title', classes='-valid') = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}).focused
+
+tests\test_en2.py:157: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_en2.py::test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back[size0]
+FAILED tests/test_en2.py::test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_bar_and_hands_back[size1]
+FAILED tests/test_en2.py::test_z2_another_field_focus_leaves_open_card_alone
+3 failed, 2907 passed, 24 deselected, 3 xfailed in 1521.21s (0:25:21)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-414719' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-414719' coro=<sleep.<locals>.wait() running at <USERPROFILE>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <USERPROFILE>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+EXIT_CODE=1

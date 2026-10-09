@@ -20,6 +20,7 @@ from __future__ import annotations
 import inspect
 
 from mapper.keymap import KEYMAP, bindings_for, duplicate_chords
+from tests.test_data_safety_census import DATA_SAFETY_ADDED
 
 # The `map`-scope seat as it stood at `68b1c09` (Inc-4a's close), which is
 # Inc-4b's ENTRY.  Identical to Inc-3's frozen exit -- Inc-4a touched 0 lines of
@@ -57,7 +58,12 @@ def live_map_seat() -> frozenset[tuple[str, str]]:
 
 def test_cd25a_the_seat_diff_is_exactly_the_three_rows_inc4b_declares():
     """Declared EQUALS measured, in both directions."""
-    exit_seat = live_map_seat()
+    # A statement about Inc-4b's exit, so the rows a LATER batch declares are
+    # subtracted rather than absorbed: the data-safety batch (2026-10-08) adds
+    # `ctrl+s` -> `save_draft`, pinned against the live seat in its own census.
+    later = {(key, action) for scope, key, action in DATA_SAFETY_ADDED if scope == "map"}
+    assert later == {("ctrl+s", "save_draft")}
+    exit_seat = live_map_seat() - later
     assert len(ENTRY_MAP_SEAT) == 31, len(ENTRY_MAP_SEAT)
     assert len(exit_seat) == 33, len(exit_seat)
     assert exit_seat - ENTRY_MAP_SEAT == DECLARED_ADDED

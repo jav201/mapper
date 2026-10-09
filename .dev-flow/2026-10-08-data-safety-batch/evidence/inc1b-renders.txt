@@ -1,0 +1,468 @@
+--- 118 cols BEFORE (seat without the ctrl+s row) · at rest ---
+ browse maps    connect repo    build map    factory                                                          ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree        ▰▰▰▱▱                card
+                        3 nodes                                                    alfa
+▾ raiz                1         ▐ raiz                                             title
+    alfa                         ◫ r                                                alfa
+    beta              1          D✓                                                state
+                                       │                                            ok   risk   late   blocked
+territory                      ┌───────┴────────┐                                  documento
+∙ · ∙                   ▐ alfa           ▐ beta                                     acta
+                         ◫ acta           ◫ no record                              notes
+coverage 67%             D✓               D░                                        n
+                                                                                   attachments
+                                                                                   + add attachment
+                                                                                   coverage
+                                                                                   ▰
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match … +26  ? all keys
+
+--- 87 cols · at rest ---
+ browse maps    connect repo    build map    factory                           ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+
+--- 87 cols · draft of two fields, card visible ---
+ browse maps    connect repo    build map    factory                           ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree ▰▰▰▱▱                card  ● unsaved (2)
+3 nodes                                             alfa
+        ▐ raiz                                      title  ●
+         ◫ r                                         alfax
+         D✓                                         state
+               │                                     ok   risk   late   blocked
+       ┌───────┴────────┐                           documento  ●
+▐ alfa           ▐ beta                              actay
+ ◫ acta           ◫ no record                       notes
+ D✓               D░                                 n
+                                                    attachments
+                                                    + add attachment
+                                                    coverage
+                                                    ▰
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+
+--- 87 cols · same draft, card hidden (hint-line prefix, ALERT) ---
+ browse maps    connect repo    build map    factory                           ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+● unsaved (2) · ctrl+s save · next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+
+--- 87 cols · j with the draft: the guard ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                             unsaved draft on «alfa» · ds
+
+                            s save   d discard   esc stay
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- 118 cols · at rest ---
+ browse maps    connect repo    build map    factory                                                          ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree        ▰▰▰▱▱                card
+                        3 nodes                                                    alfa
+▾ raiz                1         ▐ raiz                                             title
+    alfa                         ◫ r                                                alfa
+    beta              1          D✓                                                state
+                                       │                                            ok   risk   late   blocked
+territory                      ┌───────┴────────┐                                  documento
+∙ · ∙                   ▐ alfa           ▐ beta                                     acta
+                         ◫ acta           ◫ no record                              notes
+coverage 67%             D✓               D░                                        n
+                                                                                   attachments
+                                                                                   + add attachment
+                                                                                   coverage
+                                                                                   ▰
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match … +27  ? all keys
+
+--- 118 cols · draft of two fields, card visible ---
+ browse maps    connect repo    build map    factory                                                          ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree        ▰▰▰▱▱                card  ● unsaved (2)
+                        3 nodes                                                    alfa
+▾ raiz                1         ▐ raiz                                             title  ●
+    alfa                         ◫ r                                                alfax
+    beta              1          D✓                                                state
+                                       │                                            ok   risk   late   blocked
+territory                      ┌───────┴────────┐                                  documento  ●
+∙ · ∙                   ▐ alfa           ▐ beta                                     actay
+                         ◫ acta           ◫ no record                              notes
+coverage 67%             D✓               D░                                        n
+                                                                                   attachments
+                                                                                   + add attachment
+                                                                                   coverage
+                                                                                   ▰
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match … +27  ? all keys
+
+--- 118 cols · same draft, card hidden (hint-line prefix, ALERT) ---
+ browse maps    connect repo    build map    factory                                                          ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree                                            ▰▰▰▱▱
+                        3 nodes
+▾ raiz                1         ▐ raiz
+    alfa                         ◫ r
+    beta              1          D✓
+                                       │
+territory                      ┌───────┴────────┐
+∙ · ∙                   ▐ alfa           ▐ beta
+                         ◫ acta           ◫ no record
+coverage 67%             D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+● unsaved (2) · ctrl+s save · next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match … +27  ? all keys
+
+--- 118 cols · j with the draft: the guard ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                             unsaved draft on «alfa» · ds
+
+                                            s save   d discard   esc stay
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- 140 cols · at rest ---
+ browse maps    connect repo    build map    factory                                                                                ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree                              ▰▰▰▱▱                card
+                        3 nodes                                                                          alfa
+▾ raiz                1         ▐ raiz                                                                   title
+    alfa                         ◫ r                                                                      alfa
+    beta              1          D✓                                                                      state
+                                       │                                                                  ok   risk   late   blocked
+territory                      ┌───────┴────────┐                                                        documento
+∙ · ∙                   ▐ alfa           ▐ beta                                                           acta
+                         ◫ acta           ◫ no record                                                    notes
+coverage 67%             D✓               D░                                                              n
+                                                                                                         attachments
+                                                                                                         + add attachment
+                                                                                                         coverage
+                                                                                                         ▰
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match  N previous match … +26  ? all keys
+
+--- 140 cols · draft of two fields, card visible ---
+ browse maps    connect repo    build map    factory                                                                                ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree                              ▰▰▰▱▱                card  ● unsaved (2)
+                        3 nodes                                                                          alfa
+▾ raiz                1         ▐ raiz                                                                   title  ●
+    alfa                         ◫ r                                                                      alfax
+    beta              1          D✓                                                                      state
+                                       │                                                                  ok   risk   late   blocked
+territory                      ┌───────┴────────┐                                                        documento  ●
+∙ · ∙                   ▐ alfa           ▐ beta                                                           actay
+                         ◫ acta           ◫ no record                                                    notes
+coverage 67%             D✓               D░                                                              n
+                                                                                                         attachments
+                                                                                                         + add attachment
+                                                                                                         coverage
+                                                                                                         ▰
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match  N previous match … +26  ? all keys
+
+--- 140 cols · same draft, card hidden (hint-line prefix, ALERT) ---
+ browse maps    connect repo    build map    factory                                                                                ◔ mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+map · 3n · 1 missing    ◆ mapper · atlas · legacy tree                                                                  ▰▰▰▱▱
+                        3 nodes
+▾ raiz                1         ▐ raiz
+    alfa                         ◫ r
+    beta              1          D✓
+                                       │
+territory                      ┌───────┴────────┐
+∙ · ∙                   ▐ alfa           ▐ beta
+                         ◫ acta           ◫ no record
+coverage 67%             D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+● unsaved (2) · ctrl+s save · next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child  ↵ open card  / search  n next match  N previous match … +26  ? all keys
+
+--- 140 cols · j with the draft: the guard ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                        unsaved draft on «alfa» · ds
+
+                                                       s save   d discard   esc stay
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
