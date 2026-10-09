@@ -99,3 +99,20 @@ vault: it is reflected in the requirement or in the module map, which are versio
 | C14 | qa m1–m6 | arms for the four LLR boundaries (esc with live search, same-node move, same-map link, archiving the draft's own node); E-2 third mode for TC-004.2c; AT-012 observable confirmed at its RED; parametrised ids `at_014a..d`; AT-042 mutation aimed at `HelpScreen`; language/palette censuses (`tests/test_inc9.py:387-389`, `tests/test_inc9e.py:303`) run at Inc-1a; one manual `ctrl+s`/`ctrl+q` press in the operator's real Windows terminal recorded at Inc-1b | per increment packet |
 
 Unresolved operator-owned items: none (R8 ruled by the operator 2026-10-08).
+
+## Condition discharge log (orchestrator)
+
+| id | Discharged | Evidence (re-read, not trusted) |
+|---|---|---|
+| C1 | ✅ Inc-2 U7 | `MapperApp.action_quit` ends the walk when a guard is already open; `tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge` (RED proven) |
+| C2, C3 | ✅ before Inc-1b | design rows 1b.14a / 1b.9 (`5f1f4e1`) |
+| C4, C5 | ✅ at seal | ledger `.63`, design R-5 |
+| C6 | ✅ Inc-1b + Inc-1c U1 | hidden-card prefix in `ALERT`, renders 87/118/140, repaint when the card hides again |
+| C7 | ✅ Inc-1b | focus returns to the edited field after `ctrl+s` (UX-1 executed) |
+| C8 | ✅ Inc-1b | reload-failure toast wording (UX-1 inspected) |
+| C9 | ✅ Inc-1a | guard title `unsaved draft on «{title}» · {map_id}` |
+| C10 | ✅ Inc-1b / Inc-2 | enablers named in packets 003/005 |
+| C11 | ✅ Inc-1b | E-6 denylist oracle |
+| C12 | ✅ Inc-3 | per-site delayed-scroll arms or declared survivors (packet 001) |
+| C13 | ✅ Inc-1a + Inc-1b | AT-015 executed RED with `plain()` dropped; oracle reads `Static.content` |
+| C14 | ✅ | arms realised across Inc-1a…Inc-2; **operator real-terminal smoke 2026-10-09**: `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard; operator, verbatim: "Todod funcionó, continuemos." |
