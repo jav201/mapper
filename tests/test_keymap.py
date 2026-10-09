@@ -23,6 +23,7 @@ from mapper.app import (
     _ImportPreviewScreen,
 )
 from mapper.keymap import GROUP_SCOPE, KEYMAP, bindings_for, groups_for_keybar, palette_items
+from mapper.screens.draft_guard import DraftGuardScreen
 from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
@@ -42,6 +43,8 @@ SCOPE_OWNER = {
     # Inc-9 (`#D9`, LLR-N16.1.2): the last two help screens join the seat.
     keymap.SCOPE_FACTORY: FactoryScreen,
     keymap.SCOPE_SETTINGS: SettingsScreen,
+    # Data-safety batch (2026-10-08) Inc-1a: the draft guard modal.
+    keymap.SCOPE_DRAFT: DraftGuardScreen,
 }
 
 # Per-scope sizes, pinned EXACTLY.  A `>=` fence leaves slack, and slack is
@@ -75,6 +78,9 @@ EXPECTED_PER_SCOPE = {
     # (`C-D9a`).  Updated in the same edit as the seat rows.
     keymap.SCOPE_FACTORY: 10,
     keymap.SCOPE_SETTINGS: 2,
+    # 0 -> 3: data-safety Inc-1a declares the guard's `s` / `d` / `esc`
+    # (`save` / `discard` / `stay`, LLR-003.1).
+    keymap.SCOPE_DRAFT: 3,
 }
 
 # Derived from the live module, never hand-listed (control C-31).
