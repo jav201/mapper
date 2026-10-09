@@ -2378,7 +2378,16 @@ class MapScreen(Screen):
         already left every region."""
         self._declare_after_layout()
         if isinstance(event.widget, FieldInput):
+            # The field's draft hint (Inc-1c U2) is a borrow: hand the resting hint back.
+            # If the keyboard landed on another field, that field already set its own
+            # hint; if it landed on an attachment chip, the chip's `open attachment`
+            # swap (`Z2`) needs the resting text to swap inside, so re-announce it.
+            focused = self.app.focused
+            if isinstance(focused, FieldInput):
+                return
             self.query_one(HintLine).set_hint(self._resting_hint())
+            if FichaInspector._is_chip(focused):
+                self.query_one("#map-inspector", FichaInspector)._announce_open_attachment()
 
     def _current_renderer(self):
         if self.outline_mode:

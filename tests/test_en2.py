@@ -141,7 +141,13 @@ async def test_z2_a_focused_chip_says_open_attachment_on_the_hint_and_the_key_ba
             await pilot.press("tab")
             await pilot.pause()
         assert not str(getattr(app.focused, "id", "") or "").startswith("insp-att-"), app.focused
-        assert screen.query_one(HintLine).text == before_hint
+        # The chip hands back what it borrowed.  If the keyboard landed on a text field,
+        # that field's own hint applies (data-safety Inc-1c U2: it names `ctrl+s`).
+        hint = screen.query_one(HintLine).text
+        if type(app.focused).__name__ == "FieldInput":
+            assert "ctrl+s save" in hint and "open attachment" not in hint, hint
+        else:
+            assert hint == before_hint
         assert _bar_pairs(screen) == before_bar
 
 
@@ -154,5 +160,10 @@ async def test_z2_another_field_focus_leaves_open_card_alone(tmp_path, monkeypat
         for _ in range(12):
             await pilot.press("tab")
             await pilot.pause()
-            assert f"{ENTER} open card" in screen.query_one(HintLine).text or str(
-                getattr(app.focused, "id", "") or "").startswith("insp-att-"), app.focused
+            # Z2 scope: `open attachment` belongs to chips only.  Since data-safety Inc-1c
+            # (UX-1 M2) a focused text field names `ctrl+s` instead of `open card`.
+            focused = str(getattr(app.focused, "id", "") or "")
+            hint = screen.query_one(HintLine).text
+            if not focused.startswith("insp-att-"):
+                assert "open attachment" not in hint, (app.focused, hint)
+                assert f"{ENTER} open card" in hint or "ctrl+s save" in hint, (app.focused, hint)
