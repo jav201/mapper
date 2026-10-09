@@ -690,7 +690,7 @@ COMPONENT: draft_guard
 > - **Layer A — white-box / functional (`TC-NNN`):** validates the HLR/LLR mechanism (the HOW). Methods: `test`, `inspection`, `analysis`.
 > - **Layer B — black-box / behavioral acceptance (`AT-NNN`):** validates the user story's outcome through the shipped surface (the WHAT). Method: `acceptance`.
 
-> **Observation method (`obs`) — stated once, referenced by every AT:** each AT is observed through a Textual `App.run_test` pilot that presses the real keys (typing, `ctrl+s`, `↵`, `q`/`esc`, `ctrl+q`, the guard's `s`/`d`/`esc`), never through posted messages or direct setters; the map's `.mmd` and `_nodos.yml` are hashed (sha256) before and after the scenario; "written once" = the hash pair changes exactly once across the scenario. Failing-store arms inject the failure by monkeypatching the screen's store `save` to raise after writing after writing zero or both files (AT-002a, a declared Layer-A fault-injection seam).
+> **Observation method (`obs`) — stated once, referenced by every AT:** each AT is observed through a Textual `App.run_test` pilot that presses the real keys (typing, `ctrl+s`, `↵`, `q`/`esc`, `ctrl+q`, the guard's `s`/`d`/`esc`), never through posted messages or direct setters; the map's `.mmd` and `_nodos.yml` are hashed (sha256) before and after the scenario; "written once" = the hash pair changes exactly once across the scenario. Failing-store arms inject the failure by monkeypatching the screen's store `save` to raise after writing zero or both files (AT-002a, a declared Layer-A fault-injection seam).
 
 | Requirement | Layer | Method | Verification |
 |---|---|---|---|
