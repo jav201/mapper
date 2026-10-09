@@ -65,7 +65,7 @@
     }
   ],
   "guided": false,
-  "current_station": "DDR",
+  "current_station": "P4",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -201,6 +201,11 @@
       "station": "P3",
       "date": "2026-10-09",
       "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (fc5141b); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-09",
+      "decision": "DDR approved with conditions D1-D5 (architect + qa-reviewer), all discharged 2026-10-09: C14 boundary arms, AT-025b joined node, TC-009.1, records aligned, operator smoke attributed (human:Javier); tests drafted by five Kimi units; external V7 (flow bundle SKILL.md vs manifest) recorded, not this project's"
     }
   ],
   "standing_authorization": {
