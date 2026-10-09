@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 
 from mapper.app import MapperApp
-from mapper.model import Edge, Ficha, Graph, Node, SchemaField
+from mapper.model import Attachment, Edge, Ficha, Graph, Node, SchemaField
 from tests.test_draft_save import (
     _answer,
     _guards,
@@ -203,6 +203,49 @@ async def test_at_014_structural_write_opens_the_guard_first(tmp_path, key):
         before = _hashes(tmp_path, map_id)
 
         await _press(pilot, key)
+        assert _guards(app) == 1
+        assert _hashes(tmp_path, map_id) == before
+        await _answer(app, pilot, "escape")
+        assert _hashes(tmp_path, map_id) == before
+        assert _inspector(screen).draft_values() == {"title": "alfax"}
+
+
+async def _tab_to(app, pilot, want):
+    """Real keys only: `tab` until *want* holds focus (the attachment chip)."""
+    for _ in range(24):
+        if getattr(app.focused, "id", None) == want:
+            return
+        await pilot.press("tab")
+        await pilot.pause()
+    raise AssertionError(f"tab never reached {want}: focus is {getattr(app.focused, 'id', None)}")
+
+
+@pytest.mark.parametrize("key", ["A", "X"], ids=["at_014c", "at_014d"])
+async def test_at_014_structural_write_opens_the_guard_first_attachments(tmp_path, key):
+    """AT-014c/AT-014d (LLR-003.6): add-attachment (`A`) and remove-attachment
+    (`X`) are structural writes, so over a pending draft they must ask before
+    touching anything -- the same decision point the other structural writes use.
+    The guard opens and nothing is written until it is answered; `stay` leaves
+    the files byte-identical and the draft pending."""
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await pilot.pause()
+        map_id = _seed_map(app)
+        if key == "X":
+            g = app.store.load(map_id)
+            g.nodes["a"].ficha.attachments.append(
+                Attachment(kind="url", path="https://example.com/acta", caption="acta")
+            )
+            app.store.save(map_id, g)
+        screen = await _open(app, pilot, map_id)
+        await _type_into(pilot, screen, "insp-title", "x")
+        await _press(pilot, "escape")
+        before = _hashes(tmp_path, map_id)
+
+        if key == "X":
+            await _tab_to(app, pilot, "insp-att-0")
+        await _press(pilot, key)
+
         assert _guards(app) == 1
         assert _hashes(tmp_path, map_id) == before
         await _answer(app, pilot, "escape")
