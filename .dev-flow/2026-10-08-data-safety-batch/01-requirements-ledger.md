@@ -406,3 +406,10 @@
 - **What changed:** AT-004, AT-005a/b, AT-011, AT-012, AT-014a–d name the mutation that reddens them; AT-005 observes `len(app.screen_stack)`, AT-012 `app.is_running`; §5.1 lists AT-002a/AT-013 as Layer-A; HLR-002 and HLR-007 surfaces no longer name internal classes.
 - **Why:** "Feature absent" is not a counterfactual (C-40); surfaces must name keys, screens and files.
 - **Evidence:** 02-review.md Round 3.
+
+### LED-2026-10-08-data-safety-batch.58 — R4 (operator: 'Aplicar y verificar ligero') — reload re-establishes the view; wording; residuals A-14/A-15
+- **Requirement:** LLR-004.2
+- **Date:** 2026-10-08
+- **What changed:** LLR-004.2's reload re-establishes the view by the screen's own load path (nav rebuilt, load warnings surfaced, focus cleared, cursor kept or moved to root), drops a draft entry whose node is gone with a warning, and scopes "no write" to the map files (the index rebuild is a cache refresh); §5.1's obs paragraph names AT-002a's two arms; AT-011 observes stack depth; AT-009 names its mutation; AT-013 leaves the Layer-B list; residuals A-14 and A-15 recorded.
+- **Why:** P2 round 4 (architect and security majors converged: swapping `self.graph` alone leaves `NavigationModel`, focus and load warnings stale; qa major: stale three-case text). Applied by the orchestrator under the operator's ruling at the cap.
+- **Evidence:** `mapper/app.py:1622-1636`, `:270-271`, `:3528-3529`, `:3912-3914`; `mapper/store.py:783`, `:926-965`.
