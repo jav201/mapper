@@ -1,8 +1,8 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-10-09-modular-batch",
-  "batch_objective": "Modularise mapper/app.py (R-009): move the top-level screens and their modals out of the 4957-line app.py into their own modules under mapper/screens/, with MapperApp keeping orchestration, so that later batches can run parallel product lanes. Behaviour-preserving: no visible change.",
+  "batch_id": "2026-10-10-perf-batch",
+  "batch_objective": "Performance and scale (B-33 / S-15, S-18, S-19): measure first, then remedy. MAX_RENDER_NODES bounds the node COUNT, not the render WORK — a 73-node map was measured at 72.5 s because cost follows edges (the 51-node fixture carries 410); three private copies of the constant over three walks, and children_of is O(E) per call. Establish a reproducible measurement harness, then bound and reduce the work so large maps stay responsive. Behaviour-preserving except where a bound must change what is painted, and then only as the requirements state.",
   "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
   "mode": "full",
   "mode_history": [
@@ -77,175 +77,78 @@
       "batch_id": "2026-10-09-canon-batch",
       "mode": "core",
       "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-modular-batch",
+      "mode": "full",
+      "closed_at": "2026-10-10"
     }
   ],
   "guided": false,
-  "current_station": "P6",
-  "phase_status": "approved",
+  "current_station": "P0",
+  "phase_status": "not-started",
   "stations_active": [
     "P0",
-    "ARQ",
     "P1",
     "P2",
-    "PDR",
     "P3",
-    "DDR",
     "P4",
     "P5",
     "P6"
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 1,
+    "P1": 0,
     "P2": 0,
     "P3": 0,
     "P4": 0,
     "P5": 0,
-    "P6": 0,
-    "ARQ": 0,
-    "DDR": 0,
-    "PDR": 0
+    "P6": 0
   },
-  "triggers": {
-    "evaluated_at": "2026-10-09T21:47:20",
-    "fired": [
-      "A1",
-      "A2",
-      "A3",
-      "A4",
-      "B1",
-      "E1",
-      "F1"
-    ],
-    "not_fired": [
-      "B2",
-      "B3",
-      "B4",
-      "C1",
-      "C2",
-      "C3",
-      "C4",
-      "C5",
-      "C6",
-      "C7",
-      "C8",
-      "D1",
-      "D2",
-      "E2",
-      "E3",
-      "F2"
-    ],
-    "record": ".dev-flow/2026-10-09-modular-batch/PLAN.md#triggers"
-  },
+  "triggers": {},
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-10-09-modular-batch/01-requirements.md",
-    "requirements_ledger": "repo:.dev-flow/2026-10-09-modular-batch/01-requirements-ledger.md",
-    "traceability": "repo:.dev-flow/2026-10-09-modular-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-10-10-perf-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-10-perf-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-10-perf-batch/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-10-09-modular-batch/03-increments/",
-    "evidence": "repo:.dev-flow/2026-10-09-modular-batch/evidence/",
+    "increments": "repo:.dev-flow/2026-10-10-perf-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-10-perf-batch/evidence/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "design_pdr": "vault:mapper/design/PDR-2026-10-09-modular-batch.md",
-    "design_ddr": "vault:mapper/design/DDR-2026-10-09-modular-batch.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/README.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-10-perf-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-10-perf-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "d8cf9426c52e7a7b665e08e09a556ba6e12a2b50",
+  "base_ref": "a36f63e22b620fe42fc0301194313921f81e77d4",
   "artifacts": {
-    "plan": ".dev-flow/2026-10-09-modular-batch/PLAN.md",
-    "P1": ".dev-flow/2026-10-09-modular-batch/01-requirements.md",
-    "P1_ledger": ".dev-flow/2026-10-09-modular-batch/01-requirements-ledger.md"
+    "plan": ".dev-flow/2026-10-10-perf-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-10-perf-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-10-perf-batch/01-requirements-ledger.md"
   },
-  "decisions_log": [
-    {
-      "station": "P0",
-      "date": "2026-10-09",
-      "decision": "P0 approved (self-approved under the standing authorization, operator words 'full + autónomo + merge (Recomendado)'): objective R-009 modularisation; triggers A1-A4, B1, E1, F1 fired"
-    },
-    {
-      "station": "ARQ",
-      "date": "2026-10-09",
-      "decision": "ARQ approved (self-approved): module map amended in docs/ARCHITECTURE.md (TARGET rows) from the Kimi K3 proposal, corrected by the orchestrator's MRO spike (BINDINGS stay on the core class; disjoint on_* names); independent architect review owed at P2/PDR"
-    },
-    {
-      "station": "P1",
-      "date": "2026-10-09",
-      "decision": "P1 approved (self-approved): contract drafted by Kimi K2 (3 US, 7 HLR, 16 LLR, AT-065..070); scan-spec flag 'session' answered as a false positive"
-    },
-    {
-      "station": "P2",
-      "date": "2026-10-09",
-      "decision": "P2 round 1: iterate-to-refine (self-ruled): 4 blockers (ARCH-1 no legal MapScreen import edge for home/import_preview; ARCH-2 8 patch targets not 2; QA-1 parity capture undefined; QA-2 no per-method body identity / undefined-name check) + majors + minors; orchestrator rulings: sibling screens import MapScreen from screens.map with a reordered spine, patch targets repointed in the moving increment, text golden committed at Inc-0, test_mod_bodies.py"
-    },
-    {
-      "station": "P1",
-      "date": "2026-10-09",
-      "decision": "P1 iteration 1 approved (self-approved): all 18 P2 round-1 findings applied in four Kimi units (HLRs/premises, LLRs, ARCHITECTURE.md, ledger LED .1-.8); orchestrator rulings ARCH-1/ARCH-2/QA-1/QA-2 recorded"
-    },
-    {
-      "station": "P2",
-      "date": "2026-10-09",
-      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer proceed; architect ARCH-1..7 resolved, ARCH-8/9 blockers + ARCH-10/11 fixed (LED .9); orchestrator spine probe 0 illegal edges; contract size 69.7k > 54k budget recorded as watch item"
-    },
-    {
-      "station": "PDR",
-      "date": "2026-10-09",
-      "decision": "PDR approved with conditions C1-C9 (self-approved under the standing authorization): architect + qa-reviewer approved-with-conditions; document conditions C1, C2, C3, C6, C7, C8 applied (LED .10); C4, C5, C9 are executed in P3 and re-read at DDR"
-    },
-    {
-      "station": "P3",
-      "date": "2026-10-10",
-      "decision": "P3 approved (self-approved under the standing authorization): 22 increments (Inc-0, A1-A7, B0-B12); every gate run recorded (last: 3124 passed / 0 failed at e5d80e9); group code reviews A2-A4+B0 and B1-B12 APPROVE-WITH-NITS 0 HIGH, MED vacuous census scans repaired (1c77233); packets 001-022"
-    },
-    {
-      "station": "DDR",
-      "date": "2026-10-10",
-      "decision": "DDR sealed approved (DDR-2026-10-09-modular-batch): architect (Claude Opus) + qa-reviewer (Claude Sonnet) approved on re-review after increment 023 (69676cf) closed D-C1..D-C3 and the DDR evidence closed D-C4 + QA MED-1/MED-2; P4 gate full suite at 69676cf 3133 passed / 3 xfailed / 0 failed (evidence/p4-gate-full-suite.transcript), slow lane 19/0 at acbd087; 2 LOWs carried to backlog"
-    },
-    {
-      "station": "P4",
-      "date": "2026-10-10",
-      "decision": "P4 PASS-WITH-NOTES (04-validation.md): full suite at 69676cf 3133 passed / 3 xfailed / 0 failed, slow lane 19/0, network lane declared not run; Layer A 7 HLR + 17 LLR, Layer B 3 US / AT-065..071; drafted by Kimi, qa-reviewer (Claude Sonnet) approve-with-conditions, M-1/M-2 applied; 4 minor gaps to backlog"
-    },
-    {
-      "station": "P5",
-      "date": "2026-10-10",
-      "decision": "P5 close approved (05-postmortem.md rev 2): drafted by Kimi; architect (Claude Opus) + qa-reviewer (Claude Sonnet) approve-with-conditions then approve on re-review; 24 MOD ids folded into REQUIREMENTS.md (LLR-MOD.7.1 amended by LED .12 first); backlog B-108..B-113; next: P6 docs"
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-10",
-      "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary, module diagram (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH/MED; merged as 9bcbabb (PR #16, squash; feat/modular-batch kept on the remote)"
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-10",
-      "decision": "synced-to-obsidian",
-      "notes": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/ (full sync: 17 artifacts + README with metrics; PDR/DDR to vault:mapper/design/; repo-homed artifacts not copied; Dashboard untouched)"
-    }
-  ],
+  "decisions_log": [],
   "standing_authorization": {
     "autonomous": true,
     "merge": true,
-    "asked_on": "2026-10-09",
+    "asked_on": "2026-10-10",
     "operator_words": {
-      "go_ahead": "Ok, tenemos que modularizar para poder paralelizar el trabajo, eso es primordial.",
-      "mode_and_authorization": "full + autónomo + merge (Recomendado)",
+      "go_ahead": "Si, remedia rendimiento y escala. (2026-10-09) · sigue, usa kimi-for-coding como está (2026-10-10)",
+      "mode_and_authorization": "'sigue' answered the orchestrator's request for an OK on mode and autonomy after the modular close; read as the same terms as the modular batch: full + autónomo + merge",
+      "worker_model": "kimi-for-coding, unchanged",
       "decision_recording": "not asked as a separate question; the recording obligation is unconditional"
     },
-    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless."
+    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless. TUI design changes (anything that changes what is painted) need a prototype verdict from the operator first."
   },
   "previous_batch": {
-    "batch_id": "2026-10-09-canon-batch",
-    "merge_commit": "df91eaa",
-    "close_pr": "https://github.com/jav201/mapper/pull/14",
-    "sync_pr": "https://github.com/jav201/mapper/pull/15",
-    "closed_at": "2026-10-09",
-    "close_commit": "df91eaa",
+    "batch_id": "2026-10-09-modular-batch",
+    "merge_commit": "9bcbabb",
+    "close_pr": "https://github.com/jav201/mapper/pull/16",
+    "sync_pr": "https://github.com/jav201/mapper/pull/17",
+    "closed_at": "2026-10-10",
+    "close_commit": "a36f63e",
     "obsidian_synced": true,
-    "archive": ".dev-flow/2026-10-09-canon-batch/decisions-log.json + state-snapshot-at-close.json"
+    "archive": ".dev-flow/2026-10-09-modular-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
@@ -269,6 +172,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": true,
-  "created_at": "2026-10-09T00:00:00"
+  "obsidian_synced": false,
+  "created_at": "2026-10-10T00:00:00"
 }
