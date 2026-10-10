@@ -9,7 +9,7 @@ from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import DataTable, Input, Label, Static
+from textual.widgets import DataTable, Static
 
 from . import darkside
 from .export import save_svg
@@ -19,7 +19,6 @@ from .keymap import (
     SCOPE_APP,
     SCOPE_HOME,
     SCOPE_IMPORT,
-    SCOPE_PLUG,
     bindings_for,
     groups_for_keybar,
     hint_pair,
@@ -47,6 +46,7 @@ from .screens.common import (
 from .screens.construct import ConstructScreen
 from .screens.map.screen import MapScreen
 from .screens.map.navigation import NavigationModel
+from .screens.plug_repo import PlugRepoScreen
 from .screens.prompt import (
     _ConfirmScreen,
     _FichaScreen,
@@ -610,56 +610,6 @@ class _ImportPreviewScreen(Screen):
             _PromptScreen("save as", self.source_path.stem),
             callback=on_name,
         )
-
-    def action_home(self) -> None:
-        self.app.pop_screen()
-
-    def action_palette(self) -> None:
-        self.app.action_palette()
-
-
-class PlugRepoScreen(Screen):
-    """Input screen for plugging a GitHub repo."""
-
-    KEY_SCOPE = SCOPE_PLUG
-    # `K4`: the legend's title reads the SCREEN's name, not the scope id.
-    legend_view = "connect repo"
-    BINDINGS = screen_bindings(SCOPE_PLUG)
-
-    def compose(self) -> ComposeResult:
-        yield TabStrip("p", crumb=["connect repo"])
-        yield Vertical(
-            Label("connect repo", id="repo-title"),
-            Input(placeholder="owner/name or github URL", id="repo-input"),
-            id="repo-dialog",
-        )
-        yield HintLine("enter owner/name, a URL or a local path and press ↵", "↵")
-        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
-
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        if event.input.id == "repo-input":
-            raw = event.value.strip()
-            repo = self._normalize_repo(raw)
-            if repo:
-                self.app.push_screen(RepoScreen(repo))
-
-    @staticmethod
-    def _normalize_repo(value: str) -> str:
-        """Accept owner/name, full GitHub URL, or local path."""
-        value = value.strip().rstrip("/")
-        if not value:
-            return ""
-        # Strip scheme and trailing .git from GitHub URLs.
-        lowered = value.lower()
-        if lowered.startswith("https://github.com/") or lowered.startswith("http://github.com/"):
-            path = value.split("/", 3)[3]  # the check above is case-insensitive, so is this
-            path = path.removesuffix(".git")
-            return path  # owner/name
-        if ":" in value and "git@github.com" in lowered:
-            path = value.split(":", 1)[1]
-            path = path.removesuffix(".git")
-            return path
-        return value
 
     def action_home(self) -> None:
         self.app.pop_screen()
