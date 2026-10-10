@@ -502,6 +502,8 @@ async def _push_and_pop(app, pilot) -> None:
 
 
 async def test_inc9h_cr_f2_the_home_hint_follows_the_maps_when_the_screen_resumes(tmp_path):
+    """AT-062 (`2026-10-09-hygiene-batch`, HLR-002, B-99): kills `HOME-1`, the
+    removal of `HomeScreen.on_mount`'s hint refresh (the Inc-9g reviewer's `R8`)."""
     app = MapperApp(tmp_path)
     derived = keymap.hint_pair(keymap.SCOPE_HOME, "open_selected")
     async with app.run_test(size=SIZE) as pilot:

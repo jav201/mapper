@@ -166,7 +166,10 @@ async def test_llr_003_5_a_second_ctrl_q_stacks_no_second_guard(tmp_path):
 
 
 async def test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge(tmp_path):
-    """PDR C1: `ctrl+q` over a draft whose node-change guard is already up must
+    """AT-061 (`2026-10-09-hygiene-batch`, HLR-001): the walk reads the guard
+    through `guard_open()`; ignoring it wedges the walk.
+
+    PDR C1: `ctrl+q` over a draft whose node-change guard is already up must
     not hang the quit walk.  The walk ends immediately (the operator answers the
     open guard first), and a later `ctrl+q` still asks."""
     app = MapperApp(tmp_path)
