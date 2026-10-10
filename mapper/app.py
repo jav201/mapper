@@ -70,6 +70,7 @@ from .screens.common import (
     screen_bindings,
 )
 from .screens.construct import ConstructScreen
+from .screens.map.navigation import NavigationModel
 from .screens.prompt import (
     _ConfirmScreen,
     _FichaScreen,
@@ -101,45 +102,6 @@ from .views.radial import (
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 from .widgets.inspector import INSPECTOR_WIDTH, FieldInput, FichaInspector
 from .widgets.rail import RAIL_WIDTH, OutlineRail
-
-
-class NavigationModel:
-    """Cursor navigation over a tree graph."""
-
-    def __init__(self, graph: Graph):
-        self.graph = graph
-        self.cursor = graph.root_id
-
-    def children(self, nid: str | None = None) -> list[str]:
-        nid = nid or self.cursor
-        return self.graph.children_of(nid) if nid else []
-
-    def parent(self) -> str | None:
-        return self.graph.parent_of(self.cursor) if self.cursor else None
-
-    def next_sibling(self) -> str | None:
-        p = self.parent()
-        if p is None:
-            return None
-        sibs = self.children(p)
-        if self.cursor not in sibs:
-            return None
-        idx = sibs.index(self.cursor)
-        return sibs[idx + 1] if idx + 1 < len(sibs) else None
-
-    def prev_sibling(self) -> str | None:
-        p = self.parent()
-        if p is None:
-            return None
-        sibs = self.children(p)
-        if self.cursor not in sibs:
-            return None
-        idx = sibs.index(self.cursor)
-        return sibs[idx - 1] if idx > 0 else None
-
-    def first_child(self) -> str | None:
-        ch = self.children()
-        return ch[0] if ch else None
 
 
 # ---------------------------------------------------------------------------
