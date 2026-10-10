@@ -1,0 +1,186 @@
+Inc-M1 RED proofs — batch 2026-10-10-perf-batch, Lane M
+worktree-relative paths only; product: mapper/model.py; tests: tests/test_perf_adjacency.py
+
+baseline sha256(model.py) = 1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+
+### M-M1a bypass the cache (hit check -> `if False:`, rebuild every lookup)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_cache_counted_ops
+tests\test_perf_adjacency.py:195: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_cache_counted_ops - AssertionError:...
+1 failed in 0.52s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### M-M1b drop the `is` check (len-only key, `_adj_src is not None`)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_cache_mutation_script_equality
+tests\test_perf_adjacency.py:103: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_cache_mutation_script_equality - As...
+1 failed in 0.50s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### fresh-list mutant (children_of returns the cached list itself)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_cache_mutation_script_equality
+tests\test_perf_adjacency.py:149: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_cache_mutation_script_equality - As...
+1 failed in 0.52s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: alias (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:341: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.67s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: clear (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.68s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: del (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:341: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.70s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: extend (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.68s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: iadd (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:341: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.77s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: imul (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:341: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.79s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: insert (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.69s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: pop (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.65s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: remove (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.64s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: reverse (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.60s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: setitem (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:341: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.67s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: slice (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:341: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.59s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### census in-place form planted in mapper/model.py: sort (M-M1c)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_edges_writer_census
+tests\test_perf_adjacency.py:338: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_edges_writer_census - AssertionErro...
+1 failed in 0.60s
+exit=1 -> RED
+sha256 before=1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+sha256 after =1491480836bc38cd01002b893d9189548cb7f56fad9b6c15b0243ef8debbe83e
+byte-identical restore: True
+
+### post-restore GREEN (whole new file)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py
+.................                                                        [100%]
+17 passed in 8.48s
+exit=0

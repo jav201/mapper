@@ -695,7 +695,12 @@ _EXPECTED_NON_TEXT = {
     Node: ("ficha",),
     Edge: (),
     Document: ("template",),
-    Graph: ("nodes", "edges", "root_id", "schema", "documents", "load_warnings", "csv_collisions"),
+    # perf batch (Inc-M1, LLR-PERF.2.1): the private adjacency cache on Graph
+    # (`compare=False, repr=False`, the csv_collisions precedent).  Private
+    # runtime state only — never written to the sidecar; declared, not
+    # round-tripped.  Guarded by tests/test_perf_adjacency.py.
+    Graph: ("nodes", "edges", "root_id", "schema", "documents", "load_warnings", "csv_collisions",
+            "_adj_src", "_adj_len", "_adj_children", "_adj_parents"),
     # csv-safety batch (B-114): build-time provenance of a CSV import.  Only
     # `line_no` (CsvRow) and `rows` (CsvCollision) are declared non-text;
     # `raw_id`/`slug` are `str` and classify as text.  None of the four
