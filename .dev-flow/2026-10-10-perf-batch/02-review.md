@@ -12,7 +12,9 @@
 - **Gate:**
   - **Round 1** → `iterate-to-refine` → Phase 1 (contract + PDR amended; no security findings; the
     Lane S mechanism was contradicted by the code and is replaced under a spike gate).
-  - Round 2 → pending (owed after this iteration's amendments are re-reviewed).
+  - **Round 2** → `approve-with-conditions` on both artifacts (architect + qa-reviewer; no HIGH) →
+    PDR sealed with conditions, after the round-2 rulings R10–R18 were applied in this unit
+    (ledger `LED-2026-10-10-perf-batch.4`).
 
 - **Findings (round 1):** 6 high · 13 med · 5 minor (24 total). Both reviewers were read-only; the
   architect ran probes on the scratchpad (`probe/p1.py`, `p2.py`). The orchestrator ruled R1–R9
@@ -141,3 +143,66 @@ no painted string and no home-path/account-name surface.
 - ✗ AT-075b post-edit arm covers archive only → add-child + undo arms (fixed by R1);
 - ✗ M-M3 unreddenable → file-diff check (fixed by R8);
 - ✓ P4 protocol and LOW-12 recorded (fixed by R9 / no change).
+
+---
+
+## Round 2
+
+Reviewer ids follow the orchestrator's transcription of the round-2 review
+(`PERF-review-r2.md`, held in the orchestrator's temp area, not committed): the architect
+(Claude Opus; probes `p3`/`p4` on this worktree at HEAD `5cde04e`) numbered its findings by
+subject; the qa-reviewer (Claude Sonnet) numbered its findings `1`–`7`. Both reviewers were
+read-only. Round-1 items were confirmed resolved: the unscaled memo on strong references (R1),
+the widened census guard + fresh-list `children_of` (R2), the real-gesture AT-076 drive path —
+superseded in kind by R10, which replaces the round-1 gesture with `a` add_child — the per-dump
+≤ 2E + c oracle (R3, refined by R11), the withdrawn/gated Lane S (R4, resolved to B-118 at the
+spike gate), the bare-`Canvas` equality shapes (R5), exact node ids (R6), golden provenance
+(R7), the M-M3 file-diff check (R8, refined by R17), and the P4 protocol (R9).
+
+### Findings — round 2
+
+| ID | Reviewer | Severity | Area / Req | What | Recommendation / ruling | Status |
+|----|----------|----------|------------|------|------------------------|--------|
+| A-076 | architect | med | AT-076, HLR-PERF.2 | AT-076 still names a gesture that does not persist: ficha edits are DRAFTS (`copy.deepcopy` of the base graph, `drafts.py:138`; the snapshot `dump` is bound at import, `undo.py:10`); the real persisting gestures in `editing.py` are `a` add_child (`:111-124`), archive (`:145-147`), attachments (`:49-51, :76-77`). | **R10** — the drive gesture is `a` add_child through real keys on a saved map. | applied (ledger .4) |
+| dump bound | architect | med | LLR-PERF.2.2, HLR-PERF.2 | The per-dump ≤ 2E + c bound holds only for a LOCAL incident pass (probe p3: exactly 2E, ratio 2.000 vs the 3.998 base); a counting wrapper swaps `edges`, so a dump that rides the adjacency cache goes cold and costs 3E. | **R11** — the linear dump builds its own incident set locally; the bound and the [1.8, 2.2] ratio are stated per dump call against that design. | applied |
+| nodes guard | architect | med | LLR-PERF.1.2 | No guard covers the `nodes` dict writers while the memo key relies on the `nodes` dict (+len); writers today: `model.py:165` `add_node`, `editing.py:216` wholesale. | **R14** — Lane R adds its own AST guard on `nodes` dict writers (the declared set above), mirroring Lane M's `edges` guard, so the lanes stay independent. | applied |
+| one-axis | architect | low | LLR-PERF.1.1, HLR-PERF.1, AT-075 | The "a one-axis-only clip fails the cap" claim is half false (probe p4, wide-2000 ONE render: no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547 — y-only is byte-count-identical to no clip). | **R16** — say "a y-only clip fails the cap"; the x-axis carries the whole gain; record the exact count and geometry at execution. | applied |
+| memo location | architect | low | LLR-PERF.1.2, proposal §4 | The memo location is self-contradictory: "instance-private cache" (proposal §4) vs "the memo lives in module-level `_geometry`" (LLR-PERF.1.2). | **R12** — the memo lives on the `LayeredRenderer` INSTANCE and is passed into `_geometry` as an argument; no module-global state. | applied |
+| approvals | architect | — | R1 key completeness, R2/R5/R7, disjointness | APPROVE: the memo key's strong-reference completeness, the widened census guard, the bare-`Canvas` equality shapes, the golden provenance protocol, and the disjoint lane file sets were verified sound (probe p3/p4 workspaces). | recorded — no change. | recorded |
+| 1 | qa-reviewer | med | LLR-PERF.1.2 arms | The `resize` and `title` arms name no reddening mutation. | **R13** — both arms are reddened by mutation M-R2c "cache the SCALED layout (key without `card_w`/`gap`)". | applied |
+| 2 | qa-reviewer | med | LLR-PERF.1.2 `undo` arm | The `undo` arm's "identity-reuse" claim is not deterministic — allocator `id()` reuse cannot be relied on; the arm as written can pass vacuously. | **R13** — the `undo` arm is a plain "new Graph object misses" check PLUS mutation M-R2d "key on `id(graph)`" exercised by a node that forces address reuse (drop the old graph, `gc.collect()`, allocate a same-shape graph, assert a miss); if reuse cannot be forced deterministically, say so and keep only the plain check. | applied |
+| 3 | qa-reviewer | med | LLR-PERF.1.2, proposal §4 | Same memo-location contradiction as the architect; a module-global memo would leak across screens and pin `Graph`s; name the storage and the spy seam. | **R12** — instance storage named (`_layout_misses` is the spy; the memo dict is instance state passed into `_geometry`); the import preview's fresh-renderer-per-paint (`screens/import_preview.py:103`) simply misses. | applied |
+| 4 | qa-reviewer | med | §5.2 (`01-requirements.md:448-451`) | §5.2 still demands 100 % of LLRs PERF.1.1…3.2, the M-S1/2/3 controls and AT-077/077b — all withdrawn with Lane S to B-118. | **R15** — §5.2 scoped to the surviving LLRs (PERF.1.x, 2.x) and controls (no M-S*). | applied |
+| 5 | qa-reviewer | low | wire-cap rationale | ≈ 0.5 M estimated for a correct clip; an x-only clip passes the cap — the stated rationale ("one-axis-only clip fails") mis-describes which axis matters. | **R16** (merged with the architect's one-axis finding) — the rationale names the y-only failure and the expected order (thousands per render at wide-2000, 118×34), measured at execution. | applied |
+| 6 | qa-reviewer | low | M-M3 / LLR-PERF.2.3 | `git diff 5cde04e -- mapper/views` is empty only on the Lane M branch; Lane R legitimately edits `mapper/views/layered.py`, so as a batch-level check it is vacuous/misleading. | **R17** — the check runs on the Lane M branch BEFORE the join; the DDR records it PER LANE. | applied |
+| 7 | qa-reviewer | low | census alias form | The alias detection form states no limits. | **R18** — the alias form documents its limits: aliasing through function arguments, containers, or attributes on other objects is NOT detected. | applied |
+
+### Orchestrator rulings R10–R18 (round 2 → applied in this unit)
+
+| Ruling | Answers findings | Disposition |
+|--------|------------------|-------------|
+| R10 — AT-076's gesture is `a` add_child through real keys on a saved map; the counting wrapper wraps `mapper.mermaid.dump` (the store imports it at call time, `store.py:861`); the golden is pinned to the map AFTER the edit (the saved form includes the new node); archive/attachments gestures are boundary fixtures, not the drive gesture. | A-076 | applied (`01-requirements.md` §5.1 AT-076, HLR-PERF.2 shipped surface; proposal §5) |
+| R11 — the linear dump uses a LOCAL incident pass (one pass over the edges building the incident set inside the dump call), NOT the adjacency cache; bound per dump call ≤ 2E + c; scaling ratio count(2N)/count(N) ∈ [1.8, 2.2]. | dump bound | applied (HLR-PERF.2, LLR-PERF.2.2) |
+| R12 — the layout memo lives on the `LayeredRenderer` INSTANCE (each `MapScreen` holds one, `screens/map/screen.py:73`; the import preview builds a fresh renderer per paint, `screens/import_preview.py:103`, so it simply misses) and is PASSED INTO module-level `_geometry` as an argument; no module-global state; the spy is the named instance counter `_layout_misses`, incremented on each miss. | memo location (both reviewers) | applied (LLR-PERF.1.2, glossary, proposal §4/§5) |
+| R13 — the `resize` and `title` arms are reddened by mutation M-R2c "cache the SCALED layout (key without `card_w`/`gap`)"; the `undo` arm is a plain "new Graph object misses" check PLUS mutation M-R2d "key on `id(graph)`" exercised by a node forcing address reuse (drop the old graph, `gc.collect()`, allocate a same-shape graph, assert a miss) — if reuse cannot be forced deterministically, the node says so and keeps only the plain check. | qa 1, qa 2 | applied (LLR-PERF.1.2, §6.1) |
+| R14 — Lane R adds its own AST guard on `nodes` dict writers (declared set: `model.py` `add_node`, `screens/map/editing.py` wholesale), mirroring Lane M's `edges` guard, so the lanes stay independent; control = M-R2e → `test_nodes_writer_census`. | nodes guard | applied (LLR-PERF.1.2, §6.1) |
+| R15 — §5.2 scoped to the surviving LLRs (PERF.1.x, 2.x) and controls (no M-S*); the AT-077/077b golden line left with the Lane S withdrawal. | qa 4 | applied (§5.2) |
+| R16 — wire-cap rationale: the x-only clip carries the whole gain (≈ 0.5 M estimated, PASSES); "a y-only clip fails the cap"; the exact count and geometry are measured and recorded at execution (expected order: thousands per render at wide-2000, 118×34; probe p4 one render: no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547). | one-axis (architect), qa 5 | applied (HLR-PERF.1, LLR-PERF.1.1, AT-075) |
+| R17 — M-M3 (`git diff 5cde04e -- mapper/views` empty) runs on the Lane M branch BEFORE the join; the DDR records it per lane (it is not a Lane R control). | qa 6 | applied (LLR-PERF.2.3, §6.1) |
+| R18 — the census alias form documents its limits: aliasing through function arguments, containers, or attributes on other objects is NOT detected. | qa 7 | applied (LLR-PERF.2.1) |
+
+### shall / should check (round 2)
+Clean: the round-2 amendments add no modal verb to any Statement beyond `shall`.
+
+### Security review summary (round 2)
+Not run — trigger family C still does not fire (no input surface, no painted operator ids, no
+network, no new painted string). Guard A-110 (`tests/test_no_operator_paths.py`) unaffected.
+
+### Verdict round 2
+Both reviewers returned **approve-with-conditions** on both artifacts (`01-requirements.md` +
+`design/design-proposal.md`), no HIGH findings. The orchestrator merged their conditions into
+rulings R10–R18; Kimi applied them to the contract, ledger, proposal and PLAN.md in this unit
+(ledger `LED-2026-10-10-perf-batch.4`) and the PDR was sealed `approved with conditions` —
+conditions: the R10–R18 document fixes, applied here and to be re-read at the DDR, plus the
+goldens-at-base capture owed before the lanes fork. Self-approved under the standing
+authorization (`state.json` `batch_objective`, quoted in PLAN.md).

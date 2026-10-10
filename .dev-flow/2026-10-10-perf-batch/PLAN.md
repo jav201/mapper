@@ -56,6 +56,8 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 **Spike gate, 2026-10-10 — Lane S WITHDRAWN (else branch, ledger `LED-2026-10-10-perf-batch.3`).** Spike unit PERFS did not establish feasibility: on the seed map at 118×34 and 87×34 the mount renders 2× before AND after the prototype (baseline: one pre-layout `refresh_canvas` render at canvas 0×0 + one settle render; prototype: two settle renders), the final canvas is byte-identical, wide-2000 was not measured (the unit timed out), and the prototype needed a second guarded render site in `_declare_after_layout` plus an A3 census pin change (65→66). Per the pre-written ruling, Lane S leaves the batch to backlog **B-118**; HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn with it. The batch forks **two** lanes — R and M (file sets still disjoint) — and the trunk owns the join.
 
+**P1 iteration 2, 2026-10-10 — round-2 review approve-with-conditions; PDR sealed (ledger `LED-2026-10-10-perf-batch.4`).** Round 2 (architect probes p3/p4 + qa-reviewer; no HIGH) returned approve-with-conditions on both artifacts; rulings R10–R18 applied to the contract, ledger, proposal, this PLAN and the PDR: AT-076's gesture is the `a` add_child action through real keys on a saved map with the counting wrapper on `mapper.mermaid.dump` itself (golden pinned to the map AFTER the edit); the linear dump is a LOCAL incident pass (≤ 2E + c per call, ratio [1.8, 2.2]); the layout memo lives on the `LayeredRenderer` INSTANCE (passed into `_geometry` as an argument — no module-global state; spy = `_layout_misses`); the `resize`/`title` arms gain mutation M-R2c and the `undo` arm is a plain "new Graph misses" check plus M-R2d's forced-address-reuse node (with the determinism escape); Lane R gains its own `nodes`-writer census guard (M-R2e); §5.2 is scoped to the surviving LLRs/controls; the wire-cap rationale names the y-only failure (probe p4: x-only carries the whole gain — no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547 per render at wide-2000, 118×34; exact count recorded at execution); M-M3 runs per lane at the DDR; the census alias form states its limits. The PDR was sealed `approved with conditions` — conditions: R10–R18 re-read at the DDR + the goldens-at-base capture owed BEFORE the lanes fork.
+
 ## Objective
 
 Bound and reduce the work a large map costs. Measured (P0): opening a wide 2000-node map takes 4.8 s and 6000+ times out; every navigation key repaints the whole map (0.6–1.9 s at 2000–6000 nodes); mount paints three times; save is O(N·E) in the Mermaid dump; load is YAML-bound. The dense-DAG cost of B-33 (72.5 s) is not reachable by opening a saved map (the parser refuses multi-parent nodes).
@@ -65,14 +67,26 @@ Bound and reduce the work a large map costs. Measured (P0): opening a wide 2000-
 | Story / station | Status | Notes |
 |---|---|---|
 | P0 | done | measurement done (`spike/perf-baseline.md` §1–§7); resumed after the B-114 batch merged |
-| P1 | in progress | contract + PDR authored (PERFARQ, ledger .1); round-1 review iterated — rulings R1–R9 applied (iteration 1, ledger .2); awaiting PDR re-review to fork lanes R/M; spike gate resolved the else branch — Lane S withdrawn to B-118 (ledger .3), lanes R and M fork |
+| P1 | in progress | contract + PDR authored (PERFARQ, ledger .1); round-1 review iterated — rulings R1–R9 applied (iteration 1, ledger .2); spike gate resolved the else branch — Lane S withdrawn to B-118 (ledger .3), lanes R and M fork; round-2 review approve-with-conditions — rulings R10–R18 applied and the PDR sealed (iteration 2, ledger .4); next: capture the goldens at the trunk (base SHA `5cde04e`), then fork lanes R and M in parallel worktrees |
 
 ## Roadmap + increment plan
 
 Planned at P1 from `spike/perf-baseline.md` §4/§7; refined at P1 iteration 1 per round-1 rulings
 R1–R9 (ledger `LED-2026-10-10-perf-batch.2`); Lane S withdrawn at the spike gate (ledger
-`LED-2026-10-10-perf-batch.3` — the batch now forks TWO lanes, R and M). The trunk
+`LED-2026-10-10-perf-batch.3` — the batch now forks TWO lanes, R and M); refined at P1 iteration 2
+per round-2 rulings R10–R18 (ledger `LED-2026-10-10-perf-batch.4`). The trunk
 owns requirements/PDR/PLAN + the join (DDR). All verifications name exact `file::test` node ids.
+
+**Fork plan (2026-10-10, after the PDR seal):** (0) the TRUNK captures every new golden first —
+AT-075 painted lines, AT-075b painted lines, AT-076 `.mmd` bytes (pinned to the map AFTER the
+add_child edit) — on base SHA `5cde04e` (pre-remedy) with base SHA + sha256 per golden (the AT-065
+precedent), BEFORE any lane fork; (1) lanes R and M fork into PARALLEL WORKTREES off the stamped
+trunk (the A4 modular split — first parallel fork), each with the disjoint file set below; (2)
+each lane lands its increments and executes its own negative-control transcripts inside the lane;
+(3) the trunk joins at the DDR: full suite + AT-065 parity goldens + golden census byte-checks,
+the surviving controls re-executed (M-R1a/b, M-R2/b/c/d/e, M-M1a/b/c, M-M2a/b), M-M3 recorded PER
+LANE (it runs on the Lane M branch before the join — not a Lane R control), golden provenance
+verified, P4 wall-clock evidence interleaved base/head on one machine and session.
 
 - **Lane R** (2 source files): Inc-R1 — `mapper/canvas.py` span clipping + `tests/test_perf_paint_clip.py`
   (wire-count oracle with the tightened ≤ 1,200,000 cap, bare-`Canvas` equality vs in-test reference
@@ -112,6 +126,8 @@ owns requirements/PDR/PLAN + the join (DDR). All verifications name exact `file:
 | 2026-10-10 | Lane S WITHDRAWN to B-118 (else branch; ledger .3) | spike PERFS inconclusive: mount renders 2× before AND after the prototype at 118×34/87×34 on the seed map, final canvas byte-identical, wide-2000 unmeasured (unit timed out), prototype needed a second guarded render site + an A3 census pin change; HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077/077b withdrawn with it; lanes R and M proceed |
 | 2026-10-10 | wire cap tightened to ≤ 1,200,000 (from 4,800,000) | a one-axis-only clip passed the loose cap (qa baseline note); the tightened cap is ≈ 1/20 of the measured 23,983,998 baseline for two keypresses |
 | 2026-10-10 | cache validity = strong reference (`is` + `len`), never `id()` | `id()` can be recycled after free (findings B1/MED-4); soundness today is accidental (`_remove_subtree` calls `children_of` before reassigning) |
+| 2026-10-10 | round-2 rulings R10–R18 applied at P1 iteration 2; PDR sealed `approved with conditions` (ledger .4) | reviewer findings (no HIGH): AT-076's gesture was still a non-persisting ficha edit; the ≤ 2E+c dump bound held only for a local incident pass; the memo location was self-contradictory; the resize/title arms named no mutation; the undo arm relied on non-deterministic allocator reuse; §5.2 still demanded the withdrawn Lane S scope; the wire-cap rationale was half false (a y-only clip fails — x-only carries the gain); M-M3 is per-lane; the census alias form stated no limits |
+| 2026-10-10 | the layout memo is INSTANCE state on `LayeredRenderer` (spy `_layout_misses`), passed into `_geometry` as an argument — no module global | a module-global memo would leak across screens and pin `Graph`s (qa finding 3); each `MapScreen` holds one renderer (`screen.py:73`) and the import preview's fresh renderer per paint (`import_preview.py:103`) simply misses |
 
 ## Risks / watch-items
 
