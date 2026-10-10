@@ -5,56 +5,137 @@
 
 > **Owed in.** `core` ✓ · `full` ✓
 
-> **Field guide:** `templates/guides/review-template.md` explains each field below and the rules that read it. It ships with the flow and is not copied into this batch.
+> **Field guide:** `templates/guides/review-template.md` explains each field below and the rules that read them. It ships with the flow and is not copied into this batch.
 
 ## ✅ Verdict (read first)
 
-- **Gate:** `approve` → Phase 3  /  `iterate-to-refine` → Phase 1 (blockers present, or a requirement-defect major)
-- **Out-of-scope findings:** `<N>` named and routed below  /  `none`
+- **Gate:**
+  - **Round 1** → `iterate-to-refine` → Phase 1 (5 blockers).
+  - Round 2 is owed after the P1 iteration-1 rulings below are applied and re-reviewed.
+- **Out-of-scope findings:** 2 named and routed below (B-115, B-116); plus the pre-existing
+  O(N·E) orphan pass (`mapper/import_csv.py:101`) remains the design §6 watch-item already recorded — no new row.
 
-- **Findings:** `<B>` blocker · `<M>` major · `<m>` minor
-- **shall/should check:** ✓ clean  /  ✗ misuse (blocker)
-- **Two-layer (blockers):** ✓ every story has an `AT` · output reqs name deliverable+observation · both trace chains complete · ATs are genuinely black-box  /  ✗ `<which>`
-- **Census (change-first):** done — best-effort + gate-confirmed  /  ⚠ incomplete   (NEVER stamp "VERIFIED COMPLETE")
-- **Security:** ✓ no findings  /  ⚠ `<N>` findings
-- **Evidence checklists (architect / qa / security):** ✓ all complete  /  ✗ `<missing>`
-
-> If gate = `approve` and every line is ✓, the Detail below is reference. Any blocker/⚠ → read the matching part.
+- **Findings (round 1):** 5 blocker · 11 major · 8 minor (24 total). Both reviewers were
+  read-only; the architect ran probes on temp workspaces. The orchestrator ruled R1–R10
+  (table below); Kimi applied them in P1 iteration 1 (ledger `LED-2026-10-10-csv-safety-batch.2`…`.4`).
+- **shall/should check:** ✓ clean (round 1) — `shall` appears in Statements only; no modal `should` in any HLR/LLR statement.
+- **Two-layer (blockers):** ✗ in round 1:
+  - AT-072's no-write oracle was undefined and ignored `mapper.db` / `*.tmp` (qa Q2).
+  - AT-072…074's drive path cited a direct `action_save()` call, not the real import flow (qa Q3) — not genuinely black-box per (d).
+  - Negative controls were not stated per layer (qa Q5).
+  - Every story has an AT, both trace chains complete — unchanged.
+- **Census (change-first):** done best-effort by the architect (§B of the transcript: every save
+  entry point checked, `csv_collisions` does not leak through sidecar/undo/focus/deepcopy) — ⚠ the
+  "no existing test breaks" claim is unproven until the P3 full-suite gate runs (qa QB3).
+- **Security:** no security-reviewer findings in round 1. Family C fired (C6 input surface, C8
+  painted operator ids); C8 stays enforced by LLR-CSV.2.2's `darkside.plain` routing.
+- **Evidence checklists (architect / qa):** summarized below from the reviewers' transcriptions.
 
 ---
 
 ## Detail (reference)
 
-### Findings
-| ID | Reviewer | Severity | Area / Req | What | Recommendation | Status |
-|----|----------|----------|------------|------|----------------|--------|
-| `<one row per finding>` | | | | | | |
+### Findings — round 1
 
-**A worked example — text to read, never rows of your record.** It sits in a fence so that nothing has to be deleted: a row copied out of it would claim a finding nobody raised. Write your own rows in the table above.
+Reviewer ids follow the orchestrator's transcription of the round-1 review
+(`CSV-review-r1.md`, held in the orchestrator's temp area, not committed): architect
+requirements `A1`–`A6`,
 
-```text
-| *(example)* F1 | architect | blocker / major / minor | | | | open / fixed |
-```
+| ID | Reviewer | Severity | Area / Req | What | Recommendation / ruling | Status |
+|----|----------|----------|------------|------|------------------------|--------|
+| A1 | architect | blocker | LLR-CSV.2.2, HLR-CSV.2 | A collision that violates no loader rule still loses a row silently: two rows slug to the same id, both with empty parent — `import_csv.py:73` overwrites, save and reload succeed, first row gone. LLR-CSV.2.2 paints only "whenever the preview graph violates a loader invariant" ⇒ nothing painted; US-CSV-002 unmet. | **R1:** any non-empty `Graph.csv_collisions` alone paints the collision sentence (precedence first) and makes `action_save` refuse via the existing toast, whether or not a loader rule is violated. | applied in iteration 1 |
+| A2 | architect | blocker | HLR-CSV.2, boundary catalog | The root-collision fixture is a CYCLE, not multi-parent (probe: `multi_parent=[]`, `find_cycle=['a-b','c','a-b']`, save says "the map has a cycle"; the orphan loop `import_csv.py:97-102` closes it). LLR-CSV.1.1's threshold unsatisfiable as written; HLR-CSV.2 needs a precedence rule. | **R3:** reclassify the fixture as a cycle case; precedence collision > multi-parent > cycle. | applied |
+| A3 | architect | major | HLR-CSV.2 (cycle sentence) | `slugify("")` returns `"n"` (`mermaid.py:51`), so an empty parent slugifies to `n`: every top-level row points at node `n`, ids `!!!`/`???` both → `n`, a valid CSV whose root id is `N` becomes a self-cycle n→n, top-level rows get the `? ` parked prefix; the cycle sentence wrongly blames "the parent column". | **R4:** the empty-slug family → backlog **B-115**. **R3:** the cycle sentence is reworded neutral ("the import builds a cycle"), not blaming the parent column. | applied / routed |
+| A4 | architect | major | HLR-CSV.1, LLR-CSV.1.1 | Unsupported-syntax refusal (`mermaid.py:108`) IS reachable from a Graph: a title with `\n` dumps to an unparsable `.mmd` (verified). Also an orphan node titled `a --> b` re-parses as a spurious edge — silent corruption (verified). HLR-CSV.1 says "any graph that violates a loader invariant". | **R2:** the store check becomes a round trip — refuse when `mermaid.parse(mermaid.dump(G))` raises OR yields a different structure. | applied |
+| A5 | architect | minor | LLR-CSV.1.1 | Rule I1 counts edges; `dump` drops exact duplicate edges (`mermaid.py:148` region) and the reparse succeeds — a same-parent collision saves and loses a row today. Refusing it is right: declare it an intended superset of the loader. | **R2:** covered by the round-trip check; declared an intended superset in HLR-CSV.1's rationale. | applied |
+| A6 | architect | minor | CSV import order | A CSV listing a child before its root is refused as a cycle because the first row becomes the root (`import_csv.py:98`) — pre-existing. | **R4:** out of scope → backlog **B-116** (define row order or fix). | routed |
+| B1 | architect | major | proposal §2a | The claim that refusals 1 and 4–8 cannot be violated by a `Graph` is false for refusal 1 (see A4). | **R10:** §2a corrected — refusal 1 is reachable from a Graph. | applied |
+| B2 | architect | major | proposal §4 (import-preview row) | Which sentence wins when several predicates fire: key the branch on `csv_collisions` first; keep the "could not draw the preview" header pinned by `test_tc_r08b`. | **R3/R10:** precedence collision > multi-parent > cycle; header kept; header + sentence asserted together (QB4). | applied |
+| B3 | architect | minor | PLAN.md, `01-requirements.md` §4 IFC | PLAN.md increment 1 and the interface owners name only `store.py`; the design also touches `mapper/model.py`; the new field changes `Graph.__eq__`; `ARCHITECTURE.md` §4 `Graph` row amendment is owed at close. | **R10:** increment 1 names `mapper/model.py` + `mapper/store.py`; `csv_collisions` is `compare=False, repr=False`; ARCHITECTURE amendment recorded as owed at close. | applied |
+| Q1 | qa-reviewer | blocker | LLR-CSV.1.1, LLR-CSV.2.2 | A slug collision does not always produce a multi-parent node (`import_csv.py:57-73,101`): two colliding rows with no parent column (incl. the auto-id fixture), or one with a parent and one without ⇒ `multi_parent_ids()` empty ⇒ preview draws normally, row silently lost. LLR-CSV.1.1 lists the auto-id collision among must-raise fixtures — a contradiction. | **R1:** keyed on `csv_collisions`, not on `multi_parent_ids()`; new boundary items + tests for each collision shape. | applied |
+| Q2 | qa-reviewer | blocker | AT-072, LLR-CSV.1.2 | "Empty workspace" is wrong — `mapper.db` always exists (`store.py:392`) and a save may leave `*.tmp`; the no-write oracle is undefined. | **R6:** sha256 snapshot of every file in the workspace dir (`iterdir()`, recursive, incl. `mapper.db` and `*.tmp`) before/after; file set and every digest unchanged; no sidecar appeared. Same oracle at store level. | applied |
+| Q3 | qa-reviewer | major | AT-072…074, §5.1 | The drive path was cited wrongly — `tests/test_seed_safety.py:107-117` `_open_import` drives `i`, path, enter, `s`, name, enter through the home screen; §5.1 cited `test_g6_store_surrogates.py:555-600`, which pushes the screen and calls `action_save()` directly. | **R5:** AT-072…074 use `_open_import`. | applied |
+| Q4 | qa-reviewer | major | LLR-CSV.2.1 | "1-based line number" is undefined for blank rows / CRLF. | **R7:** line numbers come from `csv.DictReader.line_num`; fixtures include a blank line and a CRLF file; the evidence CSV's rows are 5 and 6. | applied |
+| Q5 | qa-reviewer | major | negative controls | Controls are mixed — mutation M2 reddens AT-073 but AT-072 stays green; not stated per layer. | **R8:** each layer names the test that reddens when ONLY its check is removed. | applied |
+| Q6 | qa-reviewer | major | M1b, LLR-CSV.1.2 | M1b bites only if the fixture overwrites an existing map — say so. | **R6:** M1b's fixture explicitly overwrites an existing map, so a check moved after any write turns RED. | applied |
+| Q7 | qa-reviewer | minor | HLR-CSV.2 | The three-way list grammar is unpinned. | **R9:** pinned to exactly `rows 2, 3 and 4` (no Oxford comma) in the sentence template. | applied |
+| Q8 | qa-reviewer | minor | HLR-CSV.2 boundary | Mapping incomplete — the empty-CSV panel (root None) is untested; self-parent via the parent column is not under HLR-CSV.2. | **R9:** both added to the boundary catalog with fixtures. | applied |
+| Q9 | qa-reviewer | minor | `01-requirements.md` ~:134 | Typo `` `READY`. `` (stray period after the code span, inconsistent with the other classification lines). | **R9:** fixed. | applied |
+| QB1 | qa-reviewer | blocker | proposal §5 | Same gap as Q1 — §5 names only multi-parent fixtures; the `refresh_canvas` branch is predicate-only. | **R1:** the preview branch keys on `csv_collisions` first; new tests for each collision shape. | applied |
+| QB2 | qa-reviewer | major | proposal §5, AT-072 | The AT-072 oracle is weak (as Q2). | **R6:** same sha256 oracle. | applied |
+| QB3 | qa-reviewer | major | proposal §6 | "No existing test breaks" is plausible but unproven (spot-checked `_diamond`, `test_tc_r08b`, trees in `test_legend_design.py` / `test_repair_depth.py` / `test_search.py`, `test_pan.py:173`). | **R10:** not claimed — verified by the P3 full-suite gate. | applied |
+| QB4 | qa-reviewer | major | proposal §5, AT-073 | Assert the panel header and the sentence together for the collision case. | **R10:** AT-073 asserts "could not draw the preview" AND the sentence. | applied |
+| QB5 | qa-reviewer | minor | `import_csv.py:101` | The O(N·E) orphan pass → backlog is fine. | Kept as the design §6 watch-item (pre-existing; no new row this round). | recorded |
+| QB6 | qa-reviewer | minor | proposal §4 (`Graph` row) | The new dataclass field affects `Graph ==` / repr. | **R10:** `field(default_factory=list, compare=False, repr=False)`. | applied |
+
+**Verified sound by the architect (probed on temp workspaces):** no partial write
+(`store.py:822-850` validates, dumps, writes two temp files, replaces, reindexes); traceability
+complete; every save entry point checked (`import_preview.py:88`, `factory.py:217`,
+`map/editing.py:51,77,124,147`, `undo.py:64`, `drafts.py:141`; `store.create` builds trees;
+`add_child` makes unique ids; no reparent action; `github.py` never saves) — the new refusal
+breaks no legitimate path; `csv_collisions` does not leak (`_build_sidecar` serializes named
+fields; undo via dump+yaml; `focus()` drops it; deepcopy copies a loaded graph); the G6-C-F4
+pattern's ATs genuinely drive the real app.
+
+### Orchestrator rulings R1–R10 (round 1 → P1 iteration 1)
+
+| Ruling | Answers findings | Disposition |
+|--------|------------------|-------------|
+| R1 — any collision blocks: non-empty `csv_collisions` alone paints the collision sentence (precedence over multi-parent and cycle) and makes `action_save` refuse via the existing toast without writing — whether or not a loader rule is violated (two parentless rows / one parented + one not / auto-id). New boundary items + tests. | A1, Q1, QB1 | applied (`LLR-CSV.2.3` new; tests `test_at_072b/c/d_*`) |
+| R2 — the store check is a round trip: refuse, before any byte, when `mermaid.parse(mermaid.dump(G))` raises OR yields a different structure (node-id set, edge set as (parent, child) pairs, root). Covers multi-parent, cycle, unsupported syntax (newline title), `-->` title re-parsing as a spurious edge, duplicate edges dropped by `dump` (intended superset). `Graph.multi_parent_ids()` kept — the preview's multi-parent sentence still needs it. Reason names the rule in plain language. O(N+E) plus one dump/parse. HLR-CSV.1 scoped to "every graph whose saved form would not load back as the same graph". | A4, A5 | applied (HLR-CSV.1, LLR-CSV.1.1, §2a) |
+| R3 — the cycle sentence is neutral (no "the parent column"); root-collision fixture reclassified as a cycle case; precedence collision > multi-parent > cycle. | A2, A3 | applied (HLR-CSV.2, LLR-CSV.2.2, boundary catalog) |
+| R4 — out of scope, to backlog: `slugify("") == "n"` family → **B-115**; child-before-root refused as a cycle → **B-116**. | A3, A6 | routed (BACKLOG.md) |
+| R5 — AT drive path is `_open_import` (`tests/test_seed_safety.py:107-117`: `i`, path, enter, `s`, name, enter from the home screen). | Q3 | applied (§5.1, HLR-CSV.3) |
+| R6 — the no-write oracle: sha256 snapshot of every file in the workspace dir (`iterdir()`, recursive, incl. `mapper.db` and `*.tmp`) before/after the refused save; file set + digests unchanged; no `_nodos.yml`/`.mmd` appeared. Same oracle at store level (LLR-CSV.1.2); M1b's fixture overwrites an existing map. | Q2, QB2, Q6 | applied (HLR-CSV.1, LLR-CSV.1.2, proposal §5) |
+| R7 — line numbers from `csv.DictReader.line_num`; fixtures include a blank line and a CRLF file; the evidence CSV's rows are 5 and 6. | Q4 | applied (HLR-CSV.2, LLR-CSV.2.1) |
+| R8 — negative controls per layer: store-check-only removal reddens `test_save_refuses_*` + AT-072; preview record/branch-only removal reddens AT-073 (AT-072 stays green). | Q5 | applied (per-requirement Negative control fields) |
+| R9 — grammar pinned: three-way example exactly `rows 2, 3 and 4` (no Oxford comma); boundary additions: empty CSV panel (root None), self-parent via the parent column; typo `` `READY`. `` fixed. | Q7, Q8, Q9 | applied |
+| R10 — `csv_collisions` is `field(default_factory=list, compare=False, repr=False)`; PLAN.md and the interface owners name `mapper/model.py` in increment 1; §2a's refusal-1 claim corrected; the panel keeps its header, asserted together with the sentence; "no existing test breaks" verified by the P3 full-suite gate, not claimed; `ARCHITECTURE.md` §4 `Graph` row amendment owed at close. | B1, B2, B3, QB3, QB4, QB6 | applied |
 
 ### shall / should check
-> Any modal `should` / `debería` inside an HLR/LLR statement is a writing error → blocker.
-
-`<result>`
+Clean (round 1): `shall` in Statements only; no modal `should`/`debería` inside any HLR/LLR statement.
 
 ### Two-layer acceptance review (blockers)
-> (a) every story has a black-box `AT`; (b) every output-producing requirement names its observable deliverable + observation method; (c) BOTH traceability chains complete (behavioral US→AT→outcome + functional US→HLR→LLR→TC); (d) each `AT` is genuinely black-box — drives the surface, asserts the outcome, references NO internal symbol.
 
 | Story / Req | (a) AT present | (b) deliverable+method named | (c) both chains | (d) black-box pure | Status |
 |-------------|----------------|------------------------------|-----------------|--------------------|--------|
-| US-001 | yes/no | yes/no/n/a | yes/no | yes/no | ✓ / blocker |
+| US-CSV-001 / HLR-CSV.1 | yes | yes | yes | no in round 1 — AT-072's oracle undefined (Q2) | blocker (Q2) → fixed by R6 |
+| US-CSV-002 / HLR-CSV.2 | yes | yes | yes | no in round 1 — drive path cited a direct `action_save()` call (Q3); collision-without-violation unpainted (A1/Q1) | blocker (Q3, A1) → fixed by R1, R5 |
+| US-CSV-003 / HLR-CSV.3 | yes | yes | yes | no in round 1 — same drive path (Q3) | major (Q3) → fixed by R5 |
 
 ### Supersession census (change-first)
-> Planned new/moved/edited files checked against EVERY guard family (behavioral-placeholder · structural/placement · AST-composition · frozen-module). State reservations; the increment gate is the completeness guarantee, not this census.
-
-`<files × families run · reservations · what the I-gate must confirm>`
+Best-effort census executed by the architect (§B of the transcription): every save entry point,
+every `csv_collisions` leak path, every `preview_csv` caller (8 direct test callers + home) checked —
+no legitimate path breaks. Reservations: the spot checks do NOT prove the whole suite stays green —
+**the P3 full-suite gate is the guarantee** (QB3, ruling R10). The increment gate must confirm the
+two new test files plus the re-run pins (`test_repair_cycles.py` `test_tc_r08b`, G6 toast-wording
+nodes, `test_import_csv.py`, `test_mod_compat.py` F4 surface).
 
 ### Security review summary
-`<security-reviewer findings + verdict, or "not run — trigger family C did not fire" in core>`
+No security-reviewer findings in round 1. Family C fired (C6 — the CSV file is an input surface;
+C8 — the refusal sentence paints operator-supplied ids). C8 stays enforced by LLR-CSV.2.2: every
+interpolated piece passes `darkside.plain`, styling from `mapper/darkside.py` tokens only; guard
+A-110 (`tests/test_no_operator_paths.py`) must stay green at the P3 gate.
 
-### Evidence checklists (full) — architect · qa-reviewer · security-reviewer
-> Attach each reviewer's completed evidence checklist (items in their agent files), ✓/✗ + one-line evidence.
+### Evidence checklists — architect · qa-reviewer
+
+**architect (round 1):**
+- ✓ constraints stated (loader frozen, no new UI, toast shows type only);
+- ✓ defect reproduced on temp workspaces (A1 probe: colliding save+reload succeeds, first row gone; A2 probe: root-collision is a cycle; A4 probes: newline title unparsable, `a --> b` title re-parses as an edge);
+- ✓ placement respected ARCHITECTURE §3 (predicate in `model`; no new dependency edges);
+- ✗ refusal-1 claim in §2a (false — fixed by R10);
+- ✗ increment-1 file set missing `mapper/model.py` (fixed by R10);
+- ✓ no partial write confirmed (`store.py` two-phase write);
+- ✓ `csv_collisions` leak census (sidecar / undo / focus / deepcopy) — no leak;
+- ✓ alternatives table present and rejected for cause.
+
+**qa-reviewer (round 1):**
+- ✓ G/W/T shape of the proposed tests;
+- ✗ no-write oracle undefined, ignored `mapper.db`/`*.tmp` (Q2 — fixed by R6);
+- ✗ AT drive path not black-box (Q3 — fixed by R5);
+- ✗ negative controls not per layer (Q5 — fixed by R8);
+- ✗ boundary mapping incomplete: empty-CSV panel, self-parent (Q8 — fixed by R9);
+- ✗ line-number semantics undefined for blank/CRLF (Q4 — fixed by R7);
+- ✗ "no existing test breaks" unproven (QB3 — fixed by R10);
+- ✓ no PII / operator-path surface beyond the C8-guarded ids;
+- ✓ reachability of every refusal from a `Graph` argued (A4 corollary).

@@ -54,7 +54,15 @@ Batch open: P0 (this plan) and P1 (`01-requirements.md` + ledger) authored from 
 brief. Defect B-114 reproduced from evidence on `origin/feat/perf-batch`
 (`perf0b-slug-reach.transcript`: `small_save_error: null`, `small_load_error: MapStoreError
 ... (ParseError)`); loader invariants enumerated from `mapper/mermaid.py` and
-`mapper/store.py`. Next owed: PDR gate, then increment 1 (store refusal).
+`mapper/store.py`. **P2 round 1 recorded in `02-review.md`: `iterate-to-refine`** (5
+blockers, 11 majors, 8 minors; architect + qa, both read-only). The orchestrator ruled
+R1–R10 (any collision blocks; the store check is a round trip; neutral cycle sentence and
+precedence collision > multi-parent > cycle; two items routed to backlog as B-115/B-116;
+`_open_import` drive path; the sha256 no-write oracle; `line_num` semantics; per-layer
+negative controls; pinned grammar + boundary additions; `compare=False, repr=False` and the
+`mapper/model.py` increment-1 ownership) — applied to the contract, ledger and proposal in
+P1 iteration 1 (`LED-2026-10-10-csv-safety-batch.2`…`.4`). Next owed: P2 round 2, then the
+PDR gate, then increment 1 (store refusal).
 
 ## Objective
 
@@ -77,8 +85,8 @@ G, and `save(G)` fails ⇒ no file in the workspace changed.
 
 ## Roadmap + increment plan
 
-- **Increment 1 — the store refuses what its loader refuses.** `mapper/store.py`: `MapStore.save` validates the graph against the loader's invariants (every node at most one parent — currently unchecked; cycle — already LLR-R01.5) and raises `MapStoreError` with a plain-language reason before any byte is written; `_save_or_toast` already turns that into the existing toast and returns `False`. Tests: `tests/test_csv_safety_store.py` (unit TCs + no-partial-write digest oracle). Source files: 1 (`mapper/store.py`).
-- **Increment 2 — the preview says why, before the user tries to save.** `mapper/import_csv.py`: `preview_csv` records which original rows (raw id + line number) collapsed into which slug. `mapper/screens/import_preview.py`: `_ImportPreviewScreen.refresh_canvas` paints the existing "could not draw the preview" panel with the exact refusal sentence naming the colliding rows (ids + line numbers) when the preview graph violates an invariant, instead of drawing a graph the save will refuse. Tests: `tests/test_csv_safety_preview.py` (AT-072/073/074 through `MapperApp` + `run_test` + real keys). Source files: 2.
+- **Increment 1 — the store refuses what its loader refuses.** `mapper/store.py`: `MapStore.save` validates by round trip (ruling R2): refuse when `mermaid.parse(mermaid.dump(G))` raises or yields a different node-id set, edge set or root — covering multi-parent, cycle, newline title, arrow title and duplicate edges — raising `MapStoreError` with a plain-language reason before any byte is written; `_save_or_toast` already turns that into the existing toast and returns `False`. `mapper/model.py`: the `Graph.csv_collisions` field (`compare=False, repr=False`), the `CsvCollision`/`CsvRow` types and `Graph.multi_parent_ids()` (the preview's multi-parent sentence needs it; the store check does not). Tests: `tests/test_csv_safety_store.py` (unit TCs + no-partial-write digest oracle over every workspace file incl. `mapper.db`/`*.tmp`). Source files: 2 (`mapper/model.py`, `mapper/store.py`) — per ruling R10 / architect B3.
+- **Increment 2 — the preview says why, before the user tries to save.** `mapper/import_csv.py`: `preview_csv` records which original rows (raw id + line number via `csv.DictReader.line_num`) collapsed into which slug. `mapper/screens/import_preview.py`: `_ImportPreviewScreen.refresh_canvas` paints the existing "could not draw the preview" panel (header kept, sentence in body) with the exact refusal sentence — precedence collision > multi-parent > cycle (rulings R1/R3) — and `_ImportPreviewScreen.action_save` refuses, via the existing toast mechanism, any import with a non-empty collision record, whether or not the graph violates a loader rule (LLR-CSV.2.3). Tests: `tests/test_csv_safety_preview.py` (AT-072/073/074 + AT-072b/c/d through `MapperApp` + `run_test` + real keys, driven by `_open_import` from `tests/test_seed_safety.py:107-117`). Source files: 2.
 - **Validation / close.** RED proof per increment (revert product change only, confirm FAIL, restore byte-identical, re-run GREEN); full-suite gate re-run after any post-review repair; `04-validation.md` + `05-close.md`.
 
 ## Key decisions

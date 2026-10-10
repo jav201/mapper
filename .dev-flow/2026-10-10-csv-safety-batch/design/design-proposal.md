@@ -26,7 +26,7 @@
 | Field | Value |
 |---|---|
 | Id | `PDR-2026-10-10-csv-safety-batch` |
-| Requirements covered | `US-CSV-001 · US-CSV-002 · US-CSV-003 · HLR-CSV.1 · HLR-CSV.2 · HLR-CSV.3 · LLR-CSV.1.1 · LLR-CSV.1.2 · LLR-CSV.2.1 · LLR-CSV.2.2 · LLR-CSV.3.1` (all v1, Ledger: none) |
+| Requirements covered | `US-CSV-001 · US-CSV-002 · US-CSV-003 · HLR-CSV.1 · HLR-CSV.2 · HLR-CSV.3 · LLR-CSV.1.1 · LLR-CSV.1.2 · LLR-CSV.2.1 · LLR-CSV.2.2 · LLR-CSV.2.3 · LLR-CSV.3.1` (amended at the P2 round-1 review: LLR-CSV.2.3 added, HLR-CSV.1/LLR-CSV.1.1 re-scoped to the round-trip check — Ledger: `LED-2026-10-10-csv-safety-batch.2`…`.4`) |
 | Modules touched (from `docs/ARCHITECTURE.md`) | `model` · `store` · `import_csv` · `screens` (`screens/import_preview.py`) |
 | Triggers that fired | `A2 · A3 · B1 · B4 · C6 · C8 · D1 · E1 · F1` |
 | Author / reviewers | `architect` · `qa-reviewer` |
@@ -42,11 +42,17 @@ parents in `preview_csv` (`mapper/import_csv.py:57` `nid = slugify(raw_id)`, `:7
 overwrites, `:81` both rows add an edge); the save persists it; re-open fails in
 `MapStore.load` → `mermaid.parse:85` "multiple parents (out of MVP scope)".
 
-This design makes `MapStore.save` refuse — before writing any byte — every graph whose shape the
-loader refuses (HLR-CSV.1), and makes `_ImportPreviewScreen.refresh_canvas` name the colliding CSV
-rows (raw ids + 1-based line numbers) in the existing refusal panel, in the exact sentence HLR-CSV.2
-fixes (HLR-CSV.2). The happy path — a valid CSV previews, saves and re-opens identical — is the
-regression guard (HLR-CSV.3).
+This design makes `MapStore.save` refuse — before writing any byte — every graph whose
+saved form would not load back as the same graph (the round-trip check of ruling R2:
+`mermaid.parse(mermaid.dump(G))` must succeed and reproduce G's node-id set, edge set
+and root — HLR-CSV.1), and makes `_ImportPreviewScreen.refresh_canvas` name the
+colliding CSV rows (raw ids + line numbers per `csv.DictReader.line_num`) in the
+existing refusal panel, in the exact sentence HLR-CSV.2 fixes, keyed on the collision
+record with the precedence collision > multi-parent > cycle (rulings R1/R3). The
+preview's save action additionally refuses any import carrying a non-empty collision
+record, whether or not the graph violates a loader rule (LLR-CSV.2.3). The happy path
+— a valid CSV previews, saves and re-opens identical — is the regression guard
+(HLR-CSV.3).
 
 Will NOT do: accept multi-parent maps end to end (DAG model — out of MVP scope per
 `mapper/mermaid.py:86`); touch the loader (`MapStore.load`, `mermaid.parse` — the invariant oracle);
@@ -56,18 +62,20 @@ silently disambiguate colliding ids; add any new screen, key, widget or toast wo
 
 | Module | What it owns here | What it exposes | What it must NOT reach into |
 |---|---|---|---|
-| `model` (`mapper/model.py`) | The loader-invariant predicate, new in this batch: `Graph.multi_parent_ids() -> list[str]` and the collision record value types `CsvCollision` / `CsvRow` (frozen dataclasses) plus one defaulted `Graph` field `csv_collisions` | Additive only: a new method, two new value types, one defaulted field on `Graph` | nothing — `model` has no outbound dependencies (`docs/ARCHITECTURE.md` §3) |
+| `model` (`mapper/model.py`) | The loader-invariant predicate the preview's multi-parent sentence needs: `Graph.multi_parent_ids() -> list[str]` (kept per ruling R2 — the STORE check no longer uses it) and the collision record value types `CsvCollision` / `CsvRow` (frozen dataclasses) plus one defaulted `Graph` field `csv_collisions: list[CsvCollision] = field(default_factory=list, compare=False, repr=False)` (ruling R10: `Graph.__eq__`/`repr` do not change) | Additive only: a new method, two new value types, one defaulted field on `Graph` | nothing — `model` has no outbound dependencies (`docs/ARCHITECTURE.md` §3) |
 | `store` (`mapper/store.py`) | `MapStore.save`'s pre-write validation (`mapper/store.py:810-824`): keep the existing cycle guard (`:822-824`, LLR-R01.5) and add the multi-parent refusal next to it, both before `mermaid.dump` at `:826` | Same `save(map_id, graph) -> None` signature; one new `MapStoreError` raise | unchanged: `store` depends on `model` only — the new check is imported from `model`, so no new edge |
 | `import_csv` (`mapper/import_csv.py`) | Collision detection in `preview_csv`'s first pass (`mapper/import_csv.py:49-74`): track every row's `(nid, line_no, raw_id)` and populate `graph.csv_collisions` for every slug produced by more than one row (including auto-generated `row-N` / title slugs from the empty-id path, `:54-56`) | Same `preview_csv(path: Path) -> Graph` signature — the record travels ON the returned `Graph` | unchanged: `import_csv` depends on `model` + `mermaid` (`slugify`) only; it still never writes anything |
-| `screens` (`mapper/screens/import_preview.py`) | `_ImportPreviewScreen.refresh_canvas` (`mapper/screens/import_preview.py:55-78`): before rendering, run the same `model`-level invariant predicate on `self.preview_graph`; on violation paint the existing "could not draw the preview" panel (`:72-76`) with the exact HLR-CSV.2 sentence (collision or cycle wording) instead of rendering; on a clean graph render exactly as today | Same screen class, same `__init__(preview_graph, source_path)`, same `#import-preview-canvas` Static | unchanged: `screens` may import `model` (`docs/ARCHITECTURE.md` §3 `screens` row) — the predicate and the record are read from there; never `mapper.app` |
+| `screens` (`mapper/screens/import_preview.py`) | `_ImportPreviewScreen.refresh_canvas` (`mapper/screens/import_preview.py:55-78`): before rendering, apply the precedence (ruling R3): non-empty `preview_graph.csv_collisions` → paint the collision sentence; else non-empty `multi_parent_ids()` → paint the multi-parent sentence; else `find_cycle()` non-None → paint the cycle sentence — in every case keeping the existing "could not draw the preview" header (`:74`) with the sentence in the body, instead of rendering; on a clean graph render exactly as today. `_ImportPreviewScreen.action_save` (`:88`): refuse through the existing toast mechanism (`_save_or_toast` semantics — toast, type only, screen open, nothing written) when `preview_graph.csv_collisions` is non-empty, whether or not the graph violates a loader rule (ruling R1, LLR-CSV.2.3) | Same screen class, same `__init__(preview_graph, source_path)`, same `#import-preview-canvas` Static, same save key | unchanged: `screens` may import `model` (`docs/ARCHITECTURE.md` §3 `screens` row) — the predicate and the record are read from there; never `mapper.app` |
 
-- Boundaries respected as declared in `docs/ARCHITECTURE.md`: ✓ — the load-bearing placement is the
-  invariant predicate in `model`: `store` depends on `model` (§3 `store` row) and `screens` depends on
-  `model` (§3 `screens` row), so ONE predicate serves both save and preview with zero new dependency
-  edges. Putting it in `mermaid` would leave `screens` reaching for a format adapter it does not
-  otherwise need; putting it in `store` is importable from `screens` (§3 allows `screens → store`)
-  but would give the multi-parent scan two homes that can drift apart — the save side and the
-  preview side would disagree on what is refusable. The
+- Boundaries respected as declared in `docs/ARCHITECTURE.md`: ✓ — the load-bearing placement
+  decisions survived the round-1 rulings: the **store check is the round trip in `store`**
+  (ruling R2) — `MapStore.save` already imports `mermaid` for `dump`, so the check
+  `parse(dump(G))` introduces no new dependency edge and cannot drift from the loader it
+  round-trips through; the **`model` predicate serves only the preview** — `screens` depends
+  on `model` (§3 `screens` row), so `Graph.multi_parent_ids()` and the `csv_collisions`
+  record are readable there with zero new edges. Putting the store check in `mermaid` would
+  invert the dependency (`mermaid` must not know about the store); duplicating the scan
+  store-side + preview-side would let the two surfaces drift apart on what is refusable. The
   §3 `model` row's ban ("any → `model`" is inbound-only) is untouched: `model` gains no imports.
 
 ### 2a · The loader's invariant list — the exact oracle (enumerated from code)
@@ -96,20 +104,37 @@ The sidecar reader (`MapStore.load`, `mapper/store.py:680-795`) refuses:
    exception typed as `… unreadable (<TypeName>)` (`mapper/store.py:744-768`).
 9. **`_mmd_hash` mismatch** — torn two-phase pair → **warning**, not refusal (`mapper/store.py:780-782`).
 
-Of these, only **2 (multi-parent)** and **3 (cycle)** are properties of a *Graph* input; 1 and 4–8
-are properties of persisted text the store's own writer produces and a `Graph` argument cannot
-violate (refusal 2 is also re-enforced textually by 8). So `MapStore.save`'s pre-write validation
-checks exactly two graph-shape invariants, in `model`:
+Of these, **2 (multi-parent)** and **3 (cycle)** are the classic graph-shape invariants —
+but ruling R2 (answering architect A4/A5) replaces the enumerated-checks design with the
+general round trip, because a `Graph` argument CAN violate refusal 1 and can silently
+corrupt the reparse in ways no enumerated predicate catches (both verified by the
+architect on temp workspaces):
 
-- **I1 — at most one parent per node:** each node id appears as `child_id` in at most one edge.
-  Detected in ONE pass over `graph.edges` building a `child_count` dict; the refused set is every
-  child with count ≥ 2, in first-seen order. **O(N+E).** (`Graph.parent_of` at
-  `mapper/model.py:152-156` scans all edges per call — `parent_of` per node is O(N·E), the exact
-  anti-pattern the perf batch measured; it is NOT used by the check. The same anti-pattern exists
-  today inside `preview_csv`'s orphan loop at `mapper/import_csv.py:101`; that loop is out of this
+- a node **title containing a newline** dumps to an unparsable `.mmd` → `parse` raises
+  (refusal 1) — so the P1 claim that refusals 1 and 4–8 "cannot be violated by a Graph"
+  was **false for refusal 1** and is corrected here (ruling R10 / architect B1);
+- a node **title containing `-->`** (e.g. an orphan node titled `a --> b`) re-parses as a
+  **spurious edge** — the reparse succeeds with a different graph: silent corruption;
+- **exact duplicate edges** are dropped by `dump`'s `emitted` set (`mapper/mermaid.py`
+  `dump`), so the reparse succeeds and loses a row.
+
+So `MapStore.save`'s pre-write validation is the **round trip** (HLR-CSV.1,
+LLR-CSV.1.1): refuse, before any byte is written, when
+`mermaid.parse(mermaid.dump(G))` raises OR yields a structure different from G — node-id
+set, edge set as (parent, child) pairs, or root. The refusal reason names the rule in
+plain language (multiple parents / cycle / the dump does not re-parse / the reparse
+changes the graph). Refusing duplicate edges is an **intended superset of the loader**
+(architect A5): the loader would accept the reparse; the store refuses the row loss.
+
+- **Complexity:** O(N+E) for the structure comparison (sets built once) plus one
+  `dump`/`parse` round trip. (`Graph.parent_of` at `mapper/model.py:152-156` scans all
+  edges per call — `parent_of` per node is O(N·E), the exact anti-pattern the perf batch
+  measured; it is NOT used by the check. The same anti-pattern exists today inside
+  `preview_csv`'s orphan loop at `mapper/import_csv.py:101`; that loop is out of this
   batch's scope and recorded as a watch-item in §6.)
-- **I2 — acyclic:** `Graph.find_cycle()` (`mapper/model.py:158-193`), already iterative and
-  O(N+E) (adjacency built once at `:166-168`), already enforced at `mapper/store.py:822-824`.
+- **`Graph.multi_parent_ids()` is kept** (`model`) — not for the store check but for the
+  preview's multi-parent sentence (the middle tier of the precedence collision >
+  multi-parent > cycle, ruling R3). The store check does not call it.
 
 ## 3 · Diagrams
 
@@ -119,14 +144,23 @@ the change is one predicate + one data field + one paint branch):
 ```text
 CSV file ──preview_csv(import_csv)──► Graph { nodes, edges, root_id, csv_collisions }
                                           │                          ▲ populated in pass 1
-                    model::Graph.multi_parent_ids() │            (nid, line_no, raw_id) per row
-                     │ I1 (new)          │ I2 (find_cycle, existing)
-                     ▼                   ▼
-        MapStore.save (store.py:810)   _ImportPreviewScreen.refresh_canvas (import_preview.py:55)
-        refuses BEFORE dump(:826):     invariant violated?
-          MapStoreError ──► _save_or_toast ──► toast (type only) + return False  │ yes: paint refusal panel
-                     │ no write of any byte (LLR-CSV.1.2)            │ no: render as today (LayeredRenderer)
-                     ▼                                                ▼
+                    (line_no via reader.line_num, raw_id per row)
+                                          │
+              refresh_canvas precedence (collision > multi-parent > cycle):
+                1. csv_collisions non-empty  → collision sentence (ruling R1)
+                2. multi_parent_ids() non-empty → multi-parent sentence
+                3. find_cycle() non-None → cycle sentence
+                     │
+        MapStore.save (store.py:810)        _ImportPreviewScreen (import_preview.py:55)
+        ROUND TRIP (ruling R2):             invariant branch before render,
+        refuse BEFORE dump(:826) when      header kept, sentence in body
+        parse(dump(G)) raises or changes     │
+        node ids / edges / root:             ▼
+          MapStoreError ──► _save_or_toast ──► toast (type only) + return False
+          action_save ALSO refuses a non-empty csv_collisions (LLR-CSV.2.3),
+          same toast mechanism, no write (LLR-CSV.1.2)
+                     │
+                     ▼ no write of any byte (LLR-CSV.1.2)
         .mmd + _nodos.yml pair ──MapStore.load──► Graph (oracle, untouched)
 ```
 
@@ -134,10 +168,10 @@ CSV file ──preview_csv(import_csv)──► Graph { nodes, edges, root_id, c
 
 | Interface | Current | After | Consumers | **Frozen for the fork?** |
 |---|---|---|---|---|
-| `Graph` value object (`model`) | fields `nodes`, `edges`, `root_id`, `schema`, `documents`, `load_warnings` (`mapper/model.py:90-98`) | + one defaulted field `csv_collisions: list[CsvCollision]` (default empty) and + one method `multi_parent_ids() -> list[str]`; new frozen value types `CsvCollision(slug: str, rows: tuple[CsvRow, ...])`, `CsvRow(line_no: int, raw_id: str)` — all additive, every existing constructor and literal keeps working | `store`, `views`, `mermaid`, `import_csv`, `screens`, `app`, `github`, `search` (ARCHITECTURE §4 `Graph` row) | **YES — the field is defaulted and additive (the `ViewState` precedent in §4: "adding a defaulted field is additive and never re-opens the A3"); no consumer's construction, equality or persistence changes** |
-| `preview_csv` (`import_csv`) | `preview_csv(path: Path) -> Graph`, silently collapsing slug collisions (`mapper/import_csv.py:57-73`) | Same signature, same return type, same graph for every non-colliding input; colliding inputs additionally carry a populated `csv_collisions` | `screens/home.py:28,511`; test callers `tests/test_import_csv.py` (6 sites), `tests/test_gate2.py:371`, `tests/test_repair_cycles.py:371`; **F4 patch surface**: `mapper.screens.home.preview_csv` patched by `tests/test_inc9c.py:114`, `tests/test_inc9n.py:285`, listed in `tests/test_mod_compat.py:61` PATCH_SURFACE | **YES — signature and `Graph` return type are the F4 contract; only the record's content is new** |
-| `_ImportPreviewScreen` (`screens/import_preview.py`) | `__init__(preview_graph, source_path)` (`:41-44`); `refresh_canvas` renders and paints the refusal panel only on a renderer exception (`:63-77`) | Same constructor (the record arrives inside `preview_graph`); `refresh_canvas` gains an invariant branch BEFORE the render: non-empty `multi_parent_ids()` or non-None `find_cycle()` → paint the refusal panel with the exact HLR-CSV.2 sentence (cycle path via `find_cycle()`'s return, `mapper/model.py:181`); renderer-exception branch kept as the fallback | constructed by `mapper/screens/home.py` and by `tests/test_repair_cycles.py:381`; canvas read by `tests/test_repair_cycles.py:388` and the new AT-073 | **YES — class, constructor, Static id and the "could not draw the preview" header substring are pinned by `tests/test_repair_cycles.py` (see §6 risks); only the panel body gains the sentence** |
-| `MapStore.save` (`store`) | `save(map_id, graph) -> None`; pre-write validation = cycle guard only (`mapper/store.py:810-824`) | Same signature; one additional `MapStoreError` raise (multi-parent, naming the duplicated child id, plain-language) placed next to the cycle guard, both before `dump` at `:826` | `_save_or_toast` (`mapper/screens/common.py:217-267`, routes every screen-initiated save); ~60 direct test call sites (B1 census) | **YES — signature and cycle-guard message frozen (LLR-R01.5 pins and G6 toast tests); the new refusal is additive behaviour** |
+| `Graph` value object (`model`) | fields `nodes`, `edges`, `root_id`, `schema`, `documents`, `load_warnings` (`mapper/model.py:90-98`) | + one defaulted field `csv_collisions: list[CsvCollision] = field(default_factory=list, compare=False, repr=False)` (ruling R10 — `Graph.__eq__`/`repr` do not change, answering architect B3 / qa B6) and + one method `multi_parent_ids() -> list[str]` (preview's multi-parent sentence only; the store check is the round trip and does not use it); new frozen value types `CsvCollision(slug: str, rows: tuple[CsvRow, ...])`, `CsvRow(line_no: int, raw_id: str)` — all additive, every existing constructor and literal keeps working | `store`, `views`, `mermaid`, `import_csv`, `screens`, `app`, `github`, `search` (ARCHITECTURE §4 `Graph` row — amendment owed at close, ruling R10) | **YES — the field is defaulted and additive with `compare=False, repr=False` (the `ViewState` precedent in §4: "adding a defaulted field is additive and never re-opens the A3"); no consumer's construction, equality or persistence changes** |
+| `preview_csv` (`import_csv`) | `preview_csv(path: Path) -> Graph`, silently collapsing slug collisions (`mapper/import_csv.py:57-73`) | Same signature, same return type, same graph for every non-colliding input; colliding inputs additionally carry a populated `csv_collisions` — each row's line number taken from `csv.DictReader.line_num` (ruling R7, so blank lines and CRLF count exactly as the reader counts them), each raw id as typed; the record is populated for every collision shape, including collisions that violate no loader rule (ruling R1) | `screens/home.py:28,511`; test callers `tests/test_import_csv.py` (6 sites), `tests/test_gate2.py:371`, `tests/test_repair_cycles.py:371`; **F4 patch surface**: `mapper.screens.home.preview_csv` patched by `tests/test_inc9c.py:114`, `tests/test_inc9n.py:285`, listed in `tests/test_mod_compat.py:61` PATCH_SURFACE | **YES — signature and `Graph` return type are the F4 contract; only the record's content is new** |
+| `_ImportPreviewScreen` (`screens/import_preview.py`) | `__init__(preview_graph, source_path)` (`:41-44`); `refresh_canvas` renders and paints the refusal panel only on a renderer exception (`:63-77`); `action_save` delegates to `_save_or_toast` (`:88`) | Same constructor (the record arrives inside `preview_graph`); `refresh_canvas` gains a precedence branch BEFORE the render (ruling R3, answering architect B2): non-empty `csv_collisions` → collision sentence; else `multi_parent_ids()` non-empty → multi-parent sentence; else `find_cycle()` non-None → cycle sentence (cycle path via `find_cycle()`'s return, `mapper/model.py:181`) — every tier keeps the "could not draw the preview" header (`:74`) with the sentence in the body; renderer-exception branch kept as the fallback. `action_save` refuses (ruling R1, LLR-CSV.2.3) when `preview_graph.csv_collisions` is non-empty — through the same `_save_or_toast` toast mechanism, nothing written — whether or not the graph violates a loader rule | constructed by `mapper/screens/home.py` and by `tests/test_repair_cycles.py:381`; canvas read by `tests/test_repair_cycles.py:388` and the new AT-073 | **YES — class, constructor, Static id and the "could not draw the preview" header substring are pinned by `tests/test_repair_cycles.py` (see §6 risks); only the panel body gains the sentence, and the save action gains the record-keyed refusal** |
+| `MapStore.save` (`store`) | `save(map_id, graph) -> None`; pre-write validation = cycle guard only (`mapper/store.py:810-824`) | Same signature; the pre-write validation becomes the round trip (ruling R2): refuse when `mermaid.parse(mermaid.dump(graph))` raises or yields a different node-id set, edge set (parent, child) pairs, or root — one `MapStoreError` raise naming the rule in plain language, next to the cycle guard, both before `dump` at `:826`. Covers multi-parent, cycle, newline title, arrow title, duplicate edges (intended superset) | `_save_or_toast` (`mapper/screens/common.py:217-267`, routes every screen-initiated save); ~60 direct test call sites (B1 census) | **YES — signature and cycle-guard message frozen (LLR-R01.5 pins and G6 toast tests); the new refusal is additive behaviour** |
 | `_save_or_toast` (`screens/common.py:217`) | `-> bool`; False + toast (type only) on any raise | unchanged — the new `MapStoreError` is just another exception it already catches | `screens/import_preview.py:88`, `screens/map/*` draft save, `tests/test_g6_store_surrogates.py` | **YES — frozen contract (False + toast on `MapStoreError`); this batch relies on it, does not move it** |
 
 **A3 note:** the only interface whose *shape* moves is the additive `Graph` field + method (defaulted
@@ -149,36 +183,50 @@ fired on the *behavioural* contract (new refusal consumed by `_save_or_toast`; n
 
 | Id | Layer (0 unit / A white / B black / UX) | What it asserts | **The mutation that would turn it RED** |
 |---|---|---|---|
-| `tests/test_csv_safety_store.py::test_save_refuses_multi_parent_graph` (LLR-CSV.1.1) | 0 | `MapStore.save` raises `MapStoreError` naming the duplicated child for every multi-parent fixture (two-row collision, three-way collision, collision-on-root, auto-id collision) and the cyclic / self-parent fixtures; happy-path fixtures (empty, single row, valid tree) raise nothing | **M1:** delete the multi-parent check in `MapStore.save` (keep the cycle check) → the multi-parent fixtures save and the paired `load` raises → RED |
+| `tests/test_csv_safety_store.py::test_save_refuses_multi_parent_graph` (LLR-CSV.1.1) | 0 | The round-trip check raises `MapStoreError` naming the rule for the multi-parent fixtures (two-row collision, three-way collision, auto-id collision) and the cyclic / self-parent fixtures; happy-path fixtures (empty, single row, valid tree) raise nothing | **M1:** delete the round-trip check in `MapStore.save` → the fixtures save and the paired `load` raises or returns a different graph → RED |
 | `tests/test_csv_safety_store.py::test_save_refuses_cycle_still` (LLR-CSV.1.1, LLR-R01.5 guard) | 0 | The pre-existing cycle refusal is untouched: cyclic and self-parent graphs raise the same `MapStoreError` ("the map has a cycle: …") | Delete the cycle guard at `mapper/store.py:822-824` → cyclic fixture saves → RED |
-| `tests/test_csv_safety_store.py::test_refused_save_changes_no_workspace_byte` (LLR-CSV.1.2) | 0 | sha256 of every workspace file captured before a refused save equals the after-digest — including a refused save over a pre-existing map id with prior content | **M1b:** move the validation to after the first temp-file `replace` → target `.mmd` digest changes → RED |
+| `tests/test_csv_safety_store.py::test_save_refuses_unparsable_dump` (LLR-CSV.1.1) | 0 | A node title containing a newline refuses: `mermaid.parse(mermaid.dump(G))` raises (the architect's verified A4 case) | **M1** → the dump lands and `load` raises → RED |
+| `tests/test_csv_safety_store.py::test_save_refuses_reparse_structure_mismatch` (LLR-CSV.1.1) | 0 | A title containing `-->` (reparse gains a spurious edge) and exact duplicate edges (dump drops them) refuse — the reparse must reproduce G's node-id set, edge set and root | **M1** → the corrupted/lossy map persists → RED |
+| `tests/test_csv_safety_store.py::test_refused_save_changes_no_workspace_byte` (LLR-CSV.1.2) | 0 | No-write oracle (ruling R6): sha256 of EVERY workspace file — `iterdir()` recursive, including `mapper.db` and any `*.tmp` — captured before a refused save equals the after-state; the file set is unchanged and no `*_nodos.yml`/`*.mmd` appeared. The fixture OVERWRITES a pre-existing map id with prior content (ruling R6 / qa A6) | **M1b:** move the validation to after the first temp-file `replace` → the target `.mmd` digest changes → RED (bites only because the fixture overwrites an existing map) |
 | round-trip nodes in `tests/test_csv_safety_store.py` (LLR-CSV.3.1) | 0 | For every passing fixture (empty graph, single node, deepest fixture tree): `save` then `load` returns equal node-id set, edge set, `root_id` and titles — 0 differences | **M3:** make `mermaid.dump` omit node titles (or skip the sidecar write) → reloaded graph unequal / unloadable → RED |
-| `tests/test_csv_safety_preview.py::test_preview_csv_records_collisions` (LLR-CSV.2.1) | 0 | `preview_csv` populates `graph.csv_collisions` with exactly the expected `(line_no, raw_id)` rows per slug for two-row, three-way, root-collision and auto-id fixtures; empty for non-colliding fixtures | **M2b:** stop appending to the collision record → record empty → RED (and AT-073 downstream RED) |
-| `tests/test_csv_safety_preview.py::test_at_073_preview_names_the_colliding_rows` (HLR-CSV.2, LLR-CSV.2.2) | B | Through `MapperApp(tmp_path)` + `run_test(size=…)` + real keys: the `#import-preview-canvas` Static source contains the exact HLR-CSV.2 sentence naming rows 5 (id 'a-b') and 6 (id 'A B'), byte-for-byte after `darkside.plain` normalisation; plus the cycle-sentence node (`a → b → a` wording) and the three-way list grammar | **M2:** make `refresh_canvas` paint the graph (skip the invariant branch) or paint a generic message → sentence absent → RED |
-| `tests/test_csv_safety_preview.py::test_at_072_refused_save_toasts_and_writes_nothing` (HLR-CSV.1) | B | Import the colliding perf-evidence CSV through the real flow; press `s`, answer the "save as" prompt with a real name; observe the toast (type only), an empty workspace (no `.mmd`/`_nodos.yml`), and the preview still open | **M1** (store-side deletion) → save succeeds and files land → RED; **M2** (panel-side skip) leaves it green by design — the mutation for this node is M1 |
-| `tests/test_csv_safety_preview.py::test_at_074_valid_csv_saves_and_reopens_identical` (HLR-CSV.3) | B | A valid multi-row CSV: `s` + name saves through the preview; `MapStore.load` returns node ids, edges, `root_id` and titles identical to the preview graph | **M3** → re-open unequal → RED; **M1** over-broad (refuses a valid tree) → save raises → RED |
+| `tests/test_csv_safety_preview.py::test_preview_csv_records_collisions` (LLR-CSV.2.1) | 0 | `preview_csv` populates `graph.csv_collisions` with exactly the expected `(line_no, raw_id)` rows per slug for two-row, three-way, root-collision, auto-id and no-loader-violation fixtures (two parentless rows; one parented + one parentless), plus blank-line and CRLF fixtures whose line numbers follow `csv.DictReader.line_num`; the perf evidence CSV's colliding rows are 5 and 6; empty for non-colliding fixtures | **M2b:** stop appending to the collision record → record empty → RED (and AT-073 downstream RED) |
+| `tests/test_csv_safety_preview.py::test_empty_csv_panel_renders_no_sentence` (LLR-CSV.2.2, ruling R9/qa A8) | 0 | An empty CSV (root None) paints the empty panel with NO refusal sentence | **M2** (paint the sentence unconditionally) → RED |
+| `tests/test_csv_safety_preview.py::test_at_073_preview_names_the_colliding_rows` (HLR-CSV.2, LLR-CSV.2.2) | B | Through `MapperApp(tmp_path)` + `run_test(size=…)` + real keys via `_open_import` (`tests/test_seed_safety.py:107-117`): the `#import-preview-canvas` Static source contains the "could not draw the preview" header AND the exact HLR-CSV.2 sentence naming rows 5 (id 'a-b') and 6 (id 'A B'), byte-for-byte after `darkside.plain` normalisation — header and sentence asserted together (ruling R10/qa B4); plus the cycle-sentence node (neutral wording, `a → b → a`), the self-parent-via-parent-column node, the three-way list grammar (exactly `rows 2, 3 and 4`) and the precedence node (a colliding cyclic CSV paints the collision sentence) | **M2:** make `refresh_canvas` paint the graph (skip the invariant branch) or paint a generic message → sentence absent → RED. Per layer (ruling R8): removing ONLY the preview record/branch reddens this node; removing ONLY the store check leaves it green |
+| `tests/test_csv_safety_preview.py::test_at_072_refused_save_toasts_and_writes_nothing` (HLR-CSV.1) | B | Import the colliding perf-evidence CSV through `_open_import`; press `s`, answer the "save as" prompt with a real name; observe the toast (type only), the no-write oracle (ruling R6: sha256 snapshot of every workspace file incl. `mapper.db`/`*.tmp`, file set unchanged, no `.mmd`/`_nodos.yml`), and the preview still open | **M1** (store-side deletion) → save succeeds and files land → RED. Per layer (ruling R8): the preview-level refusal of LLR-CSV.2.3 also refuses this fixture, so this node's distinct mutation is M1; removing only the preview branch leaves it green |
+| `tests/test_csv_safety_preview.py::test_at_072b_parentless_slug_collision_refuses_save` (LLR-CSV.2.3, ruling R1) | B | Two parentless rows sharing one slug — violates NO loader rule — through `_open_import`: the collision sentence paints AND the save refuses (toast, no-write oracle, preview open) | **M2c:** remove the `csv_collisions` refusal from `action_save` → the save lands and silently loses a row → RED |
+| `tests/test_csv_safety_preview.py::test_at_072c_mixed_parentage_slug_collision_refuses_save` (LLR-CSV.2.3, ruling R1) | B | One parented row + one parentless row sharing one slug: same assertions | **M2c** → RED |
+| `tests/test_csv_safety_preview.py::test_at_072d_auto_id_slug_collision_refuses_save` (LLR-CSV.2.3, ruling R1) | B | Two empty-id rows with the same title (auto-id collision): same assertions | **M2c** → RED |
+| `tests/test_csv_safety_preview.py::test_at_074_valid_csv_saves_and_reopens_identical` (HLR-CSV.3) | B | A valid multi-row CSV through `_open_import`: `s` + name saves through the preview; `MapStore.load` returns node ids, edges, `root_id` and titles identical to the preview graph | **M3** → re-open unequal → RED; **M1** over-broad (refuses a valid tree) → save raises → RED |
 | Re-run pins (no new nodes): `tests/test_repair_cycles.py`, `tests/test_g6_store_surrogates.py` toast-wording nodes, `tests/test_import_csv.py` (6 callers), `tests/test_mod_compat.py` (F4 PATCH_SURFACE) | A | The B1 reverse census: every existing consumer of the touched symbols stays green | Any of the frozen interfaces drifting (signature, panel header, toast wording) → pin RED |
 
 **Declared here, at authoring time, not at execution time.** The mutation column names the exact
-reddening change per case (M1/M1b/M2/M2b/M3 from `01-requirements.md` §4), each to be executed as a
+reddening change per case (M1/M1b/M2/M2b/M2c/M3, from `01-requirements.md` §4), each to be executed as a
 transcript per the batch's RED-proof rule.
 
 ## 6 · Risks and rejected alternatives
 
 > Risks (with the B1 reverse-census result executed in this unit):
 
-- **No existing test saves a graph the new check would refuse.** Executed census: every
-  `store.save` call in `tests/` saves a tree or an empty graph; the only multi-parent fixtures
-  (`tests/test_repair_cycles.py::_diamond`, used by `test_at_r03`/`test_at_r03b`) never reach
-  `save` — they stop at `parse(dump(diamond))` (`tests/test_repair_cycles.py:477-484`); the cyclic
-  preview fixture `test_tc_r08b_import_preview_survives_a_cyclic_csv`
-  (`tests/test_repair_cycles.py:371-391`) builds a cyclic CSV, pushes `_ImportPreviewScreen` and
-  never presses `s`. So the multi-parent refusal is purely additive against the suite. **Watch-item
-  (not a break):** `test_tc_r08b` asserts the substring "could not draw the preview" in the painted
-  panel — the new invariant branch MUST keep that existing header line (`mapper/screens/import_preview.py:74`)
-  and put the sentence in the body. **Second watch-item:** `test_gate2_f5`
-  (`tests/test_gate2.py:368-373`) builds two empty-id rows (`row-1`/`row-2`, no collision) — stays
-  green because distinct auto-ids produce no collision record.
+- **No existing test saves a graph the new check would refuse (executed census, NOT a
+  no-break claim).** Executed census: every `store.save` call in `tests/` saves a tree or
+  an empty graph; the only multi-parent fixtures (`tests/test_repair_cycles.py::_diamond`,
+  used by `test_at_r03`/`test_at_r03b`) never reach `save` — they stop at
+  `parse(dump(diamond))` (`tests/test_repair_cycles.py:477-484`); the cyclic preview fixture
+  `test_tc_r08b_import_preview_survives_a_cyclic_csv`
+  (`tests/test_repair_cycles.py:371-391`) builds a cyclic CSV, pushes `_ImportPreviewScreen`
+  and never presses `s`. So the refusal is expected to be purely additive against the
+  suite — but per ruling R10 / qa QB3 this is **verified by the P3 full-suite gate, not
+  claimed here** (the qa spot-checks: `_diamond`, `test_tc_r08b`, trees in
+  `test_legend_design.py` / `test_repair_depth.py` / `test_search.py`, `test_pan.py:173`).
+  **Watch-item (not a break):** `test_tc_r08b` asserts the substring "could not draw the
+  preview" in the painted panel — the new precedence branch MUST keep that existing header
+  line (`mapper/screens/import_preview.py:74`) and put the sentence in the body; AT-073
+  asserts header and sentence together. **Second watch-item:** `test_gate2_f5`
+  (`tests/test_gate2.py:368-373`) builds two empty-id rows (`row-1`/`row-2`, no collision)
+  — stays green because distinct auto-ids produce no collision record.
+  **`ARCHITECTURE.md` §4 `Graph` row amendment is owed at close** (ruling R10 /
+  architect B3): the new field `csv_collisions` (defaulted, `compare=False`, `repr=False`)
+  and method `multi_parent_ids()` must be recorded in the repo's commitment, not only here.
 - **C8 / guard A-110:** the refusal sentence interpolates operator-supplied CSV ids and line
   numbers — every interpolated piece passes `darkside.plain` before assembly (the existing
   `plain(str(exc))` pattern at `mapper/screens/import_preview.py:75`), markup stays off, and no
@@ -186,9 +234,13 @@ transcript per the batch's RED-proof rule.
 - **Toast wording (G6-C-F2):** the toast shows the exception TYPE only; the row-naming text lives
   exclusively in the panel. The new `MapStoreError` message must not be interpolated into any
   toast (it is not — `_save_or_toast` at `mapper/screens/common.py:260-265` uses `type(e).__name__`).
-- **Root-collision boundary:** a collision where one row is the root can pass a naive parent-count
-  check yet re-open with a different root. Oracle: LLR-CSV.3.1's round-trip equality includes
-  `root_id`; the boundary catalog carries the fixture.
+- **Root-collision boundary (reclassified, ruling R3 / architect A2):** the fixture is a
+  CYCLE, not a multi-parent case — the architect's probe: `multi_parent=[]`,
+  `find_cycle=['a-b','c','a-b']`, the orphan loop (`mapper/import_csv.py:97-102`) closes it,
+  and save says "the map has a cycle". It is refused by the round-trip check's cycle
+  instance and painted by the neutral cycle sentence. The general protection against a
+  persisted map re-opening with a different root remains LLR-CSV.3.1's round-trip equality
+  (root included); the boundary catalog carries the fixture in both classes.
 - **Perf:** both invariants are O(N+E) with adjacency/count built once per call; `parent_of` per
   node is banned in the new code (the perf batch measured it O(N·E)). The pre-existing
   `parent_of`-per-node loop at `mapper/import_csv.py:101` is NOT in this batch's file scope to fix
@@ -211,10 +263,10 @@ transcript per the batch's RED-proof rule.
 
 | Output of this PDR | Named consumer downstream | Where the consumer will read it |
 |---|---|---|
-| design characteristics: the invariant predicate `Graph.multi_parent_ids()` + `find_cycle` as the two loader-invariant checks, both O(N+E); `Graph.csv_collisions` + `CsvCollision`/`CsvRow` as the collision-record carrier; exact sentence templates of HLR-CSV.2 | the Phase-3 increments (increment 1: store refusal; increment 2: preview sentence) and the DDR | `PLAN.md` roadmap; increment specs; `04-validation.md` traceability matrix (LLR → test node) |
-| enablers: the boundary-catalog fixtures (empty, single row, two-row/three-way collision, collision-on-root, auto-id collision, cycle via parent column, self-parent, the perf evidence CSV verbatim), E-1 helpers imported from `tests/test_draft_save.py`, the G6-C-F4 save-flow pattern from `tests/test_g6_store_surrogates.py:555-600` | Phase 3 test authoring and validation | `tests/test_csv_safety_store.py`, `tests/test_csv_safety_preview.py` (both to be created) |
-| proposed test cases with named reddening mutations M1/M1b/M2/M2b/M3 | layers 0/A/B execution and the DDR's RED-proof transcripts | §5 above; the RED-proof step of each increment (`04-validation.md`) |
-| design → requirement traceability (D1 check placement, D2 sentence on panel, D3 collision record; frozen `MapStore.save` / `_save_or_toast` / `preview_csv` contracts) | the matrix and the DDR | `01-requirements.md` §4 IFC owners; `docs/ARCHITECTURE.md` §4 rows this batch amends (commitment, at close) |
+| design characteristics: the round-trip save check (`parse(dump(G))` must reproduce node ids, edges, root; refusal names the rule; O(N+E) plus one dump/parse); the preview precedence collision > multi-parent > cycle with `csv_collisions` keyed first; `action_save`'s record-keyed refusal (LLR-CSV.2.3); `Graph.csv_collisions` (`compare=False, repr=False`) + `CsvCollision`/`CsvRow` as the collision-record carrier; `Graph.multi_parent_ids()` kept for the preview's multi-parent sentence only; exact sentence templates of HLR-CSV.2 (three-way grammar exactly `rows 2, 3 and 4`; neutral cycle wording; line numbers via `csv.DictReader.line_num`) | the Phase-3 increments (increment 1: store refusal, `mapper/model.py` + `mapper/store.py`; increment 2: preview sentence + record, `mapper/import_csv.py` + `mapper/screens/import_preview.py`) and the DDR | `PLAN.md` roadmap; increment specs; `04-validation.md` traceability matrix (LLR → test node) |
+| enablers: the boundary-catalog fixtures (empty, single row, two-row/three-way collision, collision-on-root — cycle case, auto-id collision, two parentless rows, one parented + one parentless, newline title, arrow title, duplicate edges, cycle via parent column, self-parent via the parent column, blank-line CSV, CRLF CSV, the empty-CSV panel, the perf evidence CSV verbatim), E-1 helpers imported from `tests/test_draft_save.py`, the real AT drive path `_open_import` from `tests/test_seed_safety.py:107-117` | Phase 3 test authoring and validation | `tests/test_csv_safety_store.py`, `tests/test_csv_safety_preview.py` (both to be created) |
+| proposed test cases with named reddening mutations M1/M1b/M2/M2b/M2c/M3 and per-layer negative controls (ruling R8) | layers 0/A/B execution and the DDR's RED-proof transcripts | §5 above; the RED-proof step of each increment (`04-validation.md`) |
+| design → requirement traceability (D1 check placement — now the round trip per ruling R2; D2 sentence on panel; D3 collision record; LLR-CSV.2.3 preview save refusal; frozen `MapStore.save` / `_save_or_toast` / `preview_csv` contracts) | the matrix and the DDR | `01-requirements.md` §4 IFC owners; `docs/ARCHITECTURE.md` §4 rows this batch amends (the `Graph` row — owed at close, ruling R10) |
 
 - ⚠ Any row whose consumer column is empty: **remove the output, or explain why it is being produced.** — none; every row names its consumer.
 
