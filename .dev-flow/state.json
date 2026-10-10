@@ -80,7 +80,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P3",
+  "current_station": "DDR",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -193,6 +193,11 @@
       "station": "PDR",
       "date": "2026-10-09",
       "decision": "PDR approved with conditions C1-C9 (self-approved under the standing authorization): architect + qa-reviewer approved-with-conditions; document conditions C1, C2, C3, C6, C7, C8 applied (LED .10); C4, C5, C9 are executed in P3 and re-read at DDR"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-10",
+      "decision": "P3 approved (self-approved under the standing authorization): 22 increments (Inc-0, A1-A7, B0-B12); every gate run recorded (last: 3124 passed / 0 failed at e5d80e9); group code reviews A2-A4+B0 and B1-B12 APPROVE-WITH-NITS 0 HIGH, MED vacuous census scans repaired (1c77233); packets 001-022"
     }
   ],
   "standing_authorization": {
