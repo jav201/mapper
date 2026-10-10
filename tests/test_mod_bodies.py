@@ -84,11 +84,29 @@ def method_occurrences(root: Path) -> dict[str, list[str]]:
     A list longer than one means the move duplicated a definition; a key
     the baseline carries that is absent here was found zero times.
     """
+    # Spine B (2026-10-09-modular-batch) composes `MapScreen` from plain mixins:
+    # a method moved into `class HintsOps` is still `MapScreen.<name>` for the
+    # census.  The mixin set is DERIVED from `MapScreen`'s own bases under
+    # `root` (so a tmp-copy mutant is judged by its own tree), never hand-listed.
+    mixins = _map_screen_mixins(root)
     found: dict[str, list[str]] = {}
     for path in _py_files(root):
         for key, dump in _bodies_in_file(path).items():
+            cls, _, name = key.rpartition(".")
+            if cls in mixins:
+                key = f"MapScreen.{name}"
             found.setdefault(key, []).append(dump)
     return found
+
+
+def _map_screen_mixins(root: Path) -> set[str]:
+    """Names of the classes `MapScreen` inherits from, other than Textual's."""
+    names: set[str] = set()
+    for path in _py_files(root):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.ClassDef) and node.name == "MapScreen":
+                names |= {b.id for b in node.bases if isinstance(b, ast.Name)} - {"Screen"}
+    return names
 
 
 def method_dumps(root: Path) -> dict[str, str]:

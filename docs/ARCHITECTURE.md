@@ -279,7 +279,7 @@ the spine, and — the deliverable — (c) between product lanes after Inc-B11.)
 | A7 | `screens/import_preview.py` *(new)*, `app.py` | `_ImportPreviewScreen` — imports `MapScreen` from `mapper.screens.map` (never `mapper.app`; §3) |
 | A4 | `screens/home.py` *(new)*, `app.py` | `HomeScreen` — **last of the siblings**: it uses `plug_repo` (A6), `import_preview` (A7) and `MapScreen` (B0), so it lands after all of them (needs A1 helpers + A2 modals too) |
 | **Spine B — one concern per increment, serial on `screen.py`, 2 source files each (order = risk: smallest/cleanest first, the spike first of all, the 686-line painting concern last):** | | |
-| B1 | `screens/map/hints.py` *(new)* | hints mixin (ARCH-8: `MapHintLine` already moved at A1 — it is not part of this concern) — **the spike**: proves, with a pilot-driven hint test, that `action_*` and `on_*` dispatch through a mixin while BINDINGS stay on the core class (the ARQ spike, `evidence/arq-mro-spike.transcript`) before anything coupled moves |
+| B1 · **DONE** | `screens/map/hints.py` *(new)* | hints mixin (ARCH-8: `MapHintLine` already moved at A1 — it is not part of this concern) — **the spike**: proves, with a pilot-driven hint test, that `action_*` and `on_*` dispatch through a mixin while BINDINGS stay on the core class (the ARQ spike, `evidence/arq-mro-spike.transcript`) before anything coupled moves |
 | B2 | `screens/map/exporting.py` | export concern (3 shared attrs, 0 calls in) |
 | B3 | `screens/map/opening.py` (+ `tests/test_arch_osopen_callers.py` allow-list) | open concern; carries the osopen §3 amendment |
 | B4 | `screens/map/undo.py` | undo concern (calls in only from drafts/edits/focus) |
