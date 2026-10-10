@@ -43,7 +43,7 @@ ALLOWED_UNUSED: dict[str, dict[str, str]] = {
             "COUNT_REGION_ID", "MAX_RENDER_NODES", "PAN_INERT_HINT", "SEARCH_ACTIVE_LABEL",
             "SEARCH_COUNT_SUBJECT", "SEARCH_SUSPENDED_NOTICE", "SearchIndex", "_ConfirmScreen",
             "_FichaScreen", "_QUERY_ECHO_CELLS", "_path_refusal", "map_hint", "pan_extent",
-            "save_svg",
+            "save_svg", "GitHubConnector", "NavigationModel",
         )
     },
     "mapper/screens/__init__.py": {

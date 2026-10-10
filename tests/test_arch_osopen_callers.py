@@ -25,6 +25,9 @@ LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
 # B0 moved the only app.py launch site (the attachment-activated handler) to screens/map/screen.py,
 # until B3 moves it to screens/map/opening.py; app.py no longer references any launcher name.
 ALLOWED_FILES = {"osopen.py", "screens/map/screen.py"}
+# The osopen OWNERS may import any osopen name (ARCHITECTURE §1/§3): the boundary module itself and
+# `app`. Kept separate from ALLOWED_FILES (the LAUNCHER census) since B0 split the two sets apart.
+OSOPEN_OWNERS = {"app.py", "osopen.py"}
 # Inc-9q: the allowed-name arms were committed RED first (the set changed: `refusal_sentence`, `hard_linked`,
 # `is_link` in; `PATH_OUTSIDE_WORKSPACE` out).
 OPEN_STEPS: set[str] = set()
@@ -97,7 +100,7 @@ ALLOWED_OUTSIDE_APP = {
 def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
     seen: dict[str, set[str]] = {}
     for rel, tree in _sources():
-        if rel in ALLOWED_FILES:
+        if rel in OSOPEN_OWNERS:
             continue
         imports = list(_osopen_imports(tree))
         if imports:
