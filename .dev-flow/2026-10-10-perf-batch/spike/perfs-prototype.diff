@@ -1,0 +1,135 @@
+diff --git a/mapper/screens/map/painting.py b/mapper/screens/map/painting.py
+index 109fcf2..dba76c8 100644
+--- a/mapper/screens/map/painting.py
++++ b/mapper/screens/map/painting.py
+@@ -351,16 +351,50 @@ class PaintingOps:
+         state = self._view_state(w, h)
+         renderer = self._current_renderer()
+         if (renderer, state) != self._rendered_for:
+-            try:
+-                text = renderer.render(self.graph, state)
+-            except Exception:
+-                # `refresh_canvas` has already painted its declared "no se pudo
+-                # dibujar el mapa" for this frame; overwriting it from here would
+-                # replace a stated degradation with a second copy of itself.
+-                pass
+-            else:
++            if self._rendered_for is None:
++                # PROTOTYPE (`perfs` spike): the canvas is EMPTY — the
++                # pre-layout `refresh_canvas` skipped its paint because the
++                # region was unassigned.  This first real paint must go
++                # through the same guarded path `refresh_canvas` uses, so it
++                # is INLINED HERE rather than extracted into a helper: the
++                # paint-pass census (`tests/test_search.py`) grows readers
++                # transitively and stops only at methods that open a pass,
++                # which this helper cannot do without becoming a third opener.
++                # `_reclamp_pan` runs BEFORE the state is captured, and a
++                # renderer failure is painted as the declared "could not draw
++                # the map" (this pass's swallow-below would leave an empty
++                # canvas, and `TC-R08`'s degraded-render arm reads the canvas).
++                try:
++                    self._reclamp_pan(w, h)
++                    # CAPTURED, not recomputed afterwards: `_reclamp_pan` can
++                    # move `pan_x`/`pan_y`, so a second `_view_state` call is
++                    # not necessarily the state this content was produced
++                    # from -- and recording a state the render did not use is
++                    # exactly the desync the guard exists to prevent.
++                    state = self._view_state(w, h)
++                    text = renderer.render(self.graph, state)
++                except Exception as exc:
++                    state = self._view_state(w, h)
++                    text = darkside.Text.assemble(
++                        (" could not draw the map\n\n", f"bold {darkside.INK}"),
++                        (f" {darkside.plain(str(exc))}", darkside.MUT),
++                    )
+                 canvas.update(text)
++                # EVERYTHING this content was produced from, recorded so the
++                # settle pass can tell "already reconciled" from "needs a
++                # re-render" (`P1`).  Set even on the degraded path.
+                 self._rendered_for = (renderer, state)
++            else:
++                try:
++                    text = renderer.render(self.graph, state)
++                except Exception:
++                    # `refresh_canvas` has already painted its declared "no se pudo
++                    # dibujar el mapa" for this frame; overwriting it from here would
++                    # replace a stated degradation with a second copy of itself.
++                    pass
++                else:
++                    canvas.update(text)
++                    self._rendered_for = (renderer, state)
+         self.query_one(f"#{COUNT_REGION_ID}", Static).update(self._pagination_text())
+         # ONE PASS IS NOT ENOUGH, AND THAT WAS `B-60`'s RESIDUAL.  This runs on
+         # the first `call_after_refresh`, and at narrow terminals the region is
+@@ -603,32 +637,45 @@ class PaintingOps:
+         # Any renderer failure is a drawing problem, not an application problem:
+         # this method runs inside the message pump, so an escape here kills the
+         # app.  Scoped to the sink, not to the exception types known today --
+-        # which is why `_reclamp_pan` is INSIDE it rather than beside it: it
+-        # reaches the same `_tree_layout` the render does, and Inc-3 had moved it
+-        # out where the guard could not see it.
+-        try:
+-            self._reclamp_pan(w, h)
+-            # CAPTURED, not recomputed afterwards: `_reclamp_pan` can move
+-            # `pan_x`/`pan_y`, so a second `_view_state` call is not necessarily
+-            # the state this content was produced from -- and recording a state
+-            # the render did not use is exactly the desync the guard exists to
+-            # prevent.
+-            state = self._view_state(w, h)
+-            text = renderer.render(self.graph, state)
+-        except Exception as exc:
+-            state = self._view_state(w, h)
+-            text = darkside.Text.assemble(
+-                (" could not draw the map\n\n", f"bold {darkside.INK}"),
+-                (f" {darkside.plain(str(exc))}", darkside.MUT),
+-            )
+-        canvas.update(text)
+-        # EVERYTHING this content was produced from, recorded so the settle pass
+-        # can tell "already reconciled" from "needs a re-render" (`P1`).  Set
+-        # even on the degraded path: the failure text is what the canvas now
+-        # HOLDS for this state, and re-rendering would only replace a stated
+-        # degradation with a copy of itself.
+-        self._rendered_for = (renderer, state)
+-        pulse_cursor(canvas)
++        # which is why `_reclamp_pan` is INSIDE the `try` rather than beside it:
++        # it reaches the same `_tree_layout` the render does, and Inc-3 had
++        # moved it out where the guard could not see it.
++        #
++        # PROTOTYPE (`perfs` spike, batch `2026-10-10-perf-batch`): skip ONLY
++        # the expensive canvas paint while the canvas region is unassigned
++        # (`size.width == 0`, the pre-layout frame `on_mount` paints into).
++        # Everything else — the crumb, the inspector, the rail, the minimap,
++        # the strip LAST, and arming the settle pass below — keeps its order
++        # untouched.  The skipped frame's output was never visible: the
++        # compositor had no region to show it in, and the settle pass paints
++        # the first real frame through the same guarded path
++        # (`_declare_after_layout`'s `_rendered_for is None` branch).  Without
++        # this guard the mount of a wide-2000 map renders the canvas three
++        # times (measured: `elbow_down` 5997 = 3 x 1999).
++        if canvas.size.width:
++            try:
++                self._reclamp_pan(w, h)
++                # CAPTURED, not recomputed afterwards: `_reclamp_pan` can move
++                # `pan_x`/`pan_y`, so a second `_view_state` call is not
++                # necessarily the state this content was produced from -- and
++                # recording a state the render did not use is exactly the desync
++                # the guard exists to prevent.
++                state = self._view_state(w, h)
++                text = renderer.render(self.graph, state)
++            except Exception as exc:
++                state = self._view_state(w, h)
++                text = darkside.Text.assemble(
++                    (" could not draw the map\n\n", f"bold {darkside.INK}"),
++                    (f" {darkside.plain(str(exc))}", darkside.MUT),
++                )
++            canvas.update(text)
++            # EVERYTHING this content was produced from, recorded so the settle
++            # pass can tell "already reconciled" from "needs a re-render" (`P1`).
++            # Set even on the degraded path: the failure text is what the canvas
++            # now HOLDS for this state, and re-rendering would only replace a
++            # stated degradation with a copy of itself.
++            self._rendered_for = (renderer, state)
++            pulse_cursor(canvas)
+ 
+         tab = self.query_one(TabStrip)
+         node = self.graph.nodes.get(self.nav.cursor or "")

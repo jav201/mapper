@@ -1,0 +1,58 @@
+# PERFS spike (Lane S feasibility) — Kimi kimi-for-coding, timed out (exit 124) before writing its own summary; this transcript is the orchestrator's extraction of the measured files + log
+## perfs-check-green.txt (prototype applied)
+=== seed_118 ===
+mount renders: 2
+  #1 origin=_declare_after_layout  state=(58,26) state_sha=acd7d8b5aa12c891 canvas_size=[58, 27] canvas_region=[58, 27] screen=[118, 34]
+  #2 origin=_declare_after_layout  state=(58,26) state_sha=906c638d701c749f canvas_size=[58, 27] canvas_region=[58, 27] screen=[118, 34]
+  settled canvas sha256: f46a0fc5ec6c1a67832460cdb0633b16774288bc1d1b2694bbeb69bb918c8f27
+  settled screen sha256: 9780cce8761cdb01e06ebbf82f6d65a5e8a640a0f915f91c15ac9b1030e317c3
+  settled _declared_for: [24, 3, 58, 27]
+explicit _open refresh_canvas renders: 1
+  #e1 origin=refresh_canvas         state=(58,26) canvas_size=[58, 27] canvas_region=[58, 27]
+  after-explicit canvas sha256: f46a0fc5ec6c1a67832460cdb0633b16774288bc1d1b2694bbeb69bb918c8f27
+  after-explicit screen sha256: a123719496db88e5f6ddee251314d569e1c8e3173cb3d8a456de92e1c7950995
+=== seed_87 ===
+mount renders: 2
+  #1 origin=_declare_after_layout  state=(87,26) state_sha=dbf2c834e74c9b52 canvas_size=[87, 27] canvas_region=[87, 27] screen=[87, 34]
+  #2 origin=_declare_after_layout  state=(87,26) state_sha=022335611cd399f4 canvas_size=[87, 27] canvas_region=[87, 27] screen=[87, 34]
+  settled canvas sha256: 0a59e5918070375eb1f2bb9d2baee2ad4fc8a78496c88cedae890cd537a290b6
+  settled screen sha256: 498edcf0989ff1ede72cfce5f0fa170b2324b6fa69cfedd6061858f14648c455
+  settled _declared_for: [0, 3, 87, 27]
+explicit _open refresh_canvas renders: 1
+  #e1 origin=refresh_canvas         state=(87,26) canvas_size=[87, 27] canvas_region=[87, 27]
+  after-explicit canvas sha256: 0a59e5918070375eb1f2bb9d2baee2ad4fc8a78496c88cedae890cd537a290b6
+  after-explicit screen sha256: 9445ea8cf6d54dc5e125ed656853b2c69ba5172427bba1c86430dc0aa2690218
+=== wide_118 ===
+mount renders: 2
+  #1 origin=_declare_after_layout  state=(58,24) state_sha=f7e3bfde0ba1455f canvas_size=[58, 25] canvas_region=[58, 25] screen=[118, 34]
+  #2 origin=_declare_after_layout  state=(58,24) state_sha=32dcf023e8a39f07 canvas_size=[58, 25] canvas_region=[58, 25] screen=[118, 34]
+  settled canvas sha256: 7bf0b14154035598ca7275656809b4f88aa2a54068c6a3ef508e43da6a6b84f5
+  settled screen sha256: 13e3cec800067e9eb0d237f759a34ddfea2ba6949a95f935ad0c9c9ebce2b2f6
+  settled _declared_for: [24, 5, 58, 25]
+CHECK PASS: no pre-layout render, mount renders == 2 in every case, canvas and screen byte-identical to baseline (mount and after the explicit repaint)
+## log extract
+  - tests/test_search.py: 1 failed — `test_every_reader_of_the_resolution_is_inside_a_paint_pass`
+1 failed in 0.59s
+6 failed, 4 passed in 7.25s
+  5. python perfs_spike.py check --expect-ncalls 2 → RED (expect failures: prelayout renders + wide 3 calls)
+  8. re-run test_overflow.py with prototype → if still 20 failed, they're pre-existing; if green now, my earlier failures were caused by the helper version?? No wait — test_overflow failures are independent of the census issue. Need to determine cause.
+  - wide_118: mount_ncalls 3 != expected 2
+20 failed, 59 passed in 59.83s
+• RED confirmed on the pristine tree, and crucially `test_overflow.py` fails identically (20 failed) without the prototype — those failures pre-date this spike. Now restore the prototype and verify byte-identity:edb4f5b749afe87df9bfc24e5e8854484991921d2bb5b03ae9a0acd6fbe59287 *mapper/screens/map/painting.py
+1 passed in 0.56s
+CHECK PASS: no pre-layout render, mount renders == 2 in every case, canvas and screen byte-identical to baseline (mount and after the explicit repaint)
+11 passed in 0.67s
+4 passed in 0.91s
+1 failed, 14 passed in 4.99s
+        # node count as well as width folded its two inline renders into one
+        #       was` renders a THIRD comparand, at `selected_id=None`.  The export
+        #       artifact` renders the map at its own grown extent and drives the
+        #       artifact` renders the map at its own grown extent and drives the
+        #       do_not_reach_the_artifact` renders the CANVAS's own state -- session
+        #       renders a repo with no branches through `HybridLaneRenderer` and reads
+  Wait — but with the inlined version, test_search PASSES (the reader `_declare_after_layout` is an opener — growth stops there). Only the A3 pin fails (66 vs 65). Which shape is better for the verdict? The helper version failed test_search's pass-free census (worse — a safety arm). The inlined version fails only the cardinality pin (a bookkeeping pin with a documented update workflow). Inlined is clearly the better prototype shape.
+  Hmm wait, actually, what about calling the settle render site from refresh_canvas?? I.e., move the guarded paint INTO `_declare_after_layout` entirely and have refresh_canvas... no, refresh_canvas must paint synchronously (tests call `screen.refresh_canvas()` then assert canvas content after one pause — the settle pass runs on call_after_refresh; test_en8 does exactly one `pilot.pause()` after refresh_canvas then reads the canvas — does one pause run the settle callback? call_after_refresh callbacks run after the next refresh... test_en8 passed in my earlier full-run? test_en8 wasn't in my list. Risky — refresh_canvas must paint inline. No.
+  Remaining test runs: test_legend_design went background (wait for notification), test_mod_parity/test_mod_dispatch/test_pan/test_strips passed with helper version; the inlined version changed only the census + pin; but re-run the key files with the INLINED prototype to be safe: test_mod_parity (the big one), test_mod_dispatch, test_pan, test_strips, test_search (full), test_overflow (expect same 20 pre-existing). Also en8/repair_cycles pan degradation tests — test_pan covers. Let me batch: test_mod_parity + test_search full + test_overflow + test_mod_dispatch in parallel. test_pan/test_strips passed earlier under helper version and the inlined version is semantically identical for those paths — but to be rigorous re-run test_pan and test_strips too. And test_repair_sidecar/confirm_markup passed under helper; inlined identical semantics; I'll re-run them anyway in one batch — they're fast.
+3 passed in 9.54s
+40 passed in 60.28s (0:01:00)
+59 passed, 2 deselected in 37.79s
