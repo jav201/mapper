@@ -549,13 +549,10 @@ def _self_reads(fn) -> set[str]:
 def _app_tree():
     """`mapper/app.py` parsed, for censuses that must see the WHOLE module."""
     import ast
-    import inspect
-    import pathlib
 
-    from mapper.app import MapScreen
-
-    src = pathlib.Path(inspect.getfile(MapScreen)).read_text(encoding="utf-8")
-    return ast.parse(src)
+    # `2026-10-09-modular-batch`: the map screen spans `screen.py` and its Spine B
+    # mixin modules, so "the whole module" is the package source `_app_source` joins.
+    return ast.parse(_app_source())
 
 
 def _app_source() -> str:
@@ -1461,11 +1458,14 @@ def _map_screen_self_reads() -> dict[str, set[str]]:
     """
     import ast
 
-    cls = next(
-        node
-        for node in ast.walk(_app_tree())
-        if isinstance(node, ast.ClassDef) and node.name == "MapScreen"
-    )
+    # `2026-10-09-modular-batch` Spine B: `MapScreen` is composed from plain mixins, so
+    # its methods are the class body PLUS every mixin it inherits from.  Parsed from
+    # the package source (`_app_source`), mixin set derived from MapScreen's bases.
+    tree = ast.parse(_app_source())
+    classes = {node.name: node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
+    cls = classes["MapScreen"]
+    owners = [cls] + [classes[b.id] for b in cls.bases
+                      if isinstance(b, ast.Name) and b.id in classes and b.id != "Screen"]
     return {
         item.name: {
             sub.attr
@@ -1474,7 +1474,8 @@ def _map_screen_self_reads() -> dict[str, set[str]]:
             and isinstance(sub.value, ast.Name)
             and sub.value.id == "self"
         }
-        for item in cls.body
+        for owner in owners
+        for item in owner.body
         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
 

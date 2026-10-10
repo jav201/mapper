@@ -131,7 +131,7 @@ async def _drive_export_too_large(app, pilot, mp, tmp_path):
 
 
 async def _drive_export_failed(app, pilot, mp, tmp_path):
-    mp.setattr("mapper.screens.map.screen.save_svg", _boom)
+    mp.setattr("mapper.screens.map.exporting.save_svg", _boom)
     await pilot.press("e")
 
 

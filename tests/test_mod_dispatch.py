@@ -32,6 +32,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -355,9 +356,10 @@ def test_at066_hints_dispatch_red_when_the_mixin_is_dropped(tmp_path):
     shutil.copytree(REPO_ROOT / "mapper", mut / "mapper")
     screen_py = mut / "mapper" / "screens" / "map" / "screen.py"
     source = screen_py.read_text(encoding="utf-8")
-    needle = "class MapScreen(HintsOps, Screen):"
-    assert needle in source, "B1's composition is not on the tree"
-    screen_py.write_text(source.replace(needle, "class MapScreen(Screen):", 1), encoding="utf-8")
+    # Drop HintsOps from MapScreen's bases whatever the other Spine B mixins are.
+    mutated, n = re.subn(r"^(class MapScreen\([^)]*?)\bHintsOps,\s*", r"\1", source, count=1, flags=re.M)
+    assert n == 1, "B1's composition (HintsOps among MapScreen's bases) is not on the tree"
+    screen_py.write_text(mutated, encoding="utf-8")
 
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"  # the capture is UTF-8; Windows defaults to cp1252
