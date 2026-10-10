@@ -1,0 +1,30 @@
+◆ mapper · atlas · concept map                                                                                      6 nodes
+                 ▐ arbol a                                          ▐ arbol b                                       
+                  meta a                                             meta b                                         
+                        │                                                  │                                        
+       ┌────────────────┼────────────────┐                                 ┼                                        
+▐ hoja a0        ▐ hoja a1        ▐ hoja a2                         ▐ hoja b0                                       
+ ma0              ma1              ma2                               mb0                                            
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
+                                                                                                                    
