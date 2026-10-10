@@ -85,13 +85,16 @@
     }
   ],
   "guided": false,
-  "current_station": "P0",
-  "phase_status": "not-started",
+  "current_station": "ARQ",
+  "phase_status": "in-progress",
   "stations_active": [
     "P0",
+    "ARQ",
     "P1",
     "P2",
+    "PDR",
     "P3",
+    "DDR",
     "P4",
     "P5"
   ],
@@ -101,9 +104,42 @@
     "P2": 0,
     "P3": 0,
     "P4": 0,
-    "P5": 0
+    "P5": 0,
+    "ARQ": 0,
+    "DDR": 0,
+    "PDR": 0
   },
-  "triggers": {},
+  "triggers": {
+    "evaluated_at": "2026-10-10T12:07:44",
+    "fired": [
+      "A2",
+      "A3",
+      "B1",
+      "B4",
+      "C6",
+      "C8",
+      "D1",
+      "E1",
+      "F1"
+    ],
+    "not_fired": [
+      "A1",
+      "A4",
+      "B2",
+      "B3",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C7",
+      "D2",
+      "E2",
+      "E3",
+      "F2"
+    ],
+    "record": ".dev-flow/2026-10-10-csv-safety-batch/PLAN.md#triggers"
+  },
   "artifact_homes": {
     "requirements": "repo:.dev-flow/2026-10-10-csv-safety-batch/01-requirements.md",
     "requirements_ledger": "repo:.dev-flow/2026-10-10-csv-safety-batch/01-requirements-ledger.md",
@@ -125,7 +161,13 @@
     "P1": ".dev-flow/2026-10-10-csv-safety-batch/01-requirements.md",
     "P1_ledger": ".dev-flow/2026-10-10-csv-safety-batch/01-requirements-ledger.md"
   },
-  "decisions_log": [],
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-10",
+      "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base a36f63e; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
+    }
+  ],
   "standing_authorization": {
     "autonomous": true,
     "merge": true,

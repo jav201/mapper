@@ -30,7 +30,23 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 | Id | Verdict | Probe output |
 |---|---|---|
-| <A1 / B1 / …> | not evaluated in this unit | trigger probes are owed at the PDR gate; P0/P1 authored from the unit brief and measured premises only |
+| A1 | not fired | no module created or moved; the change lives inside `mapper/store.py`, `mapper/import_csv.py`, `mapper/screens/import_preview.py` |
+| A2 | **fired** | three modules touched (store, import_csv, screens/import_preview) |
+| A3 | **fired** | `preview_csv` gains a collision record that `screens/import_preview.py` consumes; `MapStore.save` gains a refusal its callers (`_save_or_toast`) consume |
+| A4 | not fired | two sequential increments, one lane |
+| B1 | **fired** | `grep -rlE "MapStore|preview_csv|_ImportPreviewScreen" tests/` → 40 files of other batches assert these symbols; reverse census owed per increment |
+| B2 | not fired | no file moves |
+| B3 | not fired | no golden captures the import preview or the store bytes (AT-065 goldens cover the map screen only) |
+| B4 | **fired** | the saved map (`.mmd` + sidecar) is consumed by `MapStore.load`; AT-074 is the output-then-consume test |
+| C1 / C2 / C3 / C4 / C5 / C7 | not fired | no auth, secret, external integration, sensitive data, destructive DB or network surface |
+| C6 | **fired** | the CSV file is an input surface; the refusal parses operator-supplied ids |
+| C8 | **fired** | the refusal sentence paints CSV-derived ids — they must pass `darkside.plain` (no markup/ANSI injection), asserted in LLR-CSV.2.2 |
+| D1 | **fired** | the preview paints a new refusal sentence in its existing panel; no new widget, layout or key — copy only, stated verbatim in HLR-CSV.2 |
+| D2 | not fired | no prototype in another technology |
+| E1 | **fired** | 3 user stories |
+| E2 / E3 | not fired | not declared high risk at intake; no client/regulated deliverable |
+| F1 | **fired** | the installed flow bundle differs from its manifest (`V7`, external — the same notice every recent batch carries) |
+| F2 | not fired | backlog refreshed this session (B-108..B-114) |
 
 ## Where we are
 
