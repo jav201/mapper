@@ -1,0 +1,3114 @@
+{
+ "methods": [
+  {
+   "name": "__init__",
+   "first_line": 1547,
+   "line_count": 84,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "graph"
+   ],
+   "writes": [
+    "_declared_for",
+    "_draft_guard_open",
+    "_focus_before_legend",
+    "_last_save_error",
+    "_legend_restore_pending",
+    "_pan_before_legend",
+    "_rebind_declared",
+    "_regions_pinned",
+    "_rendered_for",
+    "_search_memo",
+    "base_graph",
+    "diff",
+    "diff_active",
+    "focus_active",
+    "folded",
+    "graph",
+    "inspector_hidden",
+    "map_id",
+    "nav",
+    "outline_mode",
+    "outline_renderer",
+    "pan_x",
+    "pan_y",
+    "query_text",
+    "radial_mode",
+    "radial_renderer",
+    "rail_hidden",
+    "renderer",
+    "source_crumb",
+    "store"
+   ],
+   "calls": [],
+   "module_names": [
+    "DiffResult",
+    "Graph",
+    "LayeredRenderer",
+    "MapStore",
+    "NavigationModel",
+    "OutlineRenderer",
+    "RadialRenderer",
+    "Region",
+    "ViewState"
+   ],
+   "property": false
+  },
+  {
+   "name": "compose",
+   "first_line": 1632,
+   "line_count": 20,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "KEY_SCOPE",
+    "map_id",
+    "source_crumb"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "COUNT_REGION_ID",
+    "ComposeResult",
+    "FichaInspector",
+    "Horizontal",
+    "Input",
+    "KeyBar",
+    "MapHintLine",
+    "OutlineRail",
+    "Static",
+    "TabStrip",
+    "groups_for_keybar",
+    "keybar_groups",
+    "map_hint"
+   ],
+   "property": false
+  },
+  {
+   "name": "_notice_load_warnings",
+   "first_line": 1653,
+   "line_count": 14,
+   "decorators": [],
+   "doc_first_line": "Tell the operator which node and which field were unreadable.",
+   "reads": [
+    "notify"
+   ],
+   "writes": [],
+   "calls": [
+    "notify"
+   ],
+   "module_names": [
+    "Graph",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_establish_graph",
+   "first_line": 1668,
+   "line_count": 14,
+   "decorators": [],
+   "doc_first_line": "Make *graph* the screen's map: the ONE load path (design 1b.9).",
+   "reads": [
+    "_notice_load_warnings",
+    "nav"
+   ],
+   "writes": [
+    "base_graph",
+    "focus_active",
+    "graph",
+    "nav"
+   ],
+   "calls": [
+    "_notice_load_warnings"
+   ],
+   "module_names": [
+    "Graph",
+    "NavigationModel"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_mount",
+   "first_line": 1683,
+   "line_count": 41,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_apply_region_visibility",
+    "_declare_after_layout",
+    "_establish_graph",
+    "_park_focus",
+    "app",
+    "call_after_refresh",
+    "focus",
+    "graph",
+    "map_id",
+    "nav",
+    "notify",
+    "query_one",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "store"
+   ],
+   "calls": [
+    "_apply_region_visibility",
+    "_establish_graph",
+    "call_after_refresh",
+    "focus",
+    "notify",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "Ficha",
+    "Graph",
+    "Input",
+    "Node",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_chrome_width",
+   "first_line": 1732,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "Columns taken by the rail and inspector at the current setting.",
+   "reads": [
+    "inspector_hidden",
+    "rail_hidden"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "INSPECTOR_WIDTH",
+    "RAIL_WIDTH"
+   ],
+   "property": false
+  },
+  {
+   "name": "_apply_region_visibility",
+   "first_line": 1738,
+   "line_count": 15,
+   "decorators": [],
+   "doc_first_line": "Collapse the side regions when the terminal cannot afford them.",
+   "reads": [
+    "MIN_CANVAS_WIDTH",
+    "_regions_pinned",
+    "app",
+    "inspector_hidden",
+    "query_one",
+    "rail_hidden",
+    "size"
+   ],
+   "writes": [
+    "inspector_hidden",
+    "rail_hidden"
+   ],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector",
+    "INSPECTOR_WIDTH",
+    "OutlineRail",
+    "RAIL_WIDTH"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_toggle_rail",
+   "first_line": 1754,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_apply_region_visibility",
+    "_clear_pan_hint",
+    "rail_hidden",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "_regions_pinned",
+    "rail_hidden"
+   ],
+   "calls": [
+    "_apply_region_visibility",
+    "_clear_pan_hint",
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_toggle_inspector",
+   "first_line": 1761,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_apply_region_visibility",
+    "inspector_hidden",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "_regions_pinned",
+    "inspector_hidden"
+   ],
+   "calls": [
+    "_apply_region_visibility",
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_focus_rail",
+   "first_line": 1767,
+   "line_count": 11,
+   "decorators": [],
+   "doc_first_line": "Move keyboard focus to the rail, and say so on the hint line.",
+   "reads": [
+    "action_toggle_rail",
+    "query_one",
+    "rail_hidden",
+    "refresh_canvas"
+   ],
+   "writes": [],
+   "calls": [
+    "action_toggle_rail",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "HintLine",
+    "OutlineRail",
+    "SCOPE_MAP",
+    "label_for"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_collapse_branch",
+   "first_line": 1779,
+   "line_count": 25,
+   "decorators": [],
+   "doc_first_line": "Fold or unfold the branch under the cursor \u2014 LLR-N06.2.1, LLR-N06.2.2.",
+   "reads": [
+    "folded",
+    "graph",
+    "nav",
+    "notify",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "folded"
+   ],
+   "calls": [
+    "notify",
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_clamp_pan",
+   "first_line": 1813,
+   "line_count": 10,
+   "decorators": [
+    "staticmethod"
+   ],
+   "doc_first_line": "LLR-N06.1.2 \u2014 the legal range is `[0, max(0, E - W)]`, always.",
+   "reads": [],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_header_rows",
+   "first_line": 1842,
+   "line_count": 61,
+   "decorators": [],
+   "doc_first_line": "The header's measured physical height for the frame about to be sized.",
+   "reads": [
+    "_canvas_width",
+    "_current_renderer",
+    "_header_rows_for",
+    "graph"
+   ],
+   "writes": [],
+   "calls": [
+    "_canvas_width",
+    "_current_renderer",
+    "_header_rows_for"
+   ],
+   "module_names": [
+    "header_rows"
+   ],
+   "property": false
+  },
+  {
+   "name": "_header_rows_for",
+   "first_line": 1904,
+   "line_count": 30,
+   "decorators": [],
+   "doc_first_line": "The function this renderer's header charge comes from.",
+   "reads": [
+    "outline_renderer",
+    "radial_renderer",
+    "renderer"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "header_rows",
+    "outline_header_rows",
+    "radial_header_rows"
+   ],
+   "property": false
+  },
+  {
+   "name": "_canvas_width",
+   "first_line": 1935,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "Columns the canvas renderer is given.  Floors at 20 (`B-61`'s band).",
+   "reads": [
+    "_chrome_width",
+    "app",
+    "size"
+   ],
+   "writes": [],
+   "calls": [
+    "_chrome_width"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_canvas_size",
+   "first_line": 1942,
+   "line_count": 48,
+   "decorators": [],
+   "doc_first_line": "The `(w, h)` the canvas renderer is given, in ONE place.",
+   "reads": [
+    "_canvas_width",
+    "_header_rows",
+    "app",
+    "query_one",
+    "size"
+   ],
+   "writes": [],
+   "calls": [
+    "_canvas_width",
+    "_header_rows",
+    "query_one"
+   ],
+   "module_names": [
+    "Static"
+   ],
+   "property": false
+  },
+  {
+   "name": "_consumes_pan",
+   "first_line": 1991,
+   "line_count": 66,
+   "decorators": [],
+   "doc_first_line": "Does THIS renderer read the pan offsets it would be given?",
+   "reads": [
+    "outline_renderer",
+    "radial_renderer",
+    "renderer"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_reclamp_pan",
+   "first_line": 2058,
+   "line_count": 31,
+   "decorators": [],
+   "doc_first_line": "Pull both offsets back into range for the frame about to be drawn.",
+   "reads": [
+    "_clamp_pan",
+    "_consumes_pan",
+    "_current_renderer",
+    "_view_state",
+    "graph",
+    "pan_x",
+    "pan_y"
+   ],
+   "writes": [
+    "pan_x",
+    "pan_y"
+   ],
+   "calls": [
+    "_clamp_pan",
+    "_consumes_pan",
+    "_current_renderer",
+    "_view_state"
+   ],
+   "module_names": [
+    "pan_extent"
+   ],
+   "property": false
+  },
+  {
+   "name": "_pan",
+   "first_line": 2090,
+   "line_count": 44,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "PAN_STEP_X",
+    "PAN_STEP_Y",
+    "_canvas_size",
+    "_clamp_pan",
+    "_consumes_pan",
+    "_current_renderer",
+    "_resting_hint",
+    "_view_state",
+    "graph",
+    "pan_x",
+    "pan_y",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "pan_x",
+    "pan_y"
+   ],
+   "calls": [
+    "_canvas_size",
+    "_clamp_pan",
+    "_consumes_pan",
+    "_current_renderer",
+    "_resting_hint",
+    "_view_state",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "HintLine",
+    "PAN_EDGE_HINT",
+    "PAN_INERT_HINT",
+    "pan_extent"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_pan_left",
+   "first_line": 2135,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_pan"
+   ],
+   "writes": [],
+   "calls": [
+    "_pan"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_pan_right",
+   "first_line": 2138,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_pan"
+   ],
+   "writes": [],
+   "calls": [
+    "_pan"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_pan_up",
+   "first_line": 2141,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_pan"
+   ],
+   "writes": [],
+   "calls": [
+    "_pan"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_pan_down",
+   "first_line": 2144,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_pan"
+   ],
+   "writes": [],
+   "calls": [
+    "_pan"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_unpainted_ids",
+   "first_line": 2147,
+   "line_count": 53,
+   "decorators": [],
+   "doc_first_line": "The graph's nodes minus the ones the current render actually painted.",
+   "reads": [
+    "_canvas_size",
+    "_current_renderer",
+    "_painted_ids_for",
+    "_view_state",
+    "graph"
+   ],
+   "writes": [],
+   "calls": [
+    "_canvas_size",
+    "_current_renderer",
+    "_painted_ids_for",
+    "_view_state"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_painted_ids_for",
+   "first_line": 2201,
+   "line_count": 36,
+   "decorators": [],
+   "doc_first_line": "The function this renderer declares its painted set through.",
+   "reads": [
+    "outline_renderer",
+    "radial_renderer",
+    "renderer"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "outline_painted_ids",
+    "painted_ids",
+    "radial_painted_ids"
+   ],
+   "property": false
+  },
+  {
+   "name": "_park_focus",
+   "first_line": 2238,
+   "line_count": 3,
+   "decorators": [],
+   "doc_first_line": "Hand the keyboard back to the map itself.",
+   "reads": [
+    "set_focus"
+   ],
+   "writes": [],
+   "calls": [
+    "set_focus"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_declare_after_layout",
+   "first_line": 2242,
+   "line_count": 77,
+   "decorators": [],
+   "doc_first_line": "Repaint BOTH declaring surfaces once layout is real \u2014 B-56 and B-60.",
+   "reads": [
+    "_canvas_size",
+    "_current_renderer",
+    "_declare_after_layout",
+    "_declared_for",
+    "_open_paint_pass",
+    "_pagination_text",
+    "_rendered_for",
+    "_view_state",
+    "call_after_refresh",
+    "graph",
+    "query_one"
+   ],
+   "writes": [
+    "_declared_for",
+    "_rendered_for"
+   ],
+   "calls": [
+    "_canvas_size",
+    "_current_renderer",
+    "_open_paint_pass",
+    "_pagination_text",
+    "_view_state",
+    "call_after_refresh",
+    "query_one"
+   ],
+   "module_names": [
+    "COUNT_REGION_ID",
+    "Static"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_resize",
+   "first_line": 2320,
+   "line_count": 29,
+   "decorators": [],
+   "doc_first_line": "Re-declare when the layout actually settles \u2014 `B-60`, closed properly.",
+   "reads": [
+    "_declare_after_layout"
+   ],
+   "writes": [
+    "_declared_for"
+   ],
+   "calls": [
+    "_declare_after_layout"
+   ],
+   "module_names": [
+    "events"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_descendant_focus",
+   "first_line": 2350,
+   "line_count": 26,
+   "decorators": [],
+   "doc_first_line": "`H2` (closing verdict, round 5): repaint on every focus change, so",
+   "reads": [
+    "_declare_after_layout",
+    "_field_hint",
+    "_seat_glyph",
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "_declare_after_layout",
+    "_field_hint",
+    "_seat_glyph",
+    "query_one"
+   ],
+   "module_names": [
+    "FieldInput",
+    "HintLine",
+    "events"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_descendant_blur",
+   "first_line": 2377,
+   "line_count": 18,
+   "decorators": [],
+   "doc_first_line": "The other half of `H2`: a field can blur to NOTHING (the",
+   "reads": [
+    "_declare_after_layout",
+    "_resting_hint",
+    "app",
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "_declare_after_layout",
+    "_resting_hint",
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector",
+    "FieldInput",
+    "HintLine",
+    "events"
+   ],
+   "property": false
+  },
+  {
+   "name": "_current_renderer",
+   "first_line": 2396,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "outline_mode",
+    "outline_renderer",
+    "radial_mode",
+    "radial_renderer",
+    "renderer"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "legend_view",
+   "first_line": 2403,
+   "line_count": 12,
+   "decorators": [
+    "property"
+   ],
+   "doc_first_line": "HLR-N16.2: the name of the view `?` explains, read from the same",
+   "reads": [
+    "outline_mode",
+    "radial_mode"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "darkside"
+   ],
+   "property": true
+  },
+  {
+   "name": "legend_view_left",
+   "first_line": 2426,
+   "line_count": 6,
+   "decorators": [
+    "property"
+   ],
+   "doc_first_line": "`F9`: the first column of the view, so the legend docks only while",
+   "reads": [
+    "rail_hidden"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "RAIL_WIDTH"
+   ],
+   "property": true
+  },
+  {
+   "name": "legend_docked",
+   "first_line": 2433,
+   "line_count": 30,
+   "decorators": [],
+   "doc_first_line": "The legend is docked with its left edge at screen column `panel_x`,",
+   "reads": [
+    "_move_pan",
+    "_pan_before_legend",
+    "_pan_revealing_selection",
+    "focused",
+    "pan_x",
+    "pan_y"
+   ],
+   "writes": [
+    "_focus_before_legend",
+    "_pan_before_legend"
+   ],
+   "calls": [
+    "_move_pan",
+    "_pan_revealing_selection"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "legend_closed",
+   "first_line": 2464,
+   "line_count": 17,
+   "decorators": [],
+   "doc_first_line": "The legend closed: the pan and the focus it held return exactly",
+   "reads": [
+    "_focus_before_legend",
+    "_pan_before_legend"
+   ],
+   "writes": [
+    "_focus_before_legend",
+    "_legend_restore_pending",
+    "_pan_before_legend"
+   ],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "on_screen_resume",
+   "first_line": 2482,
+   "line_count": 19,
+   "decorators": [],
+   "doc_first_line": "Undo Textual's own post-resume auto-focus once the legend that",
+   "reads": [
+    "_legend_restore_pending",
+    "_restore_after_legend",
+    "call_after_refresh"
+   ],
+   "writes": [
+    "_legend_restore_pending"
+   ],
+   "calls": [
+    "call_after_refresh"
+   ],
+   "module_names": [
+    "events"
+   ],
+   "property": false
+  },
+  {
+   "name": "_restore_after_legend",
+   "first_line": 2502,
+   "line_count": 36,
+   "decorators": [],
+   "doc_first_line": "The pre-legend focus wins over the auto-focus grab -- restored",
+   "reads": [
+    "_canvas_size",
+    "_declare_after_layout",
+    "_reclamp_pan",
+    "query",
+    "set_focus"
+   ],
+   "writes": [
+    "pan_x",
+    "pan_y"
+   ],
+   "calls": [
+    "_canvas_size",
+    "_declare_after_layout",
+    "_reclamp_pan",
+    "query",
+    "set_focus"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_move_pan",
+   "first_line": 2539,
+   "line_count": 24,
+   "decorators": [],
+   "doc_first_line": "Move the pan and repaint through `_declare_after_layout`'s",
+   "reads": [
+    "_declare_after_layout"
+   ],
+   "writes": [
+    "pan_x",
+    "pan_y"
+   ],
+   "calls": [
+    "_declare_after_layout"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_pan_revealing_selection",
+   "first_line": 2564,
+   "line_count": 81,
+   "decorators": [],
+   "doc_first_line": "The painted pan, moved right until the selected card's box ends",
+   "reads": [
+    "REVEAL_MARGIN_CELLS",
+    "_clamp_pan",
+    "_consumes_pan",
+    "_current_renderer",
+    "_rendered_for",
+    "graph",
+    "nav",
+    "pan_x",
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "_clamp_pan",
+    "_consumes_pan",
+    "_current_renderer",
+    "query_one"
+   ],
+   "module_names": [
+    "Static",
+    "layered_geometry",
+    "pan_extent"
+   ],
+   "property": false
+  },
+  {
+   "name": "_current_crumb",
+   "first_line": 2646,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "map_id",
+    "source_crumb"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_branch_coverage_glyph",
+   "first_line": 2652,
+   "line_count": 33,
+   "decorators": [],
+   "doc_first_line": "Return (glyph, style) for a top-level branch's coverage minimap.",
+   "reads": [
+    "graph"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_minimap_entry_limit",
+   "first_line": 2726,
+   "line_count": 25,
+   "decorators": [],
+   "doc_first_line": "How many branches fit once the affordances have been paid for.",
+   "reads": [
+    "MINIMAP_ROWS",
+    "_MINIMAP_CAPTION_CELLS",
+    "_MINIMAP_DECL_CELLS",
+    "_MINIMAP_ENTRY_OVERHEAD",
+    "_MINIMAP_LEGEND_CELLS",
+    "_MINIMAP_NAME_CELLS"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_minimap_text",
+   "first_line": 2752,
+   "line_count": 41,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_MINIMAP_NAME_CELLS",
+    "_branch_coverage_glyph",
+    "_minimap_entry_limit",
+    "graph"
+   ],
+   "writes": [],
+   "calls": [
+    "_branch_coverage_glyph",
+    "_minimap_entry_limit"
+   ],
+   "module_names": [
+    "Text",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_search_index",
+   "first_line": 2794,
+   "line_count": 19,
+   "decorators": [],
+   "doc_first_line": "The owner of \"what matches\", CONSTRUCTED IN ONE PLACE.",
+   "reads": [
+    "graph"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "SearchIndex"
+   ],
+   "property": false
+  },
+  {
+   "name": "_whole_graph_tally",
+   "first_line": 2814,
+   "line_count": 21,
+   "decorators": [],
+   "doc_first_line": "How many nodes match, over the WHOLE graph, WITHOUT ordering them.",
+   "reads": [
+    "_search_index",
+    "query_text"
+   ],
+   "writes": [],
+   "calls": [
+    "_search_index"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_query_echo",
+   "first_line": 2836,
+   "line_count": 83,
+   "decorators": [],
+   "doc_first_line": "The operator's query, coerced and BOUNDED, for the count region.",
+   "reads": [
+    "query_text"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "_QUERY_ECHO_CELLS",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_suspended_count_line",
+   "first_line": 2920,
+   "line_count": 31,
+   "decorators": [],
+   "doc_first_line": "`LLR-N07.3.4` predicate 1 \u2014 the region above the renderer's bound.",
+   "reads": [
+    "_query_echo",
+    "_seat_glyph",
+    "_whole_graph_tally"
+   ],
+   "writes": [],
+   "calls": [
+    "_query_echo",
+    "_seat_glyph",
+    "_whole_graph_tally"
+   ],
+   "module_names": [
+    "SEARCH_ACTIVE_LABEL",
+    "SEARCH_COUNT_SUBJECT",
+    "SEARCH_SUSPENDED_NOTICE",
+    "Text",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_count_line",
+   "first_line": 2952,
+   "line_count": 74,
+   "decorators": [],
+   "doc_first_line": "`n/N coincidencias en el mapa` \u2014 HLR-N07.2, on the `#D37` strip.",
+   "reads": [
+    "_search_order",
+    "_suspended_count_line",
+    "nav",
+    "query_text"
+   ],
+   "writes": [],
+   "calls": [
+    "_search_order",
+    "_suspended_count_line"
+   ],
+   "module_names": [
+    "SEARCH_COUNT_SUBJECT",
+    "Text",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_pagination_text",
+   "first_line": 3033,
+   "line_count": 75,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "METER_STEPS",
+    "_count_line",
+    "_unpainted_ids",
+    "graph"
+   ],
+   "writes": [],
+   "calls": [
+    "_count_line",
+    "_unpainted_ids"
+   ],
+   "module_names": [
+    "Text",
+    "darkside",
+    "overflow_phrase"
+   ],
+   "property": false
+  },
+  {
+   "name": "_event_toast",
+   "first_line": 3113,
+   "line_count": 32,
+   "decorators": [],
+   "doc_first_line": "Bottom strip for events only \u2014 status words, not glyphs.",
+   "reads": [
+    "_TOAST_CHROME_CELLS",
+    "query_one",
+    "size"
+   ],
+   "writes": [],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "Static",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_focus_owner",
+   "first_line": 3156,
+   "line_count": 33,
+   "decorators": [],
+   "doc_first_line": "Which region holds the keyboard, as one of `FOCUS_OWNERS`.",
+   "reads": [
+    "_FOCUS_REGIONS",
+    "app"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_search_order",
+   "first_line": 3190,
+   "line_count": 78,
+   "decorators": [],
+   "doc_first_line": "The live hits, over the WHOLE graph, in tree order.  `None` above the",
+   "reads": [
+    "_search_index",
+    "_search_memo",
+    "graph",
+    "query_text"
+   ],
+   "writes": [
+    "_search_memo"
+   ],
+   "calls": [
+    "_search_index"
+   ],
+   "module_names": [
+    "MAX_RENDER_NODES"
+   ],
+   "property": false
+  },
+  {
+   "name": "_open_paint_pass",
+   "first_line": 3269,
+   "line_count": 8,
+   "decorators": [],
+   "doc_first_line": "Drop the frame-scoped search memo; called at the top of every repaint.",
+   "reads": [],
+   "writes": [
+    "_search_memo"
+   ],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_search_hits",
+   "first_line": 3278,
+   "line_count": 11,
+   "decorators": [],
+   "doc_first_line": "The same resolution, in the shape a renderer receives.",
+   "reads": [
+    "_search_order"
+   ],
+   "writes": [],
+   "calls": [
+    "_search_order"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_view_state",
+   "first_line": 3290,
+   "line_count": 20,
+   "decorators": [],
+   "doc_first_line": "The renderer's whole parameter surface, built in ONE place.",
+   "reads": [
+    "_focus_owner",
+    "_search_hits",
+    "diff",
+    "diff_active",
+    "folded",
+    "nav",
+    "pan_x",
+    "pan_y"
+   ],
+   "writes": [],
+   "calls": [
+    "_focus_owner",
+    "_search_hits"
+   ],
+   "module_names": [
+    "ViewState"
+   ],
+   "property": false
+  },
+  {
+   "name": "refresh_canvas",
+   "first_line": 3311,
+   "line_count": 123,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_canvas_size",
+    "_current_crumb",
+    "_current_renderer",
+    "_declare_after_layout",
+    "_drop_orphan_draft",
+    "_guard_draft",
+    "_minimap_text",
+    "_open_paint_pass",
+    "_pagination_text",
+    "_paint_draft_hint",
+    "_reclamp_pan",
+    "_repoint",
+    "_view_state",
+    "call_after_refresh",
+    "folded",
+    "graph",
+    "nav",
+    "query_one",
+    "size"
+   ],
+   "writes": [
+    "_declared_for",
+    "_rendered_for"
+   ],
+   "calls": [
+    "_canvas_size",
+    "_current_crumb",
+    "_current_renderer",
+    "_drop_orphan_draft",
+    "_guard_draft",
+    "_minimap_text",
+    "_open_paint_pass",
+    "_pagination_text",
+    "_paint_draft_hint",
+    "_reclamp_pan",
+    "_repoint",
+    "_view_state",
+    "call_after_refresh",
+    "query_one"
+   ],
+   "module_names": [
+    "COUNT_REGION_ID",
+    "FichaInspector",
+    "OutlineRail",
+    "Static",
+    "TabStrip",
+    "darkside",
+    "part",
+    "pulse_cursor"
+   ],
+   "property": false
+  },
+  {
+   "name": "_paint_draft_hint",
+   "first_line": 3439,
+   "line_count": 8,
+   "decorators": [],
+   "doc_first_line": "R8 / PDR C6: with the card hidden, the hint line carries the draft.",
+   "reads": [
+    "inspector_hidden",
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector",
+    "MapHintLine",
+    "SCOPE_MAP",
+    "hint_pair"
+   ],
+   "property": false
+  },
+  {
+   "name": "_drop_orphan_draft",
+   "first_line": 3448,
+   "line_count": 13,
+   "decorators": [],
+   "doc_first_line": "A draft whose node no longer exists cannot be saved or guarded: drop it,",
+   "reads": [
+    "base_graph",
+    "notify",
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "notify",
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "has_pending_draft",
+   "first_line": 3462,
+   "line_count": 3,
+   "decorators": [],
+   "doc_first_line": "Whether this map holds a draft the operator has not saved or dropped.",
+   "reads": [
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "guard_open",
+   "first_line": 3466,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "Whether a draft guard this screen pushed is up.",
+   "reads": [
+    "_draft_guard_open"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_guard_draft",
+   "first_line": 3473,
+   "line_count": 32,
+   "decorators": [],
+   "doc_first_line": "The ONE decision point for leaving a draft (R-014, LLR-003.2).",
+   "reads": [
+    "_draft_guard_open",
+    "_save_draft",
+    "app",
+    "base_graph",
+    "map_id",
+    "query_one"
+   ],
+   "writes": [
+    "_draft_guard_open"
+   ],
+   "calls": [
+    "_save_draft",
+    "query_one"
+   ],
+   "module_names": [
+    "DraftGuardScreen",
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "_repoint",
+   "first_line": 3506,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "Move the cursor to *target* once the guard answered (PDR C2).",
+   "reads": [
+    "graph",
+    "nav",
+    "refresh_canvas"
+   ],
+   "writes": [],
+   "calls": [
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_apply_field",
+   "first_line": 3513,
+   "line_count": 18,
+   "decorators": [
+    "staticmethod"
+   ],
+   "doc_first_line": "Write one drafted value onto *ficha*.",
+   "reads": [],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "Ficha",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_save_draft",
+   "first_line": 3532,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_save_draft"
+   ],
+   "writes": [],
+   "calls": [
+    "_save_draft"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_save_draft",
+   "first_line": 3535,
+   "line_count": 58,
+   "decorators": [],
+   "doc_first_line": "Write the draft: one snapshot, one whole-graph write (LLR-001.4, 004.1).",
+   "reads": [
+    "_apply_field",
+    "_drop_orphan_draft",
+    "_establish_graph",
+    "_event_toast",
+    "_focused_field_id",
+    "_last_save_error",
+    "_push_snapshot",
+    "_refocus_field",
+    "_seat_glyph",
+    "_snapshots",
+    "base_graph",
+    "map_id",
+    "nav",
+    "notify",
+    "query_one",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [],
+   "calls": [
+    "_apply_field",
+    "_drop_orphan_draft",
+    "_establish_graph",
+    "_event_toast",
+    "_focused_field_id",
+    "_push_snapshot",
+    "_refocus_field",
+    "_seat_glyph",
+    "notify",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "FichaInspector",
+    "SCOPE_DRAFT",
+    "_save_or_toast",
+    "b",
+    "bindings_for",
+    "copy",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_focused_field_id",
+   "first_line": 3594,
+   "line_count": 7,
+   "decorators": [
+    "staticmethod"
+   ],
+   "doc_first_line": "The id of the inspector field holding focus, if one does.",
+   "reads": [],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "FichaInspector",
+    "Input"
+   ],
+   "property": false
+  },
+  {
+   "name": "_refocus_field",
+   "first_line": 3602,
+   "line_count": 15,
+   "decorators": [
+    "staticmethod"
+   ],
+   "doc_first_line": "PDR C7: after `ctrl+s` from inside a field, typing continues there.",
+   "reads": [],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_field_input_left",
+   "first_line": 3618,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "`escape` inside a field returns focus to the map, keeping the value.",
+   "reads": [
+    "_paint_draft_hint",
+    "query_one",
+    "set_focus"
+   ],
+   "writes": [],
+   "calls": [
+    "_paint_draft_hint",
+    "query_one",
+    "set_focus"
+   ],
+   "module_names": [
+    "HintLine",
+    "map_hint"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_ficha_inspector_attachment_activated",
+   "first_line": 3626,
+   "line_count": 38,
+   "decorators": [],
+   "doc_first_line": "Open an attachment through the one OS-handler boundary.",
+   "reads": [
+    "_event_toast",
+    "app",
+    "graph",
+    "notify",
+    "store"
+   ],
+   "writes": [],
+   "calls": [
+    "_event_toast",
+    "notify"
+   ],
+   "module_names": [
+    "ATTACHMENT_HARD_LINKED",
+    "FichaInspector",
+    "OSOPEN_OK",
+    "_path_refusal",
+    "darkside",
+    "open_external"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_ficha_inspector_attachment_add_requested",
+   "first_line": 3665,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_add_attachment",
+    "_guard_draft"
+   ],
+   "writes": [],
+   "calls": [
+    "_add_attachment",
+    "_guard_draft"
+   ],
+   "module_names": [
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "_add_attachment",
+   "first_line": 3672,
+   "line_count": 28,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_event_toast",
+    "_push_snapshot",
+    "app",
+    "graph",
+    "map_id",
+    "notify",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "base_graph"
+   ],
+   "calls": [
+    "_event_toast",
+    "_push_snapshot",
+    "notify",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "Attachment",
+    "_PromptScreen",
+    "_path_refusal",
+    "_save_or_toast",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_ficha_inspector_attachment_remove_requested",
+   "first_line": 3701,
+   "line_count": 7,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_guard_draft",
+    "_remove_attachment"
+   ],
+   "writes": [],
+   "calls": [
+    "_guard_draft",
+    "_remove_attachment"
+   ],
+   "module_names": [
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "_remove_attachment",
+   "first_line": 3709,
+   "line_count": 15,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_event_toast",
+    "_push_snapshot",
+    "graph",
+    "map_id",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "base_graph"
+   ],
+   "calls": [
+    "_event_toast",
+    "_push_snapshot",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "_save_or_toast",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_add_attachment",
+   "first_line": 3725,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_remove_attachment",
+   "first_line": 3728,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "FichaInspector"
+   ],
+   "property": false
+  },
+  {
+   "name": "_snapshots",
+   "first_line": 3733,
+   "line_count": 9,
+   "decorators": [
+    "property"
+   ],
+   "doc_first_line": "This map's undo history, held by the App so it outlives the screen.",
+   "reads": [
+    "app",
+    "map_id"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": true
+  },
+  {
+   "name": "_push_snapshot",
+   "first_line": 3743,
+   "line_count": 17,
+   "decorators": [],
+   "doc_first_line": "Push *graph* (default: the graph on show) onto this map's undo stack.",
+   "reads": [
+    "UNDO_DEPTH",
+    "_snapshots",
+    "graph",
+    "store"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "Graph",
+    "dump_mermaid",
+    "json",
+    "yaml"
+   ],
+   "property": false
+  },
+  {
+   "name": "_pop_snapshot",
+   "first_line": 3761,
+   "line_count": 17,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_event_toast",
+    "_snapshots",
+    "graph",
+    "map_id",
+    "nav",
+    "notify",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "base_graph",
+    "graph"
+   ],
+   "calls": [
+    "_event_toast",
+    "notify",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "_save_or_toast",
+    "json",
+    "yaml"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_next_sibling",
+   "first_line": 3779,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "nav",
+    "refresh_canvas"
+   ],
+   "writes": [],
+   "calls": [
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_prev_sibling",
+   "first_line": 3785,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "nav",
+    "refresh_canvas"
+   ],
+   "writes": [],
+   "calls": [
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_child",
+   "first_line": 3791,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "nav",
+    "refresh_canvas"
+   ],
+   "writes": [],
+   "calls": [
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_parent",
+   "first_line": 3797,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "nav",
+    "refresh_canvas"
+   ],
+   "writes": [],
+   "calls": [
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_open_ficha",
+   "first_line": 3803,
+   "line_count": 10,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_current_crumb",
+    "_guard_draft",
+    "app",
+    "graph",
+    "nav"
+   ],
+   "writes": [],
+   "calls": [
+    "_current_crumb",
+    "_guard_draft"
+   ],
+   "module_names": [
+    "MapScreen",
+    "_FichaScreen"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_search",
+   "first_line": 3814,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "query_one"
+   ],
+   "module_names": [
+    "Input"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_input_submitted",
+   "first_line": 3820,
+   "line_count": 25,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_search_hint",
+    "_search_is_live",
+    "_search_order",
+    "focus",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "query_text"
+   ],
+   "calls": [
+    "_search_hint",
+    "_search_is_live",
+    "_search_order",
+    "focus",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "HintLine",
+    "Input",
+    "map_hint"
+   ],
+   "property": false
+  },
+  {
+   "name": "on_input_blurred",
+   "first_line": 3846,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "focus"
+   ],
+   "writes": [],
+   "calls": [
+    "focus"
+   ],
+   "module_names": [
+    "Input"
+   ],
+   "property": false
+  },
+  {
+   "name": "_seat_row",
+   "first_line": 3853,
+   "line_count": 13,
+   "decorators": [],
+   "doc_first_line": "The seat's row for *action* in this screen's scope, at CALL time.",
+   "reads": [
+    "KEY_SCOPE"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "KeyBinding",
+    "bindings_for"
+   ],
+   "property": false
+  },
+  {
+   "name": "_seat_glyph",
+   "first_line": 3867,
+   "line_count": 3,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_seat_row"
+   ],
+   "writes": [],
+   "calls": [
+    "_seat_row"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_seat_label",
+   "first_line": 3871,
+   "line_count": 3,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_seat_row"
+   ],
+   "writes": [],
+   "calls": [
+    "_seat_row"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_field_hint",
+   "first_line": 3875,
+   "line_count": 8,
+   "decorators": [],
+   "doc_first_line": "The hint while an inspector field holds the keyboard (U2).",
+   "reads": [
+    "_seat_glyph",
+    "_seat_label"
+   ],
+   "writes": [],
+   "calls": [
+    "_seat_glyph",
+    "_seat_label"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_search_hint",
+   "first_line": 3884,
+   "line_count": 23,
+   "decorators": [],
+   "doc_first_line": "`UX-Q3-b`'s hint for a live search, glyphs READ FROM THE SEAT.",
+   "reads": [
+    "_seat_glyph"
+   ],
+   "writes": [],
+   "calls": [
+    "_seat_glyph"
+   ],
+   "module_names": [
+    "SEARCH_SUSPENDED_NOTICE"
+   ],
+   "property": false
+  },
+  {
+   "name": "_search_is_live",
+   "first_line": 3908,
+   "line_count": 27,
+   "decorators": [],
+   "doc_first_line": "What BOTH `esc` and the hint line mean by \"a search is live\".",
+   "reads": [
+    "query_text"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_declare_rebind",
+   "first_line": 3936,
+   "line_count": 15,
+   "decorators": [],
+   "doc_first_line": "Say ONCE that `n` changed hands (`AT-051b`).",
+   "reads": [
+    "_event_toast",
+    "_seat_glyph",
+    "_seat_label"
+   ],
+   "writes": [],
+   "calls": [
+    "_event_toast",
+    "_seat_glyph",
+    "_seat_label"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_walk_toast",
+   "first_line": 3952,
+   "line_count": 11,
+   "decorators": [],
+   "doc_first_line": "One toast slot, and the one-time declaration outranks it on press 1.",
+   "reads": [
+    "_declare_rebind",
+    "_event_toast"
+   ],
+   "writes": [],
+   "calls": [
+    "_declare_rebind",
+    "_event_toast"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_unfold_onto",
+   "first_line": 3964,
+   "line_count": 29,
+   "decorators": [],
+   "doc_first_line": "Open every folded branch that hides *nid*; return what was opened.",
+   "reads": [
+    "folded",
+    "graph"
+   ],
+   "writes": [
+    "folded"
+   ],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_branch_name",
+   "first_line": 3994,
+   "line_count": 24,
+   "decorators": [],
+   "doc_first_line": "What the hint line calls a branch: its title, or its id if it has none.",
+   "reads": [
+    "graph"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_hint_with_opened",
+   "first_line": 4019,
+   "line_count": 33,
+   "decorators": [],
+   "doc_first_line": "Append `abri\u00f3 \u00ab\u2026\u00bb` to *hint*, BOUNDED, and BEHIND the affordances.",
+   "reads": [
+    "_branch_name"
+   ],
+   "writes": [],
+   "calls": [
+    "_branch_name"
+   ],
+   "module_names": [
+    "_HINT_BRANCHES",
+    "_HINT_BRANCH_CELLS",
+    "_HINT_NAME_MIN_CELLS",
+    "_HINT_NAME_OVERHEAD",
+    "darkside",
+    "nid"
+   ],
+   "property": false
+  },
+  {
+   "name": "_walk_hits",
+   "first_line": 4053,
+   "line_count": 92,
+   "decorators": [],
+   "doc_first_line": "Move the selection to the next (or previous) match, wrapping both ways.",
+   "reads": [
+    "_declare_rebind",
+    "_hint_with_opened",
+    "_rebind_declared",
+    "_search_hint",
+    "_search_order",
+    "_unfold_onto",
+    "_walk_toast",
+    "nav",
+    "query_one",
+    "query_text",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "_rebind_declared"
+   ],
+   "calls": [
+    "_declare_rebind",
+    "_hint_with_opened",
+    "_search_hint",
+    "_search_order",
+    "_unfold_onto",
+    "_walk_toast",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "HintLine",
+    "MAX_RENDER_NODES",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_next_hit",
+   "first_line": 4146,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_walk_hits"
+   ],
+   "writes": [],
+   "calls": [
+    "_walk_hits"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_prev_hit",
+   "first_line": 4149,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_walk_hits"
+   ],
+   "writes": [],
+   "calls": [
+    "_walk_hits"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_toggle_focus",
+   "first_line": 4152,
+   "line_count": 17,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_push_snapshot",
+    "base_graph",
+    "focus_active",
+    "graph",
+    "nav",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "focus_active",
+    "graph",
+    "nav"
+   ],
+   "calls": [
+    "_push_snapshot",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "NavigationModel"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_toggle_outline",
+   "first_line": 4170,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_clear_pan_hint",
+    "outline_mode",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "outline_mode",
+    "radial_mode"
+   ],
+   "calls": [
+    "_clear_pan_hint",
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_toggle_radial",
+   "first_line": 4176,
+   "line_count": 5,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_clear_pan_hint",
+    "radial_mode",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "outline_mode",
+    "radial_mode"
+   ],
+   "calls": [
+    "_clear_pan_hint",
+    "refresh_canvas"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_clear_pan_hint",
+   "first_line": 4182,
+   "line_count": 32,
+   "decorators": [],
+   "doc_first_line": "Drop `PAN_INERT_HINT` when the view changes underneath it.",
+   "reads": [
+    "_resting_hint",
+    "query_one"
+   ],
+   "writes": [],
+   "calls": [
+    "_resting_hint",
+    "query_one"
+   ],
+   "module_names": [
+    "HintLine",
+    "PAN_EDGE_HINT",
+    "PAN_INERT_HINT"
+   ],
+   "property": false
+  },
+  {
+   "name": "_resting_hint",
+   "first_line": 4215,
+   "line_count": 7,
+   "decorators": [],
+   "doc_first_line": "What the hint line says when no handler has declared anything: the live search's hint while a",
+   "reads": [
+    "_search_hint",
+    "_search_is_live",
+    "_search_order"
+   ],
+   "writes": [],
+   "calls": [
+    "_search_hint",
+    "_search_is_live",
+    "_search_order"
+   ],
+   "module_names": [
+    "map_hint"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_toggle_diff",
+   "first_line": 4223,
+   "line_count": 19,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "diff_active",
+    "map_id",
+    "notify",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "diff",
+    "diff_active"
+   ],
+   "calls": [
+    "notify",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "darkside",
+    "git_diff"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_coverage",
+   "first_line": 4243,
+   "line_count": 7,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_goto_gap",
+    "app",
+    "graph",
+    "map_id"
+   ],
+   "writes": [],
+   "calls": [
+    "_goto_gap"
+   ],
+   "module_names": [
+    "CoverageScreen"
+   ],
+   "property": false
+  },
+  {
+   "name": "_incomplete_order",
+   "first_line": 4252,
+   "line_count": 23,
+   "decorators": [],
+   "doc_first_line": "Nodes with a missing required field, in the coverage report's order.",
+   "reads": [
+    "graph"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_goto_gap",
+   "first_line": 4276,
+   "line_count": 26,
+   "decorators": [],
+   "doc_first_line": "Move the cursor to *node_id* and focus its first missing field.",
+   "reads": [
+    "_apply_region_visibility",
+    "_seat_glyph",
+    "_seat_label",
+    "graph",
+    "inspector_hidden",
+    "nav",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "inspector_hidden"
+   ],
+   "calls": [
+    "_apply_region_visibility",
+    "_seat_glyph",
+    "_seat_label",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "FichaInspector",
+    "HintLine"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_next_gap",
+   "first_line": 4303,
+   "line_count": 15,
+   "decorators": [],
+   "doc_first_line": "Advance to the next node that is missing a required field.",
+   "reads": [
+    "_event_toast",
+    "_goto_gap",
+    "_incomplete_order",
+    "nav"
+   ],
+   "writes": [],
+   "calls": [
+    "_event_toast",
+    "_goto_gap",
+    "_incomplete_order"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_export_svg",
+   "first_line": 4339,
+   "line_count": 93,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "EXPORT_DECLARE_CELLS",
+    "EXPORT_DECLARE_PAUSE",
+    "_current_renderer",
+    "_event_toast",
+    "_export_view_state",
+    "app",
+    "graph",
+    "map_id",
+    "notify",
+    "size",
+    "store"
+   ],
+   "writes": [],
+   "calls": [
+    "_current_renderer",
+    "_event_toast",
+    "_export_view_state",
+    "notify"
+   ],
+   "module_names": [
+    "asyncio",
+    "darkside",
+    "save_svg"
+   ],
+   "property": false
+  },
+  {
+   "name": "_export_view_state",
+   "first_line": 4668,
+   "line_count": 118,
+   "decorators": [],
+   "doc_first_line": "The state an export renders from: the canvas state, minus the session.",
+   "reads": [
+    "EXPORT_EXTENT_STEPS",
+    "_consumes_pan",
+    "_current_renderer",
+    "_view_state",
+    "_within_export_budget",
+    "graph"
+   ],
+   "writes": [],
+   "calls": [
+    "_consumes_pan",
+    "_current_renderer",
+    "_view_state",
+    "_within_export_budget"
+   ],
+   "module_names": [
+    "ExportError",
+    "ViewState",
+    "export_neutralised",
+    "pan_extent",
+    "replace"
+   ],
+   "property": false
+  },
+  {
+   "name": "_within_export_budget",
+   "first_line": 4787,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "Return `state`, or refuse if rendering it would exceed the budget.",
+   "reads": [
+    "EXPORT_MAX_CELLS"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "ExportTooLarge",
+    "ViewState"
+   ],
+   "property": false
+  },
+  {
+   "name": "_guard_focus_mutation",
+   "first_line": 4794,
+   "line_count": 6,
+   "decorators": [],
+   "doc_first_line": "Return True if a structural mutation should proceed.",
+   "reads": [
+    "focus_active",
+    "notify"
+   ],
+   "writes": [],
+   "calls": [
+    "notify"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_add_child",
+   "first_line": 4801,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_add_child",
+    "_guard_draft"
+   ],
+   "writes": [],
+   "calls": [
+    "_guard_draft"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_add_child",
+   "first_line": 4804,
+   "line_count": 30,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_guard_focus_mutation",
+    "_push_snapshot",
+    "app",
+    "graph",
+    "map_id",
+    "nav",
+    "notify",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "base_graph"
+   ],
+   "calls": [
+    "_guard_focus_mutation",
+    "_push_snapshot",
+    "notify",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "Edge",
+    "Ficha",
+    "Node",
+    "_PromptScreen",
+    "_save_or_toast",
+    "darkside",
+    "slugify"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_open_documents",
+   "first_line": 4835,
+   "line_count": 15,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "app",
+    "graph",
+    "map_id",
+    "nav",
+    "notify"
+   ],
+   "writes": [],
+   "calls": [
+    "notify"
+   ],
+   "module_names": [
+    "FactoryScreen"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_archive",
+   "first_line": 4851,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_archive",
+    "_guard_draft"
+   ],
+   "writes": [],
+   "calls": [
+    "_guard_draft"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_archive",
+   "first_line": 4854,
+   "line_count": 57,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_event_toast",
+    "_guard_focus_mutation",
+    "_push_snapshot",
+    "_remove_subtree",
+    "_subtree_size",
+    "app",
+    "graph",
+    "map_id",
+    "nav",
+    "notify",
+    "refresh_canvas",
+    "store"
+   ],
+   "writes": [
+    "base_graph"
+   ],
+   "calls": [
+    "_event_toast",
+    "_guard_focus_mutation",
+    "_push_snapshot",
+    "_remove_subtree",
+    "_subtree_size",
+    "notify",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "_ConfirmScreen",
+    "_save_or_toast",
+    "darkside"
+   ],
+   "property": false
+  },
+  {
+   "name": "_subtree_size",
+   "first_line": 4912,
+   "line_count": 13,
+   "decorators": [],
+   "doc_first_line": "How many nodes would go if this subtree were archived.",
+   "reads": [
+    "graph"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "_remove_subtree",
+   "first_line": 4926,
+   "line_count": 15,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "graph"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [
+    "e",
+    "k",
+    "v"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_undo",
+   "first_line": 4942,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_pop_snapshot"
+   ],
+   "writes": [],
+   "calls": [
+    "_pop_snapshot"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_home",
+   "first_line": 4945,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "_guard_draft",
+    "app"
+   ],
+   "writes": [],
+   "calls": [
+    "_guard_draft"
+   ],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_back_or_home",
+   "first_line": 4948,
+   "line_count": 34,
+   "decorators": [],
+   "doc_first_line": "`esc` clears a live search; with none live it leaves the map (`#D38`).",
+   "reads": [
+    "_guard_draft",
+    "_search_is_live",
+    "app",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "writes": [
+    "query_text"
+   ],
+   "calls": [
+    "_guard_draft",
+    "_search_is_live",
+    "query_one",
+    "refresh_canvas"
+   ],
+   "module_names": [
+    "HintLine",
+    "map_hint"
+   ],
+   "property": false
+  },
+  {
+   "name": "action_palette",
+   "first_line": 4983,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "app"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  },
+  {
+   "name": "action_help",
+   "first_line": 4986,
+   "line_count": 2,
+   "decorators": [],
+   "doc_first_line": "",
+   "reads": [
+    "app"
+   ],
+   "writes": [],
+   "calls": [],
+   "module_names": [],
+   "property": false
+  }
+ ],
+ "state_first": {
+  "_declared_for": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_draft_guard_open": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_focus_before_legend": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_last_save_error": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_legend_restore_pending": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_pan_before_legend": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_rebind_declared": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_regions_pinned": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_rendered_for": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "_search_memo": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "base_graph": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "diff": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "diff_active": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "focus_active": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "folded": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "graph": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "inspector_hidden": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "map_id": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "nav": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "outline_mode": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "outline_renderer": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "pan_x": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "pan_y": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "query_text": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "radial_mode": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "radial_renderer": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "rail_hidden": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "renderer": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "source_crumb": {
+   "where": "__init__",
+   "line": 1547
+  },
+  "store": {
+   "where": "__init__",
+   "line": 1547
+  }
+ },
+ "toplevel": {
+  "map_hint": {
+   "first_line": 158,
+   "line_count": 5,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "MapHintLine": {
+   "first_line": 165,
+   "line_count": 26,
+   "kind": "ClassDef",
+   "app_deps": []
+  },
+  "home_hint": {
+   "first_line": 196,
+   "line_count": 4,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "_home_door_key": {
+   "first_line": 204,
+   "line_count": 4,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "screen_bindings": {
+   "first_line": 228,
+   "line_count": 10,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "keybar_groups": {
+   "first_line": 240,
+   "line_count": 7,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "_refusal_toast": {
+   "first_line": 249,
+   "line_count": 10,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "_save_or_toast": {
+   "first_line": 261,
+   "line_count": 51,
+   "kind": "FunctionDef",
+   "app_deps": [
+    "_refusal_toast"
+   ]
+  },
+  "NavigationModel": {
+   "first_line": 314,
+   "line_count": 37,
+   "kind": "ClassDef",
+   "app_deps": []
+  },
+  "_path_refusal": {
+   "first_line": 358,
+   "line_count": 8,
+   "kind": "FunctionDef",
+   "app_deps": []
+  },
+  "_PromptScreen": {
+   "first_line": 368,
+   "line_count": 46,
+   "kind": "ClassDef",
+   "app_deps": []
+  },
+  "_ConfirmScreen": {
+   "first_line": 416,
+   "line_count": 54,
+   "kind": "ClassDef",
+   "app_deps": []
+  },
+  "_TemplateScreen": {
+   "first_line": 472,
+   "line_count": 37,
+   "kind": "ClassDef",
+   "app_deps": []
+  },
+  "_FichaScreen": {
+   "first_line": 511,
+   "line_count": 73,
+   "kind": "ClassDef",
+   "app_deps": []
+  },
+  "ConstructScreen": {
+   "first_line": 586,
+   "line_count": 39,
+   "kind": "ClassDef",
+   "app_deps": [
+    "_refusal_toast"
+   ]
+  },
+  "HomeScreen": {
+   "first_line": 632,
+   "line_count": 481,
+   "kind": "ClassDef",
+   "app_deps": [
+    "ConstructScreen",
+    "MapScreen",
+    "PlugRepoScreen",
+    "_ImportPreviewScreen",
+    "_PromptScreen",
+    "_TemplateScreen",
+    "_home_door_key",
+    "_refusal_toast",
+    "home_hint",
+    "keybar_groups",
+    "screen_bindings"
+   ]
+  },
+  "_ImportPreviewScreen": {
+   "first_line": 1115,
+   "line_count": 67,
+   "kind": "ClassDef",
+   "app_deps": [
+    "MapScreen",
+    "_PromptScreen",
+    "_save_or_toast",
+    "keybar_groups",
+    "screen_bindings"
+   ]
+  },
+  "PlugRepoScreen": {
+   "first_line": 1184,
+   "line_count": 48,
+   "kind": "ClassDef",
+   "app_deps": [
+    "RepoScreen",
+    "keybar_groups",
+    "screen_bindings"
+   ]
+  },
+  "RepoScreen": {
+   "first_line": 1234,
+   "line_count": 300,
+   "kind": "ClassDef",
+   "app_deps": [
+    "NavigationModel",
+    "keybar_groups",
+    "screen_bindings"
+   ]
+  },
+  "MapScreen": {
+   "first_line": 1536,
+   "line_count": 3452,
+   "kind": "ClassDef",
+   "app_deps": [
+    "MapHintLine",
+    "NavigationModel",
+    "_ConfirmScreen",
+    "_FichaScreen",
+    "_PromptScreen",
+    "_path_refusal",
+    "_save_or_toast",
+    "keybar_groups",
+    "map_hint",
+    "screen_bindings"
+   ]
+  },
+  "MapperApp": {
+   "first_line": 4990,
+   "line_count": 247,
+   "kind": "ClassDef",
+   "app_deps": [
+    "HomeScreen",
+    "MapScreen",
+    "screen_bindings"
+   ]
+  },
+  "main": {
+   "first_line": 5239,
+   "line_count": 13,
+   "kind": "FunctionDef",
+   "app_deps": [
+    "MapperApp"
+   ]
+  }
+ }
+}
