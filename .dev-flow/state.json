@@ -75,8 +75,8 @@
     }
   ],
   "guided": false,
-  "current_station": "P3",
-  "phase_status": "in-progress",
+  "current_station": "P5",
+  "phase_status": "closed",
   "stations_active": [
     "P0",
     "P1",
@@ -170,6 +170,16 @@
       "station": "P2",
       "date": "2026-10-09",
       "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; NEW-1 fixed (LED .6); 0 blocker, 0 major open"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-09",
+      "decision": "P3 increment 001 approved (self-approved under the standing authorization): 1 source file; C0-C3 and A1 killed; code-reviewer APPROVE-WITH-NITS 0 HIGH, 2 LOW folded; regression set 147 passed / 0 failed"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-09",
+      "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2941 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT, two optional notes applied; note G-001 -> B-106"
     }
   ],
   "standing_authorization": {
