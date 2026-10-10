@@ -62,15 +62,22 @@ Three disjoint lanes (A4 — the first batch to use the modular split for parall
   ones included). Consumers (`import_csv`'s orphan pass, `store._reindex`) get the speedup for free
   through the unchanged `children_of`/`parent_of` signatures.
 - **Lane S — mount paint count** (`mapper/screens/map/painting.py`, `mapper/screens/map/screen.py`) —
-  **GATED on spike unit PERFS** (running in parallel): keep `refresh_canvas`'s declaration order
+  **WITHDRAWN 2026-10-10 to backlog B-118 (the else branch of the two-branch ruling, ledger
+  `LED-2026-10-10-perf-batch.3`)**: spike unit PERFS did not establish feasibility — on the seed map
+  at 118×34 and 87×34 the mount renders 2× before AND after the prototype (baseline: one pre-layout
+  `refresh_canvas` render at canvas 0×0 + one settle render; prototype: two settle renders), the
+  final canvas is byte-identical, wide-2000 was not measured (the unit timed out), and the prototype
+  needed a second guarded render site in `_declare_after_layout` plus an A3 census pin change
+  (65→66). The design below is kept for the record as the withdrawn proposal; lanes R and M proceed
+  (file sets still disjoint — §8). The original gated text: keep `refresh_canvas`'s declaration order
   unchanged; skip only the canvas render while the canvas region is unassigned
   (`canvas.size.width == 0`); route the first real render through the normal guarded/reclamp path;
   the `_declare_after_layout` settle pass is kept and settles to a no-op when the region is stable.
   The round-1 mechanism (strip-first declaration + `_declared_for is None` deferral) is WITHDRAWN —
-  contradicted by the code (round-1 finding B4). **Two-branch ruling: if the spike proves render
-  ncalls = 1 at mount with every existing mount test green, Inc-S1 ships as specified; if the spike
-  fails, Lane S leaves the batch to the backlog (B-118) and HLR-PERF.3 / LLR-PERF.3.1–3.2 /
-  AT-077 / AT-077b are withdrawn — lanes R and M proceed regardless.**
+  contradicted by the code (round-1 finding B4). **Two-branch ruling: the spike failed to prove
+  render ncalls = 1 at mount with every existing mount test green, so Lane S leaves the batch to
+  the backlog (B-118) and HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn — lanes
+  R and M proceed regardless.**
 
 What this design will NOT do (operator-ruled, PLAN.md):
 
@@ -94,7 +101,7 @@ not duplicate:
 | `views` (`mapper/views/layered.py` — Lane R) | The UNSCALED `_tree_layout` (slot cx, level per node) memoised on strong references (`is` on the `Graph`, its `edges` list (+len), its `nodes` dict (+len), `root_id`, the hidden fold set) threaded through module-level `_geometry` (`layered.py:306`); `card_w`/`gap` scaling re-applied per call (O(N)); `render`/`painted_ids`/`pan_extent` signatures unchanged; `MAX_RENDER_NODES` value untouched | `IRenderer.render(graph, selected_id, w, h, **kwargs) -> Text` — the frozen contract, unchanged | `views` → textual / `store` / `app` bans respected; no Textual import; the per-render `_child_index` build stays (measured ≤ 0.37 ms — noise, PERF0 §1) |
 | `model` (`mapper/model.py` — Lane M) | A **private** cached adjacency on `Graph` (`_`-prefixed, `compare=False, repr=False` — the `csv_collisions` precedent), valid only while `self._adj_src is self.edges and len(self.edges) == n` (strong reference — `id()` recycling can never fake a hit); `children_of` returns a **fresh list** per call; `children_of`/`parent_of` return edge-list order / first-match exactly as today | `Graph` value object shape unchanged: `nodes`, `edges`, `root_id`, `csv_collisions`, `focus()` — the frozen §4 row gains one trunk-amended note; `__eq__`/`repr` unchanged | UI, persistence details (module's own bans); no new outbound dependency — the cache is plain dicts |
 | `mermaid` (`mapper/mermaid.py` — Lane M) | `dump`'s orphan loop: one O(N+E) incident-membership pass instead of the per-node `any(...)` scan; emission order, dedup set and escaping byte-identical | `parse(src) -> Graph`, `dump(graph) -> str`, `slugify` — frozen, unchanged signatures | UI, network (module's own bans) |
-| `map screen` (`mapper/screens/map/screen.py`, `painting.py` — Lane S, GATED on spike PERFS) | Mount paint sequencing only: `refresh_canvas`'s declaration order untouched; only the canvas render is skipped while the region is unassigned (`canvas.size.width == 0`), chrome still painting; the first real render runs through the normal guarded path (`_reclamp_pan`, `_rendered_for`); `refresh_canvas`/`_declare_after_layout` names, signatures and F2 call surface unchanged; `BINDINGS` and every class constant untouched (F3) | `MapScreen` (package re-export), F5 surface unchanged | No `mapper.app` import, no concern-module imports (§3 `screens/map` row); no `BINDINGS`/`DEFAULT_CSS`/`@on` in any mixin |
+| `map screen` (`mapper/screens/map/screen.py`, `painting.py` — Lane S, **WITHDRAWN to B-118 2026-10-10, ledger `LED-2026-10-10-perf-batch.3`** — module untouched by this batch) | (withdrawn — original text:) Mount paint sequencing only: `refresh_canvas`'s declaration order untouched; only the canvas render is skipped while the region is unassigned (`canvas.size.width == 0`), chrome still painting; the first real render runs through the normal guarded path (`_reclamp_pan`, `_rendered_for`); `refresh_canvas`/`_declare_after_layout` names, signatures and F2 call surface unchanged; `BINDINGS` and every class constant untouched (F3) | `MapScreen` (package re-export), F5 surface unchanged | No `mapper.app` import, no concern-module imports (§3 `screens/map` row); no `BINDINGS`/`DEFAULT_CSS`/`@on` in any mixin |
 
 - Boundaries respected as declared in `docs/ARCHITECTURE.md`: ✓ — no §2/§3 boundary moves; the one
   §4 touch (`Graph` row gains a note that a private adjacency cache exists) is a **trunk** act done by
@@ -115,9 +122,9 @@ flowchart TD
         m1["mapper/model.py<br/>adjacency cache (private)"]
         m2["mapper/mermaid.py<br/>linear dump"]
     end
-    subgraph laneS ["Lane S — mount paint count"]
-        s1["mapper/screens/map/painting.py<br/>region-width canvas skip · guarded settle"]
-        s2["mapper/screens/map/screen.py<br/>on_mount defers canvas render"]
+    subgraph laneS ["Lane S — mount paint count (WITHDRAWN to B-118, 2026-10-10, ledger .3)"]
+        s1["mapper/screens/map/painting.py<br/>region-width canvas skip · guarded settle — NOT LANDED"]
+        s2["mapper/screens/map/screen.py<br/>on_mount defers canvas render — NOT LANDED"]
     end
     ddr["DDR join: full suite · AT-065 parity goldens<br/>golden census · P4 wall-clock evidence"]
     trunk --> laneR & laneM & laneS
@@ -136,7 +143,7 @@ flowchart LR
         b3["strip rows move the region<br/>→ re-armed pass<br/>render #3"]
         b1 --> b2 --> b3
     end
-    subgraph after ["AFTER — 1 paid render (GATED on spike PERFS)"]
+    subgraph after ["AFTER — 1 paid render (GATED on spike PERFS — WITHDRAWN to B-118, never landed)"]
         a1["on_mount: refresh_canvas<br/>chrome painted · canvas render SKIPPED<br/>(region unassigned: canvas.size.width == 0)"]
         a2["first real geometry: guarded render<br/>region assigned · _reclamp_pan runs<br/>render #1 at real geometry"]
         a3["re-armed settle pass<br/>region == _declared_for<br/>→ _rendered_for guard: NO render"]
@@ -187,8 +194,8 @@ that must cross a seam are trunk acts, scheduled at the join (§8).
 | AT-075 — `tests/test_perf_paint_clip.py::test_at_075_keypress_wire_budget` (US-PERF-001, HLR-PERF.1, LLR-PERF.1.1) | B | Wide-2000 tree map in a tmp workspace, opened with real keys (`MapperApp(tmp_path)` + `run_test(size=(118,34))`, helpers from `tests/test_draft_save.py`); two navigation keypresses (`l`, `j`) with a counting wrapper on `Canvas.wire` (counter RESET after mount so mount paints are not charged to the keypress budget): total `wire` calls ≤ 1,200,000 (≥ 5× below — ≈ 1/20 of — the measured baseline 23,983,998 for 2 keys, PERF0C §7.1; tightened from 4,800,000 so a one-axis-only clip fails) AND the settled painted lines byte-equal the golden pinned at base SHA `5cde04e` (sha256-recorded, the AT-065 precedent) | M-R1a: remove the span clip in a tmp copy → `wire` calls jump back to ~24 M → count RED. M-R1b: clamp the clip upper bound to `min(xb, w-1)` (drops one in-bounds cell) → byte-golden RED |
 | AT-075b — `tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden` (US-PERF-001, LLR-PERF.1.2) | B | Same map; five selection-only keypresses (`l,j,j,j,j`): the memo-miss spy at the named hit-check point inside `_geometry` reads exactly 1 miss; painted output after each key byte-equal the pinned golden; then an edit that mutates edges (archive a subtree with real keys) and one more keypress: exactly 1 more miss (stale-cache detector) | M-R2: drop the memo in a tmp copy → 1 miss per keypress → RED. M-R2b: never invalidate (fixed key) → post-edit painted diff RED |
 | AT-076 — `tests/test_perf_dump.py::test_at_076_real_save_dump_budget` (US-PERF-002, HLR-PERF.2, LLR-PERF.2.2) | B | Save a wide-6000 map through a REAL persisting gesture — a ficha edit that persists via `_save_or_toast` (`screens/map/editing.py`), NOT bare `ctrl+s` with no draft (which saves nothing, `drafts.py:131-132`) — with a counting wrapper on `graph.edges`: ONE `mermaid.dump` call iterates ≤ 2·E + c (baseline: 18,003,001 genexpr visits + 6002 O(E) scans, PERF0C §7.3) AND the saved `.mmd` bytes byte-equal the golden pinned at base SHA `5cde04e` | M-M2a: restore the per-node `any()` scan in a tmp copy → iteration count RED. M-M2b: reorder the orphan loop → byte-golden RED |
-| AT-077 — `tests/test_perf_mount.py::test_at_077_mount_render_once` (US-PERF-003, HLR-PERF.3, LLR-PERF.3.1) — **GATED on spike PERFS** | B | Mount a wide-2000 map with real keys: the current renderer's `render` is called exactly **once** between `push_screen` and a settled first paint (baseline 3, PERF0C §7.2); rail, minimap, inspector and crumb painted (chrome not regressed); canvas + strip byte-equal the pinned golden | M-S1: restore the eager canvas render while the region is unassigned → render ncalls=2 → count RED |
-| AT-077b — `tests/test_perf_mount.py::test_at_077b_strip_numeral` (US-PERF-003, LLR-PERF.3.2) — **GATED on spike PERFS** | B | The B-56/B60 scenario: mount at 87×34 (and at a reflow size such as 60×20) — the pagination strip reports the hidden-row numeral at the real settled geometry | M-S2: neuter the `_declare_after_layout` settle pass in a tmp copy → the absent-numeral defect returns → strip-text RED |
+| AT-077 — `tests/test_perf_mount.py::test_at_077_mount_render_once` (US-PERF-003, HLR-PERF.3, LLR-PERF.3.1) — **WITHDRAWN to B-118 (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — was GATED on spike PERFS | B | (withdrawn — node never created; original text:) Mount a wide-2000 map with real keys: the current renderer's `render` is called exactly **once** between `push_screen` and a settled first paint (baseline 3, PERF0C §7.2); rail, minimap, inspector and crumb painted (chrome not regressed); canvas + strip byte-equal the pinned golden | M-S1: restore the eager canvas render while the region is unassigned → render ncalls=2 → count RED |
+| AT-077b — `tests/test_perf_mount.py::test_at_077b_strip_numeral` (US-PERF-003, LLR-PERF.3.2) — **WITHDRAWN to B-118 (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — was GATED on spike PERFS | B | (withdrawn — node never created; original text:) The B-56/B60 scenario: mount at 87×34 (and at a reflow size such as 60×20) — the pagination strip reports the hidden-row numeral at the real settled geometry | M-S2: neuter the `_declare_after_layout` settle pass in a tmp copy → the absent-numeral defect returns → strip-text RED |
 | `tests/test_perf_paint_clip.py::test_wire_count_budget` (LLR-PERF.1.1) | 0 | The white-box counted oracle behind AT-075: same scripted sequence and wire budget ≤ 1,200,000 | M-R1a → RED |
 | `tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality` (LLR-PERF.1.1) | 0 | Bare-`Canvas` equality: clipped `elbow_down`/`edge` write exactly the cells the pre-change loops wrote — the reference loops are copies kept INSIDE the test file, never a `Canvas` flag — over shapes: `x1 < x0` (degenerate span), spans fully off-canvas, `ybus` above and below the canvas, negative pan origin | Any clip that drops or adds an in-bounds cell → equality RED |
 | `tests/test_perf_paint_clip.py::test_render_grid_clip_identity` (LLR-PERF.1.3) | 0 | Output-equality across the fixture grid — empty map, single node, deep chain 5000, wide 6000, forest (≥ 2 parentless nodes), multi-parent DAG built directly (never saved), spans out of bounds on both sides, a panned ViewState and a folded subtree: clipped render bytes == reference render bytes, and AT-065 parity goldens + `test_repair_golden_census.py` stay green after Lane R lands | M-R1b → fixture diff RED; a parity-golden mismatch → RED |
@@ -200,7 +207,7 @@ that must cross a seam are trunk acts, scheduled at the join (§8).
 | `tests/test_perf_adjacency.py::test_minimap_outline_forest_dag_bytes` (LOW-10 — optional, included) | 0 | Minimap and outline painted bytes over a forest (≥ 2 parentless nodes) and a multi-parent DAG built directly — byte-stable across the cache | Cache order drift → byte RED |
 | `tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio` (LLR-PERF.2.2) | 0 | Counted `graph.edges` iterations inside ONE `mermaid.dump` call on wide-N and wide-2N: ≤ 2·E + c per call AND count(2N)/count(N) ∈ [1.8, 2.2] (linear, not quadratic) | M-M2a → count RED (ratio ≈ 4) |
 | `tests/test_perf_dump.py::test_dump_fixture_goldens` (LLR-PERF.2.2) | 0 | `dump(parse(f))`/`dump(G)` byte-equal pinned goldens for `fixtures/legacy.mmd`, `fixtures/anidado.mmd`, `fixtures/truncado.mmd`, wide-6000, forest, empty, single-node, and a DANGLING-EDGE graph (incident counting covers it; the edge is not written but its endpoints count) | M-M2b (emission order/dedup change) → fixture byte RED |
-| `tests/test_perf_mount.py::test_chrome_paints_at_mount` (LLR-PERF.3.1) — **GATED on spike PERFS** | A | With the canvas render skipped at unassigned geometry, rail/minimap/inspector/crumb still paint on the first pass; the error-graph path (a refused map's 1-node error graph) still paints | M-S3: make the skip swallow chrome painting too → chrome assertion RED |
+| `tests/test_perf_mount.py::test_chrome_paints_at_mount` (LLR-PERF.3.1) — **WITHDRAWN to B-118 with Lane S (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — was GATED on spike PERFS | A | (withdrawn — node never created; original text:) With the canvas render skipped at unassigned geometry, rail/minimap/inspector/crumb still paint on the first pass; the error-graph path (a refused map's 1-node error graph) still paints | M-S3: make the skip swallow chrome painting too → chrome assertion RED |
 
 **Declared here, at authoring time, not at execution time.** A proposed case whose reddening mutation
 cannot be named is not yet a test case — it is a hope.
@@ -252,12 +259,14 @@ Risks that remain, with their guard (the main one named first):
   `edges` + len, `nodes` + len, `root_id`, hidden fold set) covers every structural input. The seven
   named arms (`resize`, `title`, `fold`, `focus`, `undo`, `add_child`, `round_trip`) pin both
   directions: geometry-only changes cost 0 misses with byte-identical paint; structural changes miss.
-- **Mount skip edge cases (Lane S — GATED).** The skip reads only the canvas region width, true solely
+- **Mount skip edge cases (Lane S — GATED → WITHDRAWN).** The skip reads only the canvas region width, true solely
   before the compositor's first assignment; chrome, the degraded-path paint (`_rendered_for` is set on
   the degraded path too, `painting.py:630`) and the error-graph path are untouched. AT-077's chrome arm
-  (M-S3) and AT-065's scripted open cover it. **The gate decides whether the lane ships at all:** if
-  spike PERFS cannot prove render ncalls = 1 at mount with every existing mount test green, Lane S
-  leaves the batch to B-118 — the width-guard is never landed on spike failure.
+  (M-S3) and AT-065's scripted open cover it. **The gate resolved to the else branch (2026-10-10, ledger
+  `LED-2026-10-10-perf-batch.3`):** spike PERFS could not prove render ncalls = 1 at mount (2 renders
+  before AND after the prototype at 118×34/87×34 on the seed map, byte-identical canvas, wide-2000
+  unmeasured, second guarded render site + A3 census pin change needed), so Lane S left the batch to
+  B-118 — the width-guard was never landed.
 - **Cross-lane drift.** Lanes share no file (§8); the join re-runs the full suite + parity + census, so
   a lane that breaks another lane's oracle is caught at the DDR, not in production.
 
@@ -267,7 +276,7 @@ Risks that remain, with their guard (the main one named first):
 |---|---|---|
 | Lane R design (span clip + `_tree_layout` memo, byte-identity grid) | increments Inc-R1/Inc-R2; the DDR join | `03-increments/increment-001.md`; `04-validation.md`; `tests/test_perf_paint_clip.py`, `tests/test_perf_layout_memo.py` |
 | Lane M design (private adjacency cache + `(id, len)` token + census guard; linear dump) | increments Inc-M1/Inc-M2; the trunk's ARCHITECTURE §4 Graph-row note; the S-18 round (dump stops being the save-floor cost) | `03-increments/increment-001.md`; `docs/ARCHITECTURE.md` §4 (trunk amendment); `tests/test_perf_adjacency.py`, `tests/test_perf_dump.py` |
-| Lane S design (region-width canvas skip + guarded first real render; settle pass kept; GATED on spike PERFS) | increment Inc-S1 (only if the gate passes — else B-118); the DDR join | `03-increments/increment-001.md`; `tests/test_perf_mount.py` |
+| Lane S design (region-width canvas skip + guarded first real render; settle pass kept; GATED on spike PERFS) | **WITHDRAWN to B-118 (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — the gate resolved to the else branch; Inc-S1 never ships from this batch; the row is kept for the B-118 revisit (`tests/test_perf_mount.py` is never created here) | `03-increments/increment-001.md`; `tests/test_perf_mount.py` (not created) |
 | The edge-mutation census (model.py:170 + editing.py:217, none else) | LLR-PERF.2.1's strong-reference soundness; the AST guard test; every future batch that mutates `Graph.edges` | `01-requirements.md` §2.7 premise 4; `tests/test_perf_adjacency.py::test_edges_writer_census` |
 | The ⏸ DEFER record (single-visit DAG layout + S-18 budget, with PERF0 §2 evidence) | the S-18 prototype round | `.dev-flow/BACKLOG.md` (B-33 carry) and the prototype batch's P0 |
 | Proposed test cases (§5) with named reddening mutations M-R1a/b, M-R2/b, M-M1a/b/c, M-M2a/b, M-S1/2/3 | Phase-3 increments author their gate checks from these rows; the DDR verifies each AT owns its node with an executed RED | `04-validation.md`; `design/DDR-2026-10-10-perf-batch.md`; increment packets under `03-increments/` |
@@ -279,18 +288,20 @@ Risks that remain, with their guard (the main one named first):
 
 ## 8 · Parallelisation plan *(only if the batch forks)*
 
-The batch forks into three lanes after this PDR — the first batch to use the modular split for
-parallel work (A4). Lane file sets (source + tests):
+The batch forks into lanes after this PDR — originally three (A4 — the first batch to use the modular
+split for parallel work); **Lane S was withdrawn to B-118 at the spike gate (ledger
+`LED-2026-10-10-perf-batch.3`), so the batch now forks TWO lanes, R and M** — kept below for the
+record. Lane file sets (source + tests):
 
 | Lane | Modules / layer | Files it owns | Agent |
 |---|---|---|---|
 | Lane R — renderer work per paint | `canvas`, `views` / layer 0+A | `mapper/canvas.py`, `mapper/views/layered.py`, `tests/test_perf_paint_clip.py`, `tests/test_perf_layout_memo.py` | worker |
 | Lane M — model and serialisation | `model`, `mermaid` / layer 0 | `mapper/model.py`, `mapper/mermaid.py`, `tests/test_perf_adjacency.py`, `tests/test_perf_dump.py` | worker |
-| Lane S — mount paint count | `map screen` (painting + core lifecycle) / layer A+B | `mapper/screens/map/painting.py`, `mapper/screens/map/screen.py`, `tests/test_perf_mount.py` | worker |
+| Lane S — mount paint count | `map screen` (painting + core lifecycle) / layer A+B | `mapper/screens/map/painting.py`, `mapper/screens/map/screen.py`, `tests/test_perf_mount.py` | worker | **WITHDRAWN to B-118 (2026-10-10, ledger .3) — files untouched** |
 | Trunk (join) | all / gate | requirements, PLAN, ARCHITECTURE §4 note, `03-increments/`, `04-validation.md`, `design/DDR-2026-10-10-perf-batch.md` | orchestrator |
 
-- `modules(lane_i) ∩ modules(lane_j) = { }` — ✓ (three lane module pairs are pairwise disjoint).
-- **File sets are disjoint** (not just modules — two lanes may not edit the same file, not even different regions): ✓ — executed intersection test at P1: `R∩M = R∩S = M∩S = ∅` (printed: `R&M: set() R&S: set() M&S: set()`).
+- `modules(lane_i) ∩ modules(lane_j) = { }` — ✓ (with Lane S withdrawn, the fork is two lanes — R and M — and `R∩M = ∅`; the three-lane P1 intersection test also covered the withdrawn lane).
+- **File sets are disjoint** (not just modules — two lanes may not edit the same file, not even different regions): ✓ — executed intersection test at P1: `R∩M = R∩S = M∩S = ∅` (printed: `R&M: set() R&S: set() M&S: set()`); after the Lane S withdrawal the live fork's disjointness restated: `R∩M = ∅` (Lane S's files are edited by no lane — untouched).
 - Family-B reverse census run **per lane and shared** before forking: ✓ — executed at P1: 23 test files assert renderer/`children_of`/`parent_of` symbols, 19 assert the mount/paint path (`grep -rlE ... tests/*.py | wc -l`); the load-bearing consumers are: `tests/test_mod_parity.py` (painted text, all lanes), `tests/test_repair_golden_census.py` (renderer output at 4 sizes, Lane R), the store round-trip + CSV suites (Lane M's `dump`/`children_of` order), AT-065 and the B-56/B60 mount tests (Lane S). No lane's file set is edited by another lane's symbols.
 - Trunk-only artifacts (requirements · traceability · backlog · SPEC) are written **only** by the trunk: ✓ — this PDR, `01-requirements.md`, the ARCHITECTURE §4 note and the increment packets are written only by the orchestrator; lanes receive them read-only.
 
@@ -308,11 +319,14 @@ note is the trunk's join act); and the other lanes' files.
   (count + byte-identity grid). Inc-R2 — `layered.py` `_tree_layout` memo + `tests/test_perf_layout_memo.py`.
 - **Lane M** (2 source files): Inc-M1 — `model.py` private adjacency cache + token + `tests/test_perf_adjacency.py`
   (equality script, counted ops, AST census guard). Inc-M2 — `mermaid.py` linear orphan pass + `tests/test_perf_dump.py`.
-- **Lane S** (2 source files): Inc-S1 — `painting.py` region-width canvas skip (declaration order
+- **Lane S — WITHDRAWN (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)**: Inc-S1 does not ship —
+  the spike gate resolved to the else branch (see §1). `painting.py`, `screen.py` and
+  `tests/test_perf_mount.py` are never touched by this batch. The original gated text is kept for
+  the record: Inc-S1 — `painting.py` region-width canvas skip (declaration order
   untouched) + `screen.py` mount path + `tests/test_perf_mount.py` (one increment; the two edits are
-  one mechanism). **GATED on spike unit PERFS: if the spike proves render ncalls = 1 at mount with
-  every existing mount test green, Inc-S1 ships as specified; if the spike fails, Lane S leaves the
-  batch to the backlog (B-118) and HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn.**
+  one mechanism). **GATED on spike unit PERFS: the spike failed to prove render ncalls = 1 at mount
+  with every existing mount test green, so Lane S leaves the batch to the backlog (B-118) and
+  HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn.**
 
 **Join (DDR) plan.** Lanes land in any order (disjoint files); after each lane lands, its own new tests
 + the full suite run green on the trunk. The DDR then: (1) re-runs the suite; (2) verifies AT-065
