@@ -85,3 +85,10 @@ above this line is ever edited._
 - **What changed:** §4's AT-069 line named "the six Inc-0 test files, `-k at069`" as its node; on disk that selector collects 0 tests in those files — AT-069 is realised by `tests/test_mod_compat.py::test_at069_baseline_counts_hold` (B12), which checks the six files' pinned assertion-count baseline. The line now names that node; the six files stay the LLR node.
 - **Why:** C-18 — every AT realises in exactly one on-disk node; a selector that collects nothing is a stale pointer, and the DDR found it by re-reading.
 - **Evidence:** design/DDR-2026-10-09-modular-batch.md §B row 4; `python -B -m pytest -q -p no:cacheprovider tests/test_mod_compat.py -k at069`.
+
+### LED-2026-10-09-modular-batch.12 — DDR D-C2/D-C3/LOW-5: LLR-MOD.7.1 states the two shipped edges and the narrowed rule
+- **Requirement:** LLR-MOD.7.1
+- **Date:** 2026-10-10
+- **What changed:** the statement now (a) bans ANY name crossing between concern modules, with the single exception of the value class `NavigationModel` from `navigation.py` (`focus_mode.py:9`); (b) admits concern modules importing the modal screens re-exported by the `mapper.screens` package `__init__` (`drafts.py:13`, `opening.py:11`, `searching.py:10`) and requires that `__init__` never import a sibling screen module or `screens/map`; (c) names `osopen.py` and `screens/map/opening.py` as the only `open_external` sites (app.py references none since B3). The negative control adds the helper-name plant and the `__init__` plant.
+- **Why:** the DDR architect review found the shipped code had both edges while the statement and §3 said "never import each other", and the checker passed a plain helper import; increment 023 amended §3 and the checker, and the requirement must say what the guard enforces.
+- **Evidence:** design/DDR-2026-10-09-modular-batch.md §B8 rows D-C2, D-C3; increment-023.md; `tests/test_mod_deps.py::test_llr_mod_7_1_arch_concern_helper_name_import_is_flagged`, `::test_llr_mod_7_1_arch_screens_init_does_not_import_sibling_screens`.
