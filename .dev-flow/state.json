@@ -90,7 +90,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P1",
+  "current_station": "P2",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -188,6 +188,11 @@
       "station": "P2",
       "date": "2026-10-10",
       "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): requirements and PDR ITERATE (layout memo key omits card_w; AT-076 vacuous; dump threshold reds a correct fix; Lane S mechanism contradicts painting.py); qa (Claude Sonnet): requirements ITERATE (same HIGH), PDR approve-with-conditions. Rulings R1-R9; Lane S gated on a spike"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-10",
+      "decision": "P1 iteration 1 approved (self-approved): rulings R1-R9 applied (LED .2): unscaled layout memo keyed by strong refs; adjacency cache with strong ref + widened census; real-save AT-076 with per-dump and scaling oracles; bare-Canvas clip equality; goldens pinned pre-change; Lane S spike inconclusive -> withdrawn to B-118 (LED .3); to P2 round 2 (lanes R and M)"
     }
   ],
   "standing_authorization": {
