@@ -1,0 +1,48 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-10-09",
+    "decision": "P0 approved (self-approved under the standing authorization, operator words 'core + autónomo + merge (Recomendado)', B-105 'Anexar al canon (Recomendado)'): US-001 (B-105), US-002 (B-104) READY; B4, F1 fired"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-09",
+    "decision": "P1 approved (self-approved): 2 HLR, 3 LLR with namespaced ids (CAN); AT-063, AT-064 declared; scan-spec flags none"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-09",
+    "decision": "P2 round 1: iterate-to-refine (self-ruled): ARCH-1 and QA-2 are requirement-defect majors (close-fold expectation wrong; 'equals' under-specified), QA-1 major (AT-064 oracle); 0 blockers; all 8 findings applied in P1 iteration 1"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-09",
+    "decision": "P1 iteration 1 approved (self-approved): ARCH-1..3, QA-1..5 applied (LED .1-.5; row floor corrected to 134)"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-09",
+    "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; NEW-1 fixed (LED .6); 0 blocker, 0 major open"
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-09",
+    "decision": "P3 increment 001 approved (self-approved under the standing authorization): 1 source file; C0-C3 and A1 killed; code-reviewer APPROVE-WITH-NITS 0 HIGH, 2 LOW folded; regression set 147 passed / 0 failed"
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-09",
+    "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2941 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT, two optional notes applied; note G-001 -> B-106"
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-09",
+    "decision": "P5 closed (self-approved under the standing authorization): B-104, B-105 (project side) DONE; B-106 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as df91eaa (PR #14)"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-09",
+    "decision": "synced-to-obsidian",
+    "notes": "vault:mapper/dev-flow-batches/2026-10-09-canon-batch/ (core light sync: README only)"
+  }
+]
