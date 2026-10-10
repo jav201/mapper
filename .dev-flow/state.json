@@ -85,7 +85,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P1",
+  "current_station": "P2",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -181,6 +181,11 @@
       "station": "P2",
       "date": "2026-10-10",
       "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): requirements ITERATE (HIGH: collision without loader violation silently loses a row; root-collision fixture is a cycle), proposal approve-with-conditions; qa (Claude Sonnet): approve-with-conditions (same HIGH; AT oracle must include mapper.db; drive via _open_import). Rulings R1-R10 recorded in 02-review.md"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-10",
+      "decision": "P1 iteration 1 approved (self-approved): rulings R1-R10 applied by Kimi (LED .2-.4, new LLR-CSV.2.3; round-trip store check; any collision blocks; _open_import drive path; workspace sha256 oracle); B-115/B-116 to backlog; to P2 round 2"
     }
   ],
   "standing_authorization": {
