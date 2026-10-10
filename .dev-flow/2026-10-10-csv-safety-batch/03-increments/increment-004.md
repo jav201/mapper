@@ -33,8 +33,8 @@
 
 | File | Kind | Traces to | Change |
 |---|---|---|---|
-| `tests/test_mod_bodies.py` | test | DDR architect MED-1 | `DECLARED_CHANGES` removed; `test_llr_mod_4_3_bodies_match_baseline` gates `missing`/`duplicated` only (ruling + date in its docstring); new node `test_llr_mod_4_3_red_a_deleted_moved_method_reddens_missing`; module docstring RED-controls paragraph updated |
-| `tests/test_repair_store_boundary.py` | test | DDR architect LOW-3 | comment at the `_EXPECTED_NON_TEXT` csv-safety entries: only `line_no`/`rows` declared non-text; `raw_id`/`slug` classify as text; none written to the sidecar |
+| `tests/test_mod_bodies.py` | test | LLR-CSV.2.2, LLR-CSV.2.3 (DDR architect MED-1) | `DECLARED_CHANGES` removed; `test_llr_mod_4_3_bodies_match_baseline` gates `missing`/`duplicated` only (ruling + date in its docstring); new node `test_llr_mod_4_3_red_a_deleted_moved_method_reddens_missing`; module docstring RED-controls paragraph updated |
+| `tests/test_repair_store_boundary.py` | test | LLR-CSV.1.1 (DDR architect LOW-3) | comment at the `_EXPECTED_NON_TEXT` csv-safety entries: only `line_no`/`rows` declared non-text; `raw_id`/`slug` classify as text; none written to the sidecar |
 | `.dev-flow/2026-10-10-csv-safety-batch/01-requirements.md` | doc | LLR-CSV.3.1 (qa MED-2) | M3 retargeted in HLR-CSV.3 / LLR-CSV.3.1 negative controls and the §6.1 glossary; `LED-…-batch.11` back-pointer on both `Ledger:` lines |
 | `.dev-flow/2026-10-10-csv-safety-batch/01-requirements-ledger.md` | doc | LLR-CSV.3.1 (qa MED-2) | new entry `LED-2026-10-10-csv-safety-batch.11` |
 | `.dev-flow/2026-10-10-csv-safety-batch/design/DDR-2026-10-10-csv-safety-batch.md` | doc | all six conditions | B1 records the oracle retirement (superseding the `DECLARED_CHANGES` row) and LOW-2 as accepted/optional; new §E with the six review-condition rows; Verdict stays `PENDING-REVIEW` |
