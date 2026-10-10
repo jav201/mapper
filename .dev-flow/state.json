@@ -85,7 +85,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P3",
+  "current_station": "P4",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -196,6 +196,16 @@
       "station": "PDR",
       "date": "2026-10-10",
       "decision": "PDR sealed approved with conditions C1-C6 (PDR-2026-10-10-csv-safety-batch, D1-D5), conditions applied as document fixes before P3, re-read at DDR"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-10",
+      "decision": "P3 approved (self-approved): 4 increments (store round-trip check; preview collision record + refusal at s; review nits; DDR conditions); 3 code reviews APPROVE-WITH-NITS 0 HIGH; gate run 1 red (modular move oracle froze moved bodies; A3 pin) fixed, run 3 at 53807c4: 3157 passed / 3 xfailed / 0 failed"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-10",
+      "decision": "DDR sealed approved (DDR-2026-10-10-csv-safety-batch): architect (Claude Opus) + qa (Claude Sonnet) approved with conditions, discharged at increment 4 (oracle changed-freeze retired, dump-once and effective-M3 RED proofs, LED .11); re-review approved by both"
     }
   ],
   "standing_authorization": {
