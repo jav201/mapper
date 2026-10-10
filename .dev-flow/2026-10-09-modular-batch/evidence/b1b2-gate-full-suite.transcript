@@ -1,0 +1,83 @@
+# B1+B2 gate, full suite, orchestrator, at 8d3916a. 1 failure: test_keymap n03f[map] took __mro__[1] as the framework base, a plain mixin since B1. Fixed in the B7 census follow-up commit (first MRO class with merged bindings).
+$ python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+...............................xxx...................................... [ 18%]
+........................................................................ [ 21%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 30%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 37%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 68%]
+..................F..................................................... [ 71%]
+........................................................................ [ 73%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+........................................................................ [ 82%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+........................................................................ [ 90%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+........................................................................ [ 99%]
+..............                                                           [100%]
+================================== FAILURES ===================================
+_____________ test_at_n03f_bound_keys_match_the_seat_exactly[map] _____________
+
+scope = 'map'
+
+    @pytest.mark.parametrize("scope", sorted(SCOPE_OWNER))
+    def test_at_n03f_bound_keys_match_the_seat_exactly(scope):
+        """AT-N03f — what each screen really BINDS equals what the seat declares.
+    
+        The conformance test above checks the `action` field only, so corrupting a
+        `key` or a `glyph` left the whole suite green while help, the palette and the
+        keybar all advertised a chord that does nothing.  This closes that: it reads
+        the bindings Textual actually merged onto the class.
+        """
+        owner = SCOPE_OWNER[scope]
+        # Textual contributes bindings of its own (focus traversal, copy, ctrl+q quit).
+        # Subtract whatever the BASE class already binds — derived from the framework
+        # at runtime, not a hand-listed allowance that would rot silently.
+>       inherited = set(owner.__mro__[1]._merged_bindings.key_to_bindings)
+E       AttributeError: type object 'ExportingOps' has no attribute '_merged_bindings'
+
+tests\test_keymap.py:148: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]
+1 failed, 3034 passed, 24 deselected, 3 xfailed in 1575.38s (0:26:15)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-419514' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-419514' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-419939' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-419939' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+exit=1
