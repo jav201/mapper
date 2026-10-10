@@ -24,6 +24,7 @@ from mapper.osopen import (
     PATH_NOT_SUPPORTED, confine_reason, hard_linked, is_link, refusal_sentence, safe_local_path,
 )
 from mapper.screens.common import _save_or_toast, keybar_groups
+from mapper.screens.prompt import _PromptScreen
 from mapper.store import MapIdError, check_map_id
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
@@ -501,8 +502,6 @@ class FactoryScreen(Screen):
         self.app.push_screen(EditorScreen(doc.source), callback=on_save)
 
     def action_import_office(self) -> None:
-        from mapper.app import _PromptScreen
-
         def on_path(path_str: str | None) -> None:
             if path_str is None:
                 return
