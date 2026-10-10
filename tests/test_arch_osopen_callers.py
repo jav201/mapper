@@ -1,7 +1,7 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
 Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app` —
-plus `screens/map/screen.py` from B0 until B3 moves the call site to `screens/map/opening.py`.
+plus `screens/map/opening.py`, where B3 moved the call site.
 `github` may import
 `osopen.safe_local_path`; `screens` that name plus `confine_reason`, `refusal_sentence`, `hard_linked`, `is_link` and the sentence
 constant `PATH_NOT_SUPPORTED` (Inc-9q, `A-125`; Inc-9p's `PATH_OUTSIDE_WORKSPACE` is no longer
@@ -22,9 +22,9 @@ import mapper
 PKG = pathlib.Path(mapper.__file__).parent
 DOCS = PKG.parent / "docs" / "ARCHITECTURE.md"
 LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
-# B0 moved the only app.py launch site (the attachment-activated handler) to screens/map/screen.py,
-# until B3 moves it to screens/map/opening.py; app.py no longer references any launcher name.
-ALLOWED_FILES = {"osopen.py", "screens/map/screen.py"}
+# B0 moved the only app.py launch site (the attachment-activated handler) to screens/map/screen.py;
+# B3 moved it to screens/map/opening.py; app.py no longer references any launcher name.
+ALLOWED_FILES = {"osopen.py", "screens/map/opening.py"}
 # The osopen OWNERS may import any osopen name (ARCHITECTURE §1/§3): the boundary module itself and
 # `app`. Kept separate from ALLOWED_FILES (the LAUNCHER census) since B0 split the two sets apart.
 OSOPEN_OWNERS = {"app.py", "osopen.py"}
@@ -89,9 +89,9 @@ ALLOWED_OUTSIDE_APP = {
     "screens/common.py": {"confine_reason", "refusal_sentence"},
     "screens/factory.py": {"safe_local_path", "confine_reason", "refusal_sentence", "hard_linked", "is_link",
                            "PATH_NOT_SUPPORTED"},
-    # until B3: `MapScreen`'s attachment-activated handler moved here at B0 and calls
-    # `open_external`; B3 moves the open concern to screens/map/opening.py.
-    "screens/map/screen.py": {"ATTACHMENT_HARD_LINKED", "OK", "open_external"},
+    # B3: `MapScreen`'s open concern lives here; its attachment-activated handler is the
+    # one launch site and calls `open_external` (moved from screens/map/screen.py).
+    "screens/map/opening.py": {"ATTACHMENT_HARD_LINKED", "OK", "open_external"},
     # `2026-10-09-modular-batch` A4: `HomeScreen` moved out of `app.py` with the two
     # osopen names its CSV-import door reads (ARCHITECTURE §3 `screens` row).
     "screens/home.py": {"safe_local_path", "PATH_NOT_SUPPORTED"},
@@ -112,6 +112,13 @@ def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
     assert seen == ALLOWED_OUTSIDE_APP, seen
     assert not any(rel.startswith(("widgets/", "views/")) for rel in seen), seen
     assert not any(n in seen["github.py"] | seen["screens/factory.py"] for n in LAUNCH_NAMES), seen
+
+
+def test_map_screen_core_does_not_import_osopen_at_all():
+    """B3: the open concern moved to `screens/map/opening.py`; the composing `screen.py`
+    must not import osopen at all — not even the non-launcher names."""
+    tree = ast.parse((PKG / "screens" / "map" / "screen.py").read_text(encoding="utf-8"))
+    assert not list(_osopen_imports(tree)), "screen.py must import osopen only via opening.py"
 
 
 def _back_edges() -> dict[str, list[int]]:
