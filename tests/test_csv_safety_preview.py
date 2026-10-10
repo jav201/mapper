@@ -312,7 +312,7 @@ async def test_at_072_refused_save_toasts_and_writes_nothing(tmp_path):
 
 
 async def test_at_072b_parentless_slug_collision_refuses_save(tmp_path):
-    """Two parentless rows sharing one slug — violates NO loader rule; the
+    """AT-072b: two parentless rows sharing one slug — violates NO loader rule; the
     record-keyed refusal still fires at the `s` keypress (ruling R1)."""
     csv = _write_csv(
         tmp_path / "parentless.csv",
@@ -331,7 +331,7 @@ async def test_at_072b_parentless_slug_collision_refuses_save(tmp_path):
 
 
 async def test_at_072c_mixed_parentage_slug_collision_refuses_save(tmp_path):
-    """One parented row + one parentless row sharing one slug."""
+    """AT-072c: one parented row + one parentless row sharing one slug."""
     csv = _write_csv(
         tmp_path / "mixed.csv",
         "id,title,parent\nroot,Root,\na-b,First,\nA B,Second,root\n",
@@ -349,7 +349,7 @@ async def test_at_072c_mixed_parentage_slug_collision_refuses_save(tmp_path):
 
 
 async def test_at_072d_auto_id_slug_collision_refuses_save(tmp_path):
-    """Two empty-id rows with the same title (auto-id collision)."""
+    """AT-072d: two empty-id rows with the same title (auto-id collision)."""
     csv = _write_csv(
         tmp_path / "auto.csv",
         "id,title,parent\np1,P1,\np2,P2,\n,Same,p1\n,Same,p2\n",

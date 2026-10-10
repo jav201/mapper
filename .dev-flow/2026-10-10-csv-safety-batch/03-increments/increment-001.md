@@ -124,6 +124,7 @@ RED outputs (verbatim tails from the transcript):
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
 | inc1-red.transcript | .dev-flow/2026-10-10-csv-safety-batch/evidence/inc1-red.transcript | `44ad41e56a39e1aa7264ecd834ed072736142edbeb9f637895e61d90680c2b77` |
+| inc1-gate-full-suite.transcript | .dev-flow/2026-10-10-csv-safety-batch/evidence/inc1-gate-full-suite.transcript | `3877a5b4834284544c73641aa49b01faaf45235fba4673bf3ac54fde2755f615` |
 
 | Field | Value |
 |---|---|

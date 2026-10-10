@@ -1,0 +1,7 @@
+# DECLARED_CHANGES negative controls (csv-safety gate follow-up)
+## M-undeclared: drop the action_save declaration
+1 failed, 3 deselected in 0.48s
+## M-stale: declare a body that did not change (MapScreen.on_mount)
+1 failed, 3 deselected in 0.53s
+## restored sha256 f914f36449af2beb -> f914f36449af2beb
+1 passed, 3 deselected in 0.39s

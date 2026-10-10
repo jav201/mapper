@@ -36,6 +36,9 @@
 | `.dev-flow/2026-10-10-csv-safety-batch/evidence/inc3-red.transcript` | generated | LLR-CSV.1.1/1.2/2.2/2.3 | RED-proof transcript (§4) |
 | `.dev-flow/2026-10-10-csv-safety-batch/03-increments/increment-001.md` | doc | review closure | `Independent review` cell filled; gate checklist items 6/15 resolved |
 | `.dev-flow/2026-10-10-csv-safety-batch/03-increments/increment-002.md` | doc | review closure | same review-cell fill; "M2 flavor 2" relabelled the empty-CSV control (LOW-5) |
+| `tests/test_mod_bodies.py` | test | LLR-CSV.2.2, LLR-CSV.2.3 | gate follow-up: the modular move oracle gains `DECLARED_CHANGES` (post-move body edits declared per batch; undeclared drift and stale declarations both RED — `evidence/gate-followup-red.transcript`); declares the two `_ImportPreviewScreen` bodies increment 2 changed |
+| `tests/test_a3_census.py` | test | LLR-CSV.2.2 | gate follow-up: zero-arg widget-render pin 36 → 37 for `tests/test_csv_safety_preview.py::_painted`, itemised in the pin's own comment |
+| `tests/test_csv_safety_preview.py` | test | LLR-CSV.2.3 | AT-072b/c/d ids in the three nodes' docstrings (validator V2) |
 
 | Count | Value |
 |---|---|
@@ -119,6 +122,8 @@ RED outputs (verbatim tails from the transcript):
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
 | inc3-red.transcript | .dev-flow/2026-10-10-csv-safety-batch/evidence/inc3-red.transcript | `408847ffe02de9f9264199df3bf117c4ebb196b9d26cc5542fc184bd253a33bb` |
+| gate-run1-full-suite.transcript | .dev-flow/2026-10-10-csv-safety-batch/evidence/gate-run1-full-suite.transcript | `4ad7dc3dcc1d680d1ab50f6eb4849ac940a4f189dea13c7f1a1e4b5d928dfd2c` |
+| gate-followup-red.transcript | .dev-flow/2026-10-10-csv-safety-batch/evidence/gate-followup-red.transcript | `aecbed2dae6d0c73051d1502ff1736a1207d054d3fd9ad09096c382725e1f8bc` |
 
 | Field | Value |
 |---|---|
