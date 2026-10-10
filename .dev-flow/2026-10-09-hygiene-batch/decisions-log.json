@@ -1,0 +1,48 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-10-09",
+    "decision": "P0 approved (self-approved under the standing authorization, operator words 'core + autónomo + merge (Recomendado)'): US-001 (B-103) and US-002 (B-99, reframed as executed re-verification) READY; F1 fired (external V7), 22 triggers not fired"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-09",
+    "decision": "P1 approved (self-approved under the standing authorization): 2 HLR, 3 LLR, AT-060/061/062 declared; scan-spec flag 'expose' answered in §6.3 as a false positive"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-09",
+    "decision": "P2 round 1: iterate-to-refine (self-ruled): qa-reviewer QA-1 major is a requirement defect (AT-061's negative control misdescribes how it goes RED); 0 blockers; architect 3 minors, qa 3 minors; all seven applied in P1 iteration 1"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-09",
+    "decision": "P1 iteration 1 approved (self-approved): QA-1..QA-4, QA-R, ARCH-1..ARCH-3 applied (LED .1-.4)"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-09",
+    "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; new minor A fixed (LED .5); 0 blocker, 0 major open"
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-09",
+    "decision": "P3 increment 001 approved (self-approved under the standing authorization): 1 source file; RED 4/4 on base; M1-M3 and HOME-1 killed; code-reviewer APPROVE-WITH-NITS 0 HIGH, 3 LOW folded; regression set 187 passed / 0 failed"
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-09",
+    "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2924 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT-WITH-FIXES, fixes applied (executor per row, LLR-001.2 selector LED .6); notes G-001 watch item, G-002 -> B-104"
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-09",
+    "decision": "P5 closed (self-approved under the standing authorization): B-99, B-103 DONE; B-104, B-105 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as a482079 (PR #12)"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-09",
+    "decision": "synced-to-obsidian",
+    "notes": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/ (core light sync: README only)"
+  }
+]

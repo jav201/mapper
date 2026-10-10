@@ -1,0 +1,236 @@
+{
+  "project": "mapper",
+  "language": "en",
+  "batch_id": "2026-10-09-hygiene-batch",
+  "batch_objective": "Draft-save code hygiene (B-103: typed save-error slot, a public guard-open accessor, the F5 refusal-text ruling) and the INC9G-R8 record debt (B-99: re-verify the Inc-9h witness on master and close the item).",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
+  "mode": "core",
+  "mode_history": [
+    {
+      "batch_id": "2026-08-18-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-fix-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-medlow-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-components-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-25-ui-next-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-26"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "status": "PARKED at the PDR gate 2026-08-26; UN-PARKED 2026-08-27",
+      "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."
+    },
+    {
+      "batch_id": "2026-08-26-repair-batch",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "closed_at": "2026-08-27",
+      "merge_commit": "e164a28",
+      "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
+    },
+    {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "mode": "full",
+      "closed_at": "2026-08-27"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "closed_at": "2026-10-08"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "from": null,
+      "to": "full",
+      "date": "2026-10-08",
+      "reason": "operator at kickoff 2026-10-08: 'full (Recomendado)' -- B-36 touches persistence and UX"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "mode": "full",
+      "closed_at": "2026-10-09"
+    }
+  ],
+  "guided": false,
+  "current_station": "P5",
+  "phase_status": "closed",
+  "stations_active": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5"
+  ],
+  "iterations_per_station": {
+    "P0": 0,
+    "P1": 1,
+    "P2": 0,
+    "P3": 0,
+    "P4": 0,
+    "P5": 0
+  },
+  "triggers": {
+    "evaluated_at": "2026-10-09T18:56:58",
+    "fired": [
+      "F1"
+    ],
+    "not_fired": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "D1",
+      "D2",
+      "E1",
+      "E2",
+      "E3",
+      "F2"
+    ],
+    "record": ".dev-flow/2026-10-09-hygiene-batch/PLAN.md#triggers"
+  },
+  "artifact_homes": {
+    "requirements": "repo:.dev-flow/2026-10-09-hygiene-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-09-hygiene-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-09-hygiene-batch/06-docs/traceability-matrix.md",
+    "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-10-09-hygiene-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-09-hygiene-batch/evidence/",
+    "backlog": "repo:.dev-flow/BACKLOG.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-09-hygiene-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-09-hygiene-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/README.md",
+    "requirements_canon": "repo:REQUIREMENTS.md"
+  },
+  "base_ref": "903e0f0e46f6c7ef894f86b25dc14d2255c1728b",
+  "artifacts": {
+    "plan": ".dev-flow/2026-10-09-hygiene-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-09-hygiene-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-09-hygiene-batch/01-requirements-ledger.md"
+  },
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-09",
+      "decision": "P0 approved (self-approved under the standing authorization, operator words 'core + autónomo + merge (Recomendado)'): US-001 (B-103) and US-002 (B-99, reframed as executed re-verification) READY; F1 fired (external V7), 22 triggers not fired"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 approved (self-approved under the standing authorization): 2 HLR, 3 LLR, AT-060/061/062 declared; scan-spec flag 'expose' answered in §6.3 as a false positive"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 1: iterate-to-refine (self-ruled): qa-reviewer QA-1 major is a requirement defect (AT-061's negative control misdescribes how it goes RED); 0 blockers; architect 3 minors, qa 3 minors; all seven applied in P1 iteration 1"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 iteration 1 approved (self-approved): QA-1..QA-4, QA-R, ARCH-1..ARCH-3 applied (LED .1-.4)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; new minor A fixed (LED .5); 0 blocker, 0 major open"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-09",
+      "decision": "P3 increment 001 approved (self-approved under the standing authorization): 1 source file; RED 4/4 on base; M1-M3 and HOME-1 killed; code-reviewer APPROVE-WITH-NITS 0 HIGH, 3 LOW folded; regression set 187 passed / 0 failed"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-09",
+      "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2924 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT-WITH-FIXES, fixes applied (executor per row, LLR-001.2 selector LED .6); notes G-001 watch item, G-002 -> B-104"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-09",
+      "decision": "P5 closed (self-approved under the standing authorization): B-99, B-103 DONE; B-104, B-105 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as a482079 (PR #12)"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-09",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/ (core light sync: README only)"
+    }
+  ],
+  "standing_authorization": {
+    "autonomous": true,
+    "merge": true,
+    "asked_on": "2026-10-09",
+    "operator_words": {
+      "scope": "B-103 + B-99 (Recomendado)",
+      "mode_and_authorization": "core + autónomo + merge (Recomendado)",
+      "decision_recording": "not asked as a separate question this batch; the recording obligation is unconditional (autonomy is never silent) and is honoured in PLAN.md, decisions_log and 05-close.md"
+    },
+    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless."
+  },
+  "previous_batch": {
+    "batch_id": "2026-10-08-data-safety-batch",
+    "merge_commit": "2b6315d",
+    "close_pr": "https://github.com/<owner>/mapper/pull/10",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/11",
+    "closed_at": "2026-10-09",
+    "close_commit": "2b6315d",
+    "obsidian_synced": true,
+    "archive": ".dev-flow/2026-10-08-data-safety-batch/decisions-log.json + state-snapshot-at-close.json"
+  },
+  "batch_history": {
+    "2026-08-26-repair-batch": {
+      "batch_id": "2026-08-26-repair-batch",
+      "merge_commit": "e164a28",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
+      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "obsidian_synced": true
+    },
+    "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
+    "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
+    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
+    "2026-08-27-repair-batch-02": {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "merge_commit": "2b59071",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
+      "closed_at": "2026-08-27",
+      "close_commit": "3fe0e4b",
+      "obsidian_synced": true,
+      "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
+    }
+  },
+  "obsidian_synced": true,
+  "created_at": "2026-10-09T00:00:00"
+}
