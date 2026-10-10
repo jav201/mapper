@@ -80,7 +80,7 @@
     }
   ],
   "guided": false,
-  "current_station": "PDR",
+  "current_station": "P3",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -188,6 +188,11 @@
       "station": "P2",
       "date": "2026-10-09",
       "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer proceed; architect ARCH-1..7 resolved, ARCH-8/9 blockers + ARCH-10/11 fixed (LED .9); orchestrator spine probe 0 illegal edges; contract size 69.7k > 54k budget recorded as watch item"
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-09",
+      "decision": "PDR approved with conditions C1-C9 (self-approved under the standing authorization): architect + qa-reviewer approved-with-conditions; document conditions C1, C2, C3, C6, C7, C8 applied (LED .10); C4, C5, C9 are executed in P3 and re-read at DDR"
     }
   ],
   "standing_authorization": {
