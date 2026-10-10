@@ -80,7 +80,7 @@
     }
   ],
   "guided": false,
-  "current_station": "DDR",
+  "current_station": "P4",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -198,6 +198,11 @@
       "station": "P3",
       "date": "2026-10-10",
       "decision": "P3 approved (self-approved under the standing authorization): 22 increments (Inc-0, A1-A7, B0-B12); every gate run recorded (last: 3124 passed / 0 failed at e5d80e9); group code reviews A2-A4+B0 and B1-B12 APPROVE-WITH-NITS 0 HIGH, MED vacuous census scans repaired (1c77233); packets 001-022"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-10",
+      "decision": "DDR sealed approved (DDR-2026-10-09-modular-batch): architect (Claude Opus) + qa-reviewer (Claude Sonnet) approved on re-review after increment 023 (69676cf) closed D-C1..D-C3 and the DDR evidence closed D-C4 + QA MED-1/MED-2; P4 gate full suite at 69676cf 3133 passed / 3 xfailed / 0 failed (evidence/p4-gate-full-suite.transcript), slow lane 19/0 at acbd087; 2 LOWs carried to backlog"
     }
   ],
   "standing_authorization": {
