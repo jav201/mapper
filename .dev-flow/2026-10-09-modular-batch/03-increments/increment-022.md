@@ -34,11 +34,17 @@
 | `tests/test_mod_deps.py` | test | LLR-MOD.6.1, 6.2, 7.1, AT-070/071 | new — 470 lines, 11 nodes incl. RED arms |
 | `tests/test_mod_compat.py` | test | LLR-MOD.3.1, 3.2, AT-067/069 | new — 618 lines, 32 nodes incl. patch-guard RED arms |
 | `tests/test_mod_census.py` | test | LLR-MOD.7.2 | new — 310 lines, 3 nodes incl. `test_llr_mod_7_2_red_new_method` |
+| `tests/test_inc9c.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan package-wide again (was vacuous after the moves) |
+| `tests/test_inc9o.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan package-wide again + tmp-copy RED arm |
+| `tests/test_inc9p.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan reads every moved module + tmp-copy RED arm |
+| `tests/test_inc9q.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan reads every moved module + tmp-copy RED arm |
+| `tests/test_draft_hygiene.py` | test | LLR-MOD.5.1 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): guard-flag owner set narrowed to the drafts concern (CR-1) |
+| `tests/test_search.py` | test | LLR-MOD.5.1 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): duplicate-name asserts in the mixin-aware helpers (CR-2) |
 
 | Count | Value |
 |---|---|
 | **SOURCE files** | **1 / 4** |
-| Test files | 4 (uncapped) |
+| Test files | 10 (uncapped; 4 new guard files + 6 census files repaired in `1c77233`) |
 | Doc files | 1 (`docs/ARCHITECTURE.md`, outside the count) |
 
 ---
