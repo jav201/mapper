@@ -83,7 +83,7 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
 | ID | User Story | Source | DoR status |
 |----|------------|--------|------------|
 | US-001 | As the maintainer, I want every requirement the hygiene batch declared to be in the canon under an id that cannot collide, naming the id its record uses, so that the canon answers "what does the project demand, and who owns it" for that batch too. | B-105 | READY |
-| US-002 | As the maintainer, I want `mapper/app.py` to import nothing it does not use, so that `ruff check` on the busiest module is clean and a new warning stands out. | B-104 | READY |
+| US-002 | As the maintainer, I want `mapper/app.py` to import nothing it does not use, so that the busiest module carries no dead import and a new lint warning stands out. | B-104 | READY |
 
 #### Refinement log (one block per story)
 
@@ -102,7 +102,7 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
 - **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
 - **Functionality (V, N):** outcome = `import re` gone; every module-level import of `app.py` is used.
 - **Feasibility (E, S):** a one-line removal and one test.
-- **Evaluability (T) — behavioral, black-box:** "When the maintainer runs `ruff check mapper/app.py`, it reports no F401." It is guarded by a test that reads the shipped module.
+- **Evaluability (T) — behavioral, black-box:** "When the maintainer reads `mapper/app.py`, every module-level import is used." The oracle is the AST test over the shipped module (AT-064). `ruff check mapper/app.py` reporting no F401 is corroborating evidence and is not the oracle (LED .6).
 - **Open questions:** none.
 - **Classification:** `READY`.
 
@@ -134,9 +134,11 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
 
 ### HLR-CAN.1 — every hygiene requirement is in the canon under a collision-free id
 - **Traceability:** US-001
-- **Ledger:** none
+- **Ledger:** LED-2026-10-09-canon-batch.1, LED-2026-10-09-canon-batch.2, LED-2026-10-09-canon-batch.3, LED-2026-10-09-canon-batch.5
 - **Statement:** The canon shall hold, for each requirement heading of `2026-10-09-hygiene-batch`'s record, exactly one row owned by that batch whose statement equals the record's statement and names the record id, and no requirement id shall appear in more than one canon row.
-- **Rationale (informative):** the fold keeps an existing id and never rewrites it. A reused id therefore leaves its batch out of the canon while `V22` reads green.
+- **Rationale (informative):**
+  - The fold keeps an existing id and never rewrites it, so a reused id leaves its batch out of the canon while `V22` reads green.
+  - The uniqueness check is a regression net for these appends. It is not a detector of B-105's failure mode, which is an id reused and never appended (§6.3).
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py`
 - **Numeric pass threshold:** exit code 0; 5 hygiene rows matched; 0 duplicate ids.
@@ -145,12 +147,16 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
   - **Observable outcome:** `REQUIREMENTS.md` lists `HLR-HYG.1`, `HLR-HYG.2`, `LLR-HYG.1.1`, `LLR-HYG.1.2` and `LLR-HYG.2.1`, owned by `2026-10-09-hygiene-batch`. Each statement ends `(Record id: <id>.)`, and every id in the file is unique.
   - **Shipped surface:** the file `REQUIREMENTS.md` on disk.
   - **Acceptance test(s):** AT-063
-  - **Boundary catalog (QC-3):** ☐ empty ☑ boundary — a record id whose canon row is missing, and a canon id appearing twice ☐ invalid ☑ error — a statement that drifts from its record.
-  - **Negative control:** AT-063 goes RED on today's canon, because there are no hygiene rows. It also goes RED when one appended row is duplicated, or when one statement is altered. Executed at Phase 3.
+  - **Boundary catalog (QC-3):** ☑ empty — the hygiene record must yield exactly 5 headings and the canon table at least 134 rows (129 before this batch + 5), so the test cannot pass over an empty set ☑ boundary — a record id whose canon row is missing; a canon id appearing twice; a statement holding an escaped pipe (`LLR-001.1`'s `str \| None`) ☐ invalid ☑ error — a statement that drifts from its record; a row whose `(Record id: …)` suffix is stripped.
+  - **Negative control:** executed at Phase 3. AT-063 goes RED in each of these cases:
+    - on today's canon, which has no hygiene rows;
+    - when one appended row is duplicated;
+    - when one statement is altered;
+    - when one `(Record id: …)` suffix is stripped.
 
 ### HLR-CAN.2 — `mapper/app.py` imports nothing it does not use
 - **Traceability:** US-002
-- **Ledger:** none
+- **Ledger:** LED-2026-10-09-canon-batch.4, LED-2026-10-09-canon-batch.6
 - **Statement:** The module `mapper/app.py` shall import no module-level name that it does not reference.
 - **Rationale (informative):** an unused import in the largest module hides the next real lint warning among old ones.
 - **Validation:** `test`
@@ -158,8 +164,8 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
 - **Numeric pass threshold:** exit code 0 for both.
 - **Priority:** low
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
-  - **Observable outcome:** `ruff check mapper/app.py` prints `All checks passed!`.
-  - **Shipped surface:** the module file `mapper/app.py` and the project's lint command.
+  - **Observable outcome:** `mapper/app.py` imports no name it does not use. **The AT's oracle is the AST test**, which reads the shipped module file. `ruff check mapper/app.py` is separate evidence, run once by the orchestrator and attributed. `ruff` is not a declared project dependency, so if it is absent that run is recorded as `not-run`, never as a pass.
+  - **Shipped surface:** the module file `mapper/app.py`, which is the surface a maintainer reads.
   - **Acceptance test(s):** AT-064
   - **Boundary catalog (QC-3):** ☐ empty ☑ boundary — an `import a.b` binds `a`, and a `from x import y as z` binds `z` ☐ invalid ☐ error.
   - **Negative control:** AT-064 goes RED on today's `app.py`, because `re` is unused. Executed at Phase 3.
@@ -170,18 +176,24 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
 
 ### LLR-CAN.1.1 — five appended canon rows, one per hygiene heading
 - **Traceability:** HLR-CAN.1
-- **Ledger:** none
-- **Statement:** `REQUIREMENTS.md` shall end its requirement table with five rows, `HLR-HYG.1`, `HLR-HYG.2`, `LLR-HYG.1.1`, `LLR-HYG.1.2`, `LLR-HYG.2.1`, mapping to the record ids `HLR-001`, `HLR-002`, `LLR-001.1`, `LLR-001.2`, `LLR-002.1`. Each row shall carry the fold-normalised record statement followed by `(Record id: <id>.)`, the owner `2026-10-09-hygiene-batch` and the status `active`.
+- **Ledger:** LED-2026-10-09-canon-batch.2
+- **Statement:** `REQUIREMENTS.md` shall end its requirement table with five rows, `HLR-HYG.1`, `HLR-HYG.2`, `LLR-HYG.1.1`, `LLR-HYG.1.2`, `LLR-HYG.2.1`, mapping to the record ids `HLR-001`, `HLR-002`, `LLR-001.1`, `LLR-001.2`, `LLR-002.1`. Each row's statement cell shall equal N(record statement) + ` (Record id: <id>.)`, where N is the fold's normalisation:
+  1. drop backticks and `**`;
+  2. strip leading and trailing spaces, tabs, `*` and `-`;
+  3. drop a trailing `*(…)*`;
+  4. escape `|` as `\|`.
+
+  The owner shall be `2026-10-09-hygiene-batch` and the status `active`. The test pins these four rules as literals of its own and does not import the fold, so that a drift of either side goes RED.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py -k hygiene`
 - **Numeric pass threshold:** exit code 0.
 - **Negative control:** RED on today's canon (no rows).
-- **Boundary catalog:** ☑ boundary — a missing row; ☑ error — a drifted statement.
+- **Boundary catalog:** ☑ empty — exactly 5 record headings ☑ boundary — a missing row; the escaped pipe in `LLR-001.1` ☑ error — a drifted statement; a stripped record-id suffix.
 
 ### LLR-CAN.1.2 — canon ids are unique
 - **Traceability:** HLR-CAN.1
-- **Ledger:** none
-- **Statement:** Every requirement id in the first column of `REQUIREMENTS.md`'s table shall appear exactly once.
+- **Ledger:** LED-2026-10-09-canon-batch.3, LED-2026-10-09-canon-batch.5
+- **Statement:** Every requirement id in the first cell of a row of `REQUIREMENTS.md`'s requirement table shall appear exactly once. The table is anchored on its `| Id |` header and read until the first non-row line. Only the first cell is read (`split("|")[1]`, as the fold does), so escaped pipes in later cells cannot shift it. The table shall hold at least 134 rows.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py -k unique`
 - **Numeric pass threshold:** exit code 0.
@@ -190,13 +202,19 @@ The fold's normalisation (backticks dropped, `|` escaped as `\|`) is what the fi
 
 ### LLR-CAN.2.1 — the unused `re` import is removed and guarded
 - **Traceability:** HLR-CAN.2
-- **Ledger:** none
+- **Ledger:** LED-2026-10-09-canon-batch.4
 - **Statement:** `mapper/app.py` shall not contain `import re`, and a test shall assert that every module-level import name of `mapper/app.py` is referenced in that module.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_app_imports_used.py`
 - **Numeric pass threshold:** exit code 0.
 - **Negative control:** RED with `import re` restored.
-- **Boundary catalog:** ☑ boundary — dotted imports and aliases bind their first or aliased name.
+- **Boundary catalog:** ☑ boundary, with synthetic-source arms that check the checker itself:
+  - `import a.b` binds `a`;
+  - `import x as y` and `from m import n as z` bind the alias;
+  - an alias imported but unused is reported;
+  - a name mentioned only in a string, docstring or comment does not count as used.
+
+  What counts as a use: an `ast.Name` load, or the base `ast.Name` of an `ast.Attribute`. `from __future__ import …` is excluded. Star imports and `__all__` are out of scope (`app.py` has neither). A future deliberate re-export must go on an explicit allowlist in the test, with its reason; the test is not weakened for it.
 
 ### Information Flow Contract (IFC) — C-54
 
@@ -236,6 +254,8 @@ SINK: REQUIREMENTS.md, read by V22 and by maintainers
 ### 6.2 Relevant design decisions
 - **Append, never rename.** The data-safety rows keep `HLR-001`…, because they were folded first and own those ids. The hygiene rows take `HYG`. The record id is written into the statement, because the canon has no alias column and adding one would rewrite every row.
 - **Namespaced ids from this batch on (`CAN`).** This is a project convention until the flow's template seeds a namespace (reported for the flow backlog).
+- **The close fold appends this batch's own five rows** (`HLR-CAN.1`, `HLR-CAN.2`, `LLR-CAN.1.1`, `LLR-CAN.1.2`, `LLR-CAN.2.1`). The fold reads only the active batch's headings (`devflow-init.py` `fold_canon`). The five `HYG` rows are verified by AT-063, not by the fold.
+- **What would change this design:** a fold that can alias or rewrite rows. With one, the in-statement record id would become unnecessary.
 ### 6.3 Open risks
 - A later batch that again uses a plain `HLR-001` repeats B-105. Mitigations: the convention above, and LLR-CAN.1.2, which does not catch a reused id that is never appended. That case is only caught by reading the fold's `kept:` lines, which is stated here and not claimed away.
 ### 6.4 Phase-1 reconciliation log — moved to the ledger (§7)
