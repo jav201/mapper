@@ -57,8 +57,9 @@ GOLDEN_SHA256 = {
     87: "6ba755535f102742931c93af98a54889ea4ecc6e132f43a1db78f8461a889b9b",
 }
 
-#: The mutant's one-token change: a PAINTED string constant in app.py
-#: (`SEARCH_COUNT_SUBJECT` -- the live-search count line our session paints).
+#: The mutant's one-token change: a PAINTED string constant in
+#: `mapper/screens/common.py` (`SEARCH_COUNT_SUBJECT` -- the live-search count
+#: line our session paints; the constant moved there at increment A1).
 _MUTANT_NEEDLE = 'SEARCH_COUNT_SUBJECT = "matches in the map"'
 _MUTANT_REPLACEMENT = 'SEARCH_COUNT_SUBJECT = "hits in the map"'
 
@@ -199,11 +200,11 @@ async def test_at065_parity_red_on_a_mutant_copy(tmp_path):
     token changed in a tmp copy of the product must redden the comparison."""
     mut = tmp_path / "mut"
     shutil.copytree(REPO_ROOT / "mapper", mut / "mapper")
-    app_py = mut / "mapper" / "app.py"
-    source = app_py.read_text(encoding="utf-8")
-    assert _MUTANT_NEEDLE in source, "mutant needle not found in app.py"
-    app_py.write_text(source.replace(_MUTANT_NEEDLE, _MUTANT_REPLACEMENT, 1),
-                      encoding="utf-8")
+    common_py = mut / "mapper" / "screens" / "common.py"
+    source = common_py.read_text(encoding="utf-8")
+    assert _MUTANT_NEEDLE in source, "mutant needle not found in screens/common.py"
+    common_py.write_text(source.replace(_MUTANT_NEEDLE, _MUTANT_REPLACEMENT, 1),
+                         encoding="utf-8")
 
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"  # the capture is UTF-8; Windows defaults to cp1252

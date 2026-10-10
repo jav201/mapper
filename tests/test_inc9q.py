@@ -30,6 +30,7 @@ from mapper import office as office_module
 from mapper import osopen
 from mapper.app import MapperApp
 from mapper.model import Attachment
+from mapper.screens import common as common_module
 from mapper.screens import factory as factory_module
 from mapper.screens.factory import FactoryScreen
 from tests.test_inc9f import NARROW, SIZE
@@ -383,14 +384,14 @@ def test_inc9q_cr_f1_the_new_sentences_have_one_home():
 
     home = strings("osopen.py")
     assert CR_F3 in home and ATT_HARD in home
-    for rel in ("app.py", "screens/factory.py"):
+    for rel in ("app.py", "screens/common.py", "screens/factory.py"):
         found = strings(rel)
         assert CR_F3 not in found and ATT_HARD not in found, rel
 
 
 @red("cr1")
 def test_inc9q_cr_f1_the_attachment_paths_use_the_shared_mapping(tmp_path, monkeypatch):
-    monkeypatch.setattr(app_module, "refusal_sentence", lambda reason, **kw: f"S:{reason}")
+    monkeypatch.setattr(common_module, "refusal_sentence", lambda reason, **kw: f"S:{reason}")
     ws = tmp_path / "ws"
     ws.mkdir()
     assert app_module._path_refusal("d /x.pdf", ws) == "S:normalised"

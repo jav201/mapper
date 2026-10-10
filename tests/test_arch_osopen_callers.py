@@ -77,6 +77,9 @@ def _osopen_imports(tree: ast.AST):
 
 ALLOWED_OUTSIDE_APP = {
     "github.py": {"safe_local_path"},
+    # `2026-10-09-modular-batch` A1: `_path_refusal` moved out of `app.py` with the two
+    # sanctioned names it reads (ARCHITECTURE §3 `screens` row).
+    "screens/common.py": {"confine_reason", "refusal_sentence"},
     "screens/factory.py": {"safe_local_path", "confine_reason", "refusal_sentence", "hard_linked", "is_link",
                            "PATH_NOT_SUPPORTED"},
 }
@@ -114,7 +117,9 @@ def _back_edges() -> dict[str, list[int]]:
 @red("arch")
 def test_the_four_known_back_edges_are_exactly_the_ones_the_map_lists():
     edges = _back_edges()
-    assert {rel: len(lines) for rel, lines in edges.items()} == {"screens/factory.py": 3, "screens/settings.py": 1}, edges
+    # `2026-10-09-modular-batch` A1 removed three of the four B-02 back-edges (the
+    # helpers now import from `screens/common.py`); A2 removes the last one.
+    assert {rel: len(lines) for rel, lines in edges.items()} == {"screens/factory.py": 1}, edges
     row = _row(_section3(), "screens")
     for rel, lines in edges.items():
         for line in lines:
