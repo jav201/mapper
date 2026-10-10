@@ -115,15 +115,15 @@ def _back_edges() -> dict[str, list[int]]:
 
 
 @red("arch")
-def test_the_four_known_back_edges_are_exactly_the_ones_the_map_lists():
+def test_b02_closed_there_are_no_screens_to_app_back_edges_at_all():
     edges = _back_edges()
     # `2026-10-09-modular-batch` A1 removed three of the four B-02 back-edges (the
-    # helpers now import from `screens/common.py`); A2 removes the last one.
-    assert {rel: len(lines) for rel, lines in edges.items()} == {"screens/factory.py": 1}, edges
+    # helpers now import from `screens/common.py`); A2 removed the last one
+    # (`factory.py`'s `_PromptScreen`, now a module-level import of
+    # `screens/prompt.py`).  B-02 is closed: the map lists zero back-edges.
+    assert edges == {}, edges
     row = _row(_section3(), "screens")
-    for rel, lines in edges.items():
-        for line in lines:
-            assert f"`mapper/{rel}:{line}`" in row, (rel, line, row)
+    assert "B-02 — CLOSED" in row, row
     assert "factory.py:343" not in row, row
 
 
