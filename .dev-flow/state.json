@@ -90,13 +90,16 @@
     }
   ],
   "guided": false,
-  "current_station": "P0",
-  "phase_status": "not-started",
+  "current_station": "ARQ",
+  "phase_status": "in-progress",
   "stations_active": [
     "P0",
+    "ARQ",
     "P1",
     "P2",
+    "PDR",
     "P3",
+    "DDR",
     "P4",
     "P5",
     "P6"
@@ -108,9 +111,42 @@
     "P3": 0,
     "P4": 0,
     "P5": 0,
-    "P6": 0
+    "P6": 0,
+    "ARQ": 0,
+    "DDR": 0,
+    "PDR": 0
   },
-  "triggers": {},
+  "triggers": {
+    "evaluated_at": "2026-10-10T15:42:06",
+    "fired": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "B1",
+      "B3",
+      "E1",
+      "F1"
+    ],
+    "not_fired": [
+      "B2",
+      "B4",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "D1",
+      "D2",
+      "E2",
+      "E3",
+      "F2"
+    ],
+    "record": ".dev-flow/2026-10-10-perf-batch/PLAN.md#triggers"
+  },
   "artifact_homes": {
     "requirements": "repo:.dev-flow/2026-10-10-perf-batch/01-requirements.md",
     "requirements_ledger": "repo:.dev-flow/2026-10-10-perf-batch/01-requirements-ledger.md",
@@ -132,7 +168,13 @@
     "P1": ".dev-flow/2026-10-10-perf-batch/01-requirements.md",
     "P1_ledger": ".dev-flow/2026-10-10-perf-batch/01-requirements-ledger.md"
   },
-  "decisions_log": [],
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-10",
+      "decision": "P0 approved (self-approved under the standing authorization): measured first (spike/perf-baseline.md §1-§7, PERF0/0B/0C by Kimi): opening a wide 2000-node map 4.8 s, 6000+ times out; each navigation key repaints the whole map 0.6-1.9 s (renderer elbow_down/wire per cell); mount paints 3x; Mermaid dump O(N*E); load YAML-bound. Scope ruled: behaviour-preserving remedies first (AT-065 goldens byte-identical as the oracle), three parallel lanes; the S-18 work budget changes painted output and goes to a prototype round before any implementation. Triggers in PLAN.md#triggers."
+    }
+  ],
   "standing_authorization": {
     "autonomous": true,
     "merge": true,
