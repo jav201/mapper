@@ -73,7 +73,7 @@ New / renamed nodes:
 | Mutation applied | (1) tmp-copy plant `from mapper.screens.map.painting import RAIL_WIDTH` into `hints.py` (D-C2 arm, in-tree); (2) tmp-copy plant `from mapper.screens.home import HomeScreen` into `screens/__init__.py` (D-C3 arm, in-tree); (3) hand revert of the narrowed `concern_cross_imports` to its pre-DDR body; (4) hand revert of `screens_init_sibling_imports`'s return to `set()` |
 | Instrument | each guard runs its checker on the real tree (GREEN) and on a tmp-copy mutant (RED); the hand reverts exercise the RED-proof rule |
 | Where it ran | this worktree |
-| Transcript | §4 run output in this unit's log; gate transcript added by the orchestrator |
+| Transcript | §4 run output in this unit's log; gate: `evidence/p4-gate-full-suite.transcript` (3133 passed / 3 xfailed / 0 failed) |
 | Restore proven by | sha256 of `tests/test_mod_deps.py` before revert = after restore = `9921d2f0ecbbc8c63c5e539bb0dd26794a7c7881c144a9519346445c34d0e3e4`; `cmp` byte-identical |
 | Bytecode cache | run under `python -B` |
 | Arms resolved at baseline | the two new tmp-copy RED arms + the two hand-revert RED proofs |
@@ -119,11 +119,12 @@ RED outputs (verbatim tails):
 
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
-| gate transcript added by the orchestrator | .dev-flow/2026-10-09-modular-batch/evidence/ | — |
+| p4-gate-full-suite.transcript | .dev-flow/2026-10-09-modular-batch/evidence/p4-gate-full-suite.transcript | eb263fb1b150c8715874c037bc3147d9cdb242ee49728a14756fc86d7469b161 |
+| ddr-red-arms.transcript | .dev-flow/2026-10-09-modular-batch/evidence/ddr-red-arms.transcript | 750f2fc78cf404405215e143ea411eed4f7d8edfaed3d1b20f870a434acbb619 |
 
 | Field | Value |
 |---|---|
-| **Evidence files** | gate transcript added by the orchestrator |
+| **Evidence files** | `evidence/p4-gate-full-suite.transcript` (full suite at `69676cf`: 3133 passed / 3 xfailed / 0 failed) · `evidence/ddr-red-arms.transcript` (77 passed, every RED arm incl. this increment's two) |
 
 ### Load-bearing emptiness — what is this resting on that is only true today? (C-55)
 
@@ -172,7 +173,7 @@ RED outputs (verbatim tails):
 
 | Field | Value |
 |---|---|
-| **Independent review** | DDR reviews (architect Claude Opus, qa Claude Sonnet) raised these; re-review at DDR seal |
+| **Independent review** | `qa-reviewer` (Claude Sonnet) + architect (Claude Opus), read-only, raised D-C1..D-C3 at the DDR and re-reviewed this increment at `1156200`: both **APPROVED**; architect re-read each proving line and ran `tests/test_mod_deps.py tests/test_arch_osopen_callers.py` (18 passed), confirmed the narrowed checker and the new guard are non-vacuous; 1 LOW carried to backlog (the cycle guard sees direct importers only, `tests/test_mod_deps.py:303`) — `design/DDR-2026-10-09-modular-batch.md` §C |
 
 ---
 
@@ -209,5 +210,5 @@ The DDR seal — architect + qa re-review of D-C1..D-C3 / LOW-5 / QA-3 against t
 | 12 | **Instrument RED-proof** declared | all | ✓ | §4 |
 | 13 | **Correction population** declared | all | ✓ | §4 (7 F4 targets enumerated from the guard map before editing) |
 | 14 | **Emitted-form assertion** declared | all | ✓ | §4 (ARCHITECTURE rows read back by tests) |
-| 15 | **Independent review** names somebody | all | ✓ | §4b — DDR reviews (architect Claude Opus, qa Claude Sonnet) |
-| 16 | **Evidence files** declared | all | ✓ | §4 — gate transcript added by the orchestrator |
+| 15 | **Independent review** names somebody | all | ✓ | §4b — architect (Claude Opus) + qa-reviewer (Claude Sonnet), both APPROVED on re-review |
+| 16 | **Evidence files** declared | all | ✓ | §4 — `p4-gate-full-suite.transcript`, `ddr-red-arms.transcript` with sha256 |
