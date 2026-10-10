@@ -53,3 +53,10 @@ above this line is ever edited._
 - **What changed:** the Tagging line now names the new fourth test file, `tests/test_draft_hygiene.py`, and states that tests are outside the source-file cap.
 - **Why:** the round-2 QA confirmation noted that "touched for the tag only" read as if the batch touched only three test files.
 - **Evidence:** 02-review.md round 2.
+
+### LED-2026-10-09-hygiene-batch.6 — P4 qa-reviewer: LLR-001.2's selector selects both of its nodes
+- **Requirement:** LLR-001.2
+- **Date:** 2026-10-09
+- **What changed:** the Executed verification selector changed from `-k guard_open` to `-k llr_001_2`.
+- **Why:** `-k guard_open` does not select `test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen`, because its name holds `guard_flag`. The command as written therefore verified only one of LLR-001.2's two checks. Both nodes ran green in the full suite and in the regression set, so no result changes, only the command.
+- **Evidence:** 04-validation.md (P4 qa-reviewer, ACCEPT-WITH-FIXES).
