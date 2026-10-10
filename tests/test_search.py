@@ -560,14 +560,18 @@ def _app_tree():
 
 def _app_source() -> str:
     """The source the count chain closes over, as ONE module text: `mapper/app.py`
-    plus every module under `mapper/screens/`, so the closure can also run on a
-    SYNTHETIC module -- see `test_the_count_chain_closure_crosses_the_class_boundary`.
+    plus `mapper/screens/common.py` and every module under `mapper/screens/map/`,
+    so the closure can also run on a SYNTHETIC module -- see
+    `test_the_count_chain_closure_crosses_the_class_boundary`.
 
     `2026-10-09-modular-batch` (LLR-MOD.5.2): the split moves `MapScreen` and its
     module-level helpers out of `app.py` (A1: `screens/common.py`; B0:
     `screens/map/`).  Reading only `inspect.getfile(MapScreen)` would shrink the
     helper plane to whatever stayed beside the class and turn the crossing inert.
-    Concatenating the package keeps every helper in the plane wherever it lives;
+    Concatenating the modules the chain can actually close over keeps every helper
+    in the plane wherever it lives; A1 code-review CR-1 narrowed this from EVERY
+    `screens/**` module to exactly `common.py` + `screens/map/**` — the other
+    screens' helpers are not part of the count chain and only add shadowing noise;
     `from __future__` lines are dropped because they are only legal at the top of
     a module."""
     import pathlib
@@ -575,7 +579,8 @@ def _app_source() -> str:
     import mapper
 
     root = pathlib.Path(mapper.__file__).resolve().parent
-    files = [root / "app.py", *sorted((root / "screens").rglob("*.py"))]
+    files = [root / "app.py", root / "screens" / "common.py",
+             *sorted((root / "screens" / "map").rglob("*.py"))]
     parts = []
     for path in files:
         text = path.read_text(encoding="utf-8")
@@ -1413,10 +1418,10 @@ def test_one_paint_pass_resolves_exactly_once(tmp_path):
             built.append(1)
             super().__init__(graph)
 
-    import mapper.app as app_module
+    import mapper.screens.map.screen as screen_module
 
-    original = app_module.SearchIndex
-    app_module.SearchIndex = Counting
+    original = screen_module.SearchIndex
+    screen_module.SearchIndex = Counting
     try:
         screen = MapScreen("memoised")
         screen.graph = _titled_graph(60)
@@ -1440,7 +1445,7 @@ def test_one_paint_pass_resolves_exactly_once(tmp_path):
         assert screen._search_order() != answered
         assert len(built) == 3
     finally:
-        app_module.SearchIndex = original
+        screen_module.SearchIndex = original
 
     # The protocol itself is gated by `test_every_reader_of_the_resolution_...`
     # below, which DERIVES the set of readers instead of naming them.
@@ -2395,7 +2400,7 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
     ALSO PINS THE HINT LINE, which is where the same conflation would land next:
     above the bound the hint must NOT read `sin coincidencias`.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.screen as screen_module
 
     app = MapperApp(tmp_path)
     async with app.run_test(size=CONTEXT_OF_USE) as pilot:
@@ -2405,7 +2410,7 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
         screen = await open_map(app, pilot, MAP_ID)
         assert_declared_layout(screen, rail=True, inspector=True)
 
-        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        monkeypatch.setattr(screen_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         assert screen._search_order() is None, "the bound was not reached"
         # And the query DOES match on this graph, so "nothing was found" would be
         # false rather than merely unhelpful.
@@ -2456,7 +2461,7 @@ async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monk
     WIDTH and bounds the difference, rather than checking either against a
     constant: a constant would pass on an implementation that always wrapped.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.screen as screen_module
     from mapper.app import SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
 
     long_query = QUERY + "z" * 2000
@@ -2468,7 +2473,7 @@ async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monk
             graph = build_adjuntos(tmp_path / f"w{width}{len(query)}")
             app.store.save(MAP_ID, graph)
             screen = await open_map(app, pilot, MAP_ID)
-            monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+            monkeypatch.setattr(screen_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
             screen.query_text = query
             assert screen._search_order() is None, "the bound was not reached"
             screen.refresh_canvas()
@@ -2542,7 +2547,7 @@ async def test_a_line_bearing_query_does_not_take_the_frame(tmp_path, monkeypatc
     ordinary run is also the receipt that the fixture reaches the suspended
     branch at all.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.screen as screen_module
     from mapper.app import SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
 
     # 60 line breaks in 120 characters: a flood in ROWS while staying SHORTER
@@ -2561,7 +2566,7 @@ async def test_a_line_bearing_query_does_not_take_the_frame(tmp_path, monkeypatc
             app.store.save(MAP_ID, graph)
             screen = await open_map(app, pilot, MAP_ID)
             assert_declared_layout(screen, rail=True, inspector=True)
-            monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+            monkeypatch.setattr(screen_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
             screen.query_text = query
             assert screen._search_order() is None, "the bound was not reached"
             screen.refresh_canvas()
@@ -2621,7 +2626,7 @@ async def test_at_055_esc_means_one_thing_at_every_graph_size(tmp_path, monkeypa
     repair can break `back_or_home` altogether -- an `esc` that never leaves the
     map at all -- and stay green on the clearing half.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.screen as screen_module
 
     app = MapperApp(tmp_path)
     async with app.run_test(size=CONTEXT_OF_USE) as pilot:
@@ -2661,7 +2666,7 @@ async def test_at_055_esc_means_one_thing_at_every_graph_size(tmp_path, monkeypa
         # second `esc` is asserted in BOTH regimes and it pops in both.
         screen = await open_map(app, pilot, MAP_ID)
         assert_declared_layout(screen, rail=True, inspector=True)
-        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        monkeypatch.setattr(screen_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         screen.query_text = QUERY
         assert screen._search_order() is None, "regime 2 is not above the bound"
         # The regimes really are different, and the query really does match --
@@ -2686,7 +2691,7 @@ async def test_the_hint_line_promises_esc_at_every_graph_size(tmp_path, monkeypa
     affordance `_count_line` refuses to paint, one surface over: an empty answer
     declared over a graph that holds thousands of matches.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.screen as screen_module
     from mapper.app import SEARCH_SUSPENDED_NOTICE
 
     app = MapperApp(tmp_path)
@@ -2702,7 +2707,7 @@ async def test_the_hint_line_promises_esc_at_every_graph_size(tmp_path, monkeypa
         assert hint_text(screen) == "n next · N previous · esc clear"
 
         # Above it, the affordance is still promised and the state is named.
-        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        monkeypatch.setattr(screen_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         await submit(pilot, QUERY)
         assert screen._search_order() is None, "the bound was not reached"
         promised = hint_text(screen)

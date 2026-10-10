@@ -368,7 +368,7 @@ async def test_an_export_never_encodes_where_the_keyboard_was(tmp_path, monkeypa
     from mapper.views.state import ViewState
 
     captured = {}
-    monkeypatch.setattr("mapper.app.save_svg",
+    monkeypatch.setattr("mapper.screens.map.screen.save_svg",
                         lambda text, path: captured.update(text=text, path=path))
 
     app = MapperApp(tmp_path)
@@ -472,7 +472,7 @@ async def test_b50_the_export_carries_the_diff_the_canvas_is_showing(tmp_path, m
     is worse than an acknowledged gap.
     """
     captured = {}
-    monkeypatch.setattr("mapper.app.save_svg",
+    monkeypatch.setattr("mapper.screens.map.screen.save_svg",
                         lambda text, path: captured.update(text=text))
 
     app = MapperApp(tmp_path)
