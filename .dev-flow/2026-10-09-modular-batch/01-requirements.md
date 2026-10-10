@@ -519,7 +519,7 @@ SINK: the painted map screen under real keystrokes
 >   - AT-066 (`tests/test_mod_dispatch.py -k at066`; LLR node: `-k pilot`) drives a bound action and an `on_*` handler through the mixins with real keys (story 2 / mechanism A).
 >   - AT-067 (`tests/test_mod_compat.py -k at067`; LLR nodes: `-k patch_guard` and the patch-carrying files) observes the patched refusal/limit through the shipped screens (story 3).
 >   - AT-068 (`tests/test_mod_structure.py -k at068`; LLR nodes: `-k spine_a`/`b0`/`spine_b`) reads the shipped repository tree — story 1's surface (story 1).
->   - AT-069 (the six Inc-0 test files, `-k at069`; LLR node: the same six files without the selector) observes that moved constructs are found by content across the package (story 3).
+>   - AT-069 (`tests/test_mod_compat.py -k at069`, re-pointed by LED .11; LLR node: the six Inc-0 source-reading test files without a selector) observes that moved constructs are found by content across the package (story 3).
 >   - AT-070 (`tests/test_mod_deps.py -k at070`; LLR node: `-k b02`) greps/ASTs the shipped `screens/` tree for the closed B-02 (story 3).
 >   - AT-071 (`tests/test_mod_deps.py -k at071`; LLR node: `-k arch`) asserts the §3 dependency rules on the shipped module graph, which is what makes post-B11 lanes legal (HLR-MOD.7).
 

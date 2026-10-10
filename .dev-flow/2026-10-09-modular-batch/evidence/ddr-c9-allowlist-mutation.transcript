@@ -1,0 +1,8 @@
+# PDR C9 / LLR-MOD.5.2 — allow-list timing mutation (proposal §5), executed 2026-10-10 at DDR
+# command: python -B c9_mut.py <repo>  (tmp copy of mapper/ + tests/; mutates ALLOWED_FILES in tests/test_arch_osopen_callers.py)
+# node: tests/test_arch_osopen_callers.py::test_the_launcher_names_appear_only_in_app_and_osopen
+GREEN baseline: exit=0 | 1 passed in 0.38s
+RED not-extended-after (opening.py dropped): exit=1 | 1 failed in 0.23s
+RED extended-before (a file without the call listed): exit=1 | 1 failed in 0.23s
+GREEN restored: exit=0 | 1 passed in 0.18s
+VERDICT: both mutants RED, baseline and restore GREEN
