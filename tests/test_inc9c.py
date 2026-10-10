@@ -111,7 +111,7 @@ async def _drive_csv_not_found(app, pilot, mp, tmp_path):
 async def _drive_csv_unreadable(app, pilot, mp, tmp_path):
     csv = tmp_path / "nodos.csv"
     csv.write_text("a,b\n", encoding="utf-8")
-    mp.setattr("mapper.app.preview_csv", _boom)
+    mp.setattr("mapper.screens.home.preview_csv", _boom)
     await pilot.press("i")
     await pilot.pause()
     app.screen.query_one("#prompt-input", Input).value = str(csv)
@@ -264,8 +264,9 @@ def _leaky_interpolations(message) -> list[str]:
 #: that is NOT a bare operator path, with the reason it stays.  A stale entry --
 #: one the source no longer produces -- fails `test_..._every_exception_is_real`.
 LEAK_EXCEPTIONS: dict[tuple[str, str], str] = {
-    ("mapper/app.py", "str(exc)"): "INC9C-F3: `GitHubError`'s own message (git stderr) "
-                                  "and `store.load`'s path-free `MapStoreError` text",
+    # Moved with `HomeScreen` at 2026-10-09-modular-batch A4 (was the app.py row's site).
+    ("mapper/screens/home.py", "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
+                                            "`MapStoreError` text (INC9C-F3) — moved at A4",
     # Moved with `MapScreen` at 2026-10-09-modular-batch B0 (was keyed to the app.py row's site).
     ("mapper/screens/map/screen.py", "str(e)"): "`store.load`'s `MapStoreError`, written path-free at "
                                                 "B-30 — moved at B0",

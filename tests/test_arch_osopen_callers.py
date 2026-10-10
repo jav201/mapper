@@ -92,6 +92,9 @@ ALLOWED_OUTSIDE_APP = {
     # until B3: `MapScreen`'s attachment-activated handler moved here at B0 and calls
     # `open_external`; B3 moves the open concern to screens/map/opening.py.
     "screens/map/screen.py": {"ATTACHMENT_HARD_LINKED", "OK", "open_external"},
+    # `2026-10-09-modular-batch` A4: `HomeScreen` moved out of `app.py` with the two
+    # osopen names its CSV-import door reads (ARCHITECTURE §3 `screens` row).
+    "screens/home.py": {"safe_local_path", "PATH_NOT_SUPPORTED"},
 }
 
 

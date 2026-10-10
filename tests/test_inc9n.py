@@ -282,7 +282,7 @@ async def test_inc9n_f2_the_csv_prompt_with_a_device_name_returns_at_once_and_op
         calls.append(path)
         raise AssertionError("preview_csv was called for a device name")
 
-    monkeypatch.setattr("mapper.app.preview_csv", never)
+    monkeypatch.setattr("mapper.screens.home.preview_csv", never)
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         await pilot.pause()
@@ -400,9 +400,12 @@ async def test_inc9n_u1_pin_a_missing_accepted_path_keeps_naming_its_file(surfac
 
 @red("u1")
 def test_inc9n_u1_the_sentence_is_written_with_a_real_ellipsis_in_one_place():
-    from mapper import app as app_mod
+    # `2026-10-09-modular-batch` A4: the CSV door moved with `HomeScreen` to
+    # `screens/home.py`, which now binds the sentence it reads — checked there,
+    # not through the `mapper.app` re-export.
+    from mapper.screens import home as home_mod
 
-    assert getattr(app_mod, "PATH_NOT_SUPPORTED", None) == U1
+    assert home_mod.PATH_NOT_SUPPORTED == U1
     assert "\u2026" in U1 and "..." not in U1
 
 
