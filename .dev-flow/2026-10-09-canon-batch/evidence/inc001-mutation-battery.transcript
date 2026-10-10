@@ -1,0 +1,81 @@
+# Increment 001 (2026-10-09-canon-batch): mutation battery C0-C3 (REQUIREMENTS.md) + A1 (mapper/app.py), re-run after the code-review nits CR-1/CR-2, 2026-10-09, by the orchestrator in the main checkout (harness can_mutate.py, session scratch); every restore sha256-checked. Console output decoded from cp1252.
+
+## C0 base canon (the 5 rows absent)
+   REQUIREMENTS.md sha256 before 088073ce9a467468…, mutated 8416bfda875a8886…
+$ python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py   [C0 base canon (the 5 rows absent)]
+    E           AssertionError: HLR-001: expected exactly one canon row for HLR-HYG.1, found 0
+    E           assert 0 == 1
+    E            +  where 0 = len([])
+    E       AssertionError: expected at least 134 canon rows, found 129
+    E       assert 129 >= 134
+    E        +  where 129 = len([('HLR-CNV.1', ['', ' HLR-CNV.1 ', ' The canvas shall declare a dots layer and a bgs layer in its constructor, and row...shall paint that branch's subtree again and remove the pill. ", ' 2026-
+    FAILED tests/test_requirements_canon.py::test_at_063_every_hygiene_requirement_is_in_the_canon_once
+    FAILED tests/test_requirements_canon.py::test_llr_can_1_2_canon_ids_are_unique_and_the_table_is_not_empty
+    2 failed, 1 passed in 0.11s
+    exit=1
+   restored byte-identical: True
+
+## C1: one HYG row duplicated
+   REQUIREMENTS.md sha256 before 088073ce9a467468…, mutated 07a40d959bf588a7…
+$ python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py   [C1]
+    E           AssertionError: LLR-001.2: expected exactly one canon row for LLR-HYG.1.2, found 2
+    E           assert 2 == 1
+    E            +  where 2 = len([['', ' LLR-HYG.1.2 ', ' MapScreen shall expose guard_open() -> bool, and no code outside MapScreen shall read _draft_...tside MapScreen shall read _draft_guard_open. (Record id: LLR-001.2.)
+    E       AssertionError: duplicate canon ids: ['LLR-HYG.1.2']
+    E       assert not ['LLR-HYG.1.2']
+    FAILED tests/test_requirements_canon.py::test_at_063_every_hygiene_requirement_is_in_the_canon_once
+    FAILED tests/test_requirements_canon.py::test_llr_can_1_2_canon_ids_are_unique_and_the_table_is_not_empty
+    2 failed, 1 passed in 0.11s
+    exit=1
+   restored byte-identical: True
+
+## C2: one statement altered (HLR-HYG.1)
+   REQUIREMENTS.md sha256 before 088073ce9a467468…, mutated 10da3f9461271a59…
+$ python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py   [C2]
+    E           AssertionError: HLR-001: statement drifted from its record
+    E           assert 'When a draft...id: HLR-001.)' == 'When a draft...id: HLR-001.)'
+    E
+    E             Skipping 101 identical leading characters in diff, use -v to show
+    E             Skipping 163 identical trailing characters in diff, use -v to show
+    E             - e's error type and the
+    E             ?           ^^^^
+    E             + e's error kind and the
+    E             ?           ^^^^
+    FAILED tests/test_requirements_canon.py::test_at_063_every_hygiene_requirement_is_in_the_canon_once
+    1 failed, 2 passed in 0.12s
+    exit=1
+   restored byte-identical: True
+
+## C3: the record-id suffix stripped (LLR-HYG.1.1)
+   REQUIREMENTS.md sha256 before 088073ce9a467468…, mutated 34fa73d488454cad…
+$ python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py   [C3]
+    E           AssertionError: LLR-001.1: statement drifted from its record
+    E           assert 'MapScreen.__...n it is None.' == 'MapScreen.__...: LLR-001.1.)'
+    E
+    E             Skipping 155 identical leading characters in diff, use -v to show
+    E             - it is None. (Record id: LLR-001.1.)
+    E             + it is None.
+    FAILED tests/test_requirements_canon.py::test_at_063_every_hygiene_requirement_is_in_the_canon_once
+    1 failed, 2 passed in 0.11s
+    exit=1
+   restored byte-identical: True
+
+## A1: `import re` restored in mapper/app.py
+   mapper\app.py sha256 before b9354eb9ef154906…, mutated 4b47adcf1c5d5629…
+$ python -B -m pytest -q -p no:cacheprovider tests/test_app_imports_used.py   [A1]
+    E       AssertionError: assert {'re'} == set()
+    E
+    E         Extra items in the left set:
+    E         're'
+    E         Use -v to get more diff
+    FAILED tests/test_app_imports_used.py::test_at_064_app_imports_nothing_it_does_not_use
+    1 failed, 13 passed in 0.17s
+    exit=1
+   restored byte-identical: True
+
+## GREEN after restore
+$ python -B -m pytest -q -p no:cacheprovider tests/test_requirements_canon.py tests/test_app_imports_used.py   [increment]
+    17 passed in 0.13s
+    exit=0
+
+SUMMARY: C0 base canon (the 5 rows absent) KILLED · C1 KILLED · C2 KILLED · C3 KILLED · A1 KILLED · GREEN exit=0
