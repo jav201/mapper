@@ -175,6 +175,17 @@
       "station": "P4",
       "date": "2026-10-09",
       "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2924 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT-WITH-FIXES, fixes applied (executor per row, LLR-001.2 selector LED .6); notes G-001 watch item, G-002 -> B-104"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-09",
+      "decision": "P5 closed (self-approved under the standing authorization): B-99, B-103 DONE; B-104, B-105 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as a482079 (PR #12)"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-09",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/ (core light sync: README only)"
     }
   ],
   "standing_authorization": {
@@ -220,6 +231,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-09T00:00:00"
 }
