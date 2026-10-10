@@ -1,0 +1,83 @@
+PERFG0 — behaviour-golden capture on the BASE product (PDR condition C10)
+batch 2026-10-10-perf-batch · worktree trunk step 0 · all paths relative to the worktree root
+
+1 · Base verification (the product under mapper/ is byte-identical to base 5cde04e)
+  $ git diff --stat 5cde04e HEAD -- mapper
+  (empty output)  EXIT 0
+  $ git rev-parse HEAD
+  873de41233eb155d7a6902f2a861749d542d316b
+  No file under mapper/ was touched by this step (git status shows only new tests/ files).
+
+2 · Capture — run 1
+  $ python -B tests/perf_goldens_capture.py
+  captured render/empty_118x34.txt … captured at076_saved_wide6000_after_add_child.mmd
+  wrote tests/goldens/perf/MANIFEST.json (26 goldens, base 5cde04e)
+
+3 · Capture — run 2 (determinism proof)
+  $ python -B tests/perf_goldens_capture.py   (second run)
+  DOUBLE-CAPTURE EQUAL: all 27 files byte-identical across runs 1 and 2
+  (26 goldens + MANIFEST.json, sha256-compared after each run)
+
+4 · Golden list (sha256 · path · case · base)
+7c79ff53b2ae52dd535c416679e4a0f53e0ed35ca43bcf0845d807c855da187b  tests/goldens/perf/render/empty_118x34.txt  (LLR-PERF.1.3.render-grid.empty@118x34, base 5cde04e)
+7c79ff53b2ae52dd535c416679e4a0f53e0ed35ca43bcf0845d807c855da187b  tests/goldens/perf/render/empty_87x34.txt  (LLR-PERF.1.3.render-grid.empty@87x34, base 5cde04e)
+7be1a89521367c31eaab1bbfc4ba8f23b012c65c4fe235764b6c73457991b33d  tests/goldens/perf/render/single_118x34.txt  (LLR-PERF.1.3.render-grid.single@118x34, base 5cde04e)
+bc1a19443c612e74ba1778f27bd2c98d5c6a26eaf2b466f18d74e35088a7027e  tests/goldens/perf/render/single_87x34.txt  (LLR-PERF.1.3.render-grid.single@87x34, base 5cde04e)
+b3a9e3f9a857b078ed450b2dbeab4273385222f4f5c2f173d500e7c68aa6048d5  tests/goldens/perf/render/deep5000_118x34.txt  (LLR-PERF.1.3.render-grid.deep5000@118x34, base 5cde04e)
+000f15b5be6601b598fd5a955b3b1a2cce46bee77b8ff8af8455a5ac4496735e  tests/goldens/perf/render/deep5000_87x34.txt  (LLR-PERF.1.3.render-grid.deep5000@87x34, base 5cde04e)
+0fe9df81368edd3cee18716fbdbf63d5051290be9da0fbeed18e34b4d21a8268  tests/goldens/perf/render/wide2000_118x34.txt  (LLR-PERF.1.3.render-grid.wide2000@118x34, base 5cde04e)
+d589b541a7563c1a637a687c3d86c0abbfd4c839b9f49bb0d3435f9fe2c4d639  tests/goldens/perf/render/wide2000_87x34.txt  (LLR-PERF.1.3.render-grid.wide2000@87x34, base 5cde04e)
+d728e190eaa256da4831fd18ea02762c45588500c1b2f76b9b5d883f8b5f395d  tests/goldens/perf/render/wide6000_118x34.txt  (LLR-PERF.1.3.render-grid.wide6000@118x34, base 5cde04e)
+3e4e678d28f4460d460c434d15097b8751455c4c6cb0022166e7a19e06beca7d  tests/goldens/perf/render/wide6000_87x34.txt  (LLR-PERF.1.3.render-grid.wide6000@87x34, base 5cde04e)
+a720d992aaad50e655a43e1e27a869285e8665e0224f565b75e9357d035d185a  tests/goldens/perf/render/forest_118x34.txt  (LLR-PERF.1.3.render-grid.forest@118x34, base 5cde04e)
+c35845ca17394055046b8d9cd7db4a7ab14fcf8ae30054509b8fc68c231e8127  tests/goldens/perf/render/forest_87x34.txt  (LLR-PERF.1.3.render-grid.forest@87x34, base 5cde04e)
+759bd1e7fbbb1ed1279189c600053f9c66d264dd1e471c635a077d6301579d6f  tests/goldens/perf/render/fold_118x34.txt  (LLR-PERF.1.3.render-grid.fold@118x34, base 5cde04e)
+54c7f7bd3706430fa4bfd7356c9d06366fe311d283ea4687b8bd11ccf340421f  tests/goldens/perf/render/fold_87x34.txt  (LLR-PERF.1.3.render-grid.fold@87x34, base 5cde04e)
+bd43863edbc9b8e9963eb7f35a1faafff65d40401a05e87b313ba82417fee0af  tests/goldens/perf/render/panned_118x34.txt  (LLR-PERF.1.3.render-grid.panned@118x34, base 5cde04e)
+3bba77e56ce813b96f8683f1330fa62910bca35c5cc788ca5446fd6dcc094f167  tests/goldens/perf/render/panned_87x34.txt  (LLR-PERF.1.3.render-grid.panned@87x34, base 5cde04e)
+3b8a5a0299fee3c2ef1466d1db25075ef88e69b588c1ab3efea286183761e245  tests/goldens/perf/dump/legacy.mmd  (LLR-PERF.2.2.dump.fixture-legacy, base 5cde04e)
+41cc28498400397a61b42a6105682107c1c5b82c2d5dc58c7cb0baece9ccb7d3  tests/goldens/perf/dump/anidado.mmd  (LLR-PERF.2.2.dump.fixture-anidado, base 5cde04e)
+54b5aebff31a6d2cc972baac586bdacf70736cfc5a37d93a1d5a11d96882a14b  tests/goldens/perf/dump/truncado.mmd  (LLR-PERF.2.2.dump.fixture-truncado, base 5cde04e)
+372543b09005e5a31bdcb4f5b8f0d68d030ad9efc2fad565424849b4d3baeda4  tests/goldens/perf/dump/wide6000.mmd  (LLR-PERF.2.2.dump.wide6000, base 5cde04e)
+70628d0f4e2a458cd6abe127b7ce3c2ced12c7b4856a2d2c3e9168b146ba5937  tests/goldens/perf/dump/forest.mmd  (LLR-PERF.2.2.dump.forest, base 5cde04e)
+228e1f41f3c2674cf342c6df608dd87f63c034682c6575017585c9eec08ceb37  tests/goldens/perf/dump/empty.mmd  (LLR-PERF.2.2.dump.empty, base 5cde04e)
+0154e13113d05251b71a4194d536045dbfe7325a629684facbfcef50ab1d276d  tests/goldens/perf/dump/single.mmd  (LLR-PERF.2.2.dump.single, base 5cde04e)
+c872ddb2951cbb6b16bbb162aac7292ae8e4d44774b2c10e855fd311932e42f6  tests/goldens/perf/dump/dangling.mmd  (LLR-PERF.2.2.dump.dangling-edge, base 5cde04e)
+91a7db89a25c4473119c8a7e1161dac79e2430243f31ee26fd3c0d58fd022e88  tests/goldens/perf/at075_075b_wide2000_118x34.txt  (AT-075+AT-075b.keypress-wide2000@118x34, base 5cde04e)
+48115eb430607f9c2b1dcd8f0dc85d33e1e3efa23263fa5fb51e6faec0ffd267  tests/goldens/perf/at076_saved_wide6000_after_add_child.mmd  (AT-076.saved-wide6000-after-add-child, base 5cde04e)
+
+5 · Manifest verification — GREEN
+  $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_goldens_manifest.py
+  ..                                                                       [100%]
+  2 passed in 0.06s   (GREEN-RUN EXIT 0)
+
+6 · RED counterfactual — one golden byte flipped on disk (copy kept), instrument must report FAILURE
+  $ cp tests/goldens/perf/dump/empty.mmd /tmp/g0-empty.mmd.bak
+  $ python -B -c "flip first byte of tests/goldens/perf/dump/empty.mmd"
+  $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_goldens_manifest.py
+  .F                                                                       [100%]
+  FAILED tests/test_perf_goldens_manifest.py::test_every_golden_exists_and_matches_its_sha256
+  E  AssertionError: golden drifted: dump/empty.mmd: f3b67fe0…09ae0 != 228e1f41…eb37
+  1 failed, 1 passed in 0.16s   (RED-RUN EXIT 1)
+
+7 · Restore — byte-identical, hash-checked
+  $ cp /tmp/g0-empty.mmd.bak tests/goldens/perf/dump/empty.mmd
+  restored sha256: 228e1f41f3c2674cf342c6df608dd87f63c034682c6575017585c9eec08ceb37
+  manifest sha256 : 228e1f41f3c2674cf342c6df608dd87f63c034682c6575017585c9eec08ceb37
+  BYTE-IDENTICAL RESTORE: True
+  $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_goldens_manifest.py
+  ..                                                                       [100%]
+  2 passed in 0.08s   (GREEN-RUN EXIT 0)
+
+8 · Lint
+  $ ruff check tests/perf_goldens_capture.py tests/test_perf_goldens_manifest.py
+  All checks passed!   (EXIT 0)
+
+Notes
+- Golden files live under tests/goldens/perf/ (test-owned; backlog B-108).
+- The capture script is not pytest-collected (no test_ prefix; default python_files).
+- AT-075/075b captures clip the screen compositor's strips to the #map-canvas
+  region, so chrome, toasts, the identity row and the strip cannot leak in.
+- App-driven captures use MapperApp(tmp ws under the repo) + run_test(size=(118,34))
+  + pilot.press only; helpers _open/_press imported from tests/test_draft_save.py.
+- Bytecode cache disabled throughout (-B); pytest ran with -p no:cacheprovider.
