@@ -31,6 +31,7 @@
 | `mapper/model.py` | source | LLR-CSV.1.1 (predicate kept per R2), HLR-CSV.2 enabler | `CsvRow` + `CsvCollision` frozen dataclasses; `Graph.csv_collisions` defaulted field (`compare=False, repr=False`); `Graph.multi_parent_ids()`; removed the pre-existing dead `typing.Any` import (ruff F401, flagged by this increment's verification command) |
 | `mapper/store.py` | source | LLR-CSV.1.1, LLR-CSV.1.2 | `MapStore._check_round_trip` (new) + one call in `save` between `dump` and the sidecar build — the round-trip refusal before any byte is written |
 | `tests/test_csv_safety_store.py` | test | LLR-CSV.1.1, LLR-CSV.1.2, LLR-CSV.1.3, LLR-CSV.3.1 | new — 8 nodes (§4) |
+| `tests/test_repair_store_boundary.py` | test | LLR-CSV.1.1 | gate follow-up: the model-field totality guard (`_EXPECTED_NON_TEXT`) declares the new `Graph.csv_collisions` and the `CsvRow`/`CsvCollision` types as non-round-tripped — the increment-1 gate went RED on exactly this (4 failed / 3139 passed, `evidence/inc1-gate-full-suite.transcript` sha256 `3877a5b4834284544c73641aa49b01faaf45235fba4673bf3ac54fde2755f615`), proving the guard bites |
 | `.dev-flow/2026-10-10-csv-safety-batch/evidence/inc1-red.transcript` | generated | LLR-CSV.1.1/1.2/1.3 | RED-proof transcript (§4) |
 
 | Count | Value |
