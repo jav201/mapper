@@ -1,0 +1,25 @@
+## Files changed
+- `tests/test_requirements_canon.py` (new — the only file touched)
+
+## New test node ids
+- `tests/test_requirements_canon.py::test_at_063_every_hygiene_requirement_is_in_the_canon_once`
+- `tests/test_requirements_canon.py::test_llr_can_1_2_canon_ids_are_unique_and_the_table_is_not_empty`
+- `tests/test_requirements_canon.py::test_llr_can_1_1_normaliser_pins_the_fold_rules`
+
+## RED output (today's canon, as expected — no HYG rows; 129 < 134)
+```
+FF.                                                                      [100%]
+FAILED ...::test_at_063_every_hygiene_requirement_is_in_the_canon_once
+    AssertionError: HLR-001: expected exactly one canon row for HLR-HYG.1, found 0
+FAILED ...::test_llr_can_1_2_canon_ids_are_unique_and_the_table_is_not_empty
+    AssertionError: expected at least 134 canon rows, found 129
+2 failed, 1 passed in 0.11s
+```
+- Test 3 (`normaliser` literal arms) **passes today**.
+- RED proof is satisfied: tests 1 and 2 fail on the pre-append canon. The GREEN run (after the orchestrator appends the 5 `HYG` rows) and the mutation battery are the orchestrator's, per the unit.
+
+## Sanity check (not a shipped file)
+`_record_statements()` yields exactly the 5 ids = `set(ALIAS)`, and `_normalise(raw) + " (Record id: <id>.)"` produces the correct folded statements — including the escaped pipe in `LLR-001.1` (`str \| None`), which is why the canon row is split on unescaped pipes only.
+
+No product code was changed, so no sha256 revert/restore step applies to this unit (the "product change" the test guards is the canon append, owned by the orchestrator).
+exit=0

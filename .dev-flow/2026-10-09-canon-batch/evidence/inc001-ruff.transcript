@@ -1,0 +1,3 @@
+# ruff corroboration (AT-064), orchestrator, 2026-10-09
+$ ruff check mapper/app.py tests/test_app_imports_used.py tests/test_requirements_canon.py
+All checks passed!
