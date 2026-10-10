@@ -100,7 +100,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -171,6 +171,16 @@
       "station": "ARQ",
       "date": "2026-10-10",
       "decision": "ARQ approved (self-approved under the standing authorization): design/design-proposal.md (Kimi) — invariant check Graph.multi_parent_ids() in mapper/model.py beside find_cycle (O(N+E), no new dependency edge); collision record as a defaulted Graph.csv_collisions attribute (preview_csv signature frozen, F4 patch-compatible); census: no existing test saves a graph the check would refuse"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-10",
+      "decision": "P1 drafted (Kimi kimi-for-coding): US-CSV-001..003, HLR-CSV.1-3, LLR-CSV.*, AT-072..074; to P2 review"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-10",
+      "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): requirements ITERATE (HIGH: collision without loader violation silently loses a row; root-collision fixture is a cycle), proposal approve-with-conditions; qa (Claude Sonnet): approve-with-conditions (same HIGH; AT oracle must include mapper.db; drive via _open_import). Rulings R1-R10 recorded in 02-review.md"
     }
   ],
   "standing_authorization": {
