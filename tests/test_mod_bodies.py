@@ -26,9 +26,10 @@ enclosing class), `"<function>"` for top-level functions.  Regenerate with:
 
     python -B tests/test_mod_bodies.py
 
-RED controls (both run on a tmp copy of the package, never the real tree):
+RED controls (all run on a tmp copy of the package, never the real tree):
 a one-token mutation inside a `MapScreen` method body reddens the baseline
-diff, and a deleted import reddens the undefined-global check.
+diff's "changed" arm, a deleted moved method reddens "missing", and a deleted
+import reddens the undefined-global check.
 """
 from __future__ import annotations
 
@@ -240,30 +241,25 @@ def _delete_a_used_import(src: str) -> tuple[str, str]:
     raise AssertionError("no import used inside a nested scope found")
 
 
-# Bodies a LATER batch changed on purpose after the move.  The oracle was built to
-# prove the 2026-10-09-modular-batch move edited nothing; frozen as-is it would also
-# refuse every intentional change to the 33 moved classes forever.  So a post-move
-# edit is DECLARED here -- key -> the batch and requirement that changed it -- and
-# everything not declared stays frozen.  A declaration whose body no longer differs
-# from the baseline is stale and fails too, so the list cannot rot into a blanket pass.
-DECLARED_CHANGES: dict[str, str] = {
-    "_ImportPreviewScreen.action_save": "2026-10-10-csv-safety-batch, LLR-CSV.2.3 (refuse a colliding import at s)",
-    "_ImportPreviewScreen.refresh_canvas": "2026-10-10-csv-safety-batch, LLR-CSV.2.2 (name the colliding rows)",
-}
-
-
 def test_llr_mod_4_3_bodies_match_baseline():
-    """Every Inc-0 census body is byte-identical and appears exactly once
-    somewhere in the package: no method lost, duplicated or edited by a
-    move.  Diff must be empty (missing / duplicated / changed all none),
-    except the bodies a later batch changed on purpose and declared in
-    `DECLARED_CHANGES` -- each of which must really differ (no stale entry)."""
+    """Every Inc-0 census body still appears exactly once somewhere in the
+    package: no method lost or duplicated by a move.  Only `missing` and
+    `duplicated` are gated on here.
+
+    Ruling (architect DDR MED-1, 2026-10-10): the "changed" freeze is
+    RETIRED as a gate.  The move's purpose -- no body edited by the move --
+    was proven and sealed when `2026-10-09-modular-batch` closed; a permanent
+    "changed" freeze would tax every later batch, and per-batch declarations
+    (the old `DECLARED_CHANGES`) would become permanent exemptions.
+    `baseline_diff` still computes "changed", and the RED arm
+    `test_llr_mod_4_3_red_one_token_body_mutation_reddens_the_diff` proves
+    the oracle still sees a one-token drift -- byte-identity evidence stays
+    available on demand without freezing the tree against intentional edits.
+    Loss and duplication remain gated: `missing`/`duplicated` non-empty fails
+    here, and `test_llr_mod_4_3_red_a_deleted_moved_method_reddens_missing`
+    is the executed negative control for the loss arm."""
     diff = baseline_diff(PACKAGE, _load_baseline())
-    changed = set(diff["changed"])
-    stale = sorted(set(DECLARED_CHANGES) - changed)
-    assert stale == [], f"declared changes whose body matches the baseline again: {stale}"
-    diff["changed"] = sorted(changed - set(DECLARED_CHANGES))
-    assert diff == {"missing": [], "duplicated": [], "changed": []}
+    assert diff["missing"] == [] and diff["duplicated"] == []
 
 
 def test_llr_mod_4_3_no_undefined_globals():
@@ -298,6 +294,46 @@ def test_llr_mod_4_3_red_one_token_body_mutation_reddens_the_diff(tmp_path):
     diff = baseline_diff(copy, _load_baseline())
     assert diff["changed"], f"mutation of {name} went undetected: {diff}"
     assert not diff["missing"] and not diff["duplicated"]
+
+
+def test_llr_mod_4_3_red_a_deleted_moved_method_reddens_missing(tmp_path):
+    """Negative control on a tmp copy: delete one moved `MapScreen` method
+    body entirely -- the baseline diff must come back `missing` non-empty,
+    proving the retired "changed" freeze did not take the loss-detection arm
+    down with it."""
+    import inspect
+
+    from mapper.app import MapScreen
+
+    copy = tmp_path / "mapper"
+    shutil.copytree(PACKAGE, copy)
+    # Same DERIVED-not-named locating as the one-token arm above.
+    rel = Path(inspect.getfile(MapScreen)).resolve().relative_to(PACKAGE.resolve())
+    target = copy / rel
+    src = target.read_text(encoding="utf-8")
+    methods = sorted(k for k in _bodies_in_file(target) if k.startswith("MapScreen."))
+    assert methods, "the Inc-0 census must contain MapScreen methods"
+    qualname = methods[0]
+
+    tree = ast.parse(src)
+    lines = src.splitlines(keepends=True)
+    deleted = False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            for item in node.body:
+                key = f"{node.name}.{item.name}" if isinstance(
+                    item, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ) else None
+                if key == qualname:
+                    assert item.end_lineno is not None
+                    del lines[item.lineno - 1: item.end_lineno]
+                    deleted = True
+    assert deleted, f"{qualname} not found in {target}"
+    target.write_text("".join(lines), encoding="utf-8")
+
+    diff = baseline_diff(copy, _load_baseline())
+    assert qualname in diff["missing"], f"deletion of {qualname} went undetected: {diff}"
+    assert not diff["duplicated"]
 
 
 def test_llr_mod_4_3_red_a_deleted_import_reddens_undefined_globals(tmp_path):

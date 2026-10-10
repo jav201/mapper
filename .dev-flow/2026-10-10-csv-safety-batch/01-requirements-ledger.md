@@ -78,3 +78,10 @@ above this line is ever edited._
 - **What changed:** A one-line caveat in LLR-CSV.2.1: `str.splitlines()` also splits on `\x0b`, `\x0c`, `\x1c`–`\x1e`, `\x85`, `\u2028` and `\u2029`, so `csv.DictReader.line_num` counts those as line breaks and may differ from editor line numbers (no fixture required). §6.1 now holds the short glossary of mutation ids (M1, M1b, M2, M2b, M2c, M3 and the new M4) and the finding/ruling id families, with the rule that no id is reused for a second meaning — closing the round-1 collision where "A.6" and "M2" each named two things.
 - **Why:** qa LOW-6 (splitlines), qa LOW-7 (id reuse).
 - **Evidence:** `02-review.md` round 2 (findings qa 6, qa 7; ruling R16).
+
+### LED-2026-10-10-csv-safety-batch.11 — DDR review, increment 4: mutation M3 retargeted — titles persist in the sidecar, not the `.mmd` label
+- **Requirement:** HLR-CSV.3 (Negative control), LLR-CSV.3.1 (Negative control), §6.1 (glossary)
+- **Date:** 2026-10-10
+- **What changed:** M3 was retargeted in HLR-CSV.3's and LLR-CSV.3.1's Negative control and the §6.1 glossary: from "make `mermaid.dump` omit node titles / skip the sidecar write" to "drop the title from `_build_sidecar` in `MapStore.save`". Node titles are persisted in the `_nodos.yml` sidecar (`_build_sidecar` in `mapper/store.py`), not the `.mmd` label, so the only title-losing mutation that reaches the round-trip oracle is a sidecar-side one.
+- **Why:** qa DDR MED-2 — the original M3 was vacuous/never executed/Evidence: "make `mermaid.dump` omit node titles" cannot redden anything because `dump` never wrote titles (titles live in the sidecar), and no transcript recorded M3 ever running. The retargeted M3 is executed RED in increment 4 (`evidence/inc4-red.transcript`, M3-effective: `test_save_load_roundtrip_valid_trees` and `test_at_074_valid_csv_saves_and_reopens_identical` both FAILED, restore sha256 `293c521e…7773`, GREEN re-run).
+- **Evidence:** `design/DDR-2026-10-10-csv-safety-batch.md` (qa MED-2 row, §E); `evidence/inc4-red.transcript` (M3-effective); `mapper/store.py` `_build_sidecar` read verbatim.

@@ -696,8 +696,11 @@ _EXPECTED_NON_TEXT = {
     Edge: (),
     Document: ("template",),
     Graph: ("nodes", "edges", "root_id", "schema", "documents", "load_warnings", "csv_collisions"),
-    # csv-safety batch (B-114): build-time provenance of a CSV import, never written to the
-    # sidecar (`_build_sidecar` enumerates its fields by hand) -- declared, not round-tripped.
+    # csv-safety batch (B-114): build-time provenance of a CSV import.  Only
+    # `line_no` (CsvRow) and `rows` (CsvCollision) are declared non-text;
+    # `raw_id`/`slug` are `str` and classify as text.  None of the four
+    # fields is written to the sidecar (`_build_sidecar` enumerates its
+    # fields by hand) -- declared, not round-tripped.
     CsvRow: ("line_no",),
     CsvCollision: ("rows",),
 }
