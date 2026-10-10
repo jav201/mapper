@@ -35,7 +35,17 @@ import pytest
 import yaml
 
 from mapper import model as model_module
-from mapper.model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
+from mapper.model import (
+    Attachment,
+    CsvCollision,
+    CsvRow,
+    Document,
+    Edge,
+    Ficha,
+    Graph,
+    Node,
+    SchemaField,
+)
 from mapper.store import MapStore, MapStoreError
 
 MMD = "graph TD\n    A[Alpha] --> B[Beta]\n"
@@ -685,7 +695,11 @@ _EXPECTED_NON_TEXT = {
     Node: ("ficha",),
     Edge: (),
     Document: ("template",),
-    Graph: ("nodes", "edges", "root_id", "schema", "documents", "load_warnings"),
+    Graph: ("nodes", "edges", "root_id", "schema", "documents", "load_warnings", "csv_collisions"),
+    # csv-safety batch (B-114): build-time provenance of a CSV import, never written to the
+    # sidecar (`_build_sidecar` enumerates its fields by hand) -- declared, not round-tripped.
+    CsvRow: ("line_no",),
+    CsvCollision: ("rows",),
 }
 
 
