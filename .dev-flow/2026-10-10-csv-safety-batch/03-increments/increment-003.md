@@ -177,7 +177,7 @@ RED outputs (verbatim tails from the transcript):
 
 | Field | Value |
 |---|---|
-| **Independent review** | **PENDING** — this increment closes increments 1/2's reviews; the re-review of those closures is dispatched by the orchestrator |
+| **Independent review** | `qa-reviewer` (Claude Sonnet) + architect (Claude Opus), read-only, at the DDR: the nits this increment closes were re-checked against `evidence/inc3-red.transcript` — qa found the dump-once node and M3 still lacked RED proof (closed at increment 4); final re-review of both **APPROVED** (`design/DDR-2026-10-10-csv-safety-batch.md` header and §E) |
 
 ---
 
