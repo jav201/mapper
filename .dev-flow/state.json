@@ -85,7 +85,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P2",
+  "current_station": "P3",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -186,6 +186,16 @@
       "station": "P1",
       "date": "2026-10-10",
       "decision": "P1 iteration 1 approved (self-approved): rulings R1-R10 applied by Kimi (LED .2-.4, new LLR-CSV.2.3; round-trip store check; any collision blocks; _open_import drive path; workspace sha256 oracle); B-115/B-116 to backlog; to P2 round 2"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-10",
+      "decision": "P2 round 2 approved with conditions (self-approved): architect (Claude Opus) + qa (Claude Sonnet) approve-with-conditions; rulings R11-R16 applied (LED .5-.10): round trip compares node and edge sets, not the root (forests, B-117); one dump per save; collision sentence wins; per-layer controls; preview refuses at s with a pinned toast"
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-10",
+      "decision": "PDR sealed approved with conditions C1-C6 (PDR-2026-10-10-csv-safety-batch, D1-D5), conditions applied as document fixes before P3, re-read at DDR"
     }
   ],
   "standing_authorization": {
