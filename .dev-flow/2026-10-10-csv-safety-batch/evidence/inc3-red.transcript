@@ -1,0 +1,96 @@
+# inc3 RED proof — increment 3 of batch 2026-10-10-csv-safety-batch
+# worker: Kimi (kimi-code/kimi-for-coding) — unit CSVI3
+# All paths relative to the worktree root; product restores verified by sha256.
+# Scope: code-review nits of increments 1 and 2 — new tests + mutation evidence;
+# the ONLY product change of this increment is a one-line comment in
+# mapper/import_csv.py (LOW-4), so every behavioral mutation below is applied
+# to the committed increment-1/2 product code and then restored.
+
+## baseline (product files before any mutation; comment already in place)
+$ sha256sum mapper/import_csv.py mapper/store.py mapper/screens/import_preview.py
+68a98bc87c2c5110f52a8e6dcc706dade6c0e139b290faefd093a9d6df5ad4a1 *mapper/import_csv.py
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py
+
+## product-change revert protocol (LOW-4) — a comment is behavior-neutral
+# The one allowed product change is a one-line comment at `splitlines()` in
+# mapper/import_csv.py. Reverting ONLY that change cannot fail any test by
+# construction, so the mandated "revert -> FAILS -> restore" cycle is recorded
+# honestly: the revert stays GREEN, the restore is byte-identical, and the
+# behavioral RED evidence for this increment's tests is carried by the six
+# mutations below.
+$ python - <revert script>   # removes ONLY the comment line
+$ grep -n splitlines mapper/import_csv.py
+39:    lines = text.splitlines()
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k "dumps_once"
+1 passed, 8 deselected in 0.10s
+# GREEN as expected (comment is behavior-neutral — nothing to redden)
+$ cp <backup> mapper/import_csv.py && sha256sum mapper/import_csv.py
+68a98bc87c2c5110f52a8e6dcc706dade6c0e139b290faefd093a9d6df5ad4a1 *mapper/import_csv.py  # == baseline
+
+## LOW-3 — MapStore._check_round_trip compares edges as a SET instead of a sorted multiset, mutation in mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k "reparse_structure_mismatch"
+1 failed, 8 deselected in 0.17s
+# RED: test_save_refuses_reparse_structure_mismatch FAILED (the duplicate-edge
+# case no longer refuses: a set comparison accepts the reparse that silently
+# drops the duplicate row — exactly the regression the sorted-multiset oracle pins)
+$ cp <backup> mapper/store.py && sha256sum mapper/store.py
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py  # == baseline
+
+## MED-1a — precedence swapped so cycle comes before collision in _refusal_sentences, mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "colliding_cyclic"
+1 failed, 11 deselected in 0.64s
+# RED: test_colliding_cyclic_csv_paints_the_collision_sentence FAILED (the
+# cyclic-and-colliding evidence CSV paints the cycle sentence, violating the
+# collision > multi-parent > cycle precedence, rulings R3/R13)
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## MED-1b — one word of the neutral cycle sentence changed ("tree" -> "graph"), mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "neutral_cycle_sentence"
+1 failed, 11 deselected in 0.62s
+# RED: test_cycle_csv_paints_the_neutral_cycle_sentence FAILED (the pinned
+# sentence "a saved map must be a tree, ..." is no longer painted verbatim)
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## MED-1c — three-way list rendered with an Oxford comma, mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "three_way_collision"
+1 failed, 11 deselected in 0.61s
+# RED: test_three_way_collision_uses_list_grammar FAILED ("rows 2, 3, and 4"
+# painted instead of the pinned no-Oxford-comma "rows 2, 3 and 4")
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## MED-1d — refusal toast severity "error" -> "warning", mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "at_072_refused"
+1 failed, 1 passed, 10 deselected in 1.17s
+# RED: test_at_072_refused_save_toasts_and_writes_nothing FAILED on the
+# severity assertion (kw.get("severity") == "error" — the assertion AT-072
+# already carried; no new assertion was needed)
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## MED-1e — AT-074 "drop one edge before save in a copy of the flow": SKIPPED, not a product mutation
+# Dropping an edge from a COPY of the graph exercises nothing the product
+# does: the preview record is keyed on rows (LLR-CSV.2.1), not edges, and a
+# mutated input copy is a test-side experiment, not a change to the shipped
+# behavior. The working path is already pinned by AT-074's save-and-reopen
+# oracle; there is no product code this mutation could kill.
+
+## LOW-1 — refusal panel rendered with Text.from_markup instead of Text.assemble, mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "markup_in_id"
+1 failed, 11 deselected in 0.83s
+# RED: test_markup_in_id_is_painted_verbatim FAILED — the docstring now states
+# exactly what it guards (a switch to Text.from_markup / Static(markup=True)):
+# the markup-aware switch raises rich.errors.MarkupError on the verbatim-shaped
+# id ("closing tag '[/BOLD]' doesn't match any open tag"), so the panel never
+# paints the id as plain text. The test bites on the rendering-path switch.
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## GREEN after every restore (verification command of the increment)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py tests/test_csv_safety_preview.py tests/test_import_csv.py tests/test_repair_store_boundary.py
+129 passed in 8.99s
+$ ruff check mapper/import_csv.py tests/test_csv_safety_store.py tests/test_csv_safety_preview.py
+All checks passed!

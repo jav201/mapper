@@ -1,0 +1,84 @@
+# inc4-red.transcript — increment 4 (CSVI4) of 2026-10-10-csv-safety-batch
+# All runs from the worktree root, relative paths. Mutations applied to and
+# restored from mapper/store.py by explicit copy (cp /tmp/store_inc4_backup.py
+# mapper/store.py); every restore checked by sha256.
+
+=== Baseline digests (pre-mutation) ===
+$ sha256sum mapper/store.py tests/test_mod_bodies.py
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+e668a4ff9c454c856dbe6e5276e4f7f062bcd9b3ca9be93bce76eed7766b9e63 *tests/test_mod_bodies.py
+
+=== M-dump2 (qa MED-1): MapStore.save calls mermaid.dump a SECOND time ===
+# mutation: after `mmd_text = dump(graph)` a second bare `dump(graph)` call
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k dumps_once
+FAILED tests/test_csv_safety_store.py::test_save_writes_the_bytes_dump_returned_and_dumps_once
+1 failed, 8 deselected in 0.19s
+restore: cp /tmp/store_inc4_backup.py mapper/store.py
+$ sha256sum mapper/store.py  (must equal baseline 293c521e...7773)
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k dumps_once
+1 passed, 8 deselected in 0.11s
+
+=== M-dumpwrite (qa MED-1): the write persists a SECOND dump instead of the checked text ===
+# mutation: `mmd_tmp = self._write_tmp(mmd_path, dump(graph))` -- the text written
+# is no longer the mmd_text the round-trip check parsed
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k dumps_once
+FAILED tests/test_csv_safety_store.py::test_save_writes_the_bytes_dump_returned_and_dumps_once
+1 failed, 8 deselected in 0.18s
+restore: cp /tmp/store_inc4_backup.py mapper/store.py
+$ sha256sum mapper/store.py  (must equal baseline 293c521e...7773)
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k dumps_once
+1 passed, 8 deselected in 0.09s
+
+=== M3-effective (qa MED-2): drop the title from `_build_sidecar` ===
+# mutation: the "title" key removed from the per-node sidecar dict -- titles are
+# persisted in the `_nodos.yml` sidecar, NOT the .mmd label, so this silently
+# loses every title on reload (the original M3 wording "make mermaid.dump omit
+# node titles" was vacuous: dump never wrote titles)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k roundtrip
+FAILED tests/test_csv_safety_store.py::test_save_load_roundtrip_valid_trees
+1 failed, 1 passed, 7 deselected in 0.26s
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py::test_at_074_valid_csv_saves_and_reopens_identical
+FAILED tests/test_csv_safety_preview.py::test_at_074_valid_csv_saves_and_reopens_identical
+1 failed in 1.65s
+restore: cp /tmp/store_inc4_backup.py mapper/store.py
+$ sha256sum mapper/store.py  (must equal baseline 293c521e...7773)
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k "roundtrip or forest"
+3 passed, 6 deselected in 0.28s
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py::test_at_074_valid_csv_saves_and_reopens_identical
+1 passed in 1.54s
+
+=== M4 re-run (qa LOW-3/4: inc1 transcript completeness -- own immediate restore) ===
+# mutation: root comparison re-added to _check_round_trip (ruling R11 removed it);
+# re-run of inc1's M4, which in evidence/inc1-red.transcript shared its restore
+# with M-cyc -- this run carries its OWN immediate restore sha256
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k legacy_forest
+FAILED tests/test_csv_safety_store.py::test_save_accepts_legacy_forest_after_edit
+1 failed, 8 deselected in 0.25s
+restore: cp /tmp/store_inc4_backup.py mapper/store.py  (immediate, M4's own)
+$ sha256sum mapper/store.py  (must equal baseline 293c521e...7773)
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k legacy_forest
+1 passed, 8 deselected in 0.12s
+
+=== inc1 baseline GREEN line, re-run (qa LOW-3/4: transcript completeness) ===
+# inc1's post-restore GREEN command (evidence/inc1-red.transcript: `8 passed in 0.28s`,
+# before increment 3 added the dumps-once node); re-run on this tree:
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py
+9 passed in 0.26s
+
+=== oracle-retirement arms (architect MED-1): the modular move oracle on this tree ===
+# the retired "changed" freeze: test_llr_mod_4_3_bodies_match_baseline now gates
+# missing/duplicated only; the negative controls run mutants on a tmp copy inside
+# the node itself (delete one moved method -> missing non-empty; one-token rename
+# -> changed non-empty), so each arm IS its own executed RED proof:
+$ python -B -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py
+5 passed in 2.17s
+
+=== Final verification (restored tree) ===
+$ python -B -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py tests/test_csv_safety_store.py tests/test_csv_safety_preview.py tests/test_repair_store_boundary.py
+128 passed in 10.95s
+$ ruff check tests/test_mod_bodies.py tests/test_csv_safety_store.py tests/test_repair_store_boundary.py
+All checks passed!

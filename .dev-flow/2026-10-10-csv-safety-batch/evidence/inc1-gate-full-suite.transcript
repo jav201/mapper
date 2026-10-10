@@ -1,0 +1,195 @@
+# increment 1 gate — full suite at d4941ea; command: python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.........................................................xxx............ [ 18%]
+..........................F.FF...F...................................... [ 93%]
+================================== FAILURES ===================================
+________ test_at_p02j_the_totality_guard_covers_every_model_dataclass _________
+
+    def test_at_p02j_the_totality_guard_covers_every_model_dataclass():
+        """The guard's CLASS set must be the model's own, not a remembered subset.
+    
+        Without this, `test_at_p02i` silently narrows to whatever was listed: it covered
+        4 of 7 classes, and a `str` field on `Node` reddened nothing anywhere in 643
+        arms.  A guard whose DOMAIN is hand-listed certifies a completeness it does not
+        have -- which is the defect this batch has now produced at three levels.
+        """
+        derived = set(_model_dataclasses())
+        declared = set(_EXPECTED_NON_TEXT)
+        assert derived, "no dataclasses derived from mapper.model -- the walk broke"
+>       assert declared == derived, (
+            "the totality guard's class set drifted from the model: missing "
+            f"{sorted(c.__name__ for c in derived - declared)}, stale "
+            f"{sorted(c.__name__ for c in declared - derived)}"
+        )
+E       AssertionError: the totality guard's class set drifted from the model: missing ['CsvCollision', 'CsvRow'], stale []
+E       assert {<class 'mapp....Graph'>, ...} == {<class 'mapp...chment'>, ...}
+E         
+E         Extra items in the right set:
+E         <class 'mapper.model.CsvRow'>
+E         <class 'mapper.model.CsvCollision'>
+E         Use -v to get more diff
+
+tests\test_repair_store_boundary.py:703: AssertionError
+_________ test_at_p02i_every_model_field_is_classified[CsvCollision] __________
+
+cls = <class 'mapper.model.CsvCollision'>
+
+    @pytest.mark.parametrize(
+        "cls", sorted(_model_dataclasses(), key=lambda c: c.__name__), ids=lambda c: c.__name__
+    )
+    def test_at_p02i_every_model_field_is_classified(cls):
+        """A field spelled a new way must fail LOUDLY instead of vanishing from both sides.
+    
+        THIS GUARD PROTECTS A CONCLUSION, NOT A BEHAVIOUR (C-55 limb 1) -- do not
+        "simplify" it into an implementation detail.  HIGH-1 existed because
+        `Document.tags`/`inherited` were round-tripped as text while sitting outside the
+        census; the derivations resolve annotations now, but `Mapping[str, str]`,
+        `dict[str, str] | None` and a type alias still classify as NEITHER text nor
+        str-map.  Such a field would fall out of the coercion and out of the census
+        simultaneously, and no other arm would redden -- because the census derives the
+        very set that omitted it.  This is `_EXPECTED_REFUSAL`'s totality assertion one
+        level up, over model FIELDS rather than positions.
+    
+        WHAT IT DOES NOT CATCH, stated so nobody cites it for the wrong thing: a NEW
+        `dict[str, str]` on another dataclass.  That field CLASSIFIES -- so this guard
+        passes -- while `_coerce_str_map`'s call site is `Document`-only and
+        `_build_sidecar` is hand-enumerated, so it would be neither coerced nor written.
+        Routing such a field is a HAND step, and this arm will not remind anyone of it
+        (re-confirmation review, MEDIUM-1: measured 0 RED of 643 on three such fields).
+        """
+        every = {f.name for f in dc_fields(cls)}
+        classified = set(_text_field_names(cls)) | set(_str_map_field_names(cls))
+        declared = set(_EXPECTED_NON_TEXT.get(cls, ()))
+        assert declared <= every, (
+            f"{cls.__name__}: non-text names declared that are not fields: "
+            f"{sorted(declared - every)}"
+        )
+        assert not (classified & declared), (
+            f"{cls.__name__}: field(s) both classified as text and declared non-text: "
+            f"{sorted(classified & declared)}"
+        )
+>       assert every == classified | declared, (
+            f"{cls.__name__}: unclassified field(s) {sorted(every - classified - declared)}"
+            " -- a round-tripped field that is neither text, nor a str-map, nor declared"
+            " non-text is exactly how HIGH-1 happened; classify it or declare it"
+        )
+E       AssertionError: CsvCollision: unclassified field(s) ['rows'] -- a round-tripped field that is neither text, nor a str-map, nor declared non-text is exactly how HIGH-1 happened; classify it or declare it
+E       assert {'rows', 'slug'} == {'slug'}
+E         
+E         Extra items in the left set:
+E         'rows'
+E         Use -v to get more diff
+
+tests\test_repair_store_boundary.py:744: AssertionError
+____________ test_at_p02i_every_model_field_is_classified[CsvRow] _____________
+
+cls = <class 'mapper.model.CsvRow'>
+
+    @pytest.mark.parametrize(
+        "cls", sorted(_model_dataclasses(), key=lambda c: c.__name__), ids=lambda c: c.__name__
+    )
+    def test_at_p02i_every_model_field_is_classified(cls):
+        """A field spelled a new way must fail LOUDLY instead of vanishing from both sides.
+    
+        THIS GUARD PROTECTS A CONCLUSION, NOT A BEHAVIOUR (C-55 limb 1) -- do not
+        "simplify" it into an implementation detail.  HIGH-1 existed because
+        `Document.tags`/`inherited` were round-tripped as text while sitting outside the
+        census; the derivations resolve annotations now, but `Mapping[str, str]`,
+        `dict[str, str] | None` and a type alias still classify as NEITHER text nor
+        str-map.  Such a field would fall out of the coercion and out of the census
+        simultaneously, and no other arm would redden -- because the census derives the
+        very set that omitted it.  This is `_EXPECTED_REFUSAL`'s totality assertion one
+        level up, over model FIELDS rather than positions.
+    
+        WHAT IT DOES NOT CATCH, stated so nobody cites it for the wrong thing: a NEW
+        `dict[str, str]` on another dataclass.  That field CLASSIFIES -- so this guard
+        passes -- while `_coerce_str_map`'s call site is `Document`-only and
+        `_build_sidecar` is hand-enumerated, so it would be neither coerced nor written.
+        Routing such a field is a HAND step, and this arm will not remind anyone of it
+        (re-confirmation review, MEDIUM-1: measured 0 RED of 643 on three such fields).
+        """
+        every = {f.name for f in dc_fields(cls)}
+        classified = set(_text_field_names(cls)) | set(_str_map_field_names(cls))
+        declared = set(_EXPECTED_NON_TEXT.get(cls, ()))
+        assert declared <= every, (
+            f"{cls.__name__}: non-text names declared that are not fields: "
+            f"{sorted(declared - every)}"
+        )
+        assert not (classified & declared), (
+            f"{cls.__name__}: field(s) both classified as text and declared non-text: "
+            f"{sorted(classified & declared)}"
+        )
+>       assert every == classified | declared, (
+            f"{cls.__name__}: unclassified field(s) {sorted(every - classified - declared)}"
+            " -- a round-tripped field that is neither text, nor a str-map, nor declared"
+            " non-text is exactly how HIGH-1 happened; classify it or declare it"
+        )
+E       AssertionError: CsvRow: unclassified field(s) ['line_no'] -- a round-tripped field that is neither text, nor a str-map, nor declared non-text is exactly how HIGH-1 happened; classify it or declare it
+E       assert {'line_no', 'raw_id'} == {'raw_id'}
+E         
+E         Extra items in the left set:
+E         'line_no'
+E         Use -v to get more diff
+
+tests\test_repair_store_boundary.py:744: AssertionError
+_____________ test_at_p02i_every_model_field_is_classified[Graph] _____________
+
+cls = <class 'mapper.model.Graph'>
+
+    @pytest.mark.parametrize(
+        "cls", sorted(_model_dataclasses(), key=lambda c: c.__name__), ids=lambda c: c.__name__
+    )
+    def test_at_p02i_every_model_field_is_classified(cls):
+        """A field spelled a new way must fail LOUDLY instead of vanishing from both sides.
+    
+        THIS GUARD PROTECTS A CONCLUSION, NOT A BEHAVIOUR (C-55 limb 1) -- do not
+        "simplify" it into an implementation detail.  HIGH-1 existed because
+        `Document.tags`/`inherited` were round-tripped as text while sitting outside the
+        census; the derivations resolve annotations now, but `Mapping[str, str]`,
+        `dict[str, str] | None` and a type alias still classify as NEITHER text nor
+        str-map.  Such a field would fall out of the coercion and out of the census
+        simultaneously, and no other arm would redden -- because the census derives the
+        very set that omitted it.  This is `_EXPECTED_REFUSAL`'s totality assertion one
+        level up, over model FIELDS rather than positions.
+    
+        WHAT IT DOES NOT CATCH, stated so nobody cites it for the wrong thing: a NEW
+        `dict[str, str]` on another dataclass.  That field CLASSIFIES -- so this guard
+        passes -- while `_coerce_str_map`'s call site is `Document`-only and
+        `_build_sidecar` is hand-enumerated, so it would be neither coerced nor written.
+        Routing such a field is a HAND step, and this arm will not remind anyone of it
+        (re-confirmation review, MEDIUM-1: measured 0 RED of 643 on three such fields).
+        """
+        every = {f.name for f in dc_fields(cls)}
+        classified = set(_text_field_names(cls)) | set(_str_map_field_names(cls))
+        declared = set(_EXPECTED_NON_TEXT.get(cls, ()))
+        assert declared <= every, (
+            f"{cls.__name__}: non-text names declared that are not fields: "
+            f"{sorted(declared - every)}"
+        )
+        assert not (classified & declared), (
+            f"{cls.__name__}: field(s) both classified as text and declared non-text: "
+            f"{sorted(classified & declared)}"
+        )
+>       assert every == classified | declared, (
+            f"{cls.__name__}: unclassified field(s) {sorted(every - classified - declared)}"
+            " -- a round-tripped field that is neither text, nor a str-map, nor declared"
+            " non-text is exactly how HIGH-1 happened; classify it or declare it"
+        )
+E       AssertionError: Graph: unclassified field(s) ['csv_collisions'] -- a round-tripped field that is neither text, nor a str-map, nor declared non-text is exactly how HIGH-1 happened; classify it or declare it
+E       assert {'csv_collisi...root_id', ...} == {'documents',...id', 'schema'}
+E         
+E         Extra items in the left set:
+E         'csv_collisions'
+E         Use -v to get more diff
+
+tests\test_repair_store_boundary.py:744: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_repair_store_boundary.py::test_at_p02j_the_totality_guard_covers_every_model_dataclass
+FAILED tests/test_repair_store_boundary.py::test_at_p02i_every_model_field_is_classified[CsvCollision]
+FAILED tests/test_repair_store_boundary.py::test_at_p02i_every_model_field_is_classified[CsvRow]
+FAILED tests/test_repair_store_boundary.py::test_at_p02i_every_model_field_is_classified[Graph]
+4 failed, 3139 passed, 24 deselected, 3 xfailed in 1726.49s (0:28:46)
+exit=1
