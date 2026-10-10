@@ -111,21 +111,36 @@ class Canvas:
         self._wire_tones.setdefault((x, y), tone)
 
     def edge(self, x0: int, y0: int, x1: int, y1: int, tone: str = "frame") -> None:
-        """Vertical drop from (x0,y0) to (x1,y1); x0 must equal x1."""
+        """Vertical drop from (x0,y0) to (x1,y1); x0 must equal x1.
+
+        The span is clipped to the canvas rectangle BEFORE iterating:
+        `wire` drops every out-of-bounds cell, so the clipped loop visits
+        exactly the cells the unclipped loop would have written -- at
+        O(painted) instead of O(span) iterations (batch 2026-10-10-perf-batch,
+        LLR-PERF.1.1).
+        """
         assert x0 == x1
-        for y in range(min(y0, y1), max(y0, y1) + 1):
+        lo, hi = max(0, min(y0, y1)), min(self.h - 1, max(y0, y1))
+        for y in range(lo, hi + 1):
             self.wire(x0, y, _U | _D, tone)
 
     def elbow_down(self, x0: int, y0: int, x1: int, ybus: int, tone: str = "frame") -> None:
-        """Parent exits down, across the bus row, child drops off the bus."""
+        """Parent exits down, across the bus row, child drops off the bus.
+
+        Both spans (the vertical drop and the horizontal bus row) are clipped
+        to the canvas rectangle before iterating; every skipped cell is one
+        `wire` would have dropped, so the painted cells stay byte-identical
+        (LLR-PERF.1.1).
+        """
         self.wire(x0, y0, _D, tone)
-        for y in range(y0 + 1, ybus):
+        for y in range(max(0, y0 + 1), min(ybus, self.h)):
             self.wire(x0, y, _U | _D, tone)
-        self.wire(x0, ybus, _U | (_R if x1 > x0 else _L), tone)
-        xa, xb = min(x0, x1), max(x0, x1)
-        for x in range(xa + 1, xb):
-            self.wire(x, ybus, _L | _R, tone)
-        self.wire(x1, ybus, _D | (_L if x1 > x0 else _R), tone)
+        if 0 <= ybus < self.h:
+            self.wire(x0, ybus, _U | (_R if x1 > x0 else _L), tone)
+            xa, xb = min(x0, x1), max(x0, x1)
+            for x in range(max(0, xa + 1), min(xb, self.w)):
+                self.wire(x, ybus, _L | _R, tone)
+            self.wire(x1, ybus, _D | (_L if x1 > x0 else _R), tone)
 
     def text(self, x: int, y: int, s: str, style: str = "") -> None:
         for j, ch in enumerate(s):
