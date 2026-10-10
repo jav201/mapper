@@ -15,7 +15,7 @@ from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.geometry import Region
 from textual.reactive import reactive
-from textual.screen import ModalScreen, Screen
+from textual.screen import Screen
 from textual.widgets import DataTable, Input, Label, Static
 from textual.worker import WorkerFailed
 
@@ -69,6 +69,7 @@ from .screens.common import (
     MapHintLine,
     screen_bindings,
 )
+from .screens.construct import ConstructScreen
 from .screens.prompt import (
     _ConfirmScreen,
     _FichaScreen,
@@ -76,7 +77,7 @@ from .screens.prompt import (
     _TemplateScreen,
 )
 from .search import SearchIndex
-from .store import TEMPLATES, MapStore, MapStoreError
+from .store import TEMPLATES, MapStore
 from .views.layered import (
     MAX_RENDER_NODES,
     overflow_phrase,
@@ -139,52 +140,6 @@ class NavigationModel:
     def first_child(self) -> str | None:
         ch = self.children()
         return ch[0] if ch else None
-
-
-# ---------------------------------------------------------------------------
-# Modal helpers
-# ---------------------------------------------------------------------------
-
-
-class ConstructScreen(ModalScreen[str | None]):
-    """Ask for a new map name and return it."""
-
-    BINDINGS = [("escape", "cancel", "cancel")]
-
-    def compose(self) -> ComposeResult:
-        yield Vertical(
-            Static("new map", id="construct-label"),
-            Input(placeholder="my-new-map", id="construct-input"),
-            Static("", id="construct-hints"),
-            id="construct-dialog",
-        )
-
-    def on_mount(self) -> None:
-        self.query_one("#construct-input", Input).focus()
-        hints = Text.assemble(
-            ("↵", darkside.INK),
-            (" create   ", darkside.MUT),
-            ("esc", darkside.INK),
-            (" cancel", darkside.MUT),
-        )
-        self.query_one("#construct-hints", Static).update(hints)
-
-    def action_cancel(self) -> None:
-        self.dismiss(None)
-
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        name = event.value.strip().replace(" ", "-")
-        if not name:
-            return
-        # `A-113`: refuse here too, so the dialog stays open and the name can be
-        # fixed; the store refuses again by itself (it is the boundary).
-        try:
-            self.app.store.check_new_map_id(name)  # type: ignore[attr-defined]
-        except MapStoreError as e:
-            if _refusal_toast(self, e):
-                return
-            raise
-        self.dismiss(name)
 
 
 # ---------------------------------------------------------------------------
