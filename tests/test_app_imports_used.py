@@ -44,6 +44,9 @@ ALLOWED_UNUSED: dict[str, dict[str, str]] = {
             "SEARCH_COUNT_SUBJECT", "SEARCH_SUSPENDED_NOTICE", "SearchIndex", "_ConfirmScreen",
             "_FichaScreen", "_QUERY_ECHO_CELLS", "_path_refusal", "map_hint", "pan_extent",
             "save_svg", "GitHubConnector", "NavigationModel", "RepoScreen",
+            # A4 moved their readers to `screens/**`; tests still import these from mapper.app.
+            "ConstructScreen", "PlugRepoScreen", "_ImportPreviewScreen", "_PromptScreen",
+            "_TemplateScreen", "keybar_groups",
         )
     },
     "mapper/screens/__init__.py": {
