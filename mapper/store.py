@@ -300,7 +300,7 @@ def _raw_origin(value: Any, coordinate: str) -> str:
     anchor across 200 duplicate document names produced 19.9 MB of warnings in
     0.081 SECONDS -- 348x amplification, and CHEAPER than the alias bomb it was
     written to stop, so nothing times out. `load_warnings` are not inert: they
-    are joined and coerced into an operator toast (`app.py:548`), so a megabyte
+    are joined and coerced into an operator toast (`MapScreen._notice_load_warnings`), so a megabyte
     of them is a per-character `translate` on the way to the screen.
 
     A megabyte `str` is the same materialisation defect wearing an allowed type.
