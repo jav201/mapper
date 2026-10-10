@@ -749,8 +749,9 @@ class MapStore:
             # WHAT THIS NET DOES, STATED HONESTLY.  An earlier version of this
             # comment said "every caller in the product catches `MapStoreError`".
             # That was FALSE: `grep -rn "except MapStoreError" mapper/` outside
-            # this file returns nothing, and both real `load` callers
-            # (`app.py:450`, `app.py:1179`) catch bare `Exception`.  So this net
+            # this file returns nothing, and the real `load` callers
+            # (`HomeScreen`'s `load_or_notice`, `MapScreen.on_mount`,
+            # `MapScreen._save_draft`'s reload) catch bare `Exception`.  So this net
             # does NOT prevent a crash at any existing call site -- it converts an
             # untyped escape into an operator-legible Spanish message.  That is a
             # real win and a much smaller claim than the one previously recorded

@@ -609,9 +609,16 @@ def test_inc9n_cr_f8_source_kind_is_public_and_the_badge_reads_it():
         assert github.source_kind(text) == github._classify(text), text
     with pytest.raises(GitHubError):
         github.source_kind("https://u:tok@h/o/r")
-    tree = ast.parse((REPO_ROOT / "app.py").read_text(encoding="utf-8"))
-    used = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
-            and n.value.id == "github"}
+    # `2026-10-09-modular-batch` (LLR-MOD.5.2): the badge reader moved out of `app.py`
+    # (A5b: `RepoScreen` -> `screens/repo.py`), so the scan covers every product module
+    # but `github.py` itself -- stronger than the one file it used to read.
+    used: set[str] = set()
+    for path in sorted(REPO_ROOT.rglob("*.py")):
+        if path.name == "github.py" and path.parent == REPO_ROOT:
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        used |= {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)
+                 and isinstance(n.value, ast.Name) and n.value.id == "github"}
     assert "source_kind" in used and "_classify" not in used, used
 
 
