@@ -54,7 +54,7 @@ interfaces stay frozen, PDR §4).
 | edge-mutation census | the exhaustive list of post-construction writers of `Graph.edges`: `mapper/model.py:170` (`add_edge`, append) and `mapper/screens/map/editing.py:217-219` (`_remove_subtree`, wholesale assignment) — and no other site |
 | paid render | a renderer `render` call that paints new canvas content; a settle pass whose region is already current is not paid (the `_rendered_for` guard skips it) |
 | counted-operations oracle | a deterministic test oracle that counts calls/iterations (e.g. `Canvas.wire` calls, `graph.edges` iterations, memo misses) — never wall-clock |
-| memo-miss spy | a counter on the layout-memo HIT CHECK inside module-level `_geometry` (`views/layered.py:306`) — `_tree_layout` itself runs ~10× per two renders (`evidence/perf0c-nav.transcript:44`), so the oracle counts misses at the named check point, never layout invocations |
+| memo-miss spy | a NAMED INSTANCE COUNTER on the owning `LayeredRenderer` (e.g. `_layout_misses`), incremented on each memo MISS at the hit check inside module-level `_geometry` (`views/layered.py:306`), which receives the instance's memo storage as an ARGUMENT — the memo lives on the renderer instance, never as module-global state (ruling R12); `_tree_layout` itself runs ~10× per two renders (`evidence/perf0c-nav.transcript:44`), so the oracle counts misses at the named check point, never layout invocations |
 | unscaled layout memo | the cached result of `_tree_layout` WITHOUT the `card_w`/`gap` scaling: slot cx and level per node; the scaling is re-applied per call (O(N)) |
 | wide-2000 / wide-6000 | the PERF0B harness shapes: 2000 / 6000 nodes, one parent each, root linked to every first-layer node (`.dev-flow/2026-10-10-perf-batch/spike/perf_harness.py`) |
 | parity goldens | the AT-065 byte-pinned painted-line captures at 118 and 87 columns (`tests/test_mod_parity.py`, goldens + sha256) |
@@ -151,7 +151,7 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 **US-PERF-001 — per-keypress render work**
 - **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
 - **Functionality (V, N):** user = mapper operator · outcome = a keypress repaints with ≥ 5× fewer `wire` calls and no re-layout on selection-only moves, painting byte-identically · why = PERF0C §7.1 measured the paint phase dominant (elbow_down 4.18 s of 6.18 s profiled per repaint) · out of scope = the S-18 budget, the DAG single-visit layout (⏸ DEFER), incremental/diff repaints (bigger contract change than the measured need).
-- **Feasibility (E, S):** implementation path = clip spans in `Canvas.elbow_down`/`edge`; memoise the UNSCALED `_tree_layout` on strong references (scaling re-applied per call), threaded through module-level `_geometry` · dependencies/unknowns = none — both are internal to frozen signatures · fits one batch? = yes.
+- **Feasibility (E, S):** implementation path = clip spans in `Canvas.elbow_down`/`edge`; memoise the UNSCALED `_tree_layout` on strong references (scaling re-applied per call), stored on the `LayeredRenderer` instance and passed into module-level `_geometry` as an argument (ruling R12) · dependencies/unknowns = none — both are internal to frozen signatures · fits one batch? = yes.
 - **Evaluability (T) — behavioral, black-box:** "When I press `l` then `j` on a 2000-node map, the map repaints and the screen shows the same picture as before the fix, but the app answers in a fraction of the time."
 - **Open questions:** none.
 - **Classification:** `READY` — counted-operations oracle + byte-equality golden carry the threshold.
@@ -202,12 +202,12 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 
 ### HLR-PERF.1 — a keypress repaints with ≥ 5× less render work, byte-identically
 - **Traceability:** US-PERF-001
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
 - **Statement:** When the operator presses a navigation key on a mounted map, the system shall repaint the canvas with at least 5× fewer `Canvas.wire` calls than the measured baseline for the same shape (23,983,998 calls for two keypresses on wide-2000), shall not recompute the unscaled layered tree layout when only the selection moved, and shall paint byte-identically to the pre-change renderer for every graph the loader admits.
 - **Rationale (informative):** PERF0C §7.1 measured the paint phase dominant (`elbow_down` walks every edge's bus row cell-by-cell; 4.18 s of 6.18 s profiled per repaint) and §7.1/§2 measured the layout recomputed on every repaint. Clipping skips exactly the out-of-bounds iterations `wire` would have dropped (premise 2); the memo skips the unscaled layout only when the strong-reference key is unchanged (premise 3 corrected — the key excludes every geometry input, so `card_w`/`gap` scaling re-applies per call).
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py::test_at_075_keypress_wire_budget tests/test_perf_paint_clip.py::test_wire_count_budget tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality tests/test_perf_paint_clip.py::test_render_grid_clip_identity tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden tests/test_perf_layout_memo.py::test_memo_miss_spy` (nodes created in Inc-R1/Inc-R2); gate: `tests/test_mod_parity.py` + `tests/test_repair_golden_census.py` stay green.
-- **Numeric pass threshold:** exit code 0; the two-keypress scripted sequence at wide-2000 (118×34) performs ≤ 1,200,000 `wire` calls (tightened from 4,800,000 — ≈ 1/20 of the measured 23,983,998 — so a one-axis-only clip, which re-walks the dominant bus-row spans, fails the cap); the memo-miss spy reads exactly 1 miss across five selection-only keypresses; 0 byte differences on the fixture grid and the parity goldens.
+- **Numeric pass threshold:** exit code 0; the two-keypress scripted sequence at wide-2000 (118×34) performs ≤ 1,200,000 `wire` calls (tightened from 4,800,000 — ≈ 1/20 of the measured 23,983,998 — so a Y-ONLY clip fails the cap: the x-axis carries the whole gain; a correct x-only clip is ≈ 0.5 M estimated and PASSES, round-2 probe p4 at wide-2000 one render: no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547 — the exact clipped count and geometry are measured and recorded at execution in `04-validation.md`, expected order thousands per render at 118×34); the memo-miss spy reads exactly 1 miss across five selection-only keypresses; 0 byte differences on the fixture grid and the parity goldens.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** pressing `l`/`j` on a 2000-node map repaints instantly-in-comparison and the picture is exactly the same; folding/unfolding, resizing and editing still repaint correctly.
@@ -220,8 +220,8 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 
 ### HLR-PERF.2 — save performs O(N+E) dump work, byte-identically
 - **Traceability:** US-PERF-002
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
-- **Statement:** When a map is saved, the system shall perform dump work proportional to N+E (one incident-membership pass replacing the per-node edge rescan), shall serve `Graph.children_of`/`parent_of` lookups from a cache invalidated on every edge mutation, and shall write `.mmd` text byte-identical to the pre-change dumper.
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
+- **Statement:** When a map is saved, the system shall perform dump work proportional to N+E (one LOCAL incident-membership pass — a single pass over the edges building the incident set inside the dump call, NOT the Lane M adjacency cache: a counting wrapper that swaps `edges` would send a cache variant cold and cost 3E — replacing the per-node edge rescan), shall serve `Graph.children_of`/`parent_of` lookups from a cache invalidated on every edge mutation, and shall write `.mmd` text byte-identical to the pre-change dumper. Bound: per `mermaid.dump` call ≤ 2·E + c; scaling ratio count(2N)/count(N) ∈ [1.8, 2.2].
 - **Rationale (informative):** PERF0C §7.3 measured the O(N·E) dump (18,003,001 genexpr iterations ≈ N²/2 and 6002 O(E) `any` scans at N=6000; `parent_of` 6000 × O(E) adding 0.49 s). The consumers of the O(E)-per-call lookups — the minimap (`painting.py:472,519`), navigation, search, editing, `import_csv`'s orphan pass (`import_csv.py:110`), `store._reindex` (`store.py:994`) — all ride the cache through unchanged signatures; the renderers keep their own per-render index (≤ 0.37 ms, PERF0 §1) and are pinned as unchanged by LLR-PERF.2.3.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_cache_mutation_script_equality tests/test_perf_adjacency.py::test_cache_counted_ops tests/test_perf_adjacency.py::test_edges_writer_census tests/test_perf_adjacency.py::test_census_in_place_forms tests/test_perf_dump.py::test_at_076_real_save_dump_budget tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio tests/test_perf_dump.py::test_dump_fixture_goldens` (nodes created in Inc-M1/Inc-M2); existing store/CSV suites re-run at the join.
@@ -229,7 +229,7 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** saving a large map is as fast as writing the bytes; the saved file opens and diffs identically to a pre-change save.
-  - **Shipped surface:** `MapScreen` edit-then-persist gesture (a ficha edit persisting via `_save_or_toast`, `screens/map/editing.py` → `MapStore.save` → `mermaid.dump`).
+  - **Shipped surface:** `MapScreen` edit-then-persist gesture — the `a` add_child action through real keys on a saved map (`screens/map/editing.py:111-124`, persisting via `_save_or_toast`; a ficha edit is a DRAFT and saves nothing — `drafts.py:138` deepcopy) → `MapStore.save` → `mermaid.dump` (imported at call time, `store.py:861`).
   - **Acceptance test(s):** AT-076
   - **Boundary catalog (QC-3):** ☑ empty — an empty graph dumps `graph TD\n` exactly as today; single node ☑ boundary — forest (≥ 2 parentless nodes; orphan emission order preserved), deep chain 5000, wide 6000, a multi-parent DAG built directly (dumped byte-identically; the store still refuses to save it per the csv-safety batch), a graph with a DANGLING edge (incident counting covers it) ☑ invalid — none applies ☑ error — none applies.
   - **Negative control:** M-M2a (restore the per-node `any()` scan) → AT-076 RED (iteration count); M-M1a (bypass the cache) → counted-ops node RED; M-M1b (drop the `is`-check — `len`-only key — + same-length wholesale replacement) → equality node RED (stale results); M-M2b (emission order change) → fixture bytes RED.
@@ -262,22 +262,22 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 
 ### LLR-PERF.1.1 — spans are clipped to the canvas rectangle before iterating
 - **Traceability:** HLR-PERF.1
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
 - **Statement:** The `Canvas.elbow_down` and `Canvas.edge` span loops (`mapper/canvas.py:113-128`) shall compute the intersection of each span with the canvas rectangle (`0 <= x < self.w`, `0 <= y < self.h`) before iterating, so no loop visits a cell `wire` would drop — every written cell stays exactly the set `wire` writes today, at O(painted) instead of O(span) iterations.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py::test_wire_count_budget tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality` (nodes created in Inc-R1). The unit oracle is bare-`Canvas` equality: the clipped methods write exactly the cells the pre-change loops wrote, the reference loops being copies kept INSIDE the test file — never a `Canvas` flag.
-- **Numeric pass threshold:** the two-keypress scripted sequence (`l`, `j`) on wide-2000 at 118×34 performs ≤ 1,200,000 `wire` calls total (≈ 1/20 of the measured baseline 23,983,998 — tightened from 4,800,000 so a one-axis-only clip, which re-walks the dominant bus-row spans, fails the cap; the exact clipped count is recorded at execution in `04-validation.md`); the clipped render's bytes equal the unclipped reference render on the full fixture grid and on every bare-`Canvas` shape — 0 differences.
+- **Numeric pass threshold:** the two-keypress scripted sequence (`l`, `j`) on wide-2000 at 118×34 performs ≤ 1,200,000 `wire` calls total (≈ 1/20 of the measured baseline 23,983,998 — tightened from 4,800,000 so a Y-ONLY clip fails the cap; the x-axis carries the whole gain — a correct x-only clip is ≈ 0.5 M estimated and PASSES: round-2 probe p4 at wide-2000, one render: no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547 — so the round-1 "one-axis-only clip fails" claim was half false; the exact clipped count and geometry are measured and recorded at execution in `04-validation.md`, expected order thousands per render at 118×34); the clipped render's bytes equal the unclipped reference render on the full fixture grid and on every bare-`Canvas` shape — 0 differences.
 - **Negative control:** M-R1a (remove the clip) → wire count back to ~24 M → RED. M-R1b (clip upper bound clamped to `min(xb, w-1)` — drops one in-bounds cell) → byte-grid and bare-`Canvas` equality RED.
 - **Boundary catalog:** ☑ empty — empty/single-node maps render identical text ☑ boundary — deep chain 5000 (spans exceed the canvas height), wide 6000 (bus rows exceed the width), forest, a multi-parent DAG built directly, spans starting/ending out of bounds on both sides, a panned ViewState and a folded subtree in the render grid; bare-`Canvas` shapes: `x1 < x0` (degenerate span), spans fully off-canvas, `ybus` above and below the canvas, negative pan origin ☑ error — none applies.
 
 ### LLR-PERF.1.2 — the UNSCALED `_tree_layout` is memoised on strong references
 - **Traceability:** HLR-PERF.1
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
-- **Statement:** `LayeredRenderer` shall cache the UNSCALED layout result of `_tree_layout` — the slot cx and level per node, with `card_w`/`gap` scaling NOT applied — keyed by strong references compared with `is`: the `Graph` object, its `edges` list (+ `len`), its `nodes` dict (+ `len`), `graph.root_id`, and the hidden (fold) set; a hit re-applies the `card_w`/`gap` scaling in O(N) per call. Because the key holds strong references, object-identity reuse (`id()` recycling after garbage collection) can never fake a hit. The memo lives in module-level `_geometry` (`mapper/views/layered.py:306`), so it threads through every render path unchanged.
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
+- **Statement:** `LayeredRenderer` shall cache the UNSCALED layout result of `_tree_layout` — the slot cx and level per node, with `card_w`/`gap` scaling NOT applied — in INSTANCE storage on the owning renderer (each `MapScreen` holds one `LayeredRenderer`, `mapper/screens/map/screen.py:73`; the import preview builds a fresh renderer per paint, `screens/import_preview.py:103`, so it simply misses — no cross-screen leakage), keyed by strong references compared with `is`: the `Graph` object, its `edges` list (+ `len`), its `nodes` dict (+ `len`), `graph.root_id`, and the hidden (fold) set; a hit re-applies the `card_w`/`gap` scaling in O(N) per call. The memo is PASSED INTO module-level `_geometry` (`mapper/views/layered.py:306`) as an argument — there is NO module-global memo state (a module global would leak and pin `Graph`s across screens). Because the key holds strong references, object-identity reuse (`id()` recycling after garbage collection) can never fake a hit. The memo key relies on the `nodes` dict, so Lane R carries its own AST census guard on `nodes` dict writers — declared set: `model.py` `add_node` (`model.py:165`), `screens/map/editing.py` wholesale (`editing.py:216`) — mirroring Lane M's `edges` guard so the lanes stay independent.
 - **Validation:** `test (unit)`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_memo_miss_spy tests/test_perf_layout_memo.py::test_memo_invalidation_arms` (nodes created in Inc-R2) — the spy counts memo MISSES at the named hit-check point inside `_geometry` (`_tree_layout` itself runs ~10× per two renders, `evidence/perf0c-nav.transcript:44`, so invocations are not countable). Arms, each a named product mutation: `resize` (window resize → 0 extra misses, repaint byte-identical), `title` (ficha title edit that widens `widest` → 0 extra misses, repaint byte-identical — scaling re-applies), `fold` (fold/unfold → +1 miss), `focus` (focus toggle → miss), `undo` (undo builds a NEW `Graph` → miss — the identity-reuse arm), `add_child` (a child added via real keys → +1 miss), `round_trip` (outline ↔ radial ↔ layered switch → byte-identical paint).
+- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_memo_miss_spy tests/test_perf_layout_memo.py::test_memo_invalidation_arms tests/test_perf_layout_memo.py::test_nodes_writer_census` (nodes created in Inc-R2) — the spy is the named instance counter `_layout_misses`, incremented on each memo MISS at the hit check inside `_geometry` (`_tree_layout` itself runs ~10× per two renders, `evidence/perf0c-nav.transcript:44`, so invocations are not countable). Arms, each a named product mutation: `resize` (window resize → 0 extra misses, repaint byte-identical), `title` (ficha title edit that widens `widest` → 0 extra misses, repaint byte-identical — scaling re-applies), `fold` (fold/unfold → +1 miss), `focus` (focus toggle → miss), `undo` (undo builds a NEW `Graph` → miss — the plain "new Graph object misses" check; the identity-reuse exercise is mutation M-R2d's dedicated node, not this arm), `add_child` (a child added via real keys → +1 miss), `round_trip` (outline ↔ radial ↔ layered switch → byte-identical paint).
 - **Numeric pass threshold:** five selection-only keypresses (`l,j,j,j,j`) on wide-2000 at 118×34 cost exactly 1 memo miss; the `fold` and `add_child` arms each add exactly 1; painted output after every arm byte-equals the pinned golden — 0 diffs.
-- **Negative control:** M-R2 (drop the memo) → 1 miss per keypress → RED. M-R2b (never invalidate — fixed key) → post-edit painted diff RED (stale layout).
+- **Negative control:** M-R2 (drop the memo) → 1 miss per keypress → RED. M-R2b (never invalidate — fixed key) → post-edit painted diff RED (stale layout). M-R2c (cache the SCALED layout — key drops `card_w`/`gap`) → the `resize` and `title` arms RED (a resize / widening-title repaint reuses stale geometry). M-R2d (key on `id(graph)` instead of the strong reference) → the dedicated address-reuse node RED (drop the old graph, `gc.collect()`, allocate a same-shape graph, assert a miss; if address reuse cannot be forced deterministically on this interpreter, the node documents that and keeps only the plain "new Graph misses" assertion). M-R2e (any new `nodes` dict writer site) → the Lane R nodes-writer census guard RED.
 - **Boundary catalog:** ☑ empty — a single-node map memoises trivially and repaints identically ☑ boundary — fold/unfold, resize, a title-only ficha edit that widens `widest` (0 misses, byte-identical repaint), focus toggle, undo (new `Graph`), add-child via real keys, an outline↔radial↔layered round trip, wide 6000, deep chain 5000 ☑ error — a graph swap always misses (a new `Graph` object is never `is` the cached one); a same-length wholesale `edges` replacement with no lookup in between still misses — identity, not length, carries validity.
 
 ### LLR-PERF.1.3 — paint stays byte-identical (the behaviour oracle)
@@ -292,19 +292,19 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 
 ### LLR-PERF.2.1 — `Graph` serves adjacency lookups from a strong-reference private cache
 - **Traceability:** HLR-PERF.2
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
 - **Statement:** `Graph.children_of` and `Graph.parent_of` (`mapper/model.py:172-179`) shall serve results from a private adjacency cache (`_`-prefixed fields, `compare=False, repr=False`) whose validity is a strong-reference check: a hit requires `self._adj_src is self.edges and len(self.edges) == n` — so `id()` recycling after garbage collection can never fake a hit. `children_of` returns a FRESH list per call (callers may bind and mutate it, `painting.py:519`). Semantics stay exactly today's: child ids in edge-list order; `parent_of` returns the FIRST matching parent or `None` — so every consumer (minimap, navigation, search, editing, coverage, factory, lane view, `import_csv`'s orphan pass, `store._reindex`) is faster through unchanged signatures.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py::test_cache_mutation_script_equality tests/test_perf_adjacency.py::test_cache_counted_ops` (nodes created in Inc-M1) — the mutation script builds wide-6000, warms the cache, then runs TWO wholesale `edges` replacements back to back with NO lookup in between (the old list is freed and its `id()` may be reused by the new list — identity, not `id`, must carry validity), plus `add_edge` and a `focus()` subgraph; cached results equal the linear-scan reference at every step, order- and first-match-exact; a caller that binds the returned list and mutates it gets fresh-list semantics.
 - **Numeric pass threshold:** 0 equality mismatches across the mutation script (incl. the two-replacement no-lookup stretch); total edge visits in the counted-ops arm ≤ `len(edges)` (baseline uncached: 100 × `len(edges)`).
 - **Negative control:** M-M1a (bypass the cache) → counted-ops RED. M-M1b (drop the `is`-check — `len`-only key — then a same-length wholesale replacement) → equality RED (stale). M-M1c (any new `edges` writer site) → the census guard RED.
 - **Boundary catalog:** ☑ empty — empty graph: lookups return `[]`/`None` exactly as today ☑ boundary — single node, deep chain 5000, wide 6000, forest, multi-parent DAG (a child of two parents returns the FIRST parent), lookups after each mutation class, a caller that binds the returned list and mutates it ☑ invalid — none applies ☑ error — none applies.
-  Plus the census guard: an AST-derived test over `mapper/` asserts the edge-mutation census — the set of post-construction writers of `.edges` ⊆ {`model.py` `add_edge` (append), `screens/map/editing.py` `_remove_subtree` (wholesale assignment)} — and flags every in-place form (`edges[i] =`, slice assignment, `del`, `+=`, `*=`, `.sort`, `.reverse`, `.clear`, `.extend`, `.insert`, `.remove`, `.pop`) plus aliases (`x = <expr>.edges` with `x` then mutated); the guard carries one mutation per form (`tests/test_perf_adjacency.py::test_census_in_place_forms[setitem|slice|del|iadd|imul|sort|reverse|clear|extend|insert|remove|pop|alias]`). M-M1c reddens it — this is the cache-invalidation tripwire named as the batch's main risk in the PDR §6.
+  Plus the census guard: an AST-derived test over `mapper/` asserts the edge-mutation census — the set of post-construction writers of `.edges` ⊆ {`model.py` `add_edge` (append), `screens/map/editing.py` `_remove_subtree` (wholesale assignment)} — and flags every in-place form (`edges[i] =`, slice assignment, `del`, `+=`, `*=`, `.sort`, `.reverse`, `.clear`, `.extend`, `.insert`, `.remove`, `.pop`) plus aliases (`x = <expr>.edges` with `x` then mutated); the alias form DOCUMENTS ITS LIMITS — aliasing through function arguments, containers, or attributes on other objects is NOT detected; the guard carries one mutation per form (`tests/test_perf_adjacency.py::test_census_in_place_forms[setitem|slice|del|iadd|imul|sort|reverse|clear|extend|insert|remove|pop|alias]`). M-M1c reddens it — this is the cache-invalidation tripwire named as the batch's main risk in the PDR §6.
 
 ### LLR-PERF.2.2 — `mermaid.dump` emits parentless nodes in one linear pass
 - **Traceability:** HLR-PERF.2
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
-- **Statement:** `mermaid.dump` (`mapper/mermaid.py:152-158`) shall determine orphan (parentless AND childless) nodes by membership in one incident-id set built in a single O(N+E) pass over EVERY edge — including dangling edges (an edge whose endpoint is missing from `nodes`, which `dump` skips when writing but whose incident ids still count) — replacing the per-node `any(e.parent_id == node.id or e.child_id == node.id for e in graph.edges)` rescan, while preserving emission order (node-dict iteration order), the `emitted` dedup set semantics, label escaping, and the trailing newline byte-for-byte.
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
+- **Statement:** `mermaid.dump` (`mapper/mermaid.py:152-158`) shall determine orphan (parentless AND childless) nodes by membership in one incident-id set built in a single O(N+E) LOCAL pass over EVERY edge — a pass local to the dump call that builds its own incident set, NOT the Lane M adjacency cache (a counting wrapper that swaps `edges` would send a cache variant cold and cost 3E — round-2 probe p3: the local pass costs exactly 2E, ratio 2.000 vs the 3.998 base) — including dangling edges (an edge whose endpoint is missing from `nodes`, which `dump` skips when writing but whose incident ids still count), replacing the per-node `any(e.parent_id == node.id or e.child_id == node.id for e in graph.edges)` rescan, while preserving emission order (node-dict iteration order), the `emitted` dedup set semantics, label escaping, and the trailing newline byte-for-byte. Bound: per dump call ≤ 2·E + c; scaling ratio count(2N)/count(N) ∈ [1.8, 2.2].
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio tests/test_perf_dump.py::test_dump_fixture_goldens` (nodes created in Inc-M2) — the counted-ops arm counts `graph.edges` iterations inside ONE `mermaid.dump` call on wide-N and wide-2N; the fixture arm pins `dump` bytes for `fixtures/legacy.mmd`, `fixtures/anidado.mmd`, `fixtures/truncado.mmd`, wide-6000, forest, empty and single-node graphs, and a graph with a dangling edge.
 - **Numeric pass threshold:** ONE `mermaid.dump` call on wide-6000 iterates `graph.edges` ≤ 2·E + c times (c a small constant; baseline: 18,003,001 genexpr visits + 6002 O(E) scans); the scaling ratio count(2N)/count(N) ∈ [1.8, 2.2] (linear — a correct fix doubles, never quadruples); 0 byte differences on every fixture golden.
@@ -313,10 +313,10 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 
 ### LLR-PERF.2.3 — the renderers keep their own adjacency build (A3 boundary pinned)
 - **Traceability:** HLR-PERF.2
-- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2
+- **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
 - **Statement:** No renderer shall consume the model cache this batch, and Lane M shall not move the cache's cost into `views`: `mapper/views/*.py` shall keep building their per-render `_child_index` (measured ≤ 0.37 ms/pass, PERF0 §1) and shall import NO new cache name from `mapper/model.py` — the model cache stays private to `model` (`_`-prefixed, absent from any module's public imports) — so Lane M's A3 surface is exactly the unchanged `children_of`/`parent_of` semantics and nothing else.
 - **Validation:** `inspection`
-- **Executed verification:** `git diff 5cde04e -- mapper/views` on the Lane M branch — empty (file-diff check, executed at the Inc-M1/Inc-M2 gates and the DDR); plus `grep -rn "_child_index" mapper/views/` (present, per-render).
+- **Executed verification:** `git diff 5cde04e -- mapper/views` on the Lane M branch BEFORE the join — empty (file-diff check, executed at the Inc-M1/Inc-M2 gates on the Lane M branch and recorded PER LANE at the DDR: the check is empty only on the Lane M branch, it is not a Lane R control — Lane R legitimately edits `mapper/views/layered.py`); plus `grep -rn "_child_index" mapper/views/` (present, per-render).
 - **Numeric pass threshold:** the Lane M branch changes zero bytes under `mapper/views/`; 0 new cross-module imports of cache names.
 - **Negative control:** M-M3 (any Lane M edit under `mapper/views/`, e.g. wiring a renderer to the model cache) → the file-diff check non-empty → RED (and the fork's disjointness/A3 ruling violated — returns the increment to the trunk).
 - **Boundary catalog:** none — an internal boundary pin; the reason no input class applies is that no behaviour changes.
@@ -416,20 +416,29 @@ fixture maps built by the test into a tmp workspace):
   open a generated wide-2000 tree map at 118×34; press `l` then `j`; a counting wrapper on `Canvas.wire`
   (counter RESET after mount so mount paints are not charged to the keypress budget) asserts
   ≤ 1,200,000 calls for the two keypresses (≥ 5× below — ≈ 1/20 of — the measured baseline 23,983,998;
-  tightened from 4,800,000 so a one-axis-only clip fails; the exact clipped count is recorded at
-  execution in `04-validation.md`); the settled painted lines equal the golden pinned at base SHA
+  tightened from 4,800,000 so a Y-ONLY clip fails — the x-axis carries the whole gain, a correct
+  x-only clip passes; round-2 probe p4 at wide-2000, one render: no clip 524,313 · x-only 6,547 ·
+  y-only 524,313 · x+y 6,547; the exact clipped count and geometry are recorded at execution in
+  `04-validation.md`); the settled painted lines equal the golden pinned at base SHA
   `5cde04e` with sha256 (the AT-065 precedent). Negative control M-R1a (clip removed) → RED; M-R1b → byte-golden RED.
 - **AT-075b** (US-PERF-001 / LLR-PERF.1.2): `tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden` —
-  same map; press `l,j,j,j,j`; the memo-miss spy at the named hit-check point inside `_geometry`
-  reads exactly 1 miss (`_tree_layout` itself runs ~10× per two renders, `evidence/perf0c-nav.transcript:44`,
+  same map; press `l,j,j,j,j`; the memo-miss spy — the named instance counter `_layout_misses` on the
+  `LayeredRenderer`, passed into `_geometry` with the instance's memo storage (ruling R12) — reads
+  exactly 1 miss (`_tree_layout` itself runs ~10× per two renders, `evidence/perf0c-nav.transcript:44`,
   so invocations are not countable); each repaint byte-equal the golden; then archive a subtree with
   real keys, press a key: exactly 1 more miss. Negative control M-R2 → RED; M-R2b → post-edit diff RED.
 - **AT-076** (US-PERF-002 / HLR-PERF.2, LLR-PERF.2.2): `tests/test_perf_dump.py::test_at_076_real_save_dump_budget` —
-  open a generated wide-6000 map and SAVE THROUGH A REAL PERSISTING GESTURE (a ficha edit that
-  persists via `_save_or_toast`, `screens/map/editing.py` — NOT bare `ctrl+s` with no draft, which
-  saves nothing, `drafts.py:131-132`); a counting wrapper on `graph.edges` bounds ONE
-  `mermaid.dump` call to ≤ 2·E + c iterations (the scaling ratio count(2N)/count(N) ∈ [1.8, 2.2] is
-  pinned by the unit node); the saved `.mmd` bytes equal the golden pinned at base SHA `5cde04e`.
+  open a SAVED generated wide-6000 map and ADD A CHILD THROUGH REAL KEYS — the `a` add_child action
+  (`screens/map/editing.py:111-124`), a real persisting gesture via `_save_or_toast` — NOT a ficha
+  edit (ficha edits are DRAFTS: `copy.deepcopy` of the base graph, `drafts.py:138`; the snapshot
+  `dump` is bound at import, `undo.py:10`) and NOT bare `ctrl+s` with no draft (`drafts.py:131-132`);
+  the other real persisting gestures (archive `editing.py:145-147`, attachments `:49-51, :76-77`) are
+  boundary fixtures, not the drive gesture; a counting wrapper wraps `mapper.mermaid.dump` itself
+  (the store imports it at call time, `store.py:861` — patching `mermaid.dump` after import still
+  intercepts the save) and bounds ONE call to ≤ 2·E + c `graph.edges` iterations (the scaling ratio
+  count(2N)/count(N) ∈ [1.8, 2.2] is pinned by the unit node); the saved `.mmd` bytes equal the
+  golden pinned at base SHA `5cde04e` — the golden is pinned to the map AFTER the add_child edit
+  (the saved form includes the new node).
   Negative control M-M2a → RED; M-M2b → fixture bytes RED. Wall-clock recorded at P4 as evidence
   (baseline save 6.2 s profiled / ~9.4–10.0 s wall at 12000), never asserted.
 - **AT-077** (US-PERF-003 / HLR-PERF.3, LLR-PERF.3.1): `tests/test_perf_mount.py::test_at_077_mount_render_once` —
@@ -446,11 +455,13 @@ fixture maps built by the test into a tmp workspace):
   numeral at the settled geometry (the B-56/B60 scenario). Negative control M-S2 → RED.
 
 ### 5.2 Batch acceptance criteria
-- 100% of LLRs (PERF.1.1 … PERF.3.2) covered by at least one executed test with pass result, each
-  with an executed negative control (M-R1a/b, M-R2/b, M-M1a/b/c, M-M2a/b, M-M3, M-S1/2/3) recorded
-  as a transcript.
-- AT-075, AT-075b, AT-076, AT-077, AT-077b pass through `MapperApp` + `run_test` with real keys;
-  every AT owns a node distinct from its LLR nodes.
+- 100% of the SURVIVING LLRs (PERF.1.1 … PERF.1.3, PERF.2.1 … PERF.2.3 — PERF.3.x was withdrawn
+  with Lane S to B-118, ledger `LED-2026-10-10-perf-batch.3`) covered by at least one executed test
+  with pass result, each with an executed negative control (M-R1a/b, M-R2/b/c/d/e, M-M1a/b/c,
+  M-M2a/b, M-M3 — NO M-S* controls; Lane S and its mutations left the batch with the withdrawal)
+  recorded as a transcript.
+- AT-075, AT-075b, AT-076 pass through `MapperApp` + `run_test` with real keys (AT-077/077b were
+  withdrawn with Lane S and are not owed); every AT owns a node distinct from its LLR nodes.
 - The behaviour oracle stays green untouched: `tests/test_mod_parity.py` (AT-065 goldens) and
   `tests/test_repair_golden_census.py` — byte-identical, not re-baselined.
 - No requirement without an assigned validation method; no wall-clock assertion in the suite; no
@@ -461,8 +472,8 @@ fixture maps built by the test into a tmp workspace):
   the cache is warm (`add_edge` and wholesale replacement), a title-only ficha edit, fold/unfold,
   87×34 and 60×20 reflow geometries, the 1-node error graph at mount — each named by a fixture in
   the four new test files.
-- Golden provenance: every new golden (AT-075, AT-075b, AT-076, AT-077/077b — painted lines,
-  canvas+strip, `.mmd` bytes) is captured on the BASE SHA `5cde04e` (pre-remedy) at the trunk BEFORE
+- Golden provenance: every new golden (AT-075, AT-075b, AT-076 — painted lines, `.mmd` bytes; the
+  AT-077/077b goldens left the batch with Lane S's withdrawal) is captured on the BASE SHA `5cde04e` (pre-remedy) at the trunk BEFORE
   the lanes fork, and recorded with base SHA + sha256 per golden (the AT-065 precedent); the wire
   counter resets after mount so mount paints are not charged to the keypress budget.
 - P4 evidence: wall-clock before/after for keypress, mount and save against the §6/§7 baselines —
@@ -483,12 +494,15 @@ fixture maps built by the test into a tmp workspace):
 | M-R1b | Clamp the clip upper bound to `min(xb, w-1)` — drops one in-bounds cell (the round-1 `<= self.w` form was an EQUIVALENT mutant, finding MED-A4) | byte-identity grid (LLR-PERF.1.3), `tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality`, AT-075 golden |
 | M-R2 | Drop the unscaled-layout memo | AT-075b (a memo miss per keypress) |
 | M-R2b | Never invalidate the layout cache (fixed key) | AT-075b post-edit arm + `test_memo_invalidation_arms[fold|add_child]` (stale layout diff) |
+| M-R2c | Cache the SCALED layout (key drops `card_w`/`gap`) | `test_memo_invalidation_arms[resize|title]` (stale geometry after a resize / a widening-title edit) |
+| M-R2d | Key the memo on `id(graph)` instead of the strong reference | the address-reuse node: drop the old graph, `gc.collect()`, allocate a same-shape graph, assert a miss — if address reuse cannot be forced deterministically on this interpreter, the node documents that and keeps only the plain "new Graph misses" check (ruling R13) |
+| M-R2e | Add any new `Graph.nodes` dict writer site — Lane R's own census guard on `nodes` writers (declared set: `model.py` `add_node`, `screens/map/editing.py` wholesale), mirroring M-M1c so the lanes stay independent | `tests/test_perf_layout_memo.py::test_nodes_writer_census` |
 | M-M1a | Bypass the adjacency cache in `children_of`/`parent_of` | `tests/test_perf_adjacency.py::test_cache_counted_ops` |
 | M-M1b | Drop the `is`-check (key on `len(edges)` only); wholesale-replace with a same-length list | `tests/test_perf_adjacency.py::test_cache_mutation_script_equality` (stale results) |
 | M-M1c | Add any new `Graph.edges` writer site, or one in-place form per guard row (`edges[i]=`, slice, `del`, `+=`, `*=`, `.sort`, `.reverse`, `.clear`, `.extend`, `.insert`, `.remove`, `.pop`, alias) | `tests/test_perf_adjacency.py::test_edges_writer_census` + `test_census_in_place_forms[...]` |
 | M-M2a | Restore the per-node `any()` orphan scan in `mermaid.dump` | AT-076 + `test_dump_counted_ops_scaling_ratio` (count RED, ratio ≈ 4) |
 | M-M2b | Reorder the orphan loop / touch dedup or escaping in `dump` | AT-076 / `tests/test_perf_dump.py::test_dump_fixture_goldens` byte-goldens |
-| M-M3 | Any Lane M edit under `mapper/views/` (e.g. wiring a renderer to the model cache) | LLR-PERF.2.3 file-diff check: `git diff 5cde04e -- mapper/views` non-empty (A3 — returns the increment to the trunk) |
+| M-M3 | Any Lane M edit under `mapper/views/` (e.g. wiring a renderer to the model cache) | LLR-PERF.2.3 file-diff check: `git diff 5cde04e -- mapper/views` non-empty (A3 — returns the increment to the trunk). The check runs on the Lane M branch BEFORE the join and the DDR records it PER LANE — it is not a Lane R control: Lane R legitimately edits `mapper/views/layered.py` (ruling R17) |
 | M-S1 | Restore the eager canvas render while the region is unassigned | AT-077 (render ncalls=2) |
 | M-S2 | Neuter the `_declare_after_layout` settle pass | AT-077b (absent numeral returns) |
 | M-S3 | Make the mount skip swallow chrome painting too | `tests/test_perf_mount.py::test_chrome_paints_at_mount` |
