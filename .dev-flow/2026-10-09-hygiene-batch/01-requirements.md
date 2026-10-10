@@ -125,7 +125,7 @@ The two existing nodes named as acceptance below stay green on master today. Thi
 
 ### HLR-001 — the draft-save path reads declared, public members
 - **Traceability:** US-001
-- **Ledger:** none
+- **Ledger:** LED-2026-10-09-hygiene-batch.1, LED-2026-10-09-hygiene-batch.4, LED-2026-10-09-hygiene-batch.5
 - **Statement:** When a draft save fails, or when the quit walk reaches a map screen, the system shall read the failure's error type and the screen's guard state through members that `MapScreen` declares, and shall keep the shipped failed-save toast and quit-walk behaviour unchanged.
 - **Rationale (informative):**
   - A `getattr` default hides a renamed attribute behind the word `error`.
@@ -143,7 +143,10 @@ The two existing nodes named as acceptance below stay green on master today. Thi
   - **Boundary catalog (QC-3):** ☐ empty ☑ boundary — a guard already open when the walk arrives (AT-061) ☐ invalid ☑ error — a save that raises (AT-060).
   - **Negative control:** executed at Phase 3.
     - AT-060 goes RED when `_save_draft` reads a fixed text instead of the recorded type: the toast then reads `(error)`.
-    - AT-061 goes RED when the walk ignores the open guard: a second guard stacks.
+    - AT-061 goes RED when the walk ignores the open guard. `_guard_draft` then returns without calling `proceed` or `on_hold`, so the walk never ends. The later `ctrl+q` returns early and opens no guard, so `_guards(app) == 1` fails with 0 at the second assertion.
+    - Two mutants are owed at Phase 3, each with its failing line recorded: (1) `action_quit` drops the open-guard check; (2) `guard_open()` returns a constant `False`.
+  - **Tagging:** an existing node becomes an acceptance test when its docstring names the AT id: `AT-060` in `test_draft_save.py`, `AT-061` in `test_draft_exits.py`, `AT-062` in `test_inc9h.py`. Those three test files are touched for the tag only; the fourth test file, `tests/test_draft_hygiene.py`, is new. Tests are not capped by the 4-source-file rule, and the one source file is `mapper/app.py` (LED-2026-10-09-hygiene-batch.5).
+  - **Regression set:** `tests/test_draft_save.py`, `tests/test_draft_exits.py`, `tests/test_inspector.py` and `tests/test_inc9h.py`. They run at the increment gate, before the full suite at P4.
 
 ### HLR-002 — the `INC9G-R8` debt is closed on an executed kill
 - **Traceability:** US-002
@@ -169,23 +172,32 @@ The two existing nodes named as acceptance below stay green on master today. Thi
 
 ### LLR-001.1 — `MapScreen` declares the failed-save error slot
 - **Traceability:** HLR-001
-- **Ledger:** none
-- **Statement:** `MapScreen.__init__` shall declare `_last_save_error: str | None`, and `MapScreen._save_draft` shall read it without `getattr`.
+- **Ledger:** LED-2026-10-09-hygiene-batch.2, LED-2026-10-09-hygiene-batch.3
+- **Statement:** `MapScreen.__init__` shall declare `_last_save_error: str | None = None`, and `MapScreen._save_draft` shall read it without `getattr`, falling back to `error` when it is `None`.
+- **Writers outside `MapScreen` (reverse census):**
+  - `_save_or_toast` (`app.py:299`) still writes the slot on whatever screen calls it. Two such callers exist: `screens/factory.py:219` (the factory screen) and `app.py:1167` (`_ImportPreviewScreen`, the CSV "save as").
+  - Nothing reads the slot on those screens, so the write stays as it is. A comment at `:299` says the slot is declared on `MapScreen` and is advisory elsewhere.
+  - **What would change this:** if a non-`MapScreen` screen ever reads the slot, the slot moves to a shared base, or the helper returns the error type.
 - **Validation:** `test (unit)`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py -k last_save_error`
+- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py -k last_save_error`, with two checks:
+  - (a) behaviour: a `MapScreen` opened through the app holds `_last_save_error is None` before any save;
+  - (b) AST: `MapScreen.__init__` holds an annotated assignment to `self._last_save_error`, and no `getattr(..., "_last_save_error", ...)` call remains in `mapper/`.
+  - A read through `vars()` or `__dict__` is not detected by (b). That limit is stated here, not claimed away.
 - **Numeric pass threshold:** exit code 0.
-- **Negative control:** RED on today's code, because `app.py:3565` reads the slot through `getattr`.
-- **Boundary catalog:** none — a structural property of the source, no input class.
+- **Negative control:** both checks are RED on today's code: there is no declaration, and `app.py:3565` reads the slot through `getattr`. Executed at Phase 3.
+- **Boundary catalog:** none — a property of the class and its source, no input class.
 
 ### LLR-001.2 — the quit walk reads the guard state through `MapScreen.guard_open()`
 - **Traceability:** HLR-001
-- **Ledger:** none
+- **Ledger:** LED-2026-10-09-hygiene-batch.3
 - **Statement:** `MapScreen` shall expose `guard_open() -> bool`, and no code outside `MapScreen` shall read `_draft_guard_open`.
 - **Validation:** `test (unit)`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py -k guard_open`
+- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py -k guard_open`, with two checks:
+  - (a) behaviour, through real keys: `guard_open()` is `False` before the guard opens, `True` while it is up, and `False` after it is answered;
+  - (b) AST over every module in `mapper/`: no attribute read of `_draft_guard_open` outside the `MapScreen` class body, and `MapperApp.action_quit` calls `guard_open`.
 - **Numeric pass threshold:** exit code 0.
-- **Negative control:** RED on today's code, because `MapperApp.action_quit` reads `screen._draft_guard_open` (`app.py:5217`).
-- **Boundary catalog:** none — a structural property of the source, no input class.
+- **Negative control:** RED on today's code: `guard_open` does not exist, and `MapperApp.action_quit` reads `screen._draft_guard_open` (`app.py:5217`). Executed at Phase 3.
+- **Boundary catalog:** none — a property of the class and its source, no input class.
 
 ### LLR-002.1 — the `HOME-1` mutant is killed on master
 - **Traceability:** HLR-002
@@ -239,8 +251,8 @@ SINK: MapperApp.action_quit's step decision
 
 ### 6.1 Extended glossary
 ### 6.2 Relevant design decisions
-- **F5 (the third B-103 LOW) — no change.** `_save_or_toast(toast=False)` suppresses `_refusal_toast`'s `MapIdError` text on a draft save. Reasons:
-  - **The case is rare.** A draft is saved only on an open map, and that map's id already passed the store's id rule when the map was created. A `MapIdError` there means someone renamed the file by hand to a name the store refuses.
+- **F5 (the third B-103 LOW) — no change** (LED-2026-10-09-hygiene-batch.4). `_save_or_toast(toast=False)` suppresses `_refusal_toast`'s `MapIdError` text on a draft save. Reasons:
+  - **The case is unreachable.** `store.load` and `store.save` run the same pure `check_map_id` on the same id (`mapper/store.py:681`, `:810`). A map whose id the rule refuses never opens, so it never holds a draft.
   - **The current toast is already honest and safe.** It still names the error type (`MapIdError`) and keeps the draft.
   - **Letting the refusal text through would add a second toast.** Preventing that is exactly why `toast=False` exists.
 
