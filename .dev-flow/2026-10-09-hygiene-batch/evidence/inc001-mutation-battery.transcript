@@ -1,0 +1,72 @@
+# Increment 001 (2026-10-09-hygiene-batch): mutation battery M1-M3 + RED counterfactual + GREEN, run 2026-10-09 by the orchestrator in an isolated worktree (harness hyg1_mutate.py in the session scratch, outside the repo; paths scrubbed).
+sha256 mapper\app.py (increment) before: 3ca2cbbe4f7dc1257da3fe0cd15e7febd7b256059e62fa3dc6cd62564febe815
+
+## M1 AT-060: the toast reads a fixed text, not the declared slot
+   target occurrences: 1
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_save.py::test_llr_004_2_a_save_failure_names_ctrl_s_to_retry   [M1 AT-060]
+    >           assert messages[-1] == f"could not save {map_id!r} (OSError) · draft kept · ctrl+s to retry", messages
+    E           AssertionError: ["could not save 'ds' (error) · draft kept · ctrl+s to retry"]
+    E           assert 'could not sa...rl+s to retry' == 'could not sa...rl+s to retry'
+    E
+    E             - could not save 'ds' (OSError) · draft kept · ctrl+s to retry
+    E             ?                      ^^^
+    E             + could not save 'ds' (error) · draft kept · ctrl+s to retry
+    E             ?                      ^
+    FAILED tests/test_draft_save.py::test_llr_004_2_a_save_failure_names_ctrl_s_to_retry
+    1 failed in 1.03s
+    exit=1
+   restored byte-identical: True
+
+## M2 AT-061: action_quit drops the open-guard check
+   target occurrences: 1
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge   [M2 AT-061]
+    >           assert _guards(app) == 1
+    E           AssertionError: assert 0 == 1
+    E            +  where 0 = _guards(MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}))
+    FAILED tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge
+    1 failed in 1.40s
+    exit=1
+   restored byte-identical: True
+
+## M3 AT-061: guard_open() returns a constant False
+   target occurrences: 1
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge tests/test_draft_hygiene.py::test_llr_001_2_guard_open_follows_the_guard   [M3 AT-061]
+    >           assert _guards(app) == 1
+    E           AssertionError: assert 0 == 1
+    E            +  where 0 = _guards(MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}))
+    >           assert screen.guard_open() is True
+    E           assert False is True
+    E            +  where False = guard_open()
+    E            +    where guard_open = MapScreen().guard_open
+    FAILED tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge
+    FAILED tests/test_draft_hygiene.py::test_llr_001_2_guard_open_follows_the_guard
+    2 failed in 2.34s
+    exit=1
+   restored byte-identical: True
+
+## RED counterfactual: app.py at the base (git show HEAD:mapper/app.py), the four hygiene tests
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py   [base]
+    >           assert screen.guard_open() is False
+    E           AttributeError: 'MapScreen' object has no attribute 'guard_open'
+    >           _Track().visit(source)
+    >           assert enclosing == ["MapScreen"], (path, node.lineno, enclosing)
+    E           AssertionError: (WindowsPath('<wt>/mapper/app.py'), 5217, ['MapperApp'])
+    E           assert ['MapperApp'] == ['MapScreen']
+    E
+    E             At index 0 diff: 'MapperApp' != 'MapScreen'
+    E             Use -v to get more diff
+    FAILED tests/test_draft_hygiene.py::test_llr_001_1_last_save_error_is_declared_none_before_any_save
+    FAILED tests/test_draft_hygiene.py::test_llr_001_1_last_save_error_is_declared_and_never_read_through_getattr
+    FAILED tests/test_draft_hygiene.py::test_llr_001_2_guard_open_follows_the_guard
+    FAILED tests/test_draft_hygiene.py::test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen
+    4 failed in 1.24s
+    exit=1
+   restored byte-identical: True
+
+## GREEN after restore
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py tests/test_draft_save.py::test_llr_004_2_a_save_failure_names_ctrl_s_to_retry tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge   [increment]
+    6 passed in 3.64s
+    exit=0
+
+sha256 mapper\app.py after: 3ca2cbbe4f7dc1257da3fe0cd15e7febd7b256059e62fa3dc6cd62564febe815
+SUMMARY: M1 AT-060 KILLED · M2 AT-061 KILLED · M3 AT-061 KILLED · RED base RED · GREEN exit=0

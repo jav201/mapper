@@ -1,0 +1,34 @@
+  ## Unit HYG1 report
+
+  **Files changed**
+  - `mapper/app.py` — 5 minimal edits:
+    1. Declared `self._last_save_error: str | None = None` in `MapScreen.__init__` (after `_draft_guard_open`, app.py:1628)
+    2. `_save_draft`: `getattr(self, "_last_save_error", "") or "error"` → `self._last_save_error or "error"` (app.py:3570)
+    3. Public `guard_open()` added right after `has_pending_draft` (app.py:3463)
+    4. `action_quit`: `if screen._draft_guard_open:` → `if screen.guard_open():` (app.py:5226)
+    5. One comment line above `screen._last_save_error = type(e).__name__` in `_save_or_toast` (app.py:299)
+  - `tests/test_draft_hygiene.py` — new, 4 tests.
+
+  **New test node ids**
+  - `tests/test_draft_hygiene.py::test_llr_001_1_last_save_error_is_declared_none_before_any_save`
+  - `tests/test_draft_hygiene.py::test_llr_001_1_last_save_error_is_declared_and_never_read_through_getattr`
+  - `tests/test_draft_hygiene.py::test_llr_001_2_guard_open_follows_the_guard`
+  - `tests/test_draft_hygiene.py::test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen`
+
+  **GREEN** (after restore): `4 passed in 1.77s`
+
+  **RED** (app.py reverted to `git show HEAD:mapper/app.py`): all four FAILED —
+  ```
+  FAILED ...test_llr_001_1_last_save_error_is_declared_none_before_any_save
+  FAILED ...test_llr_001_1_last_save_error_is_declared_and_never_read_through_getattr
+  FAILED ...test_llr_001_2_guard_open_follows_the_guard
+  FAILED ...test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen
+  4 failed in 1.07s
+  ```
+
+  **sha256 restore check**: changed copy `3ca2cbbe…be815` → reverted `3d45fe63…936d` → restored `3ca2cbbe…be815` (byte-identical).
+
+  **Regression set** (`test_draft_save.py test_draft_exits.py test_inspector.py test_g6_store_surrogates.py`): `3 failed, 137 passed`. All 3 failures are `test_c6_a_hidden_card_hands_the_draft_to_the_hint_line_in_alert[87|118|140]`, which fail identically on pristine HEAD (verified: `3 failed` with HEAD app.py) — pre-existing flakiness, not caused by this change.
+
+To resume this session: kimi -r session_8d05fb88-1a66-4eed-a575-1e421d2d67fb
+exit=0

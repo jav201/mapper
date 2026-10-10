@@ -1,10 +1,10 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-10-08-data-safety-batch",
-  "batch_objective": "Data safety and verification debt: B-36 (one keystroke durably overwrites a map and its sidecar, no confirmation, no explicit edit gesture) plus the unrealised acceptance tests B-100 / B-101 and the legend paint flake B-98.",
+  "batch_id": "2026-10-09-hygiene-batch",
+  "batch_objective": "Draft-save code hygiene (B-103: typed save-error slot, a public guard-open accessor, the F5 refusal-text ruling) and the INC9G-R8 record debt (B-99: re-verify the Inc-9h witness on master and close the item).",
   "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
-  "mode": "full",
+  "mode": "core",
   "mode_history": [
     {
       "batch_id": "2026-08-18-batch-01",
@@ -62,49 +62,43 @@
       "to": "full",
       "date": "2026-10-08",
       "reason": "operator at kickoff 2026-10-08: 'full (Recomendado)' -- B-36 touches persistence and UX"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "mode": "full",
+      "closed_at": "2026-10-09"
     }
   ],
   "guided": false,
-  "current_station": "P6",
-  "phase_status": "approved",
+  "current_station": "P5",
+  "phase_status": "closed",
   "stations_active": [
     "P0",
-    "ARQ",
     "P1",
     "P2",
-    "PDR",
     "P3",
-    "DDR",
     "P4",
-    "P5",
-    "P6"
+    "P5"
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 3,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
-    "P5": 0,
-    "P6": 0,
-    "ARQ": 0,
-    "DDR": 0,
-    "PDR": 0
+    "P5": 0
   },
   "triggers": {
-    "evaluated_at": "2026-10-08T13:10:44",
+    "evaluated_at": "2026-10-09T18:56:58",
     "fired": [
-      "A2",
-      "A3",
-      "B1",
-      "C6",
-      "D1",
-      "E1",
-      "E2"
+      "F1"
     ],
     "not_fired": [
       "A1",
+      "A2",
+      "A3",
       "A4",
+      "B1",
       "B2",
       "B3",
       "B4",
@@ -113,143 +107,96 @@
       "C3",
       "C4",
       "C5",
+      "C6",
       "C7",
       "C8",
-      "F1",
+      "D1",
+      "D2",
+      "E1",
+      "E2",
+      "E3",
       "F2"
     ],
-    "record": ".dev-flow/2026-10-08-data-safety-batch/PLAN.md#triggers"
+    "record": ".dev-flow/2026-10-09-hygiene-batch/PLAN.md#triggers"
   },
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-10-08-data-safety-batch/01-requirements.md",
-    "requirements_ledger": "repo:.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md",
-    "traceability": "repo:.dev-flow/2026-10-08-data-safety-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-10-09-hygiene-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-09-hygiene-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-09-hygiene-batch/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-10-08-data-safety-batch/03-increments/",
-    "evidence": "repo:.dev-flow/2026-10-08-data-safety-batch/evidence/",
+    "increments": "repo:.dev-flow/2026-10-09-hygiene-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-09-hygiene-batch/evidence/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "design_pdr": "vault:mapper/design/PDR-2026-10-08-data-safety-batch.md",
-    "design_ddr": "vault:mapper/design/DDR-2026-10-08-data-safety-batch.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-10-08-data-safety-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-10-08-data-safety-batch/README.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-09-hygiene-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-09-hygiene-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-09-hygiene-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "07dd930890012befa1c10215bf98cdc06bef70e4",
+  "base_ref": "903e0f0e46f6c7ef894f86b25dc14d2255c1728b",
   "artifacts": {
-    "plan": ".dev-flow/2026-10-08-data-safety-batch/PLAN.md",
-    "P1": ".dev-flow/2026-10-08-data-safety-batch/01-requirements.md",
-    "P1_ledger": ".dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md"
+    "plan": ".dev-flow/2026-10-09-hygiene-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-09-hygiene-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-09-hygiene-batch/01-requirements-ledger.md"
   },
   "decisions_log": [
     {
       "station": "P0",
-      "date": "2026-10-08",
-      "decision": "P0 approved (self-approved under the standing autonomous authorization): US-001 READY on operator verdict 'C' (VERDICT-b36-prototype-2026-10-08.md, rulings R1-R4), US-002/US-003/US-004 READY; triggers A2,A3,B1,C6,D1,E1,E2 fired"
-    },
-    {
-      "station": "ARQ",
-      "date": "2026-10-08",
-      "decision": "ARQ approved (self-approved under the standing authorization): approve-map, no boundary move, one interface change (FieldCommitted removed, A3), new mapper/screens/draft_guard.py, increments Inc-1..Inc-4 under the 4-file cap (02-arq-architect.md); orchestrator rulings R5-R7 on the architect's open points"
+      "date": "2026-10-09",
+      "decision": "P0 approved (self-approved under the standing authorization, operator words 'core + autónomo + merge (Recomendado)'): US-001 (B-103) and US-002 (B-99, reframed as executed re-verification) READY; F1 fired (external V7), 22 triggers not fired"
     },
     {
       "station": "P1",
-      "date": "2026-10-08",
-      "decision": "P1 approved (self-approved under the standing authorization): 4 US, 9 HLR, 25 LLR, AT-001..AT-009 batch-local; drafted by deepseek-v4-pro, qa-reviewer ACCEPT-WITH-FIXES (1 BLOCKER R4 missing, 4 MAJOR, 6 MINOR) all applied and re-verified by the orchestrator"
+      "date": "2026-10-09",
+      "decision": "P1 approved (self-approved under the standing authorization): 2 HLR, 3 LLR, AT-060/061/062 declared; scan-spec flag 'expose' answered in §6.3 as a false positive"
     },
     {
       "station": "P2",
-      "date": "2026-10-08",
-      "decision": "P2 iterate-to-refine: 4 blockers (ARCH-B1 draft only on blur, ARCH-B2/QA-B2 ATs name internals + no observation, QA-B1 US-002/003 rows), 10 majors incl. SEC-M1 failed-save divergence, SEC-M2 ESC through markup=False; dispositions in 02-review.md"
+      "date": "2026-10-09",
+      "decision": "P2 round 1: iterate-to-refine (self-ruled): qa-reviewer QA-1 major is a requirement defect (AT-061's negative control misdescribes how it goes RED); 0 blockers; architect 3 minors, qa 3 minors; all seven applied in P1 iteration 1"
     },
     {
       "station": "P1",
-      "date": "2026-10-08",
-      "decision": "P1 iteration 1 approved (self-approved): every P2 disposition applied by deepseek-v4-pro, spot-verified by the orchestrator (no internal symbols in the AT table, keymap and store citations correct), validator exit 0; 27 LLR, 15 batch-local AT"
+      "date": "2026-10-09",
+      "decision": "P1 iteration 1 approved (self-approved): QA-1..QA-4, QA-R, ARCH-1..ARCH-3 applied (LED .1-.4)"
     },
     {
       "station": "P2",
-      "date": "2026-10-08",
-      "decision": "P2 round 2 iterate-to-refine: 0 blockers, 6 majors (save-failure cases indistinguishable -> classify by disk hashes; first-replace failure -> case a; AT-010/015 counterfactuals; AT-013 unreachable -> Layer A; AT-015 orphan; US-004 exception); dispositions in 02-review.md Round 2"
-    },
-    {
-      "station": "P1",
-      "date": "2026-10-08",
-      "decision": "P1 iteration 2 approved (self-approved): round-2 dispositions applied by deepseek-v4-pro (first run hung 1 h with no output and was killed; rerun under a 40-min watchdog succeeded); failure-case table verified by the orchestrator; validator 0 block"
-    },
-    {
-      "station": "P2",
-      "date": "2026-10-08",
-      "decision": "P2 round 3 iterate-to-refine at the P1 soft cap (iteration 3); root cause: disk-hash failure classification unsound; operator ruling 'Simplificar y seguir (Recomendado)': one rule, reload from disk + keep draft re-diffed, reload failure restores in memory, no writes from failure handling"
-    },
-    {
-      "station": "P1",
-      "date": "2026-10-08",
-      "decision": "P1 iteration 3 approved (self-approved, at the soft cap per the operator's 'Simplificar y seguir'): one failed-save rule; applied by the orchestrator after two DeepSeek hangs; validator 0 block"
-    },
-    {
-      "station": "P2",
-      "date": "2026-10-08",
-      "decision": "P2 approved after 4 rounds + light verification (operator ruling 'Aplicar y verificar ligero'): 0 blockers; round-4 fixes CONFIRMED by one reviewer for all three lenses; residuals A-14/A-15 recorded; P1 iterations 3 (soft cap reached, operator ruled 'Simplificar y seguir')"
-    },
-    {
-      "station": "PDR",
-      "date": "2026-10-08",
-      "decision": "PDR approved with conditions C1-C14 (architect, qa-reviewer, ux-reviewer; 0 blockers); C4/C5 discharged at seal; operator ruled R8 (hint-line unsaved mark in ALERT red) — 'Marca en la línea de pista (Recomendado)' + 'Usa código de colores, como el rojo'; R9 guard title"
+      "date": "2026-10-09",
+      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; new minor A fixed (LED .5); 0 blocker, 0 major open"
     },
     {
       "station": "P3",
       "date": "2026-10-09",
-      "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (fc5141b); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
-    },
-    {
-      "station": "DDR",
-      "date": "2026-10-09",
-      "decision": "DDR approved with conditions D1-D5 (architect + qa-reviewer), all discharged 2026-10-09: C14 boundary arms, AT-025b joined node, TC-009.1, records aligned, operator smoke attributed (human:Javier); tests drafted by five Kimi units; external V7 (flow bundle SKILL.md vs manifest) recorded, not this project's"
+      "decision": "P3 increment 001 approved (self-approved under the standing authorization): 1 source file; RED 4/4 on base; M1-M3 and HOME-1 killed; code-reviewer APPROVE-WITH-NITS 0 HIGH, 3 LOW folded; regression set 187 passed / 0 failed"
     },
     {
       "station": "P4",
       "date": "2026-10-09",
-      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on cab8181 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
-    },
-    {
-      "station": "P5",
-      "date": "2026-10-09",
-      "decision": "P5 close with carry-over: post-mortem assembled from Kimi units; residuals B-102/B-103 to the backlog; B-36 shipped"
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-09",
-      "decision": "P6 approved (self-approved under the standing authorization): final PR-level qa-reviewer MERGE (0 HIGH; M1/M2 and L1-L4 applied); docs in 06-docs; merge to master by PR"
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-09",
-      "decision": "synced-to-obsidian",
-      "notes": "vault:mapper/dev-flow-batches/2026-10-08-data-safety-batch/ (17 artifacts + README index); PDR and DDR records to vault:mapper/design/"
+      "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2924 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT-WITH-FIXES, fixes applied (executor per row, LLR-001.2 selector LED .6); notes G-001 watch item, G-002 -> B-104"
     }
   ],
   "standing_authorization": {
     "autonomous": true,
     "merge": true,
-    "asked_on": "2026-10-08",
+    "asked_on": "2026-10-09",
     "operator_words": {
-      "autonomy_and_merge": "Autónomo + merge (Recomendado)",
-      "decision_recording": "Confirmado",
-      "scope": "B-36 + ATs + flake (Recomendado)",
-      "mode": "full (Recomendado)"
+      "scope": "B-103 + B-99 (Recomendado)",
+      "mode_and_authorization": "core + autónomo + merge (Recomendado)",
+      "decision_recording": "not asked as a separate question this batch; the recording obligation is unconditional (autonomy is never silent) and is honoured in PLAN.md, decisions_log and 05-close.md"
     },
-    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless. TUI design changes still need a prototype round with the operator's verdict before implementation (standing operator rule 2026-09-04)."
+    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless."
   },
   "previous_batch": {
-    "batch_id": "2026-08-26-ui-next-batch-02",
-    "merge_commit": "46e190b",
-    "close_pr": "https://github.com/jav201/mapper/pull/8",
-    "sync_pr": "https://github.com/jav201/mapper/pull/9",
-    "closed_at": "2026-10-08",
-    "close_commit": "bb8328f",
+    "batch_id": "2026-10-08-data-safety-batch",
+    "merge_commit": "2b6315d",
+    "close_pr": "https://github.com/jav201/mapper/pull/10",
+    "sync_pr": "https://github.com/jav201/mapper/pull/11",
+    "closed_at": "2026-10-09",
+    "close_commit": "2b6315d",
     "obsidian_synced": true,
-    "archive": ".dev-flow/2026-08-26-ui-next-batch-02/decisions-log.json + state-snapshot-at-close.json"
+    "archive": ".dev-flow/2026-10-08-data-safety-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
@@ -273,6 +220,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": true,
-  "created_at": "2026-10-08T00:00:00"
+  "obsidian_synced": false,
+  "created_at": "2026-10-09T00:00:00"
 }
