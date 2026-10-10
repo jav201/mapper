@@ -209,12 +209,14 @@ def test_inc9m_s1_expanduser_failing_is_a_refusal_not_an_exception(exc, monkeypa
 
 @red("one")
 def test_inc9m_s1_one_helper_is_imported_by_the_three_callers():
-    from mapper import app as app_mod
+    # `2026-10-09-modular-batch` A4: the third caller (the home screen's CSV-import path)
+    # moved from `app.py` to `screens/home.py` with `HomeScreen`.
     from mapper.screens import factory as factory_mod
+    from mapper.screens import home as home_mod
 
-    for mod in (github, app_mod, factory_mod):
+    for mod in (github, home_mod, factory_mod):
         assert getattr(mod, "safe_local_path", None) is osopen.safe_local_path, mod.__name__
-    for rel in ("github.py", "app.py", "screens/factory.py"):
+    for rel in ("github.py", "screens/home.py", "screens/factory.py"):
         tree = ast.parse((REPO_ROOT / rel).read_text(encoding="utf-8"))
         calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)
                  and isinstance(n.func, ast.Attribute) and n.func.attr == "expanduser"]

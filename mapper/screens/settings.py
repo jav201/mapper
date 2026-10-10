@@ -9,6 +9,7 @@ from textual.widgets import Static
 
 from mapper import darkside
 from mapper.keymap import SCOPE_SETTINGS, groups_for_keybar, textual_bindings
+from mapper.screens.common import keybar_groups
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 from mapper.widgets.components import (
     DsChip,
@@ -86,8 +87,6 @@ class SettingsScreen(Screen):
             yield _StateRow("pagination", lambda: DsPagination(2, 5))
             yield _StateRow("tag chip", lambda: DsChip(label="legacy"))
         yield HintLine("tab walks the components — focus is the solid block", "tab")
-        from mapper.app import keybar_groups
-
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:

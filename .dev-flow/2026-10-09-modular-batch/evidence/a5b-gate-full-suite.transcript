@@ -1,0 +1,101 @@
+# A5b gate, full suite, orchestrator, at bc2ff81. 2 failures, both code that pointed at moved code: test_inc9n read the repo badge from app.py by path; store.py comment cited app.py line numbers (already stale before this batch). Fixed in the next commit (package-wide scan; symbol citations); re-run of the two files: 219 passed.
+$ python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+.....................xxx................................................ [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 50%]
+........................................................................ [ 52%]
+..........................................................F............. [ 55%]
+........................................................................ [ 57%]
+........................................................................ [ 59%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+........................................................................ [ 71%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+..................F..................................................... [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 90%]
+........................................................................ [ 93%]
+........................................................................ [ 95%]
+........................................................................ [ 98%]
+........................................................                 [100%]
+================================== FAILURES ===================================
+________ test_inc9n_cr_f8_source_kind_is_public_and_the_badge_reads_it ________
+
+    @red("crf8")
+    def test_inc9n_cr_f8_source_kind_is_public_and_the_badge_reads_it():
+        for text in ("o/r", "https://h/o/r", "git@h:r"):
+            assert github.source_kind(text) == github._classify(text), text
+        with pytest.raises(GitHubError):
+            github.source_kind("https://u:tok@h/o/r")
+        tree = ast.parse((REPO_ROOT / "app.py").read_text(encoding="utf-8"))
+        used = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
+                and n.value.id == "github"}
+>       assert "source_kind" in used and "_classify" not in used, used
+E       AssertionError: set()
+E       assert ('source_kind' in set())
+
+tests\test_inc9n.py:615: AssertionError
+______________ test_every_path_line_citation_resolves[store.py] _______________
+
+artifact = WindowsPath('<home>/Github/mapper/mapper/store.py')
+
+    @pytest.mark.parametrize("artifact", _corpus(), ids=lambda p: p.name)
+    def test_every_path_line_citation_resolves(artifact):
+        """A `file.py:NNN` citation must name a real file with at least NNN lines."""
+        bad = []
+        for match in _CITATION.finditer(artifact.read_text(encoding="utf-8")):
+            cited = match.group(1)
+            last = int(match.group(3) or match.group(2))
+            target = _resolve(cited, artifact)
+            if target is None:
+                bad.append(f"{cited}: unresolvable or ambiguous")
+                continue
+            length = len(target.read_text(encoding="utf-8", errors="replace").splitlines())
+            if last > length:
+                bad.append(f"{cited}:{last} but {target.name} has {length} lines")
+>       assert not bad, f"{artifact.name} cites what disk does not have: {bad}"
+E       AssertionError: store.py cites what disk does not have: ['app.py:1179 but app.py has 936 lines']
+E       assert not ['app.py:1179 but app.py has 936 lines']
+
+tests\test_repair_artifact_claims.py:208: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_inc9n.py::test_inc9n_cr_f8_source_kind_is_public_and_the_badge_reads_it
+FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[store.py]
+2 failed, 3003 passed, 24 deselected, 3 xfailed in 1547.26s (0:25:47)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-419812' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-419812' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-420228' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-420228' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+exit=1

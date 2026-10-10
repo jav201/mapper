@@ -1,4 +1,4 @@
-"""Inc-EN-5 -- census arm over `app.py`, plus arms for the security-bearing toasts and the search constants.
+"""Inc-EN-5 -- census arm over the package's UI modules, plus arms for the security-bearing toasts and the search constants.
 
 Authority: `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING.
 Same method as `test_en2.py` .. `test_en4.py`: the arm reads the AST, skips docstrings and comments, and fails on any
@@ -14,7 +14,24 @@ import re
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-FILES = ("mapper/app.py",)
+
+
+def _census_files() -> list[str]:
+    """`mapper/app.py` plus every `mapper/screens/**` module, as package-relative posix paths.
+
+    LLR-MOD.5.1: the census follows the code when screens move out of `app.py` — a new
+    module under `mapper/screens/**` is scanned without a test edit, and a stale
+    `app.py` pin cannot silently stop scanning moved copy.
+    """
+    files = ["mapper/app.py"]
+    files += sorted(
+        str(path.relative_to(ROOT)).replace("\\", "/")
+        for path in (ROOT / "mapper" / "screens").rglob("*.py")
+    )
+    return files
+
+
+FILES = _census_files()
 
 ACCENTED = re.compile("[áéíóúñüÁÉÍÓÚÑÜ¿¡]")
 
@@ -43,8 +60,12 @@ reemplazara requerido resaltado restaurado salir selecciona primero supera tarda
 que su sus al lo
 """.split())
 
-#: Dict keys and ids are not copy; none today.
-ALLOW: frozenset[str] = frozenset()
+#: Dict keys and ids are not copy; neither is an on-disk file name. The scanner's
+#: whole-word regex splits `_nodos.yml` on the underscore, so the one sentence that
+#: names the file (`mapper/screens/factory.py`) is allowed verbatim.
+ALLOW: frozenset[str] = frozenset({
+    "document name cannot be a file name: rename it in the map's _nodos.yml (documents)",
+})
 
 
 def _fold(text: str) -> str:
@@ -84,6 +105,7 @@ def spanish_hits(source: str) -> list[tuple[int, str, str]]:
 
 @pytest.mark.parametrize("rel", FILES)
 def test_no_spanish_user_facing_string(rel):
+    """The census arm: no Spanish string literal in `app.py` or any `mapper/screens/**` module."""
     source = (ROOT / rel).read_text(encoding="utf-8")
     hits = spanish_hits(source)
     assert hits == [], f"{rel}: Spanish string literals: {hits}"

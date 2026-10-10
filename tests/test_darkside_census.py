@@ -11,7 +11,10 @@ blue literals from app.py:1864 to :1920 and the ACCENT definition from
 darkside.py:17 to :51 -- and a census that reddens when a line merely MOVES is a
 false-failure generator, which costs as much as one that passes wrong work.
 Keyed on the line's text, moving a site is silent, EDITING one forces it to be
-re-judged, and ADDING one reddens until someone classifies it.
+re-judged, and ADDING one reddens until someone classifies it.  Rows whose path
+is ANY_HOME carry no path at all: every one of them sat in app.py when judged,
+and the modularisation (LLR-MOD.5.1) moves them out of it, so `_mobile_homes()`
+derives the file from the tracked tree BY CONTENT and asserts exactly one home.
 
 Split of labour (the reason the method is honestly `test (unit)`): assigning a
 job to a site is a human judgement, made once by reading the line and written
@@ -170,16 +173,24 @@ def _assert_hue_set_is_exactly_the_declared_tokens(sources):
 # token's single declared job.  A site absent from both this set and the
 # exception register below is a FAILURE, not a skip.
 
+#: Sentinel register path for the rows the modularisation makes mobile
+#: (LLR-MOD.5.1): every one of them sat in app.py when judged, and the split
+#: moves them out of it, so the path is NOT pinned.  `_mobile_homes()`
+#: derives each row's file from the tracked tree BY CONTENT and asserts it
+#: resolves to EXACTLY ONE home -- a pin found in two files or in none
+#: reddens instead of silently re-classifying.
+ANY_HOME = "<resolved by content>"
+
 CONFORMING_SEVERITY = {
-    ("mapper/app.py", "number_style = darkside.INK if sin_acta == 0 and vencen == 0 else darkside.WARN"),
-    ("mapper/app.py", 'lines.append(f"▲ {vencen} due today", darkside.WARN)'),
-    ("mapper/app.py", '("no record ", darkside.WARN), (f"{sin} ", darkside.WARN),'),
-    ("mapper/app.py", 'darkside.microbar(sin, total, fill=darkside.WARN), ("    ", ""),'),
-    ("mapper/app.py", 'text.append(f"{marker} {stage}", darkside.PULSE if self.loading else darkside.INK)'),
-    ("mapper/app.py", 'return Text.assemble(("● ", darkside.ALERT), ("blocked", darkside.ALERT))'),
-    ("mapper/app.py", 'return Text.assemble(("● ", darkside.WARN), ("risk", darkside.WARN))'),
-    ("mapper/app.py", 'return ("░", darkside.WARN)'),
-    ("mapper/app.py", '("░", darkside.WARN), (" low ", darkside.MUT),'),
+    (ANY_HOME, "number_style = darkside.INK if sin_acta == 0 and vencen == 0 else darkside.WARN"),
+    (ANY_HOME, 'lines.append(f"▲ {vencen} due today", darkside.WARN)'),
+    (ANY_HOME, '("no record ", darkside.WARN), (f"{sin} ", darkside.WARN),'),
+    (ANY_HOME, 'darkside.microbar(sin, total, fill=darkside.WARN), ("    ", ""),'),
+    (ANY_HOME, 'text.append(f"{marker} {stage}", darkside.PULSE if self.loading else darkside.INK)'),
+    (ANY_HOME, 'return Text.assemble(("● ", darkside.ALERT), ("blocked", darkside.ALERT))'),
+    (ANY_HOME, 'return Text.assemble(("● ", darkside.WARN), ("risk", darkside.WARN))'),
+    (ANY_HOME, 'return ("░", darkside.WARN)'),
+    (ANY_HOME, '("░", darkside.WARN), (" low ", darkside.MUT),'),
     # `escape` -> `darkside.plain` at `Inc-REPAIR` S-E: `escape` guards Rich
     # markup and coerces nothing else, and both values at this site are
     # file-derived. The CLASSIFICATION is unchanged -- this is still the ALERT
@@ -228,15 +239,15 @@ CONFORMING_SEVERITY = {
     # operator ruled ALERT for it (R8, "rojo para alertar que hay contenido no
     # guardado") -- leaving now would lose it, so it is painted as the item that
     # cannot proceed as it stands.
-    ("mapper/app.py", "visual = darkside.Text.assemble((self.draft_prefix, darkside.ALERT), visual)"),
+    (ANY_HOME, "visual = darkside.Text.assemble((self.draft_prefix, darkside.ALERT), visual)"),
     ("mapper/widgets/rail.py", "darkside.ALERT,"),
     ("mapper/widgets/rail.py", 'parts.append((f"{missing:>3}", darkside.WARN))'),
 }
 
 CONFORMING_BLUE = {
-    ("mapper/app.py", "background: #1783ff;"),
-    ("mapper/app.py", "#map-inspector Input:focus { background: #1783ff; color: #000000; }"),
-    ("mapper/app.py", "#template-table > .datatable--cursor { background: #1783ff; color: #000000; }"),
+    (ANY_HOME, "background: #1783ff;"),
+    (ANY_HOME, "#map-inspector Input:focus { background: #1783ff; color: #000000; }"),
+    (ANY_HOME, "#template-table > .datatable--cursor { background: #1783ff; color: #000000; }"),
     ("mapper/darkside.py", 'ACCENT = "#1783ff"'),
     ("mapper/screens/coverage.py", "background: #1783ff;"),
     ("mapper/screens/factory.py", "background: #1783ff;"),
@@ -271,7 +282,7 @@ OPEN_EXCEPTIONS = {
         "max(1, ahead + behind), so it paints one ALERT block even when behind "
         "is 0. Registering the other two and not this one would leave the "
         "register with no oracle for the concept. Retones to WARN in Inc-5.",
-    ("mapper/app.py", "style=darkside.INK if doc else darkside.ALERT)"):
+    (ANY_HOME, "style=darkside.INK if doc else darkside.ALERT)"):
         "'sin acta' painted ALERT here and WARN at the dashboard hero row "
         "(app.py 'sin acta ', darkside.WARN). The same literal string and the "
         "same concept in two severity tokens, both previously CONFORMING. "
@@ -279,6 +290,66 @@ OPEN_EXCEPTIONS = {
         "an item that cannot proceed. Retones to WARN in Inc-7, which owns "
         "app.py for the sala.",
 }
+
+
+def _mobile_homes() -> dict[str, str]:
+    """Resolve every ANY_HOME register row to the one tracked source file
+    whose stripped lines carry the pinned text (LLR-MOD.5.1).
+
+    A pinned line that ALSO sits under a concrete register row -- the four
+    `background: #1783ff;` CSS sites share one stripped line across four
+    files -- is resolved against the homes no concrete row already claims,
+    so those shared-literal rows stay unambiguous.  Anything left with zero
+    or two-or-more unclaimed homes is a failure: the pin was dropped from
+    the tree, or duplicated into a second file.
+    """
+    sources = tracked_sources()
+    concrete: dict[str, set[str]] = {}
+    mobile: list[str] = []
+    for path, line in itertools.chain(CONFORMING_SEVERITY, CONFORMING_BLUE, OPEN_EXCEPTIONS):
+        if path == ANY_HOME:
+            mobile.append(line)
+        else:
+            concrete.setdefault(line, set()).add(path)
+
+    resolved: dict[str, str] = {}
+    for line in mobile:
+        homes = sorted(
+            path for path, blob in sources.items()
+            if line in {ln.strip() for ln in blob.splitlines()}
+        )
+        free = [path for path in homes if path not in concrete.get(line, set())]
+        assert free, f"register pin has no home in the tracked tree: {line!r}"
+        assert len(free) == 1, (
+            f"register pin resolves to {len(free)} homes {free}: {line!r} -- "
+            "duplicated into a second file or mis-filed"
+        )
+        resolved[line] = free[0]
+    return resolved
+
+
+def _is_registered(
+    path: str, line: str, register: set[tuple[str, str]], mobile: dict[str, str]
+) -> bool:
+    """A derived site is classified by its concrete row, by the shared
+    OPEN_EXCEPTIONS register, or by the content-resolved home of a mobile
+    (ANY_HOME) row."""
+    return (
+        (path, line) in register
+        or (path, line) in OPEN_EXCEPTIONS
+        or mobile.get(line) == path
+    )
+
+
+def test_llr_mod_5_1_each_mobile_pin_resolves_to_exactly_one_home():
+    """The 14 register rows keyed ANY_HOME -- every row that sat in app.py
+    when judged -- are located by content across the tracked tree, and each
+    must resolve to EXACTLY ONE home (LLR-MOD.5.1).  This is the arm that
+    reddens when a pinned line is duplicated into a second file or dropped,
+    which a literal `mapper/app.py` path pin could not see at all.
+    """
+    mobile = _mobile_homes()
+    assert len(mobile) == 14, f"expected the 14 content-resolved pins, got {len(mobile)}"
 
 
 # --------------------------------------------------------------------------
@@ -305,10 +376,10 @@ def test_hue_census_every_severity_and_busy_site_is_classified():
     # both judged and registered above.
     assert len(sites) == 40, f"derived {len(sites)} severity/busy lines, expected 40"
 
+    mobile = _mobile_homes()
     unclassified = [
         (path, line) for path, line, _ in sites
-        if (path, line) not in CONFORMING_SEVERITY
-        and (path, line) not in OPEN_EXCEPTIONS
+        if not _is_registered(path, line, CONFORMING_SEVERITY, mobile)
     ]
     assert unclassified == []
 
@@ -329,10 +400,10 @@ def test_hue_census_no_blue_LITERAL_ships_outside_an_interactive_site():
     # 8 -> 7 at Inc-9: `.factory-tag` retoned to MUT, closing `#D10`'s entry.
     assert len(sites) == 7, f"derived {len(sites)} blue literal lines, expected 7"
 
+    mobile = _mobile_homes()
     unclassified = [
         (path, line) for path, line, _ in sites
-        if (path, line) not in CONFORMING_BLUE
-        and (path, line) not in OPEN_EXCEPTIONS
+        if not _is_registered(path, line, CONFORMING_BLUE, mobile)
     ]
     assert unclassified == []
 
@@ -357,7 +428,10 @@ def test_llr_s06_3_5_no_site_classifies_as_both_jobs_and_none_as_neither():
 def test_llr_s06_3_2_every_registered_exception_still_exists():
     """A stale entry fails, so the register cannot silently license a third site."""
     sources = tracked_sources()
+    mobile = _mobile_homes()
     for (path, line), reason in OPEN_EXCEPTIONS.items():
+        if path == ANY_HOME:
+            path = mobile[line]
         assert path in sources, f"registered exception names a file that is gone: {path}"
         present = {ln.strip() for ln in sources[path].splitlines()}
         assert line in present, f"stale exception, no longer in {path}: {line}"

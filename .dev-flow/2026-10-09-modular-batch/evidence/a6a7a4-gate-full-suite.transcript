@@ -1,0 +1,92 @@
+# A6+A7+A4 gate (spine A complete), full suite, orchestrator, at 45007da. 2 failures, both pointing at moved code: test_inc9m named app.py as the third safe_local_path caller (now screens/home.py); a store.py comment cited app.py:548. Fixed in the next commit; re-run of the two files green.
+$ python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+...........................xxx.......................................... [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 30%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+.........................................F.............................. [ 50%]
+........................................................................ [ 52%]
+........................................................................ [ 54%]
+........................................................................ [ 57%]
+........................................................................ [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 64%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+........................................................................ [ 71%]
+........................................................................ [ 73%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+...........................F............................................ [ 80%]
+........................................................................ [ 83%]
+........................................................................ [ 85%]
+........................................................................ [ 88%]
+........................................................................ [ 90%]
+........................................................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 97%]
+.......................................................................  [100%]
+================================== FAILURES ===================================
+__________ test_inc9m_s1_one_helper_is_imported_by_the_three_callers __________
+
+    @red("one")
+    def test_inc9m_s1_one_helper_is_imported_by_the_three_callers():
+        from mapper import app as app_mod
+        from mapper.screens import factory as factory_mod
+    
+        for mod in (github, app_mod, factory_mod):
+>           assert getattr(mod, "safe_local_path", None) is osopen.safe_local_path, mod.__name__
+E           AssertionError: mapper.app
+E           assert None is <function safe_local_path at 0x000001EF97B87F60>
+E            +  where None = getattr(<module 'mapper.app' from 'C:\\Users\\<user>\\Github\\mapper\\mapper\\app.py'>, 'safe_local_path', None)
+E            +  and   <function safe_local_path at 0x000001EF97B87F60> = osopen.safe_local_path
+
+tests\test_inc9m.py:216: AssertionError
+______________ test_every_path_line_citation_resolves[store.py] _______________
+
+artifact = WindowsPath('<home>/Github/mapper/mapper/store.py')
+
+    @pytest.mark.parametrize("artifact", _corpus(), ids=lambda p: p.name)
+    def test_every_path_line_citation_resolves(artifact):
+        """A `file.py:NNN` citation must name a real file with at least NNN lines."""
+        bad = []
+        for match in _CITATION.finditer(artifact.read_text(encoding="utf-8")):
+            cited = match.group(1)
+            last = int(match.group(3) or match.group(2))
+            target = _resolve(cited, artifact)
+            if target is None:
+                bad.append(f"{cited}: unresolvable or ambiguous")
+                continue
+            length = len(target.read_text(encoding="utf-8", errors="replace").splitlines())
+            if last > length:
+                bad.append(f"{cited}:{last} but {target.name} has {length} lines")
+>       assert not bad, f"{artifact.name} cites what disk does not have: {bad}"
+E       AssertionError: store.py cites what disk does not have: ['app.py:548 but app.py has 307 lines']
+E       assert not ['app.py:548 but app.py has 307 lines']
+
+tests\test_repair_artifact_claims.py:208: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_inc9m.py::test_inc9m_s1_one_helper_is_imported_by_the_three_callers
+FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[store.py]
+2 failed, 3018 passed, 24 deselected, 3 xfailed in 1567.24s (0:26:07)
+exit=1

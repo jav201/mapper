@@ -1,0 +1,6 @@
+# A1 RED proof: test_inc9q's refusal_sentence patch put back on mapper.app (the pre-A1 target)
+E       AttributeError: <module 'mapper.app' from 'C:\\Users\\<user>\\AppData\\Local\\Temp\\ds-units\\wt-moda1\\mapper\\app.py'> has no attribute 'refusal_sentence'
+FAILED tests/test_inc9q.py::test_inc9q_cr_f1_the_attachment_paths_use_the_shared_mapping
+1 failed, 7 passed, 59 deselected in 7.06s
+restored; sha256 462111a2c2906532ea08b290731829a50770994245469767094e9f3b8fc7fd5f -> 462111a2c2906532ea08b290731829a50770994245469767094e9f3b8fc7fd5f equal=yes
+8 passed, 59 deselected in 7.18s

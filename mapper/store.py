@@ -300,7 +300,7 @@ def _raw_origin(value: Any, coordinate: str) -> str:
     anchor across 200 duplicate document names produced 19.9 MB of warnings in
     0.081 SECONDS -- 348x amplification, and CHEAPER than the alias bomb it was
     written to stop, so nothing times out. `load_warnings` are not inert: they
-    are joined and coerced into an operator toast (`app.py:548`), so a megabyte
+    are joined and coerced into an operator toast (`MapScreen._notice_load_warnings`), so a megabyte
     of them is a per-character `translate` on the way to the screen.
 
     A megabyte `str` is the same materialisation defect wearing an allowed type.
@@ -749,8 +749,9 @@ class MapStore:
             # WHAT THIS NET DOES, STATED HONESTLY.  An earlier version of this
             # comment said "every caller in the product catches `MapStoreError`".
             # That was FALSE: `grep -rn "except MapStoreError" mapper/` outside
-            # this file returns nothing, and both real `load` callers
-            # (`app.py:450`, `app.py:1179`) catch bare `Exception`.  So this net
+            # this file returns nothing, and the real `load` callers
+            # (`HomeScreen`'s `load_or_notice`, `MapScreen.on_mount`,
+            # `MapScreen._save_draft`'s reload) catch bare `Exception`.  So this net
             # does NOT prevent a crash at any existing call site -- it converts an
             # untyped escape into an operator-legible Spanish message.  That is a
             # real win and a much smaller claim than the one previously recorded

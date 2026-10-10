@@ -282,7 +282,7 @@ async def test_inc9n_f2_the_csv_prompt_with_a_device_name_returns_at_once_and_op
         calls.append(path)
         raise AssertionError("preview_csv was called for a device name")
 
-    monkeypatch.setattr("mapper.app.preview_csv", never)
+    monkeypatch.setattr("mapper.screens.home.preview_csv", never)
     app = MapperApp(tmp_path)
     async with app.run_test(size=size) as pilot:
         await pilot.pause()
@@ -400,9 +400,12 @@ async def test_inc9n_u1_pin_a_missing_accepted_path_keeps_naming_its_file(surfac
 
 @red("u1")
 def test_inc9n_u1_the_sentence_is_written_with_a_real_ellipsis_in_one_place():
-    from mapper import app as app_mod
+    # `2026-10-09-modular-batch` A4: the CSV door moved with `HomeScreen` to
+    # `screens/home.py`, which now binds the sentence it reads — checked there,
+    # not through the `mapper.app` re-export.
+    from mapper.screens import home as home_mod
 
-    assert getattr(app_mod, "PATH_NOT_SUPPORTED", None) == U1
+    assert home_mod.PATH_NOT_SUPPORTED == U1
     assert "\u2026" in U1 and "..." not in U1
 
 
@@ -609,9 +612,16 @@ def test_inc9n_cr_f8_source_kind_is_public_and_the_badge_reads_it():
         assert github.source_kind(text) == github._classify(text), text
     with pytest.raises(GitHubError):
         github.source_kind("https://u:tok@h/o/r")
-    tree = ast.parse((REPO_ROOT / "app.py").read_text(encoding="utf-8"))
-    used = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
-            and n.value.id == "github"}
+    # `2026-10-09-modular-batch` (LLR-MOD.5.2): the badge reader moved out of `app.py`
+    # (A5b: `RepoScreen` -> `screens/repo.py`), so the scan covers every product module
+    # but `github.py` itself -- stronger than the one file it used to read.
+    used: set[str] = set()
+    for path in sorted(REPO_ROOT.rglob("*.py")):
+        if path.name == "github.py" and path.parent == REPO_ROOT:
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        used |= {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)
+                 and isinstance(n.value, ast.Name) and n.value.id == "github"}
     assert "source_kind" in used and "_classify" not in used, used
 
 
