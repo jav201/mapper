@@ -90,7 +90,7 @@
     }
   ],
   "guided": false,
-  "current_station": "ARQ",
+  "current_station": "P2",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -173,6 +173,16 @@
       "station": "P0",
       "date": "2026-10-10",
       "decision": "P0 approved (self-approved under the standing authorization): measured first (spike/perf-baseline.md §1-§7, PERF0/0B/0C by Kimi): opening a wide 2000-node map 4.8 s, 6000+ times out; each navigation key repaints the whole map 0.6-1.9 s (renderer elbow_down/wire per cell); mount paints 3x; Mermaid dump O(N*E); load YAML-bound. Scope ruled: behaviour-preserving remedies first (AT-065 goldens byte-identical as the oracle), three parallel lanes; the S-18 work budget changes painted output and goes to a prototype round before any implementation. Triggers in PLAN.md#triggers."
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-10",
+      "decision": "ARQ drafted (Kimi): design/design-proposal.md — lanes R (canvas span clip + layout memo), M (Graph adjacency cache + linear dump), S (one paid render at mount), file sets disjoint (intersections executed), shared seams banned; to PDR with P2"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-10",
+      "decision": "P1 drafted (Kimi): US-PERF-001..003, HLR-PERF.1-3, LLR-PERF.1.1-3.2, AT-075/075b/076/077/077b; deterministic call-count oracles, wall-clock only as P4 evidence; to P2 review"
     }
   ],
   "standing_authorization": {
