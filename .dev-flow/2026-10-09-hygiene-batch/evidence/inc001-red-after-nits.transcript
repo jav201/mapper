@@ -1,0 +1,11 @@
+# Increment 001 after the code-review nits (CR-1..CR-3): RED counterfactual re-run, 2026-10-09, main checkout, by the orchestrator.
+$ git show HEAD:mapper/app.py > mapper/app.py   (base)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py
+FAILED tests/test_draft_hygiene.py::test_llr_001_1_last_save_error_is_declared_none_before_any_save
+FAILED tests/test_draft_hygiene.py::test_llr_001_1_last_save_error_is_declared_and_never_read_through_getattr
+FAILED tests/test_draft_hygiene.py::test_llr_001_2_guard_open_follows_the_guard
+FAILED tests/test_draft_hygiene.py::test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen
+4 failed in 1.27s
+restored mapper/app.py from a copy; sha256 before = after = 4b47adcf1c5d5629f8749dffb225d395e0193a09762f3c3712c135760cc89978 (equal: yes)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py
+4 passed in 1.90s

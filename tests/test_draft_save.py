@@ -742,7 +742,10 @@ async def test_llr_004_2_reload_raises_restores_the_pre_save_graph_without_a_wri
 
 
 async def test_llr_004_2_a_save_failure_names_ctrl_s_to_retry(tmp_path):
-    """LLR-004.2: a failed save that reloaded tells the operator the draft is
+    """AT-060 (`2026-10-09-hygiene-batch`, HLR-001): the toast reads the declared
+    error slot, so a fixed text would show `(error)` here.
+
+    LLR-004.2: a failed save that reloaded tells the operator the draft is
     kept and which key retries, after the store's own path-free toast."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=WIDE) as pilot:

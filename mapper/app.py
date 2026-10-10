@@ -296,6 +296,8 @@ def _save_or_toast(
         write = store.create if new else store.save
         write(map_id, graph)
     except Exception as e:  # noqa: BLE001 -- deliberately generic, see A-111.
+        # B-103: the slot is declared on MapScreen (read by its draft save); on
+        # other screens the write is advisory and unread.
         screen._last_save_error = type(e).__name__
         if toast:
             if _refusal_toast(screen, e):
@@ -1624,6 +1626,9 @@ class MapScreen(Screen):
         # US-001 (LLR-003.2): set while a draft guard this screen pushed is up,
         # so a second exit never stacks a second guard.
         self._draft_guard_open = False
+        # B-103: set by `_save_or_toast` when a save raises, read by `_save_draft`
+        # for the failed-save toast.
+        self._last_save_error: str | None = None
 
     def compose(self) -> ComposeResult:
         crumb_prefix = self.source_crumb or [self.map_id]
@@ -3459,6 +3464,13 @@ class MapScreen(Screen):
         """Whether this map holds a draft the operator has not saved or dropped."""
         return self.query_one("#map-inspector", FichaInspector).has_draft()
 
+    def guard_open(self) -> bool:
+        """Whether a draft guard this screen pushed is up.
+
+        B-103: the quit walk reads this, not the private flag.
+        """
+        return self._draft_guard_open
+
     def _guard_draft(self, proceed, *, on_hold=None) -> None:
         """The ONE decision point for leaving a draft (R-014, LLR-003.2).
 
@@ -3562,7 +3574,7 @@ class MapScreen(Screen):
         cursor = self.nav.cursor
         try:
             graph = self.store.load(self.map_id)
-            error = darkside.plain(getattr(self, "_last_save_error", "") or "error")
+            error = darkside.plain(self._last_save_error or "error")
             message = (
                 f"could not save {darkside.plain(self.map_id)!r} ({error}) · draft kept · "
                 f"{self._seat_glyph('save_draft')} to retry"
@@ -5214,7 +5226,7 @@ class MapperApp(App):
             # PDR C1: a guard already open on this screen (a cursor move asked
             # first) makes `_guard_draft` return without calling anything.  Ending
             # the walk here keeps the operator answering the open guard first.
-            if screen._draft_guard_open:
+            if screen.guard_open():
                 end_walk()
                 return
             screen._guard_draft(

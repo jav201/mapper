@@ -1,0 +1,21 @@
+# B-99 / LLR-002.1 / AT-062 — HOME-1 mutation on branch feat/hygiene-batch at 1579e1e (product code = master 903e0f0), run 2026-10-09 in an isolated worktree by the orchestrator.
+# Harness: b99_mutate.py (session scratch, outside the repo); paths scrubbed to <wt>/<home>.
+sha256 mapper\app.py before: 873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb
+line ending: b'\r\n'
+HOME-1 target line occurrences: 1
+applied HOME-1 (line removed); sha256 mutated: ca009f184e379682dc33590e2d082ff741a919e9e1422c61fdf38b89912a1bbc
+$ python -B -m pytest -q -p no:cacheprovider tests/test_inc9h.py::test_inc9h_cr_f2_the_home_hint_follows_the_maps_when_the_screen_resumes   [mutant HOME-1]
+    E           AssertionError: \u21b5 open map \xb7 or choose a door
+    E           assert ('\u21b5 open map' not in '\u21b5 open map ...hoose a door'
+    E             
+    E             '\u21b5 open map' is contained here:
+    E               \u21b5 open map \xb7 or choose a door
+    E             ? ++++++++++)
+    FAILED tests/test_inc9h.py::test_inc9h_cr_f2_the_home_hint_follows_the_maps_when_the_screen_resumes
+    1 failed in 0.96s
+    exit=1
+restored; sha256 after: 873832e9e5f4b2c4aed1bbcb2c3a0306543e9b5b1ea27e5323e3070cfbce90cb  equal=True
+$ python -B -m pytest -q -p no:cacheprovider tests/test_inc9h.py::test_inc9h_cr_f2_the_home_hint_follows_the_maps_when_the_screen_resumes   [restored]
+    1 passed in 1.04s
+    exit=0
+VERDICT: HOME-1 KILLED
