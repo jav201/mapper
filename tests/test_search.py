@@ -558,6 +558,12 @@ def _map_screen_methods(tree) -> dict:
     owners = [cls] + [classes[b.id] for b in cls.bases
                       if isinstance(b, ast.Name) and b.id in classes]
     fndef = (ast.FunctionDef, ast.AsyncFunctionDef)
+    names = [item.name for owner in owners for item in owner.body if isinstance(item, fndef)]
+    dupes = sorted({name for name in names if names.count(name) > 1})
+    assert not dupes, (
+        f"method name defined twice across MapScreen + its mixins: {dupes} -- "
+        "the dict would silently keep one definition and watch the other never "
+        f"(`2026-10-09-modular-batch` review CR-B2)")
     return {item.name: item for owner in owners for item in owner.body if isinstance(item, fndef)}
 
 
@@ -1476,6 +1482,13 @@ def _map_screen_self_reads() -> dict[str, set[str]]:
     cls = classes["MapScreen"]
     owners = [cls] + [classes[b.id] for b in cls.bases
                       if isinstance(b, ast.Name) and b.id in classes and b.id != "Screen"]
+    fndef = (ast.FunctionDef, ast.AsyncFunctionDef)
+    names = [item.name for owner in owners for item in owner.body if isinstance(item, fndef)]
+    dupes = sorted({name for name in names if names.count(name) > 1})
+    assert not dupes, (
+        f"method name defined twice across MapScreen + its mixins: {dupes} -- "
+        "the dict would silently keep one definition and watch the other never "
+        f"(`2026-10-09-modular-batch` review CR-B2)")
     return {
         item.name: {
             sub.attr
@@ -1488,6 +1501,43 @@ def _map_screen_self_reads() -> dict[str, set[str]]:
         for item in owner.body
         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
+
+
+def test_map_screen_methods_reject_a_duplicated_method_name():
+    """RED for the duplicate-name guard (CR-B2): a method defined on both MapScreen
+    and a mixin would silently shadow in the dict (one plane watched, the other
+    never); the helper must refuse to build it."""
+    import ast
+    import pytest
+
+    src = (
+        "class _Mixin:\n"
+        "    def _refresh(self):\n"
+        "        pass\n"
+        "class MapScreen(_Mixin):\n"
+        "    def _refresh(self):\n"
+        "        pass\n"
+    )
+    with pytest.raises(AssertionError, match="defined twice"):
+        _map_screen_methods(ast.parse(src))
+
+
+def test_map_screen_self_reads_reject_a_duplicated_method_name(monkeypatch):
+    """RED for the same guard on the `self`-reads plane: the dict would keep one
+    definition's reads and report them under a name the other definition owns."""
+    import pytest
+
+    src = (
+        "class _Mixin:\n"
+        "    def _refresh(self):\n"
+        "        return self.pan_x\n"
+        "class MapScreen(_Mixin):\n"
+        "    def _refresh(self):\n"
+        "        return self.pan_y\n"
+    )
+    monkeypatch.setattr("tests.test_search._app_source", lambda: src)
+    with pytest.raises(AssertionError, match="defined twice"):
+        _map_screen_self_reads()
 
 
 # Every reader of the resolution that is NOT itself inside a paint pass, with
