@@ -71,9 +71,10 @@ from mapper.screens.map.undo import UndoOps
 from mapper.screens.map.focus_mode import FocusModeOps
 from mapper.screens.map.editing import EditingOps
 from mapper.screens.map.drafts import DraftsOps
+from mapper.screens.map.navigation import NavOps
 
 
-class MapScreen(DraftsOps, EditingOps, FocusModeOps, UndoOps, OpeningOps, ExportingOps, HintsOps, Screen):
+class MapScreen(NavOps, DraftsOps, EditingOps, FocusModeOps, UndoOps, OpeningOps, ExportingOps, HintsOps, Screen):
     """A map rendered as a layered tree."""
 
     KEY_SCOPE = SCOPE_MAP
@@ -1183,12 +1184,6 @@ class MapScreen(DraftsOps, EditingOps, FocusModeOps, UndoOps, OpeningOps, Export
             pan_x + right - edge, extent_x + self.REVEAL_MARGIN_CELLS, visible_span
         )
 
-    def _current_crumb(self) -> list[str]:
-        prefix = self.source_crumb or [self.map_id]
-        if self.source_crumb:
-            prefix = prefix + [f"linked: {self.map_id}"]
-        return prefix
-
     def _branch_coverage_glyph(self, branch_root: str) -> tuple[str, str]:
         """Return (glyph, style) for a top-level branch's coverage minimap.
 
@@ -1943,38 +1938,7 @@ class MapScreen(DraftsOps, EditingOps, FocusModeOps, UndoOps, OpeningOps, Export
     # The inspector holds the draft; this screen, which owns the graph and the
     # store, is the only thing that writes it.  `widgets -> store` is banned.
 
-    def _repoint(self, target: str | None) -> None:
-        """Move the cursor to *target* once the guard answered (PDR C2)."""
-        if target not in self.graph.nodes:
-            target = self.graph.root_id
-        self.nav.cursor = target
-        self.refresh_canvas()
-
     UNDO_DEPTH = 20
-
-    def action_next_sibling(self) -> None:
-        nxt = self.nav.next_sibling()
-        if nxt:
-            self.nav.cursor = nxt
-            self.refresh_canvas()
-
-    def action_prev_sibling(self) -> None:
-        prv = self.nav.prev_sibling()
-        if prv:
-            self.nav.cursor = prv
-            self.refresh_canvas()
-
-    def action_child(self) -> None:
-        ch = self.nav.first_child()
-        if ch:
-            self.nav.cursor = ch
-            self.refresh_canvas()
-
-    def action_parent(self) -> None:
-        p = self.nav.parent()
-        if p:
-            self.nav.cursor = p
-            self.refresh_canvas()
 
     def action_open_ficha(self) -> None:
         node = self.graph.nodes.get(self.nav.cursor or "")
@@ -2569,44 +2533,6 @@ class MapScreen(DraftsOps, EditingOps, FocusModeOps, UndoOps, OpeningOps, Export
     #: unreadable by anybody, so the refusal costs a file nobody wanted.  `f`
     #: focuses a subtree, which is the route the refusal message names.
     EXPORT_MAX_CELLS = 350_000
-
-    def action_home(self) -> None:
-        self._guard_draft(self.app.pop_screen)
-
-    def action_back_or_home(self) -> None:
-        """`esc` clears a live search; with none live it leaves the map (`#D38`).
-
-        The hint line promises `esc limpiar` the moment a search is submitted,
-        and before this branch existed `escape` popped the screen
-        UNCONDITIONALLY -- so an operator who followed the hint left the map.
-        Painting a hint for behaviour nobody implemented is the defect `AT-052`
-        exists for, one surface over.
-
-        The seat's label stays `volver` and the branch lives here, which `#D10`
-        requires: a chord whose LABEL changes with state breaks the whole-seat
-        pin's static set equality, and the pin is what makes "help shows exactly
-        the keys that work here" checkable at all.
-
-        The two identical arms this replaced -- `if self.source_crumb: pop else:
-        pop` -- are gone.  A branch whose sides are the same statement reads as a
-        distinction the code does not make.
-
-        The guard is `_search_is_live`, shared with the hint line.
-
-        IT CLEARS IN EVERY REGIME (`LLR-N07.3.4`, `#D43`), which reverses what
-        `Inc-4b` shipped.  There the shared predicate read the RESOLUTION, so
-        above the renderer's bound this handler popped the screen on the first
-        press while it cleared below it -- one chord, two meanings, selected by
-        how big the map happened to be.  The count region declares the query at
-        every size now, so there is something to clear at every size, and the
-        chord means one thing.  A second `esc`, with no query live, still leaves.
-        """
-        if self._search_is_live():
-            self.query_text = ""
-            self.refresh_canvas()
-            self.query_one(HintLine).set_hint(map_hint())
-            return
-        self._guard_draft(self.app.pop_screen)
 
     def action_palette(self) -> None:
         self.app.action_palette()
