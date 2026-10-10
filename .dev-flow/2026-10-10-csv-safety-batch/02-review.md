@@ -11,7 +11,7 @@
 
 - **Gate:**
   - **Round 1** → `iterate-to-refine` → Phase 1 (5 blockers).
-  - Round 2 is owed after the P1 iteration-1 rulings below are applied and re-reviewed.
+  - **Round 2** → `approve-with-conditions` on both artifacts (architect + qa-reviewer) → PDR with conditions, after the round-2 rulings R11–R16 were applied in this unit (ledger `LED-2026-10-10-csv-safety-batch.5`…`.10`) and the PDR was sealed.
 - **Out-of-scope findings:** 2 named and routed below (B-115, B-116); plus the pre-existing
   O(N·E) orphan pass (`mapper/import_csv.py:101`) remains the design §6 watch-item already recorded — no new row.
 
@@ -139,3 +139,56 @@ A-110 (`tests/test_no_operator_paths.py`) must stay green at the P3 gate.
 - ✗ "no existing test breaks" unproven (QB3 — fixed by R10);
 - ✓ no PII / operator-path surface beyond the C8-guarded ids;
 - ✓ reachability of every refusal from a `Graph` argued (A4 corollary).
+
+---
+
+## Round 2
+
+Reviewer ids follow the orchestrator's transcription of the round-2 review
+(`CSV-review-r2.md`, held in the orchestrator's temp area, not committed): round-1
+architect requirements `A1`–`A6` continue as `A7`; round-1 proposal findings `B1`–`B4`
+continue as `B5`–`B6`; the qa-reviewer numbered its round-2 findings `1`–`7`. Both
+reviewers were read-only; the architect probed on a temp workspace
+(`scratchpad/probe/rt.py`, HEAD fbd9459). Round-1 items were confirmed resolved: A1
+(LLR-CSV.2.3), A2 (cycle reclassified, precedence), A3/A6 (B-115/B-116), A4 (R2),
+qa HIGH-1 (record-first preview), HIGH-2 (sha256 oracle incl. `mapper.db`/`*.tmp`),
+ATs via `_open_import`, `line_num` blank/CRLF fixtures, the `rows 2, 3 and 4` grammar.
+
+### Findings — round 2
+
+| ID | Reviewer | Severity | Area / Req | What | Recommendation / ruling | Status |
+|----|----------|----------|------------|------|------------------------|--------|
+| A7 (= B4) | architect | high | round-trip check, HLR-CSV.1 / proposal §2a, §4 (`design-proposal.md:121-129,174`) | The round trip compares the root; `parse` makes the root the first parentless node in text order and `dump` writes all edges first, edgeless parentless nodes after (`mapper/mermaid.py:135-158`), so any forest (≥2 parentless nodes) changes root on reparse. Probe: legacy `a` / `b --> c` loads today with root `a`; the proposed check reports `root a->b` and refuses EVERY save of such a map (all save paths: `editing.py:51,77,124,147`, `undo.py:64`, `drafts.py:141`, `factory.py:217`) with no in-app repair. Trees are safe (child-first declared tree round-trips; the root is determined by the edge set). | **R11:** compare the node-id set and the edge set ((parent, child) pairs) only — NOT the root; the drift is pre-existing → backlog **B-117**; add a regression requirement + test: a legacy forest loads, is edited (a child added) and saves (new LLR-CSV.1.3, `test_save_accepts_legacy_forest_after_edit`, mutation M4). | applied (ledger .5; BACKLOG B-117) |
+| B5 | architect | med | complexity, proposal §2a / LLR-CSV.1.1 | "O(N+E) plus one dump/parse" is wrong — `dump` is already O(N·E) (`mapper/mermaid.py:152-153`); nothing requires the check's `mmd_text` to be the text written (else `dump` runs twice per save). | **R12:** state the complexity honestly (`dump`'s parentless-node loop is O(N·E) — B-33 territory, not fixed here); require one `dump` per save — the check parses the exact text written; numeric threshold: the added parse costs ≤ 25 % of `MapStore.save` wall time for a 6 000-node wide tree, measured once at P4 (median of 3) as evidence — NOT a wall-clock suite assertion. | applied (ledger .6) |
+| B6 | architect | low | LLR-CSV.2.3 wording | The preview refuses "through `_save_or_toast`", but that helper toasts only when `store.save` RAISES — a record-keyed refusal raises nothing. | **R15 (merged with qa 3):** the refusal emits its own toast at the call site, at the `s` keypress, before the prompt; pinned text + severity. | applied (ledger .9) |
+| 1 | qa-reviewer | high | HLR-CSV.2 boundary vs LLR-CSV.2.2 / precedence | The root-collision expectation contradicts itself: HLR-CSV.2's boundary says the CYCLE sentence paints; LLR-CSV.2.2 and the precedence rule give the COLLISION sentence (the fixture's `csv_collisions` record is non-empty). | **R13:** fix the HLR-CSV.2 boundary text and the proposal §5 fixtures to agree — the preview paints the COLLISION sentence; the store-level refusal of that graph (it IS a cycle) remains a store unit case. | applied (ledger .7) |
+| 2 | qa-reviewer | med | HLR-CSV.1 / LLR-CSV.1.1 negative controls, AT-072 | AT-072's negative control cannot go RED as claimed: its CSV has a non-empty record, so LLR-CSV.2.3 refuses before the store; removing the store check (M1) leaves AT-072 green; the toast shows the exception type only, so AT-072 cannot tell which layer refused. | **R14:** AT-072 is the PREVIEW-layer acceptance; its negative control is removing the preview refusal (record-keyed, M2c). The STORE layer's controls are its unit nodes only (M1, M1b). Correct HLR-CSV.1 / LLR-CSV.1.1 so no text claims M1 reddens AT-072. | applied (ledger .8) |
+| 3 | qa-reviewer | med | LLR-CSV.2.3, `action_save` timing | WHEN `action_save` refuses is unpinned: at `s` (then `_open_import`'s typing into `#prompt-input` fails with `NoMatches`) or after the name (then the refusal must raise inside `_save_or_toast`, exception type named)? | **R15:** pin refusal AT the `s` keypress, BEFORE the save-as prompt (no name is asked for a save that cannot happen), by the same toast mechanism at the call site, no exception raised; pinned toast: severity `error`, text exactly `the CSV has colliding ids — nothing was saved; see the preview`; AT-072/072b/c/d drive `i`, path, `enter`, `s` through `_open_import`'s first steps and assert no prompt pushed + the toast + the workspace sha256 oracle unchanged; AT-074 still types the name. | applied (ledger .9) |
+| 4 | qa-reviewer | med | round trip vs loader breadth | The round trip is broader than the loader: `dump` skips edges whose endpoint is missing; `parse` takes the root from text order — graphs with unusual root/edge order that save today could be refused; no fallback stated. | **R11 (root excluded — the found instance) + a stated fallback recorded in §6.3 / proposal §6:** if the P3 full-suite gate finds a graph that saves on master today but the new check refuses, the batch returns to design with that fixture. | applied (ledger .5; fallback stated) |
+| 5 | qa-reviewer | med | perf budget | No numeric time/size threshold for the added parse; `dump`'s orphan loop is already O(N·E). | **R12:** the ≤ 25 %-of-`save`-wall-time threshold on a 6 000-node wide tree, measured once at P4 (median of 3) as evidence — not a suite assertion. | applied (ledger .6) |
+| 6 | qa-reviewer | low | `line_num` semantics | `str.splitlines()` also splits on `\x0b`, `\x0c`, `\x1c`–`\x1e`, `\x85`, `\u2028`, `\u2029`, so `line_num` can differ from editor line numbers. | **R16:** one-line caveat in LLR-CSV.2.1 (no fixture required). | applied (ledger .10) |
+| 7 | qa-reviewer | low | id hygiene | "A.6" and "M2" were each reused for two different things. | **R16:** a short glossary of mutation ids (M1, M1b, M2, M2b, M2c, M3, M4) in `01-requirements.md` §6.1; finding ids and ruling ids enumerated there; no id reused. | applied (ledger .10) |
+
+### Orchestrator rulings R11–R16 (round 2 → applied in this unit)
+
+| Ruling | Answers findings | Disposition |
+|--------|------------------|-------------|
+| R11 — the round trip compares the NODE-ID SET and the EDGE SET ((parent, child) pairs) only — NOT the root. `parse` takes the root from text order and `dump` writes edges before parentless nodes, so a forest's root drifts on reload (pre-existing). Regression requirement + test: a legacy forest (`a` / `b --> c`) loads, is edited (a child added) and saves (LLR-CSV.1.3, `test_save_accepts_legacy_forest_after_edit`, M4). Drift → backlog **B-117**. | A7/B4, qa 4 | applied (`LED-2026-10-10-csv-safety-batch.5`; B-117) |
+| R12 — the check parses the exact `.mmd` text `save` is about to write (one `dump` per save — the same string is written); complexity stated honestly: `dump` is already O(N·E) in its parentless-node loop (`mapper/mermaid.py:152-153`, B-33 territory, not fixed here). Numeric threshold: the added parse costs ≤ 25 % of `MapStore.save` wall time for a 6 000-node wide tree, measured once at P4 as evidence (median of 3) — NOT a wall-clock assertion in the suite. | B5, qa 5 | applied (`.6`) |
+| R13 — a root-row slug collision has a non-empty `csv_collisions`, so the COLLISION sentence wins (precedence collision > multi-parent > cycle). HLR-CSV.2 boundary text and proposal §5 fixtures fixed to agree; the store-level refusal of that graph (it is a cycle) remains a store unit case. | qa 1 | applied (`.7`) |
+| R14 — AT-072 is the PREVIEW-layer acceptance; its negative control is removing the preview refusal (record-keyed, M2c). The STORE layer's controls are its unit nodes only (M1, M1b). HLR-CSV.1 / LLR-CSV.1.1 wording corrected so no text claims M1 reddens AT-072. | qa 2 | applied (`.8`) |
+| R15 — `_ImportPreviewScreen.action_save` refuses at the `s` keypress, BEFORE pushing the save-as prompt (no name is asked for a save that cannot happen), by the same toast mechanism at the call site (no exception raised): severity `error`, text exactly `the CSV has colliding ids — nothing was saved; see the preview`. AT-072/072b/c/d drive `i`, path, `enter`, `s` through `_open_import`'s first steps, then assert: no prompt screen pushed, the toast text, the workspace sha256 oracle unchanged. AT-074 (valid CSV) still types the name. | qa 3, B6 | applied (`.9`) |
+| R16 — one-line caveat that `str.splitlines()` also splits on `\x0b` `\x0c` `\x1c`–`\x1e` `\x85` `\u2028` `\u2029`, so `line_num` counts those as line breaks (no fixture required); a short glossary of mutation ids (M1, M1b, M2, M2b, M2c, M3, M4) in §6.1; no id reused for two things. | qa 6, qa 7 | applied (`.10`) |
+
+### shall / should check (round 2)
+Clean: the round-2 amendments add no modal verb to any Statement beyond `shall`.
+
+### Security review summary (round 2)
+No new security-reviewer findings. Family C still fires on the same surfaces (C6 input, C8 painted ids); R15's pinned toast is fixed English copy routed through `darkside.plain` — it carries no operator path, account name or CSV-derived text, so guard A-110 is unaffected.
+
+### Verdict round 2
+Both reviewers returned **approve-with-conditions** on both artifacts (`01-requirements.md`
++ `design/design-proposal.md`). The orchestrator merged their conditions into rulings
+R11–R16; Kimi applied them to the contract, ledger, proposal and PLAN.md in this unit and
+the PDR was sealed `approved with conditions` — conditions: the R11–R16 document fixes,
+applied here and to be re-read at the DDR. Self-approved under the standing authorization.
