@@ -50,6 +50,10 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 **P0, RESUMED 2026-10-10** after `2026-10-10-csv-safety-batch` merged (PR #18 `6dfffde`, state PR #19 `5cde04e`); master merged into this branch, `base_ref` re-stamped to `5cde04e`, the csv-safety log archived. Earlier: **P0, PAUSED 2026-10-10.** The measurement is done (`spike/perf-baseline.md` §1–§7; `evidence/perf0*-*.transcript`). The P0 spike also found a data-safety defect outside this batch's scope (B-114: a CSV import saves a map that cannot be re-opened). The operator ruled 2026-10-10 to fix it first in a short separate batch, opened in its own worktree per §Batch rollover; this batch resumes at P0's gate after that batch merges (rebase onto master, archive its log).
 
+**P1, 2026-10-10.** The contract (`01-requirements.md`) and this PDR were authored (unit PERFARQ, ledger `LED-2026-10-10-perf-batch.1`).
+
+**P1 iteration 1, 2026-10-10.** Round-1 review of the contract + PDR (transcription `PERF-review-r1.md`) returned **ITERATE-to-refine**; rulings R1–R9 applied to `01-requirements.md`, the ledger, `02-review.md` and this PDR (ledger `LED-2026-10-10-perf-batch.2`). Key moves: the layout memo caches the UNSCALED layout on strong references (premise 3 was FALSE); the adjacency cache is a strong-reference `is` check with a widened AST census guard (one mutation per in-place form) and a fresh-list `children_of`; the dump oracle is per-dump ≤ 2E + c plus a scaling ratio [1.8, 2.2] with dangling edges covered; AT-076 drives a real persisting edit gesture through `_save_or_toast` (bare `ctrl+s` with no draft saves nothing); every verification names exact `file::test` node ids (no `-k` substrings); new goldens are pinned at base SHA `5cde04e` with sha256 each, and the wire counter resets after mount; the wire cap tightens to ≤ 1,200,000 (≈ 1/20 of the 23,983,998 baseline); M-M3 becomes the file-diff check `git diff 5cde04e -- mapper/views` empty; P4 wall-clock runs base/head interleaved on the same machine and session (median of 3, raw runs into `04-validation.md`). **Lane S is GATED on spike unit PERFS** — see Roadmap.
+
 ## Objective
 
 Bound and reduce the work a large map costs. Measured (P0): opening a wide 2000-node map takes 4.8 s and 6000+ times out; every navigation key repaints the whole map (0.6–1.9 s at 2000–6000 nodes); mount paints three times; save is O(N·E) in the Mermaid dump; load is YAML-bound. The dense-DAG cost of B-33 (72.5 s) is not reachable by opening a saved map (the parser refuses multi-parent nodes).
@@ -58,11 +62,41 @@ Bound and reduce the work a large map costs. Measured (P0): opening a wide 2000-
 
 | Story / station | Status | Notes |
 |---|---|---|
-| P0 | in progress | measurement done; resumed after the B-114 batch merged |
+| P0 | done | measurement done (`spike/perf-baseline.md` §1–§7); resumed after the B-114 batch merged |
+| P1 | in progress | contract + PDR authored (PERFARQ, ledger .1); round-1 review iterated — rulings R1–R9 applied (iteration 1, ledger .2); awaiting PDR re-review to fork lanes R/M (Lane S gated on spike PERFS) |
 
 ## Roadmap + increment plan
 
-To be planned at P1 from `spike/perf-baseline.md` §4 and §7 (candidates: incremental repaint per keypress; one paint at mount; linear Mermaid dump; then the render work budget S-18).
+Planned at P1 from `spike/perf-baseline.md` §4/§7; refined at P1 iteration 1 per round-1 rulings
+R1–R9 (ledger `LED-2026-10-10-perf-batch.2`). Three lanes fork after the PDR re-review; the trunk
+owns requirements/PDR/PLAN + the join (DDR). All verifications name exact `file::test` node ids.
+
+- **Lane R** (2 source files): Inc-R1 — `mapper/canvas.py` span clipping + `tests/test_perf_paint_clip.py`
+  (wire-count oracle with the tightened ≤ 1,200,000 cap, bare-`Canvas` equality vs in-test reference
+  copies of the old loops, byte-identity grid with a panned ViewState and a fold). Inc-R2 —
+  `mapper/views/layered.py` unscaled-layout memo (strong-reference key threaded through
+  module-level `_geometry`; `card_w`/`gap` scaling re-applied per call) +
+  `tests/test_perf_layout_memo.py` (memo-miss spy at the named hit-check point + seven named arms:
+  resize, title, fold, focus, undo, add_child, round_trip).
+- **Lane M** (2 source files): Inc-M1 — `mapper/model.py` strong-reference adjacency cache
+  (`children_of` returns a fresh list) + `tests/test_perf_adjacency.py` (mutation script with the
+  two-replacement no-lookup stretch, counted ops, widened AST census guard with one mutation per
+  in-place form, LOW-10 minimap/outline bytes). Inc-M2 — `mapper/mermaid.py` linear incident pass
+  (dangling edges covered) + `tests/test_perf_dump.py` (per-dump ≤ 2·E + c + scaling ratio
+  [1.8, 2.2], fixture goldens incl. dangling-edge, AT-076 through a real persisting edit gesture
+  via `_save_or_toast`).
+- **Lane S — GATED on spike unit PERFS** (runs in parallel with this unit): **if the spike passes**
+  (render ncalls = 1 at mount, every existing mount test green), Inc-S1 ships —
+  `mapper/screens/map/painting.py` + `screen.py` keep `refresh_canvas`'s declaration order, skip
+  only the canvas render while `canvas.size.width == 0`, route the first real render through the
+  guarded/reclamp path + `tests/test_perf_mount.py`; **if the spike fails, Lane S leaves the batch
+  to the backlog (B-118)** and HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn —
+  lanes R and M proceed regardless.
+- **Join (DDR):** full suite + AT-065 parity goldens + golden census byte-checks; every named
+  negative control executed as a transcript; golden provenance verified (base SHA `5cde04e` +
+  sha256 per golden, captured at the trunk before the fork); P4 wall-clock evidence (base and head
+  on the same machine and session, interleaved, median of 3, raw runs pasted into
+  `04-validation.md`).
 
 ## Key decisions
 
@@ -70,6 +104,10 @@ To be planned at P1 from `spike/perf-baseline.md` §4 and §7 (candidates: incre
 |---|---|---|
 | 2026-10-10 | pause at P0 for B-114 | operator ruling: data safety before performance |
 | 2026-10-10 | resume at P0, rebased on master `5cde04e` | the csv-safety batch merged; its `MapStore.save` round-trip check adds one `parse` per save (+3.2 % at 6 000 nodes) — the save-cost baseline in `spike/perf-baseline.md` §7 predates it |
+| 2026-10-10 | round-1 rulings R1–R9 applied at P1 iteration 1 (ledger .2) | reviewer findings: premise 3 false, AT-076 vacuous, unsound cache keys, an equivalent M-R1b mutant, a contradicted Lane S mechanism, selector ambiguity, golden provenance, loose P4 protocol |
+| 2026-10-10 | Lane S gated on spike PERFS; else B-118 | the round-1 mechanism was contradicted by the code (finding B4); the replacement (skip the canvas render only while `canvas.size.width == 0`) ships only with spike evidence, else the lane leaves the batch |
+| 2026-10-10 | wire cap tightened to ≤ 1,200,000 (from 4,800,000) | a one-axis-only clip passed the loose cap (qa baseline note); the tightened cap is ≈ 1/20 of the measured 23,983,998 baseline for two keypresses |
+| 2026-10-10 | cache validity = strong reference (`is` + `len`), never `id()` | `id()` can be recycled after free (findings B1/MED-4); soundness today is accidental (`_remove_subtree` calls `children_of` before reassigning) |
 
 ## Risks / watch-items
 

@@ -26,7 +26,7 @@
 | Field | Value |
 |---|---|
 | Id | `PDR-2026-10-10-perf-batch` |
-| Requirements covered | `US-PERF-001 · US-PERF-002 · US-PERF-003 · HLR-PERF.1 v1 · HLR-PERF.2 v1 · HLR-PERF.3 v1 · LLR-PERF.1.1 v1 · LLR-PERF.1.2 v1 · LLR-PERF.1.3 v1 · LLR-PERF.2.1 v1 · LLR-PERF.2.2 v1 · LLR-PERF.2.3 v1 · LLR-PERF.3.1 v1 · LLR-PERF.3.2 v1` |
+| Requirements covered | `US-PERF-001 · US-PERF-002 · US-PERF-003 · HLR-PERF.1 v2 · HLR-PERF.2 v2 · HLR-PERF.3 v2 · LLR-PERF.1.1 v2 · LLR-PERF.1.2 v2 · LLR-PERF.1.3 v2 · LLR-PERF.2.1 v2 · LLR-PERF.2.2 v2 · LLR-PERF.2.3 v2 · LLR-PERF.3.1 v2 · LLR-PERF.3.2 v2` (all bumped to v2 at P1 iteration 1 — round-1 rulings R1–R9, ledger `LED-2026-10-10-perf-batch.2`) |
 | Modules touched (from `docs/ARCHITECTURE.md`) | `canvas` · `views` · `model` · `mermaid` · `map screen` |
 | Triggers that fired | `A1 · A2 · A3 · A4 · B1 · B3 · E1 · F1` (per PLAN.md §Triggers; D1 explicitly NOT fired for this scope) |
 | Author / reviewers | `architect` (worker unit PERFARQ, Kimi) · `qa-reviewer` (pending, P2) |
@@ -52,14 +52,25 @@ cell-count oracles — **no wall-clock assertions in the suite** (flaky here, pe
 Three disjoint lanes (A4 — the first batch to use the modular split for parallel work), one join:
 
 - **Lane R — renderer work per paint** (`mapper/canvas.py`, `mapper/views/layered.py`): clip every
-  span to the canvas rectangle before iterating; memoise `_tree_layout` per graph revision so a
-  selection-only keypress does not re-layout.
+  span to the canvas rectangle before iterating; memoise the UNSCALED `_tree_layout` (slot cx, level
+  per node) on strong references (`graph`/`edges`/`nodes` identity + lengths, `root_id`, hidden fold
+  set) with `card_w`/`gap` scaling re-applied per call — so a selection-only keypress does not
+  re-layout, while resize and widest-title edits still repaint byte-identically.
 - **Lane M — model and serialisation** (`mapper/model.py`, `mapper/mermaid.py`): a cached adjacency on
-  `Graph` invalidated on edge mutation; a linear Mermaid dump. Consumers (`import_csv`'s orphan pass,
-  `store._reindex`) get the speedup for free through the unchanged `children_of`/`parent_of` signatures.
-- **Lane S — mount paint count** (`mapper/screens/map/painting.py`, `mapper/screens/map/screen.py`):
-  one paid render at mount; the `_declare_after_layout` settle pass is kept but its render becomes a
-  no-op by construction (strip declared before the canvas render, so the settled region is stable).
+  `Graph` invalidated by a strong-reference check (`self._adj_src is self.edges and len(self.edges) == n`;
+  `children_of` returns a fresh list per call); a linear Mermaid dump counting every edge (dangling
+  ones included). Consumers (`import_csv`'s orphan pass, `store._reindex`) get the speedup for free
+  through the unchanged `children_of`/`parent_of` signatures.
+- **Lane S — mount paint count** (`mapper/screens/map/painting.py`, `mapper/screens/map/screen.py`) —
+  **GATED on spike unit PERFS** (running in parallel): keep `refresh_canvas`'s declaration order
+  unchanged; skip only the canvas render while the canvas region is unassigned
+  (`canvas.size.width == 0`); route the first real render through the normal guarded/reclamp path;
+  the `_declare_after_layout` settle pass is kept and settles to a no-op when the region is stable.
+  The round-1 mechanism (strip-first declaration + `_declared_for is None` deferral) is WITHDRAWN —
+  contradicted by the code (round-1 finding B4). **Two-branch ruling: if the spike proves render
+  ncalls = 1 at mount with every existing mount test green, Inc-S1 ships as specified; if the spike
+  fails, Lane S leaves the batch to the backlog (B-118) and HLR-PERF.3 / LLR-PERF.3.1–3.2 /
+  AT-077 / AT-077b are withdrawn — lanes R and M proceed regardless.**
 
 What this design will NOT do (operator-ruled, PLAN.md):
 
@@ -80,10 +91,10 @@ not duplicate:
 | Module | What it owns here | What it exposes | What it must NOT reach into |
 |---|---|---|---|
 | `canvas` (`mapper/canvas.py` — Lane R) | `Canvas.elbow_down`'s span loops: clip to `self.w`/`self.h` before iterating; `wire`/`edge`/`elbow_down`/`put`/`text`/`rows` signatures unchanged (§4 row frozen) | Same public surface; out-of-bounds writes were already dropped, clipping only skips the loop iterations that would be dropped | Layout algorithms; diagram semantics (module's own ban); nothing outside `canvas.py` |
-| `views` (`mapper/views/layered.py` — Lane R) | `LayeredRenderer._tree_layout` memoised per revision token + hidden set, on the renderer instance; `render`/`painted_ids`/`pan_extent` signatures unchanged; `MAX_RENDER_NODES` value untouched | `IRenderer.render(graph, selected_id, w, h, **kwargs) -> Text` — the frozen contract, unchanged | `views` → textual / `store` / `app` bans respected; no Textual import; the per-render `_child_index` build stays (measured ≤ 0.37 ms — noise, PERF0 §1) |
-| `model` (`mapper/model.py` — Lane M) | A **private** cached adjacency on `Graph` (`_`-prefixed, `compare=False, repr=False` — the `csv_collisions` precedent), token-invalidated; `children_of`/`parent_of` return edge-list order / first-match exactly as today | `Graph` value object shape unchanged: `nodes`, `edges`, `root_id`, `csv_collisions`, `focus()` — the frozen §4 row gains one trunk-amended note; `__eq__`/`repr` unchanged | UI, persistence details (module's own bans); no new outbound dependency — the cache is plain dicts |
+| `views` (`mapper/views/layered.py` — Lane R) | The UNSCALED `_tree_layout` (slot cx, level per node) memoised on strong references (`is` on the `Graph`, its `edges` list (+len), its `nodes` dict (+len), `root_id`, the hidden fold set) threaded through module-level `_geometry` (`layered.py:306`); `card_w`/`gap` scaling re-applied per call (O(N)); `render`/`painted_ids`/`pan_extent` signatures unchanged; `MAX_RENDER_NODES` value untouched | `IRenderer.render(graph, selected_id, w, h, **kwargs) -> Text` — the frozen contract, unchanged | `views` → textual / `store` / `app` bans respected; no Textual import; the per-render `_child_index` build stays (measured ≤ 0.37 ms — noise, PERF0 §1) |
+| `model` (`mapper/model.py` — Lane M) | A **private** cached adjacency on `Graph` (`_`-prefixed, `compare=False, repr=False` — the `csv_collisions` precedent), valid only while `self._adj_src is self.edges and len(self.edges) == n` (strong reference — `id()` recycling can never fake a hit); `children_of` returns a **fresh list** per call; `children_of`/`parent_of` return edge-list order / first-match exactly as today | `Graph` value object shape unchanged: `nodes`, `edges`, `root_id`, `csv_collisions`, `focus()` — the frozen §4 row gains one trunk-amended note; `__eq__`/`repr` unchanged | UI, persistence details (module's own bans); no new outbound dependency — the cache is plain dicts |
 | `mermaid` (`mapper/mermaid.py` — Lane M) | `dump`'s orphan loop: one O(N+E) incident-membership pass instead of the per-node `any(...)` scan; emission order, dedup set and escaping byte-identical | `parse(src) -> Graph`, `dump(graph) -> str`, `slugify` — frozen, unchanged signatures | UI, network (module's own bans) |
-| `map screen` (`mapper/screens/map/screen.py`, `painting.py` — Lane S) | Mount paint sequencing only: the pre-layout canvas render is deferred to the settle pass, and the pagination strip's row budget is declared before `canvas.update` so the settled region is stable; `refresh_canvas`/`_declare_after_layout` names, signatures and F2 call surface unchanged; `BINDINGS` and every class constant untouched (F3) | `MapScreen` (package re-export), F5 surface unchanged | No `mapper.app` import, no concern-module imports (§3 `screens/map` row); no `BINDINGS`/`DEFAULT_CSS`/`@on` in any mixin |
+| `map screen` (`mapper/screens/map/screen.py`, `painting.py` — Lane S, GATED on spike PERFS) | Mount paint sequencing only: `refresh_canvas`'s declaration order untouched; only the canvas render is skipped while the region is unassigned (`canvas.size.width == 0`), chrome still painting; the first real render runs through the normal guarded path (`_reclamp_pan`, `_rendered_for`); `refresh_canvas`/`_declare_after_layout` names, signatures and F2 call surface unchanged; `BINDINGS` and every class constant untouched (F3) | `MapScreen` (package re-export), F5 surface unchanged | No `mapper.app` import, no concern-module imports (§3 `screens/map` row); no `BINDINGS`/`DEFAULT_CSS`/`@on` in any mixin |
 
 - Boundaries respected as declared in `docs/ARCHITECTURE.md`: ✓ — no §2/§3 boundary moves; the one
   §4 touch (`Graph` row gains a note that a private adjacency cache exists) is a **trunk** act done by
@@ -105,7 +116,7 @@ flowchart TD
         m2["mapper/mermaid.py<br/>linear dump"]
     end
     subgraph laneS ["Lane S — mount paint count"]
-        s1["mapper/screens/map/painting.py<br/>strip-first · guarded settle"]
+        s1["mapper/screens/map/painting.py<br/>region-width canvas skip · guarded settle"]
         s2["mapper/screens/map/screen.py<br/>on_mount defers canvas render"]
     end
     ddr["DDR join: full suite · AT-065 parity goldens<br/>golden census · P4 wall-clock evidence"]
@@ -125,9 +136,9 @@ flowchart LR
         b3["strip rows move the region<br/>→ re-armed pass<br/>render #3"]
         b1 --> b2 --> b3
     end
-    subgraph after ["AFTER — 1 paid render"]
-        a1["on_mount: refresh_canvas<br/>chrome painted · canvas render SKIPPED<br/>(_declared_for is None)"]
-        a2["_declare_after_layout pass<br/>strip rows declared FIRST<br/>→ region stable<br/>render #1 at real geometry"]
+    subgraph after ["AFTER — 1 paid render (GATED on spike PERFS)"]
+        a1["on_mount: refresh_canvas<br/>chrome painted · canvas render SKIPPED<br/>(region unassigned: canvas.size.width == 0)"]
+        a2["first real geometry: guarded render<br/>region assigned · _reclamp_pan runs<br/>render #1 at real geometry"]
         a3["re-armed settle pass<br/>region == _declared_for<br/>→ _rendered_for guard: NO render"]
         a1 --> a2 --> a3
     end
@@ -138,7 +149,7 @@ Adjacency-cache information flow (Lane M):
 ```text
 Graph.edges (plain list; the ONLY post-construction writers are
   model.py:170 add_edge (append) and screens/map/editing.py:217 (wholesale replace))
-        │  validity token = (id(self.edges), len(self.edges))
+        │  validity = strong reference: _adj_src is self.edges and len(self.edges) == n
         ▼
 Graph._children / Graph._parents (private dicts, built once per token)
         │  edge-list order preserved (children_of); first match preserved (parent_of)
@@ -154,10 +165,10 @@ consumers through UNCHANGED signatures: children_of / parent_of
 | Interface | Current | After | Consumers | **Frozen for the fork?** |
 |---|---|---|---|---|
 | `Canvas` drawing buffer (§4 row) | `wire` bounds-checks and drops out-of-bounds cells; `elbow_down`/`edge` iterate full spans | Identical signatures and written cells; spans clipped to the rectangle **before** iterating — the skipped cells are exactly the ones `wire` would have dropped | `views` (all renderers), `export` snapshots | **YES — untouched.** Clipping is internal to method bodies; §4 row needs no amendment |
-| `IRenderer.render` (§4 row, frozen prose contract) | `render(graph, selected_id, w, h, **kwargs) -> Text`; every render recomputes layout | Identical signature and output; `_tree_layout` memoised on the renderer **instance** keyed `(id(graph), len(edges), len(nodes), root_id, frozenset(hidden))` — renderers are per-screen instances (`screens/map/screen.py:73-75`), so no cross-screen state | `app`, `screens`, `export`, `tests` (patch target on `screens/import_preview.py`) | **YES — untouched.** Instance-private cache, no signature or module-global change |
-| `Graph` value object (§4 row) | `children_of`/`parent_of` linear-scan `self.edges` per call — O(E) | Identical signatures, order and first-match semantics; a private `_`-prefixed cache with `compare=False, repr=False`, token `(id(edges), len(edges))` | `store`, `views`, `mermaid`, `github`, `app`, the whole `screens` tree | **YES — shape frozen; ONE trunk amendment at the join** notes the private cache field (same precedent as `csv_collisions`). No lane edits the §4 row |
-| `MermaidImporter/Exporter` (§4 row) | `dump`'s orphan loop is O(N·E): `any(...)` rescans all edges per node (`mermaid.py:152-153`) | Identical emitted text; orphan membership read from one O(N+E) incident set (the LLR-PERF.2.1 cache or a local pass) | `app`, `store` (round-trip check), `tests` | **YES — signatures and bytes frozen** |
-| F1 state roster | 30 attributes incl. `_rendered_for`, `_declared_for` | Unchanged — Lane S uses `_declared_for is None` as the never-declared signal; **no new attribute** | 11 mixins | **YES — no census amendment needed** |
+| `IRenderer.render` (§4 row, frozen prose contract) | `render(graph, selected_id, w, h, **kwargs) -> Text`; every render recomputes layout | Identical signature and output; the UNSCALED `_tree_layout` memoised keyed by **strong references** (`graph is`, `edges is` + len, `nodes is` + len, `root_id`, hidden fold set), threaded through module-level `_geometry`; `card_w`/`gap` scaling re-applied per call (O(N)) — resize and widest-title edits repaint byte-identically with zero extra misses | `app`, `screens`, `export`, `tests` (patch target on `screens/import_preview.py`) | **YES — untouched.** Instance-private cache, no signature or module-global change |
+| `Graph` value object (§4 row) | `children_of`/`parent_of` linear-scan `self.edges` per call — O(E) | Identical signatures, order and first-match semantics; a private `_`-prefixed cache with `compare=False, repr=False`, valid iff `self._adj_src is self.edges and len(self.edges) == n`; `children_of` returns a **fresh list** per call | `store`, `views`, `mermaid`, `github`, `app`, the whole `screens` tree | **YES — shape frozen; ONE trunk amendment at the join** notes the private cache field (same precedent as `csv_collisions`). No lane edits the §4 row |
+| `MermaidImporter/Exporter` (§4 row) | `dump`'s orphan loop is O(N·E): `any(...)` rescans all edges per node (`mermaid.py:152-153`) | Identical emitted text; orphan membership read from one O(N+E) incident set built over EVERY edge — dangling edges included | `app`, `store` (round-trip check), `tests` | **YES — signatures and bytes frozen** |
+| F1 state roster | 30 attributes incl. `_rendered_for`, `_declared_for` | Unchanged — Lane S reads the canvas region (`canvas.size.width == 0`) as the unassigned signal; **no new attribute** | 11 mixins | **YES — no census amendment needed** |
 | F2 cross-concern method surface | `refresh_canvas`, `_declare_after_layout`, `_canvas_size`, … names+signatures | Unchanged; Lane S edits **bodies only** (`on_mount`, `refresh_canvas`'s internal order) | mixins, `app` | **YES — names/signatures untouched** |
 | F3 core class surface | `BINDINGS` + all class constants on `screens/map/screen.py` | Untouched — Lane S edits `on_mount`'s body only | mixins (read-only), `app` | **YES** |
 | F4 patch surface | `MAX_RENDER_NODES` read from `screens/map/searching.py`, bound at `views/layered.py:18`; `LayeredRenderer` patched on `screens/import_preview.py` | Untouched — Lane R keeps the constant, the guards and the module-global binding exactly where they are | `tests` patch sites | **YES — the constant's VALUE is S-18 territory, out of scope** |
@@ -173,16 +184,23 @@ that must cross a seam are trunk acts, scheduled at the join (§8).
 
 | Id | Layer (0 unit / A white / B black / UX) | What it asserts | **The mutation that would turn it RED** |
 |---|---|---|---|
-| AT-075 — `tests/test_perf_paint_clip.py -k at075` (US-PERF-001, HLR-PERF.1, LLR-PERF.1.1) | B | Wide-2000 tree map in a tmp workspace, opened with real keys (`MapperApp(tmp_path)` + `run_test(size=(118,34))`, helpers from `tests/test_draft_save.py`); two navigation keypresses (`l`, `j`) with a counting wrapper on `Canvas.wire`: total `wire` calls ≤ 4,800,000 (≥ 5× below the measured baseline 23,983,998 for 2 keys, PERF0C §7.1) AND the settled painted lines byte-equal the pinned golden | M-R1a: remove the span clip in a tmp copy → `wire` calls jump back to ~24 M → count RED. M-R1b: an off-by-one clip (`< self.w` as `<= self.w`) → byte-golden RED |
-| AT-075b — `tests/test_perf_layout_memo.py -k at075b` (US-PERF-001, LLR-PERF.1.2) | B | Same map; five selection-only keypresses (`l,j,j,j,j`): `_tree_layout` computed exactly once; painted output after each key byte-equal the pinned golden; then an edit that mutates edges (archive a subtree with real keys) and one more keypress: layout recomputes (stale-cache detector) | M-R2: drop the memo in a tmp copy → layout computed 5× → count RED. M-R2b: never invalidate (fixed token) → post-edit painted diff RED |
-| AT-076 — `tests/test_perf_dump.py -k at076` (US-PERF-002, HLR-PERF.2, LLR-PERF.2.2) | B | Save a wide-6000 map through the real app (`ctrl+s`), a counting wrapper on `graph.edges`: total edge iterations during save ≤ 3·(N+E) (baseline: 18,003,001 genexpr visits + 6002 O(E) scans, PERF0C §7.3) AND the saved `.mmd` bytes byte-equal the pinned golden | M-M2a: restore the per-node `any()` scan in a tmp copy → iteration count RED. M-M2b: reorder the orphan loop → byte-golden RED |
-| AT-077 — `tests/test_perf_mount.py -k at077` (US-PERF-003, HLR-PERF.3, LLR-PERF.3.1) | B | Mount a wide-2000 map with real keys: the current renderer's `render` is called exactly **once** between `push_screen` and a settled first paint (baseline 3, PERF0C §7.2); rail, minimap, inspector and crumb painted (chrome not regressed); canvas + strip byte-equal the pinned golden | M-S1: restore the eager pre-layout canvas render in `on_mount` (tmp copy) → render ncalls=2 → count RED |
-| AT-077b — `tests/test_perf_mount.py -k at077b` (US-PERF-003, LLR-PERF.3.2) | B | The B-56/B60 scenario: mount at 87×34 (and at a reflow size such as 60×20) — the pagination strip reports the hidden-row numeral at the real settled geometry | M-S2: neuter the `_declare_after_layout` settle pass in a tmp copy → the absent-numeral defect returns → strip-text RED |
-| `tests/test_perf_paint_clip.py` — `-k identity` (LLR-PERF.1.3) | 0 | Output-equality across the fixture grid — empty map, single node, deep chain 5000, wide 6000, forest (≥ 2 parentless nodes), multi-parent DAG built directly (never saved): clipped render bytes == reference render bytes (clip disabled), and AT-065 parity goldens + `test_repair_golden_census.py` stay green after Lane R lands | Any clip that drops an in-bounds cell → fixture diff RED; a parity-golden mismatch → RED |
-| `tests/test_perf_adjacency.py` — `-k cache` (LLR-PERF.2.1) | 0 | Correctness + counted ops: cached `children_of`/`parent_of` results equal the linear-scan reference (order- and first-match-exact) across a mutation script — build wide-6000, warm the cache, `add_edge`, wholesale `edges` replacement (archive simulation), `focus()` subgraph; then 100 mixed lookups with a counting wrapper on `graph.edges`: total edge visits ≤ 1 full scan (baseline 100·E) | M-M1a: bypass the cache → visit count RED. M-M1b: key the cache on `len(edges)` only and replace the list with a same-length one → stale results → equality RED |
-| `tests/test_perf_adjacency.py` — `-k census` (LLR-PERF.2.1 guard) | 0 | The edge-mutation census is AST-derived: `\.edges` post-construction writers ⊆ {`model.py` `add_edge` body (append), `screens/map/editing.py` `_remove_subtree` (assignment)} — the soundness basis of the `(id, len)` token | M-M1c: add any new `graph.edges.append/.extend/.insert/.remove/.pop` or `.edges =` site in a tmp copy → census guard RED (this is the cache-invalidation tripwire) |
-| `tests/test_perf_dump.py` — `-k fixtures` (LLR-PERF.2.2) | 0 | `dump(parse(f))` and `dump(G)` byte-equal pinned goldens for `fixtures/legacy.mmd`, `fixtures/anidado.mmd`, `fixtures/truncado.mmd`, wide-6000, forest, empty and single-node graphs | M-M2b (emission order/dedup change) → fixture byte RED |
-| `tests/test_perf_mount.py` — `-k chrome` (LLR-PERF.3.1) | A | With the canvas render deferred at mount, the rail/minimap/inspector/crumb still paint on the first pass (they are geometry-independent) and the error-graph path (a refused map's 1-node error graph) still paints | M-S3: make the deferral skip `refresh_canvas`'s chrome painting too → chrome assertion RED |
+| AT-075 — `tests/test_perf_paint_clip.py::test_at_075_keypress_wire_budget` (US-PERF-001, HLR-PERF.1, LLR-PERF.1.1) | B | Wide-2000 tree map in a tmp workspace, opened with real keys (`MapperApp(tmp_path)` + `run_test(size=(118,34))`, helpers from `tests/test_draft_save.py`); two navigation keypresses (`l`, `j`) with a counting wrapper on `Canvas.wire` (counter RESET after mount so mount paints are not charged to the keypress budget): total `wire` calls ≤ 1,200,000 (≥ 5× below — ≈ 1/20 of — the measured baseline 23,983,998 for 2 keys, PERF0C §7.1; tightened from 4,800,000 so a one-axis-only clip fails) AND the settled painted lines byte-equal the golden pinned at base SHA `5cde04e` (sha256-recorded, the AT-065 precedent) | M-R1a: remove the span clip in a tmp copy → `wire` calls jump back to ~24 M → count RED. M-R1b: clamp the clip upper bound to `min(xb, w-1)` (drops one in-bounds cell) → byte-golden RED |
+| AT-075b — `tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden` (US-PERF-001, LLR-PERF.1.2) | B | Same map; five selection-only keypresses (`l,j,j,j,j`): the memo-miss spy at the named hit-check point inside `_geometry` reads exactly 1 miss; painted output after each key byte-equal the pinned golden; then an edit that mutates edges (archive a subtree with real keys) and one more keypress: exactly 1 more miss (stale-cache detector) | M-R2: drop the memo in a tmp copy → 1 miss per keypress → RED. M-R2b: never invalidate (fixed key) → post-edit painted diff RED |
+| AT-076 — `tests/test_perf_dump.py::test_at_076_real_save_dump_budget` (US-PERF-002, HLR-PERF.2, LLR-PERF.2.2) | B | Save a wide-6000 map through a REAL persisting gesture — a ficha edit that persists via `_save_or_toast` (`screens/map/editing.py`), NOT bare `ctrl+s` with no draft (which saves nothing, `drafts.py:131-132`) — with a counting wrapper on `graph.edges`: ONE `mermaid.dump` call iterates ≤ 2·E + c (baseline: 18,003,001 genexpr visits + 6002 O(E) scans, PERF0C §7.3) AND the saved `.mmd` bytes byte-equal the golden pinned at base SHA `5cde04e` | M-M2a: restore the per-node `any()` scan in a tmp copy → iteration count RED. M-M2b: reorder the orphan loop → byte-golden RED |
+| AT-077 — `tests/test_perf_mount.py::test_at_077_mount_render_once` (US-PERF-003, HLR-PERF.3, LLR-PERF.3.1) — **GATED on spike PERFS** | B | Mount a wide-2000 map with real keys: the current renderer's `render` is called exactly **once** between `push_screen` and a settled first paint (baseline 3, PERF0C §7.2); rail, minimap, inspector and crumb painted (chrome not regressed); canvas + strip byte-equal the pinned golden | M-S1: restore the eager canvas render while the region is unassigned → render ncalls=2 → count RED |
+| AT-077b — `tests/test_perf_mount.py::test_at_077b_strip_numeral` (US-PERF-003, LLR-PERF.3.2) — **GATED on spike PERFS** | B | The B-56/B60 scenario: mount at 87×34 (and at a reflow size such as 60×20) — the pagination strip reports the hidden-row numeral at the real settled geometry | M-S2: neuter the `_declare_after_layout` settle pass in a tmp copy → the absent-numeral defect returns → strip-text RED |
+| `tests/test_perf_paint_clip.py::test_wire_count_budget` (LLR-PERF.1.1) | 0 | The white-box counted oracle behind AT-075: same scripted sequence and wire budget ≤ 1,200,000 | M-R1a → RED |
+| `tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality` (LLR-PERF.1.1) | 0 | Bare-`Canvas` equality: clipped `elbow_down`/`edge` write exactly the cells the pre-change loops wrote — the reference loops are copies kept INSIDE the test file, never a `Canvas` flag — over shapes: `x1 < x0` (degenerate span), spans fully off-canvas, `ybus` above and below the canvas, negative pan origin | Any clip that drops or adds an in-bounds cell → equality RED |
+| `tests/test_perf_paint_clip.py::test_render_grid_clip_identity` (LLR-PERF.1.3) | 0 | Output-equality across the fixture grid — empty map, single node, deep chain 5000, wide 6000, forest (≥ 2 parentless nodes), multi-parent DAG built directly (never saved), spans out of bounds on both sides, a panned ViewState and a folded subtree: clipped render bytes == reference render bytes, and AT-065 parity goldens + `test_repair_golden_census.py` stay green after Lane R lands | M-R1b → fixture diff RED; a parity-golden mismatch → RED |
+| `tests/test_perf_layout_memo.py::test_memo_miss_spy` (LLR-PERF.1.2) | 0 | The spy counts memo MISSES at the named hit-check point inside module-level `_geometry` (`_tree_layout` itself runs ~10× per two renders, `evidence/perf0c-nav.transcript:44` — invocations are not countable): five selection-only keypresses → exactly 1 miss | M-R2 → RED (a miss per keypress) |
+| `tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize|title|fold|focus|undo|add_child|round_trip]` (LLR-PERF.1.2) | 0 | Seven named mutation arms: `resize` (0 extra misses, byte-identical repaint), `title` (ficha title edit widening `widest` → 0 extra misses — scaling re-applies per call), `fold` (+1 miss), `focus` (toggle → miss), `undo` (new `Graph` → miss — the identity-reuse arm), `add_child` (via real keys → +1 miss), `round_trip` (outline ↔ radial ↔ layered switch, byte-identical paint) | M-R2b (fixed key) → `fold`/`add_child` arms show stale paint → RED |
+| `tests/test_perf_adjacency.py::test_cache_mutation_script_equality` (LLR-PERF.2.1) | 0 | Cached `children_of`/`parent_of` results equal the linear-scan reference (order- and first-match-exact) across a mutation script — build wide-6000, warm, TWO wholesale `edges` replacements back to back with NO lookup in between (old list freed; its `id()` may be reused — only the `is` check is sound), `add_edge`, `focus()` subgraph; plus a caller binding the returned list and mutating it (fresh-list guarantee) | M-M1a: bypass the cache → counted-ops RED. M-M1b: `len`-only key + same-length wholesale replacement → stale → equality RED |
+| `tests/test_perf_adjacency.py::test_cache_counted_ops` (LLR-PERF.2.1) | 0 | 100 mixed lookups after warm-up with a counting wrapper on `graph.edges`: total visits ≤ 1 full scan (baseline 100·E) | M-M1a → RED |
+| `tests/test_perf_adjacency.py::test_edges_writer_census` + `tests/test_perf_adjacency.py::test_census_in_place_forms[setitem|slice|del|iadd|imul|sort|reverse|clear|extend|insert|remove|pop|alias]` (LLR-PERF.2.1 guard) | 0 | The edge-mutation census is AST-derived over `mapper/`: writers of `.edges` ⊆ {`model.py` `add_edge` (append), `screens/map/editing.py` `_remove_subtree` (assignment)} — the soundness basis of the strong-reference token — and every in-place form (`edges[i]=`, slice assignment, `del`, `+=`, `*=`, `.sort`, `.reverse`, `.clear`, `.extend`, `.insert`, `.remove`, `.pop`) and aliases (`x = <expr>.edges` then `x` mutated) is flagged, one mutation per form | M-M1c: any new writer site, or one in-place form per guard row in a tmp copy → census guard RED |
+| `tests/test_perf_adjacency.py::test_minimap_outline_forest_dag_bytes` (LOW-10 — optional, included) | 0 | Minimap and outline painted bytes over a forest (≥ 2 parentless nodes) and a multi-parent DAG built directly — byte-stable across the cache | Cache order drift → byte RED |
+| `tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio` (LLR-PERF.2.2) | 0 | Counted `graph.edges` iterations inside ONE `mermaid.dump` call on wide-N and wide-2N: ≤ 2·E + c per call AND count(2N)/count(N) ∈ [1.8, 2.2] (linear, not quadratic) | M-M2a → count RED (ratio ≈ 4) |
+| `tests/test_perf_dump.py::test_dump_fixture_goldens` (LLR-PERF.2.2) | 0 | `dump(parse(f))`/`dump(G)` byte-equal pinned goldens for `fixtures/legacy.mmd`, `fixtures/anidado.mmd`, `fixtures/truncado.mmd`, wide-6000, forest, empty, single-node, and a DANGLING-EDGE graph (incident counting covers it; the edge is not written but its endpoints count) | M-M2b (emission order/dedup change) → fixture byte RED |
+| `tests/test_perf_mount.py::test_chrome_paints_at_mount` (LLR-PERF.3.1) — **GATED on spike PERFS** | A | With the canvas render skipped at unassigned geometry, rail/minimap/inspector/crumb still paint on the first pass; the error-graph path (a refused map's 1-node error graph) still paints | M-S3: make the skip swallow chrome painting too → chrome assertion RED |
 
 **Declared here, at authoring time, not at execution time.** A proposed case whose reddening mutation
 cannot be named is not yet a test case — it is a hope.
@@ -198,37 +216,48 @@ cannot be named is not yet a test case — it is a hope.
 | Memoising full `_geometry` (incl. `_tree_layout`) keyed on the whole `ViewState` | `w`/`h` are in every keypress's changed state only on resize, but the `widest`-title scan and visible-set walk make a sound key heavier than the 0.11 s layout itself at admissible shapes (PERF0 §2: layout 2.9 s vs paint 128 s on p73 — paint dominates; on reachable trees `_geometry` is ~N and noise). Memoising `_tree_layout` alone (title-independent, structural) is the cheap sound subset |
 | Wall-clock assertions in the suite | Rejected by measured precedent: `tests/test_repair_perf_shape.py`'s docstring — an 8 s budget measured at 2.6–3.4 s went 10.36 s under concurrent load (~10 % flaky). All thresholds here are call-count/cell-count oracles; wall-clock runs once at P4 as evidence (median of 3, subprocess, same harness) |
 | Lane M: eager adjacency build in `Graph.__init__` / a public adjacency interface | `import_csv` and `mermaid.parse` construct a `Graph` then `add_edge` row by row — eager building rebuilds per edge; lazy-on-first-access is O(1) until needed. A public cache is an A3 on the frozen `Graph` row — the cache is private and invisible through the named interface |
-| Lane M: explicit invalidation method called from every mutation site | The census would have to be re-verified by hand at every future edit; the `(id(self.edges), len(self.edges))` token invalidates automatically on both existing writer shapes (append, wholesale replace) and needs **zero** call sites outside `model.py` — and the AST census guard (`-k census`) makes a new writer site a RED test instead of a latent bug |
+| Lane M: explicit invalidation method called from every mutation site | The census would have to be re-verified by hand at every future edit; the strong-reference check (`self._adj_src is self.edges and len(self.edges) == n`) invalidates automatically on both existing writer shapes (append, wholesale replace) and needs **zero** call sites outside `model.py` — and the AST census guard (`test_edges_writer_census` + `test_census_in_place_forms[...]`) makes a new writer site or in-place form a RED test instead of a latent bug |
 | Lane S: deleting the `_declare_after_layout` settle pass | It exists for a measured defect (B-56/B60: the strip read "nothing hidden" while half the map was off-screen at 50×20/60×20, and ordinary navigation did not heal it — `painting.py:366-377` docstring). Deleting it reintroduces the absent numeral; the design keeps the pass and makes its settled render a no-op by declaration order |
 | Lane S: deferring by Textual timing (`call_after_refresh` batching, timers) | The pass exists precisely because compositor timing is unreliable (31×1 → 29×2 → 31×3 reflow); relying on more timing adds races. The fix is structural: declare the strip's row budget (content-derived, geometry-independent) before `canvas.update`, so the first real-geometry render lands in the settled region |
+| Lane S: strip-first declaration order + `_declared_for is None` deferral (the round-1 proposal) | **WITHDRAWN at round 1** (finding B4): `_declared_for is None` is set on every `refresh_canvas` (`painting.py:701`), so it is not a mount-only signal; the reordering breaks the strip-heal ordering (measured 6 failing tests, `painting.py:668-673`); the deferred render would run inside the settle pass, which swallows exceptions (`painting.py:351-357`) and skips `_reclamp_pan`. Replacement: skip only the canvas render while `canvas.size.width == 0`, order untouched — and the replacement is **gated on spike PERFS**; if the spike fails, Lane S leaves the batch to **B-118** |
 | Lane R: consuming the model adjacency cache in the renderers | A3 — it would couple Lane R to Lane M's file. The renderers' own `_child_index` build is measured ≤ 0.37 ms per pass (PERF0 §1) — noise. Pinned by LLR-PERF.2.3 |
 
 *(Recording the rejection is what stops the same option being re-proposed in three batches.)*
 
 Risks that remain, with their guard (the main one named first):
 
-- **Cache invalidation bugs (Lane M) — the batch's main risk.** The `(id, len)` token is sound **only
+- **Cache invalidation bugs (Lane M) — the batch's main risk.** The strong-reference token is sound **only
   if** the census holds: every post-construction writer of `edges` changes the list's identity or
   length. Census (executed at P1, grep + AST over `mapper/`): `model.py:170` `add_edge` (append — len
   changes); `screens/map/editing.py:217-219` `_remove_subtree` (wholesale list assignment — id changes);
   **no** `.edges.append/.extend/.insert/.remove/.pop` anywhere else; **no** aliased edge lists (every
   construction — `mermaid.py:114-120` parse, `model.py:245-251` `focus`, store load, `import_csv` —
   builds a fresh list); undo restores a **new** `Graph` (`undo.py:60-61`), so caches die with the object.
-  A writer that mutates in place keeping both id and len (none exists today) would slip the token — that
-  is exactly what the AST census guard (`-k census`, M-M1c) reddens. Plus LLR-PERF.2.1's mutation-script
-  equality arm (add_edge / wholesale replace after warm cache).
-- **Clip off-by-one (Lane R).** The byte-identity grid (LLR-PERF.1.3) + AT-065 parity goldens catch any
-  dropped or extra in-bounds cell; the clip is a pure loop-bound change inside bodies whose per-cell
-  writes `wire` already bounds-checks (`canvas.py:107-109`).
-- **Stale layout memo (Lane R).** Key `(id(graph), len(edges), len(nodes), root_id, frozenset(hidden))`
-  covers every `_tree_layout` input (structure + hidden prune); a title-only ficha edit must NOT
-  invalidate (layout is title-independent) and must NOT repaint differently — pinned by the byte-equality
-  arm of AT-075b; the edit-then-keypress arm pins invalidation fires when edges change.
-- **Mount deferral edge cases (Lane S).** The error-graph path (refused map → 1-node graph) must still
-  paint — the deferral skips only the canvas render on the never-declared path, not chrome or the
-  degraded-path paint (`_rendered_for` is set on the degraded path too, `painting.py:630`); AT-077's
-  chrome arm (M-S3) and AT-065's scripted open cover it. `_declared_for` is cleared and re-armed each
-  pass — the "never declared" signal is only true at mount, which is the only place the deferral reads it.
+  The soundness is a strong reference, not `id()`: `_remove_subtree` calls `children_of` BEFORE
+  reassigning (`editing.py:213`), so today's code never hits the reuse window — but the mutation script
+  deliberately does (two wholesale replacements, no lookup in between). A writer that mutates in place
+  keeping both identity and length (none exists today) would slip the check — that is exactly what the
+  widened AST census guard (`test_edges_writer_census` + `test_census_in_place_forms[...]`, M-M1c,
+  one mutation per in-place form incl. aliases) reddens. Plus `children_of` returning a fresh list
+  (callers bind it, `painting.py:519`).
+- **Clip off-by-one (Lane R).** The bare-`Canvas` equality oracle (`test_bare_canvas_clip_equality`)
+  + the byte-identity grid (LLR-PERF.1.3) + AT-065 parity goldens catch any dropped or extra in-bounds
+  cell; the reference loops live in the test file, never behind a `Canvas` flag. The clip is a pure
+  loop-bound change inside bodies whose per-cell writes `wire` already bounds-checks
+  (`canvas.py:107-109`). M-R1b is a NON-equivalent mutant: clamping the upper bound to
+  `min(xb, w-1)` drops a real cell.
+- **Stale layout memo (Lane R).** Premise 3 was refuted at round 1 — `_tree_layout` takes `card_w`
+  (`layered.py:192-196`, from titles/meta and `w` at :333-342) — so the memo caches the UNSCALED
+  layout (slot cx, level per node) and re-applies scaling per call; the strong-reference key (graph,
+  `edges` + len, `nodes` + len, `root_id`, hidden fold set) covers every structural input. The seven
+  named arms (`resize`, `title`, `fold`, `focus`, `undo`, `add_child`, `round_trip`) pin both
+  directions: geometry-only changes cost 0 misses with byte-identical paint; structural changes miss.
+- **Mount skip edge cases (Lane S — GATED).** The skip reads only the canvas region width, true solely
+  before the compositor's first assignment; chrome, the degraded-path paint (`_rendered_for` is set on
+  the degraded path too, `painting.py:630`) and the error-graph path are untouched. AT-077's chrome arm
+  (M-S3) and AT-065's scripted open cover it. **The gate decides whether the lane ships at all:** if
+  spike PERFS cannot prove render ncalls = 1 at mount with every existing mount test green, Lane S
+  leaves the batch to B-118 — the width-guard is never landed on spike failure.
 - **Cross-lane drift.** Lanes share no file (§8); the join re-runs the full suite + parity + census, so
   a lane that breaks another lane's oracle is caught at the DDR, not in production.
 
@@ -238,11 +267,12 @@ Risks that remain, with their guard (the main one named first):
 |---|---|---|
 | Lane R design (span clip + `_tree_layout` memo, byte-identity grid) | increments Inc-R1/Inc-R2; the DDR join | `03-increments/increment-001.md`; `04-validation.md`; `tests/test_perf_paint_clip.py`, `tests/test_perf_layout_memo.py` |
 | Lane M design (private adjacency cache + `(id, len)` token + census guard; linear dump) | increments Inc-M1/Inc-M2; the trunk's ARCHITECTURE §4 Graph-row note; the S-18 round (dump stops being the save-floor cost) | `03-increments/increment-001.md`; `docs/ARCHITECTURE.md` §4 (trunk amendment); `tests/test_perf_adjacency.py`, `tests/test_perf_dump.py` |
-| Lane S design (strip-first declaration order + guarded settle; mount = 1 paid render) | increment Inc-S1; the DDR join | `03-increments/increment-001.md`; `tests/test_perf_mount.py` |
-| The edge-mutation census (model.py:170 + editing.py:217, none else) | LLR-PERF.2.1's token soundness; the AST guard test; every future batch that mutates `Graph.edges` | `01-requirements.md` §2.7 premise 4; `tests/test_perf_adjacency.py -k census` |
+| Lane S design (region-width canvas skip + guarded first real render; settle pass kept; GATED on spike PERFS) | increment Inc-S1 (only if the gate passes — else B-118); the DDR join | `03-increments/increment-001.md`; `tests/test_perf_mount.py` |
+| The edge-mutation census (model.py:170 + editing.py:217, none else) | LLR-PERF.2.1's strong-reference soundness; the AST guard test; every future batch that mutates `Graph.edges` | `01-requirements.md` §2.7 premise 4; `tests/test_perf_adjacency.py::test_edges_writer_census` |
 | The ⏸ DEFER record (single-visit DAG layout + S-18 budget, with PERF0 §2 evidence) | the S-18 prototype round | `.dev-flow/BACKLOG.md` (B-33 carry) and the prototype batch's P0 |
 | Proposed test cases (§5) with named reddening mutations M-R1a/b, M-R2/b, M-M1a/b/c, M-M2a/b, M-S1/2/3 | Phase-3 increments author their gate checks from these rows; the DDR verifies each AT owns its node with an executed RED | `04-validation.md`; `design/DDR-2026-10-10-perf-batch.md`; increment packets under `03-increments/` |
-| P4 wall-clock evidence protocol (median of 3, `spike/perf_harness.py` / `perf0c_profile.py`, evidence not assertion) | the P4 validation report | `04-validation.md`; `05-postmortem.md` |
+| P4 wall-clock evidence protocol (base and head on the SAME machine and session, interleaved runs, median of 3, `spike/perf_harness.py` / `perf0c_profile.py`, raw runs pasted into 04-validation.md, evidence not assertion) | the P4 validation report | `04-validation.md`; `05-postmortem.md` |
+| Golden provenance protocol (every new golden captured on base SHA `5cde04e` at the trunk before the lanes fork; base SHA + sha256 recorded per golden, the AT-065 precedent; wire counter reset after mount) | the trunk before the fork; the DDR provenance check | `04-validation.md`; the goldens' headers in the four new test files |
 | design → requirement traceability | the matrix and the DDR | `04-validation.md` traceability matrix (each HLR/LLR row cites this PDR's §4/§5 rows) |
 
 - ⚠ Any row whose consumer column is empty: **remove the output, or explain why it is being produced.** — none; every row names a consumer.
@@ -278,14 +308,15 @@ note is the trunk's join act); and the other lanes' files.
   (count + byte-identity grid). Inc-R2 — `layered.py` `_tree_layout` memo + `tests/test_perf_layout_memo.py`.
 - **Lane M** (2 source files): Inc-M1 — `model.py` private adjacency cache + token + `tests/test_perf_adjacency.py`
   (equality script, counted ops, AST census guard). Inc-M2 — `mermaid.py` linear orphan pass + `tests/test_perf_dump.py`.
-- **Lane S** (2 source files): Inc-S1 — `painting.py` strip-first declaration order + `screen.py`
-  `on_mount` deferral + `tests/test_perf_mount.py` (one increment; the two edits are one mechanism).
+- **Lane S** (2 source files): Inc-S1 — `painting.py` region-width canvas skip (declaration order
+  untouched) + `screen.py` mount path + `tests/test_perf_mount.py` (one increment; the two edits are
+  one mechanism). **GATED on spike unit PERFS: if the spike proves render ncalls = 1 at mount with
+  every existing mount test green, Inc-S1 ships as specified; if the spike fails, Lane S leaves the
+  batch to the backlog (B-118) and HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn.**
 
 **Join (DDR) plan.** Lanes land in any order (disjoint files); after each lane lands, its own new tests
 + the full suite run green on the trunk. The DDR then: (1) re-runs the suite; (2) verifies AT-065
 parity goldens and `test_repair_golden_census.py` byte-unchanged (the batch's behaviour oracle); (3)
-executes every named negative control (M-R1a/b, M-R2/b, M-M1a/b/c, M-M2a/b, M-S1/2/3) as transcripts;
-(4) writes the P4 wall-clock evidence table with the P0 harness (keypress, mount, save — median of 3,
-subprocess, against the §6/§7 baselines); (5) the trunk amends ARCHITECTURE §4's `Graph` row with the
+executes every named negative control (M-R1a/b, M-R2/b, M-M1a/b/c, M-M2a/b, M-M3, M-S1/2/3) as transcripts; (4) verifies golden provenance — every new golden records base SHA `5cde04e` + sha256, captured at the trunk before the fork; (5) writes the P4 wall-clock evidence table with the P0 harness (keypress, mount, save — base and head on the same machine and session, interleaved runs, median of 3, raw runs pasted into `04-validation.md`); (6) the trunk amends ARCHITECTURE §4's `Graph` row with the
 private-cache note. Any lane found to have touched a frozen seam returns that increment to the trunk
 as an A3 — it is never improvised inside the lane.
