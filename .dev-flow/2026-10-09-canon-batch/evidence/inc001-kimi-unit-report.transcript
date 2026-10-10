@@ -1,0 +1,30 @@
+  **Files changed**
+  - `mapper/app.py` — deleted only `import re` (line 7); `git diff --stat` → `1 file changed, 1 deletion(-)`
+  - `tests/test_app_imports_used.py` — NEW: `unused_imports(source)` AST helper + `ALLOWED_UNUSED` re-export allowlist (empty, with the stated rule in the docstring) + 2 tests
+
+  **New test node ids**
+  - `tests/test_app_imports_used.py::test_at_064_app_imports_nothing_it_does_not_use`
+  - `tests/test_app_imports_used.py::test_llr_can_2_1_checker_arms[...]` (11 parametrized arms)
+
+  **GREEN output** (`python -B -m pytest -q -p no:cacheprovider tests/test_app_imports_used.py`)
+  ```
+  ............                                                             [100%]
+  12 passed in 0.10s
+  ```
+
+  **RED output** (product change reverted, `import re` restored)
+  ```
+  FAILED tests/test_app_imports_used.py::test_at_064_app_imports_nothing_it_does_not_use
+  E       AssertionError: assert {'re'} == set()
+  1 failed, 11 passed in 0.16s
+  ```
+
+  **sha256 restore check**
+  - before deletion: `4b47adcf1c5d5629…cc89978`
+  - after deletion:  `b9354eb9ef154906…8604a5`
+  - after RED-revert + byte-identical restore: `b9354eb9ef154906…8604a5` — matches the fixed copy exactly
+
+  **Corroboration**: `tests/test_draft_hygiene.py` (parses `app.py`) → `4 passed in 2.02s` — no regression.
+
+To resume this session: kimi -r session_43807a30-ffb8-4b5a-b8ec-54264efbb6d4
+exit=0
