@@ -75,7 +75,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P2",
+  "current_station": "P3",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -87,7 +87,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -155,6 +155,21 @@
       "station": "P1",
       "date": "2026-10-09",
       "decision": "P1 approved (self-approved): 2 HLR, 3 LLR with namespaced ids (CAN); AT-063, AT-064 declared; scan-spec flags none"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 1: iterate-to-refine (self-ruled): ARCH-1 and QA-2 are requirement-defect majors (close-fold expectation wrong; 'equals' under-specified), QA-1 major (AT-064 oracle); 0 blockers; all 8 findings applied in P1 iteration 1"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 iteration 1 approved (self-approved): ARCH-1..3, QA-1..5 applied (LED .1-.5; row floor corrected to 134)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; NEW-1 fixed (LED .6); 0 blocker, 0 major open"
     }
   ],
   "standing_authorization": {

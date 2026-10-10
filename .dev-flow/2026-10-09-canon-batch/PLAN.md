@@ -35,7 +35,7 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | B1 | not fired | `grep -rln REQUIREMENTS tests --include=*.py` → `tests/test_repair_cycles.py`, `tests/test_vocabulary_declaration.py`; both read a batch's own `01-requirements.md` (`test_repair_cycles.py:30-33`, `test_vocabulary_declaration.py:297`), not the canon. No test asserts `app.py`'s import list |
 | B2 | not fired | no file moves |
 | B3 | not fired | no golden directory under `tests/` |
-| B4 | fired | `REQUIREMENTS.md` is consumed by the flow's `V22` and `--fold-canon`. Control: the appended rows follow the fold's own normalisation, and the close gate re-runs `V22` and the fold (expected: `kept` for the five HYG ids, `0 refused`) |
+| B4 | fired | `REQUIREMENTS.md` is consumed by the flow's `V22` and `--fold-canon`. Control (corrected at P2, `LED-2026-10-09-canon-batch.1`): the close fold folds THIS batch's five `CAN` rows (it reads only the active batch's headings). The five `HYG` rows are verified by AT-063. The close gate re-runs `V22` and expects the `CAN` ids folded and `0 refused` |
 | C1–C8 | not fired | no input, network, secret, auth or markup surface; `devflow-scan-spec.py` is run at P1 |
 | D1, D2 | not fired | nothing the user sees changes |
 | E1–E3 | not fired | 2 stories, 1 increment, low risk, internal |
