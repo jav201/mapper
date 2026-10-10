@@ -80,7 +80,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P2",
+  "current_station": "PDR",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -183,6 +183,11 @@
       "station": "P1",
       "date": "2026-10-09",
       "decision": "P1 iteration 1 approved (self-approved): all 18 P2 round-1 findings applied in four Kimi units (HLRs/premises, LLRs, ARCHITECTURE.md, ledger LED .1-.8); orchestrator rulings ARCH-1/ARCH-2/QA-1/QA-2 recorded"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer proceed; architect ARCH-1..7 resolved, ARCH-8/9 blockers + ARCH-10/11 fixed (LED .9); orchestrator spine probe 0 illegal edges; contract size 69.7k > 54k budget recorded as watch item"
     }
   ],
   "standing_authorization": {
