@@ -189,10 +189,10 @@ The two existing nodes named as acceptance below stay green on master today. Thi
 
 ### LLR-001.2 — the quit walk reads the guard state through `MapScreen.guard_open()`
 - **Traceability:** HLR-001
-- **Ledger:** LED-2026-10-09-hygiene-batch.3
+- **Ledger:** LED-2026-10-09-hygiene-batch.3, LED-2026-10-09-hygiene-batch.6
 - **Statement:** `MapScreen` shall expose `guard_open() -> bool`, and no code outside `MapScreen` shall read `_draft_guard_open`.
 - **Validation:** `test (unit)`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py -k guard_open`, with two checks:
+- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py -k llr_001_2`, with two checks:
   - (a) behaviour, through real keys: `guard_open()` is `False` before the guard opens, `True` while it is up, and `False` after it is answered;
   - (b) AST over every module in `mapper/`: no attribute read of `_draft_guard_open` outside the `MapScreen` class body, and `MapperApp.action_quit` calls `guard_open`.
 - **Numeric pass threshold:** exit code 0.
