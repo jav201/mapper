@@ -1,0 +1,42 @@
+# inc2 RED proof — increment 2 of batch 2026-10-10-csv-safety-batch
+# worker: Kimi (kimi-code/kimi-for-coding) — unit CSVI2
+# All paths relative to the worktree root; product restores verified by sha256.
+
+## baseline (product files before any mutation)
+$ sha256sum mapper/import_csv.py mapper/screens/import_preview.py
+9dfb12a8590451831534b7263fe9e03e9dd0169d16468265f6079f8f37794f30 *mapper/import_csv.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py
+
+## M2 (flavor 1) — refresh_canvas skips the invariant branch (sentences = []), mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "at_073 or empty_csv_panel"
+1 failed, 1 passed, 10 deselected in 1.27s
+# RED: test_at_073_preview_names_the_colliding_rows FAILED (sentence absent)
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## M2 (flavor 2) — generic refusal painted when the sentence list is empty, mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "empty_csv_panel or at_073"
+1 failed, 1 passed, 10 deselected in 0.83s
+# RED: test_empty_csv_panel_renders_no_sentence FAILED (empty CSV must paint no sentence)
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## M2b — preview_csv stops appending to the collision record, mutation in mapper/import_csv.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "records_collisions or at_073"
+2 failed, 10 deselected in 1.12s
+# RED: test_preview_csv_records_collisions FAILED (record empty) and AT-073 downstream FAILED
+$ cp <backup> mapper/import_csv.py && sha256sum mapper/import_csv.py
+9dfb12a8590451831534b7263fe9e03e9dd0169d16468265f6079f8f37794f30 *mapper/import_csv.py  # == baseline
+
+## M2c — the csv_collisions refusal removed from _ImportPreviewScreen.action_save, mutation in mapper/screens/import_preview.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py -k "at_072"
+4 failed, 8 deselected in 3.17s
+# RED: AT-072, AT-072b, AT-072c, AT-072d all FAILED (the save-as prompt opens for a save that cannot happen)
+$ cp <backup> mapper/screens/import_preview.py && sha256sum mapper/screens/import_preview.py
+2e40feb83ee27deb04cae2127cbf6efb8cdaef7552095a4cb0b6485fcdf2955e *mapper/screens/import_preview.py  # == baseline
+
+## GREEN after every restore (verification command of the increment)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_preview.py tests/test_csv_safety_store.py tests/test_import_csv.py tests/test_seed_safety.py tests/test_repair_cycles.py tests/test_gate2.py tests/test_mod_compat.py
+166 passed in 78.43s (0:01:18)
+$ ruff check mapper/import_csv.py mapper/screens/import_preview.py tests/test_csv_safety_preview.py
+All checks passed!

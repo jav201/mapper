@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 
 @dataclass(frozen=True)
@@ -86,6 +85,24 @@ class Document:
     kind: str = "text"  # text | docx | pptx | xlsx
 
 
+@dataclass(frozen=True)
+class CsvRow:
+    """One CSV row that contributed to a colliding slug id."""
+    line_no: int
+    raw_id: str
+
+
+@dataclass(frozen=True)
+class CsvCollision:
+    """A slug id more than one CSV row produced, and the rows that produced it.
+
+    Build-time provenance only: the record travels on the in-memory `Graph`
+    the import preview reads; it is never persisted into the sidecar.
+    """
+    slug: str
+    rows: tuple[CsvRow, ...]
+
+
 @dataclass
 class Graph:
     """A navigable structure of nodes and edges."""
@@ -96,6 +113,12 @@ class Graph:
     schema: list[SchemaField] = field(default_factory=list)
     documents: dict[str, Document] = field(default_factory=dict)
     load_warnings: list[str] = field(default_factory=list)
+    # `compare=False, repr=False` (ruling R10): the collision record is
+    # build-time provenance, so `Graph.__eq__` and `repr` must not change —
+    # increment 2 (`import_csv`) fills it; nothing reads it yet.
+    csv_collisions: list[CsvCollision] = field(
+        default_factory=list, compare=False, repr=False
+    )
 
     def document_names(self) -> list[str]:
         """Return all registered document names."""
@@ -154,6 +177,21 @@ class Graph:
             if e.child_id == node_id:
                 return e.parent_id
         return None
+
+    def multi_parent_ids(self) -> list[str]:
+        """Node ids that appear as the child of more than one edge, in first
+        appearance order.
+
+        Kept for the import preview's multi-parent sentence ONLY (ruling R2):
+        the store's round-trip check (`MapStore.save`) does not use it.
+        """
+        seen: set[str] = set()
+        dupes: list[str] = []
+        for e in self.edges:
+            if e.child_id in seen and e.child_id not in dupes:
+                dupes.append(e.child_id)
+            seen.add(e.child_id)
+        return dupes
 
     def find_cycle(self) -> list[str] | None:
         """Return one directed cycle's node ids, entry node repeated last.

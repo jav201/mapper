@@ -1,0 +1,305 @@
+# csv-safety final gate, first run — full suite at the increment-3 commit; command: python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..F....F................................................................ [  2%]
+......................................................................xx [ 18%]
+x....................................................................... [ 20%]
+.........F.............................................................. [ 72%]
+================================== FAILURES ===================================
+_______________ test_tc_a3_the_census_cardinalities_are_PINNED ________________
+
+    def test_tc_a3_the_census_cardinalities_are_PINNED():
+        """EQUALITY, not a floor -- and the numbers live here, not only in prose.
+    
+        `LLR-N07.2.2a` states its thresholds as set equality "never a floor", and
+        `A-32` abolished floors for exactly this reason: a derivation that gains or
+        loses members sits comfortably above one.
+    
+        These figures were published as 27 and 6 in the increment packet AND in the
+        module map, and both were wrong -- measured before this increment's own
+        AT-010 arms added five more call sites, then asserted as the post-state.
+        Unpinned, nothing in the suite could contradict them; pinned, a drift is a
+        red arm instead of a stale sentence nobody re-derives.
+    
+        The pin earned itself immediately, and has now caught the same drift THREE
+        times: written at 32, red within the minute when the export-focus fix added
+        two sites; red again at 34 when the diff-coverage arm added one.  Every one
+        of those would have been a silently stale number in a document.  That is the
+        whole argument for pinning a count rather than narrating it.
+        """
+        sites = render_call_sites()
+        # 35 -> 50 in Inc-3: its four new test modules drive the renderer directly
+        # at the AT configurations.  Updated deliberately, with the module map.  It
+        # moved twice inside the increment -- 49, then 50 when the battery's two
+        # surviving mutants forced two more arms -- which is the pin working.
+        #
+        # 50 -> 51 -> 49 in the Inc-3 FIX round, both directions in one edit and
+        # both deliberate.  The pan-fixture arm and the short-region sweep each add
+        # a site; the `HEADER_ROWS` pin loses two, because parametrising it over
+        # node count as well as width folded its two inline renders into one
+        # `_header_rows` helper.  A fourth catch for this pin, and the first in the
+        # direction a floor could never have seen.
+        #
+        # 49 -> 52 in the SECOND fix round, and the three are itemised because a
+        # bumped pin with an unitemised reason is a pin that has stopped working:
+        #   +1  `mapper/app.py` `_declare_after_layout` now RENDERS.  This is the
+        #       priced cost of closing `B-60` rather than re-recording it: the
+        #       canvas header's own numeral is written by `render`, so recomputing
+        #       only the strip left the two declaring surfaces contradicting each
+        #       other on the first frame at ordinary sizes.  The alternative,
+        #       `call_after_refresh(refresh_canvas)`, reddens the `LLR-CNV.3.1`
+        #       focus arm; this one costs exactly this pin.
+        #   +2  `tests/test_inc3_census.py`'s A-89 arm renders the fixture with and
+        #       without a `DiffResult` to prove the diff state changes what is
+        #       painted -- the non-vacuity guard on the two diff-only coercion
+        #       sinks (`layered.py:449` and `:520`) whose mutants used to survive.
+        #
+        # 52 -> 57 in Inc-4a, and this pin CAUGHT A REVERSE-CENSUS HIT THE PRE-GATE
+        # DID NOT DECLARE.  Inc-4a's own C-26 sweep named one downstream test
+        # (`test_darkside_census.py`'s hue census, which pins the pill tail line's
+        # literal source text); it did not name this one, and this arm is where the
+        # second hit surfaced.  Itemised, because a bumped pin with an unitemised
+        # reason is a pin that has stopped working:
+        #   +3  `tests/test_layered.py`'s `AT-021` arm renders the SAME graph three
+        #       times -- an empty hit set, an injected id, and a second injected id
+        #       -- because "the renderer paints what it was handed" is unfalsifiable
+        #       from one render: a single frame cannot distinguish the hit style
+        #       landing on the named node from it landing on any node.
+        #   +2  `tests/test_fold.py`'s `TC-026b` rename arm renders a folded branch
+        #       with an injected hit set and again with an empty one, which is the
+        #       pair that proves the pill's tail is query-driven rather than a
+        #       constant.
+        #
+        # 57 -> 58 in Inc-4b, AND THIS PIN CAUGHT IT.  The increment's reverse census
+        # swept the seat's readers -- `test_key_dispatch.py`, `test_keymap.py`,
+        # `test_inc3_census.py` -- and did not name this one, because the new site has
+        # nothing to do with the seat.  Itemised, because a bumped pin with an
+        # unitemised reason is a pin that has stopped working:
+        #   +1  `tests/test_search.py`'s `AT-053` arm renders the screen's own view
+        #       state to read the HIT STYLE off the returned `Text`'s spans, before
+        #       and after the real `escape`.  "`esc` clears the search" has to mean
+        #       no node is still painted as a match, and a substring probe cannot tell
+        #       "this node is a hit" from "some node's title contains those letters" --
+        #       the spans are the only channel that carries the claim.
+        #
+        # 58 -> 59 in Inc-5, AND THIS PIN CAUGHT IT TOO -- twice in two increments,
+        # which is the argument for keeping it rather than for softening it to a
+        # floor.  Itemised on the same terms:
+        #   +1  `tests/test_views_hits.py::_spans_at` renders each member of the
+        #       DERIVED renderer set to read `AT-024`'s observable off the returned
+        #       `Text`'s spans.  ONE call site, not six: the arms parametrise over
+        #       the derived class set and share this single helper, so this count
+        #       does NOT move when a seventh renderer joins -- which is the whole
+        #       point of deriving the set instead of listing it.
+        #
+        # 59 -> 60 in Inc-B55a, AND THE PIN CAUGHT IT A FOURTH TIME.  Itemised:
+        #   +1  `tests/test_overflow.py::test_p1_at_rest_region_and_content_share_
+        #       one_geometry` renders the CURRENT renderer at the CURRENT
+        #       `_canvas_size()` to compare against what the canvas widget holds.
+        #       That comparison IS the arm -- `P1`, the invariant that a region and
+        #       its content were produced from the same geometry -- so the site
+        #       cannot be shared with an existing helper without the helper
+        #       deciding the geometry the arm exists to check.
+        #
+        # 60 -> 61 in Inc-B55a's code-review round: the forced-trigger `P1` arm
+        # (`test_p1_survives_a_strip_reflow_after_the_canvas_is_painted`) renders
+        # the current renderer at the current `_canvas_size()` AFTER stubbing the
+        # strip to force a region reflow.  It cannot share the other `P1` arm's site:
+        # that arm is the one the code review proved CANNOT FAIL, and this one exists
+        # precisely because it supplies the trigger the other one waits for.
+        #
+        # 61 -> 62 in `S-B(+C)`, ONE site and it is itemised, because this pin's own
+        # docstring says a bumped pin with an unitemised reason is a pin that has
+        # stopped working:
+        #   +1  `tests/test_canvas_header_charge.py::_first_line_rows` renders each
+        #       renderer to measure the PHYSICAL rows its own first line occupies.
+        #       That measurement is the arm: defect 2 is `_canvas_size` charging
+        #       layered's header in every view, and the only honest comparand for a
+        #       charge is the line the renderer actually paints.  It cannot share an
+        #       existing site -- every other arg-ful site renders to check CONTENT,
+        #       while this one renders to price GEOMETRY, and a helper that returned
+        #       a finished picture would have already spent the width this arm is
+        #       measuring at.
+        #       Derived mechanically, not counted by eye: exactly one `.render(`
+        #       appears in that module.
+        #
+        # 62 -> 61 at `Inc-CONFIRM` `B-68`, and this is the pin's FIRST DECREASE.
+        # Itemised on the same terms, because a pin that only explains growth is
+        # half a pin:
+        #   -1  `tests/test_app.py::test_b50_the_export_carries_the_diff_the_canvas_
+        #       is_showing` no longer replaces `_current_renderer` with an anonymous
+        #       `Spy` whose `render` forwarded to the real one -- that forward was
+        #       the arg-ful site.  `B-68` made the export ask `_consumes_pan` to
+        #       classify whatever `_current_renderer` returns, and that dispatch is
+        #       identity-based and raises on an unregistered object, so the double
+        #       had to stop being one.  It now patches the REAL renderer's `render`,
+        #       which forwards through a captured bound method rather than through
+        #       an attribute call -- invisible to this census by construction, which
+        #       is correct: no renderer-protocol call site was removed, a test
+        #       double stopped impersonating one.  The arm's assertions are
+        #       unchanged and it still kills the `diff=None` mutant.
+        #
+        # 61 -> 62 in the SAME increment, at its review round.  The round trip is
+        # itemised in both directions rather than netted away: a history reading
+        # 62 -> 62 would hide that two different sites moved opposite ways.
+        #   +1  `tests/test_app.py::test_an_export_never_encodes_where_the_keyboard_
+        #       was` renders a THIRD comparand, at `selected_id=None`.  The export
+        #       ruling widened to make the CURSOR transient as well as the keyboard
+        #       owner, so this arm's non-vacuity check now needs three mutually
+        #       distinguishable tones where two used to do: without the unselected
+        #       render, "the export carries no selection" cannot be told from "the
+        #       export carries a focused one".  It cannot share either existing
+        #       site, because those two ARE the pair it must be distinguished from.
+        #
+        # 62 -> 63 in the same increment's second review round:
+        #   +1  `tests/test_export_state.py::test_no_rendered_row_is_folded_in_the_
+        #       artifact` renders the map at its own grown extent and drives the
+        #       result through `save_svg`, to assert every rendered row arrives
+        #       WHOLE in the artifact.  It cannot share a site with any existing
+        #       arm: the geometry it renders at IS its subject -- that width is what
+        #       sizes the export console -- so a helper choosing the geometry would
+        #       be choosing the very thing the arm exists to check.
+        #
+        # 63 -> 64 at `Inc-CONFIRM`'s re-ruled fix round:
+        #   +1  `tests/test_export_state.py::test_a_live_search_and_a_moved_cursor_
+        #       do_not_reach_the_artifact` renders the CANVAS's own state -- session
+        #       and all -- immediately before and after a live search, as the
+        #       POSITIVE CONTROL for a byte-invariance assertion over the artifact.
+        #       It cannot share a site with any export arm: every one of those
+        #       renders the NEUTRALISED state, and this one exists precisely to
+        #       prove the un-neutralised state MOVES the picture.  Without it, "the
+        #       two exports are byte-equal" would be green if the session state were
+        #       inert, which is the vacuity the arm was written to refuse.
+        #
+        # 64 -> 65 at `Inc-EN-3`:
+        #   +1  `tests/test_en3.py::test_hybrid_lane_with_no_branches_says_so_in_english`
+        #       renders a repo with no branches through `HybridLaneRenderer` and reads
+        #       the painted `(no branches)`.  It cannot share a site with another arm:
+        #       no other test drives that renderer on a root-only graph, and the
+        #       string it reads is the one the census arm can only see in the AST.
+        assert len(sites["argful"]) == 65, (
+            f"derived {len(sites['argful'])} arg-ful call sites against a pinned 65; "
+            "update the pin AND the module map together, or one of them is stale"
+        )
+        # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
+        # a zero-arg Textual widget site that must NOT be swept into the A3.
+        #
+        # 26 -> 27 in Inc-B55a: the same `P1` arm calls `canvas.render()` to read
+        # what the widget HOLDS.  A zero-arg Textual widget site, correctly outside
+        # the A3 -- it is not a renderer invocation, it is the widget being asked
+        # what it is currently painting.
+        #
+        # 27 -> 28 in Inc-B55a's code-review round: the same forced-trigger arm asks
+        # `canvas.render()` what the widget HOLDS after the reflow.  A zero-arg
+        # Textual widget site, correctly outside the A3.
+        #
+        # 28 -> 29 at `Inc-REPAIR` S-A: `SEC-F1`'s arm asks a freshly constructed
+        # `TabStrip` what it HOLDS, because the defect is in the constructor's render
+        # and the composited frame cannot see it -- `on_resize` supersedes the
+        # content before paint. Same shape as the site above, one widget over.
+        #
+        # 29 -> 30 in S-A's review round: the arm that pins `on_mount` as
+        # LOAD-BEARING asks the same question in a world where `on_resize` has been
+        # removed. It cannot share the site above -- that one measures a constructor
+        # with the resize still available, and this one measures what survives
+        # without it.
+        #
+        # 30 -> 32 in `S-B(+C)`, TWO sites and both itemised:
+        #   +2  `tests/test_agree_floor.py::_frame` reads BOTH declaring surfaces off
+        #       the composited frame -- `canvas.render()` and `strip.render()`.  Two
+        #       sites rather than one because `LLR-N06.3.5` is a statement ABOUT
+        #       those two surfaces differing, so an arm reading them through a shared
+        #       helper would have to decide which one it was reading and would stop
+        #       being able to see them disagree.  Both are zero-arg WIDGET renders
+        #       and must stay out of the A3 -- which is what this pin protects.
+        #
+        # 32 -> 34 in `S-D`, TWO sites, and they are the RADIAL twins of the two
+        # above:
+        #   +2  `tests/test_agree_floor.py::_radial_frame` reads the same two
+        #       declaring surfaces with the RADIAL renderer selected, for the
+        #       workstream that VERIFIES radial never reaches the floor.  It does not
+        #       share `_frame`: that helper selects `outline_mode` and derives its
+        #       truth from `outline.painted_ids`, and parameterising one helper over
+        #       the renderer would make the radial arms and their OUTLINE CONTROL
+        #       read the same code path -- which is how a control stops being
+        #       independent of the thing it controls (`C-60`).  Both are zero-arg
+        #       WIDGET renders and must stay out of the A3.
+        #
+        # 34 -> 35 at `Inc-CONFIRM` `HERMETIC-1`, ONE site, itemised on the same
+        # terms this pin's own docstring sets:
+        #   +1  `tests/test_app.py::test_repo_screen_two_pane_renders` asks the
+        #       `#repo-table` widget what it HOLDS, to assert the fetched branch was
+        #       actually painted.  The arm used to drive the real `gh` CLI and then
+        #       assert only that the widget EXISTS -- an assertion that passed
+        #       whether or not the fetch produced anything, which is why mocking the
+        #       seam had to come with a painted-result assertion rather than
+        #       replacing a live oracle with no oracle.  A zero-arg Textual WIDGET
+        #       render, correctly outside the A3.
+        #
+        # 35 -> 36 at `Inc-EN-4`, ONE site:
+        #   +1  `tests/test_en4.py::_look` reads what a `DsChip` paints so the `Z1`
+        #       arms can assert the look did not change.  A zero-arg Textual WIDGET
+        #       render, correctly outside the A3; the three `Z1` arms share the one
+        #       helper so they add one site, not five.
+>       assert len(sites["zeroarg"]) == 36, (
+            f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
+            "36; a DROP means widget sites were wrongly swept into the A3"
+        )
+E       AssertionError: derived 37 zero-arg Textual sites against a pinned 36; a DROP means widget sites were wrongly swept into the A3
+E       assert 37 == 36
+E        +  where 37 = len([('tests/test_agree_floor.py', 70), ('tests/test_agree_floor.py', 71), ('tests/test_agree_floor.py', 194), ('tests/test_agree_floor.py', 195), ('tests/test_app.py', 123), ('tests/test_app.py', 572), ...])
+
+tests\test_a3_census.py:341: AssertionError
+___ test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration ____
+
+    def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
+        """The false-failure arm: Textual's zero-arg `render()` must be untouched.
+    
+        A census that migrated these would break every widget in the app, and a
+        floor-based gate could not tell the difference.
+        """
+        zeroarg = render_call_sites()["zeroarg"]
+        # 25 -> 26 in Inc-3, 26 -> 27 and 27 -> 28 in Inc-B55a, 28 -> 29 at
+        # Inc-REPAIR S-A, 30 -> 32 at S-B(+C), 32 -> 34 at S-D, 34 -> 35 at
+        # Inc-CONFIRM `HERMETIC-1` -- the same sites the cardinality pin above
+        # itemises.  The two pins move TOGETHER by construction: they read the same
+        # derivation, so a change that updated one and not the other is a red arm
+        # rather than a quiet divergence.  S-D is the first increment to move them
+        # where BOTH reds appeared in one lane run, which is that construction
+        # working rather than two independent failures; `HERMETIC-1` is the second,
+        # and it reddened a THIRD arm with them -- the untracked-source guard, which
+        # caught the new test file before it could be invisible to all of these.
+>       assert len(zeroarg) == 36, (
+            f"derived {len(zeroarg)} zero-arg sites against a pinned 36. A floor was "
+            "used here first, in the one requirement that abolished floors: at `>= 20` "
+            "five widget sites could be wrongly migrated with the arm still green"
+        )
+E       AssertionError: derived 37 zero-arg sites against a pinned 36. A floor was used here first, in the one requirement that abolished floors: at `>= 20` five widget sites could be wrongly migrated with the arm still green
+E       assert 37 == 36
+E        +  where 37 = len([('tests/test_agree_floor.py', 70), ('tests/test_agree_floor.py', 71), ('tests/test_agree_floor.py', 194), ('tests/test_agree_floor.py', 195), ('tests/test_app.py', 123), ('tests/test_app.py', 572), ...])
+
+tests\test_a3_census.py:457: AssertionError
+___________________ test_llr_mod_4_3_bodies_match_baseline ____________________
+
+    def test_llr_mod_4_3_bodies_match_baseline():
+        """Every Inc-0 census body is byte-identical and appears exactly once
+        somewhere in the package: no method lost, duplicated or edited by a
+        move.  Diff must be empty (missing / duplicated / changed all none)."""
+        diff = baseline_diff(PACKAGE, _load_baseline())
+>       assert diff == {"missing": [], "duplicated": [], "changed": []}
+E       AssertionError: assert {'changed': [...'missing': []} == {'changed': [...'missing': []}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Differing items:
+E         {'changed': ['_ImportPreviewScreen.action_save', '_ImportPreviewScreen.refresh_canvas']} != {'changed': []}
+E         Use -v to get more diff
+
+tests\test_mod_bodies.py:248: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_a3_census.py::test_tc_a3_the_census_cardinalities_are_PINNED
+FAILED tests/test_a3_census.py::test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration
+FAILED tests/test_mod_bodies.py::test_llr_mod_4_3_bodies_match_baseline - Ass...
+3 failed, 3153 passed, 24 deselected, 3 xfailed in 1697.60s (0:28:17)
+exit=1
