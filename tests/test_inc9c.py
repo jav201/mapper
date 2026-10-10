@@ -131,7 +131,7 @@ async def _drive_export_too_large(app, pilot, mp, tmp_path):
 
 
 async def _drive_export_failed(app, pilot, mp, tmp_path):
-    mp.setattr("mapper.app.save_svg", _boom)
+    mp.setattr("mapper.screens.map.screen.save_svg", _boom)
     await pilot.press("e")
 
 
@@ -266,7 +266,9 @@ def _leaky_interpolations(message) -> list[str]:
 LEAK_EXCEPTIONS: dict[tuple[str, str], str] = {
     ("mapper/app.py", "str(exc)"): "INC9C-F3: `GitHubError`'s own message (git stderr) "
                                   "and `store.load`'s path-free `MapStoreError` text",
-    ("mapper/app.py", "str(e)"): "`store.load`'s `MapStoreError`, written path-free at B-30",
+    # Moved with `MapScreen` at 2026-10-09-modular-batch B0 (was keyed to the app.py row's site).
+    ("mapper/screens/map/screen.py", "str(e)"): "`store.load`'s `MapStoreError`, written path-free at "
+                                                "B-30 — moved at B0",
     # Moved with `_refusal_toast` at 2026-10-09-modular-batch A1 (was covered by the app.py row).
     ("mapper/screens/common.py", "str(exc)"): "`_refusal_toast`: a `MapIdError`'s text is authored "
                                               "by the store and names the rule, never a path (A-113)",

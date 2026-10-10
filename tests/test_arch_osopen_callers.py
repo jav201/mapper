@@ -1,6 +1,8 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
-Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app`.  `github` may import
+Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app` —
+plus `screens/map/screen.py` from B0 until B3 moves the call site to `screens/map/opening.py`.
+`github` may import
 `osopen.safe_local_path`; `screens` that name plus `confine_reason`, `refusal_sentence`, `hard_linked`, `is_link` and the sentence
 constant `PATH_NOT_SUPPORTED` (Inc-9q, `A-125`; Inc-9p's `PATH_OUTSIDE_WORKSPACE` is no longer
 imported by a screen, and `lexically_outside` is gone; Inc-9r, `A-126`: `PATH_THROUGH_LINK` is gone too, generate
@@ -20,7 +22,9 @@ import mapper
 PKG = pathlib.Path(mapper.__file__).parent
 DOCS = PKG.parent / "docs" / "ARCHITECTURE.md"
 LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
-ALLOWED_FILES = {"app.py", "osopen.py"}
+# B0 moved the only app.py launch site (the attachment-activated handler) to screens/map/screen.py,
+# until B3 moves it to screens/map/opening.py; app.py no longer references any launcher name.
+ALLOWED_FILES = {"osopen.py", "screens/map/screen.py"}
 # Inc-9q: the allowed-name arms were committed RED first (the set changed: `refusal_sentence`, `hard_linked`,
 # `is_link` in; `PATH_OUTSIDE_WORKSPACE` out).
 OPEN_STEPS: set[str] = set()
@@ -82,6 +86,9 @@ ALLOWED_OUTSIDE_APP = {
     "screens/common.py": {"confine_reason", "refusal_sentence"},
     "screens/factory.py": {"safe_local_path", "confine_reason", "refusal_sentence", "hard_linked", "is_link",
                            "PATH_NOT_SUPPORTED"},
+    # until B3: `MapScreen`'s attachment-activated handler moved here at B0 and calls
+    # `open_external`; B3 moves the open concern to screens/map/opening.py.
+    "screens/map/screen.py": {"ATTACHMENT_HARD_LINKED", "OK", "open_external"},
 }
 
 

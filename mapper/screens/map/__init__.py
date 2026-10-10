@@ -6,3 +6,7 @@ A5a (LLR-MOD.1.1) created the package with `navigation.py`
 this `__init__` holds no logic and no imports — package identity only,
 the same rule as the root `mapper/__init__.py` row of ARCHITECTURE §2.
 """
+
+from .screen import MapScreen
+
+__all__ = ["MapScreen"]

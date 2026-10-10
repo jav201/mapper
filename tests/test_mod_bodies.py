@@ -243,14 +243,21 @@ def test_llr_mod_4_3_red_one_token_body_mutation_reddens_the_diff(tmp_path):
     """Negative control on a tmp copy: rename one Name inside a MapScreen
     method body — the baseline diff must come back non-empty, proving the
     oracle sees a one-token drift, not just wholesale loss."""
+    import inspect
+
+    from mapper.app import MapScreen
+
     copy = tmp_path / "mapper"
     shutil.copytree(PACKAGE, copy)
-    app_py = copy / "app.py"
-    src = app_py.read_text(encoding="utf-8")
-    methods = sorted(k for k in _bodies_in_file(app_py) if k.startswith("MapScreen."))
+    # The file MapScreen lives in is DERIVED, not named: B0 moved it out of
+    # `app.py` and Spine B spreads its methods further (2026-10-09-modular-batch).
+    rel = Path(inspect.getfile(MapScreen)).resolve().relative_to(PACKAGE.resolve())
+    target = copy / rel
+    src = target.read_text(encoding="utf-8")
+    methods = sorted(k for k in _bodies_in_file(target) if k.startswith("MapScreen."))
     assert methods, "the Inc-0 census must contain MapScreen methods"
     mutated, name = _mutate_method_token(src, methods[0])
-    app_py.write_text(mutated, encoding="utf-8")
+    target.write_text(mutated, encoding="utf-8")
 
     diff = baseline_diff(copy, _load_baseline())
     assert diff["changed"], f"mutation of {name} went undetected: {diff}"

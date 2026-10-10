@@ -37,12 +37,24 @@ MODULES = _package_modules()
 # check first reached `mapper/screens/**` and Inc-0 could not edit product files —
 # go here, keyed by package-relative path, each name with its reason.
 ALLOWED_UNUSED: dict[str, dict[str, str]] = {
+    "mapper/app.py": {
+        name: "re-export for from-mapper.app import sites (LLR-MOD.3.1)"
+        for name in (
+            "COUNT_REGION_ID", "MAX_RENDER_NODES", "PAN_INERT_HINT", "SEARCH_ACTIVE_LABEL",
+            "SEARCH_COUNT_SUBJECT", "SEARCH_SUSPENDED_NOTICE", "SearchIndex", "_ConfirmScreen",
+            "_FichaScreen", "_QUERY_ECHO_CELLS", "_path_refusal", "map_hint", "pan_extent",
+            "save_svg",
+        )
+    },
     "mapper/screens/__init__.py": {
         name: "deliberate re-export declared in __all__"
         for name in (
             "CommandPalette", "CoverageScreen", "DraftGuardScreen", "EditorScreen",
             "FactoryScreen", "HelpScreen", "SettingsScreen",
         )
+    },
+    "mapper/screens/map/__init__.py": {
+        "MapScreen": "deliberate re-export declared in __all__ (B0 moved MapScreen here)",
     },
     "mapper/screens/factory.py": {
         "Node": "pre-existing unused import, recorded at Inc-0 (test-only increment; no product edit allowed)",

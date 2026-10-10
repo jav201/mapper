@@ -63,7 +63,7 @@ async def test_e1_the_unlaid_out_graph_site_says_it_too(tmp_path, monkeypatch):
         def boom(*args, **kwargs):
             raise ValueError("not a tree")
 
-        monkeypatch.setattr("mapper.app.pan_extent", boom)
+        monkeypatch.setattr("mapper.screens.map.screen.pan_extent", boom)
         await pilot.press("L")
         await pilot.pause()
         hint = _hint(screen)
