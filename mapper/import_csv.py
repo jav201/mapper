@@ -5,7 +5,7 @@ import csv
 from pathlib import Path
 
 from .mermaid import slugify
-from .model import Edge, Ficha, Graph, Node
+from .model import CsvCollision, CsvRow, Edge, Ficha, Graph, Node
 
 
 def _detect_delimiter(first_line: str) -> str:
@@ -45,6 +45,7 @@ def preview_csv(path: Path) -> Graph:
     graph = Graph()
     rows: list[tuple[str, str, str | None, int | None]] = []
     last_at_depth: dict[int, str] = {}
+    produced: dict[str, list[CsvRow]] = {}
 
     # First pass: create nodes so forward parent references resolve.
     auto_counter = 0
@@ -55,6 +56,13 @@ def preview_csv(path: Path) -> Graph:
             auto_counter += 1
             raw_id = title or f"row-{auto_counter}"
         nid = slugify(raw_id)
+        # LLR-CSV.2.1: record every row that produced this slug, with the
+        # line number exactly as `csv.DictReader.line_num` reports it (blank
+        # lines and CRLF endings count as the reader counts them) and the id
+        # as typed — including auto-generated ids from the empty-id path.
+        produced.setdefault(nid, []).append(
+            CsvRow(line_no=reader.line_num, raw_id=raw_id)
+        )
 
         title = title if title else raw_id
 
@@ -101,5 +109,14 @@ def preview_csv(path: Path) -> Graph:
             if node.id != root_id and graph.parent_of(node.id) is None:
                 graph.add_edge(Edge(parent_id=root_id, child_id=node.id))
                 _park(node)
+
+    # LLR-CSV.2.1: expose every slug more than one row produced — including
+    # collisions that violate no loader rule, because the preview keys on the
+    # record, not on loader invariants (ruling R1).
+    graph.csv_collisions = [
+        CsvCollision(slug=nid, rows=tuple(rs))
+        for nid, rs in produced.items()
+        if len(rs) > 1
+    ]
 
     return graph
