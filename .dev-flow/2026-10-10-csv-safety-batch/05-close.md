@@ -28,7 +28,7 @@
 | Field | Value |
 |---|---|
 | Gate record | `python devflow-validate.py .` from the project root · exit 0, **0 block** · 2026-10-10. The third full-suite gate run (the increment-4 tree, test-only, `53807c4`): **3157 passed / 3 xfailed / 0 failed** (`evidence/gate-run3-full-suite.transcript`). Runs 1–3 of the gate suite and the increment-1 gate are recorded in `04-validation.md` §Signed-balance test ledger. |
-| Gated tree | `63095f24a023e5f653f3e73fca7067424587aba0` · dirty — `.dev-flow/2026-10-10-csv-safety-batch/04-validation.md`, `05-close.md`, `docs/ARCHITECTURE.md` (the §4 amendment owed by ruling R10), `evidence/p4-save-cost.transcript`, `spike/p4_save_cost.py` (the close record itself excluded) |
+| Gated tree | `63095f24a023e5f653f3e73fca7067424587aba0` · dirty — `.dev-flow/2026-10-10-csv-safety-batch/04-validation.md`, `05-close.md`, `docs/ARCHITECTURE.md` (the §4 amendment owed by ruling R10), `evidence/p4-save-cost.transcript`, `spike/p4_save_cost.py` (the close record itself excluded) — **later commits change no code:** `git diff 53807c4 HEAD -- mapper tests` is empty (re-checked by the final qa-reviewer at `581c21a`); gate run 3 at `53807c4` is the gating suite run |
 | Requirements canon | `REQUIREMENTS.md`. Every id this batch declares as a heading (`HLR-CSV.1`, `HLR-CSV.2`, `HLR-CSV.3`, `LLR-CSV.1.1`, `LLR-CSV.1.2`, `LLR-CSV.1.3`, `LLR-CSV.2.1`, `LLR-CSV.2.2`, `LLR-CSV.2.3`, `LLR-CSV.3.1`) is folded into it at this close — **the orchestrator runs the fold**; at the drafting of this record the canon holds 0 CSV rows (`grep -c 'HLR-CSV\|LLR-CSV' REQUIREMENTS.md` → 0). |
 
 - **The gate runs that stand behind this close** (`04-validation.md` owns the citations): P0 base `a36f63e` — 3133 passed / 3 xfailed (modular close); increment-1 gate at `d4941ea` — 4 failed / 3139 passed (the model-field totality guard caught the new unclassified CSV fields; fixed in `6763852`); final run 1 — 3 failed / 3153 passed (modular move oracle + A3 pin, both follow-ups); final run 2 at `1537985` — **3156 passed / 0 failed**; final run 3 (increment 4, test-only) — 3157 passed / 3 xfailed / 0 failed at `53807c4` (run 3).
@@ -82,7 +82,7 @@
 | 3 | the **catalog** entry (`dev-flow-lessons`) with its measured origin | ❌ | same reason — the measured origins are recorded above and in `04-validation.md` |
 | 4 | **committed and pushed**, manifest re-hashed and bumped | ❌ | same reason; nothing pushed from this batch (no `origin` premise) |
 
-- **New controls:** none minted in the flow — the flow-side landing is the operator's, and the measured origins above are the catalog material. In-repo, the batch left permanent guards behind: the dump-once pin (`test_save_writes_the_bytes_dump_returned_and_dumps_once`), the no-write sha256 oracle, the LLR-CSV.1.3 forest pin and the retired-freeze loss arm.
+- **New controls:** 0 minted in the flow — the flow-side landing is the operator's, and the measured origins above are the catalog material. In-repo, the batch left permanent guards behind: the dump-once pin (`test_save_writes_the_bytes_dump_returned_and_dumps_once`), the no-write sha256 oracle, the LLR-CSV.1.3 forest pin and the retired-freeze loss arm.
 
 ---
 
@@ -144,10 +144,9 @@ open_items_next: 3           # B-115, B-116, B-117
 |---|---|---|---|---|
 | `01-requirements.md` + ledger | P2 architect + qa-reviewer, two rounds; PDR sealed; 11 ledger entries | ❌ | `none` | the whole contract |
 | Product code + tests | three code reviews APPROVE-WITH-NITS, 0 HIGH; nits closed in increment 3; M1–M4 executed RED | ❌ | `none` | — |
-| `04-validation.md` | gate run 2: 3156 passed / 0 failed; ledger reconciles 3136 − 0 + 24 = 3160; P4 perf 3.2 % ≤ 25 % | ❌ | `none` | — |
+| `04-validation.md` | gate run 3 (`53807c4`): 3157 passed / 3 xfailed / 0 failed; ledger reconciles 3136 − 0 + 24 = 3160; P4 perf 3.2 % ≤ 25 % | ❌ | `none` | — |
 | DDR + increment packets | sealed approved at `63095f2`; six conditions discharged in increment 4 | ❌ | `none` | — |
 
 - **Human perimeter:** the operator owns the flow-side rulings this batch surfaced (the move-oracle-freeze and vacuous-mutation lessons, §2), the carried backlog dispositions (B-115/B-116/B-117) and the canon fold. Whether the flow should adopt the lessons as encoded controls is the operator's decision, not this batch's.
-- **Human review ledger:** PENDING — recorded by the orchestrator. `none` at drafting: the operator authorized an autonomous batch, and every reviewer seat was a read-only Claude model; the single worker was Kimi (`kimi-code/kimi-for-coding`). The orchestrator replaces this marker with the human-review record (or its confirmed absence).
+- **Human review ledger:** no human audited any artifact of this batch (`none`, every row above). The operator authorized an autonomous batch ("Batch corto antes (Recomendado)", 2026-10-10); every reviewer seat was a read-only Claude model (architect Opus, qa-reviewer and code-reviewer Sonnet) and the single worker was Kimi (`kimi-code/kimi-for-coding`). The operator's review surface is the PR and this close.
 
-**Reviewer cells PENDING for the orchestrator:** §0 gate record (GATE3_PENDING), §6 human review ledger, and the qa-reviewer cell at the foot of `04-validation.md`.
