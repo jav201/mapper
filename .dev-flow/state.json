@@ -80,8 +80,8 @@
     }
   ],
   "guided": false,
-  "current_station": "P1",
-  "phase_status": "iterating",
+  "current_station": "P2",
+  "phase_status": "in-progress",
   "stations_active": [
     "P0",
     "ARQ",
@@ -178,6 +178,11 @@
       "station": "P2",
       "date": "2026-10-09",
       "decision": "P2 round 1: iterate-to-refine (self-ruled): 4 blockers (ARCH-1 no legal MapScreen import edge for home/import_preview; ARCH-2 8 patch targets not 2; QA-1 parity capture undefined; QA-2 no per-method body identity / undefined-name check) + majors + minors; orchestrator rulings: sibling screens import MapScreen from screens.map with a reordered spine, patch targets repointed in the moving increment, text golden committed at Inc-0, test_mod_bodies.py"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 iteration 1 approved (self-approved): all 18 P2 round-1 findings applied in four Kimi units (HLRs/premises, LLRs, ARCHITECTURE.md, ledger LED .1-.8); orchestrator rulings ARCH-1/ARCH-2/QA-1/QA-2 recorded"
     }
   ],
   "standing_authorization": {
