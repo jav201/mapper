@@ -81,7 +81,7 @@
   ],
   "guided": false,
   "current_station": "P6",
-  "phase_status": "in-progress",
+  "phase_status": "approved",
   "stations_active": [
     "P0",
     "ARQ",
@@ -213,6 +213,17 @@
       "station": "P5",
       "date": "2026-10-10",
       "decision": "P5 close approved (05-postmortem.md rev 2): drafted by Kimi; architect (Claude Opus) + qa-reviewer (Claude Sonnet) approve-with-conditions then approve on re-review; 24 MOD ids folded into REQUIREMENTS.md (LLR-MOD.7.1 amended by LED .12 first); backlog B-108..B-113; next: P6 docs"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-10",
+      "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary, module diagram (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH/MED; merged as 9bcbabb (PR #16, squash; feat/modular-batch kept on the remote)"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-10",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/ (full sync: 17 artifacts + README with metrics; PDR/DDR to vault:mapper/design/; repo-homed artifacts not copied; Dashboard untouched)"
     }
   ],
   "standing_authorization": {
@@ -258,6 +269,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-09T00:00:00"
 }
