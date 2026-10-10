@@ -136,6 +136,11 @@ def test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen():
     `MapScreen` class body (its declaration, `_guard_draft`, `guard_open`);
     the private is not read across classes.  And `MapperApp.action_quit` calls
     the public `guard_open()`."""
+    from mapper.app import MapScreen
+
+    owners = {"MapScreen"} | {c.__name__ for c in MapScreen.__mro__
+                              if c.__module__.startswith("mapper.screens.map")}
+
     class _Track(ast.NodeVisitor):
         def __init__(self, path: Path):
             self.path = path
@@ -148,7 +153,11 @@ def test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen():
 
         def visit_Attribute(self, node: ast.Attribute):
             if node.attr == "_draft_guard_open":
-                assert self.enclosing == ["MapScreen"], (self.path, node.lineno, self.enclosing)
+                # `2026-10-09-modular-batch` B7: the flag's owner is MapScreen composed of
+                # its Spine B mixins (DraftsOps holds `_guard_draft`/`guard_open`); the set
+                # is DERIVED from MapScreen's bases, so a read from any other class still fails.
+                assert len(self.enclosing) == 1 and self.enclosing[0] in owners, (
+                    self.path, node.lineno, self.enclosing)
             self.generic_visit(node)
 
     for path, source in _all_sources().items():

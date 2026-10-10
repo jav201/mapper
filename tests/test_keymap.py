@@ -145,7 +145,10 @@ def test_at_n03f_bound_keys_match_the_seat_exactly(scope):
     # Textual contributes bindings of its own (focus traversal, copy, ctrl+q quit).
     # Subtract whatever the BASE class already binds — derived from the framework
     # at runtime, not a hand-listed allowance that would rot silently.
-    inherited = set(owner.__mro__[1]._merged_bindings.key_to_bindings)
+    # `2026-10-09-modular-batch` Spine B: MapScreen's MRO starts with plain mixins (no
+    # bindings of their own), so the framework base is the first DOMNode class after it.
+    base = next(c for c in owner.__mro__[1:] if hasattr(c, "_merged_bindings"))
+    inherited = set(base._merged_bindings.key_to_bindings)
     bound = set(owner._merged_bindings.key_to_bindings) - inherited
     expected = {b.key for b in keymap.bindings_for(scope)}
     # `E4` (Inc-EN-9): a text-only scope still BINDS the key its field swallows (it fires once focus has left
