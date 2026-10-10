@@ -27,19 +27,29 @@
 
 | Field | Value |
 |---|---|
-| Gate record | `<the validator command, the exit code THAT run printed, and 0 block · date>` |
-| Gated tree | `<the 40-hex HEAD at the gate · clean — or: dirty — the files>` |
-| Requirements canon | `<the canon path `artifact_homes.requirements_canon` declares — every id this batch's `01-requirements.md` declares as a heading is a token in it>` |
+| Gate record | `python devflow-validate.py .` from the project root · exit 1 · 1 block · 381 notice · 2026-10-09 |
+| Gated tree | `4b1a4d04f5b01edc152131d46b63906f231866d2` · dirty — .dev-flow/BACKLOG.md (the close record itself excluded) |
+| Requirements canon | `REQUIREMENTS.md`. Every id this batch declares as a heading (`HLR-CAN.1`, `HLR-CAN.2`, `LLR-CAN.1.1`, `LLR-CAN.1.2`, `LLR-CAN.2.1`) is a token in it, folded at this close (`5 folded`). The hygiene batch's five requirements are now present as `HLR-HYG.*` / `LLR-HYG.*` (AT-063). |
+
+- **Cosmetic, the fold's own normalisation:** the folded statement of `LLR-CAN.1.2` reads correctly. The folded statement of `LLR-CAN.1.1` lost the literal backtick and `**` tokens it quotes ("drop backticks and ;"). That is because the fold drops them by rule 1, the very rule the row describes. The contract (`01-requirements.md`) keeps the exact wording.
+- **The one block is `V7`, which is external:** the installed flow bundle's `SKILL.md` hash differs from its manifest. This batch does not modify `~/.claude` (F1). Every other rule is green or a notice.
 
 ---
 
 ## 1 · What changed
 
-*(BLUF. What the user can now do that they could not before, and through which surface. Then the mechanism.)*
+**The canon now holds the hygiene batch's requirements under collision-free ids (B-105, project side), and `mapper/app.py` has no unused import (B-104).**
 
 | Requirement | Version | Verified by | Verdict |
 |---|---|---|---|
-| `R-NNN` | `vN` | `AT-NNN` · `TC-NNN` | |
+| `HLR-CAN.1` | `v1` | `AT-063` · `test_llr_can_1_2_*` · C0–C3 killed | pass |
+| `LLR-CAN.1.1` | `v1` | `AT-063`, `test_llr_can_1_1_normaliser_pins_the_fold_rules` | pass |
+| `LLR-CAN.1.2` | `v1` | `test_llr_can_1_2_canon_ids_are_unique_and_the_table_is_not_empty` | pass |
+| `HLR-CAN.2` | `v1` | `AT-064` · `ruff` corroboration · A1 killed | pass |
+| `LLR-CAN.2.1` | `v1` | `test_llr_can_2_1_checker_arms` (13) | pass |
+
+- **Gate suite on `791decb`:** 2941 passed, 3 xfailed, 0 failed (`evidence/p4-full-suite.transcript`).
+- **P4 verdict:** `PASS-WITH-NOTES`.
 
 ---
 
@@ -47,17 +57,16 @@
 
 | Control | What failure it closes | Measured origin |
 |---|---|---|
-
-**The four landings — record which ones actually happened. Command-but-not-template is *half-encoded*, and the missing half is the enforceable one:**
+| (project convention, not a flow control) **namespaced requirement ids per batch** (`CAN` here) | a plain `HLR-001` collides in the canon, and the fold keeps the old row | B-105 (`2026-10-09-hygiene-batch` close §2) |
 
 | # | Landing | Done? | SHA / path |
 |---|---|---|---|
-| 1 | the **command** (`commands/…`) — the rule itself | | |
-| 2 | its **artifact** (a template section) — a control with no output degrades to "I thought about it" | | |
-| 3 | the **catalog** entry (`dev-flow-lessons`) with its measured origin | | |
-| 4 | **committed and pushed**, manifest re-hashed and bumped | | |
+| 1 | the **command** — the rule itself | ❌ | flow-side, not landed: the bundle is owned by the rev101 session (B-106) |
+| 2 | its **artifact** (a template section) | ❌ | same reason (the template seeds `HLR-001`) |
+| 3 | the **catalog** entry (`dev-flow-lessons`) | ❌ | same reason |
+| 4 | committed and pushed, manifest re-hashed | ❌ | same reason |
 
-- **New controls:** `<N control(s) minted → C-NN, C-NN | none — the reason this batch minted none>`
+- **New controls:** none minted in the flow. The project applies the convention from this batch on, and the flow-side fix is carried as B-106 for the operator's ruling.
 
 ---
 
@@ -65,16 +74,16 @@
 
 | File | State | Evidence |
 |---|---|---|
-| `<path>` | ✅ committed **and landed** (PR / merge named; with no `origin` remote, the local branch and the no-origin premise) · 🗑️ deliberately reverted · 📋 left on purpose, path + remaining work in the backlog | |
+| `REQUIREMENTS.md`, `mapper/app.py`, `tests/test_requirements_canon.py`, `tests/test_app_imports_used.py` | ✅ committed (`791decb`, plus the canon fold at close), landed through the PR of `feat/canon-batch` | `git log feat/canon-batch` |
+| `.dev-flow/2026-10-09-canon-batch/**`, `.dev-flow/state.json`, the hygiene archive (`decisions-log.json`, `state-snapshot-at-close.json`) | ✅ committed, landed through the same PR | the batch commits |
+| `.dev-flow/BACKLOG.md` | ✅ close commit, same PR | §4 |
+| worktrees `%TEMP%/ds-units/wt-can1`, `wt-can2`, `wt-val2` (branches `unit/*`) | 📋 worker scratch outside the repo tree, never pushed | removed after the merge (scratch rule) |
 
 - **Found before the batch:** `none — no tracked file was modified when the batch began`
 
 ### Conditional-gate discharge
 
-- **Conditional-gate discharge:** `<N condition(s) · ✅ all discharged | N condition(s) · ⚠ M outstanding, named below | none — no gate closed conditionally>`
-
-| Condition | Discharged? | The artifact line that proves it |
-|---|---|---|
+- **Conditional-gate discharge:** none — no gate closed conditionally
 
 ---
 
@@ -82,27 +91,30 @@
 
 | Item | Move | Reference |
 |---|---|---|
+| B-104 | DONE | AT-064; `ruff check mapper/app.py` → `All checks passed!` |
+| B-105 | DONE (project side): the 5 hygiene rows appended; ids namespaced from this batch on | AT-063; increment-001 |
+| B-106 | NEW: the flow-side fix (the requirements template seeds a plain `HLR-001`; `--fold-canon` cannot alias; there is no rename path under `V26` + the append-only ledger). Operator ruling, flow backlog | §2 |
+| G-001 (`04-validation.md`) | carried inside B-106: B-105's failure mode is not detectable in the repo | `04-validation.md` |
+| B-102 | untouched | — |
 
 ---
 
 ## 5 · Batch metrics — the 13 keys of `core`
 
-Extract, do not invent: a key the artifacts did not record goes `null`, and the key is never dropped.
-
 ```yaml
 type: dev-flow-batch
-project: <str>
-batch_id: <str>
+project: mapper
+batch_id: 2026-10-09-canon-batch
 mode: core
-verdict: pass | iterate
-increments: <int>
-source_files_max: <int>          # highest source-file count in any one increment
-notices_raised: <int>            # ⚠ declared across the batch
-rework_returns: <int>            # items that came back, per QA's phase checklists
-triggers_fired: <str>            # e.g. "B1,B4,C3"
-tests_base_to_post: "<base> -> <post>"
-new_control: <str | none>
-open_items_next: <int>
+verdict: pass
+increments: 1
+source_files_max: 1
+notices_raised: 3            # checklist ⚠: intake 7 (V7), req 8 (absence premises); the reviewer row-count error caught (LED .5)
+rework_returns: 2            # P2 round 1 -> P1 (ARCH-1, QA-2, QA-1); P4 qa-reviewer fixes
+triggers_fired: "B4,F1"
+tests_base_to_post: "2927 -> 2944"
+new_control: none            # project convention adopted; the flow-side fix is B-106
+open_items_next: 1           # B-106
 ```
 
 ---
@@ -111,18 +123,9 @@ open_items_next: <int>
 
 | Artifact | Machine verdict (citation) | Human review | Depth | Deliberately NOT reviewed |
 |---|---|---|---|---|
-| `<one row per human-auditable artifact this batch produced>` | | | | |
+| `01-requirements.md` + ledger | P2 architect + qa-reviewer, 2 rounds; `V26` paired | ❌ | `none` | the whole contract |
+| `REQUIREMENTS.md` rows + code | `code-reviewer` APPROVE-WITH-NITS, 0 HIGH; C0–C3 and A1 killed | ❌ | `none` | — |
+| `04-validation.md` | qa-reviewer pass, fixes applied | ❌ | `none` | — |
 
-**A worked example — text to read, never rows of your record.** It sits in a fence so that
-nothing has to be deleted: a row copied out of it would claim a reading that did not happen.
-Write your own rows in the table above, one per artifact.
-
-```text
-| *(example)* `01-requirements.md` | gate §4 ✓ · `V26` green | ✅ | `rigorous` | |
-| *(example)* Test cases / ATs | `V37` 12/12 · mutants 9/9 KILLED | ✅ | `light` | the fixture matrix behind `AT-007` |
-| *(example)* Evidence view | `V41` — every cited file resolved | ❌ | `none — read the packet summaries instead` | |
-| *(example)* Code | gates + reviewer verdict `PASS` | ✅ | `spot-check` | not audited line by line |
-```
-
-- **Human perimeter:** `<what this flow does NOT cover and the operator owns — e.g. personnel selection, organisational environment, business judgement | none — why nothing lies outside>`
-- **Human review ledger:** `<human:NAME — N artifact(s) reviewed, M rigorous · K declared not-reviewed | none — why this batch recorded no human review>`
+- **Human perimeter:** B-106. Whether the flow should namespace requirement ids (in the template seed and the fold) is a flow-governance decision for the operator.
+- **Human review ledger:** none. The operator authorized an autonomous batch with merge («core + autónomo + merge (Recomendado)», 2026-10-09), and owes a later reading.
