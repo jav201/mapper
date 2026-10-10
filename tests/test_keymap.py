@@ -207,15 +207,26 @@ def test_llr_n06_5_no_screen_binds_tab_outside_the_recorded_exceptions():
     modal screens still bind it; they are named in `TAB_BINDING_EXCEPTIONS` so a
     NEW one reddens this test instead of passing unnoticed.
     """
+    import importlib
     import inspect as _inspect
+    import pkgutil
 
     from textual.screen import Screen
 
-    from mapper import app as app_module
-    from mapper.screens import coverage, editor, factory, help as help_mod, palette, settings
+    import mapper
+
+    # LLR-MOD.5.1: derive the scanned module set from the package itself --
+    # `pkgutil.walk_packages(mapper.__path__, "mapper.")` -- instead of a hand
+    # list.  A hand list rots at the first code move: a screen extracted into
+    # a brand-new module would sit outside the universal and bind `tab`
+    # unnoticed.
+    modules = [
+        importlib.import_module(name)
+        for _, name, _is_pkg in pkgutil.walk_packages(mapper.__path__, "mapper.")
+    ]
 
     offenders = []
-    for module in (app_module, coverage, editor, factory, help_mod, palette, settings):
+    for module in modules:
         for _, cls in _inspect.getmembers(module, _inspect.isclass):
             if not issubclass(cls, Screen) or cls.__module__ != module.__name__:
                 continue
@@ -313,9 +324,12 @@ def test_no_hint_or_keybar_text_advertises_a_key_the_map_does_not_bind():
     import ast
     import re
 
-    import mapper.app as app_module
+    from mapper.app import MapScreen
 
-    source = pathlib.Path(app_module.__file__).read_text(encoding="utf-8")
+    # LLR-MOD.5.1: read the file that DECLARES MapScreen (today app.py)
+    # rather than pinning the app module -- the prose this scans moves with
+    # the class at the split.
+    source = pathlib.Path(inspect.getfile(MapScreen)).read_text(encoding="utf-8")
     tree = ast.parse(source)
     # STRING LITERALS only, via the AST -- scanning raw text would also read
     # comments and docstrings, which discuss keys without advertising them.
