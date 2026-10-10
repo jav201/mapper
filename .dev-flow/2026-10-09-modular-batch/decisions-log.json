@@ -1,0 +1,68 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-10-09",
+    "decision": "P0 approved (self-approved under the standing authorization, operator words 'full + autónomo + merge (Recomendado)'): objective R-009 modularisation; triggers A1-A4, B1, E1, F1 fired"
+  },
+  {
+    "station": "ARQ",
+    "date": "2026-10-09",
+    "decision": "ARQ approved (self-approved): module map amended in docs/ARCHITECTURE.md (TARGET rows) from the Kimi K3 proposal, corrected by the orchestrator's MRO spike (BINDINGS stay on the core class; disjoint on_* names); independent architect review owed at P2/PDR"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-09",
+    "decision": "P1 approved (self-approved): contract drafted by Kimi K2 (3 US, 7 HLR, 16 LLR, AT-065..070); scan-spec flag 'session' answered as a false positive"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-09",
+    "decision": "P2 round 1: iterate-to-refine (self-ruled): 4 blockers (ARCH-1 no legal MapScreen import edge for home/import_preview; ARCH-2 8 patch targets not 2; QA-1 parity capture undefined; QA-2 no per-method body identity / undefined-name check) + majors + minors; orchestrator rulings: sibling screens import MapScreen from screens.map with a reordered spine, patch targets repointed in the moving increment, text golden committed at Inc-0, test_mod_bodies.py"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-09",
+    "decision": "P1 iteration 1 approved (self-approved): all 18 P2 round-1 findings applied in four Kimi units (HLRs/premises, LLRs, ARCHITECTURE.md, ledger LED .1-.8); orchestrator rulings ARCH-1/ARCH-2/QA-1/QA-2 recorded"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-09",
+    "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer proceed; architect ARCH-1..7 resolved, ARCH-8/9 blockers + ARCH-10/11 fixed (LED .9); orchestrator spine probe 0 illegal edges; contract size 69.7k > 54k budget recorded as watch item"
+  },
+  {
+    "station": "PDR",
+    "date": "2026-10-09",
+    "decision": "PDR approved with conditions C1-C9 (self-approved under the standing authorization): architect + qa-reviewer approved-with-conditions; document conditions C1, C2, C3, C6, C7, C8 applied (LED .10); C4, C5, C9 are executed in P3 and re-read at DDR"
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-10",
+    "decision": "P3 approved (self-approved under the standing authorization): 22 increments (Inc-0, A1-A7, B0-B12); every gate run recorded (last: 3124 passed / 0 failed at e5d80e9); group code reviews A2-A4+B0 and B1-B12 APPROVE-WITH-NITS 0 HIGH, MED vacuous census scans repaired (1c77233); packets 001-022"
+  },
+  {
+    "station": "DDR",
+    "date": "2026-10-10",
+    "decision": "DDR sealed approved (DDR-2026-10-09-modular-batch): architect (Claude Opus) + qa-reviewer (Claude Sonnet) approved on re-review after increment 023 (69676cf) closed D-C1..D-C3 and the DDR evidence closed D-C4 + QA MED-1/MED-2; P4 gate full suite at 69676cf 3133 passed / 3 xfailed / 0 failed (evidence/p4-gate-full-suite.transcript), slow lane 19/0 at acbd087; 2 LOWs carried to backlog"
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-10",
+    "decision": "P4 PASS-WITH-NOTES (04-validation.md): full suite at 69676cf 3133 passed / 3 xfailed / 0 failed, slow lane 19/0, network lane declared not run; Layer A 7 HLR + 17 LLR, Layer B 3 US / AT-065..071; drafted by Kimi, qa-reviewer (Claude Sonnet) approve-with-conditions, M-1/M-2 applied; 4 minor gaps to backlog"
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-10",
+    "decision": "P5 close approved (05-postmortem.md rev 2): drafted by Kimi; architect (Claude Opus) + qa-reviewer (Claude Sonnet) approve-with-conditions then approve on re-review; 24 MOD ids folded into REQUIREMENTS.md (LLR-MOD.7.1 amended by LED .12 first); backlog B-108..B-113; next: P6 docs"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-10",
+    "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary, module diagram (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH/MED; merged as 9bcbabb (PR #16, squash; feat/modular-batch kept on the remote)"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-10",
+    "decision": "synced-to-obsidian",
+    "notes": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/ (full sync: 17 artifacts + README with metrics; PDR/DDR to vault:mapper/design/; repo-homed artifacts not copied; Dashboard untouched)"
+  }
+]
