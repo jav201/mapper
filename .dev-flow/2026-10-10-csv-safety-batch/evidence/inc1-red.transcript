@@ -1,0 +1,42 @@
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+08fe5d72d2a3825553d6460fe02ecb38d684baf08136b1b2f26ca200dab7b48b *mapper/model.py
+
+=== M1: delete the round-trip check call in MapStore.save (check kept nothing else that refuses) ===
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k 'multi_parent or unparsable or reparse_structure'
+FAILED tests/test_csv_safety_store.py::test_save_refuses_multi_parent_graph
+FAILED tests/test_csv_safety_store.py::test_save_refuses_unparsable_dump - Fa...
+FAILED tests/test_csv_safety_store.py::test_save_refuses_reparse_structure_mismatch
+3 failed, 5 deselected in 0.24s
+restore: cp /tmp/store_inc1_backup.py mapper/store.py
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py (post-restore GREEN)
+8 passed in 0.28s
+
+=== M1b: move the validation to after the first temp-file replace (mmd_tmp.replace) ===
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k refused_save_changes_no_workspace_byte
+FAILED tests/test_csv_safety_store.py::test_refused_save_changes_no_workspace_byte
+1 failed, 7 deselected in 0.21s
+restore: cp /tmp/store_inc1_backup.py mapper/store.py
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+
+=== M4: re-add the root comparison to the round-trip check (ruling R11 removed it) ===
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k legacy_forest
+FAILED tests/test_csv_safety_store.py::test_save_accepts_legacy_forest_after_edit
+1 failed, 7 deselected in 0.21s
+
+=== M-cyc: delete the pre-existing cycle guard (LLR-R01.5) from MapStore.save ===
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py -k cycle_still
+FAILED tests/test_csv_safety_store.py::test_save_refuses_cycle_still - Assert...
+1 failed, 7 deselected in 0.19s
+
+restore: cp /tmp/store_inc1_backup.py mapper/store.py
+$ sha256sum mapper/store.py  (must equal baseline 293c521e...7773)
+293c521e12874a61901cd0f54de7f0ea3a4febd2f51a20177f22769e94ad7773 *mapper/store.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py (final GREEN)
+8 passed in 0.25s
+
+=== Final verification (restored tree) ===
+$ python -B -m pytest -q -p no:cacheprovider tests/test_csv_safety_store.py tests/test_store.py tests/test_import_csv.py tests/test_repair_cycles.py
+55 passed in 4.54s
+$ ruff check mapper/store.py mapper/model.py tests/test_csv_safety_store.py
+All checks passed!

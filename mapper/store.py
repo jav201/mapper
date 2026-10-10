@@ -807,6 +807,53 @@ class MapStore:
         tmp.write_text(text, encoding="utf-8")
         return tmp
 
+    def _check_round_trip(self, graph: Graph, mmd_text: str) -> None:
+        """LLR-CSV.1.1 (B-114): refuse a graph whose own dump does not load
+        back as the same graph.
+
+        Round-trips `mmd_text` — the exact text `save` is about to persist —
+        through this store's own loader (`mermaid.parse`), so the check cannot
+        drift from the loader it round-trips through.  Refuses when the parse
+        raises, or when the reparsed graph differs from `graph` in the node-id
+        set or the edge set as (parent, child) pairs.  The ROOT is deliberately
+        NOT compared (ruling R11 / B-117): `dump` writes edges before parentless
+        nodes and `parse` takes the first parentless node in text order, so a
+        forest's root drifts on reparse and a root comparison would refuse maps
+        that open today.  Edge MULTIPLICITY is compared (a sorted pair list,
+        not a set): `dump` deduplicates exact duplicate edges, so a set
+        comparison would accept a reparse that silently loses a row — refusing
+        duplicate edges is an intended superset of the loader (architect A5).
+        """
+        from .mermaid import ParseError, parse
+
+        try:
+            reparsed = parse(mmd_text)
+        except ParseError as exc:
+            if "multiple parents" in str(exc):
+                raise MapStoreError(
+                    "the map has a node with more than one parent; a map can "
+                    "hold only one parent per node, so fix the duplicated "
+                    "parents and save again"
+                ) from exc
+            raise MapStoreError(
+                "the map would not re-open after saving; remove the text that "
+                "breaks the saved file and save again"
+            ) from exc
+        if set(reparsed.nodes) != set(graph.nodes):
+            raise MapStoreError(
+                "saving would change the nodes: the saved map would re-open "
+                "with different node ids, so fix the node ids or titles and "
+                "save again"
+            )
+        if sorted((e.parent_id, e.child_id) for e in reparsed.edges) != sorted(
+            (e.parent_id, e.child_id) for e in graph.edges
+        ):
+            raise MapStoreError(
+                "saving would change the connections: the saved map would "
+                "re-open with different parent-child links, so remove "
+                "duplicate links or arrows in titles and save again"
+            )
+
     def save(self, map_id: str, graph: Graph) -> None:
         check_map_id(map_id)
         mmd_path = self.workspace / f"{map_id}.mmd"
@@ -824,6 +871,11 @@ class MapStore:
             raise MapStoreError(f"the map has a cycle: {CYCLE_ARROW.join(cycle)}")
 
         mmd_text = dump(graph)
+        # LLR-CSV.1.1/1.2 (B-114): never persist what this store's own read
+        # side would refuse or silently alter.  The check round-trips the EXACT
+        # text about to be written (one dump per save — `mmd_text` IS the
+        # persisted string) through the loader, BEFORE any byte is written.
+        self._check_round_trip(graph, mmd_text)
         sidecar = self._build_sidecar(graph)
         # `G6-C-F8`(b): fingerprint the mmd THIS sidecar is written alongside,
         # so a later `load()` can tell a torn write (one file replaced, the
