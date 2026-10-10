@@ -18,13 +18,10 @@ from .import_csv import preview_csv
 from .keymap import (
     SCOPE_APP,
     SCOPE_HOME,
-    SCOPE_IMPORT,
     bindings_for,
     groups_for_keybar,
-    hint_pair,
 )
 from .model import Document, Edge, Ficha, Graph, Node
-from .motion import pulse_cursor
 from .osopen import PATH_NOT_SUPPORTED, safe_local_path
 from .screens import CommandPalette, FactoryScreen, HelpScreen, SettingsScreen
 from .screens.common import (
@@ -37,13 +34,13 @@ from .screens.common import (
     _home_door_key,
     _path_refusal,
     _refusal_toast,
-    _save_or_toast,
     home_hint,
     keybar_groups,
     map_hint,
     screen_bindings,
 )
 from .screens.construct import ConstructScreen
+from .screens.import_preview import _ImportPreviewScreen
 from .screens.map.screen import MapScreen
 from .screens.map.navigation import NavigationModel
 from .screens.plug_repo import PlugRepoScreen
@@ -56,8 +53,7 @@ from .screens.prompt import (
 from .screens.repo import RepoScreen
 from .search import SearchIndex
 from .store import TEMPLATES, MapStore
-from .views.layered import MAX_RENDER_NODES, LayeredRenderer, pan_extent
-from .views.state import ViewState
+from .views.layered import MAX_RENDER_NODES, pan_extent
 from .widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 
 
@@ -547,75 +543,6 @@ class HomeScreen(Screen):
     def on_screen_resume(self) -> None:
         """Refresh the home surface when returning."""
         self.on_mount()
-
-
-class _ImportPreviewScreen(Screen):
-    """Preview a CSV import before saving it as a named map."""
-
-    KEY_SCOPE = SCOPE_IMPORT
-    BINDINGS = screen_bindings(SCOPE_IMPORT)
-
-    def __init__(self, preview_graph: Graph, source_path: Path) -> None:
-        super().__init__()
-        self.preview_graph = preview_graph
-        self.source_path = source_path
-
-    def compose(self) -> ComposeResult:
-        yield TabStrip("i", crumb=["import", self.source_path.name])
-        yield Static("", id="import-preview-canvas")
-        yield HintLine(f"{hint_pair(SCOPE_IMPORT, 'save')} · {hint_pair(SCOPE_IMPORT, 'home')}")
-        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
-
-    def on_mount(self) -> None:
-        self.refresh_canvas()
-
-    def refresh_canvas(self) -> None:
-        canvas = self.query_one("#import-preview-canvas", Static)
-        renderer = LayeredRenderer()
-        size = self.size or self.app.size
-        # Same sink class as MapScreen.refresh_canvas, and a live second door:
-        # a CSV whose `parent` column is circular builds a cyclic graph without
-        # ever passing through `mermaid.parse`, so the parser's refusal cannot
-        # reach it.  Measured — see increment-001 §1.
-        try:
-            text = renderer.render(
-                self.preview_graph,
-                ViewState(
-                    selected_id=self.preview_graph.root_id,
-                    w=max(20, size.width),
-                    h=max(5, size.height - 10),
-                ),
-            )
-        except Exception as exc:
-            text = darkside.Text.assemble(
-                (" could not draw the preview\n\n", f"bold {darkside.INK}"),
-                (f" {darkside.plain(str(exc))}", darkside.MUT),
-            )
-        canvas.update(text)
-        pulse_cursor(canvas)
-
-    def action_save(self) -> None:
-        def on_name(name: str | None) -> None:
-            if not name:
-                return
-            # `G6-C-F4`: the "guardar como" name is operator-typed and reaches
-            # `store.save(name, ...)` as the map id, uncoerced until now.
-            name = darkside.plain(name)
-            store: MapStore = self.app.store  # type: ignore[attr-defined]
-            if not _save_or_toast(self, store, name, self.preview_graph, new=True):
-                return
-            self.app.push_screen(MapScreen(name))
-
-        self.app.push_screen(
-            _PromptScreen("save as", self.source_path.stem),
-            callback=on_name,
-        )
-
-    def action_home(self) -> None:
-        self.app.pop_screen()
-
-    def action_palette(self) -> None:
-        self.app.action_palette()
 
 
 class MapperApp(App):
