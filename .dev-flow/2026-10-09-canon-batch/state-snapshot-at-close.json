@@ -1,10 +1,10 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-10-09-modular-batch",
-  "batch_objective": "Modularise mapper/app.py (R-009): move the top-level screens and their modals out of the 4957-line app.py into their own modules under mapper/screens/, with MapperApp keeping orchestration, so that later batches can run parallel product lanes. Behaviour-preserving: no visible change.",
+  "batch_id": "2026-10-09-canon-batch",
+  "batch_objective": "Canon gap and lint debt: B-105 (append the hygiene batch's five requirements to REQUIREMENTS.md under namespaced ids, with their record ids noted, and adopt namespaced ids from this batch on) and B-104 (remove the unused `re` import at mapper/app.py:7).",
   "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
-  "mode": "full",
+  "mode": "core",
   "mode_history": [
     {
       "batch_id": "2026-08-18-batch-01",
@@ -72,55 +72,41 @@
       "batch_id": "2026-10-09-hygiene-batch",
       "mode": "core",
       "closed_at": "2026-10-09"
-    },
-    {
-      "batch_id": "2026-10-09-canon-batch",
-      "mode": "core",
-      "closed_at": "2026-10-09"
     }
   ],
   "guided": false,
-  "current_station": "P0",
-  "phase_status": "not-started",
+  "current_station": "P5",
+  "phase_status": "closed",
   "stations_active": [
     "P0",
-    "ARQ",
     "P1",
     "P2",
-    "PDR",
     "P3",
-    "DDR",
     "P4",
-    "P5",
-    "P6"
+    "P5"
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
-    "P5": 0,
-    "P6": 0,
-    "ARQ": 0,
-    "DDR": 0,
-    "PDR": 0
+    "P5": 0
   },
   "triggers": {
-    "evaluated_at": "2026-10-09T21:47:20",
+    "evaluated_at": "2026-10-09T20:50:03",
     "fired": [
+      "B4",
+      "F1"
+    ],
+    "not_fired": [
       "A1",
       "A2",
       "A3",
       "A4",
       "B1",
-      "E1",
-      "F1"
-    ],
-    "not_fired": [
       "B2",
       "B3",
-      "B4",
       "C1",
       "C2",
       "C3",
@@ -131,54 +117,103 @@
       "C8",
       "D1",
       "D2",
+      "E1",
       "E2",
       "E3",
       "F2"
     ],
-    "record": ".dev-flow/2026-10-09-modular-batch/PLAN.md#triggers"
+    "record": ".dev-flow/2026-10-09-canon-batch/PLAN.md#triggers"
   },
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-10-09-modular-batch/01-requirements.md",
-    "requirements_ledger": "repo:.dev-flow/2026-10-09-modular-batch/01-requirements-ledger.md",
-    "traceability": "repo:.dev-flow/2026-10-09-modular-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-10-09-canon-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-09-canon-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-09-canon-batch/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-10-09-modular-batch/03-increments/",
-    "evidence": "repo:.dev-flow/2026-10-09-modular-batch/evidence/",
+    "increments": "repo:.dev-flow/2026-10-09-canon-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-09-canon-batch/evidence/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "design_pdr": "vault:mapper/design/PDR-2026-10-09-modular-batch.md",
-    "design_ddr": "vault:mapper/design/DDR-2026-10-09-modular-batch.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/README.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-09-canon-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-09-canon-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-09-canon-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-09-canon-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "d8cf9426c52e7a7b665e08e09a556ba6e12a2b50",
+  "base_ref": "558b41522c7d7c1461f3869981dd074464757498",
   "artifacts": {
-    "plan": ".dev-flow/2026-10-09-modular-batch/PLAN.md",
-    "P1": ".dev-flow/2026-10-09-modular-batch/01-requirements.md",
-    "P1_ledger": ".dev-flow/2026-10-09-modular-batch/01-requirements-ledger.md"
+    "plan": ".dev-flow/2026-10-09-canon-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-09-canon-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-09-canon-batch/01-requirements-ledger.md"
   },
-  "decisions_log": [],
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-09",
+      "decision": "P0 approved (self-approved under the standing authorization, operator words 'core + autónomo + merge (Recomendado)', B-105 'Anexar al canon (Recomendado)'): US-001 (B-105), US-002 (B-104) READY; B4, F1 fired"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 approved (self-approved): 2 HLR, 3 LLR with namespaced ids (CAN); AT-063, AT-064 declared; scan-spec flags none"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 1: iterate-to-refine (self-ruled): ARCH-1 and QA-2 are requirement-defect majors (close-fold expectation wrong; 'equals' under-specified), QA-1 major (AT-064 oracle); 0 blockers; all 8 findings applied in P1 iteration 1"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 iteration 1 approved (self-approved): ARCH-1..3, QA-1..5 applied (LED .1-.5; row floor corrected to 134)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; NEW-1 fixed (LED .6); 0 blocker, 0 major open"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-09",
+      "decision": "P3 increment 001 approved (self-approved under the standing authorization): 1 source file; C0-C3 and A1 killed; code-reviewer APPROVE-WITH-NITS 0 HIGH, 2 LOW folded; regression set 147 passed / 0 failed"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-09",
+      "decision": "P4 approved (self-approved under the standing authorization): PASS-WITH-NOTES; gate suite 2941 passed / 3 xfailed / 0 failed; qa-reviewer ACCEPT, two optional notes applied; note G-001 -> B-106"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-09",
+      "decision": "P5 closed (self-approved under the standing authorization): B-104, B-105 (project side) DONE; B-106 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as df91eaa (PR #14)"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-09",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-09-canon-batch/ (core light sync: README only)"
+    }
+  ],
   "standing_authorization": {
     "autonomous": true,
     "merge": true,
     "asked_on": "2026-10-09",
     "operator_words": {
-      "go_ahead": "Ok, tenemos que modularizar para poder paralelizar el trabajo, eso es primordial.",
-      "mode_and_authorization": "full + autónomo + merge (Recomendado)",
-      "decision_recording": "not asked as a separate question; the recording obligation is unconditional"
+      "go_ahead": "Dale, agrégalo y continúa.",
+      "b105_resolution": "Anexar al canon (Recomendado)",
+      "mode_and_authorization": "core + autónomo + merge (Recomendado)",
+      "decision_recording": "not asked as a separate question; the recording obligation is unconditional and is honoured in PLAN.md, decisions_log and 05-close.md"
     },
     "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless."
   },
   "previous_batch": {
-    "batch_id": "2026-10-09-canon-batch",
-    "merge_commit": "df91eaa",
-    "close_pr": "https://github.com/jav201/mapper/pull/14",
-    "sync_pr": "https://github.com/jav201/mapper/pull/15",
+    "batch_id": "2026-10-09-hygiene-batch",
+    "merge_commit": "a482079",
+    "close_pr": "https://github.com/jav201/mapper/pull/12",
+    "sync_pr": "https://github.com/jav201/mapper/pull/13",
     "closed_at": "2026-10-09",
-    "close_commit": "df91eaa",
+    "close_commit": "a482079",
     "obsidian_synced": true,
-    "archive": ".dev-flow/2026-10-09-canon-batch/decisions-log.json + state-snapshot-at-close.json"
+    "archive": ".dev-flow/2026-10-09-hygiene-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
@@ -202,6 +237,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-09T00:00:00"
 }

@@ -1,0 +1,9 @@
+# ARQ spike (orchestrator, 2026-10-09): Textual 8.2.8 dispatch through plain (non-widget) mixins
+$ python spike/mro_spike.py   # BINDINGS x declared in a mixin, y in the core
+textual 8.2.8
+log ['on_mount(mixin)', 'on_resize(mixin)', 'on_resize(mixin)', 'action_from_core']
+screen bindings ['ctrl+c', 'shift+tab', 'super+c', 'tab', 'y']
+$ python spike/mro_spike2.py  # + core binding z -> mixin action; on_mount in two mixins
+log ['on_mount(mixin)', 'on_mount(mixin2)', 'on_resize(mixin)', 'on_resize(mixin)', 'action_from_core', 'action_from_mixin']
+screen bindings ['ctrl+c', 'shift+tab', 'super+c', 'tab', 'y', 'z']
+# Verdict: (1) BINDINGS in a mixin are NOT merged (x absent) -> BINDINGS must stay on the core class; (2) a core binding dispatches to a mixin action (z -> action_from_mixin); (3) on_* handlers run from EVERY class in the MRO that defines them (on_mount ran in both mixins) -> handler names must be disjoint across mixins (guard test).
