@@ -1,0 +1,2 @@
+p51: store.load REFUSED: MapStoreError: could not read the card of p51: p51_nodos.yml unreadable (ParseError)
+p73: store.load REFUSED: MapStoreError: could not read the card of p73: p73_nodos.yml unreadable (ParseError)

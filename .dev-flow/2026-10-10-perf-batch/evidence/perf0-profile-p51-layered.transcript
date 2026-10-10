@@ -1,0 +1,52 @@
+PROFILE shape=p51 renderer=layered nodes=51 edges=410 118x34
+model O(E) lookups: {}
+--- TOP 15 BY CUMULATIVE ---
+         15303072 function calls (15303021 primitive calls) in 3.781 seconds
+
+   Ordered by: cumulative time
+   List reduced from 60 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.001    0.001    3.781    3.781 <repo>\mapper\views\layered.py:541(render)
+       50    2.537    0.051    3.657    0.073 <repo>\mapper\canvas.py:119(elbow_down)
+ 14851300    1.120    0.000    1.120    0.000 <repo>\mapper\canvas.py:107(wire)
+        1    0.000    0.000    0.112    0.112 <repo>\mapper\views\layered.py:306(_geometry)
+        1    0.000    0.000    0.112    0.112 <repo>\mapper\views\layered.py:192(_tree_layout)
+        1    0.060    0.060    0.111    0.111 <repo>\mapper\views\layered.py:217(walk)
+    11142    0.012    0.000    0.022    0.000 {method 'extend' of 'list' objects}
+   122477    0.014    0.000    0.014    0.000 {method 'get' of 'dict' objects}
+   122222    0.012    0.000    0.012    0.000 {method 'pop' of 'list' objects}
+   122221    0.010    0.000    0.010    0.000 <repo>\mapper\views\layered.py:241(<genexpr>)
+        1    0.001    0.001    0.008    0.008 <repo>\mapper\canvas.py:167(rows)
+     3429    0.003    0.000    0.007    0.000 <python-env>\Lib\site-packages\rich\text.py:964(append)
+    15394    0.002    0.000    0.002    0.000 {method 'append' of 'list' objects}
+    11111    0.002    0.000    0.002    0.000 {method 'add' of 'set' objects}
+     3430    0.001    0.000    0.002    0.000 <python-env>\Lib\site-packages\rich\control.py:181(strip_control_codes)
+
+
+
+--- TOP 15 BY TOTTIME ---
+         15303072 function calls (15303021 primitive calls) in 3.781 seconds
+
+   Ordered by: internal time
+   List reduced from 60 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       50    2.537    0.051    3.657    0.073 <repo>\mapper\canvas.py:119(elbow_down)
+ 14851300    1.120    0.000    1.120    0.000 <repo>\mapper\canvas.py:107(wire)
+        1    0.060    0.060    0.111    0.111 <repo>\mapper\views\layered.py:217(walk)
+   122477    0.014    0.000    0.014    0.000 {method 'get' of 'dict' objects}
+    11142    0.012    0.000    0.022    0.000 {method 'extend' of 'list' objects}
+   122222    0.012    0.000    0.012    0.000 {method 'pop' of 'list' objects}
+   122221    0.010    0.000    0.010    0.000 <repo>\mapper\views\layered.py:241(<genexpr>)
+     3429    0.003    0.000    0.007    0.000 <python-env>\Lib\site-packages\rich\text.py:964(append)
+    15394    0.002    0.000    0.002    0.000 {method 'append' of 'list' objects}
+    11111    0.002    0.000    0.002    0.000 {method 'add' of 'set' objects}
+        1    0.001    0.001    0.008    0.008 <repo>\mapper\canvas.py:167(rows)
+     3584    0.001    0.000    0.001    0.000 {method 'translate' of 'str' objects}
+    11111    0.001    0.000    0.001    0.000 {method 'discard' of 'set' objects}
+    10886    0.001    0.000    0.001    0.000 {built-in method builtins.len}
+        1    0.001    0.001    3.781    3.781 <repo>\mapper\views\layered.py:541(render)
+
+
+
