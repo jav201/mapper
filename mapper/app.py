@@ -38,6 +38,39 @@ from .search import SearchIndex
 from .store import MapStore
 from .views.layered import MAX_RENDER_NODES, pan_extent
 
+# `2026-10-09-modular-batch`: the screens moved into `mapper/screens/**`; these names stay
+# importable as `from mapper.app import X` for the historical sites (LLR-MOD.3.1).  They are
+# re-exports, declared here so a linter does not read them as unused imports.
+__all__ = [
+    "MapperApp",
+    "main",
+    "HomeScreen",
+    "MapScreen",
+    "COUNT_REGION_ID",
+    "ConstructScreen",
+    "GitHubConnector",
+    "MAX_RENDER_NODES",
+    "NavigationModel",
+    "PAN_INERT_HINT",
+    "PlugRepoScreen",
+    "RepoScreen",
+    "SEARCH_ACTIVE_LABEL",
+    "SEARCH_COUNT_SUBJECT",
+    "SEARCH_SUSPENDED_NOTICE",
+    "SearchIndex",
+    "_ConfirmScreen",
+    "_FichaScreen",
+    "_ImportPreviewScreen",
+    "_PromptScreen",
+    "_QUERY_ECHO_CELLS",
+    "_TemplateScreen",
+    "_path_refusal",
+    "keybar_groups",
+    "map_hint",
+    "pan_extent",
+    "save_svg",
+]
+
 
 class MapperApp(App):
     """Main application entry point."""
