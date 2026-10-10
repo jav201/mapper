@@ -183,11 +183,11 @@ def package_app_import_sites(root: pathlib.Path) -> dict[str, list[int]]:
 
 
 def concern_cross_imports(root: pathlib.Path) -> dict[str, list[str]]:
-    """LLR-MOD.7.1: concern mixin modules never import each other.  A map
-    module other than `screen.py` may not import a mixin class from a sibling
-    map module, nor pull in a concern module as a module object — the
-    `NavigationModel` import from `navigation.py` is the one sanctioned
-    non-mixin name (§3 lets siblings read the shared model)."""
+    """LLR-MOD.7.1 (narrowed DDR `2026-10-09-modular-batch`, D-C2): a concern
+    module may not import ANY name from a sibling concern module — not a mixin
+    class, not a helper, not the module object.  The single sanctioned
+    exception is exactly `NavigationModel` from `navigation.py`: it is the
+    shared non-mixin value class, not a concern's behaviour (§3 amendment)."""
     mixins = _mixin_modules(root)
     concern_mods = {pathlib.Path(f).stem for f in mixins.values()}
     bad: dict[str, list[str]] = {}
@@ -199,8 +199,13 @@ def concern_cross_imports(root: pathlib.Path) -> dict[str, list[str]]:
         for form, tail, names in _map_pkg_imports(rel, tree):
             if tail not in concern_mods:
                 continue
-            if form == "module" or any(n in mixins for n in names):
+            if form == "module":
                 hits.append(f"{tail} -> {names}")
+            else:
+                for name in names:
+                    if tail == "navigation" and name == "NavigationModel":
+                        continue  # the one sanctioned non-mixin name (D-C2)
+                    hits.append(f"{tail} -> {name}")
         if hits:
             bad[rel] = hits
     return bad
@@ -242,6 +247,61 @@ def sibling_map_importers(root: pathlib.Path) -> dict[str, set[str]]:
         if names:
             importers[rel] = names
     return importers
+
+
+def screens_init_sibling_imports(root: pathlib.Path) -> set[str]:
+    """LLR-MOD.7.1 (DDR `2026-10-09-modular-batch`, D-C3): the `mapper/screens`
+    package `__init__.py` must not import a sibling screen module or the
+    `map` package — that would close the cycle
+    `screens/map -> screens -> <sibling> -> screens/map` (drafts/opening/searching
+    already import the modal screens from the package `__init__`).
+
+    The banned set is DERIVED FROM DISK, not hand-listed — three parts:
+    (1) every top-level `screens/*.py` whose AST imports `mapper.screens.map`
+        (the cycle-closers: `home`, `repo`, `import_preview`);
+    (2) every top-level `screens/*.py` the `__init__` does NOT itself import
+        (a sibling that is not a re-exported modal: `plug_repo`, `construct`);
+    (3) the `map` package.
+    The modal screens the `__init__` already re-exports (`coverage`,
+    `draft_guard`, `editor`, `factory`, `help`, `palette`, `settings`) are in
+    neither part — importing them is the package's declared purpose.  Returns
+    the banned tails `__init__.py` actually imports (empty == GREEN)."""
+    init_tree = ast.parse(
+        (root / "screens" / "__init__.py").read_text(encoding="utf-8")
+    )
+    imported: set[str] = set()
+    for node in ast.walk(init_tree):
+        if isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module == "mapper.screens":
+                imported.update(a.name for a in node.names)
+            elif module.startswith("mapper.screens."):
+                imported.add(module.split(".")[2])
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                parts = alias.name.split(".")
+                if len(parts) > 2 and parts[:2] == ["mapper", "screens"]:
+                    imported.add(parts[2])
+    siblings = {p.stem for p in (root / "screens").glob("*.py")} - {"__init__"}
+    cycle_closers = set()
+    for stem in siblings:
+        tree = ast.parse((root / "screens" / f"{stem}.py").read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                if module == "mapper.screens.map" or module.startswith(
+                    "mapper.screens.map."
+                ):
+                    cycle_closers.add(stem)
+            elif isinstance(node, ast.Import):
+                if any(
+                    a.name == "mapper.screens.map"
+                    or a.name.startswith("mapper.screens.map.")
+                    for a in node.names
+                ):
+                    cycle_closers.add(stem)
+    banned = cycle_closers | (siblings - imported) | {"map"}
+    return imported & banned
 
 
 def factory_imports_prompt_at_module_level(root: pathlib.Path) -> bool:
@@ -394,6 +454,37 @@ def test_llr_mod_7_1_arch_concern_mixins_never_import_each_other(tmp_path):
     )
     with pytest.raises(AssertionError):
         assert concern_cross_imports(mutant) == {}
+
+
+def test_llr_mod_7_1_arch_concern_helper_name_import_is_flagged(tmp_path):
+    """D-C2 narrowing: ANY name taken from a sibling concern module is a
+    violation, not only mixin classes or module objects.  `RAIL_WIDTH` is a
+    real module-level name in `painting.py` (imported there from
+    `mapper.widgets.rail`) and not a mixin class, so the pre-DDR checker —
+    `form == "module" or any(n in mixins for n in names)` — passed this exact
+    plant; only the narrowed checker reports it."""
+    mutant = _copy_pkg(tmp_path)
+    (mutant / "screens" / "map" / "hints.py").open("a", encoding="utf-8").write(
+        "\nfrom mapper.screens.map.painting import RAIL_WIDTH  # planted defect\n"
+    )
+    with pytest.raises(AssertionError):
+        assert concern_cross_imports(mutant) == {}
+
+
+def test_llr_mod_7_1_arch_screens_init_does_not_import_sibling_screens(tmp_path):
+    """D-C3: the package `__init__` re-exports only the modal screens it
+    already holds; importing a sibling screen module (or the `map` package)
+    from it closes the cycle `screens/map -> screens -> <sibling> ->
+    screens/map`.  `drafts.py` / `opening.py` / `searching.py` legitimately
+    import the modal screens from the package `__init__` — that edge is the
+    row's declared `screens` dependency, and nothing else may cross it."""
+    assert screens_init_sibling_imports(PKG) == set()
+    mutant = _copy_pkg(tmp_path)
+    (mutant / "screens" / "__init__.py").open("a", encoding="utf-8").write(
+        "\nfrom mapper.screens.home import HomeScreen  # planted defect\n"
+    )
+    with pytest.raises(AssertionError):
+        assert screens_init_sibling_imports(mutant) == set()
 
 
 def test_llr_mod_7_1_arch_only_screen_py_imports_the_concern_modules(tmp_path):

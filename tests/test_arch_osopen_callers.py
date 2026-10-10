@@ -1,7 +1,8 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
-Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app` —
-plus `screens/map/opening.py`, where B3 moved the call site.
+Inbound ban, as reworded (LOW-5): `open_external` (and its launcher) is referenced only from
+`osopen.py` (its own definition site) and `screens/map/opening.py`, where B3 moved the call site —
+`app.py` no longer references any launcher name.
 `github` may import
 `osopen.safe_local_path`; `screens` that name plus `confine_reason`, `refusal_sentence`, `hard_linked`, `is_link` and the sentence
 constant `PATH_NOT_SUPPORTED` (Inc-9q, `A-125`; Inc-9p's `PATH_OUTSIDE_WORKSPACE` is no longer
@@ -61,7 +62,10 @@ def _names(tree: ast.AST) -> set[str]:
     return found
 
 
-def test_the_launcher_names_appear_only_in_app_and_osopen():
+def test_the_launcher_names_appear_only_in_osopen_and_opening():
+    """LOW-5: the census set is {`osopen.py`, `screens/map/opening.py`} — the
+    launcher names appear in `osopen.py` (their own definition site) and the one
+    call site; the old name lied about `app`, which references no launcher name."""
     referencing = {rel for rel, tree in _sources() if _names(tree) & LAUNCH_NAMES}
     assert referencing == ALLOWED_FILES, referencing
 
@@ -170,7 +174,7 @@ def test_the_architecture_map_says_what_the_modules_import():
                  "PATH_NOT_SUPPORTED"):
         assert f"`osopen.{name}`" in screens_row, (name, screens_row)
     assert "`osopen.PATH_OUTSIDE_WORKSPACE`" not in screens_row, screens_row
-    assert "`open_external` is referenced only from `app`" in osopen_row, osopen_row
+    assert "`open_external` is referenced only from `osopen.py`" in osopen_row, osopen_row
     assert "`widgets` / `views` / `screens` → `osopen`" not in osopen_row, osopen_row
     github_src = ast.parse((PKG / "github.py").read_text(encoding="utf-8"))
     imported = {n.module for n in ast.walk(github_src) if isinstance(n, ast.ImportFrom) and n.level == 1}
