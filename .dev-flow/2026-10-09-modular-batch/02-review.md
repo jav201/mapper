@@ -11,7 +11,7 @@
 
 - **Gate:**
   - **Round 1** → `iterate-to-refine` → Phase 1 (4 blockers).
-  - **Round 2** → see "Round 2" below.
+  - **Round 2** → `approve` → PDR, after the round-2 fixes were applied and the spine was verified by a probe.
 - **Out-of-scope findings:** none.
 
 - **Findings (round 1):** 4 blocker · 6 major · 8 minor. The orchestrator ruled on the four blockers (below), and Kimi K2 applied all of them in P1 iteration 1 (ledger `LED-2026-10-09-modular-batch.*`).
@@ -95,4 +95,13 @@ Not run: family C did not fire. Scan flag `session` is a false positive (§6.3).
 - ✓ no unfilled template.
 
 ### Round 2
-*(to be recorded after the confirmation pass)*
+
+- **qa-reviewer:** QA-1…QA-7 resolved (`01-requirements.md:396-414`, `:515-522`, `:293`, `:258`); the two-layer table is ✓ for all three stories. New minors: N-1 (baseline JSON path/hash), N-2 (the golden's `<…>` placeholders), N-3 (the scripted session reaches 6 concerns; covered by LLR-MOD.4.3). Gate: proceed. Size note: the contract is 68.5k characters against a 54k budget, and the candidates to trim are non-normative (refinement logs, rationale, §6.2/§6.3 prose). Recorded as a watch item, not trimmed in this pass.
+- **architect:** ARCH-1…ARCH-7 resolved. The architect's AST probe found that MapScreen references none of home/repo/plug/import/construct. The new spine order raised 2 blockers and 2 lesser findings:
+  - ARCH-8 (`MapHintLine` would still sit in `app.py` at B0) — fixed: it moves at A1 into `screens/common.py`.
+  - ARCH-9 (`PlugRepoScreen` pushes `RepoScreen`, so A6 cannot precede A5b) — fixed: A5b runs before A6.
+  - ARCH-10 (major: `LayeredRenderer` has two readers; the patch site names its reader `import_preview.py`) — fixed.
+  - ARCH-11 (minor: `GitHubConnector.fetch` is a class-attribute patch and survives the move) — reclassified.
+- **Fixes:** applied by two Kimi K2 units (contract + ledger LED .9; `ARCHITECTURE.md`).
+- **Orchestrator verification:** `evidence/p2r2-spine-probe.transcript` checks every moved class against the reordered spine. It found **0 illegal edges**, and `app.py` keeps only `MapperApp` and `main`.
+- **Verdict round 2:** `approve` → PDR. Self-approved under the standing authorization.

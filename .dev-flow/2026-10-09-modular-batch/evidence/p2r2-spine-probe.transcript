@@ -1,0 +1,4 @@
+# P2 round 2 spine legality probe (orchestrator, 2026-10-09, tree 24bb2d6): every moved app.py class may only use app.py names whose home lands at or before its own step.
+$ python spike/spine_probe.py
+stays in app.py: ['MapperApp', 'main']
+illegal edges: 0

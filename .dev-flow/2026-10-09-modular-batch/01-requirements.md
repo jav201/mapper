@@ -46,8 +46,8 @@ Out of scope:
 | mechanism A | one plain mixin class per concern, composed into `MapScreen(PaintingOps, …, Screen)`; methods use `self.` exactly as today |
 | core class | `MapScreen` in `mapper/screens/map/screen.py`: lifecycle concern, all class constants, `BINDINGS`, `__init__` with the 30 attribute slots |
 | F1–F5 | the frozen interfaces of `docs/ARCHITECTURE.md` §4: state roster, cross-concern method surface, core class surface, patch surface, app↔screen surface |
-| patch surface | the eight names the test suite monkeypatches on the `mapper.app` module object today (premise 4: `MAX_RENDER_NODES`, `refusal_sentence`, `save_svg`, `pan_extent`, `LayeredRenderer`, `preview_csv`, `SearchIndex`, `GitHubConnector`), each repointed in the increment that moves its reader to the module-global of the module that reads the name (LLR-MOD.3.2) |
-| spine | the serial extraction sequence Inc-0 → A1 (common) → A2 (prompt) → A3 (construct) → A5a (`screens/map/navigation.py`, `NavigationModel` only) → B0 (`MapScreen` wholesale) → A6 (plug_repo) → A7 (import_preview) → A5b (repo) → A4 (home) → B1–B11 → B12; every increment that deletes lines from `app.py`/`screen.py` collides with every other on that file |
+| patch surface | the eight names the test suite monkeypatches on the `mapper.app` module object today (premise 4: `MAX_RENDER_NODES`, `refusal_sentence`, `save_svg`, `pan_extent`, `LayeredRenderer`, `preview_csv`, `SearchIndex`, `GitHubConnector`), seven of them repointed in the increment that moves their reader to the module-global of the module that reads the name (LLR-MOD.3.2); `GitHubConnector.fetch` is a class-attribute patch on the shared class object — it survives the move, no repoint (ARCH-11) |
+| spine | the serial extraction sequence Inc-0 → A1 (common) → A2 (prompt) → A3 (construct) → A5a (`screens/map/navigation.py`, `NavigationModel` only) → B0 (`MapScreen` wholesale) → A5b (repo) → A6 (plug_repo) → A7 (import_preview) → A4 (home) → B1–B11 → B12; every increment that deletes lines from `app.py`/`screen.py` collides with every other on that file |
 | product lane | a post-batch unit of feature work that edits exactly one concern module file |
 
 ### 1.4 References
@@ -101,8 +101,9 @@ module file, so two workers changing different features never edit the same file
   plain mixin are silently not merged; `on_*` handlers run from every MRO class that
   defines them). If a later Textual upgrade changes them, HLR-MOD.2's guard test reddens
   and the batch re-baselines the spike evidence first.
-- The census (spike §3 freeze) is the F1/F2 oracle; `spike/ast_census.py` re-runs over
-  the package at B12 (LLR-MOD.7.2).
+- The census (spike §3 freeze) is the F1/F2 oracle; the batch's archived census at
+  `.dev-flow/2026-10-09-modular-batch/spike/` — the archive location the census guard reads —
+  re-runs over the package at B12 (LLR-MOD.7.2).
 - All 70 sites that import `mapper.app` (premise 2) are covered by re-exports (LLR-MOD.3.1).
 
 ### 2.6 Source user stories
@@ -118,7 +119,7 @@ module file, so two workers changing different features never edit the same file
 **US-001 — one feature, one file**
 - **INVEST:** I ✓ · N ✓ · V ✓ · E ✓ · S ✓ · T ✓
 - **Functionality (V, N):** user = maintainer · outcome = after the split, `mapper/screens/map/searching.py`, `editing.py`, `painting.py`, `exporting.py`, `drafts.py`, … are disjoint files, and `mapper/screens/home.py` + `mapper/screens/repo.py` are disjoint files beside them (both live in `mapper/screens/`, NOT in `screens/map/`); a search feature touches only `searching.py` · why = the operator's "primordial" · out of scope = the post-B11 lanes themselves.
-- **Feasibility (E, S):** implementation path = mechanism A (spike §2), increments Inc-0, A1, A2, A3, A5a, B0, A6, A7, A5b, A4, B1–B11, B12 per spike §6 (the MOD-REQ2 reorder: the sibling screens that construct `MapScreen` move after B0 and import it from `mapper.screens.map` — never from `mapper.app`) · dependencies = the F1–F5 freeze (PDR) · fits one batch? = yes — the spine is serial but each increment is ≤ 4 source files.
+- **Feasibility (E, S):** implementation path = mechanism A (spike §2), increments Inc-0, A1, A2, A3, A5a, B0, A5b, A6, A7, A4, B1–B11, B12 per spike §6 (the MOD-REQ2 reorder: the sibling screens that construct `MapScreen` move after B0 and import it from `mapper.screens.map` — never from `mapper.app`; `PlugRepoScreen` pushes `RepoScreen`, so A5b repo lands before A6 plug_repo) · dependencies = the F1–F5 freeze (PDR) · fits one batch? = yes — the spine is serial but each increment is ≤ 4 source files.
 - **Evaluability (T) — behavioral, black-box:** "When the maintainer lists the repository tree after the batch, each MapScreen concern is a module file of its own, and the guard test reads those files from the tree." The repository tree is the shipped surface.
 - **Open questions:** none.
 - **Classification:** `READY`.
@@ -146,7 +147,7 @@ module file, so two workers changing different features never edit the same file
 | 1 | `mapper/app.py` is 5255 lines; `MapScreen` starts at line 1536 and `MapperApp` follows at 4990 | executed | ✅ TRUE | `wc -l mapper/app.py` → `5255 mapper/app.py`; `grep -n "^class MapScreen\|^class MapperApp\|^def main" mapper/app.py` → `1536:class MapScreen(Screen):`, `4990:class MapperApp(App):`, `5239:def main() -> None:` | in scope (HLR-MOD.1, LLR-MOD.1.1–1.3) |
 | 2 | 68 test files import `from mapper.app import …`, and two `mapper/` modules also do | executed | ✅ TRUE | `grep -rl "from mapper.app import" tests \| wc -l` → `68`; `grep -rl "from mapper.app import" mapper` → `mapper/screens/factory.py`, `mapper/screens/settings.py` | in scope (HLR-MOD.3, LLR-MOD.3.1) |
 | 3 | 17 test files read `app.py`'s source (AST, path pins, `inspect.getsource`) | executed | ✅ TRUE | `grep -rln 'app\.py"\|app\.__file__\|inspect\.getsource' tests \| wc -l` → `17` (lists `test_app_imports_used.py`, `test_darkside_census.py`, `test_draft_hygiene.py`, `test_en5.py`, `test_en7.py`, `test_search.py`, …) | in scope (HLR-MOD.5, LLR-MOD.5.1) |
-| 4 | The test suite patches **8 distinct names** on the `mapper.app` module object — not 2: `MAX_RENDER_NODES` ×5, `refusal_sentence` ×1, `save_svg` ×3 sites, `pan_extent` ×1, `LayeredRenderer` ×1, `preview_csv` ×2, `SearchIndex` ×1 (direct attribute assignment), `GitHubConnector.fetch` ×4 (a class attribute via the dotted path) | executed | ✅ TRUE | full census over every patch form (dotted-string `setattr`/`patch`, module-object `setattr` with a `mapper.app` alias, direct attribute assignment on the alias), file-prefixed: `grep -Hn "monkeypatch.setattr" tests/test_search.py \| grep MAX_RENDER_NODES` → `tests/test_search.py:2393`, `:2456`, `:2549`, `:2649`, `:2690` (all `monkeypatch.setattr(app_module, "MAX_RENDER_NODES", …)`); `grep -Hn "setattr(app_module, \"refusal" tests/test_inc9q.py` → `tests/test_inc9q.py:393`; `grep -Hn "mapper.app.save_svg" tests/test_app.py tests/test_inc9c.py` → `tests/test_app.py:371`, `tests/test_app.py:475`, `tests/test_inc9c.py:134`; `grep -Hn "mapper.app.pan_extent\|mapper.app.LayeredRenderer" tests/test_en8.py` → `tests/test_en8.py:66`, `tests/test_en8.py:332`; `grep -Hn "mapper.app.preview_csv" tests/test_inc9c.py tests/test_inc9n.py` → `tests/test_inc9c.py:114`, `tests/test_inc9n.py:285`; `grep -Hn "mapper.app.GitHubConnector.fetch" tests/*.py` → `tests/test_app.py:22`, `tests/test_app.py:110`, `tests/test_inc9.py:151`, `tests/test_inc9c.py:488`; `grep -Hn "app_module.SearchIndex =" tests/test_search.py` → `tests/test_search.py:1404` (restored at `:1428`) | in scope (HLR-MOD.3, LLR-MOD.3.2) — the repoint premise |
+| 4 | The test suite patches **8 distinct names** on the `mapper.app` module object — not 2 — each with a named reading module: `MAX_RENDER_NODES` ×5 is read by the search/count concern (`screens/map/searching.py`); `refusal_sentence` ×1 by `_path_refusal` (A1 → `screens/common.py`); `save_svg` ×3 by the exporting concern (`screens/map/exporting.py`); `pan_extent` ×1 by the panning concern (`screens/map/panning.py`); `LayeredRenderer` ×1 (test_en8.py:332) through the CSV-import path (`screens/import_preview.py`, NOT panning/render); `preview_csv` ×2 by `screens/import_preview.py`; `SearchIndex` ×1 (direct attribute assignment) by `screens/map/searching.py`; `GitHubConnector.fetch` ×4 (dotted path) is a **class attribute patched on the shared class object — it survives the move, no repoint** — so the module-global repoint set is the other **seven** names | executed | ✅ TRUE | full census over every patch form (dotted-string `setattr`/`patch`, module-object `setattr` with a `mapper.app` alias, direct attribute assignment on the alias), file-prefixed: `grep -Hn "monkeypatch.setattr" tests/test_search.py \| grep MAX_RENDER_NODES` → `tests/test_search.py:2393`, `:2456`, `:2549`, `:2649`, `:2690` (all `monkeypatch.setattr(app_module, "MAX_RENDER_NODES", …)`); `grep -Hn "setattr(app_module, \"refusal" tests/test_inc9q.py` → `tests/test_inc9q.py:393`; `grep -Hn "mapper.app.save_svg" tests/test_app.py tests/test_inc9c.py` → `tests/test_app.py:371`, `tests/test_app.py:475`, `tests/test_inc9c.py:134`; `grep -Hn "mapper.app.pan_extent\|mapper.app.LayeredRenderer" tests/test_en8.py` → `tests/test_en8.py:66`, `tests/test_en8.py:332`; `grep -Hn "mapper.app.preview_csv" tests/test_inc9c.py tests/test_inc9n.py` → `tests/test_inc9c.py:114`, `tests/test_inc9n.py:285`; `grep -Hn "mapper.app.GitHubConnector.fetch" tests/*.py` → `tests/test_app.py:22`, `tests/test_app.py:110`, `tests/test_inc9.py:151`, `tests/test_inc9c.py:488`; `grep -Hn "app_module.SearchIndex =" tests/test_search.py` → `tests/test_search.py:1404` (restored at `:1428`) | in scope (HLR-MOD.3, LLR-MOD.3.2) — the repoint premise |
 | 5 | Both patch names are bound at `app.py` module level today (as re-exported imports) | executed | ✅ TRUE | `grep -n "refusal_sentence" mapper/app.py` → `49: ATTACHMENT_HARD_LINKED, OK as OSOPEN_OK, PATH_NOT_SUPPORTED, confine_reason, open_external, refusal_sentence,`; `grep -n "MAX_RENDER_NODES" mapper/app.py` → `58: MAX_RENDER_NODES,` | in scope — today's binding site only; the F4 call-time lazy-read design is REPLACED by the repoint policy (LED-2026-10-09-modular-batch.2) |
 | 6 | The four B-02 cycle-dodging function-local imports exist where ARCHITECTURE §3 records them | executed | ✅ TRUE | `grep -n "    import" mapper/screens/factory.py mapper/screens/settings.py \| grep mapper` → factory: `from mapper.app import keybar_groups` (≈:198), `from mapper.app import _save_or_toast` (≈:217), `from mapper.app import _PromptScreen` (≈:507); settings: `from mapper.app import keybar_groups` (≈:89) | in scope (HLR-MOD.6, LLR-MOD.6.1) |
 | 7 | `mapper/screens/map/` does not exist yet | executed | ✅ TRUE | `ls mapper/screens/map` → `ls: cannot access 'mapper/screens/map': No such file or directory` | in scope (LLR-MOD.1.2 is the commitment that creates it) |
@@ -159,7 +160,7 @@ module file, so two workers changing different features never edit the same file
 
 ### 2.8 Fork preconditions (C-52) — MANDATORY, and the declared empty when the batch does not fork
 
-The batch forks **only after Inc-B11**; during the batch the spine (Inc-0 → A1 → A2 → A3 → A5a → B0 → A6 → A7 → A5b → A4 → B1–B11 → B12) is
+The batch forks **only after Inc-B11**; during the batch the spine (Inc-0 → A1 → A2 → A3 → A5a → B0 → A5b → A6 → A7 → A4 → B1–B11 → B12) is
 **serial**, because every increment that deletes lines from
 `app.py`/`screen.py` collides with every other on that file (ARCHITECTURE §6). The MOD-REQ2
 reorder puts B0 (the wholesale `MapScreen` move) before A4–A7: `HomeScreen`
@@ -218,12 +219,12 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### HLR-MOD.3 — imports and monkeypatches through `mapper.app` keep biting
 - **Traceability:** US-003
-- **Ledger:** LED-2026-10-09-modular-batch.2, LED-2026-10-09-modular-batch.5
-- **Statement:** When an existing test imports a moved name from `mapper.app` or monkeypatches one of the eight patch targets of premise 4, the import shall resolve and the patch shall change behaviour exactly as today, with every patch site repointed to the module-global of the module that reads the name, in the same increment that moves the reader (the F4 call-time lazy-read design is dropped).
+- **Ledger:** LED-2026-10-09-modular-batch.2, LED-2026-10-09-modular-batch.5, LED-2026-10-09-modular-batch.9
+- **Statement:** When an existing test imports a moved name from `mapper.app` or monkeypatches one of the eight patch targets of premise 4, the import shall resolve and the patch shall change behaviour exactly as today, with every module-global patch site repointed to the module-global of the module that reads the name (the reader of that patch site), in the same increment that moves the reader (the F4 call-time lazy-read design is dropped); `GitHubConnector.fetch` is a class-attribute patch on the shared class object and survives the move with no repoint (ARCH-11), leaving seven module-global repoints.
 - **Rationale (informative):** a moved module that imported its patch name from `mapper.app` would re-create the banned `screens → app` edge; a module that bound a private copy would silently kill the patches. The repoint keeps the same name, same value, in the module where the name is read — and a guard test proves the target module actually reads it, so a vacuous repoint cannot pass.
 - **Validation:** `test`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_compat.py tests/test_search.py tests/test_inc9q.py tests/test_en8.py tests/test_app.py tests/test_inc9c.py tests/test_inc9n.py tests/test_inc9.py`
-- **Numeric pass threshold:** exit code 0; all 21 imported names (premise 10) resolve from `mapper.app`; all 8 patch targets bite through their repointed module-globals (premise 4's site counts per file); the patch-site guard test passes — for every patch site in `tests/`, AST shows the targeted module binds or reads the patched name; 0 imports of any patch name from `mapper.app` into a `screens/` module (any form, any scope).
+- **Numeric pass threshold:** exit code 0; all 21 imported names (premise 10) resolve from `mapper.app`; the 7 module-global patch targets bite through their repointed module-globals (premise 4's site counts per file), and the `GitHubConnector.fetch` class-attribute patch bites through the moved class; the patch-site guard test passes — for every patch site in `tests/`, the site is repointed to the module that actually reads the patched name (the reader of that patch site, not merely a module that binds it); 0 imports of any patch name from `mapper.app` into a `screens/` module (any form, any scope).
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** with `MAX_RENDER_NODES` patched below the map size, the search refusal paints at the patched limit; with `refusal_sentence` patched, the refusal text shows the patch's marker — in both cases through the shipped screens and the repointed module-global.
@@ -301,12 +302,12 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 ## 4. Low-level requirements (LLR)
 
 > Each LLR decomposes an HLR into a verifiable property at the implementation level and
-> maps to one increment of the cut (Inc-0, A1, A2, A3, A5a, B0, A6, A7, A5b, A4, B1–B11, B12).
+> maps to one increment of the cut (Inc-0, A1, A2, A3, A5a, B0, A5b, A6, A7, A4, B1–B11, B12).
 
-### LLR-MOD.1.1 — the seven sibling-screen modules own their names (Spine A1, A2, A3, A5a, A6, A7, A5b, A4)
+### LLR-MOD.1.1 — the seven sibling-screen modules own their names (Spine A1, A2, A3, A5a, A5b, A6, A7, A4)
 - **Traceability:** HLR-MOD.1
-- **Ledger:** LED-2026-10-09-modular-batch.6
-- **Statement:** `mapper/screens/common.py` shall own the shared helpers and hint-string constants (A1), `screens/prompt.py` the four literal modals (A2), `screens/construct.py` `ConstructScreen` (A3), `screens/map/navigation.py` `NavigationModel` only (A5a, landing before B0 because `MapScreen` itself reads it), `screens/plug_repo.py` `PlugRepoScreen` (A6), `screens/import_preview.py` `_ImportPreviewScreen` (A7), `screens/repo.py` `RepoScreen` (A5b) and `screens/home.py` `HomeScreen` (A4) — the MOD-REQ2 reorder lands every sibling screen that constructs `MapScreen` after B0 (premise 11) — and each name shall be re-exported from `mapper/app.py`. The sibling screens shall import `MapScreen` from `mapper.screens.map`, never from `mapper.app`.
+- **Ledger:** LED-2026-10-09-modular-batch.6, LED-2026-10-09-modular-batch.9
+- **Statement:** `mapper/screens/common.py` shall own the shared helpers, hint-string constants and `MapHintLine` (app.py:165, A1 — `MapHintLine` moves at A1 with the other hint helpers, so B0's `screens/map/screen.py` never imports it from `mapper.app`; ARCH-8), `screens/prompt.py` the four literal modals (A2), `screens/construct.py` `ConstructScreen` (A3), `screens/map/navigation.py` `NavigationModel` only (A5a, landing before B0 because `MapScreen` itself reads it), `screens/repo.py` `RepoScreen` (A5b), `screens/plug_repo.py` `PlugRepoScreen` (A6), `screens/import_preview.py` `_ImportPreviewScreen` (A7) and `screens/home.py` `HomeScreen` (A4) — the MOD-REQ2 reorder lands every sibling screen that constructs `MapScreen` after B0 (premise 11), and `PlugRepoScreen` pushes `RepoScreen` (app.py:1207), so A5b repo lands before A6 plug_repo (ARCH-9) — and each name shall be re-exported from `mapper/app.py`. The sibling screens shall import `MapScreen` from `mapper.screens.map`, never from `mapper.app`; `screens/plug_repo.py` shall import `RepoScreen` from `mapper.screens.repo`, never `MapScreen`.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_structure.py -k spine_a`
 - **Numeric pass threshold:** exit code 0; each of the 7 modules exists, defines its expected names, and `mapper.app.<name>` resolves to the same object (`is` identity through the re-export).
@@ -325,8 +326,8 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### LLR-MOD.1.3 — each concern method lives in its own module (B1–B11)
 - **Traceability:** HLR-MOD.1
-- **Ledger:** LED-2026-10-09-modular-batch.4
-- **Statement:** `mapper/screens/map/screen.py` shall end with `class MapScreen(<11 mixins>, Screen)` and each of the 11 concern modules (`hints`, `exporting`, `opening`, `undo`, `focus_mode`, `editing`, `drafts`, `navigation`, `searching`, `panning`, `painting`) shall define exactly the methods its concern owns per the census, with `hints.py` also owning `MapHintLine`.
+- **Ledger:** LED-2026-10-09-modular-batch.4, LED-2026-10-09-modular-batch.9
+- **Statement:** `mapper/screens/map/screen.py` shall end with `class MapScreen(<11 mixins>, Screen)` and each of the 11 concern modules (`hints`, `exporting`, `opening`, `undo`, `focus_mode`, `editing`, `drafts`, `navigation`, `searching`, `panning`, `painting`) shall define exactly the methods its concern owns per the census — `MapHintLine` is NOT among them: it moves at A1 into `screens/common.py` with the other hint helpers (ARCH-8).
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_structure.py -k spine_b`
 - **Numeric pass threshold:** exit code 0; 11 mixin modules present; every method of the census roster assigned to exactly one module; `MapScreen.__mro__` contains the 11 mixins ahead of `Screen`.
@@ -363,9 +364,9 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 - **Negative control:** RED when the same `on_*` name is declared in two mixins (the handler runs twice and the hint drift shows in the capture). Executed at Phase 3.
 - **Boundary catalog:** ☑ empty — the hints concern owns 0 shared attributes, so it exercises dispatch with no state coupling.
 
-### LLR-MOD.3.1 — every name the tests import is re-exported (A1, A2, A3, A5a, A6, A7, A5b, A4, B0)
+### LLR-MOD.3.1 — every name the tests import is re-exported (A1, A2, A3, A5a, A5b, A6, A7, A4, B0)
 - **Traceability:** HLR-MOD.3
-- **Ledger:** LED-2026-10-09-modular-batch.1
+- **Ledger:** LED-2026-10-09-modular-batch.1, LED-2026-10-09-modular-batch.9
 - **Statement:** `mapper/app.py` shall re-export every name imported from it by the test files and `screens/factory.py` — the 21 names of premise 10 — so that every `from mapper.app import X` site resolves to the moved definition.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_compat.py -k reexport`
@@ -375,8 +376,8 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### LLR-MOD.3.2 — the eight patch targets are repointed to their reading modules (per increment)
 - **Traceability:** HLR-MOD.3
-- **Ledger:** LED-2026-10-09-modular-batch.2
-- **Statement:** There shall be no lazy read through `mapper.app` (the F4 design is dropped): each of the eight patch targets of premise 4 shall be a module-global of the module that reads the name, bound in the increment that moves the reader — `refusal_sentence` with `_path_refusal`'s home (A1), `MAX_RENDER_NODES` and `SearchIndex` with `screens/map/searching.py` (B9), `save_svg` with the exporting concern, `pan_extent` and `LayeredRenderer` with the panning/render concerns, `preview_csv` with its reading module, `GitHubConnector` with the repo/GitHub concern — and an AST guard shall assert that every patch target referenced by a patch site in `tests/` is bound or read at module level by its target module, so a vacuous repoint cannot pass.
+- **Ledger:** LED-2026-10-09-modular-batch.2, LED-2026-10-09-modular-batch.9
+- **Statement:** There shall be no lazy read through `mapper.app` (the F4 design is dropped): each patch target of premise 4 shall be a module-global of the module that reads the name, bound in the increment that moves the reader — `refusal_sentence` with `_path_refusal`'s home (A1, `screens/common.py`), `MAX_RENDER_NODES` and `SearchIndex` with `screens/map/searching.py` (B9), `save_svg` with the exporting concern (`screens/map/exporting.py`), `pan_extent` with the panning concern (`screens/map/panning.py`), `LayeredRenderer` and `preview_csv` with `screens/import_preview.py` (read through the CSV-import path — `LayeredRenderer` at test_en8.py:332 is read by `_ImportPreviewScreen`, NOT by panning/render) — except `GitHubConnector.fetch`: a class-attribute patch on the shared class object, it survives the move with the class and needs no repoint (ARCH-11), leaving seven module-global repoints — and an AST guard shall assert, for every patch site in `tests/`, that the site is repointed to the module-global of the module that actually READS the patched name at that site (the reader of each patch site, not merely some module that binds the name), so a vacuous repoint cannot pass (ARCH-10).
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_compat.py -k patch_guard` (the AST guard) and `python -B -m pytest -q -p no:cacheprovider tests/test_search.py tests/test_inc9q.py tests/test_en8.py tests/test_app.py tests/test_inc9c.py tests/test_inc9n.py tests/test_inc9.py` (the repointed patch sites bite)
 - **Numeric pass threshold:** exit code 0; all eight targets bite through their repointed module-globals at premise 4's site counts; the guard passes for every patch site in `tests/`; 0 imports of any patch name from `mapper.app` into a `screens/` module (any form, any scope).
@@ -395,9 +396,9 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### LLR-MOD.4.2 — painted output equals the committed text golden (all increments)
 - **Traceability:** HLR-MOD.4
-- **Ledger:** LED-2026-10-09-modular-batch.3
+- **Ledger:** LED-2026-10-09-modular-batch.3, LED-2026-10-09-modular-batch.9
 - **Statement:** A TEXT golden (not SVG) shall be captured at Inc-0 on the pre-move commit, after each step of a scripted session — open a map, move, search, toggle a view, export, quit — at terminal widths 118 and 87 columns, with volatile cells normalised (paths, timestamps) and each step gated on a condition wait rather than a fixed sleep. `tests/test_mod_parity.py` shall then re-drive the same scripted session after every increment gate and compare the painted lines against the committed golden.
-- **Golden record:** golden paths `.dev-flow/2026-10-09-modular-batch/evidence/mod_parity_118.txt` and `.../mod_parity_87.txt`; captured on the pre-move commit at Inc-0; capture commit `<recorded at Inc-0 capture>`; golden sha256 (one per width) `<recorded at Inc-0 capture>` — the three values are written into this requirement when the golden is captured, and the test asserts the on-disk golden still hashes to the recorded sha256.
+- **Golden record:** golden paths `.dev-flow/2026-10-09-modular-batch/evidence/mod_parity_118.txt` and `.../mod_parity_87.txt`; captured on the pre-move commit at Inc-0; capture commit and golden sha256 (one per width) recorded in the Inc-0 increment packet (`03-increments/increment-001.md`) — the three values are written into this requirement when the golden is captured, and the test asserts the on-disk golden still hashes to the recorded sha256.
 - **Validation:** `test (e2e)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_parity.py -k parity`
 - **Numeric pass threshold:** exit code 0; 0 painted-line diffs across all scripted steps at both widths, after volatile-cell normalisation.
@@ -406,8 +407,8 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### LLR-MOD.4.3 — moved method bodies are byte-identical and new modules are name-clean (all increments)
 - **Traceability:** HLR-MOD.4
-- **Ledger:** LED-2026-10-09-modular-batch.4
-- **Statement:** `tests/test_mod_bodies.py` shall assert, per increment: (a) every census method's body is byte-identical across the move — a per-method `ast.dump` compared against a baseline JSON captured at Inc-0, with every census method appearing exactly once across the package (no method lost or duplicated by a move); and (b) no new module references an undefined global, checked per module by AST/symtable analysis.
+- **Ledger:** LED-2026-10-09-modular-batch.4, LED-2026-10-09-modular-batch.9
+- **Statement:** `tests/test_mod_bodies.py` shall assert, per increment: (a) every census method's body is byte-identical across the move — a per-method `ast.dump` compared against a baseline JSON at the pinned path `.dev-flow/2026-10-09-modular-batch/evidence/mod-bodies-baseline.json` (captured at Inc-0; its sha256 recorded in the Inc-0 packet), with every census method appearing exactly once across the package (no method lost or duplicated by a move); and (b) no new module references an undefined global, checked per module by AST/symtable analysis.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py`
 - **Numeric pass threshold:** exit code 0; the baseline diff is empty (every census method exactly once, every body `ast.dump`-equal to its Inc-0 baseline); 0 undefined-global references in any new module.
@@ -466,8 +467,8 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### LLR-MOD.7.2 — the F1/F2 freeze is mechanical (B12)
 - **Traceability:** HLR-MOD.7
-- **Ledger:** LED-2026-10-09-modular-batch.7
-- **Statement:** `tests/test_mod_census.py` shall re-run `.dev-flow/2026-10-09-modular-batch/spike/ast_census.py` over the package and diff the result against the committed `.dev-flow/2026-10-09-modular-batch/spike/census.json`, so any attribute gaining a writer concern, any new cross-concern attribute, or any F2 name/signature drift goes red without a census amendment.
+- **Ledger:** LED-2026-10-09-modular-batch.7, LED-2026-10-09-modular-batch.9
+- **Statement:** `tests/test_mod_census.py` shall re-run `.dev-flow/2026-10-09-modular-batch/spike/ast_census.py` over the package and diff the result against the committed `.dev-flow/2026-10-09-modular-batch/spike/census.json` — the batch's archive location, read by the census guard — so any attribute gaining a writer concern, any new cross-concern attribute, or any F2 name/signature drift goes red without a census amendment.
 - **Validation:** `test (unit)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_mod_census.py`
 - **Numeric pass threshold:** exit code 0; census diff empty.
