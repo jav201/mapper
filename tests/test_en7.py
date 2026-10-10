@@ -8,6 +8,7 @@ real `question_mark` key.
 from __future__ import annotations
 
 import inspect
+import pathlib
 
 import pytest
 from textual.screen import Screen
@@ -216,9 +217,26 @@ def test_no_screen_binds_the_question_mark_at_priority():
     assert not [b for b in keymap.KEYMAP if b.key == "question_mark" and b.priority]
 
 
+def _package_sources() -> dict[str, str]:
+    """Every `mapper/**/*.py` source keyed by package-relative posix path.
+
+    LLR-MOD.5.1: the exception this arm pins lived in `app.py`, so a literal
+    `app.py` scan would go blind the moment it moves — the package root is taken
+    from `mapper.app`'s own file, and every module of the package is read.
+    """
+    package_root = pathlib.Path(app_module.__file__).resolve().parent
+    return {
+        str(path.relative_to(package_root)).replace("\\", "/"): path.read_text(encoding="utf-8")
+        for path in sorted(package_root.rglob("*.py"))
+    }
+
+
 def test_the_connect_repo_field_has_no_question_mark_exception():
-    assert not hasattr(app_module, "_RepoInput")
-    assert "check_consume_key" not in inspect.getsource(app_module)
+    sources = _package_sources()
+    repo_input = [rel for rel, src in sources.items() if "_RepoInput" in src]
+    consume_key = [rel for rel, src in sources.items() if "check_consume_key" in src]
+    assert not repo_input, f"`_RepoInput` lives in: {repo_input}"
+    assert not consume_key, f"`check_consume_key` lives in: {consume_key}"
 
 
 # -- the copy ---------------------------------------------------------------------------------------------------------

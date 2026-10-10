@@ -1,0 +1,315 @@
+=== step: open ds ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / alfa
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: move j ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: move l ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: search alf enter ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3  0/1 matches in the map
+
+next ▸ n next · N previous · esc clear
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: search escape ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: outline on ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · outline
+raiz  3 nodes · 1 no record
+  - alfa
+  - beta
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: outline off ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: export e ===
+ browse maps    connect repo    build map    factory                           <time> mapper
+ds / beta
+  coverage   alfa         █   beta         ░   █ complete ▒ medium ░ low ╱ no data
+◆ mapper · atlas · legacy tree                                     ▰▰▰▱▱
+3 nodes
+        ▐ raiz
+         ◫ r
+         D✓
+               │
+       ┌───────┴────────┐
+▐ alfa           ▐ beta
+ ◫ acta           ◫ no record
+ D✓               D░
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▰▱▱   1/3
+ exported   ds.svg
+next ▸ j/k/h/l move · ↵ open card · / search
+move j next sibling  k previous sibling  h parent  l child … +30  ? all keys
+=== step: quit q (home) ===
+ c browse maps    p connect repo    n build map    f factory                   <time> mapper
+
+                                    <time> mapper   home
+
+ █
+██
+ █
+ █
+███
+nodes with no record
+ds
+
+activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█
+
+
+
+
+  with record 2 ███████░░░    no record 1 ███░░░░░░░    coverage 66 %
+ ↩ resume  ds / raiz   last session
+ ▐ name  kind      nodes  docs
+ ds       legacy   3      0
+
+
+
+
+
+
+
+
+
+
+
+next ▸ ↵ open map · or choose a door
+open c browse maps  p connect repo  n build map  t from template … +10  ? all keys

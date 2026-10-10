@@ -1,0 +1,78 @@
+{
+  "captured_on": "23c90f1",
+  "rule": "AT-069 / HLR-MOD.5: after Inc-0 and every later increment, each file keeps assert_statements and test_functions >= these values",
+  "files": {
+    "tests/test_app_imports_used.py": {
+      "assert_statements": 2,
+      "test_functions": 2
+    },
+    "tests/test_arch_osopen_callers.py": {
+      "assert_statements": 15,
+      "test_functions": 4
+    },
+    "tests/test_darkside_census.py": {
+      "assert_statements": 55,
+      "test_functions": 25
+    },
+    "tests/test_draft_hygiene.py": {
+      "assert_statements": 9,
+      "test_functions": 4
+    },
+    "tests/test_en5.py": {
+      "assert_statements": 34,
+      "test_functions": 9
+    },
+    "tests/test_en7.py": {
+      "assert_statements": 37,
+      "test_functions": 12
+    },
+    "tests/test_fold.py": {
+      "assert_statements": 116,
+      "test_functions": 17
+    },
+    "tests/test_inc3_census.py": {
+      "assert_statements": 40,
+      "test_functions": 13
+    },
+    "tests/test_inc9c.py": {
+      "assert_statements": 77,
+      "test_functions": 22
+    },
+    "tests/test_inc9e.py": {
+      "assert_statements": 40,
+      "test_functions": 15
+    },
+    "tests/test_inc9m.py": {
+      "assert_statements": 69,
+      "test_functions": 31
+    },
+    "tests/test_inc9n.py": {
+      "assert_statements": 66,
+      "test_functions": 33
+    },
+    "tests/test_inc9o.py": {
+      "assert_statements": 74,
+      "test_functions": 31
+    },
+    "tests/test_inc9p.py": {
+      "assert_statements": 78,
+      "test_functions": 33
+    },
+    "tests/test_inc9q.py": {
+      "assert_statements": 54,
+      "test_functions": 24
+    },
+    "tests/test_keymap.py": {
+      "assert_statements": 35,
+      "test_functions": 15
+    },
+    "tests/test_repair_depth.py": {
+      "assert_statements": 82,
+      "test_functions": 35
+    },
+    "tests/test_search.py": {
+      "assert_statements": 277,
+      "test_functions": 38
+    }
+  }
+}
