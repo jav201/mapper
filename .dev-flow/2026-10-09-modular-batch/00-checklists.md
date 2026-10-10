@@ -20,15 +20,15 @@
 
 | # | Item | ✓/⚠/✗ | Evidence |
 |---|---|---|---|
-| 1 | Context of use per story: user · **task** · **environment** | | |
-| 2 | Observable outcome stated per story | | |
-| 3 | Risk estimate: importance and criticality, used to prioritise | | |
-| 4 | RC-1: `origin/main` tip fetched and recorded in `PLAN.md` **before** deriving — with no `origin` remote, the local tip and the no-origin premise | | |
-| 5 | RC-2: `origin` reachable and the age of its newest commit recorded in `PLAN.md` **before** deriving (`git ls-remote --exit-code --heads origin`; V25; with no `origin` remote, RC-1 (a)'s premise line) | | |
-| 6 | "already shipped?" check per candidate story | | |
-| 7 | `flow_hash` verified against the manifest (C-45 PULL) | | |
-| 8 | **Triggers evaluated AND recorded — the ones that fired and the ones that did not, each with its probe (C-48)** | | |
-| 9 | Mode declared; any change recorded in `mode_history` with its reason | | |
+| 1 | Context of use per story: user · **task** · **environment** | ✓ | US maintainer · task: change one feature without touching another's file · env: the repo + parallel worker worktrees (PLAN.md Objective) |
+| 2 | Observable outcome stated per story | ✓ | observable: a feature change lands in its own module; no visible change in the app (P1 stories) |
+| 3 | Risk estimate: importance and criticality, used to prioritise | ✓ | high importance (operator: 'primordial'), medium risk (3454-line move) — PLAN.md Risks |
+| 4 | RC-1: `origin/main` tip fetched and recorded in `PLAN.md` **before** deriving — with no `origin` remote, the local tip and the no-origin premise | ✓ | `origin/master` = `d8cf942` fetched before deriving (PLAN.md Header) |
+| 5 | RC-2: `origin` reachable and the age of its newest commit recorded in `PLAN.md` **before** deriving (`git ls-remote --exit-code --heads origin`; V25; with no `origin` remote, RC-1 (a)'s premise line) | ✓ | `git fetch` ok; tip `d8cf942` (PR #15 merge, 2026-10-09) |
+| 6 | "already shipped?" check per candidate story | ✓ | not shipped: `wc -l mapper/app.py` → 5255; `MapScreen` 1536–4989 (P0 measurements) |
+| 7 | `flow_hash` verified against the manifest (C-45 PULL) | ⚠ | `V7` external (F1); `~/.claude` flow bundle not touched |
+| 8 | **Triggers evaluated AND recorded — the ones that fired and the ones that did not, each with its probe (C-48)** | ✓ | PLAN.md §Triggers: A1–A4, B1, E1, F1 fired; 16 not fired, each with its probe |
+| 9 | Mode declared; any change recorded in `mode_history` with its reason | ✓ | `mode: full` (operator); `mode_history` appended canon `core` |
 
 ⚠ backlog not refreshed at the previous close · ⚠ a story with a role but no task or environment
 
@@ -36,11 +36,11 @@
 
 | # | Item | ✓/⚠/✗ | Evidence |
 |---|---|---|---|
-| 1 | Module map updated — or "no architecture change" **with its empty diff** | | |
-| 2 | Every planned file falls under a declared module | | |
-| 3 | Interfaces that change, listed | | |
-| 4 | Lanes proposed with **disjoint FILE sets**, not just modules | | |
-| 5 | `rationale` per structural decision | | |
+| 1 | Module map updated — or "no architecture change" **with its empty diff** | ✓ | `docs/ARCHITECTURE.md` amended: §2 `screens` literal + `map screen` row, §3 rules, §4 F1–F5, §6 worksheet — all marked TARGET (`git diff docs/ARCHITECTURE.md`: +74 −12) |
+| 2 | Every planned file falls under a declared module | ✓ | see `docs/ARCHITECTURE.md` §2/§6 amendment and `spike/arq-proposal-kimi-k3.md` §1/§6; MRO spike `evidence/arq-mro-spike.transcript` |
+| 3 | Interfaces that change, listed | ✓ | see `docs/ARCHITECTURE.md` §2/§6 amendment and `spike/arq-proposal-kimi-k3.md` §1/§6; MRO spike `evidence/arq-mro-spike.transcript` |
+| 4 | Lanes proposed with **disjoint FILE sets**, not just modules | ✓ | see `docs/ARCHITECTURE.md` §2/§6 amendment and `spike/arq-proposal-kimi-k3.md` §1/§6; MRO spike `evidence/arq-mro-spike.transcript` |
+| 5 | `rationale` per structural decision | ✓ | see `docs/ARCHITECTURE.md` §2/§6 amendment and `spike/arq-proposal-kimi-k3.md` §1/§6; MRO spike `evidence/arq-mro-spike.transcript` |
 
 ⚠ a planned file under no declared module (the map is stale) · ✗ two lanes sharing even one file
 

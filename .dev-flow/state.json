@@ -80,8 +80,8 @@
     }
   ],
   "guided": false,
-  "current_station": "P0",
-  "phase_status": "not-started",
+  "current_station": "P1",
+  "phase_status": "in-progress",
   "stations_active": [
     "P0",
     "ARQ",
@@ -158,7 +158,18 @@
     "P1": ".dev-flow/2026-10-09-modular-batch/01-requirements.md",
     "P1_ledger": ".dev-flow/2026-10-09-modular-batch/01-requirements-ledger.md"
   },
-  "decisions_log": [],
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-09",
+      "decision": "P0 approved (self-approved under the standing authorization, operator words 'full + autónomo + merge (Recomendado)'): objective R-009 modularisation; triggers A1-A4, B1, E1, F1 fired"
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-09",
+      "decision": "ARQ approved (self-approved): module map amended in docs/ARCHITECTURE.md (TARGET rows) from the Kimi K3 proposal, corrected by the orchestrator's MRO spike (BINDINGS stay on the core class; disjoint on_* names); independent architect review owed at P2/PDR"
+    }
+  ],
   "standing_authorization": {
     "autonomous": true,
     "merge": true,
