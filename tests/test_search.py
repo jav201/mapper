@@ -559,14 +559,29 @@ def _app_tree():
 
 
 def _app_source() -> str:
-    """`mapper/app.py`'s source text, so the closure below can also run on a
-    SYNTHETIC module -- see `test_the_count_chain_closure_crosses_the_class_boundary`."""
-    import inspect
+    """The source the count chain closes over, as ONE module text: `mapper/app.py`
+    plus every module under `mapper/screens/`, so the closure can also run on a
+    SYNTHETIC module -- see `test_the_count_chain_closure_crosses_the_class_boundary`.
+
+    `2026-10-09-modular-batch` (LLR-MOD.5.2): the split moves `MapScreen` and its
+    module-level helpers out of `app.py` (A1: `screens/common.py`; B0:
+    `screens/map/`).  Reading only `inspect.getfile(MapScreen)` would shrink the
+    helper plane to whatever stayed beside the class and turn the crossing inert.
+    Concatenating the package keeps every helper in the plane wherever it lives;
+    `from __future__` lines are dropped because they are only legal at the top of
+    a module."""
     import pathlib
 
-    from mapper.app import MapScreen
+    import mapper
 
-    return pathlib.Path(inspect.getfile(MapScreen)).read_text(encoding="utf-8")
+    root = pathlib.Path(mapper.__file__).resolve().parent
+    files = [root / "app.py", *sorted((root / "screens").rglob("*.py"))]
+    parts = []
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        parts.append("\n".join(line for line in text.splitlines()
+                               if not line.startswith("from __future__")))
+    return "\n\n".join(parts)
 
 
 def _count_chain(src: str, seeds: set[str]) -> tuple[set[str], dict[str, set[str]]]:

@@ -267,6 +267,9 @@ LEAK_EXCEPTIONS: dict[tuple[str, str], str] = {
     ("mapper/app.py", "str(exc)"): "INC9C-F3: `GitHubError`'s own message (git stderr) "
                                   "and `store.load`'s path-free `MapStoreError` text",
     ("mapper/app.py", "str(e)"): "`store.load`'s `MapStoreError`, written path-free at B-30",
+    # Moved with `_refusal_toast` at 2026-10-09-modular-batch A1 (was covered by the app.py row).
+    ("mapper/screens/common.py", "str(exc)"): "`_refusal_toast`: a `MapIdError`'s text is authored "
+                                              "by the store and names the rule, never a path (A-113)",
 }
 
 

@@ -23,6 +23,7 @@ from mapper.model import Document, Graph, Node
 from mapper.osopen import (
     PATH_NOT_SUPPORTED, confine_reason, hard_linked, is_link, refusal_sentence, safe_local_path,
 )
+from mapper.screens.common import _save_or_toast, keybar_groups
 from mapper.store import MapIdError, check_map_id
 from mapper.widgets.chrome import HintLine, KeyBar, TabStrip
 
@@ -195,8 +196,6 @@ class FactoryScreen(Screen):
             yield Static(id="factory-tree")
             yield Static(id="factory-preview")
         yield HintLine(factory_hint())
-        from mapper.app import keybar_groups
-
         yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
 
     def on_mount(self) -> None:
@@ -214,8 +213,6 @@ class FactoryScreen(Screen):
         store = getattr(self.app, "store", None)
         if store is None:
             return
-        from mapper.app import _save_or_toast
-
         _save_or_toast(self, store, self.map_id, self.graph)
 
     def _step_meter(self) -> Text:
