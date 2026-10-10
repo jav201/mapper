@@ -417,7 +417,7 @@ parallelism is Inc-0: six mutually disjoint test-only files, as parallel sub-lan
 
 ### LLR-MOD.5.1 — the six source-reading tests generalise to the package (Inc-0)
 - **Traceability:** HLR-MOD.5
-- **Ledger:** LED-2026-10-09-modular-batch.8
+- **Ledger:** LED-2026-10-09-modular-batch.8, LED-2026-10-09-modular-batch.11
 - **Statement:** `test_draft_hygiene.py`, `test_darkside_census.py`, `test_keymap.py`, `test_en5.py`, `test_en7.py` and `test_app_imports_used.py` shall locate their pins by content across `mapper/**/*.py` (or via `inspect.getfile(MapScreen)`) instead of by `app.py` path, before any code moves, and their assertion counts shall be no lower than today. This extends to `tests/test_keymap.py:214–220`, whose scanned module set shall be derived by `pkgutil.walk_packages` over `mapper` rather than pinned by hand, so every new module is scanned without a test edit.
 - **Validation:** `test (integration)`
 - **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_draft_hygiene.py tests/test_darkside_census.py tests/test_keymap.py tests/test_en5.py tests/test_en7.py tests/test_app_imports_used.py`

@@ -186,7 +186,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Field | Value |
 |---|---|
-| **Independent review** | none separate — test-only increment, no product change (facts sheet, verbatim instruction: "none separate (test-only, no product change) — say so"). No reviewer ran and none is named here; the permanent mutation controls of §4 are the increment's executable review, and the batch's `code-reviewer` group reviews begin at A2–A4+B0, after Inc-0. Declared consequence: the flow's V36 grammar reads this cell as EMPTY, and this packet accepts that [x] rather than name a reviewer who did not run. |
+| **Independent review** | none — test-only increment, no product change (facts sheet, verbatim instruction: "none separate (test-only, no product change) — say so"). No reviewer ran and none is named here; the permanent mutation controls of §4 are the increment's executable review, and the batch's `code-reviewer` group reviews begin at A2–A4+B0, after Inc-0. Declared consequence: the flow's V36 grammar reads this cell as EMPTY, and this packet accepts that [x] rather than name a reviewer who did not run. |
 
 ---
 
