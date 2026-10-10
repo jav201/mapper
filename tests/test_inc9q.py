@@ -36,7 +36,7 @@ from mapper.screens.factory import FactoryScreen
 from tests.test_inc9f import NARROW, SIZE
 from tests.test_inc9m import _env, _flat, _no_fs
 from tests.test_inc9n import U1, _make_docx, _toasts
-from tests.test_inc9o import V1, W2, _activate, _doc_graph, _link, _tree
+from tests.test_inc9o import V1, W2, _activate, _doc_graph, _link, _tree, _sources_outside_osopen
 from tests.test_inc9p import MISSING, _generate, _import, _Replace, _ws_tree
 
 # Inc-9r: the arms whose expectation changed (Y1 `r_colon`, CR-F1 `r_backstop`) are committed RED first, keyed by step.
@@ -378,15 +378,33 @@ def test_inc9q_cr_f3_only_the_import_surface_reads_unreadable_differently():
 
 @red("cr1")
 def test_inc9q_cr_f1_the_new_sentences_have_one_home():
-    def strings(rel):
-        tree = ast.parse((PKG / rel).read_text(encoding="utf-8"))
+    def strings(source):
+        tree = ast.parse(source)
         return {n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
-    home = strings("osopen.py")
+    home = strings((PKG / "osopen.py").read_text(encoding="utf-8"))
     assert CR_F3 in home and ATT_HARD in home
-    for rel in ("app.py", "screens/common.py", "screens/factory.py"):
-        found = strings(rel)
+    for rel, source in _sources_outside_osopen(PKG).items():
+        found = strings(source)
         assert CR_F3 not in found and ATT_HARD not in found, rel
+
+
+def test_inc9q_the_one_home_scan_reads_every_moved_module(tmp_path):
+    """RED for the package-wide scan (CR-A2): CR_F3 planted in a module the old hand
+    list (`app.py` + `screens/common.py` + `screens/factory.py`) never read must be
+    flagged; `osopen.py` keeps its sole ownership."""
+    pkg = tmp_path / "mapper"
+    (pkg / "screens").mkdir(parents=True)
+    (pkg / "osopen.py").write_text(f'CR_F3 = "{CR_F3}"\n', encoding="utf-8")
+    (pkg / "screens" / "map").mkdir()
+    (pkg / "screens" / "map" / "drafts.py").write_text(f'HINT = "{CR_F3}"\n', encoding="utf-8")
+    found = []
+    for rel, source in _sources_outside_osopen(pkg).items():
+        tree = ast.parse(source)
+        strings = {n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
+        if CR_F3 in strings:
+            found.append(rel)
+    assert found == ["screens/map/drafts.py"], found
 
 
 @red("cr1")

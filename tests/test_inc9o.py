@@ -332,21 +332,57 @@ def test_inc9o_open_external_judges_a_relative_workspace(tmp_path, monkeypatch):
     assert got == osopen.OK and len(launcher.calls) == 1
 
 
+def _sources_outside_osopen(root: pathlib.Path) -> dict[str, str]:
+    """Every module under *root* except `osopen.py`, which legitimately owns the
+    containment sentences and the path-normalisation calls.  Derived by glob,
+    never a hand list: the split scattered the screens across `mapper/screens/**`
+    (`2026-10-09-modular-batch`), so the old scan pinned to `app.py` +
+    `screens/factory.py` watched nothing the split moved (review CR-A2)."""
+    out = {}
+    for path in sorted(root.rglob("*.py")):
+        rel = path.relative_to(root).as_posix()
+        if rel == "osopen.py":
+            continue
+        out[rel] = path.read_text(encoding="utf-8")
+    assert out, f"no sources scanned under {root}"
+    return out
+
+
 @red("confine")
 def test_inc9o_there_is_one_containment_and_one_home_for_the_sentences():
     """No other module owns an `is_relative_to`, a `normpath`, or the sentences' text (`INC9N-CR-F2/F4`)."""
-    sources = {rel: (PKG / rel).read_text(encoding="utf-8") for rel in ("app.py", "screens/factory.py", "osopen.py")}
-    for rel in ("app.py", "screens/factory.py"):
-        tree = ast.parse(sources[rel])
+    sources = _sources_outside_osopen(PKG)
+    for rel, source in sources.items():
+        tree = ast.parse(source)
         attrs = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
         assert not attrs & {"is_relative_to", "normpath", "abspath"}, (rel, attrs & {"is_relative_to", "normpath"})
         strings = {n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
         assert U1 not in strings and V1 not in strings, rel
     assert not hasattr(sys.modules["mapper.app"], "_is_workspace_file_target")
     assert osopen.PATH_NOT_SUPPORTED == U1 and osopen.PATH_OUTSIDE_WORKSPACE == V1
-    factory_tree = ast.parse(sources["screens/factory.py"])
+    factory_tree = ast.parse((PKG / "screens/factory.py").read_text(encoding="utf-8"))
     from_app = [n for n in ast.walk(factory_tree) if isinstance(n, ast.ImportFrom) and n.module == "mapper.app"]
     assert all(a.name != "PATH_NOT_SUPPORTED" for n in from_app for a in n.names)
+
+
+def test_inc9o_the_one_home_scan_reads_every_moved_module(tmp_path):
+    """RED for the package-wide scan (CR-A2): `is_relative_to` planted in a module the
+    old hand list never read — `screens/common.py`, which the split added — must be
+    flagged, while `osopen.py`'s own ownership is still excused."""
+    pkg = tmp_path / "mapper"
+    (pkg / "screens").mkdir(parents=True)
+    (pkg / "osopen.py").write_text("import os\nROOT = os.path.abspath('.')\n", encoding="utf-8")
+    (pkg / "screens" / "common.py").write_text(
+        "def f(p, root):\n    return p.is_relative_to(root)\n", encoding="utf-8")
+    sources = _sources_outside_osopen(pkg)
+    assert set(sources) == {"screens/common.py"}
+    offenders = {}
+    for rel, source in sources.items():
+        attrs = {n.attr for n in ast.walk(ast.parse(source)) if isinstance(n, ast.Attribute)}
+        owned = attrs & {"is_relative_to", "normpath", "abspath"}
+        if owned:
+            offenders[rel] = sorted(owned)
+    assert offenders == {"screens/common.py": ["is_relative_to"]}, offenders
 
 
 # ---------------------------------------------------------------------------

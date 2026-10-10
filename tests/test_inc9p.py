@@ -32,6 +32,7 @@ from tests.test_inc9m import _env, _flat, _no_fs, _office_graph, _open_prompt
 from tests.test_inc9n import U1, _add_attachment, _make_docx, _toasts
 from tests.test_inc9o import (
     V1, V2, W1_DOC, W1_NODE, W2, _activate, _doc_graph, _Forms, _link, _tree,
+    _sources_outside_osopen,
 )
 
 # Inc-9q: the arms whose expected sentence changed (X1, X2) were committed RED first, keyed by step.
@@ -345,10 +346,29 @@ def test_inc9p_the_link_sentence_has_one_home_and_the_exact_text():
     import ast
 
     assert osopen.PATH_THROUGH_LINK == W2
-    for rel in ("app.py", "screens/factory.py"):
-        tree = ast.parse((PKG / rel).read_text(encoding="utf-8"))
+    for rel, source in _sources_outside_osopen(PKG).items():
+        tree = ast.parse(source)
         strings = {n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
         assert W2 not in strings, rel
+
+
+def test_inc9p_the_one_home_scan_reads_every_moved_module(tmp_path):
+    """RED for the package-wide scan (CR-A2): W2 planted in a module the old hand list
+    (`app.py` + `screens/factory.py`) never read must be flagged; `osopen.py` keeps
+    its sole ownership."""
+    import ast
+
+    pkg = tmp_path / "mapper"
+    (pkg / "screens").mkdir(parents=True)
+    (pkg / "osopen.py").write_text(f'PATH_THROUGH_LINK = "{W2}"\n', encoding="utf-8")
+    (pkg / "screens" / "common.py").write_text(f'HINT = "{W2}"\n', encoding="utf-8")
+    found = []
+    for rel, source in _sources_outside_osopen(pkg).items():
+        tree = ast.parse(source)
+        strings = {n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
+        if W2 in strings:
+            found.append(rel)
+    assert found == ["screens/common.py"], found
 
 
 # ---------------------------------------------------------------------------

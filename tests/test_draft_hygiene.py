@@ -131,6 +131,15 @@ async def test_llr_001_2_guard_open_follows_the_guard(tmp_path):
         assert screen.guard_open() is False
 
 
+def _guard_flag_owners(screen_cls: type) -> set[str]:
+    """`{screen_cls}` ∪ `{the class that defines _guard_draft"}` — the flag's owner,
+    derived from the MRO, never "the screen + every mixin" (`2026-10-09-modular-batch`
+    review CR-B1): a read of `_draft_guard_open` planted in any OTHER mixin must fail
+    instead of being excused by the composition."""
+    owner = next(c.__name__ for c in screen_cls.__mro__ if "_guard_draft" in vars(c))
+    return {screen_cls.__name__, owner}
+
+
 def test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen():
     """AST: every attribute access named `_draft_guard_open` lies inside the
     `MapScreen` class body (its declaration, `_guard_draft`, `guard_open`);
@@ -138,8 +147,7 @@ def test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen():
     the public `guard_open()`."""
     from mapper.app import MapScreen
 
-    owners = {"MapScreen"} | {c.__name__ for c in MapScreen.__mro__
-                              if c.__module__.startswith("mapper.screens.map")}
+    owners = _guard_flag_owners(MapScreen)
 
     class _Track(ast.NodeVisitor):
         def __init__(self, path: Path):
@@ -154,8 +162,9 @@ def test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen():
         def visit_Attribute(self, node: ast.Attribute):
             if node.attr == "_draft_guard_open":
                 # `2026-10-09-modular-batch` B7: the flag's owner is MapScreen composed of
-                # its Spine B mixins (DraftsOps holds `_guard_draft`/`guard_open`); the set
-                # is DERIVED from MapScreen's bases, so a read from any other class still fails.
+                # its Spine B mixins, and CR-B1 narrowed the excused set from "every mixin"
+                # to exactly MapScreen + the class that DEFINES `_guard_draft` (DraftsOps):
+                # a read planted in any other mixin is a cross-class read and fails.
                 assert len(self.enclosing) == 1 and self.enclosing[0] in owners, (
                     self.path, node.lineno, self.enclosing)
             self.generic_visit(node)
@@ -174,3 +183,26 @@ def test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen():
         and isinstance(node.func, ast.Attribute)
     ]
     assert "guard_open" in calls, "action_quit does not call guard_open()"
+
+
+def test_llr_001_2_the_guard_flag_owner_is_derived_not_every_mixin():
+    """RED for the narrowed owner set (CR-B1): in a hierarchy whose second mixin merely
+    READS the flag, the derived owners must be exactly the definer + the screen.  The
+    old "MapScreen + every mixin" set would have included the reading mixin and
+    excused the planted read, so this test fails against the old derivation."""
+    class _DraftsOps:
+        def _guard_draft(self, proceed):
+            self._draft_guard_open = True
+
+    class _EditingOps:
+        def action_planted_read(self):
+            return self._draft_guard_open
+
+    class _MapScreen(_DraftsOps, _EditingOps):
+        pass
+
+    owners = _guard_flag_owners(_MapScreen)
+    assert owners == {"_MapScreen", "_DraftsOps"}, owners
+    assert "_EditingOps" not in owners, (
+        "a mixin that only READS the flag was excused: the owner set is still "
+        "'every mixin', not the class that defines _guard_draft")

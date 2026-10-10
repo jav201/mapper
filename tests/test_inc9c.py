@@ -561,14 +561,50 @@ async def test_inc9c_k3_the_factory_import_and_map_hints_use_the_seat_word(tmp_p
     assert "navega" not in default_map_hint, default_map_hint
 
 
+#: The package root, derived from the package itself (LLR-MOD.5.2): the scans below
+#: read EVERY `mapper/**` module by glob, never a hand list, so a screen the split
+#: moved out of `app.py` cannot silently leave the watched set.
+PKG = pathlib.Path(darkside.__file__).resolve().parent
+
+
+def _dead_enter_advertisements(root: pathlib.Path) -> dict[str, str]:
+    """Every module under *root* still advertising the dead `↵ details` affordance.
+
+    Derived by glob (`root`/`**`/`*.py`), never a hand list: the text lived in
+    `RepoScreen`, which the split moved out of `app.py` into `mapper/screens/repo.py`
+    (`2026-10-09-modular-batch`), so the old scan pinned to `app.py` alone watched
+    nothing (review CR-A1)."""
+    hits = {}
+    for path in sorted(root.rglob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        if "↵ detalle" in source or '"details"' in source:
+            hits[path.relative_to(root).as_posix()] = source
+    return hits
+
+
 @red("hints")
 def test_inc9c_k3_the_repo_surfaces_no_longer_advertise_a_dead_enter():
     """`INC9C-F1`: `↵ details` was advertised on the repo screen with no binding
     and no handler behind it (the lying affordance `US-N03` exists to remove)."""
     repo_rows = keymap.bindings_for(keymap.SCOPE_REPO)
     assert repo_rows and "enter" not in {b.key for b in repo_rows}
-    source = _product_sources()["mapper/app.py"]
-    assert "↵ detalle" not in source and '"details"' not in source
+    scanned = sorted(p.relative_to(PKG).as_posix() for p in PKG.rglob("*.py"))
+    assert scanned and "screens/repo.py" in scanned, scanned
+    advertised = _dead_enter_advertisements(PKG)
+    assert advertised == {}, advertised
+
+
+def test_inc9c_k3_the_dead_enter_scan_reads_a_moved_screen_file(tmp_path):
+    """RED for the package-wide scan (CR-A1): the advertisement planted in a module
+    the old hand list never read — `RepoScreen` now lives at `screens/repo.py` —
+    must be flagged; the scan that watched only `app.py` saw nothing there."""
+    pkg = tmp_path / "mapper"
+    (pkg / "screens").mkdir(parents=True)
+    (pkg / "app.py").write_text("class MapperApp:\n    pass\n", encoding="utf-8")
+    (pkg / "screens" / "repo.py").write_text(
+        'HINT = "↵ detalle"\nACTION = "details"\n', encoding="utf-8")
+    advertised = _dead_enter_advertisements(pkg)
+    assert set(advertised) == {"screens/repo.py"}, advertised
 
 
 # ---------------------------------------------------------------------------
