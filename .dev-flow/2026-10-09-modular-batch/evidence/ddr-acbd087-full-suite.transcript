@@ -1,0 +1,8 @@
+# DDR — full suite at acbd087 (includes the post-review census repair 1c77233); command: python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.................................................xxx.................... [ 18%]
+3131 passed, 24 deselected, 3 xfailed in 1536.56s (0:25:36)
+exit=0

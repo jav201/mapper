@@ -1,0 +1,256 @@
+# A5a+B0 gate, full suite, orchestrator, at f2cec90. 3 failures, all census tests the B0 move stranded: test_arch_osopen_callers (a follow-up reused the launcher set as the osopen-owner skip set), test_fold and test_inc3_census (read the map screen from app.py by path). Fixed in the A5b commits (3eb705d, next); re-run of the three files: 46 passed, 3 xfailed.
+$ python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.................................................................F...... [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+.................F.xxx.................................................. [ 19%]
+........................................................................ [ 21%]
+.......................................................................F [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 50%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 57%]
+........................................................................ [ 59%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+........................................................................ [ 71%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 95%]
+........................................................................ [ 98%]
+...................................................                      [100%]
+================================== FAILURES ===================================
+______ test_outside_app_only_the_allowed_names_are_imported_from_osopen _______
+
+    @red("arch9q")
+    @red("arch9p")
+    def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
+        seen: dict[str, set[str]] = {}
+        for rel, tree in _sources():
+            if rel in ALLOWED_FILES:
+                continue
+            imports = list(_osopen_imports(tree))
+            if imports:
+                seen[rel] = {name for _, name in imports}
+        assert seen, "the AST walk found no osopen import outside app: the probe is broken"
+>       assert seen == ALLOWED_OUTSIDE_APP, seen
+E       AssertionError: {'app.py': {'PATH_NOT_SUPPORTED', 'safe_local_path'}, 'github.py': {'safe_local_path'}, 'screens/common.py': {'confine...factory.py': {'PATH_NOT_SUPPORTED', 'confine_reason', 'hard_linked', 'is_link', 'refusal_sentence', 'safe_local_path'}}
+E       assert {'app.py': {'..._local_path'}} == {'github.py':...en_external'}}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'app.py': {'safe_local_path', 'PATH_NOT_SUPPORTED'}}
+E         Right contains 1 more item:
+E         {'screens/map/screen.py': {'OK', 'open_external', 'ATTACHMENT_HARD_LINKED'}}
+E         Use -v to get more diff
+
+tests\test_arch_osopen_callers.py:106: AssertionError
+_______ test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints ________
+
+tmp_path = WindowsPath('<home>/AppData/Local/Temp/pytest-of-<user>/pytest-17413/test_llr_n06_2_3_every_repaint0')
+
+    @pytest.mark.asyncio
+    async def test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints(tmp_path):
+        """The census `LLR-N06.2.3` SCOPES, driven over the regions themselves.
+    
+        The clause is "every file-derived string painted on a surface this batch
+        touches, WHETHER ITS SINK IS NEW OR PRE-EXISTING", and the previous arm
+        covered only the new one (the fold pill).  `refresh_canvas` is what this
+        increment restructured, so its scope is the regions `refresh_canvas`
+        repaints -- which is how `_minimap_text` was missed: it interpolated
+        `ficha.title` with no `darkside.plain`, and nine hostile code points reached
+        the composited frame, including a `U+202E` that displays one branch's
+        coverage under a neighbour's name.  That is the one widget whose entire job
+        is telling the operator WHICH branch is at risk.
+    
+        So the regions are enumerated from the widget ids `refresh_canvas` writes to
+        and each is read off the COMPOSITED FRAME, not off the `Text` handed to the
+        sink.  Terminal-only: the minimap is not part of the export, which is why
+        `save_svg` is the sibling arm's subject and not this one's.
+        """
+        graph = _hostile_graph()
+    
+        banned = {cp for lo, hi in darkside.COERCION_RANGES for cp in range(lo, hi + 1)}
+        # POSITIVE CONTROL on the payload, before any region is read.
+        assert any(ord(c) in banned for c in graph.nodes["b0"].ficha.title)
+        # AND ON THE SHAPES THE FIXTURE DID NOT USED TO CARRY.  It had no schema, no
+        # attachments and no documents, which is why the inspector region was swept
+        # while rendering almost nothing: `insp-field-*` rows and the attachment
+        # chip were never constructed at all, so `inspector.py:155`'s coercion had
+        # nothing standing on it (mutation-tested: removing it survived all 789
+        # arms).  A census that reads "no leak" off a region that never rendered is
+        # reporting nothing.
+        assert graph.schema, "no schema; the inspector paints no field rows"
+        assert graph.nodes["b0"].ficha.attachments, "no attachments; the chip is unreached"
+        assert any(
+            ord(c) in banned for a in graph.nodes["b0"].ficha.attachments
+            for c in a.caption + a.path + a.kind
+        )
+        assert any(ord(c) in banned for sf in graph.schema for c in sf.label)
+    
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=CONTEXT_OF_USE) as pilot:
+            await pilot.pause()
+            app.store.save("hostil", graph)
+            screen = await open_map(app, pilot, "hostil")
+            screen.refresh_canvas()
+            await pilot.pause()
+            # The graph really did survive the round trip; without this the sweep
+            # below runs on `MapScreen`'s one-node "error" fallback and is green on
+            # a map that carries nothing hostile at all.
+            assert len(screen.graph.nodes) == 7, sorted(screen.graph.nodes)
+            # THE APP IS STILL RUNNING, asserted BEFORE anything is read.  A census
+            # that looks only for banned code points in painted rows answers "no
+            # leak" identically for a clean screen and for a screen that never
+            # rendered -- and `F-A` is exactly that: a schema key outside Textual's
+            # identifier grammar raises out of the inspector rebuild, scheduled by
+            # `call_next` from `refresh_canvas`, outside every guard, and the frame
+            # the sweep then reads belongs to a dead application.
+            assert app.is_running, (
+                "the app died before the census could read a region; every leak "
+                "assertion below would be vacuously green"
+            )
+            assert graph.schema and screen.graph.schema, (
+                "the schema did not survive the store round trip, so the inspector "
+                "builds no field rows and this census cannot see them"
+            )
+    
+            # DERIVED from the ids `refresh_canvas` writes to, so a region this
+            # increment starts repainting joins the census by being repainted.
+            # By AST, not by splitting on the method name: `_ImportPreviewScreen`
+            # has a `refresh_canvas` of its own, and a textual split picks whichever
+            # one comes first -- which is how this census first ran against the
+            # import preview's single widget and asserted nothing about the map.
+            source = (REPO / "mapper" / "app.py").read_text(encoding="utf-8")
+            tree = ast.parse(source)
+>           method = next(
+                item
+                for cls in ast.walk(tree)
+                if isinstance(cls, ast.ClassDef) and cls.name == "MapScreen"
+                for item in cls.body
+                if isinstance(item, ast.FunctionDef) and item.name == "refresh_canvas"
+            )
+E           StopIteration
+
+tests\test_fold.py:495: StopIteration
+
+The above exception was the direct cause of the following exception:
+
+self = <Coroutine test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints>
+
+    def runtest(self) -> None:
+        self.obj = wrap_in_sync(
+            # https://github.com/pytest-dev/pytest-asyncio/issues/596
+            self.obj,  # type: ignore[has-type]
+        )
+>       super().runtest()
+
+..\..\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:533: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:1026: in inner
+    _loop.run_until_complete(task)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=False debug=False>
+future = <Task finished name='Task-122364' coro=<test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints() done, defined at <home>\Github\mapper\tests\test_fold.py:421> exception=RuntimeError('coroutine raised StopIteration')>
+
+    def run_until_complete(self, future):
+        """Run until the Future is done.
+    
+        If the argument is a coroutine, it is wrapped in a Task.
+    
+        WARNING: It would be disastrous to call run_until_complete()
+        with the same coroutine twice -- it would wrap it in two
+        different Tasks and that can't be good.
+    
+        Return the Future's result, or raise its exception.
+        """
+        self._check_closed()
+        self._check_running()
+    
+        new_task = not futures.isfuture(future)
+        future = tasks.ensure_future(future, loop=self)
+        if new_task:
+            # An exception is raised if the future didn't complete, so there
+            # is no need to log the "destroy pending task" message
+            future._log_destroy_pending = False
+    
+        future.add_done_callback(_run_until_complete_cb)
+        try:
+            self.run_forever()
+        except:
+            if new_task and future.done() and not future.cancelled():
+                # The coroutine raised a BaseException. Consume the exception
+                # to not log a warning, the caller doesn't have access to the
+                # local task.
+                future.exception()
+            raise
+        finally:
+            future.remove_done_callback(_run_until_complete_cb)
+        if not future.done():
+            raise RuntimeError('Event loop stopped before Future completed.')
+    
+>       return future.result()
+E       RuntimeError: coroutine raised StopIteration
+
+..\..\anaconda3\Lib\asyncio\base_events.py:687: RuntimeError
+______ test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr _______
+
+    def test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr():
+        """`02j`'s ruling, asserted mechanically.
+    
+        A `getattr(renderer, "painted_ids", None)` probe is a silent-skip generator
+        of exactly the kind this batch keeps catching: it answers "this view
+        declares nothing" and "this view's declaration is broken" with the same
+        `None`.  The branch is a static import and an identity comparison, which is
+        greppable, AST-visible and type-checkable.
+        """
+        source = (REPO / "mapper" / "app.py").read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        imported = {
+            alias.name
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and (node.module or "").endswith("layered")
+            for alias in node.names
+        }
+>       assert "painted_ids" in imported
+E       AssertionError: assert 'painted_ids' in {'LayeredRenderer', 'MAX_RENDER_NODES', 'pan_extent'}
+
+tests\test_inc3_census.py:468: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+FAILED tests/test_fold.py::test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints
+FAILED tests/test_inc3_census.py::test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr
+3 failed, 2997 passed, 24 deselected, 3 xfailed in 1528.19s (0:25:28)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-420388' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-420388' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+exit=1

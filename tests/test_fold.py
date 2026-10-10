@@ -490,13 +490,18 @@ async def test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints(tmp_pat
         # has a `refresh_canvas` of its own, and a textual split picks whichever
         # one comes first -- which is how this census first ran against the
         # import preview's single widget and asserted nothing about the map.
-        source = (REPO / "mapper" / "app.py").read_text(encoding="utf-8")
-        tree = ast.parse(source)
+        # `2026-10-09-modular-batch` (LLR-MOD.5.2): the method is located through the
+        # class, wherever the split put it (B0 moved `MapScreen` out of `app.py`;
+        # Spine B moves `refresh_canvas` into a mixin), never by a file path.
+        import inspect
+        import textwrap
+
+        from mapper.app import MapScreen
+
+        tree = ast.parse(textwrap.dedent(inspect.getsource(MapScreen.refresh_canvas)))
         method = next(
             item
-            for cls in ast.walk(tree)
-            if isinstance(cls, ast.ClassDef) and cls.name == "MapScreen"
-            for item in cls.body
+            for item in tree.body
             if isinstance(item, ast.FunctionDef) and item.name == "refresh_canvas"
         )
         regions = sorted({

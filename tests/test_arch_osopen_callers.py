@@ -1,6 +1,9 @@
 """The OS-handler boundary is countable (`docs/ARCHITECTURE.md` section 3, amended in Inc-9n, `A-122`).
 
-Inbound ban, as reworded: `open_external` (and its launcher) is referenced only from `app`.  `github` may import
+Inbound ban, as reworded (LOW-5): `open_external` (and its launcher) is referenced only from
+`osopen.py` (its own definition site) and `screens/map/opening.py`, where B3 moved the call site —
+`app.py` no longer references any launcher name.
+`github` may import
 `osopen.safe_local_path`; `screens` that name plus `confine_reason`, `refusal_sentence`, `hard_linked`, `is_link` and the sentence
 constant `PATH_NOT_SUPPORTED` (Inc-9q, `A-125`; Inc-9p's `PATH_OUTSIDE_WORKSPACE` is no longer
 imported by a screen, and `lexically_outside` is gone; Inc-9r, `A-126`: `PATH_THROUGH_LINK` is gone too, generate
@@ -20,7 +23,12 @@ import mapper
 PKG = pathlib.Path(mapper.__file__).parent
 DOCS = PKG.parent / "docs" / "ARCHITECTURE.md"
 LAUNCH_NAMES = {"open_external", "_default_launcher", "startfile"}
-ALLOWED_FILES = {"app.py", "osopen.py"}
+# B0 moved the only app.py launch site (the attachment-activated handler) to screens/map/screen.py;
+# B3 moved it to screens/map/opening.py; app.py no longer references any launcher name.
+ALLOWED_FILES = {"osopen.py", "screens/map/opening.py"}
+# The osopen OWNERS may import any osopen name (ARCHITECTURE §1/§3): the boundary module itself and
+# `app`. Kept separate from ALLOWED_FILES (the LAUNCHER census) since B0 split the two sets apart.
+OSOPEN_OWNERS = {"app.py", "osopen.py"}
 # Inc-9q: the allowed-name arms were committed RED first (the set changed: `refusal_sentence`, `hard_linked`,
 # `is_link` in; `PATH_OUTSIDE_WORKSPACE` out).
 OPEN_STEPS: set[str] = set()
@@ -54,7 +62,10 @@ def _names(tree: ast.AST) -> set[str]:
     return found
 
 
-def test_the_launcher_names_appear_only_in_app_and_osopen():
+def test_the_launcher_names_appear_only_in_osopen_and_opening():
+    """LOW-5: the census set is {`osopen.py`, `screens/map/opening.py`} — the
+    launcher names appear in `osopen.py` (their own definition site) and the one
+    call site; the old name lied about `app`, which references no launcher name."""
     referencing = {rel for rel, tree in _sources() if _names(tree) & LAUNCH_NAMES}
     assert referencing == ALLOWED_FILES, referencing
 
@@ -77,8 +88,17 @@ def _osopen_imports(tree: ast.AST):
 
 ALLOWED_OUTSIDE_APP = {
     "github.py": {"safe_local_path"},
+    # `2026-10-09-modular-batch` A1: `_path_refusal` moved out of `app.py` with the two
+    # sanctioned names it reads (ARCHITECTURE §3 `screens` row).
+    "screens/common.py": {"confine_reason", "refusal_sentence"},
     "screens/factory.py": {"safe_local_path", "confine_reason", "refusal_sentence", "hard_linked", "is_link",
                            "PATH_NOT_SUPPORTED"},
+    # B3: `MapScreen`'s open concern lives here; its attachment-activated handler is the
+    # one launch site and calls `open_external` (moved from screens/map/screen.py).
+    "screens/map/opening.py": {"ATTACHMENT_HARD_LINKED", "OK", "open_external"},
+    # `2026-10-09-modular-batch` A4: `HomeScreen` moved out of `app.py` with the two
+    # osopen names its CSV-import door reads (ARCHITECTURE §3 `screens` row).
+    "screens/home.py": {"safe_local_path", "PATH_NOT_SUPPORTED"},
 }
 
 
@@ -87,7 +107,7 @@ ALLOWED_OUTSIDE_APP = {
 def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
     seen: dict[str, set[str]] = {}
     for rel, tree in _sources():
-        if rel in ALLOWED_FILES:
+        if rel in OSOPEN_OWNERS:
             continue
         imports = list(_osopen_imports(tree))
         if imports:
@@ -96,6 +116,13 @@ def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
     assert seen == ALLOWED_OUTSIDE_APP, seen
     assert not any(rel.startswith(("widgets/", "views/")) for rel in seen), seen
     assert not any(n in seen["github.py"] | seen["screens/factory.py"] for n in LAUNCH_NAMES), seen
+
+
+def test_map_screen_core_does_not_import_osopen_at_all():
+    """B3: the open concern moved to `screens/map/opening.py`; the composing `screen.py`
+    must not import osopen at all — not even the non-launcher names."""
+    tree = ast.parse((PKG / "screens" / "map" / "screen.py").read_text(encoding="utf-8"))
+    assert not list(_osopen_imports(tree)), "screen.py must import osopen only via opening.py"
 
 
 def _back_edges() -> dict[str, list[int]]:
@@ -112,13 +139,15 @@ def _back_edges() -> dict[str, list[int]]:
 
 
 @red("arch")
-def test_the_four_known_back_edges_are_exactly_the_ones_the_map_lists():
+def test_b02_closed_there_are_no_screens_to_app_back_edges_at_all():
     edges = _back_edges()
-    assert {rel: len(lines) for rel, lines in edges.items()} == {"screens/factory.py": 3, "screens/settings.py": 1}, edges
+    # `2026-10-09-modular-batch` A1 removed three of the four B-02 back-edges (the
+    # helpers now import from `screens/common.py`); A2 removed the last one
+    # (`factory.py`'s `_PromptScreen`, now a module-level import of
+    # `screens/prompt.py`).  B-02 is closed: the map lists zero back-edges.
+    assert edges == {}, edges
     row = _row(_section3(), "screens")
-    for rel, lines in edges.items():
-        for line in lines:
-            assert f"`mapper/{rel}:{line}`" in row, (rel, line, row)
+    assert "B-02 — CLOSED" in row, row
     assert "factory.py:343" not in row, row
 
 
@@ -145,7 +174,7 @@ def test_the_architecture_map_says_what_the_modules_import():
                  "PATH_NOT_SUPPORTED"):
         assert f"`osopen.{name}`" in screens_row, (name, screens_row)
     assert "`osopen.PATH_OUTSIDE_WORKSPACE`" not in screens_row, screens_row
-    assert "`open_external` is referenced only from `app`" in osopen_row, osopen_row
+    assert "`open_external` is referenced only from `osopen.py`" in osopen_row, osopen_row
     assert "`widgets` / `views` / `screens` → `osopen`" not in osopen_row, osopen_row
     github_src = ast.parse((PKG / "github.py").read_text(encoding="utf-8"))
     imported = {n.module for n in ast.walk(github_src) if isinstance(n, ast.ImportFrom) and n.level == 1}

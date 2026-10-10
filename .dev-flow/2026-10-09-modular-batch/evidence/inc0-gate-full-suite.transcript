@@ -1,0 +1,244 @@
+# Inc-0 gate, full suite, orchestrator, at 90e731b. 8 failures, all tests/test_repair_map_truth.py: the ARQ amendment (a1b7f1a) had put TARGET file paths into ARCHITECTURE §2, which that test requires to exist on disk. Fixed in the next commit (TARGET rows moved out of the table); the file re-run 48 passed.
+$ python -B -m pytest -q -p no:cacheprovider
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  7%]
+........................................................................ [  9%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+.......xxx.............................................................. [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 24%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 48%]
+........................................................................ [ 50%]
+........................................................................ [ 53%]
+........................................................................ [ 55%]
+........................................................................ [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+........................................................................ [ 72%]
+........................................................................ [ 74%]
+........................................................................ [ 77%]
+........................................................................ [ 79%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+........................................................................ [ 86%]
+.................................................FFFFFFFF............... [ 89%]
+........................................................................ [ 91%]
+........................................................................ [ 94%]
+........................................................................ [ 96%]
+........................................................................ [ 98%]
+...............................                                          [100%]
+================================== FAILURES ===================================
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/common.py] _
+
+module = 'screens', declared = 'mapper/screens/common.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/common.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/prompt.py] _
+
+module = 'screens', declared = 'mapper/screens/prompt.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/prompt.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/construct.py] _
+
+module = 'screens', declared = 'mapper/screens/construct.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/construct.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/home.py] _
+
+module = 'screens', declared = 'mapper/screens/home.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/home.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/repo.py] _
+
+module = 'screens', declared = 'mapper/screens/repo.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/repo.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/plug_repo.py] _
+
+module = 'screens', declared = 'mapper/screens/plug_repo.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/plug_repo.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/import_preview.py] _
+
+module = 'screens', declared = 'mapper/screens/import_preview.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'screens' declares it owns 'mapper/screens/import_preview.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+_ test_at_p04_every_owned_path_exists_on_disk[map screen-mapper/screens/map/*.py] _
+
+module = 'map screen', declared = 'mapper/screens/map/*.py'
+
+    @pytest.mark.parametrize(
+        "module,declared", _declared_paths(), ids=lambda v: v if isinstance(v, str) else v
+    )
+    def test_at_p04_every_owned_path_exists_on_disk(module, declared):
+        """AT-P04 -- a path the map claims a module OWNS must exist.
+    
+        This is the arm that would have caught the un-landed ARQ amendment: the map
+        can only classify a touched file if the prefixes it declares are real.
+        """
+        matches = list(REPO.glob(declared))
+>       assert matches, (
+            f"module {module!r} declares it owns {declared!r}, which matches nothing on "
+            "disk -- the map cannot classify a file under a path that does not exist"
+        )
+E       AssertionError: module 'map screen' declares it owns 'mapper/screens/map/*.py', which matches nothing on disk -- the map cannot classify a file under a path that does not exist
+E       assert []
+
+tests\test_repair_map_truth.py:93: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/common.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/prompt.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/construct.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/home.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/repo.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/plug_repo.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[screens-mapper/screens/import_preview.py]
+FAILED tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[map screen-mapper/screens/map/*.py]
+8 failed, 2972 passed, 24 deselected, 3 xfailed in 1550.19s (0:25:50)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-419468' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-419468' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-419897' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-419897' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+exit=1

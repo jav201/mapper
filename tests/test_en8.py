@@ -63,7 +63,7 @@ async def test_e1_the_unlaid_out_graph_site_says_it_too(tmp_path, monkeypatch):
         def boom(*args, **kwargs):
             raise ValueError("not a tree")
 
-        monkeypatch.setattr("mapper.app.pan_extent", boom)
+        monkeypatch.setattr("mapper.screens.map.panning.pan_extent", boom)  # B10: the pan path reads it in panning.py
         await pilot.press("L")
         await pilot.pause()
         hint = _hint(screen)
@@ -329,7 +329,10 @@ async def test_plain_site_5b_the_preview_canvas_failure_text(tmp_path, monkeypat
     class Boom:
         render = _boom
 
-    monkeypatch.setattr("mapper.app.LayeredRenderer", Boom)
+    # A7 moved the reader here: `_ImportPreviewScreen` builds `LayeredRenderer()`
+    # in `mapper/screens/import_preview.py`, so the patch must bind that module's
+    # global (LLR-MOD.3.2, ARCH-10).
+    monkeypatch.setattr("mapper.screens.import_preview.LayeredRenderer", Boom)
     csv_path = tmp_path / "p.csv"
     csv_path.write_text("id,title,parent\na,A,\n", encoding="utf-8")
     app = MapperApp(tmp_path)

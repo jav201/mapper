@@ -457,7 +457,19 @@ def test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr():
     `None`.  The branch is a static import and an identity comparison, which is
     greppable, AST-visible and type-checkable.
     """
-    source = (REPO / "mapper" / "app.py").read_text(encoding="utf-8")
+    # `2026-10-09-modular-batch` (LLR-MOD.5.2): "the screen" is every `mapper` source
+    # file in `MapScreen`'s MRO (B0 moved it out of `app.py`; Spine B spreads it over
+    # mixin modules), so the census follows the class instead of a file path.
+    import inspect
+
+    from mapper.app import MapScreen
+
+    files = sorted({inspect.getsourcefile(c) for c in MapScreen.__mro__
+                    if c.__module__.startswith("mapper.")})
+    source = "\n".join(
+        "\n".join(line for line in open(f, encoding="utf-8").read().splitlines()
+                  if not line.startswith("from __future__"))
+        for f in files)
     tree = ast.parse(source)
     imported = {
         alias.name

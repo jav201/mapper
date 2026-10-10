@@ -546,27 +546,65 @@ def _self_reads(fn) -> set[str]:
     }
 
 
+def _map_screen_methods(tree) -> dict:
+    """`MapScreen`'s methods in *tree*: its class body PLUS every class it inherits
+    from that *tree* defines (`2026-10-09-modular-batch` Spine B composes MapScreen
+    from plain mixins).  Derived from MapScreen's own bases, never hand-listed, so a
+    synthetic one-class module still works and a new mixin is walked automatically."""
+    import ast
+
+    classes = {n.name: n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)}
+    cls = classes["MapScreen"]
+    owners = [cls] + [classes[b.id] for b in cls.bases
+                      if isinstance(b, ast.Name) and b.id in classes]
+    fndef = (ast.FunctionDef, ast.AsyncFunctionDef)
+    names = [item.name for owner in owners for item in owner.body if isinstance(item, fndef)]
+    dupes = sorted({name for name in names if names.count(name) > 1})
+    assert not dupes, (
+        f"method name defined twice across MapScreen + its mixins: {dupes} -- "
+        "the dict would silently keep one definition and watch the other never "
+        f"(`2026-10-09-modular-batch` review CR-B2)")
+    return {item.name: item for owner in owners for item in owner.body if isinstance(item, fndef)}
+
+
 def _app_tree():
     """`mapper/app.py` parsed, for censuses that must see the WHOLE module."""
     import ast
-    import inspect
-    import pathlib
 
-    from mapper.app import MapScreen
-
-    src = pathlib.Path(inspect.getfile(MapScreen)).read_text(encoding="utf-8")
-    return ast.parse(src)
+    # `2026-10-09-modular-batch`: the map screen spans `screen.py` and its Spine B
+    # mixin modules, so "the whole module" is the package source `_app_source` joins.
+    return ast.parse(_app_source())
 
 
 def _app_source() -> str:
-    """`mapper/app.py`'s source text, so the closure below can also run on a
-    SYNTHETIC module -- see `test_the_count_chain_closure_crosses_the_class_boundary`."""
-    import inspect
+    """The source the count chain closes over, as ONE module text: `mapper/app.py`
+    plus `mapper/screens/common.py` and every module under `mapper/screens/map/`,
+    so the closure can also run on a SYNTHETIC module -- see
+    `test_the_count_chain_closure_crosses_the_class_boundary`.
+
+    `2026-10-09-modular-batch` (LLR-MOD.5.2): the split moves `MapScreen` and its
+    module-level helpers out of `app.py` (A1: `screens/common.py`; B0:
+    `screens/map/`).  Reading only `inspect.getfile(MapScreen)` would shrink the
+    helper plane to whatever stayed beside the class and turn the crossing inert.
+    Concatenating the modules the chain can actually close over keeps every helper
+    in the plane wherever it lives; A1 code-review CR-1 narrowed this from EVERY
+    `screens/**` module to exactly `common.py` + `screens/map/**` — the other
+    screens' helpers are not part of the count chain and only add shadowing noise;
+    `from __future__` lines are dropped because they are only legal at the top of
+    a module."""
     import pathlib
 
-    from mapper.app import MapScreen
+    import mapper
 
-    return pathlib.Path(inspect.getfile(MapScreen)).read_text(encoding="utf-8")
+    root = pathlib.Path(mapper.__file__).resolve().parent
+    files = [root / "app.py", root / "screens" / "common.py",
+             *sorted((root / "screens" / "map").rglob("*.py"))]
+    parts = []
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        parts.append("\n".join(line for line in text.splitlines()
+                               if not line.startswith("from __future__")))
+    return "\n\n".join(parts)
 
 
 def _count_chain(src: str, seeds: set[str]) -> tuple[set[str], dict[str, set[str]]]:
@@ -619,13 +657,8 @@ def _count_chain(src: str, seeds: set[str]) -> tuple[set[str], dict[str, set[str
     import ast
 
     tree = ast.parse(src)
-    cls = next(
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ClassDef) and node.name == "MapScreen"
-    )
     fndef = (ast.FunctionDef, ast.AsyncFunctionDef)
-    methods = {i.name: i for i in cls.body if isinstance(i, fndef)}
+    methods = _map_screen_methods(tree)
     helpers = {i.name: i for i in tree.body if isinstance(i, fndef)}
 
     # A name meaning two things would make every verdict below ambiguous.
@@ -1398,10 +1431,10 @@ def test_one_paint_pass_resolves_exactly_once(tmp_path):
             built.append(1)
             super().__init__(graph)
 
-    import mapper.app as app_module
+    import mapper.screens.map.searching as searching_module  # B9: the reader of SearchIndex / MAX_RENDER_NODES
 
-    original = app_module.SearchIndex
-    app_module.SearchIndex = Counting
+    original = searching_module.SearchIndex
+    searching_module.SearchIndex = Counting
     try:
         screen = MapScreen("memoised")
         screen.graph = _titled_graph(60)
@@ -1425,7 +1458,7 @@ def test_one_paint_pass_resolves_exactly_once(tmp_path):
         assert screen._search_order() != answered
         assert len(built) == 3
     finally:
-        app_module.SearchIndex = original
+        searching_module.SearchIndex = original
 
     # The protocol itself is gated by `test_every_reader_of_the_resolution_...`
     # below, which DERIVES the set of readers instead of naming them.
@@ -1441,11 +1474,21 @@ def _map_screen_self_reads() -> dict[str, set[str]]:
     """
     import ast
 
-    cls = next(
-        node
-        for node in ast.walk(_app_tree())
-        if isinstance(node, ast.ClassDef) and node.name == "MapScreen"
-    )
+    # `2026-10-09-modular-batch` Spine B: `MapScreen` is composed from plain mixins, so
+    # its methods are the class body PLUS every mixin it inherits from.  Parsed from
+    # the package source (`_app_source`), mixin set derived from MapScreen's bases.
+    tree = ast.parse(_app_source())
+    classes = {node.name: node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
+    cls = classes["MapScreen"]
+    owners = [cls] + [classes[b.id] for b in cls.bases
+                      if isinstance(b, ast.Name) and b.id in classes and b.id != "Screen"]
+    fndef = (ast.FunctionDef, ast.AsyncFunctionDef)
+    names = [item.name for owner in owners for item in owner.body if isinstance(item, fndef)]
+    dupes = sorted({name for name in names if names.count(name) > 1})
+    assert not dupes, (
+        f"method name defined twice across MapScreen + its mixins: {dupes} -- "
+        "the dict would silently keep one definition and watch the other never "
+        f"(`2026-10-09-modular-batch` review CR-B2)")
     return {
         item.name: {
             sub.attr
@@ -1454,9 +1497,47 @@ def _map_screen_self_reads() -> dict[str, set[str]]:
             and isinstance(sub.value, ast.Name)
             and sub.value.id == "self"
         }
-        for item in cls.body
+        for owner in owners
+        for item in owner.body
         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
+
+
+def test_map_screen_methods_reject_a_duplicated_method_name():
+    """RED for the duplicate-name guard (CR-B2): a method defined on both MapScreen
+    and a mixin would silently shadow in the dict (one plane watched, the other
+    never); the helper must refuse to build it."""
+    import ast
+    import pytest
+
+    src = (
+        "class _Mixin:\n"
+        "    def _refresh(self):\n"
+        "        pass\n"
+        "class MapScreen(_Mixin):\n"
+        "    def _refresh(self):\n"
+        "        pass\n"
+    )
+    with pytest.raises(AssertionError, match="defined twice"):
+        _map_screen_methods(ast.parse(src))
+
+
+def test_map_screen_self_reads_reject_a_duplicated_method_name(monkeypatch):
+    """RED for the same guard on the `self`-reads plane: the dict would keep one
+    definition's reads and report them under a name the other definition owns."""
+    import pytest
+
+    src = (
+        "class _Mixin:\n"
+        "    def _refresh(self):\n"
+        "        return self.pan_x\n"
+        "class MapScreen(_Mixin):\n"
+        "    def _refresh(self):\n"
+        "        return self.pan_y\n"
+    )
+    monkeypatch.setattr("tests.test_search._app_source", lambda: src)
+    with pytest.raises(AssertionError, match="defined twice"):
+        _map_screen_self_reads()
 
 
 # Every reader of the resolution that is NOT itself inside a paint pass, with
@@ -2314,16 +2395,7 @@ def test_cd6a_the_walk_reads_exactly_one_resolution():
     import ast
     import re
 
-    cls = next(
-        node
-        for node in ast.walk(_app_tree())
-        if isinstance(node, ast.ClassDef) and node.name == "MapScreen"
-    )
-    methods = {
-        item.name: item
-        for item in cls.body
-        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
-    }
+    methods = _map_screen_methods(_app_tree())
     assert "_walk_hits" in methods, sorted(methods)
 
     def self_reads(node) -> set[str]:
@@ -2339,7 +2411,10 @@ def test_cd6a_the_walk_reads_exactly_one_resolution():
     # `query_text` does not match, and must not: a query is not a result set, and
     # the walk legitimately reads it to tell "never asked" from "asked and empty".
     pattern = re.compile(r"hits|matches|search_order|search_memo|lens")
-    vocabulary = {name for name in self_reads(cls) if pattern.search(name)}
+    # `self.X` is read only inside methods, so the class's reads are the union over
+    # its methods -- across the core and its Spine B mixins (`_map_screen_methods`).
+    class_reads = set().union(*(self_reads(m) for m in methods.values()))
+    vocabulary = {name for name in class_reads if pattern.search(name)}
     vocabulary |= {name for name in methods if pattern.search(name)}
     assert len(vocabulary) >= 3, (
         f"only {sorted(vocabulary)} could be a resolution source, so 'exactly "
@@ -2380,7 +2455,7 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
     ALSO PINS THE HINT LINE, which is where the same conflation would land next:
     above the bound the hint must NOT read `sin coincidencias`.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.searching as searching_module  # B9: the reader of SearchIndex / MAX_RENDER_NODES
 
     app = MapperApp(tmp_path)
     async with app.run_test(size=CONTEXT_OF_USE) as pilot:
@@ -2390,7 +2465,7 @@ async def test_the_walk_above_the_render_bound_declares_neither_zero_nor_silence
         screen = await open_map(app, pilot, MAP_ID)
         assert_declared_layout(screen, rail=True, inspector=True)
 
-        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        monkeypatch.setattr(searching_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         assert screen._search_order() is None, "the bound was not reached"
         # And the query DOES match on this graph, so "nothing was found" would be
         # false rather than merely unhelpful.
@@ -2441,7 +2516,7 @@ async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monk
     WIDTH and bounds the difference, rather than checking either against a
     constant: a constant would pass on an implementation that always wrapped.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.searching as searching_module  # B9: the reader of SearchIndex / MAX_RENDER_NODES
     from mapper.app import SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
 
     long_query = QUERY + "z" * 2000
@@ -2453,7 +2528,7 @@ async def test_the_suspended_declaration_is_actually_in_the_frame(tmp_path, monk
             graph = build_adjuntos(tmp_path / f"w{width}{len(query)}")
             app.store.save(MAP_ID, graph)
             screen = await open_map(app, pilot, MAP_ID)
-            monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+            monkeypatch.setattr(searching_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
             screen.query_text = query
             assert screen._search_order() is None, "the bound was not reached"
             screen.refresh_canvas()
@@ -2527,7 +2602,7 @@ async def test_a_line_bearing_query_does_not_take_the_frame(tmp_path, monkeypatc
     ordinary run is also the receipt that the fixture reaches the suspended
     branch at all.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.searching as searching_module  # B9: the reader of SearchIndex / MAX_RENDER_NODES
     from mapper.app import SEARCH_ACTIVE_LABEL, SEARCH_SUSPENDED_NOTICE
 
     # 60 line breaks in 120 characters: a flood in ROWS while staying SHORTER
@@ -2546,7 +2621,7 @@ async def test_a_line_bearing_query_does_not_take_the_frame(tmp_path, monkeypatc
             app.store.save(MAP_ID, graph)
             screen = await open_map(app, pilot, MAP_ID)
             assert_declared_layout(screen, rail=True, inspector=True)
-            monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+            monkeypatch.setattr(searching_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
             screen.query_text = query
             assert screen._search_order() is None, "the bound was not reached"
             screen.refresh_canvas()
@@ -2606,7 +2681,7 @@ async def test_at_055_esc_means_one_thing_at_every_graph_size(tmp_path, monkeypa
     repair can break `back_or_home` altogether -- an `esc` that never leaves the
     map at all -- and stay green on the clearing half.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.searching as searching_module  # B9: the reader of SearchIndex / MAX_RENDER_NODES
 
     app = MapperApp(tmp_path)
     async with app.run_test(size=CONTEXT_OF_USE) as pilot:
@@ -2646,7 +2721,7 @@ async def test_at_055_esc_means_one_thing_at_every_graph_size(tmp_path, monkeypa
         # second `esc` is asserted in BOTH regimes and it pops in both.
         screen = await open_map(app, pilot, MAP_ID)
         assert_declared_layout(screen, rail=True, inspector=True)
-        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        monkeypatch.setattr(searching_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         screen.query_text = QUERY
         assert screen._search_order() is None, "regime 2 is not above the bound"
         # The regimes really are different, and the query really does match --
@@ -2671,7 +2746,7 @@ async def test_the_hint_line_promises_esc_at_every_graph_size(tmp_path, monkeypa
     affordance `_count_line` refuses to paint, one surface over: an empty answer
     declared over a graph that holds thousands of matches.
     """
-    import mapper.app as app_module
+    import mapper.screens.map.searching as searching_module  # B9: the reader of SearchIndex / MAX_RENDER_NODES
     from mapper.app import SEARCH_SUSPENDED_NOTICE
 
     app = MapperApp(tmp_path)
@@ -2687,7 +2762,7 @@ async def test_the_hint_line_promises_esc_at_every_graph_size(tmp_path, monkeypa
         assert hint_text(screen) == "n next · N previous · esc clear"
 
         # Above it, the affordance is still promised and the state is named.
-        monkeypatch.setattr(app_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
+        monkeypatch.setattr(searching_module, "MAX_RENDER_NODES", len(graph.nodes) - 1)
         await submit(pilot, QUERY)
         assert screen._search_order() is None, "the bound was not reached"
         promised = hint_text(screen)
