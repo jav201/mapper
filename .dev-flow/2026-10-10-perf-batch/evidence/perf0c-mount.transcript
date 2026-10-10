@@ -1,0 +1,125 @@
+PROFILE mount wide-2000: push_screen -> first paint, 118x34, wall under profiler 15.769 s
+=== mount wide-2000 ===
+--- TOP 20 BY CUMULATIVE ---
+ 1. _run                         asyncio\events.py:86                           ncalls=271       tottime=   0.0003 cumtime=  11.5710
+ 2. <method 'run' of '_contextvars.Context' objects> ~:0                                            ncalls=271       tottime=   0.0004 cumtime=  11.5392
+ 3. invoke                       textual\_callback.py:62                        ncalls=366       tottime=   0.0004 cumtime=  11.4522
+ 4. _invoke                      textual\_callback.py:45                        ncalls=366       tottime=   0.0006 cumtime=  11.4496
+ 5. _process_messages            textual\message_pump.py:562                    ncalls=107       tottime=   0.0002 cumtime=  11.2497
+ 6. _dispatch_message            textual\message_pump.py:707                    ncalls=272       tottime=   0.0009 cumtime=  11.2348
+ 7. render                       mapper\views\layered.py:541                    ncalls=3         tottime=   0.0603 cumtime=   8.7740
+ 8. elbow_down                   mapper\canvas.py:119                           ncalls=5997      tottime=   5.9295 cumtime=   8.5394
+ 9. _on_message                  textual\message_pump.py:810                    ncalls=223       tottime=   0.0009 cumtime=   8.1470
+10. on_event                     textual\message_pump.py:802                    ncalls=135       tottime=   0.0001 cumtime=   8.1426
+11. _process_messages_loop       textual\message_pump.py:634                    ncalls=108       tottime=   0.0014 cumtime=   6.3324
+12. _declare_after_layout        mapper\screens\map\painting.py:301             ncalls=7         tottime=   0.0007 cumtime=   5.9808
+13. _pre_process                 textual\message_pump.py:588                    ncalls=27        tottime=   0.0001 cumtime=   4.9185
+14. on_mount                     mapper\screens\map\screen.py:201               ncalls=1         tottime=   0.0017 cumtime=   4.8904
+15. _flush_next_callbacks        textual\message_pump.py:695                    ncalls=105       tottime=   0.0001 cumtime=   3.0592
+16. _invoke_and_clear_callbacks  textual\screen.py:1264                         ncalls=2         tottime=   0.0000 cumtime=   3.0477
+17. refresh_canvas               mapper\screens\map\painting.py:587             ncalls=1         tottime=   0.0003 cumtime=   3.0375
+18. on_descendant_focus          mapper\screens\map\screen.py:357               ncalls=1         tottime=   0.0000 cumtime=   2.8723
+19. wire                         mapper\canvas.py:107                           ncalls=35975997  tottime=   2.6070 cumtime=   2.6072
+20. load                         mapper\store.py:680                            ncalls=1         tottime=   0.0001 cumtime=   1.8493
+--- TOP 20 BY TOTTIME ---
+ 1. elbow_down                   mapper\canvas.py:119                           ncalls=5997      tottime=   5.9295 cumtime=   8.5394
+ 2. wire                         mapper\canvas.py:107                           ncalls=35975997  tottime=   2.6070 cumtime=   2.6072
+ 3. need_more_tokens             yaml\scanner.py:145                            ncalls=358132    tottime=   0.1555 cumtime=   0.3004
+ 4. check_token                  yaml\scanner.py:113                            ncalls=218080    tottime=   0.1182 cumtime=   1.1708
+ 5. stale_possible_simple_keys   yaml\scanner.py:279                            ncalls=372128    tottime=   0.1174 cumtime=   0.1174
+ 6. forward                      yaml\reader.py:99                              ncalls=148023    tottime=   0.0931 cumtime=   0.1064
+ 7. fetch_value                  yaml\scanner.py:545                            ncalls=14004     tottime=   0.0883 cumtime=   0.1411
+ 8. <method 'translate' of 'str' objects> ~:0                                            ncalls=90700     tottime=   0.0849 cumtime=   0.0849
+ 9. parse_node                   yaml\parser.py:273                             ncalls=28009     tottime=   0.0829 cumtime=   0.3760
+10. scan_plain                   yaml\scanner.py:1270                           ncalls=16005     tottime=   0.0810 cumtime=   0.2302
+11. divide                       textual\content.py:1509                        ncalls=4581      tottime=   0.0800 cumtime=   0.1183
+12. fetch_more_tokens            yaml\scanner.py:156                            ncalls=44014     tottime=   0.0709 cumtime=   0.8053
+13. peek                         yaml\reader.py:87                              ncalls=535919    tottime=   0.0688 cumtime=   0.0688
+14. <built-in method builtins.isinstance> ~:0                                            ncalls=621282    tottime=   0.0655 cumtime=   0.0718
+15. scan_to_next_token           yaml\scanner.py:752                            ncalls=44014     tottime=   0.0615 cumtime=   0.1605
+16. render                       mapper\views\layered.py:541                    ncalls=3         tottime=   0.0603 cumtime=   8.7740
+17. get_mark                     yaml\reader.py:114                             ncalls=106033    tottime=   0.0565 cumtime=   0.0777
+18. compose_node                 yaml\composer.py:63                            ncalls=28009     tottime=   0.0508 cumtime=   1.6596
+19. <built-in method builtins.len> ~:0                                            ncalls=542401    tottime=   0.0489 cumtime=   0.0519
+20. next_possible_simple_key     yaml\scanner.py:264                            ncalls=328114    tottime=   0.0431 cumtime=   0.0431
+--- COMPONENT / MODEL CALL COUNTS ---
+{
+ "mapper/model.py:children_of": 17,
+ "mapper/model.py:coverage": 5,
+ "mapper/model.py:find_cycle": 1,
+ "mapper/model.py:missing_required": 18002,
+ "mapper/model.py:required_coverage": 10001,
+ "mapper/screens/map/painting.py:<genexpr>": 16,
+ "mapper/screens/map/painting.py:_branch_coverage_glyph": 16,
+ "mapper/screens/map/painting.py:_canvas_size": 16,
+ "mapper/screens/map/painting.py:_canvas_width": 30,
+ "mapper/screens/map/painting.py:_current_renderer": 31,
+ "mapper/screens/map/painting.py:_declare_after_layout": 7,
+ "mapper/screens/map/painting.py:_header_rows": 14,
+ "mapper/screens/map/painting.py:_header_rows_for": 14,
+ "mapper/screens/map/painting.py:_minimap_entry_limit": 1,
+ "mapper/screens/map/painting.py:_minimap_text": 1,
+ "mapper/screens/map/painting.py:_open_paint_pass": 8,
+ "mapper/screens/map/painting.py:_painted_ids_for": 8,
+ "mapper/screens/map/painting.py:_unpainted_ids": 8,
+ "mapper/screens/map/painting.py:_view_state": 17,
+ "mapper/screens/map/painting.py:refresh_canvas": 1,
+ "mapper/screens/map/screen.py:__init__": 1,
+ "mapper/screens/map/screen.py:_apply_region_visibility": 1,
+ "mapper/screens/map/screen.py:_chrome_width": 30,
+ "mapper/screens/map/screen.py:_establish_graph": 1,
+ "mapper/screens/map/screen.py:_focus_owner": 17,
+ "mapper/screens/map/screen.py:_notice_load_warnings": 1,
+ "mapper/screens/map/screen.py:_park_focus": 1,
+ "mapper/screens/map/screen.py:compose": 9,
+ "mapper/screens/map/screen.py:on_descendant_blur": 1,
+ "mapper/screens/map/screen.py:on_descendant_focus": 1,
+ "mapper/screens/map/screen.py:on_mount": 1,
+ "mapper/screens/map/screen.py:on_resize": 1,
+ "mapper/screens/map/screen.py:on_screen_resume": 1,
+ "mapper/views/layered.py:<genexpr>": 24012,
+ "mapper/views/layered.py:_child_index": 24,
+ "mapper/views/layered.py:_clip": 34003,
+ "mapper/views/layered.py:_fit": 34003,
+ "mapper/views/layered.py:_geometry": 12,
+ "mapper/views/layered.py:_header_line": 17,
+ "mapper/views/layered.py:_hidden_ids": 12,
+ "mapper/views/layered.py:_parent_index": 3,
+ "mapper/views/layered.py:_title_image": 22000,
+ "mapper/views/layered.py:_tree_layout": 12,
+ "mapper/views/layered.py:_view_label": 17,
+ "mapper/views/layered.py:_vis_width": 116006,
+ "mapper/views/layered.py:header_rows": 14,
+ "mapper/views/layered.py:overflow_phrase": 25,
+ "mapper/views/layered.py:painted_ids": 8,
+ "mapper/views/layered.py:pan_extent": 1,
+ "mapper/views/layered.py:place": 34000,
+ "mapper/views/layered.py:render": 3,
+ "mapper/views/layered.py:title_width": 22000,
+ "mapper/views/layered.py:walk": 12,
+ "mapper/widgets/inspector.py:__init__": 2,
+ "mapper/widgets/inspector.py:_dirty_count": 2,
+ "mapper/widgets/inspector.py:_field_of": 1,
+ "mapper/widgets/inspector.py:_header": 2,
+ "mapper/widgets/inspector.py:_label": 8,
+ "mapper/widgets/inspector.py:_label_row": 3,
+ "mapper/widgets/inspector.py:_paint_dirty": 1,
+ "mapper/widgets/inspector.py:_put_draft": 1,
+ "mapper/widgets/inspector.py:_rebuild": 2,
+ "mapper/widgets/inspector.py:_restore_open_words": 1,
+ "mapper/widgets/inspector.py:_rows": 1,
+ "mapper/widgets/inspector.py:_shown_draft": 6,
+ "mapper/widgets/inspector.py:_shown_value": 2,
+ "mapper/widgets/inspector.py:has_draft": 2,
+ "mapper/widgets/inspector.py:on_input_changed": 1,
+ "mapper/widgets/inspector.py:show": 1,
+ "mapper/widgets/rail.py:<genexpr>": 4000,
+ "mapper/widgets/rail.py:__init__": 1,
+ "mapper/widgets/rail.py:_body": 2,
+ "mapper/widgets/rail.py:_child_index": 2,
+ "mapper/widgets/rail.py:_lattice": 2,
+ "mapper/widgets/rail.py:_missing_map": 2,
+ "mapper/widgets/rail.py:_rows": 2,
+ "mapper/widgets/rail.py:render": 2,
+ "mapper/widgets/rail.py:show": 1
+}

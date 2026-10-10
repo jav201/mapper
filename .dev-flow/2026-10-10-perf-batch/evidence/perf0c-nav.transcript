@@ -1,0 +1,100 @@
+PROFILE nav wide-2000: keys 'l' then 'j' on mounted map, 118x34, wall under profiler 16.356 s
+=== nav wide-2000 (l, j) ===
+--- TOP 20 BY CUMULATIVE ---
+ 1. <method 'run' of '_contextvars.Context' objects> ~:0                                            ncalls=670       tottime=   0.0012 cumtime=   7.2420
+ 2. invoke                       textual\_callback.py:62                        ncalls=735       tottime=   0.0009 cumtime=   7.0785
+ 3. _invoke                      textual\_callback.py:45                        ncalls=735       tottime=   0.0021 cumtime=   7.0451
+ 4. _process_messages_loop       textual\message_pump.py:634                    ncalls=273       tottime=   0.0028 cumtime=   6.4253
+ 5. _dispatch_message            textual\message_pump.py:707                    ncalls=453       tottime=   0.0014 cumtime=   6.3566
+ 6. _on_message                  textual\message_pump.py:810                    ncalls=353       tottime=   0.0012 cumtime=   6.2734
+ 7. on_event                     textual\message_pump.py:802                    ncalls=214       tottime=   0.0002 cumtime=   6.2655
+ 8. run_app                      textual\app.py:2178                            ncalls=12        tottime=   0.0000 cumtime=   6.2592
+ 9. _process_messages            textual\app.py:3364                            ncalls=12        tottime=   0.0000 cumtime=   6.2591
+10. run_process_messages         textual\app.py:3420                            ncalls=12        tottime=   0.0000 cumtime=   6.2591
+11. on_event                     textual\app.py:4060                            ncalls=10        tottime=   0.0001 cumtime=   6.2577
+12. _check_bindings              textual\app.py:3966                            ncalls=4         tottime=   0.0000 cumtime=   6.2566
+13. _on_key                      textual\app.py:4341                            ncalls=2         tottime=   0.0000 cumtime=   6.2565
+14. run_action                   textual\app.py:4223                            ncalls=2         tottime=   0.0000 cumtime=   6.2564
+15. _dispatch_action             textual\app.py:4250                            ncalls=2         tottime=   0.0000 cumtime=   6.2564
+16. refresh_canvas               mapper\screens\map\painting.py:587             ncalls=2         tottime=   0.0007 cumtime=   6.2559
+17. render                       mapper\views\layered.py:541                    ncalls=2         tottime=   0.0433 cumtime=   6.1768
+18. elbow_down                   mapper\canvas.py:119                           ncalls=3998      tottime=   4.1793 cumtime=   5.9962
+19. action_child                 mapper\screens\map\navigation.py:95            ncalls=1         tottime=   0.0000 cumtime=   3.2839
+20. action_next_sibling          mapper\screens\map\navigation.py:83            ncalls=1         tottime=   0.0000 cumtime=   2.9724
+--- TOP 20 BY TOTTIME ---
+ 1. elbow_down                   mapper\canvas.py:119                           ncalls=3998      tottime=   4.1793 cumtime=   5.9962
+ 2. wire                         mapper\canvas.py:107                           ncalls=23983998  tottime=   1.8148 cumtime=   1.8150
+ 3. wait_inner                   textual\_win_sleep.py:97                       ncalls=36        tottime=   0.1569 cumtime=   0.1161
+ 4. <built-in method _overlapped.GetQueuedCompletionStatus> ~:0                                            ncalls=208       tottime=   0.1151 cumtime=   0.1151
+ 5. <method 'translate' of 'str' objects> ~:0                                            ncalls=68445     tottime=   0.0672 cumtime=   0.0672
+ 6. render                       mapper\views\layered.py:541                    ncalls=2         tottime=   0.0433 cumtime=   6.1768
+ 7. _title_image                 mapper\views\layered.py:373                    ncalls=16000     tottime=   0.0291 cumtime=   0.1370
+ 8. <built-in method builtins.max> ~:0                                            ncalls=104400    tottime=   0.0285 cumtime=   0.0533
+ 9. <built-in method builtins.len> ~:0                                            ncalls=272513    tottime=   0.0227 cumtime=   0.0253
+10. from_rich_style              textual\style.py:352                           ncalls=8567      tottime=   0.0211 cumtime=   0.0447
+11. append                       rich\text.py:964                               ncalls=19092     tottime=   0.0207 cumtime=   0.0494
+12. _wrap_and_format             textual\content.py:620                         ncalls=85        tottime=   0.0206 cumtime=   0.1629
+13. _clip                        mapper\views\layered.py:78                     ncalls=24002     tottime=   0.0185 cumtime=   0.0816
+14. _divide_spans                textual\content.py:1452                        ncalls=26        tottime=   0.0184 cumtime=   0.0211
+15. divide                       textual\content.py:1509                        ncalls=4806      tottime=   0.0180 cumtime=   0.0617
+16. <method 'get' of 'dict' objects> ~:0                                            ncalls=122224    tottime=   0.0170 cumtime=   0.0173
+17. cell_len                     rich\cells.py:98                               ncalls=34368     tottime=   0.0168 cumtime=   0.0285
+18. place                        mapper\views\layered.py:290                    ncalls=24000     tottime=   0.0151 cumtime=   0.0236
+19. <genexpr>                    mapper\views\layered.py:336                    ncalls=20010     tottime=   0.0146 cumtime=   0.0254
+20. _tree_layout                 mapper\views\layered.py:192                    ncalls=10        tottime=   0.0138 cumtime=   0.0450
+--- COMPONENT / MODEL CALL COUNTS ---
+{
+ "mapper/model.py:children_of": 36,
+ "mapper/model.py:coverage": 4,
+ "mapper/model.py:missing_required": 16004,
+ "mapper/model.py:parent_of": 1,
+ "mapper/model.py:required_coverage": 8002,
+ "mapper/screens/map/painting.py:<genexpr>": 32,
+ "mapper/screens/map/painting.py:_branch_coverage_glyph": 32,
+ "mapper/screens/map/painting.py:_canvas_size": 12,
+ "mapper/screens/map/painting.py:_canvas_width": 24,
+ "mapper/screens/map/painting.py:_current_renderer": 26,
+ "mapper/screens/map/painting.py:_declare_after_layout": 4,
+ "mapper/screens/map/painting.py:_header_rows": 12,
+ "mapper/screens/map/painting.py:_header_rows_for": 12,
+ "mapper/screens/map/painting.py:_minimap_entry_limit": 2,
+ "mapper/screens/map/painting.py:_minimap_text": 2,
+ "mapper/screens/map/painting.py:_open_paint_pass": 6,
+ "mapper/screens/map/painting.py:_painted_ids_for": 6,
+ "mapper/screens/map/painting.py:_unpainted_ids": 6,
+ "mapper/screens/map/painting.py:_view_state": 14,
+ "mapper/screens/map/painting.py:refresh_canvas": 2,
+ "mapper/screens/map/screen.py:_chrome_width": 24,
+ "mapper/screens/map/screen.py:_focus_owner": 14,
+ "mapper/views/layered.py:<genexpr>": 20010,
+ "mapper/views/layered.py:_child_index": 20,
+ "mapper/views/layered.py:_clip": 24002,
+ "mapper/views/layered.py:_fit": 24002,
+ "mapper/views/layered.py:_geometry": 10,
+ "mapper/views/layered.py:_header_line": 14,
+ "mapper/views/layered.py:_hidden_ids": 10,
+ "mapper/views/layered.py:_parent_index": 2,
+ "mapper/views/layered.py:_title_image": 16000,
+ "mapper/views/layered.py:_tree_layout": 10,
+ "mapper/views/layered.py:_view_label": 14,
+ "mapper/views/layered.py:_vis_width": 88004,
+ "mapper/views/layered.py:header_rows": 12,
+ "mapper/views/layered.py:overflow_phrase": 20,
+ "mapper/views/layered.py:painted_ids": 6,
+ "mapper/views/layered.py:pan_extent": 2,
+ "mapper/views/layered.py:place": 24000,
+ "mapper/views/layered.py:render": 2,
+ "mapper/views/layered.py:title_width": 16000,
+ "mapper/views/layered.py:walk": 10,
+ "mapper/widgets/inspector.py:__init__": 4,
+ "mapper/widgets/inspector.py:_dirty_count": 4,
+ "mapper/widgets/inspector.py:_field_of": 2,
+ "mapper/widgets/inspector.py:_header": 4,
+ "mapper/widgets/inspector.py:_label": 16,
+ "mapper/widgets/inspector.py:_label_row": 6,
+ "mapper/widgets/inspector.py:_paint_dirty": 2,
+ "mapper/widgets/inspector.py:_put_draft": 2,
+ "mapper/widgets/inspector.py:_rebuild": 6,
+ "mapper/widgets/inspector.py:_restore_open_words": 2,
+ "mapper/widgets/inspector.py:_rows": 2,
+ "mapper/

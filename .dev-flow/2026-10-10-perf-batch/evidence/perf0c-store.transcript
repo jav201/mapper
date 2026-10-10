@@ -1,0 +1,76 @@
+PROFILE store wide-6000: nodes=6000 edges=5999
+=== MapStore.save wide-6000 ===
+--- TOP 15 BY CUMULATIVE ---
+ 1. save                         mapper\store.py:810                            ncalls=1         tottime=   0.0005 cumtime=   6.2060
+ 2. dump                         mapper\mermaid.py:131                          ncalls=1         tottime=   0.0217 cumtime=   3.0748
+ 3. <built-in method builtins.any> ~:0                                            ncalls=6002      tottime=   1.2606 cumtime=   3.0434
+ 4. safe_dump                    yaml\__init__.py:263                           ncalls=1         tottime=   0.0001 cumtime=   2.5334
+ 5. dump_all                     yaml\__init__.py:215                           ncalls=1         tottime=   0.0085 cumtime=   2.5334
+ 6. represent                    yaml\representer.py:26                         ncalls=1         tottime=   0.0008 cumtime=   2.5247
+ 7. serialize                    yaml\serializer.py:46                          ncalls=1         tottime=   0.0011 cumtime=   2.2126
+ 8. serialize_node               yaml\serializer.py:78                          ncalls=84009     tottime=   0.2525 cumtime=   2.1568
+ 9. <genexpr>                    mapper\mermaid.py:153                          ncalls=18003001  tottime=   1.7857 cumtime=   1.7857
+10. emit                         yaml\emitter.py:111                            ncalls=102017    tottime=   0.1048 cumtime=   1.7257
+11. expect_block_mapping_key     yaml\emitter.py:395                            ncalls=48006     tottime=   0.0516 cumtime=   1.0086
+12. expect_node                  yaml\emitter.py:232                            ncalls=84009     tottime=   0.1047 cumtime=   0.7065
+13. _reindex                     mapper\store.py:927                            ncalls=1         tottime=   0.0115 cumtime=   0.5696
+14. check_simple_key             yaml\emitter.py:437                            ncalls=42004     tottime=   0.0792 cumtime=   0.5357
+15. parent_of                    mapper\model.py:152                            ncalls=6000      tottime=   0.4926 cumtime=   0.4926
+--- TOP 15 BY TOTTIME ---
+ 1. <genexpr>                    mapper\mermaid.py:153                          ncalls=18003001  tottime=   1.7857 cumtime=   1.7857
+ 2. <built-in method builtins.any> ~:0                                            ncalls=6002      tottime=   1.2606 cumtime=   3.0434
+ 3. parent_of                    mapper\model.py:152                            ncalls=6000      tottime=   0.4926 cumtime=   0.4926
+ 4. serialize_node               yaml\serializer.py:78                          ncalls=84009     tottime=   0.2525 cumtime=   2.1568
+ 5. analyze_scalar               yaml\emitter.py:626                            ncalls=66005     tottime=   0.2336 cumtime=   0.3105
+ 6. <built-in method builtins.isinstance> ~:0                                            ncalls=1710444   tottime=   0.1529 cumtime=   0.1529
+ 7. <built-in method builtins.len> ~:0                                            ncalls=2073619   tottime=   0.1499 cumtime=   0.1499
+ 8. write_plain                  yaml\emitter.py:1080                           ncalls=48005     tottime=   0.1415 cumtime=   0.2094
+ 9. prepare_tag                  yaml\emitter.py:580                            ncalls=42004     tottime=   0.1159 cumtime=   0.1836
+10. represent_mapping            yaml\representer.py:103                        ncalls=12002     tottime=   0.1150 cumtime=   0.3113
+11. emit                         yaml\emitter.py:111                            ncalls=102017    tottime=   0.1048 cumtime=   1.7257
+12. expect_node                  yaml\emitter.py:232                            ncalls=84009     tottime=   0.1047 cumtime=   0.7065
+13. check_simple_key             yaml\emitter.py:437                            ncalls=42004     tottime=   0.0792 cumtime=   0.5357
+14. resolve                      yaml\resolver.py:143                           ncalls=150014    tottime=   0.0792 cumtime=   0.1316
+15. represent_data               yaml\representer.py:33                         ncalls=84009     tottime=   0.0625 cumtime=   0.3113
+--- COMPONENT / MODEL CALL COUNTS ---
+{
+ "mapper/model.py:find_cycle": 1,
+ "mapper/model.py:parent_of": 6000
+}
+=== MapStore.load wide-6000 ===
+--- TOP 15 BY CUMULATIVE ---
+ 1. load                         mapper\store.py:680                            ncalls=1         tottime=   0.0004 cumtime=   5.6198
+ 2. safe_load                    yaml\__init__.py:117                           ncalls=1         tottime=   0.0002 cumtime=   5.4097
+ 3. load                         yaml\__init__.py:74                            ncalls=1         tottime=   0.0198 cumtime=   5.4096
+ 4. get_single_data              yaml\constructor.py:47                         ncalls=1         tottime=   0.0004 cumtime=   5.3885
+ 5. get_single_node              yaml\composer.py:29                            ncalls=1         tottime=   0.0000 cumtime=   4.9521
+ 6. compose_document             yaml\composer.py:50                            ncalls=1         tottime=   0.0000 cumtime=   4.9519
+ 7. compose_node                 yaml\composer.py:63                            ncalls=84009     tottime=   0.1390 cumtime=   4.9519
+ 8. compose_mapping_node         yaml\composer.py:117                           ncalls=12002     tottime=   0.0731 cumtime=   4.9519
+ 9. check_event                  yaml\parser.py:94                              ncalls=258034    tottime=   0.1088 cumtime=   4.4602
+10. check_token                  yaml\scanner.py:113                            ncalls=654080    tottime=   0.3408 cumtime=   3.4612
+11. parse_block_mapping_key      yaml\parser.py:427                             ncalls=48006     tottime=   0.0626 cumtime=   2.4313
+12. fetch_more_tokens            yaml\scanner.py:156                            ncalls=132014    tottime=   0.2082 cumtime=   2.3912
+13. parse_block_mapping_value    yaml\parser.py:446                             ncalls=42004     tottime=   0.0523 cumtime=   1.6898
+14. parse_block_node_or_indentless_sequence yaml\parser.py:270                             ncalls=84008     tottime=   0.0320 cumtime=   1.1383
+15. parse_node                   yaml\parser.py:273                             ncalls=84009     tottime=   0.2458 cumtime=   1.1063
+--- TOP 15 BY TOTTIME ---
+ 1. need_more_tokens             yaml\scanner.py:145                            ncalls=1074132   tottime=   0.4628 cumtime=   0.8888
+ 2. stale_possible_simple_keys   yaml\scanner.py:279                            ncalls=1116128   tottime=   0.3468 cumtime=   0.3468
+ 3. check_token                  yaml\scanner.py:113                            ncalls=654080    tottime=   0.3408 cumtime=   3.4612
+ 4. forward                      yaml\reader.py:99                              ncalls=444023    tottime=   0.2798 cumtime=   0.3189
+ 5. parse_node                   yaml\parser.py:273                             ncalls=84009     tottime=   0.2458 cumtime=   1.1063
+ 6. scan_plain                   yaml\scanner.py:1270                           ncalls=48005     tottime=   0.2372 cumtime=   0.6826
+ 7. fetch_more_tokens            yaml\scanner.py:156                            ncalls=132014    tottime=   0.2082 cumtime=   2.3912
+ 8. peek                         yaml\reader.py:87                              ncalls=1611919   tottime=   0.2030 cumtime=   0.2030
+ 9. scan_to_next_token           yaml\scanner.py:752                            ncalls=132014    tottime=   0.1773 cumtime=   0.4705
+10. get_mark                     yaml\reader.py:114                             ncalls=318033    tottime=   0.1718 cumtime=   0.3429
+11. __init__                     yaml\error.py:6                                ncalls=318033    tottime=   0.1711 cumtime=   0.1711
+12. fetch_value                  yaml\scanner.py:545                            ncalls=42004     tottime=   0.1628 cumtime=   0.4278
+13. construct_scalar             yaml\constructor.py:117                        ncalls=66005     tottime=   0.1506 cumtime=   0.1551
+14. <built-in method builtins.isinstance> ~:0                                            ncalls=1440179   tottime=   0.1481 cumtime=   0.1641
+15. compose_node                 yaml\composer.py:63                            ncalls=84009     tottime=   0.1390 cumtime=   4.9519
+--- COMPONENT / MODEL CALL COUNTS ---
+{
+ "mapper/model.py:find_cycle": 1
+}
