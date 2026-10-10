@@ -220,7 +220,7 @@ involved.
 
 ### HLR-CSV.3 — the working path is untouched
 - **Traceability:** US-CSV-003
-- **Ledger:** LED-2026-10-10-csv-safety-batch.1, LED-2026-10-10-csv-safety-batch.4, LED-2026-10-10-csv-safety-batch.5
+- **Ledger:** LED-2026-10-10-csv-safety-batch.1, LED-2026-10-10-csv-safety-batch.4, LED-2026-10-10-csv-safety-batch.5, LED-2026-10-10-csv-safety-batch.11
 - **Statement:** When a CSV with no slug collision and no cycle is imported and saved through the import preview, the system shall persist the map and `MapStore.load` shall return a graph with the same node ids, edges, root and titles as the preview graph (the round-trip invariant on the happy path).
 - **Rationale (informative):** the safety checks must never tax the working path; this HLR is the regression guard that keeps the new validation honest — including the root-collision boundary, where a naive parent-count check could pass while the persisted map re-opens with a different root (the round-trip equality is what bites — for the happy-path fixtures below the root is the unique parentless node, so root equality follows from the node-id and edge sets; the store check itself does not compare the root, ruling R11). Round-1 amendment (ruling R5): the AT drives the real import flow — `_open_import` in `tests/test_seed_safety.py:107-117` presses `i`, types the path, `enter`, `s`, types the name, `enter` from the home screen — not the G6 surrogate's direct `action_save()` call.
 - **Validation:** `test`
@@ -232,7 +232,7 @@ involved.
   - **Shipped surface:** the same import-preview save flow as HLR-CSV.1, plus `MapStore.load`.
   - **Acceptance test(s):** AT-074
   - **Boundary catalog (QC-3):** ☑ empty — empty CSV: preview shows an empty graph and save/re-open round-trips as an empty map ☑ boundary — single-row CSV; deepest-nesting valid CSV from the fixtures ☑ invalid — none applies (the happy path admits only valid input) ☑ error — none applies.
-  - **Negative control:** mutation M3: make `mermaid.dump` omit node titles (or skip the sidecar write) → the round-trip node goes RED (reloaded graph unequal / unloadable). Executed in increment 1.
+  - **Negative control:** mutation M3: drop the title from `_build_sidecar` (`mapper/store.py`) — node titles persist in the `_nodos.yml` sidecar, NOT the `.mmd` label — → the round-trip nodes go RED (the reloaded graph's titles are lost) and AT-074 goes RED. Executed in increment 4 (`evidence/inc4-red.transcript`, M3-effective).
 
 ---
 
@@ -303,12 +303,12 @@ involved.
 
 ### LLR-CSV.3.1 — happy-path round-trip equality
 - **Traceability:** HLR-CSV.3
-- **Ledger:** LED-2026-10-10-csv-safety-batch.1
+- **Ledger:** LED-2026-10-10-csv-safety-batch.1, LED-2026-10-10-csv-safety-batch.11
 - **Statement:** For every preview graph that passes the LLR-CSV.1.1 validation, `MapStore.save` followed by `MapStore.load` on the same map id shall return a graph equal to the saved one — same node-id set, same parent/child edge set, same `root_id`, same node titles — including for the empty graph and the single-node graph.
 - **Validation:** `test (unit)`
 - **Executed verification:** round-trip nodes in `tests/test_csv_safety_store.py` (to be created in increment 1); e2e twin `tests/test_csv_safety_preview.py::test_at_074_valid_csv_saves_and_reopens_identical` (increment 2).
 - **Numeric pass threshold:** 0 differences on every fixture (node ids, edges, root, titles).
-- **Negative control:** mutation M3 (dump omits titles / sidecar skipped) → RED, as recorded in HLR-CSV.3.
+- **Negative control:** mutation M3 (drop the title from `_build_sidecar` — titles persist in the `_nodos.yml` sidecar, not the `.mmd` label) → RED on the round-trip nodes and AT-074, as recorded in HLR-CSV.3 (executed in increment 4, `evidence/inc4-red.transcript`).
 - **Boundary catalog:** ☑ empty (empty graph round-trips) ☑ boundary (single row; deepest fixture tree) — invalid/error classes are covered by LLR-CSV.1.1.
 
 ### Information Flow Contract (IFC) — C-54
@@ -416,7 +416,7 @@ with E-1 helpers imported from `tests/test_draft_save.py`:
 | M2 | Make `refresh_canvas` paint the graph / a generic message (skip the invariant branch) | `test_at_073_preview_names_the_colliding_rows`, `test_empty_csv_panel_renders_no_sentence` |
 | M2b | Stop appending to the collision record in `preview_csv` | `test_preview_csv_records_collisions` (AT-073 downstream) |
 | M2c | Remove the `csv_collisions` refusal from `_ImportPreviewScreen.action_save` | AT-072, AT-072b/c/d (the prompt opens, the save lands) |
-| M3 | Make `mermaid.dump` omit node titles / skip the sidecar write | the LLR-CSV.3.1 round-trip nodes, AT-074 |
+| M3 | Drop the title from `_build_sidecar` in `MapStore.save` — titles persist in the `_nodos.yml` sidecar, not the `.mmd` label (retargeted at the DDR, LED-2026-10-10-csv-safety-batch.11: the original wording "make `mermaid.dump` omit node titles" was vacuous — `dump` never wrote titles — and was never executed) | the LLR-CSV.3.1 round-trip nodes, AT-074 |
 | M4 | Re-add the root comparison to the round-trip check (the comparison ruling R11 removed) | `test_save_accepts_legacy_forest_after_edit` (new with LLR-CSV.1.3) |
 
 **Finding and ruling ids:** round-1 architect findings `A1`–`A6`, proposal findings `B1`–`B6`, qa findings `Q1`–`Q9` and `QB1`–`QB6`; round-2 architect findings `A7`, `B5`, `B6`, qa findings `1`–`7`; orchestrator rulings `R1`–`R16`; ledger `LED-2026-10-10-csv-safety-batch.N`; PDR decisions `PDR-2026-10-10-csv-safety-batch#D1`–`#D5`. No id is reused for a second meaning (ruling R16).
