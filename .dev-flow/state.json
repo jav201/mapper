@@ -70,7 +70,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P2",
+  "current_station": "P3",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -82,7 +82,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -150,6 +150,21 @@
       "station": "P1",
       "date": "2026-10-09",
       "decision": "P1 approved (self-approved under the standing authorization): 2 HLR, 3 LLR, AT-060/061/062 declared; scan-spec flag 'expose' answered in §6.3 as a false positive"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 1: iterate-to-refine (self-ruled): qa-reviewer QA-1 major is a requirement defect (AT-061's negative control misdescribes how it goes RED); 0 blockers; architect 3 minors, qa 3 minors; all seven applied in P1 iteration 1"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 iteration 1 approved (self-approved): QA-1..QA-4, QA-R, ARCH-1..ARCH-3 applied (LED .1-.4)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 2 approved (self-approved under the standing authorization): qa-reviewer confirmed all round-1 findings resolved; new minor A fixed (LED .5); 0 blocker, 0 major open"
     }
   ],
   "standing_authorization": {
