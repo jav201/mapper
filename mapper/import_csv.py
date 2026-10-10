@@ -36,6 +36,7 @@ def preview_csv(path: Path) -> Graph:
     if not text:
         return Graph()
 
+    # `line_num` below also counts \x0b \x0c \x1c-\x1e \x85 U+2028 U+2029 as line breaks (ruling R16).
     lines = text.splitlines()
     delimiter = _detect_delimiter(lines[0])
     reader = csv.DictReader(lines, delimiter=delimiter)

@@ -177,7 +177,7 @@ RED outputs (verbatim tails from the transcript):
 
 | Field | Value |
 |---|---|
-| **Independent review** | **PENDING** — the orchestrator dispatches it (per the unit brief) |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH — nits closed in increment 003; gate follow-up committed as 6763852 (the model-field totality guard's follow-up classification of `Graph.csv_collisions` / `CsvRow` / `CsvCollision`, already listed in §2) |
 
 ---
 
@@ -207,7 +207,7 @@ Increment 2 — `preview_csv` records the collisions into `Graph.csv_collisions`
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | 8 unit nodes, 55 passed (§3) |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | M1 / M1b / M4 / M-cyc, transcript + restore digest (§4) |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | 4 probes (§4) |
-| 6 | `code-reviewer` passed | `core` · `full` | ⚠ | PENDING — orchestrator dispatches (§4b) |
+| 6 | `code-reviewer` passed | `core` · `full` | ✓ | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH — nits closed in increment 003 (§4b) |
 | 7 | No file from another lane touched | all | ✓ | one lane; files = §2 |
 | 8 | Frozen interfaces untouched | all | ✓ | `MapStore.save` signature and cycle-guard message unchanged; `Graph` field/method additive with `compare=False, repr=False` |
 | 9 | Coverage claims verified **on disk** | all | ✓ | 55 passed here (§3 command) |
@@ -216,5 +216,5 @@ Increment 2 — `preview_csv` records the collisions into `Graph.csv_collisions`
 | 12 | **Instrument RED-proof** declared | all | ✓ | §4 — pytest nodes + ruff |
 | 13 | **Correction population** declared | all | ✓ | §4 (ruff-enumerated dead import) |
 | 14 | **Emitted-form assertion** declared | all | ✓ | §4 (.mmd bytes + workspace digest map) |
-| 15 | **Independent review** names somebody | all | ⚠ | PENDING (§4b) — dispatched by the orchestrator |
+| 15 | **Independent review** names somebody | all | ✓ | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH (§4b) |
 | 16 | **Evidence files** declared | all | ✓ | §4 — `evidence/inc1-red.transcript` with sha256 |

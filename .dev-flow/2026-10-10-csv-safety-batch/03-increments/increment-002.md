@@ -75,7 +75,7 @@ New node ids:
 
 | Field | Value |
 |---|---|
-| Mutation applied | (M2 flavor 1) `sentences = []` in `refresh_canvas`; (M2 flavor 2) a generic refusal painted when the sentence list is empty; (M2b) `preview_csv` stops appending to the collision record; (M2c) the `csv_collisions` refusal removed from `action_save` |
+| Mutation applied | (M2 flavor 1) `sentences = []` in `refresh_canvas`; (empty-CSV control) a generic refusal painted when the sentence list is empty; (M2b) `preview_csv` stops appending to the collision record; (M2c) the `csv_collisions` refusal removed from `action_save` |
 | Instrument | hand edit of the product file, applied and reverted by explicit copy (`cp <backup> <product>`); every restore checked by sha256 |
 | Where it ran | this worktree |
 | Transcript | `.dev-flow/2026-10-10-csv-safety-batch/evidence/inc2-red.transcript` (relative paths only) |
@@ -83,12 +83,12 @@ New node ids:
 | Bytecode cache | run with `python -B` |
 | Arms resolved at baseline | 4 mutations × their named nodes (below) |
 | Verdict granularity | per node id |
-| Arms that stayed GREEN | under M2 flavor 1 the empty-panel node stayed green (the renderer fallback repaints the existing header without a sentence) — M2 flavor 2, the glossary's second flavor, reddens it; under M2 flavor 2 AT-073 stayed green (flavor 1 reddens it) |
+| Arms that stayed GREEN | under M2 flavor 1 the empty-panel node stayed green (the renderer fallback repaints the existing header without a sentence) — empty-CSV control, the glossary's second flavor, reddens it; under empty-CSV control AT-073 stayed green (flavor 1 reddens it) |
 
 RED outputs (verbatim tails from the transcript):
 
 - M2 flavor 1 + `-k "at_073 or empty_csv_panel"` → `1 failed, 1 passed, 10 deselected` — `test_at_073_preview_names_the_colliding_rows` `FAILED` (the sentence is absent; the graph is painted instead).
-- M2 flavor 2 + `-k "empty_csv_panel or at_073"` → `1 failed, 1 passed, 10 deselected` — `test_empty_csv_panel_renders_no_sentence` `FAILED` (a sentence paints on an empty CSV).
+- empty-CSV control + `-k "empty_csv_panel or at_073"` → `1 failed, 1 passed, 10 deselected` — `test_empty_csv_panel_renders_no_sentence` `FAILED` (a sentence paints on an empty CSV).
 - M2b + `-k "records_collisions or at_073"` → `2 failed, 10 deselected` — `test_preview_csv_records_collisions` and `test_at_073_preview_names_the_colliding_rows` `FAILED` (the record is empty; AT-073 is downstream RED, exactly LLR-CSV.2.1's negative control).
 - M2c + `-k "at_072"` → `4 failed, 8 deselected` — `test_at_072_refused_save_toasts_and_writes_nothing`, `test_at_072b_parentless_slug_collision_refuses_save`, `test_at_072c_mixed_parentage_slug_collision_refuses_save`, `test_at_072d_auto_id_slug_collision_refuses_save` `FAILED` (the save-as prompt opens for a save that cannot happen; no pinned toast; the no-write oracle bites where the flow then saves).
 
@@ -98,7 +98,7 @@ RED outputs (verbatim tails from the transcript):
 
 | Field | Value |
 |---|---|
-| **Mutation verdicts** | 4 mutants, all KILLED per node id (M2f1 → AT-073, M2f2 → empty panel, M2b → 2 nodes, M2c → 4 nodes); arms that stayed GREEN: named above (each flavor's complement — no node a flavor claims stayed green); restored byte-identical (sha256) and the full §3 run re-run GREEN (166 passed) |
+| **Mutation verdicts** | 4 mutants, all KILLED per node id (M2f1 → AT-073, empty-CSV control → empty panel, M2b → 2 nodes, M2c → 4 nodes); arms that stayed GREEN: named above (each flavor's complement — no node a flavor claims stayed green); restored byte-identical (sha256) and the full §3 run re-run GREEN (166 passed) |
 
 ### Instrument RED-proof — every instrument shown able to report FAILURE first
 
@@ -181,7 +181,7 @@ RED outputs (verbatim tails from the transcript):
 
 | Field | Value |
 |---|---|
-| **Independent review** | **PENDING** — the orchestrator dispatches it (per the unit brief) |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH — nits closed in increment 003 |
 
 ---
 
@@ -211,7 +211,7 @@ Validation/close: the P3 full-suite gate (re-run after any post-review repair), 
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | 12 nodes, 166 passed (§3) |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | M2 (2 flavors) / M2b / M2c, transcript + restore digests (§4) |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | 4 probes (§4) |
-| 6 | `code-reviewer` passed | `core` · `full` | ⚠ | PENDING — orchestrator dispatches (§4b) |
+| 6 | `code-reviewer` passed | `core` · `full` | ✓ | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH — nits closed in increment 003 (§4b) |
 | 7 | No file from another lane touched | all | ✓ | one lane; files = §2 |
 | 8 | Frozen interfaces untouched | all | ✓ | `preview_csv` signature and `_ImportPreviewScreen` constructor/Static id/`could not draw the preview` header unchanged (F4 patch surface and `test_tc_r08b` stay green) |
 | 9 | Coverage claims verified **on disk** | all | ✓ | 166 passed here (§3 command) |
@@ -220,5 +220,5 @@ Validation/close: the P3 full-suite gate (re-run after any post-review repair), 
 | 12 | **Instrument RED-proof** declared | all | ✓ | §4 — pytest nodes (+ ruff green at baseline) |
 | 13 | **Correction population** declared | all | ✓ | §4 (none) |
 | 14 | **Emitted-form assertion** declared | all | ✓ | §4 (rendered Static text + workspace digest map + captured toast) |
-| 15 | **Independent review** names somebody | all | ⚠ | PENDING (§4b) — dispatched by the orchestrator |
+| 15 | **Independent review** names somebody | all | ✓ | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH (§4b) |
 | 16 | **Evidence files** declared | all | ✓ | §4 — `evidence/inc2-red.transcript` with sha256 |
