@@ -27,7 +27,7 @@
 - **Surface-reachability (bidirectional):** ✓ all named inputs AND outputs/deliverables reached/observed at the surface
 - **Supersession inspection (read off the P3 packets):** ✓ all surviving refs negative (the dropped F4 lazy-read design has zero live readers — LLR-MOD.3.2's guard proves every patch site repointed and 0 `screens/**` imports of any patch name from `mapper.app`)
 - **Test ledger:** ✓ reconciles (`base − D + A = post` → 2941 − 0 + 192 = 3133)
-- **Evidence checklist (qa-reviewer):** `qa-reviewer` review **PENDING** (the orchestrator dispatches it) · prepared rows: 11 of 11 ✓ with evidence below
+- **Evidence checklist (qa-reviewer):** `qa-reviewer` (Claude Sonnet, independent, read-only) **APPROVE-WITH-CONDITIONS → conditions M-1, M-2 applied**; verdict PASS-WITH-NOTES confirmed · 11 of 11 ✓ with evidence below
 
 > If every line is ✓, the Detail below is reference only. Any ⚠/✗ → read the matching part.
 
@@ -113,7 +113,7 @@
 
 | US | Acceptance test (`AT-NNN`) | Surface driven | Deliverable observed (path / element) | repr · boundary · negative | Result |
 |----|----------------------------|----------------|---------------------------------------|----------------------------|--------|
-| US-001 | AT-068 (`tests/test_mod_structure.py -k at068`, 1/10 collected; companions AT-069/AT-070/AT-071, same story per DDR C3) | the repository tree itself — the files a maintainer edits | `mapper/screens/map/{painting,searching,panning,hints,navigation,drafts,editing,undo,focus_mode,opening,exporting,screen}.py`, the 7 sibling modules, and `mapper/app.py` at ~350 lines | repr: one concern per module file · boundary: `screen.py` holds exactly the lifecycle concern + constants, `__init__.py` re-export only, `app.py` at the ~350-line boundary · negative: concern method in the wrong module / `Screen` subclass left in `app.py` / re-export dropped — tmp-copy RED arms | pass |
+| US-001 | AT-068 (`tests/test_mod_structure.py -k at068`, 1/10 collected; companions AT-069/AT-070/AT-071, same story per DDR C3) | the repository tree itself — the files a maintainer edits | `mapper/screens/map/{painting,searching,panning,hints,navigation,drafts,editing,undo,focus_mode,opening,exporting,screen}.py`, the 7 sibling modules, and `mapper/app.py` at 340 lines (`wc -l`, qa L-1) | repr: one concern per module file · boundary: `screen.py` holds exactly the lifecycle concern + constants, `__init__.py` re-export only, `app.py` at the ~350-line boundary · negative: concern method in the wrong module / `Screen` subclass left in `app.py` / re-export dropped — tmp-copy RED arms | pass |
 | US-002 | AT-065 (`tests/test_mod_parity.py -k at065`, 3/3 collected) and AT-066 (`tests/test_mod_dispatch.py -k at066`, 2/7 collected) | the painted screen of the real app — `MapperApp(tmp_path)` + `app.run_test(size=…)` + `pilot.press(...)` | every painted line of the scripted session (open, move, search, toggle, export, quit) at 118 and 87 columns; the hint line after real-key dispatch through the mixins | repr: golden text lines equal step by step · boundary: wide 118 vs truncated 87 layouts; the patched limit exactly one node below the map size · negative: one-token painted-string mutant on a tmp copy (AT-065); `HintsOps`-dropped / duplicated-`on_*` mutant (AT-066) | pass |
 | US-003 | AT-067 (`tests/test_mod_compat.py -k at067`, 3/32 collected), AT-069 (`tests/test_mod_compat.py -k at069`, 2/32), AT-070 (`tests/test_mod_deps.py -k at070`, 1/13), AT-071 (`tests/test_mod_deps.py -k at071`, 1/13) | the shipped screens (search/count line, path-refusal toast) and the shipped source tree (suite's imports, patch sites, pins, module graph) | the 7 module-globals of the reading modules + the biting patched refusal/limit; the 21 re-exported names; the 14 single-home darkside pins; the closed B-02; the §3 module graph | repr: patch bites through the repointed module-global, observed through the shipped screen · boundary: patched limit one node below map size; a pinned string in two homes fails · negative: repoint-skipped (stored transcript); raised pin (AT-069); restored function-local import (AT-070); synthetic `import mapper.app` / sibling-concern import (AT-071) | pass |
 
@@ -123,7 +123,7 @@
 | Direction | US dimension / deliverable | Service param / producer | Reached/observed at surface? | TC / AT | Status |
 |-----------|---------------------------|--------------------------|------------------------------|---------|--------|
 | input | US-002 real keystrokes of the scripted session | `pilot.press(...)` at terminal widths 118 and 87 | yes | AT-065 | ✓ |
-| output | US-002 the painted screen lines | the committed text goldens on disk | yes | AT-065 | ✓ |
+| output | US-002 the painted screen lines | the committed text goldens on disk (captured at `90e731b`, Inc-0, before any move — qa L-3) | yes | AT-065 | ✓ |
 | input | US-003 the 8 monkeypatch names (7 module-globals + `GitHubConnector.fetch`) | `monkeypatch.setattr` at premise 4's sites, repointed to the reading modules | yes | AT-067 | ✓ |
 | output | US-003 the search refusal/count line and the path-refusal toast | the shipped map screen under the patched limit / marker | yes | AT-067 | ✓ |
 | input | US-001 the maintainer's view of the repository tree | `inspect` / AST reads of the shipped files | yes | AT-068 | ✓ |
@@ -136,7 +136,7 @@
 
 | base | − D | + A | = post | actual collected | passed-lean / full | reconciles? |
 |------|-----|-----|--------|------------------|--------------------|-------------|
-| 2941 passed + 3 xfailed (P0 at `d8cf942`, PLAN ledger) | 0 — checked `git diff --diff-filter=D --stat d8cf942 HEAD -- tests` → empty, exit 0 | 192 | 3133 passed + 3 xfailed = 3136 | 3136 (`3136/3160 tests collected (24 deselected)` at `c5905d6`, the gate commit's tests byte-identical) | 3133 / 3133 + 19 slow (slow lane at `acbd087`, `evidence/ddr-acbd087-slow-lane.transcript` sha256 `1fcab7c50206c396dbe27c006a8ea5d9dc5f922bfa3b0cbf4c736dbb29e02915`); **network lane (5 tests): NOT RUN — no network for this batch's gates, declared non-run, not a pass** | yes |
+| 2941 passed + 3 xfailed (P0 at `d8cf942`, PLAN ledger) | 3 — 3 test functions removed and replaced inside modified files — found by `git diff -U0 d8cf942 HEAD -- tests | grep '^-.*def test_'` (qa M-1; a file-level `--diff-filter=D` check cannot see them): `test_at_064_app_imports_nothing_it_does_not_use` → parametrised over the package (`tests/test_app_imports_used.py`), `test_the_launcher_names_appear_only_in_app_and_osopen` → renamed `…_in_osopen_and_opening` (increment 023), `test_the_four_known_back_edges_are_exactly_the_ones_the_map_lists` → `test_b02_closed_there_are_no_screens_to_app_back_edges_at_all` (B-02 closed, a stronger assertion); no test FILE deleted (`git diff --diff-filter=D --stat d8cf942 HEAD -- tests` → empty) | 195 (derived: post − base + D = 3133 − 2941 + 3) | 3133 passed + 3 xfailed = 3136 | 3136 (`3136/3160 tests collected (24 deselected)` at `c5905d6`, the gate commit's tests byte-identical) | 3133 / 3133 + 19 slow (slow lane at `acbd087`, `evidence/ddr-acbd087-slow-lane.transcript` sha256 `1fcab7c50206c396dbe27c006a8ea5d9dc5f922bfa3b0cbf4c736dbb29e02915`); **network lane (5 tests): NOT RUN — no network for this batch's gates, declared non-run, not a pass** | yes |
 
 - Gate evidence: `evidence/p4-gate-full-suite.transcript` at `69676cf` — **3133 passed, 24 deselected, 3 xfailed, 0 failed in 1498.87s, exit=0** (sha256 `eb263fb1b150c8715874c037bc3147d9cdb242ee49728a14756fc86d7469b161`). The 24 deselected are the `slow`/`network` markers (`pyproject.toml:46`).
 - Arithmetic: 2941 − 0 + 192 = 3133 (passed-lean) and 2944 − 0 + 192 = 3136 (collected) — both reconcile; the +192 counts every guard/AT node the 23 increments added, incl. increment 023's two guard nodes (not `slow`).
@@ -161,8 +161,8 @@
 **Who executed what:**
 - **The orchestrator (Claude Opus 5.5)** ran the ONE complete gate suite (C-25) at `69676cf`, the slow lane at `acbd087`, the in-tree RED arms (77 passed), the C9 allow-list mutation, and the per-increment gates a1…b10b12. It owns every transcript cited above.
 - **Workers (DeepSeek, Kimi, …)** authored the guard/AT test files across the 23 increments; the guard files carry their own in-tree RED arms.
-- **The sub-agent (Kimi, this file's drafter)** re-collected every selector count cited in Layer A/Layer B (`--collect-only`, none collects 0), verified the ledger arithmetic, the deleted-test check, and the HEAD↔gate-commit diff, and re-hashed every cited evidence file.
-- **The `qa-reviewer`** ran nothing yet — its independent review of this artifact is **PENDING** (the orchestrator dispatches it).
+- **The sub-agent (Kimi, this file's drafter)** re-collected every selector count cited in Layer A/Layer B (`--collect-only`, none collects 0), verified the ledger arithmetic, the deleted-test-file check (the function-level check was added by the qa-reviewer, M-1), and the HEAD↔gate-commit diff, and re-hashed every cited evidence file.
+- **The `qa-reviewer`** (Claude Sonnet) ran `--collect-only` on 20 selectors, re-hashed the 7 cited evidence files, and ran the function-level deleted-test check (`git diff -U0 d8cf942 HEAD -- tests | grep '^-.*def test_'`); it ran no suite.
 
 | # | Item | ✓/✗ | Evidence |
 |---|---|---|---|
@@ -175,7 +175,7 @@
 | 7 | Mode + executor per result | ✓ | "executed by: orchestrator" on the gate rows; sub-agent counts marked as re-collection |
 | 8 | Layer B with boundary + negative | ✓ | three story rows, each with repr/boundary/negative |
 | 9 | Bidirectional reachability | ✓ | 6 inputs/outputs, all ✓ |
-| 10 | Ledger | ✓ | 2941 − 0 + 192 = 3133; collected 3136/3160; deleted-test check empty |
+| 10 | Ledger | ✓ | 2941 − 3 + 195 = 3133; collected 3136/3160; 3 test functions rewritten (named in the ledger row), no test file deleted |
 | 11 | No unfilled template | ✓ | this checklist pasted; example rows left fenced, not copied |
 
-**Reviewer cell:** `qa-reviewer` review **PENDING** — the orchestrator dispatches the independent review of this artifact; the rows above are the prepared evidence for it.
+**Reviewer cell:** `qa-reviewer` (Claude Sonnet, independent of the Kimi drafter and the orchestrator; read-only; 2026-10-10) — **APPROVE-WITH-CONDITIONS**, PASS-WITH-NOTES confirmed (nothing turns it into a FAIL). It re-collected 20 selectors (all non-zero, counts match), re-hashed all 7 cited evidence files (all match), confirmed Layer A covers all 7 HLR-MOD + 17 LLR-MOD and that AT-065 drives the real app (`tests/test_mod_parity.py:149`, widths :51). Conditions applied by the orchestrator: **M-1** the ledger names the 3 rewritten test functions; **M-2** this cell. LOWs applied: L-1 (`app.py` 340 lines), L-3 (golden capture commit `90e731b`, Inc-0, before any move). Noted: AT-065/067/069 realise in one FILE each with 3/3/2 nodes (parametrised widths + RED arm).
