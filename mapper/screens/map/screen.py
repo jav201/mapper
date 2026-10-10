@@ -10,7 +10,6 @@ This module never imports `mapper.app` (LLR-MOD.6.2).
 from __future__ import annotations
 
 import copy
-import json
 
 from rich.text import Text
 from textual import events
@@ -30,7 +29,7 @@ from mapper.keymap import (
     SCOPE_DRAFT,
     SCOPE_MAP,
 )
-from mapper.mermaid import dump as dump_mermaid, slugify
+from mapper.mermaid import slugify
 from mapper.model import Attachment, Edge, Ficha, Graph, Node
 from mapper.motion import pulse_cursor
 from mapper.screens import CoverageScreen, DraftGuardScreen
@@ -79,9 +78,10 @@ from mapper.widgets.rail import OutlineRail, RAIL_WIDTH
 from mapper.screens.map.hints import HintsOps
 from mapper.screens.map.exporting import ExportingOps
 from mapper.screens.map.opening import OpeningOps
+from mapper.screens.map.undo import UndoOps
 
 
-class MapScreen(OpeningOps, ExportingOps, HintsOps, Screen):
+class MapScreen(UndoOps, OpeningOps, ExportingOps, HintsOps, Screen):
     """A map rendered as a layered tree."""
 
     KEY_SCOPE = SCOPE_MAP
@@ -2205,52 +2205,6 @@ class MapScreen(OpeningOps, ExportingOps, HintsOps, Screen):
 
     UNDO_DEPTH = 20
 
-    @property
-    def _snapshots(self) -> list[bytes]:
-        """This map's undo history, held by the App so it outlives the screen.
-
-        Keyed by `map_id`: one global stack would let an undo taken in map B
-        restore a snapshot of map A, which is data loss wearing a feature's
-        clothes.
-        """
-        return self.app.undo_stacks.setdefault(self.map_id, [])
-
-    def _push_snapshot(self, graph: Graph | None = None) -> None:
-        """Push *graph* (default: the graph on show) onto this map's undo stack.
-
-        The draft save passes `base_graph`: under focus the graph on show is a
-        subtree, and undoing a save must restore the whole map (R-1).
-        """
-        if self.store is None:
-            return
-        graph = self.graph if graph is None else graph
-        mmd = dump_mermaid(graph)
-        sidecar = self.store._build_sidecar(graph)
-        import yaml
-
-        yml = yaml.safe_dump(sidecar, sort_keys=False, allow_unicode=True)
-        stack = self._snapshots
-        stack.append(json.dumps({"mmd": mmd, "yml": yml}).encode())
-        del stack[: max(0, len(stack) - self.UNDO_DEPTH)]
-
-    def _pop_snapshot(self) -> None:
-        if not self._snapshots:
-            self.notify("nothing to undo")
-            return
-        import yaml
-
-        blob = self._snapshots.pop()
-        data = json.loads(blob.decode())
-        graph = self.store._graph_from_sidecar(data["mmd"], yaml.safe_load(data["yml"]) or {})
-        self.graph = graph
-        self.base_graph = graph
-        if self.nav.cursor not in self.graph.nodes:
-            self.nav.cursor = self.graph.root_id
-        if not _save_or_toast(self, self.store, self.map_id, self.graph):
-            return
-        self.refresh_canvas()
-        self._event_toast("undo", "state restored")
-
     def action_next_sibling(self) -> None:
         nxt = self.nav.next_sibling()
         if nxt:
@@ -3018,9 +2972,6 @@ class MapScreen(OpeningOps, ExportingOps, HintsOps, Screen):
         ]
         if self.graph.root_id in remove:
             self.graph.root_id = next(iter(self.graph.nodes), None)
-
-    def action_undo(self) -> None:
-        self._pop_snapshot()
 
     def action_home(self) -> None:
         self._guard_draft(self.app.pop_screen)
