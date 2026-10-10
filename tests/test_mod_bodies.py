@@ -240,11 +240,29 @@ def _delete_a_used_import(src: str) -> tuple[str, str]:
     raise AssertionError("no import used inside a nested scope found")
 
 
+# Bodies a LATER batch changed on purpose after the move.  The oracle was built to
+# prove the 2026-10-09-modular-batch move edited nothing; frozen as-is it would also
+# refuse every intentional change to the 33 moved classes forever.  So a post-move
+# edit is DECLARED here -- key -> the batch and requirement that changed it -- and
+# everything not declared stays frozen.  A declaration whose body no longer differs
+# from the baseline is stale and fails too, so the list cannot rot into a blanket pass.
+DECLARED_CHANGES: dict[str, str] = {
+    "_ImportPreviewScreen.action_save": "2026-10-10-csv-safety-batch, LLR-CSV.2.3 (refuse a colliding import at s)",
+    "_ImportPreviewScreen.refresh_canvas": "2026-10-10-csv-safety-batch, LLR-CSV.2.2 (name the colliding rows)",
+}
+
+
 def test_llr_mod_4_3_bodies_match_baseline():
     """Every Inc-0 census body is byte-identical and appears exactly once
     somewhere in the package: no method lost, duplicated or edited by a
-    move.  Diff must be empty (missing / duplicated / changed all none)."""
+    move.  Diff must be empty (missing / duplicated / changed all none),
+    except the bodies a later batch changed on purpose and declared in
+    `DECLARED_CHANGES` -- each of which must really differ (no stale entry)."""
     diff = baseline_diff(PACKAGE, _load_baseline())
+    changed = set(diff["changed"])
+    stale = sorted(set(DECLARED_CHANGES) - changed)
+    assert stale == [], f"declared changes whose body matches the baseline again: {stale}"
+    diff["changed"] = sorted(changed - set(DECLARED_CHANGES))
     assert diff == {"missing": [], "duplicated": [], "changed": []}
 
 
