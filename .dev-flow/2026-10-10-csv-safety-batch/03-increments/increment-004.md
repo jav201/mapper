@@ -180,7 +180,7 @@ RED outputs (verbatim tails from the transcript):
 
 | Field | Value |
 |---|---|
-| **Independent review** | **PENDING** — re-review at the DDR seal: the DDR Verdict stays `PENDING-REVIEW` and the orchestrator seals after re-reviewing this increment's discharges (DDR §E rows) |
+| **Independent review** | `qa-reviewer` (Claude Sonnet) + architect (Claude Opus), read-only, re-review at the DDR seal: both **APPROVED** — qa re-read `evidence/inc4-red.transcript` (M-dump2, M-dumpwrite, M3-effective, M4 with restores) and LED .11; architect re-read `tests/test_mod_bodies.py:244-262` and the new missing-arm, the boundary comment, and the DDR forest-root rows; two wording LOWs applied at the seal |
 
 ---
 
