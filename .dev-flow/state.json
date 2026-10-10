@@ -85,7 +85,7 @@
     }
   ],
   "guided": false,
-  "current_station": "ARQ",
+  "current_station": "P1",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -166,6 +166,11 @@
       "station": "P0",
       "date": "2026-10-10",
       "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base a36f63e; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-10",
+      "decision": "ARQ approved (self-approved under the standing authorization): design/design-proposal.md (Kimi) — invariant check Graph.multi_parent_ids() in mapper/model.py beside find_cycle (O(N+E), no new dependency edge); collision record as a defaulted Graph.csv_collisions attribute (preview_csv signature frozen, F4 patch-compatible); census: no existing test saves a graph the check would refuse"
     }
   ],
   "standing_authorization": {
