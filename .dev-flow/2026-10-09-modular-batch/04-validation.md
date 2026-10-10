@@ -26,12 +26,12 @@
 - **Black-box acceptance (Layer B):** ✓ every story's `AT` observes its outcome through the shipped surface (boundary + negative)
 - **Surface-reachability (bidirectional):** ✓ all named inputs AND outputs/deliverables reached/observed at the surface
 - **Supersession inspection (read off the P3 packets):** ✓ all surviving refs negative (the dropped F4 lazy-read design has zero live readers — LLR-MOD.3.2's guard proves every patch site repointed and 0 `screens/**` imports of any patch name from `mapper.app`)
-- **Test ledger:** ✓ reconciles (`base − D + A = post` → 2941 − 0 + 192 = 3133)
+- **Test ledger:** ✓ reconciles (`base − D + A = post` → 2941 − 3 + 195 = 3133)
 - **Evidence checklist (qa-reviewer):** `qa-reviewer` (Claude Sonnet, independent, read-only) **APPROVE-WITH-CONDITIONS → conditions M-1, M-2 applied**; verdict PASS-WITH-NOTES confirmed · 11 of 11 ✓ with evidence below
 
 > If every line is ✓, the Detail below is reference only. Any ⚠/✗ → read the matching part.
 
-**Verdict reason (3 lines):** all 24 requirements pass with executed evidence and every AT-065…AT-071 is GREEN with an executed RED counterfactual; the ledger reconciles (2941 − 0 + 192 = 3133; collected 3136/3160) and no defect escaped. The notes are three carried minor LOWs from the sealed DDR (census-baseline location, D-C3 guard's direct-importer scope, CR-3 unpatched `pan_extent` reader in `exporting.py`) plus one declared non-run (the 5-test network lane — no network available for this batch's gates; stated as a non-run, not a pass). None blocks the gate.
+**Verdict reason (3 lines):** all 24 requirements pass with executed evidence and every AT-065…AT-071 is GREEN with an executed RED counterfactual; the ledger reconciles (2941 − 3 + 195 = 3133; collected 3136/3160) and no defect escaped. The notes are three carried minor LOWs from the sealed DDR (census-baseline location, D-C3 guard's direct-importer scope, CR-3 unpatched `pan_extent` reader in `exporting.py`) plus one declared non-run (the 5-test network lane — no network available for this batch's gates; stated as a non-run, not a pass). None blocks the gate.
 
 ---
 
