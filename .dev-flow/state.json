@@ -81,7 +81,7 @@
   ],
   "guided": false,
   "current_station": "P1",
-  "phase_status": "in-progress",
+  "phase_status": "iterating",
   "stations_active": [
     "P0",
     "ARQ",
@@ -96,7 +96,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
+    "P1": 1,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -168,6 +168,16 @@
       "station": "ARQ",
       "date": "2026-10-09",
       "decision": "ARQ approved (self-approved): module map amended in docs/ARCHITECTURE.md (TARGET rows) from the Kimi K3 proposal, corrected by the orchestrator's MRO spike (BINDINGS stay on the core class; disjoint on_* names); independent architect review owed at P2/PDR"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-09",
+      "decision": "P1 approved (self-approved): contract drafted by Kimi K2 (3 US, 7 HLR, 16 LLR, AT-065..070); scan-spec flag 'session' answered as a false positive"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-09",
+      "decision": "P2 round 1: iterate-to-refine (self-ruled): 4 blockers (ARCH-1 no legal MapScreen import edge for home/import_preview; ARCH-2 8 patch targets not 2; QA-1 parity capture undefined; QA-2 no per-method body identity / undefined-name check) + majors + minors; orchestrator rulings: sibling screens import MapScreen from screens.map with a reordered spine, patch targets repointed in the moving increment, text golden committed at Inc-0, test_mod_bodies.py"
     }
   ],
   "standing_authorization": {
