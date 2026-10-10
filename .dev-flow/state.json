@@ -80,7 +80,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P5",
+  "current_station": "P6",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -208,6 +208,11 @@
       "station": "P4",
       "date": "2026-10-10",
       "decision": "P4 PASS-WITH-NOTES (04-validation.md): full suite at 69676cf 3133 passed / 3 xfailed / 0 failed, slow lane 19/0, network lane declared not run; Layer A 7 HLR + 17 LLR, Layer B 3 US / AT-065..071; drafted by Kimi, qa-reviewer (Claude Sonnet) approve-with-conditions, M-1/M-2 applied; 4 minor gaps to backlog"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-10",
+      "decision": "P5 close approved (05-postmortem.md rev 2): drafted by Kimi; architect (Claude Opus) + qa-reviewer (Claude Sonnet) approve-with-conditions then approve on re-review; 24 MOD ids folded into REQUIREMENTS.md (LLR-MOD.7.1 amended by LED .12 first); backlog B-108..B-113; next: P6 docs"
     }
   ],
   "standing_authorization": {
