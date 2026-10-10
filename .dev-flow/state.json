@@ -85,7 +85,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P4",
+  "current_station": "P5",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -206,6 +206,11 @@
       "station": "DDR",
       "date": "2026-10-10",
       "decision": "DDR sealed approved (DDR-2026-10-10-csv-safety-batch): architect (Claude Opus) + qa (Claude Sonnet) approved with conditions, discharged at increment 4 (oracle changed-freeze retired, dump-once and effective-M3 RED proofs, LED .11); re-review approved by both"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-10",
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate run 3 at 53807c4 3157 passed / 3 xfailed / 0 failed; 10/10 requirements, AT-072..074 GREEN with executed RED; save-cost +3.2 % (≤ 25 %); qa-reviewer (Claude Sonnet) approve-with-conditions, applied"
     }
   ],
   "standing_authorization": {
