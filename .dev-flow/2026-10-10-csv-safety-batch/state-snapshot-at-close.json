@@ -1,0 +1,273 @@
+{
+  "project": "mapper",
+  "language": "en",
+  "batch_id": "2026-10-10-csv-safety-batch",
+  "batch_objective": "B-114 data safety: a CSV import must never produce a map that cannot be re-opened. Two CSV rows whose ids slugify to the same id collapse into one node with two parents; the preview renders it, the commit saves it, and re-open fails (MapStoreError/ParseError, mapper/mermaid.py:85). Make the import and the save refuse or resolve what the loader refuses, so a saved map always re-opens.",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "mode": "core",
+  "mode_history": [
+    {
+      "batch_id": "2026-08-18-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-fix-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-medlow-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-components-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-25-ui-next-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-26"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "status": "PARKED at the PDR gate 2026-08-26; UN-PARKED 2026-08-27",
+      "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."
+    },
+    {
+      "batch_id": "2026-08-26-repair-batch",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "closed_at": "2026-08-27",
+      "merge_commit": "e164a28",
+      "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
+    },
+    {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "mode": "full",
+      "closed_at": "2026-08-27"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "closed_at": "2026-10-08"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "from": null,
+      "to": "full",
+      "date": "2026-10-08",
+      "reason": "operator at kickoff 2026-10-08: 'full (Recomendado)' -- B-36 touches persistence and UX"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "mode": "full",
+      "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-hygiene-batch",
+      "mode": "core",
+      "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-canon-batch",
+      "mode": "core",
+      "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-modular-batch",
+      "mode": "full",
+      "closed_at": "2026-10-10"
+    }
+  ],
+  "guided": false,
+  "current_station": "P5",
+  "phase_status": "approved",
+  "stations_active": [
+    "P0",
+    "ARQ",
+    "P1",
+    "P2",
+    "PDR",
+    "P3",
+    "DDR",
+    "P4",
+    "P5"
+  ],
+  "iterations_per_station": {
+    "P0": 0,
+    "P1": 1,
+    "P2": 0,
+    "P3": 0,
+    "P4": 0,
+    "P5": 0,
+    "ARQ": 0,
+    "DDR": 0,
+    "PDR": 0
+  },
+  "triggers": {
+    "evaluated_at": "2026-10-10T12:07:44",
+    "fired": [
+      "A2",
+      "A3",
+      "B1",
+      "B4",
+      "C6",
+      "C8",
+      "D1",
+      "E1",
+      "F1"
+    ],
+    "not_fired": [
+      "A1",
+      "A4",
+      "B2",
+      "B3",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C7",
+      "D2",
+      "E2",
+      "E3",
+      "F2"
+    ],
+    "record": ".dev-flow/2026-10-10-csv-safety-batch/PLAN.md#triggers"
+  },
+  "artifact_homes": {
+    "requirements": "repo:.dev-flow/2026-10-10-csv-safety-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-10-csv-safety-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-10-csv-safety-batch/06-docs/traceability-matrix.md",
+    "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-10-10-csv-safety-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-10-csv-safety-batch/evidence/",
+    "backlog": "repo:.dev-flow/BACKLOG.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-10-csv-safety-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-10-csv-safety-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-10-csv-safety-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-10-csv-safety-batch/README.md",
+    "requirements_canon": "repo:REQUIREMENTS.md"
+  },
+  "base_ref": "a36f63e22b620fe42fc0301194313921f81e77d4",
+  "artifacts": {
+    "plan": ".dev-flow/2026-10-10-csv-safety-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-10-csv-safety-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-10-csv-safety-batch/01-requirements-ledger.md"
+  },
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-10",
+      "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base a36f63e; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-10",
+      "decision": "ARQ approved (self-approved under the standing authorization): design/design-proposal.md (Kimi) — invariant check Graph.multi_parent_ids() in mapper/model.py beside find_cycle (O(N+E), no new dependency edge); collision record as a defaulted Graph.csv_collisions attribute (preview_csv signature frozen, F4 patch-compatible); census: no existing test saves a graph the check would refuse"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-10",
+      "decision": "P1 drafted (Kimi kimi-for-coding): US-CSV-001..003, HLR-CSV.1-3, LLR-CSV.*, AT-072..074; to P2 review"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-10",
+      "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): requirements ITERATE (HIGH: collision without loader violation silently loses a row; root-collision fixture is a cycle), proposal approve-with-conditions; qa (Claude Sonnet): approve-with-conditions (same HIGH; AT oracle must include mapper.db; drive via _open_import). Rulings R1-R10 recorded in 02-review.md"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-10",
+      "decision": "P1 iteration 1 approved (self-approved): rulings R1-R10 applied by Kimi (LED .2-.4, new LLR-CSV.2.3; round-trip store check; any collision blocks; _open_import drive path; workspace sha256 oracle); B-115/B-116 to backlog; to P2 round 2"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-10",
+      "decision": "P2 round 2 approved with conditions (self-approved): architect (Claude Opus) + qa (Claude Sonnet) approve-with-conditions; rulings R11-R16 applied (LED .5-.10): round trip compares node and edge sets, not the root (forests, B-117); one dump per save; collision sentence wins; per-layer controls; preview refuses at s with a pinned toast"
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-10",
+      "decision": "PDR sealed approved with conditions C1-C6 (PDR-2026-10-10-csv-safety-batch, D1-D5), conditions applied as document fixes before P3, re-read at DDR"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-10",
+      "decision": "P3 approved (self-approved): 4 increments (store round-trip check; preview collision record + refusal at s; review nits; DDR conditions); 3 code reviews APPROVE-WITH-NITS 0 HIGH; gate run 1 red (modular move oracle froze moved bodies; A3 pin) fixed, run 3 at 53807c4: 3157 passed / 3 xfailed / 0 failed"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-10",
+      "decision": "DDR sealed approved (DDR-2026-10-10-csv-safety-batch): architect (Claude Opus) + qa (Claude Sonnet) approved with conditions, discharged at increment 4 (oracle changed-freeze retired, dump-once and effective-M3 RED proofs, LED .11); re-review approved by both"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-10",
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate run 3 at 53807c4 3157 passed / 3 xfailed / 0 failed; 10/10 requirements, AT-072..074 GREEN with executed RED; save-cost +3.2 % (≤ 25 %); qa-reviewer (Claude Sonnet) approve-with-conditions, applied"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-10",
+      "decision": "P5 closed (self-approved under the standing authorization): 05-close.md; B-114 DONE; B-115/B-116/B-117 carried; final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH; merged as 6dfffde (PR #18, squash; fix/csv-safety-batch kept on the remote)"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-10",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-10-csv-safety-batch/ (core light sync: README only)"
+    }
+  ],
+  "standing_authorization": {
+    "autonomous": true,
+    "merge": true,
+    "asked_on": "2026-10-10",
+    "operator_words": {
+      "go_ahead": "Batch corto antes (Recomendado) — 2026-10-10, answering how to treat B-114: pause the perf batch after P0 and open a small core batch",
+      "mode_and_authorization": "the chosen option named a small core batch; autonomy and merge carried from the operator's standing terms for this session (full/core + autónomo + merge)",
+      "worker_model": "kimi-for-coding, unchanged",
+      "decision_recording": "not asked as a separate question; the recording obligation is unconditional"
+    },
+    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless. TUI design changes (anything that changes what is painted) need a prototype verdict from the operator first."
+  },
+  "previous_batch": {
+    "batch_id": "2026-10-09-modular-batch",
+    "merge_commit": "9bcbabb",
+    "close_pr": "https://github.com/jav201/mapper/pull/16",
+    "sync_pr": "https://github.com/jav201/mapper/pull/17",
+    "closed_at": "2026-10-10",
+    "close_commit": "a36f63e",
+    "obsidian_synced": true,
+    "archive": ".dev-flow/2026-10-09-modular-batch/decisions-log.json + state-snapshot-at-close.json"
+  },
+  "batch_history": {
+    "2026-08-26-repair-batch": {
+      "batch_id": "2026-08-26-repair-batch",
+      "merge_commit": "e164a28",
+      "pr": "https://github.com/jav201/mapper/pull/2",
+      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "obsidian_synced": true
+    },
+    "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
+    "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
+    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
+    "2026-08-27-repair-batch-02": {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "merge_commit": "2b59071",
+      "pr": "https://github.com/jav201/mapper/pull/3",
+      "closed_at": "2026-08-27",
+      "close_commit": "3fe0e4b",
+      "obsidian_synced": true,
+      "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
+    }
+  },
+  "obsidian_synced": true,
+  "created_at": "2026-10-10T00:00:00"
+}

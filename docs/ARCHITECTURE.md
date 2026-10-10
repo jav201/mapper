@@ -15,8 +15,8 @@
 
 | Field | Value |
 |---|---|
-| Last amended by | `2026-10-09-modular-batch` (ARQ) |
-| Date | `2026-10-09` |
+| Last amended by | `2026-10-10-csv-safety-batch` (ARQ) |
+| Date | `2026-10-10` |
 
 > **Amendment `2026-10-08-data-safety-batch` (ARQ, US-001 ← B-36, model C "draft + explicit save").**
 > **No module boundary moves and no dependency edge is added** (§3 is unchanged). What moves is one
@@ -172,9 +172,9 @@ deliberately — see R-011.
 
 | Interface | Owner module | Consumers | Shape | Frozen? |
 |---|---|---|---|---|
-| `Graph` value object | `model` | `store`, `views`, `search`, `mermaid`, `github`, `app` | `nodes: dict[str, Node]`; `edges: list[Edge]`; `root_id: str`; `focus(node_id) -> Graph` | yes for MVP |
+| `Graph` value object | `model` | `store`, `views`, `search`, `mermaid`, `github`, `app` | `nodes: dict[str, Node]`; `edges: list[Edge]`; `root_id: str`; `csv_collisions: list[CsvCollision]` *(amended `2026-10-10-csv-safety-batch`: build-time CSV provenance — which original rows collapsed into which slug — recorded by `import_csv.preview_csv`; `compare=False, repr=False`, so `Graph.__eq__` and `repr` do not change; never written to the sidecar)*; `focus(node_id) -> Graph` | yes for MVP |
 | `Canvas` drawing buffer | `canvas` | `views` | `put(x,y,ch,tone)`, `wire(x,y,mask,tone)`, `edge(...)`, `elbow_down(...)`, `text(...)`, `rows() -> list[Text]` *(corrected `2026-08-27-repair-batch-02`: the previous row said `list[str]`; executed, `Canvas.rows` is annotated and returns `list[Text]`)* | yes for MVP |
-| `MapStore` persistence | `store` | `app` | `load(map_id) -> Graph`, `save(map_id, graph)`, and the private `_reindex(...)` *(corrected `2026-08-27-repair-batch-02`: the previous row declared `load` returning a `(Graph, Sidecar)` tuple and a public `reindex()`; neither exists)* | yes for MVP |
+| `MapStore` persistence | `store` | `app` | `load(map_id) -> Graph`, `save(map_id, graph)`, and the private `_reindex(...)` *(corrected `2026-08-27-repair-batch-02`: the previous row declared `load` returning a `(Graph, Sidecar)` tuple and a public `reindex()`; neither exists)*; *(amended `2026-10-10-csv-safety-batch`: `save` refuses — before any byte is written — a graph whose saved form would not load back as the same node-id set and edge set, round-tripping the exact dumped text through `mermaid.parse` and comparing node/edge sets only, never the root — a forest's root drifts on reparse, pre-existing B-117)* | yes for MVP |
 | `IRenderer.render` | `views` | `app` | `render(graph, selected_id, w, h, **kwargs) -> Text` — **prose, not a Python type.** `grep -rn "IRenderer" mapper/` finds two mentions in comments and **no class and no `Protocol`**: the contract is enforced by convention among the renderer modules, not by the interpreter. | **yes.** *Not extended in `2026-08-25-ui-next-batch-01`, and still frozen here.* See the commitment row below. |
 | `SearchIndex.query` | `search` | — **none** | `query(q) -> list[str]` (node ids) *(corrected `2026-08-27-repair-batch-02`: the consumer column said `app`. Executed, `app` does not import `search`; the module has zero consumers in the tree.)* | yes for MVP |
 | `MermaidImporter/Exporter` | `mermaid` | `app` | `parse(src) -> Graph`, `dump(graph) -> str` | yes for MVP |

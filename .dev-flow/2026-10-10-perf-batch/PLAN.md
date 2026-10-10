@@ -34,7 +34,7 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 ## Where we are
 
-**P0, PAUSED 2026-10-10.** The measurement is done (`spike/perf-baseline.md` §1–§7; `evidence/perf0*-*.transcript`). The P0 spike also found a data-safety defect outside this batch's scope (B-114: a CSV import saves a map that cannot be re-opened). The operator ruled 2026-10-10 to fix it first in a short separate batch, opened in its own worktree per §Batch rollover; this batch resumes at P0's gate after that batch merges (rebase onto master, archive its log).
+**P0, RESUMED 2026-10-10** after `2026-10-10-csv-safety-batch` merged (PR #18 `6dfffde`, state PR #19 `5cde04e`); master merged into this branch, `base_ref` re-stamped to `5cde04e`, the csv-safety log archived. Earlier: **P0, PAUSED 2026-10-10.** The measurement is done (`spike/perf-baseline.md` §1–§7; `evidence/perf0*-*.transcript`). The P0 spike also found a data-safety defect outside this batch's scope (B-114: a CSV import saves a map that cannot be re-opened). The operator ruled 2026-10-10 to fix it first in a short separate batch, opened in its own worktree per §Batch rollover; this batch resumes at P0's gate after that batch merges (rebase onto master, archive its log).
 
 ## Objective
 
@@ -44,7 +44,7 @@ Bound and reduce the work a large map costs. Measured (P0): opening a wide 2000-
 
 | Story / station | Status | Notes |
 |---|---|---|
-| P0 | paused | measurement done; waiting for the B-114 batch |
+| P0 | in progress | measurement done; resumed after the B-114 batch merged |
 
 ## Roadmap + increment plan
 
@@ -55,6 +55,7 @@ To be planned at P1 from `spike/perf-baseline.md` §4 and §7 (candidates: incre
 | Date | Decision | Why |
 |---|---|---|
 | 2026-10-10 | pause at P0 for B-114 | operator ruling: data safety before performance |
+| 2026-10-10 | resume at P0, rebased on master `5cde04e` | the csv-safety batch merged; its `MapStore.save` round-trip check adds one `parse` per save (+3.2 % at 6 000 nodes) — the save-cost baseline in `spike/perf-baseline.md` §7 predates it |
 
 ## Risks / watch-items
 
