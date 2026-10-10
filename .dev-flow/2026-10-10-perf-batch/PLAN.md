@@ -30,7 +30,21 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 | Id | Verdict | Probe output |
 |---|---|---|
-| (not yet evaluated) | — | trigger evaluation is owed at P1 |
+| A1 | **fired** | a shared render walk / layout cache may become its own module under `mapper/views/` (decided at ARQ) |
+| A2 | **fired** | renderers (`mapper/views/layered.py`, `outline.py`, `radial.py`, `mapper/canvas.py`), `mapper/model.py`, `mapper/mermaid.py`, the mount path (`mapper/screens/map/painting.py`, `screen.py`) |
+| A3 | **fired** | a `Graph` adjacency index changes an interface every renderer and the store consume |
+| A4 | **fired** | three disjoint lanes are planned — renderer cost, model/serialisation cost, mount paint count — the first batch to use the modular split for parallel work |
+| B1 | **fired** | renderer and `Graph` symbols are asserted by many other batches' tests (`grep -rlE "LayeredRenderer|OutlineRenderer|RadialRenderer|children_of" tests/`) |
+| B2 | not fired | no file moves planned |
+| B3 | **fired** | the AT-065 parity goldens (`evidence/mod_parity_118.txt`, `mod_parity_87.txt` of the modular batch, pinned in `tests/test_mod_parity.py`) and `tests/test_repair_golden_census.py` capture painted output — every remedy must keep them byte-identical; that is the batch's behaviour oracle |
+| B4 | not fired | no new artifact consumed elsewhere (the `.mmd` text must stay byte-identical — asserted, not a new consumer) |
+| C1–C8 | not fired | no auth, secrets, integration, sensitive data, destructive DB, input surface, network or new markup over file text |
+| D1 | not fired for this scope | behaviour-preserving remedies paint identical output; the S-18 work budget (changes what is painted) is OUT of this batch's first scope and goes to a prototype round first |
+| D2 | not fired | — |
+| E1 | **fired** | ≥ 3 planned increments |
+| E2 / E3 | not fired | — |
+| F1 | **fired** | flow bundle differs from its manifest (`V7`, external) |
+| F2 | not fired | backlog refreshed this session |
 
 ## Where we are
 
