@@ -79,9 +79,10 @@ from mapper.screens.map.hints import HintsOps
 from mapper.screens.map.exporting import ExportingOps
 from mapper.screens.map.opening import OpeningOps
 from mapper.screens.map.undo import UndoOps
+from mapper.screens.map.focus_mode import FocusModeOps
 
 
-class MapScreen(UndoOps, OpeningOps, ExportingOps, HintsOps, Screen):
+class MapScreen(FocusModeOps, UndoOps, OpeningOps, ExportingOps, HintsOps, Screen):
     """A map rendered as a layered tree."""
 
     KEY_SCOPE = SCOPE_MAP
@@ -2459,24 +2460,6 @@ class MapScreen(UndoOps, OpeningOps, ExportingOps, HintsOps, Screen):
 
     def action_prev_hit(self) -> None:
         self._walk_hits(-1)
-
-    def action_toggle_focus(self) -> None:
-        if self.focus_active:
-            self.graph = self.base_graph
-            self.focus_active = False
-            self.nav = NavigationModel(self.graph)
-            if self.nav.cursor not in self.graph.nodes:
-                self.nav.cursor = self.graph.root_id
-            self.refresh_canvas()
-            return
-
-        if self.nav.cursor is None or self.nav.cursor not in self.graph.nodes:
-            return
-        self._push_snapshot()
-        self.graph = self.base_graph.focus(self.nav.cursor)
-        self.focus_active = True
-        self.nav = NavigationModel(self.graph)
-        self.refresh_canvas()
 
     def action_toggle_outline(self) -> None:
         self.outline_mode = not self.outline_mode
