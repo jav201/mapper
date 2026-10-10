@@ -117,6 +117,37 @@ def test_save_refuses_reparse_structure_mismatch(tmp_store):
     assert _digests(tmp_store.workspace) == before
 
 
+def test_save_writes_the_bytes_dump_returned_and_dumps_once(tmp_store, monkeypatch):
+    # LOW-2 (code review increment 1): "dump once, and the text written is the
+    # text checked".  `save` binds `dump` with a function-body import
+    # (`from .mermaid import CYCLE_ARROW, dump`), so the patch target is the
+    # `mapper.mermaid` module attribute, wrapped with a counter.
+    from mapper import mermaid
+
+    texts: list[str] = []
+    real_dump = mermaid.dump
+
+    def counting_dump(graph):
+        text = real_dump(graph)
+        texts.append(text)
+        return text
+
+    monkeypatch.setattr(mermaid, "dump", counting_dump)
+
+    graph = Graph()
+    graph.add_node(_node("root", title="Root"))
+    graph.add_node(_node("kid", title="Kid"))
+    graph.add_edge(Edge("root", "kid"))
+    tmp_store.save("once", graph)
+
+    assert len(texts) == 1, f"dump ran {len(texts)} times for one save"
+    # `write_text` translates "\n" to os.linesep on write, so the text read
+    # back (universal newlines) is the text `dump` returned — byte-for-byte
+    # where the platform linesep is "\n".
+    written = (tmp_store.workspace / "once.mmd").read_text(encoding="utf-8")
+    assert written == texts[0]
+
+
 def test_refused_save_changes_no_workspace_byte(tmp_store):
     # The fixture OVERWRITES an existing map id with prior content: a check
     # moved after any write turns RED because the target .mmd digest changes.

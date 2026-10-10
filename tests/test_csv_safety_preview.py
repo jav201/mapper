@@ -254,7 +254,16 @@ async def test_colliding_cyclic_csv_paints_the_collision_sentence(tmp_path):
 
 
 async def test_markup_in_id_is_painted_verbatim(tmp_path):
-    """C8: a markup-shaped id is painted as plain text, not interpreted."""
+    """C8: a markup-shaped id is painted as plain text, not interpreted.
+
+    What this guards (code review increment 2, LOW-1): the assertion cannot
+    fail merely by REMOVING `darkside.plain` — `Text.assemble` never parses
+    markup.  It bites on a switch of the RENDERING PATH to a markup-aware
+    one: building the panel with `Text.from_markup` or rendering the Static
+    with `markup=True`, which would interpret `[bold]x[/bold]` and drop the
+    brackets from the painted text.  That mutation is run in increment 3
+    (`evidence/inc3-red.transcript`) and goes RED here.
+    """
     csv = _write_csv(
         tmp_path / "markup.csv",
         "id,title,parent\n[bold]x[/bold],One,\n[BOLD]X[/BOLD],Two,\n",
