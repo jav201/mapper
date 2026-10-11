@@ -1,0 +1,34 @@
+◆ mapper · atlas · concept map                                                                                      5000 nodes  ▽ 4991 out of view
+▐ nodo 0000                                                                                                         
+ m0000                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0001                                                                                                         
+ m0001                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0002                                                                                                         
+ m0002                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0003                                                                                                         
+ m0003                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0004                                                                                                         
+ m0004                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0005                                                                                                         
+ m0005                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0006                                                                                                         
+ m0006                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0007                                                                                                         
+ m0007                                                                                                              
+       │                                                                                                            
+       ┼                                                                                                            
+▐ nodo 0008                                                                                                         

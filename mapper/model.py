@@ -1,6 +1,7 @@
 """Core domain model: nodes, edges, graph, fichas, schema, attachments."""
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 
 
@@ -119,6 +120,27 @@ class Graph:
     csv_collisions: list[CsvCollision] = field(
         default_factory=list, compare=False, repr=False
     )
+    # LLR-PERF.2.1 (perf batch): private adjacency cache served by
+    # `children_of`/`parent_of`.  Validity is a STRONG-REFERENCE token —
+    # `_adj_src is self.edges and len(self.edges) == _adj_len` — so `id()`
+    # recycling after garbage collection can never fake a hit (the cache pins
+    # the list it was built from); `add_edge`'s in-place append is caught by
+    # the `len` half and wholesale replacement by the `is` half.  Soundness
+    # rests on the edge-mutation census (`tests/test_perf_adjacency.py`): the
+    # only writers of `edges` are `add_edge` (append) and `editing.py`
+    # `_remove_subtree` (wholesale assignment).  `compare=False, repr=False`
+    # (the `csv_collisions` precedent): the cache must not change `Graph`
+    # equality or repr; `init=False` keeps every existing constructor call.
+    _adj_src: list[Edge] | None = field(
+        default=None, init=False, compare=False, repr=False
+    )
+    _adj_len: int = field(default=0, init=False, compare=False, repr=False)
+    _adj_children: dict[str, list[str]] = field(
+        default_factory=dict, init=False, compare=False, repr=False
+    )
+    _adj_parents: Mapping[str, str] = field(
+        default_factory=dict, init=False, compare=False, repr=False
+    )
 
     def document_names(self) -> list[str]:
         """Return all registered document names."""
@@ -169,14 +191,39 @@ class Graph:
     def add_edge(self, edge: Edge) -> None:
         self.edges.append(edge)
 
+    def _adjacency(self) -> tuple[dict[str, list[str]], dict[str, str]]:
+        """The cached `(children, parents)` adjacency index (LLR-PERF.2.1).
+
+        A hit requires the strong-reference token `_adj_src is self.edges`
+        plus `len(self.edges) == _adj_len`; on a miss the index is rebuilt in
+        one O(E) pass.  `parents` keeps FIRST-match semantics (`setdefault`)
+        so `parent_of` answers exactly what the old linear scan did on
+        multi-parent graphs.  Never return the cached dicts or lists to
+        callers — `children_of` copies.
+        """
+        if self._adj_src is self.edges and len(self.edges) == self._adj_len:
+            return self._adj_children, self._adj_parents
+        children: dict[str, list[str]] = {}
+        parents: dict[str, str] = {}
+        for edge in self.edges:
+            children.setdefault(edge.parent_id, []).append(edge.child_id)
+            parents.setdefault(edge.child_id, edge.parent_id)
+        # Index first, token LAST: the token is the commit point.  An
+        # exception mid-rebuild must never leave the (valid) token pointing at
+        # a stale or empty index.
+        self._adj_children = children
+        self._adj_parents = parents
+        self._adj_src = self.edges
+        self._adj_len = len(self.edges)
+        return children, parents
+
     def children_of(self, node_id: str) -> list[str]:
-        return [e.child_id for e in self.edges if e.parent_id == node_id]
+        children, _ = self._adjacency()
+        return list(children.get(node_id, ()))
 
     def parent_of(self, node_id: str) -> str | None:
-        for e in self.edges:
-            if e.child_id == node_id:
-                return e.parent_id
-        return None
+        _, parents = self._adjacency()
+        return parents.get(node_id)
 
     def multi_parent_ids(self) -> list[str]:
         """Node ids that appear as the child of more than one edge, in first

@@ -1,0 +1,30 @@
+◆ mapper · atlas · concept map                                                       7 nodes  ▽ 3 out of view
+                 ▐ raiz                                                              
+                  meta raiz                                                          
+                        │                                                            
+       ┌────────────────┼────────────────┐                                           
+▐ rama izq       ▐ rama media     ▐ rama der                                         
+ meta left        meta mid         meta right                                        
+                 ▐ ▸ rama me… +3                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     
+                                                                                     

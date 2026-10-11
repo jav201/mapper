@@ -274,8 +274,27 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       the painted `(no branches)`.  It cannot share a site with another arm:
     #       no other test drives that renderer on a root-only graph, and the
     #       string it reads is the one the census arm can only see in the AST.
-    assert len(sites["argful"]) == 65, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 65; "
+    #
+    # 65 -> 80 at `2026-10-10-perf-batch` (Lanes R and M), FIFTEEN sites, all
+    # arg-ful renderer calls that compare painted output for byte-identity:
+    #   +7  `tests/test_perf_layout_memo.py` -- the layout-memo arms render the same
+    #       graph through a memoised and a fresh `LayeredRenderer` (resize, title,
+    #       fold, focus, undo, add_child, round trip) to prove the memo paints the
+    #       bytes a fresh renderer paints.
+    #   +6  `tests/test_perf_adjacency.py` -- the minimap/outline arms render a forest
+    #       and a multi-parent graph through `OutlineRenderer` before and after the
+    #       adjacency cache warms, to prove the cache changes no painted byte.
+    #   +1  `tests/test_perf_paint_clip.py` -- the render-grid identity against the
+    #       base goldens.
+    #   +1  `tests/perf_goldens_capture.py` -- the capture script that wrote those
+    #       goldens on base `5cde04e` (a script, not a collected test).
+    #
+    # 80 -> 82 at the same batch's DDR follow-up (`8bea264`), TWO sites:
+    #   +2  `tests/test_perf_layout_memo.py` -- the `title` arm now compares the
+    #       widened card where it is visible (a memoised and a fresh renderer over
+    #       an on-screen fixture), so the scaled-layout mutant M-R2c reddens it.
+    assert len(sites["argful"]) == 82, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 82; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
