@@ -188,7 +188,7 @@ python -B tests/perf_goldens_capture.py   # regeneration; run twice, sha256 must
 
 | Field | Value |
 |---|---|
-| **Independent review** | PENDING — orchestrator assigns `code-reviewer` at the batch gate |
+| **Independent review** | `qa-reviewer` (Claude Sonnet) + architect (Claude Opus), read-only, at the DDR: the base-golden capture verified — `ac356c7` adds the goldens without touching `mapper/` and is an ancestor of both lanes; MANIFEST base `5cde04e` on all 27 entries; `g0-capture.transcript` sound; the later `2c64f76` rewrite is line-endings only (C10 ✓) |
 
 ---
 

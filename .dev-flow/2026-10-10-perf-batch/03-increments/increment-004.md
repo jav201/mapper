@@ -210,6 +210,24 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 Trunk DDR join with Lane M (the batch gate): independent `code-reviewer` pass
 on increments 001–004, then the DDR's cross-lane golden re-verification.
 
+## 8 · DDR follow-up — unit PERFDDR2 (DDR conditions applied)
+
+The DDR reviewers (architect Claude Opus + qa Claude Sonnet) returned
+approve-with-conditions; the test-affecting conditions were applied in unit
+PERFDDR2 (this unit), test files only — no product byte changed permanently:
+
+| Condition | Fix | Proof |
+|---|---|---|
+| qa MED-2 — the `[title]` arm was blind to M-R2c (viewport-clipped canvas compare, header-only at 118×34) | the arm gains a RENDERER-LEVEL full-text compare (`screen.renderer.render(screen.graph, state).plain` vs a fresh `LayeredRenderer` at the app's own `_view_state`); the app-level canvas compare stays alongside | M-R2c now reddens BOTH `[title]` and `[resize]`; restore sha256-verified (`3e34fd90…e04743`) — `evidence/ddr2-red.transcript` §2 |
+| qa LOW-4 — the wire cap dated from the unclipped baseline | `WIRE_CAP` 1,200,000 → **61,500** = 5× the measured 12,264 (61,320, rounded up), derivation in the node docstring and in HLR-PERF.1 / LLR-PERF.1.1 (`01-requirements.md`, ledger `LED-2026-10-10-perf-batch.5`) | y-only clip RED (23,983,998), removed clip RED (23,983,998), widened-span clip RED (88,226 ≈ 7.2×) — `evidence/ddr2-red.transcript` §3–§5; restores sha256-verified (`d354bd46…4838a2`) |
+
+Transcript: `.dev-flow/2026-10-10-perf-batch/evidence/ddr2-red.transcript`,
+sha256 `b5a08f19f35594259270578b8eb95996ce26deb8eb1358897c6e5bdc39b1f3b0`.
+The remaining conditions are documentary and live in `01-requirements.md`
+(rewording + `(withdrawn, B-118)` markings + ledger `.5`), `.dev-flow/BACKLOG.md`
+(B-120) and the DDR itself (C4 ⚠, B5 ledger sum with `GATE_JOIN2_PENDING`,
+participants, goldens line-endings note).
+
 ---
 
 ## Increment gate checklist

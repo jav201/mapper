@@ -22,10 +22,12 @@ out-of-bounds writes, so the clip is byte-identical by construction
   `test_at_075_keypress_wire_budget` (AT-075, HLR-PERF.1, layer B) -- the
   scripted two-keypress session (`l`, `j`) on wide-2000 at 118x34 through
   the real app (`MapperApp` + `run_test(size=(118, 34))`, real keys, helpers
-  imported from `tests/test_draft_save.py`) performs at most 1,200,000
-  `Canvas.wire` calls in total with the counter RESET after mount (the
-  measured baseline without the clip is 23,983,998, PERF0C SS7.1), and
-  AT-075's settled canvas rows byte-equal the pinned golden
+  imported from `tests/test_draft_save.py`) performs at most 61,500
+  `Canvas.wire` calls in total with the counter RESET after mount — the cap
+  is 5x the measured 12,264 for this session (61,320, rounded up to 61,500;
+  DDR qa LOW-4, `evidence/ddr2-red.transcript`), vs the measured baseline
+  without the clip of 23,983,998 (PERF0C SS7.1) — and AT-075's settled
+  canvas rows byte-equal the pinned golden
   (`tests/goldens/perf/at075_075b_wide2000_118x34.txt`, base SHA `5cde04e`).
 
 Negative controls (PDR SS5): M-R1a (remove the clip) -> the wire-count budget
@@ -54,7 +56,7 @@ from tests.perf_goldens_capture import (
 )
 from tests.test_draft_save import _open, _press
 
-WIRE_CAP = 1_200_000
+WIRE_CAP = 61_500
 BASELINE_2_KEYS = 23_983_998
 TERMINAL = (118, 34)
 AT075_GOLDEN = GOLDEN_DIR / "at075_075b_wide2000_118x34.txt"
@@ -243,9 +245,13 @@ def _golden_blocks(text: str) -> dict[str, list[str]]:
 
 async def test_wire_count_budget(tmp_path, monkeypatch):
     """LLR-PERF.1.1 counted oracle: the scripted two-keypress sequence (`l`,
-    `j`) on wide-2000 at 118x34 performs <= 1,200,000 `Canvas.wire` calls
-    with the counter reset after mount -- >= 5x under the measured baseline
-    of 23,983,998 for the same session pre-change (PERF0C SS7.1)."""
+    `j`) on wide-2000 at 118x34 performs <= 61,500 `Canvas.wire` calls with
+    the counter reset after mount.  Cap derivation (DDR qa LOW-4): the
+    measured clipped count for this exact session is 12,264
+    (`evidence/r1-red.transcript` §2); the cap is 5x that measurement
+    (61,320), rounded up to 61,500 — so a clip that loses most of the x-axis
+    gain (e.g. a y-only clip, back at 23,983,998) or a span widened ~10x
+    both fail the cap, while measurement jitter cannot."""
     calls = _counting_wire(monkeypatch)
     app = MapperApp(tmp_path)
     async with app.run_test(size=TERMINAL) as pilot:
