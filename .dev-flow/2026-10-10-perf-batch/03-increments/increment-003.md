@@ -97,7 +97,7 @@ git diff --stat 5cde04e -- mapper/views   # M-M3: must print nothing
 |---|---|---|---|
 | **0 · unit** | `core` · `full` | — | none separate (the AT nodes above are the unit layer) |
 | **A · white-box** | `core` · `full` | `tests/test_perf_adjacency.py::test_cache_mutation_script_equality` · `::test_cache_counted_ops` · `::test_edges_writer_census` · `::test_census_in_place_forms[...]` (13 arms) | 16 passed |
-| **B · black-box** | `core` · `full` | `tests/test_perf_adjacency.py::test_minimap_outline_forest_dag_bytes` (real app, real keys) + the named gate files (`test_perf_goldens_manifest.py` 2 · `test_repair_store_boundary.py` 102 · `test_model.py` 5 · `test_mod_parity.py` 3) | 113 passed; **129 passed overall, 0 failed** |
+| **B · black-box** | `core` · `full` | `tests/test_perf_adjacency.py::test_minimap_outline_forest_dag_bytes` (real app, real keys) | passed (the node's own GREEN line is in the transcript) — the lane-wide five-file run (`113 passed` / `129 passed overall`) was **not captured** in a lane transcript; the counts that hold are `m1-red.transcript` line 185 (`17 passed`, the post-restore whole-file run) and `m1b-red.transcript` line 26 (`1 passed`), and, post-join, the join gate (`1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) |
 
 ### RED counterfactual — executed, not predicted
 
@@ -148,12 +148,15 @@ git diff --stat 5cde04e -- mapper/views   # M-M3: must print nothing
 
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
-| RED-proof transcript (16 cycles, commands + outputs + full sha256 digests) | `.dev-flow/2026-10-10-perf-batch/evidence/m1-red.transcript` | recorded at the DDR |
+| RED-proof transcript (16 cycles, commands + outputs + full sha256 digests; post-restore whole-file run `17 passed` at line 185) | `.dev-flow/2026-10-10-perf-batch/evidence/m1-red.transcript` | `b20178d3778670fc747740eb16656c4c2d515e19cd5edadcefaabbb19e87a91f` |
+| Inc-M1b follow-up transcript (rebuild-order fix: RED under the old token order, `1 passed` GREEN re-run at line 26) | `.dev-flow/2026-10-10-perf-batch/evidence/m1b-red.transcript` | `55b425bdc501b6a0c3f57ab8b09e67a6611340cd355bc6f609bd843b422bd5a6` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join slow-lane run (`19 passed, 3231 deselected`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
 | RED-proof driver (re-executes all 16 cycles on demand; stdout-only tails so the transcript carries the real failure lines) | `.dev-flow/2026-10-10-perf-batch/evidence/m1-red.driver.py` | recorded at the DDR |
 
 | Field | Value |
 |---|---|
-| **Evidence files** | 2 artifacts at the declared home; every cycle's restore digest quoted verbatim inside the transcript |
+| **Evidence files** | 5 artifacts at the declared home, each cited (the driver's digest is recorded at the DDR); every cycle's restore digest quoted verbatim inside the transcript |
 
 ### Load-bearing emptiness — what is this resting on that is only true today? (C-55)
 
@@ -249,7 +252,7 @@ goldens incl. dangling-edge, AT-076 through a real persisting edit gesture via
 | 6 | `code-reviewer` passed | `core` · `full` | ⚠ | PENDING — named in §4b |
 | 7 | No file from another lane touched | all | ✓ | Lane R owns `mapper/views/` + `mapper/canvas.py`: zero bytes touched (`git diff 5cde04e -- mapper/views` empty, `mapper/canvas.py` untouched) |
 | 8 | Frozen interfaces untouched | all | ✓ | `children_of`/`parent_of` signatures, order and first-match semantics unchanged; `Graph.__eq__`/`repr` unchanged (new fields `compare=False, repr=False`); goldens manifest + parity green |
-| 9 | Coverage claims verified **on disk** | all | ✓ | 129 passed across the five named files; per-node RED transcripts on disk |
+| 9 | Coverage claims verified **on disk** | all | ✓ | the per-node RED transcripts on disk; the lane-wide `129 passed` run was not captured (§4 above) — the post-join gate holds `3222 passed` |
 | 10 | Load-bearing emptiness declared | all | ✓ | table above — the census absence, its wideness, and its positive controls |
 | 11 | **Mutation verdicts** declared | all | ✓ | M-M1a · M-M1b · fresh-list · M-M1c ×13 — each with its RED node id |
 | 12 | **Instrument RED-proof** declared | all | ✓ | 3 instruments shown RED before their PASS was believed |

@@ -181,7 +181,7 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 | 4 | The edge-mutation census is complete: the only post-construction writers of `Graph.edges` are `add_edge` (`mapper/model.py:170`, append) and `_remove_subtree` (`mapper/screens/map/editing.py:217-219`, wholesale assignment); no `.append/.extend/.insert/.remove/.pop` exists anywhere else; every construction builds a fresh list. | code | ✅ TRUE | grep + AST census over `mapper/` executed at P1 (agent census, PERFARQ unit): `add_edge` call sites all during build (import_csv.py:90,96,111 · github.py:440,462,605,635 · store.py:929-930 · editing.py:123 · home.py:434); constructions at `mermaid.py:114-120`, `model.py:245-251` (`focus`), store load; undo (`undo.py:60-61`) replaces the whole `Graph` | relied on; the soundness basis of the strong-reference check (`self._adj_src is self.edges and len(self.edges) == n`); pinned mechanically by the AST census guard (LLR-PERF.2.1) |
 | 5 | Renderers are per-screen instances, so an instance-level layout cache cannot leak across screens or app runs. | code | ✅ TRUE | `mapper/screens/map/screen.py:73-75` — renderers constructed per `MapScreen.__init__` | relied on |
 | 6 | The settle pass exists to heal the strip at real geometry, and deleting it reintroduces a measured defect. | code | ✅ TRUE | `mapper/screens/map/painting.py:366-377` docstring — absent numeral at 50×20/60×20 ("nothing hidden" while half the map off-screen), 31×1 → 29×2 → 31×3 reflow; perf note: unguarded settle costs 0.33 s at 11999 nodes | relied on; Lane S keeps the pass |
-| 7 | The next free acceptance-test number is AT-075. | measurement | ✅ TRUE | `grep -rhoE 'AT-0[0-9]{2}' REQUIREMENTS.md tests/*.py | sort -u | tail` → `AT-072`, `AT-073`, `AT-074` (max 074; AT-074 in `tests/test_csv_safety_preview.py`) | AT-075 … AT-077b assigned |
+| 7 | The next free acceptance-test number is AT-075. | measurement | ✅ TRUE | `grep -rhoE 'AT-0[0-9]{2}' REQUIREMENTS.md tests/*.py | sort -u | tail` → `AT-072`, `AT-073`, `AT-074` (max 074; AT-074 in `tests/test_csv_safety_preview.py`) | AT-075 … 077b assigned |
 
 - **Premise evaluation:** 7 premise(s) · ✅ TRUE — all verified against code or executed evidence; none undecidable.
 
@@ -240,18 +240,21 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 - **Traceability:** US-PERF-003
 - **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.3
 - **Status:** WITHDRAWN to B-118 (2026-10-10) — the two-branch gate resolved to the else: spike unit PERFS did not establish feasibility (mount renders 2× before AND after the prototype at 118×34/87×34 on the seed map, byte-identical final canvas, wide-2000 unmeasured after the unit timed out, prototype needing a second guarded render site + an A3 census pin change). The requirement and its ATs leave the batch per the pre-written ruling; the heading/id are kept, not deleted.
-- **Statement:** When a map screen mounts, the system shall perform exactly one paid canvas render before the first settled paint (baseline 3) by skipping only the canvas render while the canvas region is unassigned (`canvas.size.width == 0`) — `refresh_canvas`'s declaration order stays byte-for-byte — and routing the first real render through the normal guarded/reclamp path; it shall still paint all chrome (rail, minimap, inspector, crumb) on the first pass, and shall preserve the settle pass so the pagination strip reports hidden rows at the real settled geometry. **GATED:** this requirement activates only if spike unit PERFS proves render ncalls = 1 at mount with every existing mount test green; if the spike fails, Lane S leaves the batch to backlog **B-118** and HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn.
+- **Statement:** When a map screen mounts, the system shall perform exactly one paid canvas render before the first settled paint (baseline 3) by skipping only the canvas render while the canvas region is unassigned (`canvas.size.width == 0`) — `refresh_canvas`'s declaration order stays byte-for-byte — and routing the first real render through the normal guarded/reclamp path; it shall still paint all chrome (rail, minimap, inspector, crumb) on the first pass, and shall preserve the settle pass so the pagination strip reports hidden rows at the real settled geometry. **GATED:** this requirement activates only if spike unit PERFS proves render ncalls = 1 at mount with every existing mount test green; if the spike fails, Lane S leaves the batch to backlog **B-118** and HLR-PERF.3 / LLR-PERF.3.1–3.2 / the former Lane-S acceptance tests (077/077b) are withdrawn.
 - **Rationale (informative):** PERF0C §7.2 measured three renders: a guessed-geometry paint before the compositor assigns the canvas region, a settle pass at the real region, and a re-armed pass because the strip's row count moves the region after `canvas.update` (`painting.py:686-706`). The round-1 mechanism (declare the strip's row budget before `canvas.update` + defer on `_declared_for is None`) was withdrawn — contradicted by the code (round-1 finding B4: `_declared_for is None` is set on every `refresh_canvas`, `painting.py:701`; the reordering breaks the strip-heal ordering, measured 6 failing tests at `painting.py:668-673`; the deferred render would run in the settle pass, which swallows exceptions at `:351-357` and skips `_reclamp_pan`). The replacement candidate skips only the canvas render at zero width and is gated on the spike; the B-56/B60 heal (premise 6) is kept, not deleted.
 - **Validation:** `test`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py::test_at_077_mount_render_once tests/test_perf_mount.py::test_at_077b_strip_numeral tests/test_perf_mount.py::test_chrome_paints_at_mount` (nodes created in Inc-S1, only if the gate passes); gate: `tests/test_mod_parity.py` (its scripted session opens a map) stays green.
+- **Executed verification:** the former Lane-S acceptance tests (077/077b) and the chrome-paints
+  node — `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py` (nodes to be created
+  in Inc-S1, only if the gate passes; the file was never created — Lane S withdrew to B-118, ledger
+  `LED-2026-10-10-perf-batch.3`); gate: `tests/test_mod_parity.py` (its scripted session opens a map) stays green.
 - **Numeric pass threshold:** exit code 0; mounting wide-2000 at 118×34 calls the current renderer's `render` exactly once between `push_screen` and the settled first paint (vs 3); the painted canvas + strip equal the pinned golden — captured on base SHA `5cde04e`, sha256-recorded (0 diffs); at 87×34 and 60×20 the strip reports the correct hidden-row numeral after mount.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** opening a 2000-node map shows the first paint after one render's worth of waiting (not three), and the pagination strip is immediately correct.
   - **Shipped surface:** `MapperApp` → `push_screen(MapScreen)` → `on_mount`/`refresh_canvas`/`_declare_after_layout`.
-  - **Acceptance test(s):** AT-077, AT-077b
+  - **Acceptance test(s):** the former Lane-S acceptance tests (077/077b) — WITHDRAWN to B-118 (ledger `LED-2026-10-10-perf-batch.3`)
   - **Boundary catalog (QC-3):** ☑ empty — mounting the 1-node error graph (a refused map) still paints the error screen ☑ boundary — 87×34 and 60×20 reflow geometries, single-node map, wide-2000 ☑ invalid — none applies ☑ error — the load-error path paints as today.
-  - **Negative control:** M-S1 (restore the eager canvas render while the region is unassigned) → AT-077 RED (render ncalls=2); M-S2 (neuter the settle pass) → AT-077b RED (absent numeral returns); M-S3 (deferral skips chrome painting) → chrome arm RED.
+  - **Negative control:** M-S1 (restore the eager canvas render while the region is unassigned) → the former Lane-S test 077 RED (render ncalls=2); M-S2 (neuter the settle pass) → test 077b RED (absent numeral returns); M-S3 (deferral skips chrome painting) → chrome arm RED.
 
 ---
 
@@ -327,7 +330,11 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 - **Status:** WITHDRAWN to B-118 (2026-10-10) — withdrawn with HLR-PERF.3 after spike unit PERFS was inconclusive (see HLR-PERF.3's status and ledger `LED-2026-10-10-perf-batch.3`).
 - **Statement:** `MapScreen.on_mount` (`screens/map/screen.py:201-241`) shall not trigger a canvas render while the canvas region is unassigned (`canvas.size.width == 0`), painting all chrome (rail, minimap, inspector, crumb) as today; `refresh_canvas`'s declaration order stays byte-for-byte (the round-1 strip-first reordering is withdrawn — finding B4); the first paid render happens at the real geometry through the normal guarded path (pan re-clamped via `_reclamp_pan`, `_rendered_for` set), and the `_declare_after_layout` settle pass remains armed — its settled render is a no-op by the `_rendered_for` guard, not by deletion. No new `MapScreen` attribute is added (F1 census unchanged). **GATED** like HLR-PERF.3: active only if spike unit PERFS proves render ncalls = 1 at mount with every existing mount test green; else Lane S leaves to backlog **B-118** and this requirement is withdrawn.
 - **Validation:** `test (integration)`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py::test_at_077_mount_render_once tests/test_perf_mount.py::test_chrome_paints_at_mount` (nodes created in Inc-S1, only if the gate passes) — mount wide-2000 at 118×34 with a counting wrapper on the current renderer's `render`; poll until the first settled paint plus one tick; assert rail/minimap/inspector/crumb content on the first pass.
+- **Executed verification:** the former Lane-S acceptance test 077 and the chrome-paints node —
+  `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py` (nodes to be created in
+  Inc-S1, only if the gate passes; never created — withdrawn with Lane S) — mount wide-2000 at 118×34
+  with a counting wrapper on the current renderer's `render`; poll until the first settled paint plus
+  one tick; assert rail/minimap/inspector/crumb content on the first pass.
 - **Numeric pass threshold:** `render` called exactly once between `push_screen` and the settled first paint (baseline 3, PERF0C §7.2); chrome assertions 0 diffs; canvas + strip bytes equal the pinned golden.
 - **Negative control:** M-S1 (restore the eager pre-layout render) → render ncalls=2 → RED. M-S3 (deferral also skips chrome) → chrome arm RED.
 - **Boundary catalog:** ☑ empty — mounting the 1-node error graph (refused map) still paints the error screen on the same path ☑ boundary — 87×34, 60×20, single-node map, wide-2000, a map opened right after a resize ☑ invalid — none applies ☑ error — the load-error path paints as today.
@@ -338,7 +345,10 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 - **Status:** WITHDRAWN to B-118 (2026-10-10) — withdrawn with HLR-PERF.3 after spike unit PERFS was inconclusive (see HLR-PERF.3's status and ledger `LED-2026-10-10-perf-batch.3`).
 - **Statement:** The `_declare_after_layout` settle pass shall remain armed from `refresh_canvas` and shall still re-declare the canvas and the pagination strip whenever the region differs from `_declared_for` — preserving the B-56/B60 heal (the strip reports hidden rows at the real settled geometry; the 31×1 → 29×2 → 31×3 reflow converges) — with its settled render a no-op by the `_rendered_for` guard, not by deletion.
 - **Validation:** `test (e2e)`
-- **Executed verification:** `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py::test_at_077b_strip_numeral` (node created in Inc-S1; gated like LLR-PERF.3.1 — only if spike PERFS passes) — mount at 87×34 and at 60×20, assert the strip's hidden-row numeral at the settled geometry matches the pinned golden text.
+- **Executed verification:** the former Lane-S acceptance test 077b —
+  `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py` (the 077b node to be created
+  in Inc-S1; gated like LLR-PERF.3.1 — only if spike PERFS passes; never created) — mount at 87×34
+  and at 60×20, assert the strip's hidden-row numeral at the settled geometry matches the pinned golden text.
 - **Numeric pass threshold:** 0 diffs on the strip text at both geometries; the pass is still armed (a synthetic region change still triggers a re-declare — exercised by the 60×20 reflow fixture).
 - **Negative control:** M-S2 (neuter the settle pass) → the absent numeral returns → RED.
 - **Boundary catalog:** ☑ boundary — 87×34 and 60×20 are the load-bearing reflow cases; the rest rides LLR-PERF.3.1.
@@ -441,15 +451,18 @@ fixture maps built by the test into a tmp workspace):
   (the saved form includes the new node).
   Negative control M-M2a → RED; M-M2b → fixture bytes RED. Wall-clock recorded at P4 as evidence
   (baseline save 6.2 s profiled / ~9.4–10.0 s wall at 12000), never asserted.
-- **AT-077** (US-PERF-003 / HLR-PERF.3, LLR-PERF.3.1): `tests/test_perf_mount.py::test_at_077_mount_render_once` —
+- **the former Lane-S acceptance test 077** (US-PERF-003 / HLR-PERF.3, LLR-PERF.3.1): node
+  `test_at_077_mount_render_once` in `tests/test_perf_mount.py` — the file is never created
+  in this batch —
   **WITHDRAWN to B-118 (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — the gate resolved to the
   else branch: spike unit PERFS did not prove render ncalls = 1 at mount, so the node is never created.
   The original gated text is kept for the record: **GATED on spike PERFS**; mount the wide-2000 map at 118×34; the renderer's `render` is called
   exactly once until the settled first paint (baseline 3); rail, minimap, inspector, crumb painted
   on the first pass; canvas + strip byte-equal the golden. Negative control M-S1 → RED (ncalls=2);
   M-S3 → chrome RED.
-- **AT-077b** (US-PERF-003 / LLR-PERF.3.2): `tests/test_perf_mount.py::test_at_077b_strip_numeral` —
-  **WITHDRAWN to B-118 (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — withdrawn with AT-077;
+- **the former Lane-S acceptance test 077b** (US-PERF-003 / LLR-PERF.3.2): node
+  `test_at_077b_strip_numeral` in `tests/test_perf_mount.py` — never created —
+  **WITHDRAWN to B-118 (2026-10-10, ledger `LED-2026-10-10-perf-batch.3`)** — withdrawn with test 077;
   the node is never created. The original gated text is kept for the record: **GATED on spike PERFS**;
   mount at 87×34 and 60×20; the strip reports the correct hidden-row
   numeral at the settled geometry (the B-56/B60 scenario). Negative control M-S2 → RED.
@@ -460,7 +473,7 @@ fixture maps built by the test into a tmp workspace):
   with pass result, each with an executed negative control (M-R1a/b, M-R2/b/c/d/e, M-M1a/b/c,
   M-M2a/b, M-M3 — NO M-S* controls; Lane S and its mutations left the batch with the withdrawal)
   recorded as a transcript.
-- AT-075, AT-075b, AT-076 pass through `MapperApp` + `run_test` with real keys (AT-077/077b were
+- AT-075, AT-075b, AT-076 pass through `MapperApp` + `run_test` with real keys (the 077/077b tests were
   withdrawn with Lane S and are not owed); every AT owns a node distinct from its LLR nodes.
 - The behaviour oracle stays green untouched: `tests/test_mod_parity.py` (AT-065 goldens) and
   `tests/test_repair_golden_census.py` — byte-identical, not re-baselined.
@@ -473,7 +486,7 @@ fixture maps built by the test into a tmp workspace):
   87×34 and 60×20 reflow geometries, the 1-node error graph at mount — each named by a fixture in
   the four new test files.
 - Golden provenance: every new golden (AT-075, AT-075b, AT-076 — painted lines, `.mmd` bytes; the
-  AT-077/077b goldens left the batch with Lane S's withdrawal) is captured on the BASE SHA `5cde04e` (pre-remedy) at the trunk BEFORE
+  077/077b goldens left the batch with Lane S's withdrawal) is captured on the BASE SHA `5cde04e` (pre-remedy) at the trunk BEFORE
   the lanes fork, and recorded with base SHA + sha256 per golden (the AT-065 precedent); the wire
   counter resets after mount so mount paints are not charged to the keypress budget.
 - P4 evidence: wall-clock before/after for keypress, mount and save against the §6/§7 baselines —
@@ -503,9 +516,9 @@ fixture maps built by the test into a tmp workspace):
 | M-M2a | Restore the per-node `any()` orphan scan in `mermaid.dump` | AT-076 + `test_dump_counted_ops_scaling_ratio` (count RED, ratio ≈ 4) |
 | M-M2b | Reorder the orphan loop / touch dedup or escaping in `dump` | AT-076 / `tests/test_perf_dump.py::test_dump_fixture_goldens` byte-goldens |
 | M-M3 | Any Lane M edit under `mapper/views/` (e.g. wiring a renderer to the model cache) | LLR-PERF.2.3 file-diff check: `git diff 5cde04e -- mapper/views` non-empty (A3 — returns the increment to the trunk). The check runs on the Lane M branch BEFORE the join and the DDR records it PER LANE — it is not a Lane R control: Lane R legitimately edits `mapper/views/layered.py` (ruling R17) |
-| M-S1 | Restore the eager canvas render while the region is unassigned | AT-077 (render ncalls=2) |
-| M-S2 | Neuter the `_declare_after_layout` settle pass | AT-077b (absent numeral returns) |
-| M-S3 | Make the mount skip swallow chrome painting too | `tests/test_perf_mount.py::test_chrome_paints_at_mount` |
+| M-S1 | Restore the eager canvas render while the region is unassigned | the former Lane-S test 077 (render ncalls=2) |
+| M-S2 | Neuter the `_declare_after_layout` settle pass | the former Lane-S test 077b (absent numeral returns) |
+| M-S3 | Make the mount skip swallow chrome painting too | the chrome-paints node in `tests/test_perf_mount.py` (never created) |
 
 ### 6.2 Relevant design decisions
 The per-lane decisions, the deferred items (S-18 budget; single-visit DAG layout — ⏸ DEFER with

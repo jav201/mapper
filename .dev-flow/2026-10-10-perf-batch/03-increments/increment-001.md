@@ -129,11 +129,13 @@ python -B tests/perf_goldens_capture.py   # regeneration; run twice, sha256 must
 
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
-| capture/verification transcript | `.dev-flow/2026-10-10-perf-batch/evidence/g0-capture.transcript` | recorded at the DDR |
+| capture/verification transcript | `.dev-flow/2026-10-10-perf-batch/evidence/g0-capture.transcript` | `9ca89f126ccee8cf3058cfa602df63db2d723c5e22572ae460fc58cc3cabfad3` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join slow-lane run (`19 passed, 3231 deselected` — the perf-shape/depth slow tests) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
 
 | Field | Value |
 |---|---|
-| **Evidence files** | 1 artifact at the declared home; the 26 goldens' digests are quoted verbatim inside it (each re-verified against the stored bytes at capture time) |
+| **Evidence files** | 3 artifacts at the declared home, each sha256-pinned; the 26 goldens' digests are quoted verbatim inside the capture transcript (each re-verified against the stored bytes at capture time) |
 
 ### Load-bearing emptiness — what is this resting on that is only true today? (C-55)
 

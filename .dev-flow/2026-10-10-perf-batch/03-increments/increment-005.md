@@ -49,14 +49,28 @@ pass over every edge and tests membership in it:
 
 ## 2 · Files modified
 
-| File | Kind | Change |
-|---|---|---|
-| `mapper/mermaid.py` | source | the orphan pass: one local incident pass replaces the per-node `any()` rescan |
-| `tests/test_perf_dump.py` | test | new: `test_dump_counted_ops_scaling_ratio` · `test_dump_fixture_goldens` · `test_at_076_real_save_dump_budget` |
-| `.dev-flow/2026-10-10-perf-batch/evidence/m2-red.transcript` | evidence | RED proofs, sha256-verified restores, before/after measurements |
+| File | Kind | Traces to | Change |
+|---|---|---|---|
+| `mapper/mermaid.py` | source | `LLR-PERF.2.2` · `HLR-PERF.2` (`AT-076`) | the orphan pass: one local incident pass replaces the per-node `any()` rescan |
+| `tests/test_perf_dump.py` | test | `LLR-PERF.2.2` · `HLR-PERF.2` · `AT-076` | new: `test_dump_counted_ops_scaling_ratio` · `test_dump_fixture_goldens` · `test_at_076_real_save_dump_budget` |
+| `.dev-flow/2026-10-10-perf-batch/evidence/m2-red.transcript` | doc | RED counterfactuals · measured counts | RED proofs, sha256-verified restores, before/after measurements |
 
 `SOURCE files` count: 1 (`mapper/mermaid.py`).  No file under `mapper/views/`
 or `mapper/canvas.py` touched (M-M3 below).
+
+## 2b · Join-gate follow-up (trunk — serves both lanes)
+
+Committed after the join as `084d7b7` (test-only): the A3 census pin in
+`tests/test_a3_census.py` moves the arg-ful render pin 65 → 80, itemised —
+the perf batch's byte-identity arms (`tests/test_perf_paint_clip.py`,
+`tests/test_perf_layout_memo.py`, `tests/test_perf_dump.py`,
+`tests/perf_goldens_capture.py`) read renderer symbols, and the join gate's
+single failure was this pin (`join-gate-run1-full-suite.transcript`). The
+same commit fills the `code-reviewer` cells of increments 002–005.
+
+| File | Kind | Traces to | Change |
+|---|---|---|---|
+| `tests/test_a3_census.py` | test | `LLR-PERF.1.3` · `LLR-PERF.2.2` | A3 arg-ful render pin 65 → 80, itemised for this batch's byte-identity arms (join-gate follow-up `084d7b7`) |
 
 ## 3 · How to test
 
@@ -66,8 +80,13 @@ or `mapper/canvas.py` touched (M-M3 below).
 ## 4 · Test results
 
 `tests/test_perf_dump.py`: 3 passed (74.15 s — the AT-076 node drives the real
-app on wide-6000).  Verification suite across the six named files (§3):
-**42 passed** in 83.88 s; ruff `All checks passed!`; the M-M3 file-diff check
+app on wide-6000; the `3 passed in 74.15s` GREEN line is `m2-red.transcript`
+line 22).  The six-file verification suite across the named files (§3,
+`42 passed` in 83.88 s) was **not captured** in a lane transcript — recorded
+plainly here; the count that holds post-join is the join gate
+(`1 failed, 3222 passed` in `join-gate-run1-full-suite.transcript` — the
+single failure is the A3 census pin, fixed in the test-only follow-up
+`084d7b7`).  Ruff `All checks passed!`; the M-M3 file-diff check
 `git diff 5cde04e -- mapper/views` printed nothing.
 
 Numeric thresholds met: ONE `dump` call on wide-6000 iterates `graph.edges`
@@ -122,8 +141,15 @@ byte-compared, 0 diffs.
 
 ### Evidence files — bytes at a declared home, verbatim, hash-verified (C-59)
 
-`.dev-flow/2026-10-10-perf-batch/evidence/m2-red.transcript` — commands,
-outputs, sha256 restore lines, before/after measurements.
+| Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
+|---|---|---|
+| RED proofs, sha256 restore lines, before/after measurements (`3 passed in 74.15s` baseline GREEN at line 22) | `.dev-flow/2026-10-10-perf-batch/evidence/m2-red.transcript` | `c84b8c031d35864118fb8b5ff03af7d3b19dc53c8090d2e3422de84856328d96` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join slow-lane run (`19 passed, 3231 deselected`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
+
+| Field | Value |
+|---|---|
+| **Evidence files** | 3 artifacts at the declared home, each sha256-pinned; the shipped `mapper/mermaid.py` sha256 `5d5b8271…deba7c` is quoted inside the lane transcript (baseline line) |
 
 ### Load-bearing emptiness — what is this resting on that is only true today? (C-55)
 
