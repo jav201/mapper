@@ -165,7 +165,7 @@ ruff check mapper/canvas.py tests/test_perf_paint_clip.py
 
 | Field | Value |
 |---|---|
-| **Independent review** | PENDING — orchestrator assigns `code-reviewer` at the batch gate |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) **APPROVE**, 0 HIGH/MED — every clip border walked against base `5cde04e`; the test's reference loops match the old bodies line for line; 2 LOW (opposite-sides off-canvas case optional; a redundant alias) |
 
 ---
 

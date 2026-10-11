@@ -175,7 +175,7 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 
 | Field | Value |
 |---|---|
-| **Independent review** | PENDING — orchestrator assigns `code-reviewer` at the batch gate |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) **APPROVE-WITH-NITS**, 0 HIGH/MED — key complete for every input of the unscaled layout (edges/nodes/root/folds; focus builds a new Graph); title/resize/theme only rescale; add child, archive, undo, fold miss; `_geometry` callers compatible; LOWs: parameter naming, O(N) rescale per hit, edges rely on frozen `Edge` + no in-place writers |
 
 ---
 

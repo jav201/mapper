@@ -159,7 +159,7 @@ module (the parse path is line-bound; the write loop is one O(E) pass).
 
 | Field | Value |
 |---|---|
-| **Independent review** | PENDING — orchestrator assigns `code-reviewer` at the batch gate |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) **APPROVE** — orphan emission order and dangling-edge semantics identical to the base `any()`; the incident set is local (no cache); orphan-order, dangling-solo and counted-ops arms discriminate; AT-076 drives the real `a` add-child flow; LOW: `calls == 2` tightly coupled by design |
 
 ## 5 · Risks
 
