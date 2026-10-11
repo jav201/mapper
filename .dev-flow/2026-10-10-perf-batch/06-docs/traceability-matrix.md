@@ -3,7 +3,7 @@
 > **Artifact language:** canonical English scaffold. Generate the artifact in the batch's development language (`state.json` `language`); for Spanish batches **translate the prose, never a label**. This document mints no field a rule keys on — its ids (`US-`/`HLR-`/`LLR-`/`AT-`/`TC-`/`R-`) are read by the Atlas id-scanner and are not words in any language — so it carries no reserved-field block; what it must not do is order the translation of somebody else's.
 
 > **Owed in.** `core` — · `full` ✓
-> **Sources:** `01-requirements.md` + ledger, `04-validation.md`, `05-postmortem.md`, `03-increments/`, the shipped tree and `python -B -m pytest --collect-only -q -p no:cacheprovider` re-collection per selector. `T/` = `tests/`. Status `pass` = passed in the join gate run 2 (`evidence/join-gate-run2-full-suite.transcript`, 3223 passed / 24 deselected / 3 xfailed / 0 failed, orchestrator, base `5cde04e`). Every selector below was re-collected at `3b84e2c` (HEAD) for this matrix: **no selector collects 0** (counts in the `TC` column). HLR-PERF.3 / LLR-PERF.3.1–3.2 / US-PERF-003 and AT-077/077b are WITHDRAWN to B-118 (ledger `LED-2026-10-10-perf-batch.3`) — kept as marked rows, never deleted.
+> **Sources:** `01-requirements.md` + ledger, `04-validation.md`, `05-postmortem.md`, `03-increments/`, the shipped tree and `python -B -m pytest --collect-only -q -p no:cacheprovider` re-collection per selector. `T/` = `tests/`. Status `pass` = passed in the final full-suite gate run 2 at the gating tree `e5a2a7f` (`evidence/final-gate-run2-full-suite.transcript`, 3223 passed / 24 deselected / 3 xfailed / 0 failed, orchestrator, base `5cde04e`; the join gate run 2 carried the same totals). Every selector below was re-collected at `e5a2a7f` for this matrix (identical at HEAD — later commits change only `.dev-flow/` records and `REQUIREMENTS.md`): **no selector collects 0** (counts in the `TC` column). HLR-PERF.3 / LLR-PERF.3.1–3.2 / US-PERF-003 and AT-077/077b are WITHDRAWN to B-118 (ledger `LED-2026-10-10-perf-batch.3`) — kept as marked rows, never deleted.
 
 ---
 
@@ -55,8 +55,8 @@
 | Implemented HLR | 3 (100%) |
 | Total LLR | 8 (2 withdrawn, marked) |
 | Implemented LLR | 8 (100%) |
-| Test cases (this batch's new files, collected at `3b84e2c`) | 66 (paint_clip 17 + layout_memo 26 + adjacency 18 + dump 3 + manifest 2) |
-| TC pass | 66/66 (inside the join gate: 3223 passed / 0 failed) |
+| Test cases (this batch's new files, collected at `e5a2a7f`) | 66 (paint_clip 17 + layout_memo 26 + adjacency 18 + dump 3 + manifest 2) |
+| TC pass | 66/66 (inside the final gate: 3223 passed / 0 failed) |
 | TC fail | 0 |
 | TC pending | 0 |
 
@@ -90,7 +90,7 @@ Suite ledger (`04-validation.md`): **3157 − 0 + 66 = 3223 passed**, +3 xfailed
 | new | counted-operations oracle regime + base-pinned goldens (`tests/goldens/perf/**`, 27 files, base SHA `5cde04e`) | thresholds are measured counts, never wall-clock; every golden captured pre-remedy at the trunk (PDR C10) |
 | new | guard files `T/test_perf_paint_clip.py` / `test_perf_layout_memo.py` / `test_perf_adjacency.py` / `test_perf_dump.py` / `test_perf_goldens_manifest.py` | 66 nodes, each negative control executed RED with a sha256-verified restore |
 | modified | `mapper/canvas.py`, `mapper/views/layered.py`, `mapper/model.py`, `mapper/mermaid.py` (+203/−26) | the four remedies — span clip, unscaled-layout memo, adjacency cache, linear incident dump |
-| modified | `tests/test_a3_census.py` (pin 65 → 80), `tests/test_repair_store_boundary.py`, `.gitattributes` (`tests/goldens/** -text`, `2c64f76`) | gate follow-ups + the byte-pin line-ending rule |
+| modified | `tests/test_a3_census.py` (pin 65 → 80 → 82, `084d7b7` + `e5a2a7f`), `tests/test_repair_store_boundary.py`, `.gitattributes` (`tests/goldens/** -text`, `2c64f76`) | gate follow-ups + the byte-pin line-ending rule |
 | closed | B-33's performance follow-up (this batch IS the follow-up; B-33 stays open for `MAX_RENDER_NODES`-class work) | the S-15 dense-DAG cost is unreachable through the shipped loader (parser refuses multi-parent nodes) |
 | withdrawn | Lane S → B-118 | spike PERFS inconclusive; requirements marked, not deleted (ledger `.3`) |
 | proposed | B-121 — load sidecar parse cost | no backlog row existed; proposed in `05-postmortem.md` |

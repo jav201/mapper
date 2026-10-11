@@ -5,7 +5,7 @@
 
 ## 🔑 At a glance (read first)
 
-- **What this batch added:** four work-reduction mechanisms inside the renderer and the store — span clipping in `Canvas`, an unscaled-layout memo on `LayeredRenderer`, a private adjacency cache on `Graph`, and a one-pass incident set in `mermaid.dump` — shipping byte-identical output at 1,957× fewer `wire` calls per keypress, 1 memoised layout per session, ≤ 1 edge pass per 100 cached lookups, and 2·E edge visits per dump (was ~N²/2).
+- **What this batch added:** four work-reduction mechanisms inside the renderer and the store — span clipping in `Canvas`, an unscaled-layout memo on `LayeredRenderer`, a private adjacency cache on `Graph`, and a one-pass incident set in `mermaid.dump` — shipping byte-identical output at 1,956× fewer `wire` calls per keypress, 1 memoised layout per session, ≤ 1 edge pass per 100 cached lookups, and 2·E edge visits per dump (was ~N²/2).
 - **Capabilities:** large-map navigation repaints in ~0.4 s instead of ~1.8 s (measured) · saving a 6000-node map is 3.5× faster · the dense p51 render is 48× faster · EVERYTHING the operator sees is provably unchanged (byte-pinned goldens).
 - **How to use it:** nothing to operate — the mechanisms are automatic. To maintain them, respect the invariants below; the guards fail loudly if you don't.
 
@@ -56,7 +56,7 @@ Both caches are invalidated by IDENTITY, not by event — so the only sound writ
 | `mapper/mermaid.py` | `dump` builds its incident set in one local O(N+E) pass (LLR-PERF.2.2) |
 | `tests/test_perf_paint_clip.py` (17 nodes) · `tests/test_perf_layout_memo.py` (26) · `tests/test_perf_adjacency.py` (18) · `tests/test_perf_dump.py` (3) · `tests/test_perf_goldens_manifest.py` (2) | the guard files above — 66 nodes, +66 in the suite ledger (3157 → 3223) |
 | `tests/perf_goldens_capture.py` + `tests/goldens/perf/**` (MANIFEST + 26 goldens) | deterministic regeneration of every behaviour golden from the current product; base SHA `5cde04e` + sha256 per golden (PDR C10); `-text` line-ending rule in `.gitattributes` (`2c64f76`) |
-| `tests/test_a3_census.py` (M) · `tests/test_repair_store_boundary.py` (M) | gate follow-ups: the A3 pin 65 → 80 for the byte-identity arms' arg-ful renders (`084d7b7`); a store-boundary expectation updated |
+| `tests/test_a3_census.py` (M) · `tests/test_repair_store_boundary.py` (M) | gate follow-ups: the A3 pin 65 → 80 → 82 — first for the byte-identity arms' arg-ful renders (`084d7b7`), then for the DDR title-arm fix's 2 added render sites (`e5a2a7f`); a store-boundary expectation updated |
 
 ### Usage / examples
 
