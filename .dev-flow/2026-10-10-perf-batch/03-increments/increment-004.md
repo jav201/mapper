@@ -76,7 +76,7 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 | **A/B · black-box** | `core` · `full` | `tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize\|title\|fold\|focus\|undo\|add_child\|round_trip]` | passed — scaling-only changes 0 extra misses + byte-identical repaint; structural changes miss exactly once; round trip 0 extra misses |
 | **0 · unit** | `core` · `full` | `tests/test_perf_layout_memo.py::test_memo_id_reuse` | passed — a new `Graph` object always misses |
 | gate | | `test_nodes_writer_census` + 16 planted-form arms | passed — the declared two-writer census holds; every banned in-place/alias form is detected |
-| gate | | `tests/test_perf_paint_clip.py` · `tests/test_perf_goldens_manifest.py` · `tests/test_mod_parity.py` · `tests/test_repair_golden_census.py` | 55 passed total, 0 failed |
+| gate | | the §3 four-file run (`55 passed total`) | **not captured** in a lane transcript — recorded plainly here; the counts that hold are this packet's own RED transcript (`1 passed` per GREEN run at `r2-red.transcript` lines 55/60/70/77/102/119, `2 passed` post-restore at line 156) and, post-join, the join gate (`1 failed, 3222 passed` in `join-gate-run1-full-suite.transcript` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`; the failures in this packet's own transcript are the five deliberate RED mutations, §RED counterfactual) |
 
 ### RED counterfactual — executed, not predicted
 
@@ -129,10 +129,12 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
 | RED proofs + GREEN verifications + before/after measurement | `.dev-flow/2026-10-10-perf-batch/evidence/r2-red.transcript` | `82695d1e7c5717da2518a1f1274854fc5e01c97e96be2c587ee431a026dca5cc` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join slow-lane run (`19 passed, 3231 deselected`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
 
 | Field | Value |
 |---|---|
-| **Evidence files** | 1 transcript; the shipped `mapper/views/layered.py` sha256 `3e34fd90…e04743` is quoted inside it |
+| **Evidence files** | 3 artifacts at the declared home, each sha256-pinned; the shipped `mapper/views/layered.py` sha256 `3e34fd90…e04743` is quoted inside the lane transcript |
 
 ### Load-bearing emptiness — what is this resting on that is only true today? (C-55)
 
@@ -147,7 +149,7 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 | Probe | Command | Result |
 |---|---|---|
 | B1 symbols asserted by other tests | `grep -rl "_layout_misses\|_tree_layout_unscaled" tests/ mapper/` | the spy and the memo are read only by `tests/test_perf_layout_memo.py`; `painted_ids`/`pan_extent` keep calling `_geometry` with no memo — both re-run GREEN in §1 |
-| B3 byte-identical golden captures this source | `tests/test_perf_goldens_manifest.py` + `test_render_grid_clip_identity` | every render golden re-compared against the CURRENT product: 0 diffs (55 passed) |
+| B3 byte-identical golden captures this source | `tests/test_perf_goldens_manifest.py` + `test_render_grid_clip_identity` | every render golden re-compared against the CURRENT product: 0 diffs (the re-comparison runs are the `1 passed`/`2 passed` GREEN lines of `r2-red.transcript`; the lane-wide 55-run was not captured — §4 gate row) |
 | B4 artifact consumed elsewhere | `grep -rl "goldens/perf" tests/` | `tests/test_perf_layout_memo.py` (this increment) plus the Inc-R1 consumers; the AT-075/075b golden bytes are untouched |
 | A3 | `git diff` of `mapper/views/layered.py` vs HEAD | bodies/docstrings + the memo block only; `_tree_layout` (module-level single-call form) signature kept for the no-memo callers and the test oracles |
 
@@ -222,7 +224,7 @@ on increments 001–004, then the DDR's cross-lane golden re-verification.
 | 6 | `code-reviewer` passed | `core` · `full` | ⚠ | PENDING — named in §4b |
 | 7 | No file from another lane touched | all | ✓ | only `mapper/views/layered.py` + this lane's test; `git status` shows no `model.py`/`mermaid.py`/`screens/` change |
 | 8 | Frozen interfaces untouched | all | ✓ | `_tree_layout` module-level signature kept; `keymap.py`/`darkside.py`/`app.py` re-export block untouched; no new painted string |
-| 9 | Coverage claims verified **on disk** | all | ✓ | every painted step byte-equals the pinned golden; the render-grid goldens re-compared (55 passed) |
+| 9 | Coverage claims verified **on disk** | all | ✓ | every painted step byte-equals the pinned golden; the render-grid goldens re-compared (per-run GREEN lines in `r2-red.transcript`; the lane-wide 55-run was not captured — §4) |
 | 10 | Load-bearing emptiness declared | all | ✓ | table above — census scan limits stated; planted-form guards named; count/byte conjuncts fail independently |
 | 11 | **Mutation verdicts** declared | all | ✓ | M-R2 killed (AT-075b count RED), M-R2b killed (`[fold]` RED), M-R2c killed (`[resize]` RED; `[title]` blindness measured), M-R2d documented (escape clause), M-R2e killed (census RED) — per named node |
 | 12 | **Instrument RED-proof** declared | all | ✓ | 4 instruments fed known-bad mutants first; the fifth's non-determinism measured, not asserted |
