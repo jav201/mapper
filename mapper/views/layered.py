@@ -189,20 +189,25 @@ def _degraded(n: int, legacy: bool) -> Text:
     return out
 
 
-def _tree_layout(
+def _tree_layout_unscaled(
     graph: Graph,
-    card_w: int,
-    gap: int = 3,
     hidden: frozenset[str] = frozenset(),
-) -> dict[str, tuple[int, int]]:
-    """In-order leaf slots; internal nodes centred over their children.
-    Handles forests (disconnected trees) by laying out each root tree side-by-side.
-    Returns {id: (cx_cells, level)}.
+) -> dict[str, tuple[float, int]]:
+    """The scaling-free core of `_tree_layout`: in-order leaf slots; internal
+    nodes centred over their children.  Handles forests (disconnected trees) by
+    laying out each root tree side-by-side.  Returns {id: (slot, level)} where
+    `slot` is the raw leaf counter, NOT yet cells.
 
     `hidden` is the set folded away: pruning it from the adjacency makes a folded
     branch's root a leaf for layout purposes, so the slots close up and the pill
     lands where the subtree used to be.  Empty by default, which is the shipped
     behaviour byte for byte.
+
+    Split out from `_tree_layout` for LLR-PERF.1.2: the memo caches THIS result
+    (slot + level per node) because it is a pure function of the graph structure
+    and the fold set -- it reads the child index, prunes hidden ids and walks,
+    nothing else.  The `card_w`/`gap` scaling is derived state (titles, meta and
+    the canvas width feed it) and is re-applied per call by the caller.
     """
     pos: dict[str, tuple[float, int]] = {}
     slot = [0]
@@ -254,8 +259,47 @@ def _tree_layout(
         if slot[0] > start_slot:
             slot[0] += 1
 
+    return pos
+
+
+def _tree_layout(
+    graph: Graph,
+    card_w: int,
+    gap: int = 3,
+    hidden: frozenset[str] = frozenset(),
+) -> dict[str, tuple[int, int]]:
+    """`_tree_layout_unscaled` with the `card_w`/`gap` scaling applied.
+
+    Kept as the single-call form for callers that hold no memo (module-level
+    `painted_ids`/`pan_extent`, and the test oracles that pin this signature).
+    """
+    pos = _tree_layout_unscaled(graph, hidden)
     step = card_w + gap
     return {nid: (card_w // 2 + int(cx * step), lv) for nid, (cx, lv) in pos.items()}
+
+
+@dataclass
+class _LayoutMemo:
+    """One cached UNSCALED layout plus the strong references that vouch for it.
+
+    LLR-PERF.1.2: validity is IDENTITY, never `id()`.  The memo holds the
+    `Graph`, its `edges` list and its `nodes` dict by strong reference and a hit
+    requires each to be `is` the live object PLUS a length match -- so an
+    in-place `add_edge` append (same list object, new length) misses, a wholesale
+    replacement misses, and object-identity reuse after garbage collection can
+    never fake a hit, because the old object cannot be freed while this entry
+    pins it.  `root_id` and the hidden (fold) set complete the structural key:
+    `_tree_layout_unscaled` reads exactly these and nothing else.
+    """
+
+    graph: Graph
+    edges: list
+    edges_len: int
+    nodes: dict
+    nodes_len: int
+    root_id: str | None
+    hidden: frozenset[str]
+    pos: dict[str, tuple[float, int]]
 
 
 @dataclass(frozen=True)
@@ -303,12 +347,26 @@ class _Geometry:
         return self.card_w - 3 - chip_len
 
 
-def _geometry(graph: Graph, state: ViewState) -> _Geometry | None:
+def _geometry(
+    graph: Graph,
+    state: ViewState,
+    layout_memo: LayeredRenderer | None = None,
+) -> _Geometry | None:
     """The layout block, extracted verbatim, plus fold pruning.
 
     Returns `None` for the two shapes `render` answers without drawing a tree —
     an empty graph and one past `MAX_RENDER_NODES` — so `painted_ids` declares
     nothing painted for exactly the frames that paint no tree.
+
+    LLR-PERF.1.2: *layout_memo* is the OWNING RENDERER INSTANCE, passed in so the
+    unscaled `_tree_layout` result can be cached in instance storage — there is
+    NO module-global memo state (ruling R12: a module global would leak across
+    screens and pin `Graph`s).  The module-level callers `painted_ids` and
+    `pan_extent` pass nothing and always compute fresh.  The memo-miss spy is
+    the named instance counter `LayeredRenderer._layout_misses`, incremented on
+    each miss AT THE HIT CHECK below (`_tree_layout` itself runs ~10x per two
+    renders, `evidence/perf0c-nav.transcript:44`, so invocations are not
+    countable).
     """
     w, h = state.w, state.h
     if graph.root_id is None or not graph.nodes:
@@ -346,7 +404,45 @@ def _geometry(graph: Graph, state: ViewState) -> _Geometry | None:
     card_h, edge_h = (3 if legacy else 2), 2
     level_h = card_h + edge_h
 
-    pos = _tree_layout(graph, card_w, gap, hidden)
+    # --- the LLR-PERF.1.2 hit check: the named memo-miss point -------------
+    # The key is strong references compared with `is` plus lengths: `graph`,
+    # its `edges` list (+len), its `nodes` dict (+len), `root_id`, `hidden`.
+    # A hit re-uses the UNSCALED slots and re-applies the `card_w`/`gap`
+    # scaling BELOW, on every call, in O(N) -- a resize or a widening title
+    # edit changes the scaling, never the slots.
+    cached = layout_memo._layout_memo if layout_memo is not None else None
+    if (
+        cached is not None
+        and cached.graph is graph
+        and cached.edges is graph.edges
+        and cached.edges_len == len(graph.edges)
+        and cached.nodes is graph.nodes
+        and cached.nodes_len == len(graph.nodes)
+        and cached.root_id == graph.root_id
+        and cached.hidden == hidden
+    ):
+        raw_pos = cached.pos
+    else:
+        if layout_memo is not None:
+            layout_memo._layout_misses += 1
+        raw_pos = _tree_layout_unscaled(graph, hidden)
+        if layout_memo is not None:
+            layout_memo._layout_memo = _LayoutMemo(
+                graph=graph,
+                edges=graph.edges,
+                edges_len=len(graph.edges),
+                nodes=graph.nodes,
+                nodes_len=len(graph.nodes),
+                root_id=graph.root_id,
+                hidden=hidden,
+                pos=raw_pos,
+            )
+    step = card_w + gap
+    pos = {
+        nid: (card_w // 2 + int(cx * step), lv) for nid, (cx, lv) in raw_pos.items()
+    }
+    # --- end of the hit check; everything below is per-call derived state --
+
     depth_max = max(lv for _, lv in pos.values()) if pos else 0
     tree_bottom = (depth_max + 1) * card_h + depth_max * edge_h
     removed_h = (card_h + 2) if removed_ids else 0
@@ -538,6 +634,18 @@ def header_rows(graph: Graph, w: int, wrap_w: int) -> int:
 class LayeredRenderer:
     """Render a Graph as a layered tree of ficha cards."""
 
+    def __init__(self) -> None:
+        # LLR-PERF.1.2 (ruling R12): the unscaled-layout memo lives in INSTANCE
+        # storage and is passed into module-level `_geometry` as an argument —
+        # never a module global, which would leak across screens and pin
+        # `Graph`s.  Each `MapScreen` holds one renderer (`screen.py:73`), so
+        # its memo dies with it; the import preview builds a fresh renderer per
+        # paint (`import_preview.py:103`) and simply misses.  `_layout_misses`
+        # is the memo-miss spy the batch's counted oracle reads; it counts
+        # misses at the hit check inside `_geometry`, not layout invocations.
+        self._layout_misses = 0
+        self._layout_memo: _LayoutMemo | None = None
+
     def render(self, graph: Graph, state: ViewState) -> Text:
         selected_id, h = state.selected_id, state.h
         # RESOLVED ids, decided by `mapper.search`.  The renderer evaluates no
@@ -561,7 +669,7 @@ class LayeredRenderer:
         changed = diff.changed if diff else {}
         removed_titles = diff.removed_titles if diff else {}
 
-        geo = _geometry(graph, state)
+        geo = _geometry(graph, state, self)
         index = geo.index
         all_ids = geo.visible
         gap = geo.gap

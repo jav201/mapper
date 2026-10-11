@@ -1,0 +1,189 @@
+# Inc-R2 RED proofs + verification transcript — Lane R, batch 2026-10-10-perf-batch
+
+Worker: Kimi (kimi-code/kimi-for-coding) via the kimi CLI. All commands run from
+the worktree root; all paths relative. Product change under test: the unscaled
+`_tree_layout` memo in `mapper/views/layered.py` (instance storage on
+`LayeredRenderer`, strong-reference key, `_layout_misses` spy) +
+`tests/test_perf_layout_memo.py`. Bytecode cache off (`python -B`,
+`-p no:cacheprovider`).
+
+## 0 · The product change (GREEN state)
+
+`mapper/views/layered.py`: `_tree_layout_unscaled` (slot + level per node) is
+memoised on the owning `LayeredRenderer` instance and passed into module-level
+`_geometry` as an argument (no module-global state, ruling R12). The key is
+strong references compared with `is` plus lengths (`graph`, its `edges` list
+(+len), its `nodes` dict (+len), `root_id`, `hidden`); a hit re-applies the
+`card_w`/`gap` scaling per call. Misses are counted on the instance spy
+`_layout_misses` at the hit check.
+
+sha256 of the shipped `mapper/views/layered.py` (before any mutation, and
+restored to, byte-identically, after every mutation):
+
+    3e34fd90426b30fc9dbdf4dc8ade90de8ba7404ab232c58283c124d6e8e04743 *mapper/views/layered.py
+
+Restore command used after every mutation:
+
+    $ cp .dev-flow/2026-10-10-perf-batch/evidence/r2-layered-memo.py mapper/views/layered.py
+    $ sha256sum mapper/views/layered.py
+    3e34fd90426b30fc9dbdf4dc8ade90de8ba7404ab232c58283c124d6e8e04743 *mapper/views/layered.py
+
+## 1 · Measured layout computations, AT-075 session (before vs after)
+
+BEFORE (pre-Inc-R2 `layered.py` at HEAD, same wide-2000 nav session):
+`evidence/perf0c-nav.transcript:44` —
+
+    _tree_layout  mapper\views\layered.py:192   ncalls=10  (2 renders)
+
+i.e. ~5 `_tree_layout` computations per render, none cached.
+
+AFTER (shipped memo, AT-075b six-key session at 118x34 through the real app,
+from the GREEN run in §2 with `-s`):
+
+    AT-075b memo misses after open + l,j,j,j,j: 1
+    AT-075b memo misses after archive + l: 2
+
+One unscaled layout computation now covers open + five selection-only
+keypresses (six paints); the archive (a structural edit) costs exactly one more.
+Selection-only navigation went from ~5 layout computations per render to zero.
+
+## 2 · GREEN verification (each mutation restored before its GREEN run)
+
+GREEN after M-R2e restore:
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_nodes_writer_census
+    1 passed in 0.65s
+
+GREEN after M-R2d restore:
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_memo_id_reuse
+    1 passed in 0.35s
+
+GREEN after M-R2c restore:
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize]" "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[title]"
+    2 passed in 4.70s
+
+GREEN after M-R2b restore:
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[fold]"
+    1 passed in 1.49s
+
+GREEN after M-R2 restore (also the §1 measurement source):
+
+    $ python -B -m pytest -q -s -p no:cacheprovider tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden
+    AT-075b memo misses after open + l,j,j,j,j: 1
+    AT-075b memo misses after archive + l: 2
+    1 passed in 7.10s
+
+## 3 · RED proof M-R2e — planted `nodes` writer site → the census guard
+
+Mutation (transient, in the scanned package root; the census hardcodes
+`REPO_ROOT/mapper`): a planted `setitem` writer added to `mapper/views/layered.py`:
+
+    def _planted_m2re_writer(graph: Graph) -> None:
+        graph.nodes["planted"] = None
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_nodes_writer_census
+    E         Extra items in the left set:
+    E         ('mapper/views/layered.py', '_planted_m2re_writer', 'setitem')
+    tests\test_perf_layout_memo.py:562: AssertionError
+    1 failed in 0.83s
+
+RED → restored (sha256 == 3e34fd90…e04743, §0) → GREEN (§2).
+
+## 4 · RED proof M-R2d — key on `id(graph)` instead of the strong reference
+
+Mutation: hit check `cached.graph is graph` → `cached.graph == id(graph)`, and
+the memo field stores `graph=id(graph)` (the strong reference is dropped, so the
+old graph is no longer pinned).
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_memo_id_reuse
+    1 passed in 0.40s
+
+    $ for i in 1 2 3 4 5 6 7 8; do python -B -m pytest -q -p no:cacheprovider tests/test_perf_layout_memo.py::test_memo_id_reuse; done
+    1 passed ×8
+
+Forced-reuse probe under the mutant (2000 same-shape allocations after
+`del g1; gc.collect()`):
+
+    address collisions with freed id: 0
+    misses after 1
+
+(`weakref` confirms g1 IS collected — nothing pins it; the interpreter simply
+never recycles the freed address into the next same-shape `Graph` here.)
+
+The undo arm under the same mutant:
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[undo]"
+    1 passed in 2.22s
+
+VERDICT, RECORDED PLAINLY: on this interpreter the id()-keyed mutant cannot be
+driven RED deterministically — address reuse does not occur (0 collisions in
+2000 allocations), and the undo arm stays green because the undo snapshot pins
+the old graph, so its address is never recycled either. This is exactly the
+glossary escape clause (01-requirements.md:498, ruling R13): the node documents
+the situation and keeps the plain "new Graph misses" assertion, which the
+strong-reference key makes un-fakeable BY CONSTRUCTION (the memo pins the old
+graph, so its address cannot be reused while the entry lives). Restored
+(sha256 == 3e34fd90…e04743, §0) → GREEN (§2).
+
+## 5 · RED proof M-R2c — cache the SCALED pos (key unchanged)
+
+Mutation: the memo entry stores the scaled layout,
+`pos={nid: (card_w // 2 + int(cx * (card_w + gap)), lv) ...}`, so every hit
+re-applies the scaling to already-scaled slots.
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize]" "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[title]"
+    tests\test_perf_layout_memo.py:202: AssertionError
+    FAILED tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize]
+    1 failed, 1 passed in 4.65s
+
+`resize` RED at its renderer-level byte compare (`narrowed == fresh`,
+tests/test_perf_layout_memo.py:202): the hit returns stale scaled slots, the
+second scaling shifts every card, and the resized render no longer byte-equals
+a fresh renderer's paint. NAMED NODE RED.
+
+`title` stayed GREEN under the same mutant — measured, not assumed. Probe
+(wide instrumentation of `_geometry` through the real edit gesture): the mutant
+memo path double-scales (`root_pos` 28 → 340) but at 118x34 the fold-tree's
+canvas is header-only ("7 nodes ▽ 6 out of view"; every card, mutant and fresh,
+lies outside the viewport), so the arm's `_canvas_lines` byte compare — clipped
+to the canvas widget region — sees identical visible bytes in both. The arm's
+emitted-form pin is blind to geometry drift that never reaches the viewport;
+the `resize` arm's renderer-level `.plain` compare is not, and it reddens.
+Recorded plainly per the same escape-clause pattern as M-R2d. Restored
+(sha256 == 3e34fd90…e04743, §0) → 2 passed GREEN (§2).
+
+## 6 · RED proof M-R2b — drop the `hidden` key component
+
+Mutation: the conjunct `and cached.hidden == hidden` deleted from the hit
+check (a fold no longer invalidates).
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[fold]"
+    E           AssertionError: folding a branch must miss exactly once
+    E           assert 1 == (1 + 1)
+    tests\test_perf_layout_memo.py:260: AssertionError
+    1 failed in 1.26s
+
+RED → restored (sha256 == 3e34fd90…e04743, §0) → GREEN (§2).
+
+## 7 · RED proof M-R2 — no memo (always recompute)
+
+Mutation: the hit check disabled, `cached = None`.
+
+    $ python -B -m pytest -q -s -p no:cacheprovider tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden
+    E           AssertionError: open cost 4 misses, want exactly 1
+    E           assert 4 == 1
+    tests\test_perf_layout_memo.py:121: AssertionError
+    1 failed in 2.90s
+
+RED (a miss per repaint; open alone costs 4). → restored (sha256 ==
+3e34fd90…e04743, §0) → GREEN with the §1 counts (§2).
+
+## 8 · Digest ledger
+
+| Item | SHA-256 |
+|---|---|
+| shipped `mapper/views/layered.py` (restored after every mutation) | `3e34fd90426b30fc9dbdf4dc8ade90de8ba7404ab232c58283c124d6e8e04743` |
+| this transcript | recorded at the increment packet (increment-004.md) |
