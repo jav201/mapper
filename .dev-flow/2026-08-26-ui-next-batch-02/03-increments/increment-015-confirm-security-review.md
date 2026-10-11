@@ -303,7 +303,7 @@ the repo (`C:\Users\<operator>\clde\sec_guard_probe\`, `test_bypass.py` +
   `.env`, `.env.*`, `*.svg`, `*.png`, `*.db` and `.mapper/`, so exported
   artifacts and local session state cannot be committed.
 - `test_repo_screen_two_pane_renders` no longer drives a live repository; its
-  fixture is a two-node synthetic graph. The string `jav201/taskboard` remains
+  fixture is a two-node synthetic graph. The string `<owner>/taskboard` remains
   as an identifier in the fixture and in the classifier's parametrisation —
   a public repository name, pre-existing in the tree, not a credential.
 - `gh` credentials are held by the CLI and never touched by product code.

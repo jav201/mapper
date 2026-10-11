@@ -50,7 +50,7 @@ BRANCHES = [
     Branch("release/v1.9", 0, 0, "success", "hace 1sem", milestone="v1.9.0", kind="release"),
 ]
 DEFAULT = "main"
-REPO = "jav201/taskboard"
+REPO = "<owner>/taskboard"
 
 
 def make_console(w: int = 118, h: int = 32) -> Console:

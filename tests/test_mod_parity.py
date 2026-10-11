@@ -52,9 +52,17 @@ WIDTHS = (118, 87)
 
 #: Filled in after the goldens are captured at Inc-0 (see MOD_PARITY_UPDATE).
 #: LLR-MOD.4.2 golden record: the on-disk golden must still hash to these.
+#: RE-RECORDED at `2026-10-11-reqharness-batch`'s gate fix (increment-009):
+#: RH6a added the `R roles` door to the home key-hint row, moving its overflow
+#: counter +8 -> +9 (118 cols) and +10 -> +11 (87 cols).  The regeneration
+#: command was `MOD_PARITY_UPDATE=1 python -m pytest -q -p no:cacheprovider
+#: "tests/test_mod_parity.py::test_at065_parity_matches_golden[118]"
+#: "tests/test_mod_parity.py::test_at065_parity_matches_golden[87]"`, and the
+#: verified diff was EXACTLY that one counter line in each golden — no other
+#: painted byte moved.
 GOLDEN_SHA256 = {
-    118: "43af8e1e7613f23e9da0b9a3090c880c6b6f1cc0341f9befb8e032efd95fbf2d",
-    87: "6ba755535f102742931c93af98a54889ea4ecc6e132f43a1db78f8461a889b9b",
+    118: "8ad7729f2c5696c820c98eb18ddd708bdf2d9815649a0e3d2d55aa57af057dc0",
+    87: "0b6d937c39753d85456a4aed3b0cd695f9eb950698eacd11b7c3878666f3c137",
 }
 
 #: The mutant's one-token change: a PAINTED string constant in

@@ -87,7 +87,7 @@ vault: it is reflected in the requirement or in the module map, which are versio
 | D2 | records aligned with the code (C8 toast text, R8 ALERT, AT-044 `priority=True`) | `01-requirements.md` LLR-004.2 / HLR-007, design step 6 / diagram / TC-004.2b / §5.3; ledger `.66` |
 | D3 | `docs/ARCHITECTURE.md` describes the shipped code | rows for `FieldCommitted` (REMOVED), draft surface and `DraftGuardScreen` (PRESENT, `map_id`), Inc-1c worksheet row, A-13…A-15 pointer |
 | D4 | AT-042 / AT-025b one node each | AT-025b joined node `test_at_025b_…` (Kimi unit, RED); AT-042 declared multi-arm reconciliation; ledger `.67` |
-| D5 | the operator's real-terminal smoke attributed | `human:Javier`, PDR log row C14 (verbatim quote); carried into `04-validation.md` |
+| D5 | the operator's real-terminal smoke attributed | `human:username_subject`, PDR log row C14 (verbatim quote); carried into `04-validation.md` |
 | QA-3 | TC-009.1 missing; `I-remount-per-key` unproven | TC-009.1 `tests/test_help_scope.py::test_tc_009_1_settle_assertion_fails_loud_when_the_scroll_never_lands` (Kimi unit, RED: `DID NOT RAISE`); `I-remount-per-key` re-run recorded in packet increment-006 |
 
 **External block, not this batch's:** validator `V7` reports the installed flow bundle's `SKILL.md` differs from its own manifest (modified 2026-10-09 07:24 outside this batch — the flow's rev101 work in another session). Recorded, not acted on: the flow installation is not this project's tree.

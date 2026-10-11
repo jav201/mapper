@@ -1,0 +1,107 @@
+# RH4 (reviews + pending stores + content-keyed cache + derived states) -- RED-proof transcript
+# Batch 2026-10-11-reqharness-batch -- lane: registry
+# All commands run from the worktree root; paths relative; account names redacted.
+
+## Baseline digests
+fe56ec169d86d41cba1a102a94ec8eec4b621c375bd9a6074ecf0dd59270f132 *mapper/reqharness/derive.py
+f6da682de3b4499ac58535dd3b22fa826342690bd89ebdb325ef3d99378344b7 *mapper/reqharness/reviews.py
+c57838caf6d22506ca5e927b9a5b0f564fa7106ddf0258d02bf818e271a0fd98 *mapper/reqharness/chain.py
+
+## GREEN baseline
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py
+.........                                                                [100%]
+9 passed in 3.15s
+
+## Mutant M-RG1: fold informative fields into the normative digest -> test_normative_edit_needs_review_informative_marks_only must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k normative_edit
+E       AssertionError: assert {'HLR-TEST.1'...ged · review'} == {'HLR-TEST.1': 'reviewed'}
+tests\test_reqharness_registry.py:189: AssertionError
+FAILED tests/test_reqharness_registry.py::test_normative_edit_needs_review_informative_marks_only
+1 failed, 8 deselected in 0.24s
+# restore:
+fe56ec169d86d41cba1a102a94ec8eec4b621c375bd9a6074ecf0dd59270f132 *mapper/reqharness/derive.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 3.38s
+
+## Mutant M-RG2: check the signer's role at today's head -> test_review_by_signer_without_role_in_force_is_pre_reviewed must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k signer_without_role
+E       AssertionError: assert {'HLR-TEST.1': 'reviewed'} == {'HLR-TEST.1': 'pre-reviewed'}
+tests\test_reqharness_registry.py:226: AssertionError
+FAILED tests/test_reqharness_registry.py::test_review_by_signer_without_role_in_force_is_pre_reviewed
+1 failed, 8 deselected in 0.25s
+# restore:
+fe56ec169d86d41cba1a102a94ec8eec4b621c375bd9a6074ecf0dd59270f132 *mapper/reqharness/derive.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 3.46s
+
+## Mutant M-RG3: let a model review qualify as closing -> test_model_review_never_closes_state must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k model_review
+E       AssertionError: assert {'HLR-TEST.1': 'reviewed'} == {'HLR-TEST.1': 'pre-reviewed'}
+tests\test_reqharness_registry.py:268: AssertionError
+FAILED tests/test_reqharness_registry.py::test_model_review_never_closes_state
+1 failed, 8 deselected in 0.22s
+# restore:
+fe56ec169d86d41cba1a102a94ec8eec4b621c375bd9a6074ecf0dd59270f132 *mapper/reqharness/derive.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 3.21s
+
+## Mutant M-RG4: the withdrawn marker derives no retired state -> test_derived_states_boundary_catalog must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k boundary_catalog
+E       AssertionError: assert {'HLR-TEST.1'...not reviewed'} == {'HLR-TEST.1'...1': 'retired'}
+tests\test_reqharness_registry.py:381: AssertionError
+FAILED tests/test_reqharness_registry.py::test_derived_states_boundary_catalog
+1 failed, 8 deselected in 0.27s
+# restore:
+fe56ec169d86d41cba1a102a94ec8eec4b621c375bd9a6074ecf0dd59270f132 *mapper/reqharness/derive.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 3.39s
+
+## Mutant M-RG5: no bust+re-parse on a failed cached parse -> test_review_parse_cache_is_pure_accelerator must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k pure_accelerator
+E       AssertionError: assert Derivation(ve..., reason=None) == Derivation(ve..., reason=None)
+tests\test_reqharness_registry.py:509: AssertionError
+FAILED tests/test_reqharness_registry.py::test_review_parse_cache_is_pure_accelerator
+1 failed, 8 deselected in 1.86s
+# restore:
+f6da682de3b4499ac58535dd3b22fa826342690bd89ebdb325ef3d99378344b7 *mapper/reqharness/reviews.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 3.15s
+
+## Mutant M-FN1: name the file from the note length, not the canonical content -> test_review_file_naming_and_exclusive_create must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k naming_and_exclusive
+E       AssertionError: assert '20261011-0000000e.yml' == '20261011-d304f98e.yml'
+tests\test_reqharness_registry.py:296: AssertionError
+FAILED tests/test_reqharness_registry.py::test_review_file_naming_and_exclusive_create
+1 failed, 8 deselected in 0.24s
+# restore:
+f6da682de3b4499ac58535dd3b22fa826342690bd89ebdb325ef3d99378344b7 *mapper/reqharness/reviews.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 2.97s
+
+## Mutant M-FN2: skip the sha8 recompute over the canonical content -> test_review_file_naming_and_exclusive_create must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k naming_and_exclusive
+E       AssertionError: assert (ReviewEvent(...e old name'),) == ()
+tests\test_reqharness_registry.py:327: AssertionError
+FAILED tests/test_reqharness_registry.py::test_review_file_naming_and_exclusive_create
+1 failed, 8 deselected in 0.22s
+# restore:
+f6da682de3b4499ac58535dd3b22fa826342690bd89ebdb325ef3d99378344b7 *mapper/reqharness/reviews.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 3.19s
+
+## Mutant M-PR1: drop the admin gate on approve_pending -> test_pending_resolution_derived_from_chain_reference must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py -k pending_resolution
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+FAILED tests/test_reqharness_registry.py::test_pending_resolution_derived_from_chain_reference
+1 failed, 8 deselected in 0.24s
+# restore:
+c57838caf6d22506ca5e927b9a5b0f564fa7106ddf0258d02bf818e271a0fd98 *mapper/reqharness/chain.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py   # GREEN after restore
+9 passed in 2.92s
+
+## Final state: all three product files byte-identical to baseline
+fe56ec169d86d41cba1a102a94ec8eec4b621c375bd9a6074ecf0dd59270f132 *mapper/reqharness/derive.py
+f6da682de3b4499ac58535dd3b22fa826342690bd89ebdb325ef3d99378344b7 *mapper/reqharness/reviews.py
+c57838caf6d22506ca5e927b9a5b0f564fa7106ddf0258d02bf818e271a0fd98 *mapper/reqharness/chain.py
+$ rm -rf /tmp/tmp.c8oRw05Pco
+# done: 8 arms, every one RED on its node and GREEN after the byte-identical restore

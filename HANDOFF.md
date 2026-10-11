@@ -55,7 +55,7 @@ In `C:/Users/<operator>/Github/taskboard/prototypes/mapper/`:
   width before anything scrolls.
 - **No real data in committed artifacts** — synthetic fixtures only, always
   (the `prototypes/capture.py` law). The GitHub connector reads through `gh`
-  (authenticated as `jav201`, scopes repo/workflow/read:org — verified
+  (authenticated as `<owner>`, scopes repo/workflow/read:org — verified
   2026-08-18); read-only, never mutates GitHub.
 - **Mermaid round-trip never forks** — canvas and text are two views of one
   thing. MVP parser scope: `graph TD`, `A[x] --> B[y]`, bare ids, edge labels

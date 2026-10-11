@@ -27,6 +27,7 @@ from mapper.screens.draft_guard import DraftGuardScreen
 from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
+from mapper.screens.roles import RolesScreen
 from mapper.screens.settings import SettingsScreen
 
 # Which class owns each scope's actions.  App-scope actions live on the App and are
@@ -45,6 +46,9 @@ SCOPE_OWNER = {
     keymap.SCOPE_SETTINGS: SettingsScreen,
     # Data-safety batch (2026-10-08) Inc-1a: the draft guard modal.
     keymap.SCOPE_DRAFT: DraftGuardScreen,
+    # ReqHarness batch `2026-10-11-reqharness-batch` (HLR-RH.8): the roles
+    # screen, increment RH6a.
+    keymap.SCOPE_ROLES: RolesScreen,
 }
 
 # Per-scope sizes, pinned EXACTLY.  A `>=` fence leaves slack, and slack is
@@ -55,7 +59,9 @@ SCOPE_OWNER = {
 # must now be a deliberate edit here.
 EXPECTED_PER_SCOPE = {
     # 11 -> 12: Inc-9c declares `enter` on home (`INC9-UX-F11`).
-    keymap.SCOPE_HOME: 12,
+    # 12 -> 13: the ReqHarness batch declares the roles door `R` on home
+    # (`LLR-RH.8.1`, increment RH6a).
+    keymap.SCOPE_HOME: 13,
     # 25 -> 29: Inc-3 adds the four US-N06 pan chords `H` `J` `K` `L` to the
     # `view` group.  Updated deliberately, in the same edit as the seat rows.
     # 29 -> 31: Inc-4b's `#D5b` adds `N` (`prev_hit`, `nav`) and `M`
@@ -83,6 +89,12 @@ EXPECTED_PER_SCOPE = {
     # 0 -> 3: data-safety Inc-1a declares the guard's `s` / `d` / `esc`
     # (`save` / `discard` / `stay`, LLR-003.1).
     keymap.SCOPE_DRAFT: 3,
+    # 0 -> 7: the ReqHarness batch's roles scope declares the matrix cursor
+    # (`j`/`k` person, `h`/`l` role), `space` (`propose`) and `q`/`esc`
+    # (`home`) — HLR-RH.8, increment RH6a.
+    # 7 -> 9: increment RH6b adds the admin `a`/`r` pending-resolution rows
+    # (LLR-RH.8.6).
+    keymap.SCOPE_ROLES: 9,
 }
 
 # Derived from the live module, never hand-listed (control C-31).

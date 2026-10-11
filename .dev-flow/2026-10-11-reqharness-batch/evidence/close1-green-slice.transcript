@@ -1,0 +1,28 @@
+# CLOSE1 GREEN capture — combined close-out slice for V56 (increments 005/006 claims; env: NO_COLOR and TERM unset)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_roles_screen.py tests/test_reqharness_*.py tests/test_en5.py tests/test_inc9.py tests/test_inc9c.py tests/test_key_dispatch.py tests/test_keymap.py tests/test_help_scope.py tests/test_no_operator_paths.py tests/test_app.py tests/test_mod_compat.py tests/test_arch_osopen_callers.py tests/test_mod_deps.py
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 14%]
+........................................................................ [ 28%]
+........................................................................ [ 42%]
+........................................................................ [ 57%]
+........................................................................ [ 71%]
+........................................................................ [ 85%]
+........................................................................ [100%]
+============================== warnings summary ===============================
+tests\test_reqharness_config.py:296
+  <home>\Github\mapper\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+<unknown>:296
+tests/test_mod_compat.py::test_llr_mod_3_1_reexports_static_tree
+tests/test_mod_compat.py::test_llr_mod_3_1_reexports_static_tree
+tests/test_mod_compat.py::test_llr_mod_3_1_reexports_red_when_a_reexport_is_dropped
+tests/test_mod_compat.py::test_llr_mod_3_2_patch_guard_every_site_targets_a_reading_module
+tests/test_mod_compat.py::test_llr_mod_3_2_patch_guard_red_when_the_target_stops_reading
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+504 passed, 7 warnings in 193.77s (0:03:13)

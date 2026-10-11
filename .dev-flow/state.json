@@ -1,9 +1,9 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-10-10-perf-batch",
-  "batch_objective": "Performance and scale (B-33 / S-15, S-18, S-19): measure first, then remedy. MAX_RENDER_NODES bounds the node COUNT, not the render WORK — a 73-node map was measured at 72.5 s because cost follows edges (the 51-node fixture carries 410); three private copies of the constant over three walks, and children_of is O(E) per call. Establish a reproducible measurement harness, then bound and reduce the work so large maps stay responsive. Behaviour-preserving except where a bound must change what is painted, and then only as the requirements state.",
-  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "batch_id": "2026-10-11-reqharness-batch",
+  "batch_objective": "ReqHarness (B-107): mapper becomes the harness for dev-flow's human-auditable artifacts. Operator rulings B-119 (gallery verdict V, D2-D13), B-121 (a persistent, versioned review registry: canon per type, digest of normative fields, role-bound approval, declared or EV test results, YAML source with generated views, baselines and release rules), B-122 (roles edited in-app; hash-chained admin-approved role log; hand edits ignored and flagged; release blocked on a broken chain; strong mode optional) and B-123 (roles screen = matrix variant B).",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
   "mode": "full",
   "mode_history": [
     {
@@ -87,11 +87,16 @@
       "batch_id": "2026-10-10-csv-safety-batch",
       "mode": "core",
       "closed_at": "2026-10-10"
+    },
+    {
+      "batch_id": "2026-10-10-perf-batch",
+      "mode": "full",
+      "closed_at": "2026-10-10"
     }
   ],
   "guided": false,
   "current_station": "P6",
-  "phase_status": "approved",
+  "phase_status": "in-progress",
   "stations_active": [
     "P0",
     "ARQ",
@@ -106,7 +111,7 @@
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 1,
+    "P1": 2,
     "P2": 0,
     "P3": 0,
     "P4": 0,
@@ -117,123 +122,126 @@
     "PDR": 0
   },
   "triggers": {
-    "evaluated_at": "2026-10-10T15:42:06",
+    "evaluated_at": "2026-10-11T00:59:14",
     "fired": [
       "A1",
       "A2",
       "A3",
-      "A4",
       "B1",
-      "B3",
+      "C1",
+      "C4",
+      "C6",
+      "C8",
+      "D1",
       "E1",
+      "E2",
       "F1"
     ],
     "not_fired": [
+      "A4",
       "B2",
+      "B3",
       "B4",
-      "C1",
       "C2",
       "C3",
-      "C4",
       "C5",
-      "C6",
       "C7",
-      "C8",
-      "D1",
       "D2",
-      "E2",
       "E3",
       "F2"
     ],
-    "record": ".dev-flow/2026-10-10-perf-batch/PLAN.md#triggers"
+    "record": ".dev-flow/2026-10-11-reqharness-batch/PLAN.md#triggers"
   },
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-10-10-perf-batch/01-requirements.md",
-    "requirements_ledger": "repo:.dev-flow/2026-10-10-perf-batch/01-requirements-ledger.md",
-    "traceability": "repo:.dev-flow/2026-10-10-perf-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-10-11-reqharness-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-11-reqharness-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-11-reqharness-batch/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-10-10-perf-batch/03-increments/",
-    "evidence": "repo:.dev-flow/2026-10-10-perf-batch/evidence/",
+    "increments": "repo:.dev-flow/2026-10-11-reqharness-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-11-reqharness-batch/evidence/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "design_pdr": "vault:mapper/design/PDR-2026-10-10-perf-batch.md",
-    "design_ddr": "vault:mapper/design/DDR-2026-10-10-perf-batch.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/README.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-11-reqharness-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-11-reqharness-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-11-reqharness-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-11-reqharness-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "5cde04e3e827b6ad4696022ea58fcd6f7ebfb33c",
+  "base_ref": "fb1d4ce6118b57a540bd67bd2115e5400b356870",
   "artifacts": {
-    "plan": ".dev-flow/2026-10-10-perf-batch/PLAN.md",
-    "P1": ".dev-flow/2026-10-10-perf-batch/01-requirements.md",
-    "P1_ledger": ".dev-flow/2026-10-10-perf-batch/01-requirements-ledger.md"
+    "plan": ".dev-flow/2026-10-11-reqharness-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-11-reqharness-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-11-reqharness-batch/01-requirements-ledger.md"
   },
   "decisions_log": [
     {
       "station": "P0",
-      "date": "2026-10-10",
-      "decision": "P0 approved (self-approved under the standing authorization): measured first (spike/perf-baseline.md §1-§7, PERF0/0B/0C by Kimi): opening a wide 2000-node map 4.8 s, 6000+ times out; each navigation key repaints the whole map 0.6-1.9 s (renderer elbow_down/wire per cell); mount paints 3x; Mermaid dump O(N*E); load YAML-bound. Scope ruled: behaviour-preserving remedies first (AT-065 goldens byte-identical as the oracle), three parallel lanes; the S-18 work budget changes painted output and goes to a prototype round before any implementation. Triggers in PLAN.md#triggers."
+      "date": "2026-10-11",
+      "decision": "P0 approved (self-approved under the standing authorization): intake spike/intake.md (Kimi). Slice ruled: this batch = headless mapper/reqharness core (config, hash-chained role log, review events + normative digests + derived states, baselines + release rules, YAML I/O) + roles screen (matrix B, prototype verdict B-123) with the status band folded into it + the D12 proposal document; follow-ups: review/signing screen and baseline/release view (prototype rounds first), US canon + AT table extraction, generated views. O1-O9 ruled: config.yml + roles.yml (YAML stream, hash chain, admin-only) + reviews/ one file per event; status in the roles-screen footer; genesis copy; admin applies changes to others in one key, own changes pending; pending glyphs ◐ add / ◌ remove; D12 as a 06-docs proposal; reqharness/ at repo root, mapper --audit <repo>; baselines named + commit SHA under reqharness/baselines/, tags manual. Triggers A1-A3,B1,C1,C4,C6,C8,D1,E1,E2,F1 fired (E2: identity and authorization surface)"
     },
     {
       "station": "ARQ",
-      "date": "2026-10-10",
-      "decision": "ARQ drafted (Kimi): design/design-proposal.md — lanes R (canvas span clip + layout memo), M (Graph adjacency cache + linear dump), S (one paid render at mount), file sets disjoint (intersections executed), shared seams banned; to PDR with P2"
+      "date": "2026-10-11",
+      "decision": "ARQ drafted (Kimi): design/design-proposal.md — headless mapper/reqharness package (config, hash-chained roles.yml, reviews/ one immutable file per event, derived states, baselines, release rules, audit CLI), roles screen matrix B with status band; scale spike RHS folded as R-SCALE (CSafeLoader, local parse cache, 0.5 s budget); to PDR with P2"
     },
     {
       "station": "P1",
-      "date": "2026-10-10",
-      "decision": "P1 drafted (Kimi): US-PERF-001..003, HLR-PERF.1-3, LLR-PERF.1.1-3.2, AT-075/075b/076/077/077b; deterministic call-count oracles, wall-clock only as P4 evidence; to P2 review"
+      "date": "2026-10-11",
+      "decision": "P1 drafted (Kimi): US-RH-001..003, HLR-RH.1-9, 23 LLR-RH, AT-077..081, LED .1-.2; to P2 review (architect, qa, security)"
     },
     {
       "station": "P2",
-      "date": "2026-10-10",
-      "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): requirements and PDR ITERATE (layout memo key omits card_w; AT-076 vacuous; dump threshold reds a correct fix; Lane S mechanism contradicts painting.py); qa (Claude Sonnet): requirements ITERATE (same HIGH), PDR approve-with-conditions. Rulings R1-R9; Lane S gated on a spike"
+      "date": "2026-10-11",
+      "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): both ITERATE (policy outside the chain, canonical hashing breaks on real YAML, cache can change a verdict, one unentitled review blocks forever, pending has no home); qa (Claude Sonnet): REQ ITERATE, PDR approve-with-conditions (pending store, resolve keys, AT-080 vacuous, token census oracle); security (Claude Opus): ITERATE (F1 policy, F2 tail truncation, F3 backdating). Rulings R1-R14 in 02-review.md"
     },
     {
       "station": "P1",
-      "date": "2026-10-10",
-      "decision": "P1 iteration 1 approved (self-approved): rulings R1-R9 applied (LED .2): unscaled layout memo keyed by strong refs; adjacency cache with strong ref + widened census; real-save AT-076 with per-dump and scaling oracles; bare-Canvas clip equality; goldens pinned pre-change; Lane S spike inconclusive -> withdrawn to B-118 (LED .3); to P2 round 2 (lanes R and M)"
+      "date": "2026-10-11",
+      "decision": "P1 iteration 1 approved (self-approved): rulings R1-R14 applied by Kimi (LED .3-.17); to P2 round 2"
     },
     {
       "station": "P2",
-      "date": "2026-10-10",
-      "decision": "P2 round 2 approved with conditions (self-approved): architect (Claude Opus) + qa (Claude Sonnet) approve-with-conditions, no HIGH; rulings R10-R18 applied (AT-076 on add_child, local incident dump, per-instance memo + miss counter, named mutations, nodes-writer guard)"
+      "date": "2026-10-11",
+      "decision": "P2 round 2: iterate-to-refine (self-ruled). architect (Claude Opus) iterate text-only (genesis self-hash, fork recovery vs verify, old-head backdating; batch drifting heavy); qa (Claude Sonnet) and security (Claude Opus) approve-with-conditions (git fsmonitor hardening G1, content recheck G3, residuals G4). Rulings R15-R26 trim scope (committer warning, reactivated class, review progression, fork-recovery UI deferred to B-124..B-126)"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-11",
+      "decision": "P1 iteration 2 approved (self-approved): rulings R15-R26 applied by Kimi (LED .18-.28); scope trimmed per the architect's weight assessment, deferred work in B-124..B-126; to P2 round 3 (targeted re-review)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-11",
+      "decision": "P2 approved with conditions after three rounds (self-approved): architect (Claude Opus), qa (Claude Sonnet), security (Claude Opus) all approve-with-conditions at round 3; R1-R27 applied (LED .3-.29+); scope trimmed (B-124..B-126)"
     },
     {
       "station": "PDR",
-      "date": "2026-10-10",
-      "decision": "PDR sealed approved with conditions C1-C10 (PDR-2026-10-10-perf-batch, D1-D5); C10 goldens-at-base capture owed at the trunk before the lanes fork"
+      "date": "2026-10-11",
+      "decision": "PDR sealed approved with conditions (PDR-2026-10-11-reqharness-batch, D1-D7); implementation conditions G1-G6/H1-H4 verified at the increment gates"
     },
     {
       "station": "P3",
-      "date": "2026-10-10",
-      "decision": "P3 approved (self-approved): increments 001 (base goldens) + lanes R (002 clip, 004 layout memo) and M (003 adjacency cache + follow-up, 005 linear dump) built in parallel worktrees by Kimi; code reviews APPROVE / APPROVE-WITH-NITS, 0 HIGH; join gate run 1 3222 passed / 1 failed (A3 pin) fixed in 084d7b7, run 2 in progress"
+      "date": "2026-10-11",
+      "decision": "P3 increments RH1–RH6b complete with code reviews and follow-ups (increment-001..007); standing authorization",
+      "notes": "commits fb1d4ce..0d10b7c; each increment code-reviewed, REQUEST-CHANGES findings fixed with RED proofs"
     },
     {
       "station": "DDR",
-      "date": "2026-10-10",
-      "decision": "DDR sealed approved (DDR-2026-10-10-perf-batch): lanes R and M joined, crossed census clean (each lane touched only its files; M-M3 empty); architect + qa approved with conditions, applied at 8bea264 (title arm reddens under M-R2c, wire cap 61,500, HLR-PERF.1 wording LED .5, B-120), re-review approved; join gate run 2 3223 passed / 0 failed"
+      "date": "2026-10-11",
+      "decision": "DDR approved with conditions (architect, qa-reviewer, security-reviewer); security BLOCK-UNTIL F1/F2 discharged; independent K3 re-check CLEARED-WITH-NITS, nits fixed; standing authorization",
+      "notes": "increment-008-ddr-fix.md, increment-009-gate-fix.md; commits 5492378, bac7885, 1560066"
     },
     {
       "station": "P4",
-      "date": "2026-10-10",
-      "decision": "P4 PASS-WITH-NOTES (04-validation.md): final gate run 2 at e5a2a7f 3223 passed / 3 xfailed / 0 failed; deterministic oracles (wire 23,983,998 -> 12,264; layout 10 -> 1; dump 18,003,000 -> 11,998) and wall-clock (DeepSeek, interleaved: mount 3.9x, keys 3.8-4.1x, save 3.5x, dense render 48x, load unchanged); qa-reviewer approve-with-conditions, applied"
+      "date": "2026-10-11",
+      "decision": "P4 validation PASS: full suite 3376 passed 0 failed at 6b6750e (clean shell); LLR-RH.5.4 met 0.443 s after the stat fast path; standing authorization",
+      "notes": "04-validation.md, evidence/p4-timing.transcript, increment-010-perf.md"
     },
     {
       "station": "P5",
-      "date": "2026-10-10",
-      "decision": "P5 close approved (05-postmortem.md): first batch run in parallel lanes (R, M) with a clean crossed census; Lane S withdrawn (B-118); carried B-118, B-120; 11 PERF ids folded into the canon (3 withdrawn)"
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-10",
-      "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE; merged as 39f62cf (PR #20, squash; feat/perf-batch kept on the remote)"
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-10",
-      "decision": "synced-to-obsidian",
-      "notes": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/ (full sync: 15 artifacts + README with metrics; PDR/DDR to vault:mapper/design/; repo-homed artifacts not copied; Dashboard untouched)"
+      "date": "2026-10-11",
+      "decision": "P5 post-mortem written; open items B-124, B-125, B-126 (widened), B-127; standing authorization",
+      "notes": "05-postmortem.md"
     }
   ],
   "standing_authorization": {
@@ -241,29 +249,28 @@
     "merge": true,
     "asked_on": "2026-10-10",
     "operator_words": {
-      "go_ahead": "Si, remedia rendimiento y escala. (2026-10-09) · sigue, usa kimi-for-coding como está (2026-10-10)",
-      "mode_and_authorization": "'sigue' answered the orchestrator's request for an OK on mode and autonomy after the modular close; read as the same terms as the modular batch: full + autónomo + merge",
-      "worker_model": "kimi-for-coding, unchanged",
+      "go_ahead": "ReqHarness decisions B-119/B-121/B-122/B-123 approved by the operator 2026-10-10/11; batch opened on their answer full + autónomo + merge",
+      "mode_and_authorization": "full + autónomo + merge (Recomendado), chosen by the operator on 2026-10-11 when asked how to open the ReqHarness batch",
+      "worker_model": "Kimi kimi-for-coding primary; DeepSeek for bounded units (balance limited); Claude for reviews",
       "decision_recording": "not asked as a separate question; the recording obligation is unconditional"
     },
-    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless. TUI design changes (anything that changes what is painted) need a prototype verdict from the operator first."
+    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless. TUI design changes need a prototype verdict from the operator first; the roles screen has one (B-123, variant B); every other new screen goes back to the operator as a prototype round before implementation."
   },
   "previous_batch": {
-    "batch_id": "2026-10-10-csv-safety-batch",
-    "merge_commit": "6dfffde",
-    "close_pr": "https://github.com/jav201/mapper/pull/18",
-    "sync_pr": "https://github.com/jav201/mapper/pull/19",
+    "batch_id": "2026-10-10-perf-batch",
+    "merge_commit": "39f62cf",
+    "close_pr": "https://github.com/<owner>/mapper/pull/20",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/21",
     "closed_at": "2026-10-10",
-    "close_commit": "5cde04e",
+    "close_commit": "fb1d4ce",
     "obsidian_synced": true,
-    "archive": ".dev-flow/2026-10-10-csv-safety-batch/decisions-log.json + state-snapshot-at-close.json",
-    "note": "the perf batch opened first (base a36f63e), paused at P0 for this batch, and re-based onto it by merging master at 5cde04e"
+    "archive": ".dev-flow/2026-10-10-perf-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
       "merge_commit": "e164a28",
-      "pr": "https://github.com/jav201/mapper/pull/2",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
       "closed_at": "d8777840313145fec341687f0081afd7230c755b",
       "obsidian_synced": true
     },
@@ -274,13 +281,13 @@
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
       "merge_commit": "2b59071",
-      "pr": "https://github.com/jav201/mapper/pull/3",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
       "close_commit": "3fe0e4b",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": true,
-  "created_at": "2026-10-10T00:00:00"
+  "obsidian_synced": false,
+  "created_at": "2026-10-11T00:00:00"
 }

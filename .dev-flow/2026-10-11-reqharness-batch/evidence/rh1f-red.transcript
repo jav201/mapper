@@ -1,0 +1,90 @@
+=== RHI1F code-review follow-up RED proofs (commit target: ce590a3 follow-up) ===
+
+--- H1 revert: TIME_RE back to anchored match without re.ASCII ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_time_format_is_ascii_fullmatch
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_time_format_is_ascii_fullmatch
+1 failed, 1 warning in 0.16s
+$ restore fixed config.py; sha256sum:
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb *mapper/reqharness/config.py
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb */tmp/rh1f-config-fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_time_format_is_ascii_fullmatch
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.07s
+
+--- H2 revert: create_registry existence refusal removed ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_create_registry_refuses_existing_registry
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_create_registry_refuses_existing_registry
+1 failed, 1 warning in 0.21s
+$ restore fixed config.py; sha256sum:
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb *mapper/reqharness/config.py
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb */tmp/rh1f-config-fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_create_registry_refuses_existing_registry
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.08s
+
+--- M1 revert: check_int exact-int body neutered ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_check_int_rejects_bool
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_check_int_rejects_bool - Failed:...
+1 failed, 1 warning in 0.19s
+$ restore fixed config.py; sha256sum:
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb *mapper/reqharness/config.py
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb */tmp/rh1f-config-fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_check_int_rejects_bool
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.08s
+
+--- M3 revert: nfc dict branch back to silent collapse ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_nfc_refuses_colliding_keys
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_nfc_refuses_colliding_keys - Fai...
+1 failed, 1 warning in 0.18s
+$ restore fixed canonical.py; sha256sum:
+74d974b0d8b0aff221e61566d31b5e06a87718d98dd7f35d3615b4ab1f52396f *mapper/reqharness/canonical.py
+74d974b0d8b0aff221e61566d31b5e06a87718d98dd7f35d3615b4ab1f52396f */tmp/rh1f-canonical-fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_nfc_refuses_colliding_keys
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.11s
+
+--- LOW revert: email_sha256 back to strip().lower() without NFC ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_email_sha256_roundtrip
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_email_sha256_roundtrip - Asserti...
+1 failed, 1 warning in 0.16s
+$ restore fixed config.py; sha256sum:
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb *mapper/reqharness/config.py
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb */tmp/rh1f-config-fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_email_sha256_roundtrip
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.11s
+
+--- LOW revert: `if now is not None` back to truthy `if now` ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_genesis_creates_chain_with_declared_admin
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_genesis_creates_chain_with_declared_admin
+1 failed, 1 warning in 0.18s
+$ restore fixed config.py; sha256sum:
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb *mapper/reqharness/config.py
+0805410ca7e2952c84f9c0f4a0028030969a831979021610a96701000b63d1eb */tmp/rh1f-config-fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_genesis_creates_chain_with_declared_admin
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.08s
+
+--- M2 census positive control (no revert needed: planted-violation arm is inherent) ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_yaml_census.py
+..                                                                       [100%]
+2 passed in 0.26s
+--- FINAL VERIFICATION (all three files + ruff) ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py tests/test_no_operator_paths.py tests/test_reqharness_yaml_census.py
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+12 passed, 1 warning in 1.03s
+$ python -m ruff check mapper/reqharness/config.py mapper/reqharness/canonical.py tests/test_reqharness_config.py tests/test_reqharness_yaml_census.py
+All checks passed!

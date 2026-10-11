@@ -1,0 +1,24 @@
+# CLOSE1 GREEN capture for V56 — increment-007 slice (env: NO_COLOR and TERM unset)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_roles_screen.py tests/test_reqharness_*.py tests/test_en5.py tests/test_inc9.py tests/test_inc9c.py tests/test_key_dispatch.py tests/test_keymap.py tests/test_help_scope.py tests/test_no_operator_paths.py tests/test_app.py
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 15%]
+........................................................................ [ 31%]
+........................................................................ [ 47%]
+........................................................................ [ 63%]
+........................................................................ [ 79%]
+........................................................................ [ 95%]
+......................                                                   [100%]
+============================== warnings summary ===============================
+tests\test_reqharness_config.py:296
+  <home>\Github\mapper\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+454 passed, 1 warning in 160.36s (0:02:40)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at <home>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-29272' coro=<sleep.<locals>.wait() running at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-29272' coro=<sleep.<locals>.wait() done, defined at <home>\anaconda3\Lib\site-packages\textual\_win_sleep.py:110> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <home>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>

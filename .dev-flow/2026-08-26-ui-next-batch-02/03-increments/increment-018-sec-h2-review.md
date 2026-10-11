@@ -179,7 +179,7 @@ Every markup-**enabled** site that received a **non-empty `str`**:
 | `app.py:240` `Static(self.title)` — `_PromptScreen` | `'ruta o url del adjunto'` | **constant** (all 7 callers literal) |
 | `app.py:700` `DataTable.add_row` | `'anidado'`, `'7'`, `'0'` | map name (file-derived) — see below |
 | `app.py:921` `Label(…)` | `'conectar repositorio'` | constant |
-| `app.py:985` `Static(self.repo)` | `'jav201/taskboard'` | operator-typed, shape-validated |
+| `app.py:985` `Static(self.repo)` | `'<owner>/taskboard'` | operator-typed, shape-validated |
 | `app.py:988`, `app.py:3766` | hint / status text | constant |
 | `coverage.py:70`, `settings.py:37`, `settings.py:66` | `'cobertura incompleta'`, `'switch'`, … | constant / internal |
 | `help.py:72` | `'atajos · map'` | internal scope name |

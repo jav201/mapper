@@ -1,0 +1,12 @@
+# CLOSE1 GREEN capture for V56 — increment-006 slice (env: NO_COLOR and TERM unset)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_roles_screen.py tests/test_en5.py tests/test_inc9.py tests/test_inc9c.py tests/test_key_dispatch.py tests/test_keymap.py
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 23%]
+........................................................................ [ 46%]
+........................................................................ [ 70%]
+........................................................................ [ 93%]
+....................                                                     [100%]
+308 passed in 71.46s (0:01:11)

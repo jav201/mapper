@@ -3,7 +3,7 @@
   "language": "en",
   "batch_id": "2026-10-09-canon-batch",
   "batch_objective": "Canon gap and lint debt: B-105 (append the hygiene batch's five requirements to REQUIREMENTS.md under namespaced ids, with their record ids noted, and adopt namespaced ids from this batch on) and B-104 (remove the unused `re` import at mapper/app.py:7).",
-  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
   "mode": "core",
   "mode_history": [
     {
@@ -208,8 +208,8 @@
   "previous_batch": {
     "batch_id": "2026-10-09-hygiene-batch",
     "merge_commit": "a482079",
-    "close_pr": "https://github.com/jav201/mapper/pull/12",
-    "sync_pr": "https://github.com/jav201/mapper/pull/13",
+    "close_pr": "https://github.com/<owner>/mapper/pull/12",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/13",
     "closed_at": "2026-10-09",
     "close_commit": "a482079",
     "obsidian_synced": true,
@@ -219,7 +219,7 @@
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
       "merge_commit": "e164a28",
-      "pr": "https://github.com/jav201/mapper/pull/2",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
       "closed_at": "d8777840313145fec341687f0081afd7230c755b",
       "obsidian_synced": true
     },
@@ -230,7 +230,7 @@
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
       "merge_commit": "2b59071",
-      "pr": "https://github.com/jav201/mapper/pull/3",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
       "close_commit": "3fe0e4b",
       "obsidian_synced": true,

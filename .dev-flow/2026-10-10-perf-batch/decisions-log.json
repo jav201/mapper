@@ -1,0 +1,68 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-10-10",
+    "decision": "P0 approved (self-approved under the standing authorization): measured first (spike/perf-baseline.md §1-§7, PERF0/0B/0C by Kimi): opening a wide 2000-node map 4.8 s, 6000+ times out; each navigation key repaints the whole map 0.6-1.9 s (renderer elbow_down/wire per cell); mount paints 3x; Mermaid dump O(N*E); load YAML-bound. Scope ruled: behaviour-preserving remedies first (AT-065 goldens byte-identical as the oracle), three parallel lanes; the S-18 work budget changes painted output and goes to a prototype round before any implementation. Triggers in PLAN.md#triggers."
+  },
+  {
+    "station": "ARQ",
+    "date": "2026-10-10",
+    "decision": "ARQ drafted (Kimi): design/design-proposal.md — lanes R (canvas span clip + layout memo), M (Graph adjacency cache + linear dump), S (one paid render at mount), file sets disjoint (intersections executed), shared seams banned; to PDR with P2"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-10",
+    "decision": "P1 drafted (Kimi): US-PERF-001..003, HLR-PERF.1-3, LLR-PERF.1.1-3.2, AT-075/075b/076/077/077b; deterministic call-count oracles, wall-clock only as P4 evidence; to P2 review"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-10",
+    "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): requirements and PDR ITERATE (layout memo key omits card_w; AT-076 vacuous; dump threshold reds a correct fix; Lane S mechanism contradicts painting.py); qa (Claude Sonnet): requirements ITERATE (same HIGH), PDR approve-with-conditions. Rulings R1-R9; Lane S gated on a spike"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-10",
+    "decision": "P1 iteration 1 approved (self-approved): rulings R1-R9 applied (LED .2): unscaled layout memo keyed by strong refs; adjacency cache with strong ref + widened census; real-save AT-076 with per-dump and scaling oracles; bare-Canvas clip equality; goldens pinned pre-change; Lane S spike inconclusive -> withdrawn to B-118 (LED .3); to P2 round 2 (lanes R and M)"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-10",
+    "decision": "P2 round 2 approved with conditions (self-approved): architect (Claude Opus) + qa (Claude Sonnet) approve-with-conditions, no HIGH; rulings R10-R18 applied (AT-076 on add_child, local incident dump, per-instance memo + miss counter, named mutations, nodes-writer guard)"
+  },
+  {
+    "station": "PDR",
+    "date": "2026-10-10",
+    "decision": "PDR sealed approved with conditions C1-C10 (PDR-2026-10-10-perf-batch, D1-D5); C10 goldens-at-base capture owed at the trunk before the lanes fork"
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-10",
+    "decision": "P3 approved (self-approved): increments 001 (base goldens) + lanes R (002 clip, 004 layout memo) and M (003 adjacency cache + follow-up, 005 linear dump) built in parallel worktrees by Kimi; code reviews APPROVE / APPROVE-WITH-NITS, 0 HIGH; join gate run 1 3222 passed / 1 failed (A3 pin) fixed in 084d7b7, run 2 in progress"
+  },
+  {
+    "station": "DDR",
+    "date": "2026-10-10",
+    "decision": "DDR sealed approved (DDR-2026-10-10-perf-batch): lanes R and M joined, crossed census clean (each lane touched only its files; M-M3 empty); architect + qa approved with conditions, applied at 8bea264 (title arm reddens under M-R2c, wire cap 61,500, HLR-PERF.1 wording LED .5, B-120), re-review approved; join gate run 2 3223 passed / 0 failed"
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-10",
+    "decision": "P4 PASS-WITH-NOTES (04-validation.md): final gate run 2 at e5a2a7f 3223 passed / 3 xfailed / 0 failed; deterministic oracles (wire 23,983,998 -> 12,264; layout 10 -> 1; dump 18,003,000 -> 11,998) and wall-clock (DeepSeek, interleaved: mount 3.9x, keys 3.8-4.1x, save 3.5x, dense render 48x, load unchanged); qa-reviewer approve-with-conditions, applied"
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-10",
+    "decision": "P5 close approved (05-postmortem.md): first batch run in parallel lanes (R, M) with a clean crossed census; Lane S withdrawn (B-118); carried B-118, B-120; 11 PERF ids folded into the canon (3 withdrawn)"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-10",
+    "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE; merged as 39f62cf (PR #20, squash; feat/perf-batch kept on the remote)"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-10",
+    "decision": "synced-to-obsidian",
+    "notes": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/ (full sync: 15 artifacts + README with metrics; PDR/DDR to vault:mapper/design/; repo-homed artifacts not copied; Dashboard untouched)"
+  }
+]

@@ -3,7 +3,7 @@
   "language": "en",
   "batch_id": "2026-10-09-modular-batch",
   "batch_objective": "Modularise mapper/app.py (R-009): move the top-level screens and their modals out of the 4957-line app.py into their own modules under mapper/screens/, with MapperApp keeping orchestration, so that later batches can run parallel product lanes. Behaviour-preserving: no visible change.",
-  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
   "mode": "full",
   "mode_history": [
     {
@@ -240,8 +240,8 @@
   "previous_batch": {
     "batch_id": "2026-10-09-canon-batch",
     "merge_commit": "df91eaa",
-    "close_pr": "https://github.com/jav201/mapper/pull/14",
-    "sync_pr": "https://github.com/jav201/mapper/pull/15",
+    "close_pr": "https://github.com/<owner>/mapper/pull/14",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/15",
     "closed_at": "2026-10-09",
     "close_commit": "df91eaa",
     "obsidian_synced": true,
@@ -251,7 +251,7 @@
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
       "merge_commit": "e164a28",
-      "pr": "https://github.com/jav201/mapper/pull/2",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
       "closed_at": "d8777840313145fec341687f0081afd7230c755b",
       "obsidian_synced": true
     },
@@ -262,7 +262,7 @@
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
       "merge_commit": "2b59071",
-      "pr": "https://github.com/jav201/mapper/pull/3",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
       "close_commit": "3fe0e4b",
       "obsidian_synced": true,

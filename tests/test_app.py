@@ -12,7 +12,7 @@ async def test_plug_repo_url_flow(tmp_path, monkeypatch):
     from mapper.screens import HelpScreen
 
     fake_graph = Graph()
-    fake_graph.add_node(Node(id="jav201/s19_app", ficha=Ficha(title="s19_app")))
+    fake_graph.add_node(Node(id="<owner>/s19_app", ficha=Ficha(title="s19_app")))
 
     def fake_fetch(self, progress=None):
         if progress:
@@ -27,25 +27,25 @@ async def test_plug_repo_url_flow(tmp_path, monkeypatch):
         app.push_screen(PlugRepoScreen())
         await pilot.pause()
         input_widget = app.screen.query_one("#repo-input")
-        input_widget.value = "https://github.com/jav201/s19_app"
+        input_widget.value = "https://github.com/<owner>/s19_app"
         await pilot.press("enter")
         await pilot.pause()
         # Should now be on RepoScreen with the normalized slug.
         assert isinstance(app.screen, RepoScreen)
-        assert app.screen.repo == "jav201/s19_app"
+        assert app.screen.repo == "<owner>/s19_app"
 
 
 def test_plug_repo_normalizes_github_url():
-    assert PlugRepoScreen._normalize_repo("jav201/s19_app") == "jav201/s19_app"
+    assert PlugRepoScreen._normalize_repo("<owner>/s19_app") == "<owner>/s19_app"
     assert (
-        PlugRepoScreen._normalize_repo("https://github.com/jav201/s19_app")
-        == "jav201/s19_app"
+        PlugRepoScreen._normalize_repo("https://github.com/<owner>/s19_app")
+        == "<owner>/s19_app"
     )
     assert (
-        PlugRepoScreen._normalize_repo("https://github.com/jav201/s19_app.git")
-        == "jav201/s19_app"
+        PlugRepoScreen._normalize_repo("https://github.com/<owner>/s19_app.git")
+        == "<owner>/s19_app"
     )
-    assert PlugRepoScreen._normalize_repo("git@github.com:jav201/s19_app.git") == "jav201/s19_app"
+    assert PlugRepoScreen._normalize_repo("git@github.com:<owner>/s19_app.git") == "<owner>/s19_app"
 
 
 def test_navigation_model():
@@ -81,13 +81,13 @@ async def test_repo_screen_two_pane_renders(tmp_path, monkeypatch):
 
     HERMETIC-1: this used to drive the real `gh` CLI against a live repository,
     so the arm could not run offline, could not run without credentials, and
-    took its verdict from whatever `jav201/taskboard` happened to contain that
+    took its verdict from whatever `<owner>/taskboard` happened to contain that
     day.  The seam is `GitHubConnector.fetch` -- the same one the neighbouring
     URL-flow arm already mocks.  The fixture is a NON-EMPTY graph on purpose: an
     empty one paints the same table whether the rows render or not.
     """
     fake_graph = Graph()
-    fake_graph.add_node(Node(id="jav201/taskboard", ficha=Ficha(title="taskboard", meta="repo")))
+    fake_graph.add_node(Node(id="<owner>/taskboard", ficha=Ficha(title="taskboard", meta="repo")))
     fake_graph.add_node(
         Node(
             id="kanban-variants",
@@ -100,7 +100,7 @@ async def test_repo_screen_two_pane_renders(tmp_path, monkeypatch):
             ),
         )
     )
-    fake_graph.add_edge(Edge("jav201/taskboard", "kanban-variants"))
+    fake_graph.add_edge(Edge("<owner>/taskboard", "kanban-variants"))
 
     def fake_fetch(self, progress=None):
         if progress:
@@ -112,7 +112,7 @@ async def test_repo_screen_two_pane_renders(tmp_path, monkeypatch):
     app = MapperApp(tmp_path)
     async with app.run_test() as pilot:
         await pilot.pause()
-        app.push_screen(RepoScreen("jav201/taskboard"))
+        app.push_screen(RepoScreen("<owner>/taskboard"))
         await pilot.pause()
         screen = app.screen
         assert isinstance(screen, RepoScreen)

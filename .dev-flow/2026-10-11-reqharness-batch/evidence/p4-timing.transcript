@@ -1,0 +1,63 @@
+# P4 (LLR-RH.5.4) timing transcript — CLOSE1 measurement
+# synthetic registry: 5 000 review events over 2 000 HLR-* requirements, built in the
+# session temp (NOT in the repo) as a real git repo; review files written directly
+# (reviews.record_review's body/name logic) to avoid the O(n^2) next_seq re-scan;
+# the loaders re-validate every file at read. Machine: the operator's Windows box,
+# Windows Defender on; NO_COLOR unset; one measurement process at a time.
+
+=== registry build ===
+$ python -B fastbuild.py <session-temp>     # create_registry + policy + grant + canon + 5000 reviews + git commit
+registry build: 12.6s (5000 events / 2000 requirements)
+
+=== instrument: p4_measure.py (session temp) — medians over repeated in-process runs ===
+64 KB loader doc: 65580 bytes
+loader per 64KB file (median of 7): samples=['0.0170', '0.0169', '0.0162', '0.0160', '0.0215', '0.0223', '0.0160'] median=0.0169s
+cold-cache review load (median of 3): samples=['25.6779', '5.0164', '5.5354'] median=5.5354s
+warm-cache derive pipeline (median of 3): samples=['5.2671', '5.2500', '5.4244'] median=5.2671s
+--audit wall time (cache off): 5.85s, 7 report lines   # subprocess, exit 0, verdict ready
+
+=== attribution (valid fixture: 2000 canon objects, 5000 events, 2000 derived states) ===
+load_reviews warm (median of 3): 4.5422s   # read + sha256 of 5000 files; YAML parse served from the cache
+load_canon (2000 rows): ~0.0017s
+derive_states (5000 events -> 2000 states): 0.0502s
+verify_chain (3-event roles chain): ~0.0015s
+
+=== verdict ===
+LLR-RH.5.4 warm-cache budget (<= 0.5 s median for 5000 events / 2000 requirements):
+NOT MET on this machine — median 5.27 s. The cost is I/O-bound (5 000 file reads +
+sha256 under on-access AV; the parse cache cannot skip the read+hash because its key
+IS sha256(file bytes)); derivation itself is ~50 ms. The 24-26 s cold first sample is
+the one-time AV scan of freshly written files (the spike's recorded observation).
+--audit at the same scale: 5.85 s wall, cache OFF by design (R4).
+
+=== PERF-RH re-measurement (2026-10-11, after the stat fast path ruling) ===
+# same synthetic generator as P4 (5 000 review events over 2 000 HLR-* requirements,
+# session temp, real git repo), same machine, NO_COLOR unset, one process at a time.
+# The parse cache gained the STAT FAST PATH: (relative name, st_size, st_mtime_ns,
+# st_ino, st_dev) ALL match a fully-checked entry -> the validated parse is reused
+# WITHOUT reading the file; any mismatch -> full path (read, sha256, schema, R22).
+$ python -B <session-temp>/fastbuild.py <session-temp>/registry   # from the worktree root, PYTHONPATH=.
+registry build ok: 5000 events / 2000 requirements
+$ python -B <session-temp>/p4_measure.py <session-temp>/registry
+cache warm-up cold pass (not counted): 4.6699s
+cold-cache review load (median of 3): samples=[4.7126, 4.723, 4.6553] median=4.7126s
+warm-cache derive pipeline (median of 3): samples=[0.4367, 0.4432, 0.4624] median=0.4432s
+of which: load_reviews warm (median of 3): samples=[0.398, 0.4064, 0.3937] median=0.398s
+of which: load_canon (2000 rows): samples=[0.0055, 0.005, 0.0051] median=0.0051s
+of which: derive_states (5000 events -> 2000 states): samples=[0.0442, 0.0483, 0.0431] median=0.0442s
+of which: verify_chain (3-event roles chain): samples=[0.0023, 0.0021, 0.0021] median=0.0021s
+derived states: 2000 total, 2000 reviewed
+--audit wall time (cache off): 5.61s, 7 report lines, exit 0   # subprocess, verdict: ready
+
+=== verdict after the fast path ===
+LLR-RH.5.4 warm-cache budget (<= 0.5 s median for 5000 events / 2000 requirements):
+MET on this machine — median 0.4432 s (was 5.27 s). load_reviews warm dropped
+4.54 s -> 0.40 s: unchanged files are neither read nor hashed (stat-only fast
+path, hit re-validated on CPU); the remaining 0.40 s is 5 000 os.stat calls plus
+the schema/R22 re-validation under on-access AV. Cold load is unchanged (~4.7 s,
+paid once per new file, R-SCALE). --audit stays cache-OFF by design (R4): 5.61 s,
+unchanged semantics, verdict ready.
+Residual (stated): an in-place rewrite preserving size+mtime+file-id defeats the
+fast path (serves the stale parse); that writer can equally write
+.git/reqharness-cache itself (same trust boundary as R4); --audit re-reads every
+file and catches it. Test-pinned in tests/test_reqharness_cache_fastpath.py.

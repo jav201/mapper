@@ -72,7 +72,7 @@
   "previous_batch": {
     "batch_id": "2026-08-25-ui-next-batch-01",
     "merge_commit": "e359148195789298118cd1faf992093000b5926e",
-    "pr": "https://github.com/jav201/mapper/pull/1",
+    "pr": "https://github.com/<owner>/mapper/pull/1",
     "closed_at": "d6b60e6b4f18b10123fffc76bbb36891473df653",
     "obsidian_synced": true
   },

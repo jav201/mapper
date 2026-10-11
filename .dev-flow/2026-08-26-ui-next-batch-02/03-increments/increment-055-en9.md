@@ -60,7 +60,7 @@ M1-M4 and M8 were run on the final tree (`keymap.py` sha256 `848d243d...` pinned
 - Affected suites run alone before each lane: `test_en9`, `test_en7`, `test_inc9`, `test_keymap`, `test_palette`, `test_key_dispatch`, `test_help_scope`.
 - Ruff 0.8.4, programmatic set difference on (file, code, message) between `9105abc` in a scratch worktree (removed) and this tree over the 7 changed source and test files: 1 and 1, new: none, fixed: none.
 - Cf characters (U+2011 included) in every changed file: 0; account-name grep: 0. `git ls-files --eol`: 390 `i/lf`, 1 `i/none`, 0 `i/crlf`. No `prototypes/`, `mapper.db`, `fixtures/.mapper`, `fixtures/mapper.db` or `state.json` staged. No `git stash`. The EN-8 reviewer's worktree under `%TEMP%` was not touched (still listed).
-- Declared slip: eight of the nine commits before this one carry the repository's configured author identity (`jav201`), not an environment one: the identity variables were exported per shell call and were missing in most commit calls. Only `3fef871` uses the environment identity. No file content is affected; the instruction named a temp HOME and an identity via env, and the commits do not fully honour the second half.
+- Declared slip: eight of the nine commits before this one carry the repository's configured author identity (`<owner>`), not an environment one: the identity variables were exported per shell call and were missing in most commit calls. Only `3fef871` uses the environment identity. No file content is affected; the instruction named a temp HOME and an identity via env, and the commits do not fully honour the second half.
 
 ## 6. Risks, unmeasured, next
 

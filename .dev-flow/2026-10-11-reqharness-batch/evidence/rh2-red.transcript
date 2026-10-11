@@ -1,0 +1,106 @@
+UNIT RHI2B — RH2 RED proof — 2026-10-11T10:56:51Z
+worktree: <redacted-per-A110>/wt-rh2
+PYTHONDONTWRITEBYTECODE=1; pytest -p no:cacheprovider; single file only
+
+=== M-CH1 : mapper/reqharness/chain.py -> test_admin_applies_to_someone_else_in_one_event ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_admin_applies_to_someone_else_in_one_event
+FAILED tests/test_reqharness_chain.py::test_admin_applies_to_someone_else_in_one_event
+============================== 1 failed in 0.27s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_admin_applies_to_someone_else_in_one_event
+============================== 1 passed in 0.15s ==============================
+
+=== M-CH2 : mapper/reqharness/chain.py -> test_self_change_and_non_admin_stay_pending ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_self_change_and_non_admin_stay_pending
+FAILED tests/test_reqharness_chain.py::test_self_change_and_non_admin_stay_pending
+============================== 1 failed in 0.27s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_self_change_and_non_admin_stay_pending
+============================== 1 passed in 0.16s ==============================
+
+=== M-CH3 : mapper/reqharness/chain.py -> test_hand_edit_breaks_chain_and_keeps_last_verified ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_hand_edit_breaks_chain_and_keeps_last_verified
+FAILED tests/test_reqharness_chain.py::test_hand_edit_breaks_chain_and_keeps_last_verified
+============================== 1 failed in 0.22s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_hand_edit_breaks_chain_and_keeps_last_verified
+============================== 1 passed in 0.15s ==============================
+
+=== M-CH4 : mapper/reqharness/chain.py -> test_merge_fork_is_detected ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_merge_fork_is_detected
+FAILED tests/test_reqharness_chain.py::test_merge_fork_is_detected - Assertio...
+============================== 1 failed in 0.25s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_merge_fork_is_detected
+============================== 1 passed in 0.15s ==============================
+
+=== M-CH5 : mapper/reqharness/chain.py -> test_effective_roles_at_time_t ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_effective_roles_at_time_t
+FAILED tests/test_reqharness_chain.py::test_effective_roles_at_time_t - mappe...
+============================== 1 failed in 0.22s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_effective_roles_at_time_t
+============================== 1 passed in 0.14s ==============================
+
+=== M-P1 : mapper/reqharness/chain.py -> test_policy_event_binds_config ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_policy_event_binds_config
+FAILED tests/test_reqharness_chain.py::test_policy_event_binds_config - Asser...
+============================== 1 failed in 0.21s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_policy_event_binds_config
+============================== 1 passed in 0.13s ==============================
+
+=== M-HB1 : mapper/reqharness/chain.py -> test_head_binding_unknown_head_not_verifiable ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_head_binding_unknown_head_not_verifiable
+FAILED tests/test_reqharness_chain.py::test_head_binding_unknown_head_not_verifiable
+============================== 1 failed in 0.21s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_head_binding_unknown_head_not_verifiable
+============================== 1 passed in 0.20s ==============================
+
+=== M-FR1 : mapper/reqharness/chain.py -> test_resolve_naming_non_sibling_is_invalid ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_resolve_naming_non_sibling_is_invalid
+FAILED tests/test_reqharness_chain.py::test_resolve_naming_non_sibling_is_invalid
+============================== 1 failed in 0.22s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_resolve_naming_non_sibling_is_invalid
+============================== 1 passed in 0.13s ==============================
+
+=== M-FR2 : mapper/reqharness/chain.py -> test_merge_fork_is_detected ===
+sha256 before: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+mutation applied
+--- RED run: pytest tests/test_reqharness_chain.py::test_merge_fork_is_detected
+FAILED tests/test_reqharness_chain.py::test_merge_fork_is_detected - Assertio...
+============================== 1 failed in 0.21s ==============================
+sha256 after:  48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_chain.py::test_merge_fork_is_detected
+============================== 1 passed in 0.15s ==============================
+
+=== battery complete: 9 arms; full verification follows ===
+============================= 20 passed in 1.64s ==============================
+final sha256: 48ae4fe032992168eed91148a515c637c46f7d4cfdad5c98c25a0f026ee52e8a

@@ -607,7 +607,7 @@ def ds_repo_plug() -> None:
 
     inp = Text()
     inp.append("  ruta o url ▸ ", style=MUT)
-    inp.append("/home/jav201/repos/mapper", style=INK)
+    inp.append("/home/<owner>/repos/mapper", style=INK)
     inp.append("▌", style=ACCENT)
     console.print(group_box(inp, 2))
 
@@ -624,13 +624,13 @@ def ds_repo_plug() -> None:
     stats.add_row("ramas", "12 (4 activas este mes)")
     stats.add_row("tags / releases", "4 · último v1.2.0")
     stats.add_row("commits", "312 · último hace 2h")
-    stats.add_row("autor principal", "@jav201")
+    stats.add_row("autor principal", "@<owner>")
     console.print(group_box(stats, 2))
     console.print()
 
     alt = Text()
     alt.append("  también: ", style=STEP)
-    alt.append("https://github.com/jav201/mapper", style=INK)
+    alt.append("https://github.com/<owner>/mapper", style=INK)
     alt.append("  → se clona al cache y se lee igual", style=MUT)
     alt.append("   (+ gh enriquece con CI y PRs si está autenticado)",
                style=STEP)

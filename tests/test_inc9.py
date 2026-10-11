@@ -121,6 +121,10 @@ OPENERS = {
     "RepoScreen": lambda app, cls: cls("owner/name"),
     "FactoryScreen": lambda app, cls: cls(_factory_graph(app)),
     "SettingsScreen": lambda app, cls: cls(),
+    # ReqHarness batch (increment RH6a): the roles screen opens bare — with
+    # no repo it paints the named `no repo` state, which is exactly what
+    # this opener's workspace (no git repo) exercises.
+    "RolesScreen": lambda app, cls: cls(),
 }
 
 
@@ -367,6 +371,8 @@ def test_llr_n06_2_5_the_census_reads_a_message_keyword():
 #: The declared English vocabulary of the chrome (`A-112`).  Adding a word is
 #: a deliberate edit in the commit that paints it.
 #: Data-safety Inc-1a adds the draft guard's `discard draft stay unsaved`.
+#: ReqHarness batch `2026-10-11-reqharness-batch` (increment RH6a, HLR-RH.8)
+#: adds the roles screen's seat words.
 CHROME_LEXICON = frozenset("""
     add all app archive attachment back bottom branch browse build card child choose
     close command component components connect coverage csv default details diff disabled
@@ -377,6 +383,8 @@ CHROME_LEXICON = frozenset("""
     save scroll search settings show sibling start svg template to toggle top tree undo
     unfold up view
     discard draft stay unsaved
+    roles person role propose change
+    approve reject
 """.split())
 
 #: Screen headers allowed to stay non-English, owned by the increment that
@@ -669,6 +677,18 @@ DECLARED_ADDED = frozenset({
     ("settings", "q", "home"), ("settings", "escape", "home"),
     # Inc-EN-6 (`N2`): the palette's arrows, read by its footer as `↑↓ move`.
     ("palette", "up", "move_up"), ("palette", "down", "move_down"),
+    # ReqHarness batch `2026-10-11-reqharness-batch` (increments RH6a/RH6b,
+    # HLR-RH.8): the `R roles` home door and the roles scope's rows — the
+    # cursor, `space`, `a`/`r` (RH6b) and `q`/`esc` — the one census that
+    # declares this batch's seat addition (the door count +1 is named in
+    # round 3 per R26).
+    ("home", "R", "roles"),
+    ("roles", "j", "next_person"), ("roles", "k", "prev_person"),
+    ("roles", "l", "next_role"), ("roles", "h", "prev_role"),
+    ("roles", "space", "propose"),
+    # increment RH6b (LLR-RH.8.6): the admin a/r pending-resolution rows
+    ("roles", "a", "approve"), ("roles", "r", "reject"),
+    ("roles", "q", "home"), ("roles", "escape", "home"),
 })
 #: Group headers renamed to English (`A-112` st. 2); no key changes scope.
 DECLARED_REGROUPED = frozenset({("lista", "list"), ("lista", "exit"), ("salir", "leave")})

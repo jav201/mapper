@@ -207,7 +207,7 @@ carries commit `8675151`, on no other branch.
 
 ```
 $ git show -s --format="%an %ad %s" 8675151
-jav201  Thu Aug 27 11:52:55 2026 -0600  docs: land the ui-next-batch-02 PDR artifacts (C-44 discharge)
+<owner>  Thu Aug 27 11:52:55 2026 -0600  docs: land the ui-next-batch-02 PDR artifacts (C-44 discharge)
  14 files: .dev-flow/2026-08-26-ui-next-batch-02/**  (13,343 lines)
      plus: .dev-flow/state.json                       (183 +/-)
 ```

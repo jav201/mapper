@@ -3,7 +3,7 @@
   "language": "en",
   "batch_id": "2026-10-08-data-safety-batch",
   "batch_objective": "Data safety and verification debt: B-36 (one keystroke durably overwrites a map and its sidecar, no confirmation, no explicit edit gesture) plus the unrealised acceptance tests B-100 / B-101 and the legend paint flake B-98.",
-  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
   "mode": "full",
   "mode_history": [
     {
@@ -205,7 +205,7 @@
     {
       "station": "DDR",
       "date": "2026-10-09",
-      "decision": "DDR approved with conditions D1-D5 (architect + qa-reviewer), all discharged 2026-10-09: C14 boundary arms, AT-025b joined node, TC-009.1, records aligned, operator smoke attributed (human:Javier); tests drafted by five Kimi units; external V7 (flow bundle SKILL.md vs manifest) recorded, not this project's"
+      "decision": "DDR approved with conditions D1-D5 (architect + qa-reviewer), all discharged 2026-10-09: C14 boundary arms, AT-025b joined node, TC-009.1, records aligned, operator smoke attributed (human:username_subject); tests drafted by five Kimi units; external V7 (flow bundle SKILL.md vs manifest) recorded, not this project's"
     },
     {
       "station": "P4",
@@ -244,8 +244,8 @@
   "previous_batch": {
     "batch_id": "2026-08-26-ui-next-batch-02",
     "merge_commit": "46e190b",
-    "close_pr": "https://github.com/jav201/mapper/pull/8",
-    "sync_pr": "https://github.com/jav201/mapper/pull/9",
+    "close_pr": "https://github.com/<owner>/mapper/pull/8",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/9",
     "closed_at": "2026-10-08",
     "close_commit": "bb8328f",
     "obsidian_synced": true,
@@ -255,7 +255,7 @@
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
       "merge_commit": "e164a28",
-      "pr": "https://github.com/jav201/mapper/pull/2",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
       "closed_at": "d8777840313145fec341687f0081afd7230c755b",
       "obsidian_synced": true
     },
@@ -266,7 +266,7 @@
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
       "merge_commit": "2b59071",
-      "pr": "https://github.com/jav201/mapper/pull/3",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
       "close_commit": "3fe0e4b",
       "obsidian_synced": true,
