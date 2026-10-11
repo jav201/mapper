@@ -288,8 +288,13 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       base goldens.
     #   +1  `tests/perf_goldens_capture.py` -- the capture script that wrote those
     #       goldens on base `5cde04e` (a script, not a collected test).
-    assert len(sites["argful"]) == 80, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 80; "
+    #
+    # 80 -> 82 at the same batch's DDR follow-up (`8bea264`), TWO sites:
+    #   +2  `tests/test_perf_layout_memo.py` -- the `title` arm now compares the
+    #       widened card where it is visible (a memoised and a fresh renderer over
+    #       an on-screen fixture), so the scaled-layout mutant M-R2c reddens it.
+    assert len(sites["argful"]) == 82, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 82; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,

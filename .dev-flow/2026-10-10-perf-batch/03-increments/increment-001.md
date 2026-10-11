@@ -52,7 +52,34 @@ at capture time).
 |---|---|---|---|
 | `tests/perf_goldens_capture.py` | test | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | new capture script (builders + regeneration of every golden + MANIFEST) |
 | `tests/test_perf_goldens_manifest.py` | test | `HLR-PERF.1 · HLR-PERF.2` (golden provenance) | new manifest assertion: base SHA + per-golden existence/sha256 |
-| `tests/goldens/perf/**` (26 files + MANIFEST.json) | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | the pinned behaviour goldens (test-owned, per backlog B-108) |
+| `tests/goldens/perf/MANIFEST.json` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/at075_075b_wide2000_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/at076_saved_wide6000_after_add_child.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/anidado.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/dangling.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/empty.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/forest.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/legacy.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/single.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/truncado.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/dump/wide6000.mmd` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/deep5000_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/deep5000_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/empty_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/empty_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/fold_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/fold_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/forest_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/forest_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/panned_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/panned_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/single_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/single_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/wide2000_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/wide2000_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/wide6000_118x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `tests/goldens/perf/render/wide6000_87x34.txt` | fixture | `LLR-PERF.1.3 · LLR-PERF.2.2 · AT-075 · AT-075b · AT-076` | pinned behaviour golden captured on base `5cde04e` (sha256 in MANIFEST) |
+| `.gitattributes` | config | `HLR-PERF.1 · HLR-PERF.2` (golden provenance) | `tests/goldens/** -text` — byte-pinned goldens are never line-ending-normalised (`2c64f76`; the rewrite was line endings only) |
 
 | Count | Value |
 |---|---|
