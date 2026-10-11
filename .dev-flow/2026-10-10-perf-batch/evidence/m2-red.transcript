@@ -1,0 +1,74 @@
+Inc-M2 RED proofs — batch 2026-10-10-perf-batch, Lane M
+worktree-relative paths only; product: mapper/mermaid.py; tests: tests/test_perf_dump.py
+increment packet: .dev-flow/2026-10-10-perf-batch/03-increments/increment-005.md
+
+Product change under test: `mermaid.dump`'s per-node `any(...)` orphan rescan
+replaced by ONE LOCAL incident pass (incident-id set built over every edge,
+dangling edges included; NOT the model adjacency cache — ruling R11).
+Dump bytes byte-identical: all 8 pinned dump goldens + AT-076 golden GREEN.
+
+Baseline sha256(mermaid.py) at transcript open (fixed product) =
+5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+
+Pre-change measurement (base O(N*E) dumper, worktree before the fix):
+  dump edge iterations, wide-6000 (E=5999): 18003000
+  save wall, wide-6000, median of 3: 2.656 s  [2.754, 2.656, 2.504]
+Post-change measurement (fixed dumper):
+  dump edge iterations, wide-6000 (E=5999): 11998   (exactly 2E)
+  save wall, wide-6000, median of 3: 1.104 s  [1.131, 1.104, 0.962]
+
+GREEN line (fixed product, full new file):
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_dump.py
+3 passed in 74.15s
+
+### M-M2a — restore the per-node `any()` orphan scan (mapper/mermaid.py)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio tests/test_perf_dump.py::test_at_076_real_save_dump_budget
+tests\test_perf_dump.py:77: AssertionError: dump iterated graph.edges 1125750 times on wide-1500 (E=1499) — the per-node rescan is back (bound is 2*E + 4)
+(the AT-076 node fails the same per-dump bound: 18009001 iterations)
+=========================== short test summary info ============================
+FAILED tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio - AssertionError
+FAILED tests/test_perf_dump.py::test_at_076_real_save_dump_budget - AssertionError
+2 failed in 83.80s
+exit=1 -> RED
+sha256 before=5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+sha256 after =5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+byte-identical restore: True
+GREEN re-run: 2 passed in 76.37s
+
+### drop dangling-edge counting (incident pass skips edges whose endpoints
+### are missing from `nodes` — the natural reading of "dangling not counted")
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_dump.py::test_dump_fixture_goldens
+E  AssertionError: dangling-solo: dump bytes drifted (base 5cde04e behaviour golden)
+FAILED tests/test_perf_dump.py::test_dump_fixture_goldens - AssertionError
+1 failed in 0.48s
+exit=1 -> RED
+Note: the pinned dump/dangling.mmd bytes are INVARIANT to this mutant by
+construction (a missing endpoint is never a node, so its membership flips no
+node's emission) — the observable arm is the test's inline `dangling-solo`
+case (a node whose ONLY incident edge is dangling must NOT be re-emitted as
+an orphan; today's base dump emits nothing for it).
+sha256 before=5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+sha256 after =5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+byte-identical restore: True
+GREEN re-run: 1 passed in 0.48s
+
+### M-M2b — reorder the orphan emission loop (`reversed(list(...))`)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_perf_dump.py::test_dump_fixture_goldens
+E  AssertionError: orphan-order: dump bytes drifted (base 5cde04e behaviour golden)
+FAILED tests/test_perf_dump.py::test_dump_fixture_goldens - AssertionError
+1 failed in 0.49s
+exit=1 -> RED
+Note: every committed dump golden is a connected tree or a single node, so no
+pinned golden can see the orphan loop's order — the observable arm is the
+test's inline `orphan-order` case (two orphans pinned in node-dict order,
+today's base emission order).
+sha256 before=5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+sha256 after =5d5b8271c75315afa63aa942358b647a76cf09f884c5351fbb0ffb28e7deba7c
+byte-identical restore: True
+GREEN re-run: 1 passed in 0.40s
+
+Instrument RED-proof (every instrument shown able to report FAILURE):
+- counted-ops/ratio instrument RED under M-M2a (1,125,750 visits vs bound 3,002 on wide-1500).
+- AT-076 per-dump bound instrument RED under M-M2a (18,009,001 visits vs bound 12,004).
+- byte oracle RED under the dangling mutant (dangling-solo arm) and the ordering mutant (orphan-order arm).
+- the fixture arm was GREEN on the UNMODIFIED product before the fix (byte oracle pins base bytes, not the fix).
