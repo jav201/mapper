@@ -3,7 +3,7 @@
   "language": "en",
   "batch_id": "2026-10-10-csv-safety-batch",
   "batch_objective": "B-114 data safety: a CSV import must never produce a map that cannot be re-opened. Two CSV rows whose ids slugify to the same id collapse into one node with two parents; the preview renders it, the commit saves it, and re-open fails (MapStoreError/ParseError, mapper/mermaid.py:85). Make the import and the save refuse or resolve what the loader refuses, so a saved map always re-opens.",
-  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
   "mode": "core",
   "mode_history": [
     {
@@ -239,8 +239,8 @@
   "previous_batch": {
     "batch_id": "2026-10-09-modular-batch",
     "merge_commit": "9bcbabb",
-    "close_pr": "https://github.com/jav201/mapper/pull/16",
-    "sync_pr": "https://github.com/jav201/mapper/pull/17",
+    "close_pr": "https://github.com/<owner>/mapper/pull/16",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/17",
     "closed_at": "2026-10-10",
     "close_commit": "a36f63e",
     "obsidian_synced": true,
@@ -250,7 +250,7 @@
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
       "merge_commit": "e164a28",
-      "pr": "https://github.com/jav201/mapper/pull/2",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
       "closed_at": "d8777840313145fec341687f0081afd7230c755b",
       "obsidian_synced": true
     },
@@ -261,7 +261,7 @@
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
       "merge_commit": "2b59071",
-      "pr": "https://github.com/jav201/mapper/pull/3",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
       "close_commit": "3fe0e4b",
       "obsidian_synced": true,

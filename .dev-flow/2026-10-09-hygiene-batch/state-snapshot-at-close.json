@@ -3,7 +3,7 @@
   "language": "en",
   "batch_id": "2026-10-09-hygiene-batch",
   "batch_objective": "Draft-save code hygiene (B-103: typed save-error slot, a public guard-open accessor, the F5 refusal-text ruling) and the INC9G-R8 record debt (B-99: re-verify the Inc-9h witness on master and close the item).",
-  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of jav201/mapper. V40 NOTICEs this by design.",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
   "mode": "core",
   "mode_history": [
     {
@@ -202,8 +202,8 @@
   "previous_batch": {
     "batch_id": "2026-10-08-data-safety-batch",
     "merge_commit": "2b6315d",
-    "close_pr": "https://github.com/jav201/mapper/pull/10",
-    "sync_pr": "https://github.com/jav201/mapper/pull/11",
+    "close_pr": "https://github.com/<owner>/mapper/pull/10",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/11",
     "closed_at": "2026-10-09",
     "close_commit": "2b6315d",
     "obsidian_synced": true,
@@ -213,7 +213,7 @@
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
       "merge_commit": "e164a28",
-      "pr": "https://github.com/jav201/mapper/pull/2",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
       "closed_at": "d8777840313145fec341687f0081afd7230c755b",
       "obsidian_synced": true
     },
@@ -224,7 +224,7 @@
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
       "merge_commit": "2b59071",
-      "pr": "https://github.com/jav201/mapper/pull/3",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
       "close_commit": "3fe0e4b",
       "obsidian_synced": true,

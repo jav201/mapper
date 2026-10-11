@@ -291,7 +291,7 @@ outside this diff.)*
   actually opens. If every real map is under ~500 nodes, F1's practical impact is ~14 ms
   per frame and the severity argument rests on `MAX_RENDER_NODES = 12000` being the
   *declared* supported ceiling — the app promises to handle 12000, and at 12000 it does
-  not. I rated on the declared ceiling, not on an assumed workload. If Javier wants to
+  not. I rated on the declared ceiling, not on an assumed workload. If username_subject wants to
   re-scope the ceiling instead, that is a requirements decision, not a review one.
 - **`pilot.press("j")` did not route to `MapScreen` in my harness** (fired
   `_search_order` zero times). I did not chase why. I substituted a direct

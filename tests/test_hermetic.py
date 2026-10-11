@@ -213,7 +213,7 @@ def test_every_product_spawn_site_carries_a_hermeticity_classification():
 @pytest.mark.parametrize(
     "argv, expected",
     [
-        (["gh", "repo", "view", "jav201/taskboard"], True),
+        (["gh", "repo", "view", "<owner>/taskboard"], True),
         (["gh", "--version"], True),
         (["git", "clone", "--mirror", "https://example.invalid/x", "/tmp/x"], True),
         (["git", "-C", "/tmp/x", "fetch", "--all"], True),
@@ -261,11 +261,11 @@ def test_the_guard_refuses_a_remote_call_and_records_it(_hermetic_lane):
     guard that only raised could be swallowed and leave the arm green.
     """
     with pytest.raises(HermeticViolation) as caught:
-        subprocess.run(["gh", "api", "repos/jav201/taskboard"], capture_output=True)
+        subprocess.run(["gh", "api", "repos/<owner>/taskboard"], capture_output=True)
     assert "may not reach the network" in str(caught.value)
 
     assert len(_hermetic_lane) == 1, "the refusal was raised but never recorded"
-    assert "gh api repos/jav201/taskboard" in _hermetic_lane[0]
+    assert "gh api repos/<owner>/taskboard" in _hermetic_lane[0]
     # Consume it: this arm's violation is its evidence, not its failure.
     _hermetic_lane.clear()
 
@@ -289,7 +289,7 @@ def test_os_system_cannot_walk_past_the_guard(_hermetic_lane):
     closed if that changes.
     """
     with pytest.raises(HermeticViolation) as caught:
-        os.system("gh api repos/jav201/taskboard")
+        os.system("gh api repos/<owner>/taskboard")
     assert "may not reach the network" in str(caught.value)
 
     assert len(_hermetic_lane) == 1, "the refusal was raised but never recorded"
@@ -308,7 +308,7 @@ def test_the_guard_reads_the_KEYWORD_argv_form_too(_hermetic_lane, tmp_path):
     on it, so correct offline work would have been blamed on its author.
     """
     with pytest.raises(HermeticViolation):
-        subprocess.run(args=["gh", "api", "repos/jav201/taskboard"], capture_output=True)
+        subprocess.run(args=["gh", "api", "repos/<owner>/taskboard"], capture_output=True)
     assert len(_hermetic_lane) == 1, "the keyword form was refused but never recorded"
     _hermetic_lane.clear()
 

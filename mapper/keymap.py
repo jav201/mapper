@@ -35,6 +35,8 @@ SCOPE_APP = "app"
 # LLR-N16.1.2 / `#D9`: the last two screens that bind the help chord.
 SCOPE_FACTORY = "factory"
 SCOPE_SETTINGS = "settings"
+# ReqHarness batch `2026-10-11-reqharness-batch` (HLR-RH.8): the roles screen.
+SCOPE_ROLES = "roles"
 
 # Screens whose bindings are NOT yet in this seat.  This is not decoration: it is
 # the exception list the conformance tests quantify over, so a screen leaving the
@@ -75,6 +77,8 @@ GROUP_SCOPE: dict[str, str] = {
     "document": SCOPE_FACTORY,
     "factory": SCOPE_FACTORY,
     "settings": SCOPE_SETTINGS,
+    "roles": SCOPE_ROLES,
+    "roles-leave": SCOPE_ROLES,
     "palette": SCOPE_PALETTE,
     "help": SCOPE_HELP,
     "draft": SCOPE_DRAFT,
@@ -100,6 +104,8 @@ GROUP_HEADER: dict[str, str] = {
     "document": "document",
     "factory": "factory",
     "settings": "components",
+    "roles": "roles",
+    "roles-leave": "leave",
     "palette": "palette",
     "help": "help",
     "draft": "unsaved",
@@ -146,6 +152,10 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("i", "i", "import_csv", "import csv", "doors"),
     KeyBinding("f", "f", "factory", "factory", "doors"),
     KeyBinding("r", "r", "resume", "resume last", "doors"),
+    # ReqHarness batch `2026-10-11-reqharness-batch` (HLR-RH.8 / LLR-RH.8.1):
+    # the roles screen's home door.  Uppercase `R`: the shifted-pair precedent
+    # already in this seat; lowercase `r` stays `resume`.
+    KeyBinding("R", "R", "roles", "roles", "doors"),
     KeyBinding("s", "s", "settings", "components", "doors"),
     KeyBinding("j", "j", "table_down", "next map", "list"),
     KeyBinding("k", "k", "table_up", "previous map", "list"),
@@ -267,6 +277,22 @@ KEYMAP: list[KeyBinding] = [
     # traversal, and `C-D9a` measured dropping them neutral.
     KeyBinding("q", "q", "home", "back", "settings", priority=True),
     KeyBinding("escape", "esc", "home", "back", "settings", priority=True),
+    # -- roles (ReqHarness batch `2026-10-11-reqharness-batch`, HLR-RH.8) ----
+    # Matrix variant B (B-123): the cursor moves cell to cell and `space`
+    # PROPOSES the change — through the core's `propose`, never a direct edit.
+    KeyBinding("j", "j", "next_person", "next person", "roles"),
+    KeyBinding("k", "k", "prev_person", "previous person", "roles"),
+    KeyBinding("l", "l", "next_role", "next role", "roles"),
+    KeyBinding("h", "h", "prev_role", "previous role", "roles"),
+    KeyBinding("space", "space", "propose", "propose change", "roles"),
+    # Increment RH6b (LLR-RH.8.6): an admin resolves the pending change under
+    # the cursor — `a` approves (the change lands as the chain event
+    # referencing the request), `r` rejects (an empty `resolution` event).
+    # Both go through the core only; never one's own request.
+    KeyBinding("a", "a", "approve", "approve", "roles"),
+    KeyBinding("r", "r", "reject", "reject", "roles"),
+    KeyBinding("q", "q", "home", "back", "roles-leave"),
+    KeyBinding("escape", "esc", "home", "back", "roles-leave"),
     # -- app (available on every screen) ------------------------------------
     KeyBinding("ctrl+p", "ctrl+p", "palette", "palette", "app"),
     # Not priority, on purpose (`T3`, `EN-Q3`): a focused `Input` consumes `?` before a

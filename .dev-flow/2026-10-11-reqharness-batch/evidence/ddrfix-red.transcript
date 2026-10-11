@@ -1,0 +1,198 @@
+=== ARM M-F1 (SEC F1: render escapes registry-derived text) ===
+file:     mapper/reqharness/audit.py
+node:     tests/test_reqharness_release.py::test_audit_render_escapes_registry_derived_text
+sha256 before mutation: a3b19d0395fc4eb105f2d8368df632003c61fc72a16e67defb0817f3bf9f6d03
+M-F1 applied: _visible escapes nothing
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_audit_render_escapes_registry_derived_text
+tests\test_reqharness_release.py:656: AssertionError
+FAILED tests/test_reqharness_release.py::test_audit_render_escapes_registry_derived_text
+1 failed in 0.96s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  a3b19d0395fc4eb105f2d8368df632003c61fc72a16e67defb0817f3bf9f6d03
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_audit_render_escapes_registry_derived_text
+1 passed in 0.78s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-F2 (SEC F2: nesting pre-scan) ===
+file:     mapper/reqharness/config.py
+node:     tests/test_reqharness_config.py::test_nesting_prescan_refuses_superlinear_depth
+sha256 before mutation: 795436125dba65292f9162889a9ee3ab548ceacc747b8b23d4cd25537735fc60
+M-F2 applied: the nesting pre-scan is a no-op
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_nesting_prescan_refuses_superlinear_depth
+tests\test_reqharness_config.py:363: AssertionError
+FAILED tests/test_reqharness_config.py::test_nesting_prescan_refuses_superlinear_depth
+1 failed, 1 warning in 5.01s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  795436125dba65292f9162889a9ee3ab548ceacc747b8b23d4cd25537735fc60
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py::test_nesting_prescan_refuses_superlinear_depth
+1 passed, 1 warning in 0.07s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-F3 (SEC F3: pending confine-then-create) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_chain.py::test_pending_write_refuses_link_and_writes_nothing_outside
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-F3 applied: _write_pending writes unconfined
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_pending_write_refuses_link_and_writes_nothing_outside
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+FAILED tests/test_reqharness_chain.py::test_pending_write_refuses_link_and_writes_nothing_outside
+1 failed in 0.22s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_pending_write_refuses_link_and_writes_nothing_outside
+1 passed in 0.17s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-F4a (SEC F4 arm 1: trailing-newline repair) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-F4a applied: the missing trailing newline is never repaired
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+        the mapper/store.py:706-720 ladder) all become a ValidationError naming
+FAILED tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+1 failed in 0.27s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+1 passed in 0.13s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-F4b (SEC F4 arm 2: exclusive append lock) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-F4b applied: the append lock is not exclusive
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+FAILED tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+1 failed in 0.25s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_roles_append_lock_repairs_newline_and_refuses_stale_lock
+1 passed in 0.15s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-F5 (SEC F5: requester-approver walk rule) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_chain.py::test_request_resolving_event_needs_alien_approver
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-F5 applied: the requester-approver walk rule is gone
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_request_resolving_event_needs_alien_approver
+tests\test_reqharness_chain.py:961: AssertionError
+FAILED tests/test_reqharness_chain.py::test_request_resolving_event_needs_alien_approver
+1 failed in 0.23s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_request_resolving_event_needs_alien_approver
+1 passed in 0.16s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-C1 (QA C1: no-registry named state) ===
+file:     mapper/reqharness/audit.py
+node:     tests/test_reqharness_release.py::test_audit_cli_names_no_registry_state
+sha256 before mutation: a3b19d0395fc4eb105f2d8368df632003c61fc72a16e67defb0817f3bf9f6d03
+M-C1 applied: no-registry repos fall into the chain-broken path
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_audit_cli_names_no_registry_state
+tests\test_reqharness_release.py:677: AssertionError
+FAILED tests/test_reqharness_release.py::test_audit_cli_names_no_registry_state
+1 failed in 0.85s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  a3b19d0395fc4eb105f2d8368df632003c61fc72a16e67defb0817f3bf9f6d03
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_audit_cli_names_no_registry_state
+1 passed in 0.84s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-C3 (ARCH C3: chain<->pending cycle census) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_modgraph.py::test_no_reqharness_module_imports_a_module_that_imports_it_back
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-C3 applied: the chain<->pending back-edge is restored
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_modgraph.py::test_no_reqharness_module_imports_a_module_that_imports_it_back
+tests\test_reqharness_modgraph.py:83: AssertionError
+FAILED tests/test_reqharness_modgraph.py::test_no_reqharness_module_imports_a_module_that_imports_it_back
+1 failed in 0.17s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_modgraph.py::test_no_reqharness_module_imports_a_module_that_imports_it_back
+1 passed in 0.13s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-C5 (ARCH C5: audit uses the public osopen link helper) ===
+file:     mapper/reqharness/audit.py
+node:     tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+sha256 before mutation: a3b19d0395fc4eb105f2d8368df632003c61fc72a16e67defb0817f3bf9f6d03
+M-C5 applied: audit calls baseline._is_link again (osopen import gone)
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+tests\test_arch_osopen_callers.py:127: AssertionError
+FAILED tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+1 failed in 0.28s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  a3b19d0395fc4eb105f2d8368df632003c61fc72a16e67defb0817f3bf9f6d03
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+1 passed in 0.22s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-FR3 (QA C2: verify walks by file position) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_chain.py::test_verify_walks_by_prev_hash_in_order_fork_resolve
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-FR3 applied: the walk ignores prev_hash and takes file position
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_verify_walks_by_prev_hash_in_order_fork_resolve
+tests\test_reqharness_chain.py:632: AssertionError
+FAILED tests/test_reqharness_chain.py::test_verify_walks_by_prev_hash_in_order_fork_resolve
+1 failed in 0.23s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_verify_walks_by_prev_hash_in_order_fork_resolve
+1 passed in 0.14s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-FR4 (QA C2: resolve legitimates an unapprovable child) ===
+file:     mapper/reqharness/chain.py
+node:     tests/test_reqharness_chain.py::test_resolve_chosen_child_must_pass_approval_rule
+sha256 before mutation: 3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+M-FR4 applied: append_resolve may legitimate an unapprovable child
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_resolve_chosen_child_must_pass_approval_rule
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+FAILED tests/test_reqharness_chain.py::test_resolve_chosen_child_must_pass_approval_rule
+1 failed in 0.22s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  3b71ec4391f559d2d276b2e83caf4b0ac4743da537b90ee25006a028b0e6f2d8
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_resolve_chosen_child_must_pass_approval_rule
+1 passed in 0.13s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== ARM M-LM1 (QA C2: size limit skipped) ===
+file:     mapper/reqharness/config.py
+node:     tests/test_reqharness_chain.py::test_input_limits_reported_by_name
+sha256 before mutation: 795436125dba65292f9162889a9ee3ab548ceacc747b8b23d4cd25537735fc60
+M-LM1 applied: the size limit is skipped
+--- RED run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_input_limits_reported_by_name
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+FAILED tests/test_reqharness_chain.py::test_input_limits_reported_by_name - F...
+1 failed in 0.24s
+RED run exit code: 1 (nonzero == RED, as required)
+sha256 after restore:  795436125dba65292f9162889a9ee3ab548ceacc747b8b23d4cd25537735fc60
+restore: byte-identical
+--- GREEN run: python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_input_limits_reported_by_name
+1 passed in 0.17s
+GREEN run exit code: 0 (zero == GREEN, as required)
+
+=== final state: full slice GREEN ===
+94 passed, 1 warning in 26.22s
+All checks passed!
+cleanup: backups removed
+ALL ARMS RESOLVED
+driver exit: 0

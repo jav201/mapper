@@ -1,0 +1,82 @@
+RH6a RED proof — 2026-10-11T13:31:29Z
+GREEN baseline sha256:
+79979fb3fa8b4f407001e7c97170fa97dbf75f43035b1a8256f24c4b6a0d0ddb *mapper/screens/roles.py
+6c006e2267130f01c8c3a88299ba22d43a43fe5e7ba9f07dfaccdb8e449fe228 *mapper/reqharness/chain.py
+6514a08dd3aa2f63eced06c557d4ee4a734940e9b00aa65c27d68f9cb32b9537 *tests/test_roles_screen.py
+
+=== STEP 1: whole product change reverted (roles.py removed) -> new tests must FAIL
+ERROR tests/test_roles_screen.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.28s
+restored roles.py; sha256:
+79979fb3fa8b4f407001e7c97170fa97dbf75f43035b1a8256f24c4b6a0d0ddb *mapper/screens/roles.py
+sha256 EQUAL
+9 passed in 7.19s
+=== STEP 2: M-RS1 — hard-coded hex colour in the screen -> token/glyph census RED
+FAILED tests/test_roles_screen.py::test_at_077c_source_censuses_no_hex_no_stray_glyph_no_str_sink
+1 failed in 0.33s
+restore sha256 MISMATCH
+=== STEP 3: M-RS1b — a raw string through a paint sink -> sink census RED
+FAILED tests/test_roles_screen.py::test_at_077c_source_censuses_no_hex_no_stray_glyph_no_str_sink
+1 failed in 0.32s
+restore sha256 MISMATCH
+=== STEP 4: M-RS2 — a band element dropped (pending detail) -> band assertion RED
+FAILED tests/test_roles_screen.py::test_at_077b_status_band_shows_chain_head_viewer_and_pending
+1 failed in 0.76s
+restore sha256 MISMATCH
+NOTE: the 'MISMATCH' lines above were a transcript-script parsing bug (trailing '*-' from stdin hashing); the restored file's sha256 was verified equal: 79979fb3fa8b4f407001e7c97170fa97dbf75f43035b1a8256f24c4b6a0d0ddb
+=== STEP 5: M-RS3 — admin self-toggle applies (core propose rule mutated) -> AT-078 arm 3 RED
+FAILED tests/test_roles_screen.py::test_at_078_non_admin_toggle_pends_admin_applies_in_one_key
+1 failed in 3.17s
+restored chain.py sha256: 6c006e2267130f01c8c3a88299ba22d43a43fe5e7ba9f07dfaccdb8e449fe228 (green 6c006e2267130f01c8c3a88299ba22d43a43fe5e7ba9f07dfaccdb8e449fe228)
+=== STEP 6: M-RS4 — tampered (file-derived) roles painted instead of the verified prefix -> AT-079 RED
+FAILED tests/test_roles_screen.py::test_at_079_tampered_chain_paints_broken_state_and_blocks_release[w118]
+1 failed in 1.11s
+restored roles.py sha256: 79979fb3fa8b4f407001e7c97170fa97dbf75f43035b1a8256f24c4b6a0d0ddb (green 79979fb3fa8b4f407001e7c97170fa97dbf75f43035b1a8256f24c4b6a0d0ddb)
+=== FINAL: every restore verified — full new-test file GREEN again
+79979fb3fa8b4f407001e7c97170fa97dbf75f43035b1a8256f24c4b6a0d0ddb *mapper/screens/roles.py
+6c006e2267130f01c8c3a88299ba22d43a43fe5e7ba9f07dfaccdb8e449fe228 *mapper/reqharness/chain.py
+9 passed in 7.26s
+
+================================================================
+RH6AF — code-review follow-up RED proofs (2026-10-11, this worktree)
+New nodes under proof:
+  tests/test_roles_screen.py::test_rh6af_matrix_holds_at_87_with_six_roles_and_a_long_id
+  tests/test_roles_screen.py::test_rh6af_no_event_ledger_below_the_matrix
+  tests/test_roles_screen.py::test_rh6af_propose_writer_oserror_notifies_exception_type
+
+-- baseline digests (product + tests, before the proof)
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 *mapper/screens/roles.py
+eee46e8030f61c666d919904ec467aa067640cfaf24333009adda77fcdc53503 *tests/test_roles_screen.py
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 */tmp/roles.py.rh6af.green
+-- STEP 1 (RH6AF): product change reverted to the pre-follow-up roles.py
+RED — collection error, all three new nodes uncollectable:
+E   ImportError: cannot import name '_matrix_renderable' from 'mapper.screens.roles' (<worktree>/mapper/screens/roles.py)
+ERROR tests/test_roles_screen.py
+1 error in 0.27s
+-- STEP 1 restore: sha256 (before == after)
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 */tmp/roles.py.rh6af.green
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 *mapper/screens/roles.py
+GREEN — restored, the three new nodes pass:
+...                                                                      [100%]
+3 passed in 1.79s
+-- STEP 2 (RH6AF): the `except OSError` arm removed from action_propose
+RED — the writer OSError propagates, the node fails:
+E   OSError: disk full
+FAILED tests/test_roles_screen.py::test_rh6af_propose_writer_oserror_notifies_exception_type
+1 failed in 1.55s
+-- STEP 2 restore: sha256 (before == after)
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 */tmp/roles.py.arm-oserror (python-side copy)
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 *mapper/screens/roles.py  EQUAL
+GREEN — arm restored, the node passes:
+1 passed in 0.71s
+-- STEP 3 (RH6AF): the 12-cell person-id cap removed (name_w unbounded)
+RED — the 20-char id pushes the grid past 87 columns, the node fails:
+E   AssertionError: (a rendered body line exceeds 87 columns — full grid printed)
+FAILED tests/test_roles_screen.py::test_rh6af_matrix_holds_at_87_with_six_roles_and_a_long_id
+1 failed in 0.76s
+-- STEP 3 restore: sha256 (before == after)
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 */tmp/roles.py.cap-green
+276097d53ee666cb26144bb085baf6a3accaf551eb3e63aabc703f39d81cd242 *mapper/screens/roles.py
+GREEN — cap restored, the node passes:
+1 passed in 0.65s

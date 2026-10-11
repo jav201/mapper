@@ -67,7 +67,7 @@
 
 | Repo | File(s) | Terminal state | Landing / backlog ref |
 |------|---------|----------------|-----------------------|
-| jav201/mapper | all | ✅ committed + landed | master @ TBD |
+| <owner>/mapper | all | ✅ committed + landed | master @ TBD |
 
 ### Conditional gate verdicts
 - None.

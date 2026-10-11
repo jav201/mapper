@@ -98,7 +98,7 @@ class VariantA(RepoNavScreen):
         yield Static("▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱  42%", id="progress-line")
         yield Vertical(
             Static("owner/repo", classes="muted"),
-            Input(value="jav201/taskboard", id="repo-input"),
+            Input(value="<owner>/taskboard", id="repo-input"),
             Static("↵ conectar    tab mueve foco    1/2/3 cambia variante    q salir", classes="muted"),
             id="form-box",
         )
@@ -112,7 +112,7 @@ class VariantB(RepoNavScreen):
     BINDINGS = RepoNavScreen.BINDINGS + [Binding("c", "focus_cmd", "Comando", priority=True)]
 
     def compose(self) -> ComposeResult:
-        yield Static(darkside.tab_strip("p", ["jav201/taskboard"]).plain)
+        yield Static(darkside.tab_strip("p", ["<owner>/taskboard"]).plain)
         yield Static("cargando ramas ▰▰▰▰▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱  45%   ◐ 3/6 ramas")
         yield Static(self._render_table(), id="branch-table")
         yield Input(placeholder="c owner/repo", id="cmd-input")
@@ -131,7 +131,7 @@ class VariantC(RepoNavScreen):
         with Horizontal(id="two-pane"):
             with Vertical(id="sidebar"):
                 yield Static("owner/repo", classes="muted")
-                yield Input(value="jav201/taskboard", id="repo-input")
+                yield Input(value="<owner>/taskboard", id="repo-input")
                 yield Static("● clonar\n◐ fetch\n○ ramas\n○ listo\n")
                 yield Static("▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱  60%")
             yield Static(self._render_table(), id="branch-table", expand=True)

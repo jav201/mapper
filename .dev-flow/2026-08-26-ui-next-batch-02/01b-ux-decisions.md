@@ -21,7 +21,7 @@ Stated before any criterion, because a UX criterion has nothing to be true *abou
 
 | Element | Value |
 |---|---|
-| **User** | One operator — Javier. Expert in the domain, expert in terminals, vi-idiomatic. Population size **1**; there is no second user whose retraining cost must be amortised. This is what makes a rebind cheap here and would not make it cheap elsewhere. |
+| **User** | One operator — username_subject. Expert in the domain, expert in terminals, vi-idiomatic. Population size **1**; there is no second user whose retraining cost must be amortised. This is what makes a rebind cheap here and would not make it cheap elsewhere. |
 | **Task** | Legacy-system archaeology. Open an inherited 128-node map, find the parts that are undocumented or at risk, walk them, and record what is known. The task is *repeated survey*, not one-shot lookup: the same map is reopened across days. |
 | **Environment** | Windows 11, `PYTHONUTF8=1`, a **118-column × 34-row** terminal as the reference size (the size the batch's own story text names). Keyboard-only in practice. No pointing device is assumed by any criterion below. Textual 8.2.8 (executed: `textual version: 8.2.8`). |
 | **Constraint that shapes everything** | The map is **larger than the screen**, permanently. Every decision below is judged first on: *does the operator ever lose something without being told?* |

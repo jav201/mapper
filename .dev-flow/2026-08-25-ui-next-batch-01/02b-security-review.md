@@ -37,7 +37,7 @@ execution and I do not report it as such. The genuine untrusted input is narrowe
   the product's own words: *"the payload is file-derived text: attachment values are read out of
   `_nodos.yml`, which is user- or repo-supplied."*
 - The operator did not necessarily author the file they are about to open. The realistic story is:
-  Javier clones a client's map repo, opens it in `mapper`, presses `↵` on an attachment row whose
+  username_subject clones a client's map repo, opens it in `mapper`, presses `↵` on an attachment row whose
   caption reads `acta de cierre.pdf`, and the launcher runs something else.
 - Everything below is scored against *that*, not against a server threat model.
 

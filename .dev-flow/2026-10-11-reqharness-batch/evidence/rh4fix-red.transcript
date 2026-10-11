@@ -1,0 +1,47 @@
+=== RHFIX4 code-review follow-up RED proofs (RH4 registry fixes, batch trunk) ===
+
+Fixes: H1 (resolve at most once), H2 (cache validated parses only),
+M1/M2 (one shared pending validator, no import cycle), L1 (cache claim
+reworded + residuals stated), L2 (cache file gets its own 64 MB limit),
+L3 (record_review type-checks verdict/reviewer/object_id, where_kind gone).
+
+--- H1+M1+M2 revert: chain.py back to HEAD (fixed copy kept) ---
+$ git show HEAD:mapper/reqharness/chain.py > mapper/reqharness/chain.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_pending_request_resolved_once tests/test_reqharness_chain.py::test_pending_resolution_refuses_name_content_mismatch
+FAILED tests/test_reqharness_chain.py::test_pending_request_resolved_once - F...
+FAILED tests/test_reqharness_chain.py::test_pending_resolution_refuses_name_content_mismatch
+2 failed in 0.26s
+$ restore fixed chain.py; sha256sum:
+6c006e2267130f01c8c3a88299ba22d43a43fe5e7ba9f07dfaccdb8e449fe228 *mapper/reqharness/chain.py
+6c006e2267130f01c8c3a88299ba22d43a43fe5e7ba9f07dfaccdb8e449fe228 *<backup>/chain.fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_pending_request_resolved_once tests/test_reqharness_chain.py::test_pending_resolution_refuses_name_content_mismatch
+2 passed in 0.21s
+
+--- H2+L1+L2 revert: cache.py back to HEAD (fixed copy kept) ---
+$ git show HEAD:mapper/reqharness/cache.py > mapper/reqharness/cache.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_review_cache_caches_validated_parses_only tests/test_reqharness_registry.py::test_review_cache_size_guard_is_separate_limit
+FAILED tests/test_reqharness_registry.py::test_review_cache_caches_validated_parses_only
+FAILED tests/test_reqharness_registry.py::test_review_cache_size_guard_is_separate_limit
+2 failed in 0.26s
+$ restore fixed cache.py; sha256sum:
+f6748f741d1e4aa2fe7bc199750977879670befcbca76faa5268fad0f8f26e75 *mapper/reqharness/cache.py
+f6748f741d1e4aa2fe7bc199750977879670befcbca76faa5268fad0f8f26e75 *<backup>/cache.fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_review_cache_caches_validated_parses_only tests/test_reqharness_registry.py::test_review_cache_size_guard_is_separate_limit
+2 passed in 0.17s
+
+--- L3 (+M2 reviews half: check_int now imported from config.py) revert: reviews.py back to HEAD ---
+$ git show HEAD:mapper/reqharness/reviews.py > mapper/reqharness/reviews.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_record_review_type_checks_text_fields
+FAILED tests/test_reqharness_registry.py::test_record_review_type_checks_text_fields
+1 failed in 0.25s
+$ restore fixed reviews.py; sha256sum:
+5f48c8b43bfd7d50274ee6d99321bc318c4f83c909a740366458fff552215a01 *mapper/reqharness/reviews.py
+5f48c8b43bfd7d50274ee6d99321bc318c4f83c909a740366458fff552215a01 *<backup>/reviews.fixed.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_record_review_type_checks_text_fields
+1 passed in 0.13s
+
+--- FINAL VERIFICATION (all restores verified byte-identical by sha256 above) ---
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_*.py tests/test_no_operator_paths.py tests/test_arch_osopen_callers.py tests/test_mod_deps.py
+69 passed, 1 warning in 12.69s
+$ python -m ruff check mapper/reqharness
+All checks passed!

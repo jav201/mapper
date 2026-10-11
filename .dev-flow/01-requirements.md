@@ -511,7 +511,7 @@ building concept maps; the team sharing a versioned map.
 
 | # | Premise, as a truth-apt proposition | Tier | Verdict | Executed evidence (command output / `file:line` — **NOT** a citation of another document) | Disposition |
 |---|---|---|---|---|---|
-| P-1 | "The `gh` CLI is installed and authenticated for the operator's GitHub account with repo scope." | premise | ✅ TRUE | `gh --version` → `gh version 2.83.2`; `gh auth status` → `Logged in to github.com account jav201 (keyring)`, scopes `repo`, `workflow`, `read:org` | — |
+| P-1 | "The `gh` CLI is installed and authenticated for the operator's GitHub account with repo scope." | premise | ✅ TRUE | `gh --version` → `gh version 2.83.2`; `gh auth status` → `Logged in to github.com account <owner> (keyring)`, scopes `repo`, `workflow`, `read:org` | — |
 | P-2 | "The TUI stack (Textual 8.2.8 + Rich 15.0.0) is installed and is the same one taskboard's renderer is verified against." | premise | ✅ TRUE | `python -c …` → `textual 8.2.8`, `rich 15.0.0` | — |
 | P-3 | "The prototype machinery (`prototypes/mapper/proto.py`) renders the five views at 118×30 and 68×24 without errors." | premise | ✅ TRUE | `python prototypes/mapper/capture.py` → all five SVGs + txt written; browser check of `mapper.html` → `pageerrors: []` | — |
 | P-4 | "Mermaid `graph TD` with `A[x] --> B[y]` + bare ids suffices for the MVP's trees." | hypothesis | ❓ UNDECIDABLE | needs a probe against the real target maps (the legacy ERP tree may want edge labels / multiple parents) | decided in Phase 1 — edge labels `-->|text|` already scheduled as default; multiple parents declared out of MVP scope in writing here |

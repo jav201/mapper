@@ -25,7 +25,7 @@ from mapper.keymap import groups_for_keybar
 OUT = Path(__file__).parent / "out"
 OUT.mkdir(exist_ok=True)
 
-REPO = "jav201/taskboard"
+REPO = "<owner>/taskboard"
 
 
 @dataclass
@@ -147,7 +147,7 @@ def variant_a() -> None:
     form = Panel(
         Text.assemble(
             ("owner/repo  ", darkside.MUT),
-            ("jav201/taskboard", darkside.INK),
+            ("<owner>/taskboard", darkside.INK),
             ("_", darkside.ACCENT),
             "\n",
             ("↵ conectar    esc cancelar    tab mueve foco", darkside.MUT),
@@ -207,7 +207,7 @@ def variant_b() -> None:
 
     # command bar at bottom (appears on 'c')
     bar = Panel(
-        Text.assemble(("c ", darkside.INK), ("conectar repo  ", darkside.MUT), ("jav201/taskboard", darkside.INK), ("_", darkside.ACCENT)),
+        Text.assemble(("c ", darkside.INK), ("conectar repo  ", darkside.MUT), ("<owner>/taskboard", darkside.INK), ("_", darkside.ACCENT)),
         border_style=darkside.STEP,
         style=f"on {darkside.PANEL}",
         padding=(0, 1),
@@ -229,7 +229,7 @@ def variant_c() -> None:
     left_w = 30
     left = Text()
     left.append("owner/repo\n", darkside.MUT)
-    left.append("jav201/taskboard", darkside.INK)
+    left.append("<owner>/taskboard", darkside.INK)
     left.append("_\n\n", darkside.ACCENT)
     left.append("etapas\n", darkside.MUT)
     for i, stage in enumerate(["clonar", "fetch", "ramas", "listo"]):

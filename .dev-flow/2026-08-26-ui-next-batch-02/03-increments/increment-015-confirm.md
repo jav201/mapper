@@ -146,7 +146,7 @@ arm can watch its own teardown fail).
 
 | Instrument | Known-bad input fed to it | The FAILURE it reported |
 |---|---|---|
-| the lane guard (`_hermetic_lane`) | **the real defect**, not a synthetic argv: the guard installed with the seam still unmocked | `HermeticViolation: the default lane may not reach the network: gh repo view jav201/taskboard --json name,defaultBranchRef` — and independently `AssertionError: HERMETIC-1: this test reached the network`, in 0.64s |
+| the lane guard (`_hermetic_lane`) | **the real defect**, not a synthetic argv: the guard installed with the seam still unmocked | `HermeticViolation: the default lane may not reach the network: gh repo view <owner>/taskboard --json name,defaultBranchRef` — and independently `AssertionError: HERMETIC-1: this test reached the network`, in 0.64s |
 | `network_reaching` classifier | the product's own `git -C <path> fetch --all` | RED — it returned `False`: `-C` was skipped but **not its value**, so a directory path was read as the subcommand. A real defect in the instrument, found by measurement |
 | the ruff set-comparison harness | its own parse, on ANSI-coloured input | RED — `AssertionError: BASE parse produced ZERO rows — the instrument is broken, not the tree`. It had previously printed `SETS IDENTICAL` while comparing two **empty** lists |
 | the SVG text reader (`_svg_emitted_text`) | the artifact, searched for the human-readable `"rama 5"` | 0 of 14 titles found on an artifact that plainly contains them; 8 `rama` + 8 `hoja` once the runs are reassembled |

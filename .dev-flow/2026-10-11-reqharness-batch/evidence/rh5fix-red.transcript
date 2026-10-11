@@ -1,0 +1,111 @@
+RHFIX5 — code-review follow-up for RH5 (H1/M1/M2/L1-L4)
+RED proof per fix: revert ONLY the product change -> the fix's node(s) FAIL ->
+restore byte-identically (sha256) -> GREEN again. All commands from the
+worktree root, pytest always with -p no:cacheprovider. Paths below are
+relative to the worktree root; the operator account segment in any absolute
+path pytest echoes is redacted to <operator>.
+Green-state product-file hashes (all fixes in):
+625822130f148313bee05e75292bbe2af31ef04c2f8ab1ccd9df92afe2a477fd *mapper/reqharness/baseline.py
+27a146f616b84ffc875b9133ad8ceb55bb2d3416037117e960f52ea4ffac3ee7 *mapper/reqharness/audit.py
+643bed27ca3d8344d8b7bd05e36f7b5b5586f9452fdd60c0eee14db263b80a4b *mapper/reqharness/identity.py
+48a0f321e85aa96a94e492018d31460971af9526555b8439b144c7289f64fb78 *mapper/app.py
+
+== H1: Baseline.load objects-list type check reverted (baseline.py) ==
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix tests/test_reqharness_baseline.py::test_baseline_load_refuses_untyped_objects_and_bad_name tests/test_reqharness_baseline.py::test_audit_cli_baseline_schema_violation_is_named_not_a_traceback
+FAILED tests/test_reqharness_baseline.py::test_baseline_load_refuses_untyped_objects_and_bad_name
+FAILED tests/test_reqharness_baseline.py::test_audit_cli_baseline_schema_violation_is_named_not_a_traceback
+2 failed in 1.94s   (RED confirmed: TypeError traceback instead of the named refusal)
+625822130f148313bee05e75292bbe2af31ef04c2f8ab1ccd9df92afe2a477fd *mapper/reqharness/baseline.py
+$ cp .rh5fix-backup/baseline.py mapper/reqharness/baseline.py && sha256sum mapper/reqharness/baseline.py
+625822130f148313bee05e75292bbe2af31ef04c2f8ab1ccd9df92afe2a477fd *mapper/reqharness/baseline.py
+restore hash EQUAL to the green state (restore verified)
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix <the two H1 nodes>
+2 passed in 2.32s   (GREEN again)
+
+== L2: Baseline.load loaded-name refusal rule reverted (baseline.py) ==
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix tests/test_reqharness_baseline.py::test_baseline_load_refuses_untyped_objects_and_bad_name
+FAILED ... 1 failed in 0.59s   (RED: "../escape"/"a/b"/"a\b"/".." loaded without refusal)
+$ cp .rh5fix-backup/baseline.py mapper/reqharness/baseline.py && sha256sum  # hash EQUAL to green state
+625822130f148313bee05e75292bbe2af31ef04c2f8ab1ccd9df92afe2a477fd *mapper/reqharness/baseline.py
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix <the L2 node>
+1 passed in 0.59s   (GREEN again)
+
+== M1: audit.py + baseline.py restored to their pre-fix (HEAD) state ==
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix tests/test_reqharness_release.py::test_audit_cli_resolves_relative_repo_argument tests/test_reqharness_release.py::test_audit_cli_refuses_baseline_link_escaping_repo
+FAILED tests/test_reqharness_release.py::test_audit_cli_resolves_relative_repo_argument
+1 failed, 1 passed in 1.84s
+  (RED: the vacuous pre-fix _confine_repo refused the operator's relative "..".
+   The link node stays GREEN at HEAD because HEAD Baseline.load still refuses
+   the escaping symlink itself - the sweep is defence in depth on top.)
+$ cp .rh5fix-backup/{audit.py -> mapper/reqharness/, baseline.py -> mapper/reqharness/} && sha256sum  # both EQUAL to green state
+mapper/reqharness/audit.py     27a146f616b84ffc875b9133ad8ceb55bb2d3416037117e960f52ea4ffac3ee7
+mapper/reqharness/baseline.py  625822130f148313bee05e75292bbe2af31ef04c2f8ab1ccd9df92afe2a477fd
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix <the two M1 nodes>
+2 passed in 1.79s   (GREEN again)
+
+== M2: canon-unreadable handling reverted (audit.py back to HEAD) ==
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix tests/test_reqharness_release.py::test_audit_report_prints_chain_status_when_canon_unreadable
+FAILED ... 1 failed in 1.27s   (RED: the report hid the chain status behind the refusal)
+$ cp .rh5fix-backup/audit.py mapper/reqharness/audit.py && sha256sum  # EQUAL to green
+mapper/reqharness/audit.py  27a146f616b84ffc875b9133ad8ceb55bb2d3416037117e960f52ea4ffac3ee7
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix <the M2 node>
+1 passed in 1.25s   (GREEN again)
+
+== L1: doubled "audit: audit:" prefix restored (audit.py back to HEAD) ==
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix tests/test_reqharness_release.py::test_audit_cli_refusal_line_has_one_prefix
+FAILED ... 1 failed in 0.81s   (RED: stderr carried the doubled prefix)
+$ cp .rh5fix-backup/audit.py mapper/reqharness/audit.py && sha256sum  # EQUAL to green
+mapper/reqharness/audit.py  27a146f616b84ffc875b9133ad8ceb55bb2d3416037117e960f52ea4ffac3ee7
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix <the L1 node>
+1 passed in 0.62s   (GREEN again)
+
+== L3: PATHEXT empty-fallback reverted (identity.py back to HEAD) ==
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix tests/test_reqharness_identity.py::test_windows_resolution_falls_back_when_pathext_empty
+FAILED ... 1 failed in 0.33s   (RED: empty PATHEXT resolved nothing)
+$ cp .rh5fix-backup/identity.py mapper/reqharness/identity.py && sha256sum  # EQUAL to green
+mapper/reqharness/identity.py  643bed27ca3d8344d8b7bd05e36f7b5b5586f9452fdd60c0eee14db263b80a4b
+$ python -B -m pytest -q -p no:cacheprovider --basetemp=tmp-rh5fix <the L3 node>
+1 passed in 0.24s   (GREEN again)
+
+== L4: no code (ruling-only): retired-before-changed precedence is intended ==
+    A retired object reports "retired" even when its digest changed; stated in
+    03-increments/increment-005.md.
+
+== RHFIX5B re-review follow-up: --baseline name traversal (HIGH) + _resolve_inside LOW ==
+Product change: mapper/reqharness/baseline.py ONLY —
+  * new _check_baseline_name(): create's name rule, applied to the INCOMING
+    name at the TOP of Baseline.load and Baseline._write (create uses it too);
+  * _resolve_inside(): the FINAL resolved path is asserted under the resolved
+    root (refused (outside)) and the RESOLVED path is returned, not the lexical one.
+
+$ sha256sum mapper/reqharness/baseline.py   # green-state backup
+3a9e3d94cc28a6144c6cd12b9559cc669fae4f10bd5ba030efc802f0b425c770 *mapper/reqharness/baseline.py
+$ git show HEAD:mapper/reqharness/baseline.py > mapper/reqharness/baseline.py   # revert product change only
+$ sha256sum mapper/reqharness/baseline.py
+b6c580b6b4dfc7777a3bb4d42cb7645483f34b8d2cbaa964d8b5687acb494cea *mapper/reqharness/baseline.py
+
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py -k "traversal or dotdot"
+FAILED tests/test_reqharness_baseline.py::test_audit_cli_baseline_name_traversal_is_refused_by_name
+FAILED tests/test_reqharness_baseline.py::test_resolve_inside_refuses_lexical_dotdot_escape
+2 failed, 4 deselected in 1.02s   (RED: pre-fix, '../../../outside/y' was PARSED —
+  'audit: reqharness/baselines/../../../outside/y.yml: missing key(s): ...' proves the
+  outside file was read; _resolve_inside returned the lexical escape unrefused)
+
+$ cp <green-state backup> mapper/reqharness/baseline.py && sha256sum mapper/reqharness/baseline.py <green-state backup>
+3a9e3d94cc28a6144c6cd12b9559cc669fae4f10bd5ba030efc802f0b425c770 *mapper/reqharness/baseline.py
+3a9e3d94cc28a6144c6cd12b9559cc669fae4f10bd5ba030efc802f0b425c770 *<green-state backup>   (RESTORE EQUAL)
+
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py -k "traversal or dotdot"
+2 passed, 4 deselected in 1.45s   (GREEN again)
+
+M2 confirmation (no code change): test_audit_report_prints_chain_status_when_canon_unreadable
+drives a VALID registry (_seed + ana + grant + entitled review) with a missing / non-UTF-8
+REQUIREMENTS.md through the real console entry and asserts 'canon unreadable: <reason>' —
+GREEN as part of the restored-tree verification below.
+
+Verification (restored tree):
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py tests/test_reqharness_release.py tests/test_no_operator_paths.py tests/test_app.py
+30 passed in 15.37s
+$ ruff check mapper/reqharness
+All checks passed!
+Not committed (the orchestrator commits).

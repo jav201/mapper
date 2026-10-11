@@ -1,0 +1,146 @@
+RH4 MERGE RED transcript — merge of unit/rh4 (pending-request resolution)
+into the reviewed trunk (fb4ea82 security fixes).  Resolution: keep every
+trunk security fix verbatim and add rh4's resolution logic; the one code
+overlap (optional-key comment + _OPTIONAL_BY_ACTION grant/revoke
+request_hash) combined so both behaviours hold.
+
+Both arms mutate the MERGED mapper/reqharness/chain.py to prove each side
+still bites; every restore is verified byte-identical (sha256) against the
+merged-state backup before the GREEN re-run.  Home paths redacted per A-110.
+
+merged chain.py sha256: 436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef
+
+=== M-CH6 (trunk security fix still bites) ===
+node: tests/test_reqharness_chain.py::test_genesis_only_at_position_one
+mutant: remove the genesis position pin in _check_event AND restore the
+        unconditional genesis shortcut (return True) in _passes_approval
+$ python - (apply mutant; both anchors asserted unique)
+mutation applied: M-CH6 (pin removed, unconditional genesis shortcut)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_genesis_only_at_position_one
+C:/<profile>/anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________________ test_genesis_only_at_position_one ______________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<operator>/pytest-17866/test_genesis_only_at_position_0')
+
+    def test_genesis_only_at_position_one(tmp_path):
+        """RHFIX F1: `genesis` is valid ONLY at walk position 1 � the pin is the
+        exact identity `(event.action == "genesis") == (position == 1)` in
+        `_check_event`, and the `_passes_approval` genesis shortcut holds only
+        with no prefix.  A seq-2 `genesis` by a non-admin (its links and head
+        binding fully valid) must break the chain at its document, never mint
+        an admin (the reviewer reproduced: effective_roles -> eve admin).
+    
+        Mutant M-CH6 (remove the position pin and restore the unconditional
+        genesis shortcut) -> the forged genesis verifies clean, eve becomes
+        admin -> this node is RED."""
+        _seed(tmp_path)
+        docs = _read_docs(tmp_path)
+        genesis_hash = docs[0]["this_hash"]
+        forged = _event(
+            genesis_hash, 2, time=T1, action="genesis",
+            requested_by="eve", approved_by="eve",
+            person="eve", role="admin", note="forged second genesis",
+        )
+        forged["roles_hash"] = genesis_hash  # bind the real head, so the
+        forged["config_hash"] = config_digest(load_config(tmp_path))  # F3-required
+        body = {k: v for k, v in forged.items() if k != "this_hash"}
+        forged["this_hash"] = chain_hash(genesis_hash, body)  # position pin fails
+        _append_raw(tmp_path, forged)
+        report = verify_chain(tmp_path)
+>       assert report.status == "config changed without approval"  # exact word
+E       AssertionError: assert 'chain verified' == 'config chang...hout approval'
+E         
+E         - config changed without approval
+E         + chain verified
+
+tests\test_reqharness_chain.py:278: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_chain.py::test_genesis_only_at_position_one - As...
+1 failed in 0.18s
+-- RED as expected --
+$ cp chain.py.merged mapper/reqharness/chain.py
+$ sha256sum mapper/reqharness/chain.py
+436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef *mapper/reqharness/chain.py
+restore check: 436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef == 436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef (byte-identical)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_genesis_only_at_position_one
+C:/<profile>/anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.15s
+-- GREEN after byte-identical restore --
+
+=== M-PR1 (rh4 pending-resolution still bites) ===
+node: tests/test_reqharness_registry.py::test_pending_resolution_derived_from_chain_reference
+mutant: drop the _require_admin gate in approve_pending (a non-admin
+        resolution would land)
+$ python - (apply mutant; anchor asserted unique)
+mutation applied: M-PR1 (approve_pending admin gate removed)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_pending_resolution_derived_from_chain_reference
+C:/<profile>/anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________ test_pending_resolution_derived_from_chain_reference _____________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<operator>/pytest-17868/test_pending_resolution_derive0')
+
+    def test_pending_resolution_derived_from_chain_reference(tmp_path):
+        """R6 (HLR-RH.2): a pending request's resolution is DERIVED from the
+        chain � an admin's `a` lands the change as the event referencing the
+        request's sha256, `r` lands a `resolution` event with an empty change,
+        the file stays, and the derivation survives a re-read (restart); a
+        non-admin resolution never lands (M-PR1); nobody resolves their own
+        request; a name/content-mismatched pending file is reported by name
+        (R22)."""
+        _seed(tmp_path)
+        _add_ana(tmp_path)
+        assert propose(
+            tmp_path, requester="bob", action="grant",
+            person="ana", role="admin", now=T2,
+        ) is None  # a second admin exists now
+    
+        held = propose(
+            tmp_path, requester="bob", action="grant",
+            person="bob", role="req-reviewer", now=T3,  # a self-change: pending
+        )
+        assert held is not None
+        scan = pending.list_pending(tmp_path)
+        assert scan.reported == ()
+        assert len(scan.requests) == 1
+        request = scan.requests[0]
+        assert pending.resolution(verify_chain(tmp_path), request) == "pending"
+    
+        # nobody approves their own request; a non-admin never resolves (M-PR1)
+        with pytest.raises(ValidationError, match="their own"):
+            approve_pending(tmp_path, pending=request.name, approver="bob", now=T4)
+>       with pytest.raises(ValidationError, match="no admin"):
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+
+tests\test_reqharness_registry.py:614: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_registry.py::test_pending_resolution_derived_from_chain_reference
+1 failed in 0.22s
+-- RED as expected (the 'no admin' refusal never fired) --
+$ cp chain.py.merged mapper/reqharness/chain.py
+$ sha256sum mapper/reqharness/chain.py
+436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef *mapper/reqharness/chain.py
+restore check: 436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef == 436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef (byte-identical)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_pending_resolution_derived_from_chain_reference
+C:/<profile>/anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.18s
+-- GREEN after byte-identical restore --
+
+both arms: merged chain.py sha256 436732a5299b7e4165a92ababf07cf7ed1e5c1220f40555a56dbe23b924365ef unchanged across the sweep.

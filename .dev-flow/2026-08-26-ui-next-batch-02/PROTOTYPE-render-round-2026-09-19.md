@@ -1,4 +1,4 @@
-# Render round — two design items for Javier's verdict · 2026-09-19
+# Render round — two design items for username_subject's verdict · 2026-09-19
 
 Both items are **already shipped in a LEGAL form**, because each splits into a mechanical half and
 an aesthetic half and only the second is a design question. The mechanical half was settled by

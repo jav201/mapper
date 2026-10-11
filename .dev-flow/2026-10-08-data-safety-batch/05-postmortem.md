@@ -27,7 +27,7 @@
 - Small-unit implementation: Inc-1c/Inc-2 as eleven units, each one change + one test + its own RED proof, orchestrator-verified before chaining (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-005.md:9`).
 - Security lens caught real defects early: SEC-M1 (failed-save disk/memory divergence) and SEC-M2 (ESC through `markup=False`) at P2 round 1 (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:27-28`).
 - The DDR architect lens re-read the PDR discharge log and caught C14 marked discharged while three boundary arms were missing — the arms were then realised with executed REDs (`.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md:485-489`).
-- Every executed result names its executor (orchestrator / units / `human:Javier` for the C14 smoke) (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:278`).
+- Every executed result names its executor (orchestrator / units / `human:username_subject` for the C14 smoke) (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:278`).
 
 ### What didn't / friction
 - P1 consumed all 3 iterations; the soft cap was reached and the operator had to rule (`Simplificar y seguir`, then `Aplicar y verificar ligero`) to converge (`.dev-flow/state.json:181-193`).
@@ -149,7 +149,7 @@ Re-read from the artifacts, not from the corrective pass's claim.
 | PDR C11 — E-6 save-path denylist; oracle = save count + hash pair | ✅ | `design/PDR-…:115`; `03-increments/increment-003.md:289` |
 | PDR C12 — US-004 delayed-scroll arms or declared survivors | ✅ | `design/PDR-…:116`; `03-increments/increment-001.md:111` |
 | PDR C13 — AT-015 executed RED with `plain()` dropped; oracle reads the Static's source | ✅ | `design/PDR-…:117`; `03-increments/increment-002.md:87,217`; `increment-003.md:290` |
-| PDR C14 — LLR boundary arms, E-2 third mode, AT-012 RED, at_014a..d, AT-042 HelpScreen mutation, censuses, real-terminal smoke | ✅ **corrected at DDR** — first discharge claim was false; DDR architect lens caught three missing arms | `design/PDR-…:118` (corrected row); `design/DDR-…:38,86` (found NOT discharged, ledger `.68`); arms on disk `03-increments/increment-006.md:12`; operator smoke attributed `human:Javier` 2026-10-09 — "Todod funcionó, continuemos." — `04-validation.md:18,253` |
+| PDR C14 — LLR boundary arms, E-2 third mode, AT-012 RED, at_014a..d, AT-042 HelpScreen mutation, censuses, real-terminal smoke | ✅ **corrected at DDR** — first discharge claim was false; DDR architect lens caught three missing arms | `design/PDR-…:118` (corrected row); `design/DDR-…:38,86` (found NOT discharged, ledger `.68`); arms on disk `03-increments/increment-006.md:12`; operator smoke attributed `human:username_subject` 2026-10-09 — "Todod funcionó, continuemos." — `04-validation.md:18,253` |
 | DDR D1 — C14's three boundary arms (esc+live search, same-map link, archive own node) | ✅ | `design/DDR-…:86`; tests `test_ddr_esc_search.py`, `test_ddr_same_map_link.py`, `test_ddr_archive_own.py` (RED each, `03-increments/increment-006.md:12`) |
 | DDR D2 — records aligned with code (C8 toast text, R8 ALERT, AT-044 `priority=True`) | ✅ | `design/DDR-…:87`; `03-increments/increment-006.md:15` |
 | DDR D3 — `docs/ARCHITECTURE.md` describes the shipped code | ✅ | `design/DDR-…:88` |

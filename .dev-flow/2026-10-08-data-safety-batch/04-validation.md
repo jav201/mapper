@@ -15,7 +15,7 @@
 - **Test ledger:** 2800 collected at batch start → **2923** at the gate = 2920 passed + 3 xfailed ✓.
 - **Evidence checklist (qa-reviewer):** `qa-reviewer` · ACCEPT-WITH-FIXES (0 blocker, 0 major, 4 minor — applied) · 8 of 8 rows ✓ (drafted by unit V3; evaluated read-only; the gate run is the orchestrator's).
 
-**Executed by the operator (`human:Javier`), 2026-10-09:** real-terminal smoke — `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard; verbatim "Todod funcionó, continuemos." (PDR condition C14).
+**Executed by the operator (`human:username_subject`), 2026-10-09:** real-terminal smoke — `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard; verbatim "Todod funcionó, continuemos." (PDR condition C14).
 
 ---
 
@@ -250,7 +250,7 @@ RED counterfactuals (base-tree swaps, all digest-restored): Inc-3 S1-imm settle-
 | Expert inspection | cognitive walkthrough by a reviewer, not a user | **performed** — same `ux-reviewer` walkthrough over `evidence/inc1b-renders.txt` (renders at 87/118/140 + 118 before/after, `increment-003.md` §4 Evidence files); conditions M1, M2, header colour (operator R8 → `darkside.ALERT`) and single-toast fixed in Inc-1c (U1–U4, `increment-005.md` §1) and re-verified by `code-reviewer` (`increment-005.md` §4b addendum) |
 | Evaluation with users | real users doing the tasks in the context of use | **not performed** — one-person team; no participant population exists for this system. Recorded as a limit, not a pass |
 
-- **Operator real-terminal smoke (PDR C14):** **performed** — `human:Javier`, 2026-10-09, recorded in `design/PDR-2026-10-08-data-safety-batch.md` C14 discharge log (line 118): `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard — verbatim "Todod funcionó, continuemos." This discharges the C14 arm owed since Inc-1b (`increment-003.md` line 291 and `increment-005.md` §6 both marked it owed).
+- **Operator real-terminal smoke (PDR C14):** **performed** — `human:username_subject`, 2026-10-09, recorded in `design/PDR-2026-10-08-data-safety-batch.md` C14 discharge log (line 118): `ctrl+s` saved without freezing the terminal and `ctrl+q` raised the guard — verbatim "Todod funcionó, continuemos." This discharges the C14 arm owed since Inc-1b (`increment-003.md` line 291 and `increment-005.md` §6 both marked it owed).
 - **Evidence of the evaluation:** `increment-003.md` 2026-10-09 addendum (UX-1 record), `evidence/inc1b-renders.txt` (digest `4728f923…`), PDR C14 row above, `evidence/inc1c-inc2-units.transcript` (U1–U4 RED proofs).
 - **Limits:** the automated walkthrough covers two terminal sizes (87/118), one platform (Windows, Python 3.12.7, Textual 8.2.8), and pilot-driven input; the operator smoke is a single session by the author-operator (self-selection, no independent observer); no evaluation with users was performed, so learnability/usability beyond the declared criteria is not established.
 
@@ -266,16 +266,16 @@ RED counterfactuals (base-tree swaps, all digest-restored): Inc-3 S1-imm settle-
 
 ## 5 · Evidence checklist — drafted by unit V3; evaluated by `qa-reviewer` (ACCEPT-WITH-FIXES, m1–m4 applied)
 
-Mode: **validation**. Executor naming: each executed result names the orchestrator, the named agent/unit, or `human:Javier`.
+Mode: **validation**. Executor naming: each executed result names the orchestrator, the named agent/unit, or `human:username_subject`.
 
 - ✓ **Acceptance criteria use Given/When/Then.** — AT rows per increment in `01-requirements.md` §3.1, e.g. AT-015 realised by `test_at_015_the_guard_title_carries_no_escape_byte` (`increment-003.md` line 97).
 - ✓ **Test cases have explicit Expected, not vague "works".** — exact-sentence oracles (`title_follows_the_ruled_wording`, `increment-002.md` line 134), hash-pair oracle on emitted files (`increment-003.md` line 181), per-node verdict granularity.
 - ✓ **Edge cases include empty, boundary, invalid, error.** — F1 empty title (`llr_003_1_an_empty_title_renders_empty_guillemets`), boundary arms DDR D1 (`test_ddr_esc_search`, `test_ddr_same_map_link`, `test_ddr_archive_own`, `increment-006.md` §1), E-2 failure seam incl. `reload_raises` / `vanished_node` (`increment-003.md` line 291), hostile ESC/markup/surrogate title payloads (`increment-002.md` line 65).
 - ✓ **Regression checklist exists.** — design §5.3 regression census executed: `16 failed, 271 passed` on base tests (`increment-003.md` line 99); reverse census probes per packet (Inc-3: 5, Inc-1a: 6, Inc-1b: 5).
 - ✓ **Exit criteria stated.** — gate criterion: one complete green lane (C-25), executed by the orchestrator at `cab8181` → EXIT_CODE=0 (`evidence/p4-gate-run.transcript`).
-- ✓ **No profile path, account name or secret** (`human:Javier` is a deliberate attribution) — fixtures only (`fixtures/`, tmp paths); transcripts path-scrubbed to `<USERPROFILE>` per guard A-110 (`increment-001.md` line 133 et al.); no operator name or profile path appears in any artifact.
+- ✓ **No profile path, account name or secret** (`human:username_subject` is a deliberate attribution) — fixtures only (`fixtures/`, tmp paths); transcripts path-scrubbed to `<USERPROFILE>` per guard A-110 (`increment-001.md` line 133 et al.); no operator name or profile path appears in any artifact.
 - ✓ **Mode declared.** — `validation`, at the top of this fragment; seven-state vocabulary used (`executed` · `approved` · `not-run` for the evaluation with users).
-- ✓ **Every executed result NAMES its executor.** — attribution column in the ledger table; mutation table; UX-1 (`ux-reviewer`), C14 smoke (`human:Javier`), gate (orchestrator), increments (`software-dev` units / orchestrator / Kimi units).
+- ✓ **Every executed result NAMES its executor.** — attribution column in the ledger table; mutation table; UX-1 (`ux-reviewer`), C14 smoke (`human:username_subject`), gate (orchestrator), increments (`software-dev` units / orchestrator / Kimi units).
 - ✓ **Layer B (black-box): every output-producing story's deliverable observed through the SHIPPED surface with boundary + negative evidence.** — AT-002/002a/007/009/010 assert the emitted `.mmd`/`_nodos.yml` bytes (sha256 pair) and a fresh `MapStore.load` of them (`increment-003.md` line 181); AT-015 drives the real modal with ESC/markup payloads; C6 composited hint line asserted on strips + `darkside.ALERT` at 87/118/140; boundary arms D1 negative (esc-with-search opens no guard).
 - ✓ **Bidirectional surface-reachability.** — inputs driven with real keys via the pilot (typed edits + `ctrl+s`, `q`/`esc`/links/`a`/`x`/attachments guarded, U5–U9) never `post_message` shortcuts (unit rules; E-1/E-2 helpers in `tests/test_draft_save.py`); outputs observed at the surface (files on disk, painted hint/header, toasts, guard modal).
 - ✓ **No unfilled template.** — every cell above carries a result or a named state; the only `not performed` row (evaluation with users) states its reason (one-person team) — a limit, not a blank.
