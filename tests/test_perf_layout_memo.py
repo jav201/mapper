@@ -22,10 +22,12 @@ What is proven here:
   exactly 1 more miss.
 * `test_memo_invalidation_arms[resize|title|fold|focus|undo|add_child|round_trip]`
   (LLR-PERF.1.2) -- seven named arms.  `resize` and `title` change only the
-  scaling (0 extra misses, repaint byte-identical to a fresh renderer);
-  `fold`, `focus`, `undo`, `add_child` change a layout input (each misses);
-  `round_trip` (outline <-> radial <-> layered) repaints byte-identically with
-  no extra misses.
+  scaling (0 extra misses, repaint byte-identical to a fresh renderer;
+  `title`'s compare is renderer-level full text because the canvas region is
+  viewport-clipped and header-only for its fixture at 118x34 -- DDR qa MED-2,
+  `evidence/ddr2-red.transcript`); `fold`, `focus`, `undo`, `add_child`
+  change a layout input (each misses); `round_trip` (outline <-> radial <->
+  layered) repaints byte-identically with no extra misses.
 * `test_memo_id_reuse` (mutation M-R2d, ruling R13) -- a new `Graph` object
   always misses; with the strong-reference key the memo itself pins the old
   graph, so allocator address reuse cannot fake a hit BY CONSTRUCTION (the
@@ -49,6 +51,7 @@ import gc
 from pathlib import Path
 
 import pytest
+from textual.widgets import Static
 
 from mapper.app import MapperApp
 from mapper.screens.prompt import _ConfirmScreen, _PromptScreen
@@ -207,7 +210,11 @@ async def _arm_resize(tmp_path):
 async def _arm_title(tmp_path):
     """`title`: a ficha title edit that widens `widest` changes only the
     scaling -- 0 extra misses -- and the repaint byte-equals a fresh
-    renderer's paint of the saved (post-edit) map."""
+    renderer's paint of the saved (post-edit) map.  The byte compare runs at
+    RENDERER level (full `render().plain` text at the app's own view state):
+    the canvas-region compare is viewport-clipped and, measured at 118x34,
+    header-only for this fixture -- blind to exactly the geometry drift M-R2c
+    would cause (`evidence/r2-red.transcript` §5, `evidence/ddr2-red.transcript`)."""
     app = MapperApp(tmp_path)
     async with app.run_test(size=TERMINAL) as pilot:
         await pilot.pause()
@@ -231,6 +238,23 @@ async def _arm_title(tmp_path):
         assert screen.renderer._layout_misses == before, (
             "a widening title edit re-applies the scaling; the unscaled memo "
             "must not miss"
+        )
+        # Renderer-level pin: the region-clipped canvas compare below is blind
+        # to geometry that never reaches the viewport -- measured, at 118x34
+        # this fixture's canvas is header-only, so M-R2c (cache the SCALED
+        # layout) stayed green here while reddening `resize`
+        # (`evidence/r2-red.transcript` §5).  The widening must re-apply the
+        # scaling on the cached UNSCALED slots, so the long-lived renderer's
+        # render of the saved graph byte-equals a fresh renderer's full-text
+        # paint at the app's own view state.
+        region = screen.query_one("#map-canvas", Static).region
+        state = screen._view_state(region.width, region.height)  # noqa: SLF001
+        assert screen.renderer.render(screen.graph, state).plain == (
+            LayeredRenderer().render(screen.graph, state).plain
+        ), (
+            "a widening title re-applies the scaling on the cached unscaled "
+            "slots; caching the SCALED layout (M-R2c) reuses stale geometry "
+            "and must fail this full-text compare"
         )
 
     fresh = MapperApp(tmp_path)
