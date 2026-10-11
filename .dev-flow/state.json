@@ -90,7 +90,7 @@
     }
   ],
   "guided": false,
-  "current_station": "DDR",
+  "current_station": "P4",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -208,6 +208,11 @@
       "station": "P3",
       "date": "2026-10-10",
       "decision": "P3 approved (self-approved): increments 001 (base goldens) + lanes R (002 clip, 004 layout memo) and M (003 adjacency cache + follow-up, 005 linear dump) built in parallel worktrees by Kimi; code reviews APPROVE / APPROVE-WITH-NITS, 0 HIGH; join gate run 1 3222 passed / 1 failed (A3 pin) fixed in 084d7b7, run 2 in progress"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-10",
+      "decision": "DDR sealed approved (DDR-2026-10-10-perf-batch): lanes R and M joined, crossed census clean (each lane touched only its files; M-M3 empty); architect + qa approved with conditions, applied at 8bea264 (title arm reddens under M-R2c, wire cap 61,500, HLR-PERF.1 wording LED .5, B-120), re-review approved; join gate run 2 3223 passed / 0 failed"
     }
   ],
   "standing_authorization": {
