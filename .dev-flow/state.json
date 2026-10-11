@@ -91,7 +91,7 @@
   ],
   "guided": false,
   "current_station": "P6",
-  "phase_status": "in-progress",
+  "phase_status": "approved",
   "stations_active": [
     "P0",
     "ARQ",
@@ -223,6 +223,17 @@
       "station": "P5",
       "date": "2026-10-10",
       "decision": "P5 close approved (05-postmortem.md): first batch run in parallel lanes (R, M) with a clean crossed census; Lane S withdrawn (B-118); carried B-118, B-120; 11 PERF ids folded into the canon (3 withdrawn)"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-10",
+      "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE; merged as 39f62cf (PR #20, squash; feat/perf-batch kept on the remote)"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-10",
+      "decision": "synced-to-obsidian",
+      "notes": "vault:mapper/dev-flow-batches/2026-10-10-perf-batch/ (full sync: 15 artifacts + README with metrics; PDR/DDR to vault:mapper/design/; repo-homed artifacts not copied; Dashboard untouched)"
     }
   ],
   "standing_authorization": {
@@ -270,6 +281,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-10T00:00:00"
 }
