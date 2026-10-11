@@ -1,0 +1,110 @@
+# RH5 RED proof — increment RH5 of batch 2026-10-11-reqharness-batch
+# date: 2026-10-11T12:26:09Z
+# GREEN baseline (before any mutation):
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py tests/test_reqharness_release.py
+# 7 passed (verified above; ruff check: All checks passed!)
+# sha256 of the product files before mutation:
+b96c233cd1d9828f43d5bac9a9ca5740c3fafaf29f4d5f7899a1a66c3e128eda *mapper/reqharness/baseline.py
+736c4bd599c9e1a9f0c01145d78722c3e72d60e5c6b06f82437090d95d2e51da *mapper/reqharness/release.py
+62662375af1cd0674759b02c64b89e0905fa7a263a6f37a28b7bb2e5eeb00c6c *mapper/reqharness/audit.py
+2d3a252080d05821a7902462817de0b05924b2dd9ce7dc6c9b5dc6fd945ff204 *mapper/app.py
+188bf8605f111cfe0f12033bc0aa5d2ab0471f7c332d7e7a60686b05b0d7315c *mapper/reqharness/identity.py
+
+## M-BL1 — baseline.py: commit SHA omitted (dirty=porcelain kept; commit forced to empty)
+$ sed -i 's/commit=commit,/commit="",/' mapper/reqharness/baseline.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py::test_baseline_freezes_commit_sha_and_diffs
+tests\test_reqharness_baseline.py:111: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_baseline.py::test_baseline_freezes_commit_sha_and_diffs
+1 failed in 0.60s
+$ sha256sum mapper/reqharness/baseline.py  # restore check (must equal b96c233c...)
+b96c233cd1d9828f43d5bac9a9ca5740c3fafaf29f4d5f7899a1a66c3e128eda *mapper/reqharness/baseline.py
+
+## M-BL2 — baseline.py diff: classification by id presence only (digest comparison disabled)
+$ sed -i 's/elif after.normative_digest != before.normative_digest:/elif False:  # M-BL2/' mapper/reqharness/baseline.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_baseline.py::test_baseline_freezes_commit_sha_and_diffs
+1 failed, 1 passed in 1.53s
+$ sha256sum mapper/reqharness/baseline.py  # restore check
+b96c233cd1d9828f43d5bac9a9ca5740c3fafaf29f4d5f7899a1a66c3e128eda *mapper/reqharness/baseline.py
+
+## M-BL3 — baseline.py diff: deleted collapsed into retired
+$ sed -i 's/classes\[object_id\] = CLASS_DELETED/classes[object_id] = CLASS_RETIRED  # M-BL3/' mapper/reqharness/baseline.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py
+FAILED tests/test_reqharness_baseline.py::test_baseline_freezes_commit_sha_and_diffs
+FAILED tests/test_reqharness_baseline.py::test_at_081_baseline_vs_now_reports_new_changed_retired
+2 failed in 1.48s
+$ sha256sum mapper/reqharness/baseline.py  # restore check
+b96c233cd1d9828f43d5bac9a9ca5740c3fafaf29f4d5f7899a1a66c3e128eda *mapper/reqharness/baseline.py
+
+## M-BL4 — baseline.py: dirty flag forced (porcelain skipped)
+$ sed -i 's/dirty=porcelain != "",/dirty=True,  # M-BL4/' mapper/reqharness/baseline.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_baseline.py::test_baseline_freezes_commit_sha_and_diffs
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_baseline.py::test_baseline_freezes_commit_sha_and_diffs
+1 failed in 0.60s
+$ sha256sum mapper/reqharness/baseline.py  # restore check
+b96c233cd1d9828f43d5bac9a9ca5740c3fafaf29f4d5f7899a1a66c3e128eda *mapper/reqharness/baseline.py
+
+## M-RL1 — release.py: one mandatory rule unevaluated (policy_verified dropped from the census)
+$ sed -i 's/rules: list\[tuple\[str, bool\]\] = \[(rule, known\[rule\]) for rule in MANDATORY_RULES\]/rules: list[tuple[str, bool]] = [(rule, known[rule]) for rule in MANDATORY_RULES if rule != RULE_POLICY]  # M-RL1/' mapper/reqharness/release.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_release_rules_and_verdicts
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_release.py::test_release_rules_and_verdicts - As...
+1 failed in 0.26s
+$ sha256sum mapper/reqharness/release.py  # restore check
+736c4bd599c9e1a9f0c01145d78722c3e72d60e5c6b06f82437090d95d2e51da *mapper/reqharness/release.py
+
+## M-AU2 — audit.py: confinement after reading (the repo-path confine disabled)
+$ sed -i 's/if reason != "ok" or resolved is None:/if False:  # M-AU2/' mapper/reqharness/audit.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_audit_cli_refuses_escaping_repo_path
+mapper\reqharness\audit.py:93: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_release.py::test_audit_cli_refuses_escaping_repo_path
+1 failed in 0.26s
+$ sha256sum mapper/reqharness/audit.py  # restore check
+62662375af1cd0674759b02c64b89e0905fa7a263a6f37a28b7bb2e5eeb00c6c *mapper/reqharness/audit.py
+
+## M-AU1 — app.py: main() ignores --audit -> the TUI launches -> subprocess.run(timeout=60) raises TimeoutExpired = FAIL (R26)
+$ sed -i 's/if "--audit" in sys.argv:/if False and "--audit" in sys.argv:  # M-AU1/' mapper/app.py
+# probe: python -c "from mapper.app import main; main()" --audit <tmp> with timeout=20 -> TIMEOUT after 20.0 s (the TUI hung)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py::test_at_080_audit_report_counts_every_state_exactly
+E               subprocess.TimeoutExpired: Command '['<profile>/anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audit', '<profile>/AppData\\Local\\Temp\\pytest-of-<operator>\\pytest-17904\\test_at_080_audit_report_count0\\work']' timed out after 60 seconds
+
+<profile>/anaconda3\Lib\subprocess.py:1630: TimeoutExpired
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_release.py::test_at_080_audit_report_counts_every_state_exactly
+1 failed in 60.60s (0:01:00)
+$ sha256sum mapper/app.py  # restore check
+2d3a252080d05821a7902462817de0b05924b2dd9ce7dc6c9b5dc6fd945ff204 *mapper/app.py
+
+## Final restore verification (all five product files byte-identical to the pre-mutation backups)
+$ sha256sum mapper/reqharness/baseline.py mapper/reqharness/release.py mapper/reqharness/audit.py mapper/app.py mapper/reqharness/identity.py
+b96c233cd1d9828f43d5bac9a9ca5740c3fafaf29f4d5f7899a1a66c3e128eda *mapper/reqharness/baseline.py
+736c4bd599c9e1a9f0c01145d78722c3e72d60e5c6b06f82437090d95d2e51da *mapper/reqharness/release.py
+62662375af1cd0674759b02c64b89e0905fa7a263a6f37a28b7bb2e5eeb00c6c *mapper/reqharness/audit.py
+2d3a252080d05821a7902462817de0b05924b2dd9ce7dc6c9b5dc6fd945ff204 *mapper/app.py
+188bf8605f111cfe0f12033bc0aa5d2ab0471f7c332d7e7a60686b05b0d7315c *mapper/reqharness/identity.py
+RESTORED-OK mapper/reqharness/baseline.py
+RESTORED-OK mapper/reqharness/release.py
+RESTORED-OK mapper/reqharness/audit.py
+RESTORED-OK mapper/app.py
+RESTORED-OK mapper/reqharness/identity.py
+
+## Final GREEN re-run (full verification subset after all restores)
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py tests/test_reqharness_chain.py tests/test_reqharness_identity.py tests/test_reqharness_registry.py tests/test_reqharness_yaml_census.py tests/test_reqharness_baseline.py tests/test_reqharness_release.py tests/test_no_operator_paths.py
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+54 passed, 1 warning in 13.11s
+$ python -B -m pytest -q -p no:cacheprovider tests/test_app.py tests/test_app_imports_used.py tests/test_mod_compat.py
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+87 passed, 6 warnings in 18.08s
+$ ruff check mapper tests/test_reqharness_baseline.py tests/test_reqharness_release.py tests/test_reqharness_identity.py
+Found 7 errors.
+[*] 5 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+# note: `ruff check mapper` reports 7 PRE-EXISTING errors in files this
+# increment never touched (mapper/darkside.py, mapper/diff.py,
+# mapper/office.py, mapper/screens/factory.py, mapper/screens/settings.py).
+# The in-scope scan is clean:
+# $ ruff check mapper/reqharness mapper/app.py tests/test_reqharness_baseline.py tests/test_reqharness_release.py tests/test_reqharness_identity.py
+# All checks passed!

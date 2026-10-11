@@ -145,7 +145,7 @@ scrubbed the same way (`<operator>`), never left alone:
    `mutation-battery-inc4-supplement-2.txt`, `increment-003-security-review.md`,
    `increment-016-confirm-security-review.md`, `increment-017-ux-F7-AT058.md`.
 2. **1 occurrence** — `increment-004a-security-confirmation-2.md`: a security checklist line reading
-   *"Scan for `` `<operator>` ``, `` `username_subject` ``, `` `C:\Users` ``, `` `api_key` ``, ..."* — the
+   *"Scan for `` `<operator>` ``, `` `<email-local-part>` ``, `` `C:\Users` ``, `` `api_key` ``, ..."* — the
    account name written as a bare word naming what to grep for, not inside a path at all. Clearly
    identity; scrubbed.
 3. **2 occurrences** — `increment-004a-security-review.md`: two security-review scan-result lines

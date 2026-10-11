@@ -34,6 +34,7 @@ from .screens.prompt import (
     _TemplateScreen,
 )
 from .screens.repo import RepoScreen
+from .screens.roles import RolesScreen
 from .search import SearchIndex
 from .store import MapStore
 from .views.layered import MAX_RENDER_NODES, pan_extent
@@ -54,6 +55,7 @@ __all__ = [
     "PAN_INERT_HINT",
     "PlugRepoScreen",
     "RepoScreen",
+    "RolesScreen",
     "SEARCH_ACTIVE_LABEL",
     "SEARCH_COUNT_SUBJECT",
     "SEARCH_SUSPENDED_NOTICE",
@@ -120,6 +122,8 @@ class MapperApp(App):
 
     MapScreen, PlugRepoScreen { layout: vertical; }
     RepoScreen { layout: vertical; }
+    RolesScreen { layout: vertical; }
+    #roles-body { height: 1fr; }
     #repo-dashboard { height: 1fr; }
     #repo-sidebar { width: 30; background: #121212; padding: 1 1; }
     #repo-name { text-style: bold; color: #f5f5f5; margin-bottom: 1; }
@@ -330,6 +334,15 @@ def main() -> None:
 
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+
+    # The read-only audit branch (HLR-RH.7): after the UTF-8 re-wrap so the
+    # report prints as UTF-8, and leaving the normal app start untouched.
+    # The CLI body itself lives in the domain core (`reqharness.audit.run_cli`)
+    # — app.py only dispatches to it (LLR-MOD.1.3: app holds no other defs).
+    if "--audit" in sys.argv:
+        from mapper.reqharness import audit as reqharness_audit
+
+        raise SystemExit(reqharness_audit.run_cli(sys.argv))
 
     workspace = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd() / "maps"
     app = MapperApp(workspace)

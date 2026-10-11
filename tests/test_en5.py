@@ -177,6 +177,9 @@ def test_the_home_door_notes_read_in_english():
         "t": "start with preset fields",
         "i": "CSV / TSV of nodes",
         "f": "process documents",
+        # ReqHarness batch `2026-10-11-reqharness-batch` (LLR-RH.8.1): the
+        # roles screen's home door.
+        "R": "manages team roles",
     }
 
 

@@ -1,0 +1,543 @@
+RHFIX23 RED transcript â€” code-review follow-up for RH2 (chain) + RH3 (identity)
+fixed-state backups taken AFTER the fix was GREEN; every restore is
+verified byte-identical (sha256) against its backup before the GREEN re-run.
+fixed chain.py sha256:    b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0
+fixed identity.py sha256: 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca
+
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py tests/test_reqharness_identity.py tests/test_reqharness_config.py tests/test_no_operator_paths.py
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+35 passed, 1 warning in 3.14s
+
+=== F1 (M-CH6): remove the genesis position pin and restore the unconditional genesis shortcut ===
+node: tests/test_reqharness_chain.py::test_genesis_only_at_position_one
+$ sha256sum mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+mutation applied: position pin removed
+mutation applied: unconditional genesis shortcut restored
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_genesis_only_at_position_one
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________________ test_genesis_only_at_position_one ______________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17804/test_genesis_only_at_position_0')
+
+    def test_genesis_only_at_position_one(tmp_path):
+        """RHFIX F1: `genesis` is valid ONLY at walk position 1 — the pin is the
+        exact identity `(event.action == "genesis") == (position == 1)` in
+        `_check_event`, and the `_passes_approval` genesis shortcut holds only
+        with no prefix.  A seq-2 `genesis` by a non-admin (its links and head
+        binding fully valid) must break the chain at its document, never mint
+        an admin (the reviewer reproduced: effective_roles -> eve admin).
+    
+        Mutant M-CH6 (remove the position pin and restore the unconditional
+        genesis shortcut) -> the forged genesis verifies clean, eve becomes
+        admin -> this node is RED."""
+        _seed(tmp_path)
+        docs = _read_docs(tmp_path)
+        genesis_hash = docs[0]["this_hash"]
+        forged = _event(
+            genesis_hash, 2, time=T1, action="genesis",
+            requested_by="eve", approved_by="eve",
+            person="eve", role="admin", note="forged second genesis",
+        )
+        forged["roles_hash"] = genesis_hash  # bind the real head, so the
+        forged["config_hash"] = config_digest(load_config(tmp_path))  # F3-required
+        body = {k: v for k, v in forged.items() if k != "this_hash"}
+        forged["this_hash"] = chain_hash(genesis_hash, body)  # position pin fails
+        _append_raw(tmp_path, forged)
+        report = verify_chain(tmp_path)
+>       assert report.status == "config changed without approval"  # exact word
+E       AssertionError: assert 'chain verified' == 'config chang...hout approval'
+E         
+E         - config changed without approval
+E         + chain verified
+
+tests\test_reqharness_chain.py:278: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_chain.py::test_genesis_only_at_position_one - As...
+1 failed in 0.22s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/chain.py.fixed mapper/reqharness/chain.py
+$ sha256sum mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+restore check: b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 == b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_genesis_only_at_position_one
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.14s
+-- GREEN after byte-identical restore --
+
+=== F2 (M-CH5): flip the fold boundary 'event.seq <= bound_seq' to '<' ===
+node: tests/test_reqharness_chain.py::test_effective_roles_at_time_t
+$ sha256sum mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+mutation applied: `<=` flipped to `<`
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_effective_roles_at_time_t
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________________ test_effective_roles_at_time_t ________________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17807/test_effective_roles_at_time_t0')
+
+    def test_effective_roles_at_time_t(tmp_path):
+        """LLR-RH.2.3 (as amended by LED-2026-10-11-reqharness-batch.31): roles
+        in force AT A BOUND HEAD fold only verified-prefix events whose OWN
+        `seq` is <= the bound seq — a grant never retro-authorizes an earlier
+        head, and the boundary instant (bound seq == the grant event's own
+        `seq`) is INCLUSIVE (M-CH5 flips the `<=` to `<`).  Folding on
+        `roles_seq` would leak an event at seq k+1 (roles_seq k) into head k."""
+        _seed(tmp_path)
+>       _add_ana(tmp_path)
+
+tests\test_reqharness_chain.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_reqharness_chain.py:84: in _add_ana
+    append_policy(root, approved_by="bob", note="add ana", now=T1)
+mapper\reqharness\chain.py:817: in append_policy
+    _require_admin(report, who=approved_by, where="append_policy")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+report = ChainReport(status='config changed without approval', events=(ChainEvent(index=0, seq=1, time='2026-10-11T09:00:00Z', ...), excluded=(), policy_config_hash='fa46d573143f51637e87721b6f7d9fe91b8cfd3c00be9bf8e8f66daf4b09074b', policy_ok=False)
+
+    def _require_admin(report: ChainReport, *, who: str, where: str) -> None:
+        if "admin" not in effective_roles(report).get(who, ()):
+>           raise ValidationError(f"{where}: {who!r} holds no admin in the roles in force")
+E           mapper.reqharness.model.ValidationError: append_policy: 'bob' holds no admin in the roles in force
+
+mapper\reqharness\chain.py:665: ValidationError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_chain.py::test_effective_roles_at_time_t - mappe...
+1 failed in 0.21s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/chain.py.fixed mapper/reqharness/chain.py
+$ sha256sum mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+restore check: b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 == b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_effective_roles_at_time_t
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.16s
+-- GREEN after byte-identical restore --
+
+=== F3 (F3a): drop the required config_hash check on genesis/policy events ===
+node: tests/test_reqharness_chain.py::test_policy_event_requires_config_hash
+$ sha256sum mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+mutation applied: config_hash requirement removed
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_policy_event_requires_config_hash
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+___________________ test_policy_event_requires_config_hash ____________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17809/test_policy_event_requires_con0')
+
+    def test_policy_event_requires_config_hash(tmp_path):
+        """RHFIX F3 (R15/LLR-RH.2.4): `config_hash` is REQUIRED on `genesis`
+        and `policy` events — a policy-bearing event must bind a config hash,
+        never nothing.  A document without it is refused at the typed schema,
+        named by file AND document (R9), so the chain can never verify under a
+        policy that binds nothing and every append stays refused.
+    
+        Mutant F3a (drop the requirement) -> both fixtures pass silently ->
+        this node is RED."""
+        _seed(tmp_path)
+        _add_ana(tmp_path)  # genesis + policy, both carrying config_hash
+        docs = _read_docs(tmp_path)
+        del docs[0]["config_hash"]  # the genesis event
+        _fix_links(docs, normalize=False)  # links hold; the schema does not
+        _write_docs(tmp_path, docs)
+>       with pytest.raises(
+            ValidationError, match=r"roles\.yml: document 1: missing key\(s\): config_hash"
+        ):
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.model.ValidationError'>
+
+tests\test_reqharness_chain.py:433: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_chain.py::test_policy_event_requires_config_hash
+1 failed in 0.19s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/chain.py.fixed mapper/reqharness/chain.py
+$ sha256sum mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+restore check: b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 == b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py::test_policy_event_requires_config_hash
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.13s
+-- GREEN after byte-identical restore --
+
+=== F4 (M-ID3): let the audited repo / the cwd supply git (exclusions removed) ===
+node: tests/test_reqharness_identity.py::test_git_resolution_excludes_repo_and_cwd
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+mutation applied: repo/cwd exclusions removed
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_git_resolution_excludes_repo_and_cwd
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+__________________ test_git_resolution_excludes_repo_and_cwd __________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17811/test_git_resolution_excludes_r0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000029885866390>
+
+    def test_git_resolution_excludes_repo_and_cwd(tmp_path, monkeypatch):
+        """RHFIX F4 (R27c): `git` is resolved by walking the filtered PATH
+        ourselves — each directory that resolves to the audited repo, the
+        current working directory, `.` or an empty entry is skipped, compared
+        resolved — so a planted `git.cmd`/`git.exe` in the repo's cwd can
+        never win, even with the repo FIRST on PATH (before Python 3.12
+        `shutil.which` searches `.` on Windows regardless of
+        `NoDefaultCurrentDirectoryInExePath` — the old mechanism — and the new
+        code performs no process-wide env mutation).
+    
+        Mutant M-ID3 (let the repo/cwd supply `git`) -> the planted executable
+        wins -> this node is RED."""
+        repo = _make_repo(tmp_path)
+    
+        # A hostile executable planted in the repo's cwd, made visible TWICE:
+        # the repo itself is FIRST on PATH, and an EMPTY PATH entry (which
+        # means the cwd) sits right behind it.
+        if os.name == "nt":
+            planted = [repo / "git.cmd", repo / "git.exe"]
+            for path in planted:
+                path.write_text("@echo off\r\necho planted\r\n", encoding="utf-8")
+        else:
+            planted = [repo / "git"]
+            planted[0].write_text("#!/bin/sh\necho planted\n", encoding="utf-8")
+            planted[0].chmod(0o755)
+        monkeypatch.chdir(repo)
+        monkeypatch.setitem(
+            os.environ,
+            "PATH",
+            os.pathsep.join([str(repo), "", *os.environ.get("PATH", "").split(os.pathsep)]),
+        )
+    
+        calls: list[tuple[list[str], dict]] = []
+        real_run = subprocess.run
+    
+        def recorder(*args, **kwargs):
+            argv = list(args[0] if args else kwargs["args"])
+            calls.append((argv, kwargs))
+            return real_run(*args, **kwargs)
+    
+        monkeypatch.setattr(subprocess, "run", recorder)
+    
+        root = identity.repo_root(repo)
+>       assert Path(root).resolve() == repo.resolve(), (
+            "the planted executable ran: repo-root discovery is broken (R27c)"
+        )
+E       AssertionError: the planted executable ran: repo-root discovery is broken (R27c)
+E       assert WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17811/test_git_resolution_excludes_r0/work/no repo') == WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17811/test_git_resolution_excludes_r0/work')
+E        +  where WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17811/test_git_resolution_excludes_r0/work/no repo') = resolve()
+E        +    where resolve = WindowsPath('no repo').resolve
+E        +      where WindowsPath('no repo') = Path('no repo')
+E        +  and   WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17811/test_git_resolution_excludes_r0/work') = resolve()
+E        +    where resolve = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17811/test_git_resolution_excludes_r0/work').resolve
+
+C:\<profile>\Github\mapper\tests\test_reqharness_identity.py:253: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_identity.py::test_git_resolution_excludes_repo_and_cwd
+1 failed in 0.31s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/identity.py.fixed mapper/reqharness/identity.py
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+restore check: 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca == 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_git_resolution_excludes_repo_and_cwd
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.25s
+-- GREEN after byte-identical restore --
+
+=== F5 (F5a): strip only GIT_DIR/GIT_WORK_TREE/GIT_CONFIG* (the pre-fix behaviour) ===
+node: tests/test_reqharness_identity.py::test_git_resolution_absolute_and_path_pinned
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+mutation applied: strip narrowed to the pre-fix set
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_git_resolution_absolute_and_path_pinned
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+________________ test_git_resolution_absolute_and_path_pinned _________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17813/test_git_resolution_absolute_a0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001EECDA59700>
+
+    def test_git_resolution_absolute_and_path_pinned(tmp_path, monkeypatch):
+        """LLR-RH.7.3 (R27b/c): `git` resolves ONCE to an absolute path over a
+        PATH that excludes the audited repo, so a planted executable in the
+        repo's cwd never wins; every recorded argv carries the absolute
+        executable, `--no-pager`, the two `-c` pins, the `-C <repo>` form (never
+        `cwd=<repo>`), `shell=False`, the 10 s timeout and the stripped env with
+        `GIT_OPTIONAL_LOCKS=0`.  The audit path runs NO `git status` (R27a).
+    
+        Mutant M-ID2 (bare/relative resolution, or honouring the planted
+        executable) reddens the executable assertions."""
+        repo = _make_repo(tmp_path)
+    
+        # A hostile executable planted in the repo's cwd, made visible by putting
+        # the repo FIRST on PATH — resolution must still find the real git.
+        if os.name == "nt":
+            planted = repo / "git.cmd"
+            planted.write_text("@echo off\r\necho planted\r\n", encoding="utf-8")
+        else:
+            planted = repo / "git"
+            planted.write_text("#!/bin/sh\necho planted\n", encoding="utf-8")
+            planted.chmod(0o755)
+        monkeypatch.setitem(
+            os.environ, "PATH", str(repo) + os.pathsep + os.environ.get("PATH", "")
+        )
+        # Inherited git state that MUST NOT reach the child (R20; F5 widens the
+        # strip to EVERY GIT_* key — GIT_DIR/GIT_WORK_TREE/GIT_CONFIG* and also
+        # GIT_INDEX_FILE / GIT_COMMON_DIR / GIT_OBJECT_DIRECTORY).
+        monkeypatch.setitem(os.environ, "GIT_DIR", str(repo / ".git"))
+        monkeypatch.setitem(os.environ, "GIT_WORK_TREE", str(repo))
+        monkeypatch.setitem(os.environ, "GIT_INDEX_FILE", str(repo / ".git" / "index"))
+        monkeypatch.setitem(os.environ, "GIT_COMMON_DIR", str(repo / ".git"))
+        monkeypatch.setitem(
+            os.environ, "GIT_OBJECT_DIRECTORY", str(repo / ".git" / "objects")
+        )
+        monkeypatch.setitem(
+            os.environ, "GIT_CONFIG_GLOBAL", str(tmp_path / "injected.gitconfig")
+        )
+    
+        calls: list[tuple[list[str], dict]] = []
+        real_run = subprocess.run
+    
+        def recorder(*args, **kwargs):
+            argv = list(args[0] if args else kwargs["args"])
+            calls.append((argv, kwargs))
+            return real_run(*args, **kwargs)
+    
+        monkeypatch.setattr(subprocess, "run", recorder)
+    
+        root = identity.repo_root(repo)
+        head = identity.head_commit(repo)
+        who = identity.read(repo)
+        assert Path(root).resolve() == repo.resolve()
+        assert len(head) == 40
+        assert who.name == "Local Person"
+    
+        assert calls, "the recorder saw no subprocess: the argv census is vacuous"
+        executables = {argv[0] for argv, _ in calls}
+        assert len(executables) == 1, f"git resolved more than once: {executables}"
+        (exe,) = executables
+        assert os.path.isabs(exe), f"executable is not absolute: {exe!r}"
+        assert Path(exe).resolve() != planted.resolve(), (
+            "resolution honoured the executable planted in the repo's cwd (R27c)"
+        )
+        hooks_pin = f"core.hooksPath={os.devnull}"
+        for argv, kwargs in calls:
+            assert argv[0] == exe
+            assert argv[1] == "--no-pager"
+            pairs = list(zip(argv, argv[1:]))
+            assert ("-c", "core.fsmonitor=false") in pairs, argv
+            assert ("-c", hooks_pin) in pairs, argv
+            at = argv.index("-C")
+            assert argv[at + 1] == str(repo), argv
+            tail = tuple(argv[at + 2 :])
+            assert tail in ALLOWED_TAILS, argv
+            assert tail != ("--no-optional-locks", "status", "--porcelain"), (
+                "the audit path ran git status (R27a)"
+            )
+            assert kwargs.get("shell") is False, kwargs
+            assert kwargs.get("timeout") == 10, kwargs
+            assert "cwd" not in kwargs, "git ran with cwd=<repo> (R27)"
+            env = kwargs["env"]
+            assert env["GIT_OPTIONAL_LOCKS"] == "0", env
+            for key in env:
+>               assert not key.startswith("GIT_") or key == "GIT_OPTIONAL_LOCKS", (
+                    f"inherited git state reached the child env (F5): {key}"
+                )
+E               AssertionError: inherited git state reached the child env (F5): GIT_EDITOR
+E               assert (not True or 'GIT_EDITOR' == 'GIT_OPTIONAL_LOCKS'
+E                +  where True = <built-in method startswith of str object at 0x000001EEC9CCEC70>('GIT_')
+E                +    where <built-in method startswith of str object at 0x000001EEC9CCEC70> = 'GIT_EDITOR'.startswith
+E                 
+E                 - GIT_OPTIONAL_LOCKS
+E                 + GIT_EDITOR)
+
+tests\test_reqharness_identity.py:205: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_identity.py::test_git_resolution_absolute_and_path_pinned
+1 failed in 0.41s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/identity.py.fixed mapper/reqharness/identity.py
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+restore check: 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca == 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_git_resolution_absolute_and_path_pinned
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.32s
+-- GREEN after byte-identical restore --
+
+=== F6 (F6a): resolve the repo path unguarded (no OSError/ValueError/RuntimeError catch) ===
+node: tests/test_reqharness_identity.py::test_unresolvable_repo_path_is_named_no_repo_not_a_crash
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+mutation applied: unguarded repo.resolve() restored
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_unresolvable_repo_path_is_named_no_repo_not_a_crash
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+__________ test_unresolvable_repo_path_is_named_no_repo_not_a_crash ___________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17815/test_unresolvable_repo_path_is0')
+
+    def test_unresolvable_repo_path_is_named_no_repo_not_a_crash(tmp_path):
+        """RHFIX F6: a repo path the platform refuses to resolve (a NUL byte
+        makes `Path.resolve()` raise ValueError) degrades to the named
+        `no repo` — the resolve() guard catches (OSError, ValueError,
+        RuntimeError) — never an exception."""
+        bogus = Path(str(tmp_path) + "\x00junk")
+>       assert identity.repo_root(bogus) == identity.NO_REPO
+
+tests\test_reqharness_identity.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\reqharness\identity.py:206: in repo_root
+    found = _run_git(repo, ["rev-parse", "--show-toplevel"])
+mapper\reqharness\identity.py:171: in _run_git
+    exe = _resolve_git(repo)
+mapper\reqharness\identity.py:98: in _resolve_git
+    key = str(repo.resolve())
+..\..\anaconda3\Lib\pathlib.py:1250: in resolve
+    p.stat()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17815/test_unresolvable_repo_path_is0\x00junk')
+
+    def stat(self, *, follow_symlinks=True):
+        """
+        Return the result of the stat() system call on this path, like
+        os.stat() does.
+        """
+>       return os.stat(self, follow_symlinks=follow_symlinks)
+E       ValueError: stat: embedded null character in path
+
+..\..\anaconda3\Lib\pathlib.py:840: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_identity.py::test_unresolvable_repo_path_is_named_no_repo_not_a_crash
+1 failed in 0.19s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/identity.py.fixed mapper/reqharness/identity.py
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+restore check: 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca == 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_unresolvable_repo_path_is_named_no_repo_not_a_crash
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.09s
+-- GREEN after byte-identical restore --
+
+=== F7 (F7a): cache the failed (None) git resolution ===
+node: tests/test_reqharness_identity.py::test_failed_git_resolution_is_not_cached
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+mutation applied: failed resolution cached
+-- running the node (expect RED) --
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_failed_git_resolution_is_not_cached
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+__________________ test_failed_git_resolution_is_not_cached ___________________
+
+tmp_path = WindowsPath('C:/<profile>/AppData/Local/Temp/pytest-of-<profile>/pytest-17817/test_failed_git_resolution_is_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000193F3D591F0>
+
+    def test_failed_git_resolution_is_not_cached(tmp_path, monkeypatch):
+        """RHFIX F7: a failed git resolution must NOT be cached (`_GIT_CACHE`
+        stores no `None`), so repairing PATH is enough without a new process.
+        Mutant F7a (cache the failed resolution) -> the repaired call still
+        says `no repo` -> this node is RED."""
+        repo = _make_repo(tmp_path)
+        saved_path = os.environ.get("PATH", "")
+        monkeypatch.setitem(os.environ, "PATH", "")
+        assert identity.repo_root(repo) == identity.NO_REPO
+        monkeypatch.setitem(os.environ, "PATH", saved_path)
+        root = identity.repo_root(repo)
+>       assert root != identity.NO_REPO
+E       AssertionError: assert 'no repo' != 'no repo'
+E        +  where 'no repo' = identity.NO_REPO
+
+tests\test_reqharness_identity.py:293: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_identity.py::test_failed_git_resolution_is_not_cached
+1 failed in 0.34s
+-- RED as expected --
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/identity.py.fixed mapper/reqharness/identity.py
+$ sha256sum mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+restore check: 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca == 1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py::test_failed_git_resolution_is_not_cached
+C:\<profile>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.27s
+-- GREEN after byte-identical restore --
+
+=== final sweep after all restores ===
+$ sha256sum .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/chain.py.fixed mapper/reqharness/chain.py
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *.dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/chain.py.fixed
+b1cb014ce393b97c594d0bf974b304eeefe38e88b5f6c36e0aebe295301e22e0 *mapper/reqharness/chain.py
+$ sha256sum .dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/identity.py.fixed mapper/reqharness/identity.py
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *.dev-flow/2026-10-11-reqharness-batch/evidence/.rh23fix-backup.9248/identity.py.fixed
+1485f8cb4dd9fd57b7e7fa5b27d1e1a02379a554c644b124466934e0993178ca *mapper/reqharness/identity.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_chain.py tests/test_reqharness_identity.py tests/test_reqharness_config.py tests/test_no_operator_paths.py
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+35 passed, 1 warning in 3.58s
+$ ruff check mapper/reqharness/ tests/test_reqharness_chain.py tests/test_reqharness_identity.py
+All checks passed!
+
+backup directory removed; all restores above verified byte-identical.

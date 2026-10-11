@@ -1,0 +1,64 @@
+# RH3 (identity reader + hardened read-only git) -- RED-proof transcript
+# Batch 2026-10-11-reqharness-batch -- lane: identity
+# All commands run from the worktree root; paths relative; account names redacted.
+
+## GREEN baseline (before any mutation)
+$ sha256sum mapper/reqharness/identity.py
+891c44f6b3d1fece52d71d4f60effd0863ca7a7e90936e96e2f16e8f756ebab8 *mapper/reqharness/identity.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py
+6 passed in 1.64s
+
+## Mutant M-FS1: drop the '-c core.fsmonitor=false' pin (R27b) -> sentinel node must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py -k fsmonitor_sentinel
+>       assert identity.status_porcelain(repo) == "", (
+E       AssertionError: clean repo must give empty porcelain, not the no-repo result
+E       assert '?? 1791714122592900700\n?? 2' == ''
+tests\test_reqharness_identity.py:241: AssertionError
+FAILED tests/test_reqharness_identity.py::test_fsmonitor_sentinel_absent_after_hardened_calls
+1 failed, 5 deselected in 0.47s
+891c44f6b3d1fece52d71d4f60effd0863ca7a7e90936e96e2f16e8f756ebab8 *mapper/reqharness/identity.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py   # GREEN after restore
+6 passed in 1.92s
+
+## Mutant M-ID2: resolve git bare/relative (R27c) -> census node must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py -k resolution_absolute
+        executable) reddens the executable assertions."""
+        assert Path(root).resolve() == repo.resolve()
+        assert len(head) == 40
+        assert who.name == "Local Person"
+        assert calls, "the recorder saw no subprocess: the argv census is vacuous"
+        assert len(executables) == 1, f"git resolved more than once: {executables}"
+>       assert os.path.isabs(exe), f"executable is not absolute: {exe!r}"
+E       AssertionError: executable is not absolute: 'git'
+# restore:
+891c44f6b3d1fece52d71d4f60effd0863ca7a7e90936e96e2f16e8f756ebab8 *mapper/reqharness/identity.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py   # GREEN after restore
+6 passed in 1.90s
+
+## Mutant M-ID1: read only the global config (LLR-RH.4.4) -> precedence node must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py -k repo_local_then_global
+        assert init.returncode == 0, init.stderr
+>       assert identity.read(repo) == identity.Identity(
+>           raise ValueError(f"git call outside the read-only allowlist: {tail!r}")
+E           ValueError: git call outside the read-only allowlist: ['config', '--get', '--global', 'user.name']
+mapper\reqharness\identity.py:144: ValueError
+FAILED tests/test_reqharness_identity.py::test_identity_reader_repo_local_then_global
+1 failed, 5 deselected in 0.27s
+# restore:
+891c44f6b3d1fece52d71d4f60effd0863ca7a7e90936e96e2f16e8f756ebab8 *mapper/reqharness/identity.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py   # GREEN after restore
+6 passed in 2.04s
+## Mutant M-AU3: a git non-zero raises (check=True, CalledProcessError no longer caught) instead of becoming 'no repo' (R27d) -> no-repo node must be RED
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py -k safe_directory
+        CalledProcessError. The CalledProcessError object will have the return code
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['C:\\Program Files\\Git\\mingw64\\bin\\git.EXE', '--no-pager', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=nul', '-C', 'C:<PROFILE>\\AppData\\Local\\Temp\\pytest-of-<profile>\\pytest-17725\\test_safe_directory_refusal_is0\\work', 'rev-parse', '--show-toplevel']' returned non-zero exit status 128.
+<PROFILE>\anaconda3\Lib\subprocess.py:571: CalledProcessError
+FAILED tests/test_reqharness_identity.py::test_safe_directory_refusal_is_named_no_repo_not_a_crash
+1 failed, 5 deselected in 0.46s
+# restore:
+891c44f6b3d1fece52d71d4f60effd0863ca7a7e90936e96e2f16e8f756ebab8 *mapper/reqharness/identity.py
+$ python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_identity.py   # GREEN after restore
+6 passed in 1.60s

@@ -1,0 +1,188 @@
+# PERF-RH RED proof — stat fast path for the LLR-RH.5.4 budget miss (parse cache)
+# unit: PERF-RH (worker Kimi, kimi-code) — batch 2026-10-11-reqharness-batch
+# Method: revert ONLY the product change (mapper/reqharness/cache.py + reviews.py to
+# HEAD), run the new fast-path test file, confirm FAIL; restore byte-identically
+# (sha256 before == after), run again GREEN. Bytecode cache off (-B), no pytest cache.
+# Personal/account paths scrubbed to <home> per the batch rules.
+
+=== product change (pre-revert digests) ===
+$ sha256sum mapper/reqharness/cache.py mapper/reqharness/reviews.py
+76080da9af4e7fb5b3f60860048be7bfc9e5b027fcecb1f11d65052e59638e20 *mapper/reqharness/cache.py
+0367ce8499bb84f310367d7127cd3e737152acbded9ea44b7b2b2c51a32ab062 *mapper/reqharness/reviews.py
+
+=== revert to HEAD (git show, read-only) ===
+$ git show HEAD:mapper/reqharness/cache.py > mapper/reqharness/cache.py
+$ git show HEAD:mapper/reqharness/reviews.py > mapper/reqharness/reviews.py
+$ sha256sum mapper/reqharness/cache.py mapper/reqharness/reviews.py
+9fd04e22863e0f10d7e8192d749ac8d89dd799e1e84555c689e561975d75078f *mapper/reqharness/cache.py
+0162c423de6b9f55ce38e18be0b09d8192cd3adccec0e1a9bfd55dcac9391036 *mapper/reqharness/reviews.py
+
+=== RED run (product reverted; the new test file stays) ===
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_cache_fastpath.py
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F.FF.                                                                    [100%]
+================================== FAILURES ===================================
+__________________ test_warm_load_skips_unchanged_file_bytes __________________
+
+tmp_path = WindowsPath('<home>/AppData/Local/Temp/pytest-of-<user>/pytest-18207/test_warm_load_skips_unchanged0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002A709B02540>
+
+    def test_warm_load_skips_unchanged_file_bytes(tmp_path, monkeypatch):
+        """(1) The fast path: a warm load of an unchanged event serves the
+        validated parse from the persisted stat index � the file's bytes are
+        never read (the read path is monkeypatched to fail)."""
+        victim = _seeded_review(tmp_path)
+        cold = _cold_load(tmp_path)
+        assert [event.name for event in cold.events] == [victim.name]
+        assert cold.reported == ()
+    
+        store = json.loads(
+            (tmp_path / ".git" / "reqharness-cache" / "reviews.json").read_text(
+                encoding="utf-8"
+            )
+        )
+>       assert f"reviews/{victim.name}" in store["stat"]  # the entry records stat
+E       KeyError: 'stat'
+
+tests\test_reqharness_cache_fastpath.py:90: KeyError
+_________________ test_changed_size_or_mtime_takes_full_path __________________
+
+tmp_path = WindowsPath('<home>/AppData/Local/Temp/pytest-of-<user>/pytest-18207/test_changed_size_or_mtime_tak0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002A709B00CB0>
+
+    def test_changed_size_or_mtime_takes_full_path(tmp_path, monkeypatch):
+        """(3) A changed size OR a changed mtime alone re-binds the entry: the
+        full path runs (the file is read); a size change that breaks the content
+        digest is reported by name, an mtime-only change re-validates and
+        refreshes the stat tuple (the next warm load reads nothing again)."""
+        victim = _seeded_review(tmp_path)
+        _cold_load(tmp_path)
+    
+        # (a) size change: one extra content byte -> full read, mismatch reported
+        text = victim.read_text(encoding="utf-8")
+        victim.write_text(
+            text.replace("fixture review", "fixture reviews", 1),
+            encoding="utf-8",
+            newline="\n",
+        )
+        reads = _count_reads(monkeypatch)
+        scan = reviews.load_reviews(tmp_path, cache=ParseCache.open(tmp_path))
+        assert reads == [f"reviews/{victim.name}"]
+        assert scan.events == ()
+        assert any(
+            victim.name in line and "name/content mismatch" in line
+            for line in scan.reported
+        ), scan.reported
+    
+        # restore the original bytes (content == old, but mtime moved on)
+        victim.write_text(text, encoding="utf-8", newline="\n")
+        cache = ParseCache.open(tmp_path)
+        scan = reviews.load_reviews(tmp_path, cache=cache)
+        cache.save()
+        assert [event.name for event in scan.events] == [victim.name]
+    
+        # (b) mtime-only change: same bytes, fresh mtime -> full path, still valid
+        reads = _count_reads(monkeypatch)
+        os.utime(victim)  # touch: mtime differs from the recorded tuple
+        cache = ParseCache.open(tmp_path)
+        scan = reviews.load_reviews(tmp_path, cache=cache)
+        cache.save()  # the caller persists the refreshed stat tuple
+        assert reads == [f"reviews/{victim.name}"]  # re-read despite equal bytes
+        assert [event.name for event in scan.events] == [victim.name]
+    
+        # the touched tuple is re-recorded: the next warm load skips the read
+        _forbid_reads(monkeypatch)
+>       warm = reviews.load_reviews(tmp_path, cache=ParseCache.open(tmp_path))
+
+tests\test_reqharness_cache_fastpath.py:172: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\reqharness\reviews.py:311: in load_reviews
+    events.append(_load_one(repo, name, cache))
+mapper\reqharness\reviews.py:283: in _load_one
+    text = read_event_file(repo, f"{REVIEW_DIR}/{name}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+repo = WindowsPath('<home>/AppData/Local/Temp/pytest-of-<user>/pytest-18207/test_changed_size_or_mtime_tak0')
+name = 'reviews/20261011-d304f98e.yml'
+
+    def no_read(repo, name):
+>       raise AssertionError(f"read_event_file called for unchanged file {name}")
+E       AssertionError: read_event_file called for unchanged file reviews/20261011-d304f98e.yml
+
+tests\test_reqharness_cache_fastpath.py:51: AssertionError
+________ test_same_size_same_mtime_same_inode_rewrite_is_the_residual _________
+
+tmp_path = WindowsPath('<home>/AppData/Local/Temp/pytest-of-<user>/pytest-18207/test_same_size_same_mtime_same0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002A709B08860>
+
+    def test_same_size_same_mtime_same_inode_rewrite_is_the_residual(
+        tmp_path, monkeypatch
+    ):
+        """The residual, stated and pinned: an IN-PLACE rewrite (same file
+        object � size, mtime AND the NTFS file index all preserved) is invisible
+        to the fast path, which serves the validated parse without reading; the
+        cache-OFF audit load re-reads every file and catches the mismatch."""
+        victim = _seeded_review(tmp_path)
+        _cold_load(tmp_path)
+        old = os.stat(victim, follow_symlinks=False)
+    
+        data = bytearray(victim.read_bytes())
+        marker = b"fixture review"
+        index = bytes(data).index(marker)
+        data[index] = ord(b"X")  # same length, different bytes, in place
+        with open(victim, "r+b") as handle:
+            handle.write(bytes(data))
+        os.utime(victim, ns=(old.st_atime_ns, old.st_mtime_ns))
+        new = os.stat(victim, follow_symlinks=False)
+        assert (new.st_size, new.st_mtime_ns, new.st_ino) == (
+            old.st_size,
+            old.st_mtime_ns,
+            old.st_ino,
+        )
+    
+        # the fast path cannot see this � no read happens (the residual)
+        with monkeypatch.context() as scoped:
+            _forbid_reads(scoped)
+>           warm = reviews.load_reviews(tmp_path, cache=ParseCache.open(tmp_path))
+
+tests\test_reqharness_cache_fastpath.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\reqharness\reviews.py:311: in load_reviews
+    events.append(_load_one(repo, name, cache))
+mapper\reqharness\reviews.py:283: in _load_one
+    text = read_event_file(repo, f"{REVIEW_DIR}/{name}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+repo = WindowsPath('<home>/AppData/Local/Temp/pytest-of-<user>/pytest-18207/test_same_size_same_mtime_same0')
+name = 'reviews/20261011-d304f98e.yml'
+
+    def no_read(repo, name):
+>       raise AssertionError(f"read_event_file called for unchanged file {name}")
+E       AssertionError: read_event_file called for unchanged file reviews/20261011-d304f98e.yml
+
+tests\test_reqharness_cache_fastpath.py:51: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_cache_fastpath.py::test_warm_load_skips_unchanged_file_bytes
+FAILED tests/test_reqharness_cache_fastpath.py::test_changed_size_or_mtime_takes_full_path
+FAILED tests/test_reqharness_cache_fastpath.py::test_same_size_same_mtime_same_inode_rewrite_is_the_residual
+3 failed, 2 passed in 0.37s
+
+=== restore byte-identical ===
+$ cp <kept-copy>/cache.py.new mapper/reqharness/cache.py
+$ cp <kept-copy>/reviews.py.new mapper/reqharness/reviews.py
+$ sha256sum mapper/reqharness/cache.py mapper/reqharness/reviews.py
+76080da9af4e7fb5b3f60860048be7bfc9e5b027fcecb1f11d65052e59638e20 *mapper/reqharness/cache.py
+0367ce8499bb84f310367d7127cd3e737152acbded9ea44b7b2b2c51a32ab062 *mapper/reqharness/reviews.py
+# restore digests == pre-revert digests (byte-identical restore proven)
+
+=== GREEN run (product restored) ===
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_cache_fastpath.py
+<home>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.....                                                                    [100%]
+5 passed in 0.30s

@@ -293,8 +293,27 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #   +2  `tests/test_perf_layout_memo.py` -- the `title` arm now compares the
     #       widened card where it is visible (a memoised and a fresh renderer over
     #       an on-screen fixture), so the scaled-layout mutant M-R2c reddens it.
-    assert len(sites["argful"]) == 82, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 82; "
+    #
+    # 82 -> 83 at `2026-10-11-reqharness-batch`'s gate fix (increment-009),
+    # ONE net site from the batch's read-only `--audit` entry — and the net
+    # hides a move worth recording, because this pin's own docstring says a
+    # bumped pin with an unitemised reason is a pin that has stopped working:
+    #   +1  `tests/test_reqharness_release.py`'s R27d arm renders the report
+    #       through the ATTRIBUTE call `audit_mod.render(report)` to assert
+    #       the `no repo` text carries no traceback — the rendered text IS
+    #       the arm's subject, so the site cannot be shared with an existing
+    #       helper, and an attribute call IS what this census derives.
+    #   +1/-1  the `--audit` dispatch itself entered the tree as the attribute
+    #       call `reqharness_audit.render(report)` in `mapper/app.py` (the
+    #       pre-gate derived count was 84 for exactly this reason).  Gate-fix
+    #       ruling 1 moved the CLI body into the domain core as
+    #       `mapper/reqharness/audit.py::run_cli` (LLR-MOD.1.3 — app.py holds
+    #       no extra defs), where the same print goes through the
+    #       module-local `render(report)` — a BARE-NAME call this
+    #       attribute-only census does not derive.  The report still renders;
+    #       only the census's visibility of the site moved with it.
+    assert len(sites["argful"]) == 83, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 83; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,

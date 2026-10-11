@@ -1,0 +1,82 @@
+# CLOSE1 RED-proof transcript — security nits (K3 re-check LOW-1 / LOW-3 / LOW-4)
+# every arm: fix reverted (pre-fix form) -> RED -> byte-identical restore (sha256) -> GREEN
+# paths sanitized (no user names); run from the worktree root with NO_COLOR unset
+# one pytest command at a time; fixed snapshots kept in evidence/.close1-backup (deleted after)
+
+=== ARM LOW-1 (nesting refusal surfaces as itself, no double prefix) — fix reverted ===
+# revert: `except ValidationError: raise` removed from load_documents (config.py) —
+#         the named `nesting too deep` refusal again falls into the
+#         `except (yaml.YAMLError, ValueError, RecursionError)` clause (ValidationError
+#         IS a ValueError) and is re-wrapped as `malformed YAML (<where>: nesting too deep ...)`
+$ sha256sum mapper/reqharness/config.py   # pre-revert (fixed) hash
+7392bb36c628c74d018a87896f0923fc033da763770d8f833eb9bb8a0dbf7e76 *mapper/reqharness/config.py
+$ env -u NO_COLOR python -B -m pytest -q -p no:cacheprovider \
+    "tests/test_reqharness_config.py::test_nesting_event_stream_refuses_superlinear_depth" \
+    "tests/test_reqharness_config.py::test_nesting_event_stream_boundary_and_quoted_scalars" \
+    "tests/test_reqharness_chain.py::test_input_limits_reported_by_name"
+E   AssertionError: assert 'reqharness/r...pth 65 > 64))' == 'reqharness/r...epth 65 > 64)'
+E     - reqharness/reviews/attack.yml: nesting too deep (depth 65 > 64)
+E     + reqharness/reviews/attack.yml: malformed YAML (reqharness/reviews/attack.yml: nesting too deep (depth 65 > 64))
+tests\test_reqharness_config.py:421: AssertionError
+E       AssertionError: assert 'reqharness/r...pth 65 > 64))' == 'reqharness/r...epth 65 > 64)'
+E         + reqharness/roles.yml: malformed YAML (reqharness/roles.yml: nesting too deep (depth 65 > 64))
+tests\test_reqharness_config.py:496: AssertionError
+E       AssertionError: assert 'reqharness/r...pth 65 > 64))' == 'reqharness/r...epth 65 > 64)'
+E         + reqharness/reviews/deep.yml: malformed YAML (reqharness/reviews/deep.yml: nesting too deep (depth 65 > 64))
+tests\test_reqharness_chain.py:749: AssertionError
+FAILED tests/test_reqharness_config.py::test_nesting_event_stream_refuses_superlinear_depth
+FAILED tests/test_reqharness_config.py::test_nesting_event_stream_boundary_and_quoted_scalars
+FAILED tests/test_reqharness_chain.py::test_input_limits_reported_by_name
+3 failed, 1 warning in 0.17s
+
+=== ARM LOW-1 — restore (byte-identical, sha256-checked) ===
+$ cp evidence/.close1-backup/config.py mapper/reqharness/config.py
+$ sha256sum mapper/reqharness/config.py
+7392bb36c628c74d018a87896f0923fc033da763770d8f833eb9bb8a0dbf7e76 *mapper/reqharness/config.py
+RESTORE-MATCH (pre-revert hash identical)
+$ env -u NO_COLOR python -B -m pytest -q -p no:cacheprovider \
+    "tests/test_reqharness_config.py::test_nesting_event_stream_refuses_superlinear_depth" \
+    "tests/test_reqharness_config.py::test_nesting_event_stream_boundary_and_quoted_scalars" \
+    "tests/test_reqharness_chain.py::test_input_limits_reported_by_name"
+3 passed, 1 warning in 0.19s
+
+=== ARM LOW-4 (config.yml gets the named 64 KB byte cap) — fix reverted ===
+# revert: load_config back to the uncapped manual read (no LIMIT_EVENT_FILE_BYTES check)
+$ env -u NO_COLOR python -B -m pytest -q -p no:cacheprovider \
+    "tests/test_reqharness_config.py::test_load_rejects_unknown_reviewer_role"
+E       Failed: DID NOT RAISE <class 'mapper.reqharness.records.ValidationError'>
+FAILED tests/test_reqharness_config.py::test_load_rejects_unknown_reviewer_role
+1 failed, 1 warning in 0.17s
+# (the 65.7 KB config parses clean without the cap — the cap, not the schema, is what refuses)
+
+=== ARM LOW-4 — restore (byte-identical, sha256-checked) ===
+$ cp evidence/.close1-backup/config.py mapper/reqharness/config.py
+$ sha256sum mapper/reqharness/config.py | cut -d' ' -f1
+7392bb36c628c74d018a87896f0923fc033da763770d8f833eb9bb8a0dbf7e76
+RESTORE-MATCH (== pre-revert hash recorded above)
+$ env -u NO_COLOR python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_config.py
+11 passed, 1 warning in 1.14s
+
+=== ARM LOW-3 (_visible escapes Zs!=U+0020, Mn/Me, variation selectors) — fix reverted ===
+# revert: audit.py `_visible` back to escaping only Cf/Zl/Zp (NBSP/combining/variation
+#         selectors pass through raw)
+$ sha256sum mapper/reqharness/audit.py   # pre-revert (fixed) hash
+376655dacb54933128702b6e8ff0a0b72d2ef639ad4ea0c578c4b6fb04006467 *mapper/reqharness/audit.py
+$ env -u NO_COLOR python -B -m pytest -q -p no:cacheprovider \
+    "tests/test_reqharness_release.py::test_audit_visible_escapes_nbsp_combining_and_variation_selectors"
+E       AssertionError: assert '\\xa0\\u2000\\u...' == '\\\\u00a0\\\\u20...'
+E         - \u00a0\u2000\u2007\u202f\u205f\u3000\u0301\u20dd\ufe0f\ue01ef
+E         + \xa0\u2000\u2007\u202f\u205f\u3000\u0301\u20dd\ufe0f\U000e01ef
+FAILED tests/test_reqharness_release.py::test_audit_visible_escapes_nbsp_combining_and_variation_selectors
+1 failed in 0.24s
+
+=== ARM LOW-3 — restore (byte-identical, sha256-checked) ===
+$ cp evidence/.close1-backup/audit.py mapper/reqharness/audit.py
+$ sha256sum mapper/reqharness/audit.py | cut -d' ' -f1
+376655dacb54933128702b6e8ff0a0b72d2ef639ad4ea0c578c4b6fb04006467
+RESTORE-MATCH (== pre-revert hash recorded above)
+$ env -u NO_COLOR python -B -m pytest -q -p no:cacheprovider tests/test_reqharness_release.py
+14 passed in 8.78s
+
+=== cleanup ===
+$ rm -rf evidence/.close1-backup   # fixed snapshots deleted; nothing staged

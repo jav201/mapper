@@ -1,0 +1,113 @@
+RH6b RED proof — increment RH6b (admin a/r pending resolution, AT-082 / LLR-RH.8.6)
+batch 2026-10-11-reqharness-batch — worktree-relative paths, account redacted to <profile>
+instrument: inline commands (no absolute paths); every run from the worktree root
+product files under test: mapper/screens/roles.py, mapper/keymap.py
+GREEN backups: .dev-flow/2026-10-11-reqharness-batch/evidence/rh6b-backup/
+  tests/test_roles_screen.py::test_at_082_admin_resolves_pending_with_a_and_r
+  tests/test_roles_screen.py::test_rh6b_admin_resolving_own_request_is_refused_and_named
+  tests/test_roles_screen.py::test_rh6b_non_admin_resolution_keys_inert
+  tests/test_roles_screen.py::test_rh6b_tampered_chain_resolution_keys_inert
+  tests/test_roles_screen.py::test_rh6b_double_resolution_refusal_is_named
+  tests/test_roles_screen.py::test_rh6b_resolution_writer_oserror_notifies_exception_type
+
+=== ARM 1 — full product revert (the whole RH6b product change reverted to HEAD) ===
+$ git show HEAD:mapper/screens/roles.py > mapper/screens/roles.py
+$ git show HEAD:mapper/keymap.py > mapper/keymap.py
+$ python -B -m pytest -q -p no:cacheprovider \
+    tests/test_roles_screen.py::test_at_082_admin_resolves_pending_with_a_and_r \
+    tests/test_roles_screen.py::test_rh6b_admin_resolving_own_request_is_refused_and_named \
+    tests/test_roles_screen.py::test_rh6b_non_admin_resolution_keys_inert \
+    tests/test_roles_screen.py::test_rh6b_tampered_chain_resolution_keys_inert \
+    tests/test_roles_screen.py::test_rh6b_double_resolution_refusal_is_named \
+    tests/test_roles_screen.py::test_rh6b_resolution_writer_oserror_notifies_exception_type
+E       AssertionError: []
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_roles_screen.py:1061: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_roles_screen.py::test_at_082_admin_resolves_pending_with_a_and_r
+FAILED tests/test_roles_screen.py::test_rh6b_admin_resolving_own_request_is_refused_and_named
+FAILED tests/test_roles_screen.py::test_rh6b_non_admin_resolution_keys_inert
+FAILED tests/test_roles_screen.py::test_rh6b_double_resolution_refusal_is_named
+FAILED tests/test_roles_screen.py::test_rh6b_resolution_writer_oserror_notifies_exception_type
+5 failed, 1 passed in 5.20s
+c10ab9f977f2f2c15d0acd5cf49283465f98c8e93c44c06290dc9e7f67a2d121 *mapper/screens/roles.py
+ee3262a3a6cf7b4a2ef9fd96fe7c6114dc7369424602b006552b050eb686112d *mapper/keymap.py
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/rh6b-backup/roles.py mapper/screens/roles.py
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/rh6b-backup/keymap.py mapper/keymap.py
+$ sha256sum mapper/screens/roles.py mapper/keymap.py
+c10ab9f977f2f2c15d0acd5cf49283465f98c8e93c44c06290dc9e7f67a2d121 *mapper/screens/roles.py   (== GREEN backup, byte-identical)
+ee3262a3a6cf7b4a2ef9fd96fe7c6114dc7369424602b006552b050eb686112d *mapper/keymap.py           (== GREEN backup, byte-identical)
+note: 5 of 6 nodes RED on the full revert; test_rh6b_tampered_chain_resolution_keys_inert
+stays GREEN there BY CONSTRUCTION — with the binding reverted the key does not exist at
+all, which is indistinguishable from inert on that arm. Its RED is Arm 3 below, where the
+binding exists and the read-only guard is the only thing keeping it inert.
+
+=== ARM 2 — M-PR1 (screen limb): the non-admin guard in _resolve_pending deleted ===
+$ # mutation: the block
+$ #   if not snap.viewer_admin:
+$ #       hint.set_hint(_NOT_ADMIN_KEY_HINT.format(key))
+$ #       return
+$ # is removed from mapper/screens/roles.py — a non-admin's a/r reaches the core
+
+tests\test_roles_screen.py:937: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_roles_screen.py::test_at_082_admin_resolves_pending_with_a_and_r
+FAILED tests/test_roles_screen.py::test_rh6b_non_admin_resolution_keys_inert
+2 failed in 3.78s
+c10ab9f977f2f2c15d0acd5cf49283465f98c8e93c44c06290dc9e7f67a2d121 *mapper/screens/roles.py
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/rh6b-backup/roles.py mapper/screens/roles.py
+$ sha256sum mapper/screens/roles.py
+c10ab9f977f2f2c15d0acd5cf49283465f98c8e93c44c06290dc9e7f67a2d121 *mapper/screens/roles.py   (== GREEN, byte-identical restore)
+
+=== ARM 3 — the read-only guard in _resolve_pending deleted (R14 inert arm) ===
+$ # mutation: `snap.read_only` removed from the resolve guard — `a` reaches the
+$ # core on a tampered chain (the core refuses, but the hint no longer says read-only)
+
+tests\test_roles_screen.py:972: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_roles_screen.py::test_rh6b_tampered_chain_resolution_keys_inert
+1 failed in 1.00s
+c10ab9f977f2f2c15d0acd5cf49283465f98c8e93c44c06290dc9e7f67a2d121 *mapper/screens/roles.py
+ee3262a3a6cf7b4a2ef9fd96fe7c6114dc7369424602b006552b050eb686112d *mapper/keymap.py
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/rh6b-backup/roles.py mapper/screens/roles.py
+$ sha256sum mapper/screens/roles.py mapper/keymap.py
+c10ab9f977f2f2c15d0acd5cf49283465f98c8e93c44c06290dc9e7f67a2d121 *mapper/screens/roles.py   (== GREEN, byte-identical restore)
+ee3262a3a6cf7b4a2ef9fd96fe7c6114dc7369424602b006552b050eb686112d *mapper/keymap.py           (untouched)
+
+=== FINAL GREEN — the six RH6b nodes, restored product ===
+$ python -B -m pytest -q -p no:cacheprovider <the six nodes listed above>
+......                                                                   [100%]
+6 passed in 7.07s
+
+=== RHFIX6B — code-review follow-up for RH6b (2026-10-11, unit RHFIX6B) ===
+Product change: mapper/screens/roles.py ONLY (several-pending refusal, reload
+at keypress, success hints name the request). Tests: 4 new nodes in
+tests/test_roles_screen.py + AT-082 arms 1/2 hint assertions updated.
+
+$ sha256sum mapper/screens/roles.py   (GREEN state, backed up)
+50b7c523b13ab7cacba621701b5bedf0eda9ddb4725ea2ed834ecfd9b8b9478f *mapper/screens/roles.py
+
+$ git show HEAD:mapper/screens/roles.py > mapper/screens/roles.py   (revert product ONLY; HEAD 7cb1b81)
+$ sha256sum mapper/screens/roles.py
+05e4a2c87499e05e7ddbe2476cacebb7f4b7a757ba4cdb037a78a415c29f7adb *mapper/screens/roles.py
+
+$ python -B -m pytest -q -p no:cacheprovider tests/test_roles_screen.py -k "rhfix6b"
+E  AssertionError: approved - the change landed as one chain event   (several-pending: old code silently approved the OLDEST)
+E  AssertionError: approve_pending: 'subject' holds no admin in the roles in force   (revoked-on-disk arm: stale admin reached the core)
+E  AssertionError: (5, 5, 'a is unavailable (needs an admin)', [])   (granted-on-disk arm: stale non-admin refused)
+FAILED tests/test_roles_screen.py::test_rhfix6b_several_pending_on_one_cell_refuses_a_and_r
+FAILED tests/test_roles_screen.py::test_rhfix6b_admin_revoked_on_disk_refuses_a_at_keypress
+FAILED tests/test_roles_screen.py::test_rhfix6b_admin_granted_on_disk_allows_a_at_keypress
+3 failed, 1 passed, 18 deselected in 4.29s
+NOTE: test_rhfix6b_cursor_on_non_pending_cell_shows_no_pending_hint PASSES on
+the reverted product too — it pins pre-existing _NO_PENDING_HINT behaviour and
+no RHFIX6B ruling changes that path; it is RED-immune by construction.
+
+$ cp .dev-flow/2026-10-11-reqharness-batch/evidence/roles.py.rhfix6b.bak mapper/screens/roles.py
+$ sha256sum mapper/screens/roles.py
+50b7c523b13ab7cacba621701b5bedf0eda9ddb4725ea2ed834ecfd9b8b9478f *mapper/screens/roles.py   (== GREEN, byte-identical restore)
+
+$ python -B -m pytest -q -p no:cacheprovider tests/test_roles_screen.py -k "rhfix6b or at_082"
+5 passed, 17 deselected in 7.03s

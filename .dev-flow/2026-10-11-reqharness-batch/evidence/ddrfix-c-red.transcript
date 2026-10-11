@@ -1,0 +1,69 @@
+# DDRFIX-C RED-proof transcript — security re-verification follow-up (F2 HIGH, F1 nits)
+# instrument: ddrfix-c-red.driver.sh (session temp; pre-fix snapshots swapped in per arm)
+# every arm: pre-fix swap -> RED -> byte-identical restore (sha256) -> GREEN
+# paths sanitized (no user names); run from the worktree root with NO_COLOR unset
+
+
+=== ARM F2 (event-stream depth check) — fix reverted (pre-fix snapshot in place) ===
+86ce14742a715d1ae947c141eb454aa340201eb1d0662819b6274c9e994a639a *mapper/reqharness/config.py
+tests\test_reqharness_config.py:278
+  ~\Github\mapper\tests\test_reqharness_config.py:278: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_config.py::test_nesting_event_stream_refuses_lexically_bypassed_shapes
+1 failed, 1 passed, 1 warning in 5.17s
+
+=== ARM F2 (event-stream depth check) — restore (byte-identical, sha256-checked) ===
+RESTORE-OK config.py sha256=86ce14742a715d1ae947c141eb454aa340201eb1d0662819b6274c9e994a639a
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2 passed, 1 warning in 1.20s
+
+=== ARM F1a (refusal-path escaper) — fix reverted (pre-fix snapshot in place) ===
+14688571232948eb19fdb3e3bd7251ac4ffe08b1a157b1a1451b85b4f98bf180 *mapper/reqharness/audit.py
+E               _es0\\x\u202ey\u2028
+E               z\x1b\x9b: refused (unreadable)
+E             ?  +
+
+tests\test_reqharness_release.py:770: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_release.py::test_audit_cli_refusal_line_escapes_control_text
+1 failed in 0.68s
+
+=== ARM F1a (refusal-path escaper) — restore (byte-identical, sha256-checked) ===
+RESTORE-OK audit.py sha256=14688571232948eb19fdb3e3bd7251ac4ffe08b1a157b1a1451b85b4f98bf180
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.70s
+
+=== ARM F1b (extended _visible) — fix reverted (pre-fix snapshot in place) ===
+14688571232948eb19fdb3e3bd7251ac4ffe08b1a157b1a1451b85b4f98bf180 *mapper/reqharness/audit.py
+E               z\x1b\x9b: refused (unreadable)
+E             ?  +
+
+tests\test_reqharness_release.py:770: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_release.py::test_audit_render_escapes_bidi_and_separator_text
+FAILED tests/test_reqharness_release.py::test_audit_cli_refusal_line_escapes_control_text
+2 failed in 1.34s
+
+=== ARM F1b (extended _visible) — restore (byte-identical, sha256-checked) ===
+RESTORE-OK audit.py sha256=14688571232948eb19fdb3e3bd7251ac4ffe08b1a157b1a1451b85b4f98bf180
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..                                                                       [100%]
+2 passed in 1.46s
+
+=== final: all four new nodes GREEN on the restored tree ===
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+4 passed, 1 warning in 2.57s
+
+=== pre-fix reference digests (prefix snapshots, unchanged) ===
+62093aabd047f2d611df5a1bb71d320a7ff2cf83323f1e0b919736a358074fe4
+db59e248238d27bfc7bc9be9bec68084eb956a6be33c19a45bf94d6d945764de

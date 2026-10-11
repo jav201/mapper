@@ -42,6 +42,7 @@ from mapper.screens.import_preview import _ImportPreviewScreen
 from mapper.screens.map.screen import MapScreen
 from mapper.screens.plug_repo import PlugRepoScreen
 from mapper.screens.prompt import _PromptScreen, _TemplateScreen
+from mapper.screens.roles import RolesScreen
 from mapper.screens.settings import SettingsScreen
 from mapper.store import TEMPLATES
 from mapper.widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
@@ -380,6 +381,9 @@ class HomeScreen(Screen):
         "t": "start with preset fields",
         "i": "CSV / TSV of nodes",
         "f": "process documents",
+        # ReqHarness batch `2026-10-11-reqharness-batch` (LLR-RH.8.1): the
+        # roles screen's home door — the row this increment owns.
+        "R": "manages team roles",
     }
 
     def _empty_text(self) -> Text:
@@ -437,6 +441,9 @@ class HomeScreen(Screen):
 
     def action_settings(self) -> None:
         self.app.push_screen(SettingsScreen())
+
+    def action_roles(self) -> None:
+        self.app.push_screen(RolesScreen())
 
     def _open_map(self, name: str | None) -> None:
         if not name:

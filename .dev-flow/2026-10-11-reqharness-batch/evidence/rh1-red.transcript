@@ -1,0 +1,67 @@
+UNIT RHI1 — RH1 RED proof — 2026-10-11T10:01:08Z
+worktree: /c/Users/<operator>/Github/mapper
+PYTHONDONTWRITEBYTECODE=1; pytest -p no:cacheprovider; single file only
+
+=== M-CF1 : mapper/reqharness/config.py -> test_genesis_creates_chain_with_declared_admin ===
+sha256 before: 96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+mutation applied
+--- RED run: pytest tests/test_reqharness_config.py::test_genesis_creates_chain_with_declared_admin
+FAILED tests/test_reqharness_config.py::test_genesis_creates_chain_with_declared_admin
+============================== 1 failed in 0.21s ==============================
+sha256 after:  96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_config.py::test_genesis_creates_chain_with_declared_admin
+============================== 1 passed in 0.13s ==============================
+
+=== M-CF2 : mapper/reqharness/config.py -> test_load_rejects_unknown_reviewer_role ===
+sha256 before: 96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+mutation applied
+--- RED run: pytest tests/test_reqharness_config.py::test_load_rejects_unknown_reviewer_role
+FAILED tests/test_reqharness_config.py::test_load_rejects_unknown_reviewer_role
+============================== 1 failed in 0.21s ==============================
+sha256 after:  96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_config.py::test_load_rejects_unknown_reviewer_role
+============================== 1 passed in 0.14s ==============================
+
+=== M-CJ1 : mapper/reqharness/canonical.py -> test_canonical_json_typed_schema ===
+sha256 before: 6963e8ad0404cd261e1a518c16e48e747a27430c3d97c89bbf8c27d953d2c2a1
+mutation applied
+--- RED run: pytest tests/test_reqharness_config.py::test_canonical_json_typed_schema
+FAILED tests/test_reqharness_config.py::test_canonical_json_typed_schema - As...
+============================== 1 failed in 0.23s ==============================
+sha256 after:  6963e8ad0404cd261e1a518c16e48e747a27430c3d97c89bbf8c27d953d2c2a1
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_config.py::test_canonical_json_typed_schema
+============================== 1 passed in 0.11s ==============================
+
+=== M-EH1 : mapper/reqharness/config.py -> test_email_sha256_roundtrip ===
+sha256 before: 96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+mutation applied
+--- RED run: pytest tests/test_reqharness_config.py::test_email_sha256_roundtrip
+FAILED tests/test_reqharness_config.py::test_email_sha256_roundtrip - assert ...
+============================== 1 failed in 0.22s ==============================
+sha256 after:  96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+restore: BYTE-IDENTICAL
+--- GREEN run: pytest tests/test_reqharness_config.py::test_email_sha256_roundtrip
+============================== 1 passed in 0.12s ==============================
+
+=== M-YC1 : mapper/reqharness/config.py — census instrument (grep over mapper/reqharness/) ===
+sha256 before: 96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+mutation applied
+--- census run: grep -rnE 'yaml\.load\(|FullLoader' mapper/reqharness/
+mapper/reqharness/config.py:98:        return list(yaml.load(text, Loader=yaml.SafeLoader))
+census verdict: 1 file(s) with a hit — census FAILURE reported
+sha256 after:  96653f0d8375808eb5bc30a9e83a88d5e47f314038aec35ea47f6964e428c43f
+restore: BYTE-IDENTICAL
+--- GREEN run: grep census
+census verdict: 0 hits — clean
+
+=== final GREEN: full tests/test_reqharness_config.py ===
+
+============================== 4 passed in 0.14s ==============================
+=== guard tests after all restores ===
+.................................................                        [100%]
+49 passed in 1.72s
+=== ruff on new files ===
+All checks passed!
