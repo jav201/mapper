@@ -148,9 +148,16 @@ def dump(graph: Graph) -> str:
         if line not in emitted:
             lines.append(line)
             emitted.add(line)
-    # Emit orphan nodes (no edges) so they are not lost
+    # Emit orphan nodes (no edges) so they are not lost.  One LOCAL incident
+    # pass over every edge — including dangling ones (skipped above when
+    # written, but their ids still count) — replaces the per-node `any()`
+    # rescan; the set is built here, NOT read from the model adjacency cache.
+    incident: set[str] = set()
+    for edge in graph.edges:
+        incident.add(edge.parent_id)
+        incident.add(edge.child_id)
     for node in graph.nodes.values():
-        if not any(e.parent_id == node.id or e.child_id == node.id for e in graph.edges):
+        if node.id not in incident:
             label = _escape_mermaid(node.ficha.title) if node.ficha.title and node.ficha.title != node.id else ""
             line = f"    {node.id}[{label}]" if label else f"    {node.id}"
             if line not in emitted:
