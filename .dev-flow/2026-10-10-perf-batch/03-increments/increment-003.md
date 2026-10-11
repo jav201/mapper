@@ -257,3 +257,29 @@ goldens incl. dangling-edge, AT-076 through a real persisting edit gesture via
 | 14 | **Emitted-form assertion** declared | all | ✓ | painted `.plain` bytes before/after cache + vs uncached copy; parity goldens |
 | 15 | **Independent review** names somebody | all | ⚠ | PENDING in §4b (orchestrator assigns) |
 | 16 | **Evidence files** declared | all | ✓ | `.dev-flow/2026-10-10-perf-batch/evidence/m1-red.transcript` |
+
+---
+
+## Code-review follow-up (Inc-M1b, Claude Sonnet review MED)
+
+- **The fix** (`mapper/model.py`, `Graph._adjacency`): the rebuild now assigns
+  the index fields (`_adj_children`, `_adj_parents`) FIRST and the validity
+  token (`_adj_src`, `_adj_len`) LAST — the token is the commit point, so an
+  exception mid-rebuild can never leave a valid token pointing at a stale or
+  empty index.
+- **LOW declined**: tightening `_adj_parents` from `Mapping[str, str]` to
+  `dict[str, str]` is NOT trivial — the totality guard
+  `test_at_p02i_every_model_field_is_classified`
+  (`tests/test_repair_store_boundary.py`) resolves annotations, and a bare
+  `dict[str, str]` classifies as a str-map, tripping the guard's exclusivity
+  assertion.  The `Mapping` spelling is deliberate (documented in §1 above);
+  left unchanged.
+- **New node**: `tests/test_perf_adjacency.py::test_mid_rebuild_failure_leaves_token_invalid`
+  — a one-shot descriptor raises from `__set__` on `Graph._adj_children`
+  between the old token and index assignments; caught, the next lookup must
+  equal the brute-force reference.  RED under the old ordering (token
+  committed before the crash → stale warm-up index served), GREEN under the
+  fix.  RED transcript (mutation → FAIL → sha256-verified byte-identical
+  restore → GREEN): `.dev-flow/2026-10-10-perf-batch/evidence/m1b-red.transcript`
+  — sha256 `55b425bdc501b6a0c3f57ab8b09e67a6611340cd355bc6f609bd843b422bd5a6`.
+- **Verification**: `python -B -m pytest -q -p no:cacheprovider tests/test_perf_adjacency.py tests/test_perf_dump.py tests/test_repair_store_boundary.py tests/test_model.py` → 128 passed; `ruff check mapper/model.py tests/test_perf_adjacency.py` → clean.
