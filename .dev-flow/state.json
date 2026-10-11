@@ -96,7 +96,7 @@
   ],
   "guided": false,
   "current_station": "P6",
-  "phase_status": "in-progress",
+  "phase_status": "awaiting-sync",
   "stations_active": [
     "P0",
     "ARQ",
@@ -242,6 +242,12 @@
       "date": "2026-10-11",
       "decision": "P5 post-mortem written; open items B-124, B-125, B-126 (widened), B-127; standing authorization",
       "notes": "05-postmortem.md"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-11",
+      "decision": "P6 docs approved; PR #22 squash-merged as ecd77f7 (single squashed commit by operator ruling: public repo, intermediate commits carry personal data and stay local); standing authorization",
+      "notes": "06-docs/; merge ecd77f7; batch record cites local SHAs by design"
     }
   ],
   "standing_authorization": {
