@@ -90,7 +90,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P3",
+  "current_station": "DDR",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -203,6 +203,11 @@
       "station": "PDR",
       "date": "2026-10-10",
       "decision": "PDR sealed approved with conditions C1-C10 (PDR-2026-10-10-perf-batch, D1-D5); C10 goldens-at-base capture owed at the trunk before the lanes fork"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-10",
+      "decision": "P3 approved (self-approved): increments 001 (base goldens) + lanes R (002 clip, 004 layout memo) and M (003 adjacency cache + follow-up, 005 linear dump) built in parallel worktrees by Kimi; code reviews APPROVE / APPROVE-WITH-NITS, 0 HIGH; join gate run 1 3222 passed / 1 failed (A3 pin) fixed in 084d7b7, run 2 in progress"
     }
   ],
   "standing_authorization": {
