@@ -90,7 +90,7 @@
     }
   ],
   "guided": false,
-  "current_station": "P4",
+  "current_station": "P6",
   "phase_status": "in-progress",
   "stations_active": [
     "P0",
@@ -213,6 +213,16 @@
       "station": "DDR",
       "date": "2026-10-10",
       "decision": "DDR sealed approved (DDR-2026-10-10-perf-batch): lanes R and M joined, crossed census clean (each lane touched only its files; M-M3 empty); architect + qa approved with conditions, applied at 8bea264 (title arm reddens under M-R2c, wire cap 61,500, HLR-PERF.1 wording LED .5, B-120), re-review approved; join gate run 2 3223 passed / 0 failed"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-10",
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): final gate run 2 at e5a2a7f 3223 passed / 3 xfailed / 0 failed; deterministic oracles (wire 23,983,998 -> 12,264; layout 10 -> 1; dump 18,003,000 -> 11,998) and wall-clock (DeepSeek, interleaved: mount 3.9x, keys 3.8-4.1x, save 3.5x, dense render 48x, load unchanged); qa-reviewer approve-with-conditions, applied"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-10",
+      "decision": "P5 close approved (05-postmortem.md): first batch run in parallel lanes (R, M) with a clean crossed census; Lane S withdrawn (B-118); carried B-118, B-120; 11 PERF ids folded into the canon (3 withdrawn)"
     }
   ],
   "standing_authorization": {
