@@ -208,10 +208,13 @@ class Graph:
         for edge in self.edges:
             children.setdefault(edge.parent_id, []).append(edge.child_id)
             parents.setdefault(edge.child_id, edge.parent_id)
-        self._adj_src = self.edges
-        self._adj_len = len(self.edges)
+        # Index first, token LAST: the token is the commit point.  An
+        # exception mid-rebuild must never leave the (valid) token pointing at
+        # a stale or empty index.
         self._adj_children = children
         self._adj_parents = parents
+        self._adj_src = self.edges
+        self._adj_len = len(self.edges)
         return children, parents
 
     def children_of(self, node_id: str) -> list[str]:

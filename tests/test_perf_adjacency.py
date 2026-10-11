@@ -359,6 +359,52 @@ def test_census_in_place_forms(tmp_path, form):
     )
 
 
+# --- TC-M5 (code-review follow-up, Inc-M1): mid-rebuild failure ---------------
+# `m1b-red.transcript` — token-last ordering is the commit point.
+
+
+def test_mid_rebuild_failure_leaves_token_invalid(monkeypatch):
+    """A crash between the index build and the token must not publish a token
+    valid against a stale index (code-review finding on `_adjacency`:
+    the old code assigned `_adj_src`/`_adj_len` BEFORE `_adj_children`/
+    `_adj_parents`).
+
+    A one-shot descriptor on `Graph._adj_children` raises from `__set__` the
+    first time the rebuilt index is stored — landing BETWEEN the old token
+    assignment and the old index assignment.  Caught, the next lookup must
+    recompute cleanly: under the OLD ordering the token was already committed,
+    so the next call hit the STALE warm-up index and served pre-mutation
+    answers (this node is RED there — `m1b-red.transcript`); under the fixed
+    ordering the token is assigned LAST, so the failed rebuild left the cache
+    invalid and the next lookup rebuilds.
+    """
+    g = _wide(10)
+    g.children_of("n0")  # warm: token valid, index holds the 9-edge graph
+    g.add_edge(Edge("n3", "n4"))  # mutation: the token goes stale
+
+    class _FailOnce:
+        def __init__(self):
+            self._armed = True
+
+        def __get__(self, obj, objtype=None):
+            if obj is None:
+                return self
+            return obj.__dict__["_adj_children"]
+
+        def __set__(self, obj, value):
+            if self._armed:
+                self._armed = False
+                raise RuntimeError("simulated crash mid-rebuild")
+            obj.__dict__["_adj_children"] = value
+
+    # The class attribute does not exist (default_factory field), so
+    # `raising=False`; monkeypatch deletes it again on teardown.
+    monkeypatch.setattr(Graph, "_adj_children", _FailOnce(), raising=False)
+    with pytest.raises(RuntimeError, match="simulated crash mid-rebuild"):
+        g.children_of("n4")  # miss → rebuild → the one-shot crash fires
+    _assert_matches_reference(g)  # next lookup recomputes from scratch
+
+
 # --- TC-M4: LOW-10 — minimap/outline bytes byte-stable across the cache -------
 
 

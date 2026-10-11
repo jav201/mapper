@@ -1,0 +1,26 @@
+097f1cecddb290c2948fb357f874af42bd4270a82fa7207acd6b1a3608f21260 *mapper/model.py
+097f1cecddb290c2948fb357f874af42bd4270a82fa7207acd6b1a3608f21260 *.dev-flow/2026-10-10-perf-batch/evidence/m1b-model-fixed.py
+MUTATION APPLIED: token-first ordering restored (pre-fix)
+--- RED run under old ordering ---
+        }
+        for nid in ids:
+>           assert graph.children_of(nid) == children.get(nid, []), (
+                f"children_of({nid!r}) drifted from the linear-scan reference"
+            )
+E           AssertionError: children_of('n3') drifted from the linear-scan reference
+E           assert [] == ['n4']
+E             
+E             Right contains one more item: 'n4'
+E             Use -v to get more diff
+
+tests\test_perf_adjacency.py:103: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_perf_adjacency.py::test_mid_rebuild_failure_leaves_token_invalid
+1 failed in 0.46s
+--- sha256 restore check (must match the pre-mutation digest) ---
+097f1cecddb290c2948fb357f874af42bd4270a82fa7207acd6b1a3608f21260 *mapper/model.py
+097f1cecddb290c2948fb357f874af42bd4270a82fa7207acd6b1a3608f21260 *.dev-flow/2026-10-10-perf-batch/evidence/m1b-model-fixed.py
+--- GREEN run under fixed ordering ---
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.30s
