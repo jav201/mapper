@@ -206,7 +206,7 @@ git diff --stat 5cde04e -- mapper/views   # M-M3: must print nothing
 
 | Field | Value |
 |---|---|
-| **Independent review** | PENDING — orchestrator assigns `code-reviewer` at the batch gate |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) **APPROVE-WITH-NITS**, 0 HIGH — MED: token assigned before the index on rebuild → fixed in the follow-up `cd9cad2` (token last, new node reddens under the old order), re-reviewed **APPROVE**; LOWs: census alias limits (documented), `_adj_parents` annotation |
 
 ---
 
