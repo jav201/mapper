@@ -1,1 +1,2 @@
 .dev-flow/*/evidence/** -text
+tests/goldens/** -text

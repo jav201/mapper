@@ -1,0 +1,182 @@
+=== step: open (cursor root) ===
+◆ mapper · atlas · concept map
+2000 nodes  ▽ 1995 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0005
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== step: l (cursor c0001) ===
+◆ mapper · atlas · concept map
+2000 nodes  ▽ 1995 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0005
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== step: j (cursor c0002) ===
+◆ mapper · atlas · concept map
+2000 nodes  ▽ 1995 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0005
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== step: j (cursor c0003) ===
+◆ mapper · atlas · concept map
+2000 nodes  ▽ 1995 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0005
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== step: j (cursor c0004) ===
+◆ mapper · atlas · concept map
+2000 nodes  ▽ 1995 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0005
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== step: j (cursor c0005) ===
+◆ mapper · atlas · concept map
+2000 nodes  ▽ 1995 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0005
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=== step: archive x y then l (cursor c0001) ===
+◆ mapper · atlas · concept map
+1999 nodes  ▽ 1994 out of view
+
+
+
+    ┌───────────┬───────────┬───────────┬───────────┬───
+▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …    ▐ hijo …
+ m0001       m0002       m0003       m0004       m0006
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

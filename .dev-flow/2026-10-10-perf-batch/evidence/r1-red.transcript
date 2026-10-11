@@ -1,0 +1,121 @@
+# Inc-R1 RED proofs + verification transcript — Lane R, batch 2026-10-10-perf-batch
+
+Worker: Kimi (kimi-code/kimi-for-coding) via the kimi CLI. All commands run from
+the worktree root; all paths relative. Product change under test: span clipping
+in `mapper/canvas.py` (`Canvas.elbow_down`, `Canvas.edge`). Bytecode cache off
+(`python -B`, `-p no:cacheprovider`).
+
+## 0 · The product change (GREEN state)
+
+`mapper/canvas.py`: both span loops now clip to the canvas rectangle BEFORE
+iterating (`edge`: `range(max(0, min(y0,y1)), min(h-1, max(y0,y1)) + 1)`;
+`elbow_down`: vertical drop `range(max(0, y0+1), min(ybus, h))` under a
+`0 <= ybus < h` guard, bus row `range(max(0, xa+1), min(xb, w))`). Every skipped
+cell is one `wire` would have dropped (`canvas.py:107-109`), so painted cells
+stay byte-identical.
+
+sha256 of the shipped `mapper/canvas.py` (before any mutation, and restored to
+after every mutation):
+
+    d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2 *mapper/canvas.py
+
+## 1 · GREEN verification (final, post-restore)
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py tests/test_perf_goldens_manifest.py tests/test_mod_parity.py tests/test_repair_golden_census.py
+    .............................                                            [100%]
+    29 passed in 17.39s
+
+    $ ruff check mapper/canvas.py tests/test_perf_paint_clip.py
+    All checks passed!
+
+First run of the new file alone (with -s to print the measured counts):
+
+    $ python -B -m pytest -q -p no:cacheprovider -s tests/test_perf_paint_clip.py
+    ...............
+    wire calls for l,j on wide-2000 at 118x34 (counter reset after mount): 12264 (baseline 23983998, cap 1200000)
+    .
+    AT-075 wire calls (l,j, counter reset after mount): 12264
+    .
+    17 passed in 7.49s
+
+## 2 · MEASURED wire count and geometry (AT-075, recorded per LLR-PERF.1.1)
+
+- Session: wide-2000 (`build_wide(2000)`, one root + 1999 children), terminal
+  geometry 118x34 (`run_test(size=(118, 34))`), real keys `l` then `j` through
+  `MapperApp(tmp_path)`; counting wrapper on `Canvas.wire`; counter RESET after
+  mount so mount paints are not charged.
+- Measured: **12,264 `Canvas.wire` calls** for the two keypresses.
+- Cap asserted: `<= 1,200,000` (requirement; tightened from 4,800,000 so a
+  Y-only clip fails).
+- Baseline for the same session pre-change: 23,983,998 calls (PERF0C SS7.1) —
+  the shipped clip is ~1/1957 of the baseline. Round-2 probe p4 at wide-2000,
+  one render: no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547 —
+  the measured 12,264 ≈ 2 x 6,132 matches the x-clipped order exactly.
+
+## 3 · RED proof 1 — M-R1b (non-equivalent: clamp bus upper bound to min(xb, w-1))
+
+Mutation: `mapper/canvas.py` bus loop `min(xb, self.w)` -> `min(xb, self.w - 1)`
+(drops the in-bounds tail cell (w-1, ybus) whenever xb >= w). Copy of the
+shipped file kept at `.dev-flow/2026-10-10-perf-batch/evidence/r1-canvas-clipped.py`.
+
+    $ sha256sum mapper/canvas.py   # BEFORE
+    d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2 *mapper/canvas.py
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality
+    FAILED tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality[case1]
+    1 failed, 8 passed in 0.38s        # case1 = bus span reaching past the right edge
+
+    $ cp .dev-flow/2026-10-10-perf-batch/evidence/r1-canvas-clipped.py mapper/canvas.py
+    $ sha256sum mapper/canvas.py   # AFTER restore — byte-identical
+    d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2 *mapper/canvas.py
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py::test_bare_canvas_clip_equality
+    9 passed in 0.36s
+
+Verdict: KILLED by `test_bare_canvas_clip_equality` — the mutant drops one
+in-bounds cell; the other 8 in-bounds shapes stay green (one mutation, one
+conjunct). (The render-grid identity node would also catch it via the
+right-edge-hugging goldens; the bare-canvas node is the named oracle.)
+
+## 4 · RED proof 2 — Y-ONLY clip vs the cap
+
+Mutation: `mapper/canvas.py` bus row x-loop unclipped —
+`range(max(0, xa + 1), min(xb, self.w))` -> `range(xa + 1, xb)` (y loops still
+clipped; painted bytes stay identical, so only the count can fail).
+
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py::test_at_075_keypress_wire_budget
+    AT-075 wire calls (l,j, counter reset after mount): 23983998
+    FAILED tests/test_perf_paint_clip.py::test_at_075_keypress_wire_budget - AssertionError...
+    1 failed in 17.21s
+
+    $ cp .dev-flow/2026-10-10-perf-batch/evidence/r1-canvas-clipped.py mapper/canvas.py
+    $ sha256sum mapper/canvas.py   # AFTER restore — byte-identical
+    d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2 *mapper/canvas.py
+
+Verdict: KILLED by the wire cap — the x-axis carries the whole gain (23,983,998
+calls, exactly the unclipped baseline). The golden-equality conjunct of the
+same node stayed green under this mutant, as designed (painted bytes do not
+change); the count conjunct reddens.
+
+## 5 · RED proof 3 — M-R1a (remove the clip entirely)
+
+Mutation: `mapper/canvas.py` restored to the HEAD (pre-change, unclipped) body.
+
+    $ git show HEAD:mapper/canvas.py > mapper/canvas.py   # clip removed
+    $ python -B -m pytest -q -p no:cacheprovider tests/test_perf_paint_clip.py::test_wire_count_budget
+    wire calls for l,j on wide-2000 at 118x34 (counter reset after mount): 23983998 (baseline 23983998, cap 1200000)
+    FAILED tests/test_perf_paint_clip.py::test_wire_count_budget - AssertionError...
+    1 failed in 16.76s
+
+    $ cp .dev-flow/2026-10-10-perf-batch/evidence/r1-canvas-clipped.py mapper/canvas.py
+    $ rm .dev-flow/2026-10-10-perf-batch/evidence/r1-canvas-clipped.py
+    $ sha256sum mapper/canvas.py   # AFTER restore — byte-identical to the shipped clip
+    d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2 *mapper/canvas.py
+
+Verdict: KILLED by the wire-count budget oracle (23,983,998 > 1,200,000).
+
+## 6 · Restore check (all three mutations)
+
+sha256 BEFORE mutation == sha256 AFTER restore in every proof:
+`d354bd46…4838a2 == d354bd46…4838a2` — byte-identical restore, then the full
+GREEN verification of §1 re-run on the restored file.
