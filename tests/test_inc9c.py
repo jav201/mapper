@@ -405,9 +405,9 @@ async def test_inc9c_ux_f4_home_reads_its_labels_from_the_seat(tmp_path):
         bar = screen.query_one(KeyBar)
         door_text = screen._empty_text().plain  # noqa: SLF001
     assert bar.groups == keymap.groups_for_keybar(keybar_groups(keymap.SCOPE_HOME)), bar.groups
-    doors = [b for b in keymap.bindings_for(keymap.SCOPE_HOME) if b.key in "cpntif"
+    doors = [b for b in keymap.bindings_for(keymap.SCOPE_HOME) if b.key in "cpntifR"
              and b.group == "doors"]
-    assert len(doors) == 6, doors
+    assert len(doors) == 7, doors
     for b in doors:
         assert f"{b.glyph} {b.label}" in door_text, (b.glyph, b.label, door_text)
     assert [g for g, _ in bar.groups][-1] == keymap.group_header("app")

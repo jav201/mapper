@@ -99,6 +99,17 @@ ALLOWED_OUTSIDE_APP = {
     # `2026-10-09-modular-batch` A4: `HomeScreen` moved out of `app.py` with the two
     # osopen names its CSV-import door reads (ARCHITECTURE §3 `screens` row).
     "screens/home.py": {"safe_local_path", "PATH_NOT_SUPPORTED"},
+    # `2026-10-11-reqharness-batch` (ARQ amendment, R8/R19): the headless
+    # reqharness core reuses the ONE containment rule — `confine_reason`
+    # (reviews.py, the event-directory listing; config.py, the shared
+    # confined event-file reader the chain/pending stores read through) and
+    # `is_link` (reviews.py, the event-directory listing; audit.py, the
+    # repo-argument link probe).  ARCHITECTURE §3 names this the core's
+    # single inbound edge; the AST census mirrors it so a new osopen name
+    # fails loudly.
+    "reqharness/audit.py": {"is_link"},
+    "reqharness/config.py": {"confine_reason"},
+    "reqharness/reviews.py": {"confine_reason", "is_link"},
 }
 
 

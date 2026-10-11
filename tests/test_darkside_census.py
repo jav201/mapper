@@ -242,6 +242,36 @@ CONFORMING_SEVERITY = {
     (ANY_HOME, "visual = darkside.Text.assemble((self.draft_prefix, darkside.ALERT), visual)"),
     ("mapper/widgets/rail.py", "darkside.ALERT,"),
     ("mapper/widgets/rail.py", 'parts.append((f"{missing:>3}", darkside.WARN))'),
+    # `2026-10-11-reqharness-batch` RH6a — the roles screen: FOURTEEN sites
+    # (40 -> 54), each judged by reading the line against WARN's and ALERT's
+    # declared jobs.  The screen makes one consistent split: the CHAIN STATE
+    # when it cannot proceed (no repo, tampered, forked) names ALERT — failure
+    # or blockage, the item cannot proceed as it stands — while every
+    # RECOVERY NOTICE, PENDING TOGGLE and NOT-READY VERDICT names WARN —
+    # outstanding attention, work pending and nothing failed.  Judged one by
+    # one: `_chain_word`'s unverified branch paints the core status word
+    # ALERT (the chain is blocked); the no-repo status chip and the no-repo
+    # band lead paint the named state ALERT for the same reason; the body
+    # degradation line, the no-declared-person viewer suffix, the viewer
+    # qualifier style, the two pending-glyph cells, the legend swatch for
+    # the pending glyph, the `pending (N):` prefix with its `awaiting admin
+    # approval` tail and the not-ready verdict word are all work an operator
+    # still owes or an approval still pending — WARN verbatim.  SAGE's
+    # ready-branch is SAGE's own declared job and is not adjudicated here.
+    ("mapper/screens/roles.py", "return darkside.plain(snap.status), darkside.ALERT"),
+    ("mapper/screens/roles.py", "style = darkside.MUT if ok else darkside.WARN"),
+    ("mapper/screens/roles.py", '(" \\u2014 no declared person", darkside.WARN),'),
+    ("mapper/screens/roles.py", '(" chain ", f"bold {darkside.GROUND} on {darkside.ALERT}"),'),
+    ("mapper/screens/roles.py", '(f" {_NO_REPO}", darkside.ALERT),'),
+    ("mapper/screens/roles.py", "return Text(darkside.plain(message), style=darkside.WARN)"),
+    ("mapper/screens/roles.py", "glyph, colour = GLYPH_PENDING_ADD, darkside.WARN"),
+    ("mapper/screens/roles.py", "glyph, colour = GLYPH_PENDING_REMOVE, darkside.WARN"),
+    ("mapper/screens/roles.py", '(f" {GLYPH_PENDING_ADD} ", darkside.WARN), ("pending toggle   ", darkside.MUT),'),
+    ("mapper/screens/roles.py", '(f"{_NO_REPO} \\u00b7 ", darkside.ALERT),'),
+    ("mapper/screens/roles.py", "(darkside.plain(snap.verdict), darkside.WARN),"),
+    ("mapper/screens/roles.py", '(prefix, f"bold {darkside.WARN}"), (newest, darkside.INK),'),
+    ("mapper/screens/roles.py", "(tail, darkside.WARN), (extra, darkside.MUT),"),
+    ("mapper/screens/roles.py", "darkside.SAGE if snap.verdict == release.VERDICT_READY else darkside.WARN),"),
 }
 
 CONFORMING_BLUE = {
@@ -374,7 +404,13 @@ def test_hue_census_every_severity_and_busy_site_is_classified():
     # 38 -> 40 in data-safety Inc-1b (2026-10-08): the unsaved-draft WARN style
     # (pending) and the hidden-card hint prefix in ALERT (operator ruling R8),
     # both judged and registered above.
-    assert len(sites) == 40, f"derived {len(sites)} severity/busy lines, expected 40"
+    # 40 -> 54 at `2026-10-11-reqharness-batch` RH6a: FOURTEEN sites, all in
+    # `mapper/screens/roles.py`, judged line by line and registered in
+    # CONFORMING_SEVERITY above — the unverifiable chain state (no repo,
+    # tampered, forked) paints ALERT, every recovery notice, pending toggle
+    # and not-ready verdict paints WARN; the register block carries the
+    # per-site judgements.
+    assert len(sites) == 54, f"derived {len(sites)} severity/busy lines, expected 54"
 
     mobile = _mobile_homes()
     unclassified = [

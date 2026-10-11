@@ -139,6 +139,20 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("draft", "s"): ("save", "save", "s", "draft", False),
     ("draft", "d"): ("discard", "discard", "d", "draft", False),
     ("draft", "escape"): ("stay", "stay", "esc", "draft", False),
+    # ReqHarness batch `2026-10-11-reqharness-batch` (increment RH6a,
+    # HLR-RH.8): the roles door on home and the roles scope — the matrix
+    # cursor, `space` propose, and `q`/`esc` back.  Increment RH6b adds the
+    # admin `a`/`r` pending-resolution rows (LLR-RH.8.6).
+    ("home", "R"): ("roles", "roles", "R", "doors", False),
+    ("roles", "a"): ("approve", "approve", "a", "roles", False),
+    ("roles", "r"): ("reject", "reject", "r", "roles", False),
+    ("roles", "escape"): ("home", "back", "esc", "roles-leave", False),
+    ("roles", "h"): ("prev_role", "previous role", "h", "roles", False),
+    ("roles", "j"): ("next_person", "next person", "j", "roles", False),
+    ("roles", "k"): ("prev_person", "previous person", "k", "roles", False),
+    ("roles", "l"): ("next_role", "next role", "l", "roles", False),
+    ("roles", "q"): ("home", "back", "q", "roles-leave", False),
+    ("roles", "space"): ("propose", "propose change", "space", "roles", False),
 }
 
 

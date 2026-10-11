@@ -47,6 +47,13 @@ ALLOWED_UNUSED: dict[str, dict[str, str]] = {
             # A4 moved their readers to `screens/**`; tests still import these from mapper.app.
             "ConstructScreen", "PlugRepoScreen", "_ImportPreviewScreen", "_PromptScreen",
             "_TemplateScreen", "keybar_groups",
+            # `2026-10-11-reqharness-batch` RH6a: `RolesScreen` is imported for the
+            # stylesheet's `RolesScreen { ... }` selector and declared in app.py's
+            # `__all__` re-export list (LLR-MOD.3.1) — the same declared-re-export
+            # convention as every screen name above, so it is allowed unused here
+            # for the identical reason; the guard is not weakened, the re-export is
+            # recorded.
+            "RolesScreen",
         )
     },
     "mapper/screens/__init__.py": {

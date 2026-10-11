@@ -75,6 +75,25 @@ def delay_deferred_scroll(monkeypatch):
     monkeypatch.setattr(Widget, "call_after_refresh", late)
 
 
+@pytest.fixture(autouse=True)
+def _drop_ambient_no_color(monkeypatch):
+    """RH6AG — hermetic colour environment.
+
+    The painted-style arms below read TRUECOLOR styles off the composited
+    frame.  Textual builds each app's line filters in ``App.__init__`` from
+    the PROCESS environment: an ambient ``NO_COLOR`` (an operator- or
+    harness-exported convenience variable, meaningless under ``run_test``)
+    appends a ``Monochrome`` filter that desaturates every painted colour.
+    The legend's WARN samples (V35 ``3``, V38 ``░``) are the only NON-gray
+    tokens in these vocabularies, so exactly those members read as unpainted
+    and the four ``test_llr_n16_2_1`` arms redden — in any test order, with
+    no involvement from the roles tests.  The variable is removed for the
+    duration of every test in this module so the app under test is the same
+    in a colour-forcing shell and a plain one.
+    """
+    monkeypatch.delenv("NO_COLOR", raising=False)
+
+
 async def _legend_from_map(app, pilot, *view_keys: str):
     await _open_map(app, pilot, _tree(app))
     for key in view_keys:
@@ -223,6 +242,36 @@ async def test_llr_n16_2_1_every_member_is_painted_in_its_declared_style(tmp_pat
         if not any(glyph.strip() in text and _paints_as(st, style) for text, st in painted)
     ]
     assert not unpainted, f"members not painted in their declared style: {unpainted}"
+
+
+async def test_rh6ag_ambient_no_color_cannot_desaturate_legend_samples(tmp_path):
+    """RH6AG root-cause pin: the legend's non-gray samples paint in their
+    declared truecolor style even when the AMBIENT shell exports
+    ``NO_COLOR``.
+
+    The module fixture drops the variable before any ``MapperApp`` is
+    constructed, so the app's line filters never gain Textual's ``Monochrome``
+    desaturation.  Without the fixture this node fails in any shell that
+    exports ``NO_COLOR``: the WARN members (the only non-gray tokens in the
+    vocabulary) read back as grayscale while every gray token passes the
+    filter unchanged, so they alone report as unpainted.
+    """
+    view = darkside.VIEW_NAMES["canvas"]
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=SIZE) as pilot:
+        await _legend_from_map(app, pilot)
+        assert app.screen.view == view
+        painted = await _harvest(app, pilot, _painted_segments,
+                                 region_id="#help-vocabulary")
+
+    members = [m for m in vocabulary_for(view) if m[1] and m[3] == "WARN"]
+    assert members, "the fixture view gained no WARN sample — the pin is blind"
+    unpainted = [
+        (vid, glyph) for vid, glyph, _label, style in members
+        if not any(glyph.strip() in text and _paints_as(st, style)
+                   for text, st in painted)
+    ]
+    assert not unpainted, f"WARN samples desaturated (ambient NO_COLOR leaked): {unpainted}"
 
 
 # ---------------------------------------------------------------------------
