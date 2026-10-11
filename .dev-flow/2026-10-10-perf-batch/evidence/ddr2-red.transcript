@@ -1,0 +1,115 @@
+# DDR follow-up RED transcript — batch 2026-10-10-perf-batch (unit PERFDDR2)
+
+DDR conditions applied after the architect (Claude Opus) + qa-reviewer (Claude Sonnet)
+approve-with-conditions pass. Two test-only changes were landed first:
+
+1. qa MED-2 — `tests/test_perf_layout_memo.py` `[title]` arm gains a RENDERER-LEVEL
+   full-text compare (`screen.renderer.render(screen.graph, state).plain` vs a fresh
+   `LayeredRenderer` at the app's own `_view_state`), because the region-clipped canvas
+   compare is blind to geometry that never reaches the viewport (measured at 118x34:
+   the fold-tree canvas is header-only, `r2-red.transcript` §5).
+2. qa LOW-4 — `tests/test_perf_paint_clip.py` `WIRE_CAP` tightened 1,200,000 -> 61,500
+   = 5x the measured 12,264 (61,320), rounded up; derivation stated in the node's
+   docstring.
+
+All runs: `python -B -m pytest -q -p no:cacheprovider <node>` from the worktree root.
+Product mutations are transient; every restore is checked by sha256 (§0, §7).
+
+## 0 · Shipped digests (before any mutation)
+
+    $ sha256sum mapper/views/layered.py mapper/canvas.py
+    3e34fd90426b30fc9dbdf4dc8ade90de8ba7404ab232c58283c124d6e8e04743 *mapper/views/layered.py
+    d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2 *mapper/canvas.py
+
+## 1 · GREEN baseline under the two test changes (no product mutation)
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[title]" "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize]"
+    2 passed in 4.66s
+
+    $ python -B -m pytest -q -s -p no:cacheprovider tests/test_perf_paint_clip.py::test_wire_count_budget tests/test_perf_paint_clip.py::test_at_075_keypress_wire_budget
+    wire calls for l,j on wide-2000 at 118x34 (counter reset after mount): 12264 (baseline 23983998, cap 61500)
+    AT-075 wire calls (l,j, counter reset after mount): 12264
+    2 passed in 6.17s
+
+Measured 12,264 <= cap 61,500 (5x + rounding) with headroom; the tightened cap does not
+flake on the shipped code.
+
+## 2 · RED proof M-R2c — cache the SCALED layout (qa MED-2's proof)
+
+Mutation (`mapper/views/layered.py`, transient): the memo entry stores the SCALED
+layout, `pos={nid: (card_w // 2 + int(cx * (card_w + gap)), lv) ...}`, so a hit
+re-applies the scaling to already-scaled slots.
+
+    $ python -B -m pytest -q -p no:cacheprovider "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[title]" "tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize]"
+    E           AssertionError: a widening title re-applies the scaling on the cached unscaled slots; caching the SCALED layout (M-R2c) reuses stale geometry and must fail this full-text compare
+    tests\test_perf_layout_memo.py:252: AssertionError
+    E       AssertionError: the resized render must byte-equal a fresh renderer's paint
+    tests\test_perf_layout_memo.py:205: AssertionError
+    FAILED tests/test_perf_layout_memo.py::test_memo_invalidation_arms[title] - A...
+    FAILED tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize] - ...
+    2 failed in 4.85s
+
+`[title]` is now RED under M-R2c — the new renderer-level full-text compare sees the
+stale scaled slots; the old region-clipped canvas compare could not (header-only
+canvas, `r2-red.transcript` §5). `[resize]` stays RED as before.
+
+RED -> restored (sha256 == 3e34fd90…e04743, §0) -> 2 passed GREEN (§1).
+
+## 3 · RED proof — Y-ONLY clip (bus row not x-clipped)
+
+Mutation (`mapper/canvas.py`, transient): `elbow_down`'s bus loop iterates
+`range(xa + 1, xb)` — the pre-change unclipped form; the y spans stay clipped.
+
+    $ python -B -m pytest -q -s -p no:cacheprovider tests/test_perf_paint_clip.py::test_wire_count_budget
+    wire calls for l,j on wide-2000 at 118x34 (counter reset after mount): 23983998 (baseline 23983998, cap 61500)
+    E       AssertionError: 23983998 wire calls for two keypresses exceeds the cap 61500 (baseline 23983998)
+    1 failed in 17.45s
+
+RED at the full unclipped baseline — the tightened cap still catches the y-only mutant
+(the x-axis carries the whole gain). RED -> restored (sha256 == d354bd46…4838a2, §0).
+
+## 4 · RED proof — clip REMOVED (both spans unclipped)
+
+Mutation (`mapper/canvas.py`, transient): `edge` and `elbow_down` restored to the
+pre-change loops verbatim (in-test reference forms): y spans `range(min(y0,y1),
+max(y0,y1)+1)` / `range(y0+1, ybus)`, bus row `range(xa+1, xb)`.
+
+    $ python -B -m pytest -q -s -p no:cacheprovider tests/test_perf_paint_clip.py::test_wire_count_budget
+    wire calls for l,j on wide-2000 at 118x34 (counter reset after mount): 23983998 (baseline 23983998, cap 61500)
+    E       AssertionError: 23983998 wire calls for two keypresses exceeds the cap 61500 (baseline 23983998)
+    1 failed in 16.87s
+
+RED. RED -> restored (sha256 == d354bd46…4838a2, §0).
+
+## 5 · RED proof — clip span WIDENED by a margin (partial-regression probe)
+
+Mutation (`mapper/canvas.py`, transient): the vertical-drop clip bounds widened by a
+16-cell margin each side, `range(max(0, y0 + 1 - 16), min(ybus + 16, self.h))` — the
+clip keeps working but visits ~an extra span per edge. (A margin on the BUS row was
+probed first and barely registers on this fixture — adjacent buses overlap — so the
+drop span carries the probe; recorded plainly.)
+
+    $ python -B -m pytest -q -s -p no:cacheprovider tests/test_perf_paint_clip.py::test_wire_count_budget
+    wire calls for l,j on wide-2000 at 118x34 (counter reset after mount): 88226 (baseline 23983998, cap 61500)
+    E       AssertionError: 88226 wire calls for two keypresses exceeds the cap 61500 (baseline 23983998)
+    1 failed in 3.19s
+
+RED: 88,226 ~= 7.2x the measured 12,264 — a partial clip regression, far below the
+~24 M unclipped baseline, still fails the 5x-derived cap. (The old 1,200,000 cap would
+have passed this mutant.) RED -> restored (sha256 == d354bd46…4838a2, §0) ->
+`tests/test_perf_paint_clip.py` 17 passed GREEN.
+
+## 6 · Note on the §1 arm of qa MED-2
+
+The `[title]` arm's app-level canvas compare is KEPT (the emitted-form pin against the
+fresh app session); the renderer-level compare is ADDED alongside it, so the arm now
+bites at both levels. The `test_memo_invalidation_arms` docstring and the module
+docstring say so.
+
+## 7 · Digest ledger
+
+| Item | SHA-256 |
+|---|---|
+| shipped `mapper/views/layered.py` (restored after M-R2c) | `3e34fd90426b30fc9dbdf4dc8ade90de8ba7404ab232c58283c124d6e8e04743` |
+| shipped `mapper/canvas.py` (restored after every clip mutation) | `d354bd46424a0a8d2f459b6d56903eb0df96baff8164a9e74e5b92e3d14838a2` |
+| this transcript | recorded at the increment packet (`03-increments/increment-004.md` "DDR follow-up") |
