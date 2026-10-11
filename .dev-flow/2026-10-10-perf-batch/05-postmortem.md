@@ -16,8 +16,8 @@
 
 | Field | Value |
 |---|---|
-| Gate record | `<the validator command, its exit code, and 0 block · date>` |
-| Gated tree | `<the 40-hex HEAD at the gate · clean — or: dirty — the files>` |
+| Gate record | `python -B -m pytest -q -p no:cacheprovider tests/` (default `addopts`, `pyproject.toml:46`) → exit 0 — **3223 passed / 24 deselected / 3 xfailed / 0 failed in 1802.10s** · 2026-10-10 — stored at `evidence/join-gate-run2-full-suite.transcript` (sha256 `16efbc896201a2dcec3412c282420467064ff6a31144422cc2280eca69080124`; the numbers `04-validation.md` carries) · **FINAL full-suite gate at the closing SHA: `PERF_FINAL_GATE_PENDING`** — the orchestrator's close gate is running in this worktree; the row it stamps replaces this token |
+| Gated tree | join gate run 2 at product `42b79c7` (evidence committed at `b5e7cce`) — the FINAL gate tree is the closing SHA, **PENDING** (`PERF_FINAL_GATE_PENDING`) · `git status --porcelain` was empty at this revision apart from this artifact's own write |
 
 > **This is `full`'s copy of the two rows `close-template.md` §0 carries for `core`, and that
 > file's §0 note is the rule's one home** — `full` is not seeded `05-close.md`, so `V57` reads
@@ -26,11 +26,11 @@
 
 ## 🔑 At a glance (read first)
 
-- **Outcome:** closed clean  /  closed with carry-over  /  needed `<N>` iterations
-- **Top 3:** ① `<what worked>`  ② `<what didn't>`  ③ `<key root cause, if any>`
-- **New control this batch:** `<one line, or "none">`
-- **Open items → next batch:** `<N>` — `<headline of the biggest>`
-- **Metrics:** iterations `<sum>` · findings `<closed>`/`<opened>` · ledger `<base>`→`<post>`
+- **Outcome:** closed with carry-over — the parallel-lane fork worked (crossed census clean, join gate green at run 2), and 4 items carry: B-120 (memo scoping), B-118 (Lane S withdrawal), the load-YAML-bound finding (backlog row B-121 proposed — none existed), the PDR A2 `docs/ARCHITECTURE.md` §4 `Graph`-row note (a trunk act still unlanded). Reviewer cells: PENDING.
+- **Top 3:** ① behaviour-preserving performance at scale, proven the hard way: every painted cell and every `.mmd` byte identical to base-pinned goldens while measured work fell 1,957× (wire calls), 1,500× (dump edge visits) and 10× (layout computations) — deterministic counted-ops oracles, no wall-clock assertions in the suite ② the first parallel-lane fork of the repo — lanes R and M in separate worktrees, two Kimi workers concurrently, disjoint file sets verified by a crossed census at the join ③ Lane S failed its pre-written spike gate honestly: spike PERFS was inconclusive (mount renders 2× before AND after the prototype, wide-2000 unmeasured after the unit timed out), so the lane left the batch to B-118 by ruling — zero sunk-cost shipping.
+- **New control this batch:** the base-pinned counted-operations oracle regime — every threshold is a measured call/iteration count indexed to the P0 baseline (`spike/perf-baseline.md`), every behaviour golden captured on the BASE SHA before any remedy (PDR C10), and every negative control executed RED with a sha256-verified byte-identical restore.
+- **Open items → next batch:** 4 — B-118 (single-render mount design), B-120 (thread the memo into `painted_ids`/`pan_extent`/pan clamp), B-121 (load sidecar parse cost — proposed), the ARCHITECTURE §4 `Graph`-row note (trunk act).
+- **Metrics:** 10 station passes, 2 iterations (P1 ×2, P2 ×2 — `state.json` `decisions_log`) · findings 51 opened / 49 closed / 2 carried-or-declared (+10 PDR conditions, all discharged) · ledger 3157 − 0 + 66 = 3223 passed
 
 > Enough to know the batch's health and what carries forward. Detail below only for the why.
 
@@ -39,62 +39,108 @@
 ## Detail (reference)
 
 ### What worked
-- `<…>`
+- **The deterministic oracle regime.** No wall-clock assertions in the suite (the standing `tests/test_repair_perf_shape.py` rule); every threshold is a counted operation indexed to the P0 measurement: wire calls 23,983,998 → 12,264 (cap 61,500 = 5× measured, tightened at the DDR so a y-only clip AND a 7.2× partial-clip regression both fail), layout computations 10 per 2 renders → 1 memo miss per session, per-dump edge iterations 18,003,000 → 11,998 = 2·E with a [1.8, 2.2] scaling ratio, 100 cached lookups ≤ 1 edge pass. Wall-clock lives only in P4 evidence (`evidence/p4-wallclock.transcript`, base/head interleaved, median of 3: mount 4.89 → 1.24 s (3.9×), `l` 1.75 → 0.43 s (4.1×), `j` 1.78 → 0.47 s (3.8×), save 3.01 → 0.87 s (3.5×), dense p51 render 1.45 → 0.03 s (48.5×), load 2.32 → 2.22 s (1.05× — unchanged, YAML-bound)).
+- **The byte-identity contract held at batch scale.** 26 behaviour goldens + MANIFEST captured on base `5cde04e` BEFORE the lanes forked (PDR C10), sha256-pinned, region-clipped to `#map-canvas`; plus the pre-existing AT-065 parity goldens and `test_repair_golden_census.py` — 0 diffs anywhere in the gate.
+- **The first parallel fork.** Lanes R and M ran in separate worktrees off the stamped trunk, two Kimi workers concurrently; the DDR's crossed census (the one check impossible from inside a lane) verified each lane touched only its own files under `mapper/`, and M-M3 (`git diff 5cde04e unit/perfm1 -- mapper/views` empty) was recorded per lane. B-111's predicted merge hotspots never fired — the lanes were disjoint by module, which is the batch's evidence that B-111's plan matters only when work does NOT split by module.
+- **Every negative control was executed, not asserted.** 16+ named mutations (M-R1a/b, M-R2/b/c/d/e, M-M1a/b/c, M-M2a/b) each RED in a transcript with a sha256-verified byte-identical restore — including the widened census guards (13 planted in-place/alias `edges` forms, 16 planted `nodes` forms).
+- **The pre-written withdrawal ruling saved the batch.** Lane S carried a two-branch gate from P1 (ruling R4): spike proves ncalls=1, else the lane leaves to B-118 with its requirements. The spike resolved the else branch cleanly — requirements, ledger, backlog and PLAN all said the same thing the same day.
 
 ### What didn't / friction
-- `<…>`
+- **Spike PERFS timed out** — its wide-2000 measurement never ran, which is exactly the datapoint B-118 now needs first. Root cause: no hard measurement target and no time budget on the spike unit (see Process findings).
+- **A sub-agent timed out mid-RED** and left the product file in its intended (mutated) state — harmless ONLY because the lane discipline keeps a byte copy of the shipped file for every mutation and restores by sha256. Recorded as a habit to keep, not a near-miss to forget.
+- **CRLF normalisation nearly invalidated the golden manifest** — the goldens were captured before `.gitattributes` marked `tests/goldens/** -text`; the repair `2c64f76` re-materialised line endings only (content verified unchanged via `git diff --ignore-cr-at-eol ac356c7 2c64f76 -- tests/goldens` → empty), but the capture protocol must pin the line-ending policy BEFORE capture (see Process findings).
+- **Join gate run 1 went red** on the A3 census pin (`test_tc_a3_the_census_cardinalities_are_PINNED`, 3222 passed / 1 failed) — the pin was stale the moment the byte-identity arms legitimately added arg-ful renders; fixed test-only in `084d7b7` (pin 65 → 80) and the whole suite re-ran green (run 2). The DDR had pre-marked this re-run a hard close condition, and it was.
+- **The M-R2d control is unreddenable on this interpreter** (address reuse 0/2000 forced allocations) — recorded as a declared escape per ruling R13 rather than a silent pass; id-reuse safety rests on the strong-reference construction plus Lane M's two-replacement script.
+- **Lane-level wide runs not captured** — two lane packets record plainly that their five/six-file verification runs were not saved as lane transcripts; the counts that hold are the per-node RED/GREEN lines and the post-join gate (recorded in the packets, not hidden).
 
 ### Scope drift (planned vs actual)
 | Planned | Actual | Note |
 |---------|--------|------|
-| | | |
+| 3 parallel lanes (R: renderer work · M: store work · S: one paid render at mount) | 2 lanes + a trunk capture increment | Lane S withdrew to B-118 at the pre-written spike gate (ledger `.3`); its requirements/ATs are marked withdrawn, not deleted |
+| Goldens captured per lane | Goldens captured ONCE at the trunk on base `5cde04e` before the fork | PDR C10 / ruling R7 — provenance pinned (base SHA + sha256 per golden), the AT-065 precedent |
+| Load in scope as a measurement case only | Load measured, unchanged, declared out of scope | PERF0C §7.4: `MapStore.load` is 100% YAML `safe_load` of the sidecar (5.41 s of 5.62 s cumulative at wide-6000) — no batch code lies on that path; P4 table states it; backlog row B-121 proposed |
+| `docs/ARCHITECTURE.md` §4 `Graph`-row note at the join (PDR A2, a trunk act) | Not landed | no commit in `5cde04e..HEAD` touches `docs/ARCHITECTURE.md` — deferred to the trunk/orchestrator (see deferred table) |
+| Wire cap 1,200,000 (round-1 tightening) | 61,500 (5× the measured 12,264, rounded up from 61,320) | DDR qa LOW-4: the old cap would pass a ~7.2× partial clip regression (widened-span probe at 88,226, `evidence/ddr2-red.transcript` §5) |
+
+### Parallel-work outcome
+**Lanes CAN run disjoint when the work splits by module.** The fork preconditions (`01-requirements.md` §2.8) demanded disjoint file sets and the intersection test was executed at P1 (`R∩M = R∩S = M∩S = ∅`); the DDR crossed census re-verified it on the shipped diffs. Two Kimi workers ran concurrently without a single merge conflict, and the only shared files were the trunk's PERFG0 artifacts present at both lane bases. Contrast the modular batch (B-111): its seams (keymap seat, `app.py` `__all__`, ARCHITECTURE map, `PATCH_SURFACE`, census baseline) were shared because the work did not split by module — this batch is the counterexample that decides WHEN B-111's plan is needed.
 
 ### Metrics (full)
 | Metric | Value |
 |--------|-------|
-| Iterations per station | `{P0:_,P1:_,P2:_,P3:_,P4:_,P5:_,P6:_}` |
-| Findings opened / closed | `<N>` / `<N>` |
-| Findings by severity (blocker/major/minor) | `<N>/<N>/<N>` |
-| Where caught (P2 / P3 gate / P4) | `<N>/<N>/<N>` |
-| Test ledger (base − D + A = post) | `<…>` |
-| Files touched · increments (cap trips) | `<N>` · `<N>` (`<N>`) |
+| Iterations per station | **10 station passes, 2 iterations** — derivation: `state.json` `decisions_log` has 10 entries for this batch, in order `P0, ARQ, P1, P2, P1 (iteration 1), P2 (round 2), PDR, P3, DDR, P4`; counting stations: P1 ×2, P2 ×2, P0/ARQ/PDR/P3/DDR/P4 ×1 each (`state.json` `iterations_per_station` holds only `P1: 1` — it is not cited for more) |
+| Findings opened / closed | **51 opened / 49 closed / 2 carried-or-declared** — arithmetic per station below; plus **10 PDR conditions C1–C10, all discharged by re-reading at the DDR** (one, C4/M-R2d, discharged as a documented non-determinism escape, not a RED) |
+| Findings per station (severity, with derivation) | **P2 round 1: 6 high / 13 med / 5 minor = 24** — `02-review.md` verdict line (findings A1–A6, B1–B6, HIGH-1, MED-2…MED-9, LOW-10…LOW-12). · **P2 round 2: 6 med / 5 low / 1 recorded = 12 + 1** — `02-review.md` round-2 table (architect: A-076, dump-bound, nodes-guard = med; one-axis, memo-location = low; approvals = recorded-no-severity · qa: 1, 2, 3 = med; 5, 6, 7 = low; 4 = med) = 13 rows, 12 severity-bearing. · **P3 code reviews: 1 med / 8 low = 9** — the four lane packets' independent-review rows: increment-002 APPROVE (2 LOW), increment-003 APPROVE-WITH-NITS (1 MED — token-before-index rebuild, fixed in `cd9cad2` and re-reviewed APPROVE; 2 LOW), increment-004 APPROVE-WITH-NITS (0 HIGH/MED; 3 LOW — naming, O(N) rescale per hit, frozen-`Edge` reliance), increment-005 APPROVE (1 LOW); increment-001 was verified at the DDR by qa + architect with no findings. · **DDR: 1 med (architect — render-path scoping → B-120) / 1 med (qa MED-2 — the `[title]` arm's header-only compare) / 2 low (qa LOW-4 wire cap, qa LOW-5 Lane-S markings) / 1 recorded-⚠ (C4, M-R2d non-determinism) = 5**. Total: 24 + 13 + 9 + 5 = 51. |
+| Where caught (P2 / PDR / P3 / DDR) | P2: 37 (24 + 13) · PDR: 10 conditions (document-level, all discharged) · P3 code reviews: 9 · DDR: 5 (4 applied at `8bea264`, re-review approved; C4 declared) |
+| Test ledger (base − D + A = post) | **3157 − 0 + 66 = 3223 passed; +3 xfailed = 3226 collected** — base at `5cde04e` (join gate's base tree); D = 0 (`git diff -U0 5cde04e HEAD -- tests \| grep '^-.*def test_'` prints nothing — re-run by this unit); A = 66 (re-collected `--collect-only` at `3b84e2c`: 17 + 26 + 18 + 3 + 2 = 66); post gate: `evidence/join-gate-run2-full-suite.transcript` — 3223 passed / 24 deselected / 3 xfailed / 0 failed; slow lane 19 passed (`evidence/join-slow-lane.transcript`) |
+| Files touched · increments (cap trips) | **105 files in `git diff --name-status 5cde04e HEAD`** (96 added + 9 modified + 0 deleted — `git diff --diff-filter=D --name-only 5cde04e HEAD` empty), grouped: product 4 modified (`mapper/canvas.py` +33/−, `mapper/views/layered.py` +128/−, `mapper/model.py` +57/−, `mapper/mermaid.py` +11/−, +203/−26 total per `git diff --shortstat 5cde04e HEAD -- mapper/`) · tests 8 (6 added — `perf_goldens_capture.py`, `test_perf_goldens_manifest.py`, `test_perf_paint_clip.py`, `test_perf_layout_memo.py`, `test_perf_adjacency.py`, `test_perf_dump.py` + 2 modified — `test_a3_census.py`, `test_repair_store_boundary.py`) · goldens 27 added (`tests/goldens/perf/**` MANIFEST + 26) · batch record 61 (7 top-level + 3 design + 5 increment packets + 39 evidence + 7 spike) · flow/canon 9 (`.gitattributes` M — the `-text` golden rule, `BACKLOG.md` M — B-114 note + B-118/B-119/B-120, `state.json` M, 2 csv-safety-batch records) — full enumeration in the C-44 table below · 5 increments · **0 source-file cap trips** (every increment ≤ 2 source files by design; the source budget counts 4 total) |
 
 ### Root causes (only if a phase took ≥2 iterations)
-- `<iteration trigger → root cause>`
+- **P1 iteration 1 ← P2 round-1 `iterate-to-refine`.** Round 1 found 24 findings incl. a FALSE premise (premise 3: `_tree_layout` takes `card_w`, so a naive memo key goes stale on resize/title-edit — HIGH-A1/B2/HIGH-1), a vacuous AT-076 (`ctrl+s` on the map screen is `save_draft`; with no draft it saves nothing — HIGH-A2), an unsatisfiable ≤ 3·(N+E) threshold (HIGH-A3: `MapStore.save`'s own re-parse eats the margin — the csv-safety round-trip check), an equivalent M-R1b mutant (MED-A4), a contradicted Lane S mechanism (B4, measured 6 failing tests), selector ambiguity (MED-2) and golden-provenance gaps (A5/MED-7) — rulings R1–R9 applied in P1 iteration 1 (ledger `.2`), incl. the Lane S spike gate that later withdrew the lane.
+- **P2 round 2 ← the round-1 corrections themselves.** Sharpening the contract exposed the next layer: AT-076 still named a non-persisting gesture (ficha edits are DRAFTs — R10), the ≤ 2E+c bound held only for a LOCAL incident pass, not the cache (probe p3 — R11), the memo location was self-contradictory (instance vs module-global — R12), the resize/title arms named no mutation (R13), the `nodes`-writer side of the memo key had no guard (R14), §5.2 still demanded the withdrawn Lane S scope (R15), the wire-cap rationale was half false (probe p4: x-only carries the whole gain — R16), M-M3 was vacuous as a batch-level check (R17) and the census alias form stated no limits (R18). PDR sealed `approved with conditions` the same iteration (ledger `.4`).
+- **DDR conditions ← the join, not the design.** The two-pass DDR (architect + qa, both read-only) found the render-path overclaim (three module-level readers contradict "no re-layout on a selection-only key" — B-120), the too-loose wire cap, and the header-only `[title]` compare; applied at `8bea264`, re-review approved (ledger `.5`).
 
 ### Process / workflow findings
-> About the dev-flow itself (phases, gates, templates, agents, controls). Feeds workflow improvement — keep separate from product.
-- `<finding → suggested workflow change>`
+> About the dev-flow itself. Each lesson names its owner and route; the deferred table carries one row per open item.
+- **A spike must carry a hard measurement target and a shorter budget.** PERFS had neither: it timed out before measuring the one datapoint (wide-2000 mount renders) that decided its lane, and the timeout is why B-118 reopens with "measure wide-2000 first". Suggested change: the spike template's header requires the target metric(s) and a wall-clock budget; a spike that exhausts its budget reports INCONCLUSIVE with what it measured — exactly what PERFS did, but by accident rather than by design. (Flow-side; route: dev-flow bundle; owner: the operator's flow sessions.)
+- **A sub-agent timing out mid-RED leaves the product in its intended state only because it kept a byte copy.** The restore-by-sha256 habit (copy out → mutate → RED → restore → sha256 compare) turned a timeout into a non-event. Keep the habit; make it the default RED protocol in the increment template. (Flow-side; **DONE as habit** — every transcript this batch shows the digest ledger; owner: every worker unit.)
+- **Byte-pinned goldens must be marked `-text` in `.gitattributes` BEFORE capture.** CRLF normalisation nearly invalidated the MANIFEST sha256s; the repair (`2c64f76`) was content-verified, but the capture protocol (PDR C10) should add the line-ending policy as a step-0 check. (Flow-side; route: dev-flow bundle; owner: the operator's flow sessions.)
+- **The pre-written two-branch gate is what made the Lane S withdrawal clean.** Ruling R4 wrote both branches into PLAN/PDR BEFORE the spike ran, so the inconclusive spike resolved to a recorded withdrawal the same day — requirements, ledger, backlog and PLAN agreed without a re-litigation. (Flow-side; positive finding, no change needed; owner: the architect station.)
+- **Counted-operations oracles travel; wall-clock does not.** Every gate machine can count `wire` calls; no two machines agree on seconds. Keeping wall-clock in P4 evidence only (interleaved base/head, median of 3, one session) made every gate deterministic. (Flow-side; positive finding; owner: the qa-reviewer station.)
 
 ### Product findings
 > About the code/product under development.
-- `<finding>`
+- **What shipped (4 product files, +203/−26):** ① `mapper/canvas.py` — `elbow_down`/`edge` clip every span to the canvas rectangle before iterating (bodies only; signatures frozen) · ② `mapper/views/layered.py` — the UNSCALED `_tree_layout` memoised on the `LayeredRenderer` INSTANCE (strong-reference key: graph, edges +len, nodes +len, root_id, hidden), passed into module-level `_geometry` as an argument; spy `_layout_misses`; scaling re-applied per hit in O(N) · ③ `mapper/model.py` — `Graph` private adjacency cache (`_adj_src is self.edges and len == n` validity token; fresh list from `children_of`; first-match `parent_of`) · ④ `mapper/mermaid.py` — `dump` builds its incident set in ONE local O(N+E) pass (dangling edges counted; local to the call, NOT the cache — a counting wrapper swapping `edges` would send a cache variant cold at 3E).
+- **Measured outcomes (P4, `evidence/p4-wallclock.transcript`, median of 3, interleaved):** mount wide-2000 4.89 → 1.24 s (3.9×) · key `l` 1.75 → 0.43 s (4.1×), `j` 1.78 → 0.47 s (3.8×) · save wide-6000 3.01 → 0.87 s (3.5×) · dense p51 render 1.45 → 0.03 s (48.5×) · load 2.32 → 2.22 s (1.05×, unchanged — YAML-bound, out of scope).
+- **Load is YAML-bound — a finding, not a fix of this batch.** PERF0C §7.4 profiled `MapStore.load` at wide-6000: 5.41 s of 5.62 s cumulative is PyYAML's scanner/parser on the metadata sidecar; mapper's own code is invisible. O(document size) and unavoidable for the format, but it IS the entire cost — the next lever on open latency.
+- **B-120 (declared scoping):** a selection-only keypress still lays out three module-level readers — `painted_ids` (`mapper/views/layered.py:495`), `pan_extent` (`:509`), the pan clamp's `layered_geometry` reader (`mapper/screens/map/panning.py:277`). The batch's claim covers the render path only; the DDR reworded HLR-PERF.1 accordingly.
+- **M-R2d non-determinism (C4 ⚠):** the `id()`-recycle hazard is real on paper and unexercisable on this interpreter (0/2000 forced reuses); safety is by construction (the memo entry pins the old graph) plus Lane M's two-replacement script. Declared, not silently passed.
+- **B-114 (data safety) stayed out of scope** and was confirmed DONE by the csv-safety batch; the perf batch's P0 found its reproduction (slug-collision CSV) and it closed there.
 
 ### Control lineage
-- **New control proposed this batch:** `<control + origin finding>` (status: propose / adopt-next-batch)
-- **Prior controls exercised:** `<which held · which were stress-tested · near-misses>`
+- **New control proposed this batch:** the base-pinned counted-operations oracle regime (thresholds = measured counts indexed to the P0 baseline; goldens captured on the BASE SHA before any remedy; every negative control executed RED with sha256-verified restore; wall-clock quarantined to P4 evidence). **Status: adopt** — in force at every gate this batch.
+- **Prior controls exercised:** the byte-identity oracle AT-065 + golden census (held — 0 diffs in every gate); the function-level no-test-deleted check from B-112(3) (held — D=0 verified by re-running the check); the full-suite gate per join + the post-repair re-run rule from B-112(4) (held — join gate run 1's red pin triggered the `084d7b7` fix and a full re-run, exactly as the rule says); the source-file increment cap (held — 4 source files across 5 increments, 0 trips). **Stress-tested:** the A3 census pin (failed loudly the moment the new byte-identity arms landed — the pin working as designed, updated 65 → 80 test-only).
 
 ### Open / deferred items → next batch
 | Item | Type (process/product) | Reason deferred | Trigger / owner |
 |------|------------------------|-----------------|-----------------|
-| | | | |
+| B-118 — single-render mount (with HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077/077b / US-PERF-003 withdrawn here) | product | spike PERFS inconclusive: 118×34/87×34 render 2× before AND after the prototype, wide-2000 unmeasured (unit timed out), prototype needed a second guarded render site + an A3 pin change | next batch touching the mount path — measure wide-2000 FIRST (`.dev-flow/BACKLOG.md` B-118) |
+| B-120 — thread the renderer memo into `painted_ids`, `pan_extent` and `screens/map/panning.py` | product | screen-side files, outside this batch's two lanes by design (DDR architect MED) | screen-side perf batch (`mapper/screens/map/panning.py` + the two module-level readers in `mapper/views/layered.py`) — disjoint from the perf lanes |
+| B-121 (proposed) — load sidecar parse cost | product | load is 100% YAML `safe_load` of the metadata sidecar (PERF0C §7.4); no batch code lies on that path; no backlog row existed, one is proposed here | store-side batch — lazy/metadata-only parse or a cheaper sidecar codec |
+| `docs/ARCHITECTURE.md` §4 `Graph`-row note (PDR A2 — a trunk act at the join) | product | never inside a lane; the join landed without it | trunk/orchestrator before the batch folder archives |
+| Spike template: hard measurement target + time budget | process | PERFS timed out before its deciding datapoint; the template change belongs to the flow's bundle | dev-flow bundle — owner: the operator's flow sessions |
+| Goldens `-text` policy before capture (PDR C10 step-0) | process | the CRLF near-miss (`2c64f76` repair, content-verified) | dev-flow bundle — owner: the operator's flow sessions |
+| RED-protocol default: byte copy out + sha256 restore (the timeout near-miss habit) | process | already the worker habit; belongs in the increment template | dev-flow bundle — owner: the operator's flow sessions |
 
 ### Working-file reconciliation (C-44) — MANDATORY, every file this batch touched
-> **Run it as a sweep, never from memory:** `git status --short` in **every repository touched, auxiliary repos outside the project tree included** (skills / commands / config are where this hides) · `git log @{u}..HEAD` for commits that exist but were never pushed · an open-PR check for any branch other work depends on. **Report pre-existing uncommitted changes as FOUND, never fold them into this batch's commit.** A tracked file already modified when the batch began goes in the `Found before the batch` field below the table, not in it (`templates/guides/close-template.md` §3 holds the rule).
->
-> **A commit that never lands is NOT a terminal state.** Work that is finished but unlanded is indistinguishable from work never done — and it makes the state files the next batch reads assert something false, which that batch then inherits as a premise (**C-43 §2.7**).
+> **Run it as a sweep, never from memory:** `git status --short` in **every repository touched, auxiliary repos outside the project tree included** · `git log @{u}..HEAD` for commits that exist but were never pushed · an open-PR check for any branch other work depends on. **Report pre-existing uncommitted changes as FOUND, never fold them into this batch's commit.**
+
+Base verified: **`5cde04e`** (the committed pre-batch tip — `state.json` base; the join gate also ran the suite in a `../perf-base` checkout of it). Sweep: `git diff --name-status 5cde04e HEAD` = **105 files** (96 A + 9 M + 0 D — counts from `awk '{print $1}' | sort | uniq -c`), all grouped below; `git status --porcelain` empty at this revision apart from this artifact's own write; no auxiliary repos touched by this batch; unpushed-commit check is the orchestrator's (it owns the push).
 
 | Repo | File(s) | Terminal state | Landing / backlog ref |
 |------|---------|----------------|-----------------------|
-| `<repo>` | `<path>` | ✅ committed + landed \| 🗑️ discarded \| 📋 in backlog | `<PR # / merge SHA / backlog line>` |
+| mapper | product: `mapper/canvas.py` (M — span clip, +33/−) · `mapper/views/layered.py` (M — unscaled-layout memo, +128/−) · `mapper/model.py` (M — adjacency cache, +57/−) · `mapper/mermaid.py` (M — linear incident pass, +11/−) — 4 files, +203/−26 (`git diff --shortstat 5cde04e HEAD -- mapper/`) | ✅ committed + landed | lane R `4da1f94` (clip, memo) · lane M `42b79c7` + `cd9cad2` (cache, dump) — HEAD `3b84e2c` |
+| mapper | tests: 6 added — `tests/perf_goldens_capture.py` · `tests/test_perf_goldens_manifest.py` · `tests/test_perf_paint_clip.py` (17 nodes) · `tests/test_perf_layout_memo.py` (26) · `tests/test_perf_adjacency.py` (18) · `tests/test_perf_dump.py` (3) + 2 modified — `tests/test_a3_census.py` (pin 65 → 80, `084d7b7`) · `tests/test_repair_store_boundary.py` — 8 files | ✅ committed + landed | `ac356c7` (capture) · lane increments · `084d7b7` |
+| mapper | goldens: `tests/goldens/perf/**` — 27 added (MANIFEST.json + 26 byte-pinned goldens; `-text` rule `.gitattributes`, `2c64f76`) | ✅ committed + landed | `ac356c7`, `2c64f76` |
+| mapper | `.gitattributes` (M — `tests/goldens/** -text`) | ✅ committed + landed | `2c64f76` |
+| batch record | `.dev-flow/2026-10-10-perf-batch/` — 61 files: 7 top-level (`PLAN.md`, `00-checklists.md`, `01-requirements.md`, `01-requirements-ledger.md`, `02-review.md`, `04-validation.md`, `05-postmortem.md`) · 3 design (`design/design-proposal.md`, `PDR-2026-10-10-perf-batch.md`, `DDR-2026-10-10-perf-batch.md`) · 5 increment packets (`03-increments/increment-001..005.md`) · 39 evidence files (incl. `join-gate-run1/2-full-suite.transcript`, `join-slow-lane.transcript`, `p4-wallclock.transcript`, `r1/r2/m1/m1b/m2-red.transcript`, `ddr2-red.transcript`, `g0-capture.transcript`, `perfs-*`, `perf0*/perf0b*/perf0c*` measurements) · 7 spike files (`spike/perf-baseline.md`, `perf_harness.py`, `perf0b_harness.py`, `perf0c_profile.py`, `p4_wallclock.py`, `perfs_spike.py`, `perfs-prototype.diff`) | ✅ committed + landed | trunk + lane commits; `this artifact (04/05/06-docs) PENDING the orchestrator's commit` |
+| canon record | `.dev-flow/2026-10-10-csv-safety-batch/decisions-log.json`, `state-snapshot-at-close.json` (both A — committed inside this range as the csv-safety batch's close records) | ✅ committed + landed | in-range commit (orchestrator) |
+| flow state | `.dev-flow/BACKLOG.md` (M — B-114 done-note, B-118/B-119/B-120 rows) · `.dev-flow/state.json` (M) | ✅ committed + landed | in-range commits; B-121 proposed in this artifact |
+| — | removed files | 🗑️ none — `git diff --diff-filter=D --name-only 5cde04e HEAD` is empty | — |
 
-- **Found before the batch:** `<one backticked path @ hash per tracked file already modified when the batch began, the hash from git hash-object <path> at that moment | none — no tracked file was modified when the batch began>`
+- **Found before the batch:** none — no tracked file was modified when the batch began (the tree opened clean at `5cde04e`, the committed pre-batch tip; `git status --porcelain` is empty at this revision apart from this artifact's own write).
 
 **Conditional gate verdicts:** if any gate this batch ran closed as *"once items 1–N land this is a PASS/MERGE"*, list each item and its discharge **verified by re-reading the artifact** — not by trusting that the corrective pass ran.
 
 | Conditional item | Discharged? | Verified how |
 |---|---|---|
-| | ✅ / ❌ | `<file:line re-read>` |
+| PDR conditions C1–C10 (PDR sealed `approved with conditions`) | ✅ | `design/DDR-2026-10-10-perf-batch.md` B8 table re-reads each against its proving line — e.g. C1 → `01-requirements.md:232`; C2 → measured `11,998 (exactly 2E)` in `evidence/m2-red.transcript`; C10 → `evidence/g0-capture.transcript` double-capture byte-equality; **C4 → ⚠ discharged as the documented M-R2d non-determinism escape** (address reuse 0/2000; safety by construction + Lane M's two-replacement script) — carries to the validation gaps table (G-004) |
+| DDR conditions (architect MED + qa MED-2/LOW-4/LOW-5; two passes each, re-review approved) | ✅ | Applied at `8bea264` (`evidence/ddr2-red.transcript`: M-R2c reddens BOTH `[resize]` and `[title]`, restores sha256-verified; y-only/removed/widened-span mutants RED under the 61,500 cap; HLR-PERF.1 reworded with the B-120 scoping; Lane-S markings) — re-review approved per `state.json` `decisions_log` DDR entry |
+| DDR close condition — post-`084d7b7` full-suite re-run | ✅ | Join gate run 2, `evidence/join-gate-run2-full-suite.transcript` — 3223 passed / 3 xfailed / 0 failed |
+| P4/P5/P6 record reviews (this artifact + `04-validation.md` + `06-docs/`) | ⏸ PENDING | reviewer cells stamped by the orchestrator after its read-only passes |
 
 ### Evidence checklist — architect + qa-reviewer
 > Attach both co-authors' completed evidence checklists (items in their agent files), each ✓/✗ with one-line evidence.
+
+- **architect (Claude Opus):** PENDING — station findings are listed per-row above (render-path scoping → B-120; C4/M-R2d escape); the review cell is stamped after the orchestrator's read-only pass.
+- **qa-reviewer (Claude Sonnet):** PENDING — the qa cells from the DDR (MED-2, LOW-4, LOW-5) are applied and re-review-approved; the P5 cell for this artifact is stamped after the pass.

@@ -53,6 +53,7 @@ the base golden.
 | `mapper/views/layered.py` | source | `LLR-PERF.1.2` · `LLR-PERF.1.3` · `HLR-PERF.1` (`AT-075b`) | unscaled `_tree_layout` memo on the renderer instance (strong-reference key, scaling re-applied per call); `_layout_misses` spy at the hit check inside `_geometry` |
 | `tests/test_perf_layout_memo.py` | test | `LLR-PERF.1.2` · `LLR-PERF.1.3` · `AT-075b` | new: miss-spy layer-0 node; AT-075b real-app session (miss counts + golden bytes); the seven named invalidation arms; M-R2d address-reuse node (ruling R13); the `Graph.nodes` writer census + 16 planted-form detector arms (ruling R14) |
 | `.dev-flow/2026-10-10-perf-batch/evidence/r2-red.transcript` | doc | RED counterfactuals · measured counts | commands + outputs of the GREEN runs, the before/after measurement, and the five mutation proofs (relative paths) |
+| `tests/test_a3_census.py` | test | `LLR-PERF.1.3 · LLR-PERF.2.2` | join-gate follow-up `084d7b7`: arg-ful render pin 65 → 80, the 15 new byte-identity render sites itemised in the pin's comment |
 
 | Count | Value |
 |---|---|
