@@ -248,6 +248,12 @@
       "date": "2026-10-11",
       "decision": "P6 docs approved; PR #22 squash-merged as d216d68 (single squashed commit by operator ruling: public repo, intermediate commits carry personal data and stay local); standing authorization",
       "notes": "06-docs/; merge d216d68; batch record cites local SHAs by design"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-11",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: mapper/dev-flow-batches/2026-10-11-reqharness-batch/ (+ PDR/DDR in mapper/design/)"
     }
   ],
   "standing_authorization": {
@@ -294,6 +300,6 @@
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }
   },
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-11T00:00:00"
 }
