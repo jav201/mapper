@@ -1,6 +1,6 @@
 # Increment 033 -- Inc-9g: the Inc-9f review defects
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `2d1a1b8`. Authority: the Inc-9f
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `5309de2`. Authority: the Inc-9f
 independent reviews, the coordinator's rulings, and `N1` (`VERDICT-inc9-2026-09-30.md`, Round 4).
 Amendment: `A-115` (appended to `01-requirements.md`). Findings are named `INC9F-*`.
 Not here: `N2` (arrows in the palette footer) goes to `Inc-EN`.
@@ -33,8 +33,8 @@ Not here: `N2` (arrows in the palette footer) goes to `Inc-EN`.
   imports the value it checks compares code to itself; `test_inc9g_cr_f6_the_declared_set_is_the_set_the_operator_ruled`
   pins the two to be equal, and the mutant that drops a category is killed by it.
 - **Items 7-14 were implemented before their arms were committed.** They arrived while items 1-6 were landing.
-  RED was shown on `2d1a1b8` from an archive copy instead of an arms-first commit (section 4). The arms for
-  items 1-6 were committed RED first (`36c1701`, `8d74b73`).
+  RED was shown on `5309de2` from an archive copy instead of an arms-first commit (section 4). The arms for
+  items 1-6 were committed RED first (`e87d215`, `78a26eb`).
 - **Changed existing arms (declared; no assertion weakened):**
   1. `test_inc9f.py::test_inc9f_f1_the_clone_argv_ends_options_before_the_url`: the target directory is no
      longer `widget`, it is `widget-<hash>`; the assertion `endswith("widget")` became
@@ -50,7 +50,7 @@ Not here: `N2` (arrows in the palette footer) goes to `Inc-EN`.
   unselected row does not survive on the accent ground (the two greys are under 4.5:1 on it).
 - File count: **3 source files** (`github.py`, `app.py`, `screens/palette.py`), at the cap. Tests and docs uncapped.
 
-## 3. Arm table, RED on `2d1a1b8` (archive copy of the base; `CATEGORIES = ()` shim appended to its `github.py`
+## 3. Arm table, RED on `5309de2` (archive copy of the base; `CATEGORIES = ()` shim appended to its `github.py`
 because the new arms import that name) and GREEN on HEAD
 
 Command: `pytest tests/test_inc9g.py --runxfail -m "not network"` in the archive: **44 failed, 27 passed**, plus
@@ -107,9 +107,9 @@ toast carries only a fixed category, so `markup=True` would be an equivalent mut
 |---|---|
 | `tests/test_inc9g.py`, default lane | executed: 71 arms green in the full lane |
 | the one `network`-marked arm (`real_git_two_local_remotes...`), local bare repositories, HOME in a temp dir | executed: green on HEAD, RED on the base |
-| Full lane, first run at `e34e65a`: **1 failed, 1680 passed, 3 xfailed, 21 deselected**, 22:39 | executed. The 1 failure was `test_fold`: my arm file spelled two code points as literals; fixed in the next commit, `test_fold` + `test_no_operator_paths` + `test_inc9g` re-run green (92 passed) |
-| Full lane, final run | **1681 passed, 3 xfailed, 21 deselected, 0 failed**, 19:02 (at `4f6b568`; reconciled with 1610: +71 arms in `test_inc9g.py`, the `network` arm deselected) |
-| `ruff check .` against `2d1a1b8`, set difference (line numbers stripped) | executed: new = none, gone = none (the base archive also lists `prototypes/`, which the working tree does not carry; excluded from both sides) |
+| Full lane, first run at `f2377fe`: **1 failed, 1680 passed, 3 xfailed, 21 deselected**, 22:39 | executed. The 1 failure was `test_fold`: my arm file spelled two code points as literals; fixed in the next commit, `test_fold` + `test_no_operator_paths` + `test_inc9g` re-run green (92 passed) |
+| Full lane, final run | **1681 passed, 3 xfailed, 21 deselected, 0 failed**, 19:02 (at `c94336f`; reconciled with 1610: +71 arms in `test_inc9g.py`, the `network` arm deselected) |
+| `ruff check .` against `5309de2`, set difference (line numbers stripped) | executed: new = none, gone = none (the base archive also lists `prototypes/`, which the working tree does not carry; excluded from both sides) |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | not hit |
 
 ## 6. Renders of the palette (text frames; the selected row's colours are asserted per cell, printed here)
@@ -143,15 +143,15 @@ home hint reads `next ▸ choose a door`. Text frames show layout, not colour; t
   rules only. (6) The 12-hex mirror key is a cache key, not a security boundary. (7) Spanish strings remain on
   the repo screen: `Inc-EN`. (8) Existing mirrors under the old name (`<name>` without a hash) are orphaned,
   not migrated or deleted: the first connect after this change clones again.
-- **A stash entry was left by mistake** (`stash@{0}`, "WIP on feat/ui-next-batch-02: 8d74b73"): a `git stash`
+- **A stash entry was left by mistake** (`stash@{0}`, "WIP on feat/ui-next-batch-02: 78a26eb"): a `git stash`
   in a compound command; the working tree was restored from it and the tree is clean. Dropping it was
   denied by the permission classifier, so it is left for the operator. It holds nothing that is not committed.
 - **Next.** `Inc-EN` (not started), carrying `N2`.
 
 ## Commits
 
-`36c1701` arms (RED) · `4764561` github items · `8d74b73` N1 arms (RED) + 9f seed · `8ad867d` app items ·
-`78459bd` palette · `e34e65a` review items 7-14 · `28c6c6d` the `test_fold` escape fix · `4f6b568` docs (this record, `A-115`); a last docs commit fills in the final lane line.
+`e87d215` arms (RED) · `50d079e` github items · `78a26eb` N1 arms (RED) + 9f seed · `212f158` app items ·
+`ab57c88` palette · `f2377fe` review items 7-14 · `b6a62e7` the `test_fold` escape fix · `c94336f` docs (this record, `A-115`); a last docs commit fills in the final lane line.
 
 ## Correction appended 2026-10-01 (Inc-9h, `INC9G-CR-F2`; the text above is not rewritten)
 

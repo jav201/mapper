@@ -6,8 +6,8 @@
 > **Lens:** ISO 9241-210:2019 activity 4 — evaluate the design against the requirements. `01b` §0's
 > context of use is adopted unchanged: **118 × 34**, keyboard-only, legacy-system archaeology.
 >
-> **Base.** `git rev-parse --short HEAD` → **`94ad8d3`**, branch `docs/amendment-set-3`. My pass-2
-> ledger was written against `d877784`, so **every load-bearing claim below was re-executed**; two of
+> **Base.** `git rev-parse --short HEAD` → **`8f07800`**, branch `docs/amendment-set-3`. My pass-2
+> ledger was written against `bd17fab`, so **every load-bearing claim below was re-executed**; two of
 > my own pass-2 numbers turned out to be wrong and are corrected here.
 >
 > **Evidence rule.** Command + output, or `file:line` on the current tree. **No claim rests on a
@@ -41,7 +41,7 @@ the predicate in the same requirement.
 
 ### 1.1 · Condition ledger
 
-| id | Pass-2 severity | Status at `94ad8d3` | Landed at |
+| id | Pass-2 severity | Status at `8f07800` | Landed at |
 |---|---|---|---|
 | `UX2-C-01` | blocker | **LIVE** — deferral ACCEPTED, recorded rationale **REFUSED** | §5 |
 | `UX2-C-02` | blocker | **DISCHARGED** by accepted deferral | §5 |
@@ -139,7 +139,7 @@ Recorded first, because a lens that only audits others is not auditing.
    routing works. The painted title still names the **scope**, not the **view** — US-N16 requires
    `leyenda · <vista>`; that is in scope and specified, not a finding.
 2. **The scroll keys work and none is declared.** `bindings_for('help')` is exactly `escape` and `q`.
-   Reachability is total (`27/27`) and undeclared. `UX2-C-05` reproduces at `94ad8d3` unchanged.
+   Reachability is total (`27/27`) and undeclared. `UX2-C-05` reproduces at `8f07800` unchanged.
 3. **The four pan chords are inert on the shipped screen and all four are free.** Frame hash
    identical before and after all four presses; `duplicate_chords()` returns `[]`.
 
@@ -468,7 +468,7 @@ feature. `B-31` should inherit that.
 
 ### 5.2 · `UX2-C-01` — **deferral of the DESIGN RULING accepted; the recorded RATIONALE refused**
 
-**First, the defect, re-executed at `94ad8d3` in a temp workspace, fresh app per target
+**First, the defect, re-executed at `8f07800` in a temp workspace, fresh app per target
 (`p5_commit_fresh.py`):**
 
 ```
@@ -573,7 +573,7 @@ stayed.
    were set for web text, not terminal glyphs at cell size; I apply them as the best available proxy
    and say so. `UX3-C-A` is arithmetic against the batch's own declared floor — that part does not
    depend on the proxy being right, only on the floor being the one the batch chose.
-3. **No behaviour of the four in-scope stories was exercised, because none exists at `94ad8d3`.**
+3. **No behaviour of the four in-scope stories was exercised, because none exists at `8f07800`.**
    Every §3 finding is about how an acceptance is *specified to be driven*. Whether the implementation
    honours it is DDR's and validation's question.
 4. **`#D27`'s glyph was not evaluated, because `C-D27b` deliberately does not name a codepoint.**
@@ -594,7 +594,7 @@ stayed.
 
 | ✓/✗ | Claim | Probe |
 |---|---|---|
-| ✓ | Base `94ad8d3`, branch `docs/amendment-set-3`; `fixtures/` clean before and after | `git rev-parse`, `git status --short` |
+| ✓ | Base `8f07800`, branch `docs/amendment-set-3`; `fixtures/` clean before and after | `git rev-parse`, `git status --short` |
 | ✓ | `?` routes per screen: `home` → `atajos · home`, `map` → `atajos · map` | `p1_pilot.py` §2, §5 |
 | ✓ | 118 × 34: dialog 28 rows, pane **24** rows, `max_scroll_y` 14, **16/27** clipped to `#help-dialog` | `p1_pilot.py` §5 |
 | ✓ | `down`/`pagedown`/`end` all scroll; `bindings_for('help')` is exactly `escape`, `q` | `p1_pilot.py` §6, §7 |
@@ -614,7 +614,7 @@ stayed.
 | ✓ | `_commit` posts unconditionally; no delta comparison exists | `mapper/widgets/inspector.py:277-291` |
 | ✓ | The shipped guard scrolls by method call, not keystroke | `tests/test_repair_layout.py`, `_painted_bindings` |
 | ✗ | **Not executed:** whether `MUT on PANEL` *reads* as damage to a human | requires a user session — §6 item 1 |
-| ✗ | **Not executed:** any behaviour of US-N06/N07/N13/N16 | none exists at `94ad8d3` |
+| ✗ | **Not executed:** any behaviour of US-N06/N07/N13/N16 | none exists at `8f07800` |
 
 ---
 

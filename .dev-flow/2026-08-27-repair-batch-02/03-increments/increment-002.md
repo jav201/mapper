@@ -1,6 +1,6 @@
 # Increment 2 — `HLR-MAP.1`: the module map is true against the tree
 
-**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `d877784` · **Branch:** `fix/repair-batch-02`
+**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `bd17fab` · **Branch:** `fix/repair-batch-02`
 **Source files: 0 of 4.** `docs/ARCHITECTURE.md` is a product doc; tests are uncapped.
 
 > **BLUF.** The `2026-08-26-ui-next-batch-02` ARQ was approved *with this map amended*, and the

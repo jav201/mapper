@@ -7,11 +7,11 @@
 > **extends `01b-ux-decisions.md`; it does not restart it.** `01b`'s context of use (§0) is adopted
 > unchanged and is the context every finding below is judged against.
 >
-> **Evidence rule (C-43).** Every load-bearing claim was **executed against `d877784`** and its
+> **Evidence rule (C-43).** Every load-bearing claim was **executed against `bd17fab`** and its
 > transcript is pasted inline. Nothing is asserted from a document. Where a claim could not be
 > executed it is labelled **inspected, not exercised**.
 >
-> **Base verified:** `git log --oneline -1` → `d877784 chore: record the vault sync for
+> **Base verified:** `git log --oneline -1` → `bd17fab chore: record the vault sync for
 > 2026-08-26-repair-batch`. Tree clean apart from the untracked batch directory. **No file under
 > `mapper/`, `tests/` or `prototypes/` was read-modified, staged or touched.** All probes ran from a
 > scratchpad outside the repository.
@@ -394,7 +394,7 @@ how hard it is to fix.
 holding focus**, threshold: *"`app.focused` is inside the inspector region after each press."* Under
 `#D6` the walk chord is `n` — a printable letter.
 
-**Executed** against `d877784`, fresh app per target, real `pilot.press("n")`, shipped seat:
+**Executed** against `bd17fab`, fresh app per target, real `pilot.press("n")`, shipped seat:
 
 ```
 focusable widgets on MapScreen:
@@ -776,12 +776,12 @@ product pins nothing.
 
 ## 6 · Evidence checklist
 
-Every row re-runnable against `d877784`. Probe scripts are in this session's scratchpad, outside the
+Every row re-runnable against `bd17fab`. Probe scripts are in this session's scratchpad, outside the
 repository; each is self-contained and imports nothing from `tests/`.
 
 | ✓/✗ | Claim | How to re-run |
 |---|---|---|
-| ✓ | Base is `d877784`; tree clean apart from the untracked batch dir | `git log --oneline -1` · `git status --porcelain` |
+| ✓ | Base is `bd17fab`; tree clean apart from the untracked batch dir | `git log --oneline -1` · `git status --porcelain` |
 | ✓ | `rich 15.0.0`; M-2 reproduced — SAGE/TEAL/VIOLET → slots 35 / 38 / 105, **0 collisions** | `Color.parse(h).downgrade(ColorSystem.EIGHT_BIT).number` over the 13 tokens |
 | ✓ | Minimum CIEDE2000 over semantic pairs = **13.99** (`ACCENT` vs `VIOLET`), ≈ 6× the JND | `EIGHT_BIT_PALETTE[n]` → CIE L\*a\*b\* (D65) → CIEDE2000, all pairs |
 | ✓ | `ACCENT` slot 33 vs `TEAL` slot 38 = **20.18 ΔE00** — "five slots apart" is not a perceptual metric | same probe |
@@ -805,7 +805,7 @@ repository; each is self-contained and imports nothing from `tests/`.
 | ✓ | AT three-way intersection = 40; `AT-046`, `AT-047` absent from US-N06's story line | mechanical id extraction over `01-requirements.md` |
 | ✓ | `▸` already carries three jobs in shipped code | `grep -rn "▸" mapper/` → `darkside.py:177`, `screens/factory.py:244`, `views/lane.py:150`, `widgets/rail.py:228` |
 | ✗ | **Not executed:** whether `mapa dañado — ↵ ver por qué` survives at 118 columns | requires the card layout, which does not exist until Inc-7. This is `UX2-C-09` limb 2, and it is *why* the pilot size must change |
-| ✗ | **Not executed:** pan, fold, lens, legend vocabulary as behaviours | none exists at `d877784`. Every finding above is about the **specification** of their acceptance, which is what a PDR pass can observe |
+| ✗ | **Not executed:** pan, fold, lens, legend vocabulary as behaviours | none exists at `bd17fab`. Every finding above is about the **specification** of their acceptance, which is what a PDR pass can observe |
 
 ---
 
@@ -834,7 +834,7 @@ Stated in writing rather than left to inference. `01b` §7 is adopted in full; t
 5. **Screen-reader and non-visual access are out of scope entirely.** No criterion here addresses
    them, and several — the whole glyph vocabulary, figure-ground dimming, the constellation
    thumbnail — are visual-only by construction.
-6. **No behaviour of the five stories was exercised, because none exists at `d877784`.** Everything
+6. **No behaviour of the five stories was exercised, because none exists at `bd17fab`.** Everything
    in §3 and §5 is a judgement about how the acceptance is *specified to be driven*. Whether the
    implementation honours it is DDR's and validation's question, not this gate's.
 7. **`Q-5` (the `◍` provenance marker) is out of scope and nothing above depends on it.** `01b`

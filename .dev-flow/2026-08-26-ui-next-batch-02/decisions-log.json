@@ -3,7 +3,7 @@
     "station": "P0",
     "date": "2026-08-26",
     "decision": "approved",
-    "notes": "RC-1 clean at d6b60e6. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
+    "notes": "RC-1 clean at 1b51aca. 20 premises executed; 17 TRUE, 3 FALSE. Seven stories intake-classified: six READY, one REFINE."
   },
   {
     "station": "P0",
@@ -14,7 +14,7 @@
   {
     "station": "ARQ",
     "date": "2026-08-27",
-    "decision": "approved -- architecture module map proposed (ARCHITECTURE-proposed-at-ARQ.md, commit 8675151); the batch proceeded to P1/PDR on it",
+    "decision": "approved -- architecture module map proposed (ARCHITECTURE-proposed-at-ARQ.md, commit 0353909); the batch proceeded to P1/PDR on it",
     "notes": "RETROACTIVE: entry written 2026-10-08 at batch close because the ARQ gate decision was never logged (validator V61). Date is the artifact's commit date, not the logging date."
   },
   {
@@ -27,7 +27,7 @@
     "station": "P0",
     "date": "2026-08-27",
     "decision": "un-parked",
-    "notes": "RC-1 re-run clean at d877784 (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
+    "notes": "RC-1 re-run clean at bd17fab (HEAD == origin/master == merge-base). Baseline re-measured 245 -> 429 collected. Premises re-executed against the post-repair tree, not carried from the parked record."
   },
   {
     "station": "PDR",
@@ -45,7 +45,7 @@
     "station": "PDR",
     "date": "2026-08-27",
     "decision": "RIDER-1 reconciliation executed; batch STOPPED before iteration 3",
-    "notes": "Four parallel read-only lens audits against the lenses' OWN condition ledgers, never the amendment table. 51 union items: ~39 LIVE, 11 discharged -- all 11 by the repair batch's shipped code, none by a document fold. 01-requirements.md has ONE commit (8675151) and has not been edited since the verdicts. Briefed scope executed FALSE (6 named vs ~39 live), so the batch was referred to the operator rather than spending the final iteration. Artifact: 02g-lens-reconciliation.md, merged as PR #7."
+    "notes": "Four parallel read-only lens audits against the lenses' OWN condition ledgers, never the amendment table. 51 union items: ~39 LIVE, 11 discharged -- all 11 by the repair batch's shipped code, none by a document fold. 01-requirements.md has ONE commit (0353909) and has not been edited since the verdicts. Briefed scope executed FALSE (6 named vs ~39 live), so the batch was referred to the operator rather than spending the final iteration. Artifact: 02g-lens-reconciliation.md, merged as PR #7."
   },
   {
     "station": "PDR",
@@ -74,7 +74,7 @@
   {
     "station": "P3",
     "date": "2026-10-08",
-    "decision": "P3 closed: implementation line (Inc-1 .. Inc-EN-9, whole-branch gates) merged to master as squash 46e190b on 2026-10-03 (operator M2/M5); logged at close 2026-10-08"
+    "decision": "P3 closed: implementation line (Inc-1 .. Inc-EN-9, whole-branch gates) merged to master as squash 2eaabf3 on 2026-10-03 (operator M2/M5); logged at close 2026-10-08"
   },
   {
     "station": "DDR",
@@ -84,7 +84,7 @@
   {
     "station": "P4",
     "date": "2026-10-08",
-    "decision": "P4 PASS-WITH-NOTES (04-validation.md): one gate run 2797 passed / 0 failed on 46e190b by the orchestrator; drafted by deepseek-v4-pro, evaluated by qa-reviewer; notes FLAKE-2 (B-98), INC9G-R8 (B-99), ledger not closed"
+    "decision": "P4 PASS-WITH-NOTES (04-validation.md): one gate run 2797 passed / 0 failed on 2eaabf3 by the orchestrator; drafted by deepseek-v4-pro, evaluated by qa-reviewer; notes FLAKE-2 (B-98), INC9G-R8 (B-99), ledger not closed"
   },
   {
     "station": "P5",

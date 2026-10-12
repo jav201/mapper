@@ -43,7 +43,7 @@
       "mode": "full",
       "opened_at": "2026-08-26",
       "closed_at": "2026-08-27",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
     },
     {
@@ -139,7 +139,7 @@
     "metrics": "vault:mapper/dev-flow-batches/2026-10-09-canon-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "558b41522c7d7c1461f3869981dd074464757498",
+  "base_ref": "3c0c33883341b1893dc367b5635b3a86fdc330f8",
   "artifacts": {
     "plan": ".dev-flow/2026-10-09-canon-batch/PLAN.md",
     "P1": ".dev-flow/2026-10-09-canon-batch/01-requirements.md",
@@ -184,7 +184,7 @@
     {
       "station": "P5",
       "date": "2026-10-09",
-      "decision": "P5 closed (self-approved under the standing authorization): B-104, B-105 (project side) DONE; B-106 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as df91eaa (PR #14)"
+      "decision": "P5 closed (self-approved under the standing authorization): B-104, B-105 (project side) DONE; B-106 carried; final PR-level qa-reviewer MERGE-WITH-NOTES 0 HIGH; merged as 16c0522 (PR #14)"
     },
     {
       "station": "P6",
@@ -207,32 +207,32 @@
   },
   "previous_batch": {
     "batch_id": "2026-10-09-hygiene-batch",
-    "merge_commit": "a482079",
+    "merge_commit": "55a3400",
     "close_pr": "https://github.com/<owner>/mapper/pull/12",
     "sync_pr": "https://github.com/<owner>/mapper/pull/13",
     "closed_at": "2026-10-09",
-    "close_commit": "a482079",
+    "close_commit": "55a3400",
     "obsidian_synced": true,
     "archive": ".dev-flow/2026-10-09-hygiene-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "pr": "https://github.com/<owner>/mapper/pull/2",
-      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
     "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
-      "merge_commit": "2b59071",
+      "merge_commit": "7d04ba2",
       "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
-      "close_commit": "3fe0e4b",
+      "close_commit": "d8a8536",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }

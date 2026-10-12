@@ -1,9 +1,9 @@
 # Inc-REPAIR S-A — Independent Code Review
 
 **Reviewer:** code-reviewer (sole gate, lighter lane)
-**Range:** `git diff 5106cee..317c1a9 -- mapper/ tests/`
+**Range:** `git diff 3f4ff7d..3c42e28 -- mapper/ tests/`
 **Files:** `mapper/darkside.py`, `mapper/widgets/chrome.py`, `tests/test_crumb.py`, `tests/test_a3_census.py`
-**Tree at review:** clean at `317c1a9`; byte-identical at exit (shas verified, `__pycache__` purged)
+**Tree at review:** clean at `3c42e28`; byte-identical at exit (shas verified, `__pycache__` purged)
 
 ## VERDICT: **PASS** — no HIGH. Six findings, all recommendations.
 
@@ -305,7 +305,7 @@ this increment's scope.
 
 ## Boundaries
 
-- **Reviewed:** the full four-file diff `5106cee..317c1a9`, read in full; plus a repo-wide
+- **Reviewed:** the full four-file diff `3f4ff7d..3c42e28`, read in full; plus a repo-wide
   AST census over `mapper/` and `tests/`; plus five mutants; plus a live-app render count.
 - **Did not review:** security (out of lane and waived for this stage), suite-wide
   functional/UX validation beyond the confirmation run, performance.

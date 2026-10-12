@@ -8,8 +8,8 @@
 | Date | 2026-09-29 |
 | Authority | §5.4 (`Inc-9` row: help scope routing, `KEY_SCOPE` declarations, seat migration, `LLR-N06.2.5` by `#D21`); `PDR#D9` (migrate both), `#D10` (`.factory-tag`), `#D6`/`C-D6b`; `VERDICT-inc8-legend-2026-09-28.md` LANGUAGE RULING and `D5` (names ratified 2026-09-29: `atlas` / `outline` / `mind map` / `home`) |
 | Requirement added | `A-112` (`01-requirements.md`, appended) |
-| Starting state | main tree, `feat/ui-next-batch-02` @ `6fe35f5`, clean |
-| Commits | `7e64508` → `b998085` → `bd1d99c` → `6b39b78` → `66fae00` → `82a231c` → `68e3675` → (this record) |
+| Starting state | main tree, `feat/ui-next-batch-02` @ `d0a69ad`, clean |
+| Commits | `6e478e3` → `f8cde32` → `a69b664` → `abd185f` → `1153b38` → `a03066f` → `8409d3b` → (this record) |
 | Source files | **5 of a cap of 5**: `mapper/keymap.py`, `mapper/app.py`, `mapper/darkside.py`, `mapper/screens/factory.py`, `mapper/screens/settings.py`. `mapper/screens/help.py` untouched. No renderer file touched — see `INC9-F2` (split) |
 
 ---
@@ -47,7 +47,7 @@
    exact painted form; a padded key-section row (`esc` + `close`) no longer counts.
 8. **`C-D6b` / `LLR-N14.3.2` re-run** (new arm): 9 `tab` presses from the map walk the derived ring,
    8 transitions, each to the next member. **`C-D25a/b`** (new arms): the seat diff against
-   `6fe35f5` (read with `git show`) is exactly the 12 declared rows plus the two declared regroups;
+   `d0a69ad` (read with `git show`) is exactly the 12 declared rows plus the two declared regroups;
    no row lost or rebound; `duplicate_chords()` empty on entry and exit.
 9. **Found in the renders, fixed: `INC9-F6`.** The new groups were declared after `app`, so both
    migrated key bars led with `app`. Reordered; arm added.
@@ -83,7 +83,7 @@ now walks the components.
 
 ## 4 · Test results
 
-### RED before (commit `7e64508`, `--runxfail`)
+### RED before (commit `6e478e3`, `--runxfail`)
 
 19 failed, 10 passed. Each RED arm failed on its named defect, e.g.
 `help screens with no declared seat scope: ['FactoryScreen', 'SettingsScreen']`;
@@ -92,7 +92,7 @@ now walks the components.
 `[-1, -1, -1, -1, -1, -1, -1, -1, -1]`; `'#1783ff' == '#737373'`; 16 uncoerced notify sites;
 `[('r', 'alternar radial')]`; home row `◕ mapper   mapas vivos`; CR-F9 `esc       close` counted.
 
-### Full default lane, once, on the final source tree (`68e3675`)
+### Full default lane, once, on the final source tree (`8409d3b`)
 
 **Run as six sequential chunks by test file** (alphabetical, 61 files): a single run takes about
 16 minutes here and was stopped twice by the 10-minute background limit (once by a session restart).
@@ -118,17 +118,17 @@ deliberate `test_inc9.py::test_inc9b_each_map_view_header_names_its_view` (stric
 **0 failed.** FLAKE-1 and the FLAKE-2 candidate were not observed. Chunk 0 printed a Textual
 `Task cancelling ... _win_sleep` line after its summary (teardown noise, exit 0).
 
-**The reviewer's partial run on `6fe35f5` (about 15–20 `F` at about 30%), NOT settled by this lane.**
-This lane ran on `68e3675`, not `6fe35f5`, and saw no failure. Two observations, labelled as such:
+**The reviewer's partial run on `d0a69ad` (about 15–20 `F` at about 30%), NOT settled by this lane.**
+This lane ran on `8409d3b`, not `d0a69ad`, and saw no failure. Two observations, labelled as such:
 my own full lane at an intermediate state (after the relabel, before re-deriving the label pins)
-showed exactly 4 `F` near 42%, all label pins, all fixed in `6b39b78`; and at `6fe35f5` none of
-Inc-9's changes exist. I did not re-run `6fe35f5` (no second tree was in my brief), so the
+showed exactly 4 `F` near 42%, all label pins, all fixed in `abd185f`; and at `d0a69ad` none of
+Inc-9's changes exist. I did not re-run `d0a69ad` (no second tree was in my brief), so the
 reviewer's failures are **unmeasured** here.
 
 ### ruff
 
 `ruff check .` → **27 errors**, and the error SET (file + code + message, positions stripped) is
-**identical** to the baseline set taken at `6fe35f5`. No new finding.
+**identical** to the baseline set taken at `d0a69ad`. No new finding.
 
 ### Guards before the docs commit
 
@@ -306,7 +306,7 @@ Arms that pin a LABEL value were re-derived; arms that pin behaviour are unchang
 
 | Arm | Change | Justification |
 |---|---|---|
-| `test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification` (`EXPECTED_SEAT`) | 60 label + 3 group fields re-derived; 12 rows added | label values (A-112) and the `#D9` migration; action/glyph/priority of every pre-existing row unchanged — `test_cd25a_*` proves it against `6fe35f5` |
+| `test_key_dispatch.py::test_at_n03h_the_whole_seat_matches_its_specification` (`EXPECTED_SEAT`) | 60 label + 3 group fields re-derived; 12 rows added | label values (A-112) and the `#D9` migration; action/glyph/priority of every pre-existing row unchanged — `test_cd25a_*` proves it against `d0a69ad` |
 | `test_keymap.py` `SCOPE_OWNER` / `EXPECTED_PER_SCOPE` | +`factory: FactoryScreen, 10`, +`settings: SettingsScreen, 2` | the seat-size fence is a deliberate edit by design; `AT-N03a`/`AT-N03f` then quantify over the new rows |
 | `test_keymap.py::test_groups_for_keybar_order_and_glyphs` | `("j","siguiente")` → `("j","next sibling")`, `("↵","abrir ficha")` → `("↵","open card")` | label values |
 | `test_keymap.py::test_palette_items_filters_by_scope_and_query` | query `cobertura` → `coverage` | label value; still narrows to exactly `coverage` |
@@ -342,7 +342,7 @@ pin re-checked. Every pin matched after restore.
 | M11 | home key bar `legend` → `ayuda` | `app.py` | language census `[keybar]` | **KILLED** | `3246ffb8c291` |
 | M12 | drop factory row `0` | `keymap.py` | `C-D25a` (the route arm stayed green: `0` also leaves the expected set) | **KILLED** 1/2 | `86482e78da18` |
 | M13 | settings crumb → `preferencias` | `settings.py` | language census `[headers]` | **KILLED** | `38fe364a9eed` |
-| M14 | tab strip `browse` → `consultar` | `darkside.py` | language census `[headers]` | **SURVIVED** first run → `INC9-F5` (the walk missed an annotated assignment and derived no tab label) → fixed in `82a231c` → **KILLED** | `6aa263d885cc` |
+| M14 | tab strip `browse` → `consultar` | `darkside.py` | language census `[headers]` | **SURVIVED** first run → `INC9-F5` (the walk missed an annotated assignment and derived no tab label) → fixed in `a03066f` → **KILLED** | `6aa263d885cc` |
 | M15 | `KEYBAR_MORE = "todas"` | `darkside.py` | language census `[keybar]` | **KILLED** | `6aa263d885cc` |
 | M16 | re-add a screen `tab` binding on settings | `settings.py` | C-D9a arm, `LLR-N06.5` tree guard | **KILLED** 2/2 | `38fe364a9eed` |
 | M17 | group `tree` declared after `app` | `keymap.py` | `INC9-F6` arm | **KILLED** | `99e6b4d67d21` |
@@ -352,7 +352,7 @@ predicate controls for the notify census and the language judge.
 
 ## Renders
 
-Real Textual renders of the final tree (`68e3675`), each as SVG (Textual's own screenshot) plus a
+Real Textual renders of the final tree (`8409d3b`), each as SVG (Textual's own screenshot) plus a
 text dump of the composited frame, at **118×34** (reference), **87×34** and **140×45**. For each of
 `home`, `atlas`, `outline`, `mind_map`, `import`, `plug`, `repo`, `factory`, `settings`:
 `<name>_screen_<size>` (header row + key bar) and `<name>_legend_<size>` (the legend opened with

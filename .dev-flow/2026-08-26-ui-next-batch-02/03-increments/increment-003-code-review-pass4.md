@@ -42,7 +42,7 @@ $ PYTHONUTF8=1 python -m pytest -q -m "not slow" -p no:randomly --durations=12
 $ PYTHONUTF8=1 python -m pytest -q -m slow -p no:randomly
 17 passed, 804 deselected in 29.90s                      EXIT=0
 
-$ git diff --name-only 954f8f3 -- mapper/
+$ git diff --name-only 909cc27 -- mapper/
 mapper/app.py  mapper/keymap.py  mapper/views/layered.py
 mapper/views/outline.py  mapper/views/state.py  mapper/widgets/rail.py      <- exactly six
 ```
@@ -423,7 +423,7 @@ surface does.
 
 # Rider B — `pytest-timeout`: DISCHARGED
 
-Diffed against `954f8f3`; the change is exactly two things and nothing else:
+Diffed against `909cc27`; the change is exactly two things and nothing else:
 
 ```
 -dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]

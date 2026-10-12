@@ -7,8 +7,8 @@
 | Agent | `software-dev` |
 | Date | 2026-09-30 |
 | Authority | `VERDICT-inc9-2026-09-30.md` (operator answers **K1–K4**, the coordinator's defect rulings); `A-112` (+ dated note below); `increment-025-inc9.md` (copy table, `INC9-Fn`); `increment-026-inc9b.md` (`INC9B-F1`); `state.json` → `p3_progress.G6_CLOSED_AND_INC-9_LANDED_2026-09-30` (`G6-SEC-F9`) |
-| Starting state | `feat/ui-next-batch-02` @ `bab76c1`, clean |
-| Commits | `930be78` (arms, RED) → `90c8ce8` (toasts) → `8303a60` (wording, groups, K2/K4) → `5495f5e` (hints, K3) → `2147205` (UX-F2/F3/F4/F10/F11) → `a0b63ba` (test-strength, G6-SEC-F9) → `9994499` (census reads painted headers) → `(the commit that adds this record)` (this record) |
+| Starting state | `feat/ui-next-batch-02` @ `e1351fc`, clean |
+| Commits | `98beef4` (arms, RED) → `5096838` (toasts) → `449d636` (wording, groups, K2/K4) → `6037e24` (hints, K3) → `8fc3e4a` (UX-F2/F3/F4/F10/F11) → `aa78b28` (test-strength, G6-SEC-F9) → `c8759c9` (census reads painted headers) → `(the commit that adds this record)` (this record) |
 | Source files | **6** (see below). Operator approval 2026-09-30: *"Déjalo terminar con los 6"* — the operator's global cap is now 4 source files per increment; this increment finishes with its 6 declared files and goes no further |
 
 The six source files: `mapper/keymap.py`, `mapper/app.py`, `mapper/darkside.py`, `mapper/screens/settings.py`,
@@ -188,7 +188,7 @@ Manual: on the connect-repo screen type `owner/na` and press `?` (legend opens, 
 
 ## 4 · Test results
 
-### RED first (`930be78`, `--runxfail`, source = `bab76c1`)
+### RED first (`98beef4`, `--runxfail`, source = `e1351fc`)
 
 55 arms committed as strict xfails keyed by `OPEN_STEPS` (48 in `tests/test_inc9c.py`, 7 in
 `test_g6_store_surrogates.py`); `--runxfail` on the base source: **55 failed**, 27 guard/control arms passed. Each
@@ -209,7 +209,7 @@ repair_layout, components, app, factory, g6): **579 passed, 10 xfailed** in 728 
 
 ### Full default lane (`executed`)
 
-**Run as six sequential chunks by test file** (alphabetical, 62 files) on `a0b63ba`, no docs staged; chunk 3 (the
+**Run as six sequential chunks by test file** (alphabetical, 62 files) on `aa78b28`, no docs staged; chunk 3 (the
 legend arms) took 587 s. Same tree, same interpreter, default markers.
 
 | chunk | files | result |
@@ -222,25 +222,25 @@ legend arms) took 587 s. Same tree, same interpreter, default markers.
 | 5 | `test_search` .. `test_worklist_safety` | 144 passed, 2 deselected |
 | **sum** | | **1438 passed, 3 xfailed, 20 deselected, 0 failed** |
 
-**Reconciled against 1373.** `--collect-only` per file on an extracted `git archive` of `bab76c1` and on this tree
+**Reconciled against 1373.** `--collect-only` per file on an extracted `git archive` of `e1351fc` and on this tree
 (`test_views_hits.py` excluded from both: it needs a git repo): **+65** = 55 (`test_inc9c.py`) + 7 (`G6-SEC-F9`
 arms, `test_g6_store_surrogates.py`) + 2 (`test_inc9.py`: the pinned-seat fence and the keyword-census arm) + 1
 (`test_keymap.py`: the per-row `AT-N03` parametrization for the new `home enter` row). 1373 + 65 = **1438**, measured
 1438. The 3 xfailed are the pre-existing `test_fold.py::test_f_a_*`; no Inc-9c arm is an xfail any more.
 
-**0 failed.** `FLAKE-1` and the `FLAKE-2` candidate did not fire. The last commit after the lane (`9994499`) changes
+**0 failed.** `FLAKE-1` and the `FLAKE-2` candidate did not fire. The last commit after the lane (`c8759c9`) changes
 `tests/test_inc9.py` only (the census reads the painted headers); that file was re-run: 40 passed.
 
 ### ruff (`executed`)
 
-`ruff check mapper tests` → **26 errors**, against the baseline of **27** at `bab76c1`. The error SET (file + code +
+`ruff check mapper tests` → **26 errors**, against the baseline of **27** at `e1351fc`. The error SET (file + code +
 message, positions stripped) is the baseline set **minus one**: `screens/settings.py` `F401` (`Horizontal` imported but
 unused), which went away because that import line was replaced by `VerticalScroll`. No new finding.
 
 ### Shallow clone (`executed`)
 
-`git clone --depth 1 file://…` of `a0b63ba` (one commit in the clone): `tests/test_inc9.py -k cd25` → 3 passed. On
-`bab76c1` these arms ran `git show 6fe35f5:…`, which the reviewer reported as an ERROR on a shallow clone; that failure
+`git clone --depth 1 file://…` of `aa78b28` (one commit in the clone): `tests/test_inc9.py -k cd25` → 3 passed. On
+`e1351fc` these arms ran `git show d0a69ad:…`, which the reviewer reported as an ERROR on a shallow clone; that failure
 was not re-measured here, only the pass of the literal version.
 
 ### Guards before the docs commit (`executed`)
@@ -269,7 +269,7 @@ as a literal), `test_llr_n06_2_5_notify_sites_are_coerced` (+ keyword arm), `tes
 
 Harness outside the repo (`%TEMP%\inc9c\mutants9c.py`): per mutant a sha256 pin of every touched file, byte-level
 edits in each file's own line endings, the killing tests run, the verdict **printed before** the restore, the pins
-re-checked. **Every pin matched after restore (45 of 45, and 5 of 5 in the survivor run); the tree was clean afterwards.** Run on `a0b63ba` (`X1` on `9994499`).
+re-checked. **Every pin matched after restore (45 of 45, and 5 of 5 in the survivor run); the tree was clean afterwards.** Run on `aa78b28` (`X1` on `c8759c9`).
 
 | # | Mutant | File | Killing arm(s) | Verdict |
 |---|---|---|---|---|
@@ -319,10 +319,10 @@ re-checked. **Every pin matched after restore (45 of 45, and 5 of 5 in the survi
 | C4 | home header paints both names (`CR-F8`) | `app.py` | `test_a112_the_home_header_reads_its_one_name` | **KILLED** — *the pre-Inc-9c arm SURVIVES* |
 | G1 | `db = store; db.save(...)` in product code (`G6-SEC-F9`) | `app.py` | `test_g6c_f3_census_every_store_save_call_is_guarded` | **KILLED** — *the pre-Inc-9c arm SURVIVES* |
 
-"The pre-Inc-9c arm SURVIVES" means the same mutant was also run against the test file as it stood at `bab76c1`
+"The pre-Inc-9c arm SURVIVES" means the same mutant was also run against the test file as it stood at `e1351fc`
 (copied to a scratch name, deleted afterwards): `SURVIVED` for S11, C2, C3, C4 and G1, 5 of 5. `INC9-CR-F2` has no
 mutant (it is an environment fix); it is shown by the shallow-clone run above. **Correction:** the message of
-`9994499` says the pre-change census *survives* `X1`. That was not measured (the pre-change file fails on the new tree
+`c8759c9` says the pre-change census *survives* `X1`. That was not measured (the pre-change file fails on the new tree
 for lexicon reasons, so its verdict says nothing); what is true is structural — it read only the group ids, never the
 painted headers.
 
@@ -379,7 +379,7 @@ stubbed to an empty graph).
 | `INC9C-F6` | Textual removes a key from the binding chain while a focused widget would consume it, priority or not (`Screen._binding_chain`). A priority binding for a printable key is inert under an `Input` unless the input gives the key up. Worth knowing for any future global chord | whoever adds one |
 | `INC9C-F7` | The legend's own-scope group is 3 lines docked (`INC9B-F1` realised, see the changed-arm table) | closed here |
 | `INC9C-F8` | `RepoScreen.on_mount`'s `except GitHubError` / `except Exception` around `worker.wait()` is effectively unreachable for a failing fetch: `@work(thread=True)` defaults to `exit_on_error`, so a raising fetch exits the app (seen in the committed RED run). Pre-existing | next owner of `RepoScreen` |
-| `INC9C-F9` | The committed `repo-unexpected` driver reached the wrong defect and was corrected in `90c8ce8` | closed here |
+| `INC9C-F9` | The committed `repo-unexpected` driver reached the wrong defect and was corrected in `5096838` | closed here |
 | `INC9C-F10` | `G6-SEC-F9` not covered: a string-built `getattr(store, "sa" + "ve")` | accepted |
 | — | `BACKLOG.md` and `state.json` not edited (outside this brief) | coordinator |
 

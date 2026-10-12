@@ -1,6 +1,6 @@
 # Increment 043 -- Inc-9q: stream suffix and MAX_PATH (SEC-F1/F4), hard links at open (SEC-F3), parent re-check (SEC-F2), X1, X2, one reason mapping (CR-F1/F3)
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `55dc530`. Authority: `VERDICT-inc9-2026-09-30.md` Round 13 (operator X1, X2; coordinator rulings) and the review findings `INC9P-SEC-F1`..`F4`, `INC9P-CR-F1`..`F8`. Amendment: `A-125` (appended to `01-requirements.md`, dated 2026-10-02).
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `efb8e03`. Authority: `VERDICT-inc9-2026-09-30.md` Round 13 (operator X1, X2; coordinator rulings) and the review findings `INC9P-SEC-F1`..`F4`, `INC9P-CR-F1`..`F8`. Amendment: `A-125` (appended to `01-requirements.md`, dated 2026-10-02).
 
 ## 1. What changed
 
@@ -46,7 +46,7 @@ No arm was weakened: every changed expectation names a new cause or is stricter,
 
 ## 3. Arm table (RED/GREEN)
 
-RED = `40b33e6` (the arms, strict xfail; sources of `55dc530`) with `--runxfail` in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9q.py tests/test_inc9p.py tests/test_inc9o.py tests/test_inc9n.py tests/test_arch_osopen_callers.py`, **71 failed, 273 passed**; 71 = the 71 xfail marks, one for one (they also passed as `71 xfailed` on the committed arms head, 0 XPASS). GREEN = the implementation commit, same five files plus `test_inc9m`, `test_attachments`, `test_palette`, `test_darkside_census`: 295 passed on the targeted run before the final lane (see Full-lane result for the lane).
+RED = `fd68ab4` (the arms, strict xfail; sources of `efb8e03`) with `--runxfail` in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9q.py tests/test_inc9p.py tests/test_inc9o.py tests/test_inc9n.py tests/test_arch_osopen_callers.py`, **71 failed, 273 passed**; 71 = the 71 xfail marks, one for one (they also passed as `71 xfailed` on the committed arms head, 0 XPASS). GREEN = the implementation commit, same five files plus `test_inc9m`, `test_attachments`, `test_palette`, `test_darkside_census`: 295 passed on the targeted run before the final lane (see Full-lane result for the lane).
 
 | Step | Arms (RED on base) | Closed by |
 |---|---|---|
@@ -123,7 +123,7 @@ The 87-column width is covered by the `NARROW` params of the CR-F3 and X2 arms, 
 
 ## 6. Test results, risks, carries, next
 
-- Ruff 0.8.4, `ruff check mapper tests`, clean `55dc530` worktree under `%TEMP%` (removed) vs this tree: 26 errors on both; the 26 (file, code, message) entries are the same (compared after stripping the root prefix by eye; the script's prefix strip failed, so the programmatic set difference was not clean).
+- Ruff 0.8.4, `ruff check mapper tests`, clean `efb8e03` worktree under `%TEMP%` (removed) vs this tree: 26 errors on both; the 26 (file, code, message) entries are the same (compared after stripping the root prefix by eye; the script's prefix strip failed, so the programmatic set difference was not clean).
 - `-W error::SyntaxWarning`: used on every targeted run and on the lane.
 - Risks
   1. A `:` in any component but the drive anchor is refused for every caller (add, open, factory template, import): a name legitimate on POSIX is `normalised` here. Windows only.
@@ -137,10 +137,10 @@ The 87-column width is covered by the `NARROW` params of the CR-F3 and X2 arms, 
 
 ## Commits
 
-- `40b33e6` the arms, strict xfail.
-- `3eb6263` the implementation (3 source files, tests, `ARCHITECTURE.md`).
+- `fd68ab4` the arms, strict xfail.
+- `fbce8c9` the implementation (3 source files, tests, `ARCHITECTURE.md`).
 - the simplification of `_write_via_sibling`, `A-125` and this record (below).
 
 ## Full-lane result
 
-`2570 passed, 24 deselected, 3 xfailed` (0 failed) in 1267 s (21 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `0c95883`, run AFTER the record was final except this section. Baseline 2510/0; the delta is the new `test_inc9q.py` arms (60). The 3 xfailed are pre-existing. After this section was appended only this `.md` changed; `tests/test_no_operator_paths.py` was re-run alone and the lane was NOT re-run in full.
+`2570 passed, 24 deselected, 3 xfailed` (0 failed) in 1267 s (21 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `1f5591b`, run AFTER the record was final except this section. Baseline 2510/0; the delta is the new `test_inc9q.py` arms (60). The 3 xfailed are pre-existing. After this section was appended only this `.md` changed; `tests/test_no_operator_paths.py` was re-run alone and the lane was NOT re-run in full.

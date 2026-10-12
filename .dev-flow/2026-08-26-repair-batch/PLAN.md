@@ -23,7 +23,7 @@ small, so the scope is fenced hard: **no frozen interface moves in this batch.**
 |---|---|
 | Batch id | `2026-08-26-repair-batch` |
 | Branch | `fix/shipped-defects-repair` |
-| Base | `origin/master` = `d6b60e6` |
+| Base | `origin/master` = `1b51aca` |
 | Baseline suite | **245 passed, exit 0** (`pytest -q -p no:randomly`, one complete run) |
 | Mode | `full` — operator asked for batch 1's gate protocol explicitly |
 | Successor | `2026-08-26-ui-next-batch-02`, **parked** at its PDR gate with all artifacts retained |

@@ -11,7 +11,7 @@
 | Lane (if the batch forked) | n/a — one lane |
 | Requirement(s) | `LLR-MOD.1.3` (drafts module owns its census methods) · `LLR-MOD.5.2` (extraction-riding test follow-ups land in the increment) |
 | Acceptance | full suite at the B3–B9 gate · the permanent guard tests (`test_mod_bodies.py`, `test_mod_parity.py`, `test_mod_dispatch.py`) · `tests/test_draft_hygiene.py`, `tests/test_keymap.py` follow-ups |
-| Agent | Product move `fd8a4e8` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). Census follow-ups `5229b12` — orchestrator. Gate — orchestrator. |
+| Agent | Product move `072466f` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). Census follow-ups `5087cfd` — orchestrator. Gate — orchestrator. |
 | Date | `2026-10-10` |
 
 ---
@@ -20,7 +20,7 @@
 
 - **The draft concern moved.** The draft-handling methods of `MapScreen` moved byte-identically (AST cut/paste) from `mapper/screens/map/screen.py` into the new `mapper/screens/map/drafts.py`, which defines `class DraftsOps` (`drafts.py:20`). `screen.py` composes it as one more mixin base.
 - **`test_draft_hygiene.py` follows the mixins.** `test_llr_001_2_no_read_of_the_guard_flag_outside_map_screen` no longer hard-pins the owner class: the allowed owner set is derived at runtime from `MapScreen.__mro__` (`{"MapScreen"} ∪ {mixin names whose module is mapper.screens.map}`), because `DraftsOps` now holds `_guard_draft`/`guard_open`.
-- **`test_keymap.py` follows the mixins.** `test_at_n03f_bound_keys_match_the_seat_exactly` no longer assumes the framework base is `__mro__[1]` (a plain mixin since B1); it takes the first MRO class carrying `_merged_bindings`. This fixed the one failure recorded at the B1+B2 gate ("keymap base class, fixed at B7 5229b12").
+- **`test_keymap.py` follows the mixins.** `test_at_n03f_bound_keys_match_the_seat_exactly` no longer assumes the framework base is `__mro__[1]` (a plain mixin since B1); it takes the first MRO class carrying `_merged_bindings`. This fixed the one failure recorded at the B1+B2 gate ("keymap base class, fixed at B7 5087cfd").
 
 ---
 
@@ -75,7 +75,7 @@ python -B -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py tests/test_m
 
 | Field | Value |
 |---|---|
-| **RED counterfactual** | The increment's own new assertions are the two census follow-ups. Their RED evidence is the B1+B2 gate: with the mixins landed but `test_keymap` still reading `__mro__[1]`, `b1b2-gate-full-suite.transcript` shows **1 failed** — the instrument bit before it was repaired in `5229b12`. Transcript: `.dev-flow/2026-10-09-modular-batch/evidence/b1b2-gate-full-suite.transcript`. No hand mutation, no restore digest — the RED state is a committed gate history, not a tmp edit. |
+| **RED counterfactual** | The increment's own new assertions are the two census follow-ups. Their RED evidence is the B1+B2 gate: with the mixins landed but `test_keymap` still reading `__mro__[1]`, `b1b2-gate-full-suite.transcript` shows **1 failed** — the instrument bit before it was repaired in `5087cfd`. Transcript: `.dev-flow/2026-10-09-modular-batch/evidence/b1b2-gate-full-suite.transcript`. No hand mutation, no restore digest — the RED state is a committed gate history, not a tmp edit. |
 
 | Field | Value |
 |---|---|
@@ -145,8 +145,8 @@ python -B -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py tests/test_m
 
 | Correction | Population — the assertion category | Enumeration method (the command) | Count | Sites edited | Sites left, and why |
 |---|---|---|---|---|---|
-| guard-flag owner may be MapScreen or any Spine B mixin | every class allowed to read `_draft_guard_open` | runtime derivation from `MapScreen.__mro__` (commit `5229b12`) | 2 at B7 (core + `DraftsOps`) | `tests/test_draft_hygiene.py:139` | none — derivation absorbs later mixins without edits |
-| framework base class under mixin MRO | every class that can contribute merged bindings | runtime scan for the first MRO class with `_merged_bindings` (commit `5229b12`) | 1 | `tests/test_keymap.py:151` | none |
+| guard-flag owner may be MapScreen or any Spine B mixin | every class allowed to read `_draft_guard_open` | runtime derivation from `MapScreen.__mro__` (commit `5087cfd`) | 2 at B7 (core + `DraftsOps`) | `tests/test_draft_hygiene.py:139` | none — derivation absorbs later mixins without edits |
+| framework base class under mixin MRO | every class that can contribute merged bindings | runtime scan for the first MRO class with `_merged_bindings` (commit `5087cfd`) | 1 | `tests/test_keymap.py:151` | none |
 
 | Field | Value |
 |---|---|
@@ -160,7 +160,7 @@ python -B -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py tests/test_m
 
 ### Signed-balance test ledger
 
-`post = base − deleted + added` — the B3–B9 gate is shared across B3–B9; a per-increment collection count was not recorded. Gate deltas: b1b2 = 3034 passed / 1 failed → b3b9 = 3060 passed / 0 failed; `5229b12` added no new test nodes (edits to existing arms only).
+`post = base − deleted + added` — the B3–B9 gate is shared across B3–B9; a per-increment collection count was not recorded. Gate deltas: b1b2 = 3034 passed / 1 failed → b3b9 = 3060 passed / 0 failed; `5087cfd` added no new test nodes (edits to existing arms only).
 
 ---
 
@@ -192,7 +192,7 @@ B8 — the nav concern to `NavOps` (`increment-018`).
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 2 / 4 |
-| 2 | Tests written in this same increment | all | ✓ | `5229b12` — `tests/test_draft_hygiene.py`, `tests/test_keymap.py` |
+| 2 | Tests written in this same increment | all | ✓ | `5087cfd` — `tests/test_draft_hygiene.py`, `tests/test_keymap.py` |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `test_mod_bodies.py` at the gate |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | B1+B2 gate `1 failed` pre-fix (§4) |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | 5 probes (§4) |

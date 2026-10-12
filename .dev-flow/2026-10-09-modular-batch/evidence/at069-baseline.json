@@ -1,5 +1,5 @@
 {
-  "captured_on": "23c90f1",
+  "captured_on": "fb1c39b",
   "rule": "AT-069 / HLR-MOD.5: after Inc-0 and every later increment, each file keeps assert_statements and test_functions >= these values",
   "files": {
     "tests/test_app_imports_used.py": {

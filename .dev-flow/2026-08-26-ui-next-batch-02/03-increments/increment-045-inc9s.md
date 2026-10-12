@@ -1,6 +1,6 @@
 # Increment 045 -- Inc-9s: a lone surrogate is refused by the allow-list (INC9R-SEC-F3) and the Inc-9r record corrections (B-81)
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `4a79baa`. Authority: `A-127` (appended to `01-requirements.md`, dated 2026-10-02). Micro-fix; 1 source file.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `9e4bee0`. Authority: `A-127` (appended to `01-requirements.md`, dated 2026-10-02). Micro-fix; 1 source file.
 
 ## 1. What changed
 
@@ -17,9 +17,9 @@ Source: `mapper/osopen.py`. Tests: `tests/test_inc9s.py` (new). Docs: `increment
 
 ## 3. Arm table (RED/GREEN)
 
-RED = `f372ea2` (the arms as strict xfail; source identical to `4a79baa`) with `--runxfail`, in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9s.py` **11 failed, 2 passed**. The committed arms head itself reports `2 passed, 11 xfailed` (0 XPASS). GREEN = `2459fd6`: 13 passed; the neighbouring suites in section 5 pass (498).
+RED = `5273af2` (the arms as strict xfail; source identical to `9e4bee0`) with `--runxfail`, in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9s.py` **11 failed, 2 passed**. The committed arms head itself reports `2 passed, 11 xfailed` (0 XPASS). GREEN = `5647f1c`: 13 passed; the neighbouring suites in section 5 pass (498).
 
-| Arm | RED on `4a79baa` (measured) | GREEN |
+| Arm | RED on `9e4bee0` (measured) | GREEN |
 |---|---|---|
 | `safe_local_path` / `confine_reason` / `confine` refuse a lone surrogate, zero filesystem calls (5 texts: `\ud800/x.pdf`, `docs/\udc80.pdf`, `docs/a\udbffb.pdf`, `\udfff`, and `docs/` + two adjacent lone-surrogate escapes + `.pdf`) | 5 failed: `safe_local_path` returned a path, not None. Direct probe: `confine_reason` RAISES `UnicodeEncodeError` for the first 4; for the adjacent-pair text it returns `ok` (CPython's utf-16 encoder accepts a high surrogate followed by a low one, so nothing raised) | pass |
 | `open_external` refuses with `REFUSED_TYPE`, no raise, launcher not called (same 5 texts) | 5 failed: 4 `UnicodeEncodeError` ('utf-16-le' codec can't encode, surrogates not allowed); the adjacent-pair text returned `no se pudo abrir` | pass |
@@ -31,7 +31,7 @@ Surrogates are written as escapes and the test file is ASCII (checked: 0 charact
 
 ## 4. Mutant table
 
-Harness `%TEMP%\inc9s-harness\mut.py` (outside the repo): byte-level read and write of `osopen.py` (CRLF; every mutated text is single-line, so line endings are untouched), a sha256 pin checked before each mutation and after each restore, verdict printed before the restore, `-B`, `-x`, `-W error::SyntaxWarning`, suite `tests/test_inc9s.py`. Pin (the `2459fd6` file): `osopen.py 357cc17ed34060da4ed53c51e2d7f58ef2c9dd1c809e0eaffceae342991e1b5d`. Pin re-checked after the run: OK. **6 mutants run, 6 killed, 0 survived.** The last column is what the harness printed (`-x`): the first failing item in file order, which is not always the arm the mutant was written for (see the `044` correction).
+Harness `%TEMP%\inc9s-harness\mut.py` (outside the repo): byte-level read and write of `osopen.py` (CRLF; every mutated text is single-line, so line endings are untouched), a sha256 pin checked before each mutation and after each restore, verdict printed before the restore, `-B`, `-x`, `-W error::SyntaxWarning`, suite `tests/test_inc9s.py`. Pin (the `5647f1c` file): `osopen.py 357cc17ed34060da4ed53c51e2d7f58ef2c9dd1c809e0eaffceae342991e1b5d`. Pin re-checked after the run: OK. **6 mutants run, 6 killed, 0 survived.** The last column is what the harness printed (`-x`): the first failing item in file order, which is not always the arm the mutant was written for (see the `044` correction).
 
 | # | Arm claimed | Exact text -> mutant text (osopen.py) | Killed by (first failure printed) |
 |---|---|---|---|
@@ -47,7 +47,7 @@ Not mutated (declared): the "nothing is written under `templates`" half of the P
 ## 5. Test results
 
 - `tests/test_inc9s.py tests/test_inc9r.py tests/test_inc9q.py tests/test_inc9p.py tests/test_inc9o.py tests/test_inc9n.py tests/test_inc9m.py tests/test_arch_osopen_callers.py`: **498 passed** in 235 s (`-W error::SyntaxWarning`, temp HOME).
-- Ruff 0.8.4, `ruff check mapper tests --output-format json`, clean `4a79baa` worktree under `%TEMP%` (removed) vs this tree, a programmatic set difference on (file relative to its root, code, message): **26 entries on each side, both differences empty.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json`, clean `9e4bee0` worktree under `%TEMP%` (removed) vs this tree, a programmatic set difference on (file relative to its root, code, message): **26 entries on each side, both differences empty.**
 - Environment: temp HOME and USERPROFILE, git identity from environment variables, no network, loopback, UNC, device or real cache; the stream file was created under pytest's `tmp_path`; the pytest rootdir was the repo or the scratch worktree only; scratch worktrees removed.
 
 ## 6. Risks, unmeasured, next
@@ -58,10 +58,10 @@ Not mutated (declared): the "nothing is written under `templates`" half of the P
 
 ## Commits
 
-- `f372ea2` the arms, strict xfail.
-- `2459fd6` the fix (1 source file; `OPEN_STEPS` emptied).
+- `5273af2` the arms, strict xfail.
+- `5647f1c` the fix (1 source file; `OPEN_STEPS` emptied).
 - the records (`044` corrections, `A-127`, this file).
 
 ## Full-lane result
 
-`2634 passed, 24 deselected, 3 xfailed` (0 failed) in 1356 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `f252606`, with a temp HOME and a git identity from the environment, run as the last step. Baseline 2621/0; the delta is the 13 new `test_inc9s.py` items. The 3 xfailed are pre-existing. After this section was appended only this `.md` changed; the lane was NOT re-run.
+`2634 passed, 24 deselected, 3 xfailed` (0 failed) in 1356 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `932876b`, with a temp HOME and a git identity from the environment, run as the last step. Baseline 2621/0; the delta is the 13 new `test_inc9s.py` items. The 3 xfailed are pre-existing. After this section was appended only this `.md` changed; the lane was NOT re-run.

@@ -4,7 +4,7 @@
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` |
 | Finding | `F3` (Inc-W1), routed 2026-09-10 to `qa-reviewer`; pickup "Inc-CONFIRM, or the whole-branch QA gate — whichever comes FIRST" |
-| Base measured | `046acea` (repo HEAD at pickup) |
+| Base measured | `58b3647` (repo HEAD at pickup) |
 | Agent | `qa-reviewer` (independent lens) |
 | **Mode** | **`validation`** — a verdict over re-measured results, not a test plan |
 | Date | 2026-09-19 |
@@ -38,7 +38,7 @@ tests/test_views_hits.py  c7e4c121e4c8972ccdc1b9812aa659c2a4fa8dd3ed4f361ec368b1
 tests/test_a3_census.py   0d06556d9c098a2957bee8bb1406798568ddcf924bd38768f88e5d261cd8fa90  32311  CRLF
 ```
 
-— identical in mirror and repo at `046acea`. Every mutation harness re-pinned the base digest, printed
+— identical in mirror and repo at `58b3647`. Every mutation harness re-pinned the base digest, printed
 its verdicts **before** the restore assertion, and asserted the restored digest equals the base
 (`RESTORE-OK` on every run). Final digests after all work, re-read from disk:
 
@@ -102,7 +102,7 @@ I did **not** run the lane in the repo: the ONE complete gate-suite run belongs 
 ### 2.2 · The finding's own mutant, relocated and re-fired
 
 The finding names `radial.py:221`. **That line no longer exists** — `radial.py` moved three times since
-(`f828d7b`, `540123c`, `e15fed8`). The co-drop site today is:
+(`4e6d6de`, `4d2bbaf`, `63b35d7`). The co-drop site today is:
 
 ```
 mapper/views/radial.py:298        title = darkside.plain(node.ficha.title)[:18]

@@ -1,11 +1,11 @@
 # 02h — architect lens, PDR iteration 3 (FINAL)
 
 **Date:** 2026-08-27 · **Batch:** `2026-08-26-ui-next-batch-02`
-**Base audited:** branch `docs/amendment-set-3` @ `94ad8d3` (tree clean, nothing mutated by this audit)
+**Base audited:** branch `docs/amendment-set-3` @ `8f07800` (tree clean, nothing mutated by this audit)
 **Instrument:** my own pass-2 ledger `02c` — `P2-B1`–`P2-B6`, `P2-C1`–`P2-C8`. **Not** the §6.5
 amendment table, which dropped conditions twice (RIDER-1).
 **Evidence rule applied:** every status below carries a command + output, or a `file:line` on the
-tree at `94ad8d3`. **No status rests on a citation of another document.**
+tree at `8f07800`. **No status rests on a citation of another document.**
 
 ---
 
@@ -30,7 +30,7 @@ requirements still contains the sentence *"`Inc-3` shall not open until the cap 
 
 ## 1 · Condition-by-condition audit (task 1)
 
-| id | Grade | Status | Executed evidence at `94ad8d3` |
+| id | Grade | Status | Executed evidence at `8f07800` |
 |---|---|---|---|
 | `P2-B1` | blocker | **DISCHARGED** | §5.4 (`01-requirements.md:5548`) states the cut **once**, with authority `#D5`. `grep -n "^### 3\."` → §3.6 header now `*(Inc-7 — §5.4)*` (`:2876`), §3.8 now `*(Inc-8 and Inc-9 — §5.4)*` (`:4062`). Both stale ARQ-7-cut headers gone. `Inc-6` **vacated, not renumbered** (`:5586`), with the renumbering and the reuse alternatives each rejected on stated grounds (`:5565-5578`). Residual `Inc-6` mentions at `:4032`, `:6460` are inside DEFERRED §3.7 / verbatim `#D6` quotation. |
 | `P2-B2` | blocker | **DISCHARGED** | Re-derived: 56 distinct `AT` tokens; 5 not on any `**Acceptance:**` line. Each dispositioned: `AT-009` owned at `:1517`, `AT-031` owned at `:3340`; `AT-040` leaves with DEFERRED US-N14 (`:5275`, §3.7 deferral block); `AT-027`/`AT-028`/`AT-045` **DELETED** (`:5314`, A-07); `AT-048` **DEFERRED** by `#D24` (`:5303`). Zero live unowned. |
@@ -40,10 +40,10 @@ requirements still contains the sentence *"`Inc-3` shall not open until the cap 
 | `P2-B6` | blocker | **DISCHARGED** | `LLR-N06.2.5` (`:1873`) re-parented to `HLR-COERCE`, owning increment **Inc-9**, on a two-limb criterion that is shown to *discriminate* (applied to sibling `LLR-N06.2.3`, which correctly stays). §5.4 `:5590` gives Inc-9 `screens/factory.py` already, so the re-parent removes Inc-3's undeclared 5th-file breach at **zero** added files. The one unperformed clause (physically relocating the block) is recorded as a deliberate deviation at `:1905-1911` — presentational, and I ratify leaving it. |
 | `P2-C1` | condition | **DISCHARGED** | AST `Call` nodes with `func.attr == "rows"` over `mapper/**`: **4 sites / 3 files**, all in `mapper/views/` (`lane.py:216`, `:299`, `layered.py:283`, `radial.py:253`). The IFC row (`:5016`) now lists exactly those three files; `export.py` moved to `transitive observers`; `outline.py` removed. `#D4`'s reversal condition — *"a consumer outside `mapper/views/` indexing `rows()`"* — is executed **still unmet, 0 sites**, so `#D4` is checkable again instead of self-contradicting. |
 | `P2-C2` | condition | **DISCHARGED** | `C-D4c` is now a **clause**, not a finding: `:1242-1249`, "STANDING RE-RUN OBLIGATION — `AT-007` and `AT-009` are RE-RUN AFTER `Inc-2` … `Inc-2` does not close with either red", with a named weaker variant (`M-CNV.1-rerun`) that is reddened by `AT-009`'s on-disk threshold. |
-| `P2-C3` | condition | **DISCHARGED — and I executed the join myself, not the claim of it.** | `#D15` discharged as a **derived join** (`:5415`) rather than a third hand table. I ran the join independently at `94ad8d3`: bind each `**Acceptance:**` line to its nearest `####`/`#####` heading, skip headings marked `SUPERSEDED`/`DEFERRED`, join to the functional table on requirement id. Result: **40 live `AT` ids with an owner, 69 requirements in the functional table, 0 live `AT` reaching no `TC`.** The join is TOTAL. The two known false positives (`AT-025b`, `AT-048`) are pre-recorded at `:5438` with the reason a naive scanner drops them. |
+| `P2-C3` | condition | **DISCHARGED — and I executed the join myself, not the claim of it.** | `#D15` discharged as a **derived join** (`:5415`) rather than a third hand table. I ran the join independently at `8f07800`: bind each `**Acceptance:**` line to its nearest `####`/`#####` heading, skip headings marked `SUPERSEDED`/`DEFERRED`, join to the functional table on requirement id. Result: **40 live `AT` ids with an owner, 69 requirements in the functional table, 0 live `AT` reaching no `TC`.** The join is TOTAL. The two known false positives (`AT-025b`, `AT-048`) are pre-recorded at `:5438` with the reason a naive scanner drops them. |
 | `P2-C4` | condition | **DISCHARGED** | See §3.1 below — routed edit verified. |
 | `P2-C5` | condition | **DISCHARGED, and it defuses the `A-11` trap by name.** | `LLR-N07.2.3` (`:2603`) creates `mapper/views/state.py::ViewState` (frozen, all-defaulted) and `IRenderer` (`runtime_checkable` Protocol). Code-side premises verified: `mapper/views/state.py` **does not exist**; `IRenderer` exists as a Python type **0** times (only comments at `layered.py:288`, `rail.py:6`); AST over `mapper/views/` returns **6** `render` defs, **all** already carrying a `render` attribute. Threshold 2 (`isinstance`) would therefore be **green on master today** — the requirement says exactly this at `:2632-2639` and pairs it with **threshold 3**, a parameter-name equality derived with `inspect.signature`. Named weaker variant `M-N07.2.3-a` is the vacuous `A-11` gate, explicitly reddened by threshold 3. |
-| `P2-C6` | condition | **DISCHARGED — census reproduced exactly.** | `~~>= 6~~` superseded (`:2582`); threshold is now four-part **set equality** including *"Call sites — THE CLAUSE THAT WAS MISSING ENTIRELY"* (`:2528`). I re-ran the A3 census by AST at `94ad8d3`: **ARG-FUL `.render` call sites = 23, files = 10, production = 3 → `mapper/app.py:737`, `:1352`, `:1727`; test = 20 / 9 files; ZERO-ARG `.render()` = 25.** Byte-for-byte the figure at `:2554`. Grep control returns 49 raw `.render(` lines — only the AST separates the two protocols. |
+| `P2-C6` | condition | **DISCHARGED — census reproduced exactly.** | `~~>= 6~~` superseded (`:2582`); threshold is now four-part **set equality** including *"Call sites — THE CLAUSE THAT WAS MISSING ENTIRELY"* (`:2528`). I re-ran the A3 census by AST at `8f07800`: **ARG-FUL `.render` call sites = 23, files = 10, production = 3 → `mapper/app.py:737`, `:1352`, `:1727`; test = 20 / 9 files; ZERO-ARG `.render()` = 25.** Byte-for-byte the figure at `:2554`. Grep control returns 49 raw `.render(` lines — only the AST separates the two protocols. |
 | `P2-C7` | condition | **DISCHARGED** | See §3.2 below — routed edit verified. Ownership half also closed: `Inc-2` OWNS the Phase-6 `docs/ARCHITECTURE.md` amendment (`:5514`), with a threshold derived by comparing each declared signature against `inspect.signature` on the live symbol, *"never by reading the table"* (`:5524`), and a stated reason for one owner rather than two. |
 | `P2-C8` | condition | **DISCHARGED BY DISPOSITION — recorded honestly as disposed, not answered.** | `HLR-N13.3` threshold 1 is struck: `:3450` `~~"Mount completes in < 1000 ms for 200 maps"~~` **DEFERRED (`#D24`)**; threshold 2 likewise. `:3389-3392` states plainly that `P2-C8` *"is not answered; its subject is gone"* and that the follow-on batch inherits the headroom question. This is consistent with the standing re-scope (S-18 work budget CUT, S-19 its precondition), which I do not re-litigate. **Critically, the batch does not launder the defect**: `:3392-3400` and `BACKLOG.md:156` (`B-33`) both record that `S-15`/`M-H3` — a 73-node map costing 72.5 s — is **LIVE on `master`** and that deferring a bound does not repair a defect. That is the correct record. |
 
@@ -91,7 +91,7 @@ Three supporting observations of my own:
    sentence, name three further increments under that cap while declining to quantify any of them.
    The pin reading makes it coherent. Charity resolves to the pin.
 2. `#D5b`'s own subject is *"Inc-4 … **alone**"*. Its quantifier is one increment.
-3. Executed basis reproduces at `94ad8d3`: `duplicate_chords()` → `[]`; `len(KEYMAP)` = 48; `H`, `J`,
+3. Executed basis reproduces at `8f07800`: `duplicate_chords()` → `[]`; `len(KEYMAP)` = 48; `H`, `J`,
    `K`, `L` all absent from the 25 map-scope keys. No collision exists to adjudicate.
 
 **But `#D25` carries two defects, both in its condition text rather than its reasoning.** See
@@ -156,7 +156,7 @@ the fifth hand-listed count in a document that has already shipped four.
 
 ### 3.1 · `ARCHITECTURE-proposed-at-ARQ.md` — `with_header` struck from the dataclass ✓
 
-`git diff 20f86de..HEAD` on that file shows the strike is **inside the committed `ViewState`
+`git diff ea7693a..HEAD` on that file shows the strike is **inside the committed `ViewState`
 dataclass**, exactly where `#D2` needed it. `with_header: bool = True` is **removed** at `:277` and
 replaced by a comment recording `#D2`, the pass-1 landing in `01-requirements.md`, the `P2-C4` /
 `A-56` closure, and a do-not-reinstate note whose reason is correct: `LLR-N07.2.3`'s signature clause
@@ -185,7 +185,7 @@ The row landed (one-line diff at `docs/ARCHITECTURE.md:160`), is worded like the
 at `:159`, marks itself **COMMITTED, NOT PRESENT**, names the batch's **second** A3 explicitly as
 distinct from the first, and names `Inc-1` as where it lands.
 
-Both of its factual claims verified at `94ad8d3`:
+Both of its factual claims verified at `8f07800`:
 
 - **`mapper/canvas.py` declares neither attribute.** `grep -n "dots\|bgs" mapper/canvas.py` → **zero
   occurrences**. `Canvas.__init__` (`canvas.py:30-33`) declares `w`, `h`, `cells`, `bits`,
@@ -204,7 +204,7 @@ Correct.
 | id | Sev | Finding | Executed evidence |
 |---|---|---|---|
 | **`ARQ-3-N1`** | condition | **`#D25` is landed in the amendment ledger but NOT in the normative body — and the body still blocks `Inc-3`.** `A-74` (`:7513`) records the ruling correctly. But `01-requirements.md:1673-1682` still reads *"⚠ ROUTED — `#D10`'s SEAT-DIFF CAP IS NOW ARITHMETICALLY BREACHED … **`Inc-3` shall not open until the cap is ruled**"*, and `:4540` still says `Inc-8`'s rows *"count against `#D10`'s cap, which §3.4 already routes to the PDR lane as arithmetically breached."* An implementer reads §3.4, not §6.5. **This is the exact failure mode RIDER-1 exists for**, one fold later. | `sed -n '1668,1685p'`, `sed -n '4538,4541p'` |
-| **`ARQ-3-N2`** | condition | **The `keymap.py` collision roster is wrong in three artifacts, in two different directions.** `#D25`'s `C-D25a`/`C-D25c` name **`Inc-3`, `Inc-4`, `Inc-6`, `Inc-9`** and *"DDR reviews the **four** diffs"* — but `Inc-6` is **VACATED** (`:5586`). `01-requirements.md:5611` and `:1671` say the collision is **three-way** (`Inc-3`, `Inc-4`, `Inc-9`) — but `HLR-N16.4:4538-4540` puts seat rows in **`Inc-8`**, added the same day. **The true set at `94ad8d3` is four: `Inc-3`, `Inc-4`, `Inc-8`, `Inc-9`.** And §5.4's `Inc-8` row (`:5588`) lists `screens/help.py`, `darkside.py`, `app.py` — **`keymap.py` is not declared**, which is the undeclared-source class validator rule `V9` exists to catch. `#D25` imported `#D5b`'s stale roster verbatim without reconciling it against `A-49`. | `:5586`, `:5588`, `:5611`, `:1671`, `:4538-4540`; `PDR-addendum-3.md:92,98` |
+| **`ARQ-3-N2`** | condition | **The `keymap.py` collision roster is wrong in three artifacts, in two different directions.** `#D25`'s `C-D25a`/`C-D25c` name **`Inc-3`, `Inc-4`, `Inc-6`, `Inc-9`** and *"DDR reviews the **four** diffs"* — but `Inc-6` is **VACATED** (`:5586`). `01-requirements.md:5611` and `:1671` say the collision is **three-way** (`Inc-3`, `Inc-4`, `Inc-9`) — but `HLR-N16.4:4538-4540` puts seat rows in **`Inc-8`**, added the same day. **The true set at `8f07800` is four: `Inc-3`, `Inc-4`, `Inc-8`, `Inc-9`.** And §5.4's `Inc-8` row (`:5588`) lists `screens/help.py`, `darkside.py`, `app.py` — **`keymap.py` is not declared**, which is the undeclared-source class validator rule `V9` exists to catch. `#D25` imported `#D5b`'s stale roster verbatim without reconciling it against `A-49`. | `:5586`, `:5588`, `:5611`, `:1671`, `:4538-4540`; `PDR-addendum-3.md:92,98` |
 | **`ARQ-3-N3`** | condition | **`C-D26c` is unmet: `B-34` and `B-35` do not exist.** Both are cited four times across two artifacts as landed carries. `.dev-flow/BACKLOG.md` tops out at **`B-33`**. `C-D26c` reads *"deferral is recorded as a carry, not dropped"* — today it is dropped. | `grep -oE "B-[0-9]+" .dev-flow/BACKLOG.md \| sort -uV \| tail` → `…B-31 B-32 B-33` |
 | **`ARQ-3-N4`** | record correction | **`PDR-addendum-3` §5's "minimal alternative" does not close `UX2-C-01`.** `mapper/widgets/inspector.py:280` — `_commit` posts `FieldCommitted(node.id, field, widget.value)` unconditionally from `on_input_blurred`. Under `UX2-C-01`'s reproduction, pressing `n` **types the character into the focused `Input`**, so `'ACTA-2011-034' → 'n'` is a **genuinely non-empty delta**. A non-empty-delta predicate closes `UX2-C-11` / `B-31` and **nothing of `UX2-C-01`**. §5 does not literally claim otherwise, but it offers the gate as the alternative to refusing the `UX2-C-01` deferral, which reads as if it did. | `mapper/widgets/inspector.py:277-296`; `02g` §4.4 transcript |
 
@@ -269,7 +269,7 @@ own rationale, just not thresholded).
   `mapper/views/` renderers already carry a `render` attribute, so `runtime_checkable` member-presence
   passes **before any migration**. `LLR-N07.2.3` threshold 3 is what makes the pair discriminating. I
   graded `P2-C5` on the pair, never on the `isinstance` clause alone.
-- **The heading census anchor.** Used `^#{4,5} \`?(HLR|LLR)-` exactly. Live at `94ad8d3`: **25 HLR /
+- **The heading census anchor.** Used `^#{4,5} \`?(HLR|LLR)-` exactly. Live at `8f07800`: **25 HLR /
   62 LLR** headings total, matching the briefed figure (21/52 after `DEFERRED`/`SUPERSEDED`). No
   drift; `S-17`'s misdiagnosis not repeated.
 - **AST over grep, everywhere it mattered.** Four censuses re-derived by `ast`, never by substring:
@@ -289,7 +289,7 @@ own rationale, just not thresholded).
 | Cost / latency estimated where relevant | ✓ | No model calls, no network. Cost is source-file budget: `Inc-REPAIR` 1→2 of 4 for the optional gate; `Inc-8` 3→4 of 4 for the declared `keymap.py`. `P2-C8`'s wall-clock budget deferred with its subject; `S-15`'s 72.5 s / 73-node measurement recorded as LIVE, not disposed |
 | Diagram included when flow is non-trivial | n/a | The flow at issue is a condition ledger and three text rulings; §5.4's table is the cut and it is already tabular |
 | What would change the recommendation | ✓ | §9 |
-| **Two-layer requirements: Acceptance block + `AT-NNN`, BOTH chains** | **✓ — first time in this batch** | Behavioral `US→AT` at `:5266`; functional `US→HLR→LLR→TC` at `:5340`. **They now cross**, via `#D15`'s derived join (`:5415`), which **I executed independently at `94ad8d3`: 0 live `AT` ids reach no `TC`.** Graded ✗ at both prior passes |
+| **Two-layer requirements: Acceptance block + `AT-NNN`, BOTH chains** | **✓ — first time in this batch** | Behavioral `US→AT` at `:5266`; functional `US→HLR→LLR→TC` at `:5340`. **They now cross**, via `#D15`'s derived join (`:5415`), which **I executed independently at `8f07800`: 0 live `AT` ids reach no `TC`.** Graded ✗ at both prior passes |
 
 ---
 
@@ -303,7 +303,7 @@ own rationale, just not thresholded).
   says it shall not open is a gate failure on the first commit, and the likely repair — weakening the
   clause under time pressure — is worse than the delay.
 - **Any of the 14 discharges failing to reproduce.** Each is a named command; all are re-runnable at
-  `94ad8d3`.
+  `8f07800`.
 - **A fifth generation of any census transcribed as a literal.** Every threshold that had one now
   carries a QUESTION / INSTRUMENT / MEASURED-AT derivation instead. A literal reappearing is a
   regression to the defect that cost this batch five generations of one number.

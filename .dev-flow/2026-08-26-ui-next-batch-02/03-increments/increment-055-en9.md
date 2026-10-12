@@ -1,6 +1,6 @@
 # Increment 055 -- Inc-EN-9: no `?` where the only control is a text field (E4), review carries
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `9105abc`. Authority: `A-137` (appended to `01-requirements.md`, dated 2026-10-03), `VERDICT-inc-en-2026-10-02.md` Round 4 (`E4`, `EN7-REV-F1`) and its routing paragraph, plus the coordinator's EN-8 review items `EN8-REV-F1` to `F7`. Source files: 3 (`mapper/keymap.py`, `mapper/app.py`, `mapper/screens/coverage.py`; expected 2, ceiling 4, approved by the coordinator for the EN-8 items; no overage). Commits: `1881eee` and `4425472` (tests, arms first, `xfail(strict=True)`), `136d0fc` (E4 source), `3bd603e` (EOL restore), then the F2/F6/F7 fix and the docs.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `dae2d33`. Authority: `A-137` (appended to `01-requirements.md`, dated 2026-10-03), `VERDICT-inc-en-2026-10-02.md` Round 4 (`E4`, `EN7-REV-F1`) and its routing paragraph, plus the coordinator's EN-8 review items `EN8-REV-F1` to `F7`. Source files: 3 (`mapper/keymap.py`, `mapper/app.py`, `mapper/screens/coverage.py`; expected 2, ceiling 4, approved by the coordinator for the EN-8 items; no overage). Commits: `030eaa9` and `9dac2cc` (tests, arms first, `xfail(strict=True)`), `84f3e04` (E4 source), `cb185a2` (EOL restore), then the F2/F6/F7 fix and the docs.
 
 ## 1. What changed
 
@@ -15,14 +15,14 @@ Design chosen (seat-derived, no painted string edited): `keymap.TEXT_ONLY_SCOPES
 
 Rendered key bar of connect-repo (read from `KeyBar.content.plain`), before and after:
 
-| width | before (`9105abc`) | after |
+| width | before (`dae2d33`) | after |
 |---|---|---|
 | 118 | `connect repo esc back   global ctrl+p palette  ? legend` | `connect repo esc back   global ctrl+p palette` |
 | 87 | `connect repo esc back   global ctrl+p palette  ? legend` | `connect repo esc back   global ctrl+p palette` |
 
 **Review carries.** `EN7-REV-F2`: dated correction appended to `A-135` (the palette's legend action reaches the legend from every seat-migrated screen; the coverage and editor modals have none), `B-82`. `EN7-REV-F3`: correction note on record 053 (no prompt pre-fills a value; select-on-focus is moot for prompts; verified by reading every `Input(` in the tree). `EN7-REV-F4`: **option chosen: relabel.** At 87 the inspector has a 0x0 region (the field's own `display` is still `True`, so `assert field.display` would have claimed nothing), so the 87 params of `test_question_mark_in_an_inspector_field_appends_and_keeps_the_content` are declared a programmatic-focus control in the docstring, and a region assertion pins which params are reachable (area > 0 at 118, == 0 at 87). `B-83` records the live path (`M` at 87 focuses the hidden `#insp-field-D` and typed text goes into it; measured on the base source and on this tree: same).
 
-**EN-8 review items (coordinator).** `F1`: four records restored to LF in the index (`3bd603e`), `git ls-files --eol` 4 `i/crlf` / 385 `i/lf` before, 0 / 389 after (the `i/none` file unchanged); `git diff --ignore-cr-at-eol` empty. My own commits write LF into the index (`i/lf` on every touched file, checked). `F2`: `tests/test_overflow.py` comment "two widths sooner (34 -> 32)", note on record 049. `F3`/`F4`/`F5`: correction notes on records 048, 054, 047. `F6`: the ficha modal paints `owner —` / `created —` for an EMPTY value too (`fields.get("O") or "—"`). `F7`: the coverage `Select` binding label is `select`. No key, row or feature moved.
+**EN-8 review items (coordinator).** `F1`: four records restored to LF in the index (`cb185a2`), `git ls-files --eol` 4 `i/crlf` / 385 `i/lf` before, 0 / 389 after (the `i/none` file unchanged); `git diff --ignore-cr-at-eol` empty. My own commits write LF into the index (`i/lf` on every touched file, checked). `F2`: `tests/test_overflow.py` comment "two widths sooner (34 -> 32)", note on record 049. `F3`/`F4`/`F5`: correction notes on records 048, 054, 047. `F6`: the ficha modal paints `owner —` / `created —` for an EMPTY value too (`fields.get("O") or "—"`). `F7`: the coverage `Select` binding label is `select`. No key, row or feature moved.
 
 ## 2. Files modified
 
@@ -36,7 +36,7 @@ Source (3): `mapper/keymap.py`, `mapper/app.py` (two lines, `F6`), `mapper/scree
 
 ## 4. RED / GREEN and mutants
 
-RED on the base: scratch `git worktree` of `1881eee`/`4425472` (base source `9105abc` plus the tests) under `%TEMP%` (removed), `mapper` imported from the worktree (`__file__` checked). Default run: `10 passed, 7 xfailed`. With `--runxfail`: `7 failed, 10 passed` (bar x2, palette-opened legend x2, `bindings_for`, relabelled sentinel x2). The ten GREEN-on-base arms are the pins: other screens (home, map, factory, repo; 8 items), the settings sentinel control (2). `F6`/`F7` arms were written after their fix and are shown RED by mutant only (below), not by a base worktree; declared.
+RED on the base: scratch `git worktree` of `030eaa9`/`9dac2cc` (base source `dae2d33` plus the tests) under `%TEMP%` (removed), `mapper` imported from the worktree (`__file__` checked). Default run: `10 passed, 7 xfailed`. With `--runxfail`: `7 failed, 10 passed` (bar x2, palette-opened legend x2, `bindings_for`, relabelled sentinel x2). The ten GREEN-on-base arms are the pins: other screens (home, map, factory, repo; 8 items), the settings sentinel control (2). `F6`/`F7` arms were written after their fix and are shown RED by mutant only (below), not by a base worktree; declared.
 
 Mutants (harness in `%TEMP%`, outside the repo; byte-level read and write; sha256 pin per file re-checked after restore, all `True`; verdict printed before the restore):
 
@@ -55,12 +55,12 @@ M1-M4 and M8 were run on the final tree (`keymap.py` sha256 `848d243d...` pinned
 
 ## 5. Test results
 
-- Full default lane, once, uninterrupted, last step, on `3fef871` (all code and tests; this docs commit follows): `2768 passed, 24 deselected, 3 xfailed` (0 failed) in 1343.48 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE (real backslashes), git identity from environment variables. Baseline 2746 plus the 22 items of `test_en9.py`. FLAKE-1 and FLAKE-4 did not occur.
-- Lane history, declared, none counted: (1) a lane started on `c7008db` was killed by me when the coordinator's EN-8 items arrived (its source was about to change). (2) The next lane, on `c7008db`, ended `2 failed, 2762 passed`: `test_inc9::test_llr_n16_1_1_the_screen_set_is_derived_and_large_enough` and `test_every_derived_help_screen_has_an_opener`, because the first draft also dropped connect-repo's `question_mark` binding (section 1). Fixed by keeping the binding. (3) The next, on `9feff3e`, ended `1 failed, 2767 passed`: `test_keymap::test_at_n03f_bound_keys_match_the_seat_exactly[plug]` (a bound key the seat no longer lists); the arm was relabelled (section 2). Not flakes: both were mine.
+- Full default lane, once, uninterrupted, last step, on `d35ecbc` (all code and tests; this docs commit follows): `2768 passed, 24 deselected, 3 xfailed` (0 failed) in 1343.48 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE (real backslashes), git identity from environment variables. Baseline 2746 plus the 22 items of `test_en9.py`. FLAKE-1 and FLAKE-4 did not occur.
+- Lane history, declared, none counted: (1) a lane started on `ae78206` was killed by me when the coordinator's EN-8 items arrived (its source was about to change). (2) The next lane, on `ae78206`, ended `2 failed, 2762 passed`: `test_inc9::test_llr_n16_1_1_the_screen_set_is_derived_and_large_enough` and `test_every_derived_help_screen_has_an_opener`, because the first draft also dropped connect-repo's `question_mark` binding (section 1). Fixed by keeping the binding. (3) The next, on `211988b`, ended `1 failed, 2767 passed`: `test_keymap::test_at_n03f_bound_keys_match_the_seat_exactly[plug]` (a bound key the seat no longer lists); the arm was relabelled (section 2). Not flakes: both were mine.
 - Affected suites run alone before each lane: `test_en9`, `test_en7`, `test_inc9`, `test_keymap`, `test_palette`, `test_key_dispatch`, `test_help_scope`.
-- Ruff 0.8.4, programmatic set difference on (file, code, message) between `9105abc` in a scratch worktree (removed) and this tree over the 7 changed source and test files: 1 and 1, new: none, fixed: none.
+- Ruff 0.8.4, programmatic set difference on (file, code, message) between `dae2d33` in a scratch worktree (removed) and this tree over the 7 changed source and test files: 1 and 1, new: none, fixed: none.
 - Cf characters (U+2011 included) in every changed file: 0; account-name grep: 0. `git ls-files --eol`: 390 `i/lf`, 1 `i/none`, 0 `i/crlf`. No `prototypes/`, `mapper.db`, `fixtures/.mapper`, `fixtures/mapper.db` or `state.json` staged. No `git stash`. The EN-8 reviewer's worktree under `%TEMP%` was not touched (still listed).
-- Declared slip: eight of the nine commits before this one carry the repository's configured author identity (`<owner>`), not an environment one: the identity variables were exported per shell call and were missing in most commit calls. Only `3fef871` uses the environment identity. No file content is affected; the instruction named a temp HOME and an identity via env, and the commits do not fully honour the second half.
+- Declared slip: eight of the nine commits before this one carry the repository's configured author identity (`<owner>`), not an environment one: the identity variables were exported per shell call and were missing in most commit calls. Only `d35ecbc` uses the environment identity. No file content is affected; the instruction named a temp HOME and an identity via env, and the commits do not fully honour the second half.
 
 ## 6. Risks, unmeasured, next
 

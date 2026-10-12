@@ -6,7 +6,7 @@
 | Increment | `018` — Inc-CONFIRM item 3: `SEC-H2`, the `B-64` driven sweep, `F3`→qa, `F7`+`UI-AT058`→ux |
 | Agent | `software-dev`, with `qa-reviewer` and `ux-reviewer` on their own mirrors |
 | Date | 2026-09-19 |
-| Commits | `3ef067c` (`SEC-H2`) + this docs commit |
+| Commits | `1c52434` (`SEC-H2`) + this docs commit |
 
 ---
 
@@ -37,7 +37,7 @@ with `chr(0x…)` at test time like every other hostile payload in the suite.
 ### `B-64` — the DRIVEN reachable-sink sweep, and the census it rests on is STALE
 
 **The recorded census does not describe this tree.** The carry records *"38 sites: app.py 14,
-factory.py 12, lane.py 7, editor.py 4, darkside.py 1"*. Derived by AST at `046acea`: **45 calls**
+factory.py 12, lane.py 7, editor.py 4, darkside.py 1"*. Derived by AST at `58b3647`: **45 calls**
 — app.py 17, factory.py 13, lane.py 9, editor.py 4, darkside.py 1, **and `views/layered.py` 1,
 a file the census does not name at all**. Rider 2 says the carry travels with its measurements;
 the population those measurements were taken over has moved.
@@ -147,7 +147,7 @@ both arms would leave it unknown whether either arm pins its own hazard.
 
 | Field | Value |
 |---|---|
-| **Independent review** | **OWED for `SEC-H2`.** `qa-reviewer` and `ux-reviewer` returned on the routed pickups (below) but neither reviewed `SEC-H2`; `ux-reviewer` explicitly recorded it as *"not reviewed — security's"*. The `code-reviewer` pass for increment 017 was dispatched against `046acea` and **does not extend to `3ef067c`**. |
+| **Independent review** | **OWED for `SEC-H2`.** `qa-reviewer` and `ux-reviewer` returned on the routed pickups (below) but neither reviewed `SEC-H2`; `ux-reviewer` explicitly recorded it as *"not reviewed — security's"*. The `code-reviewer` pass for increment 017 was dispatched against `58b3647` and **does not extend to `1c52434`**. |
 
 ---
 

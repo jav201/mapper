@@ -6,7 +6,7 @@
 |---|---|
 | Batch | `2026-10-08-data-safety-batch` |
 | Increment | `002` (plan name Inc-1a) |
-| Lane (if the batch forked) | none · worktree `mapper-inc1a`, branch `inc1a/draft-guard`, based on Inc-3's tip `80635a1` |
+| Lane (if the batch forked) | none · worktree `mapper-inc1a`, branch `inc1a/draft-guard`, based on Inc-3's tip `e3eab1f` |
 | Requirement(s) | US-001 · HLR-003 · LLR-003.1 · design rows 1a.1–1a.3 · verdict R4, R9 · PDR conditions C9, C13, C14 (Inc-1a parts) |
 | Acceptance | AT-015 (modal-level part only; the AT through `j` is Inc-1b) · white-box TC-003.1 · unit — none beyond the TC-003.1 nodes |
 | Agent | `software-dev` |
@@ -68,7 +68,7 @@ python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider          
 
 Touched files: 151 passed in the four seat/modal files; the census/related files (7 files) 106 passed after the lexicon edit; `test_inc9.py`+`test_inc9e.py` 57 passed. Python 3.12.7, Textual 8.2.8, executed.
 
-**Default lane (executed once, whole tree, at the final code `8120a24`):** `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` finished `2828 passed, 24 deselected, 3 xfailed in 1424.00s (0:23:43)`, `EXIT_CODE=0`. Zero failures (Inc-3's `test_at_p07` failure is fixed on this branch's base). The "Task was destroyed but it is pending" lines after the summary are Textual timer teardown noise at interpreter exit. Transcript: `evidence/inc1a-default-lane.transcript`.
+**Default lane (executed once, whole tree, at the final code `6b0c8a5`):** `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` finished `2828 passed, 24 deselected, 3 xfailed in 1424.00s (0:23:43)`, `EXIT_CODE=0`. Zero failures (Inc-3's `test_at_p07` failure is fixed on this branch's base). The "Task was destroyed but it is pending" lines after the summary are Textual timer teardown noise at interpreter exit. Transcript: `evidence/inc1a-default-lane.transcript`.
 
 ### RED counterfactual — executed, not predicted
 
@@ -184,7 +184,7 @@ Run over the four node files (152 nodes with the then-count). Pre-mutation diges
 
 ### Signed-balance test ledger
 
-`post = base − deleted + added` gives `2831 = 2808 − 0 + 23` ✓ reconciles. Base: Inc-3's lane result 2808 selected. Post: `--collect-only` at `8120a24` -> `2831/2855 tests collected (24 deselected)`, and the lane: 2828 passed + 3 xfailed = 2831 selected. Added 23 = 13 (`test_draft_save.py`) + 4 (`test_data_safety_census.py`) + 4 (`test_keymap.py`: `n03a` x3 draft bindings, `n03f[draft]`) + 2 (`test_repair_artifact_claims.py`: `…[draft_guard.py]` x2, parametrised over product files). Deleted 0.
+`post = base − deleted + added` gives `2831 = 2808 − 0 + 23` ✓ reconciles. Base: Inc-3's lane result 2808 selected. Post: `--collect-only` at `6b0c8a5` -> `2831/2855 tests collected (24 deselected)`, and the lane: 2828 passed + 3 xfailed = 2831 selected. Added 23 = 13 (`test_draft_save.py`) + 4 (`test_data_safety_census.py`) + 4 (`test_keymap.py`: `n03a` x3 draft bindings, `n03f[draft]`) + 2 (`test_repair_artifact_claims.py`: `…[draft_guard.py]` x2, parametrised over product files). Deleted 0.
 
 ---
 

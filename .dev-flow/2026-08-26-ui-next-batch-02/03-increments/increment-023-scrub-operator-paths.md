@@ -7,7 +7,7 @@
 | Agent | `software-dev` |
 | Date | 2026-09-29 |
 | Authority | Operator, verbatim: *"Limpia el usuario de los registros en un incremento propio."* Closes the identity half of `B-22` |
-| Starting state | `feat/ui-next-batch-02` @ `037c733`, `git status --porcelain` clean |
+| Starting state | `feat/ui-next-batch-02` @ `2759b3d`, `git status --porcelain` clean |
 
 Throughout this record the real Windows account name is written `<operator>` and never spelled,
 per the increment's own instructions and per the requirement it discharges.
@@ -63,7 +63,7 @@ E   AssertionError: the real account name (read from $USERNAME, not printed here
 ```
 
 Committed at this point with both arms marked `xfail(strict=True, reason="scrub pending")`, so the
-suite stayed green while the defect was real (commit `0031570`).
+suite stayed green while the defect was real (commit `ec58cd3`).
 
 ### GREEN, after the scrub
 
@@ -87,7 +87,7 @@ this increment actually introduces, not mint a second one.
 1295 passed, 20 deselected, 3 xfailed in 837.80s (0:13:57)
 ```
 
-Reconciled: baseline at `037c733` is 1293 passed, 20 deselected, 3 xfailed, 0 failed. `+2` passed
+Reconciled: baseline at `2759b3d` is 1293 passed, 20 deselected, 3 xfailed, 0 failed. `+2` passed
 here is exactly the two new `A-110` guard nodes; every other count is unchanged, and 0 failed. The
 wall clock (~14 min vs. the ~105 s the batch's baseline was measured at) is this sandbox's own
 resource ceiling, not a regression — no test's own logic changed. FLAKE-1

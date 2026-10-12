@@ -60,7 +60,7 @@ or `mapper/canvas.py` touched (M-M3 below).
 
 ## 2b · Join-gate follow-up (trunk — serves both lanes)
 
-Committed after the join as `084d7b7` (test-only): the A3 census pin in
+Committed after the join as `4d82c16` (test-only): the A3 census pin in
 `tests/test_a3_census.py` moves the arg-ful render pin 65 → 80, itemised —
 the perf batch's byte-identity arms (`tests/test_perf_paint_clip.py`,
 `tests/test_perf_layout_memo.py`, `tests/test_perf_dump.py`,
@@ -70,7 +70,7 @@ same commit fills the `code-reviewer` cells of increments 002–005.
 
 | File | Kind | Traces to | Change |
 |---|---|---|---|
-| `tests/test_a3_census.py` | test | `LLR-PERF.1.3` · `LLR-PERF.2.2` | A3 arg-ful render pin 65 → 80, itemised for this batch's byte-identity arms (join-gate follow-up `084d7b7`) |
+| `tests/test_a3_census.py` | test | `LLR-PERF.1.3` · `LLR-PERF.2.2` | A3 arg-ful render pin 65 → 80, itemised for this batch's byte-identity arms (join-gate follow-up `4d82c16`) |
 
 ## 3 · How to test
 
@@ -86,14 +86,14 @@ line 22).  The six-file verification suite across the named files (§3,
 plainly here; the count that holds post-join is the join gate
 (`1 failed, 3222 passed` in `join-gate-run1-full-suite.transcript` — the
 single failure is the A3 census pin, fixed in the test-only follow-up
-`084d7b7`).  Ruff `All checks passed!`; the M-M3 file-diff check
-`git diff 5cde04e -- mapper/views` printed nothing.
+`4d82c16`).  Ruff `All checks passed!`; the M-M3 file-diff check
+`git diff e7d433d -- mapper/views` printed nothing.
 
 Numeric thresholds met: ONE `dump` call on wide-6000 iterates `graph.edges`
 11,998 = 2·E times (bound 2·E + 4; baseline 18,003,000); scaling ratio
 count(3000)/count(1500) = 2.000 ∈ [1.8, 2.2]; AT-076's single persisting-save
 dump = 12,000 ≤ 2·6000 + 4 and the saved `.mmd` byte-equals the AT-076 golden
-pinned at base SHA `5cde04e`; 0 byte diffs on all 8 dump goldens.
+pinned at base SHA `e7d433d`; 0 byte diffs on all 8 dump goldens.
 
 Measured (median of 3, same session, wide-6000 `MapStore.save`): dump edge
 iterations 18,003,000 → 11,998; save wall 2.656 s → 1.104 s.
@@ -144,7 +144,7 @@ byte-compared, 0 diffs.
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
 | RED proofs, sha256 restore lines, before/after measurements (`3 passed in 74.15s` baseline GREEN at line 22) | `.dev-flow/2026-10-10-perf-batch/evidence/m2-red.transcript` | `c84b8c031d35864118fb8b5ff03af7d3b19dc53c8090d2e3422de84856328d96` |
-| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `4d82c16`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
 | join slow-lane run (`19 passed, 3231 deselected`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
 
 | Field | Value |
@@ -166,7 +166,7 @@ byte-compared, 0 diffs.
 `dump`/`parse`/`slugify` signatures frozen; consumers (`store.save`
 round-trip check, export, undo snapshot bound at import) ride unchanged
 signatures; `mapper/views/` builds its own per-render index (LLR-PERF.2.3)
-and imports nothing new — `git diff 5cde04e -- mapper/views` is empty.
+and imports nothing new — `git diff e7d433d -- mapper/views` is empty.
 
 ### Correction population — enumerated BEFORE the first site was edited
 
@@ -214,7 +214,7 @@ The trunk's DDR join of lanes R and M (per the fork plan in `PLAN.md`).
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | 3 cycles (M-M2a ×2 nodes, dangling, M-M2b), all RED, sha256-verified restores, GREEN re-runs |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | signatures frozen; `mapper/views` diff empty |
 | 6 | `code-reviewer` passed | `core` · `full` | ⚠ | PENDING — named in §4b |
-| 7 | No file from another lane touched | all | ✓ | Lane R owns `mapper/views/` + `mapper/canvas.py`: zero bytes touched (`git diff 5cde04e -- mapper/views` empty) |
+| 7 | No file from another lane touched | all | ✓ | Lane R owns `mapper/views/` + `mapper/canvas.py`: zero bytes touched (`git diff e7d433d -- mapper/views` empty) |
 | 8 | Frozen interfaces untouched | all | ✓ | `parse`/`dump`/`slugify` signatures and `.mmd` bytes unchanged (8 goldens + AT-076 byte-equal) |
 | 9 | Coverage claims verified **on disk** | all | ✓ | 3 nodes + verification suite + per-node RED transcripts on disk |
 | 10 | Load-bearing emptiness declared | all | ✓ | golden invariance to dangling/order declared; inline arms pin the observable base behaviour |

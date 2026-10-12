@@ -2,7 +2,7 @@
 
 > **Method.** Audited against **my own eight conditions in `02d-pdr-qa-pass2.md` §1.1**, never against
 > §6.5's amendment table — that instrument dropped conditions twice in this batch. Every number below
-> was executed at **`94ad8d3`** in this session; transcripts pasted. **READ-ONLY**: nothing under
+> was executed at **`8f07800`** in this session; transcripts pasted. **READ-ONLY**: nothing under
 > `mapper/`, `tests/` or `fixtures/` was created, modified or staged; probe scripts live in the
 > session scratchpad. No `MapperApp` was constructed anywhere in this pass, and no probe touched
 > `fixtures/`. Mutated ids are described by position and operation, never pasted (C-56).
@@ -45,7 +45,7 @@ than inherit, and this is the explicit ruling. Costed in §6.
 $ PYTHONUTF8=1 python -m pytest -q
 630 passed, 17 deselected in 54.55s
 $ git log --oneline -1
-94ad8d3 docs: land amendment set 3 pass 2 and discharge all six routed cross-artifact edits
+8f07800 docs: land amendment set 3 pass 2 and discharge all six routed cross-artifact edits
 $ git status --porcelain fixtures/
 (empty)
 $ grep -n "erp\[" fixtures/legacy.mmd
@@ -170,7 +170,7 @@ union of the functional-table `TC`s of the requirements carrying that `AT` on an
 Question: does every live `AT` reach at least one `TC`?
 
 ```
-$ PYTHONUTF8=1 python join.py          # measured at 94ad8d3
+$ PYTHONUTF8=1 python join.py          # measured at 8f07800
 
 live AT = 40 ; AT with >=1 live owning requirement = 40
 
@@ -186,8 +186,8 @@ HLR-N13.3 functional row @5381:
   thresholds 1 and 2 **DEFERRED (`#D24`)** with `AT-048` |
 ```
 
-**Result: the join is TOTAL at `94ad8d3` — 0 live `AT` ids reach no `TC`.** `A-55`'s result holds
-at the current HEAD, not only at `ea1fbf9`.
+**Result: the join is TOTAL at `8f07800` — 0 live `AT` ids reach no `TC`.** `A-55`'s result holds
+at the current HEAD, not only at `6816aaa`.
 
 **The known false gap reproduced exactly, and NOT reported as a gap.** `A-55` warns that a scanner
 discarding rows containing the word `DEFERRED` loses `HLR-N13.3`'s **live** `TC-076` row, because the
@@ -473,7 +473,7 @@ says the same thing in its own warning, and I am agreeing with it.
 | **QA3-C-03** | Two live sentences still read the three-row figure as a budget, and `01-requirements.md:4540` tells an implementer `Inc-8` is *"arithmetically breached"* by a cap `#D25` ruled does not exist. Both cite the ambiguous bare `#D10`/`D10` (`B-34`). | Strike both in place with `#D25` named, as this document strikes elsewhere. | **condition — the sharpest one.** Fourth false-oracle in this batch |
 | **QA3-C-04** | `C-D26b` is unscoped. Applied to `_painted_bindings` (`tests/test_repair_layout.py:118`) it couples `AT-053`'s subject into `AT-041`, `AT-042`, `AT-043`, `AT-044` and the negative control `AT-R14`. | Scope `C-D26b` to `HLR-N16.4`/`AT-053`'s threshold; state that `scroll_to` remains legitimate as a content-harvesting mechanism and is forbidden only as the assertion that an operator can scroll. | **condition** — false-fail generator |
 | **QA3-C-05** | `PRED-VIS` says *"a **declared** token or glyph"*; `C-D27b` correctly fixes no codepoint; nothing asserts the card's glyph is a member of `declared_vocabulary`. A glyph outside the vocabulary passes every arm. | One clause: the card's glyph shall be a member of `LLR-N16.2.1`'s `declared_vocabulary`, asserted by membership at run time. Preserves `C-D27b` intact. | **condition** |
-| **QA3-C-06** | §5.3's exit criteria are numbered 1, 2, 3, 4, 5, 7, 8 — **there is no criterion 6** at HEAD (it was 6 at `ea1fbf9` and a new criterion was inserted above it). And criterion 8 (`:5544-5547`) specifies the A3 census as `grep -rn "\.render(" mapper/ tests/`, which is **`M-N07.2.2a-b`**, the named weaker variant `01-requirements.md:2572-2575` says can never equal the migrated set. | Renumber; restate criterion 8's instrument as the AST census of `LLR-N07.2.2a`. | **minor**, but it is an *exit criterion* citing its own rejected mutant, and my pass-2 artifact cites "criterion 6" |
+| **QA3-C-06** | §5.3's exit criteria are numbered 1, 2, 3, 4, 5, 7, 8 — **there is no criterion 6** at HEAD (it was 6 at `6816aaa` and a new criterion was inserted above it). And criterion 8 (`:5544-5547`) specifies the A3 census as `grep -rn "\.render(" mapper/ tests/`, which is **`M-N07.2.2a-b`**, the named weaker variant `01-requirements.md:2572-2575` says can never equal the migrated set. | Renumber; restate criterion 8's instrument as the AST census of `LLR-N07.2.2a`. | **minor**, but it is an *exit criterion* citing its own rejected mutant, and my pass-2 artifact cites "criterion 6" |
 
 **None of these makes a wrong implementation pass an acceptance test.** `QA3-C-01` through `QA3-C-05`
 make a *correct* implementation fail, or let a specific wrong one through a control that was supposed

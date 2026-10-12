@@ -1,9 +1,9 @@
 # Increment 4 — HIGH-A: the `dict[str, str]` refusal sink and collision record get a gate
 
-**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `d877784` · **Branch:** `fix/repair-batch-02`
-**Increment base:** `01d7578` (the four-defect repair commit, PR #3) · **Language:** English
+**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `bd17fab` · **Branch:** `fix/repair-batch-02`
+**Increment base:** `ac4065e` (the four-defect repair commit, PR #3) · **Language:** English
 
-> **BLUF.** The independent confirmation review of `01d7578` came back **BLOCKED** with one new HIGH:
+> **BLUF.** The independent confirmation review of `ac4065e` came back **BLOCKED** with one new HIGH:
 > the fix for HIGH-1 gave the new `dict[str, str]` family its covered sibling's *implementation* but
 > not its sibling's *gate*, and `04-gate-findings-disposition.md` recorded those limbs as gated when
 > they were gated by nothing. **I reproduced the finding before fixing it** — four mutants, **0 RED
@@ -42,7 +42,7 @@ BASELINE:  pre-red arms: 0
 === MX3  :: collision record deleted ===                        RED ARMS: 0
 ```
 
-Run in my own scratchpad lab (`git archive 01d7578`), `PYTHONDONTWRITEBYTECODE=1`, every substitution
+Run in my own scratchpad lab (`git archive ac4065e`), `PYTHONDONTWRITEBYTECODE=1`, every substitution
 guarded by an asserted hit count of exactly 1, every restore proven by sha256 returning to the
 pristine pin `4a36fdf26391ada2` (C-40, C-46). **Mutations are described here by position and
 operation, never spelled verbatim** — this packet is corpus the id-scanner and the batch's own
@@ -159,7 +159,7 @@ decide would be worse than one whose limits are stated.
 
 ### 1.7 · Re-confirmation gate — conditions discharged, and one claim I could NOT make
 
-The independent re-confirmation of `d75f0fd` returned **PASS WITH CONDITIONS, no HIGH**. Both
+The independent re-confirmation of `125f9f7` returned **PASS WITH CONDITIONS, no HIGH**. Both
 conditions are discharged below. **Both findings were reproduced here before being fixed.**
 
 | Condition | Reproduced | Discharge |
@@ -221,7 +221,7 @@ python -m pytest -q -p no:randomly -o addopts= tests/test_repair_store_boundary.
 
 ## 4 · Test results — executed, read from each run's own output
 
-| Measure | At `d75f0fd` (pre-condition) | **Final (conditions discharged)** |
+| Measure | At `125f9f7` (pre-condition) | **Final (conditions discharged)** |
 |---|---|---|
 | collected | 643 | **647** |
 | fast lane | 626 passed, 17 deselected, exit 0 | **630 passed, 17 deselected**, exit 0 |
@@ -234,7 +234,7 @@ python -m pytest -q -p no:randomly -o addopts= tests/test_repair_store_boundary.
 
 | Term | Value | Derivation |
 |---|---|---|
-| base (`01d7578`) | 548 | measured |
+| base (`ac4065e`) | 548 | measured |
 | D (deletions) | 0 | no test removed |
 | A — boundary arms | +16 | `test_at_p02g` 6 · `test_at_p02h` 2 · `test_at_p02i` **7** (one per model dataclass) · `test_at_p02j` 1 |
 | A — artifact-claims file | +83 | 1 corpus arm + 41 × 2, where 41 = 8 authored artifacts + 33 `mapper/` source files |

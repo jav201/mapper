@@ -247,7 +247,7 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
   node — `python -B -m pytest -q -p no:cacheprovider tests/test_perf_mount.py` (nodes to be created
   in Inc-S1, only if the gate passes; the file was never created — Lane S withdrew to B-118, ledger
   `LED-2026-10-10-perf-batch.3`); gate: `tests/test_mod_parity.py` (its scripted session opens a map) stays green.
-- **Numeric pass threshold:** exit code 0; mounting wide-2000 at 118×34 calls the current renderer's `render` exactly once between `push_screen` and the settled first paint (vs 3); the painted canvas + strip equal the pinned golden — captured on base SHA `5cde04e`, sha256-recorded (0 diffs); at 87×34 and 60×20 the strip reports the correct hidden-row numeral after mount.
+- **Numeric pass threshold:** exit code 0; mounting wide-2000 at 118×34 calls the current renderer's `render` exactly once between `push_screen` and the settled first paint (vs 3); the painted canvas + strip equal the pinned golden — captured on base SHA `e7d433d`, sha256-recorded (0 diffs); at 87×34 and 60×20 the strip reports the correct hidden-row numeral after mount.
 - **Priority:** high
 - **Acceptance (black-box) — the user-verified outcome (the WHAT):**
   - **Observable outcome:** opening a 2000-node map shows the first paint after one render's worth of waiting (not three), and the pagination strip is immediately correct.
@@ -319,7 +319,7 @@ TUI. No administrative surface is involved; no new UI ships in this batch.
 - **Ledger:** LED-2026-10-10-perf-batch.1, LED-2026-10-10-perf-batch.2, LED-2026-10-10-perf-batch.4
 - **Statement:** No renderer shall consume the model cache this batch, and Lane M shall not move the cache's cost into `views`: `mapper/views/*.py` shall keep building their per-render `_child_index` (measured ≤ 0.37 ms/pass, PERF0 §1) and shall import NO new cache name from `mapper/model.py` — the model cache stays private to `model` (`_`-prefixed, absent from any module's public imports) — so Lane M's A3 surface is exactly the unchanged `children_of`/`parent_of` semantics and nothing else.
 - **Validation:** `inspection`
-- **Executed verification:** `git diff 5cde04e -- mapper/views` on the Lane M branch BEFORE the join — empty (file-diff check, executed at the Inc-M1/Inc-M2 gates on the Lane M branch and recorded PER LANE at the DDR: the check is empty only on the Lane M branch, it is not a Lane R control — Lane R legitimately edits `mapper/views/layered.py`); plus `grep -rn "_child_index" mapper/views/` (present, per-render).
+- **Executed verification:** `git diff e7d433d -- mapper/views` on the Lane M branch BEFORE the join — empty (file-diff check, executed at the Inc-M1/Inc-M2 gates on the Lane M branch and recorded PER LANE at the DDR: the check is empty only on the Lane M branch, it is not a Lane R control — Lane R legitimately edits `mapper/views/layered.py`); plus `grep -rn "_child_index" mapper/views/` (present, per-render).
 - **Numeric pass threshold:** the Lane M branch changes zero bytes under `mapper/views/`; 0 new cross-module imports of cache names.
 - **Negative control:** M-M3 (any Lane M edit under `mapper/views/`, e.g. wiring a renderer to the model cache) → the file-diff check non-empty → RED (and the fork's disjointness/A3 ruling violated — returns the increment to the trunk).
 - **Boundary catalog:** none — an internal boundary pin; the reason no input class applies is that no behaviour changes.
@@ -430,7 +430,7 @@ fixture maps built by the test into a tmp workspace):
   x-only clip passes; round-2 probe p4 at wide-2000, one render: no clip 524,313 · x-only 6,547 ·
   y-only 524,313 · x+y 6,547; the exact clipped count and geometry are recorded at execution in
   `04-validation.md`); the settled painted lines equal the golden pinned at base SHA
-  `5cde04e` with sha256 (the AT-065 precedent). Negative control M-R1a (clip removed) → RED; M-R1b → byte-golden RED.
+  `e7d433d` with sha256 (the AT-065 precedent). Negative control M-R1a (clip removed) → RED; M-R1b → byte-golden RED.
 - **AT-075b** (US-PERF-001 / LLR-PERF.1.2): `tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden` —
   same map; press `l,j,j,j,j`; the memo-miss spy — the named instance counter `_layout_misses` on the
   `LayeredRenderer`, passed into `_geometry` with the instance's memo storage (ruling R12) — reads
@@ -447,7 +447,7 @@ fixture maps built by the test into a tmp workspace):
   (the store imports it at call time, `store.py:861` — patching `mermaid.dump` after import still
   intercepts the save) and bounds ONE call to ≤ 2·E + c `graph.edges` iterations (the scaling ratio
   count(2N)/count(N) ∈ [1.8, 2.2] is pinned by the unit node); the saved `.mmd` bytes equal the
-  golden pinned at base SHA `5cde04e` — the golden is pinned to the map AFTER the add_child edit
+  golden pinned at base SHA `e7d433d` — the golden is pinned to the map AFTER the add_child edit
   (the saved form includes the new node).
   Negative control M-M2a → RED; M-M2b → fixture bytes RED. Wall-clock recorded at P4 as evidence
   (baseline save 6.2 s profiled / ~9.4–10.0 s wall at 12000), never asserted.
@@ -486,7 +486,7 @@ fixture maps built by the test into a tmp workspace):
   87×34 and 60×20 reflow geometries, the 1-node error graph at mount — each named by a fixture in
   the four new test files.
 - Golden provenance: every new golden (AT-075, AT-075b, AT-076 — painted lines, `.mmd` bytes; the
-  077/077b goldens left the batch with Lane S's withdrawal) is captured on the BASE SHA `5cde04e` (pre-remedy) at the trunk BEFORE
+  077/077b goldens left the batch with Lane S's withdrawal) is captured on the BASE SHA `e7d433d` (pre-remedy) at the trunk BEFORE
   the lanes fork, and recorded with base SHA + sha256 per golden (the AT-065 precedent); the wire
   counter resets after mount so mount paints are not charged to the keypress budget.
 - P4 evidence: wall-clock before/after for keypress, mount and save against the §6/§7 baselines —
@@ -515,7 +515,7 @@ fixture maps built by the test into a tmp workspace):
 | M-M1c | Add any new `Graph.edges` writer site, or one in-place form per guard row (`edges[i]=`, slice, `del`, `+=`, `*=`, `.sort`, `.reverse`, `.clear`, `.extend`, `.insert`, `.remove`, `.pop`, alias) | `tests/test_perf_adjacency.py::test_edges_writer_census` + `test_census_in_place_forms[...]` |
 | M-M2a | Restore the per-node `any()` orphan scan in `mermaid.dump` | AT-076 + `test_dump_counted_ops_scaling_ratio` (count RED, ratio ≈ 4) |
 | M-M2b | Reorder the orphan loop / touch dedup or escaping in `dump` | AT-076 / `tests/test_perf_dump.py::test_dump_fixture_goldens` byte-goldens |
-| M-M3 | Any Lane M edit under `mapper/views/` (e.g. wiring a renderer to the model cache) | LLR-PERF.2.3 file-diff check: `git diff 5cde04e -- mapper/views` non-empty (A3 — returns the increment to the trunk). The check runs on the Lane M branch BEFORE the join and the DDR records it PER LANE — it is not a Lane R control: Lane R legitimately edits `mapper/views/layered.py` (ruling R17) |
+| M-M3 | Any Lane M edit under `mapper/views/` (e.g. wiring a renderer to the model cache) | LLR-PERF.2.3 file-diff check: `git diff e7d433d -- mapper/views` non-empty (A3 — returns the increment to the trunk). The check runs on the Lane M branch BEFORE the join and the DDR records it PER LANE — it is not a Lane R control: Lane R legitimately edits `mapper/views/layered.py` (ruling R17) |
 | M-S1 | Restore the eager canvas render while the region is unassigned | the former Lane-S test 077 (render ncalls=2) |
 | M-S2 | Neuter the `_declare_after_layout` settle pass | the former Lane-S test 077b (absent numeral returns) |
 | M-S3 | Make the mount skip swallow chrome painting too | the chrome-paints node in `tests/test_perf_mount.py` (never created) |

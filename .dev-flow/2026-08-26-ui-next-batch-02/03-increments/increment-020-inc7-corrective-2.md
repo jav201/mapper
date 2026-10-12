@@ -1,7 +1,7 @@
 # Increment 020 · Inc-7 corrective pass 2 · 2026-09-28
 
 Fixes `CR-F1` and `CR-F3` from the round-2 re-review (`increment-019`), plus the
-cheap carry `INC7-CR-R2-F1`, at HEAD `0c4215a` on `feat/ui-next-batch-02`. Tree
+cheap carry `INC7-CR-R2-F1`, at HEAD `f809e14` on `feat/ui-next-batch-02`. Tree
 clean before and after (`git status --porcelain` = 0 lines both times).
 
 ## What changed, per finding
@@ -142,7 +142,7 @@ The 8 failures are **all** in `tests/test_agree_floor.py`
 max_count * (len(bars) - 1)))` with `max_count == 0`). **This is a NEW
 observation, not a claim from this increment's own scope**, so it was
 verified rather than assumed: `git stash` of both changed files, then
-`pytest tests/test_agree_floor.py -q` on the **unmodified HEAD `0c4215a`**
+`pytest tests/test_agree_floor.py -q` on the **unmodified HEAD `f809e14`**
 reproduces the identical 8 failures with the identical traceback, then the
 stash was popped back. It predates this pass, is untouched by either diff
 file (`darkside.py`, `test_repair_cycles.py`), and looks date-dependent
@@ -155,7 +155,7 @@ unscoped, date-sensitive defect, distinct from `FLAKE-1`.
 ## Ruff
 
 Baseline captured from `ruff check --output-format=concise` at unmodified
-HEAD `0c4215a`: **27 distinct errors**, 29 output lines (27 error lines + the
+HEAD `f809e14`: **27 distinct errors**, 29 output lines (27 error lines + the
 `Found 27 errors` and `[*] N fixable` summary lines -- this reconciles the
 prompt's "29 errors" against the tool's own "Found 27 errors" line: the
 "29" was the previous reviewer counting output *lines*, not error *entries*).
@@ -273,7 +273,7 @@ Inc-8's.
 
 The `test_agree_floor.py` `ZeroDivisionError` inside `HomeScreen._sparkline_text`
 (`app.py:579`), first surfaced under this file's original "Tests run" section
-and reproduced there on unmodified HEAD `0c4215a`. Per the coordinator's
+and reproduced there on unmodified HEAD `f809e14`. Per the coordinator's
 explicit instruction for this round: **not fixed**. It goes to the operator,
 not to a further Inc-7 corrective pass -- fixing it would be source change
 outside this round's two-item scope (`INC7-CR-R3-F1`, `INC7-CR-R3-F2`) and
@@ -296,14 +296,14 @@ asserts can fail; the unmutated tree, correctly, still passes all 38.)
 
 `ruff check --output-format=concise` compared against the same baseline
 capture used for the first pass of this increment (27 distinct errors / 29
-output lines, unmodified HEAD `0c4215a`): `diff` is **empty**. Zero new
+output lines, unmodified HEAD `f809e14`): `diff` is **empty**. Zero new
 errors, identical set.
 
 ## Commits
 
-1. `8eb62d9` -- `fix(sala): Inc-7 corrective pass 2 -- the declared string, derived from the document; the docstring narrowed to what is checked`
-2. `e0a17d2` -- `docs(state): Inc-7 corrective pass 2 -- increment record with mutation table and lane figures`
-3. `6cbbeff` -- `fix(sala): Inc-7 round 3 -- V22's glyph pin now derives from 01b, not from darkside against itself`
+1. `5021b19` -- `fix(sala): Inc-7 corrective pass 2 -- the declared string, derived from the document; the docstring narrowed to what is checked`
+2. `cc4710c` -- `docs(state): Inc-7 corrective pass 2 -- increment record with mutation table and lane figures`
+3. `eafac36` -- `fix(sala): Inc-7 round 3 -- V22's glyph pin now derives from 01b, not from darkside against itself`
 4. This file's round-3 update (docs).
 
 ## Next

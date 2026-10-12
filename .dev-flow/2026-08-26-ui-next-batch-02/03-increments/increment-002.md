@@ -10,7 +10,7 @@
 | Protocol | **FULL** per `A-91` — the A3 contract |
 | Agent | `software-dev` |
 | Date | 2026-08-28 |
-| Base | `4eaba35` (Inc-1) |
+| Base | `105d238` (Inc-1) |
 
 ---
 
@@ -18,7 +18,7 @@
 
 **The batch's headline A3 landed: all six `render` definitions and all 27 arg-ful call
 sites moved to `(graph, state)` in one increment, and the protocol they implement exists in code
-for the first time.** Executed at `3fe0e4b`, `IRenderer` was a Python type **zero** times — it
+for the first time.** Executed at `d8a8536`, `IRenderer` was a Python type **zero** times — it
 survived only as prose in two comments, so the interface the batch was migrating had never been
 written down.
 
@@ -94,7 +94,7 @@ python -m pytest tests/test_app.py -q -k focus_owner
 
 **Ruff reconciled, not accepted.** It first read **30**. Both new errors were mine — `lane.py` and
 `outline.py` unpacked a `w` those two renderers never use — and both are gone. The remaining 28 were
-verified byte-identical at `4eaba35` (`layered.py` `Node`, `app.py` `re`, `test_app.py` `pytest` and
+verified byte-identical at `105d238` (`layered.py` `Node`, `app.py` `re`, `test_app.py` `pytest` and
 `HelpScreen`).
 
 ### Signed-balance test ledger
@@ -110,7 +110,7 @@ verified byte-identical at `4eaba35` (`layered.py` `Node`, `app.py` `re`, `test_
 
 **The last two were not written by hand and are worth naming.** That module builds its parameter set
 from the citations in the artifacts, so adding a `state.py` citation to the module map *created two
-arms that check it*. Confirmed by diffing collected node ids against `4eaba35` in a detached
+arms that check it*. Confirmed by diffing collected node ids against `105d238` in a detached
 worktree: **+2 added, 0 removed**, both `[state.py]` arms.
 
 ### The A3 census — the increment's actual gate
@@ -124,7 +124,7 @@ worktree: **+2 added, 0 removed**, both `[state.py]` arms.
 
 **Instrument: `ast`, never `grep`.** `.render` names two different protocols here — Textual's
 zero-arg `Widget.render()`, which must **not** migrate (25 sites), and the map renderer, which must
-(27). A line-oriented count answers neither, and a grep at `3fe0e4b` returned one site more than the
+(27). A line-oriented count answers neither, and a grep at `d8a8536` returned one site more than the
 AST: a mention of `renderer.render(...)` inside a docstring. The census carries that as an executed
 control — it asserts the instrument sees a real call and does **not** see the docstring.
 
@@ -368,8 +368,8 @@ RED**; sha256 restore on 6 files; `55/55` after.
 | a `*` splat call site appears | **RED** | 1 |
 
 **Final state:** fast `719 passed, 17 deselected`; slow `17 passed`; ruff **28** — exactly the
-`4eaba35` baseline, **zero new**; `fixtures/` clean. Ledger `736 = 711 + 25`, **0 removed**, every
-added node id enumerated against a detached worktree at `4eaba35`.
+`105d238` baseline, **zero new**; `fixtures/` clean. Ledger `736 = 711 + 25`, **0 removed**, every
+added node id enumerated against a detached worktree at `105d238`.
 
 ---
 
@@ -419,7 +419,7 @@ confirmation pass is really **four focusable plus one deliberately dormant** —
 `B-51` remains carried.**
 
 **Final state:** fast `719 passed, 17 deselected`; slow `17 passed`; ruff **28** — exactly the
-`4eaba35` baseline, zero new. Focus arms stable across 5-way parallel load after the timing change.
+`105d238` baseline, zero new. Focus arms stable across 5-way parallel load after the timing change.
 
 ---
 

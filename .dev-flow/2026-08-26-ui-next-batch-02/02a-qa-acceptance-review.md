@@ -5,7 +5,7 @@
 > plausible-wrong-implementation rule (batch-1 post-mortem §2.1, backlog P-01).
 >
 > **Method: executed, not reasoned (C-43).** Every finding below that names a number was produced by
-> a probe run against `master` at `d6b60e6b4f18b10123fffc76bbb36891473df653` in this session.
+> a probe run against `master` at `1b51aca7a11582acf2de878d8138d26cef2d301b` in this session.
 > Transcripts are pasted inline. `01-requirements.md`, `01b`, `01c` and `PLAN.md` were read, but no
 > claim in them is relied on without re-execution. **Four of them came back different.**
 > No `mapper/**`, `tests/**` or `prototypes/**` file was created, modified or staged.

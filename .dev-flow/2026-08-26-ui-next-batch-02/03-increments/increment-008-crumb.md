@@ -1,7 +1,7 @@
 # Increment CRUMB — the title-length vector, and the fifth strip underneath it
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-CRUMB` · **Branch:** `feat/ui-next-batch-02`
-**Entry commit:** `57fb403` (Inc-STRIPS close) · **SOURCE FILE COUNT: 3** — `mapper/darkside.py`, `mapper/app.py`, `mapper/widgets/chrome.py`. Widened from 2 by a recorded cut amendment (§2). Tests uncapped.
+**Entry commit:** `f5f1bd5` (Inc-STRIPS close) · **SOURCE FILE COUNT: 3** — `mapper/darkside.py`, `mapper/app.py`, `mapper/widgets/chrome.py`. Widened from 2 by a recorded cut amendment (§2). Tests uncapped.
 **Protocol:** FULL — same collapse class. **Reviews SERIAL**, per the rule `Inc-STRIPS` earned.
 
 ---
@@ -350,7 +350,7 @@ ARM 1 -- signed (reconstructed) vs current, sha256(ast, docstrings stripped)
                             current 1cd89affad3c039813cccd6866015bff6c8612b3ba6aec41b0eb257c81ebf87f
                             text delta +187 chars   -> IDENTICAL
 
-ARM 2 -- current vs commit 57fb403, every executable delta line, no exceptions
+ARM 2 -- current vs commit f5f1bd5, every executable delta line, no exceptions
 
   +from textual.dom import NoActiveAppError
   +_KEYBAR_FALLBACK_CELLS = 118

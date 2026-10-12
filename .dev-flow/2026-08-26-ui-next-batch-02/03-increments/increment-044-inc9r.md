@@ -1,6 +1,6 @@
 # Increment 044 -- Inc-9r: the final-resolve backstop (CR-F1), the colon's own sentence (Y1), generate's refusal mapping (CR-F2), the MAX_PATH re-check in UTF-16 units (CR-F3, SEC-F1), the preview's hard-link sentence (SEC-F2)
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `bf68d07`. Authority: `VERDICT-inc9-2026-09-30.md` Round 14 (operator Y1, coordinator ruling for CR-F1) and the review findings `INC9Q-CR-F1`..`F6`, `INC9Q-SEC-F1`, `F2`. Amendment: `A-126` (appended to `01-requirements.md`, dated 2026-10-02).
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `e7a289b`. Authority: `VERDICT-inc9-2026-09-30.md` Round 14 (operator Y1, coordinator ruling for CR-F1) and the review findings `INC9Q-CR-F1`..`F6`, `INC9Q-SEC-F1`, `F2`. Amendment: `A-126` (appended to `01-requirements.md`, dated 2026-10-02).
 
 ## 1. What changed
 
@@ -95,7 +95,7 @@ No other sealed arm changed. No arm was weakened: the changed expectations are s
 
 ## 3. Arm table (RED/GREEN)
 
-RED = `b2fa9aa` (the arms as strict xfail; sources of `bf68d07`) with `--runxfail` in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9r.py tests/test_inc9q.py`, **57 failed, 54 passed**; 57 = the 57 xfail marks, one for one (they also passed as `57 xfailed` on the committed arms head, 0 XPASS; on a first pass seven marks XPASSed on the base (three generate-table params that were already green, three failed-re-check params, and one old Inc-9q open-external mark that my new step name had re-activated), and were un-keyed or renamed before the commit). GREEN = the implementation: the same two files, 111 passed (after the OPEN_STEPS were emptied), then the lane.
+RED = `ffa2019` (the arms as strict xfail; sources of `e7a289b`) with `--runxfail` in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9r.py tests/test_inc9q.py`, **57 failed, 54 passed**; 57 = the 57 xfail marks, one for one (they also passed as `57 xfailed` on the committed arms head, 0 XPASS; on a first pass seven marks XPASSed on the base (three generate-table params that were already green, three failed-re-check params, and one old Inc-9q open-external mark that my new step name had re-activated), and were un-keyed or renamed before the commit). GREEN = the implementation: the same two files, 111 passed (after the OPEN_STEPS were emptied), then the lane.
 
 | Step | Arms (RED on base) | Count | Closed by |
 |---|---|---|---|
@@ -160,7 +160,7 @@ The CR-F2 toast is the render of a simulated failure (`os.lstat` raising `Permis
 
 ## 6. Test results, risks, carries, next
 
-- Ruff 0.8.4, `ruff check mapper tests --output-format json`, clean `bf68d07` worktree under `%TEMP%` (removed) vs this tree, a programmatic set difference on (file relative to its root, code, message): **26 entries on each side, both differences empty.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json`, clean `e7a289b` worktree under `%TEMP%` (removed) vs this tree, a programmatic set difference on (file relative to its root, code, message): **26 entries on each side, both differences empty.**
 - `-W error::SyntaxWarning`: used on every targeted run and on the lane.
 - Targeted: `tests/test_inc9r.py tests/test_inc9q.py tests/test_arch_osopen_callers.py tests/test_darkside_census.py` 140 passed; `test_inc9m/n/o/p`, `test_attachments`, `test_darkside_census`, `test_arch_osopen_callers` 425 passed before the two sealed pins above were fixed (3 failed then: two arch pins and the hue census; the census failed because a first draft added a second `ALERT` site to the preview, which was folded into the existing one).
 - Risks
@@ -174,12 +174,12 @@ The CR-F2 toast is the render of a simulated failure (`os.lstat` raising `Permis
 
 ## Commits
 
-- `b2fa9aa` the arms, strict xfail.
+- `ffa2019` the arms, strict xfail.
 - the implementation (3 source files, tests, `ARCHITECTURE.md`), then `A-126` and this record.
 
 ## Full-lane result
 
-`2621 passed, 24 deselected, 3 xfailed` (0 failed) in 1334 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `857cf0b`, run AFTER the record was final except this section, with a temp HOME and a git identity from the environment. Baseline 2570/0; the delta is the new `test_inc9r.py` arms and the added `sub/l:$I30` params. The 3 xfailed are pre-existing. **A first lane run on the same head failed 5 `test_github` tests** (`git commit` exit 128, "Author identity unknown"): my own environment error (a temp HOME with no git identity), not code; the lane was re-run in full with the identity variables and is the result above. After this section was appended only this `.md` changed; the lane was NOT re-run.
+`2621 passed, 24 deselected, 3 xfailed` (0 failed) in 1334 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `305301c`, run AFTER the record was final except this section, with a temp HOME and a git identity from the environment. Baseline 2570/0; the delta is the new `test_inc9r.py` arms and the added `sub/l:$I30` params. The 3 xfailed are pre-existing. **A first lane run on the same head failed 5 `test_github` tests** (`git commit` exit 128, "Author identity unknown"): my own environment error (a temp HOME with no git identity), not code; the lane was re-run in full with the identity variables and is the result above. After this section was appended only this `.md` changed; the lane was NOT re-run.
 
 ## Corrections, 2026-10-02 (appended by Inc-9s, `A-127`; nothing above is rewritten)
 

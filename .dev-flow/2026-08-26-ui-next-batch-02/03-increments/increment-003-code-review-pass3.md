@@ -351,7 +351,7 @@ Verified by independent re-execution.
   scheduled by `call_next`, outside every guard. `textual.dom.BadIdentifier`. The arm's
   oracle is `assert app.is_running` preceded by `assert len(screen.graph.nodes) == 2`, so
   it proves the map opened first. **DISCHARGED.**
-- **Byte-identity.** `git diff --stat 954f8f3 --` is empty for `mapper/widgets/inspector.py`,
+- **Byte-identity.** `git diff --stat 909cc27 --` is empty for `mapper/widgets/inspector.py`,
   `mapper/screens/coverage.py`, `mapper/screens/factory.py`, `mapper/store.py`. Raw sha256
   differs on all four, and the delta is **exactly** the CR count (299/157/489/676 bytes,
   0 CRs in the blob) under `core.autocrlf=true`; CR-stripped, all four hash to the blob.
@@ -443,7 +443,7 @@ E   AssertionError: `J` moved `pan_y` and the painted canvas is byte-identical;
 
 **DISCHARGED.**
 
-**Ledger `814 = 737 − 0 + 77`.** Verified set-wise against a `git archive 954f8f3` export,
+**Ledger `814 = 737 − 0 + 77`.** Verified set-wise against a `git archive 909cc27` export,
 node ids sorted and compared: base_all 737, post_all 814, added 77, **deleted 0** (the
 `comm -23` output is empty on both lanes); default lane `797 = 720 − 0 + 77` likewise.
 The convention that makes it work is per-node-id, parametrised cases counted individually.

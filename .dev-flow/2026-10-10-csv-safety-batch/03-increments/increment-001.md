@@ -178,7 +178,7 @@ RED outputs (verbatim tails from the transcript):
 
 | Field | Value |
 |---|---|
-| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH — nits closed in increment 003; gate follow-up committed as 6763852 (the model-field totality guard's follow-up classification of `Graph.csv_collisions` / `CsvRow` / `CsvCollision`, already listed in §2) |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) APPROVE-WITH-NITS, 0 HIGH — nits closed in increment 003; gate follow-up committed as 507d72c (the model-field totality guard's follow-up classification of `Graph.csv_collisions` / `CsvRow` / `CsvCollision`, already listed in §2) |
 
 ---
 

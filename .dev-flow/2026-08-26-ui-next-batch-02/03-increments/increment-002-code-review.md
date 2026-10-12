@@ -4,7 +4,7 @@
 |---|---|
 | Reviewer | `code-reviewer` (independent) |
 | Batch | `2026-08-26-ui-next-batch-02` · branch `feat/ui-next-batch-02` |
-| Scope | `4eaba35`..working tree — `mapper/ tests/ docs/`, plus staged `mapper/views/state.py` and untracked `tests/test_a3_census.py` |
+| Scope | `105d238`..working tree — `mapper/ tests/ docs/`, plus staged `mapper/views/state.py` and untracked `tests/test_a3_census.py` |
 | Date | 2026-08-28 |
 | **Verdict** | **BLOCK — 3 HIGH findings** |
 
@@ -35,10 +35,10 @@ unchanged before and after every run (4 files). All app probes ran against `temp
 | slow `17 passed` | `pytest -q -m slow` | ✓ `17 passed, 712 deselected in 23.13s` |
 | ruff `mapper/ tests/` = 28 | `ruff check` | ✓ `Found 28 errors.` |
 | ruff `fixtures/` clean | `ruff check fixtures/` | ✓ `All checks passed!` |
-| Ledger `712 = 694 − 0 + 18` | detached worktree at `4eaba35`, collected-node-id `comm` diff | ✓ **exact**: base 694, now 712, **0 removed**, +18 = `test_a3_census` 12, `test_layered` 3, `test_app` 1, `test_repair_artifact_claims` **2 derived `[state.py]` arms** |
-| **Threshold 4 — no digest re-baselined** | `git diff 4eaba35 -- tests/test_repair_depth.py` | ✓ **zero change** in the `MASTER_LEGACY_DIGESTS` literal; all 12 strings byte-identical. The earlier `sed` offset was a 1-line import shift, not an edit |
+| Ledger `712 = 694 − 0 + 18` | detached worktree at `105d238`, collected-node-id `comm` diff | ✓ **exact**: base 694, now 712, **0 removed**, +18 = `test_a3_census` 12, `test_layered` 3, `test_app` 1, `test_repair_artifact_claims` **2 derived `[state.py]` arms** |
+| **Threshold 4 — no digest re-baselined** | `git diff 105d238 -- tests/test_repair_depth.py` | ✓ **zero change** in the `MASTER_LEGACY_DIGESTS` literal; all 12 strings byte-identical. The earlier `sed` offset was a 1-line import shift, not an edit |
 | Digests still match what renderers produce | `pytest -k c53_legacy` | ✓ `12 passed` |
-| **`with_header` was dead** | `git grep -n with_header 4eaba35 -- .` over the whole tracked tree | ✓ **exactly 2 code hits at baseline**: `layered.py:138` (decl), `:182` (use). **Zero call sites** in `mapper/` or `tests/`. Removal is correct; header body is unchanged apart from dedent |
+| **`with_header` was dead** | `git grep -n with_header 105d238 -- .` over the whole tracked tree | ✓ **exactly 2 code hits at baseline**: `layered.py:138` (decl), `:182` (use). **Zero call sites** in `mapper/` or `tests/`. Removal is correct; header body is unchanged apart from dedent |
 | `w` removable from `Hybrid`/`Outline` unpack | AST name-set over both `render` bodies | ✓ neither body references `w`. Safe |
 | The migration itself is complete | AST census, re-derived | ✓ **all** arg-ful `.render` sites are 2-positional new shape; **0** old-shape keywords; **0** `**` splat; **0** ≥3-positional |
 | `query` as a transitional field | judged against `LLR-N07.2.3`'s roster + `#D6`/`R-014` | ✓ **correct call** — see "On `query`" below |
@@ -67,11 +67,11 @@ about the migration being incomplete.
   preamble and never reaches the row.
 
 - **Proof it repairs nothing** — I ran the new assertion against the **baseline**
-  `docs/ARCHITECTURE.md` at `4eaba35`, i.e. the exact state the docstring says it now forbids
+  `docs/ARCHITECTURE.md` at `105d238`, i.e. the exact state the docstring says it now forbids
   ("*it now asserts the row is NOT still marked as a forward commitment*"):
 
   ```
-  --- BASELINE 4eaba35 (row still COMMITTED, NOT PRESENT) <-- the regression ---
+  --- BASELINE 105d238 (row still COMMITTED, NOT PRESENT) <-- the regression ---
     first 'state.py' at char 1836
     'COMMITTED, NOT PRESENT' present anywhere in doc? True
     ... inside the 400-char window after first 'state.py'? False
@@ -80,7 +80,7 @@ about the migration being incomplete.
   ```
 
 - **Why it matters:** This is a net **loss** of coverage disguised as a discharge. The guard at
-  `4eaba35` was live and load-bearing — `assert not (REPO/"mapper"/"views"/"state.py").exists()` is
+  `105d238` was live and load-bearing — `assert not (REPO/"mapper"/"views"/"state.py").exists()` is
   what would have fired the moment `state.py` landed, and it is what forced the promotion. The
   increment deleted a working assertion and installed one that cannot fail, while the docstring
   claims it is "kept and INVERTED rather than deleted". `docs/ARCHITECTURE.md` is declared in-tree as
@@ -437,7 +437,7 @@ arm that is weaker than it looks.
 
 ## Evidence checklist
 
-- [✓] **Diff read in full** — `git diff 4eaba35 -- mapper/ tests/ docs/` (922 lines) plus staged
+- [✓] **Diff read in full** — `git diff 105d238 -- mapper/ tests/ docs/` (922 lines) plus staged
       `mapper/views/state.py:1-88` and untracked `tests/test_a3_census.py:1-291`, read entire.
 - [✓] **Correctness pass (edge / None / error paths)** — `_focus_owner()` walked against every
       focusable widget on `MapScreen`, against `app.focused is None`, and against a pushed modal

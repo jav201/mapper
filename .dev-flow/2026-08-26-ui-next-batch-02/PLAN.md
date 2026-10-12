@@ -18,8 +18,8 @@ approved. A rejection returns to design: **no increment opens.**
 
 **Station (historical): P1, iterating (fold iteration 1). UN-PARKED 2026-08-27 on a new base.** The batch was
 parked at its PDR gate on 2026-08-26 with **13 blockers** (10 qa + 3 security) so a repair batch
-could ship the four defects the gate had found. That batch merged (`e164a28`); its close,
-`d877784`, is this batch's new base. **The parked record is not carried — every premise was
+could ship the four defects the gate had found. That batch merged (`820e7e3`); its close,
+`bd17fab`, is this batch's new base. **The parked record is not carried — every premise was
 re-executed against the post-repair tree**, and four of the parked scope items came back
 `SATISFIED-EXTERNALLY`.
 
@@ -45,8 +45,8 @@ premise verdicts are the *parked* run and are superseded where §12 says so.
 | Batch id | `2026-08-26-ui-next-batch-02` |
 | Objective | Variant B «atlas» canvas mechanics (pan · fold · overflow · braille edges) + search hit-count/navigation + home 2.0 «sala» + field-query «lente» + per-view «leyenda» + palette-v2 tokens |
 | Mode | `full` (client-grade V-model; merge authority granted) |
-| Predecessor | `2026-08-25-ui-next-batch-01`, merged `e359148`, closed at `d6b60e6` |
-| Base ref (RC-1) | `origin/master` = `d6b60e6b4f18b10123fffc76bbb36891473df653` |
+| Predecessor | `2026-08-25-ui-next-batch-01`, merged `3b1a288`, closed at `1b51aca` |
+| Base ref (RC-1) | `origin/master` = `1b51aca7a11582acf2de878d8138d26cef2d301b` |
 | Flow revision | rev46 (`~/.claude` clean, level with `origin/main`; V7 GREEN, aggregate `9c1449ed815d267c`) |
 | Baseline suite | **245 tests collected**, `pytest -q --collect-only`, 2026-08-26 |
 | Toolchain | Python 3.12.7 · textual 8.2.8 · ruff 0.8.4 · mypy 1.13.0 · pytest — all present, entry gate PASS |
@@ -202,7 +202,7 @@ size**, since the size is the thing the suite was blind to.
 
 | Station | Status | Note |
 |---|---|---|
-| **P0** intake | ✅ **approved** | RC-1 clean at `d6b60e6`; toolchain PASS; 20 premises executed (17 TRUE / 3 FALSE, all dispositioned); triggers recorded; 6 READY + 1 REFINE |
+| **P0** intake | ✅ **approved** | RC-1 clean at `1b51aca`; toolchain PASS; 20 premises executed (17 TRUE / 3 FALSE, all dispositioned); triggers recorded; 6 READY + 1 REFINE |
 | **ARQ** | ⚠ **approved, but its map amendment NEVER LANDED — see §15.4 `ARQ-1`** | ~~Map amended (+456/−248 lines)~~ **FALSE against disk**: `docs/ARCHITECTURE.md` still declares the old frozen `render` signature at `:58` and `:136`. The amendment lives only as `ARCHITECTURE-proposed-at-ARQ.md`. Original text follows. Map amended (+456/−248 lines), byte-scan clean, **V8 now GREEN**. New frozen signature committed to; Q-1, Q-2, Q-4 answered; **0 of 21 increment pairs parallelisable** (the sala-as-a-lane hypothesis measured FALSE — `HomeScreen` is declared at `app.py:338`); R-009 ruled NO and scheduled; a second A3 (`Canvas`) surfaced and routed to PDR |
 | **P1** requirements | ✅ approved (iteration 1) | 21 HLR · 48 LLR · **44** AT (3 rejected as phantom) · 71 TC · IFC Parts A + B |
 | **PDR** | ❌ **REJECTED at pass 2 (2026-08-27) — `iterate-to-refine` to P1, iteration 2 of 3 — see §15** | **Pass 2:** architect **REJECTED** (6 blockers; flags ruled as `#D21`/`#D22`); security **BLOCKED** (`S-16`/`S-17`/`S-18`); qa + ux approved-with-conditions, ux carrying 2 blocker-class. **Pass 1 (historical):** architect **approved-with-conditions** (20 sealed decisions; cut re-derived **7 → 9** increments); **qa BLOCKED — 10 blockers / 14 majors / 11 minors**; **security BLOCKED — 3 blockers / 6 majors / 5 minors**. Two further shipped defects (**S-01** cycle/deep-recursion crash, **S-02** non-string ficha field) reproduced independently by the orchestrator. **Scope decision referred to the operator** — see §11. |
@@ -244,7 +244,7 @@ size**, since the size is the thing the suite was blind to.
 | D10 | 2026-08-26 | **Q-3 answered: option (a).** Search takes `n` / `N`; `next_gap` moves `n → M`. New seat rows: `map/n → next_hit "siguiente coincidencia" (nav)` · `map/N → prev_hit "coincidencia anterior" (nav)` · `map/M → next_gap "siguiente faltante" (view)` | Executed over `KEYMAP`: the collision is a **semantics** problem, not scarcity — free lowercase in map scope is `b c i p s t v w y`, every uppercase except `A I R X` is free, and `duplicate_chords()` returns `[]`. **Option (c), the state-dependent chord, was rejected because it cannot survive the whole-seat pin:** under (c) `map/n` has no constant `label`, leaving only two exits — pin a placeholder, which stops pinning the displayed string and is *verbatim narrowing #2 from post-mortem §2.4c* (the one under which swapping the `u`/`z` labels kept all 245 tests green), or make the spec state-dependent, which is no longer set equality. It also breaks one-declaration-four-readers, since `groups_for_keybar` returns `binding.label` straight from the seat. `M` chosen because `m` is already `cobertura` and walks the same tree order — `m` opens the report, `M` walks it; the seat already carries two genuine shift-pairs (`a`/`A`, `x`/`X`). **Condition:** the seat-spec diff is exactly one changed row plus two added rows, reviewed row-by-row at DDR. |
 | D11 | 2026-08-26 | **Q-6 answered: an unresolvable lens query is never executed.** `Z:algo` → canvas **unchanged**, chip ` Z ? sin definir ` in ALERT, line `el mapa no define el campo «Z» · campos: …` with the field list **derived from `graph.schema`**. `E:inexistente` → figure-ground **applied**, chip in MUT, line `0 nodos · ningún nodo tiene estado = inexistente` | Executing an unresolvable query would dim the entire canvas and paint **identically** to a zero-match result. Distinguishing *"the map has no such field"* from *"nothing matches"* is the difference the story exists to make. |
 | D12 | 2026-08-26 | **S-8 folded into scope — a third shipped defect: `?` hides ten of its own bindings** | See the block below. |
-| D32 | 2026-08-28 | **Inc-1 CLOSED and pushed (`4eaba35`).** `code-reviewer` BLOCK on 1 HIGH → fixed → confirmation pass *"the HIGH is discharged, no HIGH survives"*; `security-reviewer` signed off. 4 source files (the declared cap); 6 battery rounds; 154 arms | Four unplanned defects, two of them **in the sealed spec**: `WARN`'s job made `LLR-S06.3.5`'s own threshold unsatisfiable by any implementation (`A-78`); the C0 range row omitted `U+000D`, so adopting it verbatim **narrowed** shipped coverage (`A-80`); `radial` sliced titles raw into the exported SVG; and `AT-009` derived its oracle from the constant it was testing, staying green while 19 invisible code points reached the artifact (`A-87`). The confirmation pass additionally caught a **fabricated measurement in production source** — a probe that constructed the theme it then observed — and a "fix" of mine that repaired nothing |
+| D32 | 2026-08-28 | **Inc-1 CLOSED and pushed (`105d238`).** `code-reviewer` BLOCK on 1 HIGH → fixed → confirmation pass *"the HIGH is discharged, no HIGH survives"*; `security-reviewer` signed off. 4 source files (the declared cap); 6 battery rounds; 154 arms | Four unplanned defects, two of them **in the sealed spec**: `WARN`'s job made `LLR-S06.3.5`'s own threshold unsatisfiable by any implementation (`A-78`); the C0 range row omitted `U+000D`, so adopting it verbatim **narrowed** shipped coverage (`A-80`); `radial` sliced titles raw into the exported SVG; and `AT-009` derived its oracle from the constant it was testing, staying green while 19 invisible code points reached the artifact (`A-87`). The confirmation pass additionally caught a **fabricated measurement in production source** — a probe that constructed the theme it then observed — and a "fix" of mine that repaired nothing |
 | **D33** | 2026-08-28 | **`B-47` folded into `Inc-3`; `LLR-COERCE.2` widened from one named truncator to every renderer feeding an operator-visible sink (`A-89`)** | **Coordinator ruling — recorded as such, NOT as operator approval.** The batch's coercion guarantee held only in radial view while `LayeredRenderer` is the **default**; measured, a hostile title through layered or outline writes an SVG that is not well-formed XML. **The narrowing lived in the `Touched symbols` line, not in the Statement**, which was already general — the transferable lesson. `Inc-3` declares a 5-file breach; the renderer set is **derived**, never hand-listed, because a hand-listed set is the defect class this batch has already paid for twice |
 | **D34** | 2026-08-28 | **`B-46` gets its own increment, `Inc-CONFIRM`, with `Inc-REPAIR` and before `Inc-7` (`A-90`)** | **Coordinator ruling.** `_ConfirmScreen` renders a ficha title through a markup-parsing sink while composing the dialog that **gates subtree archival** — the newly-reachable-destructive-action class, and the fix is the `darkside.plain` the same function already applies seven lines above. Two acceptance arms, one per failure mode (crash · action-span injection), because they fail independently and one arm would let the other ship. Named rather than numbered so no substring scan collides it |
 | **D35** | 2026-08-28 | **Pace calibrated, not uniform (`A-91`)** | **Coordinator ruling.** Full protocol (review + confirmation pass + battery) retained for `Inc-2`, `Inc-3`, `Inc-REPAIR`, `Inc-CONFIRM`, `Inc-7` — anything touching a data path, a destructive action, the A3 contract or a security sink. Lighter protocol (single review, no confirmation pass) permitted for a presentational increment **only while** the review returns zero HIGH and no data path is touched; **any HIGH restores the full protocol for that increment**. Batteries are never skipped, only sized. Recorded so the post-mortem can judge the trade — Inc-1 is the control, and its confirmation pass returned 7 MEDIUM + 6 LOW |
@@ -388,7 +388,7 @@ the wrong sidecar shape — re-run with a positive control, it reproduced. A pla
 
 ## 12 · UN-PARK record — 2026-08-27
 
-> **Everything in this section was executed against the tree at `d877784` in this session.** The
+> **Everything in this section was executed against the tree at `bd17fab` in this session.** The
 > parked artifacts (§1–§11, `01-requirements.md`, `01b`, `01c`, `02a`, `02b`, the PDR) were read,
 > but **no claim in them is relied on without re-execution** — C-43's rule that citing a document
 > is not evidence applies with extra force here, because the tree underneath them moved.
@@ -397,9 +397,9 @@ the wrong sidecar shape — re-run with a positive control, it reproduced. A pla
 
 | Check | Result |
 |---|---|
-| `git fetch origin` then HEAD / `origin/master` / merge-base | all three = `d8777840313145fec341687f0081afd7230c755b` — **clean, no rebase needed** |
-| Superseded base | `d6b60e6` (the parked run's base) |
-| Intervening merge | `e164a28` — PR #2, `2026-08-26-repair-batch` |
+| `git fetch origin` then HEAD / `origin/master` / merge-base | all three = `bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba` — **clean, no rebase needed** |
+| Superseded base | `1b51aca` (the parked run's base) |
+| Intervening merge | `820e7e3` — PR #2, `2026-08-26-repair-batch` |
 | Repair-batch diff vs the parked base | **14 files, +4241 / −184**: `mapper/{app,mermaid,model,store}.py`, `mapper/screens/{factory,help}.py`, `mapper/views/{layered,outline,radial}.py`, `mapper/widgets/rail.py`, and four new test files |
 | Baseline suite | **429 passed**, exit 0, 133.35 s — `pytest -q -p no:randomly -o addopts=`, one complete run, read from its own captured output (C-19 / C-25) |
 | Baseline collected | **429** — `pytest -q --collect-only -p no:randomly -o addopts=`. The parked baseline of **245 is superseded**; the ledger unit stays *collected node ids*, never `def test_` |
@@ -416,11 +416,11 @@ whole `.dev-flow/`. Scoped by rule, and each block dispositioned rather than cou
 | **V12** | 12 | `01-requirements.md:2250`, `:2265`, ... | (X) **REAL — blocks, folded as F-14.** IFC Part B does not balance: `rail` consumes `cursor, folded` and emits `rail_tree_rows`; `canvas` consumes `state` and emits `canvas_rows, painted_map` — none declared on the parent `map_screen`. Containment is a set operation and the parent's list is short. |
 | **V7 / V16** | 3 | `~/.claude`, `~/.claude/skills` | (!) **Notice against an AUXILIARY repo, reported as FOUND — not swept up (C-44).** Both are **4 commits ahead of `origin/main` and never pushed**, and `FLOW-VERSION.md` consequently disagrees with the manifest (`5abe414d8e2fdb1f` vs `9c1449ed815d267c`). These commits **pre-date this session**; committing or pushing another session's work in progress is its own defect. The **PULL** half of C-45 is satisfied — `git rev-list --left-right --count HEAD...@{u}` gives `4 0`, i.e. **0 behind**, so this batch does not run a stale flow. The **PUSH** half is broken by work that is not this batch's. Carried to `BACKLOG.md` at close. |
 
-### 12.3 — Premises re-executed against `d877784`
+### 12.3 — Premises re-executed against `bd17fab`
 
-The parked §6 table is the **`d6b60e6` run**. Re-executed here; **five verdicts moved.**
+The parked §6 table is the **`1b51aca` run**. Re-executed here; **five verdicts moved.**
 
-| # | Premise | Parked | Now | Executed evidence at `d877784` |
+| # | Premise | Parked | Now | Executed evidence at `bd17fab` |
 |---|---|---|---|---|
 | P-1 | `Canvas.rows()` drops the `dots` / `bgs` layers | TRUE | **STILL TRUE — the defect is live** | `mapper/canvas.py:67-82` reads `self.cells` and `self.bits` only; `Canvas.__init__` (`:30-33`) declares neither `dots` nor `bgs`. `mapper/views/radial.py:123-124` still assigns `cv.dots = {}` / `cv.bgs = {}` onto the instance and writes at `:209` and `:224`. **The repair batch did not touch this**, and it remains the HLR-canvas story. |
 | P-2 | `render` surface: 6 definitions, 3 production call sites | TRUE | **TRUE, at new addresses** | 6 defs: `lane.py:108,171,311` / `layered.py:131` / `outline.py:47` / `radial.py:107`. 3 production call sites: `app.py:737`, `:1352`, `:1727`. Every parked line number is stale. |
@@ -458,7 +458,7 @@ entirely unwritten.**
 | **D17** | **The S-8 clipping half of `HLR-N16.1` is struck as `SATISFIED-EXTERNALLY`; the per-view legend half is not.** | The scroll container shipped. What remains is the batch's actual story: the five un-scoped routes (P-13), the two screens with no `KEY_SCOPE`, the glyph vocabulary, the view name in the title, and the `??` stub. |
 | **D18** | **S-01 and S-02 are struck as `SATISFIED-EXTERNALLY`; security conditions C-1 and C-2 are discharged by execution.** | See 12.3. **C-3 (S-03, the mount budget) is NOT discharged and remains a blocking condition.** |
 | **D19** | **`MAX_RENDER_NODES = 12000` is adopted as a given, not re-litigated**, and `HLR-N13.3`'s budget is expressed **relative to it**. | It is shipped, tested and enforced in all three renderers. Re-deriving a second bound would create two live definitions of *"too big"* — the exact defect `D6` removed for *"hit"* and `D14` for *"coverage"*. |
-| **D20** | **The parked `01-requirements.md` is amended in place, not rewritten.** Struck sections are marked `SUPERSEDED — SATISFIED-EXTERNALLY at d877784` with their evidence, and remain readable. | Section 6.5 is the flow's record for exactly this, and a silent deletion would make the batch's own history assert something false. It also keeps the id space stable so the `02a`/`02b` findings still address something. |
+| **D20** | **The parked `01-requirements.md` is amended in place, not rewritten.** Struck sections are marked `SUPERSEDED — SATISFIED-EXTERNALLY at bd17fab` with their evidence, and remain readable. | Section 6.5 is the flow's record for exactly this, and a silent deletion would make the batch's own history assert something false. It also keeps the id space stable so the `02a`/`02b` findings still address something. |
 
 ---
 
@@ -486,7 +486,7 @@ repair batch's record.
 
 ### 13.1 — The five gating questions, ruled
 
-Executed against `d877784` in this session. Map scope holds **25** `KEYMAP` entries while
+Executed against `bd17fab` in this session. Map scope holds **25** `KEYMAP` entries while
 `bindings_for('map')` returns **27** (it merges two app-scope rows) — `QA-M-04`'s ambiguity
 reproduces exactly, and the requirement must pin `bindings_for` explicitly.
 
@@ -535,7 +535,7 @@ which is worth more than one lens asserting them alone.
 | **Q-10** | Fix all three, exempt none | **`#D10` — same direction, better dispositions** | **PDR governs.** It is more precise on all three: `#a3a3a3` is a *legitimate missing ramp step* inside `_GREYS = (INK, "#a3a3a3", MUT)`, not a stray hue → promote with its job documented. The progress `WARN` gets the **busy job assigned to one of the three v2 tokens** — squarely S-6's own work — rather than my vague *"re-tone"*. `.factory-tag` retones to `MUT`, but since `screens/factory.py` is not in Inc-1's file set, **Inc-1 registers it as a known-open exception and Inc-9 closes it**, with the stale-exception guard reddening if Inc-9 forgets — a mechanical handoff instead of a promise. |
 
 **The one place my re-execution still governs:** the PDR cites the progress-`WARN` site as
-`app.py:848`. At `d877784` that address is **`app.py:879`** —
+`app.py:848`. At `bd17fab` that address is **`app.py:879`** —
 `text.append(f"{marker} {stage}", darkside.WARN if self.loading else darkside.INK)`. The PDR's
 *disposition* stands; its *citation* is stale, like every other line number in the parked set.
 
@@ -603,7 +603,7 @@ visible absence. What actually ships is a card that **looks exactly like a healt
 **misdeclaration, not omission.**
 
 The consequence is the one that matters: **`M-H1`'s remedy as `02b` states it — *"the threshold must
-be painted card count"* — is ALREADY GREEN at `d877784`.** A requirement written to painted card
+be painted card count"* — is ALREADY GREEN at `bd17fab`.** A requirement written to painted card
 count alone would pass on the shipped defect. `LLR-N13.1.5` therefore asserts **painted card count
 AND per-card state distinguishability**, and the brief's «mapa dañado — ↵ ver por qué» is what makes
 the second half observable.
@@ -667,7 +667,7 @@ needs to know the mount budget exists for a measured reason rather than a precau
 
 ## 15 · PDR SECOND PASS — consolidated verdict, 2026-08-27 (resumed session)
 
-> **Base unchanged at `d877784`.** Four lenses ran in parallel over the amended
+> **Base unchanged at `bd17fab`.** Four lenses ran in parallel over the amended
 > `01-requirements.md` (5,199 lines, 41 amendments across two sets). Their artifacts are
 > `02c-pdr-architect-pass2.md`, `02d-pdr-qa-pass2.md`, `02e-pdr-security-pass2.md`,
 > `02f-pdr-ux-pass2.md`. Nothing under `mapper/` or `tests/` was edited by any lens or by the
@@ -689,7 +689,7 @@ now at **iteration 2**; the soft cap is 3.
 
 | Check | Result |
 |---|---|
-| HEAD / base / `origin/master` | `d877784`, all three equal |
+| HEAD / base / `origin/master` | `bd17fab`, all three equal |
 | Fast lane | **413 passed · 16 deselected**, 74.32 s, exit 0 |
 | Slow lane (manual — repo has no CI workflows) | **16 passed · 413 deselected**, 36.36 s, exit 0 |
 | Collected, both lanes | **413 + 16 = 429** |
@@ -806,7 +806,7 @@ byte-identical `V4` duplicate takes it to **22**, so "correct 21 to 23" would be
 briefed list not at all.
 
 The structural cause is mechanical: `git log --oneline -- .../01-requirements.md` returns **one
-commit** (`8675151`). The requirements document has not been edited since the lenses wrote their
+commit** (`0353909`). The requirements document has not been edited since the lenses wrote their
 verdicts, so every requirement-side finding is frozen exactly where its lens left it. Only code
 moved, and the repair batch touched only `mapper/store.py`, `docs/ARCHITECTURE.md` and five test
 files. **All 11 discharges are that shipped code**; no lens condition was closed by a document fold.
@@ -835,7 +835,7 @@ the work rather than re-deriving it.
 | **D26** | **The strict rule is adopted: a code fix never discharges a missing requirement** | It is what keeps `S-17` visible. `mapper/store.py` cites `LLR-STO.1.1` normatively in **five docstrings**, and that identifier has no statement, threshold, `TC`, `AT` or traceability row anywhere. The shipped fix made the hole *harder* to notice, because the tree now looks like the requirement is being obeyed. Under this rule the architect lens is **14 of 14 LIVE**, not 12 |
 | **D27** | **`B-29` and `B-30` ride INSIDE this batch** as one small repair increment, with requirement stubs in amendment set 3 | Operator rider 1, orchestrator's call. Measured: `B-30` is one line with **zero** tests asserting the message text; `B-29` is ~3 lines and **only one** test asserts `load_warnings == []`, while the real fixture yields 0 warnings and no phantom. Both are shipped defects with mechanical fixes, not design rulings, so they do not burden the PDR. **Both are newly reachable with zero operator action** — US-N13's sala loads every map on mount |
 | **D28** | **`B-29`'s guard ships with a SYNTHETIC fixture** | The guard is a **no-op on the current tree**: no fixture carries a sidecar id absent from its `.mmd`, so a mutation of the guard changes nothing today and the suite stays green either way. C-55 limb 2 — the case the tree lacks must be constructed, or the guard is untested however green the suite |
-| **D29** | **The A3 census is settled by AST and stated as question + instrument + SHA** | Four generations of this number were wrong because *"blast radius"* names three different sets. **Generation five was produced during the reconciliation itself, by the orchestrator**: a grep returned 24 sites, the 24th being `renderer.render(...)` inside a **docstring** at `mapper/widgets/rail.py:180`. Settled: **23 arg-ful sites / 10 files / 6 definitions** at `3fe0e4b`. A grep cannot tell a call from a mention of a call |
+| **D29** | **The A3 census is settled by AST and stated as question + instrument + SHA** | Four generations of this number were wrong because *"blast radius"* names three different sets. **Generation five was produced during the reconciliation itself, by the orchestrator**: a grep returned 24 sites, the 24th being `renderer.render(...)` inside a **docstring** at `mapper/widgets/rail.py:180`. Settled: **23 arg-ful sites / 10 files / 6 definitions** at `d8a8536`. A grep cannot tell a call from a mention of a call |
 | **D30** | **Amendment set 3 is authored in TWO SEQUENTIAL passes on `01-requirements.md`, never in parallel lanes** | C-52 condition 2: two lanes may not edit the same file, not even different regions. `PLAN.md` and `state.json` are disjoint and were taken concurrently |
 | **D31** | **PR #7 (the reconciliation ledger) merged docs-only before the fold** | Landed evidence, no gated verdict involved. An unmerged evidence branch is the un-landed-record defect (C-44) this project keeps naming |
 
@@ -861,7 +861,7 @@ incident log.
 
 ### 17.1 — Where we are
 
-Inc-1/2/3 closed and committed (`4eaba35`, `fe50799`, `bdc4b6a`, recorded at `5f4816c`). The Inc-4
+Inc-1/2/3 closed and committed (`105d238`, `12e5645`, `abbeb11`, recorded at `8ef1553`). The Inc-4
 pre-gate ran two independent lenses before a line of code was written, and **both changed the plan**.
 `Inc-4` is **struck and split** into `Inc-4a` (search core) and `Inc-4b` (seat and walk). `Inc-4a` is
 in implementation.
@@ -928,10 +928,10 @@ later increment inherits it.
 
 ## Record — commit attribution transition
 
-From **`9a773e4`** (Inc-CRUMB's source commit) onward, commits carry
+From **`19a5921`** (Inc-CRUMB's source commit) onward, commits carry
 `Co-Authored-By: Claude Opus 5 (1M context)` in place of `Claude Fable 5`. The authoring session's
 harness guidance explicitly replaces earlier attribution guidance, and honest attribution of the
 session that actually wrote the code outranks cosmetic trailer consistency. Commits up to and
-including `57fb403` keep Fable 5. **No history was rewritten** — force-pushing to normalise a
+including `f5f1bd5` keep Fable 5. **No history was rewritten** — force-pushing to normalise a
 trailer is force-push-for-cosmetics. The split is deliberate, and this line is why it reads that
 way. Coordinator ruling 2026-09-10.

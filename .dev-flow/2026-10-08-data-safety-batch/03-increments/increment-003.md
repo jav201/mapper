@@ -8,7 +8,7 @@
 |---|---|
 | Batch | `2026-10-08-data-safety-batch` |
 | Increment | `003` (plan name Inc-1b) |
-| Lane (if the batch forked) | none · worktree `mapper-inc1b`, branch `inc1b/draft-save`, based on `554314f` |
+| Lane (if the batch forked) | none · worktree `mapper-inc1b`, branch `inc1b/draft-save`, based on `60922f9` |
 | Requirement(s) | HLR-001 · HLR-002 · HLR-004 · HLR-005 · HLR-006 · LLR-001.1–001.4 · LLR-002.1–002.2 · LLR-003.1 (F1 boundary) · LLR-003.2 · LLR-004.1–004.4 · LLR-005.1–005.2 · LLR-006.1–006.2 · design rows 1b.1–1b.14a, 1b.15, 1b.16 · verdict R1–R9 · PDR C2, C3, C6, C7, C8, C10, C11, C13, C14 (Inc-1b parts) |
 | Acceptance | AT-001 · AT-002 · AT-002a · AT-003 · AT-004 · AT-006 · AT-007 · AT-009 · AT-010 · AT-015 · white-box TC-001.1–TC-006.2, TC-004.2a–d · unit TC-L0-1, TC-L0-2 |
 | Agent | `software-dev` |
@@ -56,7 +56,7 @@ The source files are 3, all as the design names them. 57 new test nodes, 1 renam
 ```bash
 cd <worktree>   # mapper-inc1b
 python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider tests/test_draft_save.py tests/test_inspector.py tests/test_g6_store_surrogates.py tests/test_worklist_safety.py tests/test_data_safety_census.py tests/test_keymap.py tests/test_key_dispatch.py tests/test_inc4_census.py tests/test_darkside_census.py
-python -B .dev-flow/2026-10-08-data-safety-batch/evidence/inc1b-mutate.py red        # base-tree counterfactual (BASE pinned 554314f)
+python -B .dev-flow/2026-10-08-data-safety-batch/evidence/inc1b-mutate.py red        # base-tree counterfactual (BASE pinned 60922f9)
 python -B .dev-flow/2026-10-08-data-safety-batch/evidence/inc1b-mutate.py census     # design 5.3 census
 python -B .dev-flow/2026-10-08-data-safety-batch/evidence/inc1b-mutate.py A-no-refocus   # one mutant: apply, run, restore, sha-verify
 python -B .dev-flow/2026-10-08-data-safety-batch/evidence/inc1b-render.py            # frames at 87/118/140
@@ -83,8 +83,8 @@ Touched files: `297 passed` before the fixes of this run; after them the default
 
 | Field | Value |
 |---|---|
-| Mutation applied | the three source files replaced by their `554314f` blobs (`git show 554314f:<path>`, written in place, restored from saved bytes; no stash, no checkout); every new and edited test as on disk |
-| Instrument | `evidence/inc1b-mutate.py red` (BASE pinned to `554314f`, never `HEAD`) |
+| Mutation applied | the three source files replaced by their `60922f9` blobs (`git show 60922f9:<path>`, written in place, restored from saved bytes; no stash, no checkout); every new and edited test as on disk |
+| Instrument | `evidence/inc1b-mutate.py red` (BASE pinned to `60922f9`, never `HEAD`) |
 | Where it ran | own worktree `mapper-inc1b` |
 | Transcript | `evidence/inc1b-red-counterfactual.transcript`: `59 failed, 238 passed` — `test_draft_save.py` 35 (of its 50 nodes; the 15 green ones are the Inc-1a modal nodes plus the F1 empty-title node, which test `DraftGuardScreen` alone), `test_inspector.py` 18, `test_data_safety_census.py` 2, `test_g6_store_surrogates.py` 1, `test_keymap.py` 1, `test_key_dispatch.py` 1, `test_darkside_census.py` 1 |
 | Restore proven by | `restored: True` for `inspector.py` `bd24c09b…`, `app.py` `f37b33f5…`, `keymap.py` `dc3f513a…` |
@@ -96,7 +96,7 @@ Touched files: `297 passed` before the fixes of this run; after them the default
 |---|---|
 | **RED counterfactual** | base-tree swap of the 3 source files: 59 nodes RED by assertion, per resolved node id; transcript `evidence/inc1b-red-counterfactual.transcript`; all three files restored (`restored: True`). C13: `G-plain-title` turns `test_at_015_guard_title_carries_no_escape_byte[esc]` RED through `j` |
 
-**Design §5.3 regression census (executed):** final source, the 8 edited existing test files at `554314f` + `test_inc9.py` + `test_a3_census.py`: `16 failed, 271 passed` (`evidence/inc1b-regression-census.transcript`). Every predicted (a)/(b)/(c)/NEW row reddened: `n01a`, `n01b[0..3]`, `n01d`; `g6b_field_committed…`, `g6c[field_commit]`, `g6c[undo]`, `g6c_f2`; `worklist n05_6`; `keymap completeness`; `n03h`; `inc4 cd25a`; `darkside hue census`; plus `test_inc9::cd25a` (reads `DATA_SAFETY_ADDED` from the base census file, which lacks the 4th row — consistent, green with the final file). `test_inc9` f6 and `test_keymap` M-1 stayed green as predicted.
+**Design §5.3 regression census (executed):** final source, the 8 edited existing test files at `60922f9` + `test_inc9.py` + `test_a3_census.py`: `16 failed, 271 passed` (`evidence/inc1b-regression-census.transcript`). Every predicted (a)/(b)/(c)/NEW row reddened: `n01a`, `n01b[0..3]`, `n01d`; `g6b_field_committed…`, `g6c[field_commit]`, `g6c[undo]`, `g6c_f2`; `worklist n05_6`; `keymap completeness`; `n03h`; `inc4 cd25a`; `darkside hue census`; plus `test_inc9::cd25a` (reads `DATA_SAFETY_ADDED` from the base census file, which lacks the 4th row — consistent, green with the final file). `test_inc9` f6 and `test_keymap` M-1 stayed green as predicted.
 
 ### Mutation verdicts — per resolved node (`evidence/inc1b-mutation-battery.transcript`)
 
@@ -203,7 +203,7 @@ Touched files: `297 passed` before the fixes of this run; after them the default
 |---|---|
 | Claim resting on an absence | LLR-001.3 / TC-001.3: no `FieldCommitted` / `field_committed` under `mapper/` and `tests/` |
 | Search | `grep -rn "FieldCommitted\|field_committed" --include=*.py mapper tests` → 0 hits on the final tree |
-| Positive control | the same grep on the `554314f` bytes (seen while the RED swap was live) returned 5 hits (`app.py:3344-3345`, `inspector.py:68,365,372`) |
+| Positive control | the same grep on the `60922f9` bytes (seen while the RED swap was live) returned 5 hits (`app.py:3344-3345`, `inspector.py:68,365,372`) |
 | Conjunctive criteria | C6 = prefix shown ⟺ (card hidden AND draft): `A-prefix-never` and `A-prefix-always` separately; AT-015 = `plain` AND `markup=False`: `G-plain-title` here, `G-markup` at Inc-1a |
 | Synthetic instance | `I-raw-title`: a raw-title node is synthesised in memory because the load path cannot produce one |
 
@@ -273,7 +273,7 @@ Touched files: `297 passed` before the fixes of this run; after them the default
 - **Design text vs C8:** design §2.1 step 6 still says `could not reload — leave and reopen the map`; the code follows PDR C8. Design text to be amended by the orchestrator.
 - **C14 operator smoke OWED:** one real-terminal `ctrl+s` and `ctrl+q` press (§3).
 - **UX-1 OWED:** `ux-reviewer` walkthrough over `evidence/inc1b-renders.txt`.
-- **F2 (Inc-1a review, record only):** `evidence/inc1a-mutate.py`'s `red` mode restores from `git show HEAD:`; it should pin base `80635a1`. Not changed here. `inc1b-mutate.py` pins `554314f`.
+- **F2 (Inc-1a review, record only):** `evidence/inc1a-mutate.py`'s `red` mode restores from `git show HEAD:`; it should pin base `e3eab1f`. Not changed here. `inc1b-mutate.py` pins `60922f9`.
 - After commit: re-derive evidence digests from index blobs (`git show :<path> | sha256sum`).
 
 **PDR conditions (Inc-1b parts):**

@@ -1,7 +1,7 @@
 # Increment 022 · Inc-8 · the legend panel (US-N16 «leyenda») · 2026-09-28
 
 Implements `Inc-8` per §5.4 of `01-requirements.md` on `feat/ui-next-batch-02`.
-Entry HEAD `261e8df`, tree clean (`git status --porcelain` = 0 lines). Exit HEAD
+Entry HEAD `f83b019`, tree clean (`git status --porcelain` = 0 lines). Exit HEAD
 is this record's commit; the tree is clean after it. Operator authorization is
 dated 2026-09-28. The implementer does not review this work; independent code,
 security and UX reviews follow.
@@ -131,7 +131,7 @@ Two mutants survived the **first** battery. The arms were fixed and both went RE
 
 ## `keymap.py` collision set (`C-D25a`/`C-D25b`, §5.4)
 
-- **Entry**, measured at `261e8df` in a temporary worktree outside the repo (removed after): `duplicate_chords()` = `[]`; help seat = `{(escape,dismiss_none), (q,dismiss_none)}`, which equals `ENTRY_HELP_SEAT`. `pytest -k "cd25 or duplicate or whole_seat or tab or completeness"` over `test_keymap`, `test_key_dispatch`, `test_inc3_census` and `test_inc4_census` gave **15 passed**.
+- **Entry**, measured at `f83b019` in a temporary worktree outside the repo (removed after): `duplicate_chords()` = `[]`; help seat = `{(escape,dismiss_none), (q,dismiss_none)}`, which equals `ENTRY_HELP_SEAT`. `pytest -k "cd25 or duplicate or whole_seat or tab or completeness"` over `test_keymap`, `test_key_dispatch`, `test_inc3_census` and `test_inc4_census` gave **15 passed**.
 - **Exit** (this tree): the same selection plus Inc-8's census gave **17 passed**. That covers `test_no_duplicate_chord_inside_one_scope`, `test_at_n03h_the_whole_seat_matches_its_specification`, the Inc-3 and Inc-4b censuses, `test_llr_n06_5_no_screen_binds_tab_outside_the_recorded_exceptions`, `test_no_seat_entry_binds_tab` and `test_tab_binding_exceptions_are_still_real`.
 - **Deliberate pin edits**, made in the same change as the seat:
   - `EXPECTED_PER_SCOPE[help]` 2→8
@@ -142,10 +142,10 @@ Two mutants survived the **first** battery. The arms were fixed and both went RE
 
 ## Lane and ruff
 
-- **First full-lane run** on `6e5275f`: `1 failed, 1197 passed, 20 deselected, 3 xfailed`. The failure was `test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts`, flagging `tests/test_help_scope.py`: the file held a literal U+202E. This is a faithful record of that tree, so it is annotated rather than struck. Fixed in `8dea408`; see F5.
+- **First full-lane run** on `f3872a2`: `1 failed, 1197 passed, 20 deselected, 3 xfailed`. The failure was `test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts`, flagging `tests/test_help_scope.py`: the file held a literal U+202E. This is a faithful record of that tree, so it is annotated rather than struck. Fixed in `8dea408`; see F5.
 - **Final full-lane run**, once, main tree, `8dea408`: **`1198 passed, 20 deselected, 3 xfailed, 0 failed`** in 428 s, with stderr kept separate from the summary. `FLAKE-1` did not fire.
-- **Reconciliation.** 1170 at `c371a0d`, plus 1 from `239f242` (INC21-CR-F1's two-day arm), gives 1171 at entry `261e8df`. Measured by per-file collection, entry 1174 collected and exit 1201 collected, with 3 xfailed each. Inc-8 adds +27: `test_help_scope.py` +14, `test_keymap.py` +6 (the `at_n03a` parametrization over the six new seat rows), and `test_vocabulary_declaration.py` +7. 1171 + 27 = 1198.
-- **ruff** (`--output-format=concise --no-cache`, ANSI stripped, file:line:col normalized to file:code:message): entry `261e8df` has **27 errors**, exit has **27 errors**, and `diff` of the normalized sets is empty. None of them sit in the files this increment added or rewrote.
+- **Reconciliation.** 1170 at `985c990`, plus 1 from `b47ba0b` (INC21-CR-F1's two-day arm), gives 1171 at entry `f83b019`. Measured by per-file collection, entry 1174 collected and exit 1201 collected, with 3 xfailed each. Inc-8 adds +27: `test_help_scope.py` +14, `test_keymap.py` +6 (the `at_n03a` parametrization over the six new seat rows), and `test_vocabulary_declaration.py` +7. 1171 + 27 = 1198.
+- **ruff** (`--output-format=concise --no-cache`, ANSI stripped, file:line:col normalized to file:code:message): entry `f83b019` has **27 errors**, exit has **27 errors**, and `diff` of the normalized sets is empty. None of them sit in the files this increment added or rewrote.
 
 ## Render
 
@@ -168,7 +168,7 @@ These were reached by pressing the real keys the legend now declares.
 - **`INC8-F6` · Two of my arms were weaker than claimed until mutants showed it.**
   - M18: the coercion arm counted the markup literal anywhere, so the title was never checked on its own.
   - M23: the `#D28` arm exempted spans **by style value**, and `MUT` is also V4b's style.
-  Both were fixed in `6e5275f` and re-measured RED.
+  Both were fixed in `f3872a2` and re-measured RED.
 
 ## Carries
 
@@ -193,9 +193,9 @@ These were reached by pressing the real keys the legend now declares.
 
 ## Commits
 
-- `1538f4a` feat(legend): the legend reads the one vocabulary declaration, derived from 01b by a written rule
-- `0f342a1` test(legend): the legend panel through the painted frame
-- `6e5275f` test(legend): two arms strengthened after surviving mutants
+- `f13cafc` feat(legend): the legend reads the one vocabulary declaration, derived from 01b by a written rule
+- `d235b71` test(legend): the legend panel through the painted frame
+- `f3872a2` test(legend): two arms strengthened after surviving mutants
 - `8dea408` test(legend): spell U+202E as an escape, not the character
 - this record (docs)
 
@@ -280,23 +280,23 @@ Real Textual `run_test` + `export_screenshot`, top of the atlas legend through t
 
 **What this pass is.** The operator's design verdict on the legend
 (`VERDICT-inc8-legend-2026-09-28.md`, the authority for this pass), applied under the batch's
-`/dev-flow` rules. Entry HEAD `ca36a3f`, tree clean. Independent reviews follow; this record does not
+`/dev-flow` rules. Entry HEAD `ee7a3bb`, tree clean. Independent reviews follow; this record does not
 review its own work. Hashes cited from before the Q9 message rewrite are mapped in the verdict record.
 
 ### Verdict items applied
 
 | Item | What was done | Commit | Arm(s) |
 |---|---|---|---|
-| `D2` derive from what is painted | A catalogue instrument drove each view over real fixtures and harvested every painted non-alphanumeric glyph with its style. `01b` DECISION 3 §3.1–§3.4 was rewritten from it, with a change log above §3.1 and a new **Views** column. `DECLARED_VOCABULARY` was re-derived from `01b` by the existing instrument: 41 members. | `7e1c2e2` | `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document`, `test_design_pass_a_retired_id_is_never_a_row_again` |
-| `D2` close `INC8-F2` / `UX-F3` | Each view is rendered and checked in both directions: every member is painted by its view in its declared style (soundness), and every meaningful glyph the view paints belongs to a member of that view (completeness). The exclusion rule is written once and has its own arm. | `efbb9ac` | `test_d2_the_legend_and_the_view_agree_in_both_directions[atlas, esquema, mapa mental, sala]`, `test_d2_the_exclusion_rule_keeps_the_forms_the_catalogue_kept` |
-| `D1` copy | Every surviving and new row has short, lowercase Spanish copy. It starts from the ux reviewer's proposal and is corrected where the painted form means something else. See *Copy, in one place* below. | `7e1c2e2` | `test_llr_n16_2_1_every_declared_row_is_FAITHFUL_to_the_document`, EQUALS |
-| `D3` esquema and mapa mental | `LEGEND_VIEWS` has four views. Radial gets braille (`V4b`), `●` (`V42`, `V43`) and the root `◆` (`V44`). All three map views share the rail and strip rows, so `▾ ▸ ▽` (`V33`, `V34`, `V31`) are in esquema. Braille left the atlas. | `7e1c2e2` | `test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names`, the D2 arm |
-| `Q1·Q2` | `V4b` moved to radial with a measured braille run as its sample, `⣉⡉⠉`. `V4`'s braille range left `DECLARED_GLYPH_RANGES`. The mechanism stays, because `V29` (box-drawing wires), `V4b` (braille) and `V40` (activity bars) own ranges. `V4` itself is retired; see `INC8-D-Q2`. | `7e1c2e2` | `test_every_declared_range_EQUALS_the_document` |
-| `Q4` | `V11`–`V16` carry `DEFERRED(#D7)`, so they leave the declaration. Their rows stay in §3.3. | `7e1c2e2` | `test_design_pass_q4_the_lens_rows_are_marked_deferred_and_not_declared` |
-| `Q8` | `V19`'s sample stays `█ █ ░`, now in the tones the sala paints (`INK`, `WARN`, `WORDMARK`). | `7e1c2e2` | EQUALS, the D2 arm `[sala]` |
+| `D2` derive from what is painted | A catalogue instrument drove each view over real fixtures and harvested every painted non-alphanumeric glyph with its style. `01b` DECISION 3 §3.1–§3.4 was rewritten from it, with a change log above §3.1 and a new **Views** column. `DECLARED_VOCABULARY` was re-derived from `01b` by the existing instrument: 41 members. | `a58aeed` | `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document`, `test_design_pass_a_retired_id_is_never_a_row_again` |
+| `D2` close `INC8-F2` / `UX-F3` | Each view is rendered and checked in both directions: every member is painted by its view in its declared style (soundness), and every meaningful glyph the view paints belongs to a member of that view (completeness). The exclusion rule is written once and has its own arm. | `09a4433` | `test_d2_the_legend_and_the_view_agree_in_both_directions[atlas, esquema, mapa mental, sala]`, `test_d2_the_exclusion_rule_keeps_the_forms_the_catalogue_kept` |
+| `D1` copy | Every surviving and new row has short, lowercase Spanish copy. It starts from the ux reviewer's proposal and is corrected where the painted form means something else. See *Copy, in one place* below. | `a58aeed` | `test_llr_n16_2_1_every_declared_row_is_FAITHFUL_to_the_document`, EQUALS |
+| `D3` esquema and mapa mental | `LEGEND_VIEWS` has four views. Radial gets braille (`V4b`), `●` (`V42`, `V43`) and the root `◆` (`V44`). All three map views share the rail and strip rows, so `▾ ▸ ▽` (`V33`, `V34`, `V31`) are in esquema. Braille left the atlas. | `a58aeed` | `test_hlr_n16_2_each_view_paints_the_rows_its_01b_views_column_names`, the D2 arm |
+| `Q1·Q2` | `V4b` moved to radial with a measured braille run as its sample, `⣉⡉⠉`. `V4`'s braille range left `DECLARED_GLYPH_RANGES`. The mechanism stays, because `V29` (box-drawing wires), `V4b` (braille) and `V40` (activity bars) own ranges. `V4` itself is retired; see `INC8-D-Q2`. | `a58aeed` | `test_every_declared_range_EQUALS_the_document` |
+| `Q4` | `V11`–`V16` carry `DEFERRED(#D7)`, so they leave the declaration. Their rows stay in §3.3. | `a58aeed` | `test_design_pass_q4_the_lens_rows_are_marked_deferred_and_not_declared` |
+| `Q8` | `V19`'s sample stays `█ █ ░`, now in the tones the sala paints (`INK`, `WARN`, `WORDMARK`). | `a58aeed` | EQUALS, the D2 arm `[sala]` |
 | `Q7` | No change (`⊘`). | — | — |
-| `D4` side panel | Docked top-right at ≥ 118 columns, the modal below. The panel is modal for keys in both layouts. See *D4* below. | `9136a3f` | six `test_d4_*` arms |
-| `D5` names | `MapScreen.legend_view` returns `atlas` / `esquema` / `mapa mental`; the sala stays `sala`. Other screens' headers are untouched (Inc-9 carry). | `7e1c2e2` | `test_hlr_n16_2_legend_names_the_map_view[atlas, esquema, mapa mental]` |
+| `D4` side panel | Docked top-right at ≥ 118 columns, the modal below. The panel is modal for keys in both layouts. See *D4* below. | `6e83bcb` | six `test_d4_*` arms |
+| `D5` names | `MapScreen.legend_view` returns `atlas` / `esquema` / `mapa mental`; the sala stays `sala`. Other screens' headers are untouched (Inc-9 carry). | `a58aeed` | `test_hlr_n16_2_legend_names_the_map_view[atlas, esquema, mapa mental]` |
 | `A5` | Unchanged. The own-scope group `en esta leyenda` is still pending ratification. | — | — |
 
 ### The catalogue instrument
@@ -589,7 +589,7 @@ The D1 proposals for `V8`, `V9` and `V10` are not used, because D2 retired those
 ### Findings (`INC8-D-Fn`)
 
 - **`INC8-D-F1` — the verdict record itself fails the lane.**
-  `VERDICT-inc8-legend-2026-09-28.md:23` (committed at `ca36a3f`, entry HEAD) carries a literal
+  `VERDICT-inc8-legend-2026-09-28.md:23` (committed at `ee7a3bb`, entry HEAD) carries a literal
   U+202E. The sentence meant to spell it as six escape characters and wrote the character instead.
   `test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts` is RED
   on the entry tree and on every commit of this pass. The byte was confirmed in `git show HEAD:`
@@ -599,7 +599,7 @@ The D1 proposals for `V8`, `V9` and `V10` are not used, because D2 retired those
 - **`INC8-D-F2` — the legend-side style arm read the wrong rows once the panel moved.**
   `_harvest` read a scrolled widget's **unclipped** region. At the docked height `#help-vocabulary`
   scrolls to `y=-10`, and `strips[-10:16]` slices from the **end** of the frame. The old centred
-  geometry happened to keep `y` non-negative. Fixed by clipping to the pane (`9136a3f`). `MH1`
+  geometry happened to keep `y` non-negative. Fixed by clipping to the pane (`6e83bcb`). `MH1`
   re-proves the arm after the fix: it goes RED on all four views.
 - **`INC8-D-F3` — the catalogue's own first run measured a fade-in.** See the instrument section.
   Caught because impossible tones appeared, not by review.
@@ -611,7 +611,7 @@ The D1 proposals for `V8`, `V9` and `V10` are not used, because D2 retired those
   `01b` as all-CRLF. It is LF in the worktree. The splice briefly wrote CRLF into the new section;
   a byte count caught it before staging, and it was normalised.
 - **`INC8-D-F6` — a second literal 118.** `LEGEND_DOCK_MIN_WIDTH = 118` reddened
-  `test_crumb.py::test_decl_118_is_spelled_ONCE` in the first full lane. It was fixed in `40c5c6a`
+  `test_crumb.py::test_decl_118_is_spelled_ONCE` in the first full lane. It was fixed in `2f032c8`
   and the D4 mutants were re-fired on the fixed file (7 of 7 RED, pins OK). This is the tree's own
   census firing on this pass's work.
 
@@ -702,7 +702,7 @@ before the battery:
 | M4g | `on_resize` ignored | **RED** `…a_resize_moves_the_open_legend_between_layouts` |
 
 **The pre/post pair (control: fire the same mutant against both oracles).** The pre-increment tree
-`ca36a3f` was exported with `git archive` to `%TEMP%\inc8d\base_ca36a3f`. Its `mapper` import
+`ee7a3bb` was exported with `git archive` to `%TEMP%\inc8d\base_ca36a3f`. Its `mapper` import
 resolves to the export, not the repo's editable install. That was checked by path, and by base's
 title arm passing on `outline`, which only base's `app.py` returns. MD1 and MD3 were fired there
 against base's legend oracles (`test_help_scope.py`, `test_vocabulary_declaration.py`,
@@ -711,14 +711,14 @@ against base's legend oracles (`test_help_scope.py`, `test_vocabulary_declaratio
 
 ### Lane and ruff
 
-- **First full-lane run**, once, main tree, at `9136a3f` (before the threshold fix), with stdout and
+- **First full-lane run**, once, main tree, at `6e83bcb` (before the threshold fix), with stdout and
   stderr kept separate: **`2 failed, 1225 passed, 20 deselected, 3 xfailed`** in 428 s. This is a
   faithful record of that tree, so it is annotated, not struck.
   - `test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts` is
     **`INC8-D-F1`**, which was already present at entry.
   - `test_crumb.py::test_decl_118_is_spelled_ONCE` was **mine** (`INC8-D-F6`).
     `LEGEND_DOCK_MIN_WIDTH = 118` was a second literal of a number the package spells once. Fixed
-    in `40c5c6a` by reading `darkside.DECLARED_CONTEXT_CELLS`. The lane caught it; care did not.
+    in `2f032c8` by reading `darkside.DECLARED_CONTEXT_CELLS`. The lane caught it; care did not.
   - `FLAKE-1` did not fire.
 - **Reconciliation.** 1206 at entry, plus 21 new nodes, gives 1227, and 1225 + 2 = 1227 ✓. The 21:
   - `test_vocabulary_declaration.py` +2: the retired-id arm and the `Q4` arm. The other changes
@@ -726,14 +726,14 @@ against base's legend oracles (`test_help_scope.py`, `test_vocabulary_declaratio
   - `test_help_scope.py` +2: the member-style arm now runs over four views instead of two.
   - `test_legend_design.py` +17, a new file: D2 ×4, the rule arm, the switch ×3, visible ×2,
     overlap, keys, the budget ×4, and resize.
-- **Final full-lane run**, on the final tree with the docs in place: **`1 failed, 1226 passed, 20 deselected, 3 xfailed`** in 573 s at `40c5c6a`, with this record and `A-106` in the tree. The one failure is `INC8-D-F1`, and 1226 + 1 = 1227 ✓. `FLAKE-1` did not fire. This run is a
+- **Final full-lane run**, on the final tree with the docs in place: **`1 failed, 1226 passed, 20 deselected, 3 xfailed`** in 573 s at `2f032c8`, with this record and `A-106` in the tree. The one failure is `INC8-D-F1`, and 1226 + 1 = 1227 ✓. `FLAKE-1` did not fire. This run is a
   deviation from "once", and it is declared: the first run's tree was not the final one, and a lane
   figure for a tree that did not ship is weaker than one for the tree that did.
 - **ruff** (`--output-format=concise --no-cache`, line and column dropped, paths normalised; the
   instrument is `%TEMP%\inc8d\ruffset.py`):
-  - entry `ca36a3f`: **27** errors; exit: **27**; the sets are identical;
+  - entry `ee7a3bb`: **27** errors; exit: **27**; the sets are identical;
   - the four touched Python files are clean.
-  - The export of `ca36a3f` reports 45, because an export has no `.git`, so ruff stops honouring
+  - The export of `ee7a3bb` reports 45, because an export has no `.git`, so ruff stops honouring
     `.gitignore` and counts `prototypes/`. Compared like for like, excluding `prototypes/`, both
     are 27.
 
@@ -779,44 +779,44 @@ only temporarily, and every file was restored and verified against its pin. `.de
 
 ### Commits (this pass)
 
-- `7e1c2e2` feat(legend): the vocabulary derived from what the product paints — `01b`, the
+- `a58aeed` feat(legend): the vocabulary derived from what the product paints — `01b`, the
   declaration, names, and test updates
-- `efbb9ac` test(legend): the legend and the view agree in both directions
-- `9136a3f` feat(legend): the legend docks beside the view at ≥ 118 columns, including `INC8-D-F2`
-- `40c5c6a` fix(legend): the dock threshold reads the declared context of use (`INC8-D-F6`)
+- `09a4433` test(legend): the legend and the view agree in both directions
+- `6e83bcb` feat(legend): the legend docks beside the view at ≥ 118 columns, including `INC8-D-F2`
+- `2f032c8` fix(legend): the dock threshold reads the declared context of use (`INC8-D-F6`)
 - this record and `A-106` (docs)
 
 ## Design pass 2 (2026-09-29)
 
 **What this pass is.** The operator's second design verdict and language ruling
 (`VERDICT-inc8-legend-2026-09-28.md`, sections *Round 2* and *LANGUAGE RULING*), plus the findings
-the final reviews of `4ae3091` carried in (`state.json` → `p3_progress.INC-8_ROUND_2_2026-09-29`),
-applied under the batch's `/dev-flow` rules. Entry HEAD `4b40587`, tree clean. Independent reviews
+the final reviews of `4c38271` carried in (`state.json` → `p3_progress.INC-8_ROUND_2_2026-09-29`),
+applied under the batch's `/dev-flow` rules. Entry HEAD `d6c6761`, tree clean. Independent reviews
 follow; this record does not review its own work.
 
 ### Verdict items and findings applied
 
 | Item | What was done | Commit | Arm(s) |
 |---|---|---|---|
-| **Language ruling** | Every string the legend paints is English: vocabulary and colour labels, §3.6 headers and footer, the group title, the title and close hint, the view names. `01b` §3.1–§3.6 rewritten, with a pass-2 change log above §3.1. Samples keep what the renderers paint (see `INC8-D2-Q3`) | `9d51593` | EQUALS, FAITHFUL, the §3.6 arms, the title arms |
-| **View names** (`D5` in English) | `atlas` / `outline` / `mind map` / `home`, behind ONE constant, `darkside.VIEW_NAMES` (assumption **`A6`**, `INC8-D2-Q1`). `legend_view` and `LEGEND_VIEWS` read it. Other screens' headers untouched (Inc-9) | `9d51593` | `test_hlr_n16_2_each_view_paints_…` (pins the `01b` Views column to `VIEW_NAMES`) |
-| **E1** narrow docked panel | 44 columns, full height, flush right at ≥ 118; the modal stays 80 × ≤ 28. Two row budgets, each derived (`_row_cells`) and each pinned against the painted pane in its own layout. The vocabulary section first in both layouts. Keys stay modal while docked (pinned, unchanged). A resize re-budgets the painted rows | `9fbc6a8`, `a4dcdd2` | switches ×3, budget ×4, resize, `test_e1_the_docked_panel_covers_the_inspector_whole_and_little_canvas` ×2, `test_e1_the_vocabulary_section_is_painted_first` ×2, `test_e1_no_painted_string_is_cut_at_either_budget` ×2, `TC-R36` ×3 |
-| **A-107** | `TC-R36`'s cap: the DOCKED layout is exempt (full height); the modal keeps it, re-measured at 100×45 | `9fbc6a8` | `test_tc_r36_…[cap-governs, percentage-governs, docked-full-height]` |
-| **E2** | Every sample cell painted on `GROUND` (a member declaring its own ground keeps it); the label stays on `PANEL` | `29781d6` | `test_llr_n16_2_1_every_member_is_painted_in_its_declared_style` ×4 now checks the ground |
-| **E3** | Group titled `in this legend`, two lines: `esc q close · ↑ ↓ line` / `pageup pagedown page · home end ends`. Words are legend copy per action (`help.OWN_SCOPE_COPY`), glyphs from the seat. The close hint uses the same word | `9fbc6a8` | `test_hlr_n16_4_…` ×2 (all 8 keys), `test_e3_the_title_hint_and_own_scope_copy_EQUAL_section_3_6` |
-| **E4** | §3.5 derived from what is painted. `SAGE`, `TEAL`, `VIOLET` leave; `ALERT` joins with its second job, `red — missing record`. `DECLARED_COLOURS` re-derived | `9d51593`, `29781d6` | `test_e4_the_colour_rows_are_the_hues_the_views_paint` (both directions), §3.5 EQUALS |
-| **E6** | `V19`, `V21a/b`, `V31` keep their corrected meanings; `V35` = `pending fields here and below`; `V27`'s sample is `D✓`, `field initial · ✓ filled` | `9d51593` | EQUALS, the rule arm |
-| `INC8-F-CR-F1` | Own keys read with the pane at rest AND at its end equal every own key painted | `9fbc6a8` | `test_e3_the_own_keys_are_visible_at_rest_and_at_the_end` ×2 |
-| `INC8-F-CR-F2` | `X2` = ASCII punctuation + the separators found (`·` `…` `—`); `•` and `‹` must be meaningful | `29781d6` | the rule arm; D2 |
-| `INC8-F-CR-F3` | `V29` owns exactly the eleven wires of `canvas._GLYPH` (`01b` "glyph set" notation) | `29781d6` | `test_inc8_f_cr_f3_V29_owns_exactly_the_wires_the_canvas_paints`, `test_every_declared_range_EQUALS_the_document` |
-| `INC8-F-CR-F4` | Completeness per (glyph, style); one overlay allow-list `OVERLAY_STYLES` (`V23`, `V24`, the rail cursor's `INK on STEP`) | `29781d6` | D2 ×8 |
-| `INC8-F-CR-F5` | D2 parametrized on `sorted(LEGEND_VIEWS)` × both sizes; `<= 28` → `LEGEND_MODAL_MAX_ROWS`; `- 5` removed (the pane measurement is the pin) | `9d51593`, `9fbc6a8` | D2, budget |
-| `INC8-F-CR-F6` | ONE state table in the test module; the catalogue imports it and the rule; deep outline fixture; harvest advances by `cell_len` | `29781d6`, `27be355` | D2, `test_cr_f6_the_harvest_advances_by_cell_width` |
-| `INC8-F-CR-F7` | The glyph-rule docstring's examples are current | `29781d6` | — (prose) |
-| `INC8-F-SEC-F1` | `_STYLE_MODIFIERS = frozenset({"bold", "on"})` is the allow-list; `_declared_modifiers()` must sit inside it; a declared `link file:///x` row raises at `resolve_style`, so no `Text` is returned | `29781d6` | `test_inc8_f_sec_f1_the_style_allow_list_does_not_authorize_itself` |
-| `INC8-F-SEC-F2` | Option **(a)**: callers size `fit` by `darkside.shown_cells` (the width after `fit`'s own coercion). `fit`'s contract stays exact; the defect was the caller measuring a different string than the one painted | `4b7c2ba` | `test_inc8_f_sec_f2_an_invisible_only_part_is_not_painted_empty` |
-| `INC8-F-UX-F4` | Row `V45` `⇲15`, `MUT`, outline only; a 26-level fixture | `29781d6` | D2 `[outline-*]`, EQUALS |
-| `INC8-F-UX-F6/F7` | Covered by E6 | `9d51593` | — |
+| **Language ruling** | Every string the legend paints is English: vocabulary and colour labels, §3.6 headers and footer, the group title, the title and close hint, the view names. `01b` §3.1–§3.6 rewritten, with a pass-2 change log above §3.1. Samples keep what the renderers paint (see `INC8-D2-Q3`) | `3498dcd` | EQUALS, FAITHFUL, the §3.6 arms, the title arms |
+| **View names** (`D5` in English) | `atlas` / `outline` / `mind map` / `home`, behind ONE constant, `darkside.VIEW_NAMES` (assumption **`A6`**, `INC8-D2-Q1`). `legend_view` and `LEGEND_VIEWS` read it. Other screens' headers untouched (Inc-9) | `3498dcd` | `test_hlr_n16_2_each_view_paints_…` (pins the `01b` Views column to `VIEW_NAMES`) |
+| **E1** narrow docked panel | 44 columns, full height, flush right at ≥ 118; the modal stays 80 × ≤ 28. Two row budgets, each derived (`_row_cells`) and each pinned against the painted pane in its own layout. The vocabulary section first in both layouts. Keys stay modal while docked (pinned, unchanged). A resize re-budgets the painted rows | `391b03f`, `37b1439` | switches ×3, budget ×4, resize, `test_e1_the_docked_panel_covers_the_inspector_whole_and_little_canvas` ×2, `test_e1_the_vocabulary_section_is_painted_first` ×2, `test_e1_no_painted_string_is_cut_at_either_budget` ×2, `TC-R36` ×3 |
+| **A-107** | `TC-R36`'s cap: the DOCKED layout is exempt (full height); the modal keeps it, re-measured at 100×45 | `391b03f` | `test_tc_r36_…[cap-governs, percentage-governs, docked-full-height]` |
+| **E2** | Every sample cell painted on `GROUND` (a member declaring its own ground keeps it); the label stays on `PANEL` | `3ed1021` | `test_llr_n16_2_1_every_member_is_painted_in_its_declared_style` ×4 now checks the ground |
+| **E3** | Group titled `in this legend`, two lines: `esc q close · ↑ ↓ line` / `pageup pagedown page · home end ends`. Words are legend copy per action (`help.OWN_SCOPE_COPY`), glyphs from the seat. The close hint uses the same word | `391b03f` | `test_hlr_n16_4_…` ×2 (all 8 keys), `test_e3_the_title_hint_and_own_scope_copy_EQUAL_section_3_6` |
+| **E4** | §3.5 derived from what is painted. `SAGE`, `TEAL`, `VIOLET` leave; `ALERT` joins with its second job, `red — missing record`. `DECLARED_COLOURS` re-derived | `3498dcd`, `3ed1021` | `test_e4_the_colour_rows_are_the_hues_the_views_paint` (both directions), §3.5 EQUALS |
+| **E6** | `V19`, `V21a/b`, `V31` keep their corrected meanings; `V35` = `pending fields here and below`; `V27`'s sample is `D✓`, `field initial · ✓ filled` | `3498dcd` | EQUALS, the rule arm |
+| `INC8-F-CR-F1` | Own keys read with the pane at rest AND at its end equal every own key painted | `391b03f` | `test_e3_the_own_keys_are_visible_at_rest_and_at_the_end` ×2 |
+| `INC8-F-CR-F2` | `X2` = ASCII punctuation + the separators found (`·` `…` `—`); `•` and `‹` must be meaningful | `3ed1021` | the rule arm; D2 |
+| `INC8-F-CR-F3` | `V29` owns exactly the eleven wires of `canvas._GLYPH` (`01b` "glyph set" notation) | `3ed1021` | `test_inc8_f_cr_f3_V29_owns_exactly_the_wires_the_canvas_paints`, `test_every_declared_range_EQUALS_the_document` |
+| `INC8-F-CR-F4` | Completeness per (glyph, style); one overlay allow-list `OVERLAY_STYLES` (`V23`, `V24`, the rail cursor's `INK on STEP`) | `3ed1021` | D2 ×8 |
+| `INC8-F-CR-F5` | D2 parametrized on `sorted(LEGEND_VIEWS)` × both sizes; `<= 28` → `LEGEND_MODAL_MAX_ROWS`; `- 5` removed (the pane measurement is the pin) | `3498dcd`, `391b03f` | D2, budget |
+| `INC8-F-CR-F6` | ONE state table in the test module; the catalogue imports it and the rule; deep outline fixture; harvest advances by `cell_len` | `3ed1021`, `673eee1` | D2, `test_cr_f6_the_harvest_advances_by_cell_width` |
+| `INC8-F-CR-F7` | The glyph-rule docstring's examples are current | `3ed1021` | — (prose) |
+| `INC8-F-SEC-F1` | `_STYLE_MODIFIERS = frozenset({"bold", "on"})` is the allow-list; `_declared_modifiers()` must sit inside it; a declared `link file:///x` row raises at `resolve_style`, so no `Text` is returned | `3ed1021` | `test_inc8_f_sec_f1_the_style_allow_list_does_not_authorize_itself` |
+| `INC8-F-SEC-F2` | Option **(a)**: callers size `fit` by `darkside.shown_cells` (the width after `fit`'s own coercion). `fit`'s contract stays exact; the defect was the caller measuring a different string than the one painted | `b057d41` | `test_inc8_f_sec_f2_an_invisible_only_part_is_not_painted_empty` |
+| `INC8-F-UX-F4` | Row `V45` `⇲15`, `MUT`, outline only; a 26-level fixture | `3ed1021` | D2 `[outline-*]`, EQUALS |
+| `INC8-F-UX-F6/F7` | Covered by E6 | `3498dcd` | — |
 
 ### The English copy — every string the legend paints, in one place
 
@@ -961,7 +961,7 @@ PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colo
   `word_cells` at 0, and the space before the word was painted anyway: 76 cells in a 75-cell row. It
   was latent in the pass-1 code too. The pass-1 SEC-F3 arm widened only the label, which cannot reach
   it. Found when that arm was widened to the glyph (the title's word is legend copy now). Fixed
-  (`9fbc6a8`); mutant `MA10` pins it.
+  (`391b03f`); mutant `MA10` pins it.
 - **`INC8-D2-F2` — the same family, one caller over, outside this boundary.** `app.py:2625` (the
   map toast) sizes `fit(detail, min(room, len(detail)))` by code points. It never blanks, since
   `len` ≥ 1, but it cuts a wide-glyph string early. Not in `legend_view`, so not touched. Carry.
@@ -973,17 +973,17 @@ PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python %TEMP%/inc8d/catalogue.py --md --colo
   each commit (`inc8d2\scan.py`).
 - **`INC8-D2-F4` — the cell-width fix was unpinned.** No view paints a wide glyph, so reverting
   `cell_len` in `harvest` survived D2. Seen while planning the battery; the arm
-  `test_cr_f6_the_harvest_advances_by_cell_width` was added (`27be355`), and `MH6` is RED on it.
+  `test_cr_f6_the_harvest_advances_by_cell_width` was added (`673eee1`), and `MH6` is RED on it.
 - **`INC8-D2-F5` — the narrow-panel arm was tautological.** Mutant `MA1` (panel 44 → 80) **SURVIVED
   every arm**: the canvas bound was written against `LEGEND_DOCKED_CELLS` itself. The arm now holds
-  the verdict's own number (`VERDICT_E1_PANEL_CELLS = 44`, tolerance +1 only) (`a4dcdd2`). `MA1` re-fired: RED at
+  the verdict's own number (`VERDICT_E1_PANEL_CELLS = 44`, tolerance +1 only) (`37b1439`). `MA1` re-fired: RED at
   both sizes.
 - **`INC8-D2-F6` — the resize arm broke a sealed census.** The first full lane went **2 failed**,
   both in `tests/test_a3_census.py`. It pins the tree's zero-argument `.render()` call sites at 35,
   and the resize arm had added a 36th by asking `#help-footer` what it held. Moving a pin in a file
   outside this increment was not the fix. The arm now reads the composited frame instead: the title
   row is right-aligned to the budget, so the close hint's last cell shows which budget the painted
-  rows were built for (`5d45c93`). The census is green again. `MA9` and `M4g` were re-fired against
+  rows were built for (`929f7db`). The census is green again. `MA9` and `M4g` were re-fired against
   the rewritten arm: both RED, pins OK. This is the tree's own census firing on this pass's work, as
   `INC8-D-F6` did in pass 1.
 - **Cost, stated.** D2 now drives 16–17 states per (view, size): 26–38 s per node, ~4 min for its
@@ -1065,7 +1065,7 @@ untouched.
 | MH6 | harvest advances per character | **RED** CR-F6 arm |
 | ME3 | `01b`'s own-scope word drifts | **RED** §3.6 E3 arm |
 
-**The pre/post pair.** The commit-1 tree `9d51593` (English copy, before the per-style and
+**The pre/post pair.** The commit-1 tree `3498dcd` (English copy, before the per-style and
 narrowed-`X2` rule) was exported with `git archive` to `inc8d2\base_9d51593`. Its `mapper` import
 resolves to the export, checked by path. MF4 and MF2 were fired there against its own D2 arm, and
 **both SURVIVED** (1 passed each). On the final tree both are **RED**. The per-(glyph, style) and `•`
@@ -1073,17 +1073,17 @@ sight is new with this pass.
 
 ### Lane and ruff
 
-- **First full-lane run**, once, main tree, at `a4dcdd2` with this record drafted in the tree,
+- **First full-lane run**, once, main tree, at `37b1439` with this record drafted in the tree,
   stdout and stderr kept separate: **`2 failed, 1245 passed, 20 deselected, 3 xfailed`** in 691 s.
-  Both failures are **`INC8-D2-F6`** (`test_a3_census.py`, mine), fixed in `5d45c93`. This is a
+  Both failures are **`INC8-D2-F6`** (`test_a3_census.py`, mine), fixed in `929f7db`. This is a
   faithful record of that tree, so it is annotated, not struck. `FLAKE-1` did not fire.
-- **Final full-lane run** on the final tree (`5d45c93`, with this record and the `01b` `:264`
+- **Final full-lane run** on the final tree (`929f7db`, with this record and the `01b` `:264`
   citation in the working tree): **`1247 passed, 20 deselected, 3 xfailed, 0 failed`** in 641 s.
   `FLAKE-1` did not fire. Running the lane twice is a deviation from "once", and it is declared: the
   first run's tree was not the one that ships.
-- **Reconciliation.** 1227 at the reviewers' baseline (`4ae3091`, the same tests as entry `4b40587`),
+- **Reconciliation.** 1227 at the reviewers' baseline (`4c38271`, the same tests as entry `d6c6761`),
   plus **20** new nodes, gives 1247 ✓, and 1245 + 2 = 1247 ✓ for the first run. The 20, by node, are
-  from `--collect-only` diffed between an export of `4b40587` and the tree:
+  from `--collect-only` diffed between an export of `d6c6761` and the tree:
   - `test_help_scope.py` **+9**:
     - no-cut ×2, section order ×2, own keys at rest and at the end ×2;
     - SEC-F1 +1, SEC-F2 +1;
@@ -1099,8 +1099,8 @@ sight is new with this pass.
     count.
 
 - **ruff** (`inc8d\ruffset.py`, line and column dropped, paths normalised): entry **27**, exit **27**,
-  and the **sets are identical**. The capture at `40c5c6a` is the entry baseline, since no `.py`
-  changed between `40c5c6a` and `4b40587`.
+  and the **sets are identical**. The capture at `2f032c8` is the entry baseline, since no `.py`
+  changed between `2f032c8` and `d6c6761`.
 
 ### Render — real `run_test` + `export_screenshot`, PNGs rasterised by headless Chrome
 
@@ -1143,13 +1143,13 @@ touched. Nothing was pushed.
 
 ### Commits (this pass)
 
-- `9d51593` feat(legend): the legend in English; `01b` §3.5 derived from what is painted
-- `29781d6` feat(legend): the declaration and its arms (E2, E4, UX-F4, CR-F2/F3/F4, SEC-F1)
-- `9fbc6a8` feat(legend): the narrow full-height dock, vocabulary first, two-line own keys (E1, E3, A-107)
-- `4b7c2ba` fix(legend): size `fit` by what it paints (`INC8-F-SEC-F2`)
-- `27be355` test(legend): pin that the harvest advances by cell width (`INC8-F-CR-F6`)
-- `a4dcdd2` test(legend): the narrow-panel arm reads the verdict, not the constant (`INC8-D2-F5`)
-- `5d45c93` test(legend): the resize arm reads the frame, not `render()` (`INC8-D2-F6`)
+- `3498dcd` feat(legend): the legend in English; `01b` §3.5 derived from what is painted
+- `3ed1021` feat(legend): the declaration and its arms (E2, E4, UX-F4, CR-F2/F3/F4, SEC-F1)
+- `391b03f` feat(legend): the narrow full-height dock, vocabulary first, two-line own keys (E1, E3, A-107)
+- `b057d41` fix(legend): size `fit` by what it paints (`INC8-F-SEC-F2`)
+- `673eee1` test(legend): pin that the harvest advances by cell width (`INC8-F-CR-F6`)
+- `37b1439` test(legend): the narrow-panel arm reads the verdict, not the constant (`INC8-D2-F5`)
+- `929f7db` test(legend): the resize arm reads the frame, not `render()` (`INC8-D2-F6`)
 - this record and the `01b` `:264` citation (docs)
 
 ## Design pass 3 (2026-09-29)
@@ -1157,7 +1157,7 @@ touched. Nothing was pushed.
 **What this pass is.** The operator's third design verdict and the width principle
 (`VERDICT-inc8-legend-2026-09-28.md`, sections *Round 3* and *DESIGN PRINCIPLE*), plus the findings
 the pass-2 reviews carried in (`state.json` → `p3_progress.INC-8_ROUND_3_2026-09-29`), applied under
-the batch's `/dev-flow` rules. Entry HEAD `834b740`, tree clean. Independent reviews follow; this
+the batch's `/dev-flow` rules. Entry HEAD `78a7592`, tree clean. Independent reviews follow; this
 record does not review its own work.
 
 ### Verdict items applied, and how the width principle shaped each
@@ -1167,25 +1167,25 @@ reference width, `DECLARED_CONTEXT_CELLS` = 118, shown beside a narrower and a w
 
 | Item | What was done | Width principle | Commit | Arms |
 |---|---|---|---|---|
-| **F1** colours per view | `DECLARED_COLOURS` rows gain ids `C1`–`C4`, one row per JOB; `LEGEND_COLOURS` maps each view to its rows; the legend paints `colours_for(view)`, and a view with no row omits the section. `WARN` gains `C3`, *missing, as a count*. `01b` §3.5 gains **Painted on** (`marks` / `words`) and **Views** columns, every row cited to its renderer line | per view, not per width: the census is read at both sizes and must agree at each | `8c8c818` | `test_f1_each_legend_paints_the_colour_rows_its_view_paints` ×8 (both directions); `test_f1_each_view_paints_the_colour_rows_its_01b_views_column_names`; §3.5 EQUALS |
-| **F2** pan on dock | `MapScreen.legend_docked(panel_x)` / `legend_closed()`. The pan held when the legend opened is kept; every call starts from it; docked, the pan moves right just enough for the selected card's box to end at the panel's edge | the panel's edge is `width - 44` at any width, and the reveal is recomputed on every resize from the kept pan | `00915cc`, `46cb2dc`, `050572a` | `test_f2_…` ×5 |
-| **F9** derived threshold | `LEGEND_DOCK_MIN_WIDTH` (= 118) is gone. `help.docks(width, view_left)`: dock while `width - 44 - view_left >= LEGEND_DOCK_MIN_VIEW_CELLS` (43). `MapScreen.legend_view_left` is the rail's width when shown, else 0 | this IS the principle: no width is written; the switch derives from the panel, the minimum and the host's own chrome | `2db8d74` | `test_f9_the_legend_docks_exactly_while_the_view_keeps_its_minimum` ×6, the D4 arms re-derived, `test_f9_the_layout_sizes_drive_both_layouts`, `TC-R36` (`A-108`) |
-| **Q7** letter samples | `V27` = `D` (`MUT`) + `✓` (`INK`); `V28` = `D` (`MUT`) + `░` (`STEP`), label `field initial · ░ pending`; painted ADJACENT (`help.ADJACENT_ROWS`), as `views/layered.py:628-631` paints them | — | `9b45eb6` | D2's targeted adjacency check; `test_q7_the_adjacent_rows_are_the_ones_01b_paints_adjacent` |
-| **copy** ×9 | `what the colours mean`; `node, grey of its branch`; `… recorded` ×2; `nodes with / without record`; `scroll`; one footer line `? always explains the view you are in`; `V34` → `folded branch, left list`; the close hint once, in the group (the title paints its name alone); modal sample column 12, docked 8 | the sample columns are widths inside panels of FIXED width (80, 44), not terminal widths, so they stay declared; the no-cut arm checks both budgets | `9b45eb6` | §3.6 EQUALS arms, `test_e1_no_painted_string_is_cut_at_either_budget` ×2, the resize arm (holds the verdict's 12 and 8) |
+| **F1** colours per view | `DECLARED_COLOURS` rows gain ids `C1`–`C4`, one row per JOB; `LEGEND_COLOURS` maps each view to its rows; the legend paints `colours_for(view)`, and a view with no row omits the section. `WARN` gains `C3`, *missing, as a count*. `01b` §3.5 gains **Painted on** (`marks` / `words`) and **Views** columns, every row cited to its renderer line | per view, not per width: the census is read at both sizes and must agree at each | `d1708b9` | `test_f1_each_legend_paints_the_colour_rows_its_view_paints` ×8 (both directions); `test_f1_each_view_paints_the_colour_rows_its_01b_views_column_names`; §3.5 EQUALS |
+| **F2** pan on dock | `MapScreen.legend_docked(panel_x)` / `legend_closed()`. The pan held when the legend opened is kept; every call starts from it; docked, the pan moves right just enough for the selected card's box to end at the panel's edge | the panel's edge is `width - 44` at any width, and the reveal is recomputed on every resize from the kept pan | `9b1a644`, `d77ec46`, `50aea55` | `test_f2_…` ×5 |
+| **F9** derived threshold | `LEGEND_DOCK_MIN_WIDTH` (= 118) is gone. `help.docks(width, view_left)`: dock while `width - 44 - view_left >= LEGEND_DOCK_MIN_VIEW_CELLS` (43). `MapScreen.legend_view_left` is the rail's width when shown, else 0 | this IS the principle: no width is written; the switch derives from the panel, the minimum and the host's own chrome | `44e32ae` | `test_f9_the_legend_docks_exactly_while_the_view_keeps_its_minimum` ×6, the D4 arms re-derived, `test_f9_the_layout_sizes_drive_both_layouts`, `TC-R36` (`A-108`) |
+| **Q7** letter samples | `V27` = `D` (`MUT`) + `✓` (`INK`); `V28` = `D` (`MUT`) + `░` (`STEP`), label `field initial · ░ pending`; painted ADJACENT (`help.ADJACENT_ROWS`), as `views/layered.py:628-631` paints them | — | `c0535ef` | D2's targeted adjacency check; `test_q7_the_adjacent_rows_are_the_ones_01b_paints_adjacent` |
+| **copy** ×9 | `what the colours mean`; `node, grey of its branch`; `… recorded` ×2; `nodes with / without record`; `scroll`; one footer line `? always explains the view you are in`; `V34` → `folded branch, left list`; the close hint once, in the group (the title paints its name alone); modal sample column 12, docked 8 | the sample columns are widths inside panels of FIXED width (80, 44), not terminal widths, so they stay declared; the no-cut arm checks both budgets | `c0535ef` | §3.6 EQUALS arms, `test_e1_no_painted_string_is_cut_at_either_budget` ×2, the resize arm (holds the verdict's 12 and 8) |
 
 ### Carried findings, disposition
 
 | Finding | What was done | Commit | Killing mutant |
 |---|---|---|---|
-| `INC8-P2-SEC-F1` (`B-67`, **closed**) | `COERCION_RANGES` gains `(0xD800, 0xDFFF)`; the census oracle reads `Cs` from `unicodedata` with Cc/Cf/Zl/Zp. New arm: `json.loads(json.dumps(...))` of a lone surrogate through `plain()` then `.encode("utf-8")`. **RED before the fix** at the encode line (`UnicodeEncodeError: … surrogates not allowed`), and the oracle RED listing U+D800–U+DFFF; **GREEN after** | `0a386e3` | `MS1` |
-| `INC8-P2-CR-F1` | `_crumb_line([chr(0x202E), "tail"], 80)` paints `U+FFFD / tail` | `9b45eb6` | `MS2b` |
-| `INC8-P2-CR-F2` | the own-scope group renders exactly its title + 2 lines, both layouts | `9b45eb6` | `ME3a` |
-| `INC8-P2-CR-F3` | the colour arm is per (view, size) over `painted_by`, so alone each node drives one view's states. Measured standalone: worst node `F1[mind map-140x45]` **46.71 s** in an F1-only run, **42.22 s** alone in its own process; the highest reading of that drive this pass is **48.21 s** (D2, same states). Ceiling 120 s. These are single readings, not a bound | `8c8c818` | — (cost, not behaviour) |
-| `INC8-P2-CR-F4` | `darkside._row_text(s)`, used by `shown_cells` and `fit` | `cd4aceb` | `MR1` |
-| `INC8-P2-CR-F5` | the view-side `_paints_as` docstring now says what it compares, and how it differs from the legend-side one | `9b45eb6` | — (prose) |
+| `INC8-P2-SEC-F1` (`B-67`, **closed**) | `COERCION_RANGES` gains `(0xD800, 0xDFFF)`; the census oracle reads `Cs` from `unicodedata` with Cc/Cf/Zl/Zp. New arm: `json.loads(json.dumps(...))` of a lone surrogate through `plain()` then `.encode("utf-8")`. **RED before the fix** at the encode line (`UnicodeEncodeError: … surrogates not allowed`), and the oracle RED listing U+D800–U+DFFF; **GREEN after** | `8ae96c1` | `MS1` |
+| `INC8-P2-CR-F1` | `_crumb_line([chr(0x202E), "tail"], 80)` paints `U+FFFD / tail` | `c0535ef` | `MS2b` |
+| `INC8-P2-CR-F2` | the own-scope group renders exactly its title + 2 lines, both layouts | `c0535ef` | `ME3a` |
+| `INC8-P2-CR-F3` | the colour arm is per (view, size) over `painted_by`, so alone each node drives one view's states. Measured standalone: worst node `F1[mind map-140x45]` **46.71 s** in an F1-only run, **42.22 s** alone in its own process; the highest reading of that drive this pass is **48.21 s** (D2, same states). Ceiling 120 s. These are single readings, not a bound | `d1708b9` | — (cost, not behaviour) |
+| `INC8-P2-CR-F4` | `darkside._row_text(s)`, used by `shown_cells` and `fit` | `d865f5a` | `MR1` |
+| `INC8-P2-CR-F5` | the view-side `_paints_as` docstring now says what it compares, and how it differs from the legend-side one | `c0535ef` | — (prose) |
 | `INC8-P2-CR-F6`, `-F7` | struck in place in *Design pass 2*: the catalogue keeps its own harvest walk (`harvest_counted`); the E1 tolerance is **+1 only**; the group's second line is **38 of 39** docked cells | this record | — (prose) |
-| `INC8-P2-CR-F9` | the close hint leaves the title; `HLR-N16.4`'s painted-keys arm reads the own-scope GROUP's region alone | `9b45eb6` | `MK1` (pre/post pair below) |
-| `INC8-P2-UX-F6` | derived PER MEMBER from the census: a member painted only on `PANEL` declares it — `V40` (the home's cards, `app.py:4342`), `V42`/`V43`/`V44` (radial's node pills, `views/radial.py:302-304`). Members painted on both grounds (`V19`, `V32`, `V4b`) stay bare, sampled on `GROUND`. D2 now requires every bare member to be painted on `GROUND` somewhere. A compound row's separator takes the ground of the sample before it (**not pinned by an arm**) | `9b45eb6` | `MG1`, `MG2` |
+| `INC8-P2-CR-F9` | the close hint leaves the title; `HLR-N16.4`'s painted-keys arm reads the own-scope GROUP's region alone | `c0535ef` | `MK1` (pre/post pair below) |
+| `INC8-P2-UX-F6` | derived PER MEMBER from the census: a member painted only on `PANEL` declares it — `V40` (the home's cards, `app.py:4342`), `V42`/`V43`/`V44` (radial's node pills, `views/radial.py:302-304`). Members painted on both grounds (`V19`, `V32`, `V4b`) stay bare, sampled on `GROUND`. D2 now requires every bare member to be painted on `GROUND` somewhere. A compound row's separator takes the ground of the sample before it (**not pinned by an arm**) | `c0535ef` | `MG1`, `MG2` |
 
 ### Per-view colour table (catalogue, both sizes, all D2 states; cells)
 
@@ -1288,13 +1288,13 @@ Every other string in *Design pass 2*'s copy table stands.
 - **`INC8-D3-F3` — two F2 arms were weaker than claimed; the battery found it.** `MP3` (re-pan a
   clear card) survived: both clear cases started at pan 0, where a wrong LEFTWARD shift clamps back
   to 0. `MP4` (pan in the modal) survived: the resize arm's modal width had already put the card past
-  the canvas edge. Fixed in `46cb2dc` (pan first, asserted; a card 13 columns short of the edge; a new
+  the canvas edge. Fixed in `d77ec46` (pan first, asserted; a card 13 columns short of the edge; a new
   arm opening the modal at 86 over a card a docked edge would cut, asserted). Re-fired: `MP3`,
   `MP3b`, `MP4` RED.
 - **`INC8-D3-F4` — shell heredocs collapse a doubled backslash.** A Bash heredoc turned `\\n` into
   `\n` twice this pass (an edit script and a harness edit). Both failed LOUDLY (an unmatched edit, a
   syntax error), before touching a repo file; every later script built the backslash with `chr(92)`,
-  and the Write/Edit tools kept `\\` intact (checked in `0a386e3`'s diff). **0 banned code points**
+  and the Write/Edit tools kept `\\` intact (checked in `8ae96c1`'s diff). **0 banned code points**
   in every staged diff and every commit message of this pass (`inc8d3\scan.py`, before and after
   each commit).
 - **`INC8-D3-F6` — the first full lane went 1 failed, mine.** `tests/test_search.py`'s census
@@ -1302,7 +1302,7 @@ Every other string in *Design pass 2*'s copy table stands.
   and `legend_docked` reaching the search resolution through `_view_state` without a paint pass.
   The census pins its openers EXACTLY and offers a registry for exemptions, both in a file outside
   this increment; moving another file's pin is not the fix (the `INC8-D2-F6` precedent). The reveal
-  now reads the state the preceding `refresh_canvas` recorded (`050572a`); behaviour is unchanged
+  now reads the state the preceding `refresh_canvas` recorded (`50aea55`); behaviour is unchanged
   and `MP1`–`MP5`, `MP3b` were re-fired against the rewritten methods, all RED. This is the tree's own
   census firing on this pass's work, as `INC8-D-F6` and `INC8-D2-F6` did in passes 1 and 2.
 - **`INC8-D3-F5` — the `100` columns the pass-2 arms called modal now dock.** The "both layouts"
@@ -1370,7 +1370,7 @@ afterwards.
 | MK1 | the group stops painting `esc` | **RED** HLR-N16.4 ×3 |
 | MR1 | `fit` paints `plain()` without the row breakers | **RED** SEC-F1 fit arm |
 
-**The pre/post pairs.** The tree at `2db8d74` (before Q7 and before the title lost its hint) was
+**The pre/post pairs.** The tree at `44e32ae` (before Q7 and before the title lost its hint) was
 exported with `git archive` to `inc8d3\base_2db8d74`; its `mapper` import resolves to the export,
 checked by path. There, **`MQ1` SURVIVED** (D2[atlas] ×2 green: X1 hid the letter) and **`MK1`
 SURVIVED** (HLR-N16.4 ×3 green: the title proved `esc`). On the final tree both are RED. The
@@ -1382,16 +1382,16 @@ separator.
 
 ### Lane and ruff
 
-- **First full-lane run**, main tree at `46cb2dc`, stdout and stderr kept separate:
+- **First full-lane run**, main tree at `d77ec46`, stdout and stderr kept separate:
   **`1 failed, 1274 passed, 20 deselected, 3 xfailed`** in 906 s. The failure is **`INC8-D3-F6`**
-  (`test_search.py`'s paint-pass census, mine), fixed in `050572a`. A faithful record of that tree,
+  (`test_search.py`'s paint-pass census, mine), fixed in `50aea55`. A faithful record of that tree,
   so annotated, not struck. `FLAKE-1` did not fire.
-- **Final full-lane run** on the final code tree (`050572a`; this record and the pass-2 strikes were
+- **Final full-lane run** on the final code tree (`50aea55`; this record and the pass-2 strikes were
   in the working tree, uncommitted, and no test reads them): **`1275 passed, 20 deselected, 3 xfailed,
   0 failed`** in 834 s. `FLAKE-1` did not fire. Running the lane twice is a deviation from "once",
   declared: the first run's tree was not the one that ships.
 
-- **Reconciliation.** Entry `834b740` = 1247 passed + 3 xfailed = 1250 selected (the export collects
+- **Reconciliation.** Entry `78a7592` = 1247 passed + 3 xfailed = 1250 selected (the export collects
   0 of `test_views_hits.py`'s 57 nodes, an artifact of the export, as in pass 2; with them it equals
   the entry). The tree collects **1278**: **+36** new or re-parametrized nodes, **−8** removed.
   - removed: `test_d4_the_layout_switches_at_118_columns` ×3, the row-budget arm's `[117]`/`[118]`,
@@ -1430,7 +1430,7 @@ real `?`: `_legend_top` at rest, `_legend_keys` at the keys section, `_legend_en
 - **`INC8-D2-F2`** (`app.py:2625`, the map toast sized by `len`), the diff mode's tones, and the D2
   arm's lane cost (six map nodes of 28–48 s each), unchanged.
 - **Inc-9 / Inc-EN (`B-71`)** unchanged; `INC8-P2-UX-F4` stays routed to Inc-9.
-- `B-67` is **closed** by `0a386e3`.
+- `B-67` is **closed** by `8ae96c1`.
 
 ### Files
 
@@ -1449,33 +1449,33 @@ Nothing was pushed.
 
 ### Commits (this pass)
 
-- `0a386e3` fix(darkside): coerce lone surrogates in plain() (`INC8-P2-SEC-F1`, `B-67`)
-- `8c8c818` feat(legend): colour rows per view, one row per job (`F1`)
-- `00915cc` feat(legend): docking pans the selection clear of the panel (`F2`)
-- `2db8d74` feat(legend): the dock threshold is derived from the view left visible (`F9`, `A-108`)
-- `9b45eb6` feat(legend): letter samples, the nine copy adjustments, per-member grounds (`Q7`, copy, `UX-F6`)
-- `cd4aceb` refactor(darkside): one row coercion for shown_cells and fit (`INC8-P2-CR-F4`)
-- `46cb2dc` test(legend): the F2 arms see a wrong shift and a modal pan (`INC8-D3-F3`)
-- `050572a` fix(legend): the dock reveal reads the painted state, inside a paint pass (`INC8-D3-F6`)
+- `8ae96c1` fix(darkside): coerce lone surrogates in plain() (`INC8-P2-SEC-F1`, `B-67`)
+- `d1708b9` feat(legend): colour rows per view, one row per job (`F1`)
+- `9b1a644` feat(legend): docking pans the selection clear of the panel (`F2`)
+- `44e32ae` feat(legend): the dock threshold is derived from the view left visible (`F9`, `A-108`)
+- `c0535ef` feat(legend): letter samples, the nine copy adjustments, per-member grounds (`Q7`, copy, `UX-F6`)
+- `d865f5a` refactor(darkside): one row coercion for shown_cells and fit (`INC8-P2-CR-F4`)
+- `d77ec46` test(legend): the F2 arms see a wrong shift and a modal pan (`INC8-D3-F3`)
+- `50aea55` fix(legend): the dock reveal reads the painted state, inside a paint pass (`INC8-D3-F6`)
 - this record, with the pass-2 strikes (docs)
 
 ## Pass-3 corrective (2026-09-29)
 
-**What this pass is.** Design pass 3 (`c7cdf85`) got three independent reviews: code
+**What this pass is.** Design pass 3 (`f5bbd6d`) got three independent reviews: code
 BLOCK-UNTIL `INC8-P3-CR-F1`, UX PASS-WITH-FINDINGS, security PASS. This pass closes the
 blocking finding and two coverage gaps the code review also raised. Design questions
 (`INC8-D3-Q1`-`Q5`), the dock-minimum literal (`INC8-P3-CR-F4`), the `store.py` surrogate
 path (`INC8-P3-SEC-F1`) and the private `layered._geometry` import (`CR-F5`) are for the
-operator, unchanged. Entry HEAD `c7cdf85`, tree clean.
+operator, unchanged. Entry HEAD `f5bbd6d`, tree clean.
 
 ### Findings and disposition
 
 | Finding | Severity | What was done | Commit |
 |---|---|---|---|
-| `INC8-P3-CR-F1` | HIGH, blocking | `legend_docked` called `refresh_canvas()` on every layout apply, modal included, and `refresh_canvas` unconditionally rebuilds the ficha inspector (`FichaInspector._rebuild`'s `remove_children`), which destroys a focused field with nothing to restore it. `_move_pan` (the one path both `legend_docked` and `legend_closed` move pan through) now repaints through `_declare_after_layout`'s canvas-only render path instead -- it touches `#map-canvas` and the pagination `Static` only, never the rail or the inspector. `MapScreen` also saves the pre-legend focus (a widget id, or `None`) the moment the legend opens and restores it in a new `on_screen_resume` handler, deferred one message behind Textual's own post-resume auto-focus (`Screen._update_auto_focus`, `AUTO_FOCUS = "*"` at the app level, which grabs the rail the instant this screen resumes with `focused is None`) via `call_after_refresh`, so the operator's restore wins instead of being overwritten by it. | `4a372dc` |
-| `INC8-P3-UX-F1` (folds in carried `INC8-P2-UX-F7`) | same root as `CR-F1` | With focus `None` before `?`, `esc` used to leave the rail focused -- the same `_update_auto_focus` mechanism, independent of any inspector rebuild, since nothing needs destroying when nothing was focused. The deferred restore in `on_screen_resume` now explicitly re-asserts `None` afterward, so it returns `None` exactly, and the canvas is never repainted with the wrong focus baked into the selection's fill (blue when unfocused, `INK on PANEL` otherwise -- `views/layered.py:744-747`) because focus is restored BEFORE the pan-restore repaint that follows it, not after. | `4a372dc` |
-| `INC8-P3-CR-F2` | MEDIUM | No arm pinned that `legend_closed` clears `_pan_before_legend`. Behaviour was already correct (measured: the reopen-after-pan sequence below matched on the unmodified tree); added the arm to close the coverage gap. | `60bf183` |
-| `INC8-P3-CR-F3` | MEDIUM | `darkside.shown_cells` was unpinned against a real `fit()` paint for `\t`/`\n`/`\r` and wide text. Behaviour was already correct; added the arm. | `60bf183` |
+| `INC8-P3-CR-F1` | HIGH, blocking | `legend_docked` called `refresh_canvas()` on every layout apply, modal included, and `refresh_canvas` unconditionally rebuilds the ficha inspector (`FichaInspector._rebuild`'s `remove_children`), which destroys a focused field with nothing to restore it. `_move_pan` (the one path both `legend_docked` and `legend_closed` move pan through) now repaints through `_declare_after_layout`'s canvas-only render path instead -- it touches `#map-canvas` and the pagination `Static` only, never the rail or the inspector. `MapScreen` also saves the pre-legend focus (a widget id, or `None`) the moment the legend opens and restores it in a new `on_screen_resume` handler, deferred one message behind Textual's own post-resume auto-focus (`Screen._update_auto_focus`, `AUTO_FOCUS = "*"` at the app level, which grabs the rail the instant this screen resumes with `focused is None`) via `call_after_refresh`, so the operator's restore wins instead of being overwritten by it. | `a89b73a` |
+| `INC8-P3-UX-F1` (folds in carried `INC8-P2-UX-F7`) | same root as `CR-F1` | With focus `None` before `?`, `esc` used to leave the rail focused -- the same `_update_auto_focus` mechanism, independent of any inspector rebuild, since nothing needs destroying when nothing was focused. The deferred restore in `on_screen_resume` now explicitly re-asserts `None` afterward, so it returns `None` exactly, and the canvas is never repainted with the wrong focus baked into the selection's fill (blue when unfocused, `INK on PANEL` otherwise -- `views/layered.py:744-747`) because focus is restored BEFORE the pan-restore repaint that follows it, not after. | `a89b73a` |
+| `INC8-P3-CR-F2` | MEDIUM | No arm pinned that `legend_closed` clears `_pan_before_legend`. Behaviour was already correct (measured: the reopen-after-pan sequence below matched on the unmodified tree); added the arm to close the coverage gap. | `597b41f` |
+| `INC8-P3-CR-F3` | MEDIUM | `darkside.shown_cells` was unpinned against a real `fit()` paint for `\t`/`\n`/`\r` and wide text. Behaviour was already correct; added the arm. | `597b41f` |
 
 ### A regression this pass's own first draft introduced, and caught before it shipped
 
@@ -1510,9 +1510,9 @@ restore, and the pin re-verified after. **All four restores matched their pins.*
 
 - **Targeted**, corrective's own test files, on the final tree: `tests/test_legend_design.py` +
   `tests/test_help_scope.py` -- **91 passed, 0 failed**.
-- **Full default lane**, run once on `60bf183` (the main tree, both commits landed):
+- **Full default lane**, run once on `597b41f` (the main tree, both commits landed):
   **1284 passed, 20 deselected, 3 xfailed, 0 failed** in 919 s. `FLAKE-1` did not fire.
-- **Reconciliation.** Baseline (both implementer and code reviewer, `c7cdf85`): 1275 passed +
+- **Reconciliation.** Baseline (both implementer and code reviewer, `f5bbd6d`): 1275 passed +
   3 xfailed = 1278 selected. This pass adds **9** nodes, all in `test_legend_design.py` /
   `test_help_scope.py`: `test_cr_f1_closing_the_legend_restores_the_focused_field` ×2,
   `test_cr_f1_closing_the_legend_with_no_prior_focus_stays_unfocused` ×2,
@@ -1547,25 +1547,25 @@ scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing wa
 
 ### Commits (this pass)
 
-- `4a372dc` fix(legend): opening/closing the legend no longer moves keyboard focus (`INC8-P3-CR-F1`)
-- `60bf183` test(legend): pin the reopen-after-pan sequence and shown_cells' row-breaker translation (`INC8-P3-CR-F2`, `INC8-P3-CR-F3`)
+- `a89b73a` fix(legend): opening/closing the legend no longer moves keyboard focus (`INC8-P3-CR-F1`)
+- `597b41f` test(legend): pin the reopen-after-pan sequence and shown_cells' row-breaker translation (`INC8-P3-CR-F2`, `INC8-P3-CR-F3`)
 - this record (docs)
 
 ## Design pass 4 (2026-09-29)
 
 **What this pass is.** The operator's fourth design verdict
 (`VERDICT-inc8-legend-2026-09-28.md`, section *Round 4*), applied under the batch's `/dev-flow`
-rules. Entry HEAD `74e1e20`, tree clean. Independent reviews follow; this record does not review
+rules. Entry HEAD `7673bce`, tree clean. Independent reviews follow; this record does not review
 its own work.
 
 ### Verdict items applied
 
 | Item | What was done | Commit | Arms |
 |---|---|---|---|
-| **G2** pan range while docked | `A-109` amends `LLR-N06.1.2`: while docked, `MapScreen._pan_revealing_selection`'s legal maximum uses the VISIBLE canvas (`panel_x - canvas_x`) instead of the canvas's own full drawn width (`geo.avail`) -- for this ONE call only. `_clamp_pan` itself, `_pan`, the modal path and the close path are untouched | `d65da78` | `test_g2_a_card_at_the_maps_right_edge_is_revealed_whole_and_closing_returns_it`, `test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card` |
-| **G3** red label | `DECLARED_COLOURS`'s `C4` label -> `red — required, missing` (was `red — missing record`), same token, same Views | `e273444` | `test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5` (doc/declaration EQUALS) |
-| **G4** one amber row | `C2`/`C3` merged into ONE row, id `C2`, label `amber — attention · missing count`, **Painted on** widened to `marks · words` (the union of the two retired cells). `LEGEND_COLOURS` drops `C3` everywhere -- `C2` was already declared on every view that paints amber, so no view's row set otherwise changes | `e273444` | the EQUALS test above; `test_f1_each_legend_paints_the_colour_rows_its_view_paints` (unchanged code, re-verified against the new declarations, both directions, both sizes) |
-| **G5** three parts | `V34` -> `folded branch, in the rail` (was `folded branch, left list`); `V28` -> `field initial, pending` (was `field initial · ░ pending`); `MapScreen.REVEAL_MARGIN_CELLS = 2`, the ONE named constant `_pan_revealing_selection` reads for the reveal's target margin | `446c1e3` | the vocabulary EQUALS test (`test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document`); `test_g5_the_revealed_card_keeps_its_declared_margin_from_the_panel`; `test_cr_f2_reopening_after_a_pan_keeps_the_new_pan` (re-pinned, see below) |
+| **G2** pan range while docked | `A-109` amends `LLR-N06.1.2`: while docked, `MapScreen._pan_revealing_selection`'s legal maximum uses the VISIBLE canvas (`panel_x - canvas_x`) instead of the canvas's own full drawn width (`geo.avail`) -- for this ONE call only. `_clamp_pan` itself, `_pan`, the modal path and the close path are untouched | `19f8f6e` | `test_g2_a_card_at_the_maps_right_edge_is_revealed_whole_and_closing_returns_it`, `test_g2_the_modal_layout_does_not_widen_the_range_for_an_edge_card` |
+| **G3** red label | `DECLARED_COLOURS`'s `C4` label -> `red — required, missing` (was `red — missing record`), same token, same Views | `261d781` | `test_llr_n16_2_1_the_colour_rows_EQUAL_section_3_5` (doc/declaration EQUALS) |
+| **G4** one amber row | `C2`/`C3` merged into ONE row, id `C2`, label `amber — attention · missing count`, **Painted on** widened to `marks · words` (the union of the two retired cells). `LEGEND_COLOURS` drops `C3` everywhere -- `C2` was already declared on every view that paints amber, so no view's row set otherwise changes | `261d781` | the EQUALS test above; `test_f1_each_legend_paints_the_colour_rows_its_view_paints` (unchanged code, re-verified against the new declarations, both directions, both sizes) |
+| **G5** three parts | `V34` -> `folded branch, in the rail` (was `folded branch, left list`); `V28` -> `field initial, pending` (was `field initial · ░ pending`); `MapScreen.REVEAL_MARGIN_CELLS = 2`, the ONE named constant `_pan_revealing_selection` reads for the reveal's target margin | `ae569eb` | the vocabulary EQUALS test (`test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document`); `test_g5_the_revealed_card_keeps_its_declared_margin_from_the_panel`; `test_cr_f2_reopening_after_a_pan_keeps_the_new_pan` (re-pinned, see below) |
 | **G1**, **G7** | No change needed (43 canvas columns kept, rail not counted; `MUT`-on-`GROUND` stays `BACKLOG.md` `B-37`) | — | — |
 
 ### The G2 mechanism, measured
@@ -1624,14 +1624,14 @@ files' final sha256 equal the same two pins (confirmed separately after the full
 
 ### Lane and ruff
 
-- **Full default lane, once**, on the final tree (`446c1e3`), stdout and stderr kept together:
+- **Full default lane, once**, on the final tree (`ae569eb`), stdout and stderr kept together:
   **`1287 passed, 20 deselected, 3 xfailed, 0 failed`** in 957.92 s (`0:15:57`). `FLAKE-1`
   (`test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region`) did not fire -- zero
   `FAILED`/`ERROR` lines in the run's own output, and its name appears nowhere in it. The
   `Task was destroyed but it is pending!` lines after the summary are `asyncio`/Textual animator
   cleanup noise from process teardown, not test output -- they appear after the pass/fail summary
   line, attached to no test id.
-- **Reconciliation.** Baseline (this record's own entry, `74e1e20`, carried from the pass-3
+- **Reconciliation.** Baseline (this record's own entry, `7673bce`, carried from the pass-3
   corrective): `1284 passed, 20 deselected, 3 xfailed` = **1287** selected. This pass adds exactly
   **3** nodes, all in `tests/test_legend_design.py`, none parametrized (counted by
   `grep -c '^async def test_'` against the entry-HEAD file, `19` -> `22`):
@@ -1697,9 +1697,9 @@ scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing wa
 
 ### Commits (this pass)
 
-- `d65da78` fix(legend): amend LLR-N06.1.2 -- the docked reveal's pan range is the visible canvas (`G2`, `A-109`)
-- `e273444` feat(legend): the red row widens; the two amber rows merge into one (`G3`, `G4`)
-- `446c1e3` feat(legend): a declared 2-column margin on reveal; V34 and V28 reworded (`G5`)
+- `19f8f6e` fix(legend): amend LLR-N06.1.2 -- the docked reveal's pan range is the visible canvas (`G2`, `A-109`)
+- `261d781` feat(legend): the red row widens; the two amber rows merge into one (`G3`, `G4`)
+- `ae569eb` feat(legend): a declared 2-column margin on reveal; V34 and V28 reworded (`G5`)
 - this record (docs)
 
 ## Closing pass (2026-09-29)
@@ -1707,19 +1707,19 @@ scratch files and `backup/pre-q9-reword-2026-09-28` were not touched. Nothing wa
 **What this pass is.** Both closing reviews (code, ux) said Inc-8 may close (round 5,
 `VERDICT-inc8-legend-2026-09-28.md`, section *Round 5 — closing questions*). This pass applies
 the operator's four answers (`H1`-`H4`) plus one code finding the coordinator raised alongside them
-(`INC8-CL-CR-F1`), under the batch's `/dev-flow` rules. Entry HEAD `69d9a96`, tree clean. A narrow
+(`INC8-CL-CR-F1`), under the batch's `/dev-flow` rules. Entry HEAD `91ccbdd`, tree clean. A narrow
 independent review follows; this record does not review its own work.
 
 ### Verdict items applied
 
 | Item | What was done | Commit(s) | Arm(s) |
 |---|---|---|---|
-| **H2** stale selection tone | `MapScreen.on_descendant_focus`/`on_descendant_blur` repaint the canvas (`_declare_after_layout`, never `refresh_canvas`) on every focus change. `tab` alone never repainted anything before this; the stale blue-after-focus-left tone the operator saw on `esc` was the SAME defect, one layer up | `316007b` | `test_h2_the_canvas_repaints_on_every_focus_change` |
-| **H3** the margin is exact everywhere | `_pan_revealing_selection` fixes an off-by-one (`right = ... + geo.card_w - 1`, the card box's own last PAINTED column, not one past it) and widens the docked reveal's legal range by `REVEAL_MARGIN_CELLS`, withdrawing design pass 4's map's-true-right-edge exception. `A-109` gets a dated addendum (`01-requirements.md`), the original text left standing | `7092526` | `test_h3_the_painted_margin_is_the_declared_one_everywhere[fina-4-118x34, ti-4-118x34, ti-4-140x45]` |
-| **INC8-CL-CR-F1** re-clamp after close | `_restore_after_legend` calls `self._reclamp_pan(*self._canvas_size())` after the pan restore, then repaints once more (`_reclamp_pan` alone does not repaint) | `7092526`, `35a469d` (a self-caught regression -- see *Lane and ruff*) | `test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close` |
-| **H4** rail rows only while shown | `vocabulary_for(view, rail_shown)` drops `darkside.RAIL_VOCABULARY` while `rail_shown` is `False`. `RAIL_VOCABULARY` is derived from 01b §3.2's own **Source** column (`widgets/rail.py`-sourced rows only), checked against the document, not a hand list -- the coverage strip (`V36`-`V39`) and the meter (`V32`) share §3.2's title with the rail but are sourced from `app.py`'s always-visible minimap and `darkside.py`, so they stay either way | `ec820c8` | `test_h4_the_legend_lists_rail_rows_only_while_the_rail_is_shown`, `tests/test_vocabulary_declaration.py::test_h4_rail_vocabulary_EQUALS_the_01b_rail_sourced_rows` |
-| **H1** footer copy | Footer becomes `? explains the view you are in,` / `outside text fields` (two lines: the honest sentence no longer fits the docked row's 39-cell budget on one) | `7454211` | `tests/test_vocabulary_declaration.py::test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6` |
-| **V27 copy** | `field initial · ✓ filled` → `field initial, filled`, matching `V28`'s comma-separated wording | `7454211` | `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document` |
+| **H2** stale selection tone | `MapScreen.on_descendant_focus`/`on_descendant_blur` repaint the canvas (`_declare_after_layout`, never `refresh_canvas`) on every focus change. `tab` alone never repainted anything before this; the stale blue-after-focus-left tone the operator saw on `esc` was the SAME defect, one layer up | `5c2af4d` | `test_h2_the_canvas_repaints_on_every_focus_change` |
+| **H3** the margin is exact everywhere | `_pan_revealing_selection` fixes an off-by-one (`right = ... + geo.card_w - 1`, the card box's own last PAINTED column, not one past it) and widens the docked reveal's legal range by `REVEAL_MARGIN_CELLS`, withdrawing design pass 4's map's-true-right-edge exception. `A-109` gets a dated addendum (`01-requirements.md`), the original text left standing | `612e1fb` | `test_h3_the_painted_margin_is_the_declared_one_everywhere[fina-4-118x34, ti-4-118x34, ti-4-140x45]` |
+| **INC8-CL-CR-F1** re-clamp after close | `_restore_after_legend` calls `self._reclamp_pan(*self._canvas_size())` after the pan restore, then repaints once more (`_reclamp_pan` alone does not repaint) | `612e1fb`, `8056ae8` (a self-caught regression -- see *Lane and ruff*) | `test_inc8_cl_cr_f1_a_resize_while_docked_is_reclamped_on_close` |
+| **H4** rail rows only while shown | `vocabulary_for(view, rail_shown)` drops `darkside.RAIL_VOCABULARY` while `rail_shown` is `False`. `RAIL_VOCABULARY` is derived from 01b §3.2's own **Source** column (`widgets/rail.py`-sourced rows only), checked against the document, not a hand list -- the coverage strip (`V36`-`V39`) and the meter (`V32`) share §3.2's title with the rail but are sourced from `app.py`'s always-visible minimap and `darkside.py`, so they stay either way | `203b31f` | `test_h4_the_legend_lists_rail_rows_only_while_the_rail_is_shown`, `tests/test_vocabulary_declaration.py::test_h4_rail_vocabulary_EQUALS_the_01b_rail_sourced_rows` |
+| **H1** footer copy | Footer becomes `? explains the view you are in,` / `outside text fields` (two lines: the honest sentence no longer fits the docked row's 39-cell budget on one) | `6fe707f` | `tests/test_vocabulary_declaration.py::test_inc8_cr_f3_the_section_headers_and_footer_EQUAL_section_3_6` |
+| **V27 copy** | `field initial · ✓ filled` → `field initial, filled`, matching `V28`'s comma-separated wording | `6fe707f` | `test_inc7_cr_r2_f3_the_declaration_EQUALS_the_document` |
 
 ### The off-by-one, measured
 
@@ -1767,7 +1767,7 @@ reason), one exact substring replaced exactly once per mutant, the verdict print
 restore, and the pin re-verified after every restore. **All 8 restores matched their pins.**
 
 Pins (entry, and exit -- every mutant restored and re-verified). Run TWICE: once before the
-`test_search.py` regression fix (`35a469d`) and once after, since that fix touched `app.py` again;
+`test_search.py` regression fix (`8056ae8`) and once after, since that fix touched `app.py` again;
 the pin below is the SECOND (final) run's, on the tree this record's own commits leave behind:
 
 - `mapper/app.py` `77a6b7f4b5d4bdacdb8a33e246fe7461e53c41e9a07175235748aed5448fe72c`
@@ -1789,20 +1789,20 @@ the pin below is the SECOND (final) run's, on the tree this record's own commits
 
 - **Targeted, at every commit of this pass** (each verified GREEN in isolation by committing, then
   `git stash -u` to strip everything not yet committed, running the relevant subset, then `git stash
-  pop`): `316007b` (H2) 6/6; `7092526` (H3 + `INC8-CL-CR-F1`) 12/12; `ec820c8` (H4) 14/14; `7454211`
-  + `0b6f1e2` (H1 + V27, plus the 01b rows split out of it once the first attempt measured RED
+  pop`): `5c2af4d` (H2) 6/6; `612e1fb` (H3 + `INC8-CL-CR-F1`) 12/12; `203b31f` (H4) 14/14; `6fe707f`
+  + `ae431e0` (H1 + V27, plus the 01b rows split out of it once the first attempt measured RED
   without them) 63/63 over `test_vocabulary_declaration.py` + `test_help_scope.py`.
-- **Full default lane, once, on the final tree (`35a469d`):** **`1293 passed, 20 deselected, 3
+- **Full default lane, once, on the final tree (`8056ae8`):** **`1293 passed, 20 deselected, 3
   xfailed, 0 failed`** in 863.27 s (`0:14:23`). `FLAKE-1`
   (`test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region`) did not fire; `FLAKE-2`
   (`test_hlr_n16_4_legend_declares_its_own_keys[size2]`) did not fire either. The `Task was
   destroyed but it is pending!` lines after the summary are `asyncio`/Textual animator teardown
   noise, attached to no test id, same as prior passes' own note on this.
 - **A regression this pass's own first draft introduced, and this run caught.** The FIRST full-lane
-  attempt (on `7092526`, before `ec820c8`/`7454211`/`0b6f1e2` landed) reddened
+  attempt (on `612e1fb`, before `203b31f`/`6fe707f`/`ae431e0` landed) reddened
   `tests/test_search.py::test_every_reader_of_the_resolution_is_inside_a_paint_pass`: `INC8-CL-CR-F1`'s
   new `_reclamp_pan` call from `_restore_after_legend` reaches `_view_state` without a paint pass
-  open. Fixed in `35a469d`, not by opening a THIRD named pass (that arm separately pins the opener
+  open. Fixed in `8056ae8`, not by opening a THIRD named pass (that arm separately pins the opener
   set to exactly `{refresh_canvas, _declare_after_layout}`, and a third would have reddened that
   half too) but by correcting `_reclamp_pan`'s own exemption in `_PASS_FREE_READERS`: its reason had
   named ONE call site ("called from inside `refresh_canvas`'s pass") rather than the fact that makes
@@ -1810,8 +1810,8 @@ the pin below is the SECOND (final) run's, on the tree this record's own commits
   memo-derived field of `ViewState`, so no `_search_memo` value, stale or fresh, changes what it
   computes. `_restore_after_legend` and `on_screen_resume` are exempted on that same, now-general,
   basis. Re-run of `tests/test_search.py` after the fix: 37 passed, 0 failed.
-- **Reconciliation.** Baseline (`3818a96`, measured by both the implementer and the code reviewer,
-  carried unchanged through `69d9a96`'s docs-only commit): `1287 passed, 20 deselected, 3 xfailed` =
+- **Reconciliation.** Baseline (`80ea547`, measured by both the implementer and the code reviewer,
+  carried unchanged through `91ccbdd`'s docs-only commit): `1287 passed, 20 deselected, 3 xfailed` =
   1290 selected. This pass adds **6** nodes: `tests/test_legend_design.py` gains 5 net (`grep -c
   '^async def test_'`: 21 -> 24 function defs; `test_g5_the_revealed_card_keeps_its_declared_margin_
   from_the_panel` retired and replaced by the 3-case `test_h3_the_painted_margin_is_the_declared_
@@ -1870,12 +1870,12 @@ touched. Nothing was staged from `prototypes/`, `mapper.db` or scratch, and
 
 ### Commits (this pass)
 
-- `316007b` fix(legend): repaint the canvas on every focus change (`H2`)
-- `7092526` fix(legend): the reveal margin is exact everywhere; re-clamp on close (`H3`, `INC8-CL-CR-F1`)
-- `ec820c8` feat(legend): rail rows only while the rail is shown (`H4`)
-- `7454211` fix(legend): the footer stops over-promising; V27 matches V28's wording (`H1`)
-- `0b6f1e2` docs(legend): 01b rows for H1/V27 -- the two rows the tests derive from
-- `35a469d` fix(legend): `INC8-CL-CR-F1`'s reclamp reads the resolution outside a pass
+- `5c2af4d` fix(legend): repaint the canvas on every focus change (`H2`)
+- `612e1fb` fix(legend): the reveal margin is exact everywhere; re-clamp on close (`H3`, `INC8-CL-CR-F1`)
+- `203b31f` feat(legend): rail rows only while the rail is shown (`H4`)
+- `6fe707f` fix(legend): the footer stops over-promising; V27 matches V28's wording (`H1`)
+- `ae431e0` docs(legend): 01b rows for H1/V27 -- the two rows the tests derive from
+- `8056ae8` fix(legend): `INC8-CL-CR-F1`'s reclamp reads the resolution outside a pass
 - this record (docs)
 
 ### Follow-ups correction (`INC8-FU-F4`, `INC8-FU-F5`), 2026-09-29
@@ -1886,14 +1886,14 @@ pass (`INC8-FU-Fn` below) under this same batch. This subsection is the record-a
 that pass owed back to THIS record; it does not rewrite anything above.
 
 - **(a) the search census's own RED window was four commits, not one.** The *Lane and ruff* section
-  above, under *A regression this pass's own first draft introduced*, names only `7092526` as where
+  above, under *A regression this pass's own first draft introduced*, names only `612e1fb` as where
   the first full-lane attempt "reddened" `test_every_reader_of_the_resolution_is_inside_a_paint_pass`.
   Checked directly (a scratch worktree, each of the four commits checked out in isolation and the
   one test run standalone): the underlying defect (`_restore_after_legend` and `on_screen_resume`
   reaching the search resolution without opening a pass and without a stated reason) is introduced
-  AT `7092526` and is not touched again until `35a469d` fixes it -- so the census is RED in isolation
-  at `7092526`, `ec820c8`, `7454211` AND `0b6f1e2`, all four, not only the one commit this record's
-  prose happened to name. `35a469d` is GREEN. The record's own targeted-verification bullets (the
+  AT `612e1fb` and is not touched again until `8056ae8` fixes it -- so the census is RED in isolation
+  at `612e1fb`, `203b31f`, `6fe707f` AND `ae431e0`, all four, not only the one commit this record's
+  prose happened to name. `8056ae8` is GREEN. The record's own targeted-verification bullets (the
   "targeted, at every commit of this pass" line, just above) never ran the FULL `test_search.py`
   census at the three intermediate commits -- only the relevant SUBSET each one's own item touches --
   which is why the four-commit RED window went unstated rather than merely unfixed.
@@ -1910,7 +1910,7 @@ that pass owed back to THIS record; it does not rewrite anything above.
   with `G5`'s `V28` wording, not an `H4` item.** `01b-ux-decisions.md`'s closing-pass change-log row
   for `V27` names the authority as `` `H4`'s companion copy item ``, which is wrong on its face -- `H4`
   is round 5's rail-visibility ruling and says nothing about `V27`'s label. This record's own commit
-  list, immediately above, reads `` `7454211` ... V27 matches V28's wording (`H1`) `` -- the `(H1)`
+  list, immediately above, reads `` `6fe707f` ... V27 matches V28's wording (`H1`) `` -- the `(H1)`
   there names the COMMIT this landed in, alongside `H1`'s own footer fix, not an attribution of
   authority to `H1` either. The correct authority is stated in `VERDICT-inc8-legend-2026-09-28.md`,
   Round 5's closing paragraph: *"the coordinator aligns V27's copy with the operator's G5 wording for

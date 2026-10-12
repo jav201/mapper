@@ -43,7 +43,7 @@ ran `--color=no`. **No ANCHOR MISS occurred.** **`FLAKE-1` did not fire.**
 `{override} | {comprehension}` lesson. M2 specifically placed the override on a line *after* the
 comprehension and printed `_CONTROL_MAP[0x202E]` to prove the override took.
 
-**One writer per tree; tree left byte-identical at `11d0a12`:**
+**One writer per tree; tree left byte-identical at `72b7c76`:**
 
 | file | sha256 (before == after) |
 |---|---|
@@ -156,7 +156,7 @@ comprehension and printed `_CONTROL_MAP[0x202E]` to prove the override took.
   WEAK on the two LENGTH-based truncators and STRONG on the cell-based one, and
   the distinction is the whole point.  `darkside.plain` is a 1:1 `str.translate`,
   so it distributes over an INDEX slice: `layered._clip` / `layered._fit` satisfy
-  this equality whether or not they coerce (measured at `954f8f3`).  It does NOT
+  this equality whether or not they coerce (measured at `909cc27`).  It does NOT
   distribute over a CELL slice: 221 of the 235 banned points have cell width 0 and
   `U+FFFD` has cell width 1, so coercion INFLATES width and `darkside.fit` budgets
   a different string in each order.  Fired at `S-B(+C)` confirmation pass 3: with
@@ -362,7 +362,7 @@ defence against this particular mutant.
 
 ## Evidence checklist
 
-- [x] **Diff read in full** — `11d0a12` (`01-requirements.md:589-619`), `21809fd`
+- [x] **Diff read in full** — `72b7c76` (`01-requirements.md:589-619`), `bf8f80b`
   (`tests/test_inc3_census.py:148-190`, `tests/test_outline_caps.py`), plus the standing
   `mapper/darkside.py:495-545` and `mapper/views/layered.py:73-116`. `executed`
 - [x] **Correctness pass** — cell-vs-index width audit over all 235 banned points; 493,845-comparison
@@ -400,4 +400,4 @@ review is the artifact that first published the "same function" claim. `qa-revie
 **Lanes this pass.** Baseline restored and re-verified: `tests/test_inc3_census.py
 tests/test_fold.py` → 42 passed, 3 xfailed. Mutant lanes: M1 full default **5 failed / 1058
 passed** (exit 1, 307 s); M2 targeted **13 failed / 29 passed**. ruff not re-run — no repo file
-was left changed (`not-run`, `n/a — tree byte-identical to 11d0a12`).
+was left changed (`not-run`, `n/a — tree byte-identical to 72b7c76`).

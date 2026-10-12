@@ -256,7 +256,7 @@ ten-minute three-lane run on a parameter name. Named here rather than left for a
 19 + 1003 deselected is **1022** again. Three independent runs partition the same collected set with
 no residue, so no arm is silently deselected in every lane.
 
-Suite growth: **995** at `ea5d4c2` → **997** at `46075a4` (the code review's two folded arms) →
+Suite growth: **995** at `3bcec4d` → **997** at `9da9e44` (the code review's two folded arms) →
 **1000** here (the rewritten coverage arm, the `[/]` crash arm, and the attachment-amplification
 arm).
 

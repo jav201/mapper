@@ -17,7 +17,7 @@
 | Field | Value |
 |---|---|
 | Record id | `PDR-2026-10-08-data-safety-batch` |
-| Reviews | `design/design-proposal.md` at `297bb79` (single lane) |
+| Reviews | `design/design-proposal.md` at `d38369f` (single lane) |
 | Participants | `architect` + `qa-reviewer` (tester lens) + `ux-reviewer` (family D) — independent, read-only, 2026-10-08 |
 | Date sealed | `2026-10-08` |
 | **Verdict** | `approved with conditions` (C1–C14 below; each names when it must be discharged) |
@@ -105,7 +105,7 @@ Unresolved operator-owned items: none (R8 ruled by the operator 2026-10-08).
 | id | Discharged | Evidence (re-read, not trusted) |
 |---|---|---|
 | C1 | ✅ Inc-2 U7 | `MapperApp.action_quit` ends the walk when a guard is already open; `tests/test_draft_exits.py::test_pdr_c1_quit_while_a_node_guard_is_open_does_not_wedge` (RED proven) |
-| C2, C3 | ✅ before Inc-1b | design rows 1b.14a / 1b.9 (`5f1f4e1`) |
+| C2, C3 | ✅ before Inc-1b | design rows 1b.14a / 1b.9 (`be78253`) |
 | C4, C5 | ✅ at seal | ledger `.63`, design R-5 |
 | C6 | ✅ Inc-1b + Inc-1c U1 | hidden-card prefix in `ALERT`, renders 87/118/140, repaint when the card hides again |
 | C7 | ✅ Inc-1b | focus returns to the edited field after `ctrl+s` (UX-1 executed) |

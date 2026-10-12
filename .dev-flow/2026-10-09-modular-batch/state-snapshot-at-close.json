@@ -43,7 +43,7 @@
       "mode": "full",
       "opened_at": "2026-08-26",
       "closed_at": "2026-08-27",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
     },
     {
@@ -152,7 +152,7 @@
     "metrics": "vault:mapper/dev-flow-batches/2026-10-09-modular-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "d8cf9426c52e7a7b665e08e09a556ba6e12a2b50",
+  "base_ref": "a5b679eae7e064b5864a8b29d83c02576641d544",
   "artifacts": {
     "plan": ".dev-flow/2026-10-09-modular-batch/PLAN.md",
     "P1": ".dev-flow/2026-10-09-modular-batch/01-requirements.md",
@@ -197,17 +197,17 @@
     {
       "station": "P3",
       "date": "2026-10-10",
-      "decision": "P3 approved (self-approved under the standing authorization): 22 increments (Inc-0, A1-A7, B0-B12); every gate run recorded (last: 3124 passed / 0 failed at e5d80e9); group code reviews A2-A4+B0 and B1-B12 APPROVE-WITH-NITS 0 HIGH, MED vacuous census scans repaired (1c77233); packets 001-022"
+      "decision": "P3 approved (self-approved under the standing authorization): 22 increments (Inc-0, A1-A7, B0-B12); every gate run recorded (last: 3124 passed / 0 failed at c353600); group code reviews A2-A4+B0 and B1-B12 APPROVE-WITH-NITS 0 HIGH, MED vacuous census scans repaired (afec38a); packets 001-022"
     },
     {
       "station": "DDR",
       "date": "2026-10-10",
-      "decision": "DDR sealed approved (DDR-2026-10-09-modular-batch): architect (Claude Opus) + qa-reviewer (Claude Sonnet) approved on re-review after increment 023 (69676cf) closed D-C1..D-C3 and the DDR evidence closed D-C4 + QA MED-1/MED-2; P4 gate full suite at 69676cf 3133 passed / 3 xfailed / 0 failed (evidence/p4-gate-full-suite.transcript), slow lane 19/0 at acbd087; 2 LOWs carried to backlog"
+      "decision": "DDR sealed approved (DDR-2026-10-09-modular-batch): architect (Claude Opus) + qa-reviewer (Claude Sonnet) approved on re-review after increment 023 (886fdfa) closed D-C1..D-C3 and the DDR evidence closed D-C4 + QA MED-1/MED-2; P4 gate full suite at 886fdfa 3133 passed / 3 xfailed / 0 failed (evidence/p4-gate-full-suite.transcript), slow lane 19/0 at 418eee0; 2 LOWs carried to backlog"
     },
     {
       "station": "P4",
       "date": "2026-10-10",
-      "decision": "P4 PASS-WITH-NOTES (04-validation.md): full suite at 69676cf 3133 passed / 3 xfailed / 0 failed, slow lane 19/0, network lane declared not run; Layer A 7 HLR + 17 LLR, Layer B 3 US / AT-065..071; drafted by Kimi, qa-reviewer (Claude Sonnet) approve-with-conditions, M-1/M-2 applied; 4 minor gaps to backlog"
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): full suite at 886fdfa 3133 passed / 3 xfailed / 0 failed, slow lane 19/0, network lane declared not run; Layer A 7 HLR + 17 LLR, Layer B 3 US / AT-065..071; drafted by Kimi, qa-reviewer (Claude Sonnet) approve-with-conditions, M-1/M-2 applied; 4 minor gaps to backlog"
     },
     {
       "station": "P5",
@@ -217,7 +217,7 @@
     {
       "station": "P6",
       "date": "2026-10-10",
-      "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary, module diagram (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH/MED; merged as 9bcbabb (PR #16, squash; feat/modular-batch kept on the remote)"
+      "decision": "P6 closed (self-approved under the standing authorization): 06-docs traceability matrix, functionality, executive summary, module diagram (Kimi); final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH/MED; merged as 7c81cb6 (PR #16, squash; feat/modular-batch kept on the remote)"
     },
     {
       "station": "P6",
@@ -239,32 +239,32 @@
   },
   "previous_batch": {
     "batch_id": "2026-10-09-canon-batch",
-    "merge_commit": "df91eaa",
+    "merge_commit": "16c0522",
     "close_pr": "https://github.com/<owner>/mapper/pull/14",
     "sync_pr": "https://github.com/<owner>/mapper/pull/15",
     "closed_at": "2026-10-09",
-    "close_commit": "df91eaa",
+    "close_commit": "16c0522",
     "obsidian_synced": true,
     "archive": ".dev-flow/2026-10-09-canon-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "pr": "https://github.com/<owner>/mapper/pull/2",
-      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
     "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
-      "merge_commit": "2b59071",
+      "merge_commit": "7d04ba2",
       "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
-      "close_commit": "3fe0e4b",
+      "close_commit": "d8a8536",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }

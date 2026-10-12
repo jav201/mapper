@@ -13,7 +13,7 @@
 | Lane (if the batch forked) | n/a — serial spine, no lane |
 | Requirement(s) | `LLR-MOD.1.1 v1` · `LLR-MOD.3.1` · `LLR-MOD.3.2 v1` · `HLR-MOD.1, 3, 4` |
 | Acceptance | `AT-065` (painted parity) · `LLR-MOD.4.1` (full suite at the gate) · `LLR-MOD.4.3` (`tests/test_mod_bodies.py`) · `LLR-MOD.3.2` bite: the repointed `preview_csv` patch sites in `tests/test_inc9c.py` / `tests/test_inc9n.py` |
-| Agent | Product move by a **Kimi (`kimi-for-coding`) unit** in an isolated worktree, with its own RED + sha256 restore in its own log (session scratch — not committed, see §6). Gate follow-up `689d537` (test_inc9m third caller, store.py symbol citation, transcript) and the gate run by the **orchestrator**. |
+| Agent | Product move by a **Kimi (`kimi-for-coding`) unit** in an isolated worktree, with its own RED + sha256 restore in its own log (session scratch — not committed, see §6). Gate follow-up `0e7b8c2` (test_inc9m third caller, store.py symbol citation, transcript) and the gate run by the **orchestrator**. |
 | Date | `2026-10-09/10` (commits dated 2026-10-10) |
 
 ---
@@ -22,10 +22,10 @@
 
 **`HomeScreen` now lives in `mapper/screens/home.py` (533 lines); `mapper/app.py` shed 516 lines and stands at 307 — spine A is complete: every sibling screen is out of the monolith.**
 
-- `HomeScreen` cut whole from `app.py` into `mapper/screens/home.py`; `mapper/app.py` keeps the re-export (LLR-MOD.1.1/LLR-MOD.3.1). Verified on disk: `git show 45007da:mapper/app.py | wc -l` → **307**.
+- `HomeScreen` cut whole from `app.py` into `mapper/screens/home.py`; `mapper/app.py` keeps the re-export (LLR-MOD.1.1/LLR-MOD.3.1). Verified on disk: `git show 908a9b0:mapper/app.py | wc -l` → **307**.
 - **Patch repoint (LLR-MOD.3.2, PDR C1):** the two `preview_csv` patch sites — `tests/test_inc9c.py:114` and `tests/test_inc9n.py:285` — are retargeted from `mapper.app` to `screens/home.py`'s module-global: the reader is `HomeScreen` (it read the name at the old `app.py:1090`), **not** `_ImportPreviewScreen`.
 - `home.py` imports `MapScreen` from `mapper.screens.map` (it constructs one at five sites) — never from `mapper.app` (LLR-MOD.1.1/LLR-MOD.6.2, the MOD-REQ2 reorder's whole point).
-- Gate follow-up `689d537`: `test_inc9m.py`'s third `safe_local_path` caller is `screens/home.py` (was `app.py`); a `store.py` comment citing `app.py:548` now cites by symbol; the gate transcript recorded.
+- Gate follow-up `0e7b8c2`: `test_inc9m.py`'s third `safe_local_path` caller is `screens/home.py` (was `app.py`); a `store.py` comment citing `app.py:548` now cites by symbol; the gate transcript recorded.
 - `docs/ARCHITECTURE.md` records spine A complete.
 
 ---
@@ -36,14 +36,14 @@
 |---|---|---|---|
 | `mapper/app.py` | source | LLR-MOD.1.1, LLR-MOD.3.1 | HomeScreen body deleted (−516 lines) → 307 lines; re-export kept |
 | `mapper/screens/home.py` | source | LLR-MOD.1.1, LLR-MOD.3.2 | new — HomeScreen whole (533 lines) + module-level `preview_csv` binding |
-| `mapper/store.py` | source | LLR-MOD.5.2 | 2 comment lines: citation by symbol, not `app.py:548` (`689d537`) |
+| `mapper/store.py` | source | LLR-MOD.5.2 | 2 comment lines: citation by symbol, not `app.py:548` (`0e7b8c2`) |
 | `docs/ARCHITECTURE.md` | doc | | TARGET rows amended; spine A recorded complete |
 | `tests/test_inc9c.py` | test | LLR-MOD.3.2 | `preview_csv` patch site repointed (`:114`) + source-set lines |
-| `tests/test_inc9n.py` | test | LLR-MOD.3.2, LLR-MOD.5.2 | `preview_csv` patch site repointed (`:285`) + package scan (`45007da`) |
+| `tests/test_inc9n.py` | test | LLR-MOD.3.2, LLR-MOD.5.2 | `preview_csv` patch site repointed (`:285`) + package scan (`908a9b0`) |
 | `tests/test_app_imports_used.py` | test | LLR-MOD.5.2 | source set follows the package |
 | `tests/test_arch_osopen_callers.py` | test | LLR-MOD.5.2 | launcher-set line follows the move |
-| `tests/test_inc9m.py` | test | LLR-MOD.5.2 | third `safe_local_path` caller = `screens/home.py` (`689d537`) |
-| `evidence/a6a7a4-gate-full-suite.transcript` | generated | LLR-MOD.4.1 | the gate transcript, recorded (`689d537`) |
+| `tests/test_inc9m.py` | test | LLR-MOD.5.2 | third `safe_local_path` caller = `screens/home.py` (`0e7b8c2`) |
+| `evidence/a6a7a4-gate-full-suite.transcript` | generated | LLR-MOD.4.1 | the gate transcript, recorded (`0e7b8c2`) |
 
 | Count | Value |
 |---|---|
@@ -71,15 +71,15 @@ python -B -m pytest -q -p no:cacheprovider tests/test_inc9c.py tests/test_inc9n.
 | Layer | Owed in | Nodes | Result |
 |---|---|---|---|
 | **0 · unit** (LLR-MOD.4.3 bodies oracle) | `core` · `full` | `tests/test_mod_bodies.py` | passed within the gate run (HomeScreen's methods exactly once, `ast.dump`-equal to baseline) |
-| **A · white-box** ↔ LLR | `core` · `full` | `test_inc9m`, `test_repair_artifact_claims[store.py]`, `test_inc9c`, `test_inc9n` | RED at the gate (2 failures, both this increment's); after `689d537`: **re-run of the two files green** (transcript header) |
+| **A · white-box** ↔ LLR | `core` · `full` | `test_inc9m`, `test_repair_artifact_claims[store.py]`, `test_inc9c`, `test_inc9n` | RED at the gate (2 failures, both this increment's); after `0e7b8c2`: **re-run of the two files green** (transcript header) |
 | **B · black-box** AT-065 ↔ painted screen | `core` · `full` | `tests/test_mod_parity.py` (widths 118/87) | 0 painted-line diffs within the gate run |
 
-Gate (`a6a7a4-gate-full-suite.transcript`, run at `45007da`): **`2 failed, 3018 passed, 24 deselected, 3 xfailed in 1567.24s (0:26:07)`** — cited verbatim, including the failures, **both this increment's**:
+Gate (`a6a7a4-gate-full-suite.transcript`, run at `908a9b0`): **`2 failed, 3018 passed, 24 deselected, 3 xfailed in 1567.24s (0:26:07)`** — cited verbatim, including the failures, **both this increment's**:
 
 - `FAILED tests/test_inc9m.py::test_inc9m_s1_one_helper_is_imported_by_the_three_callers` — named `app.py` as the third `safe_local_path` caller; it is now `screens/home.py`.
 - `FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[store.py]` — a `store.py` comment cited `app.py:548`.
 
-Transcript header: "2 failures, both pointing at moved code: test_inc9m named app.py as the third safe_local_path caller (now screens/home.py); a store.py comment cited app.py:548. Fixed in the next commit; re-run of the two files green." Both fixes are in `689d537`, part of this increment.
+Transcript header: "2 failures, both pointing at moved code: test_inc9m named app.py as the third safe_local_path caller (now screens/home.py); a store.py comment cited app.py:548. Fixed in the next commit; re-run of the two files green." Both fixes are in `0e7b8c2`, part of this increment.
 
 ### RED counterfactual — executed, not predicted
 
@@ -97,7 +97,7 @@ Transcript header: "2 failures, both pointing at moved code: test_inc9m named ap
 
 | Field | Value |
 |---|---|
-| **RED counterfactual** | none separate committed beyond the in-force permanent controls — the two gate FAILED nodes (named above) are this increment's own honest RED evidence: both pinned moved code and both were fixed within the increment (`689d537`). |
+| **RED counterfactual** | none separate committed beyond the in-force permanent controls — the two gate FAILED nodes (named above) are this increment's own honest RED evidence: both pinned moved code and both were fixed within the increment (`0e7b8c2`). |
 
 | Field | Value |
 |---|---|
@@ -121,7 +121,7 @@ Transcript header: "2 failures, both pointing at moved code: test_inc9m named ap
 | Artifact emitted | The assertion, run against the EMITTED form | What it returned |
 |---|---|---|
 | `mapper/screens/home.py` + pruned `mapper/app.py` (on-disk AST) | `tests/test_mod_bodies.py` — per-method `ast.dump` against the Inc-0 baseline, exactly-once across the package | passed (within the 3018) |
-| the pruned `mapper/app.py` line count | `git show 45007da:mapper/app.py \| wc -l` | **307** — matches the facts sheet ("app.py 307 lines") |
+| the pruned `mapper/app.py` line count | `git show 908a9b0:mapper/app.py \| wc -l` | **307** — matches the facts sheet ("app.py 307 lines") |
 | the repointed patch surface | `test_inc9c.py` / `test_inc9n.py` read `preview_csv` from `screens/home.py`'s module-global and observe the patched value | passed within the gate run |
 
 | Field | Value |
@@ -154,7 +154,7 @@ Transcript header: "2 failures, both pointing at moved code: test_inc9m named ap
 | Probe | Command | Result |
 |---|---|---|
 | B1 symbols asserted by **other** tests | `grep -rl "from mapper.app import" tests` (premise 2: 68 files) | all still resolve via the re-export — 3018 passed includes every importer |
-| B2 file moved on disk | readers of HomeScreen / the `preview_csv` name at the old `app.py` path | **fired**: `test_inc9m` (third caller), `store.py` citation — both fixed in `689d537`; the two `preview_csv` patch sites followed the reader (`45007da`) |
+| B2 file moved on disk | readers of HomeScreen / the `preview_csv` name at the old `app.py` path | **fired**: `test_inc9m` (third caller), `store.py` citation — both fixed in `0e7b8c2`; the two `preview_csv` patch sites followed the reader (`908a9b0`) |
 | B3 byte-identical golden captures this source | `grep mapper/app.py tests/goldens/**` | no golden captures source bytes — not fired |
 | B4 artifact produced here is consumed elsewhere | `grep -rn "preview_csv\|HomeScreen" mapper tests` | `HomeScreen` consumed via `mapper/app.py` re-export (`screens/factory.py`); `preview_csv` read at `screens/home.py` — its two patch sites bite |
 
@@ -169,7 +169,7 @@ Transcript header: "2 failures, both pointing at moved code: test_inc9m named ap
 | Correction | Population — the assertion category | Enumeration method (the command) | Count | Sites edited | Sites left, and why |
 |---|---|---|---|---|---|
 | `preview_csv` patch sites must target the name's reader | the 8 patch targets of premise 4 | premise 4's full census over every patch form in `tests/` (P0, before any move) | 7 module-global names / 16 sites total | this increment: `preview_csv` ×2 (`test_inc9c.py:114`, `test_inc9n.py:285`) → `screens/home.py` | none — this was the last outstanding module-global repoint (refusal_sentence A1, MAX_RENDER_NODES/save_svg/pan_extent/SearchIndex B0, LayeredRenderer A7); `GitHubConnector.fetch` needs none (class patch, ARCH-11) |
-| pins citing moved home-screen code | every test/comment naming `app.py` callers or lines | premise 3's census + the gate's FAILED lines | the 2 that fired | `test_inc9m.py`, `store.py` (`689d537`) | rest already generalised |
+| pins citing moved home-screen code | every test/comment naming `app.py` callers or lines | premise 3's census + the gate's FAILED lines | the 2 that fired | `test_inc9m.py`, `store.py` (`0e7b8c2`) | rest already generalised |
 
 | Field | Value |
 |---|---|
@@ -179,7 +179,7 @@ Transcript header: "2 failures, both pointing at moved code: test_inc9m named ap
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| `preview_csv` / third caller / `app.py:548` read through `mapper.app` | 2 stranded refs at the gate | yes — 0 surviving stale refs after `45007da` + `689d537`; re-run of the two files green | gate transcript FAILED lines; `689d537` diff |
+| `preview_csv` / third caller / `app.py:548` read through `mapper.app` | 2 stranded refs at the gate | yes — 0 surviving stale refs after `908a9b0` + `0e7b8c2`; re-run of the two files green | gate transcript FAILED lines; `0e7b8c2` diff |
 
 ### Signed-balance test ledger
 
@@ -216,7 +216,7 @@ B1: the hints concern moves to the `HintsOps` mixin — the Spine B spike with t
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 3 / 4 — app.py + home.py are the move; store.py is the gate-mandated citation repair |
-| 2 | Tests written in this same increment | all | ✓ | patch repoints + census follow-ups in `45007da`; `test_inc9m` fix in `689d537` |
+| 2 | Tests written in this same increment | all | ✓ | patch repoints + census follow-ups in `908a9b0`; `test_inc9m` fix in `0e7b8c2` |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `tests/test_mod_bodies.py` passed in the gate |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | §4 — in-force permanent controls + the gate's own 2 FAILED nodes |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | §4 — 5 probes; B2 and A3 fired and repaired |

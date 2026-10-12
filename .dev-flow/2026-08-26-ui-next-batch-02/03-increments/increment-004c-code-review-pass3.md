@@ -1,6 +1,6 @@
 # Increment 4c — code review, pass 3 (narrow confirmation) · **VERDICT: PASS**
 
-**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `9ba2f26` · nothing committed.
+**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `a6dc8d7` · nothing committed.
 **Conducted by:** a fresh `code-reviewer`, third pass, scoped by coordinator ruling to `H1-R` and `F-B` only.
 
 ## BLUF
@@ -23,7 +23,7 @@ round-2 or round-3 transcript.
 ## State verified before any claim
 
 ```
-branch feat/ui-next-batch-02      HEAD 9ba2f26139cc6bf32853bef63e2a6bb5d97e2110      core.autocrlf=true
+branch feat/ui-next-batch-02      HEAD a6dc8d7b76847b2bbf67d956148a448142fb2ddd      core.autocrlf=true
 sha256 mapper/app.py        c0709eabb0453d3263e9fc80a4131c5393fd9a6e608a17569086972c79e4f21a   MATCHES declared
 sha256 tests/test_search.py 6a7e736a4e7b1a22dc1a0dfe55e2da20facc5c6d94c1be5813a864244a0298fa   MATCHES declared
 ```

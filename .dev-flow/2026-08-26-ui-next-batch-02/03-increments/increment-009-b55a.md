@@ -157,7 +157,7 @@ legal move: hand-editing a generated table is the two-registries defect.
 ## 6 · Pre-gate captures — taken on the PRE-FIX tree, before any code
 
 All four are the "before" half of this increment's two-oracle evidence. Captured 2026-09-10 at
-`258e83c`, one fixture (`legacy`), through the live screen.
+`61f47bc`, one fixture (`legacy`), through the live screen.
 
 - [x] **`C1` — `A-98` tripwire, pre-fix.** `painted_ids_exporters() == {'mapper.views.layered'}` —
   the pinned equality holds today. It must go **RED** the moment `outline` declares; repairing it
@@ -313,8 +313,8 @@ wrap-dependent, so a differently shaped graph prices differently.
 ## 8 · Close
 
 **Commits.** Source landed across seven commits as each stage was acknowledged —
-`3920e06` (`AT-058`), `7a973df` (settle), `ff55ab6` (`painted_ids`), `f355499` (the P1 guard),
-`45663b6` (canvas declaration), `a4862bf` (code-review fixes), `1ab87d8` (security fix) — plus this
+`69c9791` (`AT-058`), `6cf948c` (settle), `3a855f6` (`painted_ids`), `a9ca92f` (the P1 guard),
+`f6e63fa` (canvas declaration), `c1d824d` (code-review fixes), `e644781` (security fix) — plus this
 close record. **That is not the two-commit shape** `Inc-CRUMB` used, where the work stayed
 uncommitted until the gate. Stated rather than dressed up: the staged shape came from reporting at
 each boundary, and it left every stage independently revertible, but it is a different shape and the

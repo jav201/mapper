@@ -1,6 +1,6 @@
 # 02h · Security lens — PDR iteration 3 (final), batch `2026-08-26-ui-next-batch-02`
 
-> **Base:** `94ad8d3` (branch `docs/amendment-set-3`) · **Instrument:** my own pass-2 ledger
+> **Base:** `8f07800` (branch `docs/amendment-set-3`) · **Instrument:** my own pass-2 ledger
 > (`02e`), audited item-by-item against DISK. **Not** the amendment table, and **not** `02g`'s
 > discharges — the 11 discharges recorded there were re-executed here from scratch, not inherited.
 >
@@ -59,7 +59,7 @@
 
 Statuses re-derived. Where I assert an absence, the positive control is named in the same row.
 
-| # | Item | Status | Executed evidence at `94ad8d3` |
+| # | Item | Status | Executed evidence at `8f07800` |
 |---|---|---|---|
 | **C-1** | cycle- and depth-safe traversal | **DISCHARGED** | Re-executed, `recursionlimit=2000`: `LayeredRenderer.render` on chains of depth 500 / 1500 / 3000 / 20000 → **OK, 0 `RecursionError`**. 3-cycle → refused with `ValueError`. **Positive control:** leaf count for `b=3 d=7` returns **2187** (expected 2187) — the rewrite is memoised, not capped, so the absence of a crash is not the absence of work. |
 | **C-2a** | store-boundary coercion over **derived** positions | **DISCHARGED** | Poisoned each of the 15 positions I derive from the model (`_text_fields` over `Ficha` 4 / `Attachment` 3 / `SchemaField` 3 / `Document` 4, plus the node-id dict key) with a coercible non-`str`. **0 LEAKS / 15.** **Positive control:** `Attachment(kind=1,…)` constructed *without* the ladder → `.kind` is not `str`, so the detector fires on a real leak. Threshold-2 arm re-run: a container field lands `''` (not the repr `'{…}'`), appends `campo ilegible: a.acta`, and `coverage()` returns `(0, 2)` — the miscount does not survive its own fix. |
@@ -110,7 +110,7 @@ Only then the case. Sidecar declares `ghost`; the `.mmd` defines only `a` and `b
 
 **The reported shape is right: `+1`, not the doubling an earlier pass argued.** `load_or_notice`'s
 warning arm never fires and `LLR-N13.1.5`'s containment never engages, because there is no failure
-to contain. This matches `LLR-REPAIR.1`'s own declared pre-state at `20f86de` — *"`coverage() = (2, 3)`
+to contain. This matches `LLR-REPAIR.1`'s own declared pre-state at `ea7693a` — *"`coverage() = (2, 3)`
 with `warnings = []`"* — exactly, on an independently written harness.
 
 **One sharpening, and it is not a blocker.** Measured with **ten** phantom ids: `coverage() = (0, 12)`
@@ -383,7 +383,7 @@ is layout; `C-D26a`'s *"set equality asserts over CONTENT, never over visible ro
 |---|---|
 | Tracked secrets | `git ls-files \| grep -iE '\.env\|credential\|secret\|\.pem$\|\.key$\|token'` → **empty** |
 | `.gitignore` coverage | `.env`, `.env.*`, `*.db`, `.mapper/`, `*.svg`, `*.png`, `scratch/`, `prototypes/`. `fixtures/mapper.db` confirmed ignored by `*.db` and **untracked** (`git ls-files fixtures/` returns the two text files only). |
-| New dependencies | `git diff 20f86de..HEAD --stat -- pyproject.toml` → **empty**. No new package, no install script, no supply-chain surface. |
+| New dependencies | `git diff ea7693a..HEAD --stat -- pyproject.toml` → **empty**. No new package, no install script, no supply-chain surface. |
 | New external tool / integration | **None.** No MCP, Composio, n8n, HTTP client or credential store enters this batch. Scope and blast radius unchanged: local rendering of local files. |
 | Secret values in this artifact | None. The one path disclosed is written with the username replaced by `<USER>`. |
 | Corrupted tokens spelled verbatim (C-56) | None. Mutations described by position and operation. |
@@ -432,7 +432,7 @@ record says *"deferring a bound does not repair a defect"* in the requirement it
 | Every asserted absence carries a positive control | ✓ | `S-22` (container field produces a warning) · `S-11` (unguarded inner call raises `AttributeError`) · `S-16` (ladder-free `Attachment` leaks) · `C-1` (leaf count = 2187) · `S-17` (the same regex finds two headings) · `S-23` (the repaired arm carries neither separator nor username) · `UX2-C-01` (focus+blur no-keystroke = 0/8) |
 | Uniformity treated as a TRIGGER, never a verdict | ✓ | 15/15 coerced, 19/19 refused typed, 0/8 empty-delta — each paired with a control that can produce the opposite |
 | Discharges re-executed, not inherited from `02g` | ✓ | All 11 re-run on independently written harnesses: recursion battery, coercion poison census, `notify` AST walk, hostile-input battery |
-| No line citation inherited from `02e` | ✓ | The document moved (`LLR-N13.1.5` `:2391` → `:3060`); every address re-derived at `94ad8d3` |
+| No line citation inherited from `02e` | ✓ | The document moved (`LLR-N13.1.5` `:2391` → `:3060`); every address re-derived at `8f07800` |
 | Working tree not mutated | ✓ | `git archive HEAD` export + `tempfile.mkdtemp()` workspaces only; `git status --short fixtures/` empty; sha256 MATCH on all three fixture files |
 | No `MapperApp` pointed at real `fixtures/` | ✓ | Every app probe copies `*.mmd`/`*.yml` into `mkdtemp` first; integrity block printed at probe exit |
 | No mutated token spelled verbatim (C-56) | ✓ | Mutations described by position and operation; no dotted id ranges |

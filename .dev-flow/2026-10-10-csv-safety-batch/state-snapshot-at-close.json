@@ -43,7 +43,7 @@
       "mode": "full",
       "opened_at": "2026-08-26",
       "closed_at": "2026-08-27",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
     },
     {
@@ -155,7 +155,7 @@
     "metrics": "vault:mapper/dev-flow-batches/2026-10-10-csv-safety-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "a36f63e22b620fe42fc0301194313921f81e77d4",
+  "base_ref": "87a1f981d2bf6205e893c2fed09146470cf789b2",
   "artifacts": {
     "plan": ".dev-flow/2026-10-10-csv-safety-batch/PLAN.md",
     "P1": ".dev-flow/2026-10-10-csv-safety-batch/01-requirements.md",
@@ -165,7 +165,7 @@
     {
       "station": "P0",
       "date": "2026-10-10",
-      "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base a36f63e; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
+      "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base 87a1f98; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
     },
     {
       "station": "ARQ",
@@ -200,7 +200,7 @@
     {
       "station": "P3",
       "date": "2026-10-10",
-      "decision": "P3 approved (self-approved): 4 increments (store round-trip check; preview collision record + refusal at s; review nits; DDR conditions); 3 code reviews APPROVE-WITH-NITS 0 HIGH; gate run 1 red (modular move oracle froze moved bodies; A3 pin) fixed, run 3 at 53807c4: 3157 passed / 3 xfailed / 0 failed"
+      "decision": "P3 approved (self-approved): 4 increments (store round-trip check; preview collision record + refusal at s; review nits; DDR conditions); 3 code reviews APPROVE-WITH-NITS 0 HIGH; gate run 1 red (modular move oracle froze moved bodies; A3 pin) fixed, run 3 at a20248b: 3157 passed / 3 xfailed / 0 failed"
     },
     {
       "station": "DDR",
@@ -210,12 +210,12 @@
     {
       "station": "P4",
       "date": "2026-10-10",
-      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate run 3 at 53807c4 3157 passed / 3 xfailed / 0 failed; 10/10 requirements, AT-072..074 GREEN with executed RED; save-cost +3.2 % (≤ 25 %); qa-reviewer (Claude Sonnet) approve-with-conditions, applied"
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate run 3 at a20248b 3157 passed / 3 xfailed / 0 failed; 10/10 requirements, AT-072..074 GREEN with executed RED; save-cost +3.2 % (≤ 25 %); qa-reviewer (Claude Sonnet) approve-with-conditions, applied"
     },
     {
       "station": "P5",
       "date": "2026-10-10",
-      "decision": "P5 closed (self-approved under the standing authorization): 05-close.md; B-114 DONE; B-115/B-116/B-117 carried; final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH; merged as 6dfffde (PR #18, squash; fix/csv-safety-batch kept on the remote)"
+      "decision": "P5 closed (self-approved under the standing authorization): 05-close.md; B-114 DONE; B-115/B-116/B-117 carried; final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH; merged as 6364a02 (PR #18, squash; fix/csv-safety-batch kept on the remote)"
     },
     {
       "station": "P5",
@@ -238,32 +238,32 @@
   },
   "previous_batch": {
     "batch_id": "2026-10-09-modular-batch",
-    "merge_commit": "9bcbabb",
+    "merge_commit": "7c81cb6",
     "close_pr": "https://github.com/<owner>/mapper/pull/16",
     "sync_pr": "https://github.com/<owner>/mapper/pull/17",
     "closed_at": "2026-10-10",
-    "close_commit": "a36f63e",
+    "close_commit": "87a1f98",
     "obsidian_synced": true,
     "archive": ".dev-flow/2026-10-09-modular-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "pr": "https://github.com/<owner>/mapper/pull/2",
-      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
     "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
-      "merge_commit": "2b59071",
+      "merge_commit": "7d04ba2",
       "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
-      "close_commit": "3fe0e4b",
+      "close_commit": "d8a8536",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }

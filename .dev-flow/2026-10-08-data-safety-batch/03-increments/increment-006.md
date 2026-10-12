@@ -5,7 +5,7 @@
 | Batch | `2026-10-08-data-safety-batch` |
 | Increment | DDR fixes (conditions D1–D5 and the qa lens's three conditions) — tests and records only |
 | Requirement(s) | LLR-003.3 · LLR-003.4 · LLR-003.6 · HLR-007 · LLR-007.2 · HLR-009 · LLR-009.1 · LLR-002.2 |
-| Base | `0a16d90` |
+| Base | `6e0eadb` |
 | Method | Five small Kimi units (`kimi -m kimi-code/kimi-for-coding -p`, one per worktree, run in parallel; operator ruling 2026-10-09: K2.x first, K3 only for Opus-grade work). A DeepSeek unit for AT-025b produced no output for 9 min and was stopped; the same plan was re-run on Kimi. Records and the `I-remount-per-key` re-run by the orchestrator. |
 
 ## 1 · What changed

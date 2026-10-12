@@ -1,6 +1,6 @@
 # Increment 056 -- Gate-1: FLAKE-1, FLAKE-4 and the Inc-EN carries
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `9a2d1c7`. Authority: `A-138` (appended to `01-requirements.md`, dated 2026-10-03) and the Inc-EN closure block of `state.json` (`FLAKES`, `CARRIES`). Source files: 1 (`mapper/keymap.py`, a docstring only; cap 4, no overage). Everything else is tests and docs. `state.json` was not touched.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `967ab7c`. Authority: `A-138` (appended to `01-requirements.md`, dated 2026-10-03) and the Inc-EN closure block of `state.json` (`FLAKES`, `CARRIES`). Source files: 1 (`mapper/keymap.py`, a docstring only; cap 4, no overage). Everything else is tests and docs. `state.json` was not touched.
 
 ## 1. What changed
 
@@ -22,7 +22,7 @@ Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `9a2d1
 
 ## 2. Files modified
 
-Source (1): `mapper/keymap.py` (docstring). Tests (3): `tests/test_app.py`, `tests/test_inc9c.py`, `tests/test_keymap.py`. Docs (4): `01-requirements.md` (`A-137` correction, `A-138`), records 051 and 055 (appended notes), this record. Scratch (not in the repo): harnesses and logs under the session scratchpad; a scratch `git worktree` of `9a2d1c7` under `%TEMP%` (removed).
+Source (1): `mapper/keymap.py` (docstring). Tests (3): `tests/test_app.py`, `tests/test_inc9c.py`, `tests/test_keymap.py`. Docs (4): `01-requirements.md` (`A-137` correction, `A-138`), records 051 and 055 (appended notes), this record. Scratch (not in the repo): harnesses and logs under the session scratchpad; a scratch `git worktree` of `967ab7c` under `%TEMP%` (removed).
 
 ## 3. How to test
 
@@ -30,7 +30,7 @@ Source (1): `mapper/keymap.py` (docstring). Tests (3): `tests/test_app.py`, `tes
 
 ## 4. Measurements and mutants
 
-Rates on `9a2d1c7` (BEFORE) and the fixed tree (AFTER). "Load" = a second pytest process running the full default lane in a loop on the base worktree, plus whatever else the shared machine was running (other agents' pytest processes were visible, so the load is real but not controlled).
+Rates on `967ab7c` (BEFORE) and the fixed tree (AFTER). "Load" = a second pytest process running the full default lane in a loop on the base worktree, plus whatever else the shared machine was running (other agents' pytest processes were visible, so the load is real but not controlled).
 
 | Measurement | Before | After |
 |---|---|---|
@@ -57,7 +57,7 @@ Mutants:
 
 ## 5. Test results
 
-- Ruff: `ruff check .` base `9a2d1c7` 26, head 26, programmatic multiset difference over (path, code, message) EMPTY.
+- Ruff: `ruff check .` base `967ab7c` 26, head 26, programmatic multiset difference over (path, code, message) EMPTY.
 - `-W error::SyntaxWarning`: the four touched `.py` files compile clean.
 - Full default lane x3 (sequential, uninterrupted, `-rf`, the last step): see the section appended below.
 
@@ -71,7 +71,7 @@ Mutants:
 
 ## 7. Full default lane x3 (last step)
 
-On `c2cafec` (all code and tests; this docs commit follows), sequential, uninterrupted, nothing else of mine running, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables, default basetemp:
+On `0423939` (all code and tests; this docs commit follows), sequential, uninterrupted, nothing else of mine running, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables, default basetemp:
 
 | Run | Result | Time |
 |---|---|---|

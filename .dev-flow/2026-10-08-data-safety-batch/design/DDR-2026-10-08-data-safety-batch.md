@@ -17,7 +17,7 @@
 | Field | Value |
 |---|---|
 | Record id | `DDR-2026-10-08-data-safety-batch` |
-| Reviews | the shipped code `07dd930..0a16d90` against `design/design-proposal.md` (single lane) |
+| Reviews | the shipped code `ed67c58..6e0eadb` against `design/design-proposal.md` (single lane) |
 | Participants | `architect` + `qa-reviewer` (independent, read-only, 2026-10-09); `software-dev` lens covered by the per-increment `code-reviewer` gates |
 | Date sealed | `2026-10-09` |
 | **Verdict** | `approved with conditions` → conditions D1–D5 discharged 2026-10-09 (below) |

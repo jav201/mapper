@@ -6,7 +6,7 @@
 |---|---|
 | Batch | `2026-10-08-data-safety-batch` |
 | Increment | `001` (plan name Inc-3) |
-| Lane (if the batch forked) | none · worktree `mapper-inc3`, branch `inc3/flake2`, base `fc2e4c9` |
+| Lane (if the batch forked) | none · worktree `mapper-inc3`, branch `inc3/flake2`, base `3328c8f` |
 | Requirement(s) | US-004 · HLR-009 · LLR-009.1 · LLR-009.2 · design rows 3.1–3.3 · PDR condition C12 |
 | Acceptance | AT-008 · white-box TC-009.2 · unit — none (test-instrument change only) |
 | Agent | `software-dev` |
@@ -27,7 +27,7 @@ The legend own-keys test no longer races a queued scroll. The four `scroll_to(..
 | `tests/test_help_scope.py` | test | HLR-009, LLR-009.1, LLR-009.2, AT-008 | `delay_deferred_scroll` fixture + `late_scroll()`; `_harvest` (was `:93`) immediate + settle assert; `_effective_keys` / `_painted_own_keys` lifted from the n16_4 node (was `:365`), node now calls them; new nodes: `test_at_008_…` x3 sizes, fixture RED-proof node, `_harvest` arm, `_painted_bindings` arm |
 | `tests/test_repair_layout.py` | test | HLR-009, LLR-009.1 | `_painted_bindings` (was `:118`) immediate + settle assert |
 | `tests/test_en7.py` | test | HLR-009, LLR-009.1 | body of `test_the_painted_legend_ends_with_the_rule` (was `:246`) lifted to `_footer_text_at_the_end` with immediate + settle assert + `target > 0` guard; new `…_under_a_late_scroll` arm x2 sizes |
-| `tests/test_repair_golden_census.py` | test | HLR-009, LLR-009.1 | `STATE` reads ui-next-batch-02's archived trigger record (`80635a1`; the live `state.json` is single-slot) — see the addendum |
+| `tests/test_repair_golden_census.py` | test | HLR-009, LLR-009.1 | `STATE` reads ui-next-batch-02's archived trigger record (`e3eab1f`; the live `state.json` is single-slot) — see the addendum |
 | `.gitattributes` | config | HLR-009 | `.dev-flow/*/evidence/** -text` so stored evidence keeps its bytes (template, §Evidence files) |
 | `.dev-flow/2026-10-08-data-safety-batch/evidence/*` (5 files) | doc | | transcripts + the mutation driver `inc3-mutate.py` |
 | `.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-001.md` | doc | | this packet |
@@ -62,7 +62,7 @@ python -B .dev-flow/2026-10-08-data-safety-batch/evidence/inc3-mutate.py S1-imm 
 
 Touched files, fully: `tests/test_help_scope.py tests/test_en7.py tests/test_repair_layout.py` gave 101 passed (base 93 + 8), 74.95 s. Python 3.12.7, Textual 8.2.8, executed.
 
-**Default lane (executed once, whole tree, at the final code):** `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` finished with exit code 1 and `1 failed, 2804 passed, 24 deselected, 3 xfailed in 1432.01s (0:23:52)`. The one failure is **not caused by this increment**: `tests/test_repair_golden_census.py::test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped` asserts `"B3"` is in `.dev-flow/state.json["triggers"]["fired"]`. That node reads batch state only, this increment touches neither it nor `state.json` (unmodified on the branch), so it fails on the base commit `fc2e4c9` for the same reason (state.json was re-seeded for this batch). Not fixed here (out of scope); see §6. Selected count: 2800 base, 2808 post = 2804 passed + 1 failed + 3 xfailed.
+**Default lane (executed once, whole tree, at the final code):** `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` finished with exit code 1 and `1 failed, 2804 passed, 24 deselected, 3 xfailed in 1432.01s (0:23:52)`. The one failure is **not caused by this increment**: `tests/test_repair_golden_census.py::test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped` asserts `"B3"` is in `.dev-flow/state.json["triggers"]["fired"]`. That node reads batch state only, this increment touches neither it nor `state.json` (unmodified on the branch), so it fails on the base commit `3328c8f` for the same reason (state.json was re-seeded for this batch). Not fixed here (out of scope); see §6. Selected count: 2800 base, 2808 post = 2804 passed + 1 failed + 3 xfailed.
 
 ### RED counterfactual — executed, not predicted
 
@@ -186,7 +186,7 @@ The touched-files run (101 passed) is not stored as its own file; the lane trans
 
 ### Signed-balance test ledger
 
-`post = base − deleted + added` gives `2808 = 2800 − 0 + 8` ✓ reconciles. Default-lane selected; base measured by `--collect-only` at `fc2e4c9`: `2800/2824 tests collected (24 deselected)`; post: 2804 passed + 1 failed + 3 xfailed = 2808. Per touched file: 93 to 101 (test_help_scope 44 to 52, test_en7 31 to 33, test_repair_layout 18 to 18).
+`post = base − deleted + added` gives `2808 = 2800 − 0 + 8` ✓ reconciles. Default-lane selected; base measured by `--collect-only` at `3328c8f`: `2800/2824 tests collected (24 deselected)`; post: 2804 passed + 1 failed + 3 xfailed = 2808. Per touched file: 93 to 101 (test_help_scope 44 to 52, test_en7 31 to 33, test_repair_layout 18 to 18).
 
 ---
 
@@ -245,7 +245,7 @@ Orchestrator ruling on the `test_at_p07` state.json failure, then `code-reviewer
 
 ## Addendum (orchestrator, 2026-10-08) — the one lane failure, fixed in this increment
 
-- **Failure:** `tests/test_repair_golden_census.py::test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped` read `.dev-flow/state.json`, which is single-slot and was rolled over to this batch at `606510f` (triggers reset). The test pins **ui-next-batch-02's** trigger record (B3 fired + its correction), so it was coupled to whichever batch is active — a defect exposed, not caused, by the rollover.
+- **Failure:** `tests/test_repair_golden_census.py::test_at_p07_trigger_b3_is_recorded_fired_and_not_merely_flipped` read `.dev-flow/state.json`, which is single-slot and was rolled over to this batch at `38ebbfb` (triggers reset). The test pins **ui-next-batch-02's** trigger record (B3 fired + its correction), so it was coupled to whichever batch is active — a defect exposed, not caused, by the rollover.
 - **Fix (test-side, 1 line + comment):** `STATE` now reads `.dev-flow/2026-08-26-ui-next-batch-02/state-snapshot-at-close.json`, the archive the rollover wrote (B3 in `fired`, correction `B3` present).
 - **RED → GREEN:** pointing back at `.dev-flow/state.json` → `1 failed, 6 passed`; with the archive → `7 passed` (the file, orchestrator run).
 - **Traces to:** HLR-009 (US-004 — the default lane is the gate instrument this story keeps trustworthy).
@@ -254,6 +254,6 @@ Orchestrator ruling on the `test_at_p07` state.json failure, then `code-reviewer
 ## Addendum 2 (orchestrator, 2026-10-08) — code-review F1/F2 and §4b
 
 - **§4b independent review:** `code-reviewer` · OK to advance (notes: F1, F2 MEDIUM; F3 LOW) · no HIGH findings — RED counterfactual, 4 mutation verdicts and the archive equivalence re-run by the reviewer (`executed`).
-- **F1 (packet stale):** this addendum supersedes §4's "not fixed here" and §6's open ruling for `tests/test_repair_golden_census.py` (fixed in `80635a1`, Traces to HLR-009). The evidence and packet rows trace `n/a — records, not product or test code`.
+- **F1 (packet stale):** this addendum supersedes §4's "not fixed here" and §6's open ruling for `tests/test_repair_golden_census.py` (fixed in `e3eab1f`, Traces to HLR-009). The evidence and packet rows trace `n/a — records, not product or test code`.
 - **F2 (node name):** AT-008 is realised by `tests/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll`; the design proposal and the contract now name that node.
 - **F3 (LOW, not acted on):** the fixture is imported across modules; moving it to `conftest.py` is optional.

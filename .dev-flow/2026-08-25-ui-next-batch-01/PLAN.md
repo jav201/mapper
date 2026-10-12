@@ -11,7 +11,7 @@
 |---|---|
 | Batch id | `2026-08-25-ui-next-batch-01` |
 | Mode | `full` (operator asked for the full V-model; merge authority is a `full`-lane control) |
-| Branch | `feat/ui-next-batch-01` off `695bd2d` |
+| Branch | `feat/ui-next-batch-01` off `d35974f` |
 | Current station | see §9 Decision log (latest row) |
 | Flow revision | local `~/.claude/commands/dev-flow.md` + `dev-flow-lessons` skill as loaded 2026-08-25; no manifest published for this machine → currency asserted by inspection, not by hash (⚠ recorded, not claimed as verified) |
 
@@ -55,9 +55,9 @@ Two in-scope known bugs, because they block the above:
 
 ```
 git fetch origin
-merge-base HEAD origin/master = 695bd2dd9ec2f8cf3072b6dcc25cbe7576227cb8
-origin/master               = 695bd2dd9ec2f8cf3072b6dcc25cbe7576227cb8
-HEAD                        = 695bd2dd9ec2f8cf3072b6dcc25cbe7576227cb8
+merge-base HEAD origin/master = d35974f4884653f076de1493044ee42dbc2d23fb
+origin/master               = d35974f4884653f076de1493044ee42dbc2d23fb
+HEAD                        = d35974f4884653f076de1493044ee42dbc2d23fb
 ```
 ✓ Branch is current with `origin/master`; no rebase needed. Recorded **before** derivation.
 
@@ -65,7 +65,7 @@ Already-shipped check per story: none of US-N01…N05 has a satisfying implement
 `origin/master` — the palette-dispatch probe below returns 0/33, the inspector does not exist,
 and `action_archive` deletes non-root subtrees unconfirmed. No story reclassifies `SATISFIED-EXTERNALLY`.
 
-Baseline suite on `695bd2d`: **88 passed in 11.28s** (`PYTHONUTF8=1 python -m pytest -q`).
+Baseline suite on `d35974f`: **88 passed in 11.28s** (`PYTHONUTF8=1 python -m pytest -q`).
 
 ## 4 · Premise table (C-43) — executed against disk, never trusted
 

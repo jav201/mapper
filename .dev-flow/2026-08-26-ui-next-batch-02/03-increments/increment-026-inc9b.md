@@ -7,8 +7,8 @@
 | Agent | `software-dev` |
 | Date | 2026-09-30 |
 | Authority | `VERDICT-inc9-2026-09-30.md` § "Split" (Inc-9b); `A-112` st. 4 and 5; `VERDICT-inc8-legend-2026-09-28.md` § LANGUAGE RULING; `INC9-CR-F1` (widen the gate) |
-| Starting state | `feat/ui-next-batch-02` @ `77200b8`, clean |
-| Commits | `36304a3` (gate, RED by design) → `ce753f9` (implementation) → (this record) |
+| Starting state | `feat/ui-next-batch-02` @ `6db4538`, clean |
+| Commits | `65d8e06` (gate, RED by design) → `046e883` (implementation) → (this record) |
 | Source files | **5 of a cap of 5**: `views/layered.py`, `views/radial.py`, `views/outline.py`, `screens/coverage.py`, `screens/editor.py`. `darkside.py` read, not edited |
 | Tests touched | `tests/test_inc9.py` (gate, register), plus the three sealed files listed under "Changed sealed arms" (tests are uncapped) |
 
@@ -21,7 +21,7 @@
    that each one READS `VIEW_NAMES` (every entry is monkeypatched to a sentinel and each header must follow it, so a
    header that spells its name fails even when the spelling equals the ratified word); that the atlas states its kind
    as English secondary text; and the coverage and editor titles, mounted for real, English and state-free.
-   Committed RED. `--runxfail` on `77200b8`'s source: **4 of 4 arms fail**.
+   Committed RED. `--runxfail` on `6db4538`'s source: **4 of 4 arms fail**.
 2. **Implementation.** The atlas header now reads `· atlas · concept map` / `· atlas · legacy tree` through one helper
    (`layered._view_label`, used by the header and the banner, so the two cannot drift). The mind map and outline headers
    and banners read `VIEW_NAMES`. The coverage title is `coverage`; the editor title is `edit document`. The xfail is
@@ -59,7 +59,7 @@ The first full lane after the implementation had **10 failures**, all label-bear
 
 | Arm | What it pinned | Re-derived how, and why it is a LABEL change |
 |---|---|---|
-| `tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master` x8 (Layered x4, Radial x4 sizes) | Full `(plain, spans)` digest of the render, which includes row 0 | New digests. Measured first against `git show 77200b8:` copies of both renderers: the old copy reproduces the pinned digest (same method), and at **every** one of the 8 keys exactly ONE row differs, row 0 (the header), row count unchanged. The four Outline keys are unmoved and were not re-captured |
+| `tests/test_repair_depth.py::test_c53_legacy_fixture_renders_identically_to_master` x8 (Layered x4, Radial x4 sizes) | Full `(plain, spans)` digest of the render, which includes row 0 | New digests. Measured first against `git show 6db4538:` copies of both renderers: the old copy reproduces the pinned digest (same method), and at **every** one of the 8 keys exactly ONE row differs, row 0 (the header), row count unchanged. The four Outline keys are unmoved and were not re-captured |
 | `tests/test_overflow.py::test_llr_n06_3_1_the_charge_band_over_node_count_and_width` | A band of the header's wrapped height over width, measured with the old label: `w >= 35` always 2 rows; node-count axis visible at `w = 31` | The legacy header is 7 cells longer after the `·` (`árbol legacy` 12, `atlas · legacy tree` 19 counting the kind), so it wraps two widths later. Re-read from the same grid: `w >= 37` always 2 rows; node-count axis at `w = 35`. The grid, the `{2,3,4}` set, the `w < 23` bound and the huge-graph `34 -> 3, 35 -> 2` pin hold unchanged |
 | `tests/test_radial.py::test_at_007b_the_containment_arm_nothing_the_renderer_painted_is_lost` | `PRE_CHANGE_PAINTED`, the glyph set the pre-change render painted; it contained `l`, whose only source is `mapa mental` | `l` removed (`mind map` has none; no pill title has one). The derived containment half of the arm is unchanged |
 
@@ -82,11 +82,11 @@ ruff check mapper tests
 
 ## 4 · Test results
 
-- **Gate RED on the base (`executed`).** `--runxfail -k inc9b` with `77200b8`'s source: 4 failed. Plain run of the same arms: 4 xfailed; `-k "inc9b or a112"`: 7 passed, 4 xfailed.
+- **Gate RED on the base (`executed`).** `--runxfail -k inc9b` with `6db4538`'s source: 4 failed. Plain run of the same arms: 4 xfailed; `-k "inc9b or a112"`: 7 passed, 4 xfailed.
 - **Targeted GREEN (`executed`).** `tests/test_inc9.py`: 38 passed. With the three sealed files: 198 passed, 15 deselected.
 - **First full lane after the implementation (`executed`).** 10 failed, 1363 passed, 20 deselected, 3 xfailed (the 10 listed above; 3 xfailed = 4 minus the lifted arm).
-- **Full lane at `ce753f9` (`executed`).** **1373 passed, 3 xfailed, 20 deselected, 0 failed** in 888 s (baseline 1369 passed, 4 xfailed: +4 new gate arms now green, the old xfail arm replaced by them, 3 pre-existing xfails remain).
-- **Ruff (`executed`).** `ruff check mapper tests`: 27 errors, none in a file this increment changed; the same 27 on `77200b8`. (A 28th, an unused `Edge` import, was mine in the gate commit and is fixed in `ce753f9`.)
+- **Full lane at `046e883` (`executed`).** **1373 passed, 3 xfailed, 20 deselected, 0 failed** in 888 s (baseline 1369 passed, 4 xfailed: +4 new gate arms now green, the old xfail arm replaced by them, 3 pre-existing xfails remain).
+- **Ruff (`executed`).** `ruff check mapper tests`: 27 errors, none in a file this increment changed; the same 27 on `6db4538`. (A 28th, an unused `Edge` import, was mine in the gate commit and is fixed in `046e883`.)
 - **Known flakes:** neither `FLAKE-1` nor the `FLAKE-2` candidate fired in either lane run.
 
 ### Mutants (`executed`)

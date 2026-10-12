@@ -13,7 +13,7 @@
 | Lane (if the batch forked) | n/a — the spine is serial until B11 (§2.8 of the contract); no lane |
 | Requirement(s) | `LLR-MOD.1.2 v1` · `LLR-MOD.3.1` · `LLR-MOD.3.2` · `LLR-MOD.5.2` · `LLR-MOD.6.2` · `HLR-MOD.1, 3, 4, 5, 6` |
 | Acceptance | `AT-065` (painted parity) · `LLR-MOD.4.1` (full suite at the gate) · `LLR-MOD.4.3` (`tests/test_mod_bodies.py`) · unit `tests/test_mod_parity.py -k parity`. The dedicated structure node (`-k b0` / AT-068) lands at B12 — not yet in force here. |
-| Agent | Product move by the **orchestrator's AST cut/paste scripts** (`b0_move.py`, `b0_prune.py` — bodies byte-identical); B0 census follow-ups (`bc2ff81`) by the orchestrator; the gate run by the orchestrator. No Kimi worker unit in this increment. |
+| Agent | Product move by the **orchestrator's AST cut/paste scripts** (`b0_move.py`, `b0_prune.py` — bodies byte-identical); B0 census follow-ups (`b1e8e2c`) by the orchestrator; the gate run by the orchestrator. No Kimi worker unit in this increment. |
 | Date | `2026-10-09/10` (commits dated 2026-10-10) |
 
 ---
@@ -24,7 +24,7 @@
 
 - New package `mapper/screens/map/`: `screen.py` (3541 lines — MapScreen with its lifecycle concern, all class constants and `BINDINGS`) and a re-export-only `__init__.py` (4 lines). `mapper/app.py` re-exports `MapScreen` so all 70 `from mapper.app import` sites keep resolving (LLR-MOD.1.2, LLR-MOD.3.1).
 - Patch sites repointed to their reading modules in the same increment (LLR-MOD.3.2, premise 4): `MAX_RENDER_NODES` ×5 + `SearchIndex` ×1 (`tests/test_search.py`), `save_svg` ×3 (`tests/test_app.py`, `tests/test_inc9c.py`), `pan_extent` ×1 (`tests/test_en8.py`).
-- Census follow-up `bc2ff81` (LLR-MOD.5.2): `test_fold.py` and `test_inc3_census.py` locate MapScreen through the class (`inspect.getfile`) instead of the `app.py` path pin.
+- Census follow-up `b1e8e2c` (LLR-MOD.5.2): `test_fold.py` and `test_inc3_census.py` locate MapScreen through the class (`inspect.getfile`) instead of the `app.py` path pin.
 - `docs/ARCHITECTURE.md` TARGET rows updated to record the move as landed.
 
 ---
@@ -44,8 +44,8 @@
 | `tests/test_app_imports_used.py` | test | LLR-MOD.5.2 | source set follows the package |
 | `tests/test_arch_osopen_callers.py` | test | LLR-MOD.5.2 | launcher-set follow-up (see §6 — it carried a defect) |
 | `tests/test_mod_bodies.py` | test | LLR-MOD.4.3 | baseline keys follow the moved bodies |
-| `tests/test_fold.py` | test | LLR-MOD.5.2 | MapScreen located through the class, not the app.py path (`bc2ff81`) |
-| `tests/test_inc3_census.py` | test | LLR-MOD.5.2 | same generalisation (`bc2ff81`) |
+| `tests/test_fold.py` | test | LLR-MOD.5.2 | MapScreen located through the class, not the app.py path (`b1e8e2c`) |
+| `tests/test_inc3_census.py` | test | LLR-MOD.5.2 | same generalisation (`b1e8e2c`) |
 
 | Count | Value |
 |---|---|
@@ -74,10 +74,10 @@ python -B -m pytest -q -p no:cacheprovider tests/test_fold.py tests/test_inc3_ce
 | **A · white-box** ↔ LLR | `core` · `full` | census follow-ups `test_fold`, `test_inc3_census`, `test_arch_osopen_callers` | 2 of 3 RED at the gate (stranded by the move); re-run after the fixes: **46 passed, 3 xfailed** (transcript header) |
 | **B · black-box** AT-065 ↔ painted screen | `core` · `full` | `tests/test_mod_parity.py` (widths 118/87) | 0 painted-line diffs within the gate run |
 
-Gate (`a5a-b0-gate-full-suite.transcript`, run at `f2cec90`): **`3 failed, 2997 passed, 24 deselected, 3 xfailed in 1528.19s (0:25:28)`** — cited verbatim, including the failures:
+Gate (`a5a-b0-gate-full-suite.transcript`, run at `e4bcf11`): **`3 failed, 2997 passed, 24 deselected, 3 xfailed in 1528.19s (0:25:28)`** — cited verbatim, including the failures:
 
 - `FAILED tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen` — the B0 follow-up reused the launcher set as the osopen-owner skip set (a defect in this increment's own test change; fixed in the next increment's A5b commit, §6).
-- `FAILED tests/test_fold.py::test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints` and `FAILED tests/test_inc3_census.py::test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr` — both read MapScreen from `app.py` by path; **fixed in `bc2ff81` (this increment)**.
+- `FAILED tests/test_fold.py::test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints` and `FAILED tests/test_inc3_census.py::test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr` — both read MapScreen from `app.py` by path; **fixed in `b1e8e2c` (this increment)**.
 
 The transcript header records: "3 failures, all census tests the B0 move stranded … Fixed in the A5b commits (next); re-run of the three files: 46 passed, 3 xfailed."
 
@@ -97,7 +97,7 @@ The transcript header records: "3 failures, all census tests the B0 move strande
 
 | Field | Value |
 |---|---|
-| **RED counterfactual** | none separate beyond the in-force permanent controls — this increment adds no new assertion of its own; its honest RED evidence is the gate itself: the move stranded three real census pins and the suite printed 3 FAILED (named above) until `bc2ff81` and the A5b commit repaired them. |
+| **RED counterfactual** | none separate beyond the in-force permanent controls — this increment adds no new assertion of its own; its honest RED evidence is the gate itself: the move stranded three real census pins and the suite printed 3 FAILED (named above) until `b1e8e2c` and the A5b commit repaired them. |
 
 | Field | Value |
 |---|---|
@@ -157,7 +157,7 @@ The transcript header records: "3 failures, all census tests the B0 move strande
 | Probe | Command | Result |
 |---|---|---|
 | B1 symbols asserted by **other** tests | `grep -rl "from mapper.app import" tests` (premise 2: 68 files) | all 68 + `screens/factory.py`/`settings.py` still resolve through the re-export — the gate's 2997 passed includes every importer |
-| B2 file moved on disk | readers of MapScreen at the old `app.py` path | **fired**: `test_fold`, `test_inc3_census` (fixed in `bc2ff81`), `test_arch_osopen_callers` (defect fixed next increment) |
+| B2 file moved on disk | readers of MapScreen at the old `app.py` path | **fired**: `test_fold`, `test_inc3_census` (fixed in `b1e8e2c`), `test_arch_osopen_callers` (defect fixed next increment) |
 | B3 byte-identical golden captures this source | `grep mapper/app.py tests/goldens/**` | no golden captures source bytes — not fired |
 | B4 artifact produced here is consumed elsewhere | `grep -rln "screens.map\b\|from mapper.screens.map" mapper tests` | `mapper/app.py` (re-export) + `test_mod_bodies.py` baseline keys; consumers re-validated by the gate |
 
@@ -182,7 +182,7 @@ The transcript header records: "3 failures, all census tests the B0 move strande
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| MapScreen's home = `mapper/app.py` (path pins) | 3 stranded readers at the gate | yes — after `bc2ff81` + the A5b commit, 0 surviving stale refs; re-run 46 passed, 3 xfailed | gate transcript FAILED lines; `bc2ff81` diff |
+| MapScreen's home = `mapper/app.py` (path pins) | 3 stranded readers at the gate | yes — after `b1e8e2c` + the A5b commit, 0 surviving stale refs; re-run 46 passed, 3 xfailed | gate transcript FAILED lines; `b1e8e2c` diff |
 
 ### Signed-balance test ledger
 
@@ -221,7 +221,7 @@ A5b: `RepoScreen` → `mapper/screens/repo.py`, landing before A6 because `PlugR
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 3 / 4 — `screen.py`, `__init__.py`, `app.py` are one indivisible move |
-| 2 | Tests written in this same increment | all | ✓ | census follow-ups `bc2ff81` (`test_fold.py`, `test_inc3_census.py`); patch repoints in `f2cec90` |
+| 2 | Tests written in this same increment | all | ✓ | census follow-ups `b1e8e2c` (`test_fold.py`, `test_inc3_census.py`); patch repoints in `e4bcf11` |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `tests/test_mod_bodies.py` (LLR-MOD.4.3) passed in the gate |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | §4 — in-force permanent controls (bodies, parity); the gate's own 3 FAILED census nodes |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | §4 — 5 probes; B2 fired, 3 readers repaired |

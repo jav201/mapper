@@ -69,7 +69,7 @@ python -B -m pytest -q -p no:cacheprovider   # the increment gate — full suite
 | **B · black-box** | `core` · `full` | the 3 repointed `save_svg` patch tests (`test_app.py`, `test_inc9c.py`) | GREEN at gate |
 | **Increment gate — full suite** | — | whole suite | **3034 passed, 1 failed** (`b1b2-gate-full-suite.transcript`: `1 failed, 3034 passed, 24 deselected, 3 xfailed in 1575s`, exit=1) |
 
-The one failure is the same pre-existing `tests/test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]` base-class blind spot carried from B1 — **fixed at B7 (`5229b12`)**, unrelated to the export concern. The repointed patch tests passed, proving the patches bite at the new module-global (a stale repoint would have failed these tests, not silently passed).
+The one failure is the same pre-existing `tests/test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]` base-class blind spot carried from B1 — **fixed at B7 (`5087cfd`)**, unrelated to the export concern. The repointed patch tests passed, proving the patches bite at the new module-global (a stale repoint would have failed these tests, not silently passed).
 
 ### RED counterfactual — executed, not predicted
 
@@ -188,7 +188,7 @@ The gate count is carried from B1 (same transcript): `3034 passed + 1 failed = 3
 
 ## 6 · Pending items / spec deviations
 
-- The B1-carried `test_at_n03f` keymap failure is still red at this gate; fixed at B7 (`5229b12`). No deviation from the contract.
+- The B1-carried `test_at_n03f` keymap failure is still red at this gate; fixed at B7 (`5087cfd`). No deviation from the contract.
 
 ## 7 · Suggested next task
 

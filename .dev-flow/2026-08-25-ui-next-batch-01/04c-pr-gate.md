@@ -4,9 +4,9 @@
 (8 touch `mapper/**` or `tests/**`).
 **Gate run:** 2026-08-26, `qa-reviewer`, final PR-level pass over the whole merged diff.
 **Pass 1 verdict: `merge blocked` — 3 HIGH findings.**
-**Pass 2 verdict (after `42d96e2`): `merge still blocked` — H-2 and H-3 discharged, H-1 remains
+**Pass 2 verdict (after `b47c16e`): `merge still blocked` — H-2 and H-3 discharged, H-1 remains
 open at HIGH. See §11.**
-**Pass 3 verdict (after `4979f4c`): `merge` — all three HIGH discharged, each re-verified by
+**Pass 3 verdict (after `cb552e7`): `merge` — all three HIGH discharged, each re-verified by
 re-running my own mutations. Two residual gaps, MEDIUM and LOW, neither blocking. See §12.**
 
 Every claim below is an executed probe or a `file:line`. Where I re-derived something the batch
@@ -33,7 +33,7 @@ already asserted, I say what I ran, not that it was verified.
 | L-3 | Post-mortem says "7 commits"; 8 touch code, 9 exist. | LOW |
 | L-4 | Post-mortem says Inc-3 touched 5 source files; it touched 6. | LOW |
 | L-5 | Traceability matrix's "each mapping to exactly one node" is true of test *functions*, not node ids. | LOW |
-| L-6 | `BACKLOG.md` B-07's line numbers are stale after `930dfa6`. | LOW |
+| L-6 | `BACKLOG.md` B-07's line numbers are stale after `ca689e9`. | LOW |
 
 **Items that came back clean:** frozen interfaces (§3), flakiness (§5), hygiene (§7), and the
 27 ATs the traceability matrix does list (§1).
@@ -126,7 +126,7 @@ N-1, N-2, N-3, N-4, N-7, N-12, N-13. Properly carried into `BACKLOG.md`: S-M5→
 legacy escape sites→B-03, unmigrated screens→B-04, Amendment-3 canvas tone→B-05, N-6/N-8/N-9/N-10→
 B-06, N-14 remainder→B-07, N-4 refusal shape→B-08, and process lessons P-01…P-05.
 
-The `(partial)` in commit `930dfa6` covers exactly N-14's nine remaining sinks, and **that
+The `(partial)` in commit `ca689e9` covers exactly N-14's nine remaining sinks, and **that
 remainder is properly recorded** as B-07. N-12 and N-13 are fully done.
 
 ### M-2 · The census test the sign-off conditioned its fix on was never written
@@ -139,7 +139,7 @@ again under N-14, with the reason: "**the wording is what let this recur twice**
 grep -rn "census\|markup=False" tests/     → zero hits
 ```
 
-`930dfa6` broadened LLR-N01.11's wording and fixed some call sites. It added no census. So the nine
+`ca689e9` broadened LLR-N01.11's wording and fixed some call sites. It added no census. So the nine
 known-uncoerced sinks in B-07 are held open by **a list in a markdown file rather than a test** —
 which is precisely the failure mode the sign-off named. Neither fixed nor in `BACKLOG.md`.
 
@@ -447,15 +447,15 @@ shortcuts; `216 cells at 118`; 13 premises / 11 held; 10 of 30 undeclared files;
 ### Low-severity numeric corrections
 
 - **L-2** — "88 → 210 (**+123, −6** superseded)": 88 − 6 + 123 = **205**. The figure was carried
-  over from `04-validation.md`, where it correctly described a 205-test run before `930dfa6` added
+  over from `04-validation.md`, where it correctly described a 205-test run before `ca689e9` added
   five. True delta is **+128**.
 - **L-3** — "committed across **7 commits**": 8 commits touch `mapper/**` or `tests/**`; 9 exist on
   the branch.
 - **L-4** — "Increments 2, 3 and 4 touched **6, 5 and 5** source files against a cap of 4": Inc-3
-  (`0b69fe2`) touched **6** (`app.py`, `darkside.py`, `keymap.py`, `widgets/chrome.py`,
+  (`d7b70e2`) touched **6** (`app.py`, `darkside.py`, `keymap.py`, `widgets/chrome.py`,
   `widgets/inspector.py`, `widgets/rail.py`). Actual is 6, 6, 5. The section exists to disclose a
   budget breach honestly and under-reports the largest one.
-- **L-6** — `BACKLOG.md` B-07 cites `:1671 :1673`; after `930dfa6` inserted three lines at `:1133`
+- **L-6** — `BACKLOG.md` B-07 cites `:1671 :1673`; after `ca689e9` inserted three lines at `:1133`
   the export sink moved to `:1679` and `:1673` no longer exists. The other seven line numbers still
   match and are still uncoerced.
 
@@ -564,7 +564,7 @@ under `prototypes/` was read or written. This report is the only file this gate 
 
 ---
 
-# 11 · Pass 2 — re-gate of `42d96e2`
+# 11 · Pass 2 — re-gate of `b47c16e`
 
 **Verdict: `merge still blocked`.** H-2 and H-3 are fully discharged. H-1 is **partially**
 discharged: the exact mutation I filed now reddens, but two mutations of the same class still leave
@@ -742,8 +742,8 @@ that do not exist. L-2 — the ledger reads `88 → 245 (−6 superseded, +163 a
 **Still stale (LOW, uncorrected):**
 
 - **L-4** — `05-postmortem.md:132` still reads "Increments 2, 3 and 4 touched **6, 5 and 5** source
-  files against a cap of 4." Measured from the commits: Inc-2 (`df74da1`) **6**, Inc-3 (`0b69fe2`)
-  **6**, Inc-4 (`f37d824`) **5**. Actual is **6, 6 and 5**. This is the batch's own budget-breach
+  files against a cap of 4." Measured from the commits: Inc-2 (`d562ef5`) **6**, Inc-3 (`d7b70e2`)
+  **6**, Inc-4 (`659d3d4`) **5**. Actual is **6, 6 and 5**. This is the batch's own budget-breach
   disclosure still under-reporting one of its breaches — the one section where the number is the
   whole point.
 - **L-3** — `05-postmortem.md:242` still reads "committed across **7 commits**". The branch now has
@@ -754,7 +754,7 @@ that do not exist. L-2 — the ledger reads `88 → 245 (−6 superseded, +163 a
 
 ## 11.7 · Flakiness
 
-Three consecutive full runs on `42d96e2`, executed by me: **`245 passed`** each, no failures, no
+Three consecutive full runs on `b47c16e`, executed by me: **`245 passed`** each, no failures, no
 errors, no non-determinism. Combined with pass 1's seven runs, the gate has now been run ten times
 across two trees without a single flake.
 
@@ -776,7 +776,7 @@ this gate has created; the pass-2 edits are to this file alone.
 
 ---
 
-# 12 · Pass 3 — re-gate of `4979f4c`
+# 12 · Pass 3 — re-gate of `cb552e7`
 
 **Verdict: `merge`.** All three HIGH findings are discharged. I re-ran every mutation I had filed,
 plus the two attacks the author asked for. Suite re-run by me: **`245 passed`**, three consecutive
@@ -867,7 +867,7 @@ invalidates it. Either drop the figure, or qualify it as "at time of writing". L
 
 ## 12.5 · Flakiness and discipline
 
-Three consecutive flakiness runs on `4979f4c` plus the opening run: **`245 passed`** each, no
+Three consecutive flakiness runs on `cb552e7` plus the opening run: **`245 passed`** each, no
 failures, no errors. Counting only unmutated runs I executed myself — 8 in pass 1 (including one
 with the file order reversed), 4 in pass 2, 4 in pass 3 — that is **16 clean full-suite runs across
 three trees, zero flakes**, plus `AT-N04a` 20/20 in isolated processes. No test has been observed

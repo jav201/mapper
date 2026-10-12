@@ -6,7 +6,7 @@
 > on the precedent of `2026-08-26-repair-batch`. Artifact language: **English**; UI strings
 > **Spanish**.
 
-**Base ref (RC-1):** `d8777840313145fec341687f0081afd7230c755b` = `HEAD` = `origin/master` =
+**Base ref (RC-1):** `bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba` = `HEAD` = `origin/master` =
 merge-base. Verified clean by `git fetch origin` before any derivation.
 
 **Baseline suite:** **429 collected** — fast lane 413 passed / 16 deselected, slow lane 16 passed /
@@ -37,7 +37,7 @@ honest 51-node measurement fixture and nothing more.
 
 ## 2 · Premise table (C-43)
 
-Executed against `d877784` in this session. **Citing a document is not evidence.**
+Executed against `bd17fab` in this session. **Citing a document is not evidence.**
 
 | # | Premise | Tier | Verdict | Executed evidence |
 |---|---|---|---|---|
@@ -184,7 +184,7 @@ what makes it a gate rather than a coincidence.
 ##### `LLR-GOLD.1.1` — the pin census is derived from the test module
 
 - **Threshold:** the census is computed by parsing `MASTER_LEGACY_DIGESTS`, and equals
-  `len(renderers) × len(GOLDEN_SIZES)`. Derived at `d877784`: **12** = 3 × 4. **The literal 18
+  `len(renderers) × len(GOLDEN_SIZES)`. Derived at `bd17fab`: **12** = 3 × 4. **The literal 18
   carried by the architect lens is corrected here.**
 - **Threshold:** the census names `RadialRenderer` as pinned at **all four** sizes.
 - **Named weaker variant `M-GOLD-a` (must go RED):** hand-write the number. The derivation arm

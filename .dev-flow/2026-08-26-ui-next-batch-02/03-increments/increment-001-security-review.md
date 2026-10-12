@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` |
-| Branch | `feat/ui-next-batch-02`, base `5d8ee0d` |
+| Branch | `feat/ui-next-batch-02`, base `5686fe0` |
 | Reviewed | working tree, uncommitted |
 | Environment | Python 3.12 · rich 15.0.0 · textual 8.2.8 · Windows · `PYTHONUTF8=1` |
 | Files in scope | `mapper/darkside.py`, `mapper/canvas.py`, `mapper/views/radial.py`, `mapper/app.py`, `tests/test_export.py`, `tests/test_canvas.py`, `tests/test_radial.py`, `tests/test_darkside_census.py` |
@@ -33,12 +33,12 @@ U+000A preserved: True          <- claim: preserved   ✓
 U+000D coerced:   True
 ```
 
-Against the shipped map reconstructed from `5d8ee0d:mapper/darkside.py:272-273`
+Against the shipped map reconstructed from `5686fe0:mapper/darkside.py:272-273`
 (`range(0x00,0x20)` minus `{0x09,0x0A}`, plus `range(0x7F,0xA0)` = 63 points):
 
 ```
 base size 63 ; new size 85
-LOST (covered at 5d8ee0d, not now): []      <- claim: 0            ✓
+LOST (covered at 5686fe0, not now): []      <- claim: 0            ✓
 newly covered: 22
   U+061C U+200B U+200C U+200D U+200E U+200F U+2028 U+2029
   U+202A U+202B U+202C U+202D U+202E U+2060 U+2066 U+2067
@@ -50,7 +50,7 @@ The change is a **strict superset**. `A-80`'s figures reproduce exactly.
 ### 1.2 The near-miss — **CONFIRMED FIXED**
 
 `mapper/darkside.py:368` reads `(0x0000, 0x0008), (0x000B, 0x001F)` — 30 points, not the sealed
-table's 29. `plain(chr(0x0D)) == '�'`. CR coverage that shipped at `5d8ee0d` is retained.
+table's 29. `plain(chr(0x0D)) == '�'`. CR coverage that shipped at `5686fe0` is retained.
 
 ### 1.3 Other omissions of the same shape in §3.0's table — **ONE FOUND**
 
@@ -232,7 +232,7 @@ control that matters. **No finding.**
   delivered SVG, invisible to the operator who exports it and to the client who opens it, and fully
   recoverable by anything that reads the file as text — including a downstream LLM. `U+00AD` and the
   zero-width family defeat exactly the *"changes matching"* property the row's own rationale names.
-- **This does NOT block Inc-1.** Base coverage at `5d8ee0d` was zero for all 19; Inc-1 is a strict
+- **This does NOT block Inc-1.** Base coverage at `5686fe0` was zero for all 19; Inc-1 is a strict
   improvement and satisfies the sealed requirement **as written**. The defect is in the sealed row,
   not in the implementation of it.
 - **Recommendation.** Prefer the derived form over five more hand-typed ranges, so the list stops

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Reviewer | `code-reviewer` (independent) — confirmation pass, second reviewer |
-| Batch | `2026-08-26-ui-next-batch-02` · branch `feat/ui-next-batch-02` · base `4eaba35` |
+| Batch | `2026-08-26-ui-next-batch-02` · branch `feat/ui-next-batch-02` · base `105d238` |
 | Judging | `increment-002-code-review.md` (BLOCK, 3 HIGH / 6 MED / 4 LOW) against `increment-002.md` §8–§9 |
 | Date | 2026-08-28 |
 | **Verdict** | **BLOCK — the three original HIGH are all genuinely discharged, but one NEW HIGH was introduced by the M2 fix** |
@@ -47,7 +47,7 @@ when the full suite stays green with that behaviour reverted.
 |---|---|
 | fast `716 passed, 17 deselected, 1 xfailed` | ✓ `716 passed, 17 deselected, 1 xfailed in 58.02s` |
 | slow `17 passed` | ✓ `17 passed, 717 deselected in 23.99s` |
-| ruff `mapper/ tests/` = **27**, zero new | ✓ `Found 27 errors.` — and I diffed the finding *set* against `4eaba35` in a detached worktree: the **only** delta is `tests/test_app.py: F401 pytest imported but unused`, removed. The author's "−1 is the pre-existing `pytest` F401 the new xfail consumes" is **exactly right**, line for line |
+| ruff `mapper/ tests/` = **27**, zero new | ✓ `Found 27 errors.` — and I diffed the finding *set* against `105d238` in a detached worktree: the **only** delta is `tests/test_app.py: F401 pytest imported but unused`, removed. The author's "−1 is the pre-existing `pytest` F401 the new xfail consumes" is **exactly right**, line for line |
 | `ruff check fixtures/` clean | ✓ — but see **N-L1**: `warning: No Python files found under the given path(s)`. The control is vacuous |
 
 ---
@@ -62,7 +62,7 @@ not on a document-wide `split("state.py")`. Five mutants, executed against
 
 | Mutant | Verdict | Reading |
 |---|---|---|
-| **A** — the row replaced with the **verbatim `4eaba35` row** (the exact regression the docstring names) | **RED** | ✓ **the finding is discharged** — this is the case that passed before |
+| **A** — the row replaced with the **verbatim `105d238` row** (the exact regression the docstring names) | **RED** | ✓ **the finding is discharged** — this is the case that passed before |
 | **C** — legitimate content edit to the row's description cell (`hits` added to the roster) | **GREEN** | ✓ no false-fail on a legitimate row edit |
 | **E** — `mapper/views/state.py` removed from disk | **RED** | ✓ the existence half is live |
 | **D** — cosmetic edit to the row's *label* (`**\`ViewState\`** parameter object`) | RED | brittle-but-loud; see **N-L3** |
@@ -446,7 +446,7 @@ pinning working as intended — recorded so nobody treats it as a surprise.
 
 ## Evidence checklist
 
-- [✓] **Diff read in full** — `git diff 4eaba35 -- mapper/ tests/ docs/` across `app.py`,
+- [✓] **Diff read in full** — `git diff 105d238 -- mapper/ tests/ docs/` across `app.py`,
       `ARCHITECTURE.md`, `test_app.py`, `test_export.py`, `test_repair_map_truth.py`, plus
       `mapper/views/state.py:1-88` and `tests/test_a3_census.py:1-389` read entire.
 - [✓] **Correctness pass** — export path traced end to end through the shipped action and the real

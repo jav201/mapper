@@ -869,7 +869,7 @@ declared vocabulary by the increment that paints it"*. `declared_vocabulary` is 
 `LLR-N16.2.1`'s own instrument, from DECISION 3 §3.1–§3.4 as the set of distinct
 `(glyph, label, painted-in style)` triples minus `DEFERRED(#D7)` rows.
 
-**Derived mechanically at `8ba326a`: 21 rows, `V1`–`V21`. Rows whose meaning is a damaged or
+**Derived mechanically at `05c9345`: 21 rows, `V1`–`V21`. Rows whose meaning is a damaged or
 unreadable map: ZERO.** §3.4 (Sala) is `V17` *enlaza mapas*, `V18` *procedencia repo*, `V19`
 coverage microbar, `V20` *actas vencidas*, `V21` *nodo con acta*. None of the other sixteen carries
 that meaning either.

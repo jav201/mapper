@@ -4,7 +4,7 @@
 |---|---|
 | Reviewer | `code-reviewer` (independent; authored none of this diff; fresh session) |
 | Batch | `2026-08-26-ui-next-batch-02` · FULL protocol per `D35` |
-| Commit | `f3398f4` on `feat/ui-next-batch-02`, base `a552783` |
+| Commit | `7a635cf` on `feat/ui-next-batch-02`, base `ab592f3` |
 | Date | 2026-09-19 |
 | **Verdict** | **OK to advance** — no HIGH. `CR-F1` CLOSED, verified by me on the shipped bytes. 4 MEDIUM + 2 LOW raised, none blocking |
 
@@ -56,7 +56,7 @@ Per-reviewer *directories* are not per-reviewer *sys.path* — worth adding to t
 
 ## Scope reviewed
 
-`git diff a552783 f3398f4` in full — 17 files, 3,312 insertions / 63 deletions.
+`git diff ab592f3 7a635cf` in full — 17 files, 3,312 insertions / 63 deletions.
 
 **Under review (product):**
 - `mapper/app.py` — `action_export_svg` 3466–3490 (the `ExportTooLarge` handler at 3476–3489),
@@ -89,7 +89,7 @@ The remedy is applied at `tests/test_pan.py:683–702`: `_export_bytes` unlinks 
 asserts `path.exists()` after, with the reasoning (Windows mtime granularity, byte-identical
 re-writes) written into the helper.
 
-**Measured on `f3398f4`, three sites, as a PAIR rather than a kill:**
+**Measured on `7a635cf`, three sites, as a PAIR rather than a kill:**
 
 | Site | Mutation | Expected | **Measured** |
 |---|---|---|---|
@@ -172,7 +172,7 @@ handler, so this returns the terminal-sized request rather than inventing a seco
   then `app.py` was edited; eight of the eighteen sites (`M1`, `M2`, `M5`, `M6`, `M7`, `M8`, `M10`,
   `M11`) carry verdicts about a file that is not under review.
 - **Where:** `increment-016-confirm-reruled.md` §4 · *RED counterfactual* and *Mutation verdicts*,
-  against `mapper/app.py` as shipped at `f3398f4`.
+  against `mapper/app.py` as shipped at `7a635cf`.
 - **Why it matters:** the *entire function* of a restore digest is to make the verdicts attributable
   to the bytes that ship. A digest naming different bytes converts a battery from evidence into a
   report — the exact substitution this increment's own reviewers are instructed to refuse. The
@@ -200,7 +200,7 @@ handler, so this returns the terminal-sized request rather than inventing a seco
 - **What:** `action_export_svg` writes to a fixed `{map_id}.svg`. When the export refuses, nothing is
   written — correct — but any artifact from an **earlier successful press stays on disk, unchanged**,
   at exactly the path the earlier `exportado` toast printed. The refusal notice does not mention it.
-  At base `a552783` the second press would have overwritten that file, so this is **new behaviour
+  At base `ab592f3` the second press would have overwritten that file, so this is **new behaviour
   introduced by this increment**, not a pre-existing condition.
 - **Where:** `mapper/app.py:3466–3489` (the path is fixed at `:3472`; the handler at `:3476–3489`
   toasts without touching the file). The blind spot is `tests/test_export_state.py:148–184`, which
@@ -388,7 +388,7 @@ handler, so this returns the terminal-sized request rather than inventing a seco
 | the measured boundary — 315,252 export / 490,052 refuse | reproduced exactly: 80×80 → ACCEPTED 973×324 = **315,252**; 100×100 → REFUSED **490,052** > 350,000; 1000-chain **480,480**; 4001-wide **1,200,325** | **TRUE** |
 | `EXPORT_MAX_CELLS = 350_000` keeps an accepted export under the 2 s target | hunted the top of the accepted band: worst accepted **1.957 s** (1,160-wide, 348,025 cells); next shape up refused. **Margin 43 ms** | **TRUE — but see N4: the recorded DERIVATION does not reproduce** |
 | the bracket `315,252 → 1.801 s` | same shape, 3 reps, two independent probe runs: **0.321 s / 0.313 s** | **DOES NOT REPRODUCE — N4** |
-| A3 arg-ful pin `63 → 64`, hiding no removed product call site | derived `render_call_sites()` at `a552783` and at head, diffed per file: argful **62 → 64**, delta `tests/test_export_state.py` **+2**, `tests/test_app.py` **net 0** (the −1 Spy removal and +1 third comparand cancel, exactly as itemised). **PRODUCT files with a delta: NONE** | **TRUE — the round trip reconciles and no renderer-protocol site was removed** |
+| A3 arg-ful pin `63 → 64`, hiding no removed product call site | derived `render_call_sites()` at `ab592f3` and at head, diffed per file: argful **62 → 64**, delta `tests/test_export_state.py` **+2**, `tests/test_app.py` **net 0** (the −1 Spy removal and +1 third comparand cancel, exactly as itemised). **PRODUCT files with a delta: NONE** | **TRUE — the round trip reconciles and no renderer-protocol site was removed** |
 | A3 zero-arg pin `34 → 35` | derived both ends: **34 → 35**, delta `tests/test_app.py` **+1**. **PRODUCT files with a delta: NONE** | **TRUE** |
 | the `B-68` arms respect the pan trap | both use `_open_pan_map` (`test_pan.py:304–308`, driven off `pan_graph()`, **not** `legacy`/`anidado`) at `CONTEXT_OF_USE = (118, 34)`, and both carry the `_pan_is_live` guard before asserting | **TRUE — the PAN-1 trap is not re-entered** |
 | every return from `_export_view_state` is budget-checked | traced all four exits (non-panning view, `pan_extent` raise, converged, exhausted): three go through `_within_export_budget`, the fourth raises. **No partial-artifact path** | **TRUE** |
@@ -459,7 +459,7 @@ the safeguard does not pay the cost it exists to avoid.
 
 | Item | ✓/✗ | Evidence |
 |---|---|---|
-| Diff read in full | ✓ | `git diff a552783 f3398f4`, all 17 files; product ranges itemised under **Scope reviewed** (`app.py:3466–3680`, `export.py:1–61`, `state.py:59–173`) |
+| Diff read in full | ✓ | `git diff ab592f3 7a635cf`, all 17 files; product ranges itemised under **Scope reviewed** (`app.py:3466–3680`, `export.py:1–61`, `state.py:59–173`) |
 | Correctness pass (edge / None / error paths) | ✓ | all four exits of `_export_view_state` traced to a budget check or a raise; `ExportTooLarge`/`ExportError` handler ordering at `:3476`; the `MISSING`-leak path in `_declared_default` chased and found foreclosed by `test_a3_census.py:477`; refusal-path cost measured (12 ms worst) — **N2**, **N5** |
 | Simplicity pass (no premature abstraction) | ✓ | `_within_export_budget` is 4 lines and single-purpose; `export_neutralised` derives from the table rather than re-listing; `EXPORT_EXTENT_STEPS = 6` re-measured at **1 step over 10 shapes**, so the headroom is honest. One speculative branch found — **N5** |
 | Reuse / duplication checked against existing utils | ✓ | `_SVG_CELL` byte-identical across two test files, `_squash` identical body, reassembly duplicated under two names — **N3**. On the product side the reuse is correct: `pan_extent` is the shared helper, `_consumes_pan` reuses `_reclamp_pan`'s seam, `conftest.py` is the guard's single home |
@@ -489,7 +489,7 @@ the safeguard does not pay the cost it exists to avoid.
 | three lane tails (1133/20/3 · 19 · 1) | **`approved`** — one complete run each on my own mirror, exit code and tail read from that run |
 | ruff set equality (27 = 27, added 0, removed 0) | **`approved`** — both sides extracted to symmetric scope, both parses asserted non-empty before any set arithmetic |
 | mutation battery (14 sites) | **`approved`** — 13 KILL / 3 expected SURVIVE / 0 mismatches; substitution count asserted at exactly 1 per site, verdicts printed BEFORE every restore assert, all restores byte-identical, `PYTHONDONTWRITEBYTECODE=1`, CRLF/LF handled per file |
-| A3 census pins (argful 64, zeroarg 35) | **`approved`** — derived at `a552783` and at head and diffed per file; PRODUCT delta NONE both sets |
+| A3 census pins (argful 64, zeroarg 35) | **`approved`** — derived at `ab592f3` and at head and diffed per file; PRODUCT delta NONE both sets |
 | growth-step count (1 step) | **`approved`** — counted by instrumenting the product's own `pan_extent` symbol, never a replay |
 | refusal-path cost | **`approved`** — 0.8 / 4.4 / 12.0 ms on the three refused shapes |
 | mirror isolation + hash stability (control 15) | **`approved`** — 299-file manifests matched at open and close across repo and both mirrors; contaminated first probe discarded and declared |

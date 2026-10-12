@@ -21,7 +21,7 @@ PYTHONUTF8=1 python -m pytest -q
 exit=0
 ```
 
-Read from that run's own output, not stitched from partial runs. Baseline on `695bd2d` was
+Read from that run's own output, not stitched from partial runs. Baseline on `d35974f` was
 **88 passed**.
 
 **Test ledger across the batch:** `205 = 88 − 6 + 123`. The six deletions are the four old keymap
@@ -59,7 +59,7 @@ C-18 VERDICT: PASS — every AT maps to exactly one on-disk node
 The first run of this check **failed**: `AT-N03b` resolved to three functions, `AT-N04c` and
 `AT-N06d` to two each. No acceptance was unrealized, so it was id hygiene rather than a coverage
 gap — but an id naming several nodes cannot be traced. Fixed by splitting out `AT-N03f`, `AT-N04d`
-and `AT-N06e` (commit `dd83725`), then re-run to the result above.
+and `AT-N06e` (commit `7dae751`), then re-run to the result above.
 
 ---
 

@@ -1,6 +1,6 @@
 # Increment 1 — `HLR-STO.1` / `LLR-STO.1.1`: the store boundary returns text where text is promised
 
-**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `d877784` · **Branch:** `fix/repair-batch-02`
+**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `bd17fab` · **Branch:** `fix/repair-batch-02`
 **Source files: 1 of 4** (`mapper/store.py`). Tests uncapped. `.dev-flow/**` outside the count.
 
 > **BLUF.** `MapStore.load` promised text and delivered other types in 12 of 17 derived positions,

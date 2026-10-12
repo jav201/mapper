@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Reviewer | `code-reviewer` (independent; author does not self-clear) |
-| Branch / entry | `feat/ui-next-batch-02` @ `5f4816c`, **nothing committed** |
+| Branch / entry | `feat/ui-next-batch-02` @ `8ef1553`, **nothing committed** |
 | Scope reviewed | `git diff HEAD -- mapper/ tests/` + staged `tests/inc4_support.py`, `tests/test_search.py`. `.dev-flow/**` excluded by instruction |
 | Source files | `mapper/search.py`, `mapper/views/state.py`, `mapper/views/layered.py`, `mapper/app.py` |
 | **Verdict** | **BLOCK** — 2 HIGH |

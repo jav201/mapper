@@ -4,7 +4,7 @@
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` (sealed) · FULL protocol per ruling `D35` |
 | Reviewer | `security-reviewer`, independent, on the frozen tree |
-| Base | `a552783` + staged `tests/test_hermetic.py` |
+| Base | `ab592f3` + staged `tests/test_hermetic.py` |
 | Date | 2026-09-19 |
 | **Verdict** | **BLOCK — 2 HIGH** (`F1`, `F2`) |
 

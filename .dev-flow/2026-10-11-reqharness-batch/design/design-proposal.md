@@ -446,7 +446,7 @@ review reports `deleted`:
 ```yaml
 name: v0
 created: "2026-10-11T12:00:00Z"
-commit: "fb1d4ce6118b57a540bd67bd2115e5400b356870"
+commit: "c00dfe9adab435bf392ed11ae9abc4a6e48a7655"
 dirty: false
 roles_seq: 3
 roles_hash: "77d0…"

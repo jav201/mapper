@@ -25,7 +25,7 @@ Everything was executed in detached copies; the shared working tree was never wr
 
 ## 1 · Scope reviewed
 
-- `git diff HEAD` over base `954f8f3` on `feat/ui-next-batch-02` plus untracked files: 22 files,
+- `git diff HEAD` over base `909cc27` on `feat/ui-next-batch-02` plus untracked files: 22 files,
   +3635/−101. Source: `mapper/app.py`, `mapper/views/layered.py`, `mapper/views/outline.py`,
   `mapper/views/state.py`, `mapper/widgets/rail.py`, `mapper/keymap.py`. Diff read in full,
   including the six smaller source diffs no fix-round claim covers.
@@ -232,7 +232,7 @@ widening is what does it. The remaining 6 arms (M7, M8, M10–M13) were not inde
 The zero-survivors claim is true of the battery's own arms. It is **not** true of the mutant space
 around the fixes — this pass found three survivors the battery does not cover: the
 partial-overlap sum (MEDIUM-3), the one-row-under `_canvas_size` (MEDIUM-2), and the vertical-pan
-lockstep drop (MEDIUM-5). Ledger and lint re-verified independently: base `954f8f3` collects 720,
+lockstep drop (MEDIUM-5). Ledger and lint re-verified independently: base `909cc27` collects 720,
 work collects 789 (= 720 + 64 + 5 ✓); ruff 0.8.4 set-wise, scope-matched (`--exclude prototypes`
 both sides): **NEW = ∅**, gone = `mapper/views/layered.py F401`.
 
@@ -366,7 +366,7 @@ and w=31..40, and derive the bounds from the measurements.
 
 ## 8 · Evidence checklist
 
-- [x] Diff read in full — 22 files over `954f8f3`, all six source diffs read line-by-line (§1).
+- [x] Diff read in full — 22 files over `909cc27`, all six source diffs read line-by-line (§1).
 - [x] Correctness pass — five HIGHs re-executed; boundary/edge sweeps ≈1500 driven configurations (§2, §3).
 - [x] Simplicity pass — no new premature abstraction found in the fix-round diffs; the one duplication carry (`CR-F11`) stands as recorded.
 - [x] Reuse/duplication — `_declared_total`, oracle and censuses checked against shipped utils; `darkside.fit` vs `[:1]` flagged (LOW-6).

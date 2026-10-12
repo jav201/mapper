@@ -11,7 +11,7 @@
 
 ## 1. Master table — functional chain (white-box)
 
-> One row per live LLR. `TC`/`AT` ids and `File:line` are cited from `01-requirements.md` §5.2 (functional table) and each LLR's own `Touched symbols` / `Acceptance` lines; `File:line` re-grepped at HEAD (`46e190b`). Superseded S-7 and deferred US-N14 LLRs are excluded and listed in §4.
+> One row per live LLR. `TC`/`AT` ids and `File:line` are cited from `01-requirements.md` §5.2 (functional table) and each LLR's own `Touched symbols` / `Acceptance` lines; `File:line` re-grepped at HEAD (`2eaabf3`). Superseded S-7 and deferred US-N14 LLRs are excluded and listed in §4.
 
 | US | HLR | LLR | TC | File:line | Status | Notes |
 |----|-----|-----|-----|-----------|--------|-------|
@@ -101,7 +101,7 @@
 | TC fail | 0 |
 | TC pending | 0 |
 
-> **Derivation (no literal counts — §5.2 / A-07).** 7 derivable live stories (S-6, HLR-canvas, US-N06, US-N07, US-N13, US-N16, repair pair); superseded S-7 and deferred US-N14 excluded. 21 `#### HLR-` headings and 54 live LLRs (58 `##### LLR-` headings marked neither `SUPERSEDED` nor `DEFERRED`, minus the 3 `LLR-S07.1.x` under the superseded `HLR-S07.1`, minus the split parent `LLR-N07.2.2`) (the split parent `LLR-N07.2.2` counted once as its two halves 2a/2b). TC = 88 distinct `TC-NNN` in the §5.2 functional table − 5 struck (TC-001…005) − 13 deferred (TC-051…062, TC-078) + 5 amendment-added (TC-026b, TC-089…092) = **75**. All pass on the one complete gate run: **2797 passed / 0 failed / 3 xfailed** (`gate-run-master-tree.txt`, orchestrator, squash tree `46e190b`).
+> **Derivation (no literal counts — §5.2 / A-07).** 7 derivable live stories (S-6, HLR-canvas, US-N06, US-N07, US-N13, US-N16, repair pair); superseded S-7 and deferred US-N14 excluded. 21 `#### HLR-` headings and 54 live LLRs (58 `##### LLR-` headings marked neither `SUPERSEDED` nor `DEFERRED`, minus the 3 `LLR-S07.1.x` under the superseded `HLR-S07.1`, minus the split parent `LLR-N07.2.2`) (the split parent `LLR-N07.2.2` counted once as its two halves 2a/2b). TC = 88 distinct `TC-NNN` in the §5.2 functional table − 5 struck (TC-001…005) − 13 deferred (TC-051…062, TC-078) + 5 amendment-added (TC-026b, TC-089…092) = **75**. All pass on the one complete gate run: **2797 passed / 0 failed / 3 xfailed** (`gate-run-master-tree.txt`, orchestrator, squash tree `2eaabf3`).
 
 ---
 
@@ -127,7 +127,7 @@
 |------|------|--------|
 | new | 21 HLR + 54 LLR | Derived in Phase 1 from 6 READY stories + palette v2 + HLR-canvas + the repair pair. Amendment sets 1–3 added `HLR-N13.3`, `HLR-N16.4`, `LLR-S06.3.5`, `LLR-N06.2.5`, `LLR-N13.1.5`, `LLR-N13.1.6`, `LLR-N13.1.7` (§5.2 note, A-58, A-72); later Phase-3 rulings added `LLR-N07.1.3` (`#D36`) and `LLR-N07.3.4` (`#D43`) |
 | new | 35 amendments A-105…A-139 | Legend dock/pan, repo hygiene, ficha coercion, English chrome, map-id confinement, repo/path allow-lists, attachment chip, English UI, gate fixes. Each carries a named passing node (`04-validation.md` Layer A) |
-| retired | `HLR-S07.1`, `LLR-S07.1.1/2/3` | Struck at `d877784` (D16); shipped as `HLR-R04`, guarded by `tests/test_repair_layout.py` |
+| retired | `HLR-S07.1`, `LLR-S07.1.1/2/3` | Struck at `bd17fab` (D16); shipped as `HLR-R04`, guarded by `tests/test_repair_layout.py` |
 | deferred | US-N14 (3 HLR + 10 LLR), `AT-032`…`AT-040` (incl. `AT-034b`), `TC-051`…`TC-062`, `TC-078` | Deferred whole to a follow-on design batch (`#D23`) |
 | split | `LLR-N07.2.2` | Split into `LLR-N07.2.2a` (Inc-2) / `LLR-N07.2.2b` (Inc-5) per `PDR-… #D12` |
 
@@ -175,4 +175,4 @@
 
 ---
 
-*Gap rows G-1…G-5 added by the orchestrator after a `qa-reviewer` pass found the draft's "None at close" untrue. Drafted by `deepseek/deepseek-v4-pro` (via `opencode run`), to be verified by the orchestrator. All ids and counts derived by grepping `01-requirements.md` (§5.2); every `File:line` re-grepped at HEAD `46e190b`. Nothing was re-run for this artifact; the single gate run cited is the orchestrator's (`gate-run-master-tree.txt`).*
+*Gap rows G-1…G-5 added by the orchestrator after a `qa-reviewer` pass found the draft's "None at close" untrue. Drafted by `deepseek/deepseek-v4-pro` (via `opencode run`), to be verified by the orchestrator. All ids and counts derived by grepping `01-requirements.md` (§5.2); every `File:line` re-grepped at HEAD `2eaabf3`. Nothing was re-run for this artifact; the single gate run cited is the orchestrator's (`gate-run-master-tree.txt`).*

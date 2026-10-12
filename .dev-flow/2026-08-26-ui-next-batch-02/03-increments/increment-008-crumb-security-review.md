@@ -1,7 +1,7 @@
 # Security Review — `Inc-CRUMB` (increment 008)
 
 **Batch:** `2026-08-26-ui-next-batch-02` · **Reviewer:** independent (`security-reviewer`), SERIAL, sole writer
-**Tree:** `C:\Users\<operator>\Github\mapper` @ `57fb403` + working-tree diff (post-`F1`/`F2` fix tree)
+**Tree:** `C:\Users\<operator>\Github\mapper` @ `f5f1bd5` + working-tree diff (post-`F1`/`F2` fix tree)
 Python 3.12 / Textual 8.2.8 / Windows, `PYTHONUTF8=1`, `PYTHONDONTWRITEBYTECODE=1`
 
 ## VERDICT: **SIGN-OFF** — 0 HIGH

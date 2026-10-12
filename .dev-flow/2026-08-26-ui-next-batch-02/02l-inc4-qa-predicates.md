@@ -1,7 +1,7 @@
 # `02l` — Inc-4 acceptance predicates, designed at authoring time
 
 **Lane:** qa · **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** Inc-4
-**Base:** `feat/ui-next-batch-02` @ `5f4816c`, clean · baseline 801 passed / 17 deselected / 3 xfailed
+**Base:** `feat/ui-next-batch-02` @ `8ef1553`, clean · baseline 801 passed / 17 deselected / 3 xfailed
 **Scope:** US-N07 «búsqueda» + the `#D5b` seat rebind + `LLR-N06.2.4`
 **Authority read:** `01-requirements.md` §3.5, `LLR-N06.2.4`, §5.4, §5.4.1
 **Nothing under `mapper/` was edited.** Every fixture below is built in `tempfile.mkdtemp`.
@@ -21,7 +21,7 @@ Nine of the eleven acceptance ids are buildable as specified. **Two are not**, a
 | **`shall` with NO acceptance id** | the one-time rebind declaration · `esc limpiar` · `C-D6a` · `UX-Q3-a` (§8) |
 
 **Four executed corrections to the sealed text.** Each is a number the document states and
-the tree contradicts at `5f4816c`:
+the tree contradicts at `8ef1553`:
 
 1. **`HLR-N07.1`'s pre-state is `9`, not `4`.** `grep -rn "qlower" mapper/views/` returns **9**
    occurrences, all in `layered.py`, and the predicate is now a module-level function
@@ -73,7 +73,7 @@ the new Inc-4 fixture through the real Pilot at three sizes:
   PRED-2 declared<=traced: True | PRED-3 traced<=declared: True
 ```
 
-**On the JOIN rule, honestly reported.** Measured at `5f4816c` on `legacy`, the
+**On the JOIN rule, honestly reported.** Measured at `8ef1553` on `legacy`, the
 `#map-pagination` region is **height 1** at 118x34, 100x30 and 80x24 — so the join is a no-op
 at the batch's declared size:
 
@@ -125,7 +125,7 @@ Predicates that must vary size, and why:
 ## 3 · The Inc-4 fixture (`QA-N-08`) — exact shape, built in `mkdtemp`
 
 `§5.4.1` owes Inc-4 "a synthetic graph carrying attachments and distinguishing `meta`".
-Executed on the shipped `legacy` fixture at `5f4816c`:
+Executed on the shipped `legacy` fixture at `8ef1553`:
 
 ```
 attachments total: 0
@@ -274,7 +274,7 @@ by a **real chord**: (a) nothing folded, nothing panned; (b) `fin` folded with t
 equal `len(SearchIndex(graph).query("carlos"))`.
 
 1. **Subject:** the painted count line. **It is NEW in Inc-4** — executed, `grep -rn
-   "coincidencia" mapper/` returns no output; the string does not exist at `5f4816c`. The
+   "coincidencia" mapper/` returns no output; the string does not exist at `8ef1553`. The
    predicate's value therefore cannot be invariant under the change: today it parses `None`.
    **Gate, not pin.**
 2. **Mutation:** compute the count from `painted_ids(...)` instead of from the whole graph.
@@ -381,7 +381,7 @@ and the painted pill still declares its hidden hit count (2 of `b`'s 2 descendan
    mentions and cannot separate a call from a name. P-021.3 — delete `_matches` and let the
    pill's `hits` term fall to `0`; the pill paints `+2` with no hit tail and the arm fails.
 3. **Input set:** the module set is an `ast` walk over `mapper/views/`, derived. **Executed
-   pre-state, re-derived at `5f4816c` and CORRECTING the sealed figure:**
+   pre-state, re-derived at `8ef1553` and CORRECTING the sealed figure:**
    ```
    grep -rn "qlower" mapper/views/  ->  9 occurrences, all layered.py
      :113 def _matches(node, qlower)      :116 :117 :118 :119   (the predicate body)
@@ -502,7 +502,7 @@ every node. Zero nodes carry the hit style in all four.
 source files Inc-4 does not touch). §3.5's story-level list carries `AT-024` under a header
 marked *(Inc-4)*, which is the story's list, not the cut.
 
-Executed at `5f4816c`, over the **derived** renderer set (module walk over `mapper/views/`,
+Executed at `8ef1553`, over the **derived** renderer set (module walk over `mapper/views/`,
 selecting classes defined in their own module that expose `render`):
 
 ```
@@ -640,7 +640,7 @@ rows: `("map","n") → ("next_hit","siguiente coincidencia","n","nav",False)`,
 `("map","M") → ("next_gap","siguiente faltante","M","view",False)`.
 
 1. **Subject:** P-051.1 — the **dispatch** of `M`. **Gate.** Executed pre-state: `press M`
-   moves `cursor 'inv' -> 'inv'` — inert, `M` is unbound today (map-scope keys at `5f4816c`:
+   moves `cursor 'inv' -> 'inv'` — inert, `M` is unbound today (map-scope keys at `8ef1553`:
    `A H I J K L R X a d e enter equals_sign escape f g h j k l m n o q r slash u x z` — no `M`,
    no `N`). P-051.2 — the seat **declaration**. **This is a PIN, not a gate for `AT-051`'s own
    claim**: it proves the seat *says* `M` is `next_gap` and cannot distinguish a rebind from a
@@ -806,7 +806,7 @@ asserted vacuously and counted as covered.
 
 ### 8.4 · `esc limpiar` describes behaviour that does not exist, and the seat does not declare it
 
-`UX-Q3-b` and `LLR-N07.3.2` both paint the hint `… · esc limpiar`. Executed at `5f4816c`:
+`UX-Q3-b` and `LLR-N07.3.2` both paint the hint `… · esc limpiar`. Executed at `8ef1553`:
 
 ```python
 def action_back_or_home(self) -> None:          # mapper/app.py:2354
@@ -894,7 +894,7 @@ assert ENTRY_MAP_SEAT - exit_seat == frozenset()
 assert len(exit_seat) == 31
 ```
 
-Executed at `5f4816c`: `len(exit_seat) == 31`. After Inc-4's rebind (`n`: `next_gap` →
+Executed at `8ef1553`: `len(exit_seat) == 31`. After Inc-4's rebind (`n`: `next_gap` →
 `next_hit`; `+N`; `+M`): **33**, and `ENTRY_MAP_SEAT - exit_seat == {("n","next_gap")}`. All
 three assertions fail. `tests/test_key_dispatch.py::EXPECTED_SEAT` at `:88` fails too — that
 one is intended and its own docstring says so ("if the rebinding is deliberate, update
@@ -922,7 +922,7 @@ export path is not on any Inc-4 acceptance. **Recommended pin:** one arm asserti
 scope exists in the seat). `tests/test_key_dispatch.py:137`'s fence
 `{"j","k","u","x","m","n"} ⊆ MAP_BINDINGS keys` still holds, since `n` stays bound.
 
-**10.4 · Baseline for the two seat suites, executed at `5f4816c`:**
+**10.4 · Baseline for the two seat suites, executed at `8ef1553`:**
 ```
 pytest tests/test_key_dispatch.py tests/test_inc3_census.py -q  ->  54 passed in 17.35s
 ```
@@ -959,7 +959,7 @@ pytest tests/test_key_dispatch.py tests/test_inc3_census.py -q  ->  54 passed in
   gate Inc-4.
 - [✓] No real PII / secrets — every fixture synthetic, built in `mkdtemp`; no tracked file written.
 - [✓] Test results left blank — **no test was run for these predicates; none exists.** Every
-  number above is a probe of the pre-state at `5f4816c`, run read-only.
+  number above is a probe of the pre-state at `8ef1553`, run read-only.
 - [✓] **Layer B (black-box)** — `AT-018`, `AT-019`, `AT-022`, `AT-023`, `AT-046`, `AT-047`,
   `AT-051`, `AT-052` all observe through the SHIPPED surface: real `slash`/`enter`/`n`/`N`/`M`/`z`
   chords into `MapperApp.run_test`, read back from `screen._compositor.render_strips()` via
@@ -976,7 +976,7 @@ pytest tests/test_key_dispatch.py tests/test_inc3_census.py -q  ->  54 passed in
 
 ---
 
-*Written by the qa lens. `mapper/` untouched — `git status --short` clean at `5f4816c` on entry
+*Written by the qa lens. `mapper/` untouched — `git status --short` clean at `8ef1553` on entry
 and on exit. All scratch harnesses live in the session scratchpad; all fixtures in
 `tempfile.mkdtemp` workspaces.*
 

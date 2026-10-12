@@ -6,12 +6,12 @@
 
 | Field | Value |
 |---|---|
-| Gate record | `python devflow-validate.py --brief <repo root>` with the branch's upstream pointed at `origin/master` for the run (the batch branch tracks its own remote, which made `V59` misread its own commits as rebased-in; restored after) → exit 1 · **1 block**, the external `V7` (the installed flow bundle's `SKILL.md` vs its manifest — rev101 work outside this batch, recorded in the DDR) · 2026-10-09. An earlier close attempt recorded "38 block — the external V7", which was WRONG: 36 were the owed canon fold-back (`V22`, now folded, 36 rows) and 1 a missing §2 row (`V59`, added). Product gate: `2920 passed / 0 failed / 3 xfailed` on `cab8181` (`04-validation.md`). |
-| Gated tree | `393b8f909bbe0d92ba3cd17d40f60b5d181aebad` · dirty — `.dev-flow/2026-10-08-data-safety-batch/05-postmortem.md` (this close record itself) |
+| Gate record | `python devflow-validate.py --brief <repo root>` with the branch's upstream pointed at `origin/master` for the run (the batch branch tracks its own remote, which made `V59` misread its own commits as rebased-in; restored after) → exit 1 · **1 block**, the external `V7` (the installed flow bundle's `SKILL.md` vs its manifest — rev101 work outside this batch, recorded in the DDR) · 2026-10-09. An earlier close attempt recorded "38 block — the external V7", which was WRONG: 36 were the owed canon fold-back (`V22`, now folded, 36 rows) and 1 a missing §2 row (`V59`, added). Product gate: `2920 passed / 0 failed / 3 xfailed` on `4b8b103` (`04-validation.md`). |
+| Gated tree | `9251dfd2eee48fa915300727fd69225f28c0b415` · dirty — `.dev-flow/2026-10-08-data-safety-batch/05-postmortem.md` (this close record itself) |
 
 ## 🔑 At a glance (read first)
 
-- **Outcome:** closed with carry-over — P4 `PASS-WITH-NOTES` (gate `2920 passed / 0 failed / 3 xfailed` on `cab8181`, `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`); batch closed at P6 after the final PR-level qa-reviewer pass (MERGE).dev-flow/state.json:68-69`). P1 needed 3 iterations (soft cap).
+- **Outcome:** closed with carry-over — P4 `PASS-WITH-NOTES` (gate `2920 passed / 0 failed / 3 xfailed` on `4b8b103`, `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`); batch closed at P6 after the final PR-level qa-reviewer pass (MERGE).dev-flow/state.json:68-69`). P1 needed 3 iterations (soft cap).
 - **Top 3:** ① prototype-first US-001 (operator verdict C) gave the batch a validated design before requirements — zero design churn after P0 (`.dev-flow/2026-10-08-data-safety-batch/VERDICT-b36-prototype-2026-10-08.md:5-9`). ② the round-2 save-failure disposition (disk-hash classification) was itself unsound and cost an extra full P1/P2 cycle (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:93`). ③ root cause of the cap: failure-case semantics over-specified against an incompletely understood store (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:90-98`).
 - **New control this batch:** none named in the artifacts; nearest candidate is the mutation-battery driver running `python -u` after an interrupted battery left a mutant applied (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-003.md:270`).
 - **Open items → next batch:** 3 accepted residuals (A-13 typed-ahead `d`, A-14 saved-but-raised, A-15 double index failure) + F5 + external V7 (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:261-265`) — biggest: A-15 (disk/edit divergence after a double `_reindex` failure).
@@ -40,8 +40,8 @@
 | Planned | Actual | Note |
 |---------|--------|------|
 | B-36 (draft model + explicit save) | Delivered (Inc-1a/1b/1c, Inc-2, Inc-3) | `state.json:5` objective; landed on `feat/data-safety-batch` (`state.json:202`) |
-| B-100/B-101 acceptance tests | DONE, reconciled on disk | commit `3d3e999`; AT-033/034/035 retired to deferred US-N14 — the B-101 attribution was the orchestrator's own error at the prior close (`.dev-flow/2026-10-08-data-safety-batch/PLAN.md:79`) |
-| B-98 legend-paint flake | Fixed test-side at four `scroll_to` sites + regression arms | `PLAN.md` decision row (`US-004 READY with a test-side fix at four scroll_to sites`); commit `c5c4d62` |
+| B-100/B-101 acceptance tests | DONE, reconciled on disk | commit `b149b0d`; AT-033/034/035 retired to deferred US-N14 — the B-101 attribution was the orchestrator's own error at the prior close (`.dev-flow/2026-10-08-data-safety-batch/PLAN.md:79`) |
+| B-98 legend-paint flake | Fixed test-side at four `scroll_to` sites + regression arms | `PLAN.md` decision row (`US-004 READY with a test-side fix at four scroll_to sites`); commit `e73a75d` |
 | HLR-004 as drafted | Widened: LLR-004.4 states focus mode writes the whole map; TC-004.4 planned in the design proposal | PDR probe found a present data-loss path (inspector edit under focus writes only the focused subtree as the whole map); accepted under HLR-004 (`.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md:417-422`) |
 | Eleven units U1–U10 + Z2 | U11 added at the §4b review (+2 test nodes) | `.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-005.md:216` (via `04-validation.md:216`) |
 | `test_en2.py` Z2 arms as written | Rescoped (intent kept) | `.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-005.md:85` |
@@ -54,7 +54,7 @@
 | Findings by severity (blocker/major/minor) | Round 1 `4/10/14`; round 2 `0/6/13`; rounds 3–4 minors not individually countable — see above (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:9,74,98,107`) |
 | Where caught (P2 / P3 gate / P4) | `28+` / 0 / 0 (all requirement-phase findings at P2's four rounds; P3 closed on lane evidence + independent reviews, `.dev-flow/state.json:202`) |
 | Test ledger (base − D + A = post) | `2800 + 123 = 2923` (2800 at batch start → 2923 at gate = 2920 passed + 3 xfailed, `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:15`) |
-| Files touched · increments (cap trips) | `28` files, `3082 insertions(+), 221 deletions(-)` (`git diff --stat 07dd930..HEAD -- mapper/ tests/ | tail -1`) · `6` packets (`03-increments/increment-001..006.md`) · `1` cap trip (P1 soft cap at iteration 3, `.dev-flow/state.json:183`) |
+| Files touched · increments (cap trips) | `28` files, `3082 insertions(+), 221 deletions(-)` (`git diff --stat ed67c58..HEAD -- mapper/ tests/ | tail -1`) · `6` packets (`03-increments/increment-001..006.md`) · `1` cap trip (P1 soft cap at iteration 3, `.dev-flow/state.json:183`) |
 
 ### Root causes (only if a phase took ≥2 iterations)
 - P1 iteration 2 trigger → root cause: the round-2 disposition it implemented (classify failed saves by sha256 of the on-disk pair) was unsound against the real store in four named ways; round 3 replaced the three-case table with ONE rule (reload from disk, keep draft re-diffed, undo untouched, no writes from failure handling) (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:93-98`).
@@ -69,7 +69,7 @@
 
 ### Product findings
 - Focus-mode data loss found at PDR: an inspector edit under focus mode writes only the focused subtree as the whole map (probe on the real tree: on-disk nodes after the edit `['a']`). Accepted under HLR-004 as "save writes the whole map"; planned node TC-004.4 (`.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md:417-422`; ``MapScreen._save_draft` (`mapper/app.py:3524`) and ledger `.59``).
-- Z2 hint-borrow interference: leaving a field re-announced an attachment chip's `open attachment`, because the chip swap works inside the resting hint the U2 field hint had replaced; U2's borrow and the chip's borrow now coordinate through the screen's blur handler, with a hand-back rule for future borrowers (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-005.md:18,80`; fix commit `5ad158e`).
+- Z2 hint-borrow interference: leaving a field re-announced an attachment chip's `open attachment`, because the chip swap works inside the resting hint the U2 field hint had replaced; U2's borrow and the chip's borrow now coordinate through the screen's blur handler, with a hand-back rule for future borrowers (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-005.md:18,80`; fix commit `0033df3`).
 - The interrupted Inc-1b battery left mutant `A-prefix-always` applied to `mapper/app.py` while the visible-card assertion still passed — a passing test over a mutated product; restored byte-identically (digest match) and closed with a new visible-card arm (`.dev-flow/2026-10-08-data-safety-batch/03-increments/increment-003.md:270`).
 - Save-failure handling: the shipped model is one rule (reload from disk = truth, keep draft re-diffed, undo stack untouched, reload-failure restores in memory with a refusal to write); residual A-14 (edit on disk with no undo step) and A-15 (double `_reindex` failure leaves disk ahead of memory) accepted and recorded (`.dev-flow/2026-10-08-data-safety-batch/02-review.md:98`; `.dev-flow/2026-10-08-data-safety-batch/04-validation.md:262-263`).
 
@@ -83,7 +83,7 @@
   - RED proof with sha256 restore: per-unit and per-mutant batteries; totals 105 mutants run · 92 killed · 0 BAD (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:210-219`).
   - Stress-tested: the PDR discharge log — DDR re-read it and caught C14 marked discharged while arms were missing (`.dev-flow/2026-10-08-data-safety-batch/01-requirements-ledger.md:485-489`).
 
-> Drafted by unit P5b (Kimi, kimi-code/kimi-for-coding) for postmortem assembly. All facts re-read from the batch's artifacts; `not recorded` where absent. Sources: `.dev-flow/state.json`, `.dev-flow/2026-10-08-data-safety-batch/` (01-requirements.md, 02-review.md, 03-increments/increment-001..006.md + inc4-reconciliation-proposal.md, 04-validation.md, design/PDR + DDR, VERDICT-b36-prototype-2026-10-08.md, 00-checklists.md), `.dev-flow/BACKLOG.md`, `git status --short`, `git worktree list`, `git log --oneline 07dd930..HEAD`.
+> Drafted by unit P5b (Kimi, kimi-code/kimi-for-coding) for postmortem assembly. All facts re-read from the batch's artifacts; `not recorded` where absent. Sources: `.dev-flow/state.json`, `.dev-flow/2026-10-08-data-safety-batch/` (01-requirements.md, 02-review.md, 03-increments/increment-001..006.md + inc4-reconciliation-proposal.md, 04-validation.md, design/PDR + DDR, VERDICT-b36-prototype-2026-10-08.md, 00-checklists.md), `.dev-flow/BACKLOG.md`, `git status --short`, `git worktree list`, `git log --oneline ed67c58..HEAD`.
 
 ## Open / deferred items → next batch
 
@@ -102,12 +102,12 @@ Packet `Pending` sections (§6 of each increment) hold no other live carries: in
 Commands run (read-only) from the worktree root:
 
 - `git status --short` → ` M .dev-flow/BACKLOG.md` — the only tracked modification in the primary checkout. Verified as **this batch's own close edit**: the diff adds the "Last refresh 2026-10-09" line and rows B-102/B-103, which exist only in the worktree, not in `HEAD` (`git show HEAD:.dev-flow/BACKLOG.md` has no B-102/B-103). Must land in the orchestrator's close commit.
-- `git worktree list` → 19 worktrees; 18 under `%TEMP%`. Of those, 17 are this batch's (see table); `%TEMP%\mapper-ds-p4` is a leftover from the **previous** batch's P6 vault sync — it holds branch `docs/ui-next-02-synced`, whose tip 5762947 ("batch ui-next-02 synced to the Obsidian vault") sits on bb8328f (PR #8 merge, already in `previous_batch` at `.dev-flow/state.json:228-237`). Flagged FOUND, not this batch's work.
-- `git log --oneline 07dd930..HEAD` → 68 commits at the close (60 first-parent), all landed on `feat/data-safety-batch`. No unpushed-dependency check failed: the branch carries the whole increment/DDR/PDR/P4 chain.
+- `git worktree list` → 19 worktrees; 18 under `%TEMP%`. Of those, 17 are this batch's (see table); `%TEMP%\mapper-ds-p4` is a leftover from the **previous** batch's P6 vault sync — it holds branch `docs/ui-next-02-synced`, whose tip ee8fbd7 ("batch ui-next-02 synced to the Obsidian vault") sits on 7c50099 (PR #8 merge, already in `previous_batch` at `.dev-flow/state.json:228-237`). Flagged FOUND, not this batch's work.
+- `git log --oneline ed67c58..HEAD` → 68 commits at the close (60 first-parent), all landed on `feat/data-safety-batch`. No unpushed-dependency check failed: the branch carries the whole increment/DDR/PDR/P4 chain.
 
 | Repo | File(s) | Terminal state | Landing / backlog ref |
 |------|---------|----------------|-----------------------|
-| mapper (primary worktree) | `.dev-flow/BACKLOG.md` | ✅ committed + landed | `de40d6e` (B-36/B-98 DONE, B-102/B-103 added, refresh line) |
+| mapper (primary worktree) | `.dev-flow/BACKLOG.md` | ✅ committed + landed | `c56fc17` (B-36/B-98 DONE, B-102/B-103 added, refresh line) |
 | mapper (temp worktrees) | — | 🗑️ cleanup candidates — worktrees removable after close | `git worktree remove` for each batch worktree below |
 | flow bundle (external) | `SKILL.md` vs manifest drift | 📋 recorded external (V7) | `design/DDR-2026-10-08-data-safety-batch.md:93` |
 
@@ -159,8 +159,8 @@ Re-read from the artifacts, not from the corrective pass's claim.
 | P2 round 1 — 4 blockers (ARCH-B1, ARCH-B2/QA-B2, QA-B1 + security SEC-M1/M2) + 10 majors, iterate-to-refine | ✅ all applied | `02-review.md:22-48` (findings), `:73` (round-2 header: architect 12/12, security 3/3, qa all discharged) |
 | P2 round 2 — 6 majors | ⚠️ 5/6 — R2-N1 (disk-hash failure classification) **NOT discharged**, proven unsound at round 3 | `02-review.md:71-86` (findings), `:92-93` (discharge + root cause SEC-N-A/B/C/D) |
 | P2 round 3 — operator ruling "Simplificar y seguir": one failed-save rule (reload from disk, keep draft re-diffed, no writes from failure handling) | ✅ applied; discharged at round 4 | `02-review.md:90-101` (R3-SAVE `:98`); `.dev-flow/state.json:183-188` |
-| P2 round 4 — 0 blockers; operator ruling "Aplicar y verificar ligero": orchestrator applies, one reviewer confirms | ✅ applied (ledger `.58`, `02-review.md:109`); residuals A-14/A-15 recorded | `02-review.md:105-109`; `04-validation.md:262-263` (gaps table), `:75` (LLR-004.2 nodes green on cab8181) |
-| P4 qa-reviewer ACCEPT-WITH-FIXES — 4 minors applied | ✅ applied — **individual texts not recorded** in any artifact; only the count survives | `04-validation.md:16` (0 blocker / 0 major / 4 minor, "8 of 8 rows ✓"), `:267`; applied edits visible as commit a513190's diff to `04-validation.md:3,16,59,203,267,277`. Caveat: §5 tally still reads "11 of 11 rows ✓" at `04-validation.md:283` — internal inconsistency left by the fix pass |
+| P2 round 4 — 0 blockers; operator ruling "Aplicar y verificar ligero": orchestrator applies, one reviewer confirms | ✅ applied (ledger `.58`, `02-review.md:109`); residuals A-14/A-15 recorded | `02-review.md:105-109`; `04-validation.md:262-263` (gaps table), `:75` (LLR-004.2 nodes green on 4b8b103) |
+| P4 qa-reviewer ACCEPT-WITH-FIXES — 4 minors applied | ✅ applied — **individual texts not recorded** in any artifact; only the count survives | `04-validation.md:16` (0 blocker / 0 major / 4 minor, "8 of 8 rows ✓"), `:267`; applied edits visible as commit c5bc480's diff to `04-validation.md:3,16,59,203,267,277`. Caveat: §5 tally still reads "11 of 11 rows ✓" at `04-validation.md:283` — internal inconsistency left by the fix pass |
 
 ## Evidence checklist — architect + qa-reviewer
 
@@ -168,12 +168,12 @@ Re-read from the artifacts, not from the corrective pass's claim.
 
 | # | Check | ✓/✗ | Evidence |
 |---|-------|-----|----------|
-| 1 | Gate record: validator run, exit 0, date | ✓ | `04-validation.md:9,38-40` — 2920 passed / 24 deselected / 3 xfailed / EXIT_CODE=0, single orchestrator run on cab8181; hash-verified transcript `04-validation.md:291` |
-| 2 | Gated tree clean at P4 | ✓ | `04-validation.md:9` names cab8181; ledger reconciliation 2923 = 2920+3 at `04-validation.md:227,239` |
+| 1 | Gate record: validator run, exit 0, date | ✓ | `04-validation.md:9,38-40` — 2920 passed / 24 deselected / 3 xfailed / EXIT_CODE=0, single orchestrator run on 4b8b103; hash-verified transcript `04-validation.md:291` |
+| 2 | Gated tree clean at P4 | ✓ | `04-validation.md:9` names 4b8b103; ledger reconciliation 2923 = 2920+3 at `04-validation.md:227,239` |
 | 3 | PDR C1–C14 each discharged, verified by re-read | ✓ | table above; C14's false first claim caught by the DDR re-read (`design/DDR-…:38`) |
 | 4 | DDR D1–D5 + QA-3 discharged | ✓ | `design/DDR-…:84-91`; `03-increments/increment-006.md:12,15` |
 | 5 | P2 round dispositions traced to dispositions in 02-review.md | ✓ | `02-review.md:73,92-93,109`; round-3 operator ruling `02-review.md:94` |
-| 6 | P4 qa minors applied | ✓ (with caveat) | commit a513190 diff; `04-validation.md:16,267`; texts not recorded — flag for next batch's record-keeping |
+| 6 | P4 qa minors applied | ✓ (with caveat) | commit c5bc480 diff; `04-validation.md:16,267`; texts not recorded — flag for next batch's record-keeping |
 | 7 | Residuals A-13/A-14/A-15 carried to BACKLOG, not lost | ✓ | `.dev-flow/BACKLOG.md:212` (B-102); definitions `01-requirements.md:740-742` |
 | 8 | F5 + sibling LOWs carried to BACKLOG | ✓ | `.dev-flow/BACKLOG.md:213` (B-103); `03-increments/increment-005.md:98` |
 | 9 | External V7 recorded as not-this-project's | ✓ | `design/DDR-…:93`; `03-increments/increment-006.md:65-66`; no BACKLOG row (recorded here as a gap) |

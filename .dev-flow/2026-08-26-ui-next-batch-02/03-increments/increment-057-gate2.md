@@ -1,6 +1,6 @@
 # Increment 057 -- Gate-2: the pre-merge fixes of the whole-branch gates
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `0133cfb`. Authority: `A-139` (appended to `01-requirements.md`, dated 2026-10-03) and `VERDICT-merge-2026-10-03.md` ruling `M1` (the blocker plus the MEDIUM findings; LOW to `BACKLOG.md`). Source files: 4 (`mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/import_csv.py`; cap 4, no overage). Everything else is tests and docs. `state.json` was not touched. No push.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `820ab35`. Authority: `A-139` (appended to `01-requirements.md`, dated 2026-10-03) and `VERDICT-merge-2026-10-03.md` ruling `M1` (the blocker plus the MEDIUM findings; LOW to `BACKLOG.md`). Source files: 4 (`mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/import_csv.py`; cap 4, no overage). Everything else is tests and docs. `state.json` was not touched. No push.
 
 ## 1. What changed
 
@@ -13,7 +13,7 @@ Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `0133c
 
 ## 2. Files modified
 
-Source (4): `mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/import_csv.py`. Tests (1 new, 3 edited): `tests/test_gate2.py` (28 items); `tests/test_inc9f.py` (new helper `_after_pins`, used by the `_Mirror` fake), `tests/test_inc9h.py` (one assertion through the helper), `tests/test_search.py` (six `_PASS_FREE_READERS` entries with reasons). Docs (4): `.dev-flow/BACKLOG.md`, `01-requirements.md` (`A-139`), `docs/ARCHITECTURE.md` (one line number, `factory.py:504` -> `507`), this record. Not staged or touched: `prototypes/`, `mapper.db`, `fixtures/.mapper/`, `fixtures/mapper.db`, `state.json`. Commits: `9f9c2a9` (arms, strict xfail), `111f775` (helper byte I/O), `a63922b` (fixes, `OPEN_STEPS` emptied, docs), `c7d281b` (record), `f88e0b6` (test and doc follow-ups from the first lane, section 7), then this final docs commit. Identity `gate2 <gate2@example.invalid>`; every message ends with the Co-Authored-By line; index line endings LF (`git ls-files --eol`: `i/lf` for all touched files; two files are `w/crlf` in the working tree, as before, and `autocrlf` normalises them).
+Source (4): `mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/import_csv.py`. Tests (1 new, 3 edited): `tests/test_gate2.py` (28 items); `tests/test_inc9f.py` (new helper `_after_pins`, used by the `_Mirror` fake), `tests/test_inc9h.py` (one assertion through the helper), `tests/test_search.py` (six `_PASS_FREE_READERS` entries with reasons). Docs (4): `.dev-flow/BACKLOG.md`, `01-requirements.md` (`A-139`), `docs/ARCHITECTURE.md` (one line number, `factory.py:504` -> `507`), this record. Not staged or touched: `prototypes/`, `mapper.db`, `fixtures/.mapper/`, `fixtures/mapper.db`, `state.json`. Commits: `e7b63d6` (arms, strict xfail), `5b4fa49` (helper byte I/O), `642d587` (fixes, `OPEN_STEPS` emptied, docs), `2c2c908` (record), `2a078fc` (test and doc follow-ups from the first lane, section 7), then this final docs commit. Identity `gate2 <gate2@example.invalid>`; every message ends with the Co-Authored-By line; index line endings LF (`git ls-files --eol`: `i/lf` for all touched files; two files are `w/crlf` in the working tree, as before, and `autocrlf` normalises them).
 
 ## 3. How to test
 
@@ -21,7 +21,7 @@ Source (4): `mapper/app.py`, `mapper/github.py`, `mapper/screens/factory.py`, `m
 
 ## 4. Arms, RED/GREEN, mutants
 
-**Arms first.** Committed as `xfail(strict=True)` keyed by `OPEN_STEPS` (the repo's convention) in `9f9c2a9`: 2 passed (pins), 26 xfailed. RED on the base: `git worktree add --detach %TEMP%/g2base 0133cfb`, the test file copied in, `--runxfail`: **26 failed, 2 passed** (the 2 passes are pins, below). Reasons read, not assumed: `AttributeError: 'DataTable' object has no attribute 'cursor_down'` / "the app stopped on 'j'"; `'' == 'j/k/h/l move ...'` after a pan; `'edge of the map' == 'j/k/h/l ...'` after `o`/`r`/`R`; `'' == 'n next ...'` in a live search; the forged-signature repo: **the trap is armed (plain `git log -1` wrote the marker) and `fetch()` wrote it too: "fetch() ran the repository's gpg.program"**; preview `'[docx] C:\...'` with no relative path; U+FFFD absent from the preview (hostile text unchanged); `['fila-1', 'fila-2', 'root']`. One helper defect was found on the way (text-mode `input=` turned the forged commit's LF into CRLF, `hash-object` refused it): fixed in `111f775`, RED re-run after. GREEN: all 28 pass on the fixed tree (`--runxfail` and plain).
+**Arms first.** Committed as `xfail(strict=True)` keyed by `OPEN_STEPS` (the repo's convention) in `e7b63d6`: 2 passed (pins), 26 xfailed. RED on the base: `git worktree add --detach %TEMP%/g2base 820ab35`, the test file copied in, `--runxfail`: **26 failed, 2 passed** (the 2 passes are pins, below). Reasons read, not assumed: `AttributeError: 'DataTable' object has no attribute 'cursor_down'` / "the app stopped on 'j'"; `'' == 'j/k/h/l move ...'` after a pan; `'edge of the map' == 'j/k/h/l ...'` after `o`/`r`/`R`; `'' == 'n next ...'` in a live search; the forged-signature repo: **the trap is armed (plain `git log -1` wrote the marker) and `fetch()` wrote it too: "fetch() ran the repository's gpg.program"**; preview `'[docx] C:\...'` with no relative path; U+FFFD absent from the preview (hostile text unchanged); `['fila-1', 'fila-2', 'root']`. One helper defect was found on the way (text-mode `input=` turned the forged commit's LF into CRLF, `hash-object` refused it): fixed in `5b4fa49`, RED re-run after. GREEN: all 28 pass on the fixed tree (`--runxfail` and plain).
 
 | Item | Arms (real keys, 118 and 87) |
 |---|---|
@@ -73,7 +73,7 @@ On the base the first line was blank and the third still read `edge of the map`.
 
 ## 6. Test results, risks, unmeasured, next
 
-- Ruff: `ruff check .` base `0133cfb` 26 (programmatic, in a scratch worktree), head `f88e0b6` 27; the multiset difference was ONE new finding, `F401` for an unused `import os` in `tests/test_gate2.py`; removed in the final docs commit, after which the difference is empty (checked on that file; the other files are unchanged since). The lanes below ran with the unused import still present: a deleted import cannot change a result, and `tests/test_gate2.py` was re-run green after the deletion (28 passed); no third full lane was run.
+- Ruff: `ruff check .` base `820ab35` 26 (programmatic, in a scratch worktree), head `2a078fc` 27; the multiset difference was ONE new finding, `F401` for an unused `import os` in `tests/test_gate2.py`; removed in the final docs commit, after which the difference is empty (checked on that file; the other files are unchanged since). The lanes below ran with the unused import still present: a deleted import cannot change a result, and `tests/test_gate2.py` was re-run green after the deletion (28 passed); no third full lane was run.
 - `-W error::SyntaxWarning`: the four source files and the test file compile clean.
 - Full default lane x2 (sequential, uninterrupted, `-rf`, the last step): section 7.
 - Risks: `_pan` now restores `map_hint()` where it blanked, so a status hint another handler set before a pan is replaced on the first good pan (it was blanked before; same loss, better text). `action_toggle_rail` now clears a pan hint; `action_toggle_inspector` does not (the verdict named `R`; the inspector has the same width effect: not changed, say if wanted).
@@ -82,7 +82,7 @@ On the base the first line was blank and the third still read `edge of the map`.
 
 ## 7. Full default lane x2 (last step)
 
-**The first lane did not pass, and is recorded.** On `c7d281b` (the fixes, before the follow-ups) the first full default lane ran **46 failed, 2751 passed** (`lane` discarded, never counted as a pass). Causes, each measured:
+**The first lane did not pass, and is recorded.** On `2c2c908` (the fixes, before the follow-ups) the first full default lane ran **46 failed, 2751 passed** (`lane` discarded, never counted as a pass). Causes, each measured:
 
 - 44 tests in `test_inc9f/g/h/i`: the `_Mirror` fake of `test_inc9f.py` matched `argv[3:6] == ["config", "--get", "remote.origin.url"]`, and `test_inc9h` matched `fetches[0][3:]`; the `-c` pins now sit at index 3, so the fake no longer answered `config --get` and a second connect re-cloned (1 + 6 + 19 + 18 tests). Fix: `_after_pins(argv)` skips leading `-c key=value` pairs; the subcommand has no fixed index any more, which is the cost of `-c` over an environment variable (`GIT_CONFIG_COUNT` would keep argv but is ignored silently by git older than 2.31, i.e. the pin would vanish quietly; chosen against).
 - `test_arch_osopen_callers` (1): `docs/ARCHITECTURE.md` lists `factory.py` back-edge line numbers; the preview edit moved one (`504` -> `507`). Line number updated.
@@ -90,7 +90,7 @@ On the base the first line was blank and the third still read `edge of the map`.
 
 I had run only `tests/test_gate2.py` before that lane; the lesson is to run the neighbouring suites (`-k` on the changed names) before the first full lane.
 
-**Result, on `f88e0b6`** (all code and tests of this increment; the final docs commit follows), sequential, uninterrupted, nothing else of mine running, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables, default basetemp:
+**Result, on `2a078fc`** (all code and tests of this increment; the final docs commit follows), sequential, uninterrupted, nothing else of mine running, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables, default basetemp:
 
 | Run | Result | Time |
 |---|---|---|

@@ -1,13 +1,13 @@
 # 02e · Security review — PDR pass 2, batch `2026-08-26-ui-next-batch-02`
 
-> Lens: **security**, second PDR pass, base `d877784` (= HEAD = `origin/master`).
+> Lens: **security**, second PDR pass, base `bd17fab` (= HEAD = `origin/master`).
 > Re-read: `02b-security-review.md` (my first pass), `PLAN.md` §12.3 / §12.4 / §13 / §14,
 > `01-requirements.md` §3.0, §3.6, §3.7, §3.8, §4.1, §5.2, §6.1, §6.5 (A-04, A-05, A-13 … A-18,
 > A-25, A-26, A-38, A-39, A-40, A-41), and the live tree.
 >
 > **Nothing below is discharged by reading an amendment.** Every condition was re-verified by
 > re-reading the requirement text it claims to live in, and every defect claim was re-executed
-> against `d877784`. Per C-43 a citation is not evidence; per C-44 a corrective pass having run is
+> against `bd17fab`. Per C-43 a citation is not evidence; per C-44 a corrective pass having run is
 > not a discharge. Three probe lanes ran on independently written harnesses in the system temp
 > directory. No file under `mapper/` or `tests/` was modified; no pytest gate was run (C-25).
 > Every code point below is written as a `U+XXXX` **name** and was constructed with `chr(0x...)` at
@@ -78,7 +78,7 @@ column**, not by trusting `§6.5`'s claim that the fold happened.
 
 ### `S-01` — a cycle or a deep chain kills the app · **DISSOLVED. `C-1` discharged.**
 
-The repair batch's claim holds and is better than claimed. Executed at `d877784`:
+The repair batch's claim holds and is better than claimed. Executed at `bd17fab`:
 
 ```
 === (b) battery on 3-node CYCLE ===
@@ -335,11 +335,11 @@ where the helper is required, and it currently says "one place".
 | Every finding has a severity | ✓ | `S-16` blocker · `S-17` blocker · `S-18` blocker · `S-19` major · `S-20` major · `S-21` minor. Counts restated in §1 |
 | No secret value appears in this output | ✓ | `grep -rniE "api[_-]?key|secret|token|password|BEGIN .*PRIVATE KEY|credential|Bearer " .dev-flow/2026-08-26-ui-next-batch-02/` → only design-token hits (`SAGE`, `TEAL`, `VIOLET`, "token set"). `git ls-files \| grep -iE "\.env\|credential\|secret\|\.pem\|\.key"` → empty. `.gitignore` covers `*.db`, `.mapper/`, `*.svg`, `*.png` |
 | Verdict is explicit | ✓ | §1 — `BLOCKED` |
-| New tool/integration scope and blast radius addressed | ✓ | **None added.** `git diff d6b60e6..d877784 -- pyproject.toml` = +8 lines, pytest markers only, **no new dependency**. No MCP, Composio, n8n or network surface in scope. Blast radius remains local rendering of local files |
+| New tool/integration scope and blast radius addressed | ✓ | **None added.** `git diff 1b51aca..bd17fab -- pyproject.toml` = +8 lines, pytest markers only, **no new dependency**. No MCP, Composio, n8n or network surface in scope. Blast radius remains local rendering of local files |
 | Every condition discharged by RE-READING, never by trusting the fold | ✓ | §2's fourth column names the line range re-read for each of C-1, C-2, C-3, C-4, C-5, C-6, C-7, C-8, C-9, C-10, C-11, C-12 and S-11 individually |
-| Every defect claim re-EXECUTED at `d877784` | ✓ | Probe 1 (`S-01` battery + cap boundary), Probe 2 (`S-02` ten hostile sidecars + four uncovered-surface cases), Probe 3 (`S-15` shapes with two positive controls), my own §3.0 re-execution (84 / 62 / 22 + both truncators) |
+| Every defect claim re-EXECUTED at `bd17fab` | ✓ | Probe 1 (`S-01` battery + cap boundary), Probe 2 (`S-02` ten hostile sidecars + four uncovered-surface cases), Probe 3 (`S-15` shapes with two positive controls), my own §3.0 re-execution (84 / 62 / 22 + both truncators) |
 | Timing probes carry a positive control | ✓ | `S-15` lane: Control A (12001 nodes, refusal fires, cap read back = 12000) and Control B (12000 nodes, 179.3 ms) both reported **before** any DAG figure. Coercion probe: ESC/OSC-52 coerced = True, benign string unchanged = True |
-| `02b`'s stale renderer timings NOT quoted | ✓ | The parked 3.4 s / 9.1 s figures appear nowhere in this document. All timings are re-measured at `d877784` |
+| `02b`'s stale renderer timings NOT quoted | ✓ | The parked 3.4 s / 9.1 s figures appear nowhere in this document. All timings are re-measured at `bd17fab` |
 | `M-H1`'s already-green remedy NOT used as a threshold | ✓ | §3 `S-03` adopts `A-04`'s correction: the threshold is painted card count **AND** state distinguishability. I verified the shipped misdeclaration independently at `mapper/app.py:559-573` |
 | Every new required control carries a **named weaker variant** | ✓ | `M-H7` (post-hoc elapsed measurement) for `S-18`; `M-S1` re-executed on `master` for `S-16`; the renderer-unqualified fixture for `S-19` |
 | No mutated token spelled verbatim (C-56) | ✓ | Mutants described by position and operation only |

@@ -1,8 +1,8 @@
 # Increment 010 — Inc-B55b — Independent Security Review
 
 **Reviewer:** security-reviewer (independent, second and final gate)
-**Range:** `git diff 10fd573..4bb63bf -- mapper/ tests/ fixtures/`
-**Tree at review:** `4bb63bf`, clean on entry, clean on exit. **No source mutation was fired**
+**Range:** `git diff ca76a00..942a1de -- mapper/ tests/ fixtures/`
+**Tree at review:** `942a1de`, clean on entry, clean on exit. **No source mutation was fired**
 — every probe ran read-only from `C:\Users\<operator>\clde\` against temp workspaces, so the
 sha256/CRLF-anchor discipline was not exercised because nothing needed it.
 **Verdict: SIGN-OFF** — one MEDIUM (carry), one LOW (hardening note). No HIGH.
@@ -18,7 +18,7 @@ sha256/CRLF-anchor discipline was not exercised because nothing needed it.
 | LOW | 1 (S2) |
 | Verified-OK (explicitly checked, no defect) | 7 (V1–V7) |
 
-**Coercion delta vs `10fd573`: NO LOSS, and a net GAIN in declaration honesty.** The content
+**Coercion delta vs `ca76a00`: NO LOSS, and a net GAIN in declaration honesty.** The content
 coercion site count is **1 before, 1 after**, the same expression, and a hostile payload
 reaches neither the frame nor the exported SVG. The one defect found is not a coercion
 regression — it is a *width*-accounting gap in a surface this increment newly makes
@@ -73,7 +73,7 @@ max body-row width against `inner = 38`: **layered 38 (correct)**, **outline 42*
 41**. `layered` is width-correct because it routes titles through `darkside.fit`, which
 truncates on `Text.cell_len`. `radial` is the only renderer that sizes a pill with raw `len()`.
 
-**THIS IS NOT A REGRESSION — DO NOT READ IT AS ONE.** At `10fd573`, `_painted_ids_for` returned
+**THIS IS NOT A REGRESSION — DO NOT READ IT AS ONE.** At `ca76a00`, `_painted_ids_for` returned
 `None` for radial, and `LLR-N06.3.3` makes that silence mean *"nothing is hidden"* — the **same
 false claim, at every size, for every input**. This increment narrows a universally-false
 declaration to one that is false only for wide-character titles at narrow terminals. The
@@ -124,12 +124,12 @@ a promise each of three seams must keep. Cheap enough to fold into `Inc-REPAIR`.
 ## Verified OK — checked, no defect
 
 - **V1 — Content coercion is UNCHANGED, exactly one site, and it holds.** `grep` of
-  `darkside.plain` in `radial.py`: **1 match at `10fd573:221`, 1 match at `4bb63bf:239`**, the
+  `darkside.plain` in `radial.py`: **1 match at `ca76a00:221`, 1 match at `942a1de:239`**, the
   same expression (`darkside.plain(node.ficha.title)[:18]`), moved only by the 4-column dedent
   the code review verified as faithful (V1 there). **Fired:** rendered a map whose titles carry
   an OSC-52 clipboard-write payload, a `U+E0020..U+E0024` TAG-block payload, and a `U+202E`
   bidi override. Residual `Cc`/`Cf`/`Zl`/`Zp` code points in the frame: **NONE**.
-- **V2 — The SVG export path is unchanged and still coerced.** `git diff 10fd573..4bb63bf`
+- **V2 — The SVG export path is unchanged and still coerced.** `git diff ca76a00..942a1de`
   touches **no** `mapper/export.py`, `mapper/canvas.py`, `mapper/darkside.py`, `mapper/model.py`
   or `mapper/store.py` (empty `--stat`). The export call site (`app.py:3255-3263`) is outside
   every diff hunk and reaches the canvas through `renderer.render(...)` → `_paint(...)[0]`, the
@@ -179,7 +179,7 @@ a promise each of three seams must keep. Cheap enough to fold into `Inc-REPAIR`.
 
 ## Spot-checks of asserted numbers (calibration, as requested)
 
-Three checked; **all three hold.** The comment corrections made in `540123c` are sound.
+Three checked; **all three hold.** The comment corrections made in `4d2bbaf` are sound.
 
 | Claim | Where | Measured | Holds? |
 |---|---|---|---|
@@ -192,7 +192,7 @@ Three checked; **all three hold.** The comment corrections made in `540123c` are
 `hidden = ['erp', 'inv', 'rrhh']` — `erp` correctly declared **hidden**, where before the fix
 it was declared painted with its last character shorn off.
 
-**Suite baseline:** full run at `4bb63bf`, **984 passed, 19 deselected, 3 xfailed** in 245 s.
+**Suite baseline:** full run at `942a1de`, **984 passed, 19 deselected, 3 xfailed** in 245 s.
 The named flake (`test_llr_cnv_3_1_...`) did not fire on this run. Per the brief, I weight this
 green as a *weaker* green and did not rest any finding on suite colour alone — every conclusion
 above is from a probe I ran, not from a passing test.
@@ -251,7 +251,7 @@ increment's cut and I measured it only to scope S1. Someone should look, but not
   file write. The only new external-state path in the diff is the two fixture files, and V6
   shows they are unreachable from the shipped app.
 - [x] **Data-flow / LFPDPPP check** — the one path on which client data leaves the machine is
-  `export.save_svg`, and it is **byte-identical to `10fd573`** and still coerced (V2). No client
+  `export.save_svg`, and it is **byte-identical to `ca76a00`** and still coerced (V2). No client
   data crosses a new boundary in this increment.
 
 ---
@@ -259,7 +259,7 @@ increment's cut and I measured it only to scope S1. Someone should look, but not
 ## Boundary attestation
 
 Sole writer; **no evidence of another writer** — `git status --porcelain` empty on entry and on
-exit, `git diff --stat` empty, `git rev-parse HEAD` = `4bb63bf` throughout. No mutating git
+exit, `git diff --stat` empty, `git rev-parse HEAD` = `942a1de` throughout. No mutating git
 command was run. **No source mutation was fired**, so no restore was required; all probe
 scripts live in `C:\Users\<operator>\clde\` and every map the probes built was written to a
 `tmp_path` or a `tempfile.mkdtemp()`, never into `fixtures/`. The exported probe SVG went to
@@ -273,7 +273,7 @@ review writes is this artifact.
 - [ ] OK to ship
 - [x] **OK to ship — SIGN-OFF.** No HIGH. `S1` and `S2` are carried to `Inc-REPAIR`, neither
       blocks, and `S1` is explicitly a **narrowing of a pre-existing false claim**, not a
-      regression: at `10fd573` radial's silence asserted "nothing is hidden" at every size for
+      regression: at `ca76a00` radial's silence asserted "nothing is hidden" at every size for
       every input; it now asserts it falsely only for wide-character titles at narrow terminals.
       Content coercion is unchanged and verified intact on both the frame and the exported SVG.
 - [ ] Block

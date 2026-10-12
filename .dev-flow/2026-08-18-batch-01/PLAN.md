@@ -121,7 +121,7 @@ Mermaid diagrams.
   darkside render; US-020..023 READY (23 US total); HANDOFF-improvements.md.
   Note: another session already implemented the darkside redesign into
   production (`mapper/darkside.py`, `mapper/keymap.py`, screens) — commit
-  4cda8a9; the prototypes now read from those shared modules.
+  b9015a9; the prototypes now read from those shared modules.
 
 - 2026-08-18 · design triplet (operator): D-A radial active-path + D-B motion
   flipbook + D-C home identity, all rendered into prototypes/ui_darkside/out/;

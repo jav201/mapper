@@ -41,7 +41,7 @@
     "P1": ".dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md"
   },
   "baseline": {
-    "base_ref": "d6b60e6b4f18b10123fffc76bbb36891473df653",
+    "base_ref": "1b51aca7a11582acf2de878d8138d26cef2d301b",
     "base_ref_name": "origin/master",
     "tests_collected": 245,
     "measured_by": "pytest -q --collect-only",
@@ -53,7 +53,7 @@
       "station": "P0",
       "date": "2026-08-26",
       "decision": "approved",
-      "notes": "RC-1 clean at d6b60e6 (HEAD == origin/master == merge-base). Toolchain entry gate PASS: python 3.12.7, textual 8.2.8, ruff 0.8.4, mypy 1.13.0. Validator: 0 blocks, 20 notices. 20 premises executed; 17 TRUE, 3 FALSE (P-10, P-13, P-20), all three dispositioned in writing and none left open. Seven stories intake-classified: six READY, one REFINE (US-N13 repo marker, pending Q-5). Six blocking questions carried to ARQ/PDR."
+      "notes": "RC-1 clean at 1b51aca (HEAD == origin/master == merge-base). Toolchain entry gate PASS: python 3.12.7, textual 8.2.8, ruff 0.8.4, mypy 1.13.0. Validator: 0 blocks, 20 notices. 20 premises executed; 17 TRUE, 3 FALSE (P-10, P-13, P-20), all three dispositioned in writing and none left open. Seven stories intake-classified: six READY, one REFINE (US-N13 repo marker, pending Q-5). Six blocking questions carried to ARQ/PDR."
     },
     {
       "station": "P0",
@@ -71,9 +71,9 @@
   },
   "previous_batch": {
     "batch_id": "2026-08-25-ui-next-batch-01",
-    "merge_commit": "e359148195789298118cd1faf992093000b5926e",
+    "merge_commit": "3b1a288630c232e6a767835a9311041137ef8462",
     "pr": "https://github.com/<owner>/mapper/pull/1",
-    "closed_at": "d6b60e6b4f18b10123fffc76bbb36891473df653",
+    "closed_at": "1b51aca7a11582acf2de878d8138d26cef2d301b",
     "obsidian_synced": true
   },
   "obsidian_synced": false,

@@ -1,6 +1,6 @@
 # Increment 049 -- Inc-EN-3: English strings in the lane, layered, outline and radial views
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `5865bc8`. Authority: `A-131` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 4 source files (the cap).
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `dbb86b3`. Authority: `A-131` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 4 source files (the cap).
 
 ## 1. What changed
 
@@ -25,7 +25,7 @@ Found by the FULL non-docstring literal dump (an AST walk, 4 files), beyond the 
 
 ## 2. Files modified
 
-Source (4, the cap): `mapper/views/lane.py`, `layered.py`, `outline.py`, `radial.py`. Tests: `tests/test_en3.py` (new, 6 items: 4 file arms, 1 oracle control, 1 lane arm); relabelled or re-derived in `test_overflow`, `test_inc3_census`, `test_repair_depth`; the call-site pin `64 -> 65` in `test_a3_census`; comment only in `test_canvas_header_charge`. Docs: `01-requirements.md` (append `A-131`), this file. `darkside.py`, `app.py`, `keymap.py`, `store.py`, `views/state.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `7a9d383` (code, tests, A-131), `c36ea34` (this record), then the `test_a3_census` pin.
+Source (4, the cap): `mapper/views/lane.py`, `layered.py`, `outline.py`, `radial.py`. Tests: `tests/test_en3.py` (new, 6 items: 4 file arms, 1 oracle control, 1 lane arm); relabelled or re-derived in `test_overflow`, `test_inc3_census`, `test_repair_depth`; the call-site pin `64 -> 65` in `test_a3_census`; comment only in `test_canvas_header_charge`. Docs: `01-requirements.md` (append `A-131`), this file. `darkside.py`, `app.py`, `keymap.py`, `store.py`, `views/state.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `fc2b99f` (code, tests, A-131), `8fb8834` (this record), then the `test_a3_census` pin.
 
 ## 3. Sealed-arm changes
 
@@ -47,7 +47,7 @@ Not relabelled, and why:
 
 ### 3a. Re-derived digests (8)
 
-Both sides were rendered by the test file's own helpers (`_legacy_graph`, `_fingerprint`, `selected_id="fin"`) in the sizes of the pin: `5865bc8` in a scratch worktree (its twelve digests equal the pinned ones, so the harness reads the same thing) and this tree. Each render was cut into `(substring, style)` segments at every span boundary and adjacent equal-style pieces merged. With only the four mappings `sin acta -> no record` (chip and note), `nodos -> nodes`, `fuera de vista -> out of view` and `eliminados -> removed` applied to the base segments, the two segment lists are identical at all twelve keys (`True` x12; trailing pad ignored inside a segment, because the chip is padded to a fixed width). Raw widths: the chip segment is the same width (no card cell moved); the declaration segment is 20 -> 17 cells (Layered 140x8, Outline 140x8); the outline branch notes are 22 -> 23 cells (every Outline key). The four Radial digests are unchanged. The new digests are in the file under a comment saying so. The harness lives outside the repo (`%TEMP%\en3-harness`).
+Both sides were rendered by the test file's own helpers (`_legacy_graph`, `_fingerprint`, `selected_id="fin"`) in the sizes of the pin: `dbb86b3` in a scratch worktree (its twelve digests equal the pinned ones, so the harness reads the same thing) and this tree. Each render was cut into `(substring, style)` segments at every span boundary and adjacent equal-style pieces merged. With only the four mappings `sin acta -> no record` (chip and note), `nodos -> nodes`, `fuera de vista -> out of view` and `eliminados -> removed` applied to the base segments, the two segment lists are identical at all twelve keys (`True` x12; trailing pad ignored inside a segment, because the chip is padded to a fixed width). Raw widths: the chip segment is the same width (no card cell moved); the declaration segment is 20 -> 17 cells (Layered 140x8, Outline 140x8); the outline branch notes are 22 -> 23 cells (every Outline key). The four Radial digests are unchanged. The new digests are in the file under a comment saying so. The harness lives outside the repo (`%TEMP%\en3-harness`).
 
 ### 3b. Re-derived geometry pins (not label changes), declared
 
@@ -68,7 +68,7 @@ The two pins that DO depend on the shorter declaration (section 3b) are at 20..3
 
 ## 5. RED / GREEN and mutants
 
-**Census arm, RED on the base.** A scratch `git worktree` of `5865bc8` under `%TEMP%` (removed), temp HOME, `tests/test_en3.py` copied in with `@pytest.mark.xfail(strict=True)` on the four file arms and the lane arm. Without `--runxfail`: `1 passed, 5 xfailed`. With `--runxfail`: `5 failed, 1 passed` (the four file arms and the lane arm fail; the oracle control passes on both sides, by design). `mapper` was imported from the worktree (its `__file__` checked). GREEN on this tree: `6 passed`.
+**Census arm, RED on the base.** A scratch `git worktree` of `dbb86b3` under `%TEMP%` (removed), temp HOME, `tests/test_en3.py` copied in with `@pytest.mark.xfail(strict=True)` on the four file arms and the lane arm. Without `--runxfail`: `1 passed, 5 xfailed`. With `--runxfail`: `5 failed, 1 passed` (the four file arms and the lane arm fail; the oracle control passes on both sides, by design). `mapper` was imported from the worktree (its `__file__` checked). GREEN on this tree: `6 passed`.
 
 **Mutants.** Harness `%TEMP%\en3-harness\mut.py` (outside the repo): byte-level read and write, sha256 pin per file checked before and after, verdict printed before the restore, `-B`, `-W error::SyntaxWarning`, `-x`, temp HOME and USERPROFILE, git identity from environment. 9 run, 9 killed, 0 survived; all four files restored (`True`). Pins (first 8 hex): `radial.py 1a313966`, `lane.py a9a13b86`, `outline.py 427cd6af`, `layered.py 2f9f6226`.
 
@@ -86,7 +86,7 @@ The two pins that DO depend on the shorter declaration (section 3b) are at 20..3
 
 ## 6. Test results
 
-- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `5865bc8` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `dbb86b3` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
 - `-W error::SyntaxWarning`: the four sources, `test_en3.py` and the edited tests compile clean; every pytest run below carried it (the mutant runs too).
 - Targeted before the fixes (one process, 466 tests: `test_layered*`, `test_outline*`, `test_overflow`, `test_radial*`, `test_lane*`, `test_strips*`, `test_canvas_header_charge`, `test_agree_floor`, `test_vocabulary*`, `test_inc3_census`, `test_repair_depth`, `test_repair_cycles`, `test_darkside_census`, `test_legend_design`, `test_app`, `test_inc9h`): `29 failed, 437 passed, 19 deselected` -- 17 `test_overflow` (the regex, the charge band, the strip stub), 1 `test_inc3_census`, 11 `test_repair_depth` (3 over-bound, 8 digests). After the section 3 / 3b changes: `test_overflow` + `test_inc3_census` + `test_repair_depth` + `test_en3`: 4 failed (3 geometry, 1 outline over-bound fragment: `"was not drawn"` against outline's `"were not drawn"`, fixed by the shorter fragment `"not drawn"`); then `test_overflow` + `test_repair_depth` + `test_en3`: `161 passed, 15 deselected`.
 - Account-name grep of the staged diff (name read at run time from the environment, not printed): 0 hits; no `prototypes/`, `mapper.db` or scratch staged; Cf characters in the staged diff: none (decoded UTF-8, category `Cf`), U+2011: 0, bidi controls: 0.
@@ -101,9 +101,9 @@ The two pins that DO depend on the shorter declaration (section 3b) are at 20..3
 
 ## Full-lane result
 
-`2667 passed, 24 deselected, 3 xfailed` in 1724.7 s (28 min 45 s), `python -B -m pytest -rf -q -W error::SyntaxWarning`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `7afc185` (the last code and test change), run as the last step. Baseline 2660 passed + 1 failed (the `test_inc9c` ux_f3 flake) = 2661; the delta is the 6 new `test_en3.py` items (2661 + 6 = 2667). The flake did not fail this time.
+`2667 passed, 24 deselected, 3 xfailed` in 1724.7 s (28 min 45 s), `python -B -m pytest -rf -q -W error::SyntaxWarning`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `574464e` (the last code and test change), run as the last step. Baseline 2660 passed + 1 failed (the `test_inc9c` ux_f3 flake) = 2661; the delta is the 6 new `test_en3.py` items (2661 + 6 = 2667). The flake did not fail this time.
 
-Lane history, declared: a first full lane on `c36ea34` ended `1 failed, 2666 passed` -- `test_a3_census::test_tc_a3_the_census_cardinalities_are_PINNED` (derived 65 arg-ful `.render(...)` call sites against a pinned 64): the `test_en3.py` lane arm is the +1. It was re-run alone after the fix and passed (15 of 15 in that file). The pin and its ledger entry are in section 3; the lane above was then re-run in full from a fresh output file, nothing else of mine running. That first lane's one failure was not a flake and is not waved away.
+Lane history, declared: a first full lane on `8fb8834` ended `1 failed, 2666 passed` -- `test_a3_census::test_tc_a3_the_census_cardinalities_are_PINNED` (derived 65 arg-ful `.render(...)` call sites against a pinned 64): the `test_en3.py` lane arm is the +1. It was re-run alone after the fix and passed (15 of 15 in that file). The pin and its ledger entry are in section 3; the lane above was then re-run in full from a fresh output file, nothing else of mine running. That first lane's one failure was not a flake and is not waved away.
 
 ## Correction note (EN-8, 2026-10-02)
 

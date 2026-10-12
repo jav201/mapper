@@ -1,6 +1,6 @@
 # Increment 3 — `HLR-GOLD.1` + `LLR-PERF.1`: the derived pin census, `B3`'s correction, the honest fixture
 
-**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `d877784` · **Branch:** `fix/repair-batch-02`
+**Batch:** `2026-08-27-repair-batch-02` · **Base ref:** `bd17fab` · **Branch:** `fix/repair-batch-02`
 **Source files: 0 of 4.** Tests and records only.
 
 > **BLUF.** Trigger `B3` was recorded `not_fired` on a probe that was **correct as executed and had

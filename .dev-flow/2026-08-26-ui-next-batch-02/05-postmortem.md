@@ -10,16 +10,16 @@
 | Field | Value |
 |---|---|
 | Gate record | `python devflow-validate.py --brief <repo root>` exit 1 · 48 block, every one dispositioned in §Validator waivers (V59 28, V53 10, V2 5 → B-101, V56 3, V1 1, V22 1) · 2026-10-08 |
-| Gated tree | `e56b774d9901b01ca2c77f96697607bac26b2124` · dirty — `.dev-flow/BACKLOG.md`, `.dev-flow/2026-08-26-ui-next-batch-02/05-postmortem.md` (the close record itself) |
+| Gated tree | `c1c18ed1828db18ea9df772d7d49bdcc87873894` · dirty — `.dev-flow/BACKLOG.md`, `.dev-flow/2026-08-26-ui-next-batch-02/05-postmortem.md` (the close record itself) |
 
 > Written at the close gate from that run's own `git rev-parse HEAD` and `git status --porcelain`.
-> The merge itself is squash `46e190b` (branch tip `4572e52`), and the one complete gate run on that
+> The merge itself is squash `2eaabf3` (branch tip `daa5c3a`), and the one complete gate run on that
 > tree is **2797 passed / 0 failed** (`gate-run-master-tree.txt`).
 
 ## 🔑 At a glance (read first)
 
 - **Outcome:** closed with carry-over — the batch was **parked at its first PDR gate** (2026-08-26) and
-  **un-parked** (2026-08-27) on a repair-batch base, then merged as squash `46e190b` on 2026-10-03
+  **un-parked** (2026-08-27) on a repair-batch base, then merged as squash `2eaabf3` on 2026-10-03
   with 24 open items carried to the next batch.
 - **Top 3:** ① the Inc-9 security line only converged after deny-lists were replaced by closed
   allow-lists (`S1` for URLs, `safe_local_path` for paths). ② Five instruments across three agents
@@ -43,7 +43,7 @@
   `https://host[:port]/path` or `git@host:path` and refuses everything else before any process. For
   local paths, `osopen.safe_local_path` / `confine_reason` (`04-validation.md:145`, A-119…A-127)
   replaced the drifting deny-list with one containment helper. The squash commit message records it:
-  "closed allow-lists for typed repo URLs (S1) and local paths" (`git show 46e190b`).
+  "closed allow-lists for typed repo URLs (S1) and local paths" (`git show 2eaabf3`).
 - **Repeated review rounds per increment forced defects out, and no HIGH was ever self-cleared.**
   Inc-4c ran three code-review rounds, Inc-5 five, Inc-STRIPS four, Inc-CRUMB four
   (`state.json` `p3_progress.closed` Inc-4c / Inc-5 / Inc-STRIPS / Inc-CRUMB). Every fixed tree went
@@ -103,7 +103,7 @@
 | Findings by severity (blocker/major/minor) | not recorded — no batch-wide severity tally exists; per-station figures ARE recorded (see note below) |
 | Where caught (P2 / P3 gate / P4) | not recorded — no cross-phase "where caught" tally exists |
 | Test ledger (base − D + A = post) | base 429 collected (`PLAN.md:405`) → post 2797 passed (`gate-run-master-tree.txt`; units differ); `base − D + A` not closed — D/A were not recorded as one pair (`04-validation.md:160`) |
-| Files touched · increments (cap trips) | 292 · 126 (`2`) — `git show --stat 46e190b` reports 292 files changed; 126 `increment-0*.md` packet files across 57 numbered increments (counted with `ls`); 2 declared source-file-cap breaches |
+| Files touched · increments (cap trips) | 292 · 126 (`2`) — `git show --stat 2eaabf3` reports 292 files changed; 126 `increment-0*.md` packet files across 57 numbered increments (counted with `ls`); 2 declared source-file-cap breaches |
 
 > **Findings note (why not recorded):** the only recorded, citable finding counts are per-station or
 > per-gap, not a batch total — PDR pass 1 "qa 10 blockers / 14 majors / 11 minors; security 3 blockers
@@ -214,9 +214,9 @@
 
 | Repo | File(s) | Terminal state | Landing / backlog ref |
 |------|---------|----------------|-----------------------|
-| mapper | merged batch — source, tests, `.dev-flow/` records | ✅ committed + landed | squash `46e190b` on `master` (branch tip `4572e52`, 391 commits) |
-| mapper | `04-validation.md`, `06-docs/`, `REQUIREMENTS.md`, `state.json` | ✅ committed — landing by PR | `6e3bb67`, `e56b774` on `docs/ui-next-02-close` |
-| mapper | `05-postmortem.md`, `.dev-flow/BACKLOG.md` | ✅ committed — landing by PR | the close commit after `e56b774` on `docs/ui-next-02-close` |
+| mapper | merged batch — source, tests, `.dev-flow/` records | ✅ committed + landed | squash `2eaabf3` on `master` (branch tip `daa5c3a`, 391 commits) |
+| mapper | `04-validation.md`, `06-docs/`, `REQUIREMENTS.md`, `state.json` | ✅ committed — landing by PR | `2297a60`, `c1c18ed` on `docs/ui-next-02-close` |
+| mapper | `05-postmortem.md`, `.dev-flow/BACKLOG.md` | ✅ committed — landing by PR | the close commit after `c1c18ed` on `docs/ui-next-02-close` |
 | mapper (remote) | `origin/feat/ui-next-batch-02` | ✅ committed + landed (on the remote) | left untouched, pending operator decision M3 (`VERDICT-merge-2026-10-03.md:16`) |
 
 - **Found before the batch:** not recorded — no record in this repo states that a tracked file was
@@ -244,7 +244,7 @@ discharge verified by re-reading the artifact (not by trusting the corrective pa
 | `V2` (AT with no node on disk) | `AT-033/034/035/041/042` | 5 | **Carried** as B-101 (with `AT-044` in B-100) |
 | `V22` (split parent `LLR-N07.2.2` has no `Statement:`) | `01-requirements.md` (sealed) | 1 | **Waived** — the canon carries it as `split`; the sealed requirements block is not rewritten |
 | `V22` (no requirements canon) | `state.json` | — | **Fixed**: `artifact_homes.requirements_canon = repo:REQUIREMENTS.md`, canon folded (91 rows; S07 rows marked superseded, N14 rows deferred; `LLR-COERCE.2` and the split parent `LLR-N07.2.2` added by hand after the fold refused them) |
-| `V61` (ARQ gate never decided) | `state.json` `decisions_log` | 1 | **Fixed** with a RETROACTIVE entry dated by the ARQ artifact's commit (`8675151`, 2026-08-27) and labelled as written at close |
+| `V61` (ARQ gate never decided) | `state.json` `decisions_log` | 1 | **Fixed** with a RETROACTIVE entry dated by the ARQ artifact's commit (`0353909`, 2026-08-27) and labelled as written at close |
 
 - **DDR was never held** as its own gate or artifact. The nearest evidence is the whole-branch Gate-1, Gate-2 and security sign-off before merge (`VERDICT-merge-2026-10-03.md`). Logged as such in `decisions_log`; a process gap, not discharged retroactively.
 - **P4/P5/P6 were written after the merge**, from existing evidence, drafted by `deepseek-v4-pro` and corrected by the orchestrator and a `qa-reviewer` pass (which found an off-by-one citation shift along the Inc-9 chain in P4 and two untraced HLRs in P6, now B-100). Process finding: the closing artifacts should be written before merge, while the evidence is fresh.
@@ -257,7 +257,7 @@ discharge verified by re-reading the artifact (not by trusting the corrective pa
 
 | # | Item | ✓/✗ | Evidence |
 |---|---|---|---|
-| 1 | ONE complete run, launched by the orchestrator — never stitched | ✓ | `gate-run-master-tree.txt` — "2797 passed, 24 deselected, 3 xfailed … executed by the orchestrator … on the squash tree 46e190b" |
+| 1 | ONE complete run, launched by the orchestrator — never stitched | ✓ | `gate-run-master-tree.txt` — "2797 passed, 24 deselected, 3 xfailed … executed by the orchestrator … on the squash tree 2eaabf3" |
 | 2 | Layer 0 unit · Layer A white-box · Layer B black-box | ✓ | `04-validation.md` §Layer 0 (mutation tables), §Layer A (35 amendment rows A-105…A-139), §Layer B (driven surface) |
 | 3 | UX walkthrough with the real mechanism and the painted result | ✓ | `04-validation.md` §UX walkthrough — Textual pilot at each test file's declared widths, painted frame asserted |
 | 4 | Representative + boundary + negative | ✓ | `04-validation.md` §Layer B repr·boundary·negative column |

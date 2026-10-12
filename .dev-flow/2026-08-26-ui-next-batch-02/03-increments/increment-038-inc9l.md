@@ -1,6 +1,6 @@
 # Increment 038 -- Inc-9l: the Inc-9k review fixes and the operator's T1
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `606a13a`. Authority: the operator's Round 9, T1
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `e79abeb`. Authority: the operator's Round 9, T1
 (`VERDICT-inc9-2026-09-30.md`, "Decir las formas") and the coordinator's rulings for the Inc-9k code, ux and security findings.
 Amendment: `A-120` (appended to `01-requirements.md`, dated 2026-10-01).
 
@@ -49,10 +49,10 @@ Sealed-arm changes (what, why; no leak assertion is weakened):
 
 ## 3. Arm table (RED/GREEN)
 
-RED: `tests/test_inc9l.py` committed as strict xfail (`b64026b`), copied into a detached `git worktree` of `606a13a` in `%TEMP%` (no stash),
-`--runxfail`: **40 failed, 61 passed** (101 cases). The 61 passes are pins (green on the base). GREEN: **101 passed** on `910cba3`, `OPEN_STEPS` empty.
+RED: `tests/test_inc9l.py` committed as strict xfail (`93cd0eb`), copied into a detached `git worktree` of `e79abeb` in `%TEMP%` (no stash),
+`--runxfail`: **40 failed, 61 passed** (101 cases). The 61 passes are pins (green on the base). GREEN: **101 passed** on `05cbdda`, `OPEN_STEPS` empty.
 
-| arm family (`test_inc9l`) | cases | RED on `606a13a` | on HEAD |
+| arm family (`test_inc9l`) | cases | RED on `e79abeb` | on HEAD |
 |---|---|---|---|
 | T1: the one sentence names the accepted forms and echoes nothing (5 texts) | 5 | RED x5 | green |
 | T1: the refusal screen paints the sentence (118, 87) | 2 | RED x2 | green |
@@ -72,12 +72,12 @@ RED: `tests/test_inc9l.py` committed as strict xfail (`b64026b`), copied into a 
 | SEC-F2: a plain branch name is unchanged | 1 | green (pin) | green |
 | SEC-F1: a text with a null byte is not a folder | 1 | green (pin) | green |
 
-Reworked arms on `606a13a` (the reworked `test_inc9d/g/h/i/j/k` copied into the same worktree): **94 cases fail** (label-only: `test_inc9k` 72 + 5 + 6, `test_inc9d` 1,
+Reworked arms on `e79abeb` (the reworked `test_inc9d/g/h/i/j/k` copied into the same worktree): **94 cases fail** (label-only: `test_inc9k` 72 + 5 + 6, `test_inc9d` 1,
 `test_inc9h` 2, `test_inc9i` 3, `test_inc9j` 5); every other arm of those files is green on the base.
 
 ## 4. Mutant table
 
-Harness `mutate9l.py` in the session scratchpad, outside the repo; run on a detached `git worktree` of `910cba3` in `%TEMP%`;
+Harness `mutate9l.py` in the session scratchpad, outside the repo; run on a detached `git worktree` of `05cbdda` in `%TEMP%`;
 sha256 pinned before (`github.py` `32f51c5316bccf59...`, `app.py` `0f20d6b0f081e2d2...`), byte-level I/O in the file's own line ending, the verdict
 printed before the file is restored, the pin re-checked after: **pin OK**, both runs. `old` occurs exactly once. `<LF>` is a line break. Run `-x`.
 "arms" = `tests/test_inc9l.py` unless stated.
@@ -116,8 +116,8 @@ real UNC path is ever opened, including under mutant M5.
 ## 5. The consistency table
 
 `painted_repo(x) != (unrecognised URL)` iff `fetch(x)` reaches a process (`subprocess.run` stub that answers rc 128), 52 inputs, `<T>` is the temp directory
-(a folder `work` with `.git`, a folder `plain`, a `-x` with `.git`, and `dashdir/-x` with `.git`; the cwd is the temp directory). Measured on `910cba3` (HEAD) and on
-`606a13a` (base): **0 mismatches on HEAD, 7 on the base** (c00-c05 and c46).
+(a folder `work` with `.git`, a folder `plain`, a `-x` with `.git`, and `dashdir/-x` with `.git`; the cwd is the temp directory). Measured on `05cbdda` (HEAD) and on
+`e79abeb` (base): **0 mismatches on HEAD, 7 on the base** (c00-c05 and c46).
 
 | id | input | painted (HEAD) | reaches a process (HEAD) | painted (base) | base |
 |---|---|---|---|---|---|
@@ -205,9 +205,9 @@ At 87 the header row is shorter (the `◕ mapper` mark moves left); every other 
 
 | check | state |
 |---|---|
-| `tests/test_inc9l.py` + `test_inc9d/f/g/h/i/j/k`, `test_github`, `test_inc9`, `test_inc9c`, `test_inc9e` | executed: 720 passed, 4 deselected (the `network` arms) on `910cba3` |
+| `tests/test_inc9l.py` + `test_inc9d/f/g/h/i/j/k`, `test_github`, `test_inc9`, `test_inc9c`, `test_inc9e` | executed: 720 passed, 4 deselected (the `network` arms) on `05cbdda` |
 | the 4 `network` arms with the tightened patch (`-m network`, local bare repos only, temp HOME, git identity from env) | executed: 4 passed |
-| `ruff check . --exclude prototypes --output-format concise`, set difference vs `606a13a` (a detached worktree; line and column stripped) | executed: 28 lines each side, new = none, gone = none |
+| `ruff check . --exclude prototypes --output-format concise`, set difference vs `e79abeb` (a detached worktree; line and column stripped) | executed: 28 lines each side, new = none, gone = none |
 | Literal Cf/Cc characters in every touched file | executed: none (control and bidi are `\u` escapes) |
 | Full default lane, once, uninterrupted, last step | see "Full-lane result" at the end of this record |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`) | see "Full-lane result" |
@@ -226,9 +226,9 @@ At 87 the header row is shorter (the `◕ mapper` mark moves left); every other 
 
 ## Commits
 
-`b64026b` arms (strict xfail) · `910cba3` `github.py` + `app.py` + sealed-arm edits + `OPEN_STEPS` emptied · docs commit (this record, `A-120`) · docs commit (the full-lane result).
+`93cd0eb` arms (strict xfail) · `05cbdda` `github.py` + `app.py` + sealed-arm edits + `OPEN_STEPS` emptied · docs commit (this record, `A-120`) · docs commit (the full-lane result).
 No push; `state.json` untouched.
 
 ## Full-lane result
 
-2137 passed, 3 xfailed, 24 deselected, 0 failed in 1111.70s (18:31), `-rf`, run once and uninterrupted (background limit 50 minutes) on `ae8a76c` (the docs commit; `test_no_operator_paths` reads `.dev-flow`). Baseline 2036/0 plus the 101 cases of `test_inc9l`. No known flake appeared (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`: not hit). This result line is added by the docs commit after the run.
+2137 passed, 3 xfailed, 24 deselected, 0 failed in 1111.70s (18:31), `-rf`, run once and uninterrupted (background limit 50 minutes) on `7385d82` (the docs commit; `test_no_operator_paths` reads `.dev-flow`). Baseline 2036/0 plus the 101 cases of `test_inc9l`. No known flake appeared (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`: not hit). This result line is added by the docs commit after the run.

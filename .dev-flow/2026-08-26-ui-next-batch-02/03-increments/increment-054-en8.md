@@ -1,6 +1,6 @@
 # Increment 054 -- Inc-EN-8: operator wording (E1-E3), copy carries, `plain()` pins for six sites, review carries
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `9198edf`, code commits `f68d083` (tests, arms first), `045b3b2` (source), then a test fix and the docs. Authority: `A-136` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` Rounds 1-3 (`E1`, `E2`, `E3`, the EN-8 routing paragraph). 4 source files (cap 4, no overage): `mapper/app.py`, `mapper/screens/palette.py`, `mapper/widgets/inspector.py`, `mapper/screens/coverage.py`. No feature, key or row moved.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `114f36c`, code commits `982c494` (tests, arms first), `a871c6e` (source), then a test fix and the docs. Authority: `A-136` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` Rounds 1-3 (`E1`, `E2`, `E3`, the EN-8 routing paragraph). 4 source files (cap 4, no overage): `mapper/app.py`, `mapper/screens/palette.py`, `mapper/widgets/inspector.py`, `mapper/screens/coverage.py`. No feature, key or row moved.
 
 ## 1. What changed
 
@@ -67,7 +67,7 @@ ficha modal, record REC-7        ficha modal, no record
 
 ## 5. RED / GREEN and mutants
 
-RED on the base: scratch `git worktree` of `9198edf` under `%TEMP%` (removed), `tests/test_en8.py` and the carry edits checked out from `f68d083`, `mapper` imported from the worktree (`__file__` checked). Committed with the wording arms `xfail(strict=True)`: without `--runxfail` `8 passed, 12 xfailed`; with `--runxfail` `12 failed, 8 passed`. The 12 failures are assertion failures on the old wording (checked per test, not just counted): `edge of the territory` (2), the old export sentence (1), the old footer at both widths (2), `alfa` without the label `record` (2), `1 descendants` (2), `['Cancel']` (1), `declaration not available` (1), `map from a template` (1). The 8 passes are the six `plain()` pins (7 tests incl. `5a`/`5b`) and the plural control, green on the base by design. The carry edits to `test_en3`, `test_en4`, `test_en5`, `test_en6`, `test_inc9m`, `test_repair_cycles`, `test_vocabulary_declaration` are pins: 174 passed on the base. GREEN: `tests/test_en8.py` 20 passed.
+RED on the base: scratch `git worktree` of `114f36c` under `%TEMP%` (removed), `tests/test_en8.py` and the carry edits checked out from `982c494`, `mapper` imported from the worktree (`__file__` checked). Committed with the wording arms `xfail(strict=True)`: without `--runxfail` `8 passed, 12 xfailed`; with `--runxfail` `12 failed, 8 passed`. The 12 failures are assertion failures on the old wording (checked per test, not just counted): `edge of the territory` (2), the old export sentence (1), the old footer at both widths (2), `alfa` without the label `record` (2), `1 descendants` (2), `['Cancel']` (1), `declaration not available` (1), `map from a template` (1). The 8 passes are the six `plain()` pins (7 tests incl. `5a`/`5b`) and the plural control, green on the base by design. The carry edits to `test_en3`, `test_en4`, `test_en5`, `test_en6`, `test_inc9m`, `test_repair_cycles`, `test_vocabulary_declaration` are pins: 174 passed on the base. GREEN: `tests/test_en8.py` 20 passed.
 
 Mutants: harness in the scratchpad (outside the repo), byte-level read and write (CRLF handled), sha256 pin per file checked after every restore (all `True`), verdict printed before the restore, `-B -W error::SyntaxWarning -x`, temp HOME.
 
@@ -98,7 +98,7 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 ## 6. Test results
 
 - Targeted before the lane: `tests/test_en8.py`, `test_en3`-`test_en6`, `test_inc9m`, `test_repair_cycles`, `test_vocabulary_declaration`, `test_pan`, `test_export_state`, `test_palette`, `test_darkside_census`, `test_inc3_census`, `test_a3_census`, `test_inc9`, `test_key_dispatch`: three old-wording pins failed after the source change (`test_export_state` stale sentence, `test_en5` door note and plural) and were updated; then green.
-- Ruff 0.8.4, programmatic set difference on (file, code, message), `9198edf` in a scratch worktree vs this tree, over the 14 changed `.py` files: 1 and 1, new: none, gone: none.
+- Ruff 0.8.4, programmatic set difference on (file, code, message), `114f36c` in a scratch worktree vs this tree, over the 14 changed `.py` files: 1 and 1, new: none, gone: none.
 - Cf characters (U+2011 included) in every changed file: 0 (one raw U+202E written by an editor tool into `tests/test_en8.py` was found by the grep and replaced by an escape before the first commit); account-name grep: 0. No `prototypes/`, `mapper.db`, `fixtures/.mapper`, `fixtures/mapper.db` or `state.json` staged. No `git stash`. The EN-7 reviewer's worktrees (`en7-rev`) were not touched; my scratch worktree was removed.
 - Full-lane result: below.
 
@@ -111,7 +111,7 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 
 ## Full-lane result
 
-`2746 passed, 24 deselected, 3 xfailed` (0 failed) in 1308 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, uninterrupted, last step, on `8952a2a` (all code and tests; this note follows). Baseline 2725 plus 21 new items (`test_en8.py` 20, `test_vocabulary_declaration.py` 1). Temp HOME and USERPROFILE, git identity from environment, no network. FLAKE-1 and FLAKE-4 did not occur.
+`2746 passed, 24 deselected, 3 xfailed` (0 failed) in 1308 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, uninterrupted, last step, on `f2f729d` (all code and tests; this note follows). Baseline 2725 plus 21 new items (`test_en8.py` 20, `test_vocabulary_declaration.py` 1). Temp HOME and USERPROFILE, git identity from environment, no network. FLAKE-1 and FLAKE-4 did not occur.
 
 Lane history, declared: a first full lane ended `1 failed, 2745 passed` (`test_inc9d::test_inc9d_sec_f1_a_missing_tilde_path_paints_no_profile_path`, "path not supported"). It re-failed alone three times and passed once my USERPROFILE was written correctly: my env file had lost the backslashes of the temp profile path, so `~` expansion produced an unsupported path. An environment fault of mine, not code and not a flake; that lane is not counted. The counted lane is the one above.
 

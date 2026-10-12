@@ -48,11 +48,11 @@ The trigger evaluation `state.json`'s `triggers.record` points at: one row per t
 
 ## Where we are
 
-**P0, RESUMED 2026-10-10** after `2026-10-10-csv-safety-batch` merged (PR #18 `6dfffde`, state PR #19 `5cde04e`); master merged into this branch, `base_ref` re-stamped to `5cde04e`, the csv-safety log archived. Earlier: **P0, PAUSED 2026-10-10.** The measurement is done (`spike/perf-baseline.md` §1–§7; `evidence/perf0*-*.transcript`). The P0 spike also found a data-safety defect outside this batch's scope (B-114: a CSV import saves a map that cannot be re-opened). The operator ruled 2026-10-10 to fix it first in a short separate batch, opened in its own worktree per §Batch rollover; this batch resumes at P0's gate after that batch merges (rebase onto master, archive its log).
+**P0, RESUMED 2026-10-10** after `2026-10-10-csv-safety-batch` merged (PR #18 `6364a02`, state PR #19 `e7d433d`); master merged into this branch, `base_ref` re-stamped to `e7d433d`, the csv-safety log archived. Earlier: **P0, PAUSED 2026-10-10.** The measurement is done (`spike/perf-baseline.md` §1–§7; `evidence/perf0*-*.transcript`). The P0 spike also found a data-safety defect outside this batch's scope (B-114: a CSV import saves a map that cannot be re-opened). The operator ruled 2026-10-10 to fix it first in a short separate batch, opened in its own worktree per §Batch rollover; this batch resumes at P0's gate after that batch merges (rebase onto master, archive its log).
 
 **P1, 2026-10-10.** The contract (`01-requirements.md`) and this PDR were authored (unit PERFARQ, ledger `LED-2026-10-10-perf-batch.1`).
 
-**P1 iteration 1, 2026-10-10.** Round-1 review of the contract + PDR (transcription `PERF-review-r1.md`) returned **ITERATE-to-refine**; rulings R1–R9 applied to `01-requirements.md`, the ledger, `02-review.md` and this PDR (ledger `LED-2026-10-10-perf-batch.2`). Key moves: the layout memo caches the UNSCALED layout on strong references (premise 3 was FALSE); the adjacency cache is a strong-reference `is` check with a widened AST census guard (one mutation per in-place form) and a fresh-list `children_of`; the dump oracle is per-dump ≤ 2E + c plus a scaling ratio [1.8, 2.2] with dangling edges covered; AT-076 drives a real persisting edit gesture through `_save_or_toast` (bare `ctrl+s` with no draft saves nothing); every verification names exact `file::test` node ids (no `-k` substrings); new goldens are pinned at base SHA `5cde04e` with sha256 each, and the wire counter resets after mount; the wire cap tightens to ≤ 1,200,000 (≈ 1/20 of the 23,983,998 baseline); M-M3 becomes the file-diff check `git diff 5cde04e -- mapper/views` empty; P4 wall-clock runs base/head interleaved on the same machine and session (median of 3, raw runs into `04-validation.md`). **Lane S was GATED on spike unit PERFS** — the gate resolved below.
+**P1 iteration 1, 2026-10-10.** Round-1 review of the contract + PDR (transcription `PERF-review-r1.md`) returned **ITERATE-to-refine**; rulings R1–R9 applied to `01-requirements.md`, the ledger, `02-review.md` and this PDR (ledger `LED-2026-10-10-perf-batch.2`). Key moves: the layout memo caches the UNSCALED layout on strong references (premise 3 was FALSE); the adjacency cache is a strong-reference `is` check with a widened AST census guard (one mutation per in-place form) and a fresh-list `children_of`; the dump oracle is per-dump ≤ 2E + c plus a scaling ratio [1.8, 2.2] with dangling edges covered; AT-076 drives a real persisting edit gesture through `_save_or_toast` (bare `ctrl+s` with no draft saves nothing); every verification names exact `file::test` node ids (no `-k` substrings); new goldens are pinned at base SHA `e7d433d` with sha256 each, and the wire counter resets after mount; the wire cap tightens to ≤ 1,200,000 (≈ 1/20 of the 23,983,998 baseline); M-M3 becomes the file-diff check `git diff e7d433d -- mapper/views` empty; P4 wall-clock runs base/head interleaved on the same machine and session (median of 3, raw runs into `04-validation.md`). **Lane S was GATED on spike unit PERFS** — the gate resolved below.
 
 **Spike gate, 2026-10-10 — Lane S WITHDRAWN (else branch, ledger `LED-2026-10-10-perf-batch.3`).** Spike unit PERFS did not establish feasibility: on the seed map at 118×34 and 87×34 the mount renders 2× before AND after the prototype (baseline: one pre-layout `refresh_canvas` render at canvas 0×0 + one settle render; prototype: two settle renders), the final canvas is byte-identical, wide-2000 was not measured (the unit timed out), and the prototype needed a second guarded render site in `_declare_after_layout` plus an A3 census pin change (65→66). Per the pre-written ruling, Lane S leaves the batch to backlog **B-118**; HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn with it. The batch forks **two** lanes — R and M (file sets still disjoint) — and the trunk owns the join.
 
@@ -67,7 +67,7 @@ Bound and reduce the work a large map costs. Measured (P0): opening a wide 2000-
 | Story / station | Status | Notes |
 |---|---|---|
 | P0 | done | measurement done (`spike/perf-baseline.md` §1–§7); resumed after the B-114 batch merged |
-| P1 | in progress | contract + PDR authored (PERFARQ, ledger .1); round-1 review iterated — rulings R1–R9 applied (iteration 1, ledger .2); spike gate resolved the else branch — Lane S withdrawn to B-118 (ledger .3), lanes R and M fork; round-2 review approve-with-conditions — rulings R10–R18 applied and the PDR sealed (iteration 2, ledger .4); next: capture the goldens at the trunk (base SHA `5cde04e`), then fork lanes R and M in parallel worktrees |
+| P1 | in progress | contract + PDR authored (PERFARQ, ledger .1); round-1 review iterated — rulings R1–R9 applied (iteration 1, ledger .2); spike gate resolved the else branch — Lane S withdrawn to B-118 (ledger .3), lanes R and M fork; round-2 review approve-with-conditions — rulings R10–R18 applied and the PDR sealed (iteration 2, ledger .4); next: capture the goldens at the trunk (base SHA `e7d433d`), then fork lanes R and M in parallel worktrees |
 
 ## Roadmap + increment plan
 
@@ -79,7 +79,7 @@ owns requirements/PDR/PLAN + the join (DDR). All verifications name exact `file:
 
 **Fork plan (2026-10-10, after the PDR seal):** (0) the TRUNK captures every new golden first —
 AT-075 painted lines, AT-075b painted lines, AT-076 `.mmd` bytes (pinned to the map AFTER the
-add_child edit) — on base SHA `5cde04e` (pre-remedy) with base SHA + sha256 per golden (the AT-065
+add_child edit) — on base SHA `e7d433d` (pre-remedy) with base SHA + sha256 per golden (the AT-065
 precedent), BEFORE any lane fork; (1) lanes R and M fork into PARALLEL WORKTREES off the stamped
 trunk (the A4 modular split — first parallel fork), each with the disjoint file set below; (2)
 each lane lands its increments and executes its own negative-control transcripts inside the lane;
@@ -110,7 +110,7 @@ verified, P4 wall-clock evidence interleaved base/head on one machine and sessio
   HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077 / AT-077b are withdrawn with the lane — lanes R and M
   proceed regardless.
 - **Join (DDR):** full suite + AT-065 parity goldens + golden census byte-checks; every named
-  negative control executed as a transcript; golden provenance verified (base SHA `5cde04e` +
+  negative control executed as a transcript; golden provenance verified (base SHA `e7d433d` +
   sha256 per golden, captured at the trunk before the fork); P4 wall-clock evidence (base and head
   on the same machine and session, interleaved, median of 3, raw runs pasted into
   `04-validation.md`).
@@ -120,7 +120,7 @@ verified, P4 wall-clock evidence interleaved base/head on one machine and sessio
 | Date | Decision | Why |
 |---|---|---|
 | 2026-10-10 | pause at P0 for B-114 | operator ruling: data safety before performance |
-| 2026-10-10 | resume at P0, rebased on master `5cde04e` | the csv-safety batch merged; its `MapStore.save` round-trip check adds one `parse` per save (+3.2 % at 6 000 nodes) — the save-cost baseline in `spike/perf-baseline.md` §7 predates it |
+| 2026-10-10 | resume at P0, rebased on master `e7d433d` | the csv-safety batch merged; its `MapStore.save` round-trip check adds one `parse` per save (+3.2 % at 6 000 nodes) — the save-cost baseline in `spike/perf-baseline.md` §7 predates it |
 | 2026-10-10 | round-1 rulings R1–R9 applied at P1 iteration 1 (ledger .2) | reviewer findings: premise 3 false, AT-076 vacuous, unsound cache keys, an equivalent M-R1b mutant, a contradicted Lane S mechanism, selector ambiguity, golden provenance, loose P4 protocol |
 | 2026-10-10 | Lane S gated on spike PERFS; else B-118 | the round-1 mechanism was contradicted by the code (finding B4); the replacement (skip the canvas render only while `canvas.size.width == 0`) ships only with spike evidence, else the lane leaves the batch |
 | 2026-10-10 | Lane S WITHDRAWN to B-118 (else branch; ledger .3) | spike PERFS inconclusive: mount renders 2× before AND after the prototype at 118×34/87×34 on the seed map, final canvas byte-identical, wide-2000 unmeasured (unit timed out), prototype needed a second guarded render site + an A3 census pin change; HLR-PERF.3 / LLR-PERF.3.1–3.2 / AT-077/077b withdrawn with it; lanes R and M proceed |

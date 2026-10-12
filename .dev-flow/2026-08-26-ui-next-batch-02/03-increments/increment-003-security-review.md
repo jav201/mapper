@@ -1,4 +1,4 @@
-# Security Review — Inc-3 (`feat/ui-next-batch-02`, uncommitted over `954f8f3`)
+# Security Review — Inc-3 (`feat/ui-next-batch-02`, uncommitted over `909cc27`)
 
 ## VERDICT: **BLOCK** — 2 HIGH, 3 MEDIUM, 3 LOW
 
@@ -20,7 +20,7 @@ and split-at-width arms, which are genuinely discriminating (mutation-tested).
 
 ## Scope reviewed
 
-`git diff HEAD` plus untracked files at branch `feat/ui-next-batch-02`, base `954f8f3`:
+`git diff HEAD` plus untracked files at branch `feat/ui-next-batch-02`, base `909cc27`:
 21 files, +2821 / −89. Product: `mapper/app.py`, `mapper/keymap.py`,
 `mapper/views/layered.py`, `mapper/views/outline.py`, `mapper/views/state.py`,
 `mapper/widgets/rail.py`. New fixtures `fixtures/anidado.mmd` / `anidado_nodos.yml`.
@@ -29,7 +29,7 @@ Tests `tests/inc3_support.py`, `test_inc3_census.py`, `test_fold.py`, `test_over
 
 **Shared working tree not modified.** All work ran in an exported copy at
 `C:\Users\<operator>\AppData\Local\Temp\claude\C--Users-<operator>-clde\9192a111-06ab-49d6-93e0-be74df48d23d\scratchpad\mapper-wt`
-(Inc-3) and `…\9192a111-…\mapper-base` (`git archive 954f8f3`). A sha256 manifest of
+(Inc-3) and `…\9192a111-…\mapper-base` (`git archive 909cc27`). A sha256 manifest of
 167 tracked `.py/.yml/.mmd/.md` files under `mapper/ tests/ fixtures/ .dev-flow/` was
 taken before and after: **167/167 digests identical**. The single manifest delta is one
 *added* file, `03-increments/increment-003-code-review.md`, written by the concurrent
@@ -167,7 +167,7 @@ Baseline suite in the exported copy: **784 passed, 17 deselected in 87.46 s**.
 
 - **Where:** `mapper/app.py:1593` (`self._reclamp_pan(w, h)` → `pan_extent`) and
   `mapper/app.py:1623` (`_pagination_text` → `_unpainted_ids` → `painted_ids`). At
-  `954f8f3` the only `_tree_layout`-reaching call in `refresh_canvas` was
+  `909cc27` the only `_tree_layout`-reaching call in `refresh_canvas` was
   `renderer.render(...)`, inside the try, and `_pagination_text` had no `painted_ids` call.
 
 - **Why it matters:** A contained, declared degradation ("no se pudo dibujar el mapa")
@@ -304,11 +304,11 @@ Baseline suite in the exported copy: **784 passed, 17 deselected in 87.46 s**.
   node count stays linear. `MAX_RENDER_NODES = 12000` does not defend it — the attack uses
   ~50 nodes.
 - **Where:** `mapper/views/layered.py:155-179` (unchanged by this increment).
-- **Why it matters / not a blocker:** measured identically at `954f8f3` and at Inc-3, so
+- **Why it matters / not a blocker:** measured identically at `909cc27` and at Inc-3, so
   **this increment does not introduce it**:
 
   ```
-  levels  nodes   edges         ms          BASE 954f8f3
+  levels  nodes   edges         ms          BASE 909cc27
       12     25      46       3.68            3.31
       16     33      62      53.06           55.23
       18     37      70     214.82          220.91
@@ -358,7 +358,7 @@ Payload per title, all `chr()`-constructed: a Rich-markup literal, `U+0001`, a b
 `U+202E`…`U+202C` pair, `U+200D`, `U+200B`, six TAG-block code points `U+E0053 U+E0045
 U+E0043 U+E0052 U+E0045 U+E0054` and `U+E007F`.
 
-**The pre-state defect was real.** The same probe at `954f8f3`:
+**The pre-state defect was real.** The same probe at `909cc27`:
 
 ```
   Layered   80x24  svg_leak=[]                                     xml=well-formed
@@ -394,7 +394,7 @@ one statement of the ordering rather than one per call site.
 
 `darkside.plain` is `str.translate` over a 1:1 map (`darkside.py:410-428`), so it is
 length-preserving and distributes over slicing. Executed against the **uncoerced**
-`954f8f3` truncators:
+`909cc27` truncators:
 
 ```
   layered._clip  w=1..40  commutes=True   (all six widths)

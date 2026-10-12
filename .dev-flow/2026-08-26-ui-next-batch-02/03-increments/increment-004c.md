@@ -1,7 +1,7 @@
 # Increment 4c — `LLR-N07.3.4`: one regime, not two (`#D43`)
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-4c` · **Branch:** `feat/ui-next-batch-02`
-**Entry commit:** `9ba2f26`, tree clean except the `.dev-flow/` spec edits · **NOT COMMITTED** — the working tree is what is gated.
+**Entry commit:** `a6dc8d7`, tree clean except the `.dev-flow/` spec edits · **NOT COMMITTED** — the working tree is what is gated.
 **SOURCE FILE COUNT: 1** — `mapper/app.py`. Tests uncapped, as declared.
 **Language:** English (engineering artifact).
 
@@ -331,7 +331,7 @@ at the narrow end of the band.
 
 # Review round 2 — code-review BLOCK cleared, security items applied
 
-**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `9ba2f26` · **nothing committed.**
+**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `a6dc8d7` · **nothing committed.**
 **Scope unchanged:** 1 source file (`mapper/app.py`); tests uncapped.
 
 **Exit digests, declared before any claim below is read:**
@@ -492,7 +492,7 @@ landed; the run above is at the exit digest `a257b9c1…` and supersedes it. Bot
 fixes added assertions rather than arms.*
 
 **Ruff SET over `mapper/ tests/`, identical scope:** `Found 27 errors.` — compared against a clean
-`9ba2f26` checkout as sorted `file + rule` sets with line and column stripped: **diff empty, zero NEW,
+`a6dc8d7` checkout as sorted `file + rule` sets with line and column stripped: **diff empty, zero NEW,
 zero GONE.**
 
 ## R2.7 · Mutation battery round 2 — 7 arms, 7 KILLED, 7 sha256 restores
@@ -595,7 +595,7 @@ cut as a blocker. **I did not edit it**, as instructed.
 
 ## R2.10 · Evidence checklist — round 2
 
-- [x] **Tests / type checks / lint pass** — `853 passed, 17 deselected, 3 xfailed` exit 0; `870 passed, 3 xfailed` all markers; ruff 27, SET-identical to `9ba2f26` (diff empty). Real output pasted in R2.6, from a tree with zero other writers, verified by process count.
+- [x] **Tests / type checks / lint pass** — `853 passed, 17 deselected, 3 xfailed` exit 0; `870 passed, 3 xfailed` all markers; ruff 27, SET-identical to `a6dc8d7` (diff empty). Real output pasted in R2.6, from a tree with zero other writers, verified by process count.
 - [x] **No secrets in code or output** — no credentials, tokens or paths beyond the repo; no `.env` read or written. No hostile code point spelled verbatim in this file: all named as `U+XXXX`.
 - [x] **No destructive commands run without approval** — deletions confined to my own scratchpad (`rm -rf` on the disposable mirror and its logs) and `Stop-Process` on my own four runaway battery processes. **Nothing in the repo deleted, reset, forced or committed.**
 - [x] **File count within cap** — **1 SOURCE file** (`mapper/app.py`). Tests uncapped, as scoped.
@@ -606,7 +606,7 @@ cut as a blocker. **I did not edit it**, as instructed.
 
 # Review round 3 — independent confirmation pass · **VERDICT: BLOCK**
 
-**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `9ba2f26` · **nothing committed.**
+**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `a6dc8d7` · **nothing committed.**
 **Conducted by:** a fresh `code-reviewer` with no round-1 or round-2 context, dispatched by the
 orchestrator under the standing rule that **a HIGH is never self-cleared**.
 
@@ -741,7 +741,7 @@ the five are one line each) or to re-scope, this being the **second** round on t
 
 # Round 3 — fixes applied · awaiting the narrow third pass
 
-**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `9ba2f26` · **nothing committed.**
+**Date:** 2026-08-29 · **Branch:** `feat/ui-next-batch-02` · **Entry:** `a6dc8d7` · **nothing committed.**
 **Authorised by coordinator ruling, 2026-08-29:** fix in-increment (one source file, zero
 shipped-behaviour change, the `H1-R` fix proven in both directions, four one-liners), then a third pass
 scoped ONLY to `H1-R` and `F-B`.
@@ -827,7 +827,7 @@ TREE UNCHANGED THROUGHOUT   (sha256 of both sources pinned pre-run and post-run,
 **Ledger.** Default 853 -> **854**; all-markers 870 -> **871**. Both **+1**, and the +1 is the single
 new arm named in R3F.2. The other four fixes added assertions to existing arms, so they move no count.
 
-**Ruff SET over `mapper/ tests/`, identical scope, against a clean `9ba2f26` export:** base **27**,
+**Ruff SET over `mapper/ tests/`, identical scope, against a clean `a6dc8d7` export:** base **27**,
 work **27**, **zero NEW, zero GONE**. The comparator asserts `parsed base=27 work=27` **before** it is
 allowed to compare.
 
@@ -894,7 +894,7 @@ phase** and is carried in the backlog until then.
 
 ## R3F.9 · Evidence checklist — round 3
 
-- [x] **Tests / type checks / lint pass** — `854 passed, 17 deselected, 3 xfailed` exit 0; `871 passed, 3 xfailed` all markers; ruff SET-identical to `9ba2f26`, zero NEW / zero GONE. One clean run, from a tree pinned before and after; one contaminated run discarded and declared in R3F.5.
+- [x] **Tests / type checks / lint pass** — `854 passed, 17 deselected, 3 xfailed` exit 0; `871 passed, 3 xfailed` all markers; ruff SET-identical to `a6dc8d7`, zero NEW / zero GONE. One clean run, from a tree pinned before and after; one contaminated run discarded and declared in R3F.5.
 - [x] **No secrets in code or output** — no credentials, tokens or paths beyond the repo; no `.env` read or written. No hostile code point spelled verbatim in this file; mutations described by position and operation.
 - [x] **No destructive commands run without approval** — deletions confined to my own scratchpad (the disposable mirror). **Nothing in the repo deleted, reset, forced or committed.**
 - [x] **File count within cap** — **1 SOURCE file** (`mapper/app.py`). Tests uncapped, as scoped.
@@ -1024,7 +1024,7 @@ three reproduce the round-3 result exactly.
 |---|---|---|---|
 | default lane | `854 passed, 17 deselected, 3 xfailed` exit 0 | `854 passed, 17 deselected, 3 xfailed` exit 0, 210.34s | **reproduces** |
 | all markers (`-o addopts=`) | `871 passed, 3 xfailed` exit 0 | `871 passed, 3 xfailed` exit 0, 234.76s | **reproduces** |
-| ruff SET over `mapper/ tests/` vs a clean `9ba2f26` export | 27 = 27, zero NEW / zero GONE | 27 = 27, **19 `(file, rule)` pairs**, zero NEW / zero GONE | **reproduces** |
+| ruff SET over `mapper/ tests/` vs a clean `a6dc8d7` export | 27 = 27, zero NEW / zero GONE | 27 = 27, **19 `(file, rule)` pairs**, zero NEW / zero GONE | **reproduces** |
 
 The lane arithmetic holds independently: `854 + 17 deselected = 871`.
 
@@ -1067,7 +1067,7 @@ Both were found before any verdict was believed, which is the only reason they a
 (**C-57**).
 
 1. **Config-discovery contamination — the baseline was measuring a different rule set.** The clean
-   `9ba2f26` export was materialised under `/tmp`, and ruff walks *upward* for configuration: from
+   `a6dc8d7` export was materialised under `/tmp`, and ruff walks *upward* for configuration: from
    that path it resolved a config enabling `I001`, which is **not** in ruff's default set, and
    reported `Found 70 errors` against the repo's 27. The two sides were never comparable. Confirmed
    by `--show-settings` (`I001` present in the export's resolved rules, absent in the repo's), and
@@ -1082,7 +1082,7 @@ Both were found before any verdict was believed, which is the only reason they a
 on each side, 27 and 27), and carries a **positive control**: a synthetic entry planted into the work
 set must be reported as NEW. It is, so a `zero NEW / zero GONE` verdict from it is a measurement and
 not a silence. The export it reads is itself digest-verified — all **236** blobs `git hash-object`
-byte-identical to `9ba2f26`, materialised with `core.autocrlf=false` (**B-53**: both `clone --local`
+byte-identical to `a6dc8d7`, materialised with `core.autocrlf=false` (**B-53**: both `clone --local`
 and `git archive` re-materialise CRLF with autocrlf on, which would have made every file differ).
 
 ### P3.8.3 · A staleness in this document's own BLUF, left standing and named

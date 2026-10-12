@@ -28,7 +28,7 @@
 | Field | Value |
 |---|---|
 | Gate record | `python devflow-validate.py .` from the project root · exit 1 · 1 block · 380 notice · 2026-10-09 |
-| Gated tree | `ca3c81127dca66ee25306fc52141fe169002e683` · dirty — .dev-flow/BACKLOG.md (the close record itself excluded) |
+| Gated tree | `6005a63e98b829bc45d4301b9e8dace4e9613e04` · dirty — .dev-flow/BACKLOG.md (the close record itself excluded) |
 | Requirements canon | `REQUIREMENTS.md`. **⚠ Read §2 before trusting this row.** Every id this batch declares as a heading (`HLR-001`, `HLR-002`, `LLR-001.1`, `LLR-001.2`, `LLR-002.1`) is a token in the canon, but each token belongs to `2026-10-08-data-safety-batch`. `--fold-canon` printed `0 folded, 5 kept`. This batch's own statements are NOT in the canon (B-105). |
 
 - **The one block is `V7`, and it is external:** the installed flow bundle's `SKILL.md` hash differs from its manifest (`29e9c490927538a7 != a2751ce96e24b120`). The bundle was changed outside this project by the session that owns rev101. This batch does not modify `~/.claude` (trigger F1, PLAN.md). Every other rule is green or a notice.
@@ -47,7 +47,7 @@
 | `HLR-002` | `v1` | `AT-062` | pass |
 | `LLR-002.1` | `v1` | `HOME-1` killed (`evidence/b99-home1-mutation.transcript`) | pass |
 
-The gate suite ran on `092875e`: 2924 passed, 3 xfailed, 0 failed (`evidence/p4-full-suite.transcript`). P4 verdict: `PASS-WITH-NOTES`.
+The gate suite ran on `5f19b6e`: 2924 passed, 3 xfailed, 0 failed (`evidence/p4-full-suite.transcript`). P4 verdict: `PASS-WITH-NOTES`.
 
 ---
 
@@ -73,8 +73,8 @@ The gate suite ran on `092875e`: 2924 passed, 3 xfailed, 0 failed (`evidence/p4-
 
 | File | State | Evidence |
 |---|---|---|
-| `mapper/app.py`, `tests/test_draft_hygiene.py`, `tests/test_draft_save.py`, `tests/test_draft_exits.py`, `tests/test_inc9h.py` | ✅ committed (`092875e`) and landed through the PR of `feat/hygiene-batch` | `git log feat/hygiene-batch` |
-| `.dev-flow/2026-10-09-hygiene-batch/**`, `.dev-flow/state.json`, `.dev-flow/2026-10-08-data-safety-batch/{decisions-log,state-snapshot-at-close}.json` | ✅ committed and landed through the same PR | `c10afef`, `1579e1e`, `f6c6141`, P4 commit, close commits |
+| `mapper/app.py`, `tests/test_draft_hygiene.py`, `tests/test_draft_save.py`, `tests/test_draft_exits.py`, `tests/test_inc9h.py` | ✅ committed (`5f19b6e`) and landed through the PR of `feat/hygiene-batch` | `git log feat/hygiene-batch` |
+| `.dev-flow/2026-10-09-hygiene-batch/**`, `.dev-flow/state.json`, `.dev-flow/2026-10-08-data-safety-batch/{decisions-log,state-snapshot-at-close}.json` | ✅ committed and landed through the same PR | `8d0f467`, `0477efa`, `ae10f8a`, P4 commit, close commits |
 | `.dev-flow/BACKLOG.md` | ✅ committed in the close commit, landed through the same PR | §4 |
 | worktrees `%TEMP%/ds-units/wt-hyg1`, `wt-b99`, `wt-val` (branches `unit/hyg1`, `unit/b99`, `unit/val`) | 📋 left on purpose: worker scratch, outside the repo tree, never pushed | removed after the merge (scratch rule: the evidence is committed and nothing is running) |
 

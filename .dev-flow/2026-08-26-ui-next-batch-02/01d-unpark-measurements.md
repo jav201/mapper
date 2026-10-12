@@ -1,6 +1,6 @@
 # 01d · Un-park measurements — QA lane
 
-**Batch:** `2026-08-26-ui-next-batch-02` · **Base ref:** `d877784` · **Date:** 2026-08-27
+**Batch:** `2026-08-26-ui-next-batch-02` · **Base ref:** `bd17fab` · **Date:** 2026-08-27
 **Lane:** QA measurement (discharging `02a-qa-acceptance-review.md` §3 blockers)
 **Toolchain:** Python 3.12.7 · Textual 8.2.8 · Windows · `PYTHONUTF8=1`
 
@@ -109,14 +109,14 @@ the painted id set, then assert every declared id has a visible trace" — is gr
 deletion mutation.** It certifies a renderer that declares *nothing* painted, which is exactly the
 shipped pre-state failure. A third predicate is required and is specified in §2.6.
 
-### 2.2 The parked census, re-executed at `d877784`
+### 2.2 The parked census, re-executed at `bd17fab`
 
 `python p1_census.py` — non-overflowing sizes, restated in the "declared hidden" frame the
 requirement uses (`declared = N − traced`; **truth = 0 hidden at every one of these sizes**):
 
 ```
 ==============================================================================
-PART 1 - the PARKED oracle re-executed at d877784
+PART 1 - the PARKED oracle re-executed at bd17fab
 ==============================================================================
 map              w x h        N  id-cs  id-ci  title-full  truth
 legacy(8 nodes)  60x30        8      0      7           4      8
@@ -135,7 +135,7 @@ must have its _clip image present in the real painted text:
 
 (`id-cs` / `id-ci` / `title-full` are counts **traceable**; `truth` is `|declared painted set|`.)
 
-| Reading | Parked claim | Executed at `d877784` | Verdict |
+| Reading | Parked claim | Executed at `bd17fab` | Verdict |
 |---|---|---|---|
 | id, case-sensitive | 0 of 8 | **0 of 8 at every width** → declares **8 hidden when 0 are** | **Confirmed** |
 | id, case-insensitive | 8 of 8 "by fixture luck" | **8 of 8 at w ≥ 80; 7 of 8 at w = 60** | **Confirmed and refined** — the luck also runs out under truncation |
@@ -838,7 +838,7 @@ hand — `PLAN.md` R-6.
 
 Recorded explicitly, per the lane's instruction that the executed result governs.
 
-| # | Parked review says | Executed at `d877784` says | Consequence |
+| # | Parked review says | Executed at `bd17fab` says | Consequence |
 |---|---|---|---|
 | **C-1** | `QA-B-01`: two predicates suffice — return the painted set, and assert every declared id has a visible trace | **`MUT-1` (declared set = ∅) is GREEN on both.** `PRED-1` is an identity; `PRED-2` is vacuously true over an empty set | **A third predicate (traced ⊆ declared) is mandatory.** Without it the replacement oracle re-certifies the shipped defect |
 | **C-2** | `QA-B-02` (dissolved, but its remedy shape is reused in `QA-B-01`): assert "a declared prefix of ≥ 8 characters" | **L=8 false-fails 69 times.** The only discriminating length is **exactly 2**, failing on both sides | **Use the `_clip` image at that width (0 FN / 0 FP over 31 cases), not a prefix** |
@@ -890,7 +890,7 @@ and `PLAN.md` §12.4's live `load_or_notice` work.
 
 ## 10 · Provenance
 
-Probes executed 2026-08-27 against a clean working tree at `d877784` (`git status --short` showed
+Probes executed 2026-08-27 against a clean working tree at `bd17fab` (`git status --short` showed
 only the pre-existing ` M .dev-flow/state.json` and the untracked batch directory; `prototypes/**`
 untouched). All scripts and all synthetic fixtures were written to the session scratchpad and a
 `tempfile.mkdtemp()` workspace. Commands, all run with `PYTHONUTF8=1`:

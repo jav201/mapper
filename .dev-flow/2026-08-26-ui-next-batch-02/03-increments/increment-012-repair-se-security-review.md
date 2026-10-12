@@ -1,8 +1,8 @@
 # Increment 012 — Inc-REPAIR S-E — independent security review
 
-**Range:** `git diff fdbdd62..46075a4 -- mapper/ tests/`
+**Range:** `git diff febbd20..9da9e44 -- mapper/ tests/`
 **Reviewer:** security-reviewer (gate 2 of 2; code review at
-`increment-012-repair-se-code-review.md` returned BLOCK on 3 HIGH, all folded at `46075a4`)
+`increment-012-repair-se-code-review.md` returned BLOCK on 3 HIGH, all folded at `9da9e44`)
 **Date:** 2026-09-11
 
 ## VERDICT: **BLOCK** — 2 HIGH
@@ -10,7 +10,7 @@
 The code review's HIGH-1 is **closed, and I verified it by firing rather than by reading** — the
 shipped `Text(darkside.plain(...))` neutralises every markup class I could reach, including two the
 code review did not name. That part of the stage is sound and the coercion posture at the render
-sinks is a clear **gain** over `fdbdd62`.
+sinks is a clear **gain** over `febbd20`.
 
 The block is elsewhere:
 
@@ -29,7 +29,7 @@ The block is elsewhere:
 
 ## Boundary statement
 
-**I was the sole agent touching this tree.** Working tree clean at `46075a4` on entry and on exit.
+**I was the sole agent touching this tree.** Working tree clean at `9da9e44` on entry and on exit.
 No evidence of another writer.
 
 **Mutations.** One (`M-SEC-1`, fired twice). Byte-level against a **CRLF** anchor with the match
@@ -65,8 +65,8 @@ from disk. Hostile code points are named as `U+XXXX` per `C-56` and never pasted
 2. Whether `app.py:253` / `app.py:3342` were deliberately deferred. Nothing I read records a
    deferral, and `LLR-N06.2.5` ratifies the *derived-census* discipline for `notify` only.
 
-**Suite, and how much I weight it.** `46075a4` baseline: **997 passed, 19 deselected, 3 xfailed in
-261.32 s** (the code review measured 995/20/3 at `ea5d4c2`; the two folded arms account for the
+**Suite, and how much I weight it.** `9da9e44` baseline: **997 passed, 19 deselected, 3 xfailed in
+261.32 s** (the code review measured 995/20/3 at `3bcec4d`; the two folded arms account for the
 delta). This lane contains the named `FLAKE-1` (`_focus_owner` axis, `state.json` → `named_flakes`),
 so **it is a weaker green than the count suggests** and I have not used it as evidence for anything
 positive. I use it in exactly one direction — to show that a mutant it *should* redden does not
@@ -299,7 +299,7 @@ notify sites total = 31   non-literal first arg = 19
 The markup half holds. The **coercion half is still 15 sites** — that is `LLR-N06.2.5`'s ratified
 open work, unchanged by this diff and **not re-reported here as new**; I record the re-derivation
 only because I assert the markup half in this report and would not assert it unmeasured. (The doc's
-parked total of 30 is now 31; a site was added since `d877784`.)
+parked total of 30 is now 31; a site was added since `bd17fab`.)
 
 **The systemic gap:** the batch ratified a **derived census** for the `notify` sink family
 (`LLR-N06.2.5`: *"the verification shall obtain the set of such call sites by derivation from the
@@ -426,7 +426,7 @@ the regression.
 **Fired — `M-SEC-1` against the whole suite.**
 
 ```
-baseline  46075a4         997 passed, 19 deselected, 3 xfailed in 261.32s
+baseline  9da9e44         997 passed, 19 deselected, 3 xfailed in 261.32s
 M-SEC-1   Text() removed  997 passed, 19 deselected, 3 xfailed in 257.20s   exit code 0
           anchor match count = 1 | restored sha256 374779563fbc3987… MATCH
 ```
@@ -471,7 +471,7 @@ regression are inside this gap.
 > *"Measured on the shipped tree -- benign 31 chars; 5 levels 522,311 chars in 0.025 s. Five levels
 > is driven here precisely because it is RED by four orders of magnitude…"*
 
-**Spot-check, using the module's own `amplified()` helper at `46075a4`:**
+**Spot-check, using the module's own `amplified()` helper at `9da9e44`:**
 
 ```
 levels=0: total=31 chars in 25.1 ms     <- holds
@@ -506,7 +506,7 @@ defect reintroduced, five levels emitted 522,311 chars in 25 ms — red by 261×
 
 ---
 
-## Coercion posture relative to `fdbdd62`
+## Coercion posture relative to `febbd20`
 
 **Net: a real gain at the render sinks, a real loss at the diagnostic sink.**
 
@@ -535,7 +535,7 @@ defect reintroduced, five levels emitted 522,311 chars in 25 ms — red by 261×
    a fourth instance of this class; SEC-M3 is a correction to the record and should land with the
    HIGHs.
 
-SEC-H2 and SEC-L3/L4 are **outside `fdbdd62..46075a4`**. I am not blocking S-E for a defect S-E did
+SEC-H2 and SEC-L3/L4 are **outside `febbd20..9da9e44`**. I am not blocking S-E for a defect S-E did
 not introduce — **SEC-H1 alone is the block.** SEC-H2 is nevertheless a HIGH that this gate found
 and that must be scheduled, not carried silently: it is live on `main`, it defeats a destructive
 action's only human gate, and the batch has now written the fix pattern for it twice.
@@ -550,4 +550,4 @@ action's only human gate, and the batch has now written the fix pattern for it t
 - [x] New tool / integration scope and blast radius — no new dependency, MCP, connector or outbound
       surface in this diff. The *existing* blast radius is addressed: OSC-8 to the terminal emulator
       (item 1), Textual actions from file content (SEC-H2), and `load_warnings` → `notify` (SEC-H1).
-- [x] Tree left byte-identical to `46075a4`, sha256-verified per file, `__pycache__` purged.
+- [x] Tree left byte-identical to `9da9e44`, sha256-verified per file, `__pycache__` purged.

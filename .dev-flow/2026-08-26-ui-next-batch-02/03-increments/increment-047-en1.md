@@ -1,6 +1,6 @@
 # Increment 047 -- Inc-EN-1: English strings in `osopen`, `github`, the factory screen and the editor
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `2f80142`. Authority: `A-129` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 4 source files (the cap).
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `eeda6b5`. Authority: `A-129` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 4 source files (the cap).
 
 ## 1. What changed
 
@@ -30,7 +30,7 @@ Tests: `tests/test_en1.py` (new, 5 items); labels relabelled in seven files (sec
 
 ## 2. Files modified
 
-Source (4, the cap): `mapper/osopen.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/screens/editor.py`. Tests: `tests/test_en1.py` (new); relabelled `test_darkside_census`, `test_inc9c`, `test_inc9n`, `test_inc9o`, `test_inc9p`, `test_inc9q`, `test_repair_depth`; `test_inc9x3` (one new assertion, no relabel). Docs: `01-requirements.md` (append `A-129`), this file. `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `e9648db`, `9603110`, then the records.
+Source (4, the cap): `mapper/osopen.py`, `mapper/github.py`, `mapper/screens/factory.py`, `mapper/screens/editor.py`. Tests: `tests/test_en1.py` (new); relabelled `test_darkside_census`, `test_inc9c`, `test_inc9n`, `test_inc9o`, `test_inc9p`, `test_inc9q`, `test_repair_depth`; `test_inc9x3` (one new assertion, no relabel). Docs: `01-requirements.md` (append `A-129`), this file. `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `0c42e48`, `11b27ca`, then the records.
 
 ## 3. Sealed-arm label changes (labels only; no assertion weakened)
 
@@ -58,7 +58,7 @@ Pins found by grep that were NOT relabelled, and why:
 
 ## 4. RED / GREEN and mutants
 
-**Census arm, RED on the base.** A scratch `git worktree` of `2f80142` under `%TEMP%` (removed), temp HOME, `tests/test_en1.py` copied in with `@pytest.mark.xfail(strict=True)` on the four file arms: without `--runxfail` `1 passed, 4 xfailed`; with `--runxfail` `4 failed, 1 passed` (the four file arms fail; `test_scanner_sees_what_it_claims` passes on both sides because it scans synthetic source). `mapper` was imported from the worktree (checked). GREEN: `5 passed` on this tree.
+**Census arm, RED on the base.** A scratch `git worktree` of `eeda6b5` under `%TEMP%` (removed), temp HOME, `tests/test_en1.py` copied in with `@pytest.mark.xfail(strict=True)` on the four file arms: without `--runxfail` `1 passed, 4 xfailed`; with `--runxfail` `4 failed, 1 passed` (the four file arms fail; `test_scanner_sees_what_it_claims` passes on both sides because it scans synthetic source). `mapper` was imported from the worktree (checked). GREEN: `5 passed` on this tree.
 
 **Mutants.** Harness `%TEMP%\en1-harness\mut.py` (outside the repo): byte-level read and write, sha256 pin per file checked before and after (all restored: True), verdict printed before the restore, `-B`, `-W error::SyntaxWarning`, temp HOME. 10 run, 10 killed, 0 survived. Pins (HEAD files, first 8 hex): `components.py 06f77b43`, `factory.py b8f3932d`, `osopen.py 54a6b47f`, `github.py f7f29159`, `editor.py 219fa3a8`.
 
@@ -77,13 +77,13 @@ Pins found by grep that were NOT relabelled, and why:
 
 C1..C4 are killed ONLY by the census arm: no existing test pins the osopen words or the editor labels, which is why the census arm exists.
 
-**Full-lane correction (found by the first full lane, 7 failed).** My grep-driven relabel had two errors, both fixed in the commit after `0e20cc6`: (a) the csv import prompt's `archivo no encontrado: {name}` is `app.py:1044`'s own literal, not the factory's, so the csv pins in `test_inc9m` (4 sites) and `test_inc9n` (`d.csv`, and the csv half of `missing.{ext}`) went back to Spanish (a negative `not in` pin on the English word would have been vacuous); (b) `test_repair_depth` pinned `el mapa tiene un ciclo`, a fragment my grep pattern missed. The first M1 run counted 6 kills of which 3 were the csv pins, which do not depend on the factory; the 3 above are the honest count. First full lane on `0e20cc6`: `7 failed, 2646 passed, 24 deselected, 3 xfailed`.
+**Full-lane correction (found by the first full lane, 7 failed).** My grep-driven relabel had two errors, both fixed in the commit after `eb033f1`: (a) the csv import prompt's `archivo no encontrado: {name}` is `app.py:1044`'s own literal, not the factory's, so the csv pins in `test_inc9m` (4 sites) and `test_inc9n` (`d.csv`, and the csv half of `missing.{ext}`) went back to Spanish (a negative `not in` pin on the English word would have been vacuous); (b) `test_repair_depth` pinned `el mapa tiene un ciclo`, a fragment my grep pattern missed. The first M1 run counted 6 kills of which 3 were the csv pins, which do not depend on the factory; the 3 above are the honest count. First full lane on `eb033f1`: `7 failed, 2646 passed, 24 deselected, 3 xfailed`.
 
 ## 5. Test results
 
-- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `2f80142` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `eeda6b5` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
 - `tests/test_en1.py`: 5 passed. `tests/test_inc9x3.py` (with the new assertion): 14 passed.
-- Account-name grep of the staged diff (name read at run time, not printed): 0 hits; no `prototypes/`, `mapper.db` or scratch staged; no Cf characters in the changed files (decoded UTF-8; one stray U+2011 in the word list was found and removed in `9603110`).
+- Account-name grep of the staged diff (name read at run time, not printed): 0 hits; no `prototypes/`, `mapper.db` or scratch staged; no Cf characters in the changed files (decoded UTF-8; one stray U+2011 in the word list was found and removed in `11b27ca`).
 - Environment: temp HOME and USERPROFILE, git identity from environment variables, no network, UNC, device or real cache, no real gh, no real file launched; the launcher is a recording stub in the x3 arms; scratch worktrees removed. No `git stash`. The reviewer's Inc-X3 worktree was not touched.
 
 ## 6. Risks, unmeasured, next
@@ -95,7 +95,7 @@ C1..C4 are killed ONLY by the census arm: no existing test pins the osopen words
 
 ## Full-lane result
 
-`2653 passed, 24 deselected, 3 xfailed` (0 failed) in 1650 s (27 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `f31480e` (the first lane, on `0e20cc6`, is the 7-failure run above), temp HOME, run as the last step. Baseline 2648/0; the delta is the 5 new `test_en1.py` items (the `test_inc9x3` assertion adds no item).
+`2653 passed, 24 deselected, 3 xfailed` (0 failed) in 1650 s (27 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `5111ef3` (the first lane, on `eb033f1`, is the 7-failure run above), temp HOME, run as the last step. Baseline 2648/0; the delta is the 5 new `test_en1.py` items (the `test_inc9x3` assertion adds no item).
 
 ## Correction note (EN-8, 2026-10-02)
 

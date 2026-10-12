@@ -11,7 +11,7 @@
 | Protocol | **FULL** — declared 6-file breach, `A-89` + `A-97` |
 | Agent | `software-dev` |
 | Date | 2026-08-28 |
-| Base | `954f8f3`, branch `feat/ui-next-batch-02` |
+| Base | `909cc27`, branch `feat/ui-next-batch-02` |
 
 ---
 
@@ -38,7 +38,7 @@ size, declared the full node count in its header, and painted **no** overflow de
   1.85 : 1 against `GROUND` and vanishes entirely on the `WINDOWS` rung), painted on the canvas
   header and on `#map-pagination`, both from the one `painted_ids` pass. Absent entirely at zero.
 - **Coercion (`B-47`)** — `layered._clip` coerces before it truncates, so all six `_fit` sites
-  inherit it; `views/outline.py` coerces its title and meta. Executed at `954f8f3`, `LayeredRenderer`
+  inherit it; `views/outline.py` coerces its title and meta. Executed at `909cc27`, `LayeredRenderer`
   (the **default** view) and `OutlineRenderer` both leaked `0x01`, `0x200b` and `0x202e` into
   `export.save_svg`, so `AT-009`'s guarantee held in one of three views.
 
@@ -110,14 +110,14 @@ python -m pytest -q tests/test_pan.py tests/test_fold.py tests/test_overflow.py 
 | `ruff check .` | **28** — the baseline figure, **ZERO NEW** |
 | `ruff check mapper/ tests/` | **28** — same set |
 
-Baseline at `954f8f3`, reproduced before starting: `720 passed, 17 deselected` · `17 passed, 720
+Baseline at `909cc27`, reproduced before starting: `720 passed, 17 deselected` · `17 passed, 720
 deselected` · `737 collected` · `28` ruff. Every figure matched.
 
 ### Signed-balance test ledger — DERIVED, not counted by hand
 
 `post = base − deleted + added` → **`801 = 737 − 0 + 64`** ✓
 
-Executed by collecting node ids from a **detached `git archive` of `954f8f3`** in the scratchpad and
+Executed by collecting node ids from a **detached `git archive` of `909cc27`** in the scratchpad and
 diffing the sorted sets against the working tree — so `deleted = 0` is a measurement, not a claim:
 
 ```
@@ -206,7 +206,7 @@ Derived structurally, not by name: a renderer is *reached* iff a tracked product
 lives, and the day `app.py` names `LaneRenderer` that renderer enters the census automatically.
 
 > **`02j`'s claim about `views/lane.py` was verified mechanically, not adopted.** Re-derived over the
-> tracked tree at `954f8f3`: `LaneRenderer`, `HybridLaneRenderer` and `RailTimelineRenderer` are
+> tracked tree at `909cc27`: `LaneRenderer`, `HybridLaneRenderer` and `RailTimelineRenderer` are
 > named **nowhere** outside `mapper/views/` — zero product call sites, confirmed. Pinned as an
 > equality so the increment that wires one up goes red and inherits the obligation.
 
@@ -252,7 +252,7 @@ bound `enter -> run_selected`, a method `HelpScreen` never defined.
 Asserted **equal** to the entry/exit difference of `bindings_for("map")`: entry 27, exit 31,
 `exit − entry == DECLARED_DIFF`, `entry − exit == ∅`. There is no row budget on Inc-3 —
 `PLAN.md:244`'s "one changed row plus two added rows" is an equality on `D10`'s **own** diff
-(`PDR-addendum-3 #D25`). Executed basis at `954f8f3`: `duplicate_chords() -> []`, map scope binds 27
+(`PDR-addendum-3 #D25`). Executed basis at `909cc27`: `duplicate_chords() -> []`, map scope binds 27
 chords, and of the uppercase letters only `A`, `I`, `R`, `X` were taken.
 
 ---
@@ -315,7 +315,7 @@ value (`93f120a60cc50cae` and `9e2c911fbf9eaa6e`).
   replacements length 1 — so it distributes over slicing. Coerce-then-truncate and
   truncate-then-coerce were compared over **380,000** `(string, width)` pairs: **0** disagreements.
   The stated threshold `t(plain(s), n) == plain(t(s, n))` was **already green on the uncoerced
-  `layered._fit` at `954f8f3`** — I re-executed it before writing any code. It is kept because it is
+  `layered._fit` at `909cc27`** — I re-executed it before writing any code. It is kept because it is
   the requirement's threshold and because it is *not* vacuous for a truncator measuring display
   cells, but the arms that actually discriminate are "0 coerced code points in the output" (**RED**,
   7 arms) and the split-at-width arm. This is flagged in the test's own docstring, not just here.
@@ -371,7 +371,7 @@ the operator cannot see the selection. It should also take `B-58`'s threshold re
 | Check | Evidence |
 |---|---|
 | Tests pass | **POST-FIX: `789 passed, 17 deselected` fast, exit 0, over 8 consecutive runs** (§11.5). Pre-fix: `784 passed` · `17 passed` slow · `801 collected` |
-| Lint | **POST-FIX, set-wise and scope-matched vs `git archive 954f8f3`: base 28, work 27, ZERO NEW**, one removal (§11.5). The pre-fix claim compared totals, which the code review correctly called out |
+| Lint | **POST-FIX, set-wise and scope-matched vs `git archive 909cc27`: base 28, work 27, ZERO NEW**, one removal (§11.5). The pre-fix claim compared totals, which the code review correctly called out |
 | No secrets in code or output | no credential, token or `.env` read or written; hostile fixtures are `chr(0x…)` at test time and **no control byte is spelled into any source file** |
 | No destructive command without approval | none run; nothing committed, pushed or merged; `prototypes/` and `fixtures/mapper.db` untouched |
 | File count within cap | **6 source files, the declared `A-89` + `A-97` breach**; no seventh taken. The fix round touched **2** of those six and took no new source file — `store.py` was routed to Inc-REPAIR rather than opened |
@@ -511,7 +511,7 @@ sha256 returning to its pre-mutation value.
 | Lane | Result |
 |---|---|
 | fast, x8 consecutive | `789 passed, 17 deselected` **8 times out of 8**, exit 0 every run — read from pytest's own exit code, never through a pipe (piping to `tail` reports *tail's* status, which is how a failing run once displayed `exited with code 0`) |
-| ruff, **set-wise** vs `git archive 954f8f3` | base **28**, work **27**, **NEW = ∅**, gone = `mapper/views/layered.py F401` |
+| ruff, **set-wise** vs `git archive 909cc27` | base **28**, work **27**, **NEW = ∅**, gone = `mapper/views/layered.py F401` |
 
 ### Flake tally — the retracted-`B-51` family, closed
 
@@ -578,7 +578,7 @@ pin failed at `(30, 20)` while the frame plainly read `▽ 7 fuera de vista`. No
 | `CR-F13` | Smaller items: the removed-node ghost applies `pan_y` but not `pan_x`; `render` uses `geo.index` with no `None` check; `TC-040` kills its mutant by `KeyError` rather than by its documented oracle |
 | `SEC-F5` | `_hidden_ids` is quadratic in `\|folded\|` — measured **987.8 ms at n = 4000** with every node folded, and `_geometry` runs **4×** per pan keypress. New code, on the repaint path |
 | `SEC-F6` | The truncator census walks `tree.body` only, so a truncator defined as a method escapes it. Latent — all 23 AST candidates were checked and none is a `(str, int) -> str` truncator |
-| `SEC-F7` | `_tree_layout` is **exponential** on a multi-parent DAG — `2^depth` while node count stays linear; **~100 s** to render 49 nodes, measured **identically at `954f8f3` and at Inc-3** (3352 ms vs 3523 ms at 22 levels), so pre-existing. `MAX_RENDER_NODES = 12000` does not defend it. The one shape that hangs rather than raises |
+| `SEC-F7` | `_tree_layout` is **exponential** on a multi-parent DAG — `2^depth` while node count stays linear; **~100 s** to render 49 nodes, measured **identically at `909cc27` and at Inc-3** (3352 ms vs 3523 ms at 22 levels), so pre-existing. `MAX_RENDER_NODES = 12000` does not defend it. The one shape that hangs rather than raises |
 | `SEC-F8` | Test modules shell out to `git ls-files`. Fixed argv, no `shell=True`, call-site-literal globs, test-only. Accepted as-is |
 | `store.py` `_coerce_text_fields` | **Routed to Inc-REPAIR by ruling**, which owns `store.py`. Coercing `key`/`label` at the load boundary is the defence-in-depth half of `SEC-F1`; the sink half ships here |
 
@@ -806,9 +806,9 @@ tracked one, so it cannot silently degrade into the sweep it replaced.
 
 The one `xfailed` is `F-A`, landed deliberately and strict.
 
-### Signed-balance test ledger — DERIVED against `954f8f3`, zero deleted
+### Signed-balance test ledger — DERIVED against `909cc27`, zero deleted
 
-Collected node ids from a detached `git archive 954f8f3` and diffed the sorted sets against the
+Collected node ids from a detached `git archive 909cc27` and diffed the sorted sets against the
 working tree, so `deleted = 0` is a measurement:
 
 ```
@@ -1177,9 +1177,9 @@ not decoration.
 
 The three `xfailed` are `F-A`, one per key, landed deliberately and strict.
 
-### Signed-balance test ledger — DERIVED against `954f8f3`, zero deleted
+### Signed-balance test ledger — DERIVED against `909cc27`, zero deleted
 
-Node ids collected from a detached `git archive 954f8f3` export and diffed set-wise against the
+Node ids collected from a detached `git archive 909cc27` export and diffed set-wise against the
 working tree, so `deleted = 0` is a measurement and not a claim:
 
 ```

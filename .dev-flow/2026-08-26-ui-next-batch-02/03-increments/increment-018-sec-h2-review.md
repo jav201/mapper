@@ -4,9 +4,9 @@
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` (sealed) |
 | Reviewer | `security-reviewer`, independent — authored none of this diff |
-| Subject commit | `3ef067c` *fix(security): SEC-H2* on `feat/ui-next-batch-02` |
-| Repo `HEAD` at start of review | `152ecd9` |
-| Repo `HEAD` at end of review | `2c74347` — **the tree moved under me**, see `S-F1` |
+| Subject commit | `1c52434` *fix(security): SEC-H2* on `feat/ui-next-batch-02` |
+| Repo `HEAD` at start of review | `11c16ef` |
+| Repo `HEAD` at end of review | `24999b5` — **the tree moved under me**, see `S-F1` |
 | Date | 2026-09-19 |
 | **Verdict** | **`SEC-H2` is CLOSED on my own measurement.** 0 HIGH open. 3 MEDIUM + 3 LOW recorded, none blocking. **This authorises nothing and is not a deploy approval.** |
 
@@ -38,14 +38,14 @@ All probing, mutation and lane work ran **outside the repo**, in two sandboxes:
 **Three defects in my own instrument, found and reported rather than hidden
 (`S-F3`).** The brief's description of the mirror is wrong in three ways:
 
-1. **The mirror is not the full tracked tree.** It tracks **282** files; `3ef067c`
+1. **The mirror is not the full tracked tree.** It tracks **282** files; `1c52434`
    tracks **303**. The entire `prototypes/` tree (24 files, including
    `generate.py` / `prototype.py`) is present **on disk** but **absent from the
    mirror's git index**. Every `git ls-files`-driven gate — the `C-56` hostile
    code-point sweep, the `A3` census — therefore runs on a **weaker set** in the
    mirror than in the repo. I drove my own census from `rglob`, not `ls-files`,
    so it did cover `prototypes/`.
-2. **The mirror is not `3ef067c`.** It contains three `.dev-flow` files that exist
+2. **The mirror is not `1c52434`.** It contains three `.dev-flow` files that exist
    only at `HEAD` (`increment-017-qa-F3.md`, `increment-017-ux-F7-AT058.md`,
    `increment-018-item3-pickups.md`). It is `HEAD`-ish minus `prototypes/`.
 3. **Line endings — I initially mis-read this and correct myself.** The brief's
@@ -60,7 +60,7 @@ All probing, mutation and lane work ran **outside the repo**, in two sandboxes:
 
 ## Scope reviewed
 
-`git show 3ef067c` — 2 files, +198/−2: `mapper/app.py` (+32/−2),
+`git show 1c52434` — 2 files, +198/−2: `mapper/app.py` (+32/−2),
 `tests/test_confirm_markup.py` (new, 168 lines).
 
 Blast radius read, not diffed: `mapper/darkside.py`, `mapper/store.py`,
@@ -233,7 +233,7 @@ here comes from the **sink** (`markup=False`), not from the source. The two
 halves are genuinely different hazards, exactly as the packet claims — I verified
 this by mutation (below), where reverting either half left the other arm green.
 
-`name = darkside.plain(node.ficha.title or node.id)` (`app.py:3846` at `3ef067c`,
+`name = darkside.plain(node.ficha.title or node.id)` (`app.py:3846` at `1c52434`,
 `3901` at `HEAD`) is the **only** site that builds the confirmation's quoted
 name; the archive toast eight lines above independently coerces the same value.
 
@@ -280,9 +280,9 @@ Each half kills exactly its own arm — neither arm is carrying both, as claimed
 ## Findings
 
 ### `S-F1` — The sealed repo moved during an independent review  [Severity: MEDIUM]
-- **What:** `HEAD` went `152ecd9` → `2c74347` and `mapper/app.py` changed digest
+- **What:** `HEAD` went `11c16ef` → `24999b5` and `mapper/app.py` changed digest
   (`19aece4e2d44daae` → `3335d63a0ac43610`) while this review was running.
-- **Where:** repo root; commits `344db11`, `63673ee`, `2c74347`.
+- **Where:** repo root; commits `24d6f6e`, `9438652`, `24999b5`.
 - **Why it matters:** a reviewer's verdict names a tree. If the tree moves, the
   verdict silently stops describing the artifact. The 016 review reported a
   weaker form of this (files appearing during the read); this time the **reviewed
@@ -291,7 +291,7 @@ Each half kills exactly its own arm — neither arm is carrying both, as claimed
   require every review to state the digest it measured and re-assert it at the
   end — which is what saved this one.
 - **Impact on this verdict: none, and I verified that rather than assuming it.**
-  The `3ef067c..HEAD` change to `app.py` is the **export budget** (`A-100.4/.5`,
+  The `1c52434..HEAD` change to `app.py` is the **export budget** (`A-100.4/.5`,
   carried out of scope), touching only hunks at `~3517` and `~3601`. I extracted
   both SEC-H2 regions from both revisions and compared them normalised:
   `_ConfirmScreen` **identical** (`87da1c4b2ce5291a`), archive-action block
@@ -399,8 +399,8 @@ Each half kills exactly its own arm — neither arm is carrying both, as claimed
 - [ ] Block — n/a.
 
 `SEC-H2` is **CLOSED on my own measurement**, on the mirror named above, at
-subject commit `3ef067c`, and — verified separately — the two fixed regions are
-byte-identical at current `HEAD` `2c74347`. The closure rests on:
+subject commit `1c52434`, and — verified separately — the two fixed regions are
+byte-identical at current `HEAD` `24999b5`. The closure rests on:
 the defect reproduced by me on the vulnerable shape with the action-binding
 **observed in segment meta**; the fix verified to leave **zero bound actions**;
 all three fired impacts measured closed end-to-end through the real app; a

@@ -13,18 +13,18 @@
 | Lane (if the batch forked) | n/a during the batch — the spine is serial; Inc-0 itself ran as parallel test-only sub-lanes (contract §2.8) |
 | Requirement(s) | `LLR-MOD.4.2 v1` (parity golden) · `LLR-MOD.4.3 v1` (body baseline) · `LLR-MOD.5.1 v1` (six source-reading tests generalised) · traces `HLR-MOD.4`, `HLR-MOD.5` |
 | Acceptance | `AT-065` (painted-capture golden at 118/87 cols) · `AT-069` (per-file assertion-count baseline) · white-box `tests/test_mod_bodies.py` (LLR-MOD.4.3 oracle), `tests/test_mod_parity.py` (LLR-MOD.4.2 runner) · unit none |
-| Agent | The Inc-0 test generalisation + goldens/baselines: **not recorded** in the facts sheet (Inc-0 ran as six disjoint test-only sub-lanes). The ARCHITECTURE TARGET-row fix (20c0161) and the gate run: **orchestrator (Claude Opus 5.5)**. This packet: Kimi unit MODPKT-p1. |
-| Date | `2026-10-10` (commits 90e731b 00:11, 20c0161 00:38, −0600) |
+| Agent | The Inc-0 test generalisation + goldens/baselines: **not recorded** in the facts sheet (Inc-0 ran as six disjoint test-only sub-lanes). The ARCHITECTURE TARGET-row fix (13f81aa) and the gate run: **orchestrator (Claude Opus 5.5)**. This packet: Kimi unit MODPKT-p1. |
+| Date | `2026-10-10` (commits 0bb31a0 00:11, 13f81aa 00:38, −0600) |
 
 ---
 
 ## 1 · What changed
 
-- **AT-065 golden captured on the pre-move commit** `23c90f1a7df85f95f868e23b98840c30f247ee93` ("chore(dev-flow): modular batch PDR -> P3"): TEXT captures of the scripted session (open a map, move, search, toggle a view, export, quit) at widths 118 and 87, stored at the evidence home (`mod_parity_118.txt`, `mod_parity_87.txt`); volatile cells normalised, steps gated on condition waits.
+- **AT-065 golden captured on the pre-move commit** `fb1c39b3f335ef47ef0cd73e9266782eac1bbfeb` ("chore(dev-flow): modular batch PDR -> P3"): TEXT captures of the scripted session (open a map, move, search, toggle a view, export, quit) at widths 118 and 87, stored at the evidence home (`mod_parity_118.txt`, `mod_parity_87.txt`); volatile cells normalised, steps gated on condition waits.
 - **LLR-MOD.4.3 body baseline captured:** `mod-bodies-baseline.json` — per-method `ast.dump` of every census method, the oracle every later increment diffs against.
 - **AT-069 baseline recorded:** `at069-baseline.json` — today's per-file assertion counts (`test_draft_hygiene.py` ≥ 9, `test_darkside_census.py` ≥ 55, `test_keymap.py` ≥ 35, `test_en5.py` ≥ 34, `test_en7.py` ≥ 37, `test_app_imports_used.py` ≥ 2) and the 14 `("mapper/app.py", line)` darkside pins.
 - **Six source-reading tests generalised to the package (LLR-MOD.5.1)** before any code moves: pins locate constructs by content across `mapper/**/*.py` (or via `inspect.getfile(MapScreen)`); `test_keymap.py`'s module set is derived by `pkgutil.walk_packages` (the hand-pinned list is gone). Two new instruments ship: `tests/test_mod_bodies.py` and `tests/test_mod_parity.py`, each carrying its own tmp-copy RED controls.
-- **Gate found `test_repair_map_truth` red** (8 AT-P04 owned-path arms: the ARCHITECTURE composition table declared TARGET files not yet on disk); fixed in 20c0161 by taking the TARGET rows out of the composition table — the map declares only files on disk.
+- **Gate found `test_repair_map_truth` red** (8 AT-P04 owned-path arms: the ARCHITECTURE composition table declared TARGET files not yet on disk); fixed in 13f81aa by taking the TARGET rows out of the composition table — the map declares only files on disk.
 
 ---
 
@@ -44,8 +44,8 @@
 | `.dev-flow/.../evidence/mod_parity_87.txt` | generated | LLR-MOD.4.2 | AT-065 golden, width 87 |
 | `.dev-flow/.../evidence/mod-bodies-baseline.json` | generated | LLR-MOD.4.3 | body baseline JSON |
 | `.dev-flow/.../evidence/at069-baseline.json` | generated | LLR-MOD.5.1, HLR-MOD.5 | AT-069 per-file counts + pins |
-| `docs/ARCHITECTURE.md` | doc | | TARGET rows removed from the composition table (20c0161) |
-| `.dev-flow/.../evidence/inc0-gate-full-suite.transcript` | generated | LLR-MOD.4.1 | the gate run (20c0161) |
+| `docs/ARCHITECTURE.md` | doc | | TARGET rows removed from the composition table (13f81aa) |
+| `.dev-flow/.../evidence/inc0-gate-full-suite.transcript` | generated | LLR-MOD.4.1 | the gate run (13f81aa) |
 
 | Count | Value |
 |---|---|
@@ -72,7 +72,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 | **A · white-box** ↔ LLR | `core` · `full` | `tests/test_mod_bodies.py`, `tests/test_mod_parity.py`, the six generalised files | see gate |
 | **B · black-box** `AT-NNN` ↔ story | `core` · `full` | AT-065 golden capture (pre-move), AT-069 baseline | recorded in evidence |
 
-**Gate (`inc0-gate-full-suite.transcript`, c8f832d8…):** `8 failed, 2972 passed, 24 deselected, 3 xfailed in 1550.19s`, `exit=1`. All 8 failures are `tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[…]` — the composition table declared the 7 TARGET sibling screens + `mapper/screens/map/*.py`, which matched nothing on disk. **This was the gate doing its job, not a regression**: 20c0161 removed the TARGET rows (the map declares only files on disk). A standalone post-fix re-run of the inc0 gate is not recorded; the next gate (a1, `2977 passed … exit=0`) includes the fixed ARCHITECTURE and these tests green.
+**Gate (`inc0-gate-full-suite.transcript`, c8f832d8…):** `8 failed, 2972 passed, 24 deselected, 3 xfailed in 1550.19s`, `exit=1`. All 8 failures are `tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk[…]` — the composition table declared the 7 TARGET sibling screens + `mapper/screens/map/*.py`, which matched nothing on disk. **This was the gate doing its job, not a regression**: 13f81aa removed the TARGET rows (the map declares only files on disk). A standalone post-fix re-run of the inc0 gate is not recorded; the next gate (a1, `2977 passed … exit=0`) includes the fixed ARCHITECTURE and these tests green.
 
 ### RED counterfactual — executed, not predicted
 
@@ -112,7 +112,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Artifact emitted | The assertion, run against the EMITTED form | What it returned |
 |---|---|---|
-| `mod_parity_118.txt` / `mod_parity_87.txt` | golden record: captured on commit `23c90f1a7df85f95f868e23b98840c30f247ee93`; sha256 of the stored bytes asserted by `tests/test_mod_parity.py` | `43af8e1e7613f23e9da0b9a3090c880c6b6f1cc0341f9befb8e032efd95fbf2d` (118) · `6ba755535f102742931c93af98a54889ea4ecc6e132f43a1db78f8461a889b9b` (87) — re-verified on disk 2026-10-10 |
+| `mod_parity_118.txt` / `mod_parity_87.txt` | golden record: captured on commit `fb1c39b3f335ef47ef0cd73e9266782eac1bbfeb`; sha256 of the stored bytes asserted by `tests/test_mod_parity.py` | `43af8e1e7613f23e9da0b9a3090c880c6b6f1cc0341f9befb8e032efd95fbf2d` (118) · `6ba755535f102742931c93af98a54889ea4ecc6e132f43a1db78f8461a889b9b` (87) — re-verified on disk 2026-10-10 |
 | `mod-bodies-baseline.json` | pinned path read by `tests/test_mod_bodies.py` | sha256 `7c76289cb7ed2649cc01edb870bc7d49d28d1cbf15eca3e1f7947f504aec6836` — re-verified on disk |
 
 | Field | Value |
@@ -164,7 +164,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 | Correction | Population — the assertion category | Enumeration method (the command) | Count | Sites edited | Sites left, and why |
 |---|---|---|---|---|---|
 | path-pinned source reads that must generalise to the package | the source-reading test files of premise 3 | `grep -rln 'app\.py"\|app\.__file__\|inspect\.getsource' tests` (P0 premise 3) | 17 files, 6 in scope (the other 11 read `app.py` for other reasons) | 6 test files | none — the 2 new instruments cover the moved-construct oracles |
-| AT-P04 composition rows for files not on disk | TARGET rows in the ARCHITECTURE composition table | the gate's 8 failures | 8 | 8 rows removed (20c0161) | none |
+| AT-P04 composition rows for files not on disk | TARGET rows in the ARCHITECTURE composition table | the gate's 8 failures | 8 | 8 rows removed (13f81aa) | none |
 
 | Field | Value |
 |---|---|
@@ -174,7 +174,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| TARGET rows in the ARCHITECTURE composition table | 0 surviving owned-path arms | yes | inc0 gate: 8 failed → 20c0161 → a1 gate 2977 passed, exit=0 |
+| TARGET rows in the ARCHITECTURE composition table | 0 surviving owned-path arms | yes | inc0 gate: 8 failed → 13f81aa → a1 gate 2977 passed, exit=0 |
 
 ### Signed-balance test ledger
 
@@ -198,7 +198,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 ## 6 · Pending items / spec deviations
 
-- The gate's 8 failures were repaired by a docs commit (20c0161) inside the same increment, not by landing code early — no deviation.
+- The gate's 8 failures were repaired by a docs commit (13f81aa) inside the same increment, not by landing code early — no deviation.
 - None open.
 
 ## 7 · Suggested next task
@@ -212,7 +212,7 @@ A1 (increment 002): shared helpers → `mapper/screens/common.py`, first product
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 0 / 4 — test-only; contract forbids `mapper/**` edits at Inc-0 |
-| 2 | Tests written in this same increment | all | ✓ | 8 test files in 90e731b (6 generalised + test_mod_bodies + test_mod_parity) |
+| 2 | Tests written in this same increment | all | ✓ | 8 test files in 0bb31a0 (6 generalised + test_mod_bodies + test_mod_parity) |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | n/a — no unit meets the criterion; new instruments are white-box |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | §4 — tmp-copy arms inside the two new instruments + AT-069 duplicated/deleted pin |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | §4 — B3/B4 resolved; no product symbol touched |

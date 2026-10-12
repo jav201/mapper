@@ -7,8 +7,8 @@
 | Agent | `software-dev` |
 | Date | 2026-09-30 |
 | Authority | Finding `INC9BC-UX` section E, `SEED-1` and `SEED-2` (independent UX review of Inc-9b/9c, reproduced through the real key path) |
-| Starting state | branch `feat/ui-next-batch-02` @ `fddd07d`, clean |
-| Commits | `7521ac9` (requirement `A-113` + RED arms, strict xfail) -> `597b7fa` (fix, xfail set emptied) -> docs commit (this file, `BACKLOG.md`) |
+| Starting state | branch `feat/ui-next-batch-02` @ `32d9c47`, clean |
+| Commits | `4f6aad1` (requirement `A-113` + RED arms, strict xfail) -> `717a522` (fix, xfail set emptied) -> docs commit (this file, `BACKLOG.md`) |
 | Source files | 2 (`mapper/store.py`, `mapper/app.py`); cap 4 |
 
 ---
@@ -83,7 +83,7 @@ Method: grep of `write_text|write_bytes|open(|mkdir|save_svg|shutil|.replace(|un
 Not driven with real keys: 4-7 (they need a loaded map or a hand-edited file); covered by the store-level arms and
 the mutant M4.
 
-### RED before the fix (commit `7521ac9`, run on the `fddd07d` tree)
+### RED before the fix (commit `4f6aad1`, run on the `32d9c47` tree)
 
 `pytest tests/test_seed_safety.py -q`: **4 passed, 43 xfailed** (strict xfail: any accidental pass would fail the
 run). Driven again with `--runxfail` to read the real failures:
@@ -101,7 +101,7 @@ run). Driven again with `--runxfail` to read the real failures:
 Positive controls that pass on the base and must keep passing: a valid new name creates the map through all three
 entries; ordinary names (`mi mapa`, `a.b`, `ñandú`, `concept`, `console`) are accepted.
 
-### GREEN after the fix (commit `597b7fa`)
+### GREEN after the fix (commit `717a522`)
 
 `tests/test_seed_safety.py`: **47 passed**. Related suites (`test_store`, `test_g6_store_surrogates`,
 `test_inc9c`, `test_fold`, `test_no_operator_paths`, `test_import_csv`, `test_legacy_fixture`): **118 passed,
@@ -128,7 +128,7 @@ distinguishing input is a name like `a..b`, because `../x` is already refused by
 
 ### Lane, ruff, guards
 
-- **Full default lane, once, after the fix** (run on the tree at `597b7fa`): `1485 passed, 20 deselected, 3 xfailed
+- **Full default lane, once, after the fix** (run on the tree at `717a522`): `1485 passed, 20 deselected, 3 xfailed
   in 985.94s`. Reconciliation: baseline `1438 passed, 3 xfailed, 20 deselected` + the 47 new cases = 1485; the 3
   xfailed and 20 deselected are unchanged; 0 failed.
 - **Guards** (`tests/test_fold.py`, `tests/test_no_operator_paths.py`), run again before the docs commit:

@@ -1,6 +1,6 @@
 # Traceability Matrix — mapper — Batch `2026-10-08-data-safety-batch`
 
-> Phase 6 artifact. The §1 rows were drafted by three small Kimi units (`kimi-code/kimi-for-coding`; one per HLR group) from `01-requirements.md`, the Layer A table of `04-validation.md` and `grep` over `mapper/`; composed and checked by the orchestrator (27 rows = the 27 LLR headings, no duplicates). `T/` = `tests/`. Status `pass` = passed in the Phase-4 gate run on `cab8181` (2920 passed / 0 failed, orchestrator).
+> Phase 6 artifact. The §1 rows were drafted by three small Kimi units (`kimi-code/kimi-for-coding`; one per HLR group) from `01-requirements.md`, the Layer A table of `04-validation.md` and `grep` over `mapper/`; composed and checked by the orchestrator (27 rows = the 27 LLR headings, no duplicates). `T/` = `tests/`. Status `pass` = passed in the Phase-4 gate run on `4b8b103` (2920 passed / 0 failed, orchestrator).
 
 ## 1. Master table — functional chain (white-box)
 

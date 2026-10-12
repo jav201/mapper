@@ -11,7 +11,7 @@
 | Lane (if the batch forked) | n/a — one lane |
 | Requirement(s) | `LLR-MOD.1.3` (painting module owns its census methods; all 11 concern modules present) |
 | Acceptance | full suite at the B10–B12 gate · the permanent guard tests (`test_mod_bodies.py`, `test_mod_parity.py`, `test_mod_dispatch.py`) |
-| Agent | Product move `e7fff33` — orchestrator script (`mixin_move.py` / `screen_prune.py`, AST cut/paste; Claude Opus 5.5). No test follow-up commit. Gate — orchestrator. |
+| Agent | Product move `e19d6ae` — orchestrator script (`mixin_move.py` / `screen_prune.py`, AST cut/paste; Claude Opus 5.5). No test follow-up commit. Gate — orchestrator. |
 | Date | `2026-10-10` |
 
 ---

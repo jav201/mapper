@@ -1,7 +1,7 @@
 # Increment 5 — Independent code review (`LLR-N07.2.2b` / `AT-024`)
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-5`
-**Reviewed:** the UNCOMMITTED working tree against `90e2a3f`. Reviewer is independent of the implementer.
+**Reviewed:** the UNCOMMITTED working tree against `54145dd`. Reviewer is independent of the implementer.
 **Protocol claimed:** `A-91` lighter lane, conditional on **zero HIGH** from this review.
 
 ## Gate verdict

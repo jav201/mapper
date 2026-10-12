@@ -50,7 +50,7 @@ files; no PowerShell file I/O. `__pycache__` purged before every run. pytest `--
 **Both mutants proven to alter behaviour before their verdicts were trusted** — `M1` by printing the
 overrun (2 cells into budget 1), `M3` by printing the collapsed classification map.
 
-**Tree left byte-identical at `ce294f1`:**
+**Tree left byte-identical at `a53f6e0`:**
 
 | file | sha256 (before == after) |
 |---|---|
@@ -267,7 +267,7 @@ to refuse it.** Four reasons, each checked:
    says "within the requested budget" without fixing a unit, so the declared unit is the defensible
    reading.
 2. **It is genuinely pre-existing and out of the cut.** I checked provenance rather than taking the
-   claim: `git log -S "no CJK handling" -- mapper/views/layered.py` resolves to **`2217cac`, a prior
+   claim: `git log -S "no CJK handling" -- mapper/views/layered.py` resolves to **`10ff83a`, a prior
    batch's Phase-6 close.** S-B(+C) did not introduce it and does not own `layered.py`'s width model.
    The `NOT_FIXED_HERE` field is accurate.
 3. **Routing it costs `LLR-COERCE.2` nothing.** The ordering defect the clause guards lives *only* in
@@ -285,7 +285,7 @@ to refuse it.** Four reasons, each checked:
 
 ## Evidence checklist
 
-- [x] **Diff read in full** — `11d0a12..ce294f1`: `01-requirements.md` (+100/−40 at `LLR-COERCE.2`),
+- [x] **Diff read in full** — `72b7c76..a53f6e0`: `01-requirements.md` (+100/−40 at `LLR-COERCE.2`),
   `tests/test_darkside_budget.py` (170 lines, read entire), and all six narration sites. `executed`
 - [x] **Correctness pass** — M1 fired on the full lane; M3 fired on the guard; metric stability under
   M1 verified; the 120-comparison length-budget sweep. `executed`

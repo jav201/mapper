@@ -5,7 +5,7 @@
 | Batch | `2026-08-26-repair-batch` · PR A, the shipped-defect repair |
 | Objective | Repair S-01, S-02, S-07, S-08 before any feature work lands on top of them |
 | Mode | `full` |
-| Base | `origin/master` @ `d6b60e6b4f18b10123fffc76bbb36891473df653` |
+| Base | `origin/master` @ `1b51aca7a11582acf2de878d8138d26cef2d301b` |
 | Increments | 1, 2, 2b, 3, 4 — plus a whole-branch security fold at the close |
 | Suite | 245 collected at intake → **429 passing** at close |
 | Sessions | 5, of which 4 ended in an interruption |

@@ -57,7 +57,7 @@ The UI side: `mapper/keymap.py::bindings_for` + `groups_for_keybar` drive the se
 
 | # | Item | ✓/✗ | Evidence |
 |---|---|---|---|
-| 1 | Every claimed symbol exists in `mapper/` at HEAD | ✓ | grep of `_classify`/`_is_url`, `safe_local_path`/`confine_reason`, `check_map_id`, `_coerce_field`, `bindings_for`, `COERCION_RANGES`, `VIEW_NAMES`, `plain` at HEAD `46e190b` |
+| 1 | Every claimed symbol exists in `mapper/` at HEAD | ✓ | grep of `_classify`/`_is_url`, `safe_local_path`/`confine_reason`, `check_map_id`, `_coerce_field`, `bindings_for`, `COERCION_RANGES`, `VIEW_NAMES`, `plain` at HEAD `2eaabf3` |
 | 2 | Requirement ids cited are in `01-requirements.md` | ✓ | `HLR-N16.*`, `HLR-COERCE`, `US-N06/N07/N13`, amendments `A-105`…`A-139` |
 | 3 | Functional description matches shipped behavior | ✓ | `04-validation.md` Layer A/B + `VERDICT-merge-2026-10-03.md` |
 | 4 | No unfilled template / no placeholder as a live value | ✓ | — |

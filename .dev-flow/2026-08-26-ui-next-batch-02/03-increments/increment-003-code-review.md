@@ -1,7 +1,7 @@
 # Code Review — Increment 3 (US-N06 «escala»)
 
 **Verdict: BLOCK — 3 HIGH.**
-Independent review, not the author. Branch `feat/ui-next-batch-02`, base `954f8f3`, increment
+Independent review, not the author. Branch `feat/ui-next-batch-02`, base `909cc27`, increment
 uncommitted in the working tree.
 
 Every behavioural claim below carries an executed transcript. Where I could not execute, the
@@ -57,7 +57,7 @@ items the brief flagged as historically wrong in this batch.
 
 ### The re-captured digest is legitimate, minimal, and correctly bounded
 
-Independently re-derived from a clean `git archive 954f8f3` export with the increment's renderer
+Independently re-derived from a clean `git archive 909cc27` export with the increment's renderer
 applied, using a re-implementation of `_fingerprint` (so a change to `test_repair_depth.py` could
 not change my oracle):
 
@@ -146,7 +146,7 @@ defect — no gate impact on this increment.)*
 
 `darkside.plain` is `str.translate` over a map whose every value is a single character, so it is
 1:1 and length-preserving; `_clip` truncates by index. The commutation is therefore an identity
-regardless of coercion order. Executed against the **uncoerced** `_fit` at `954f8f3`:
+regardless of coercion order. Executed against the **uncoerced** `_fit` at `909cc27`:
 
 ```
 [base] commutation over 176868 pairs: disagreements = 0
@@ -354,7 +354,7 @@ self.call_after_refresh(
 ### F4 — one NEW ruff error, masked by a coincidental removal  [Severity: MEDIUM]
 
 - **Where:** `tests/test_pan.py:16`.
-- **What:** compared by *file + code*, not by total, against a fresh `git archive 954f8f3` export
+- **What:** compared by *file + code*, not by total, against a fresh `git archive 909cc27` export
   using the same ruff (0.8.4):
 
 ```

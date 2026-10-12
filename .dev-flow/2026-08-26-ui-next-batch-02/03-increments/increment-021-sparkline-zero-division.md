@@ -4,9 +4,9 @@ Fixes `INC7-CR-R3-F3` (HIGH, pre-existing product defect), the finding the
 round-3 reviewer routed to the operator rather than to a further `Inc-7`
 corrective pass (`increment-020-inc7-corrective-2.md`'s "Round 3" section;
 `state.json`'s `p3_progress.NEW_FINDING_ROUTED_TO_OPERATOR`). Base HEAD
-`b529b34` on `feat/ui-next-batch-02`, tree clean before starting
-(`git status --porcelain` = 0 lines). Commits: `54f1cfc` (requirement),
-`bc0ba0a` (fix + tests), this record.
+`8cef065` on `feat/ui-next-batch-02`, tree clean before starting
+(`git status --porcelain` = 0 lines). Commits: `9ad8621` (requirement),
+`63660b5` (fix + tests), this record.
 
 ## The requirement, first
 
@@ -115,7 +115,7 @@ Proved rather than asserted, both runs at the fixed code:
   8 passed in 76.05s
   ```
 
-- **Fresh `git worktree`**, created detached at HEAD `b529b34` outside the
+- **Fresh `git worktree`**, created detached at HEAD `8cef065` outside the
   repo (`/tmp/mapper-worktrees/hermeticity-check`, path is outside this
   repo's own worktree tree; the pre-existing `basewt` worktree was never
   touched), with the fix and the new test file copied in (mtimes on checkout
@@ -148,7 +148,7 @@ mutation window.
 
 | # | Mutant | File : sha256 pin | Test run | Verdict | Restored, sha ok |
 |---|---|---|---|---|---|
-| 1 | The escaped bug returns: guard removed, reverting `max_count = max_count or 1` back to bare `max_count = max(counts) if counts else 1` | `mapper/app.py` : `ba31b9277d4655a4cd5ea5f75f42ea0561195c0ec36d993f64ff07a380fd8f03` | `tests/test_sparkline_floor.py` | **RED on the zero-activity arm, GREEN on the complementary arm** -- `1 failed, 1 passed`; failure: `ZeroDivisionError: division by zero` at `app.py:579`, identical to the pre-fix RED capture above | yes -- mutant sha `e14c8d77bb63628b37a4eb4624114ea566e8b80356266fb21f65c54751ab28eb` (incidentally identical to `mapper/app.py`'s pin in `increment-020`, confirming `app.py` was untouched between `0c4215a` and `b529b34`), restored sha matched `ba31b927...` |
+| 1 | The escaped bug returns: guard removed, reverting `max_count = max_count or 1` back to bare `max_count = max(counts) if counts else 1` | `mapper/app.py` : `ba31b9277d4655a4cd5ea5f75f42ea0561195c0ec36d993f64ff07a380fd8f03` | `tests/test_sparkline_floor.py` | **RED on the zero-activity arm, GREEN on the complementary arm** -- `1 failed, 1 passed`; failure: `ZeroDivisionError: division by zero` at `app.py:579`, identical to the pre-fix RED capture above | yes -- mutant sha `e14c8d77bb63628b37a4eb4624114ea566e8b80356266fb21f65c54751ab28eb` (incidentally identical to `mapper/app.py`'s pin in `increment-020`, confirming `app.py` was untouched between `f809e14` and `8cef065`), restored sha matched `ba31b927...` |
 | 2 | The guard over-corrects: `idx = min(len(bars) - 1, int(c / max_count * (len(bars) - 1)))` replaced with `idx = 0` (every bar forced to the floor, regardless of real activity) | `mapper/app.py` : `ba31b9277d4655a4cd5ea5f75f42ea0561195c0ec36d993f64ff07a380fd8f03` | `tests/test_sparkline_floor.py` | **RED on the complementary arm, GREEN on the zero-activity arm** -- `1 failed, 1 passed`; failure: `assert '▁▁▁▁▁▁▁▁▁▁▁▁▁▁' == '▁▁▁▁▁▁▁▁▁▁▁▁▁█'` -- today's map was flattened to the floor instead of lighting the last bar | yes -- mutant sha `9931cc70fc95fcc1187feb02503015cdd4acd14481ee56a2aa60689ae4123dca`, restored sha matched `ba31b927...` |
 
 Mutant 1 and mutant 2 are deliberately complementary: mutant 1 (the crash
@@ -191,10 +191,10 @@ exactly against `increment-020`'s last full-lane figure at this same HEAD
 
 ## Ruff
 
-Baseline re-captured on unmodified HEAD `b529b34` (`git stash -u`, run, `git
+Baseline re-captured on unmodified HEAD `8cef065` (`git stash -u`, run, `git
 stash pop`) rather than trusted from `increment-020`'s record: **27 distinct
 errors, 29 output lines** (`ruff check --output-format=concise`) -- identical
-to the prior baseline, confirming no drift between `0c4215a` and `b529b34`.
+to the prior baseline, confirming no drift between `f809e14` and `8cef065`.
 
 After this pass's changes: `diff` against that same-session baseline capture
 is **empty**. Zero new errors, identical 27-error set.
@@ -309,6 +309,6 @@ first pass of this increment (`git stash -u`, run, `git stash pop` --
 27 errors / 29 lines). `diff` is **empty** again after the review round's
 changes. Zero new errors, identical set.
 
-`mapper/app.py`'s diff versus `bc0ba0a` (this increment's first fix commit)
+`mapper/app.py`'s diff versus `63660b5` (this increment's first fix commit)
 is comment-only: the guard line and its logic are untouched; only the
 comment above it gained `/ INC7-CR-R3-F3`.

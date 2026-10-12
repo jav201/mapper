@@ -21,8 +21,8 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | Batch | 2026-10-09-modular-batch |
 | Objective | Modularise `mapper/app.py` (R-009) so that later batches can run parallel product lanes; behaviour-preserving |
 | Standing authorization | Asked 2026-10-09 through AskUserQuestion. The operator's words, verbatim: «Ok, tenemos que modularizar para poder paralelizar el trabajo, eso es primordial.»; mode and authorization «full + autónomo + merge (Recomendado)». Also standing from the same message: Kimi is the primary worker («Es también primordial que te entiendas bien con kimi»). Merge only after a clean final PR-level qa-reviewer pass; a HIGH finding blocks. |
-| First gate | `devflow-validate.py --brief` after the rollover on `d8cf942`: 1 block, `V7`, which is external (the installed flow bundle differs from its manifest) |
-| Premises / RC-1 | `git fetch`; `origin/master` = `d8cf942` = the local tip. The P0 measurements are below. |
+| First gate | `devflow-validate.py --brief` after the rollover on `a5b679e`: 1 block, `V7`, which is external (the installed flow bundle differs from its manifest) |
+| Premises / RC-1 | `git fetch`; `origin/master` = `a5b679e` = the local tip. The P0 measurements are below. |
 
 ## Triggers
 
@@ -56,7 +56,7 @@ P0 is open; ARQ is next.
 2. `MapScreen` (3454 lines) is split by concern into modules that two workers can edit at the same time without touching the same file.
 3. Every existing test stays green, with no change to its behaviour assertions. Source-reading tests are generalised to scan the package.
 
-## Measurements at P0 (`d8cf942`)
+## Measurements at P0 (`a5b679e`)
 
 | Measure | Value |
 |---|---|
@@ -108,7 +108,7 @@ P0 is open; ARQ is next.
 
 | Suite / command | Last run | Result |
 |---|---|---|
-| full suite (canon P4, `791decb`) | 2026-10-09 | 2941 passed / 3 xfailed / 0 failed |
+| full suite (canon P4, `fd996e8`) | 2026-10-09 | 2941 passed / 3 xfailed / 0 failed |
 
 ## Decision log
 

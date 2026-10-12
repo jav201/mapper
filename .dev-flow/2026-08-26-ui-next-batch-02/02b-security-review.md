@@ -2,7 +2,7 @@
 
 > Lens: **security**, at PDR. Reviewed: `01-requirements.md` (2707 lines), `PLAN.md`,
 > `docs/ARCHITECTURE.md` §1/§3/§4a, batch 1's `02b-security-review.md` and `04b-security-signoff.md`,
-> and the shipped tree at `d6b60e6` + working changes.
+> and the shipped tree at `1b51aca` + working changes.
 >
 > **Nothing below is a reading.** Every finding carries a probe that was run against the real
 > parser, the real store, the real renderers or the real Textual compositor. Fixtures were built in

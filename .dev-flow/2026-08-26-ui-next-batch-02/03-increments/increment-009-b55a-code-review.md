@@ -1,7 +1,7 @@
-# Code Review — Inc-B55a · `45663b6` and predecessors against `3122519`
+# Code Review — Inc-B55a · `f6e63fa` and predecessors against `8613d49`
 
 **Reviewer:** independent code-review lane, 2026-09-10.
-**Tree:** `0b2fc1b`, clean on entry and byte-identical on exit (`app.py`
+**Tree:** `53124b5`, clean on entry and byte-identical on exit (`app.py`
 `fc060a30…`, `outline.py` `88a5d987…`, `layered.py` `3e081a6c…`,
 `test_overflow.py` `5af28595…`). No evidence of another writer.
 **Baseline:** `954 passed, 19 deselected, 3 xfailed` before and after.
@@ -24,9 +24,9 @@ ratified and never written.
 
 | reviewed | not reviewed |
 |---|---|
-| `mapper/app.py`, `mapper/views/outline.py` in full at `0b2fc1b` | security (routed to `security-reviewer`) |
+| `mapper/app.py`, `mapper/views/outline.py` in full at `53124b5` | security (routed to `security-reviewer`) |
 | `tests/test_overflow.py` (+506), `test_inc3_census.py`, `test_a3_census.py`, `test_repair_depth.py` diffs | register / wording of the Spanish string (routed to `ux-reviewer`) |
-| `git show 57fb403:mapper/views/outline.py` line-by-line against `_rows` | `9a773e4` (Inc-CRUMB), already reviewed; excluded from the diff base |
+| `git show f5f1bd5:mapper/views/outline.py` line-by-line against `_rows` | `19a5921` (Inc-CRUMB), already reviewed; excluded from the diff base |
 | 12 source mutants fired and restored | `mapper/views/radial.py`, `lane.py` |
 | 201,000 synthetic shapes through `_fit_declared` | whether `S-15`'s wall-clock numbers reproduce on another machine |
 
@@ -45,7 +45,7 @@ cannot.
 **Where:** `mapper/app.py:2532-2533`; arms at `tests/test_overflow.py:1377-1430`.
 
 **What I fired.** `M0` deleted the two lines that are the entire content of
-`7a973df` — `self._declared_for = None` and
+`6cf948c` — `self._declared_for = None` and
 `self.call_after_refresh(self._declare_after_layout)` — reverting the
 increment's headline defect fix. Confirmed live at `app.py:2532`
 (`pass  # MUTANT M0`). Result:
@@ -366,7 +366,7 @@ You asked me to check at least two measured claims. I checked four.
 ## Verified — stated because you asked for a check, not for reassurance
 
 **The `_rows` move is faithful.** I diffed `git show
-57fb403:mapper/views/outline.py`'s `render` body against the new `_rows` clause
+f5f1bd5:mapper/views/outline.py`'s `render` body against the new `_rows` clause
 by clause: same `subtree_counts` memoisation, same `visiting` cycle guard and its
 `ValueError`, same `own` "sin acta" predicate, same reversed-children LIFO
 producing pre-order, same selection-painted-over-hit precedence, same `meta`
@@ -446,7 +446,7 @@ size; vacuous"`), with `radial` taking over the `None` case. The only deletion i
 
 | mutant | change | caught by |
 |---|---|---|
-| `M0` | settle arming removed (`7a973df` reverted) | **NOTHING — 954 pass** |
+| `M0` | settle arming removed (`6cf948c` reverted) | **NOTHING — 954 pass** |
 | `M1` | `_rendered_for` re-stamped after the strip update | nothing (no-op: geometry unchanged there) |
 | `M2` | guard → `if self._rendered_for is None` | nothing (settle never re-renders anyway) |
 | `M5` | `_fit_declared` loop → 1 pass | `AT-057` `AGREE-2` @ `(30,16)` ✓ |
@@ -468,8 +468,8 @@ semantic arm. That is the same hole `F4`'s missing `PHYS-1` would close.
 
 ## Evidence checklist
 
-- [x] **Diff read in full.** `3122519..0b2fc1b` — `app.py` +134, `outline.py`
-      +375/-146, four test files. `9a773e4` excluded as Inc-CRUMB.
+- [x] **Diff read in full.** `8613d49..53124b5` — `app.py` +134, `outline.py`
+      +375/-146, four test files. `19a5921` excluded as Inc-CRUMB.
 - [x] **Correctness pass.** Empty-frame floor, cycle guard, short-circuit paths,
       `LookupError` seam, `_rendered_for` writers, `w`/`h` source asymmetry.
 - [x] **Simplicity pass.** `F5` (unreachable third pass), `M11` (redundant
@@ -480,7 +480,7 @@ semantic arm. That is the same hole `F4`'s missing `PHYS-1` would close.
       results.
 - [x] **Verdict explicit.** BLOCK on `F1`; `F2` requires a recorded carry or an
       extended arm before close.
-- [x] **Tree restored.** Byte-identical to `0b2fc1b`, `__pycache__` purged,
+- [x] **Tree restored.** Byte-identical to `53124b5`, `__pycache__` purged,
       `954 passed` re-confirmed post-restore.
 
 ## What must happen before this advances

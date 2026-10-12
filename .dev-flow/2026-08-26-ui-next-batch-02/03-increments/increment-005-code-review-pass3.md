@@ -3,7 +3,7 @@
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-5`
 **Confirming against:** `increment-005-code-review.md` (round 1, BLOCK, `F1` HIGH + `F2`-`F7`) and
 `increment-005-code-review-confirmation.md` (round 2, BLOCK, `N1` HIGH + `N2` MEDIUM + `N3` LOW).
-**Reviewed:** the UNCOMMITTED round-3 working tree at the six pinned sha256s, against `90e2a3f`.
+**Reviewed:** the UNCOMMITTED round-3 working tree at the six pinned sha256s, against `54145dd`.
 **Reviewer:** independent of the implementer and of both prior reviewers. Harness built from scratch
 for this pass; nothing was accepted on the strength of §12 having been written.
 

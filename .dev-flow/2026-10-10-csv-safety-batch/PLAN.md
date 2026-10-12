@@ -22,7 +22,7 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | Objective | B-114 data safety: a CSV import must never produce a map that cannot be re-opened. `MapStore.save` refuses what `MapStore.load` refuses (multi-parent graphs from slug collisions, cycles), before writing any byte; the import preview names the colliding CSV rows instead of drawing a graph the save will refuse. |
 | Standing authorization | `state.json` `batch_objective` (B-114, quoted in Objective above) — the runtime cannot prompt; the commission is the batch objective itself, recorded in `state.json` at batch open. Orchestrator design decisions 1–3 (see Key decisions) are pre-authorised by the operator's unit brief; no gate re-ask is needed for them. |
 | First gate | not yet run — this unit authored P0 (plan) and P1 (requirements) only; the first gate run and its `V7` line are owed at the PDR gate. |
-| Premises / RC-1 | no `origin/main`; trunk is `origin/master` at `a36f63e` (verified `git rev-parse --short origin/master` + `git merge-base --is-ancestor origin/master HEAD` → ancestor-ok). Each other premise the batch rests on is evaluated in §2.7 of `01-requirements.md` with executed evidence. |
+| Premises / RC-1 | no `origin/main`; trunk is `origin/master` at `87a1f98` (verified `git rev-parse --short origin/master` + `git merge-base --is-ancestor origin/master HEAD` → ancestor-ok). Each other premise the batch rests on is evaluated in §2.7 of `01-requirements.md` with executed evidence. |
 
 ## Triggers
 

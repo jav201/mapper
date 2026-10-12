@@ -1,6 +1,6 @@
 # Increment 032 -- Inc-9f: argument injection, fixed failure categories, home hint, palette
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `532d32e`. Authority:
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `d3ea7a5`. Authority:
 `VERDICT-inc9-2026-09-30.md` section "Round 3" (`M1`, `M2` and the coordinator's Inc-9f rulings).
 Amendment: `A-114` (appended to `01-requirements.md`). Findings are named `INC9F-Fn`.
 
@@ -9,7 +9,7 @@ Amendment: `A-114` (appended to `01-requirements.md`). Findings are named `INC9F
 | id | Source id | Change | Evidence state |
 |---|---|---|---|
 | `INC9F-F1` | argument injection | `_ensure_cloned` refuses a spec starting with `-` or a `scheme::` transport helper before any process starts; the clone argv is `git clone --mirror -- <url> <target>` | executed (stub argv + real git, local) |
-| `INC9F-F2` | same, `gh` side | `GitHubConnector.fetch` refuses a `-`-prefixed spec before `gh`; on `532d32e` it reached `gh repo view --branch=a/b` | executed (argv stub) |
+| `INC9F-F2` | same, `gh` side | `GitHubConnector.fetch` refuses a `-`-prefixed spec before `gh`; on `d3ea7a5` it reached `gh repo view --branch=a/b` | executed (argv stub) |
 | `INC9F-F3` | same, ref names (found while measuring) | `git log` and `git rev-list` take the ref after `--end-of-options`; a branch named `--output=marker.txt` made `git log` write that file | executed (real git, local) |
 | `INC9F-F4` | `R3-CR-F7` | cache hit is `target/HEAD` as a file (a mirror is bare), then `fetch --all`; a second connect no longer re-clones | executed (real git out of lane; stub in lane) |
 | `INC9F-F5` | `R3-SEC-F1` | clone has `timeout=120` (reads keep 30 s); `TimeoutExpired` is the `timed out` category, unchained (its argv holds the URL) | executed |
@@ -23,9 +23,9 @@ Amendment: `A-114` (appended to `01-requirements.md`). Findings are named `INC9F
 | `INC9F-F13` | `R3-CR-F5` | `_screen_headers`: the stale `assert tabs` message names `_TAB_ACTIONS` | executed |
 | `INC9F-F14` | `R3-CR-F6` | note appended to `increment-030-seed-2.md`: "8 calls" is 7 | n/a (docs) |
 
-## 2. Argument-injection reachability on `532d32e` (measured, local, HOME and USERPROFILE in a temp dir)
+## 2. Argument-injection reachability on `d3ea7a5` (measured, local, HOME and USERPROFILE in a temp dir)
 
-| path | result on `532d32e` |
+| path | result on `d3ea7a5` |
 |---|---|
 | Through the connect-repo entry, `-`-prefixed text to the clone | NOT reachable: `_normalize_repo` passes it through unchanged, but `_is_url` needs `http(s)://` or `git@`, so it never reaches `_ensure_cloned` |
 | Through the same entry, to `gh` | REACHABLE: `--branch=a/b` and `-x/y` give `gh repo view --branch=a/b --json ...` (argv recorded by a stub; no `gh` ran). Effect measured: a flag from typed text. Impact beyond that: not measured |
@@ -80,9 +80,9 @@ locale (it falls to `unknown (exit N)`; carried).
 
 | check | state |
 |---|---|
-| Arms committed RED first (`7834fec`), `--runxfail` on `532d32e`: 41 failed, 8 passed | executed. The 8 are controls that are green by construction: 5 argv-census judge samples, the palette-typing control, and the two `R3-CR-F2` pin params (the header width was already derived; the arm pins it and is killed by the hand-written-width mutant). The 3 census cases were RED too |
-| Full lane at `3a7fa8d` (docs commit adds no code): **1610 passed, 3 xfailed, 20 deselected, 0 failed**, 21:16 | executed. Reconciled with 1558: +49 tests in `test_inc9f.py` +3 census cases = +52 |
-| `ruff check .` against `532d32e`, set difference (line numbers stripped) | executed: new = none, gone = none |
+| Arms committed RED first (`951d507`), `--runxfail` on `d3ea7a5`: 41 failed, 8 passed | executed. The 8 are controls that are green by construction: 5 argv-census judge samples, the palette-typing control, and the two `R3-CR-F2` pin params (the header width was already derived; the arm pins it and is killed by the hand-written-width mutant). The 3 census cases were RED too |
+| Full lane at `df54cf8` (docs commit adds no code): **1610 passed, 3 xfailed, 20 deselected, 0 failed**, 21:16 | executed. Reconciled with 1558: +49 tests in `test_inc9f.py` +3 census cases = +52 |
+| `ruff check .` against `d3ea7a5`, set difference (line numbers stripped) | executed: new = none, gone = none |
 | `test_fold`, `test_no_operator_paths` before this commit | executed: green |
 | Real-git, local bare repository, out of lane (the lane guard refuses `git clone/fetch/push` outside the `network` marker) | executed: reconnect succeeds on the second connect; `--output=marker.txt` not written; payload not run |
 
@@ -116,7 +116,7 @@ pinned `"128" in message`; the ruling `M2` replaces the exit-code wording with a
 
 ## Commits
 
-`7834fec` arms (RED) · `1127242` items 1-4 · `7f37c61` items 5-7 · `f405105` items 8-9 · `3a7fa8d` items 10-11 · docs commit (this record, `A-114`, the `increment-030` note).
+`951d507` arms (RED) · `bceea26` items 1-4 · `3802852` items 5-7 · `23456fb` items 8-9 · `df54cf8` items 10-11 · docs commit (this record, `A-114`, the `increment-030` note).
 
 ## Renders (outside the repo, text frames of the composited screen)
 

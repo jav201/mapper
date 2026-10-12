@@ -11,7 +11,7 @@
 | Lane (if the batch forked) | n/a — one lane |
 | Requirement(s) | `LLR-MOD.1.3` (panning module owns its census methods) · `LLR-MOD.3.2` (`pan_extent` repointed to its reading module) |
 | Acceptance | full suite at the B10–B12 gate · `tests/test_en8.py` `pan_extent` site bites through `mapper.screens.map.panning` · the permanent guard tests |
-| Agent | Product move + patch repoint `3fd3b63` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). Gate — orchestrator. |
+| Agent | Product move + patch repoint `7bff42c` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). Gate — orchestrator. |
 | Date | `2026-10-10` |
 
 ---
@@ -190,7 +190,7 @@ B11 — the views concern to `PaintingOps`, completing Spine B (`increment-021`)
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 2 / 4 |
-| 2 | Tests written in this same increment | all | ✓ | `3fd3b63` — `tests/test_en8.py` repoint |
+| 2 | Tests written in this same increment | all | ✓ | `7bff42c` — `tests/test_en8.py` repoint |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `test_mod_bodies.py` at the gate |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | repoint bite + permanent battery (§4) |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | 5 probes (§4) |

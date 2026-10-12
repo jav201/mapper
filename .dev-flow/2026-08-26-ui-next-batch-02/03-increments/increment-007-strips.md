@@ -1,7 +1,7 @@
 # Increment STRIPS — three unbounded strips, and the count nobody could read
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-STRIPS` · **Branch:** `feat/ui-next-batch-02`
-**Entry commit:** `005d99a` (Inc-W1 close) · **SOURCE FILE COUNT: 1** — `mapper/app.py` (+ its CSS block). Tests uncapped.
+**Entry commit:** `2090511` (Inc-W1 close) · **SOURCE FILE COUNT: 1** — `mapper/app.py` (+ its CSS block). Tests uncapped.
 **Protocol:** FULL, per coordinator ruling — a layout increment whose failure mode is a crushed canvas, and it unblocks `LLR-N07.3.4`.
 
 ---

@@ -128,7 +128,7 @@ The operator verdict "C" (2026-10-08) is binding for US-001; the deferred US-N14
 | P-7 | The four `scroll_to(..., animate=False)` call sites without `immediate=True` are the complete affected set for US-004 | premise | ✅ TRUE | grep `scroll_to(` in `tests/` → `tests/test_help_scope.py:93` (in `_harvest`, `:64`), `tests/test_help_scope.py:365` (`test_hlr_n16_4_legend_declares_its_own_keys`, `:328`), `tests/test_en7.py:246` (`test_the_painted_legend_ends_with_the_rule`, `:235`), `tests/test_repair_layout.py:118` | — |
 | P-8 | `MapStore.save(map_id, graph)` writes both `.mmd` and `_nodos.yml` in one call (no partial-write path) | premise | ✅ TRUE | `mapper/store.py:809` `def save(self, map_id, graph)`; `_build_sidecar` (`:469`) builds the sidecar inside `save` | — |
 
-- **Premise evaluation:** 8 premise(s) · 8 ✅ TRUE · 0 ❌ FALSE · 0 ❓ UNDECIDABLE. RC-1/RC-2 were executed by the orchestrator at P0 and are recorded in `PLAN.md` (Premises / RC-1): `origin/master` = `07dd930` = merge-base of the batch branch; `git ls-remote --exit-code --heads origin` exit 0.
+- **Premise evaluation:** 8 premise(s) · 8 ✅ TRUE · 0 ❌ FALSE · 0 ❓ UNDECIDABLE. RC-1/RC-2 were executed by the orchestrator at P0 and are recorded in `PLAN.md` (Premises / RC-1): `origin/master` = `ed67c58` = merge-base of the batch branch; `git ls-remote --exit-code --heads origin` exit 0.
 
 ### 2.8 Fork preconditions (C-52) — MANDATORY, and the declared empty when the batch does not fork
 

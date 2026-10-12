@@ -1,7 +1,7 @@
 # 04 — Adversarial whole-branch QA pass · `2026-08-27-repair-batch-02`
 
 **Reviewer:** `qa-reviewer`, adversarial merge-gate pass.
-**Branch:** `fix/repair-batch-02` · **HEAD** `8675151` · **Base** `d877784` (= `origin/master` = merge-base).
+**Branch:** `fix/repair-batch-02` · **HEAD** `0353909` · **Base** `bd17fab` (= `origin/master` = merge-base).
 **Date:** 2026-08-27 · **Posture:** hostile to the evidence. Every figure below was re-derived in this
 session from its own command output; nothing is copied from the packets.
 
@@ -203,17 +203,17 @@ one place where the independent review's final verdict rests on a claim that is 
 ### MEDIUM-5 — 13,526 undeclared lines of another batch's artifacts ride on the branch, and `state.json` ends with no record of this batch at all
 
 The brief described the branch as base + uncommitted worktree. It is not: `fix/repair-batch-02`
-carries commit `8675151`, on no other branch.
+carries commit `0353909`, on no other branch.
 
 ```
-$ git show -s --format="%an %ad %s" 8675151
+$ git show -s --format="%an %ad %s" 0353909
 <owner>  Thu Aug 27 11:52:55 2026 -0600  docs: land the ui-next-batch-02 PDR artifacts (C-44 discharge)
  14 files: .dev-flow/2026-08-26-ui-next-batch-02/**  (13,343 lines)
      plus: .dev-flow/state.json                       (183 +/-)
 ```
 
 ```
-$ grep -rn "8675151\|land the ui-next-batch-02\|C-44 discharge" .dev-flow/2026-08-27-repair-batch-02/
+$ grep -rn "0353909\|land the ui-next-batch-02\|C-44 discharge" .dev-flow/2026-08-27-repair-batch-02/
 NOT MENTIONED ANYWHERE IN THIS BATCH'S ARTIFACTS
 
 $ grep -c "2026-08-27-repair-batch-02" .dev-flow/state.json
@@ -279,7 +279,7 @@ the packet's claim is broader than what was measured.
 
 | Ref | Behaviour on `attachments: [{kind: img}]` (no `path`) |
 |---|---|
-| base `d877784` | `MapStore.load` raises bare `KeyError: 'path'` |
+| base `bd17fab` | `MapStore.load` raises bare `KeyError: 'path'` |
 | branch | `Attachment(kind='img', path='', caption='')`, `load_warnings=[]` |
 
 Both executed. The direction is right for S-11 and it *is* declared in prose at the `Attachment(...)`
@@ -342,7 +342,7 @@ Credit where due: the withdrawal itself is honest — the superseded claim is st
 | fast lane | 517 passed / 17 deselected | **517 passed, 17 deselected**, 157.03s, exit 0 | `pytest -q` |
 | slow lane | 17 passed / 517 deselected | **17 passed, 517 deselected**, 38.38s, exit 0 | `pytest -q -p no:randomly -o addopts= -m slow` |
 | collection (branch) | 534 | **534** | `pytest -q --collect-only -p no:randomly -o addopts=` |
-| collection (base `d877784`) | 429 | **429** | same, in the `git worktree` at base |
+| collection (base `bd17fab`) | 429 | **429** | same, in the `git worktree` at base |
 | `test_repair_store_boundary.py` | 70 | **70** | per-file collect |
 | `test_repair_map_truth.py` | 26 | **26** | per-file collect |
 | `test_repair_golden_census.py` | 7 | **7** | per-file collect |
@@ -362,7 +362,7 @@ Credit where due: the withdrawal itself is honest — the superseded claim is st
 ### 3.1 · The pre-fix measurement is honest and independently reproducible
 
 I copied the batch's own `tests/test_repair_store_boundary.py` unchanged into a `git worktree` at
-`d877784` and ran it against the pre-fix source:
+`bd17fab` and ran it against the pre-fix source:
 
 ```
 43 failed, 27 passed in 7.52s
@@ -414,10 +414,10 @@ mechanism in.** `S-18` stays parked.
 ### 3.5 · The slow-lane flake — SETTLED. The batch's belief is correct; its UNVERIFIED marker can be retired
 
 `PLAN.md:142-145` and `increment-001.md` §4.0 record as **UNVERIFIED BY EITHER PARTY** whether the
-flake predates `d877784`. I checked it via `git worktree add` to a temp path — the main tree was never
+flake predates `bd17fab`. I checked it via `git worktree add` to a temp path — the main tree was never
 touched (`git status` byte-identical throughout).
 
-| Condition (base ref `d877784`, zero branch code present) | Result |
+| Condition (base ref `bd17fab`, zero branch code present) | Result |
 |---|---|
 | unloaded, 6 sequential runs | **6/6 clean**, 36.58s–42.12s |
 | two concurrent base slow lanes | **both clean**, 40.07s / 40.70s |
@@ -425,7 +425,7 @@ touched (`git status` byte-identical throughout).
 | same load, runs 2–3 | passed, 66.80s / 38.24s |
 
 **That is the exact node the batch names, failing at the base ref, with none of this batch's code
-present.** The flake predates `d877784`. The batch's argument was sound and is now a measurement; the
+present.** The flake predates `bd17fab`. The batch's argument was sound and is now a measurement; the
 backlog carry (make the bounds load-tolerant rather than larger) stands.
 
 ### 3.6 · The derived census is complete against `_build_sidecar`'s *scalar* positions
@@ -563,7 +563,7 @@ an asserted count of exactly 1.
 | Every node name cited in the record resolves on disk | ✗ | **3 phantoms** — MEDIUM-3 |
 | Operator rider verified | ✓ | §3.4 — grep + line-by-line read of the assertions |
 | Base-ref questions settled with `git worktree`, no working-tree mutation | ✓ | §3.5, §3.1, §3.12 |
-| Pre-fix measurement independently reproduced | ✓ | §3.1 — 43 failed / 27 passed at `d877784` |
+| Pre-fix measurement independently reproduced | ✓ | §3.1 — 43 failed / 27 passed at `bd17fab` |
 | Every finding carries `file:line` or pasted output | ✓ | §1 |
 | Clean categories reported as clean, not padded | ✓ | §3 — 12 categories |
 | No repo file edited; no PII, secrets or real credentials | ✓ | §3.12; all fixtures synthetic (`Alpha`/`Beta`, `d1`, `p.png`) |
@@ -574,9 +574,9 @@ an asserted count of exactly 1.
 
 **Reviewer:** `code-reviewer`, independent confirmation pass. Not the author; not the QA reviewer who
 raised HIGH-1.
-**Target:** branch `fix/repair-batch-02`, commit **`01d7578`**, PR #3. **This gates the merge.**
+**Target:** branch `fix/repair-batch-02`, commit **`ac4065e`**, PR #3. **This gates the merge.**
 **Date:** 2026-08-27 · **Posture:** the author's evidence is a claim, not a result. Every figure below
-was executed in this session against a `git archive 01d7578` copy under `scratchpad/lab/`.
+was executed in this session against a `git archive ac4065e` copy under `scratchpad/lab/`.
 
 ## Verdict — **BLOCKED**. One **NEW HIGH**.
 
@@ -595,7 +595,7 @@ not its sibling's *gate*.
 **No repo file was edited by this pass.** All mutation work ran on a detached copy with
 `PYTHONDONTWRITEBYTECODE=1`, every substitution guarded by an asserted count of exactly 1 and every
 restore verified by sha256. `mapper/store.py` and `tests/test_repair_store_boundary.py` in the lab copy
-are byte-identical to `01d7578` at the end of the pass (measured, EOL-normalised).
+are byte-identical to `ac4065e` at the end of the pass (measured, EOL-normalised).
 
 ---
 
@@ -822,7 +822,7 @@ absence is what let HIGH-1 exist.
 
 ### 3.1 · HIGH-1's product defect is CLOSED — QA's own probe shapes, re-run
 
-Fifteen shapes, executed against `01d7578`. **Every text position of a loaded `Document` is `str`, and
+Fifteen shapes, executed against `ac4065e`. **Every text position of a loaded `Document` is `str`, and
 every refusal is RECORDED:**
 
 ```
@@ -993,7 +993,7 @@ twice).
   ` M .dev-flow/…/03-increments/increment-001.md`, `?? .dev-flow/…/05-carries.md`, and
   `?? tests/test_repair_artifact_claims.py` (mtimes 17:47–17:51, during this pass). **I created none of
   them** — I ran only read-only `git show` / `git status` / `grep` in the main tree, and every
-  experiment ran on a detached `git archive 01d7578` copy. **This verdict covers commit `01d7578` and
+  experiment ran on a detached `git archive ac4065e` copy. **This verdict covers commit `ac4065e` and
   nothing else**; a new test file and an edited increment packet are outside it and un-reviewed.
 - I did **not** re-run the author's full 24-mutant battery. I built **22 mutants of my own** and
   reproduced six of the author's by name (`Q-high1`, `Q-f1a`, `Q-f1b`, `Q-med4`, `Q-f7`, plus `M-STO-a`
@@ -1021,18 +1021,18 @@ twice).
 | Four secondary gate fixes checked | ✓ | §3.6 — 2/1/1/1 arms; F2 comment verified against disk |
 | Every figure executed, none copied | ✓ | §3.7 |
 | Clean categories reported as clean, not padded | ✓ | §3 — 7 categories |
-| No repo file edited; no git mutation in the main tree | ✓ | detached `git archive` copy; lab `store.py` + boundary file byte-identical to `01d7578` (EOL-normalised) at close |
+| No repo file edited; no git mutation in the main tree | ✓ | detached `git archive` copy; lab `store.py` + boundary file byte-identical to `ac4065e` (EOL-normalised) at close |
 
 ---
 
-# Re-confirmation review — HIGH-A fix (post-fix tree, d75f0fd)
+# Re-confirmation review — HIGH-A fix (post-fix tree, 125f9f7)
 
 **Reviewer:** `code-reviewer`, independent re-confirmation pass. Not the author; not the QA reviewer
 who raised HIGH-1; not the confirmation reviewer who raised HIGH-A.
-**Target:** branch `fix/repair-batch-02`, commit **`d75f0fd`**, PR #3, diff `01d7578..d75f0fd`.
+**Target:** branch `fix/repair-batch-02`, commit **`125f9f7`**, PR #3, diff `ac4065e..125f9f7`.
 **This gates the merge.** **Date:** 2026-08-27
 **Posture:** the author's evidence is a claim, not a result. Every figure below was executed in this
-session against a `git archive d75f0fd` copy in my own scratchpad, `PYTHONDONTWRITEBYTECODE=1`, every
+session against a `git archive 125f9f7` copy in my own scratchpad, `PYTHONDONTWRITEBYTECODE=1`, every
 substitution guarded by an asserted hit count of exactly 1, every restore proven by sha256, every
 verdict taken **per resolved arm** and never from a process exit code. Mutations are described by
 position and operation, never spelled verbatim.
@@ -1060,7 +1060,7 @@ session a collected-count that is stale at the very tip it names, inside the car
 purpose is to stop a stale count propagating.
 
 **No repo file was edited by this pass except this one.** At close, the lab tree is byte-identical to
-pristine `d75f0fd` for every tracked file (`diff -r` against a fresh archive: no differences), and
+pristine `125f9f7` for every tracked file (`diff -r` against a fresh archive: no differences), and
 `git status --porcelain` in the main repo is **empty** — the working-tree drift the previous pass had
 to disclaim did not recur.
 
@@ -1185,7 +1185,7 @@ The class set is the residual hand list one level above the field sets — which
 
 > 2. Re-measure `baseline.tests_collected` rather than carrying `429`; it is **548** at this batch's tip.
 
-The tip is `d75f0fd`. **Measured: 643.** The line was authored in this commit, and the commit that
+The tip is `125f9f7`. **Measured: 643.** The line was authored in this commit, and the commit that
 authored it is the one that took the count from 548 to 643. P-CARRY-1's entire argument is that the
 next session will read a stale number and inherit a false premise; the instruction it gives hands
 over a number stale by 95 arms. `04-gate-findings-disposition.md`'s own post-fix table has 643 right,
@@ -1343,7 +1343,7 @@ survivor — if it is ever pinned, pin it on both sites together).
 
 | Item | Mark | Executed evidence |
 |---|---|---|
-| Diff read in full | OK | `01d7578..d75f0fd`: `mapper/store.py` (+28/-16), both test files, all four records |
+| Diff read in full | OK | `ac4065e..125f9f7`: `mapper/store.py` (+28/-16), both test files, all four records |
 | Expected arm count asserted before any verdict | OK | 643 collected; whole-tree trials report **643 resolved arms** each; boundary file 96, claims file 83 |
 | Both lanes and ruff re-derived, not copied | OK | 626/17 in 55.3s; 17/626 in 23.5s; ruff 29 whole-tree, clean on the three touched files |
 | The four HIGH-A mutants rebuilt, not taken on report | OK | §2 — 6 / 6 / 6 / 2, arm names matched |
@@ -1361,21 +1361,21 @@ survivor — if it is ever pinned, pin it on both sites together).
 | Records re-checked against disk | Mixed | disposition OK, AMD-1 OK, AMD-2 OK; store.py docstring FALSE (MEDIUM-1); carries `:40` FALSE (MEDIUM-2) |
 | Every MEDIUM carries a recommended fix | OK | §3 — replacement sentence given for MEDIUM-1; one token for MEDIUM-2 |
 | Clean categories reported as clean, not padded | OK | §5 — 11 categories; LOW-3 explicitly declined as a finding |
-| No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive d75f0fd`: **no differences** in any tracked file; `git status --porcelain` empty |
+| No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive 125f9f7`: **no differences** in any tracked file; `git status --porcelain` empty |
 
 ---
 
-# Condition-discharge review (a5db8df)
+# Condition-discharge review (43b84cd)
 
 **Reviewer:** `code-reviewer`, independent condition-discharge pass. Not the author; not the QA
 reviewer who raised HIGH-1; not the confirmation reviewer who raised HIGH-A; not the re-confirmation
 reviewer who raised MEDIUM-1/MEDIUM-2.
-**Target:** branch `fix/repair-batch-02`, commit **`a5db8df`**, PR #3, diff `d75f0fd..a5db8df`.
+**Target:** branch `fix/repair-batch-02`, commit **`43b84cd`**, PR #3, diff `125f9f7..43b84cd`.
 **Scope, deliberately narrow:** are the two conditions actually discharged, and did the discharge
 break or newly over-claim anything. HIGH-A was **not** re-reviewed from scratch; the prior pass
 cleared it.
 **Date:** 2026-08-27
-**Posture:** every figure below was executed in this session against a `git archive a5db8df` copy in
+**Posture:** every figure below was executed in this session against a `git archive 43b84cd` copy in
 my own scratchpad, `PYTHONDONTWRITEBYTECODE=1`, every substitution guarded by an asserted hit count
 of exactly 1, every restore proven by sha256, every verdict taken **per resolved arm** and never from
 a process exit code. Mutations are described by position and operation, never spelled verbatim.
@@ -1407,7 +1407,7 @@ own docstring: the sentence rewritten to be honest about scope states a figure t
 sentence contradicts and disk refutes**.
 
 **No repo file was edited by this pass except this one.** At close, the lab tree is byte-identical to
-a fresh `git archive a5db8df` (`diff -r`: no differences in any tracked file) and `git status
+a fresh `git archive 43b84cd` (`diff -r`: no differences in any tracked file) and `git status
 --porcelain` in the main repo is **empty**.
 
 ---
@@ -1478,7 +1478,7 @@ the third assertion (`every == classified | declared`) is what would have caught
 ## 4 · MEDIUM-2 — the carried count. **DISCHARGED.**
 
 `05-carries.md:40-44` no longer hands over a bare stale number. Measured: `548` is gone; the line now
-reads "It is **643** at `d75f0fd`; at any later tip, measure it rather than trusting this sentence."
+reads "It is **643** at `125f9f7`; at any later tip, measure it rather than trusting this sentence."
 **That is TRUE as written** — it names the commit whose count it states, and instructs re-measurement
 rather than copying. I considered whether stating 643 in a commit that collects 647 re-commits the
 original sin and concluded it does not: the number is explicitly scoped to a named commit, which is
@@ -1577,7 +1577,7 @@ that is no longer there, and `:325` cites a section that now disagrees with it.
 
 **Explicitly NOT findings, and I checked each rather than assuming:** §4.1's table header "(of 643)",
 `:256`'s "(548 / 643, matched)", and `:312`/`:314` all describe the HIGH-A mutation battery that
-genuinely ran at `d75f0fd` against 643 arms. They are historical and **correct**. I decline to inflate
+genuinely ran at `125f9f7` against 643 arms. They are historical and **correct**. I decline to inflate
 them.
 
 ### NEW-3 — the "40 arms" nit was fixed in the code and left standing in the packet. **[LOW]**
@@ -1669,7 +1669,7 @@ introduced by this diff. It is the natural next rung if anyone closes the save-s
 | Item | Mark | Executed evidence |
 |---|---|---|
 | Prior re-confirmation verdict read in full first | OK | `04-qa-adversarial.md:1028-1210`, both conditions and all three LOWs |
-| Diff read in full | OK | `d75f0fd..a5db8df`: 7 files, +490/-36; `mapper/store.py` +12/-4, both test files, four records |
+| Diff read in full | OK | `125f9f7..43b84cd`: 7 files, +490/-36; `mapper/store.py` +12/-4, both test files, four records |
 | Expected arm count asserted before any verdict | OK | pristine **647**, 0 pre-red; every mutation reports its own resolved count, deltas explained |
 | Both lanes and ruff re-derived, not copied | OK | 630/17 in 55.8s · 17/630 in 22.9s · ruff 29 whole-tree, clean on the three touched files |
 | Ledger re-derived | OK | `647 = 548 + 16 + 83`; boundary **100**, claims **83**, p02i **7**, p02j **1** |
@@ -1689,22 +1689,22 @@ introduced by this diff. It is the natural next rung if anyone closes the save-s
 | Bytecode cache neutralised | OK | `PYTHONDONTWRITEBYTECODE=1` on every mutation run |
 | Every mutation restored, proven by sha256 | OK | 4 files back to `3d39a861…` / `637d537e…` / `87402d1d…` / `a30deb52…`, matching the pre-mutation baseline |
 | Mutations described by position, not spelled | OK | §2-§5 name position and operation only |
-| No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive a5db8df`: **no differences** in any tracked file; `git status --porcelain` empty |
+| No repo file edited but this one; no git mutation | OK | lab `diff -r` vs a fresh `git archive 43b84cd`: **no differences** in any tracked file; `git status --porcelain` empty |
 
 ---
 
-# Final verification (bef1d69)
+# Final verification (380997d)
 
 **Reviewer:** `code-reviewer`, independent final pass. Not the author; not the QA reviewer who raised
 HIGH-1; not the confirmation reviewer who raised HIGH-A; not the re-confirmation reviewer who raised
 MEDIUM-1/MEDIUM-2; not the condition-discharge reviewer who raised NEW-1..NEW-4.
-**Target:** branch `fix/repair-batch-02`, commit **`bef1d69`**, PR #3, diff `a5db8df..bef1d69`.
+**Target:** branch `fix/repair-batch-02`, commit **`380997d`**, PR #3, diff `43b84cd..380997d`.
 **Scope, deliberately narrow:** are NEW-1..NEW-4 discharged, did the sweep's own edits introduce
 anything false, and does an independently-run numeric sweep find any live false figure. HIGH-A, the
 arms and the class-set derivation were **not** re-reviewed; three passes cleared them.
 **Date:** 2026-08-27
 **Posture:** every figure below was executed in this session. Historical columns were re-derived from
-detached `git archive` copies of `01d7578`, `d75f0fd` and `a5db8df` in my own scratchpad,
+detached `git archive` copies of `ac4065e`, `125f9f7` and `43b84cd` in my own scratchpad,
 `PYTHONDONTWRITEBYTECODE=1`; the tip was measured in the worktree read-only. **No mutation work was
 needed and none was done** — this diff changes no logic. No repo file was edited but this one;
 `git status --porcelain` is empty at close.
@@ -1727,7 +1727,7 @@ None of the four touches behaviour, weakens a test, or inflates any claim.
 
 ## 1 · Numbers — re-derived, not copied
 
-| Figure | Packet claims | **Measured here (tip `bef1d69`)** |
+| Figure | Packet claims | **Measured here (tip `380997d`)** |
 |---|---|---|
 | collected | 647 | **647** |
 | fast lane | 630 passed / 17 deselected | **630 passed, 17 deselected**, 57.2s, exit 0 |
@@ -1770,9 +1770,9 @@ TOTAL checkable claims           : 4   across 2 of 33 files
 
 I re-checked the figures the prior pass **declined** to change, and it was right to decline: §4.1's
 "(of 643)", `:256`'s "(548 / 643, matched)" and `:312`/`:314` all describe the HIGH-A battery that ran
-at `d75f0fd`, where the tree genuinely collected **643** (archive-verified below). Historical and
+at `125f9f7`, where the tree genuinely collected **643** (archive-verified below). Historical and
 correct. They were left alone. Same for `01-requirements.md:316` ("all 643 arms", attributed to the
-re-confirmation review) and `05-carries.md:42-44` (explicitly commit-scoped to `d75f0fd`).
+re-confirmation review) and `05-carries.md:42-44` (explicitly commit-scoped to `125f9f7`).
 
 ### NEW-3 — **DISCHARGED, and 41 is the right number.**
 
@@ -1797,40 +1797,40 @@ packet, and not from the prior reviewers:
 
 | Cell | Column claims | **Archive-measured** |
 |---|---|---|
-| `01d7578` fast / slow / collected | 531/17 · 17/531 · 548 | **531/17 · 17/531 · 548** |
-| `01d7578` ledger `548 = 429 + 119` | asserted | **exact** (429 base from `01-requirements.md:12`, 413+16) |
-| `d75f0fd` fast / slow / collected | 626/17 · 17/626 · 643 | **626/17 · 17/626 · 643** |
-| `d75f0fd` ledger `643 = 548 + 12 + 83` | asserted | **exact** — boundary file **96** (84+12), claims file **83** |
-| `a5db8df` fast / slow / collected | 630/17 · 17/630 · 647 | **630/17 · 17/630 · 647** |
-| `a5db8df` ledger `647 = 548 + 16 + 83` | asserted | **exact** — boundary file **100**, claims file **83** |
+| `ac4065e` fast / slow / collected | 531/17 · 17/531 · 548 | **531/17 · 17/531 · 548** |
+| `ac4065e` ledger `548 = 429 + 119` | asserted | **exact** (429 base from `01-requirements.md:12`, 413+16) |
+| `125f9f7` fast / slow / collected | 626/17 · 17/626 · 643 | **626/17 · 17/626 · 643** |
+| `125f9f7` ledger `643 = 548 + 12 + 83` | asserted | **exact** — boundary file **96** (84+12), claims file **83** |
+| `43b84cd` fast / slow / collected | 630/17 · 17/630 · 647 | **630/17 · 17/630 · 647** |
+| `43b84cd` ledger `647 = 548 + 16 + 83` | asserted | **exact** — boundary file **100**, claims file **83** |
 | ruff, all three columns | 29 / 29 / 29 | **Found 29 errors** at each of the three commits, and **29** at the tip |
 
-**The two mutation cells check out against the records they summarise.** `d75f0fd`'s "+4 (`MX1`,
+**The two mutation cells check out against the records they summarise.** `125f9f7`'s "+4 (`MX1`,
 `MX2`, `MX11`, `MX3`): 0 → 6 / 6 / 6 / 2" reproduces `increment-004.md:248-252` exactly, and the arm
-counts it names are live today (`p02g` **6** arms, `p02h` **2**). `a5db8df`'s "+4 more on the derived
+counts it names are live today (`p02g` **6** arms, `p02h` **2**). `43b84cd`'s "+4 more on the derived
 class set: 2 / 1 / 1 RED, and one deliberate 0 carried as an open gap" is an exact summary of the
 author's own §1.7 counterfactual — four mutations at **2 / 1 / 1 / 0**, the 0 being the plain `str`
 field on `Node`, and the cell **labels that 0 as a carried gap rather than folding it into the RED
 tally**. That is the honest rendering.
 
-**The "Final" column names `a5db8df`, not the tip.** Deliberate and correct — it names the commit its
+**The "Final" column names `43b84cd`, not the tip.** Deliberate and correct — it names the commit its
 numbers belong to, which is exactly the discipline MEDIUM-2 demanded. I verified the figures also hold
-at `bef1d69` (§1), so nothing is stale; the label is precise, not evasive.
+at `380997d` (§1), so nothing is stale; the label is precise, not evasive.
 
 ### 3.2 · The rows 1–13 enumeration (`05-carries.md:92-106`). **ACCURATE, and the citation is exact.**
 
 - **Row 5's `mapper/store.py:98-130`** — verified to the line: `_str_map_fields` is defined at `:97`,
   its docstring opens at **`:98`** and its closing `"""` is at **`:130`**. The old `98-119` was
   genuinely stale (the docstring grew when MEDIUM-1's rewrite landed) and the replacement is exact.
-  `mapper/store.py` is untouched between `a5db8df` and `bef1d69`, so the citation was stale at
-  `a5db8df` and is correct now.
+  `mapper/store.py` is untouched between `43b84cd` and `380997d`, so the citation was stale at
+  `43b84cd` and is correct now.
 - **Rows 1–6** unchanged and still true. **Row 7** (`test_at_p02i` named as a gate it is not) sits in
   the `mapper/store.py` docstring — correct. **Row 8** (4 classes named, 7 defined) — `mapper.model`
   defines exactly **7** dataclasses, verified. **Rows 9, 11, 12, 13** name the right files.
 - **Row 10** — "*3 checkable citations* where disk says 4" in `tests/test_repair_artifact_claims.py`:
   correct, and independently re-derived in §2.
 - **Row 12** — "this table's own post-fix figures, stale one commit after being written": **TRUE**. The
-  two-column table was written at `d75f0fd` carrying 643/626 and the very next commit collected 647.
+  two-column table was written at `125f9f7` carrying 643/626 and the very next commit collected 647.
 
 **Both "reviewer-measured" attributions are accurate.** `05-carries.md:174` (`0.8 µs → 348.5 µs`) is
 the re-confirmation reviewer's LOW-2 figure, explicitly *not* re-derived by the condition-discharge
@@ -1901,7 +1901,7 @@ clause: "— `tests/` is still outside the corpus, which is where rows 8 and 10 
 > `# MEASURED, not guessed: the authored set carries 8 such citations today.`
 
 **Re-derived with the file's own `_CITATION` regex over its own `_authored()` set: 10, not 8.** Traced
-through history: **8 at `01d7578`** (correct when written), **10 at `d75f0fd`**, and 10 ever since —
+through history: **8 at `ac4065e`** (correct when written), **10 at `125f9f7`**, and 10 ever since —
 `increment-004.md` and `05-carries.md` each added one when they landed. Stale for three commits.
 
 Nothing breaks: the assertion beneath it is a floor (`>= 5`) and it holds. Two adjacent measured
@@ -1949,7 +1949,7 @@ is correct, so no reader is misled about *what* was stale — only about which r
 2. **Every measured cell of the three-column post-fix table is true for the commit its column names**,
    re-derived from three archive copies (§3.1). Twelve cells, twelve matches.
 3. **The `mapper/store.py:98-130` citation is exact to the line** (§3.2), and its staleness at
-   `a5db8df` was real.
+   `43b84cd` was real.
 4. **Rows 1–13 are each accurate** in shape, location and attribution (§3.2).
 5. **Both "reviewer-measured" tags are correct**, and — the discriminating check — the adjacent
    author-measured figure correctly does **not** carry one (§3.2).
@@ -1970,13 +1970,13 @@ is correct, so no reader is misled about *what* was stale — only about which r
 - **I did not re-review HIGH-A, the arms, or the class-set derivation.** The brief scoped them out and
   three passes cleared them; I re-ran both lanes only to confirm nothing regressed.
 - **I ran no mutations.** This diff changes no logic, so a counterfactual battery would measure the
-  previous commit, not this one. The `a5db8df` mutation figures in §3.1 are checked for *fidelity to
+  previous commit, not this one. The `43b84cd` mutation figures in §3.1 are checked for *fidelity to
   the records they summarise*, not re-executed.
 - **I did not re-measure the timing figures** (`0.8 µs` / `348.5 µs` / `~430x`). They are correctly
   tagged as taken on report, which is the honest disposition.
 - **`state.json`, `04-security-review.md`, and the reviewer-authored artifacts remain out of scope**,
   as the checker's own exclusion rule requires.
-- **The 24-mutant figure in the `01d7578` column** is an aggregate from earlier increments; I checked
+- **The 24-mutant figure in the `ac4065e` column** is an aggregate from earlier increments; I checked
   its consistency with the packet, not by re-running 24 mutants.
 
 ## 8 · What blocks, and what does not
@@ -1999,7 +1999,7 @@ the honest next rung, and it is a bigger prize than any of the four lines.
 | Item | Mark | Executed evidence |
 |---|---|---|
 | Prior condition-discharge verdict read in full first | OK | `04-qa-adversarial.md:1368-1692`, all four NEW findings and §8's non-verifications |
-| Diff read in full | OK | `a5db8df..bef1d69`: 6 files, +386/-20; every hunk of all six read |
+| Diff read in full | OK | `43b84cd..380997d`: 6 files, +386/-20; every hunk of all six read |
 | NEW-1 re-derived with the file's OWN two regexes | OK | §2 — 33 source files, 2 `path:line` + 2 `test_*` = **4 across 2 files**; docstring now says 4 |
 | NEW-2 verified at both named lines | OK | §2 — `:244` **647** resolves upward; `:325` **630 + 17 = 647** exact |
 | NEW-3 re-derived, not copied | OK | §2 — `_corpus()` = 8 + 33 = **41** arms; packet and docstring now agree |
@@ -2016,4 +2016,4 @@ the honest next rung, and it is a bigger prize than any of the four lines.
 | Ledger re-derived | OK | §1 — `647 = 548 + 16 + 83`; boundary **100**, claims **83**, `p02g` 6 · `p02h` 2 · `p02i` 7 · `p02j` 1 |
 | Clean categories reported as clean, not padded | OK | §6 — 10 categories; §7 states five things I did not verify |
 | No mutation work performed on a docs-only diff | OK | §7 — none needed; archive copies read-only, tip read-only |
-| No repo file edited but this one; no git mutation | OK | `git status --porcelain` **empty** at open and at close; HEAD still `bef1d69` |
+| No repo file edited but this one; no git mutation | OK | `git status --porcelain` **empty** at open and at close; HEAD still `380997d` |

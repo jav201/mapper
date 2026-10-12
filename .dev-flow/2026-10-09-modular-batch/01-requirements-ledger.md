@@ -14,14 +14,14 @@ above this line is ever edited._
 - **Date:** 2026-10-09
 - **What changed:** LLR-MOD.3.1's increment map re-labelled from `A1–A7` to the MOD-REQ2 order (A1, A2, A3, A5a, B0, A6, A7, A5b, A4, B0 already placed — final spine Inc-0 → A1 → A2 → A3 → A5a → B0 → A6 → A7 → A5b → A4 → B1–B11 → B12). US-001's outcome paths were corrected in the same amendment: `home.py` + `repo.py` live in `mapper/screens/`, NOT in `screens/map/`.
 - **Why:** premise 11 measured that the sibling screens construct `MapScreen` (5× `HomeScreen`, 1× `_ImportPreviewScreen`) and never the reverse; with `MapScreen` still in `app.py` their modules would have to import `mapper.app` — the banned `screens → app` edge. After B0 they import it from `mapper.screens.map`.
-- **Evidence:** 02-review.md round 1, ARCH-1 and QA-10; 01-requirements.md:156 (premise 11); `git diff e4d58c1 HEAD -- 01-requirements.md` (LLR-MOD.3.1 heading).
+- **Evidence:** 02-review.md round 1, ARCH-1 and QA-10; 01-requirements.md:156 (premise 11); `git diff 20c375e HEAD -- 01-requirements.md` (LLR-MOD.3.1 heading).
 
 ### LED-2026-10-09-modular-batch.2 — ARCH-2 / QA-8 / QA-11: the patch surface is eight repointed module-globals; the F4 lazy-read design is dropped
 - **Requirement:** HLR-MOD.1, HLR-MOD.3, HLR-MOD.6, LLR-MOD.2.2, LLR-MOD.3.2, LLR-MOD.6.1, LLR-MOD.6.2
 - **Date:** 2026-10-09
 - **What changed:** premise 4 re-censused over every patch form (dotted-string `setattr`/`patch`, module-object `setattr` via alias, direct attribute assignment) → 8 distinct targets, not 2. HLR-MOD.1, HLR-MOD.3 and LLR-MOD.3.2 rewritten from "two names read lazily through the module object" to "each target is a module-global of the module that reads it, repointed in the increment that moves the reader, with an AST guard against a vacuous repoint". HLR-MOD.6, LLR-MOD.6.1 and LLR-MOD.6.2 delete the sanctioned F4 function-local exception — 0 imports of `mapper.app` under `screens/` in either AST form (`import mapper.app` any alias, `from mapper.app import …`) at any scope. LLR-MOD.2.2 bans importing any of the eight patch names from `mapper.app`. The §6.3 "F4 lazy reads" risk entry is superseded by "Patch repoints"; the §4 F4 row of docs/ARCHITECTURE.md is retargeted to the reading modules.
 - **Why:** the F4 lazy read was itself a `screens → app` back-edge, and a re-exported or privately copied name would silently kill the patches while the suite stayed green.
-- **Evidence:** 02-review.md round 1, ARCH-2, QA-8 and QA-11; 01-requirements.md:149–150 (premises 4–5); `git diff e4d58c1 HEAD -- docs/ARCHITECTURE.md` (§3 `screens/map` row, §4 F4 row).
+- **Evidence:** 02-review.md round 1, ARCH-2, QA-8 and QA-11; 01-requirements.md:149–150 (premises 4–5); `git diff 20c375e HEAD -- docs/ARCHITECTURE.md` (§3 `screens/map` row, §4 F4 row).
 
 ### LED-2026-10-09-modular-batch.3 — ARCH-4 / QA-1: AT-065 is a committed TEXT golden with a recorded path, commit and sha256
 - **Requirement:** HLR-MOD.4, LLR-MOD.4.2
@@ -49,7 +49,7 @@ above this line is ever edited._
 - **Date:** 2026-10-09
 - **What changed:** LLR-MOD.1.1 re-sequenced to the MOD-REQ2 spine with per-increment owners — A1 common, A2 prompt, A3 construct, A5a `screens/map/navigation.py` (`NavigationModel` only, before B0 because `MapScreen` itself reads it), B0 the wholesale `MapScreen` move, A6 plug_repo, A7 import_preview, A5b repo, A4 home last — and the rule that the sibling screens import `MapScreen` from `mapper.screens.map`, never from `mapper.app`. LLR-MOD.1.1/1.2's negative controls become package-root checkers run on tmp-copy mutants. HLR-MOD.6's statement, observable and threshold drop the F4 exception (either import form, any scope; the empty set is the boundary) and AT-070 becomes its own node distinct from LLR-MOD.6.1's `-k b02`.
 - **Why:** premise 11 — the sibling screens construct `MapScreen`, never the reverse — so they can only land after B0 without re-creating the banned `screens → app` edge.
-- **Evidence:** 02-review.md round 1, ARCH-1, QA-3 and QA-4; 01-requirements.md:156 (premise 11); `git diff e4d58c1 HEAD -- docs/ARCHITECTURE.md` (§6 order constraints, A4 last of the siblings).
+- **Evidence:** 02-review.md round 1, ARCH-1, QA-3 and QA-4; 01-requirements.md:156 (premise 11); `git diff 20c375e HEAD -- docs/ARCHITECTURE.md` (§6 order constraints, A4 last of the siblings).
 
 ### LED-2026-10-09-modular-batch.7 — QA-5: the F1/F2 census oracle moves under the batch's spike/ directory
 - **Requirement:** LLR-MOD.7.2
@@ -63,7 +63,7 @@ above this line is ever edited._
 - **Date:** 2026-10-09
 - **What changed:** HLR-MOD.5's threshold now pins per-file AST assertion-count baselines measured 2026-10-09 — `test_draft_hygiene.py` ≥ 9, `test_darkside_census.py` ≥ 55, `test_keymap.py` ≥ 35, `test_en5.py` ≥ 34, `test_en7.py` ≥ 37, `test_app_imports_used.py` ≥ 2 — recorded as the AT-069 baseline before Inc-0, replacing the unmeasurable "assertion counts ≥ today's". LLR-MOD.5.1 adds that `test_keymap.py`'s scanned module set is derived by `pkgutil.walk_packages` over `mapper` (its hand-pinned list at :214–220 must be gone) so every new module is scanned without a test edit.
 - **Why:** "no weaker than today" is unenforceable without a recorded today; a hand-pinned module list rots the first time a new module appears.
-- **Evidence:** 02-review.md round 1, ARCH-3 and QA-7; `git diff e4d58c1 HEAD -- 01-requirements.md` (HLR-MOD.5 numeric pass threshold, LLR-MOD.5.1 statement).
+- **Evidence:** 02-review.md round 1, ARCH-3 and QA-7; `git diff 20c375e HEAD -- 01-requirements.md` (HLR-MOD.5 numeric pass threshold, LLR-MOD.5.1 statement).
 
 ### LED-2026-10-09-modular-batch.9 — ARCH-8, ARCH-9, ARCH-10, ARCH-11, QA N-1, N-2: round-2 spine and pinning fixes
 - **Requirement:** HLR-MOD.3, LLR-MOD.1.1, LLR-MOD.1.3, LLR-MOD.3.1, LLR-MOD.3.2, LLR-MOD.4.2, LLR-MOD.4.3, LLR-MOD.7.2

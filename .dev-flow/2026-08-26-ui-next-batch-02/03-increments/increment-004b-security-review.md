@@ -2,7 +2,7 @@
 
 **Verdict: SIGN-OFF.** No HIGH. Two MEDIUM findings recommended, neither blocking.
 
-Branch `feat/ui-next-batch-02`, entry `a971432`, nothing committed. Source under review: `mapper/app.py`, `mapper/keymap.py`. `.dev-flow/**` ignored.
+Branch `feat/ui-next-batch-02`, entry `8919c2a`, nothing committed. Source under review: `mapper/app.py`, `mapper/keymap.py`. `.dev-flow/**` ignored.
 
 ## Method
 

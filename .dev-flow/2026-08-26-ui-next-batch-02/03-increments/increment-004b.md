@@ -1,7 +1,7 @@
 # Increment 4b — US-N07 seat + walk (`#D5b`, `LLR-N06.2.4`, `E1b`/`E1c`, `#D38`)
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-4b` · **Branch:** `feat/ui-next-batch-02`
-**Entry commit:** `a971432`, tree clean · **NOT COMMITTED** — the working tree is what is gated.
+**Entry commit:** `8919c2a`, tree clean · **NOT COMMITTED** — the working tree is what is gated.
 **SOURCE FILE COUNT: 2** — `mapper/keymap.py`, `mapper/app.py`. Tests uncapped, as declared.
 **Language:** English (engineering artifact).
 
@@ -211,7 +211,7 @@ collection, all markers: 846/863 tests collected (17 deselected)
 
 ### 4.4 · `C-D25b` — the whole-seat pin and `duplicate_chords()`, ENTRY and EXIT
 
-| Measurement | ENTRY (`a971432`) | EXIT |
+| Measurement | ENTRY (`8919c2a`) | EXIT |
 |---|---|---|
 | `len(KEYMAP)` | 52 | **54** |
 | `len(bindings_for("map"))` | 31 | **33** |
@@ -547,7 +547,7 @@ reddens on exactly that.
 | `.dev-flow/…/increment-004b.md` | this section |
 
 **Source file count: 2** (`mapper/app.py`, `mapper/keymap.py` — the latter unchanged this round).
-Tests uncapped, as declared. **NOT COMMITTED**; `HEAD` is still `a971432`.
+Tests uncapped, as declared. **NOT COMMITTED**; `HEAD` is still `8919c2a`.
 
 ---
 
@@ -582,12 +582,12 @@ test_fold.py -k "at_046 or at_047 or esc_limpiar_off_the_frame"              -> 
 ### R3.3 · Ruff — SET comparison at identical scope
 
 ```
-scope: mapper/ tests/     entry (a971432): 27 findings     exit: 27 findings
+scope: mapper/ tests/     entry (8919c2a): 27 findings     exit: 27 findings
 NEW  (in exit, not entry): (none)
 GONE (in entry, not exit): (none)
 ```
 
-Compared as sorted sets over a clean `a971432` checkout in the mirror, not as counts. This closes
+Compared as sorted sets over a clean `8919c2a` checkout in the mirror, not as counts. This closes
 the review's "the count agreeing is not the same claim" caveat.
 
 ### R3.4 · Seat measurements, re-run on the exit tree
@@ -609,7 +609,7 @@ confirmation, not a change.
 
 ## R4 · Mutation ledger, round 2
 
-Mirror: `git clone --local --no-hardlinks` of the repo at `a971432`, working tree of `mapper/` and
+Mirror: `git clone --local --no-hardlinks` of the repo at `8919c2a`, working tree of `mapper/` and
 `tests/` overlaid, `tests/test_inc4_census.py` staged (the real repo has it staged; a fresh clone
 does not, and `test_a3_census` fails an untracked file by design). **Overlay fidelity established
 BEFORE any mutation** by sha256 against the real repo on all five touched files, and by a full run:
@@ -702,7 +702,7 @@ mapper/app.py        6f0f14614ff93fa8b3bee31d06339954cd3ae0e58149cb48e0159be7995
 mapper/keymap.py     3846c22ebb2f69b5dc7589a0f29444c3e7f90845189b09a49def70d828d7c159
 tests/test_search.py d66a21c385dee8ae349bde712daf06378971843a896babc395138335f007ab8f
 tests/test_fold.py   420ba5fddb4f9559afed09c9e4c0ee990f24b0bdd744d5a6da289f85f49ea13b
-HEAD = a971432, nothing committed
+HEAD = 8919c2a, nothing committed
 ```
 
 ---
@@ -794,7 +794,7 @@ round created.
 
 - [✓] **Tests pass** — `847 passed, 17 deselected, 3 xfailed`, exit 0, zero FAILED, one complete
       run read from its own output; slow lane `17 passed`.
-- [✓] **Ruff SET identical at identical scope** — diffed as sorted sets against a clean `a971432`
+- [✓] **Ruff SET identical at identical scope** — diffed as sorted sets against a clean `8919c2a`
       checkout, not compared as counts.
 - [✓] **Both HIGH findings closed test-only** — no production code changed for `H1` or `H2`.
 - [✓] **Both MEDIUM findings closed**, one of them on the second attempt, with the first attempt's
@@ -857,7 +857,7 @@ production resolves through `_search_order`. A **second, divergent resolution** 
 ## R2b.2 · Discharge — the new guard measured RED, and the old one measured inert
 
 A guard that could not fire is the class this batch exists to catch, so the replacement is
-**measured, not argued**. Mirror as in `R4`: `git clone --local --no-hardlinks` at `a971432`,
+**measured, not argued**. Mirror as in `R4`: `git clone --local --no-hardlinks` at `8919c2a`,
 working tree overlaid, `tests/test_inc4_census.py` staged. Overlay fidelity established by sha256
 against the real repo **before** any mutation (`mapper/app.py 6f0f1461…95c0b51`,
 `tests/test_search.py fe5dd6de…51b9cdb`) and by a green base on the selector. Mutation described
@@ -922,7 +922,7 @@ test_fold.py -k "at_046 or at_047 or esc_limpiar_off_the_frame"              -> 
 **Ruff — SET comparison at identical scope, still at the entry pin:**
 
 ```
-scope: mapper/ tests/     entry (a971432): 27 findings     exit: 27 findings
+scope: mapper/ tests/     entry (8919c2a): 27 findings     exit: 27 findings
 NEW  (in exit, not entry): (none)
 GONE (in entry, not exit): (none)
 ```
@@ -936,7 +936,7 @@ Diffed as sorted sets, not as counts.
 | `tests/test_search.py` | `AT-022b` — guard moved below `submit` and pointed at `_search_order()`; docstring paragraph corrected |
 | `.dev-flow/…/increment-004b.md` | `R1.1` corrected in place; this Round-2b section |
 
-**Source file count: 0.** No production code moved. **NOT COMMITTED**; `HEAD` is still `a971432`.
+**Source file count: 0.** No production code moved. **NOT COMMITTED**; `HEAD` is still `8919c2a`.
 
 Exit tree:
 

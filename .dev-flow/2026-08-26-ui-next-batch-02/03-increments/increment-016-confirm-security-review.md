@@ -4,7 +4,7 @@
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` (sealed) · FULL protocol per ruling `D35` |
 | Reviewer | `security-reviewer`, independent — authored none of this diff, fresh pass |
-| Commit | `f3398f4` on `feat/ui-next-batch-02`, base `a552783` |
+| Commit | `7a635cf` on `feat/ui-next-batch-02`, base `ab592f3` |
 | Date | 2026-09-19 |
 | **Verdict** | **OK from the security lens — 0 HIGH open.** `SEC-F1`, `SEC-F2`, `SEC-F3`, `SEC-F6` measured CLOSED by this pass. 5 MEDIUM + 4 LOW recorded, none blocking. **This authorises nothing** — see *Verdict*. |
 
@@ -30,7 +30,7 @@ mirror that is mine alone:
 | Verified against source | all 91 census-relevant tracked files (`mapper/**`, `tests/**`) **byte-identical**; the five subject files match the shipped digests |
 | Tree-wide digest | `2959ddb4f523ab2f1b0d9d12e1c4b467…` over 299 tracked files — **equals the coordinator's quoted value** |
 | Digests re-asserted at end | **ALL HELD.** Tree digest unchanged; `app.py` `914afcb8b0a364a6`, `export.py` `56773345bc4731f1`, `state.py` `bf239adef8e1c159`, `test_pan.py` `e65128c51866fa05`, `conftest.py` `c1acf140b03d3301`, `github.py` `d9bd9853e5214855` |
-| Written in the repo by me | **this file only.** `HEAD` still `f3398f4`; no tracked file moved |
+| Written in the repo by me | **this file only.** `HEAD` still `7a635cf`; no tracked file moved |
 
 **Two process facts found while doing this, both reported under `S-F13`/`S-F14`:**
 another writer was creating files in the "frozen" repo tree during my read, and
@@ -40,7 +40,7 @@ the editable install defeats mirror isolation by default.
 
 ## Scope reviewed
 
-`git diff a552783 f3398f4` — 17 files, +3312/−63.
+`git diff ab592f3 7a635cf` — 17 files, +3312/−63.
 
 - **Source:** `mapper/app.py`, `mapper/export.py`, `mapper/views/state.py`
 - **Config:** `pyproject.toml`
@@ -162,7 +162,7 @@ Measured by me on the shipped tree, inside a real pytest run so the autouse guar
 
 ### `SEC-F8` — secrets  [Severity: LOW — NOTE] — **clean, re-run by me**
 
-Scanned the **full** diff (`a552783..f3398f4`, all 17 files) for `api_key`/`secret`/`token`/`password`/`Bearer`/`ghp_`/`gho_`/`github_pat_`/`xox[baprs]-`/`sk-…`/`AKIA…`/`-----BEGIN … PRIVATE KEY`. **Zero credential values.** Hits are prose, the word "token" in `git` sub-command parsing, and one test fixture string `"secreto"` (`tests/test_export_state.py:2731` of the diff) used as a node title to prove the export strips it — a fixture, not a credential. No secret value appears anywhere in this report.
+Scanned the **full** diff (`ab592f3..7a635cf`, all 17 files) for `api_key`/`secret`/`token`/`password`/`Bearer`/`ghp_`/`gho_`/`github_pat_`/`xox[baprs]-`/`sk-…`/`AKIA…`/`-----BEGIN … PRIVATE KEY`. **Zero credential values.** Hits are prose, the word "token" in `git` sub-command parsing, and one test fixture string `"secreto"` (`tests/test_export_state.py:2731` of the diff) used as a node title to prove the export strips it — a fixture, not a credential. No secret value appears anywhere in this report.
 
 **Supply chain:** the `pyproject.toml` diff touches `[tool.pytest.ini_options]` only — **no new dependency, no version change, no install script**. Clean.
 
@@ -234,7 +234,7 @@ Scanned the **full** diff (`a552783..f3398f4`, all 17 files) for `api_key`/`secr
 
 - **Measured:**
 
-  | file | packet's restore digest | shipped at `f3398f4` | |
+  | file | packet's restore digest | shipped at `7a635cf` | |
   |---|---|---|---|
   | `mapper/app.py` | `60c5dde90e610e20` | **`914afcb8b0a364a6`** | ✗ |
   | `mapper/export.py` | `56773345bc4731f1` | `56773345bc4731f1` | ✓ |

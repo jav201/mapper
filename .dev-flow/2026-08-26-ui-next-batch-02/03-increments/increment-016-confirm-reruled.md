@@ -138,7 +138,7 @@ python -m pytest tests/test_hermetic.py -q
 | default | **0** | `1133 passed, 20 deselected, 3 xfailed in 355.94s` |
 | slow | **0** | `19 passed, 1137 deselected in 64.94s` |
 | network | **0** | `1 passed, 1155 deselected in 1.21s` |
-| ruff | — | **27 findings, SETS EQUAL AT EQUAL SCOPE** (base `a552783` 27 / head 27; added 0, removed 0), both sides extracted to temp trees so the scopes are symmetric |
+| ruff | — | **27 findings, SETS EQUAL AT EQUAL SCOPE** (base `ab592f3` 27 / head 27; added 0, removed 0), both sides extracted to temp trees so the scopes are symmetric |
 
 ### Corrections — two inherited figures did not survive re-measurement
 
@@ -280,7 +280,7 @@ operator can build. `M7` is now KILLED.
 
 `post = base − deleted + added` → **`1133 = 1095 − 0 + 38`** ✓ reconciles
 
-**Both ends MEASURED, not quoted.** The base figure is taken from a `git worktree` at `a552783` —
+**Both ends MEASURED, not quoted.** The base figure is taken from a `git worktree` at `ab592f3` —
 the commit, not a directory somebody named "base" — and collected with `-o addopts=` so no marker
 deselects anything: **1117 collected**. Head, collected the same way: **1156**. Delta **+39 nodes, 0
 deleted**, and the thirty-ninth is `network`-marked, which is why *deselected* moves `19 → 20` and
@@ -294,7 +294,7 @@ deleted**, and the thirty-ninth is `network`-marked, which is why *deselected* m
 
 | Field | Value |
 |---|---|
-| **Independent review** | `code-reviewer` · **OK to advance — 0 HIGH** · 4 MEDIUM + 2 LOW raised. `security-reviewer` · **OK from the security lens — 0 HIGH** · 5 MEDIUM + 4 LOW raised. Verdicts at `increment-016-confirm-code-review.md` and `increment-016-confirm-security-review.md`, both re-read on the shipped tree at `f3398f4`. |
+| **Independent review** | `code-reviewer` · **OK to advance — 0 HIGH** · 4 MEDIUM + 2 LOW raised. `security-reviewer` · **OK from the security lens — 0 HIGH** · 5 MEDIUM + 4 LOW raised. Verdicts at `increment-016-confirm-code-review.md` and `increment-016-confirm-security-review.md`, both re-read on the shipped tree at `7a635cf`. |
 
 Inc-CONFIRM is **FULL protocol** by ruling `D35`, so both passes are owed. Increment 015's three HIGH
 findings (`CR-F1`, `SEC-F1`, `SEC-F2`) are all addressed here, and **none of them is self-cleared**:
@@ -357,7 +357,7 @@ Both reviewers reproduced all four lanes independently as well (`code-reviewer` 
 
 ### Correction — a restore digest in §4 does not describe the tree this increment shipped
 
-| File | §4's recorded restore digest | Shipped at `f3398f4` | |
+| File | §4's recorded restore digest | Shipped at `7a635cf` | |
 |---|---|---|---|
 | `mapper/export.py` | `56773345bc4731f1` | `56773345bc4731f1` | matches |
 | `mapper/views/state.py` | `bf239adef8e1c159` | `bf239adef8e1c159` | matches |
@@ -392,7 +392,7 @@ the exit code; baseline asserted green (45 nodes) before the first mutation.
 | remedy reverted, export HEALTHY | SURVIVE | SURVIVED | remedy is inert on correct work |
 | comment-only negative control | SURVIVE | SURVIVED | — |
 
-Restores byte-identical; tree clean against `f3398f4` after the battery. **The pair is the point, not
+Restores byte-identical; tree clean against `7a635cf` after the battery. **The pair is the point, not
 the kill** — *the mutant is killed* is satisfied by an arm that was already killing it.
 
 **The anchor failure is the instrument working.** Five sites in, the harness refused a mutation with
@@ -553,5 +553,5 @@ reads; the `B-64` sweep must DRIVE the derived set rather than a hand-built mode
 | 12 | **Instrument RED-proof** declared | all | ✓ | §4 — 10 instruments; 2 reported a real defect in themselves and those readings were discarded |
 | 13 | **Correction population** declared | all | ✓ | §4 — 2 corrections, each enumerated before its first site was edited |
 | 14 | **Emitted-form assertion** declared | all | ✓ | §4 — 4 assertions over the exported SVG; `AT-009`'s blindness to folding named |
-| 15 | **Independent review** names somebody | all | ✓ | §4b — `code-reviewer` and `security-reviewer`, each re-reading the shipped tree at `f3398f4`; ⚠ dispatched in violation of catalog entry 15 and corrected mid-run, recorded in §4b |
+| 15 | **Independent review** names somebody | all | ✓ | §4b — `code-reviewer` and `security-reviewer`, each re-reading the shipped tree at `7a635cf`; ⚠ dispatched in violation of catalog entry 15 and corrected mid-run, recorded in §4b |
 | 16 | **Evidence files** declared | all | ⚠ | `none — this batch declares no artifact_homes.evidence`; declared gap, inherited, surfaced in §6 item 2 |

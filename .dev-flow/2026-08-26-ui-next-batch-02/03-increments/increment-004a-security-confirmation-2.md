@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Scope | **Narrow.** C1–C4 only, plus the three volunteered self-corrections. Not a re-review of the increment. |
-| Branch / entry | `feat/ui-next-batch-02` @ `5f4816c`, nothing committed, 21 dirty paths |
+| Branch / entry | `feat/ui-next-batch-02` @ `8ef1553`, nothing committed, 21 dirty paths |
 | Method | isolated mirror (`git clone --local --no-hardlinks` + working-tree overlay of `mapper/` and `tests/`); real repo never mutated |
 | Instrument | `PYTHONUTF8=1 python -m pytest`; verdicts read **per arm**, collected count asserted at 1, never a process exit code |
 | Restores | every mutation restored in a `finally`, sha256 `identical=True` printed per mutation |
@@ -341,7 +341,7 @@ resolvable address. Recording the call alongside the numeral is the right correc
 has now moved twice.
 
 **2 · The ledger reconciles, and the "retired fifth arm" really did not exist.** Measured at
-`HEAD 5f4816c` in a pristine clone:
+`HEAD 8ef1553` in a pristine clone:
 
 ```
 baseline: 801 passed, 17 deselected, 3 xfailed   ->  804 collected
@@ -356,7 +356,7 @@ The self-correction is accurate and the original claim was not.
 **3 · Ruff set identity holds; the pair count is instrument-dependent.**
 
 ```
-entry pin (5f4816c):  Found 27 errors   19 distinct file|rule pairs
+entry pin (8ef1553):  Found 27 errors   19 distinct file|rule pairs
 current:              Found 27 errors   19 distinct file|rule pairs
 diff entry vs now  -> EMPTY -- SETS IDENTICAL
 distinct rules: F401 F841
@@ -436,7 +436,7 @@ softening the S7 wording to "no … entered this round's addition".
 - [x] Real repo never mutated — post-run digests identical to entry (`app.py b960f4eff37093c9`,
       `test_search.py e22a72937b268e24`, `search.py 77836620bbddec54`,
       `state.py 0b661033b2ceff9a`, `layered.py 3e081a6c61af9a20`), `HEAD` still
-      `5f4816c1fe1e407d33058eb6f5c3b06e39c39b4d`, 21 dirty paths — unchanged from entry.
+      `8ef15539bfade6988b9cce7208fca154030d556d`, 21 dirty paths — unchanged from entry.
 - [x] Every mutation restored, `identical=True` printed per mutation; mirror carries no residue —
       full lane re-run **after** the whole battery: `822 passed, 17 deselected, 3 xfailed`, exit 0.
 - [x] Mutations described by position and operation; no mutated token spelled.

@@ -59,7 +59,7 @@ declares the one-job rule.** `LLR-S06.3.5`'s census then has no oracle for that 
 > requirement hierarchy settles this without needing a date.
 
 **Tiebreak 2 — the last-sealed document forecloses it explicitly.** `PDR-addendum-3.md:183-186`
-(§4 `#D27`, sealed last at `5d8ee0d`): *"`Inc-1` adds `SAGE`, `TEAL`, `VIOLET` … **all three new
+(§4 `#D27`, sealed last at `5686fe0`): *"`Inc-1` adds `SAGE`, `TEAL`, `VIOLET` … **all three new
 tokens are already spent** … There is **no unspent colour token**."* It then names each one's
 claimant (V17/V18/V14+V19). Addendum-3 is not ruling on `#D10`, which makes it the stronger
 witness: it is a *disinterested* recital of palette state, written for a different question, and it
@@ -332,7 +332,7 @@ over 14 tokens; `LLR-S06.3.2`'s register still lands at **1** entry after Inc-1 
    the document contradicted itself. Choosing between two readings a sealed document already
    contains is discharge; choosing a third is re-opening.
 2. **The governing reading was already the majority and the latest.** Three sites state it, the
-   last-sealed document (`addendum-3`, `5d8ee0d`) presupposes it, and the normative parent
+   last-sealed document (`addendum-3`, `5686fe0`) presupposes it, and the normative parent
    (`HLR-S06.1`) makes the rival reading unexecutable. This ruling **records** that, it does not
    create it.
 3. **The name and hex were always Phase-3 fill-in.** `:994` marks the busy token `NEW — created in

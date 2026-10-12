@@ -7,7 +7,7 @@
 
 **Mode:** `full` (inherited: client-grade V-model, merge authority granted).
 **Language:** artifacts and code English; UI strings Spanish.
-**Branch:** `fix/repair-batch-02`. **Base ref (RC-1):** `d877784` = `origin/master` = merge-base.
+**Branch:** `fix/repair-batch-02`. **Base ref (RC-1):** `bd17fab` = `origin/master` = merge-base.
 **Flow revision:** rev46 (recorded at the feature batch's un-park; unchanged this session).
 
 ---
@@ -101,7 +101,7 @@ Serial. **Inc-1 owns the only source change in the batch** — 1 of the 4-file b
 
 ## 7 · Test ledger
 
-`post = base − D + A`. Base **429** (measured at `d877784`, `pytest -q --collect-only
+`post = base − D + A`. Base **429** (measured at `bd17fab`, `pytest -q --collect-only
 -p no:randomly -o addopts=`).
 
 | Inc | D | A | Expected post | Observed |
@@ -139,7 +139,7 @@ record of what the four counterfactual passes actually bought — 50 arms at the
   **Operational consequence for the rest of this batch: a slow-lane result taken while any other
   suite is running is not evidence.** Not fixed here — outside the four-defect fence; carried to the
   backlog with the recipe and the recommendation to make the bounds load-tolerant, not larger.
-  **UNVERIFIED BY EITHER PARTY: whether the flake predates `d877784`.** Neither I nor the reviewer
+  **UNVERIFIED BY EITHER PARTY: whether the flake predates `bd17fab`.** Neither I nor the reviewer
   ran the slow lane at the base ref. It is *believed* pre-existing because nothing in this diff
   touches `test_repair_depth.py` or the render path it times — but that is an argument, not a
   measurement, and it is recorded as such rather than claimed.

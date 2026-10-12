@@ -37,7 +37,7 @@ wire counter reset after mount, performs **12,264 `Canvas.wire` calls** —
 under the ≤ 1,200,000 cap (≈ 1/20 of the 23,983,998 baseline; actually ≈
 1/1957) and matching round-2 probe p4's x-clipped order (6,547/render at
 wide-2000). Painted canvas rows after open, `l`, `j` byte-equal the golden
-pinned at base SHA `5cde04e`.
+pinned at base SHA `e7d433d`.
 
 ## 2 · Files modified
 
@@ -106,7 +106,7 @@ ruff check mapper/canvas.py tests/test_perf_paint_clip.py
 
 | Artifact emitted | The assertion, run against the EMITTED form | What it returned |
 |---|---|---|
-| the painted canvas rows (app session) | `test_at_075_keypress_wire_budget` compares the `#map-canvas` region strips after open/`l`/`j` against the pinned golden `tests/goldens/perf/at075_075b_wide2000_118x34.txt` (base SHA `5cde04e`) | equal — 0 diffs (29 passed, transcript §1) |
+| the painted canvas rows (app session) | `test_at_075_keypress_wire_budget` compares the `#map-canvas` region strips after open/`l`/`j` against the pinned golden `tests/goldens/perf/at075_075b_wide2000_118x34.txt` (base SHA `e7d433d`) | equal — 0 diffs (29 passed, transcript §1) |
 | the rendered grid text | `test_render_grid_clip_identity` re-renders all 16 grid cases with the capture script's builders and compares to `tests/goldens/perf/render/*.txt` | 0 diffs; plus the multi-parent DAG clipped-vs-reference render equal |
 | `Canvas` layer dicts | `test_bare_canvas_clip_equality*` compares `cells`/`bits`/`dots`/`bgs`/`_wire_tones` of clipped vs reference canvases | 0 differences across all 13 shapes |
 
@@ -119,7 +119,7 @@ ruff check mapper/canvas.py tests/test_perf_paint_clip.py
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
 | RED proofs + GREEN verification + measured count (`29 passed` §1 gate run at transcript line 26) | `.dev-flow/2026-10-10-perf-batch/evidence/r1-red.transcript` | `61da2b990cd286b33cc7876b3e781a642d53fbe378dd60e9eae21d2385679f14` |
-| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `4d82c16`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
 | join slow-lane run (`19 passed, 3231 deselected`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
 
 | Field | Value |
@@ -141,7 +141,7 @@ ruff check mapper/canvas.py tests/test_perf_paint_clip.py
 | B1 symbols asserted by other tests | `grep -rl "elbow_down\|\.edge(" tests/ mapper/` | renderers in `mapper/views/` call `elbow_down`; `tests/test_mod_parity.py` + `tests/test_repair_golden_census.py` pin painted output — both re-run GREEN in §1 |
 | B3 byte-identical golden captures this source | `tests/test_perf_goldens_manifest.py` + `test_render_grid_clip_identity` | every render golden re-compared against the CURRENT product: 0 diffs |
 | B4 artifact consumed elsewhere | `grep -rl "goldens/perf" tests/` | `tests/test_perf_goldens_manifest.py`, `tests/test_perf_paint_clip.py` (this increment); `tests/test_perf_layout_memo.py` / `tests/test_perf_dump.py` at Inc-R2/M1/M2 (per PDR §7) |
-| A3 | `Canvas` signatures unchanged; bodies only | `git diff 5cde04e -- mapper/canvas.py` touches only the two method bodies |
+| A3 | `Canvas` signatures unchanged; bodies only | `git diff e7d433d -- mapper/canvas.py` touches only the two method bodies |
 
 | Field | Value |
 |---|---|
@@ -167,7 +167,7 @@ ruff check mapper/canvas.py tests/test_perf_paint_clip.py
 
 | Field | Value |
 |---|---|
-| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) **APPROVE**, 0 HIGH/MED — every clip border walked against base `5cde04e`; the test's reference loops match the old bodies line for line; 2 LOW (opposite-sides off-canvas case optional; a redundant alias) |
+| **Independent review** | `code-reviewer` (Claude Sonnet, read-only) **APPROVE**, 0 HIGH/MED — every clip border walked against base `e7d433d`; the test's reference loops match the old bodies line for line; 2 LOW (opposite-sides off-canvas case optional; a redundant alias) |
 
 ---
 

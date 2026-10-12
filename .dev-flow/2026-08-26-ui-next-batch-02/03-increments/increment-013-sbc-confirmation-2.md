@@ -24,7 +24,7 @@ the forbidden order it stays **green**. Pass 1's own sentence applies verbatim �
 
 ## Boundary statement
 
-**Reviewed.** The `f3c1795..278fd36` diff in full (`layered.py` +31/−9, `test_fold.py`
+**Reviewed.** The `956ee41..ef4689d` diff in full (`layered.py` +31/−9, `test_fold.py`
 +21/−4, `test_outline_caps.py` +43/−12, `01-requirements.md` +17); `mapper/views/layered.py`
 `_clip`/`_fit` (`:73-115`); `mapper/darkside.py` `_CONTROL_MAP`/`plain` (`:496-536`);
 `tests/test_fold.py:360-410`; `tests/test_outline_caps.py:1-200, 250-270`;
@@ -40,7 +40,7 @@ increment before 013.
 
 **One writer.** Eight mutants, all applied with the Edit tool, all restored
 unconditionally, all sha256-verified back to baseline. Final state — `git status` empty,
-HEAD `278fd36`:
+HEAD `ef4689d`:
 
 | file | sha256 (pre = post) |
 |---|---|
@@ -171,8 +171,8 @@ Reproduced independently, and the corrected docstring is true.
   measured it, and the count is **2**, not 1 and not 3.
 
 - **Sub-claims of the rewritten docstring, each checked:**
-  - *"UNCHANGED across both folds"* — `git diff --stat a6598b2 278fd36 -- tests/test_inc3_census.py` is **empty**.
-  - *"written two increments earlier"* — last touched at `540123c`, three commits before `a6598b2`.
+  - *"UNCHANGED across both folds"* — `git diff --stat fce1ece ef4689d -- tests/test_inc3_census.py` is **empty**.
+  - *"written two increments earlier"* — last touched at `4d2bbaf`, three commits before `fce1ece`.
   - *"`TC-081` … still does not exist"* — no `TC-081` node in `tests/` or `mapper/`.
 
   The docstring now says the call site *was* armed and explains why the arm still earns its
@@ -271,7 +271,7 @@ not here.
 
 ## Regression — F2 / F3 / F4 after four post-pass-1 edits
 
-`mapper/views/outline.py` was **not** touched by `278fd36` (sha256 identical to pass 1's
+`mapper/views/outline.py` was **not** touched by `ef4689d` (sha256 identical to pass 1's
 recorded `EAC1EB1A…7484E`), and `tests/test_agree_floor.py` likewise (`3DC6F501…1AA3`).
 `tests/test_outline_caps.py` **was** edited, and F2's and F4's arms live in it — so all
 three were re-fired rather than argued from hashes.
@@ -288,7 +288,7 @@ All three still closed. The fold broke nothing it did not touch.
 
 ## Evidence checklist
 
-- [✓] **Diff read in full** — `f3c1795..278fd36` across all four files, plus `test_inc3_census.py:135-190` and `01-requirements.md` §3.0 / `LLR-COERCE.2` / `LLR-N06.2.3` / `AT-056` as context the diff did not cover.
+- [✓] **Diff read in full** — `956ee41..ef4689d` across all four files, plus `test_inc3_census.py:135-190` and `01-requirements.md` §3.0 / `LLR-COERCE.2` / `LLR-N06.2.3` / `AT-056` as context the diff did not cover.
 - [✓] **Correctness pass** — both cap derivations fired independently (`outline.py:211-212`); `_clip`'s coercion fired three ways (removed, re-mapped, reordered); `_CONTROL_MAP` cardinality and value-shape verified in-process (235 / single `U+FFFD`).
 - [✓] **Simplicity pass** — no new abstraction in this fold; the F1 fix is one `parametrize` decorator on an existing arm and adds no fixture.
 - [✓] **Reuse / duplication checked** — found the duplication that is this pass's finding: `test_inc3_census.py:148` and `test_fold.py:399-409` are the same arm, and only one was re-pointed (`F7`).

@@ -188,7 +188,7 @@ The gate count stepped from the b1b2 transcript (`3034 passed + 1 failed`) to th
 
 ## 6 · Pending items / spec deviations
 
-- None open. The B1-carried keymap failure is resolved by the b3b9 gate window (fixed at B7 `5229b12`).
+- None open. The B1-carried keymap failure is resolved by the b3b9 gate window (fixed at B7 `5087cfd`).
 
 ## 7 · Suggested next task
 

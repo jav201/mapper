@@ -21,8 +21,8 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | Batch | 2026-10-09-hygiene-batch |
 | Objective | Draft-save code hygiene (B-103) and the `INC9G-R8` record debt (B-99) |
 | Standing authorization | Asked 2026-10-09 through AskUserQuestion. Operator answers, verbatim: scope «B-103 + B-99 (Recomendado)»; mode and authorization «core + autónomo + merge (Recomendado)». The decision-recording acknowledgement was not asked as a separate question this batch. The recording obligation is unconditional and is honoured here, in `state.json.decisions_log` and in `05-close.md`. Merge only after a clean final PR-level qa-reviewer pass; a HIGH finding blocks. |
-| First gate | `devflow-validate.py --brief` on `903e0f0` (before the rollover): exit 1, with 1 block, which is `V7` — `SKILL.md` differs from the hash the bundle's manifest declares (`29e9c490927538a7 != a2751ce96e24b120`). It is external: the installed flow bundle was changed outside this project, and this batch does not modify `~/.claude`. |
-| Premises / RC-1 | RC-1 (a): `git fetch origin`; `origin/master` = `903e0f0e46f6c7ef894f86b25dc14d2255c1728b`, which is the local tip, so no rebase was needed. RC-2: `git ls-remote --exit-code --heads origin master` → `903e0f0…`, newest commit 2026-10-09 13:02:40 -0600. The premises are in `01-requirements.md` §2.7 (4 TRUE). |
+| First gate | `devflow-validate.py --brief` on `73b34fb` (before the rollover): exit 1, with 1 block, which is `V7` — `SKILL.md` differs from the hash the bundle's manifest declares (`29e9c490927538a7 != a2751ce96e24b120`). It is external: the installed flow bundle was changed outside this project, and this batch does not modify `~/.claude`. |
+| Premises / RC-1 | RC-1 (a): `git fetch origin`; `origin/master` = `73b34fbd3c36e68750d16a78125c149bfe04b9e3`, which is the local tip, so no rebase was needed. RC-2: `git ls-remote --exit-code --heads origin master` → `73b34fb…`, newest commit 2026-10-09 13:02:40 -0600. The premises are in `01-requirements.md` §2.7 (4 TRUE). |
 
 ## Triggers
 
@@ -44,7 +44,7 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | E2 | not fired | risk declared low (B-103 rows are LOWs) |
 | E3 | not fired | internal tool, not a client deliverable |
 | F1 | fired | the local `flow_hash` differs from the manifest (`V7`, see First gate). Control C-45 PULL: recorded. No pull or edit of `~/.claude`, because another session owns the flow bundle (rev101). |
-| F2 | not fired | the backlog was refreshed at the data-safety close (B-102, B-103 added in `2b6315d`) |
+| F2 | not fired | the backlog was refreshed at the data-safety close (B-102, B-103 added in `9848827`) |
 
 ## Where we are
 
@@ -101,7 +101,7 @@ P0 is closed and P1 is drafting. The contract `01-requirements.md` holds 2 stori
 
 | Suite / command | Last run | Result |
 |---|---|---|
-| full suite (data-safety P4, `cab8181`) | 2026-10-09 | 2920 passed / 0 failed |
+| full suite (data-safety P4, `4b8b103`) | 2026-10-09 | 2920 passed / 0 failed |
 
 ## Decision log
 

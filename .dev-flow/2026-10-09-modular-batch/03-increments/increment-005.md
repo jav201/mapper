@@ -14,7 +14,7 @@
 | Requirement(s) | `LLR-MOD.1.1` (`screens/map/navigation.py` owns `NavigationModel` only, re-exported; the package lands before B0 because `MapScreen` itself reads it) · `LLR-MOD.3.1` (imports keep resolving with identity) |
 | Acceptance | `AT-065` parity · white-box `tests/test_mod_bodies.py` (byte-identical body), `tests/test_mod_parity.py` (0 diffs) · gate: full suite (a5a-b0 transcript — see the honest note in §4) |
 | Agent | Product move: **Kimi (`kimi-for-coding`) unit in an isolated worktree**, RED + sha256-restore in its own log (session scratch — not stored as an evidence file). Gate: **orchestrator (Claude Opus 5.5)**. Group review: `code-reviewer` (Claude Sonnet). This packet: Kimi unit MODPKT-p1. |
-| Date | `2026-10-10` (commit 911ce1f, 01:40 −0600) |
+| Date | `2026-10-10` (commit cd48c47, 01:40 −0600) |
 
 ---
 
@@ -67,7 +67,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 - `tests/test_fold.py::test_llr_n06_2_3_every_repainted_region_coerces_what_it_paints`
 - `tests/test_inc3_census.py::test_a98_the_screen_imports_painted_ids_by_name_never_by_getattr` (`assert 'painted_ids' in {'LayeredRenderer', 'MAX_RENDER_NODES', 'pan_extent'}` — the screen's import block changed under B0)
 
-All three were fixed in follow-up commits `9e87ccd` (A5b) and `bc2ff81` (B0 follow-up). The next full gate (a5b, transcript cited in increment-007) shows the repaired state; the final 0-failure state of the batch is recorded at the B10+B11+B12 gate.
+All three were fixed in follow-up commits `e2f8725` (A5b) and `b1e8e2c` (B0 follow-up). The next full gate (a5b, transcript cited in increment-007) shows the repaired state; the final 0-failure state of the batch is recorded at the B10+B11+B12 gate.
 
 ### RED counterfactual — executed, not predicted
 
@@ -137,12 +137,12 @@ All three were fixed in follow-up commits `9e87ccd` (A5b) and `bc2ff81` (B0 foll
 
 | Probe | Command | Result |
 |---|---|---|
-| B1 symbols asserted by **other** tests | `git grep -ln "NavigationModel" 911ce1f -- tests/` | 1 test file imports it (via `mapper.app`) — green at the gate |
-| B2 file moved on disk | `git show 911ce1f:mapper/app.py \| grep -c "^class NavigationModel"` | 0 — the class is gone from `app.py` |
+| B1 symbols asserted by **other** tests | `git grep -ln "NavigationModel" cd48c47 -- tests/` | 1 test file imports it (via `mapper.app`) — green at the gate |
+| B2 file moved on disk | `git show cd48c47:mapper/app.py \| grep -c "^class NavigationModel"` | 0 — the class is gone from `app.py` |
 | B3 byte-identical golden | not applicable | not fired |
-| B4 artifact produced here is consumed elsewhere | `git grep -ln "NavigationModel" 911ce1f -- mapper/` | consumers: `mapper/app.py` (import + re-export, 6 use sites incl. `MapScreen`) — the sanctioned `app → screens/map` edge |
+| B4 artifact produced here is consumed elsewhere | `git grep -ln "NavigationModel" cd48c47 -- mapper/` | consumers: `mapper/app.py` (import + re-export, 6 use sites incl. `MapScreen`) — the sanctioned `app → screens/map` edge |
 
-| A3 | interface consumed by another module changed | `git show 911ce1f:mapper/app.py \| grep -n "NavigationModel"` | `app.py:73` imports from `.screens.map.navigation`; `MapScreen` constructs it at :731, :987, :1034, :1160, :3636, :3647 — same objects through the re-export |
+| A3 | interface consumed by another module changed | `git show cd48c47:mapper/app.py \| grep -n "NavigationModel"` | `app.py:73` imports from `.screens.map.navigation`; `MapScreen` constructs it at :731, :987, :1034, :1160, :3636, :3647 — same objects through the re-export |
 
 | Field | Value |
 |---|---|
@@ -158,7 +158,7 @@ All three were fixed in follow-up commits `9e87ccd` (A5b) and `bc2ff81` (B0 foll
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| `class NavigationModel` in `mapper/app.py` | 0 hits at 911ce1f | yes | probe output above; gate 2997 passed |
+| `class NavigationModel` in `mapper/app.py` | 0 hits at cd48c47 | yes | probe output above; gate 2997 passed |
 
 ### Signed-balance test ledger
 
@@ -181,7 +181,7 @@ All three were fixed in follow-up commits `9e87ccd` (A5b) and `bc2ff81` (B0 foll
 
 ## 6 · Pending items / spec deviations
 
-- The 3 census follow-ups were fixed in 9e87ccd + bc2ff81 (B0-stage commits), recorded in the facts sheet; none open against A5a itself.
+- The 3 census follow-ups were fixed in e2f8725 + b1e8e2c (B0-stage commits), recorded in the facts sheet; none open against A5a itself.
 - None.
 
 ## 7 · Suggested next task

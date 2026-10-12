@@ -21,7 +21,7 @@ these arms now drive but never drive this fixture through.
 ## Boundary statement
 
 **Reviewed.** `mapper/views/outline.py` in full (463 lines); `tests/test_outline_caps.py`
-(282); `tests/test_agree_floor.py` (156); the `a6598b2..f3c1795` diff of all four; the
+(282); `tests/test_agree_floor.py` (156); the `fce1ece..956ee41` diff of all four; the
 `LLR-N06.3.5` and `AT-056` blocks of `01-requirements.md`; `layered._clip`;
 `tests/test_fold.py:375-392`.
 
@@ -33,7 +33,7 @@ reconcile to the author's numbers is recorded under F5 — I report my measureme
 author's side by side rather than guessing which run produced "3 arms".
 
 **One writer.** Every mutant was applied with the Edit tool, restored unconditionally, and
-sha256-verified back to baseline. Final state: `git status` empty, HEAD `f3c1795`,
+sha256-verified back to baseline. Final state: `git status` empty, HEAD `956ee41`,
 `outline.py` = `EAC1EB1A…7484E`, `test_outline_caps.py` = `F4BB063C…57B6`,
 `test_agree_floor.py` = `3DC6F501…1AA3` — all identical to the pre-pass values. Probe
 scripts were written **outside** the repo (`C:\Users\<operator>\clde\`).
@@ -214,8 +214,8 @@ declared a coverage gap that did not exist.
   `test_the_clip_uses_the_existing_ellipsis_idiom`, and the new arm.
 - **Isolating the coercion** (cap kept, coercion removed):
   **2 arms red — the new arm AND the A-89 census arm**; **every cap arm stayed green**.
-- `tests/test_inc3_census.py` is **unchanged across both folds** (`git diff a6598b2 f3c1795`
-  empty; last touched at `540123c`), so the A-89 census arm already pinned outline's
+- `tests/test_inc3_census.py` is **unchanged across both folds** (`git diff fce1ece 956ee41`
+  empty; last touched at `4d2bbaf`), so the A-89 census arm already pinned outline's
   coercion **before** gate 2 declared it unpinned.
 - **Therefore:** the claim now standing in `test_outline_caps.py:243-247` and echoed in the
   commit — *"removing the COERCION and removing the CAP fail the identical three tests, all
@@ -251,7 +251,7 @@ declared a coverage gap that did not exist.
 
 ## Evidence checklist
 
-- [✓] **Diff read in full** — `a6598b2..f3c1795` over `outline.py` (+74/−9), `test_outline_caps.py`, `test_agree_floor.py`, `01-requirements.md`; plus `outline.py:1-463` entire.
+- [✓] **Diff read in full** — `fce1ece..956ee41` over `outline.py` (+74/−9), `test_outline_caps.py`, `test_agree_floor.py`, `01-requirements.md`; plus `outline.py:1-463` entire.
 - [✓] **Correctness pass** — empty-`rows` guards on both `_widen` call sites (`:356`, `:387`); `_widen` extraction behaviour-identical (diff + census 9/90 unchanged); `floor_reached` vs fallback: 0 divergences / 17,871 frames.
 - [✓] **Simplicity pass** — `floor_reached` public is proportionate and matches the module's existing surface; `_widen` extraction removes a real duplication. No premature abstraction found.
 - [✓] **Reuse / duplication checked** — found one: the new coercion arm duplicates coverage already held by `test_inc3_census.py`'s A-89 census arm (F6). `_clip` correctly reused rather than re-truncated.

@@ -1,7 +1,7 @@
 # Security Review — Inc-4c (US-N07 / `LLR-N07.3.4`, `#D43`)
 
 **Reviewer:** security-reviewer (independent) · **Date:** 2026-08-29
-**Branch:** `feat/ui-next-batch-02` · **Entry:** `9ba2f26` · nothing committed
+**Branch:** `feat/ui-next-batch-02` · **Entry:** `a6dc8d7` · nothing committed
 **Source under review:** `mapper/app.py` (1 file, +339/−? hunks). `.dev-flow/**` ignored.
 **Verdict:** **SIGN-OFF** — with F-1 applied first (one line) and F-4 corrected.
 
@@ -11,7 +11,7 @@
 
 Reviewed in an isolated mirror (`git clone --local --no-hardlinks` of the real
 repo + working-tree overlay of `mapper/app.py` and `tests/test_search.py`).
-A second mirror pinned at `9ba2f26` (Inc-4b, no overlay) was used to separate
+A second mirror pinned at `a6dc8d7` (Inc-4b, no overlay) was used to separate
 what this increment **introduces** from what it inherits.
 
 Mirror reproduces the declared baseline exactly:
@@ -109,7 +109,7 @@ in this document.
 
   | tree | after one `esc` | frame changed visibly |
   |---|---|---|
-  | `9ba2f26` (Inc-4b) | `HomeScreen` — left the map | **True** |
+  | `a6dc8d7` (Inc-4b) | `HomeScreen` — left the map | **True** |
   | working tree (Inc-4c) | `MapScreen`, query cleared | **False** |
 
   This is the inverse of `#D38` and precisely the failure `_search_is_live`'s own
@@ -134,7 +134,7 @@ in this document.
   availability dimension.**
 - **Where:** `#map-minimap` (`app.py:1228`), the unbounded meter
   (`app.py:1944-1947`), `#map-canvas` (`app.py:1234`).
-- **Measured, identically at `9ba2f26` and at the working tree** (12002 nodes,
+- **Measured, identically at `a6dc8d7` and at the working tree** (12002 nodes,
   118x34):
 
   ```

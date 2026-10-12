@@ -461,7 +461,7 @@ by whom; (ii) that `test_a3_census.py:382` was reddened as a consequence rather 
   `lane.py` in this increment's scope for a reason not written into `01-requirements.md`, my §2
   refutation is wrong and I would want to see that ruling. On the evidence in the tree, it is not
   there.
-- **I found no evidence of a second writer.** Working tree clean at `335d0e4`; no stray lock or
+- **I found no evidence of a second writer.** Working tree clean at `cc3c584`; no stray lock or
   editor files.
 
 ---

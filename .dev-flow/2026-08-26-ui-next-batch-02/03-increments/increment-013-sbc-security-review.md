@@ -15,7 +15,7 @@ parses. The problem is not the code. The problem is that almost nothing tests it
 
 ## Scope reviewed
 
-`git diff fc0aeff~1..6bb1abf -- mapper/ tests/` — 6 files, +922/−24:
+`git diff d77abae~1..f91f4ed -- mapper/ tests/` — 6 files, +922/−24:
 `mapper/app.py`, `mapper/views/outline.py`, `tests/test_a3_census.py`,
 `tests/test_agree_floor.py`, `tests/test_canvas_header_charge.py`,
 `tests/test_outline_caps.py`. Read beyond the diff for context:
@@ -23,8 +23,8 @@ parses. The problem is not the code. The problem is that almost nothing tests it
 `COERCION_RANGES`), `mapper/mermaid.py`, `mapper/import_csv.py`,
 `mapper/store.py`, `mapper/export.py`, `mapper/model.py`.
 
-**What I did NOT review:** the docs-only commits (`5333618`, `9c8fe24`,
-`ae501ea`) beyond reading `01-requirements.md` for traceability; `views/radial.py`
+**What I did NOT review:** the docs-only commits (`7bb67a5`, `99d9f79`,
+`0eee321`) beyond reading `01-requirements.md` for traceability; `views/radial.py`
 (`S-D`'s file); the 19 deselected lane tests; `views/lane.py`'s unreachable
 renderers (`B-49`'s raw survivors) — outline was my remit and outline is reachable.
 

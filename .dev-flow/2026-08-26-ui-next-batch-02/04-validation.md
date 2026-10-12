@@ -19,7 +19,7 @@
 - **Test ledger:** ⚠ not closed — post is 2797 passed (+3 xfailed, 24 deselected) on the gate lane; collected count not recorded; baseline 429 was a `--collect-only -o addopts=` count (deselected included), so the units differ; D/A not recorded as one pair (see Detail)
 - **Evidence checklist (qa-reviewer):** `qa-reviewer` agent evaluated the rows (gate run executed by the orchestrator; draft by `deepseek-v4-pro`) · 11 of 12 rows ✓ with evidence
 
-> Justification for the token: the ONE complete gate run is clean — **2797 passed, 24 deselected, 3 xfailed, 0 failed** on the squash tree `46e190b` == branch tip `4572e52` (`gate-run-master-tree.txt`); one earlier full run hit FLAKE-2 once (10/10 alone); zero HIGH findings across the whole-branch gates (`VERDICT-merge-2026-10-03.md`). The notes are: one open flake (FLAKE-2) and operator-deferred residuals B-36, B-79…B-97 (`.dev-flow/BACKLOG.md`), none of which blocks this batch's gate.
+> Justification for the token: the ONE complete gate run is clean — **2797 passed, 24 deselected, 3 xfailed, 0 failed** on the squash tree `2eaabf3` == branch tip `daa5c3a` (`gate-run-master-tree.txt`); one earlier full run hit FLAKE-2 once (10/10 alone); zero HIGH findings across the whole-branch gates (`VERDICT-merge-2026-10-03.md`). The notes are: one open flake (FLAKE-2) and operator-deferred residuals B-36, B-79…B-97 (`.dev-flow/BACKLOG.md`), none of which blocks this batch's gate.
 
 ---
 
@@ -193,7 +193,7 @@ Notes: the Inc-9 → EN → Gate sub-line ran **1558 → 2797** (`state.json:106
 | Regression id | Pre-fix run (evidence it FAILED) | Pre-fix RED kind (value / shape) | Post-fix value-discriminating? (QC-2) | Post-fix result | Reconciled node |
 |---------------|----------------------------------|----------------------------------|----------------------------------------|-----------------|-----------------|
 | `test_a105_a_zero_activity_workspace_paints_every_bar_at_the_floor` | `ZeroDivisionError` at `app.py:579` on a 14-day-idle workspace (`INC7-CR-R3-F3`, HIGH) | value (division by `max_count == 0`) | yes — the two-day arm `test_a105_two_days_of_activity_scale_relative_to_each_other` discriminates true-max vs sum vs binary tier | pass | `test_sparkline_floor.py::test_a105_*` |
-| `test_inc9s_sec_f3_a_lone_surrogate_is_refused_by_the_allow_list_with_no_filesystem_call` | regression of `929a039`: `UnicodeEncodeError` escaped the walk's `except` | shape (exception out of a narrow `except`) | yes — `surrogatepass` second guard + astral pin `..._an_astral_character_counts_as_two_units_and_is_accepted` | pass | `test_inc9s.py::test_inc9s_sec_f3_*` |
+| `test_inc9s_sec_f3_a_lone_surrogate_is_refused_by_the_allow_list_with_no_filesystem_call` | regression of `46df0f2`: `UnicodeEncodeError` escaped the walk's `except` | shape (exception out of a narrow `except`) | yes — `surrogatepass` second guard + astral pin `..._an_astral_character_counts_as_two_units_and_is_accepted` | pass | `test_inc9s.py::test_inc9s_sec_f3_*` |
 | `test_g6c_f7_crlf_notes_round_trip_as_lf_with_no_replacement_char` | `plain()` mapped `\r`→U+FFFD at the LOAD boundary, corrupting CRLF notes silently (self-introduced) | value (permanent corruption) | yes — `test_g6c_f7_tab_cjk_emoji_round_trip_byte_identical` pins byte-identity | pass | `test_g6_store_surrogates.py::test_g6c_f7_*` |
 
 ### Evidence checklist — qa-reviewer (full)
@@ -202,7 +202,7 @@ Notes: the Inc-9 → EN → Gate sub-line ran **1558 → 2797** (`state.json:106
 
 | # | Item | ✓/✗ | Evidence / executor |
 |---|---|---|---|
-| 1 | One complete run, launched by the orchestrator — never stitched | ✓ | `gate-run-master-tree.txt`: 2797 passed, 24 deselected, 3 xfailed, 1486.29s; executor: orchestrator, tree `46e190b`. The earlier FLAKE-2 run (`gate-run-1-flake.txt`) is disclosed, not stitched |
+| 1 | One complete run, launched by the orchestrator — never stitched | ✓ | `gate-run-master-tree.txt`: 2797 passed, 24 deselected, 3 xfailed, 1486.29s; executor: orchestrator, tree `2eaabf3`. The earlier FLAKE-2 run (`gate-run-1-flake.txt`) is disclosed, not stitched |
 | 2 | Layer 0 · Layer A · Layer B present | ✓ | Layer 0 tables, 35 Layer A rows, 6 Layer B rows; mutant counts from `state.json` (reviewer agents); Layer A citations corrected after the qa-reviewer pass (A-114, A-117…A-120, A-125 rows) |
 | 3 | UX walkthrough with the real mechanism and the painted result | ✓ | Textual pilot in the suite (orchestrator's gate run) + per-increment `ux-reviewer` verdicts; adversarial PR QA drove the app for `VERDICT-merge-2026-10-03.md` |
 | 4 | Representative + boundary + negative | ✓ | Layer B repr · boundary · negative column, 6 rows (drafter; checked by qa-reviewer) |

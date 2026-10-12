@@ -14,7 +14,7 @@
 | Requirement(s) | `LLR-MOD.1.1` (common.py owns the shared helpers + `MapHintLine`, re-exported) · `LLR-MOD.3.1` (21 names still resolve from `mapper.app`) · `LLR-MOD.3.2` (`refusal_sentence` repointed with its reader `_path_refusal`) · `LLR-MOD.6.1` (two of the four B-02 function-local imports closed) · `LLR-MOD.5.2` (extraction-riding test follow-ups) |
 | Acceptance | `AT-065` (painted parity) · `AT-067`/`AT-069` pins through the suite · white-box `tests/test_mod_bodies.py` (bodies byte-identical), `tests/test_mod_parity.py` (0 painted diffs), `tests/test_mod_compat.py -k reexport` (identity) · gate: full suite 2977 passed / 0 failed |
 | Agent | Product move: **Kimi (`kimi-for-coding`) unit in isolated worktree `wt-moda1`**, with its own RED + sha256-restore log (Kimi unit report, session scratch). Gate run + regression set: **orchestrator (Claude Opus 5.5)**. Independent review: `code-reviewer` (Claude Sonnet). This packet: Kimi unit MODPKT-p1. |
-| Date | `2026-10-10` (commit b024a13, 00:49 −0600) |
+| Date | `2026-10-10` (commit a9a47b3, 00:49 −0600) |
 
 ---
 
@@ -145,12 +145,12 @@ The only failing transcript cited in this packet is `a1-red-patch-repoint.transc
 
 | Probe | Command | Result |
 |---|---|---|
-| B1 symbols asserted by **other** tests | `git grep -l "keybar_groups\|MapHintLine\|_save_or_toast" b024a13 -- tests/` | 6 test files import the moved names (via `mapper.app`) — all green at the gate |
-| B2 file moved on disk | `git show b024a13:mapper/app.py \| grep -c "^class MapHintLine\|^def keybar_groups\|^def _save_or_toast"` | 0 — definitions gone from `app.py`; only the re-export block remains |
+| B1 symbols asserted by **other** tests | `git grep -l "keybar_groups\|MapHintLine\|_save_or_toast" a9a47b3 -- tests/` | 6 test files import the moved names (via `mapper.app`) — all green at the gate |
+| B2 file moved on disk | `git show a9a47b3:mapper/app.py \| grep -c "^class MapHintLine\|^def keybar_groups\|^def _save_or_toast"` | 0 — definitions gone from `app.py`; only the re-export block remains |
 | B3 byte-identical golden captures this source | goldens capture painted output, not this source | not fired |
 | B4 artifact produced here is consumed elsewhere | `screens/common.py` consumed by `app.py` (re-export), `factory.py`, `settings.py` | consumers in-tree, suite green |
 
-| A3 | interface consumed by another module changed | `git grep -n "refusal_sentence" b024a13 -- mapper/screens/common.py tests/test_inc9q.py` | `common.py:30` binds it from `osopen`, `:277` reads it; `test_inc9q.py:394` patches the `common` module-global |
+| A3 | interface consumed by another module changed | `git grep -n "refusal_sentence" a9a47b3 -- mapper/screens/common.py tests/test_inc9q.py` | `common.py:30` binds it from `osopen`, `:277` reads it; `test_inc9q.py:394` patches the `common` module-global |
 
 | Field | Value |
 |---|---|
@@ -170,7 +170,7 @@ The only failing transcript cited in this packet is `a1-red-patch-repoint.transc
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| helper definitions in `mapper/app.py` | 0 definition hits at b024a13 | yes — only re-exports survive | test_mod_bodies byte-identity green; gate 2977/0 |
+| helper definitions in `mapper/app.py` | 0 definition hits at a9a47b3 | yes — only re-exports survive | test_mod_bodies byte-identity green; gate 2977/0 |
 
 ### Signed-balance test ledger
 
@@ -207,7 +207,7 @@ A2 (increment 003): the four literal modals → `mapper/screens/prompt.py`, clos
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 4 / 4 — reason stated in §2 |
-| 2 | Tests written in this same increment | all | ✓ | 5 test files in b024a13 |
+| 2 | Tests written in this same increment | all | ✓ | 5 test files in a9a47b3 |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | n/a — no unit meets the criterion; byte-identity + parity carry the layer |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | §4 — repoint-skipped mutant, transcript + restore digest |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | §4 — 5 probes, 4 fired |

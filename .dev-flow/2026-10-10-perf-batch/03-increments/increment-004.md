@@ -34,7 +34,7 @@ counter `LayeredRenderer._layout_misses`, incremented at the hit check inside
 `evidence/perf0c-nav.transcript:44`, so invocations are not countable).
 Module-level callers `painted_ids`/`pan_extent` pass no memo and always compute
 fresh. Rendered bytes are unchanged (AT-075/075b goldens still byte-match,
-pinned at base SHA `5cde04e`).
+pinned at base SHA `e7d433d`).
 
 Measured (AT-075 session, `evidence/r2-red.transcript` §1): BEFORE, the
 wide-2000 nav session cost **10 `_tree_layout` computations per 2 renders**
@@ -53,7 +53,7 @@ the base golden.
 | `mapper/views/layered.py` | source | `LLR-PERF.1.2` · `LLR-PERF.1.3` · `HLR-PERF.1` (`AT-075b`) | unscaled `_tree_layout` memo on the renderer instance (strong-reference key, scaling re-applied per call); `_layout_misses` spy at the hit check inside `_geometry` |
 | `tests/test_perf_layout_memo.py` | test | `LLR-PERF.1.2` · `LLR-PERF.1.3` · `AT-075b` | new: miss-spy layer-0 node; AT-075b real-app session (miss counts + golden bytes); the seven named invalidation arms; M-R2d address-reuse node (ruling R13); the `Graph.nodes` writer census + 16 planted-form detector arms (ruling R14) |
 | `.dev-flow/2026-10-10-perf-batch/evidence/r2-red.transcript` | doc | RED counterfactuals · measured counts | commands + outputs of the GREEN runs, the before/after measurement, and the five mutation proofs (relative paths) |
-| `tests/test_a3_census.py` | test | `LLR-PERF.1.3 · LLR-PERF.2.2` | join-gate follow-up `084d7b7`: arg-ful render pin 65 → 80, the 15 new byte-identity render sites itemised in the pin's comment |
+| `tests/test_a3_census.py` | test | `LLR-PERF.1.3 · LLR-PERF.2.2` | join-gate follow-up `4d82c16`: arg-ful render pin 65 → 80, the 15 new byte-identity render sites itemised in the pin's comment |
 
 | Count | Value |
 |---|---|
@@ -73,11 +73,11 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 | Layer | Owed in | Nodes | Result |
 |---|---|---|---|
 | **0 · unit** | `core` · `full` | `tests/test_perf_layout_memo.py::test_memo_miss_spy` | passed — 5 repeated renders cost exactly 1 miss, byte-identical |
-| **A/B · black-box** | `core` · `full` | `tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden` | passed — open + `l,j,j,j,j` cost 1 miss; archive + `l` cost 2; every painted step byte-equals the golden pinned at base SHA `5cde04e` |
+| **A/B · black-box** | `core` · `full` | `tests/test_perf_layout_memo.py::test_at_075b_memo_misses_and_golden` | passed — open + `l,j,j,j,j` cost 1 miss; archive + `l` cost 2; every painted step byte-equals the golden pinned at base SHA `e7d433d` |
 | **A/B · black-box** | `core` · `full` | `tests/test_perf_layout_memo.py::test_memo_invalidation_arms[resize\|title\|fold\|focus\|undo\|add_child\|round_trip]` | passed — scaling-only changes 0 extra misses + byte-identical repaint; structural changes miss exactly once; round trip 0 extra misses |
 | **0 · unit** | `core` · `full` | `tests/test_perf_layout_memo.py::test_memo_id_reuse` | passed — a new `Graph` object always misses |
 | gate | | `test_nodes_writer_census` + 16 planted-form arms | passed — the declared two-writer census holds; every banned in-place/alias form is detected |
-| gate | | the §3 four-file run (`55 passed total`) | **not captured** in a lane transcript — recorded plainly here; the counts that hold are this packet's own RED transcript (`1 passed` per GREEN run at `r2-red.transcript` lines 55/60/70/77/102/119, `2 passed` post-restore at line 156) and, post-join, the join gate (`1 failed, 3222 passed` in `join-gate-run1-full-suite.transcript` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`; the failures in this packet's own transcript are the five deliberate RED mutations, §RED counterfactual) |
+| gate | | the §3 four-file run (`55 passed total`) | **not captured** in a lane transcript — recorded plainly here; the counts that hold are this packet's own RED transcript (`1 passed` per GREEN run at `r2-red.transcript` lines 55/60/70/77/102/119, `2 passed` post-restore at line 156) and, post-join, the join gate (`1 failed, 3222 passed` in `join-gate-run1-full-suite.transcript` — the single failure is the A3 census pin, fixed in the test-only follow-up `4d82c16`; the failures in this packet's own transcript are the five deliberate RED mutations, §RED counterfactual) |
 
 ### RED counterfactual — executed, not predicted
 
@@ -117,7 +117,7 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 
 | Artifact emitted | The assertion, run against the EMITTED form | What it returned |
 |---|---|---|
-| the painted canvas rows (app session) | `test_at_075b_memo_misses_and_golden` compares the `#map-canvas` region strips after open / each keypress / archive against the pinned golden `tests/goldens/perf/at075_075b_wide2000_118x34.txt` (base SHA `5cde04e`) | equal — 0 diffs across all 7 painted steps |
+| the painted canvas rows (app session) | `test_at_075b_memo_misses_and_golden` compares the `#map-canvas` region strips after open / each keypress / archive against the pinned golden `tests/goldens/perf/at075_075b_wide2000_118x34.txt` (base SHA `e7d433d`) | equal — 0 diffs across all 7 painted steps |
 | the rendered grid text | `test_memo_invalidation_arms[resize\|title]` compares full `render().plain` text against a fresh renderer's paint | byte-identical (and this is the exact conjunct M-R2c reddens) |
 | the folded/unfolded canvas | `test_memo_invalidation_arms[fold]` | unfold repaints byte-identically to the unfolded map |
 
@@ -130,7 +130,7 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
 | Evidence artifact | Path — under `artifact_homes.evidence` | SHA-256 |
 |---|---|---|
 | RED proofs + GREEN verifications + before/after measurement | `.dev-flow/2026-10-10-perf-batch/evidence/r2-red.transcript` | `82695d1e7c5717da2518a1f1274854fc5e01c97e96be2c587ee431a026dca5cc` |
-| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `084d7b7`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
+| join gate full-suite run 1 (post-join, all lanes: `1 failed, 3222 passed` — the single failure is the A3 census pin, fixed in the test-only follow-up `4d82c16`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-gate-run1-full-suite.transcript` | `06a24f17c296ae015c7d981003862f85774eef7f54004a265e0f3c21a3890756` |
 | join slow-lane run (`19 passed, 3231 deselected`) | `.dev-flow/2026-10-10-perf-batch/evidence/join-slow-lane.transcript` | `63d6a2c89abd789b5bcb6ee20969658558d8f40b41de4b4c8fa9ee9eb5e922b1` |
 
 | Field | Value |
@@ -204,7 +204,7 @@ ruff check mapper/views/layered.py tests/test_perf_layout_memo.py
   non-deterministic-on-this-interpreter (escape clause exercised and recorded,
   transcript §4) rather than executed RED. No other deviations.
 - The AT-075/075b golden file this increment reads was pinned by the trunk at
-  PERFG0 (base SHA `5cde04e`).
+  PERFG0 (base SHA `e7d433d`).
 
 ## 7 · Suggested next task
 

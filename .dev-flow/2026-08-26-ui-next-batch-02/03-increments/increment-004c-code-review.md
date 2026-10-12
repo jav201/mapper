@@ -9,7 +9,7 @@ the `esc` half of the increment is genuinely delivered and genuinely gated.
 
 ## Scope reviewed
 
-- `mapper/app.py` — 1 source file, working tree vs `9ba2f26` (entry pin). +339/−136 lines.
+- `mapper/app.py` — 1 source file, working tree vs `a6dc8d7` (entry pin). +339/−136 lines.
 - `tests/test_search.py` — 2 arms removed, 5 added (30 → 33 functions in the file; net +3, so
   847 → 850 is arithmetically consistent).
 - `.dev-flow/…/01-requirements.md` — `LLR-N07.3.4` (new) and its gate amendment.

@@ -1,6 +1,6 @@
 # Increment 046 -- Inc-X3: an attachment chip opens with real keys and a real click (INC9P-UX-F1)
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `f06f8ee`. Authority: `A-128` (appended to `01-requirements.md`, dated 2026-10-02) and `VERDICT-inc9-2026-09-30.md` Round 13, X3. 1 source file.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `11ae444`. Authority: `A-128` (appended to `01-requirements.md`, dated 2026-10-02) and `VERDICT-inc9-2026-09-30.md` Round 13, X3. 1 source file.
 
 ## 1. What changed
 
@@ -14,9 +14,9 @@ Source: `mapper/widgets/components.py`. Tests: `tests/test_inc9x3.py` (new). Doc
 
 ## 3. Arm table (RED/GREEN)
 
-RED = commit `086c746` (arms as strict xfail; source byte-identical to `f06f8ee`, checked with `git diff --stat f06f8ee HEAD -- mapper` = empty) in a separate `git worktree` under `%TEMP%` (removed), temp HOME, `--runxfail`: **14 failed**. Without `--runxfail` the same tree reports `14 xfailed` (0 XPASS). GREEN = `b4ccca9`: **14 passed**.
+RED = commit `52a8217` (arms as strict xfail; source byte-identical to `11ae444`, checked with `git diff --stat 11ae444 HEAD -- mapper` = empty) in a separate `git worktree` under `%TEMP%` (removed), temp HOME, `--runxfail`: **14 failed**. Without `--runxfail` the same tree reports `14 xfailed` (0 XPASS). GREEN = `f4721ba`: **14 passed**.
 
-| Arm (118 and 87 each; real input only; launcher stubbed) | RED on `f06f8ee` (measured) | GREEN |
+| Arm (118 and 87 each; real input only; launcher stubbed) | RED on `11ae444` (measured) | GREEN |
 |---|---|---|
 | `tab` to the file chip `docs/x.pdf`, then `enter` / `space` (4 items): launcher called once with the resolved inside path, and the `#map-toast` strip reads `abierto` + the caption | failed: `[] == ['<tmp>\docs\x.pdf']` (launcher never called) | pass |
 | real click on the file chip (2 items): same result | failed: same | pass |
@@ -27,7 +27,7 @@ At 87 the inspector is hidden until `I`: the arms press `I` first (declared). Th
 
 ## 4. Mutant table
 
-Harness `%TEMP%\x3-harness\mut.py` (outside the repo): byte-level read and write in the file's own line endings (all three files CRLF; every mutated text uses `\r\n` where it spans lines), sha256 pin checked before each mutation and after each restore, the verdict printed before the restore, `-B`, `-W error::SyntaxWarning`, suite `tests/test_inc9x3.py` (not `-x`; the failed names listed are all that failed). Pins (the `b4ccca9` files): `components.py 06f77b4318350023bbd5936101ca6126ea070fc77a52101c1fab2b91d3caad9d`, `inspector.py 2ace7f91d3bdb9463413b67ab24e0a54e94c931b071a06fbf6ad049cceb519f6`, `app.py df9839393c334ab516c774644813a63d1d23923b8389854925ba231d72628df2`. All pins re-checked after the run: OK. **7 mutants run, 7 killed, 0 survived.**
+Harness `%TEMP%\x3-harness\mut.py` (outside the repo): byte-level read and write in the file's own line endings (all three files CRLF; every mutated text uses `\r\n` where it spans lines), sha256 pin checked before each mutation and after each restore, the verdict printed before the restore, `-B`, `-W error::SyntaxWarning`, suite `tests/test_inc9x3.py` (not `-x`; the failed names listed are all that failed). Pins (the `f4721ba` files): `components.py 06f77b4318350023bbd5936101ca6126ea070fc77a52101c1fab2b91d3caad9d`, `inspector.py 2ace7f91d3bdb9463413b67ab24e0a54e94c931b071a06fbf6ad049cceb519f6`, `app.py df9839393c334ab516c774644813a63d1d23923b8389854925ba231d72628df2`. All pins re-checked after the run: OK. **7 mutants run, 7 killed, 0 survived.**
 
 | # | Arm claimed | Exact text -> mutant text | Result |
 |---|---|---|---|
@@ -44,7 +44,7 @@ Not mutated (declared): a double launch (it would show as a two-item list, but n
 ## 5. Test results
 
 - `tests/test_attachments.py tests/test_components.py tests/test_inspector.py tests/test_inc9x3.py tests/test_inc9n.py`: **182 passed** in 113 s (`-W error::SyntaxWarning`, temp HOME).
-- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, a clean `f06f8ee` worktree under `%TEMP%` (removed) vs this tree, a programmatic set difference on (file relative to its root, code, message): **26 entries on each side, both differences empty.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, a clean `11ae444` worktree under `%TEMP%` (removed) vs this tree, a programmatic set difference on (file relative to its root, code, message): **26 entries on each side, both differences empty.**
 - Render, the success toast after `enter` on the file chip at 118x34 (the bottom rows of the screen; the launcher stub received `<tmp>\ws\docs\x.pdf`):
 
 ```
@@ -64,10 +64,10 @@ Not mutated (declared): a double launch (it would show as a two-item list, but n
 
 ## Commits
 
-- `086c746` the arms, strict xfail.
-- `b4ccca9` the fix (1 source file; `OPEN_STEPS` emptied).
+- `52a8217` the arms, strict xfail.
+- `f4721ba` the fix (1 source file; `OPEN_STEPS` emptied).
 - the records (`A-128`, this file).
 
 ## Full-lane result
 
-`2648 passed, 24 deselected, 3 xfailed` (0 failed) in 1328 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `2fa4845`, with a temp HOME and a git identity from the environment, run as the last step. Baseline 2634/0; the delta is the 14 new `test_inc9x3.py` items. The 3 xfailed are pre-existing. A first attempt of the lane ran WITHOUT the git identity in its environment (my omission) and reported 5 failed in `tests/test_github.py` (`git commit` exit 128, "Author identity unknown"); it was discarded and the lane re-run once, as above. After this section was appended only this `.md` changed; the lane was NOT re-run.
+`2648 passed, 24 deselected, 3 xfailed` (0 failed) in 1328 s (22 min), `python -m pytest -rf -q -W error::SyntaxWarning`, uninterrupted, on `c49f6a4`, with a temp HOME and a git identity from the environment, run as the last step. Baseline 2634/0; the delta is the 14 new `test_inc9x3.py` items. The 3 xfailed are pre-existing. A first attempt of the lane ran WITHOUT the git identity in its environment (my omission) and reported 5 failed in `tests/test_github.py` (`git commit` exit 128, "Author identity unknown"); it was discarded and the lane re-run once, as above. After this section was appended only this `.md` changed; the lane was NOT re-run.

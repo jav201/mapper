@@ -7,8 +7,8 @@
 | Agent | `software-dev` |
 | Date | 2026-09-30 |
 | Authority | `VERDICT-inc9-2026-09-30.md`, "Round 2", the table L1–L4, "Split", **Inc-9e**; `increment-027-inc9c.md`; `increment-029-inc9d.md` |
-| Starting state | branch `feat/ui-next-batch-02` @ `e475bd9`, `git status --porcelain` = 0 |
-| Commits | `35e77fb` arms (RED) -> `e8283e0` L1 + L2 + CR-F6 -> `54d4a45` L3 -> `0a37fb6` palette -> docs commit (this file) |
+| Starting state | branch `feat/ui-next-batch-02` @ `26ef4b9`, `git status --porcelain` = 0 |
+| Commits | `ede3108` arms (RED) -> `444b22d` L1 + L2 + CR-F6 -> `0129c7c` L3 -> `70e54ac` palette -> docs commit (this file) |
 | Source files | **4** (`mapper/darkside.py`, `mapper/keymap.py`, `mapper/screens/palette.py`, `mapper/screens/settings.py`); cap 4, given 3. `settings.py` is the declared 4th: CR-F6 is only closed if the screen passes the explicit value. |
 | Amendment | none: L1–L3 are the operator's rulings in the verdict; no threshold or rule needed a new requirement. `A-113` stays the last id taken. |
 
@@ -47,7 +47,7 @@ Findings are named `INC9E-Fn`.
 |---|---|---|
 | `INC9E-F1` | **How the strip knows it is home is implicit.** `TabStrip` has no flag for it, and adding one means editing `chrome.py` and the call sites in `app.py` (six source files, over the cap). `tab_strip` decides `letters = crumb is None and active == <first door>`: home is the only strip with that pair (the map's crumb is never empty; the factory has no crumb but its active tab is `f`). A new screen with that pair would grow letters; a crumb added to home would lose them (the home arm goes RED). | Declared. Proper fix: a `letters` argument on `TabStrip` and `tab_strip`, set by `HomeScreen` (2 files). Carry. |
 | `INC9E-F2` | The search hint `n siguiente · N anterior · esc limpiar` (`app.py:3590`) still says `siguiente`: it is a SEAT WORD in Spanish (`K3`), not the prefix, and `test_search.py` pins it in four places. The L2 census covers the hint lines the screens paint at rest, not that transient one. | Not fixed (out of the three files). Carry with `Inc-EN`. |
-| `INC9E-F3` | The first RED run (`35e77fb`) did not reach the factory half of two arms: `FactoryScreen()` needs a graph, and the arms failed earlier on the map. Fixed in `e8283e0` (no amend), and RED re-shown on a clean archive of `e475bd9` carrying the corrected file: 15 failed, 2 passed. A second arm bug (the home strip was not re-rendered after the sentinel relabel) was fixed there too. | Fixed. |
+| `INC9E-F3` | The first RED run (`ede3108`) did not reach the factory half of two arms: `FactoryScreen()` needs a graph, and the arms failed earlier on the map. Fixed in `444b22d` (no amend), and RED re-shown on a clean archive of `26ef4b9` carrying the corrected file: 15 failed, 2 passed. A second arm bug (the home strip was not re-rendered after the sentinel relabel) was fixed there too. | Fixed. |
 | `INC9E-F4` | The non-home strip now paints the seat's labels (`browse maps`, `build map`), not the old short words (`browse`, `build`). The verdict says "tab names without letters"; I read "names" as the same words the bar and the door list use, which is what closes F1 on every screen, not only home. The tab row is 1 cell wider off home (53 vs 52) and 9 wider on home (61 vs 52, before the wordmark), counted from the strings. | Judgement; reversible in `tab_strip` alone. Not measured below 87 columns. |
 
 ## 2 · Files modified
@@ -85,11 +85,11 @@ By hand, home at 87x34: the bar starts `open c browse maps  p connect repo …`;
 
 ### Arms first (`executed`)
 
-`35e77fb` committed 15 strict-xfail arms and 2 controls (a real home tab letter opens its tab; `tab_strip(None)` marks nothing: both pass on base by design). `--runxfail` on a clean archive of `e475bd9` plus the corrected `tests/test_inc9e.py`: **15 failed, 2 passed**, each for the stated reason: the home strip says `c browse` (not `c browse maps`); the map strip paints `['c','p','n','f']`; a relabelled seat is not reflected; `hint_line` returns `siguiente ▸ probe`; `settings.py` passes `Constant('s')`; the home order is `['maps','open','exit','global']`; the home bar starts `maps j next map …`; the palette's first row is `app     palette  ctrl+p`; the footer is ` 14/14 acciones   ↵ ejecutar   esc cerrar`. Output: `%TEMP%\inc9e\inc9e_red_base.txt`. Honest limit: see `INC9E-F3` (the committed `35e77fb` arms did not reach the factory; fixed in `e8283e0`).
+`ede3108` committed 15 strict-xfail arms and 2 controls (a real home tab letter opens its tab; `tab_strip(None)` marks nothing: both pass on base by design). `--runxfail` on a clean archive of `26ef4b9` plus the corrected `tests/test_inc9e.py`: **15 failed, 2 passed**, each for the stated reason: the home strip says `c browse` (not `c browse maps`); the map strip paints `['c','p','n','f']`; a relabelled seat is not reflected; `hint_line` returns `siguiente ▸ probe`; `settings.py` passes `Constant('s')`; the home order is `['maps','open','exit','global']`; the home bar starts `maps j next map …`; the palette's first row is `app     palette  ctrl+p`; the footer is ` 14/14 acciones   ↵ ejecutar   esc cerrar`. Output: `%TEMP%\inc9e\inc9e_red_base.txt`. Honest limit: see `INC9E-F3` (the committed `ede3108` arms did not reach the factory; fixed in `444b22d`).
 
 ### Mutants (`executed`)
 
-Harness outside the repo (`%TEMP%\inc9e\mutants9e.py`): per mutant a sha256 pin of every touched file, byte-level edits in each file's own line endings, the killing tests (`tests/test_inc9e.py`, `-x`), the verdict **printed before** the restore, the pins re-checked. Run on `0a37fb6`. **17 of 17 KILLED; 17 of 17 pins matched after restore; the tree was clean afterwards.**
+Harness outside the repo (`%TEMP%\inc9e\mutants9e.py`): per mutant a sha256 pin of every touched file, byte-level edits in each file's own line endings, the killing tests (`tests/test_inc9e.py`, `-x`), the verdict **printed before** the restore, the pins re-checked. Run on `70e54ac`. **17 of 17 KILLED; 17 of 17 pins matched after restore; the tree was clean afterwards.**
 
 | # | Mutant | File | Killing arm | Verdict |
 |---|---|---|---|---|
@@ -115,9 +115,9 @@ Harness outside the repo (`%TEMP%\inc9e\mutants9e.py`): per mutant a sha256 pin 
 
 ### Lane, ruff, guards
 
-- Baseline: **1541 passed, 3 xfailed, 20 deselected, 0 failed** (`e475bd9`).
-- Full lane on the final code tree (`0a37fb6`): **1558 passed, 3 xfailed, 20 deselected, 0 failed** (1242 s). Reconciliation: 1541 + 17 (`test_inc9e.py`) = 1558; xfailed and deselected unchanged.
-- `ruff check .` at the repo root, same command, base = a local clone at `e475bd9`: **26 and 26**; the multiset difference (file and rule, line numbers dropped) is **empty both ways**.
+- Baseline: **1541 passed, 3 xfailed, 20 deselected, 0 failed** (`26ef4b9`).
+- Full lane on the final code tree (`70e54ac`): **1558 passed, 3 xfailed, 20 deselected, 0 failed** (1242 s). Reconciliation: 1541 + 17 (`test_inc9e.py`) = 1558; xfailed and deselected unchanged.
+- `ruff check .` at the repo root, same command, base = a local clone at `26ef4b9`: **26 and 26**; the multiset difference (file and rule, line numbers dropped) is **empty both ways**.
 - `tests/test_fold.py` + `tests/test_no_operator_paths.py`: 21 passed, 3 xfailed (the pre-existing marked ones), before this commit.
 - Every commit's staged diff and message were byte-scanned for Cc/Cf/Zl/Zp/Cs and for the account name (read from `$USERNAME`, never printed): CLEAN on all four code commits; `git log -1 --format=%B` shows the `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` trailer on each.
 

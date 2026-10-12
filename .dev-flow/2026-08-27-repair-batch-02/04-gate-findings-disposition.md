@@ -107,7 +107,7 @@ control untestable. The guard raises **without** `from` and every net arm raises
 | MEDIUM-1 | `_CORRECTED_FALSEHOODS` holds 5 entries while two prose sites say six | Documentation-count defect. **Recorded as a carry rather than papered over**: the sixth falsehood (`SearchIndex.query`'s consumer) genuinely lacks an arm. |
 | MEDIUM-2 | `TC-P02`/`P03`/`P04` have **zero on-disk nodes** — comment banners only | Real traceability gap. The `AT-` chain is complete and clean (QA verified one distinct driving node each, no orphans); the `TC-` layer is the one that is nominal. |
 | MEDIUM-3 | Three phantom node citations, one inside F4's own disposition row | Evidence-hygiene defect, C-56's family. |
-| MEDIUM-5 | Commit `8675151` carries 13.3k undeclared lines of the **feature** batch's PDR artifacts, and `state.json` never mentions this batch | **Pre-existing on the branch before this session** and the most consequential carry: on merge, master's state pointer names a rejected, parked batch with a stale `tests_collected: 429`. Fixing it is a `state.json` rewrite that belongs to the batch close, not to an increment. |
+| MEDIUM-5 | Commit `0353909` carries 13.3k undeclared lines of the **feature** batch's PDR artifacts, and `state.json` never mentions this batch | **Pre-existing on the branch before this session** and the most consequential carry: on merge, master's state pointer names a rejected, parked batch with a stale `tests_collected: 429`. Fixing it is a `state.json` rewrite that belongs to the batch close, not to an increment. |
 | F4 (sec) | Warning amplification — `load_warnings` is unbounded | A million malformed entries produce a million strings. Local-file TUI; the reviewer rated it MEDIUM and noted the fix changes a record format **18 tests pin**. |
 | F5, F6 (sec) | `_mappings` rationale does not reproduce at the stated base; two map citations imprecise | Documentation accuracy. |
 | LOW ×6 | Stale 66-vs-70 counts; no `campo ilegible` negative control **in this batch's file**; ungated silent default for missing attachment `kind`/`path`; `M-STO-a` measured 21 vs claimed 20; `M-RR2` naming collision; a self-quotation appearing nowhere | Each real, none affecting behaviour. The missing negative control is the notable one: a mutant emitting `campo ilegible` unconditionally survives all this file's arms — the 32 red arms are in **other** batches' files, the same cross-file dependency C2 fixed for the owner coordinate. |
@@ -116,7 +116,7 @@ control untestable. The guard raises **without** `from` and every net arm raises
 
 ## What the gates settled that the batch had left open
 
-- **The slow-lane flake predates `d877784` — CONFIRMED.** The batch recorded this as UNVERIFIED,
+- **The slow-lane flake predates `bd17fab` — CONFIRMED.** The batch recorded this as UNVERIFIED,
   correctly. QA checked it in a worktree at the base ref: 6/6 clean unloaded, clean under two
   concurrent runs, and under 16 CPU-load processes it **failed `test_at_r16b…composed`** — the exact
   node this batch named, with **zero branch code present**. The observation is upgraded from
@@ -131,7 +131,7 @@ control untestable. The guard raises **without** `from` and every net arm raises
 
 ## Post-fix state
 
-| Measure | At `01d7578` | Inc-4, HIGH-A (`d75f0fd`) | **Final — conditions discharged (`a5db8df`)** |
+| Measure | At `ac4065e` | Inc-4, HIGH-A (`125f9f7`) | **Final — conditions discharged (`43b84cd`)** |
 |---|---|---|---|
 | fast lane | 531 passed, 17 desel, exit 0 | 626 passed, 17 desel, exit 0 | **630 passed, 17 deselected**, exit 0 |
 | slow lane | 17 passed, 531 desel, exit 0 | 17 passed, 626 desel, exit 0 | **17 passed, 630 deselected**, exit 0 |
@@ -139,7 +139,7 @@ control untestable. The guard raises **without** `from` and every net arm raises
 | ruff | 29 whole-tree (= base) | 29 (= base) | **29** whole-tree (= base); clean on all touched files |
 | mutation battery | 24 mutants, every one reddening a named arm | **+4** (`MX1`, `MX2`, `MX11`, `MX3`): **0 → 6 / 6 / 6 / 2** | **+4 more** on the derived class set: **2 / 1 / 1** RED, and one deliberate **0** carried as an open gap |
 
-**The merge was held at `01d7578`,** correctly: a HIGH had been raised, and under the standing
+**The merge was held at `ac4065e`,** correctly: a HIGH had been raised, and under the standing
 authorization a HIGH returns to the operator rather than being self-cleared. The operator then
 directed the close-out to verify the new HIGH independently, fix it with real arms, and re-confirm
 before merging. **Inc-4 is that work** (`03-increments/increment-004.md`): the HIGH was reproduced
@@ -150,11 +150,11 @@ is recorded in `04-qa-adversarial.md`:
 
 | Pass | Target | Verdict |
 |---|---|---|
-| re-confirmation | `d75f0fd` | **PASS WITH CONDITIONS** — no HIGH; 2 MEDIUM (a docstring naming a gate it is not; a carry with a count stale at its own tip) |
-| condition-discharge | `a5db8df` | **DISCHARGED WITH NEW CONDITIONS** — no HIGH; 3 record-truth findings, all one-token counts |
+| re-confirmation | `125f9f7` | **PASS WITH CONDITIONS** — no HIGH; 2 MEDIUM (a docstring naming a gate it is not; a carry with a count stale at its own tip) |
+| condition-discharge | `43b84cd` | **DISCHARGED WITH NEW CONDITIONS** — no HIGH; 3 record-truth findings, all one-token counts |
 
 Each round's findings were **reproduced before being fixed**, never accepted on report. The
-final round's conditions are discharged in `a5db8df`'s successor, together with a **mechanical sweep
+final round's conditions are discharged in `43b84cd`'s successor, together with a **mechanical sweep
 of every live numeric claim** across the batch's authored artifacts — which caught a fifth stale
 figure (this very table) that no reviewer had flagged. Four consecutive rounds produced *a false
 figure inside the correction of a false figure*; the sweep exists because vigilance demonstrably did

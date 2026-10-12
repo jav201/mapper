@@ -42,7 +42,7 @@
 Reviewer ids follow the orchestrator's transcription of the round-1 review
 (`PERF-review-r1.md`, held in the orchestrator's temp area, not committed): architect requirements
 findings `A1`–`A6`, architect PDR findings `B1`–`B6` (B1 carries two parts), qa-reviewer findings
-`HIGH-1`, `MED-2`…`MED-9`, `LOW-10`…`LOW-12`. HEAD at review: `56d32ce`.
+`HIGH-1`, `MED-2`…`MED-9`, `LOW-10`…`LOW-12`. HEAD at review: `b355285`.
 
 | ID | Reviewer | Severity | Area / Req | What | Recommendation / ruling | Status |
 |----|----------|----------|------------|------|------------------------|--------|
@@ -50,7 +50,7 @@ findings `A1`–`A6`, architect PDR findings `B1`–`B6` (B1 carries two parts),
 | A2 | architect | high | AT-076, LLR-PERF.2.2 | AT-076 is vacuous: on the map screen `ctrl+s` is `save_draft` (`keymap.py:184`); with no draft it returns without saving (`drafts.py:131-132`) → count 0, passes trivially; with a draft the save runs on `copy.deepcopy(base_graph)` (`drafts.py:138`) plus a snapshot `dump`. | **R3** — AT-076 drives a REAL save path: an edit gesture that persists via `_save_or_toast` (`screens/map/editing.py`). | applied |
 | A3 | architect | high | HLR-PERF.2 threshold | ≤ 3·(N+E) is wrong: simulated fix on wide-6000 — `MapStore.save` alone 35,994 edge iterations vs threshold 35,997 (3 margin); the snapshot dump + sidecar adds 11,998 → the real gesture reds a correct fix. | **R3** — assert per `mermaid.dump` call ≤ 2E + c AND a scaling ratio count(2N)/count(N) ∈ [1.8, 2.2]. | applied |
 | A4 | architect | med | M-R1b, LLR-PERF.1.3 | M-R1b is an equivalent mutant: clipping at `<= self.w` only adds a call `wire` drops (`canvas.py:107-109`). | **R5** — the control drops an in-bounds cell (e.g. `min(xb, w-1)`). | applied |
-| A5 | architect | med | golden provenance | Pinned goldens must be generated from pre-change code at the trunk before the fork. | **R7** — capture on base SHA `5cde04e`, base SHA + sha256 per golden; wire counter resets after mount. | applied |
+| A5 | architect | med | golden provenance | Pinned goldens must be generated from pre-change code at the trunk before the fork. | **R7** — capture on base SHA `e7d433d`, base SHA + sha256 per golden; wire counter resets after mount. | applied |
 | A6 | architect | low | LLR-PERF.2.3 | Inaccurate as written: `views/lane.py:121,211,330` already call `children_of`. | **R8** — reword "Lane M imports no new cache name into `mapper/views/`"; M-M3 = file-diff check. | applied |
 | B1a | architect | med | Lane M cache soundness | Sound today by accident: `Edge` frozen (`model.py:66`); writers only `model.py:170` and `editing.py:217`; no in-place forms in `mapper/`; tests append or replace wholesale. `id()` can be reused after free — avoided today only because `_remove_subtree` calls `children_of` BEFORE reassigning (`editing.py:213`). | **R2** — strong ref + `self._adj_src is self.edges and len == n`; census guard widened (sort/reverse/clear/`__setitem__`/slice/del/`+=`/`*=` + aliases); `children_of` returns a fresh list (`painting.py:519` binds it). | applied |
 | B1b | architect | med | Lane M linear dump | Incident counting must cover every edge as incident, incl. dangling (today's `any()` does, `mermaid.py:152`). | **R3** — dangling-edge fixture in the byte-golden set. | applied |
@@ -67,7 +67,7 @@ findings `A1`–`A6`, architect PDR findings `B1`–`B6` (B1 carries two parts),
 | MED-6 | qa-reviewer | med | span clip test coverage | No test for `Canvas.edge`; nothing panned or negative. | **R5** — bare-`Canvas` equality for BOTH methods; a panned ViewState and a fold in the render grid. | applied |
 | MED-7 | qa-reviewer | med | golden provenance | Capture on the base SHA before any remedy; record base SHA + sha256 per golden; reset the wire counter after mount so mount calls don't count toward the two-keypress budget. | **R7** — provenance protocol in §5.2; counter reset in AT-075. | applied |
 | MED-8 | qa-reviewer | med | AT coverage | AT-065 uses a tiny seed map; AT-075b's post-edit arm covers archive only. | **R1** — arms `add_child` (real keys) and `undo` (new Graph = the id-reuse case). | applied |
-| MED-9 | qa-reviewer | med | M-M3 cannot redden | Renderers already call `children_of` (`:313`). | **R8** — M-M3 is the file-diff check `git diff 5cde04e -- mapper/views` empty. | applied |
+| MED-9 | qa-reviewer | med | M-M3 cannot redden | Renderers already call `children_of` (`:313`). | **R8** — M-M3 is the file-diff check `git diff e7d433d -- mapper/views` empty. | applied |
 | LOW-10 | qa-reviewer | low | optional coverage | Minimap/outline byte test over a forest and a multi-parent graph. | Included (cheap): `tests/test_perf_adjacency.py::test_minimap_outline_forest_dag_bytes`. | applied |
 | LOW-11 | qa-reviewer | low | P4 wall-clock plan | Base and head must run on the same machine and session, interleaved; raw runs into `04-validation.md`. | **R9** — P4 protocol pinned in §5.2. | applied |
 | LOW-12 | qa-reviewer | low | wall-clock assertions | None asserted — correct; AT-077's poll-until-settled is a condition wait (acceptable). | Recorded; no change. | recorded |
@@ -90,8 +90,8 @@ strip-first reordering).
 | R4 — Lane S: the proposed mechanism is WITHDRAWN; new candidate: keep `refresh_canvas` ordering unchanged, skip only the canvas render while the region is unassigned (`canvas.size.width == 0`), route the first real render through the guarded/reclamp path. GATED on spike unit PERFS (render ncalls = 1 at mount, every existing mount test green); if the spike fails, Lane S leaves the batch to the backlog (B-118). Both branches written into PLAN.md and the PDR. | B4, B6 | applied (`HLR-PERF.3`, `LLR-PERF.3.1`, gated) |
 | R5 — span clip tests: bare-`Canvas` unit equality of the clipped `elbow_down` and `edge` vs a reference copy of the OLD methods kept in the test file (never a `Canvas` flag): `x1<x0`, spans fully off-canvas, `ybus` above/below the canvas, negative pan; the render grid gains a panned ViewState and a fold; M-R1b replaced by a non-equivalent mutant (`min(xb, w-1)` drops an in-bounds cell); the wire-count cap tightened so a one-axis clip fails (numbers stated from the baseline: 23,983,998 → cap 1,200,000). | A4, B3, MED-6 | applied (`LLR-PERF.1.1`, `LLR-PERF.1.3`, §6.1) |
 | R6 — every executed verification names exact node ids (`file::test`), no `-k` substrings. | MED-2 | applied (all `Executed verification` fields) |
-| R7 — goldens for AT-075/075b/076/077 are captured on the BASE SHA `5cde04e` (pre-remedy) at the trunk before the lanes fork, recorded with base SHA + sha256 per golden (as AT-065 does); the wire counter resets after mount. | A5, B6, MED-7 | applied (§5.1 AT-075, §5.2) |
-| R8 — reword `LLR-PERF.2.3` to "Lane M imports no new cache name into `mapper/views/`"; M-M3 becomes a file-diff check (`git diff 5cde04e -- mapper/views` empty on the Lane M branch). | A6, MED-9 | applied (`LLR-PERF.2.3`, §6.1) |
+| R7 — goldens for AT-075/075b/076/077 are captured on the BASE SHA `e7d433d` (pre-remedy) at the trunk before the lanes fork, recorded with base SHA + sha256 per golden (as AT-065 does); the wire counter resets after mount. | A5, B6, MED-7 | applied (§5.1 AT-075, §5.2) |
+| R8 — reword `LLR-PERF.2.3` to "Lane M imports no new cache name into `mapper/views/`"; M-M3 becomes a file-diff check (`git diff e7d433d -- mapper/views` empty on the Lane M branch). | A6, MED-9 | applied (`LLR-PERF.2.3`, §6.1) |
 | R9 — P4 wall-clock plan: base and head on the same machine and session, interleaved runs, median of 3, raw runs pasted into `04-validation.md`. | LOW-11 | applied (§5.2, PDR §7) |
 
 ### shall / should check
@@ -150,7 +150,7 @@ no painted string and no home-path/account-name surface.
 
 Reviewer ids follow the orchestrator's transcription of the round-2 review
 (`PERF-review-r2.md`, held in the orchestrator's temp area, not committed): the architect
-(Claude Opus; probes `p3`/`p4` on this worktree at HEAD `5cde04e`) numbered its findings by
+(Claude Opus; probes `p3`/`p4` on this worktree at HEAD `e7d433d`) numbered its findings by
 subject; the qa-reviewer (Claude Sonnet) numbered its findings `1`–`7`. Both reviewers were
 read-only. Round-1 items were confirmed resolved: the unscaled memo on strong references (R1),
 the widened census guard + fresh-list `children_of` (R2), the real-gesture AT-076 drive path —
@@ -174,7 +174,7 @@ spike gate), the bare-`Canvas` equality shapes (R5), exact node ids (R6), golden
 | 3 | qa-reviewer | med | LLR-PERF.1.2, proposal §4 | Same memo-location contradiction as the architect; a module-global memo would leak across screens and pin `Graph`s; name the storage and the spy seam. | **R12** — instance storage named (`_layout_misses` is the spy; the memo dict is instance state passed into `_geometry`); the import preview's fresh-renderer-per-paint (`screens/import_preview.py:103`) simply misses. | applied |
 | 4 | qa-reviewer | med | §5.2 (`01-requirements.md:448-451`) | §5.2 still demands 100 % of LLRs PERF.1.1…3.2, the M-S1/2/3 controls and AT-077/077b — all withdrawn with Lane S to B-118. | **R15** — §5.2 scoped to the surviving LLRs (PERF.1.x, 2.x) and controls (no M-S*). | applied |
 | 5 | qa-reviewer | low | wire-cap rationale | ≈ 0.5 M estimated for a correct clip; an x-only clip passes the cap — the stated rationale ("one-axis-only clip fails") mis-describes which axis matters. | **R16** (merged with the architect's one-axis finding) — the rationale names the y-only failure and the expected order (thousands per render at wide-2000, 118×34), measured at execution. | applied |
-| 6 | qa-reviewer | low | M-M3 / LLR-PERF.2.3 | `git diff 5cde04e -- mapper/views` is empty only on the Lane M branch; Lane R legitimately edits `mapper/views/layered.py`, so as a batch-level check it is vacuous/misleading. | **R17** — the check runs on the Lane M branch BEFORE the join; the DDR records it PER LANE. | applied |
+| 6 | qa-reviewer | low | M-M3 / LLR-PERF.2.3 | `git diff e7d433d -- mapper/views` is empty only on the Lane M branch; Lane R legitimately edits `mapper/views/layered.py`, so as a batch-level check it is vacuous/misleading. | **R17** — the check runs on the Lane M branch BEFORE the join; the DDR records it PER LANE. | applied |
 | 7 | qa-reviewer | low | census alias form | The alias detection form states no limits. | **R18** — the alias form documents its limits: aliasing through function arguments, containers, or attributes on other objects is NOT detected. | applied |
 
 ### Orchestrator rulings R10–R18 (round 2 → applied in this unit)
@@ -188,7 +188,7 @@ spike gate), the bare-`Canvas` equality shapes (R5), exact node ids (R6), golden
 | R14 — Lane R adds its own AST guard on `nodes` dict writers (declared set: `model.py` `add_node`, `screens/map/editing.py` wholesale), mirroring Lane M's `edges` guard, so the lanes stay independent; control = M-R2e → `test_nodes_writer_census`. | nodes guard | applied (LLR-PERF.1.2, §6.1) |
 | R15 — §5.2 scoped to the surviving LLRs (PERF.1.x, 2.x) and controls (no M-S*); the AT-077/077b golden line left with the Lane S withdrawal. | qa 4 | applied (§5.2) |
 | R16 — wire-cap rationale: the x-only clip carries the whole gain (≈ 0.5 M estimated, PASSES); "a y-only clip fails the cap"; the exact count and geometry are measured and recorded at execution (expected order: thousands per render at wide-2000, 118×34; probe p4 one render: no clip 524,313 · x-only 6,547 · y-only 524,313 · x+y 6,547). | one-axis (architect), qa 5 | applied (HLR-PERF.1, LLR-PERF.1.1, AT-075) |
-| R17 — M-M3 (`git diff 5cde04e -- mapper/views` empty) runs on the Lane M branch BEFORE the join; the DDR records it per lane (it is not a Lane R control). | qa 6 | applied (LLR-PERF.2.3, §6.1) |
+| R17 — M-M3 (`git diff e7d433d -- mapper/views` empty) runs on the Lane M branch BEFORE the join; the DDR records it per lane (it is not a Lane R control). | qa 6 | applied (LLR-PERF.2.3, §6.1) |
 | R18 — the census alias form documents its limits: aliasing through function arguments, containers, or attributes on other objects is NOT detected. | qa 7 | applied (LLR-PERF.2.1) |
 
 ### shall / should check (round 2)

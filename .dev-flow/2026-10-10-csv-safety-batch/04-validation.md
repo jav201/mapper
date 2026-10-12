@@ -75,7 +75,7 @@
 
 ### Layer A — functional (white-box): per-requirement results
 > `TC-NNN` ↔ LLR/HLR. `Result` = pass / fail. `Evidence` = command output, observed behavior, inspection note, or analysis result.
-> Selector counts re-collected at HEAD `04e9740` (still valid at `581c21a`: `git diff 04e9740 581c21a -- mapper tests` is empty) by the worker sub-agent (unit CSVCLOSE) with `python -B -m pytest --collect-only -q -p no:cacheprovider`: `tests/test_csv_safety_store.py` → 9, `tests/test_csv_safety_preview.py` → 12, `tests/test_mod_bodies.py` → 5, whole suite → `3160/3184`. None of the cited selectors collects 0.
+> Selector counts re-collected at HEAD `861b772` (still valid at `ee7314e`: `git diff 861b772 ee7314e -- mapper tests` is empty) by the worker sub-agent (unit CSVCLOSE) with `python -B -m pytest --collect-only -q -p no:cacheprovider`: `tests/test_csv_safety_store.py` → 9, `tests/test_csv_safety_preview.py` → 12, `tests/test_mod_bodies.py` → 5, whole suite → `3160/3184`. None of the cited selectors collects 0.
 
 | Req | Method | Executed verification | Numeric threshold | Result | Evidence |
 |-----|--------|-----------------------|-------------------|--------|----------|
@@ -124,16 +124,16 @@
 
 | base | − D | + A | = post | actual collected | passed-lean / full | reconciles? |
 |------|-----|-----|--------|------------------|--------------------|-------------|
-| 3136 = 3133 passed + 3 xfailed (P0 base `a36f63e`, the modular close — `evidence` of `.dev-flow/2026-10-09-modular-batch/evidence/p4-gate-full-suite.transcript`: **3133 passed, 24 deselected, 3 xfailed**, sha256 `eb263fb1…`, exit=0) | 0 — `git diff -U0 a36f63e HEAD -- tests \| grep '^-.*def test_'` prints **nothing**: no test function was deleted (`DECLARED_CHANGES` was a module-level constant added at `1537985` and removed in increment 4 — not a test function; no test FILE deleted either) | 24 = **22 new test functions** (`git diff a36f63e HEAD -- tests \| grep -c '^+.*def test_'` → 22; `git grep -c 'def test_'` 1315 → 1337; the 22 are named in the §6.1 fixture list of the contract) **+ 2 new parametrised arms** `test_at_p02i_every_model_field_is_classified[CsvRow]` / `[CsvCollision]` — the model-field totality guard derives its arms from `mapper.model`, so the two new CSV dataclasses add 2 collected items with no new `def` | = 3160 | 3160 (`3160/3184 tests collected (24 deselected)` at HEAD `04e9740`, re-collected by this sub-agent) | — / gate run 2 at `1537985` (the tree one test-only commit before HEAD): **3156 passed, 24 deselected, 3 xfailed in 1718.54s, exit=0**, sha256 `0825717e…`; the HEAD tree adds exactly increment 4's one node (`test_llr_mod_4_3_red_a_deleted_moved_method_reddens_missing`), collected 3160 | yes |
+| 3136 = 3133 passed + 3 xfailed (P0 base `87a1f98`, the modular close — `evidence` of `.dev-flow/2026-10-09-modular-batch/evidence/p4-gate-full-suite.transcript`: **3133 passed, 24 deselected, 3 xfailed**, sha256 `eb263fb1…`, exit=0) | 0 — `git diff -U0 87a1f98 HEAD -- tests \| grep '^-.*def test_'` prints **nothing**: no test function was deleted (`DECLARED_CHANGES` was a module-level constant added at `e6a374c` and removed in increment 4 — not a test function; no test FILE deleted either) | 24 = **22 new test functions** (`git diff 87a1f98 HEAD -- tests \| grep -c '^+.*def test_'` → 22; `git grep -c 'def test_'` 1315 → 1337; the 22 are named in the §6.1 fixture list of the contract) **+ 2 new parametrised arms** `test_at_p02i_every_model_field_is_classified[CsvRow]` / `[CsvCollision]` — the model-field totality guard derives its arms from `mapper.model`, so the two new CSV dataclasses add 2 collected items with no new `def` | = 3160 | 3160 (`3160/3184 tests collected (24 deselected)` at HEAD `861b772`, re-collected by this sub-agent) | — / gate run 2 at `e6a374c` (the tree one test-only commit before HEAD): **3156 passed, 24 deselected, 3 xfailed in 1718.54s, exit=0**, sha256 `0825717e…`; the HEAD tree adds exactly increment 4's one node (`test_llr_mod_4_3_red_a_deleted_moved_method_reddens_missing`), collected 3160 | yes |
 
 **Gate runs (the orchestrator's; this sub-agent consumes, never owns):**
 
 | Run | Tree | Result | Evidence (sha256) |
 |-----|------|--------|-------------------|
-| P0 base | `a36f63e` | 3133 passed / 3 xfailed / 0 failed (modular close) | `.dev-flow/2026-10-09-modular-batch/evidence/p4-gate-full-suite.transcript` (`eb263fb1b150c871…`) |
-| increment-1 gate | `d4941ea` | **4 failed / 3139 passed** — the model-field totality guard caught the new unclassified `Graph.csv_collisions` / `CsvRow` / `CsvCollision` fields; fixed in `6763852` (the follow-up classification) | `evidence/inc1-gate-full-suite.transcript` (`3877a5b4…`) |
+| P0 base | `87a1f98` | 3133 passed / 3 xfailed / 0 failed (modular close) | `.dev-flow/2026-10-09-modular-batch/evidence/p4-gate-full-suite.transcript` (`eb263fb1b150c871…`) |
+| increment-1 gate | `35e2e30` | **4 failed / 3139 passed** — the model-field totality guard caught the new unclassified `Graph.csv_collisions` / `CsvRow` / `CsvCollision` fields; fixed in `507d72c` (the follow-up classification) | `evidence/inc1-gate-full-suite.transcript` (`3877a5b4…`) |
 | final run 1 | increment-3 commit | **3 failed / 3153 passed** — the modular move oracle (`test_llr_mod_4_3_bodies_match_baseline`) and the A3 census pin, both gate follow-ups | `evidence/gate-run1-full-suite.transcript` (`4ad7dc3d…`) |
-| final run 2 | `1537985` | **3156 passed / 0 failed** (after the gate follow-ups; before increment 4, which is test-only) | `evidence/gate-run2-full-suite.transcript` (`0825717e…`) |
+| final run 2 | `e6a374c` | **3156 passed / 0 failed** (after the gate follow-ups; before increment 4, which is test-only) | `evidence/gate-run2-full-suite.transcript` (`0825717e…`) |
 | final run 3 | HEAD (after increment 4, test-only) | **3157 passed / 24 deselected / 3 xfailed / 0 failed**, exit 0 — 3157 + 3 = 3160 = collected | `evidence/gate-run3-full-suite.transcript` sha256 `a70ebc27befe3f8557994057db38daa1e42073bb07eef061c6c91dcc1e6ef3f9` |
 
 - Arithmetic: 3136 − 0 + 24 = 3160 (collected) — reconciles. Passed-full form: 3133 − 0 + 23 = 3156 at the run-2 tree (22 new functions + 2 new param arms − 1 xfailed-invariant… none; the 22nd function and both arms are the +23 passed over base at run 2: 3156 − 3133 = 23 = 21 store/preview functions (9 + 12) + 2 param arms, with `test_mod_bodies`' +1 landing after run 2) — both forms stated, both reconcile.
@@ -159,7 +159,7 @@
 **Who executed what:**
 - **The orchestrator (Claude Opus 5.5)** owns the gate suite runs (C-25): the increment-1 gate, final runs 1–3. It also ran the P2 architect/qa reviews (two rounds), the PDR, the three code reviews, the DDR and the increment-4 re-reviews — all Claude models, read-only; the worker was Kimi (`kimi-code/kimi-for-coding`).
 - **Workers (Kimi, units CSVI1–CSVI4)** authored the product change and the guard/AT tests across the 4 increments; each increment's RED transcript is the worker's (`evidence/inc1-red.transcript` … `inc4-red.transcript`, `gate-followup-red.transcript` for the `DECLARED_CHANGES` arms).
-- **The sub-agent (Kimi, unit CSVCLOSE)** ran the P4 performance measurement (`evidence/p4-save-cost.transcript`), re-collected every selector count at HEAD `04e9740`, ran the function-level deleted-test check and the ledger arithmetic, and drafted this file.
+- **The sub-agent (Kimi, unit CSVCLOSE)** ran the P4 performance measurement (`evidence/p4-save-cost.transcript`), re-collected every selector count at HEAD `861b772`, ran the function-level deleted-test check and the ledger arithmetic, and drafted this file.
 - **The `qa-reviewer`** ran nothing and read the transcripts; its review happened as the P2 rounds/PDR/DDR.
 
 | # | Item | ✓/✗ | Evidence |
@@ -167,7 +167,7 @@
 | 1 | Acceptance criteria as outcomes | ✓ | AT-072/072b/072c/072d/073/074 observed in Layer B through the shipped app |
 | 2 | Explicit Expected | ✓ | exit 0; pinned toast text and severity; exact sentence; no-write sha256 oracle; round-trip equality |
 | 3 | Edge cases | ✓ | empty CSV, blank-line/CRLF counting, three-way grammar, auto-id collision, root-collision precedence (R13), forest after edit, newline/arrow titles, duplicate edges, overwrite-attempt |
-| 4 | Regression checklist | ✓ | gate run 3 (`53807c4`): 3157 passed / 3 xfailed / 0 failed; P4 perf record 3.2 % ≤ 25 %; M1–M4 mutation transcripts |
+| 4 | Regression checklist | ✓ | gate run 3 (`a20248b`): 3157 passed / 3 xfailed / 0 failed; P4 perf record 3.2 % ≤ 25 %; M1–M4 mutation transcripts |
 | 5 | Exit criteria | ✓ | 10/10 requirements pass; every AT GREEN with an executed RED; 0 failed at gate run 3 |
 | 6 | No PII / secrets | ✓ | no operator paths, no home paths, no account names in this artifact or the cited transcripts (guard A-110 stays green) |
 | 7 | Mode + executor per result | ✓ | "executed by: orchestrator" on the gate rows; worker/sub-agent rows marked |
@@ -176,4 +176,4 @@
 | 10 | Ledger | ✓ | 3136 − 0 + 24 = 3160; 22 functions + 2 param arms; deleted-function check prints nothing |
 | 11 | No unfilled template | ✓ | this checklist pasted; example rows left fenced, not copied |
 
-**Reviewer cell:** `qa-reviewer` (Claude Sonnet, independent, read-only, 2026-10-10) — **APPROVE-WITH-CONDITIONS**, PASS-WITH-NOTES confirmed; it re-collected 6 nodes (1 each), matched all 8 cited sha256, confirmed the ledger (22 added functions, 0 deleted) and that gate run 3 still applies to HEAD (`git diff 53807c4 HEAD -- mapper tests` empty); conditions applied by the orchestrator: reviewer cell, run-3 references, HEAD note. Merge gate: MERGE.
+**Reviewer cell:** `qa-reviewer` (Claude Sonnet, independent, read-only, 2026-10-10) — **APPROVE-WITH-CONDITIONS**, PASS-WITH-NOTES confirmed; it re-collected 6 nodes (1 each), matched all 8 cited sha256, confirmed the ledger (22 added functions, 0 deleted) and that gate run 3 still applies to HEAD (`git diff a20248b HEAD -- mapper tests` empty); conditions applied by the orchestrator: reviewer cell, run-3 references, HEAD note. Merge gate: MERGE.

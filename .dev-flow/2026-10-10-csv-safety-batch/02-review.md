@@ -149,7 +149,7 @@ Reviewer ids follow the orchestrator's transcription of the round-2 review
 architect requirements `A1`–`A6` continue as `A7`; round-1 proposal findings `B1`–`B4`
 continue as `B5`–`B6`; the qa-reviewer numbered its round-2 findings `1`–`7`. Both
 reviewers were read-only; the architect probed on a temp workspace
-(`scratchpad/probe/rt.py`, HEAD fbd9459). Round-1 items were confirmed resolved: A1
+(`scratchpad/probe/rt.py`, HEAD 1b1e6f7). Round-1 items were confirmed resolved: A1
 (LLR-CSV.2.3), A2 (cycle reclassified, precedence), A3/A6 (B-115/B-116), A4 (R2),
 qa HIGH-1 (record-first preview), HIGH-2 (sha256 oracle incl. `mapper.db`/`*.tmp`),
 ATs via `_open_import`, `line_num` blank/CRLF fixtures, the `rows 2, 3 and 4` grammar.

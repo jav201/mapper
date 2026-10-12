@@ -28,7 +28,7 @@
 | Field | Value |
 |---|---|
 | Gate record | `python devflow-validate.py .` from the project root · exit 1 · 1 block · 381 notice · 2026-10-09 |
-| Gated tree | `4b1a4d04f5b01edc152131d46b63906f231866d2` · dirty — .dev-flow/BACKLOG.md (the close record itself excluded) |
+| Gated tree | `d9a123e4b3a6feadbe8830b921c48559dfe197be` · dirty — .dev-flow/BACKLOG.md (the close record itself excluded) |
 | Requirements canon | `REQUIREMENTS.md`. Every id this batch declares as a heading (`HLR-CAN.1`, `HLR-CAN.2`, `LLR-CAN.1.1`, `LLR-CAN.1.2`, `LLR-CAN.2.1`) is a token in it, folded at this close (`5 folded`). The hygiene batch's five requirements are now present as `HLR-HYG.*` / `LLR-HYG.*` (AT-063). |
 
 - **Cosmetic, the fold's own normalisation:** the folded statement of `LLR-CAN.1.2` reads correctly. The folded statement of `LLR-CAN.1.1` lost the literal backtick and `**` tokens it quotes ("drop backticks and ;"). That is because the fold drops them by rule 1, the very rule the row describes. The contract (`01-requirements.md`) keeps the exact wording.
@@ -48,7 +48,7 @@
 | `HLR-CAN.2` | `v1` | `AT-064` · `ruff` corroboration · A1 killed | pass |
 | `LLR-CAN.2.1` | `v1` | `test_llr_can_2_1_checker_arms` (13) | pass |
 
-- **Gate suite on `791decb`:** 2941 passed, 3 xfailed, 0 failed (`evidence/p4-full-suite.transcript`).
+- **Gate suite on `fd996e8`:** 2941 passed, 3 xfailed, 0 failed (`evidence/p4-full-suite.transcript`).
 - **P4 verdict:** `PASS-WITH-NOTES`.
 
 ---
@@ -74,7 +74,7 @@
 
 | File | State | Evidence |
 |---|---|---|
-| `REQUIREMENTS.md`, `mapper/app.py`, `tests/test_requirements_canon.py`, `tests/test_app_imports_used.py` | ✅ committed (`791decb`, plus the canon fold at close), landed through the PR of `feat/canon-batch` | `git log feat/canon-batch` |
+| `REQUIREMENTS.md`, `mapper/app.py`, `tests/test_requirements_canon.py`, `tests/test_app_imports_used.py` | ✅ committed (`fd996e8`, plus the canon fold at close), landed through the PR of `feat/canon-batch` | `git log feat/canon-batch` |
 | `.dev-flow/2026-10-09-canon-batch/**`, `.dev-flow/state.json`, the hygiene archive (`decisions-log.json`, `state-snapshot-at-close.json`) | ✅ committed, landed through the same PR | the batch commits |
 | `.dev-flow/BACKLOG.md` | ✅ close commit, same PR | §4 |
 | worktrees `%TEMP%/ds-units/wt-can1`, `wt-can2`, `wt-val2` (branches `unit/*`) | 📋 worker scratch outside the repo tree, never pushed | removed after the merge (scratch rule) |

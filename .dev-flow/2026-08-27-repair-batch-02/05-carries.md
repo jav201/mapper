@@ -5,12 +5,12 @@ riders. **Recorded because an unlanded fact is indistinguishable from one nobody
 
 ---
 
-## P-CARRY-1 — commit `8675151` puts the FEATURE batch's artifacts on this branch
+## P-CARRY-1 — commit `0353909` puts the FEATURE batch's artifacts on this branch
 
 **Measured, not argued:**
 
 ```
-$ git show --stat 8675151 | tail -3
+$ git show --stat 0353909 | tail -3
  .../2026-08-26-ui-next-batch-02/state-parked.json  |   81 +
  .dev-flow/state.json                               |  183 +-
  15 files changed, 13526 insertions(+), 112 deletions(-)
@@ -19,7 +19,7 @@ $ grep -c "2026-08-27-repair-batch-02" .dev-flow/state.json
 0
 ```
 
-**What it is.** `8675151` ("docs: land the ui-next-batch-02 PDR artifacts (C-44 discharge)") was
+**What it is.** `0353909` ("docs: land the ui-next-batch-02 PDR artifacts (C-44 discharge)") was
 already on `fix/repair-batch-02` when this batch resumed — it is **not** this batch's work. It
 carries ~13.5k lines of the *feature* batch's PDR artifacts and rewrites `.dev-flow/state.json`.
 
@@ -30,7 +30,7 @@ asserts that the current batch is a REJECTED, PARKED one, at a gate it did not p
 baseline that is three increments stale.** That is precisely the C-44 failure mode the flow
 documents: the next session reads that file to orient itself and inherits a false premise (C-43).
 
-**Deliberately NOT untangled here.** Rewriting or splitting `8675151` is history surgery on a shared
+**Deliberately NOT untangled here.** Rewriting or splitting `0353909` is history surgery on a shared
 branch, and rebasing it out would discard a legitimate C-44 discharge that the feature batch needs.
 The correct owner is the **batch close**, which is where `state.json` is rewritten anyway.
 
@@ -38,11 +38,11 @@ The correct owner is the **batch close**, which is where `state.json` is rewritt
 1. Rewrite `.dev-flow/state.json` to describe the batch actually in flight — do not append to the
    parked record, replace it, and keep `previous_batch` pointing at this one with its merge SHA.
 2. Re-measure `baseline.tests_collected` rather than carrying `429`. **Re-measure it — do not copy
-   this line either.** It first read `548`, the count at `01d7578`, and was already stale when
+   this line either.** It first read `548`, the count at `ac4065e`, and was already stale when
    written: the very commit that authored it took the count to **643**. A carry whose whole purpose
    is to stop a stale number propagating shipped a stale number (re-confirmation review, MEDIUM-2).
-   It is **643** at `d75f0fd`; at any later tip, measure it rather than trusting this sentence.
-3. Record `8675151`'s provenance in the feature batch's own PLAN, so its artifacts are not
+   It is **643** at `125f9f7`; at any later tip, measure it rather than trusting this sentence.
+3. Record `0353909`'s provenance in the feature batch's own PLAN, so its artifacts are not
    re-derived on the assumption they never landed.
 
 ---
@@ -173,7 +173,7 @@ reviewer-authored files and are **left untouched**, noted rather than edited.
 
 | Item | Note |
 |---|---|
-| slow-lane wall-clock flake, ~10% | `FACTORY_TREE_BOUND_SECONDS = 8.0` and Textual Pilot's own timeout. **Confirmed pre-existing at `d877784`** by the QA gate, with zero branch code present. Make the bounds load-tolerant or non-gating; raising the constant only moves the threshold where the same class reappears. |
+| slow-lane wall-clock flake, ~10% | `FACTORY_TREE_BOUND_SECONDS = 8.0` and Textual Pilot's own timeout. **Confirmed pre-existing at `bd17fab`** by the QA gate, with zero branch code present. Make the bounds load-tolerant or non-gating; raising the constant only moves the threshold where the same class reappears. |
 | `load_warnings` is unbounded | A million malformed entries produce a million strings. The fix changes a record format **18 tests pin**, so it wants its own increment. |
 | `_text_attributes()` shim | One-line delegation kept because shipped tests use the name; collapse when those tests are next touched. |
 | `create_from_template` | Still hand-constructs `SchemaField` with the old `f.get("kind","text")` shape — out of this batch's fence. |

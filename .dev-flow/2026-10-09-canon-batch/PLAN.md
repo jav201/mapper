@@ -21,8 +21,8 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | Batch | 2026-10-09-canon-batch |
 | Objective | B-105 (the hygiene requirements appended to the canon under namespaced ids) and B-104 (the unused `re` import) |
 | Standing authorization | Asked 2026-10-09 through AskUserQuestion, after the operator's «Dale, agrégalo y continúa.». The operator's answers, verbatim: B-105 «Anexar al canon (Recomendado)»; mode and authorization «core + autónomo + merge (Recomendado)». The decision-recording obligation is honoured unconditionally. Merge only after a clean final PR-level qa-reviewer pass; a HIGH finding blocks. |
-| First gate | `devflow-validate.py --brief` right after the rollover, on `558b415`: 1 block, `V7`, which is external (the installed flow bundle differs from its manifest) |
-| Premises / RC-1 | `git fetch origin`; `origin/master` = `558b41522c7d` = the local tip. The premises are in `01-requirements.md` §2.7 (4 TRUE). |
+| First gate | `devflow-validate.py --brief` right after the rollover, on `3c0c338`: 1 block, `V7`, which is external (the installed flow bundle differs from its manifest) |
+| Premises / RC-1 | `git fetch origin`; `origin/master` = `3c0c33883341` = the local tip. The premises are in `01-requirements.md` §2.7 (4 TRUE). |
 
 ## Triggers
 
@@ -97,7 +97,7 @@ P0 is closed. P1: the contract is drafted, with 2 stories, 2 HLR and 3 LLR, all 
 
 | Suite / command | Last run | Result |
 |---|---|---|
-| full suite (hygiene P4, `092875e`) | 2026-10-09 | 2924 passed / 3 xfailed / 0 failed |
+| full suite (hygiene P4, `5f19b6e`) | 2026-10-09 | 2924 passed / 3 xfailed / 0 failed |
 
 ## Decision log
 

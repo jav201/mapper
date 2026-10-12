@@ -65,7 +65,7 @@ PYTHONUTF8=1 python -m pytest -q tests/test_keymap.py tests/test_palette.py
 ```
 
 **Ledger:** `post = base − D + A` → `132 = 88 − 6 + 50`. Reconciles exactly.
-(base 88 on `695bd2d`; deleted the 4 old keymap tests and the 2 old palette tests; added 50.)
+(base 88 on `d35974f`; deleted the 4 old keymap tests and the 2 old palette tests; added 50.)
 
 **Escaped-bug RED (the `ENABLE_COMMAND_PALETTE` typo), captured before the fix:**
 ```

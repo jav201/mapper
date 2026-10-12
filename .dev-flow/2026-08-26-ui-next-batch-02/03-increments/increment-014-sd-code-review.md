@@ -2,7 +2,7 @@
 
 **Reviewer:** `code-reviewer` (independent of the author)
 **Date:** 2026-09-18
-**Repo/branch:** `C:\Users\<operator>\Github\mapper` · `feat/ui-next-batch-02` · base `2f78ecc`
+**Repo/branch:** `C:\Users\<operator>\Github\mapper` · `feat/ui-next-batch-02` · base `6add288`
 **Scope:** the UNCOMMITTED working tree at review time.
 
 ## Verdict
@@ -20,7 +20,7 @@ stayed green at 1096.
 
 ## Scope reviewed
 
-`git diff` against `2f78ecc`, read in full — 320 insertions / 61 deletions over 6 files:
+`git diff` against `6add288`, read in full — 320 insertions / 61 deletions over 6 files:
 
 | File | Range read |
 |---|---|
@@ -61,9 +61,9 @@ width but one). I built a workspace whose map genuinely pans and **guarded the p
 on `layered_moves > 0`**. Driven through the real screen actions, never a model.
 
 `C:\Users\<operator>\clde\cr_sd_probe3c.py`, `grande` (61 nodes), both 118x34 and 80x24 —
-and the same probe run against a detached `2f78ecc` worktree for the before-picture:
+and the same probe run against a detached `6add288` worktree for the before-picture:
 
-| Step | HEAD `2f78ecc` | Working tree |
+| Step | HEAD `6add288` | Working tree |
 |---|---|---|
 | pan in layered | `(48, 0)` | `(48, 0)` |
 | enter outline | `(48, 0)` | **`(0, 0)`** |
@@ -340,7 +340,7 @@ would have shown as an `argful` delta or a production-file site. There is none. 
 pins moved together in one lane run, as their construction requires.
 
 **The `_header_line` factoring is inert. CONFIRMED — I tried to falsify it and failed.**
-`C:\Users\<operator>\clde\cr_sd_probe2.py` loads `2f78ecc:mapper/views/radial.py` as a
+`C:\Users\<operator>\clde\cr_sd_probe2.py` loads `6add288:mapper/views/radial.py` as a
 separate module and compares `_paint` output — **plain text, style spans, and the
 returned painted set** — against the working tree:
 
@@ -374,7 +374,7 @@ not a finding.
 | | Measured by me |
 |---|---|
 | default lane | **1096 passed, 19 deselected, 3 xfailed**, exit 0, 324 s |
-| `ruff check .` | **27 errors** — identical to `2f78ecc` measured in a detached worktree |
+| `ruff check .` | **27 errors** — identical to `6add288` measured in a detached worktree |
 | ruff on the 5 S-D files | 1 — `mapper/app.py:5 F401 're' imported but unused`, **pre-existing**, line 5, untouched |
 | `FLAKE-2` | did not fire in my run; `n/a — not reproduced here`. Your 4-of-10 isolated figure stands unchallenged and unverified by me. |
 
@@ -458,7 +458,7 @@ driving the derived set or the real screen rather than a model of it.
 | Header factoring inert | `executed` — 6 579 renders, 0 diffs, control fired |
 | Charge equality 10/10 + narrow 7/7 | `executed` — probe1 |
 | A3 census +2, argful 62→62 | `executed` — probe4, the pin's own derivation |
-| Default lane / ruff | `executed` — 1096 / 27, ruff baseline matched at `2f78ecc` |
+| Default lane / ruff | `executed` — 1096 / 27, ruff baseline matched at `6add288` |
 | `-m slow` lane | `not-run` |
 | `FLAKE-2` isolation rate | `not-run` — `n/a — did not fire here` |
 | Security review | `n/a — security-reviewer's lane` |

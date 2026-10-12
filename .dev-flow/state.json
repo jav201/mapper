@@ -43,7 +43,7 @@
       "mode": "full",
       "opened_at": "2026-08-26",
       "closed_at": "2026-08-27",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
     },
     {
@@ -167,7 +167,7 @@
     "metrics": "vault:mapper/dev-flow-batches/2026-10-11-reqharness-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "fb1d4ce6118b57a540bd67bd2115e5400b356870",
+  "base_ref": "c00dfe9adab435bf392ed11ae9abc4a6e48a7655",
   "artifacts": {
     "plan": ".dev-flow/2026-10-11-reqharness-batch/PLAN.md",
     "P1": ".dev-flow/2026-10-11-reqharness-batch/01-requirements.md",
@@ -223,7 +223,7 @@
       "station": "P3",
       "date": "2026-10-11",
       "decision": "P3 increments RH1–RH6b complete with code reviews and follow-ups (increment-001..007); standing authorization",
-      "notes": "commits fb1d4ce..0d10b7c; each increment code-reviewed, REQUEST-CHANGES findings fixed with RED proofs"
+      "notes": "commits c00dfe9..0d10b7c; each increment code-reviewed, REQUEST-CHANGES findings fixed with RED proofs"
     },
     {
       "station": "DDR",
@@ -246,8 +246,8 @@
     {
       "station": "P6",
       "date": "2026-10-11",
-      "decision": "P6 docs approved; PR #22 squash-merged as ecd77f7 (single squashed commit by operator ruling: public repo, intermediate commits carry personal data and stay local); standing authorization",
-      "notes": "06-docs/; merge ecd77f7; batch record cites local SHAs by design"
+      "decision": "P6 docs approved; PR #22 squash-merged as d216d68 (single squashed commit by operator ruling: public repo, intermediate commits carry personal data and stay local); standing authorization",
+      "notes": "06-docs/; merge d216d68; batch record cites local SHAs by design"
     }
   ],
   "standing_authorization": {
@@ -264,32 +264,32 @@
   },
   "previous_batch": {
     "batch_id": "2026-10-10-perf-batch",
-    "merge_commit": "39f62cf",
+    "merge_commit": "c7d50e1",
     "close_pr": "https://github.com/<owner>/mapper/pull/20",
     "sync_pr": "https://github.com/<owner>/mapper/pull/21",
     "closed_at": "2026-10-10",
-    "close_commit": "fb1d4ce",
+    "close_commit": "c00dfe9",
     "obsidian_synced": true,
     "archive": ".dev-flow/2026-10-10-perf-batch/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "pr": "https://github.com/<owner>/mapper/pull/2",
-      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
     "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
-      "merge_commit": "2b59071",
+      "merge_commit": "7d04ba2",
       "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
-      "close_commit": "3fe0e4b",
+      "close_commit": "d8a8536",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }

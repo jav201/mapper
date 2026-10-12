@@ -11,7 +11,7 @@
 | Lane (if the batch forked) | n/a — one lane |
 | Requirement(s) | `LLR-MOD.1.1–1.3, 3.1, 3.2, 6.1, 6.2, 7.1, 7.2` · `HLR-MOD.1, 3, 5, 6, 7` |
 | Acceptance | AT-068 (`test_mod_structure.py`) · AT-067/069 (`test_mod_compat.py`) · AT-070/071 (`test_mod_deps.py`) · LLR-MOD.7.2 census-freeze (`test_mod_census.py`) · full suite at the B10–B12 gate |
-| Agent | `d4948b2` (`app.py __all__` + ARCHITECTURE) — orchestrator (Claude Opus 5.5). `e5d80e9` (the four guard test files) — Kimi (`kimi-for-coding`), per the facts sheet. Gate — orchestrator. |
+| Agent | `5b5bc83` (`app.py __all__` + ARCHITECTURE) — orchestrator (Claude Opus 5.5). `c353600` (the four guard test files) — Kimi (`kimi-for-coding`), per the facts sheet. Gate — orchestrator. |
 | Date | `2026-10-10` |
 
 ---
@@ -34,17 +34,17 @@
 | `tests/test_mod_deps.py` | test | LLR-MOD.6.1, 6.2, 7.1, AT-070/071 | new — 470 lines, 11 nodes incl. RED arms |
 | `tests/test_mod_compat.py` | test | LLR-MOD.3.1, 3.2, AT-067/069 | new — 618 lines, 32 nodes incl. patch-guard RED arms |
 | `tests/test_mod_census.py` | test | LLR-MOD.7.2 | new — 310 lines, 3 nodes incl. `test_llr_mod_7_2_red_new_method` |
-| `tests/test_inc9c.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan package-wide again (was vacuous after the moves) |
-| `tests/test_inc9o.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan package-wide again + tmp-copy RED arm |
-| `tests/test_inc9p.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan reads every moved module + tmp-copy RED arm |
-| `tests/test_inc9q.py` | test | LLR-MOD.5.2 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan reads every moved module + tmp-copy RED arm |
-| `tests/test_draft_hygiene.py` | test | LLR-MOD.5.1 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): guard-flag owner set narrowed to the drafts concern (CR-1) |
-| `tests/test_search.py` | test | LLR-MOD.5.1 | post-review census repair `1c77233` (group review B1–B12 MED / CR-1 / CR-2): duplicate-name asserts in the mixin-aware helpers (CR-2) |
+| `tests/test_inc9c.py` | test | LLR-MOD.5.2 | post-review census repair `afec38a` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan package-wide again (was vacuous after the moves) |
+| `tests/test_inc9o.py` | test | LLR-MOD.5.2 | post-review census repair `afec38a` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan package-wide again + tmp-copy RED arm |
+| `tests/test_inc9p.py` | test | LLR-MOD.5.2 | post-review census repair `afec38a` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan reads every moved module + tmp-copy RED arm |
+| `tests/test_inc9q.py` | test | LLR-MOD.5.2 | post-review census repair `afec38a` (group review B1–B12 MED / CR-1 / CR-2): 'one home' scan reads every moved module + tmp-copy RED arm |
+| `tests/test_draft_hygiene.py` | test | LLR-MOD.5.1 | post-review census repair `afec38a` (group review B1–B12 MED / CR-1 / CR-2): guard-flag owner set narrowed to the drafts concern (CR-1) |
+| `tests/test_search.py` | test | LLR-MOD.5.1 | post-review census repair `afec38a` (group review B1–B12 MED / CR-1 / CR-2): duplicate-name asserts in the mixin-aware helpers (CR-2) |
 
 | Count | Value |
 |---|---|
 | **SOURCE files** | **1 / 4** |
-| Test files | 10 (uncapped; 4 new guard files + 6 census files repaired in `1c77233`) |
+| Test files | 10 (uncapped; 4 new guard files + 6 census files repaired in `afec38a`) |
 | Doc files | 1 (`docs/ARCHITECTURE.md`, outside the count) |
 
 ---
@@ -68,7 +68,7 @@ ruff check mapper/app.py
 | **B · black-box** | `core` · `full` | AT-067, AT-068, AT-069, AT-070, AT-071 | within the 56 |
 | **This increment's files** | — | 56 nodes | **56 passed in 15.70s** (run in this worktree: `tests/test_mod_structure.py tests/test_mod_deps.py tests/test_mod_compat.py tests/test_mod_census.py`) |
 | **Gate** | — | full suite | **3124 passed, 24 deselected, 3 xfailed, 0 failed, exit=0** (`b10b12-gate-full-suite.transcript`) |
-| `ruff` corroboration | — | `mapper/app.py` | `All checks passed!` (per commit `d4948b2`) |
+| `ruff` corroboration | — | `mapper/app.py` | `All checks passed!` (per commit `5b5bc83`) |
 
 ### RED counterfactual — executed, not predicted
 
@@ -163,7 +163,7 @@ ruff check mapper/app.py
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| F401-unused re-export imports in `mapper/app.py` (unannotated since B0) | the 25 names are now inside `__all__` (`app.py:44`); `ruff check` clean | yes | commit `d4948b2`; `ruff` per its message |
+| F401-unused re-export imports in `mapper/app.py` (unannotated since B0) | the 25 names are now inside `__all__` (`app.py:44`); `ruff check` clean | yes | commit `5b5bc83`; `ruff` per its message |
 
 ### Signed-balance test ledger
 
@@ -188,7 +188,7 @@ ruff check mapper/app.py
 ## 6 · Pending items / spec deviations
 
 - The post-review census-repair commit (Kimi unit MODREV; folded CR-1/CR-2 and the A-review census findings) is **not present in this worktree's git history — its sha is not recorded**; its content is known only from the facts sheet.
-- The +8 difference between the gate delta (+64 passed) and the four files' collected nodes (56) is **not recorded**; `git diff 0735a0a..0923ca6 --stat -- tests/` shows no other test addition, so the residual is unexplained from available evidence.
+- The +8 difference between the gate delta (+64 passed) and the four files' collected nodes (56) is **not recorded**; `git diff 5b268a8..de94176 --stat -- tests/` shows no other test addition, so the residual is unexplained from available evidence.
 - CR-3 carried as a deliberate gap; CR-4 sanctioned by `test_mod_deps`.
 
 ## 7 · Suggested next task
@@ -202,7 +202,7 @@ P4 — the full-suite close gate and the batch close (postmortem + the canonical
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 1 / 4 |
-| 2 | Tests written in this same increment | all | ✓ | `e5d80e9` — 4 new test files, 56 nodes |
+| 2 | Tests written in this same increment | all | ✓ | `c353600` — 4 new test files, 56 nodes |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `test_mod_structure.py` (10) + `test_mod_deps.py` (11) + `test_mod_census.py` (3) |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | in-tree tmp-copy RED arms per file (§4) |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | 5 probes (§4) |

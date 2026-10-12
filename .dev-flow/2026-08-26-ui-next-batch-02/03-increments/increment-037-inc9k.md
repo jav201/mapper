@@ -1,6 +1,6 @@
 # Increment 037 -- Inc-9k: the closed allow-list for typed repo URLs
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `a906c80`. Authority: the operator's Round 8, S1
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `604c81a`. Authority: the operator's Round 8, S1
 (`VERDICT-inc9-2026-09-30.md`, answer "Lista cerrada"). Amendment: `A-119` (appended to `01-requirements.md`, dated
 2026-10-01; `A-117` st. 5 and `A-118` st. 1-2 are marked superseded, not deleted).
 
@@ -71,11 +71,11 @@ new refusal arm).
 
 ## 3. Arm table
 
-RED: `tests/test_inc9k.py` committed as strict xfail (`3f4bcac`), copied into a detached `git worktree` of `a906c80` in
+RED: `tests/test_inc9k.py` committed as strict xfail (`fdde012`), copied into a detached `git worktree` of `604c81a` in
 `%TEMP%` (no stash), `--runxfail`: **237 failed, 43 passed** (280 cases). The 43 passes are pins (green on the base).
-GREEN: `test_inc9k` 280 passed on `71d2de2` with `OPEN_STEPS` empty.
+GREEN: `test_inc9k` 280 passed on `1eec656` with `OPEN_STEPS` empty.
 
-| arm family (`test_inc9k`) | cases | RED on `a906c80` | on HEAD |
+| arm family (`test_inc9k`) | cases | RED on `604c81a` | on HEAD |
 |---|---|---|---|
 | a form outside the allow-list is refused before any process (operator list + Inc-9j forms + grammar cuts) | 73 | RED x73 | green |
 | `_ensure_cloned` refuses the same forms by itself | 6 | RED x6 | green |
@@ -90,12 +90,12 @@ GREEN: `test_inc9k` 280 passed on `71d2de2` with `OPEN_STEPS` empty.
 | owner/name through gh; a local git directory connects | 2 | green (pin) | green |
 | Pilot: an allowed URL is painted as typed (118, 87) | 2 | green (pin) | green |
 
-Reworked arms on `a906c80` (the reworked files copied into the same worktree): **16 cases RED** (`test_inc9i` sec_f2 x3,
+Reworked arms on `604c81a` (the reworked files copied into the same worktree): **16 cases RED** (`test_inc9i` sec_f2 x3,
 `test_inc9h` sec_f4 x2 and cr_f7, `test_inc9d` token arm, `test_inc9j` extra_slashes x4, no_host, painted x4); the rest are pins.
 
 ## 4. Mutant table
 
-Harness `mutate9k.py` in the session scratchpad, outside the repo; run on a detached `git worktree` of `71d2de2` in `%TEMP%`;
+Harness `mutate9k.py` in the session scratchpad, outside the repo; run on a detached `git worktree` of `1eec656` in `%TEMP%`;
 sha256 pinned before (`github.py` `c97183e11be98f49...`, `app.py` `9878dee90dd2d442...`, files are CRLF there), byte-level I/O in
 the file's own line endings, the verdict printed before the file is restored, the pin re-checked after: **pin OK 26 of 26**.
 `old` occurs exactly once. `<LF>` is a line break. Runs `test_inc9k.py` (the 4 Pilot-arm mutants run its Pilot arms only; M21 adds
@@ -139,9 +139,9 @@ the dash/transport pins and the owner/name-through-gh and local-directory pins (
 
 | check | state |
 |---|---|
-| `tests/test_inc9k.py` + `test_inc9j/i/h/d/f/g`, `test_github`, `test_inc9/c/e` (incl. the 4 `network` real-git arms, local bare repos only) | executed: 623 passed on `71d2de2` |
-| Full default lane, once, uninterrupted, last step | executed: **2036 passed, 3 xfailed, 24 deselected, 0 failed**, 18:11 (baseline 1778/0), run on `b7e52cc` (the docs commit; `test_no_operator_paths` reads `.dev-flow`) |
-| `ruff check . --exclude prototypes --output-format concise`, set difference vs `a906c80` (a detached worktree; line and column stripped) | executed: 28 lines each side, new = none, gone = none |
+| `tests/test_inc9k.py` + `test_inc9j/i/h/d/f/g`, `test_github`, `test_inc9/c/e` (incl. the 4 `network` real-git arms, local bare repos only) | executed: 623 passed on `1eec656` |
+| Full default lane, once, uninterrupted, last step | executed: **2036 passed, 3 xfailed, 24 deselected, 0 failed**, 18:11 (baseline 1778/0), run on `f639952` (the docs commit; `test_no_operator_paths` reads `.dev-flow`) |
+| `ruff check . --exclude prototypes --output-format concise`, set difference vs `604c81a` (a detached worktree; line and column stripped) | executed: 28 lines each side, new = none, gone = none |
 | Literal Cf/Cc/C1 characters in the touched test files | executed: none (control and bidi are `\u` escapes) |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`) | not hit (0 failed) |
 | `git stash` | not used |
@@ -185,9 +185,9 @@ no row of the frame. Not measured: any terminal other than Textual's headless dr
 
 ## Commits
 
-`3f4bcac` arms (strict xfail) · `71d2de2` `github.py` + `app.py` + sealed-arm reworks + `OPEN_STEPS` emptied · docs commit
+`fdde012` arms (strict xfail) · `1eec656` `github.py` + `app.py` + sealed-arm reworks + `OPEN_STEPS` emptied · docs commit
 (this record, `A-119`) · docs commit (the full-lane result). No push; `state.json` untouched.
 
 ## Full-lane result
 
-2036 passed, 3 xfailed, 24 deselected, 0 failed in 1091.96s (18:11), on `b7e52cc`. A first run was stopped by the background time limit I set (10 min, my error) before it finished; it produced no result and was re-run once, uninterrupted, from the start; this is that run.
+2036 passed, 3 xfailed, 24 deselected, 0 failed in 1091.96s (18:11), on `f639952`. A first run was stopped by the background time limit I set (10 min, my error) before it finished; it produced no result and was re-run once, uninterrupted, from the start; this is that run.

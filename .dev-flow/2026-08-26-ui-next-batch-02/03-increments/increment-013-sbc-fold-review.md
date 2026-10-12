@@ -12,7 +12,7 @@ my own instruments before trusting it — including the one that turned out to n
 
 ## Scope reviewed
 
-Working tree at base `ce294f1`, branch `feat/ui-next-batch-02`, six modified files and one untracked
+Working tree at base `a53f6e0`, branch `feat/ui-next-batch-02`, six modified files and one untracked
 document. Diff read in full (`git diff` over all six; hunks at `01-requirements.md:639-641` and
 `:8819`, `state.json:824-828`, `layered.py:112-116`, `test_fold.py:396-398/400-401/411-416`,
 `test_inc3_census.py:169-175/193-199`, `test_darkside_budget.py:84-92/121-132`).
@@ -67,12 +67,12 @@ is genuinely active. The per-truncator oracle is immune as stated. `Evidence sta
 I checked this hardest, as asked, and the answer is that both extra sites needed correcting.
 
 - **`mapper/views/layered.py:112-116` (production docstring).** `git blame` at HEAD: the paragraph
-  that read *"The load-bearing property is that the output is COERCED"* was written by **`278fd36`**
+  that read *"The load-bearing property is that the output is COERCED"* was written by **`ef4689d`**
   (this batch's own fold, 2026-09-11 08:57). The sentence eleven lines above it —
-  *"THE ORDERING CLAUSE IS NORMATIVE AND LOAD-BEARING"* — was added later, by **`ce294f1`**
+  *"THE ORDERING CLAUSE IS NORMATIVE AND LOAD-BEARING"* — was added later, by **`a53f6e0`**
   (10:34). So the self-contradiction was **manufactured by the re-ruling commit** and left in
-  production code. Correcting it is not scope creep; it is finishing `ce294f1`.
-- **`tests/test_inc3_census.py:169-175` (function docstring).** Blame: `21809fd`, same batch, same
+  production code. Correcting it is not scope creep; it is finishing `a53f6e0`.
+- **`tests/test_inc3_census.py:169-175` (function docstring).** Blame: `bf8f80b`, same batch, same
   day. *"The property that IS load-bearing is that the output is coerced"* asserts the substitution
   framing flatly, unscoped.
 
@@ -218,7 +218,7 @@ stopping is what the increment boundary is for. **Agreed, without reservation.**
   | `:228-230` | *"That -- the title path being coerced AT ALL -- **is the load-bearing property here**"* |
   | `:244` | *"**The ordering clause is normative.**"* |
 
-  One comment block, production code, `git blame` → `f3c1795`, this batch, 2026-09-11. It is the only
+  One comment block, production code, `git blame` → `956ee41`, this batch, 2026-09-11. It is the only
   remaining occurrence of the phrase in `mapper/` or `tests/`; my sweep for
   `reaching for|property that IS load-bearing|load-bearing property` across both trees returns this
   and nothing else.
@@ -261,7 +261,7 @@ stopping is what the increment boundary is for. **Agreed, without reservation.**
 Stated so the next pass does not re-derive them.
 
 - **Overreach in the widening.** Checked by blame; both extra sites are this batch's own text and
-  one was made self-contradictory by `ce294f1` itself. Not overreach. `n/a — checked, not a finding.`
+  one was made self-contradictory by `a53f6e0` itself. Not overreach. `n/a — checked, not a finding.`
 - **A test coupled to the rewritten assertion messages.** Swept `tests/` and `mapper/`; nothing
   matches the old or new message text outside the two assertions. `n/a — checked, not a finding.`
 - **Behavioural change smuggled into a narration fold.** AST delta identical on all four files with

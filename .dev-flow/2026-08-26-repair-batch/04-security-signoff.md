@@ -1,7 +1,7 @@
 # Security Sign-off — `fix/shipped-defects-repair` (whole branch diff vs `origin/master`)
 
 Reviewer: security-reviewer · Date: 2026-08-27
-Base: `origin/master` @ `d6b60e6b4f18b10123fffc76bbb36891473df653`
+Base: `origin/master` @ `1b51aca7a11582acf2de878d8138d26cef2d301b`
 Tree state: nothing committed, nothing staged — the batch is entirely working-tree.
 
 ---

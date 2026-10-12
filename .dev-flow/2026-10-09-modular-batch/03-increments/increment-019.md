@@ -11,7 +11,7 @@
 | Lane (if the batch forked) | n/a — one lane |
 | Requirement(s) | `LLR-MOD.1.3` (searching module owns its census methods) · `LLR-MOD.3.2` (`MAX_RENDER_NODES` + `SearchIndex` repointed to their reading module) · `LLR-MOD.5.2` (extraction-riding test follow-ups land in the increment) |
 | Acceptance | full suite at the B3–B9 gate · `tests/test_search.py` patch sites bite through `mapper.screens.map.searching` · the permanent guard tests |
-| Agent | Product move + test follow-up `dd5ec28` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). Gate — orchestrator. |
+| Agent | Product move + test follow-up `b232b96` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). Gate — orchestrator. |
 | Date | `2026-10-10` |
 
 ---
@@ -38,7 +38,7 @@
 | Test files | 1 (uncapped) |
 | Doc files | 0 |
 
-- ⚠ LLR-MOD.5.2's contract names `test_inc9p.py`/`test_inc9q.py` "one home" arms for B9; no edit to those files appears in `dd5ec28` (see §6).
+- ⚠ LLR-MOD.5.2's contract names `test_inc9p.py`/`test_inc9q.py` "one home" arms for B9; no edit to those files appears in `b232b96` (see §6).
 
 ---
 
@@ -180,7 +180,7 @@ No test files added or deleted; `tests/test_search.py` was edited in place. Per-
 
 ## 6 · Pending items / spec deviations
 
-- LLR-MOD.5.2 names `test_inc9p.py`/`test_inc9q.py` "one home" arms as B9 follow-ups, but `dd5ec28` contains no edit to those files; whether their scanned sets already covered the package at Inc-0 (LLR-MOD.5.1) or needed an extension is **not recorded**. They passed at the gate either way.
+- LLR-MOD.5.2 names `test_inc9p.py`/`test_inc9q.py` "one home" arms as B9 follow-ups, but `b232b96` contains no edit to those files; whether their scanned sets already covered the package at Inc-0 (LLR-MOD.5.1) or needed an extension is **not recorded**. They passed at the gate either way.
 - The post-review census-repair commit (CR-2) is not present in this worktree's git history — sha **not recorded**.
 
 ## 7 · Suggested next task
@@ -194,7 +194,7 @@ B10 — the pan concern to `PanningOps`, with the `pan_extent` repoint (`increme
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 2 / 4 |
-| 2 | Tests written in this same increment | all | ✓ | `dd5ec28` — `tests/test_search.py` follow-ups |
+| 2 | Tests written in this same increment | all | ✓ | `b232b96` — `tests/test_search.py` follow-ups |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `test_mod_bodies.py` at the gate |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | repoint bite + permanent battery (§4) |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | 5 probes (§4) |

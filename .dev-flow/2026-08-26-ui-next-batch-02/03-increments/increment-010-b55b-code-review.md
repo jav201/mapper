@@ -1,8 +1,8 @@
 # Increment 010 — Inc-B55b — Independent Code Review
 
 **Reviewer:** code-reviewer (independent)
-**Range:** `git diff 10fd573..f828d7b -- mapper/ tests/`
-**Tree at review:** `f828d7b`, clean on entry, byte-identical on exit (hashes below).
+**Range:** `git diff ca76a00..4e6d6de -- mapper/ tests/`
+**Tree at review:** `4e6d6de`, clean on entry, byte-identical on exit (hashes below).
 **Verdict: BLOCK** — one HIGH finding, empirically reproduced, with a fix verified against
 the full suite and a 234-combination sweep.
 
@@ -303,7 +303,7 @@ amplification itself is the trade `outline` already made and is correctly carrie
 ## Verified OK — checked, no defect
 
 - **V1 — the ~170-line body move is FAITHFUL.** *Fired, not reasoned.* I extracted
-  `10fd573:mapper/views/radial.py`, dedented `render`'s body by exactly 4 columns (0 lines
+  `ca76a00:mapper/views/radial.py`, dedented `render`'s body by exactly 4 columns (0 lines
   failed to dedent) and diffed it against `_paint`'s body. **Every hunk is a pure addition.**
   Zero deletions, zero reorderings, zero modified lines other than the three returns becoming
   tuples. The `place`/`tag` closures, the cycle guard, the `on_path`/`branch_of` precedence

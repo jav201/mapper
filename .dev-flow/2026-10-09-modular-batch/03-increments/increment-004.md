@@ -14,7 +14,7 @@
 | Requirement(s) | `LLR-MOD.1.1` (`screens/construct.py` owns `ConstructScreen`, re-exported) · `LLR-MOD.3.1` (imports keep resolving with identity) |
 | Acceptance | `AT-065` parity · white-box `tests/test_mod_bodies.py` (byte-identical body), `tests/test_mod_parity.py` (0 diffs) · gate: full suite green (a2a3 transcript, 2987/0) |
 | Agent | Product move: **Kimi (`kimi-for-coding`) unit in an isolated worktree**, RED + sha256-restore in its own log (session scratch — not stored as an evidence file). Gate: **orchestrator (Claude Opus 5.5)**. Group review: `code-reviewer` (Claude Sonnet). This packet: Kimi unit MODPKT-p1. |
-| Date | `2026-10-10` (commit 9f5975e, 01:25 −0600) |
+| Date | `2026-10-10` (commit 735db51, 01:25 −0600) |
 
 ---
 
@@ -129,12 +129,12 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Probe | Command | Result |
 |---|---|---|
-| B1 symbols asserted by **other** tests | `git grep -ln "ConstructScreen" 9f5975e -- tests/` | 4 test files name the class (test_en5, test_en7, test_inc9c, test_seed_safety) — all import via `mapper.app`, all green at the gate |
-| B2 file moved on disk | `git show 9f5975e:mapper/app.py \| grep -c "^class ConstructScreen"` | 0 — the class is gone from `app.py` |
+| B1 symbols asserted by **other** tests | `git grep -ln "ConstructScreen" 735db51 -- tests/` | 4 test files name the class (test_en5, test_en7, test_inc9c, test_seed_safety) — all import via `mapper.app`, all green at the gate |
+| B2 file moved on disk | `git show 735db51:mapper/app.py \| grep -c "^class ConstructScreen"` | 0 — the class is gone from `app.py` |
 | B3 byte-identical golden | not applicable | not fired |
-| B4 artifact produced here is consumed elsewhere | `git grep -ln "ConstructScreen" 9f5975e -- mapper/` | consumers: `mapper/app.py` (re-export), `screens/construct.py` — in-tree |
+| B4 artifact produced here is consumed elsewhere | `git grep -ln "ConstructScreen" 735db51 -- mapper/` | consumers: `mapper/app.py` (re-export), `screens/construct.py` — in-tree |
 
-| A3 | interface consumed by another module changed | `git grep -n "ConstructScreen" 9f5975e -- mapper/screens/factory.py` | factory constructs it via the `mapper.app` re-export — the legal edge direction (`app` → `screens` only) |
+| A3 | interface consumed by another module changed | `git grep -n "ConstructScreen" 735db51 -- mapper/screens/factory.py` | factory constructs it via the `mapper.app` re-export — the legal edge direction (`app` → `screens` only) |
 
 | Field | Value |
 |---|---|
@@ -150,7 +150,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| `class ConstructScreen` in `mapper/app.py` | 0 hits at 9f5975e | yes | probe output above; gate 2987/0 |
+| `class ConstructScreen` in `mapper/app.py` | 0 hits at 735db51 | yes | probe output above; gate 2987/0 |
 
 ### Signed-balance test ledger
 

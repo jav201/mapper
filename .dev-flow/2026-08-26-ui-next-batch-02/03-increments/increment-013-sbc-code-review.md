@@ -16,7 +16,7 @@ FIRED, not inferred. None is self-cleared.
 
 ## Scope reviewed
 
-- `git diff fc0aeff~1..ae501ea -- mapper/ tests/` read in full: `mapper/app.py` (+80), `mapper/views/outline.py` (+117), `tests/test_a3_census.py` (+41), `tests/test_agree_floor.py` (new, 135), `tests/test_canvas_header_charge.py` (new, 275), `tests/test_outline_caps.py` (new, 153).
+- `git diff d77abae~1..0eee321 -- mapper/ tests/` read in full: `mapper/app.py` (+80), `mapper/views/outline.py` (+117), `tests/test_a3_census.py` (+41), `tests/test_agree_floor.py` (new, 135), `tests/test_canvas_header_charge.py` (new, 275), `tests/test_outline_caps.py` (new, 153).
 - Read beyond the diff for context: `mapper/app.py:1440-1640` (`_header_rows`, `_header_rows_for`, `_canvas_size`), `:1690-1762` (`_painted_ids_for`), `:1875-1880` (`_current_renderer`), `:2547-2600` (`refresh_canvas`); `mapper/views/layered.py` (`_clip`, `_fit`, `header_rows`, `plain`); `mapper/views/outline.py::_fit_declared`; `mapper/widgets/rail.py:231-236` (the cited cap precedent); `mapper/darkside.py::plain`.
 - Both ratification texts read in full in `01-requirements.md` (the `AT-056` block and the `LLR-N06.3.5` block).
 - `.dev-flow/state.json` -> `PAN-1` entry.
@@ -40,7 +40,7 @@ match count asserted `== 1` before every edit. `__pycache__` purged before every
 restored unconditionally and **sha256 verified back to baseline**. No ANCHOR MISS occurred: all
 four outline anchors and both app.py anchors matched exactly once.
 
-Final tree state -- **byte-identical to `ae501ea`**, `git status --porcelain` empty:
+Final tree state -- **byte-identical to `0eee321`**, `git status --porcelain` empty:
 
 ```
 33499cfb0707ad44bdbd44766e9d11d6f1be15177ba102d6cca1e03e8cd79bb5  mapper/app.py
@@ -302,7 +302,7 @@ These were the claims I was asked to attack. They held.
 
 ## Evidence checklist
 
-- [x] **Diff read in full** -- `fc0aeff~1..ae501ea -- mapper/ tests/`, 6 files, +782/-19; plus both ratified blocks in `01-requirements.md` and the `PAN-1` state entry.
+- [x] **Diff read in full** -- `d77abae~1..0eee321 -- mapper/ tests/`, 6 files, +782/-19; plus both ratified blocks in `01-requirements.md` and the `PAN-1` state entry.
 - [x] **Correctness pass (edge / None / error paths)** -- `LookupError` degrade path verified against `TC-R08`; `_canvas_size`'s three branches re-read; `row_cap` at `h == 0` falls back to `state.w`; `_indent` clamp branch analysed (F5).
 - [x] **Simplicity pass** -- no premature abstraction found. `_header_line()` extraction is justified (charge and paint off one helper); `_degraded`'s deliberate non-routing through it is correctly reasoned. `_header_rows_for`'s identity dispatch correctly mirrors `_painted_ids_for`.
 - [x] **Reuse / duplication checked** -- `_clip` is the right reuse and preserves `LLR-COERCE.2` ordering (F6 is the name only); `rail.py:235` precedent verified real; no second truncator introduced.

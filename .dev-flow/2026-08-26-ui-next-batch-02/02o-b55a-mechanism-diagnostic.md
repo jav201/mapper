@@ -3,7 +3,7 @@
 Read-only lane. No repo source or test file was edited, created or deleted; no
 `print`/logging was added to `mapper/`. All instrumentation was in-process
 monkeypatching from probes under `C:\Users\<operator>\clde\`. Working tree observed
-CLEAN at `c6f3f25` before and after; no evidence of another writer.
+CLEAN at `5745917` before and after; no evidence of another writer.
 
 Probes written for this lane (all outside the repo):
 

@@ -4,7 +4,7 @@
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` |
 | Increment | `001` |
-| Base | `5d8ee0d` on `feat/ui-next-batch-02` |
+| Base | `5686fe0` on `feat/ui-next-batch-02` |
 | Reviewer | `code-reviewer` (independent; author's reasoning re-derived, not accepted) |
 | Date | 2026-08-28 |
 | **Verdict** | **BLOCK — 1 HIGH must be fixed before the increment advances** |
@@ -13,7 +13,7 @@
 
 ## Scope reviewed
 
-Working-tree diff against `5d8ee0d` over `mapper/ tests/ docs/`, plus the two untracked
+Working-tree diff against `5686fe0` over `mapper/ tests/ docs/`, plus the two untracked
 test files, plus amendment set 4 in `01-requirements.md`.
 
 ```
@@ -41,10 +41,10 @@ tests/test_darkside_census.py| 500 (untracked, new)
 | `_DOT_BITS` matches the Unicode braille layout | Checked `((0x01,0x08),(0x02,0x10),(0x04,0x20),(0x40,0x80))` against dot numbering 1/4, 2/5, 3/6, 7/8 at bit values 0x01…0x80 | **CORRECT** |
 | Negative sub-cell coords | `-1 // 2 == -1`, `-1 // 4 == -1`; any `sx <= -1` folds to `x <= -1` and fails `0 <= x` | **CORRECT — all negatives dropped** |
 | `int(dx*2)` truncation hazard in `radial.py:210` | `pos` is clamped to `[0, inner-1]` / `[0, body_h-1]` at `radial.py:142-143`, so `dx, dy >= 0` always | **NOT A DEFECT** — truncation never sees a negative |
-| Empty-layer path byte-identical to `5d8ee0d` | `Text.append(" ")` ≡ `append(" ", None)` (rich signature default) | **BYTE-IDENTICAL** |
+| Empty-layer path byte-identical to `5686fe0` | `Text.append(" ")` ≡ `append(" ", None)` (rich signature default) | **BYTE-IDENTICAL** |
 | `Text.append(ch, "")` ≡ `Text.append(ch)` (your item 8) | Read `rich.text.Text.append` source: `if style:` guards the span append. Constructed all three forms — `spans == []` for each, `a == b == c`, identical ANSI output | **YOUR MEASUREMENT IS CORRECT.** The deleted branch was dead and its comment was false. Deleting it was right |
-| `COERCION_RANGES` is a strict widening | Rebuilt the `5d8ee0d` map (`range(0x00,0x20) - {0x09,0x0A}` ∪ `range(0x7F,0xA0)`) and diffed against `_CONTROL_MAP` | **85 declared · 0 survivors through `plain()` · 0 shipped points lost · +22 · TAB & LF preserved · CR coerced.** Ranges do not overlap; `declared == set(_CONTROL_MAP)` |
-| The four re-baselined digests | Independent re-derivation in a clean `git worktree` at `5d8ee0d` vs the current tree, recipe re-implemented from `_fingerprint` | **Exactly the 4 `RadialRenderer` keys moved. All 8 `Layered`/`Outline` digests byte-identical to `5d8ee0d`'s output and NOT recaptured. All 4 new literals equal the working tree's true output. The recipe and `fixtures/` are unchanged** |
+| `COERCION_RANGES` is a strict widening | Rebuilt the `5686fe0` map (`range(0x00,0x20) - {0x09,0x0A}` ∪ `range(0x7F,0xA0)`) and diffed against `_CONTROL_MAP` | **85 declared · 0 survivors through `plain()` · 0 shipped points lost · +22 · TAB & LF preserved · CR coerced.** Ranges do not overlap; `declared == set(_CONTROL_MAP)` |
+| The four re-baselined digests | Independent re-derivation in a clean `git worktree` at `5686fe0` vs the current tree, recipe re-implemented from `_fingerprint` | **Exactly the 4 `RadialRenderer` keys moved. All 8 `Layered`/`Outline` digests byte-identical to `5686fe0`'s output and NOT recaptured. All 4 new literals equal the working tree's true output. The recipe and `fixtures/` are unchanged** |
 | Fast lane / ruff | `685 passed, 17 deselected in 56.10s`; `ruff check mapper/ tests/` → **28** | **REPRODUCED** |
 | Census arithmetic | 36 severity sites = 35 `CONFORMING_SEVERITY` + 1 severity `OPEN_EXCEPTIONS`; 8 blue = 7 + 1. No stale rows in either conforming set | **RECONCILES** |
 
@@ -350,7 +350,7 @@ makes the handoff mechanical rather than a promise. Legitimate — but see F5.
 ### F9 — the packet's coercion baseline is off by one  [Severity: LOW]
 
 - **What:** `increment-001.md:42` says `plain()` widened *"from 62 to 85 covered code points"*.
-  Measured: the `5d8ee0d` map covers **63** (30 C0 + 33 for `0x7F..0x9F`). A-80's own arithmetic
+  Measured: the `5686fe0` map covers **63** (30 C0 + 33 for `0x7F..0x9F`). A-80's own arithmetic
   agrees — it states `+22` newly covered, and `85 − 22 = 63`.
 - **Where:** `.dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-001.md:42`.
 - **Why it matters:** Nothing in the code or the tests depends on it; it is a transcription error in
@@ -460,7 +460,7 @@ Recorded so the absence is on the record rather than implied.
 - [x] **Tests reviewed for intent** — F1 (`test_canvas.py:115` dodges the default wire tone),
       F3 (`test_darkside_census.py:222` narrower than its name), F6 (`M-S06.3.5-a` mutates the
       test's own table), F4 (no guard on the injected policy's default).
-- [x] **Independent re-derivation of the goldens** — clean `git worktree` at `5d8ee0d`; recipe
+- [x] **Independent re-derivation of the goldens** — clean `git worktree` at `5686fe0`; recipe
       re-implemented from `_fingerprint`; 4 moved / 8 held confirmed; recipe and `fixtures/`
       unchanged; worktree removed; repo tree untouched.
 - [x] **No file under `mapper/`, `tests/` or `docs/` edited.** No mutating git command run.

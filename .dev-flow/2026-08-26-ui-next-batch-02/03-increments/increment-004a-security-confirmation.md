@@ -1,7 +1,7 @@
 # Security Review — Inc-4a CONFIRMATION pass (independent)
 
 Reviewer: security-reviewer (independent confirmation; no HIGH self-cleared in this batch)
-Branch: `feat/ui-next-batch-02` · `HEAD` = `5f4816c` · work uncommitted in the working tree
+Branch: `feat/ui-next-batch-02` · `HEAD` = `8ef1553` · work uncommitted in the working tree
 Method: isolated `git clone --local --no-hardlinks` mirror + working-tree overlay. Real repo never mutated.
 
 ## Scope reviewed
@@ -23,7 +23,7 @@ Mirror reproduces the declared suite exactly:
 
 ### Non-mutation proof
 
-180 files under `mapper/`, `tests/`, `.dev-flow/` hashed before the review; `sha256sum -c` after: **all OK, zero mismatches**. Real repo `HEAD` unchanged at `5f4816c`. Hostile fixtures were built in `tempfile.mkdtemp`, never in `fixtures/`.
+180 files under `mapper/`, `tests/`, `.dev-flow/` hashed before the review; `sha256sum -c` after: **all OK, zero mismatches**. Real repo `HEAD` unchanged at `8ef1553`. Hostile fixtures were built in `tempfile.mkdtemp`, never in `fixtures/`.
 
 ### The keypath gap I declared last time — now CLOSED
 
@@ -65,7 +65,7 @@ Above `MAX_RENDER_NODES`: **0 resolutions, 0.0 ms**. Search now stops where draw
 
 ### The residual frame is pre-existing, and the author's `S-15` framing is HONEST
 
-Identical probe against pristine `HEAD` (`5f4816c`, no working-tree changes):
+Identical probe against pristine `HEAD` (`8ef1553`, no working-tree changes):
 
 | | pristine HEAD | with the fix |
 |---|---|---|

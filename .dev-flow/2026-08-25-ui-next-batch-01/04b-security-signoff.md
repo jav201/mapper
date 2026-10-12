@@ -9,14 +9,14 @@
 
 ## 0 · Verdict
 
-> ## Round 2 (`52d77bb`) — `sign-off granted`, with four recorded carries
+> ## Round 2 (`571c67c`) — `sign-off granted`, with four recorded carries
 >
 > **Both blockers are fixed and independently re-verified — see §9.** No blocker remains outstanding,
 > and the shipped confinement control is correct and unbroken across 21 attack cases. Four majors are
 > carried explicitly (N-12, N-13, N-14, and the N-4 refusal *shape*); none is a defect in the shipped
 > control itself — three are gaps in the *gate*, one is a wrong status word.
 >
-> **Round 1 verdict (`dd83725`) was `sign-off blocked`. It is retained below as the record.**
+> **Round 1 verdict (`7dae751`) was `sign-off blocked`. It is retained below as the record.**
 
 ---
 
@@ -56,10 +56,10 @@ not to a server.
 
 ### Scope note — concurrent commit
 
-Commit `dd83725` landed **during** this review. I re-verified afterwards: `mapper/osopen.py`
+Commit `7dae751` landed **during** this review. I re-verified afterwards: `mapper/osopen.py`
 (`sha256 4d07b6a2…`) and `tests/test_attachments.py` (`sha256 0b17eed6…`) were byte-identical
 throughout; `mapper/app.py` changed outside the reviewed region and the attachment handlers are
-byte-identical, only shifted by one line. **All line numbers in this document are as of `dd83725`.**
+byte-identical, only shifted by one line. **All line numbers in this document are as of `7dae751`.**
 
 ---
 
@@ -443,7 +443,7 @@ Re-review on re-submission, per `docs/ARCHITECTURE.md:287` (risk A-4).
 
 ---
 
-# 9 · Round 2 — re-review of `52d77bb`
+# 9 · Round 2 — re-review of `571c67c`
 
 **Verdict: `sign-off granted`, with four recorded carries.**
 
@@ -464,7 +464,7 @@ The five PDR conditions now stand: **C-1 ✅ · C-2 ✅ (control) · C-3 ✅ · 
 
 ## 9.2 · Confinement re-attacked — 0 escapes
 
-21 cases re-run against `52d77bb`. **Refused:** `..` traversal, nested traversal, absolute-outside,
+21 cases re-run against `571c67c`. **Refused:** `..` traversal, nested traversal, absolute-outside,
 `.gitconfig`, `calc.exe`, sibling-absolute, sibling-via-`..`, UNC, `C:..`, symlink→outside,
 symlink-dir, `\\?\` long path, **directory** (newly refused), workspace-dot. **Launched, all
 confined:** `acta.pdf`, `sub/deep.txt`, trailing dot, case flip, `NUL` (inert), `payload.exe`

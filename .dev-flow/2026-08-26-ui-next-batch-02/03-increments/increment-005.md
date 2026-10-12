@@ -1,7 +1,7 @@
 # Increment 5 — `LLR-N07.2.2b`: every renderer paints its hits (`AT-024`)
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-5` · **Branch:** `feat/ui-next-batch-02`
-**Entry commit:** `90e2a3f` (Inc-4c close), tree clean at entry · **NOT COMMITTED** — the working tree is what is gated.
+**Entry commit:** `54145dd` (Inc-4c close), tree clean at entry · **NOT COMMITTED** — the working tree is what is gated.
 **SOURCE FILE COUNT: 3** — `views/outline.py`, `views/radial.py`, `views/lane.py`. Exactly the sealed cut. Tests uncapped.
 **Protocol: LIGHTER lane (`A-91`)** — see §7 for the executed justification. Battery NOT skipped.
 **Language:** English (engineering artifact).
@@ -17,7 +17,7 @@ set goes from **1 of 6 compliant to 6 of 6**, measured by the `#D42` observable 
 ```
 default lane : 887 passed, 17 deselected, 3 xfailed   exit 0
 all markers  : 904 passed, 3 xfailed                  exit 0
-ruff SET     : 27 = 27 vs 9ba2f26, zero NEW, zero GONE
+ruff SET     : 27 = 27 vs a6dc8d7, zero NEW, zero GONE
 battery      : 9 mutants, 9 KILLED, 0 SURVIVED, 0 BAD, 9 sha256-verified restores
 ```
 
@@ -261,7 +261,7 @@ keeping it as an equality rather than softening it to a floor.
 
 ## 9 · Gate checklist
 
-- [x] **Tests / type checks / lint pass** — `887 passed, 17 deselected, 3 xfailed` exit 0; `904 passed, 3 xfailed` all markers; ruff SET-identical to `9ba2f26`, 27 = 27, zero NEW / zero GONE. One complete run each, from a tree sha256-pinned before and after both lanes; one earlier run discarded because the tree moved under it (§8.1).
+- [x] **Tests / type checks / lint pass** — `887 passed, 17 deselected, 3 xfailed` exit 0; `904 passed, 3 xfailed` all markers; ruff SET-identical to `a6dc8d7`, 27 = 27, zero NEW / zero GONE. One complete run each, from a tree sha256-pinned before and after both lanes; one earlier run discarded because the tree moved under it (§8.1).
 - [x] **Counterfactual executed** — 5 of 6 renderers RED pre-fix on the sealed threshold, §1.
 - [x] **Every predicate demonstrated able to go RED** — 9 mutants, 9 KILLED, per-arm verdicts, §4.
 - [x] **Derived input set, non-empty asserted before evaluation** (`C-31`) — §1, and the guard arm.
@@ -386,7 +386,7 @@ UX change.
 ```
 default lane : 898 passed, 17 deselected, 3 xfailed   exit 0
 all markers  : 915 passed, 3 xfailed                  exit 0
-ruff SET     : 27 = 27 vs 9ba2f26, zero NEW, zero GONE
+ruff SET     : 27 = 27 vs a6dc8d7, zero NEW, zero GONE
 battery      : round 1  9 mutants / 9 KILLED
                round 2  7 mutants / 7 KILLED  (5x F1 shape, 2x F3 shape)
 arms         : 44, zero skipped

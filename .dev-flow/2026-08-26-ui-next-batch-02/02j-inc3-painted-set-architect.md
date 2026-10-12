@@ -1,6 +1,6 @@
 # 02j · Inc-3 — how the renderer declares its painted set
 
-**Architect ruling.** Read-only pass at `954f8f3`, branch `feat/ui-next-batch-02`.
+**Architect ruling.** Read-only pass at `909cc27`, branch `feat/ui-next-batch-02`.
 Every claim below carries an executed probe. Probe sources are in the session scratchpad;
 each transcript is pasted verbatim.
 

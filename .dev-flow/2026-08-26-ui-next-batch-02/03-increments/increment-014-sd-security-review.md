@@ -1,6 +1,6 @@
 # Security Review — Inc-REPAIR S-D (`2026-08-26-ui-next-batch-02`)
 
-Independent reviewer. Branch `feat/ui-next-batch-02`, base `2f78ecc`, working tree
+Independent reviewer. Branch `feat/ui-next-batch-02`, base `6add288`, working tree
 uncommitted. Reviewed at the declared context of use (118x34) and at `run_test`'s
 default (80x24), plus a narrow sweep down to 24x8.
 

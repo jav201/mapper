@@ -91,7 +91,7 @@ python -m pytest tests/test_export_state.py tests/test_hermetic.py -q
 | default | **0** | `1140 passed, 20 deselected, 3 xfailed in 371.97s` |
 | slow | **0** | `19 passed, 1144 deselected in 58.76s` |
 | network | **0** | `1 passed, 1162 deselected in 0.35s` |
-| ruff | — | **27 findings, SETS EQUAL AT EQUAL SCOPE** vs `a552783`; both parses asserted non-empty (27/27, added 0, removed 0) |
+| ruff | — | **27 findings, SETS EQUAL AT EQUAL SCOPE** vs `ab592f3`; both parses asserted non-empty (27/27, added 0, removed 0) |
 
 ### Signed-balance test ledger
 
@@ -145,7 +145,7 @@ control.
 
 | Field | Value |
 |---|---|
-| **Independent review** | **NOT YET OBTAINED for this increment.** Increment 016's two passes cleared the tree at `f3398f4`; this increment changes `mapper/app.py` after that clearance, so their verdicts do **not** extend to it. |
+| **Independent review** | **NOT YET OBTAINED for this increment.** Increment 016's two passes cleared the tree at `7a635cf`; this increment changes `mapper/app.py` after that clearance, so their verdicts do **not** extend to it. |
 
 **Stated rather than implied.** The rulings applied here were the coordinator's, and a coordinator
 ruling is not an independent review — it authorises the change, it does not inspect the
@@ -209,7 +209,7 @@ and must DRIVE the derived set rather than a hand-built model of it.
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | `_spawn_argv` (branching over call forms) driven by the both-spellings parametrisation |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | §4 — 5 sites, 4 KILL all killed, 1 expected survivor |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | `grep -rn "_spawn_argv\|_derived_spawn_executables" tests/ mapper/` → owner module only; `EXPORT_MAX_CELLS` consumers re-validated by the lane |
-| 6 | `code-reviewer` passed — a HIGH blocks | `core` · `full` | **✗ OWED** | §4b — not obtained for this increment; 016's clearance does not extend past `f3398f4` |
+| 6 | `code-reviewer` passed — a HIGH blocks | `core` · `full` | **✗ OWED** | §4b — not obtained for this increment; 016's clearance does not extend past `7a635cf` |
 | 7 | No file from another lane touched | all | ✓ | batch not forked |
 | 8 | Frozen interfaces untouched | all | ✓ | `IRenderer.render` unchanged; `_spawn_argv` is test-local |
 | 9 | Coverage claims verified **on disk** | all | ✓ | every figure re-measured this session |

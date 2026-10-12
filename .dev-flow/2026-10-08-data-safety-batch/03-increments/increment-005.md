@@ -5,7 +5,7 @@
 | Batch | `2026-10-08-data-safety-batch` |
 | Increments | **Inc-1c** — UX-1 conditions M1, M2 + header colour (operator R8) + single failed-save toast · **Inc-2** — design rows 2.1–2.4 (leave, link, quit, structural writes) |
 | Requirement(s) | HLR-002 · LLR-002.2 · HLR-003 · LLR-003.3 · LLR-003.4 · LLR-003.5 · LLR-003.6 · HLR-004 · LLR-004.2 · HLR-005 · LLR-005.2 · AT-005a/b · AT-011 · AT-012 · AT-013 · AT-014a–d · PDR conditions C1, C6, C10, C14 (Inc-2 parts) |
-| Base | `6676585` (Inc-1b + Inc-4 integrated, reviews recorded) → `5ad158e` |
+| Base | `87084e7` (Inc-1b + Inc-4 integrated, reviews recorded) → `0033df3` |
 | Method | **Ten small `deepseek/deepseek-v4-pro` units** (U1–U10), each one `opencode run` in a fresh session with a 15-min watchdog, one change + one test + its own RED proof; the orchestrator (Claude Opus 5.5) verified each unit with the census files before committing it and chaining the next. Operator method ruling 2026-10-08: "partir el trabajo de deepseek en partes más pequeñas, aunque llames más instancias". |
 
 ## 1 · What changed
@@ -61,7 +61,7 @@ Every unit reverted ONLY its product change, ran its new nodes, recorded the fai
 
 ## 4 · Test results
 - Per unit (orchestrator): the unit's files plus `tests/test_search.py` and `tests/*census*.py` — 175 → 226 passed across the units.
-- **Full default lane 1:** `3 failed, 2907 passed` — the `Z2` arms (`evidence/inc1c-inc2-default-lane-1-z2.transcript`); fixed in `5ad158e`.
+- **Full default lane 1:** `3 failed, 2907 passed` — the `Z2` arms (`evidence/inc1c-inc2-default-lane-1-z2.transcript`); fixed in `0033df3`.
 - **Full default lane 2 (orchestrator):** `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` → `2910 passed, 24 deselected, 3 xfailed in 1472.93s`, `EXIT_CODE=0` (`evidence/inc1c-inc2-default-lane.transcript`).
 - **Ledger:** 2890 collected (Inc-1b + Inc-4) − 0 + 23 (4 + 19) = 2913 = 2910 passed + 3 xfailed. ✓ (rewrite-in-place: `test_draft_save.py`, `test_en2.py` ×2, `test_darkside_census.py`, `test_search.py` registry — counts unchanged.)
 
@@ -74,7 +74,7 @@ Every unit reverted ONLY its product change, ran its new nodes, recorded the fai
 | Unit reports U1–U10 (RED, sha256 restores) | `.dev-flow/2026-10-08-data-safety-batch/evidence/inc1c-inc2-units.transcript` | `8eba2049f9262ef87c7594f67c579fa5d19eef218e0a7a23dbce10ce34fb4b65` |
 
 ## 4b · Independent review
-⚠ owed — `code-reviewer` over `6676585..HEAD`.
+⚠ owed — `code-reviewer` over `87084e7..HEAD`.
 
 ## 5 · Risks
 - U2's hint borrow and the chip's `Z2` borrow now coordinate through the screen's blur handler; a future third borrower of the hint line must follow the same hand-back rule.

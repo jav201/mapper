@@ -1,6 +1,6 @@
 # Review — mapper — Batch 2026-10-08-data-safety-batch
 
-> Phase 2 artifact. Reviewers (in parallel, read-only, HEAD `b74325a`): `architect` ∥ `qa-reviewer` ∥ `security-reviewer` (always in `full`; trigger C6 also fired). Consolidated by the orchestrator, which owns the dispositions (standing autonomous authorization, 2026-10-08).
+> Phase 2 artifact. Reviewers (in parallel, read-only, HEAD `c6e93fe`): `architect` ∥ `qa-reviewer` ∥ `security-reviewer` (always in `full`; trigger C6 also fired). Consolidated by the orchestrator, which owns the dispositions (standing autonomous authorization, 2026-10-08).
 
 ## ✅ Verdict (read first)
 
@@ -68,7 +68,7 @@
 
 ---
 
-## Round 2 (HEAD `8783526`, after P1 iteration 1)
+## Round 2 (HEAD `1328a7e`, after P1 iteration 1)
 
 - **Gate:** `iterate-to-refine` → Phase 1 (iteration 2). Round-1 ids: architect 12/12 discharged; security 3/3 majors discharged (m1, m4 partial); qa all discharged (m2 partial).
 - **Findings:** 0 blocker · 6 major · 13 minor.
@@ -87,7 +87,7 @@
 
 ---
 
-## Round 3 (HEAD `8effc5c`, after P1 iteration 2) — iteration cap reached, operator ruling
+## Round 3 (HEAD `699517e`, after P1 iteration 2) — iteration cap reached, operator ruling
 
 - **Gate:** `iterate-to-refine` → Phase 1 (iteration 3 = the soft cap). Round-2 ids: architect 3/3 discharged; qa 3/3 majors discharged; security R2-N1 NOT discharged.
 - **Root cause, named at the cap:** the disk-hash classification of failed saves (round-2 disposition) is itself unsound in the real store — a non-title draft rewrites the `.mmd` with identical bytes (`mermaid.py:131-155`), so a committed save reads as torn (SEC-N-A); an external edit between pre-hash and save reads as committed (SEC-N-B); "pop" in case (a) calls `_pop_snapshot`, which writes (`app.py:3530`, SEC-N-C); the reload-failure fallback keeps drafted values in `self.graph` and can lock structural writes forever (ARCH-R3-1, SEC-N-D).
@@ -102,7 +102,7 @@
 
 ---
 
-## Round 4 (HEAD `b3827c0`, after P1 iteration 3)
+## Round 4 (HEAD `f17b24e`, after P1 iteration 3)
 
 - **Gate:** all three lenses `iterate-to-refine` with **0 blockers**; one converging major (architect + security: the reload swaps `self.graph` only, leaving `NavigationModel`, focus and load warnings stale; a draft on a vanished node unspecified) and one qa major (stale three-case text in §5.1), plus minors (write scope vs index rebuild, AT-011 observation, AT-009 label, AT-013 in the Layer-B list) and two residuals.
 - **Operator ruling 2026-10-08, verbatim:** "Aplicar y verificar ligero (Recomendado)" — the orchestrator applies the fixes, ONE reviewer confirms them, then PDR.

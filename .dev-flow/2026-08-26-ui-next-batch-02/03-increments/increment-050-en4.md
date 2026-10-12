@@ -1,6 +1,6 @@
 # Increment 050 -- Inc-EN-4: English strings in the store, the legend and the components; `Z1`
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `d5bedd4`. Authority: `A-132` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2, `Z1`) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 4 source files (the cap): the three in scope plus `widgets/inspector.py`, declared in section 2.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `be54619`. Authority: `A-132` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2, `Z1`) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 4 source files (the cap): the three in scope plus `widgets/inspector.py`, declared in section 2.
 
 ## 1. What changed
 
@@ -33,7 +33,7 @@ Kept as is, declared: the on-disk sidecar name `_nodos.yml` (a file-name format;
 
 ## 2. Files modified
 
-Source (4, the cap, no overage): `mapper/store.py`, `mapper/darkside.py`, `mapper/widgets/components.py`, and `mapper/widgets/inspector.py` (one line, `toggle=False`, which `Z1` needs; declared because the task said the inspector would be a 4th file). Tests: `tests/test_en4.py` (new, 10 items); relabelled or re-derived in `test_g6_store_surrogates`, `test_repair_cycles`, `test_repair_fields`, `test_repair_sidecar`, `test_repair_store_boundary`, `test_store`, `test_vocabulary_declaration`; the zero-arg render pin `35 -> 36` in `test_a3_census` (section 3); one docstring in `test_seed2`. Docs: `01-requirements.md` (append `A-132`), this file. `app.py`, `keymap.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `99331cc` (code, tests, A-132), then the `test_a3_census` pin, then this record.
+Source (4, the cap, no overage): `mapper/store.py`, `mapper/darkside.py`, `mapper/widgets/components.py`, and `mapper/widgets/inspector.py` (one line, `toggle=False`, which `Z1` needs; declared because the task said the inspector would be a 4th file). Tests: `tests/test_en4.py` (new, 10 items); relabelled or re-derived in `test_g6_store_surrogates`, `test_repair_cycles`, `test_repair_fields`, `test_repair_sidecar`, `test_repair_store_boundary`, `test_store`, `test_vocabulary_declaration`; the zero-arg render pin `35 -> 36` in `test_a3_census` (section 3); one docstring in `test_seed2`. Docs: `01-requirements.md` (append `A-132`), this file. `app.py`, `keymap.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `f7d446e` (code, tests, A-132), then the `test_a3_census` pin, then this record.
 
 ## 3. Sealed-arm changes (labels only; none weakened)
 
@@ -65,7 +65,7 @@ Legend samples, cells (Python `len`, all single-cell glyphs): `payroll` 9 vs 8 (
 
 ## 5. RED / GREEN and mutants
 
-**Census arm, RED on the base.** A scratch `git worktree` of `d5bedd4` under `%TEMP%` (removed), temp HOME, `tests/test_en4.py` copied in with `@pytest.mark.xfail(strict=True)` on the 8 items that must fail there (three file arms, the `MapIdError` item, the seed item, and the three `Z1` items). Without `--runxfail`: `2 passed, 8 xfailed`. With `--runxfail`: `8 failed, 2 passed` (the two passes are the oracle control and `the default chip still toggles`, by design). `mapper` was imported from the worktree (its `__file__` checked). GREEN here: `10 passed`. A first draft of the real-key `Z1` arm passed on the base (two presses toggle twice and end `False`), so it was strengthened to assert after EACH press, then re-run RED.
+**Census arm, RED on the base.** A scratch `git worktree` of `be54619` under `%TEMP%` (removed), temp HOME, `tests/test_en4.py` copied in with `@pytest.mark.xfail(strict=True)` on the 8 items that must fail there (three file arms, the `MapIdError` item, the seed item, and the three `Z1` items). Without `--runxfail`: `2 passed, 8 xfailed`. With `--runxfail`: `8 failed, 2 passed` (the two passes are the oracle control and `the default chip still toggles`, by design). `mapper` was imported from the worktree (its `__file__` checked). GREEN here: `10 passed`. A first draft of the real-key `Z1` arm passed on the base (two presses toggle twice and end `False`), so it was strengthened to assert after EACH press, then re-run RED.
 
 **Mutants.** Harness `%TEMP%\h\mut.py` (outside the repo): byte-level read and write, sha256 of the file checked after the restore (every `restored True`), verdict printed before the restore, `-B`, `-W error::SyntaxWarning`, `-x`, temp HOME and USERPROFILE, git identity from environment. 13 run, 13 killed, 0 survived. Two harness slips were fixed and re-run (a pattern with two sites, a backslash eaten on the way in); the count of 13 is after those.
 
@@ -89,7 +89,7 @@ Pins (first 8 hex, before and after): `store.py 1f649ca8`, `darkside.py d8c4da4b
 
 ## 6. Test results
 
-- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `d5bedd4` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `be54619` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
 - `-W error::SyntaxWarning`: every pytest run carried it.
 - Targeted (one process, 906 tests: every test file naming a changed string, plus `test_legacy_fixture`, `test_seed*`, `test_darkside_census`, `test_vocabulary*`, `test_legend*`, `test_app`, `test_search`) BEFORE the fixes: `61 failed, 844 passed` -- `test_repair_store_boundary` (37), `test_repair_fields` (11), `test_repair_sidecar` (5), `test_repair_cycles` (4), `test_g6` (1), `test_store` (1), `test_vocabulary_declaration` (2). After the section 3 changes: the failed files re-run together with `test_en4`: `269 passed, 1 failed` (`test_repair_cycles::test_at_r01`, the `"ciclo"` half, fixed), then `test_repair_cycles` `33 passed`, `test_en4` `10 passed`.
 - Account-name grep of the staged diff (name read at run time, not printed): 0 hits; no `prototypes/`, `mapper.db` or `state.json` staged; Cf characters in the staged diff: none, U+2011: 0.
@@ -104,9 +104,9 @@ Pins (first 8 hex, before and after): `store.py 1f649ca8`, `darkside.py d8c4da4b
 
 ## Full-lane result
 
-`2677 passed, 24 deselected, 3 xfailed` in 1705.7 s (28 min 26 s), `python -B -m pytest -rf -q -W error::SyntaxWarning -p no:cacheprovider`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `0c3e454` (the last code and test change), run as the last step. Baseline 2667; the delta is the 10 new `test_en4.py` items (2667 + 10 = 2677). No flake failed this time (FLAKE-1, FLAKE-4 did not appear).
+`2677 passed, 24 deselected, 3 xfailed` in 1705.7 s (28 min 26 s), `python -B -m pytest -rf -q -W error::SyntaxWarning -p no:cacheprovider`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `4d2f745` (the last code and test change), run as the last step. Baseline 2667; the delta is the 10 new `test_en4.py` items (2667 + 10 = 2677). No flake failed this time (FLAKE-1, FLAKE-4 did not appear).
 
-Lane history, declared: a first full lane on `99331cc` ended `2 failed, 2675 passed` -- `test_a3_census::test_tc_a3_the_census_cardinalities_are_PINNED` and `test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration` (derived 40 zero-arg widget `.render()` sites against a pinned 35: the five `chip.render()` calls in `test_en4.py`). Not flakes. Fixed by one shared helper (+1) and the pin `35 -> 36` with a ledger entry (section 3); the two arms and `test_en4` re-run alone `25 passed`; the lane above was then re-run in full from a fresh output file, nothing else of mine running.
+Lane history, declared: a first full lane on `f7d446e` ended `2 failed, 2675 passed` -- `test_a3_census::test_tc_a3_the_census_cardinalities_are_PINNED` and `test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration` (derived 40 zero-arg widget `.render()` sites against a pinned 35: the five `chip.render()` calls in `test_en4.py`). Not flakes. Fixed by one shared helper (+1) and the pin `35 -> 36` with a ledger entry (section 3); the two arms and `test_en4` re-run alone `25 passed`; the lane above was then re-run in full from a fresh output file, nothing else of mine running.
 
 ## Correction note (EN-8, 2026-10-02)
 

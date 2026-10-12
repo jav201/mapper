@@ -55,6 +55,6 @@ The legend own-keys flake was the **test instrument**, not the product: Textual 
 
 ### Evidence
 
-- Gate: one complete run on `cab8181` — **2920 passed, 24 deselected, 3 xfailed, EXIT_CODE=0** (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`; test ledger 2800 → 2923 collected, `:15`).
+- Gate: one complete run on `4b8b103` — **2920 passed, 24 deselected, 3 xfailed, EXIT_CODE=0** (`.dev-flow/2026-10-08-data-safety-batch/04-validation.md:9`; test ledger 2800 → 2923 collected, `:15`).
 - Requirements: 36/36 (9 HLR + 27 LLR) verified, 0 blocker fails (`04-validation.md:11`).
 - Operator real-terminal smoke (PDR C14): performed 2026-10-09 — `ctrl+s` saved without freezing, `ctrl+q` raised the guard; verdict PASS-WITH-NOTES with accepted residuals A-13…A-15, F5 (`04-validation.md:18,253,261-264`).

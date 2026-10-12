@@ -57,7 +57,7 @@
   {
     "station": "P3",
     "date": "2026-10-09",
-    "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (fc5141b); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
+    "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (569cb90); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
   },
   {
     "station": "DDR",
@@ -67,7 +67,7 @@
   {
     "station": "P4",
     "date": "2026-10-09",
-    "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on cab8181 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
+    "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on 4b8b103 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
   },
   {
     "station": "P5",

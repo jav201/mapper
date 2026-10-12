@@ -1,6 +1,6 @@
 # Increment 039 -- Inc-9m: local paths get an allow-list (S1 applied to paths), and the Inc-9l review fixes
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `19b2824`. Authority: the operator's S1 (Round 8) and T1 (Round 9) in
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `2a01ccf`. Authority: the operator's S1 (Round 8) and T1 (Round 9) in
 `VERDICT-inc9-2026-09-30.md`, and the coordinator's ruling "local paths get an allow-list, like URLs" (the two-slash deny-check of `A-120` st. 4 was
 bypassed by `\??\UNC\host\share`, measured locally by both reviewers). Amendment: `A-121` (appended to `01-requirements.md`, dated 2026-10-01).
 
@@ -66,15 +66,15 @@ Sealed-arm changes (what, why; no leak assertion is weakened):
 |---|---|---|
 | `test_inc9l::test_inc9l_unc_a_single_slash_or_drive_text_is_still_probed`, parameter `/tmp/x` | the parameter is deleted (3 left: `relative/dir`, `o/r`, `C:\work\repo`) | `/tmp/x` is root-relative (`\x`): the allow-list refuses it before any probe, by the ruling. The arm kept its purpose: an accepted ordinary path is still probed |
 | consistency table row `c00` (`git@h:r`) of `increment-038` section 5 and `CONSISTENCY[0]` of `test_inc9l` | was "refused (False/False)"; now accepted (True/True) | `INC9L-CR-F2`. The `test_inc9l` arm asserts only `painted iff fetch reaches a process`, so it is green unchanged; only the table's expected column in the record changes |
-| `tests/test_inc9m.py` itself, between the RED commit `5b1d61d` and `594cc9e` | three `REFUSED` entries removed (`CC:\x`, `~\\h`, `~nosuchuser`) | my arm was wrong, not the code: `CC:\x` is a relative name for `PureWindowsPath` (branch (b), declared in `A-121`); `~\\h` and `~nosuchuser` expand with the REAL home of the machine that runs the test (they are covered by the tmp-HOME arms instead). The RED run in the base worktree was repeated with the final file (section 3) |
+| `tests/test_inc9m.py` itself, between the RED commit `4db6703` and `2f25b7b` | three `REFUSED` entries removed (`CC:\x`, `~\\h`, `~nosuchuser`) | my arm was wrong, not the code: `CC:\x` is a relative name for `PureWindowsPath` (branch (b), declared in `A-121`); `~\\h` and `~nosuchuser` expand with the REAL home of the machine that runs the test (they are covered by the tmp-HOME arms instead). The RED run in the base worktree was repeated with the final file (section 3) |
 
 ## 3. Arm table (RED/GREEN)
 
-Arms committed as strict xfail in `5b1d61d` (88 cases; no sources touched), copied into a detached `git worktree` of `19b2824` in `%TEMP%` (no stash), `--runxfail`:
+Arms committed as strict xfail in `4db6703` (88 cases; no sources touched), copied into a detached `git worktree` of `2a01ccf` in `%TEMP%` (no stash), `--runxfail`:
 **71 failed, 17 passed**. After the three-entry trim above, the final file on the same base worktree: **68 failed, 17 passed (85 cases)**. The 17 passes are pins. GREEN: **85 passed** on
-`c740ef8`, `OPEN_STEPS` empty. (`71 -> 68` is exactly the three removed entries, all three were RED.)
+`de16d60`, `OPEN_STEPS` empty. (`71 -> 68` is exactly the three removed entries, all three were RED.)
 
-| arm family (`test_inc9m`) | cases | RED on `19b2824` | on HEAD |
+| arm family (`test_inc9m`) | cases | RED on `2a01ccf` | on HEAD |
 |---|---|---|---|
 | S1: an accepted text returns a `Path` equal to the pure parse | 9 | RED x9 | green |
 | S1: every other text is refused with a spy that fails on any filesystem call | 21 | RED x21 | green |
@@ -101,7 +101,7 @@ Arms committed as strict xfail in `5b1d61d` (88 cases; no sources touched), copi
 
 ## 4. Mutant table
 
-Harness `mutate9m.py` in the session scratchpad, outside the repo; run on a detached `git worktree` of `c740ef8` in `%TEMP%`; sha256 pinned before (`osopen.py` `2e77052cae3d976d...`,
+Harness `mutate9m.py` in the session scratchpad, outside the repo; run on a detached `git worktree` of `de16d60` in `%TEMP%`; sha256 pinned before (`osopen.py` `2e77052cae3d976d...`,
 `github.py` `850efdc5e39b7f9e...`, `app.py` `c772231c09035712...`, `factory.py` `4d39ee61eff5173d...`), byte-level I/O in each file's own line ending, `old` must occur exactly once, the verdict
 printed before the file is restored, the pin re-checked after: **pin OK**. `<LF>` is a line break. Run `-x`; arms = `tests/test_inc9m.py` unless stated. In the texts below `\\` is the two characters
 backslash backslash, as in the file.
@@ -144,8 +144,8 @@ backslash backslash, as in the file.
 | F2 | import-office never names a refused text | factory | `self.notify("archivo no encontrado", severity="error", markup=False)<LF>                return<LF>            # \`INC9BC-SEC-F1\`` -> the same with `f"archivo no encontrado: {Path(path_str).name}"` | RED | `sec_f2_import_office_survives...[size0]` |
 
 Runs: 34 mutant ids (N1-N14 with N9b, G1-G11, A1-A6, F1-F2) + 4 deselected variants (G1b, G3b, A1b, F1b) = 38 runs; **35 RED, 3 SURVIVED**: N9 and N11 are each equivalent (the two guards cover each other; N9b removes both and is RED), and G3b is
-behaviourally equivalent (killed only by the AST "one helper" arm, which is its purpose). The first harness run was on `594cc9e`, whose `osopen.py` had a one-backslash escape (`"\/"`, the same runtime value, a
-`SyntaxWarning`); the fix `c740ef8` spells `"\\/"` and the whole harness was run again on it (the table above is that run). Not mutated: the spy helpers themselves; the pins' counterparts N9/N11 above.
+behaviourally equivalent (killed only by the AST "one helper" arm, which is its purpose). The first harness run was on `2f25b7b`, whose `osopen.py` had a one-backslash escape (`"\/"`, the same runtime value, a
+`SyntaxWarning`); the fix `de16d60` spells `"\\/"` and the whole harness was run again on it (the table above is that run). Not mutated: the spy helpers themselves; the pins' counterparts N9/N11 above.
 
 ## 5. Renders (Pilot, real keys, HOME and USERPROFILE in a temp dir; `i` on Home, typed `~nosuchuser/secret-token.csv`), 118x34
 
@@ -189,9 +189,9 @@ the toast as a painted widget.
 
 | check | state |
 |---|---|
-| `tests/test_inc9m.py` | executed: 85 passed on `c740ef8`; RED run on `19b2824` in a worktree: 68 failed, 17 passed |
-| `test_inc9d/g/h/i/j/k/l`, `test_inc9`, `test_inc9c`, `test_inc9e`, `test_inc9f`, `test_github`, `test_attachments`, `test_g6_store_surrogates` with `test_inc9m` | executed: 874 passed, 4 deselected (`network`) on `594cc9e` (before the one-character escape fix); `test_inc9m` + `test_attachments` re-run on `c740ef8`: 114 passed with `-W error::SyntaxWarning`; the whole lane covers the rest |
-| `ruff check . --exclude prototypes --output-format concise`, set difference vs `19b2824` (a detached worktree; line and column stripped) | executed: 30 lines each side, new = none, gone = none |
+| `tests/test_inc9m.py` | executed: 85 passed on `de16d60`; RED run on `2a01ccf` in a worktree: 68 failed, 17 passed |
+| `test_inc9d/g/h/i/j/k/l`, `test_inc9`, `test_inc9c`, `test_inc9e`, `test_inc9f`, `test_github`, `test_attachments`, `test_g6_store_surrogates` with `test_inc9m` | executed: 874 passed, 4 deselected (`network`) on `2f25b7b` (before the one-character escape fix); `test_inc9m` + `test_attachments` re-run on `de16d60`: 114 passed with `-W error::SyntaxWarning`; the whole lane covers the rest |
+| `ruff check . --exclude prototypes --output-format concise`, set difference vs `2a01ccf` (a detached worktree; line and column stripped) | executed: 30 lines each side, new = none, gone = none |
 | Literal Cf characters in every touched file (Python scan by Unicode category) | executed: none |
 | Full default lane, once, uninterrupted, last step | see "Full-lane result" at the end of this record |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`) | see "Full-lane result" |
@@ -210,17 +210,17 @@ the toast as a painted widget.
 
 ## Commits
 
-`5b1d61d` arms (strict xfail) · `594cc9e` four sources + the sealed-arm edit + `OPEN_STEPS` emptied · `c740ef8` the escape fix in `osopen.py` · docs commit (this record, `A-121`) · docs commit (the full-lane result).
+`4db6703` arms (strict xfail) · `2f25b7b` four sources + the sealed-arm edit + `OPEN_STEPS` emptied · `de16d60` the escape fix in `osopen.py` · docs commit (this record, `A-121`) · docs commit (the full-lane result).
 No push; `state.json` untouched.
 
 ## Full-lane result
 
-2221 passed, 3 xfailed, 24 deselected, 0 failed in 1122.91s (18:42), `-rf`, run once and uninterrupted (background limit 60 minutes) on `a56410e` (the docs commit; `test_no_operator_paths` reads
+2221 passed, 3 xfailed, 24 deselected, 0 failed in 1122.91s (18:42), `-rf`, run once and uninterrupted (background limit 60 minutes) on `c4fef4e` (the docs commit; `test_no_operator_paths` reads
 `.dev-flow`). Baseline 2137/0 plus the 85 cases of `test_inc9m`, minus the one deleted `/tmp/x` case of `test_inc9l` (2137 + 85 - 1 = 2221). No known flake appeared
 (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`, `test_palette::test_at_n03b...`: not hit). The 3 xfailed are the pre-existing ones. This result line is added by the docs commit after the run.
 
 ## Correction (added in Inc-9n, `INC9M-CR-F6`)
 
-Section 6 claims the `ruff` set difference against `19b2824` was "new = none". That measurement is wrong as a claim about the tree: the base worktree it used had the new arms copied in, so the
+Section 6 claims the `ruff` set difference against `2a01ccf` was "new = none". That measurement is wrong as a claim about the tree: the base worktree it used had the new arms copied in, so the
 two unused imports of `tests/test_inc9m.py` (`subprocess`, `textual.widgets.Static`) sat on both sides and the difference hid them. Re-measured on a clean base worktree they are two new F401; they were
 removed in Inc-9n (`increment-040-inc9n.md` section 7).

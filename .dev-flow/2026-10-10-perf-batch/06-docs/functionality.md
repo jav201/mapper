@@ -1,7 +1,7 @@
 # Functionality — mapper — Batch `2026-10-10-perf-batch`
 
 > **Artifact language:** canonical English scaffold. Generate in the batch's development language (`state.json` `language`).
-> Phase 6 artifact. Owner: `docs-writer`. Audience: **the maintainer**. There is no user-visible change: the batch's contract is byte-identity — every painted cell and every `.mmd` byte is identical to the base goldens pinned at `5cde04e` (AT-065 parity, `tests/test_perf_goldens_manifest.py`, `tests/test_repair_golden_census.py`).
+> Phase 6 artifact. Owner: `docs-writer`. Audience: **the maintainer**. There is no user-visible change: the batch's contract is byte-identity — every painted cell and every `.mmd` byte is identical to the base goldens pinned at `e7d433d` (AT-065 parity, `tests/test_perf_goldens_manifest.py`, `tests/test_repair_golden_census.py`).
 
 ## 🔑 At a glance (read first)
 
@@ -33,8 +33,8 @@
 | the `edges` list writers stay exactly {`model.py` `add_edge` (append), `editing.py` `_remove_subtree` (wholesale)} | `test_edges_writer_census` + `test_census_in_place_forms[setitem\|slice\|del\|iadd\|imul\|sort\|reverse\|clear\|extend\|insert\|remove\|pop\|alias]` — 13 in-place/alias forms, one mutation per form |
 | cached lookups equal the linear-scan reference through EVERY mutation class, incl. `id()` recycling | `test_cache_mutation_script_equality` (two wholesale replacements back to back, NO lookup between), `test_mid_rebuild_failure_leaves_token_invalid` (the token must be assigned only after the rebuild) |
 | `dump` output bytes never drift | `test_dump_fixture_goldens` (legacy/anidado/truncado/wide-6000/forest/empty/single/dangling, base-pinned) + `test_dump_counted_ops_scaling_ratio` (≤ 2·E + c per call, ratio ∈ [1.8, 2.2]) |
-| every behaviour golden stays byte-pinned to base `5cde04e` | `test_perf_goldens_manifest.py` (base SHA + per-golden sha256) + AT-065 parity + `test_repair_golden_census.py` — all inside the full-suite gate |
-| Lane M never moves cache cost into the renderers | M-M3 file-diff check `git diff 5cde04e -- mapper/views` empty on the Lane M branch — recorded per lane at the DDR (`_child_index` per-render builds stay in `mapper/views/`) |
+| every behaviour golden stays byte-pinned to base `e7d433d` | `test_perf_goldens_manifest.py` (base SHA + per-golden sha256) + AT-065 parity + `test_repair_golden_census.py` — all inside the full-suite gate |
+| Lane M never moves cache cost into the renderers | M-M3 file-diff check `git diff e7d433d -- mapper/views` empty on the Lane M branch — recorded per lane at the DDR (`_child_index` per-render builds stay in `mapper/views/`) |
 
 ### How to add a mutation path to `edges` / `nodes` safely
 
@@ -55,8 +55,8 @@ Both caches are invalidated by IDENTITY, not by event — so the only sound writ
 | `mapper/model.py` | `Graph` private adjacency cache with the strong-reference validity token (LLR-PERF.2.1) |
 | `mapper/mermaid.py` | `dump` builds its incident set in one local O(N+E) pass (LLR-PERF.2.2) |
 | `tests/test_perf_paint_clip.py` (17 nodes) · `tests/test_perf_layout_memo.py` (26) · `tests/test_perf_adjacency.py` (18) · `tests/test_perf_dump.py` (3) · `tests/test_perf_goldens_manifest.py` (2) | the guard files above — 66 nodes, +66 in the suite ledger (3157 → 3223) |
-| `tests/perf_goldens_capture.py` + `tests/goldens/perf/**` (MANIFEST + 26 goldens) | deterministic regeneration of every behaviour golden from the current product; base SHA `5cde04e` + sha256 per golden (PDR C10); `-text` line-ending rule in `.gitattributes` (`2c64f76`) |
-| `tests/test_a3_census.py` (M) · `tests/test_repair_store_boundary.py` (M) | gate follow-ups: the A3 pin 65 → 80 → 82 — first for the byte-identity arms' arg-ful renders (`084d7b7`), then for the DDR title-arm fix's 2 added render sites (`e5a2a7f`); a store-boundary expectation updated |
+| `tests/perf_goldens_capture.py` + `tests/goldens/perf/**` (MANIFEST + 26 goldens) | deterministic regeneration of every behaviour golden from the current product; base SHA `e7d433d` + sha256 per golden (PDR C10); `-text` line-ending rule in `.gitattributes` (`96b6ea7`) |
+| `tests/test_a3_census.py` (M) · `tests/test_repair_store_boundary.py` (M) | gate follow-ups: the A3 pin 65 → 80 → 82 — first for the byte-identity arms' arg-ful renders (`4d82c16`), then for the DDR title-arm fix's 2 added render sites (`77b3c49`); a store-boundary expectation updated |
 
 ### Usage / examples
 

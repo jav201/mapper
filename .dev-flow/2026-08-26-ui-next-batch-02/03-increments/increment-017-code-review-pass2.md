@@ -4,7 +4,7 @@
 |---|---|
 | Reviewer | `code-reviewer` (independent; authored none of this diff) |
 | Batch | `2026-08-26-ui-next-batch-02` |
-| Commit reviewed | **`344db11`** (`A-100.4` / `A-100.5`). Source at `2c74347` is identical — only docs moved after |
+| Commit reviewed | **`24d6f6e`** (`A-100.4` / `A-100.5`). Source at `24999b5` is identical — only docs moved after |
 | Pass 1 | `increment-017-code-review.md` (verdict BLOCK, 1 HIGH) |
 | Date | 2026-09-19 |
 | **Verdict** | **OK to advance — no HIGH open.** `CR17-F1` **CLOSED** and `CR17-F2` **CLOSED**, both verified by me on the shipped bytes. **One new MEDIUM (`CR17-F6`) opens** on the sentence that replaced the struck universal |
@@ -29,10 +29,10 @@ byte-identical with sha256 re-pinned. Trap 1 defended in every probe (`mapper.__
 **printed** inside the mirror). Repo `git status` clean apart from my two report files.
 
 **Source parity established before measuring**, since HEAD had moved past the fix:
-`git diff 344db11 2c74347 -- mapper/ tests/` is **empty**, so the working tree I copied *is* the fix
+`git diff 24d6f6e 24999b5 -- mapper/ tests/` is **empty**, so the working tree I copied *is* the fix
 commit's source. I also pinned, by extracting the functions and stripping comments, that
-`_export_view_state` and `_within_export_budget` are **byte-identical** across `152ecd9` and
-`344db11` (`1fc22b02…`, `ed42f4b5…`) — which is what licensed me to reuse an idle earlier mirror for
+`_export_view_state` and `_within_export_budget` are **byte-identical** across `11c16ef` and
+`24d6f6e` (`1fc22b02…`, `ed42f4b5…`) — which is what licensed me to reuse an idle earlier mirror for
 the variance probe.
 
 ---
@@ -78,7 +78,7 @@ control** — my constant mirror artifact — so the differential is clean.
 | P2-B | suppress the sentence (`if False`) | only the declaration arm | `test_a_refusal_DECLARES_the_stale_artifact_it_leaves_behind` | ✓ exact |
 | P2-C | comment-only control | SURVIVES | nothing | ✓ survived |
 
-Default lane at `344db11`: **1143 passed**, 20 deselected, 3 xfailed (+1 constant mirror artifact).
+Default lane at `24d6f6e`: **1143 passed**, 20 deselected, 3 xfailed (+1 constant mirror artifact).
 `FLAKE-1` did not fire in any of the four full-lane runs.
 
 ---
@@ -240,9 +240,9 @@ Harmless; noted only so the asymmetry is a decision rather than an accident.
 | Not run | Why |
 |---|---|
 | **ruff** | not executed in either pass. Still unverified by me |
-| slow / network lanes at `344db11` | ran at `152ecd9` in pass 1 (19 / 1 ✓); the fix touches no code they reach |
+| slow / network lanes at `24d6f6e` | ran at `11c16ef` in pass 1 (19 / 1 ✓); the fix touches no code they reach |
 | `SEC-H2` (`_ConfirmScreen markup=False`, `darkside.plain`) and `tests/test_confirm_markup.py` | **never reviewed by me, in either pass.** It rode in on the same commit range and is squarely `security-reviewer`'s lane |
-| base-lane arithmetic at `4800906` | unchanged from pass 1 |
+| base-lane arithmetic at `e007aab` | unchanged from pass 1 |
 | `CR17-F3`/`F4`/`F5` fixes | none were made; nothing to verify |
 | whether 350,000 is the right constant | a ruling, not a review call |
 
@@ -271,10 +271,10 @@ actioned — I am not the right person to also ratify my own §5 recommendation.
 
 | Item | State |
 |---|---|
-| fix diff read in full (`046acea..344db11`) | `executed` |
+| fix diff read in full (`58b3647..24d6f6e`) | `executed` |
 | mirror digests (`3d90c32a…`), pre/post | `approved` |
-| source parity `344db11` == `2c74347` | `approved` |
-| default lane at `344db11` | `executed` — 1143 passed |
+| source parity `24d6f6e` == `24999b5` | `approved` |
+| default lane at `24d6f6e` | `executed` — 1143 passed |
 | 3-site battery | `executed` — 3/3, restores byte-identical |
 | `CR17-F1` closure | **`approved`** — verified on shipped bytes, both locations |
 | `CR17-F2` closure | **`approved`** — verified on shipped bytes + battery |

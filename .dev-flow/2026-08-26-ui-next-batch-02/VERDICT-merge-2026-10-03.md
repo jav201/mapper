@@ -1,6 +1,6 @@
 # Operator verdict — whole-branch gates · 2026-10-03
 
-Base `9a2d1c7` (Gate-1 then landed `c2cafec..ab2106f`: FLAKE-1 and FLAKE-4 were test races, fixed;
+Base `967ab7c` (Gate-1 then landed `0423939..feabf68`: FLAKE-1 and FLAKE-4 were test races, fixed;
 three uninterrupted full lanes 2769/0). Whole-branch security sign-off: PASS (no HIGH; BRANCH-SEC-F1
 operator paths in intermediate history, F2 personal email on 15 commits, F3 repo-local git config can run
 a program via `log.showSignature`, all MEDIUM; F4–F6 LOW). Adversarial PR QA: BLOCK-UNTIL PR-QA-F1
@@ -15,7 +15,7 @@ recommended option.
 | M2 | How is the branch merged into `master`? | Squash merge | One clean commit on `master`; the intermediate commits (operator paths, personal email) do not enter `master`'s history |
 | M3 | The remote branch after the squash | Decidir después del merge | `origin/feat/ui-next-batch-02` is left untouched until a later explicit decision; deleting it is irreversible |
 
-## Round 2 — after the Gate-2 review (2026-10-03, base `8b7dee5`)
+## Round 2 — after the Gate-2 review (2026-10-03, base `19fc728`)
 
 Gate-2 review: PASS (no HIGH; PR-QA-F1 verified; every repo-local program-execution vector closed;
 GATE2-REV-F1 MEDIUM, F2–F4 LOW). Two questions were put to the operator; both took the recommended option.

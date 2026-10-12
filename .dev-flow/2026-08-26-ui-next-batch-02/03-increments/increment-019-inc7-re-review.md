@@ -1,7 +1,7 @@
 # Increment 019 · Inc-7 re-review (round 2) · 2026-09-25
 
-Both lenses re-read the corrective pass (`6d775b8`, `c907aa6`; `15723df` is docs-only) at HEAD
-`2de10da`, **serially**, under the pinned rev46+ process. Each fix was judged by the reviewer's own
+Both lenses re-read the corrective pass (`59eec03`, `d3c5076`; `fb23e59` is docs-only) at HEAD
+`d2389ea`, **serially**, under the pinned rev46+ process. Each fix was judged by the reviewer's own
 counterfactual (mutate → a test must go RED → restore). Tree clean after each lens
 (`git status --porcelain` = 0 lines, `git diff --quiet` passes).
 
@@ -40,7 +40,7 @@ counterfactual (mutate → a test must go RED → restore). Tree clean after eac
 | `INC7-SEC-R2-F1` | LOW | app.py:704, :756 | SEC-F1 guards have no regression test; structurally invisible while the `damaged` invariant holds (mutation B+M1/B+M2 → crash, M1+M2 alone → GREEN) | carry → tester / next sala increment |
 | `INC7-SEC-R2-F2` | LOW | app.py:611-626, :655, :932 | warning map loaded up to 4× per mount, re-run on every return home; 8 identical toasts measured. Footprint, not injection | carry with `N-C2`, `F4` |
 | `INC7-SEC-R2-F3` | LOW | state `open_blocks.B-64` | fourth-mechanism record has no file:line; site now app.py:795 | carry → B-64 re-basing |
-| routed → qa | — | app.py:724-725 (`4cda8a92`, pre-batch) | `table.clear()` keeps columns, `add_columns` re-adds → 8 columns, 4 painting `None` | qa-reviewer; not Inc-7 |
+| routed → qa | — | app.py:724-725 (`b9015a97`, pre-batch) | `table.clear()` keeps columns, `add_columns` re-adds → 8 columns, 4 painting `None` | qa-reviewer; not Inc-7 |
 
 ## Security lens — the load-warning path
 

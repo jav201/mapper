@@ -5,7 +5,7 @@ an aesthetic half and only the second is a design question. The mechanical half 
 measurement against a ratified constraint; **this round is the aesthetic half, and nothing is
 blocked while it waits.**
 
-Base `91fdbbd`. Every frame below is painted by the shipped widget — no mockups.
+Base `d1f30fd`. Every frame below is painted by the shipped widget — no mockups.
 
 ---
 

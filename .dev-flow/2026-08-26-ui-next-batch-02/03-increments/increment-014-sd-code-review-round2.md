@@ -2,7 +2,7 @@
 
 **Reviewer:** `code-reviewer` (independent of the author)
 **Date:** 2026-09-18
-**Repo/branch:** `C:\Users\<operator>\Github\mapper` · `feat/ui-next-batch-02` · base `2f78ecc` · still uncommitted
+**Repo/branch:** `C:\Users\<operator>\Github\mapper` · `feat/ui-next-batch-02` · base `6add288` · still uncommitted
 **Round-1 verdict:** BLOCKED · `BLOCK-UNTIL: F1, F2`
 **Predecessor:** `increment-014-sd-code-review.md`
 
@@ -22,7 +22,7 @@ two I could not re-derive are named in the Boundary statement.
 
 ## Scope reviewed
 
-`git diff` against `2f78ecc` — 578 insertions / 63 deletions over 7 files. Round-2 delta
+`git diff` against `6add288` — 578 insertions / 63 deletions over 7 files. Round-2 delta
 read in full: `PAN_INERT_HINT` (`app.py:80-97`), `_consumes_pan` (`app.py:1636-1682`),
 `_reclamp_pan` (`app.py:1684-1712`), `_pan`'s inert branch (`app.py:1715-1725`), both
 toggle actions + `_clear_pan_hint` (`app.py:3307-3351`), the five new arms
@@ -99,7 +99,7 @@ move, matching the strip's house pattern. See **R2-4** for one measured conseque
 
 **The A3 census is back to exactly 34 and `argful` is still 62. CONFIRMED.**
 `cr_sd_probe4b.py`, running `test_a3_census.render_call_sites()` — the pins' own
-derivation — against a detached `2f78ecc` worktree and the working tree:
+derivation — against a detached `6add288` worktree and the working tree:
 
 ```
 zeroarg: HEAD=32  NOW=34  delta=+2
@@ -119,13 +119,13 @@ repair is real.
 |---|---|
 | default | **1094 passed / 19 deselected / 3 xfailed**, exit 0, 340 s |
 | slow | **19 passed**, 1097 deselected, 52 s *(round-1 boundary item, now closed)* |
-| `ruff check .` | **27** — identical to `2f78ecc` in a detached worktree |
+| `ruff check .` | **27** — identical to `6add288` in a detached worktree |
 | ruff, the 6 S-D files | 1 — `mapper/app.py:5 F401 're'`, pre-existing, untouched |
 | `FLAKE-2` | did not fire in either lane. `n/a — not reproduced here` |
 
 **The ledger, derived mechanically from the base rather than from round 1.** Your
 `1096 − 7 + 5 = 1094` is right, and here is the stronger form — per-file collected
-counts, `2f78ecc` → now:
+counts, `6add288` → now:
 
 ```
 tests/test_agree_floor.py           4 -> 8   (+4)   two radial arms x two map_ids
@@ -329,7 +329,7 @@ does not lead it.
 **What I saw.** The full round-2 diff; every seam it touches and the two sibling
 dispatches it claims to mirror; `HintLine`'s implementation; both lanes executed here;
 ruff on both trees; the A3 derivation and the collected-count ledger run against a
-detached `2f78ecc`; five mutants with per-node attribution; and four probes, two of which
+detached `6add288`; five mutants with per-node attribution; and four probes, two of which
 I rewrote after catching them asserting nothing.
 
 **What I could not see — constructed before declaring, not asserted.**

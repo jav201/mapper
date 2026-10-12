@@ -1,4 +1,4 @@
-# Security Pass 3 — Inc-3 fix round 2 (`feat/ui-next-batch-02`, uncommitted over `954f8f3`)
+# Security Pass 3 — Inc-3 fix round 2 (`feat/ui-next-batch-02`, uncommitted over `909cc27`)
 
 ## VERDICT: **SIGN-OFF — 0 HIGH**
 
@@ -8,8 +8,8 @@ All five resolve in the author's favour.
 **The F-A routing is honest.** The arm drives the real crash, `strict` is set, and I reproduced the
 mechanism by which the marker cannot be left behind: fixing F-A in an export turns the arm
 `[XPASS(strict)] -> 1 failed, exit 1`. The two claims the routing rests on — F-A is pre-existing at
-`954f8f3`, and it subsumes `SEC-F1`'s attack — are both **true, measured, and discriminating**.
-`inspector.py`, `coverage.py`, `factory.py` and `store.py` are **byte-identical** to `954f8f3`.
+`909cc27`, and it subsumes `SEC-F1`'s attack — are both **true, measured, and discriminating**.
+`inspector.py`, `coverage.py`, `factory.py` and `store.py` are **byte-identical** to `909cc27`.
 
 **This increment is safe to commit with F-A routed rather than fixed.** No new HIGH. Nothing in
 round 2 adds a leak, an unguarded pump path, or a process/network/dependency surface.
@@ -31,7 +31,7 @@ hang, the three guard placements, the `A-89` attribute-form derivation.
 
 | Check | Result |
 |---|---|
-| Where the work ran | `tar` export of the working tree at `…/scratchpad/mapper_copy` with its own `git init` (about 25 census arms shell out to `git ls-files`), plus a second `git archive 954f8f3` export at `…/scratchpad/base954` for the pre-existence reproduction |
+| Where the work ran | `tar` export of the working tree at `…/scratchpad/mapper_copy` with its own `git init` (about 25 census arms shell out to `git ls-files`), plus a second `git archive 909cc27` export at `…/scratchpad/base954` for the pre-existence reproduction |
 | Green baseline before any mutant | `796 passed, 17 deselected, 1 xfailed` in 104.44 s, **exit 0** — matches §12.6 exactly. Slow lane `17 passed, 797 deselected` in 28.72 s, **exit 0** |
 | Restores | 12 mutants applied, **12 of 12 restored, sha256 `OK`, 0 `MISMATCH`** |
 | Shared-tree digests at close | `outline.py 74604dbfdb6d35c3` · `radial.py def09fbe114af7e5` · `rail.py 508b5d5d1ebc644a` · `inspector.py 2ace7f91d3bdb946` · `factory.py 771a15e3c418b4c8` · `coverage.py 63cf11a4a01b8f8a` — **all six identical to the previous pass's reported digests**. Only `app.py` (`f90835563212f2a0 -> a8e3753530724b80`) and `layered.py` (`d4d82a2052a198da -> 815a337927e673df`) moved: exactly the two round-2 source files. **No third source file moved.** |
@@ -42,8 +42,8 @@ with `chr(0x…)` at run time and is named below by code point and position only
 
 > One measurement artifact, so it is not mistaken for a finding: the previous pass's `git show`-based
 > digests for `inspector.py` et al. differ from a raw `sha256sum` of the working file purely because
-> of CRLF normalisation. Compared correctly — `git archive 954f8f3` against the working tree, raw
-> bytes — all four are **byte-identical**, and `git diff 954f8f3 -- <file>` is empty for each.
+> of CRLF normalisation. Compared correctly — `git archive 909cc27` against the working tree, raw
+> bytes — all four are **byte-identical**, and `git diff 909cc27 -- <file>` is empty for each.
 
 ---
 
@@ -90,7 +90,7 @@ arm `N14`, re-executed: keying the field rows by index in the export
 `inspector.py` restored, sha256 `2ace7f91d3bdb946 -> 2ace7f91d3bdb946 OK`. **Inc-REPAIR cannot land
 the fix without deleting this marker.** The obligation cannot be silently left behind.
 
-**Byte-identity of the four out-of-scope files, against `git archive 954f8f3`, raw bytes:**
+**Byte-identity of the four out-of-scope files, against `git archive 909cc27`, raw bytes:**
 
 | File | sha256 (base = worktree) | Verdict |
 |---|---|---|
@@ -99,7 +99,7 @@ the fix without deleting this marker.** The obligation cannot be silently left b
 | `mapper/screens/factory.py` | `771a15e3c418b4c8` | **BYTE-IDENTICAL** |
 | `mapper/store.py` | `637d537e7ff2ef0b` | **BYTE-IDENTICAL** |
 
-`git diff 954f8f3` is empty for all four. No seventh source file was taken.
+`git diff 909cc27` is empty for all four. No seventh source file was taken.
 
 ---
 
@@ -134,7 +134,7 @@ claim is confirmed by execution.
 
 **`rail.py:230` is still correctly green, and was not "fixed" into a phantom arm.** Two checks:
 
-- `git diff 954f8f3 -- mapper/widgets/rail.py` is entirely the `collapsed` -> `folded` supersession
+- `git diff 909cc27 -- mapper/widgets/rail.py` is entirely the `collapsed` -> `folded` supersession
   from earlier in Inc-3. Line 230 — `label = darkside.plain(node.ficha.title or nid)` — is
   **untouched**, and no arm was added for it.
 - The equivalence holds at the source: `darkside.py:431-433`, `def fit(s, w): s = plain(s)`. Both
@@ -197,12 +197,12 @@ swept. The placement is right.
 
 ## 4 · The two claims the routing rests on
 
-### 4a · F-A is pre-existing at `954f8f3` — **CONFIRMED**
+### 4a · F-A is pre-existing at `909cc27` — **CONFIRMED**
 
-Reproduced on a clean `git archive 954f8f3` export (`open_map` inlined, because
+Reproduced on a clean `git archive 909cc27` export (`open_map` inlined, because
 `tests/inc3_support.py` does not exist at that commit), same probe, same six keys:
 
-| Key | `954f8f3` | post-fix tree |
+| Key | `909cc27` | post-fix tree |
 |---|---|---|
 | `chr(0x01)` | `running=False`, `BadIdentifier` | `running=False`, `BadIdentifier` |
 | `"a" + chr(0xF1) + "o"` | `running=False`, `BadIdentifier` | `running=False`, `BadIdentifier` |
@@ -268,7 +268,7 @@ than escaping.
 **Edge-hint clearing introduces no sink** — `set_hint("")` on success, `set_hint("borde del
 territorio")` otherwise. Both constants; no file-derived text.
 
-**Standard sweep on the full diff vs `954f8f3`:**
+**Standard sweep on the full diff vs `909cc27`:**
 
 | Check | Result |
 |---|---|
@@ -434,7 +434,7 @@ Inc-REPAIR), `F-B`, `F-C` (MEDIUM, `escape`-only sinks on `coverage.py` / `facto
 ---
 
 *Scoped confirmation pass, questions 1–5 only. Every claim above was re-executed in a `tar` export
-with its own `git init`, plus a `git archive 954f8f3` export for the pre-existence reproduction. 12
+with its own `git init`, plus a `git archive 909cc27` export for the pre-existence reproduction. 12
 mutants applied (5 × F-D, 1 × census hostile key, 2 × scan coverage, 1 × N14 F-A-fixed, 3 restored
 baselines), 12 killed or resolved as intended, 12 of 12 restores `OK`. Default lane `796 passed, 17
 deselected, 1 xfailed`, slow lane `17 passed, 797 deselected`, both exit 0.*

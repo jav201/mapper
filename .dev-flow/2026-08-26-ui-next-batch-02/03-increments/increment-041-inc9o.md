@@ -1,6 +1,6 @@
 # Increment 041 -- Inc-9o: one containment helper, the document name (SEC-F1), V1, V2, FLAKE-3
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `63b2de3`. Authority: `VERDICT-inc9-2026-09-30.md` Round 11 (V1, V2; the operator took the recommended option on both) and the coordinator's
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `3739263`. Authority: `VERDICT-inc9-2026-09-30.md` Round 11 (V1, V2; the operator took the recommended option on both) and the coordinator's
 rulings for the Inc-9n reviews (`INC9N-SEC-F1`..`F3`, `INC9N-CR-F1`..`F5`). Amendment: `A-123` (appended to `01-requirements.md`, dated 2026-10-01).
 
 ## 1. What changed
@@ -69,12 +69,12 @@ No assertion that a refusal leaks the typed text was weakened; V1 and V2 name no
 
 ## 3. Arm table (RED/GREEN)
 
-The arms were committed as strict xfail in `e781be2` (no source touched), the keys corrected in `b518c09` after the first RED measurement (below), then RED measured on a detached `git worktree` of `63b2de3` in `%TEMP%` (no stash) with the final test files copied in and
+The arms were committed as strict xfail in `71359ba` (no source touched), the keys corrected in `6cb85eb` after the first RED measurement (below), then RED measured on a detached `git worktree` of `3739263` in `%TEMP%` (no stash) with the final test files copied in and
 `--runxfail`: **80 failed, 151 passed** across `test_inc9o` (81 cases: 68 RED, 13 pins), `test_inc9n` (8 RED), `test_attachments` (1 RED), `test_arch_osopen_callers` (3 RED). The same files in plain mode on the base: 13 passed, 68 xfailed for `test_inc9o`.
 The first RED measurement showed four wrong keys: two pins keyed RED that pass on the base (`v1` UNC open x2, `v2` template behind a link), a parameter that passes on the base because `resolve()` caught it (`open_external` through a junction that leads out), and one RED arm that was not keyed
-(the `~` at open: `open_external` never expanded it). Corrected before the fix. GREEN: all of them pass on `e56662d` (271 passed over the five files incl. `test_inc9.py`).
+(the `~` at open: `open_external` never expanded it). Corrected before the fix. GREEN: all of them pass on `63d371e` (271 passed over the five files incl. `test_inc9.py`).
 
-| arm family | cases | on `63b2de3` | on HEAD |
+| arm family | cases | on `3739263` | on HEAD |
 |---|---|---|---|
 | `confine` accepts: relative, bare name, `..` that stays inside, drive-absolute inside, upper-cased drive-absolute | 5 | RED x5 (no `confine`) | green |
 | `confine` refuses with NO filesystem call (`_no_fs`): `..`, `..\ws2\x`, `ws2` absolute, `ws2` itself, `ws-extra` string prefix, the parent, `C:\outside`, deep `..`, UNC, `\??\UNC`, DOS device, empty, leading dash (CR-F5 sibling cases included) | 13 | RED x13 | green |
@@ -98,7 +98,7 @@ Not claimed by the arms: a hostile name on the BASE was spied (refuse and record
 
 ## 4. Mutant table
 
-Harness `mutate9o.py` in the session scratchpad, outside the repo, on a detached `git worktree` of `e56662d` in `%TEMP%`; sha256 pinned before (`osopen.py` `51f526fb0996d198`, `app.py` `0939a1625ac1ced7`, `factory.py` `43e88c6f98384727`,
+Harness `mutate9o.py` in the session scratchpad, outside the repo, on a detached `git worktree` of `63d371e` in `%TEMP%`; sha256 pinned before (`osopen.py` `51f526fb0996d198`, `app.py` `0939a1625ac1ced7`, `factory.py` `43e88c6f98384727`,
 `ARCHITECTURE.md` `80841ab214ccc44e`), byte-level I/O in each file's own line ending (CRLF here), `old` must occur exactly once, the verdict printed before the file is restored, the pin re-checked after each restore and at the end: **pins re-checked: OK**.
 Run `-x` on `tests/test_inc9o.py` (the arch mutants on `tests/test_arch_osopen_callers.py`). `<LF>` is a line break; backslashes are as in the file. **33 mutants: 31 RED, 2 SURVIVED (both behaviourally equivalent on Windows, see below).**
 
@@ -184,10 +184,10 @@ Not measured: terminals other than Textual's headless driver; widths other than 
 
 | check | state |
 |---|---|
-| `tests/test_inc9o.py` (81), `test_inc9n`, `test_attachments`, `test_arch_osopen_callers`, `test_inc9` | executed: 271 passed on `e56662d`; RED run on `63b2de3` in a worktree: 80 failed, 151 passed |
+| `tests/test_inc9o.py` (81), `test_inc9n`, `test_attachments`, `test_arch_osopen_callers`, `test_inc9` | executed: 271 passed on `63d371e`; RED run on `3739263` in a worktree: 80 failed, 151 passed |
 | 33 mutants | executed: 31 RED, 2 SURVIVED (C1, P2: equivalent on Windows), pins re-checked OK |
 | FLAKE-3: the two palette arms, 30 runs each on HEAD after the fix | executed: `test_at_n03b...` **30/30**, `test_palette_empty_query_dispatches_nothing` **30/30**, each in its own process; the whole `tests/test_palette.py` **30/30**. Isolated runs under-measure a race seen under the full lane's load; the full-lane result below is the real test |
-| `ruff check . --exclude prototypes --output-format concise`, set difference vs `63b2de3` on a CLEAN detached worktree (line and column stripped) | executed: 26 on the base, 26 on HEAD; new = none; gone = none |
+| `ruff check . --exclude prototypes --output-format concise`, set difference vs `3739263` on a CLEAN detached worktree (line and column stripped) | executed: 26 on the base, 26 on HEAD; new = none; gone = none |
 | `-W error::SyntaxWarning` compile of `osopen`, `app`, `screens/factory`, `test_inc9o`, `test_inc9n`, `test_arch_osopen_callers`, `test_palette`, `test_attachments` | executed: clean |
 | Literal Cf characters in every touched file and `01-requirements.md` (Python scan by Unicode category) | executed: none |
 | Full default lane, once, uninterrupted, `-rf`, last step | see "Full-lane result" at the end |
@@ -204,15 +204,15 @@ Not measured: terminals other than Textual's headless driver; widths other than 
 
 ## Commits
 
-`e781be2` arms (strict xfail) · `b518c09` four RED keys corrected · `e56662d` three sources + `ARCHITECTURE.md` + test files with `OPEN_STEPS` emptied + FLAKE-3 · docs commit (`A-123`, this record, the full-lane result).
+`71359ba` arms (strict xfail) · `6cb85eb` four RED keys corrected · `63d371e` three sources + `ARCHITECTURE.md` + test files with `OPEN_STEPS` emptied + FLAKE-3 · docs commit (`A-123`, this record, the full-lane result).
 No push; `state.json` untouched.
 
 ## Full-lane result
 
-**2427 passed, 24 deselected, 3 xfailed in 1530.76s (25:30), `-rf`, 0 failed**, on `ed9ce49`'s tree (the record update that follows is a docs commit; `test_no_operator_paths` reads `.dev-flow`). Baseline 2344 + 81 (`test_inc9o`) + 1 (the back-edge arm
+**2427 passed, 24 deselected, 3 xfailed in 1530.76s (25:30), `-rf`, 0 failed**, on `2425a48`'s tree (the record update that follows is a docs commit; `test_no_operator_paths` reads `.dev-flow`). Baseline 2344 + 81 (`test_inc9o`) + 1 (the back-edge arm
 of `test_arch_osopen_callers`) + 1 (the allowed-names arm grew into a keyed test: the rename kept the count) = 2427 as run. The 3 xfailed are the pre-existing ones. Neither known flake (`test_llr_cnv_3_1...`, `test_hlr_n16_4...[size2]`) nor FLAKE-3 failed in this run.
 
 - This is the SECOND full-lane run, not a retry of a flake: the FIRST (1 failed, 2426 passed, 1555.69s) failed for real on `test_darkside_census::test_hue_census_every_severity_and_busy_site_is_classified` (the census keys on the source text of a severity site; V2 changed
-  the `archivo de plantilla no encontrado` line). Fixed in `ed9ce49` (section 2), and the lane was run again from the start, uninterrupted.
+  the `archivo de plantilla no encontrado` line). Fixed in `2425a48` (section 2), and the lane was run again from the start, uninterrupted.
 - Scratch worktrees (`wt-base-9o`, `wt-mut-9o`, `wt-red-9o`) were removed after checking they equalled their commit or held only the copied test files; none remains (`git worktree list`).
 

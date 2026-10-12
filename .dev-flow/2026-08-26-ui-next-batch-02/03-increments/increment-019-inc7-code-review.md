@@ -7,15 +7,15 @@ the diff after the fixes land.
 
 ## Scope reviewed
 
-`git diff 6acaf64 7c99df6`; substance `91fdbbd` (`mapper/darkside.py` +58, `mapper/app.py` +46/-4,
-`tests/test_repair_cycles.py` +137), docs `1a718e6` / `7c99df6`. Read in full:
+`git diff ac6e3cb 0eb5374`; substance `d1f30fd` (`mapper/darkside.py` +58, `mapper/app.py` +46/-4,
+`tests/test_repair_cycles.py` +137), docs `6d536ab` / `0eb5374`. Read in full:
 `mapper/darkside.py:543-603`, `mapper/app.py:584-760` (both branches plus the hero `:489-504` and
 resume `:512-531` sites the LLR names), `tests/test_repair_cycles.py:453-589`.
 Requirements read: `01-requirements.md:3839-3948` (`LLR-N13.1.5` + `PRED-VIS` whole),
 `:5153-5240` (`LLR-N16.2.1` census instrument), `:9522-9600` (`A-101`, `A-102`);
 `01b-ux-decisions.md:263-320` (DECISION 3 §3.1–§3.4, every row) and `:697-790` (Amendment 1).
 
-**Mirror used:** `…\scratchpad\mirror-inc7-cr` at `7c99df6` (mirror commit `e89036b`).
+**Mirror used:** `…\scratchpad\mirror-inc7-cr` at `0eb5374` (mirror commit `e89036b`).
 Provenance asserted inside every probe: `mapper.__file__` =
 `…\scratchpad\mirror-inc7-cr\mapper\__init__.py` — printed GREEN on every run, including inside the
 mutation battery. **Every digest held** (below). The mirror is byte-clean at exit (`git status`
@@ -50,7 +50,7 @@ and only the two glyph-bearing arms see the loss. That is the correct shape.
 
 **`sano_vacio` is load-bearing** — confirmed by inspection of the lines this diff *deletes*
 (`kind, nodos, docs = "concept", "0", "0"`, byte-equal to a healthy empty map's cells) plus the
-execution already recorded at `d877784` in `01-requirements.md:3925-3935`. I did **not** re-run the
+execution already recorded at `bd17fab` in `01-requirements.md:3925-3935`. I did **not** re-run the
 pre-fix-restore site myself (see *What I did NOT run*).
 
 ---
@@ -235,7 +235,7 @@ pre-fix-restore site myself (see *What I did NOT run*).
 - **What:** you asked two questions. (a) *Was declining the projection rule right?* **Yes.** The
   ambiguity is real — `LLR-N16.2.1`'s instrument says *"project every row onto **the** triple"* and
   never says how a row naming three styles projects — it is a UX decision, and the coordinator has
-  since had to rule it (`A-103`, post-`7c99df6`). Taking it silently in `darkside.py` would have been
+  since had to rule it (`A-103`, post-`0eb5374`). Taking it silently in `darkside.py` would have been
   the worse failure. (b) *Is the declared absence honest, or a hole wearing a constant's clothes?*
   **It is a real hole, honestly named, by a method that cannot tell whether the naming is complete —
   and it is not complete.** `V4b` (`01b:288`) names two styles in one cell (`MUT`; the path to the
@@ -397,7 +397,7 @@ pre-fix-restore site myself (see *What I did NOT run*).
    lives in the exact surface this increment repairs and nobody has named it. The same two call sites
    make `MapStore.load` run twice per map per resume, which is `LLR-N13.1.6`'s clause. → `software-dev`
    / coordinator.
-2. **`A-103` may be built on the same arithmetic gap as F3.** `A-103` (added after `7c99df6`, so
+2. **`A-103` may be built on the same arithmetic gap as F3.** `A-103` (added after `0eb5374`, so
    outside this review's diff) derives *22 rows → 25 members* without visibly accounting for `V4a`,
    `V4b`, or the `#D7` removal of `V18` that `LLR-N16.2.1:5192-5204` requires. `Inc-8`'s set equality
    will be written against that number. → coordinator, before `Inc-8` opens.

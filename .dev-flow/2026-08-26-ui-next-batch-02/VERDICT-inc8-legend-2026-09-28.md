@@ -28,13 +28,13 @@ reports from before this rewrite maps as follows:**
 
 | old | new | subject |
 |---|---|---|
-| `8dea408` | `e89a347` | test(legend): Inc-8 — spell U+202E as an escape |
-| `fc57ac3` | `8e3841e` | docs(legend): Inc-8 — increment record |
-| `9295135` | `1996637` | fix(legend): paint the legend's own scope (HLR-N16.4) |
-| `e7b2f00` | `cd74eca` | fix(legend): coercion, row-budget and derivation findings |
-| `c243eff` | `3756b62` | docs(legend): Inc-8 corrective pass 1 |
+| `8dea408` | `35c8203` | test(legend): Inc-8 — spell U+202E as an escape |
+| `fc57ac3` | `9772993` | docs(legend): Inc-8 — increment record |
+| `9295135` | `bc3b032` | fix(legend): paint the legend's own scope (HLR-N16.4) |
+| `e7b2f00` | `59aac14` | fix(legend): coercion, row-budget and derivation findings |
+| `c243eff` | `7b7271e` | docs(legend): Inc-8 corrective pass 1 |
 
-Commits before `8dea408` (`1538f4a`, `0f342a1`, `6e5275f`, and everything earlier) are unchanged.
+Commits before `8dea408` (`f13cafc`, `d235b71`, `f3872a2`, and everything earlier) are unchanged.
 
 ## Still open for the operator
 - **A5** — the own-scope group title `en esta leyenda` (corrective pass 1) awaits ratification
@@ -42,7 +42,7 @@ Commits before `8dea408` (`1538f4a`, `0f342a1`, `6e5275f`, and everything earlie
 
 ---
 
-# Round 2 — operator verdict, 2026-09-29 (base `4ae3091`)
+# Round 2 — operator verdict, 2026-09-29 (base `4c38271`)
 
 Given on the decision page «Leyenda de mapper, segunda ronda» (renders from the final ux review),
 pasted back verbatim, plus one clarifying answer. **Authority for Inc-8 design pass 2.**
@@ -80,7 +80,7 @@ stand, rendered in English. Consequences, as routed by the coordinator:
 
 ---
 
-# Round 3 — operator verdict, 2026-09-29 (base `7227521`)
+# Round 3 — operator verdict, 2026-09-29 (base `bed1bd7`)
 
 Decision page «Leyenda de mapper, tercera ronda» (renders from the pass-2 ux review), pasted back
 verbatim. **Authority for Inc-8 design pass 3.** All five items took the recommended option.
@@ -109,7 +109,7 @@ Reading applied by the coordinator:
   reference width, alongside a narrower and a wider one.
 ---
 
-# Round 4 — operator verdict, 2026-09-29 (base `c7cdf85`)
+# Round 4 — operator verdict, 2026-09-29 (base `f5bbd6d`)
 
 Decision page «Leyenda de mapper, cuarta ronda», pasted back verbatim. **Authority for Inc-8 design pass 4 and for the G6 micro-increment.** All seven took the recommended option.
 
@@ -123,11 +123,11 @@ Decision page «Leyenda de mapper, cuarta ronda», pasted back verbatim. **Autho
 | G6 | micro-incremento propio justo después de Inc-8: limpiar los campos de ficha al entrar al grafo y proteger los 6 guardados | A dedicated micro-increment right after Inc-8: ficha string fields are coerced as they enter the graph (load and in-app mutation), and the 6 unguarded `store.save()` call sites are guarded (`INC8-P3-SEC-F1`) |
 | G7 | dejarlo en B-37 (recalibrar MUT en un batch de diseño) | The MUT-on-GROUND 4.43:1 shortfall stays in `BACKLOG.md` B-37 (recalibrate MUT in a design batch) |
 
-Also landed before this record: the pass-3 corrective (`4a372dc`, `60bf183`, `da49eb0`) fixed the code-review BLOCK `INC8-P3-CR-F1` (opening the legend moved keyboard focus) and restores the pre-legend focus on close, including `None` (closes `INC8-P3-UX-F1` / `UX-F7`).
+Also landed before this record: the pass-3 corrective (`a89b73a`, `597b41f`, `070bac6`) fixed the code-review BLOCK `INC8-P3-CR-F1` (opening the legend moved keyboard focus) and restores the pre-legend focus on close, including `None` (closes `INC8-P3-UX-F1` / `UX-F7`).
 
 ---
 
-# Round 5 — closing questions, operator answers 2026-09-29 (base `3818a96`)
+# Round 5 — closing questions, operator answers 2026-09-29 (base `80ea547`)
 
 Both closing reviews said **Inc-8 may close** (code PASS, ux PASS-WITH-FINDINGS). Four
 questions were put to the operator directly; each answer took the recommended option.

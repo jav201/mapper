@@ -5,9 +5,9 @@
 | **Station** | PDR second pass — architect lens |
 | **Batch** | `2026-08-26-ui-next-batch-02` · variant B «atlas» + round-10 capabilities |
 | **Date** | 2026-08-27 |
-| **Base** | `d8777840313145fec341687f0081afd7230c755b` — executed, `git rev-parse HEAD` |
+| **Base** | `bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba` — executed, `git rev-parse HEAD` |
 | **Input** | `PLAN.md` §12–§14 · `PDR-2026-08-26-ui-next-batch-02.md` (my sealed first pass, `#D1`…`#D20`) · `01-requirements.md` §6.5 amendment sets 1 and 2 (`A-01`…`A-41`) · `ARCHITECTURE-proposed-at-ARQ.md` · live `docs/ARCHITECTURE.md` |
-| **Method** | Every tree claim below was executed in this session against `d877784` with the output pasted. No line number, count or verdict is inherited from a parked artifact, from `PLAN.md`, or from my own first pass (C-43). Where my first pass is now wrong, it is corrected here against itself. |
+| **Method** | Every tree claim below was executed in this session against `bd17fab` with the output pasted. No line number, count or verdict is inherited from a parked artifact, from `PLAN.md`, or from my own first pass (C-43). Where my first pass is now wrong, it is corrected here against itself. |
 | **Verdict** | **REJECTED — iterate to Phase 1 for amendment set 3.** |
 
 ---
@@ -55,7 +55,7 @@ serial cut is **confirmed in content** and **rejected in the document that carri
 | **P2-C4** | `#D2` half-discharged: `with_header` struck from `01-requirements.md`, still declared at `ARCHITECTURE-proposed-at-ARQ.md:275` | condition | §4 |
 | **P2-C5** | `IRenderer` as a real `runtime_checkable` Protocol appears in **no requirement**; risk `A-11`'s `isinstance` gate was dropped | condition | §5 |
 | **P2-C6** | `LLR-N07.2.2a` has no threshold over the **22** call sites, and its `>= 6` floor is a floor on a census whose naive derivation returns **17** | condition | §5 |
-| **P2-C7** | The live `docs/ARCHITECTURE.md` at `d877784` still freezes **both** A3 subjects; no increment owns amending it | condition | §5 |
+| **P2-C7** | The live `docs/ARCHITECTURE.md` at `bd17fab` still freezes **both** A3 subjects; no increment owns amending it | condition | §5 |
 | **P2-C8** | `HLR-N13.3` threshold 1 (`< 1000 ms` for 200 maps) is an absolute wall-clock assertion with no stated headroom | condition | §7 |
 
 ---
@@ -333,7 +333,7 @@ threshold whose right-hand side has the wrong cardinality is a floor with extra 
 set-equality threshold points at.
 
 **(iii) The set mandates legend rows for glyphs this batch does not and will not paint.** Reachability
-census over `mapper/**/*.py` at `d877784`:
+census over `mapper/**/*.py` at `bd17fab`:
 
 ```
 V4/V4a braille (U+2800-U+28FF)  -> mapper/widgets/components.py only (10)  — no view, no canvas
@@ -410,7 +410,7 @@ two disagree, the artifact governs. Audited against the **source** conditions in
 
 | Condition | Demanded | State | Executed re-read |
 |---|---|---|---|
-| **`C-D4a`** | IFC `canvas_rows` consumer list corrected to the four `views` call sites; `mapper/export.py` moved to a transitive-observer line | **LIVE** | `01-requirements.md:3746`–`:3752` still lists consumers `views/layered.py`, `views/lane.py`, `views/outline.py`, `views/radial.py`, **`mapper/export.py`**. `:3760` re-asserts it in prose. `A-40` at `:5150` re-asserts it a third time. **And it is now wrong in a second way**: executed, `views/outline.py` builds **no `Canvas`** (probe §3.3, `canvases=0`) and calls `rows()` nowhere. Real list at `d877784`: `lane.py:216`, `lane.py:299`, `layered.py:283`, `radial.py:253` — **4 sites, 3 files, 0 outside `views`** |
+| **`C-D4a`** | IFC `canvas_rows` consumer list corrected to the four `views` call sites; `mapper/export.py` moved to a transitive-observer line | **LIVE** | `01-requirements.md:3746`–`:3752` still lists consumers `views/layered.py`, `views/lane.py`, `views/outline.py`, `views/radial.py`, **`mapper/export.py`**. `:3760` re-asserts it in prose. `A-40` at `:5150` re-asserts it a third time. **And it is now wrong in a second way**: executed, `views/outline.py` builds **no `Canvas`** (probe §3.3, `canvases=0`) and calls `rows()` nowhere. Real list at `bd17fab`: `lane.py:216`, `lane.py:299`, `layered.py:283`, `radial.py:253` — **4 sites, 3 files, 0 outside `views`** |
 | **`C-D4b`** | `Canvas` gets a direct unit test in Inc-1 | **DISCHARGED as specified** | Five `Executed verification` lines now name `pytest tests/test_canvas.py` with distinct `-k` selectors (`:988`, `:1009`, `:1025`, `:1040`, `:1069`). `ls tests/test_canvas.py` → absent, which is correct: the file is Inc-1's deliverable, and the requirement now names it and its predicates |
 | **`C-D4c`** | `AT-007` / `AT-009` re-run after Inc-2 | **LIVE** | `grep -rn "C-D4" .dev-flow/2026-08-26-ui-next-batch-02/` returns hits **only in my own first-pass PDR**. Zero in `01-requirements.md`, zero in `PLAN.md`. C-49 empty row |
 | **`C-D6a`** | *"only one result set is live"* becomes a tested Layer-0 invariant | **DISCHARGED** | Requirement **bodies** at `:2127`, `:2878`, `:4153`, `:4211`, not only the amendment table at `:4922`/`:4928`/`:4930` |
@@ -441,12 +441,12 @@ two disagree, the artifact governs. Audited against the **source** conditions in
 ### 4.3 · One correction to my own first pass (C-43 applied to myself)
 
 My §1.2 wrote: *"the working-tree amendment has already flipped it to 'NO — Inc-1 owns it. See
-R-016.'"* **That is now false.** The tree at `d877784` is clean apart from `.dev-flow/state.json`, and:
+R-016.'"* **That is now false.** The tree at `bd17fab` is clean apart from `.dev-flow/state.json`, and:
 
 ```
 $ git log --oneline -2 -- docs/ARCHITECTURE.md
-e359148 feat(ui): variant A «taller» ...
-a190d08 Phase 2-3: architecture, frozen interfaces, increment plan
+3b1a288 feat(ui): variant A «taller» ...
+221794e Phase 2-3: architecture, frozen interfaces, increment plan
 $ git status --porcelain docs/ARCHITECTURE.md
 (empty)
 $ grep -n -i canvas docs/ARCHITECTURE.md | sed -n '5p'
@@ -454,7 +454,7 @@ $ grep -n -i canvas docs/ARCHITECTURE.md | sed -n '5p'
 ```
 
 The ARQ amendment was never committed and no longer exists anywhere except as the uncommitted
-proposal in `.dev-flow/`. **The live governing architecture document at `d877784` still freezes both
+proposal in `.dev-flow/`. **The live governing architecture document at `bd17fab` still freezes both
 A3 subjects**, and still declares `IRenderer.render(graph, selected_id, w, h, **kwargs)` at `:58` and
 `:136`. That is normal for a PDR — Phase 6 amends docs — but **no increment in the cut owns the
 amendment**, so nine increments would run against a governing document that forbids two of them.
@@ -494,7 +494,7 @@ $ grep -rn "def render" mapper/ --include=*.py | wc -l
    of which Textual widgets   : 11  widgets/components.py (9) · widgets/rail.py:177 · app.py:974 (render_group)
 ```
 
-| Surface | `d877784` | Parked figure | Verdict |
+| Surface | `bd17fab` | Parked figure | Verdict |
 |---|---|---|---|
 | `IRenderer` definitions | **6**, in `mapper/views/` | 6 | ✓ holds |
 | Arg-ful call sites | **22**, 9 files — 3 production, **19 in 8 test files** | mine: "3 production" · orchestrator: "29 / 14" | **both incomplete** |
@@ -536,7 +536,7 @@ Two defects, both executed:
 protocol-aware, and add a call-site clause:
 
 > **Numeric pass threshold.** The set of migrated definitions **equals** the set of `render`
-> definitions in `mapper/views/*.py` (executed at `d877784`: 6 — `lane.py:108`, `lane.py:171`,
+> definitions in `mapper/views/*.py` (executed at `bd17fab`: 6 — `lane.py:108`, `lane.py:171`,
 > `lane.py:311`, `layered.py:131`, `outline.py:47`, `radial.py:107`); the set is derived with an
 > `ast` walk restricted to `mapper/views/`, **never** by `grep -rn "def render" mapper/`, which
 > returns 17 by sweeping in 11 Textual `Widget.render(self)` definitions that must not be migrated.
@@ -707,7 +707,7 @@ their guard. That converts the repair batch's C-53 false-failure arm into a rubb
 **Inc-3 breaks the rail guard, and `LLR-N06.2.1`'s census under-derives by 7.** `LLR-N06.2.1:1478`
 deletes `OutlineRail.collapsed` (`rail.py:35`) and `OutlineRail.toggle` (`rail.py:42`) and widens
 `show`. Its amended threshold (`A-41`, `QA-N-07`) reads: *"'0 remaining references' names no
-reference, so nobody can check the census found them all… Re-executed at `d877784`,
+reference, so nobody can check the census found them all… Re-executed at `bd17fab`,
 `OutlineRail.toggle` has **2** call sites, both in `tests/test_rail.py` (`:73`, `:77`), and both are
 predicted red. They are named here at Phase 1 rather than discovered at the gate."* Executed:
 
@@ -790,7 +790,7 @@ nodes each."* That is an **absolute wall-clock assertion with no stated measured
 threshold 2 whose 7.7× margin is derived. A gate that false-fails correct work on a slower CI box
 costs as much as one that passes wrong work — `tests/test_repair_depth.py:807`'s own docstring says
 so, and that file is the batch's neighbour. `HLR-N13.3` shall state the **measured** mount time for
-the 200-map workspace at `d877784` and choose threshold 1 with a declared multiple of it, the way
+the 200-map workspace at `bd17fab` and choose threshold 1 with a declared multiple of it, the way
 threshold 2 is chosen. If the measured value is close to 1000 ms, the requirement must say so and pick
 a different figure rather than shipping a coin-flip gate.
 
@@ -826,7 +826,7 @@ a different figure rather than shipping a coin-flip gate.
 
 | Item | ✓/✗ | Evidence a third party can re-run |
 |---|---|---|
-| Constraints stated explicitly | ✓ | §6.4 budget table (≤4 source files, Inc-2's declared breach); 429-test baseline; serial chain; `git rev-parse HEAD` = `d877784` |
+| Constraints stated explicitly | ✓ | §6.4 budget table (≤4 source files, Inc-2's declared breach); 429-test baseline; serial chain; `git rev-parse HEAD` = `bd17fab` |
 | At least 2 alternatives considered | ✓ | §2.1 options a1 / a2 / a3, with a3 shown unavailable by `grep -n "C-8" 01-requirements.md`; §3.1 options b1 / b2, with b1 shown structurally unavailable by the `.dots` probe |
 | Recommendation has rationale tied to constraints | ✓ | §2.3 limb 2 ties `#D21` to Inc-3's ≤4-file budget; §6.4 shows `#D21` **removes** a breach; §3.5 ties `#D22` to `HLR-N16.2`'s evaluability |
 | Risks listed | ✓ | `P2-B1`…`P2-B6`, `P2-C1`…`P2-C8` in §1.1; the digest-recapture hazard in §6.3; the eight-increment exposure window accepted and stated in §2.5 |
@@ -836,7 +836,7 @@ a different figure rather than shipping a coin-flip gate.
 | **Two-layer requirements: Acceptance block + `AT-NNN`, BOTH chains** | **✗** | **Unchanged from my first pass and this is the third asking.** Behavioral US→AT exists (§5.2 table 1, `:3965`). Functional US→HLR→LLR→TC exists (§5.2 table 2, `:4013`). `grep -rn "D15\|AT↔TC" 01-requirements.md` → **NONE**; the chains still never cross. Compounded by `P2-B2`: three live `AT` ids are in the behavioral chain and in **neither** the functional chain nor any increment |
 
 **Executed-verification note (C-43).** Every count, address and verdict above was produced in this
-session against `d877784` by a command whose output is pasted. Probe scripts are in the session
+session against `bd17fab` by a command whose output is pasted. Probe scripts are in the session
 scratchpad (`a3census.py`, `notify_census.py`, `dots_probe.py`, `glyphs.py`, `atcensus.py`,
 `owner.py`); each is short enough to re-derive from the pasted output alone. **Nothing under
 `mapper/` or `tests/` was modified**, no pytest gate was run (C-25), and `~/.claude` was not touched.
@@ -848,7 +848,7 @@ scratchpad (`a3census.py`, `notify_census.py`, `dots_probe.py`, `glyphs.py`, `at
 | | |
 |---|---|
 | **Date** | 2026-08-27 |
-| **Base** | `d877784`, executed |
+| **Base** | `bd17fab`, executed |
 | **Verdict** | **REJECTED — iterate to Phase 1 for amendment set 3.** Six blockers, eight conditions, each individually named and dischargeable by a document edit. No increment starts. |
 | **New decisions** | `PDR-2026-08-26-ui-next-batch-02#D21` (flag a — re-parent `LLR-N06.2.5`; promote §3.0 to `HLR-COERCE`) · `PDR-2026-08-26-ui-next-batch-02#D22` (flag b — deferral, with the prose and the set-equality target both amended) |
 | **Sealed decisions re-affirmed** | `#D1` `#D3` `#D4` `#D5` `#D5a` `#D5b` `#D6` `#D7` `#D8` `#D9` `#D10` `#D11` `#D12` `#D13` `#D14` `#D16` `#D17` `#D18` `#D19` `#D20` |

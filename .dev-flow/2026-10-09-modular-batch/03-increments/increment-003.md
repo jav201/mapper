@@ -14,7 +14,7 @@
 | Requirement(s) | `LLR-MOD.1.1` (`screens/prompt.py` owns the four literal modals, re-exported) · `LLR-MOD.3.1` (imports keep resolving) · `LLR-MOD.6.1` (B-02 closed: the four function-local imports deleted) |
 | Acceptance | `AT-065` parity · `AT-070`/`AT-071` dependency surface (asserted fully by the batch guard tests at B12; here: zero `mapper.app` imports under `screens/`) · white-box `tests/test_mod_bodies.py`, `tests/test_mod_parity.py`, `tests/test_arch_osopen_callers.py` · gate: full suite green (a2a3 transcript, 2987/0) |
 | Agent | Product move: **Kimi (`kimi-for-coding`) unit in an isolated worktree**, RED + sha256-restore in its own log (Kimi unit report, session scratch — not stored as an evidence file). Gate: **orchestrator (Claude Opus 5.5)**. Group review: `code-reviewer` (Claude Sonnet). This packet: Kimi unit MODPKT-p1. |
-| Date | `2026-10-10` (commit 02959fb, 01:10 −0600) |
+| Date | `2026-10-10` (commit 10bf2c3, 01:10 −0600) |
 
 ---
 
@@ -133,12 +133,12 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Probe | Command | Result |
 |---|---|---|
-| B1 symbols asserted by **other** tests | `git grep -ln "_PromptScreen\|_ConfirmScreen" 02959fb -- mapper/` | readers: `mapper/app.py` (re-export), `screens/factory.py` (module-level import), `screens/prompt.py` — all in-tree, suite green |
-| B2 file moved on disk | `git show 02959fb:mapper/app.py \| grep -c "^class _PromptScreen\|^class _ConfirmScreen"` | 0 — modal classes gone from `app.py` |
+| B1 symbols asserted by **other** tests | `git grep -ln "_PromptScreen\|_ConfirmScreen" 10bf2c3 -- mapper/` | readers: `mapper/app.py` (re-export), `screens/factory.py` (module-level import), `screens/prompt.py` — all in-tree, suite green |
+| B2 file moved on disk | `git show 10bf2c3:mapper/app.py \| grep -c "^class _PromptScreen\|^class _ConfirmScreen"` | 0 — modal classes gone from `app.py` |
 | B3 byte-identical golden | not applicable | not fired |
 | B4 artifact produced here is consumed elsewhere | `screens/prompt.py` consumed by `app.py` (re-export) and `factory.py` | consumers in-tree |
 
-| A3 | interface consumed by another module changed | `git grep -n "from mapper.app import\|import mapper.app" 02959fb -- mapper/screens/` | **0 code hits** — only docstring mentions at `common.py:7`/`prompt.py:7`; B-02 closed |
+| A3 | interface consumed by another module changed | `git grep -n "from mapper.app import\|import mapper.app" 10bf2c3 -- mapper/screens/` | **0 code hits** — only docstring mentions at `common.py:7`/`prompt.py:7`; B-02 closed |
 
 | Field | Value |
 |---|---|
@@ -158,7 +158,7 @@ python -B -m pytest -q -p no:cacheprovider tests/    # the increment gate (full 
 
 | Superseded marker | grep result | All surviving refs negative? | Evidence (file:line) |
 |-------------------|-------------|------------------------------|----------------------|
-| modal classes + the function-local `_PromptScreen` import in `mapper/app.py` / `factory.py` | 0 definition / 0 function-local import hits at 02959fb | yes | probe output above; gate 2987/0 |
+| modal classes + the function-local `_PromptScreen` import in `mapper/app.py` / `factory.py` | 0 definition / 0 function-local import hits at 10bf2c3 | yes | probe output above; gate 2987/0 |
 
 ### Signed-balance test ledger
 
@@ -195,7 +195,7 @@ A3 (increment 004): `ConstructScreen` → `mapper/screens/construct.py`.
 | # | Item | Owed in | ✓/⚠/✗ | Evidence (node id · command output · file:line) |
 |---|---|---|---|---|
 | 1 | ≤4 source files, or reason declared | all | ✓ | 3 / 4 |
-| 2 | Tests written in this same increment | all | ✓ | test_arch_osopen_callers.py follow-up in 02959fb |
+| 2 | Tests written in this same increment | all | ✓ | test_arch_osopen_callers.py follow-up in 10bf2c3 |
 | 3 | Layer 0 written where the criterion applies | `core` · `full` | ✓ | n/a — no unit meets the criterion |
 | 4 | **RED counterfactual** declared | `core` · `full` | ✓ | §4 — none stored; permanent controls in force; unit-level RED per facts sheet |
 | 5 | **Reverse census** declared | `core` · `full` | ✓ | §4 — 5 probes, 4 fired, 0 code hits for the banned edge |

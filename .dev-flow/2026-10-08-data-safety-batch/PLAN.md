@@ -21,8 +21,8 @@ orchestrator presents the full plan in-conversation at each phase gate.
 | Batch | 2026-10-08-data-safety-batch |
 | Objective | Data safety and verification debt: B-36 (one keystroke durably overwrites a map and its sidecar) plus the unrealised acceptance tests B-100/B-101 and the legend paint flake B-98 |
 | Standing authorization | Asked 2026-10-08. Operator, verbatim: autonomy and merge "Autónomo + merge (Recomendado)"; decision recording "Confirmado"; scope "B-36 + ATs + flake (Recomendado)"; mode "full (Recomendado)". Merge only after a clean final PR-level `qa-reviewer` pass; a HIGH finding blocks; TUI design still needs the operator's prototype verdict. |
-| First gate | `devflow-validate.py --brief` at rollover (606510f): exit 0, 0 block; `V7` identical to the rev100 manifest; NOTICEs `V27` (empty log) and `V40` (`owner` omitted by A-110) |
-| Premises / RC-1 | RC-1: `git fetch origin`; `origin/master` = `07dd930` (2026-10-08) = merge-base of `feat/data-safety-batch`. RC-2: `git ls-remote --exit-code --heads origin` exit 0, newest commit 2026-10-08. Premises: §2.7 of `01-requirements.md` |
+| First gate | `devflow-validate.py --brief` at rollover (38ebbfb): exit 0, 0 block; `V7` identical to the rev100 manifest; NOTICEs `V27` (empty log) and `V40` (`owner` omitted by A-110) |
+| Premises / RC-1 | RC-1: `git fetch origin`; `origin/master` = `ed67c58` (2026-10-08) = merge-base of `feat/data-safety-batch`. RC-2: `git ls-remote --exit-code --heads origin` exit 0, newest commit 2026-10-08. Premises: §2.7 of `01-requirements.md` |
 
 ## Triggers
 

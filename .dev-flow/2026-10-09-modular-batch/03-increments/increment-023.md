@@ -124,7 +124,7 @@ RED outputs (verbatim tails):
 
 | Field | Value |
 |---|---|
-| **Evidence files** | `evidence/p4-gate-full-suite.transcript` (full suite at `69676cf`: 3133 passed / 3 xfailed / 0 failed) · `evidence/ddr-red-arms.transcript` (77 passed, every RED arm incl. this increment's two) |
+| **Evidence files** | `evidence/p4-gate-full-suite.transcript` (full suite at `886fdfa`: 3133 passed / 3 xfailed / 0 failed) · `evidence/ddr-red-arms.transcript` (77 passed, every RED arm incl. this increment's two) |
 
 ### Load-bearing emptiness — what is this resting on that is only true today? (C-55)
 
@@ -173,7 +173,7 @@ RED outputs (verbatim tails):
 
 | Field | Value |
 |---|---|
-| **Independent review** | `qa-reviewer` (Claude Sonnet) + architect (Claude Opus), read-only, raised D-C1..D-C3 at the DDR and re-reviewed this increment at `1156200`: both **APPROVED**; architect re-read each proving line and ran `tests/test_mod_deps.py tests/test_arch_osopen_callers.py` (18 passed), confirmed the narrowed checker and the new guard are non-vacuous; 1 LOW carried to backlog (the cycle guard sees direct importers only, `tests/test_mod_deps.py:303`) — `design/DDR-2026-10-09-modular-batch.md` §C |
+| **Independent review** | `qa-reviewer` (Claude Sonnet) + architect (Claude Opus), read-only, raised D-C1..D-C3 at the DDR and re-reviewed this increment at `dc744c6`: both **APPROVED**; architect re-read each proving line and ran `tests/test_mod_deps.py tests/test_arch_osopen_callers.py` (18 passed), confirmed the narrowed checker and the new guard are non-vacuous; 1 LOW carried to backlog (the cycle guard sees direct importers only, `tests/test_mod_deps.py:303`) — `design/DDR-2026-10-09-modular-batch.md` §C |
 
 ---
 

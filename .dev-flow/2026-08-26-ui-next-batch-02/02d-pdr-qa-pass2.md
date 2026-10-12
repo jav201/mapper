@@ -3,7 +3,7 @@
 > **Method (C-43).** Audited against **my own 35 source findings in `02a-qa-acceptance-review.md`**
 > (10 blockers · 14 majors · 11 minors), **never against §6.5's amendment table**. For each finding I
 > re-read the requirement text as it stands now and marked it CARRIED / RETIRED-WITH-REASON /
-> **DROPPED**. Every number below was executed against `d877784` in this session; transcripts pasted.
+> **DROPPED**. Every number below was executed against `bd17fab` in this session; transcripts pasted.
 > **READ-ONLY**: no file under `mapper/` or `tests/` was created, modified or staged; probe scripts
 > live in the session scratchpad. The full pytest suite was **not** run (C-25 — the orchestrator owns
 > gate runs). Mutated ids are described by position and operation, never pasted (C-56).
@@ -35,7 +35,7 @@ silently and one of which its own amendment table asserts as done and is not:**
 1. **`QA-M-02` was DROPPED.** It appears **zero times** in `01-requirements.md` and zero times in
    `PLAN.md` under its own id. `PLAN.md` §9 C-1 carries the correction under a different label, but
    **R-1's own row still reads *"plus 7 test files"***, and the §9 correction (29 sites / 14 files)
-   is itself now stale: executed at `d877784`, **48 `.render(` sites across 17 files, 15 of them test
+   is itself now stale: executed at `bd17fab`, **48 `.render(` sites across 17 files, 15 of them test
    files**. Third generation of the same census defect, on the batch's largest declared risk.
 2. **`QA-N-08` was DROPPED.** Zero occurrences in either document.
 3. **Six live `AT` ids fail the document's own three-way derivation rule**, and for one of them
@@ -54,7 +54,7 @@ these land on the condition side of it.
 | # | Condition | Discharge |
 |---|---|---|
 | **QA2-C-01** | Bring the six intersection-failing ids into the three-way rule or strike them. `AT-009` gets the `Acceptance:` line `A-29` claims; `AT-034b`, `AT-046`, `AT-047` get onto their stories' `Acceptance tests:` lines; `AT-031` and `AT-040` are either promoted or removed from the story lists and §5.2 table, since a declared-catalog-only id still counts as declared everywhere a reader looks. | §3 + §5.2 edits; re-run the intersection script in §3 below and show it empty. |
-| **QA2-C-02** | Re-derive the A3 blast radius **at `d877784`** and re-size `R-1` in its own row. Executed truth below: 48 sites / 17 files / 15 test files. Correct `PLAN.md` §5 B1, §9 C-1 and §11. | Paste the grep; edit R-1. |
+| **QA2-C-02** | Re-derive the A3 blast radius **at `bd17fab`** and re-size `R-1` in its own row. Executed truth below: 48 sites / 17 files / 15 test files. Correct `PLAN.md` §5 B1, §9 C-1 and §11. | Paste the grep; edit R-1. |
 | **QA2-C-03** | Write `LLR-STO.1.1` as a block, or re-home the five-exception-type arm into a requirement that exists. It is currently prose inside `LLR-N13.1.6` carrying a `shall`. | One heading with method + threshold + owning increment, or a re-home. |
 | **QA2-C-04** | `HLR-S06.3`'s threshold still reads *"every `WARN`/`ALERT` site is classified **severity**"* — which is exactly `M-S06.3.5-a`, the mutant `LLR-S06.3.5` names. Restate the parent against the two adjudicated jobs. | One-line edit at the parent. |
 | **QA2-C-05** | Define the census **classifier**. *"Every derived `WARN` site classifies as outstanding attention"* has no executable definition — this is `QA-B-04`'s shape at a different surface. Name how a site is classified (keyword table? declared per-site register? inspection with a recorded verdict?), or mark `AT-005`/`AT-006` `analysis` rather than `test (unit)`. | Requirement edit. |
@@ -93,7 +93,7 @@ either document.
 | # | Disposition | What the text now says |
 |---|---|---|
 | **QA-M-01** | **CARRIED** | `LLR-N07.2.1` threshold: query pinned to **`carlos`**; counts equal; `> 0` both states; **and at least one hit strictly inside folded branch `fin`, painted before the fold**. `riesgo` named as the vacuous case with its reason. `M-N07.2.1-a` added. |
-| **QA-M-02** | **DROPPED** | Zero occurrences in `01-requirements.md`; zero in `PLAN.md`. `PLAN.md` §9 C-1 records the correction under a different label, but **`R-1`'s own row (line 214) still reads *"plus 7 test files"***, and §9's replacement figure is itself stale. Executed at `d877784` — see §5.1. → **QA2-C-02**. |
+| **QA-M-02** | **DROPPED** | Zero occurrences in `01-requirements.md`; zero in `PLAN.md`. `PLAN.md` §9 C-1 records the correction under a different label, but **`R-1`'s own row (line 214) still reads *"plus 7 test files"***, and §9's replacement figure is itself stale. Executed at `bd17fab` — see §5.1. → **QA2-C-02**. |
 | **QA-M-03** | **CARRIED** | `LLR-S06.3.1`/`.3.3`/`.3.4` floors replaced by **set equality against the derivation**, with the reason stated better than mine: `>= 30` *does* catch the 16-file glob, but *"catching it is an accident of the gap"* — a derivation losing three files sits above the floor. |
 | **QA-M-04** | **CARRIED** | Every count is `len(keymap.bindings_for(scope))` evaluated at run time and never typed; the 25-vs-27 ambiguity is recorded with the executed numbers. |
 | **QA-M-05** | **CARRIED** | `UX-Q3-a` and `UX-Q3-b` are in `HLR-N07.3`'s threshold table with the exact string `n siguiente · N anterior · esc limpiar`. The fold order is recorded: UX-Q3-b names `n`/`N`, correct only after `#D5b`. |
@@ -333,7 +333,7 @@ headers, not declared per `AT`, and it disagrees with the cut in two places. →
 | `AT-041` … `AT-044` | Legend ATs | **resolved** — Pilot sizes read from `WIDE_SIZES` / `NARROW_SIZE` rather than re-typed |
 | **`LLR-STO.1.1`** | **A requirement id, not an `AT`** — referenced normatively (*"`LLR-STO.1.1` **shall** carry the five-exception-type arm"*, and *"a bomb under `nodes:` … belongs in `LLR-STO.1.1`'s fixture set"*) with **no heading anywhere in the document**. Four occurrences, all prose. `LLR-N13.1.5` — the `C-3` security containment — is written to depend on it. | **DANGLING** → QA2-C-03. Note the document itself records that `V21` resolves owners against **headings** only, so a bullet-declared id resolves to nothing — the fold learned this for `LLR-R04.1` and then reproduced it here. |
 
-### 5.3 The A3 blast radius, re-derived at `d877784` (QA2-C-02)
+### 5.3 The A3 blast radius, re-derived at `bd17fab` (QA2-C-02)
 
 ```
 $ grep -rn "\.render(" tests/ mapper/ --include=*.py | wc -l      -> 48

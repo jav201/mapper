@@ -2,7 +2,7 @@
   {
     "station": "P0",
     "date": "2026-10-10",
-    "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base a36f63e; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
+    "decision": "P0 approved (self-approved under the standing authorization): B-114 reproduced by the perf P0 spike (perf0b-slug-reach.transcript); base 87a1f98; triggers evaluated in PLAN.md#triggers (A2,A3,B1,B4,C6,C8,D1,E1,F1 fired); design decision: the store refuses what its loader refuses, the preview names the colliding rows through its existing refusal panel; silent id disambiguation rejected"
   },
   {
     "station": "ARQ",
@@ -37,7 +37,7 @@
   {
     "station": "P3",
     "date": "2026-10-10",
-    "decision": "P3 approved (self-approved): 4 increments (store round-trip check; preview collision record + refusal at s; review nits; DDR conditions); 3 code reviews APPROVE-WITH-NITS 0 HIGH; gate run 1 red (modular move oracle froze moved bodies; A3 pin) fixed, run 3 at 53807c4: 3157 passed / 3 xfailed / 0 failed"
+    "decision": "P3 approved (self-approved): 4 increments (store round-trip check; preview collision record + refusal at s; review nits; DDR conditions); 3 code reviews APPROVE-WITH-NITS 0 HIGH; gate run 1 red (modular move oracle froze moved bodies; A3 pin) fixed, run 3 at a20248b: 3157 passed / 3 xfailed / 0 failed"
   },
   {
     "station": "DDR",
@@ -47,12 +47,12 @@
   {
     "station": "P4",
     "date": "2026-10-10",
-    "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate run 3 at 53807c4 3157 passed / 3 xfailed / 0 failed; 10/10 requirements, AT-072..074 GREEN with executed RED; save-cost +3.2 % (≤ 25 %); qa-reviewer (Claude Sonnet) approve-with-conditions, applied"
+    "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate run 3 at a20248b 3157 passed / 3 xfailed / 0 failed; 10/10 requirements, AT-072..074 GREEN with executed RED; save-cost +3.2 % (≤ 25 %); qa-reviewer (Claude Sonnet) approve-with-conditions, applied"
   },
   {
     "station": "P5",
     "date": "2026-10-10",
-    "decision": "P5 closed (self-approved under the standing authorization): 05-close.md; B-114 DONE; B-115/B-116/B-117 carried; final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH; merged as 6dfffde (PR #18, squash; fix/csv-safety-batch kept on the remote)"
+    "decision": "P5 closed (self-approved under the standing authorization): 05-close.md; B-114 DONE; B-115/B-116/B-117 carried; final PR-level qa-reviewer (Claude Sonnet) MERGE, 0 HIGH; merged as 6364a02 (PR #18, squash; fix/csv-safety-batch kept on the remote)"
   },
   {
     "station": "P5",

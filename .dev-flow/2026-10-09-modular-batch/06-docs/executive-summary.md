@@ -28,7 +28,7 @@ A pure cut-and-paste modularisation, proven safe by construction and by measurem
 
 - `mapper/app.py`: 5255 → **340 lines**; `MapScreen` moved into **12 map modules** (core + 11 concerns) beside **7 sibling screens** (`wc -l`, post-mortem §Product findings).
 - **Behaviour identical, proven:** the scripted session (open, move, search, toggle, export, quit) paints byte-equal output against pre-move goldens at 118 and 87 columns (AT-065), and every moved method body is `ast.dump`-identical to its baseline (`tests/test_mod_bodies.py`).
-- **Suite: 2941 → 3133 passed, 0 failed** (2941 − 3 + 195 = 3133 reconciles; the 3 rewritten test functions were renamed/stronger, none weakened; gate at `69676cf`).
+- **Suite: 2941 → 3133 passed, 0 failed** (2941 − 3 + 195 = 3133 reconciles; the 3 rewritten test functions were renamed/stronger, none weakened; gate at `886fdfa`).
 - **What it unlocks:** parallel lanes by concern — each lane edits exactly one module file, and the dependency rules that make lanes legal are themselves an executable test (AT-071).
 - **What it does not yet remove — the shared seams** (post-mortem, restated after the P5 architect review): key changes still meet on the keymap seat / core `BINDINGS`, new public names on `app.py` `__all__`, structural changes on the architecture map and the patch-surface guard, and F1/F2 changes on the census baseline. A merge-hotspot plan (B-111) was proposed and deferred to the first batch that runs parallel lanes.
 

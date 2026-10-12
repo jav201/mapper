@@ -5,7 +5,7 @@
 | Batch | `2026-10-08-data-safety-batch` |
 | Increment | Inc-4 (design §2.1 rows 4.1–4.3) — packet numbered by completion order |
 | Requirement(s) | HLR-007 · LLR-007.1 · LLR-007.2 · HLR-008 · LLR-008.1 · LLR-008.2 · LLR-008.3 · PDR condition C14 (AT-042 mutation aimed at `HelpScreen`) |
-| Base | `554314f` (Inc-1b branch point) · commit `3d3e999` |
+| Base | `60922f9` (Inc-1b branch point) · commit `b149b0d` |
 | Authors | tests and the reconciliation proposal drafted by `deepseek/deepseek-v4-pro` (one short `opencode run`, no hang); RED re-run, reconciliation applied, lane run and packet by the orchestrator (Claude Opus 5.5) |
 
 ## 1 · What changed

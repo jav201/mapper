@@ -1,6 +1,6 @@
 # Operator verdict — Inc-9 follow-through · 2026-09-30
 
-Base `6d7ee71`. Inc-9 landed (`7e64508..a1d1a32`) and all three independent reviews cleared it:
+Base `750dacc`. Inc-9 landed (`6e478e3..fde250d`) and all three independent reviews cleared it:
 code PASS, security PASS, ux PASS-WITH-FINDINGS. The code reviewer's uninterrupted full lane:
 1369 passed, 4 xfailed, 20 deselected, 0 failed. Four questions were put to the operator directly;
 each answer took the recommended option. **This record is the authority for Inc-9b and Inc-9c.**
@@ -38,13 +38,13 @@ each answer took the recommended option. **This record is the authority for Inc-
 
 ---
 
-# Round 2 — after the Inc-9b/9c reviews (2026-09-30, base `fddd07d`)
+# Round 2 — after the Inc-9b/9c reviews (2026-09-30, base `32d9c47`)
 
 Reviews of Inc-9b + Inc-9c: code PASS (uninterrupted lane 1438 passed / 0 failed), ux
 PASS-WITH-FINDINGS, security BLOCK-UNTIL INC9BC-SEC-F1 (the factory office-import toast still paints
 the expanded profile path). The ux reviewer also reproduced two PRE-EXISTING data defects in
 `MapStore.create_seed` (silent overwrite of an existing map; `../x` writes outside the workspace);
-the coordinator cut them as **Inc-SEED** (`7521ac9..06d132c`, requirement A-113) without an
+the coordinator cut them as **Inc-SEED** (`4f6aad1..e144c59`, requirement A-113) without an
 operator question — a defect, not a design choice. Four design questions were put to the operator;
 each answer took the recommended option.
 
@@ -71,7 +71,7 @@ reviewer's recommendation; `atlas (legacy tree)` noted as an alternative, not ad
 
 ---
 
-# Round 3 — after the Inc-9d / Inc-SEED-2 / Inc-9e reviews (2026-09-30, base `bd7d673`)
+# Round 3 — after the Inc-9d / Inc-SEED-2 / Inc-9e reviews (2026-09-30, base `ee99e6d`)
 
 All three lenses PASS: code (uninterrupted lane 1558 passed / 0 failed; FLAKE-1/2 green), security
 (no HIGH/MEDIUM; every closure re-executed), ux PASS-WITH-FINDINGS (the eight previous findings
@@ -101,7 +101,7 @@ option.
 
 ---
 
-# Round 4 — after the Inc-9f reviews (2026-09-30, base `ce8b240`)
+# Round 4 — after the Inc-9f reviews (2026-09-30, base `c25a5b9`)
 
 Security PASS (no HIGH; INC9F-SEC-F1..F4 routed to Inc-9g), ux PASS except INC9F-UX-F1 (selected
 palette row's key invisible, routed to Inc-9g); the code review was still running when these answers
@@ -116,7 +116,7 @@ were taken. Four questions were put to the operator; each answer took the recomm
 
 ---
 
-# Round 5 — after the Inc-9g reviews (2026-10-01, base `3dbd5a4`)
+# Round 5 — after the Inc-9g reviews (2026-10-01, base `5c887d8`)
 
 Security PASS (five LOW). Code BLOCK-UNTIL INC9G-CR-F1 and ux FAIL on the same defect (INC9G-UX-F1):
 after any filter edit the palette's first row is painted GROUND on the plain row ground (1.12:1) while
@@ -130,7 +130,7 @@ with the remaining findings. Two questions were put to the operator; both took t
 
 ---
 
-# Round 6 — Inc-9h landed (2026-10-01, `8e8f9f0..134d74c`)
+# Round 6 — Inc-9h landed (2026-10-01, `7f55a28..6613af4`)
 
 The Inc-9h implementer found that two coordinator-specified arms conflict (`…/r` vs `…/r.git` distinct;
 `tools`, `tools/`, `tools.git`, `tools.git/` one mirror) and resolved it: the directory key keeps the
@@ -143,7 +143,7 @@ and a mismatch gets its own directory keyed on the typed form.
 
 ---
 
-# Round 7 — Inc-9i ux review (2026-10-01, base `e865d43`)
+# Round 7 — Inc-9i ux review (2026-10-01, base `adf982d`)
 
 ux PASS-WITH-NOTICES (the three Inc-9i changes discharged). One question was put to the operator; the
 answer took the recommended option. Code and security reviews were still running when it was taken.
@@ -154,7 +154,7 @@ answer took the recommended option. Code and security reviews were still running
 
 ---
 
-# Round 8 — Inc-9j reviews (2026-10-01, base `c8a692d`)
+# Round 8 — Inc-9j reviews (2026-10-01, base `b6f2289`)
 
 ux PASS-WITH-NOTICES (R1 discharged), security PASS (INC9I-SEC-F1 verified closed against libcurl's own
 parser and git's credential parser; INC9J-SEC-F1 MEDIUM: credential forms without `://` are painted
@@ -172,7 +172,7 @@ INC9J-UX-F3 (palette test raced once) is logged as FLAKE-3 candidate for the who
 
 ---
 
-# Round 9 — Inc-9k ux review (2026-10-01, base `c6b9d32`)
+# Round 9 — Inc-9k ux review (2026-10-01, base `da8d16c`)
 
 ux PASS-WITH-NOTICES (S1 display and the accepted forms discharged). Three questions were put to the
 operator; each answer took the recommended option. Code and security reviews were still running.
@@ -185,7 +185,7 @@ operator; each answer took the recommended option. Code and security reviews wer
 
 ---
 
-# Round 10 — Inc-9m reviews (2026-10-01, base `c2af781`)
+# Round 10 — Inc-9m reviews (2026-10-01, base `8de7a06`)
 
 security BLOCK-UNTIL INC9M-SEC-F1 (HIGH, pre-existing: a sidecar `documents[].path` such as `\host\s\a.docx`
 is stat'ed when the factory screen opens — SMB/NTLM exposure from a shared map); code OK (no HIGH;
@@ -199,7 +199,7 @@ Two questions were put to the operator; both took the recommended option.
 
 ---
 
-# Round 11 — Inc-9n reviews (2026-10-01, base `287681f`)
+# Round 11 — Inc-9n reviews (2026-10-01, base `48bb250`)
 
 security BLOCK-UNTIL INC9N-SEC-F1 (HIGH, pre-existing: the sidecar `documents[].name` chooses where
 "generate office" writes — `..`, drive-absolute and UNC names reproduced); code OK (CR-F1 relative
@@ -215,7 +215,7 @@ Two questions were put to the operator; both took the recommended option.
 
 ---
 
-# Round 12 — Inc-9o reviews (2026-10-01, base `66dd6e5`)
+# Round 12 — Inc-9o reviews (2026-10-01, base `1a67f6c`)
 
 security BLOCK-UNTIL INC9O-SEC-F1 (HIGH: a dot/space-only or trailing-space path component makes the
 walk stop early, so `resolve()` follows a link before it is refused — measured with local junctions;
@@ -231,14 +231,14 @@ recommended option. The security reviewer stated in writing that no network-targ
 
 ---
 
-# Round 13 — Inc-9p reviews (2026-10-02, base `5af3f1c`)
+# Round 13 — Inc-9p reviews (2026-10-02, base `c51b005`)
 
 security BLOCK-UNTIL INC9P-SEC-F1 (HIGH: a stream-type suffix on a link component — `lnk:$I30`,
 `lnk::$BITMAP` — makes the walk stop, then `resolve()` follows the junction; an inside junction is even
 returned `ok`); code OK (full lane 2510 passed / 0 failed; CR-F1 duplicated reason mapping, CR-F2/F7 test
 gaps, CR-F3 import wording); ux PASS-WITH-NOTICES (W1, W2 discharged; found a pre-existing defect: an
 attachment chip cannot be opened by keyboard or mouse). Three questions were put to the operator; each
-took the recommended option. The account name is in no commit of `7ebac19..5af3f1c` (both reviewers).
+took the recommended option. The account name is in no commit of `5356f3f..c51b005` (both reviewers).
 
 | id | Question | Answer (verbatim label) | What it rules |
 |---|---|---|---|
@@ -253,7 +253,7 @@ Coordinator rulings for the next increment: the import's unreadable-target sente
 
 ---
 
-# Round 14 — Inc-9q reviews (2026-10-02, base `67732a0`)
+# Round 14 — Inc-9q reviews (2026-10-02, base `d012f94`)
 
 security PASS (first round of the Inc-9 line with no HIGH/MEDIUM; two LOW: INC9Q-SEC-F1 MAX_PATH counted
 in code points not UTF-16 units, F2 preview reads a hard-linked template generate refuses). code

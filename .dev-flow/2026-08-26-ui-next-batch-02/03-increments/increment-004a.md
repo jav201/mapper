@@ -9,7 +9,7 @@
 | Acceptance | `AT-018` `AT-019` `AT-020` `AT-021` `AT-052` · white-box **`TC-026b`** · unit `LLR-N07.3.1`, `LLR-N07.3.3`, the shared-resolution arm |
 | Agent | `software-dev` (supervised-incremental-development) |
 | Date | 2026-08-29 |
-| Entry commit | `feat/ui-next-batch-02` @ `5f4816c` |
+| Entry commit | `feat/ui-next-batch-02` @ `8ef1553` |
 | **Committed?** | **NO.** Left in the tree for the gate. New test files are `git add`-ed (staged, not committed) because `test_a3_census.py` refuses to see an untracked source file. |
 
 ---
@@ -165,7 +165,7 @@ call from a mention, and an absence-only assertion is satisfied by a rename, whi
 
 | | modules derived | `FunctionDef _matches` | `qlower` bindings/loads |
 |---|---|---|---|
-| entry `5f4816c` | 6 (`__init__`, `lane`, `layered`, `outline`, `radial`, `state`) | **1** (all in `layered.py`) | **9** (all in `layered.py`) |
+| entry `8ef1553` | 6 (`__init__`, `lane`, `layered`, `outline`, `radial`, `state`) | **1** (all in `layered.py`) | **9** (all in `layered.py`) |
 | exit | 6 | **0** | **0** |
 
 ### The pill's tail, before and after — measured, with the hidden count held constant
@@ -436,7 +436,7 @@ auto-open, `E1b`/`E1c`, and `esc`. Before starting, decide `C-D6a` (§6.8) and r
 | Field | Value |
 |---|---|
 | Date | 2026-08-29 |
-| Entry | `feat/ui-next-batch-02` @ `5f4816c`, working tree, **still nothing committed** |
+| Entry | `feat/ui-next-batch-02` @ `8ef1553`, working tree, **still nothing committed** |
 | Reviews answered | `increment-004a-code-review.md` (F1–F7) · `increment-004a-security-review.md` (F1, F1a, F1b, F2) |
 | Files touched this round | `mapper/search.py`, `mapper/app.py`, `tests/test_search.py` — 2 source, within the declared 4-file lane |
 | `mapper/keymap.py` | **untouched** (Inc-4b's) — `git diff HEAD --stat mapper/keymap.py` → 0 lines |
@@ -777,7 +777,7 @@ probe first.
 |---|---|
 | Trigger | `increment-004a-code-review-confirmation.md` (**PASS**) and `increment-004a-security-confirmation.md` (**SIGN-OFF**) — both conditional on listed mitigations |
 | Under repair | code lens NEW-1 / NEW-2 / NEW-3, security lens NEW-1 / NEW-2 / NEW-3, plus the two mis-routed carries |
-| Branch / entry | `feat/ui-next-batch-02` @ `5f4816c`, **nothing committed** |
+| Branch / entry | `feat/ui-next-batch-02` @ `8ef1553`, **nothing committed** |
 | Entry digests | `app.py a2b621256c22e533`, `test_search.py bd035104c012dee8` — identical to both reviewers' declared values, so this repaired the tree they measured |
 | Scope | `mapper/app.py`, `tests/test_search.py` (+ this file). `search.py`, `views/state.py`, `views/layered.py` **not touched this round**; `mapper/keymap.py` **0 lines** |
 
@@ -970,7 +970,7 @@ against the derived set and GREEN against the list it replaced.
   described by position and operation.
 - ok **No secrets** — no fixture, path, token or username entered this file or the diff. The one
   absolute-path sink is pre-existing and routed, not touched.
-- ok **No destructive command; nothing committed** — `HEAD` still `5f4816c`. The mutation harness
+- ok **No destructive command; nothing committed** — `HEAD` still `8ef1553`. The mutation harness
   lives in the session scratchpad, never in the repo.
 - ok **File cap** — **1 source file** (`mapper/app.py`) plus `tests/test_search.py` and this record.
   Inside the declared 4-file lane; tests uncapped by the brief.

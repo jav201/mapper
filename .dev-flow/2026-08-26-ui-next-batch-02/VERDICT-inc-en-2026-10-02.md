@@ -1,6 +1,6 @@
 # Operator verdict — Inc-EN plan · 2026-10-02
 
-Base `e747d8d`. The Inc-9 line is closed. A read-only census (AST scan of non-docstring string literals
+Base `0eb5fdf`. The Inc-9 line is closed. A read-only census (AST scan of non-docstring string literals
 under `mapper/`, prototypes excluded) found ~230 user-facing Spanish strings in 14 source files, ~150–180
 pinning test assertions in ~45 test files, and ~100 quoted Spanish fragments in `01-requirements.md`.
 Authority for the language: `VERDICT-inc8-legend-2026-09-28.md` § LANGUAGE RULING ("Todo en inglés,

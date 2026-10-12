@@ -1,6 +1,6 @@
 # Increment 012 — Inc-REPAIR S-E — independent code review
 
-**Range:** `git diff fdbdd62..ea5d4c2 -- mapper/ tests/`
+**Range:** `git diff febbd20..3bcec4d -- mapper/ tests/`
 **Reviewer:** code-reviewer (gate 1 of 2; security review follows)
 **Date:** 2026-09-11
 
@@ -26,7 +26,7 @@ implementation green (HIGH-3).
 
 **Fired** (see each finding): 4 source mutants (M1–M4, hash-verified), 1 scalar-amplification probe,
 1 attachment round-trip probe, 1 coverage-arithmetic probe, 1 path-like-map-id probe, 1 markup-sink
-probe, 1 calibration probe. Full suite: **995 passed, 20 deselected, 3 xfailed** at `ea5d4c2`.
+probe, 1 calibration probe. Full suite: **995 passed, 20 deselected, 3 xfailed** at `3bcec4d`.
 
 **Not reviewed / out of lane.** Security framing of HIGH-1 and HIGH-2 (routed to `security-reviewer`
 — I report the correctness fact and the measurement, not the threat model). The Spanish register of
@@ -39,7 +39,7 @@ negative arm were deliberately deferred to a later stage: `inc_repair_pregate.S-
 `AT_NODES_MISSING` and says "S-E owes both arms", but records no deferral of either arm's boundary
 catalog. If a deferral exists, HIGH-3 downgrades to MEDIUM; nothing I read recorded one.
 
-**Tree state.** Working tree clean at `ea5d4c2` on entry and on exit. Every mutation was byte-level
+**Tree state.** Working tree clean at `3bcec4d` on entry and on exit. Every mutation was byte-level
 against CRLF-anchored text with the match count asserted `== 1` before firing, restored
 unconditionally, and sha256-verified after each. Final hashes match pristine:
 `store.py b5503ef8…`, `coverage.py 925a655c…`, `test_repair_sidecar.py 9a63595d…`,
@@ -453,13 +453,13 @@ offers that inside the slow lane's budget.
   was reflowed so the tuple sits alone. The classification (ALERT on a missing-fields list) is
   genuinely unchanged.
 - **Only ONE pin actually changed, and that is the right outcome.** The brief said three
-  (A3 census, hue census, `AT-P02d`). `git show --stat ea5d4c2` lists four files;
+  (A3 census, hue census, `AT-P02d`). `git show --stat 3bcec4d` lists four files;
   `tests/test_a3_census.py` and `tests/test_repair_store_boundary.py` are **untouched** and green.
   `AT-P02d` in particular was left intact and the fix was built to keep it green — which is the
   correct handling of a ratified acceptance, and better than the "updated" the brief claims. Worth
   correcting in the record: *unchanged because the fix respected them* is a stronger statement than
   *updated*.
-- **Full suite green at `ea5d4c2`:** 995 passed, 20 deselected, 3 xfailed, 236 s.
+- **Full suite green at `3bcec4d`:** 995 passed, 20 deselected, 3 xfailed, 236 s.
 
 ---
 
@@ -508,4 +508,4 @@ a measured before/after, not as a threat assessment.
 - [x] Tests reviewed for intent — four mutants fired; two arms found non-discriminating (HIGH-3,
       MEDIUM-1), one found without a positive control (MEDIUM-2).
 - [x] Verdict explicit — **BLOCK**.
-- [x] Tree left byte-identical to `ea5d4c2`, sha256-verified, caches purged.
+- [x] Tree left byte-identical to `3bcec4d`, sha256-verified, caches purged.

@@ -1,7 +1,7 @@
 # 04 — Validation · `2026-08-26-repair-batch` (PR A) · whole-branch merge gate
 
 > Reviewer: `qa-reviewer`, independent of `software-dev`, `code-reviewer` and `security-reviewer`.
-> Base `origin/master` @ `d6b60e6b4f18b10123fffc76bbb36891473df653`. Branch `fix/shipped-defects-repair`.
+> Base `origin/master` @ `1b51aca7a11582acf2de878d8138d26cef2d301b`. Branch `fix/shipped-defects-repair`.
 > Tree state: **nothing committed, nothing staged** — the batch is entirely working-tree.
 > Date 2026-08-27. Artifact language English; UI strings Spanish.
 
@@ -103,7 +103,7 @@ discharge as written.
 ### 2.4 Cross-increment regression — by construction, not by inference
 
 I reverted **both** of increment 4's source edits on an isolated copy under the session
-scratchpad (`help.py` restored to `d6b60e6`; the `#map-rail` CSS rule removed from
+scratchpad (`help.py` restored to `1b51aca`; the `#map-rail` CSS rule removed from
 `MapperApp.CSS` by position) and re-ran everything else:
 
 ```

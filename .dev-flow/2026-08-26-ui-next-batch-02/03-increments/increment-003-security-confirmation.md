@@ -1,4 +1,4 @@
-# Security Confirmation — Inc-3 post-fix tree (`feat/ui-next-batch-02`, uncommitted over `954f8f3`)
+# Security Confirmation — Inc-3 post-fix tree (`feat/ui-next-batch-02`, uncommitted over `909cc27`)
 
 ## VERDICT: **BLOCK — 1 HIGH**
 
@@ -10,7 +10,7 @@ confirmed guarded. Nothing in this increment regresses.
 The block is **not** on anything Inc-3 changed. It is on **F-A**: the field `SEC-F1` names —
 `SchemaField.key` — reaches a *second* sink in the *same* repaint path `LLR-N06.2.3` enumerates,
 `FichaInspector`'s widget id, where it **kills the application on map open**. It is pre-existing at
-`954f8f3` (reproduced there), so it is a routing decision rather than a rework of this increment —
+`909cc27` (reproduced there), so it is a routing decision rather than a rework of this increment —
 but it cannot be signed past silently, because it means a hostile `SchemaField.key` can never reach
 the SVG sink `SEC-F1` hardened: **the session dies first**, and it dies for ordinary Spanish keys
 like `año` and `fecha limite`, not only for hostile ones.
@@ -27,7 +27,7 @@ The shared working tree was **never written to** by this review, except for this
 |---|---|
 | Manifest before | `sha256sum` over 325 tracked+untracked files (`.git`, `__pycache__`, `.pyc` excluded) → manifest digest `284ea6730ff1f24e97bba183f087c63d3aa2aef90b8599c57c8a42c0f32b19fe` |
 | Manifest after | `diff BEFORE AFTER` → **one added line only**: `.dev-flow/…/increment-003-code-review-confirmation.md`, written by the concurrent code-review gate. **324 of 324 pre-existing files byte-identical.** |
-| Where the work ran | `tar`-exported copy at `…/scratchpad/work` with its own `git init` (the censuses call `git ls-files`), plus a second `git archive 954f8f3` export at `…/scratchpad/base` for the base-state reproduction |
+| Where the work ran | `tar`-exported copy at `…/scratchpad/work` with its own `git init` (the censuses call `git ls-files`), plus a second `git archive 909cc27` export at `…/scratchpad/base` for the base-state reproduction |
 | Mutation restores | every mutant restored from the in-memory original and proven by sha256 returning to its pre-mutation value; **21 of 21 `OK`, 0 `MISMATCH`** |
 | Scratch worktree at close | `git status --porcelain` → empty |
 | Product-file digests, shared tree, at close | `app.py f90835563212f2a0…` · `views/layered.py d4d82a2052a198da…` · `views/outline.py 74604dbfdb6d35c3…` · `views/radial.py def09fbe114af7e5…` · `widgets/rail.py 508b5d5d1ebc644a…` · `widgets/inspector.py 2ace7f91d3bdb946…` · `screens/factory.py 771a15e3c418b4c8…` · `screens/coverage.py 63cf11a4a01b8f8a…` |
@@ -236,7 +236,7 @@ arm is weak; that reading is confirmed, not merely repeated.
   `fecha limite` both kill it — so this is not only an adversarial case; it is the LATAM-Spanish
   happy path for a hand-written sidecar. It also **subsumes `SEC-F1`'s attack**: no hostile
   `SchemaField.key` can reach the SVG the increment hardened, because the session is already gone.
-  Reproduced identically on a clean `git archive 954f8f3`, so it is **pre-existing, not a regression**.
+  Reproduced identically on a clean `git archive 909cc27`, so it is **pre-existing, not a regression**.
 - **Why the census cannot see it:** `LLR-N06.2.3` sweeps `#map-inspector` — it is one of the four
   enumerated regions — but it looks for banned **code points in painted rows**, never for **survival**,
   and its fixture (`test_fold.py:264-270`) carries **no schema at all**, so no `insp-field-*` widget is

@@ -6,7 +6,7 @@
 | **Batch** | `2026-08-26-ui-next-batch-02` · variant B «atlas» + round-10 capabilities |
 | **Date** | 2026-08-26 |
 | **Participants** | architect lens (this document). ux lens ruled separately in `01b-ux-decisions.md`. security lens **not yet run** — see `PDR-2026-08-26-ui-next-batch-02#D18`. |
-| **Repo state at review** | `d6b60e6` + uncommitted `docs/ARCHITECTURE.md` (ARQ amendment) and `.dev-flow/2026-08-26-ui-next-batch-02/` |
+| **Repo state at review** | `1b51aca` + uncommitted `docs/ARCHITECTURE.md` (ARQ amendment) and `.dev-flow/2026-08-26-ui-next-batch-02/` |
 | **Baseline** | `pytest -q` → **245 passed in 35.01s** (executed) |
 | **Verdict** | **APPROVED WITH CONDITIONS.** Two frozen-interface moves approved (one with conditions). The 7-increment cut is **STALE and REJECTED**; a 9-increment cut is re-derived below. Four open questions ruled. Three requirement artifacts rejected as unconsumed. |
 

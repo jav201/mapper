@@ -23,8 +23,8 @@
 | 1 | Context of use per story: user · **task** · **environment** | ✓ | US maintainer · task: change one feature without touching another's file · env: the repo + parallel worker worktrees (PLAN.md Objective) |
 | 2 | Observable outcome stated per story | ✓ | observable: a feature change lands in its own module; no visible change in the app (P1 stories) |
 | 3 | Risk estimate: importance and criticality, used to prioritise | ✓ | high importance (operator: 'primordial'), medium risk (3454-line move) — PLAN.md Risks |
-| 4 | RC-1: `origin/main` tip fetched and recorded in `PLAN.md` **before** deriving — with no `origin` remote, the local tip and the no-origin premise | ✓ | `origin/master` = `d8cf942` fetched before deriving (PLAN.md Header) |
-| 5 | RC-2: `origin` reachable and the age of its newest commit recorded in `PLAN.md` **before** deriving (`git ls-remote --exit-code --heads origin`; V25; with no `origin` remote, RC-1 (a)'s premise line) | ✓ | `git fetch` ok; tip `d8cf942` (PR #15 merge, 2026-10-09) |
+| 4 | RC-1: `origin/main` tip fetched and recorded in `PLAN.md` **before** deriving — with no `origin` remote, the local tip and the no-origin premise | ✓ | `origin/master` = `a5b679e` fetched before deriving (PLAN.md Header) |
+| 5 | RC-2: `origin` reachable and the age of its newest commit recorded in `PLAN.md` **before** deriving (`git ls-remote --exit-code --heads origin`; V25; with no `origin` remote, RC-1 (a)'s premise line) | ✓ | `git fetch` ok; tip `a5b679e` (PR #15 merge, 2026-10-09) |
 | 6 | "already shipped?" check per candidate story | ✓ | not shipped: `wc -l mapper/app.py` → 5255; `MapScreen` 1536–4989 (P0 measurements) |
 | 7 | `flow_hash` verified against the manifest (C-45 PULL) | ⚠ | `V7` external (F1); `~/.claude` flow bundle not touched |
 | 8 | **Triggers evaluated AND recorded — the ones that fired and the ones that did not, each with its probe (C-48)** | ✓ | PLAN.md §Triggers: A1–A4, B1, E1, F1 fired; 16 not fired, each with its probe |

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Reviewer | `code-reviewer`, independent confirmation. Author does not self-clear |
-| Branch / entry | `feat/ui-next-batch-02` @ `5f4816c`, **nothing committed** |
+| Branch / entry | `feat/ui-next-batch-02` @ `8ef1553`, **nothing committed** |
 | Under confirmation | `increment-004a-code-review.md` F1 (HIGH), F2 (HIGH), and M1 / M2 / F7 |
 | Author's response | `increment-004a.md` §"Review round 2" (R0–R8) |
 | Method | isolated `git clone --local --no-hardlinks` mirror + working-tree overlay; **14 mutations executed**, per-arm verdicts, sha256 restores |
@@ -41,7 +41,7 @@ rests on trust.
 
 | Step | Result |
 |---|---|
-| `git clone --local --no-hardlinks` → mirror at `5f4816c` | ok |
+| `git clone --local --no-hardlinks` → mirror at `8ef1553` | ok |
 | Working-tree overlay of `mapper/` + `tests/` | **all `.py` digests byte-identical to the real repo** |
 | First mirror run | `1 failed, 817 passed` — `test_a3_census` only |
 | Cause | **mirror artifact, not a defect.** The A3 census reads the git index; `tests/inc4_support.py` and `tests/test_search.py` are staged in the real repo, untracked in a fresh clone. Reproduced the real index state with `git add -N` |
@@ -307,17 +307,17 @@ made the same call.
 Measured at byte level on the committed blob and on the working tree
 (counts are `CRLF` / `LF-only`):
 
-| file | HEAD blob `5f4816c` | working tree |
+| file | HEAD blob `8ef1553` | working tree |
 |---|---|---|
 | `mapper/search.py` | 0 / 14 | 0 / 122 |
 | `mapper/views/state.py` | 0 / 97 | 0 / 117 |
 | `mapper/app.py` | 0 / 2552 | **2673 / 0** |
 | `mapper/views/layered.py` | 0 / 666 | **663 / 0** |
 
-**The author is right:** `search.py` was already LF at `5f4816c` — 0 CRLF. Round 1's F7
+**The author is right:** `search.py` was already LF at `8ef1553` — 0 CRLF. Round 1's F7
 ("newly introduced by this increment") is **false**, and the retraction is correct.
 
-**NEW-5 · But the actual change runs the other way · LOW.** At `5f4816c` the whole repo
+**NEW-5 · But the actual change runs the other way · LOW.** At `8ef1553` the whole repo
 was LF. In the working tree, **`mapper/app.py` and `mapper/views/layered.py` have been
 converted wholesale to CRLF**; `search.py` is the one that stayed as it was. Neither round
 described this. It is **not a gate**: `core.autocrlf=true` and `git diff --numstat` shows

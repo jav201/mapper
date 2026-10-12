@@ -1,7 +1,7 @@
 # Code Review — Increment 4c, ROUND-2 CONFIRMATION PASS
 
 **Reviewer:** code-reviewer (fresh, independent — did not participate in round 1) · **Date:** 2026-08-29
-**Branch:** `feat/ui-next-batch-02` · **Entry:** `9ba2f26` · nothing committed
+**Branch:** `feat/ui-next-batch-02` · **Entry:** `a6dc8d7` · nothing committed
 **Verdict: BLOCK** — one HIGH survives. It is round-1 **F1 narrowed, not closed**: the ban's
 *method* axis is now genuinely derived, but the closure stops at the class boundary, and the same
 defect re-enters through a module-level helper. Reproduced against the full default lane
@@ -19,7 +19,7 @@ mutation I constructed myself, with the correct arm reddening in each case.
 | Check | Expected | Measured |
 |---|---|---|
 | branch | `feat/ui-next-batch-02` | ✓ |
-| HEAD | `9ba2f26` | `9ba2f26139cc6bf32853bef63e2a6bb5d97e2110` ✓ |
+| HEAD | `a6dc8d7` | `a6dc8d7b76847b2bbf67d956148a448142fb2ddd` ✓ |
 | `mapper/app.py` | `3aff3829…fcea4` | `3aff38298f2cea33d4f891066f117f3d05614678c74bf2cf2a5333c6aa7fcea4` ✓ |
 | `tests/test_search.py` | `a257b9c1…be084` | `a257b9c1d2769a11c32856b72314a797cea87902f0cde5943b5c789f0c3be084` ✓ |
 | working tree | Inc-4c uncommitted | 4 modified, 3 untracked ✓ |
@@ -384,7 +384,7 @@ this pass's two survivors also sat between the arms the battery fired.
 
 ## Evidence checklist
 
-- [x] **Diff read in full** — `git diff 9ba2f26 -- mapper/app.py tests/test_search.py`, +946/−149.
+- [x] **Diff read in full** — `git diff a6dc8d7 -- mapper/app.py tests/test_search.py`, +946/−149.
   Shipped source read at `mapper/app.py:1759-2002` and `:2183-2212`; `tests/test_search.py:534-760`,
   `:809-1063`, `:1238-1310`, `:2138-2300`. `mapper/darkside.py:370-403` and `pyproject.toml:11` read as
   dependencies of the S1 claim.

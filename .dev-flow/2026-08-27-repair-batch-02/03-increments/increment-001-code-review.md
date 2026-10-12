@@ -1,7 +1,7 @@
 # Code Review — Increment 1 · `2026-08-27-repair-batch-02`
 
 **Reviewer:** `code-reviewer` (independent; did not author the diff)
-**Branch:** `fix/repair-batch-02` · **Base ref:** `d877784`
+**Branch:** `fix/repair-batch-02` · **Base ref:** `bd17fab`
 **Requirement under review:** `HLR-STO.1` / `LLR-STO.1.1` (`01-requirements.md` §2.1, §3.1)
 
 ## Verdict
@@ -19,7 +19,7 @@ one-liners with executed evidence attached.
 
 | Artefact | Range read |
 |---|---|
-| `mapper/store.py` | full file, 485 lines; diff `d877784..worktree` read in full (`git diff mapper/store.py`, 5 hunks) |
+| `mapper/store.py` | full file, 485 lines; diff `bd17fab..worktree` read in full (`git diff mapper/store.py`, 5 hunks) |
 | `tests/test_repair_store_boundary.py` | full file, 332 lines (new, untracked) |
 | `mapper/model.py` | full file, 240 lines (the derivation's source of truth) |
 | `mapper/app.py:1525-1543`, `mapper/diff.py:45-63` | the two callers of `_graph_from_sidecar` outside `load` |
@@ -160,7 +160,7 @@ files, so the "unchanged from base" claim holds by construction, not by comparis
 - **Evidence — measured on both refs, same input:**
 
   ```
-  BASE d877784: schema.kind -> 'text'      document.kind -> 'text'
+  BASE bd17fab: schema.kind -> 'text'      document.kind -> 'text'
   HEAD          schema.kind -> ''          document.kind -> ''
   # sidecar: schema: [{key: E, label: estado, required: true}]   (no `kind`)
   #          documents: [{name: d1, source: s}]                  (no `kind`)
@@ -213,7 +213,7 @@ files, so the "unchanged from base" claim holds by construction, not by comparis
 
   ```
   input fields: {1: 'from-int', '1': 'from-str'}
-  BASE d877784 -> {1: 'from-int', '1': 'from-str'}      (2 fields)
+  BASE bd17fab -> {1: 'from-int', '1': 'from-str'}      (2 fields)
   HEAD         -> {'1': 'from-str'}                     (1 field)
   warnings     -> []
   ```
@@ -782,7 +782,7 @@ poisoned position, safe only because exactly one poison is applied per arm.
 **One slow-lane run failed and I could not reproduce or identify it.** My first execution
 returned `1 failed, 15 passed, 479 deselected`; **eight** subsequent runs all returned
 `16 passed`. My first command discarded the `FAILED` line before I saw it, so **I cannot name the
-test**, and I have not established whether it is pre-existing at `d877784` or introduced here.
+test**, and I have not established whether it is pre-existing at `bd17fab` or introduced here.
 
 This does not change the verdict — the 16 slow tests are pre-existing and none is in this
 increment's fence — but your packet reports the slow lane as `16 passed … exit 0`, and I saw it
@@ -1013,6 +1013,6 @@ figure that should drive its priority before `LLR-PERF.1` lands in that lane.
 
 - **The 17-mutant battery.** I ran 5 of my own with controls; the 17 verdicts remain your
   measurement. Every one of mine agreed with the corresponding claim.
-- **Whether the slow-lane flake is pre-existing at `d877784`.** Neither of us executed it at the
+- **Whether the slow-lane flake is pre-existing at `bd17fab`.** Neither of us executed it at the
   base ref. The mechanism is untouched by this diff — strong circumstantial evidence, not a
   measurement.

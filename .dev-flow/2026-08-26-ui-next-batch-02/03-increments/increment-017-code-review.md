@@ -4,7 +4,7 @@
 |---|---|
 | Reviewer | `code-reviewer` (independent; authored none of this diff; fresh session) |
 | Batch | `2026-08-26-ui-next-batch-02` |
-| Commit reviewed | **`046acea`** on `feat/ui-next-batch-02`, base `4800906` |
+| Commit reviewed | **`58b3647`** on `feat/ui-next-batch-02`, base `e007aab` |
 | Date | 2026-09-19 |
 | **Verdict** | **BLOCK — one HIGH open (`CR17-F1`).** The `A-100.1` re-grounding is REFUTED by measurement. 2 MEDIUM + 2 LOW also raised |
 
@@ -23,11 +23,11 @@ Every mutation and probe ran in **my own mirrors**, never in the repo. The only 
 | `mirror-cr017b` (mine, created mid-review) | `…/scratchpad/mirror-cr017b` | the stale-claim probe + slow/network lanes, so the battery's tree was never disturbed |
 
 **Digest discipline — every digest HELD.** Aggregate sha256 over all 91 `.py` files in
-`mapper/` + `tests/`, sorted, at `046acea`:
+`mapper/` + `tests/`, sorted, at `58b3647`:
 
 | Tree | Aggregate digest |
 |---|---|
-| repo at `046acea` | `04828ea170c744c82e31b8148f92188fbcbe7724866f0b345b5904f377545a27` |
+| repo at `58b3647` | `04828ea170c744c82e31b8148f92188fbcbe7724866f0b345b5904f377545a27` |
 | `mirror-cr017` | `04828ea1…` **identical** |
 | `pyproject.toml` (both) | `2b3ffba9ca51b3f1a16426622f280675e78cacb7dc50969b963fa3cdb89aeebb` |
 
@@ -49,21 +49,21 @@ unchanged each time. All five battery sites restored **byte-identical**, sha256 
 
 ### ⚠ The tree moved under me mid-review — control 15, again
 
-`git rev-parse HEAD` was `046acea` when I started and **`152ecd9` when I re-checked**. Two commits
+`git rev-parse HEAD` was `58b3647` when I started and **`11c16ef` when I re-checked**. Two commits
 landed during this review, and `mapper/app.py` changed (`+30/-2`).
 
-- No evidence of mine was corrupted: every number below was taken in a mirror pinned to `046acea`,
+- No evidence of mine was corrupted: every number below was taken in a mirror pinned to `58b3647`,
   and I caught the move only because a digest I recomputed disagreed — *asserting hash-stability
   across my own run is what surfaced it*, exactly as control 15's discharge says.
 - **The post-review `app.py` change is `SEC-H2`** (`_ConfirmScreen` `markup=False` + `darkside.plain`
   on the title) at lines ~276 and ~3834. **It does not touch the export seam** (3466–3620), so
-  `CR17-F1` and `CR17-F2` hold against `152ecd9` as well. I have **not** reviewed `SEC-H2`.
+  `CR17-F1` and `CR17-F2` hold against `11c16ef` as well. I have **not** reviewed `SEC-H2`.
 - Recorded because the batch's own control says a violation that lands clean is the one most likely
   to be repeated. Writes to the shared tree continued while an independent review was in flight.
 
 ### One provisioning note
 
-The mirror's 91 `.py` files were complete and correct for `046acea`. But `mapper/` + `tests/` +
+The mirror's 91 `.py` files were complete and correct for `58b3647`. But `mapper/` + `tests/` +
 `pyproject.toml` **cannot run the suite**: collection needs `docs/`, `fixtures/`, `maps/`,
 `.dev-flow/` and a git repo (`git ls-files`). I copied those in myself and re-verified the source
 digest after each. Worth folding into the mirror recipe.
@@ -72,7 +72,7 @@ digest after each. Worth folding into the mirror recipe.
 
 ## 2 · Scope reviewed
 
-`git diff 4800906 046acea` **read in full** — 7 files, 650 insertions / 44 deletions.
+`git diff e007aab 58b3647` **read in full** — 7 files, 650 insertions / 44 deletions.
 
 | File | Lines read |
 |---|---|
@@ -93,7 +93,7 @@ I judged the implementation, not the rulings.
 | default lane `1140 passed / 20 deselected / 3 xfailed` | **1138 passed + 2 failed = 1140 total.** The 2 are mirror-provenance, not real: `test_fold::…INCLUDING_the_artifacts` dies on a binary file my own `git add -A` tracked, and `test_app::test_llr_cnv_3_1…` **passes 3/3 standalone** — order-dependent, i.e. carried `FLAKE-1`. Consistent with the claim |
 | slow lane `19` | **19 passed** ✓ |
 | network lane `1` | **1 passed** ✓ |
-| signed balance `1140 = 1133 − 0 + 7` | **the `+7` itemises exactly** against the diff: 2 CJK fold params + 2 refusal arms + 2 census params + 1 census positive control. I did not run the base lane at `4800906` |
+| signed balance `1140 = 1133 − 0 + 7` | **the `+7` itemises exactly** against the diff: 2 CJK fold params + 2 refusal arms + 2 census params + 1 census positive control. I did not run the base lane at `e007aab` |
 | 5-site battery, 4 kills + 1 survivor, granular | **REPRODUCED, all five** — table below |
 | `A-100.1`: "nothing the budget admits crosses the target", ≈28 % margin, 0.955–3.27 µs/cell | **REFUTED.** `CR17-F1` |
 
@@ -303,9 +303,9 @@ Not padding — these are the parts I tried to break and could not.
 
 | Not run | Why |
 |---|---|
-| **ruff** (`--isolated`, 27, set-equality vs `a552783`) | not executed at all. That claim is **unverified by me** |
-| base lane at `4800906` (`1133`) | not run; I checked the `+7` itemisation against the diff arithmetically only |
-| `mapper/app.py` `SEC-H2` change at `152ecd9` | outside the reviewed commit |
+| **ruff** (`--isolated`, 27, set-equality vs `ab592f3`) | not executed at all. That claim is **unverified by me** |
+| base lane at `e007aab` (`1133`) | not run; I checked the `+7` itemisation against the diff arithmetically only |
+| `mapper/app.py` `SEC-H2` change at `11c16ef` | outside the reviewed commit |
 | security lens (`SEC-*`), suite/functional adequacy | `security-reviewer` / `qa-reviewer` |
 | `FLAKE-1` root cause | carried. It did **not** fire in any of the 5 battery lanes; it fired once in my first full lane and passed 3/3 standalone |
 | `.gitattributes`/`autocrlf`, socket-level guard, `N3`, `SEC-F4`, `S-F12`/`S-F15`/`N5`/`N6`, validator pre-existing blocks | carried, out of scope |
@@ -335,7 +335,7 @@ weaker — the evidence that should discharge it is an arm I did not write (`CR1
 
 | Item | State |
 |---|---|
-| diff read in full (`4800906..046acea`) | `executed` |
+| diff read in full (`e007aab..58b3647`) | `executed` |
 | mirror digests (`04828ea1…`), pre/post | `approved` |
 | default lane | `executed` — 1140 total, 2 mirror-provenance failures explained |
 | slow / network lanes | `executed` — 19 / 1 ✓ |

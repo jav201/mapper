@@ -7,9 +7,9 @@
 | Agent | `software-dev` |
 | Date | 2026-09-29 |
 | Authority | Operator verdict, Round 4, `VERDICT-inc8-legend-2026-09-28.md` § "Round 4", `G6`, verbatim: *"micro-incremento propio justo después de Inc-8: limpiar los campos de ficha al entrar al grafo y proteger los 6 guardados."* Closes `INC8-P3-SEC-F1` |
-| Starting state | worktree branched from `feat/ui-next-batch-02` @ `3611c20`, clean |
-| Isolation | `git worktree add %TEMP%\g6\wt -b g6-store-surrogates 3611c20`. Main tree (`C:\Users\<operator>\Github\mapper`) never touched — a separate agent was running the full lane against it |
-| Commits | `1130d4c` (requirement + RED, xfail) → `c383d0a` (fix, xfail removed) |
+| Starting state | worktree branched from `feat/ui-next-batch-02` @ `648a9b1`, clean |
+| Isolation | `git worktree add %TEMP%\g6\wt -b g6-store-surrogates 648a9b1`. Main tree (`C:\Users\<operator>\Github\mapper`) never touched — a separate agent was running the full lane against it |
+| Commits | `b2a677e` (requirement + RED, xfail) → `012a9b0` (fix, xfail removed) |
 
 ---
 
@@ -70,7 +70,7 @@ python -m pytest tests/test_no_operator_paths.py tests/test_fold.py -q
 
 ## 4 · Test results
 
-### RED, before the fix (commit `1130d4c`, driven with `--runxfail` to see the real failure)
+### RED, before the fix (commit `b2a677e`, driven with `--runxfail` to see the real failure)
 
 ```
 FAILED test_g6a_load_coerces_a_sidecar_lone_surrogate_title_instead_of_denying_the_map
@@ -95,10 +95,10 @@ this time uncaught, out of `_atomic_write`'s `Path.write_text(..., encoding="utf
 message handler; arm (c) the forced `RuntimeError` escaping uncaught at each of the 6 named call
 sites in turn. None is a fixture artefact — each is the real production code path.
 
-Recorded as `xfail(strict=True, reason="G6 fix pending")` at commit `1130d4c`, so the suite stayed
+Recorded as `xfail(strict=True, reason="G6 fix pending")` at commit `b2a677e`, so the suite stayed
 green with the defect live in the code.
 
-### GREEN, after the fix (commit `c383d0a`, xfail markers removed)
+### GREEN, after the fix (commit `012a9b0`, xfail markers removed)
 
 ```
 tests/test_g6_store_surrogates.py: 8 passed in 3.25-3.40s
@@ -122,7 +122,7 @@ Reconciled by `--collect-only` (1311 collected, 20 deselected = 1331 total) agai
 increment's only test-count change is the 8 new nodes in `tests/test_g6_store_surrogates.py` (no
 other test file touched). `1308 passed + 3 xfailed = 1311` matches the collected count exactly, and
 `1308 - 8 = 1300` reconciles against the batch's stated baseline ("about 1295+ passed, 0 failed" at
-`3611c20`) within that stated margin. **0 failed.** The 3 xfailed are pre-existing and unrelated to
+`648a9b1`) within that stated margin. **0 failed.** The 3 xfailed are pre-existing and unrelated to
 this increment. FLAKE-1
 (`test_llr_cnv_3_1_the_parent_walk_maps_a_nested_widget_to_its_region`) was **not observed** this
 run; FLAKE-2 candidate also not observed. Wall clock (~15 min) is this sandbox's own resource
@@ -211,7 +211,7 @@ present and nothing else was touched.
 
 ## Corrective pass (2026-09-29, same day)
 
-The independent security review returned **`BLOCK-UNTIL G6-C-F1, F2, F3, F8`** against `65621f3`
+The independent security review returned **`BLOCK-UNTIL G6-C-F1, F2, F3, F8`** against `28bde27`
 (this increment's own three commits), plus `G6-C-F4`/`F5`/`F6`/`F7` (medium/low). All eight are fixed
 here. `G6-F1` (`_pop_snapshot` assigns before the guarded save) is carried, not fixed — unchanged
 from §6 above.
@@ -220,7 +220,7 @@ from §6 above.
 |---|---|---|
 | `G6-C-F1` | HIGH | Fixed. `mapper/screens/factory.py::_persist` was reached from `action_edit_doc`/`action_import_office` with no guard at all. Routed through the new shared helper (see F2); `action_edit_doc`'s `EditorScreen` callback now coerces `Document.source`, and `action_import_office`'s `rel` (built from operator-typed path text) is coerced before it reaches the graph. |
 | `G6-C-F2` | HIGH | Fixed. Every guard (the pre-existing one, this increment's six, `G6-C-F1`'s and `G6-C-F3`'s) interpolated `str(e)` into an operator-facing toast — an `OSError`'s own message embeds the full path and, on Windows, the account name, exactly the leak `B-30` already closed for `store.load` (`store.py` ~594-599). All eight now share one helper, `mapper/app.py::_save_or_toast`, whose toast names the map id and the exception TYPE only, both through `darkside.plain()`. Spanish wording unchanged (Inc-EN/`B-71` still owns translating it). |
-| `G6-C-F3` | HIGH | Fixed, and this record's §1 corrected in place (a note appended above the false sentence, not a rewrite). `MapScreen.on_mount`'s `map_id == "new"` branch was an 8th, unguarded `store.save()` call site this increment's own "every ... call site" claim missed. Guarded via the shared helper. A census test (`ast`-derived, walks `mapper/` for every `store.save(`-shaped call and asserts each sits in the helper or a `try`) now guards the invariant going forward — it found exactly this site and `G6-C-F1`'s, unguarded, when run against `65621f3`. |
+| `G6-C-F3` | HIGH | Fixed, and this record's §1 corrected in place (a note appended above the false sentence, not a rewrite). `MapScreen.on_mount`'s `map_id == "new"` branch was an 8th, unguarded `store.save()` call site this increment's own "every ... call site" claim missed. Guarded via the shared helper. A census test (`ast`-derived, walks `mapper/` for every `store.save(`-shaped call and asserts each sits in the helper or a `try`) now guards the invariant going forward — it found exactly this site and `G6-C-F1`'s, unguarded, when run against `28bde27`. |
 | `G6-C-F4` | MEDIUM | Fixed. `ImportPreviewScreen.action_save`'s "guardar como" name reached `store.save(name, ...)` uncoerced — the one mutation site `A-111`'s statement 1 missed. Coerced with `darkside.plain()` before the guarded save. |
 | `G6-C-F5` | LOW | Fixed. `Edge.label`, set raw by `mermaid.parse` straight from the `.mmd` text, never passed through `A-111`'s ladder (scoped to sidecar text positions). Coerced at the same site, in `mermaid.parse` itself. |
 | `G6-C-F6` | LOW | Fixed. An mmd-only ("orphan") node — the sidecar carries no entry for it at all — never entered `_graph_from_sidecar`'s per-node loop, so its `Ficha` (title set raw by `mermaid.parse`) skipped every coercion. A post-loop pass now coerces every node not already covered by the sidecar loop. |
@@ -230,12 +230,12 @@ from §6 above.
 
 ### Commits
 
-- `943e808` — `G6-C-F1`/`F2`/`F3`/`F4`: shared `_save_or_toast` helper, guard the 8th call site,
+- `159fdbd` — `G6-C-F1`/`F2`/`F3`/`F4`: shared `_save_or_toast` helper, guard the 8th call site,
   coerce the "guardar como" name. Touches `mapper/app.py`, `mapper/screens/factory.py`, and 5 of the
   12 new test arms (F1, F2, F3×2, F4).
-- `3db2216` — `G6-C-F5`/`F6`: coerce `Edge.label` and mmd-only orphan node fichas. Touches
+- `0605c39` — `G6-C-F5`/`F6`: coerce `Edge.label` and mmd-only orphan node fichas. Touches
   `mapper/mermaid.py`, one hunk of `mapper/store.py` (the post-loop coercion), and 2 more arms.
-- `6c205d6` — `G6-C-F7`/`F8`: CRLF regression fix and the two-phase write + mismatch check. Touches
+- `a1f619c` — `G6-C-F7`/`F8`: CRLF regression fix and the two-phase write + mismatch check. Touches
   the remaining hunks of `mapper/store.py`, and the last 5 arms.
 
 Consolidated from the requested seven-point sequence (F2+F3, then F1, F4, F7, F8, then F5/F6, then
@@ -249,7 +249,7 @@ here rather than claimed as the full seven-commit sequence.
 
 ### RED-before evidence
 
-All 12 new arms were run against `65621f3` (source files reverted via `git stash`, keeping only the
+All 12 new arms were run against `28bde27` (source files reverted via `git stash`, keeping only the
 new test file) before any fix landed:
 
 ```
@@ -270,7 +270,7 @@ FAILED test_g6c_f8b_failure_between_replaces_is_warned_on_next_load - no mismatc
 ```
 
 (11 failed, not 12: `test_g6c_f7_tab_cjk_emoji_round_trip_byte_identical`, the negative control, was
-already green against `65621f3` — it asserts nothing the fix changes.) The census's own failure list
+already green against `28bde27` — it asserts nothing the fix changes.) The census's own failure list
 is the exact defect population: `mapper\app.py:1468` (`G6-C-F3`) and `mapper\screens\factory.py:153`
 (`G6-C-F1`), not a fixture artefact.
 
@@ -324,7 +324,7 @@ python -m pytest tests/test_no_operator_paths.py tests/test_fold.py -q
 1320 passed, 20 deselected, 3 xfailed in 967.37s (0:16:07)
 ```
 
-Reconciled against the batch's stated baseline at `65621f3` (**1308 passed, 20 deselected, 3
+Reconciled against the batch's stated baseline at `28bde27` (**1308 passed, 20 deselected, 3
 xfailed, 0 failed**): this pass adds exactly 12 new nodes (`tests/test_g6_store_surrogates.py`'s
 `test_g6c_*` functions) and touches no other test file, so `1308 + 12 = 1320` reconciles exactly, not
 approximately. **0 failed.** Neither `FLAKE-1`
@@ -365,4 +365,4 @@ tests/test_fold.py: 19 passed, 3 xfailed
 - `G6-C-F1`..`F8` — the independent security review's findings this corrective pass closes
   (`BLOCK-UNTIL G6-C-F1, F2, F3, F8`, plus `F4`/`F5`/`F6`/`F7`).
 - `G6-F1` — carried, not fixed (unchanged).
-- Commits `943e808`, `3db2216`, `6c205d6` — the corrective pass itself.
+- Commits `159fdbd`, `0605c39`, `a1f619c` — the corrective pass itself.

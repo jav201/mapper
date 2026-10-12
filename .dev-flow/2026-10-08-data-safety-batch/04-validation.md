@@ -6,7 +6,7 @@
 
 ## ✅ Verdict (read first)
 
-- **Result:** `PASS-WITH-NOTES` — one complete gate run on `cab8181`: `2920 passed, 24 deselected, 3 xfailed in 1497.08s`, `EXIT_CODE=0`; notes = the accepted residuals A-13…A-15 and F5, and the external `V7` flow-bundle block.
+- **Result:** `PASS-WITH-NOTES` — one complete gate run on `4b8b103`: `2920 passed, 24 deselected, 3 xfailed in 1497.08s`, `EXIT_CODE=0`; notes = the accepted residuals A-13…A-15 and F5, and the external `V7` flow-bundle block.
 - **Layer 0:** mutation batteries in every increment that changed product code (Inc-1a 15/15 killed; Inc-1b 46 killed + 2 crashed, both since named-killed; Inc-1c/Inc-2 one RED per unit; Inc-3 and Inc-4 with declared, reasoned survivors) — see §Layer 0.
 - **Requirements:** `36`/`36` (9 HLR + 27 LLR) verified · `0` blocker fails.
 - **Black-box acceptance (Layer B):** every story has its AT observed through the shipped surface (Textual pilot, real keys, sha256 of `.mmd` / `_nodos.yml`); declared exceptions: AT-002a, AT-013 (Layer-A injection), AT-008 (test instrument), AT-042 (multi-arm reconciliation, ledger `.67`).
@@ -35,7 +35,7 @@
 
 ## Gate run every test row defers to
 
-- Executed by: **orchestrator** (Claude Opus 5.5), the ONE complete gate-suite run (C-25), on commit `cab8181`.
+- Executed by: **orchestrator** (Claude Opus 5.5), the ONE complete gate-suite run (C-25), on commit `4b8b103`.
 - Command: `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` → `2920 passed, 24 deselected, 3 xfailed in 1497.08s`, EXIT_CODE=0.
 - Transcript: `.dev-flow/2026-10-08-data-safety-batch/evidence/p4-gate-run.transcript`.
 - Every `Result: pass` below means: the named node ids were collected in that gate run and passed there. Node ids were resolved by unit V1 with `python -B -m pytest --collect-only -q -p no:cacheprovider <file> [-k <name>]` (outputs cited per row; `T/` below = `tests/`, repo-relative).
@@ -43,8 +43,8 @@
 
 ## Layer A — functional (white-box): per-requirement results
 
-> `Result` = pass in the orchestrator's gate run (commit `cab8181`), except inspection rows, whose
-> evidence is the named grep/inspection command executed by unit V1 (2026-10-09) against commit `cab8181`.
+> `Result` = pass in the orchestrator's gate run (commit `4b8b103`), except inspection rows, whose
+> evidence is the named grep/inspection command executed by unit V1 (2026-10-09) against commit `4b8b103`.
 > Provisional `-k` selectors from `01-requirements.md` are resolved to exact on-disk node ids;
 > `params` are shown as `[p1|p2|…]`. Inspection rows name file:line and the observable condition.
 
@@ -61,7 +61,7 @@
 | HLR-009 | test | `T/test_help_scope.py::test_hlr_n16_4_legend_declares_its_own_keys[size0\|size1\|size2]`; `T/test_help_scope.py::test_at_008_the_own_keys_loop_is_deterministic_under_a_late_scroll[size0\|size1\|size2]`; `T/test_help_scope.py::test_e3_the_own_keys_are_visible_at_rest_and_at_the_end[size0\|size1\|size2]`; `T/test_en7.py::test_the_painted_legend_ends_with_the_rule[size0\|size1]`; `T/test_en7.py::test_the_painted_legend_ends_with_the_rule_under_a_late_scroll[size0\|size1]` | exit 0; own-keys loop reports no `work but not painted` under the late-scroll fixture | pass | gate run; `--collect-only tests/test_help_scope.py tests/test_en7.py tests/test_repair_layout.py \| grep -i 'n16_4\|own_keys\|legend_ends_with_the_rule\|at_008'`; the committed node's RED side is the spike counterfactual `spike/red_green_flake2.py` (2/2), not a second gate run — per the contract, one committed node cannot be both RED and GREEN | orchestrator |
 | LLR-001.1 | test (unit) | `T/test_inspector.py::test_llr_001_1_draft_surface_is_a_copy_and_clears` | exit 0; `draft_values()` returns a copy, `has_draft()` false after `clear_draft()` | pass | gate run; `-k draft` on `T/test_inspector.py` (10 nodes; this is one) | orchestrator |
 | LLR-001.2 | test (unit) | `T/test_inspector.py::test_llr_001_2_draft_updates_on_every_keystroke_and_posts_no_save`; `T/test_inspector.py::test_llr_001_2_a_stale_change_from_a_re_pointed_input_is_dropped` | exit 0; blur/submit/keystroke post no `FieldCommitted` and write nothing; stale change dropped | pass | gate run; `-k draft` on `T/test_inspector.py` | orchestrator |
-| LLR-001.3 | inspection | `grep -rn 'FieldCommitted\|field_committed' --include='*.py' mapper tests` → **0 hits** (re-run by unit V1 on commit `cab8181`; pre-state was 17 lines per the contract) | 0 references post-increment | pass | command above, executed 2026-10-09 by unit V1 | unit V1 |
+| LLR-001.3 | inspection | `grep -rn 'FieldCommitted\|field_committed' --include='*.py' mapper tests` → **0 hits** (re-run by unit V1 on commit `4b8b103`; pre-state was 17 lines per the contract) | 0 references post-increment | pass | command above, executed 2026-10-09 by unit V1 | unit V1 |
 | LLR-001.4 | test (integration) | `T/test_draft_save.py::test_llr_001_4_one_ctrl_s_is_one_store_save`; seat row present: `mapper/keymap.py:184` `KeyBinding("ctrl+s", "ctrl+s", "save_draft", "save", "node")` | exit 0; one `ctrl+s` = one `store.save` call | pass | gate run; `-k save` on `T/test_draft_save.py` (45 nodes; this is one); seat row verified by `grep -n 'save_draft\|ctrl+s' mapper/keymap.py` | orchestrator |
 | LLR-002.1 | test (unit) | `T/test_inspector.py::test_llr_002_1_dirty_is_against_the_shown_value_plain_alters_title`; `T/test_inspector.py::test_llr_002_1_dirty_is_measured_against_plain_not_the_raw_title`; `T/test_inspector.py::test_llr_002_1_dirty_is_against_the_shown_value_unknown_state` | exit 0; `plain()`-coerced title equal to stored ⇒ not dirty on open; unknown stored state shows `ok`, not dirty | pass | gate run; `-k dirty` on `T/test_inspector.py` (3 nodes) | orchestrator |
 | LLR-002.2 | test (unit) | `T/test_inspector.py::test_llr_002_2_markers_update_without_remounting_the_focused_field`; `T/test_draft_save.py::test_at_003_header_counts_unsaved_fields_and_marks_each` | exit 0; N equals the dirty-field count; markers update without remounting the focused `Input` | pass | gate run; the contract's provisional `-k unsaved tests/test_inspector.py` resolves to **0 nodes** (minted node name carries `markers`); the minted node is at `T/test_inspector.py:502` (`grep -n 'def test_llr_002_2'`), and `-k unsaved` on `T/test_draft_save.py` resolves to `test_at_003_…` | orchestrator |
@@ -74,7 +74,7 @@
 | LLR-004.1 | test (integration) | `T/test_draft_save.py::test_llr_004_1_one_snapshot_and_one_write_per_multi_field_save` | exit 0; one save adds exactly one `_snapshots` entry and one `store.save` | pass | gate run; `-k one_snapshot` on `T/test_draft_save.py` (1 node) | orchestrator |
 | LLR-004.2 | test (integration) | `T/test_draft_save.py::test_at_002a_failed_save_reloads_from_disk[zero_files\|both_files]`; `test_llr_004_2_failure_restores_the_undo_stack_exactly_at_depth`; `test_llr_004_2_reload_raises_restores_the_pre_save_graph_without_a_write`; `test_llr_004_2_a_save_failure_names_ctrl_s_to_retry`; `test_llr_004_2_a_draft_on_a_vanished_node_is_dropped_with_a_warning`; `test_llr_004_2_failure_clears_focus_and_rebuilds_nav`; `test_llr_004_2_a_reload_that_carries_the_drafted_state_turns_it_clean` | exit 0; zero-files arm: files byte-identical, fields still dirty; both-files arm: files carry the edit, draft empty; hash pair changes ≤ once; undo stack depth restored | pass | gate run; `-k failure` on `T/test_draft_save.py` (3 nodes) plus the remaining `test_llr_004_2_*` from the file collect (7 total) | orchestrator |
 | LLR-004.3 | test (integration) | `T/test_draft_save.py::test_at_009_undo_leaves_the_draft_and_recomputes_the_markers`; `test_llr_004_3_undo_with_an_empty_stack_keeps_the_draft` | exit 0; after `u` markers are re-diffed against restored stored values; the pending draft survives | pass | gate run; `-k undo` on `T/test_draft_save.py` (3 nodes; 2 cited — `test_llr_004_2_failure_restores_the_undo_stack_exactly_at_depth` also matched and is cited under LLR-004.2) | orchestrator |
-| LLR-004.4 | inspection | save call site is whole-graph: `mapper/store.py:809` `def save(self, map_id: str, graph: Graph)`; no partial-write path: `grep -rn 'save_field' --include='*.py' mapper` → **0 hits** (re-run by unit V1 on commit `cab8181`); white-box pinning node: `T/test_draft_save.py::test_llr_004_4_ctrl_s_under_focus_writes_the_whole_map` | 0 new partial-write call sites | pass | commands above, executed 2026-10-09 by unit V1; node passed in the gate run | unit V1 (inspection) + orchestrator (pinning node) |
+| LLR-004.4 | inspection | save call site is whole-graph: `mapper/store.py:809` `def save(self, map_id: str, graph: Graph)`; no partial-write path: `grep -rn 'save_field' --include='*.py' mapper` → **0 hits** (re-run by unit V1 on commit `4b8b103`); white-box pinning node: `T/test_draft_save.py::test_llr_004_4_ctrl_s_under_focus_writes_the_whole_map` | 0 new partial-write call sites | pass | commands above, executed 2026-10-09 by unit V1; node passed in the gate run | unit V1 (inspection) + orchestrator (pinning node) |
 | LLR-005.1 | test (unit) | `T/test_inspector.py::test_llr_005_1_enter_leaves_the_field_and_keeps_the_draft` | exit 0; `↵` produces no write and focus leaves the field | pass | gate run; `-k enter` on `T/test_inspector.py` (1 node) | orchestrator |
 | LLR-005.2 | test (integration) | `T/test_draft_save.py::test_llr_005_2_fill_in_hint_reads_the_save_glyph_from_the_seat` | exit 0; the hint reads `ctrl+s save` from the seat | pass | gate run; `-k hint` on `T/test_draft_save.py` (6 nodes; this is the LLR-005.2 one; `test_llr_003_1_the_hint_*` belong to LLR-003.1) | orchestrator |
 | LLR-006.1 | test (unit) | `T/test_inspector.py::test_llr_006_1_state_change_updates_the_draft_and_writes_nothing` | exit 0; a `state` change writes nothing until the save gesture | pass | gate run; `-k state` on `T/test_inspector.py` (7 nodes; this is one) | orchestrator |
@@ -99,7 +99,7 @@ Provisional-selector divergences reconciled while resolving (not gaps — the mi
 ## Layer B — black-box acceptance and surface matrix (V2)
 
 > Batch `2026-10-08-data-safety-batch`, repo **mapper**. Unit V2 — 04-validation (drafting unit).
-> Gate-suite GREEN is the ORCHESTRATOR's single P4 run on commit `cab8181`:
+> Gate-suite GREEN is the ORCHESTRATOR's single P4 run on commit `4b8b103`:
 > `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` →
 > `2920 passed, 24 deselected, 3 xfailed in 1497.08s`, EXIT_CODE=0
 > (`.dev-flow/2026-10-08-data-safety-batch/evidence/p4-gate-run.transcript`, tail).
@@ -201,7 +201,7 @@ real keys. **No gaps.**
 ## Layer 0, ledger, UX walkthrough, gaps, evidence checklist (V3)
 
 > **Mode:** validation. **Author:** drafted by unit V3 (Kimi `kimi-code/kimi-for-coding`), evaluated by the `qa-reviewer` agent (read-only; consumed the orchestrator's run); the orchestrator (Claude Opus 5.5) owns the gate run and writes `04-validation.md`.
-> Every result below names its executor. Paths are repo-relative. Gate run: orchestrator, commit `cab8181`, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` → `2920 passed, 24 deselected, 3 xfailed in 1497.08s`, EXIT_CODE=0; transcript `.dev-flow/2026-10-08-data-safety-batch/evidence/p4-gate-run.transcript` (tail read above).
+> Every result below names its executor. Paths are repo-relative. Gate run: orchestrator, commit `4b8b103`, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider` → `2920 passed, 24 deselected, 3 xfailed in 1497.08s`, EXIT_CODE=0; transcript `.dev-flow/2026-10-08-data-safety-batch/evidence/p4-gate-run.transcript` (tail read above).
 
 ## 1 · Layer 0 / mutation summary per increment
 
@@ -228,7 +228,7 @@ RED counterfactuals (base-tree swaps, all digest-restored): Inc-3 S1-imm settle-
 
 | Step | base | − D | + A | = post | Evidence | Executor |
 |---|---|---|---|---|---|---|
-| Batch start (Inc-3 base) | 2800 | 0 | — | 2800 | `--collect-only` at `fc2e4c9`: `2800/2824 collected (24 deselected)` (`increment-001.md` line 188) | `software-dev` unit |
+| Batch start (Inc-3 base) | 2800 | 0 | — | 2800 | `--collect-only` at `3328c8f`: `2800/2824 collected (24 deselected)` (`increment-001.md` line 188) | `software-dev` unit |
 | Inc-3 | 2800 | 0 | 8 | 2808 | `increment-001.md` line 188 | `software-dev` unit |
 | Inc-1a | 2808 | 0 | 23 | 2831 | `increment-002.md` line 187 | `software-dev` unit |
 | Inc-1b | 2831 | 1 | 57 | 2887 | `increment-003.md` line 245 | `software-dev` unit |
@@ -272,7 +272,7 @@ Mode: **validation**. Executor naming: each executed result names the orchestrat
 - ✓ **Test cases have explicit Expected, not vague "works".** — exact-sentence oracles (`title_follows_the_ruled_wording`, `increment-002.md` line 134), hash-pair oracle on emitted files (`increment-003.md` line 181), per-node verdict granularity.
 - ✓ **Edge cases include empty, boundary, invalid, error.** — F1 empty title (`llr_003_1_an_empty_title_renders_empty_guillemets`), boundary arms DDR D1 (`test_ddr_esc_search`, `test_ddr_same_map_link`, `test_ddr_archive_own`, `increment-006.md` §1), E-2 failure seam incl. `reload_raises` / `vanished_node` (`increment-003.md` line 291), hostile ESC/markup/surrogate title payloads (`increment-002.md` line 65).
 - ✓ **Regression checklist exists.** — design §5.3 regression census executed: `16 failed, 271 passed` on base tests (`increment-003.md` line 99); reverse census probes per packet (Inc-3: 5, Inc-1a: 6, Inc-1b: 5).
-- ✓ **Exit criteria stated.** — gate criterion: one complete green lane (C-25), executed by the orchestrator at `cab8181` → EXIT_CODE=0 (`evidence/p4-gate-run.transcript`).
+- ✓ **Exit criteria stated.** — gate criterion: one complete green lane (C-25), executed by the orchestrator at `4b8b103` → EXIT_CODE=0 (`evidence/p4-gate-run.transcript`).
 - ✓ **No profile path, account name or secret** (`human:username_subject` is a deliberate attribution) — fixtures only (`fixtures/`, tmp paths); transcripts path-scrubbed to `<USERPROFILE>` per guard A-110 (`increment-001.md` line 133 et al.); no operator name or profile path appears in any artifact.
 - ✓ **Mode declared.** — `validation`, at the top of this fragment; seven-state vocabulary used (`executed` · `approved` · `not-run` for the evaluation with users).
 - ✓ **Every executed result NAMES its executor.** — attribution column in the ledger table; mutation table; UX-1 (`ux-reviewer`), C14 smoke (`human:username_subject`), gate (orchestrator), increments (`software-dev` units / orchestrator / Kimi units).

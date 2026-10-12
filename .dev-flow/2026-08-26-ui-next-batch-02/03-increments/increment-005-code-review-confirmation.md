@@ -2,7 +2,7 @@
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-5`
 **Confirming against:** `increment-005-code-review.md` (**BLOCK — 1 HIGH**, findings `F1`-`F7`)
-**Reviewed:** the UNCOMMITTED post-fix working tree at the five pinned sha256s, against `90e2a3f`.
+**Reviewed:** the UNCOMMITTED post-fix working tree at the five pinned sha256s, against `54145dd`.
 **Reviewer:** independent of both the implementer and the round-1 reviewer. Nothing was accepted on
 the strength of the corrective pass having run; every finding was re-executed with a harness built
 from scratch for this pass.
@@ -312,11 +312,11 @@ Both lanes run once each, from the tree sha256-pinned before the run and re-pinn
 | `44 arms, zero skipped` | 44 resolved node ids, 44 PASSED; zero `skipped` in either full lane | **TRUE** |
 | census `argful 59, zeroarg 26, defs 7` | re-derived from `render_call_sites()` / `render_definitions()`: `argful 59 zeroarg 26 defs 7` | **TRUE** |
 | the pin did not move because `selected` is a defaulted parameter | the module's only arg-ful site is `('tests/test_views_hits.py', 79)` — one site, as claimed | **TRUE** |
-| ruff SET `27 = 27`, zero NEW, zero GONE | `ruff check mapper tests` = **27**, and `ruff check` over all five touched paths = **All checks passed** — so the delta from `90e2a3f` is empty in both directions. `90e2a3f`'s own 27 / SET-identity to `9ba2f26` is Inc-4c's pinned figure, which I did not re-derive | **TRUE for this increment's delta** |
+| ruff SET `27 = 27`, zero NEW, zero GONE | `ruff check mapper tests` = **27**, and `ruff check` over all five touched paths = **All checks passed** — so the delta from `54145dd` is empty in both directions. `54145dd`'s own 27 / SET-identity to `a6dc8d7` is Inc-4c's pinned figure, which I did not re-derive | **TRUE for this increment's delta** |
 | `898 = 887 − 1 + 12` | consistent with 33 → 44 arms and the retired agree-arm | **TRUE** |
 
 **A methodology warning for whoever re-runs the ruff comparison.** Comparing ruff across directories
-is not valid here. Linting a `git archive` of `9ba2f26` extracted outside the repository enables an
+is not valid here. Linting a `git archive` of `a6dc8d7` extracted outside the repository enables an
 extra rule family (`I001`/`I002`) inherited from an ancestor configuration that the repository
 directory does not resolve — 70 findings there against 27 here, and a spurious "NEW `I001` in
 `tests/test_views_hits.py`". `--show-settings` shows the two rule sets differing. Any future SET

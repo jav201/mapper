@@ -1,6 +1,6 @@
 # Typed-input safety flow — mapper — Batch 2026-08-26-ui-next-batch-02
 
-> Phase 6 diagram. Every node that names code names a real symbol at HEAD `46e190b` (grep-verified). Owner role: `docs-writer` — drafted by `deepseek-v4-pro`, verified by the orchestrator.
+> Phase 6 diagram. Every node that names code names a real symbol at HEAD `2eaabf3` (grep-verified). Owner role: `docs-writer` — drafted by `deepseek-v4-pro`, verified by the orchestrator.
 
 ```mermaid
 flowchart TD

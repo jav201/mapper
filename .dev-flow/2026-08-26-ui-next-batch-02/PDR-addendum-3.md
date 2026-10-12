@@ -361,7 +361,7 @@ then picked `MUT` twice.
 | Sealed decisions re-opened | `#D5b` (by `#D25`, scope stated; figure re-labelled a pin) |
 | Open, referred | **none** — `UX2-C-01`/`UX2-C-02` ruled; deferral accepted with riders (`B-36`) |
 | New backlog carries | `B-34` `B-35` `B-36` `B-37`; `B-31` mechanism withdrawn |
-| Base | `master` `20f86de` |
+| Base | `master` `ea7693a` |
 
 ---
 

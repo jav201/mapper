@@ -6,7 +6,7 @@
 | **Mode** | **`validation`** — a verdict over results. Every item below carries one of the seven evidence states and names its executor |
 | Batch | `2026-08-26-ui-next-batch-02` (sealed) |
 | Scope | `CR17-F6` (increment-017 pass 2 §4; `01-requirements.md` amendment set 11 / `A-100.6`) and `tests/test_export_state.py::test_the_SAME_map_is_admitted_or_refused_by_the_TERMINAL` + the `EXPORT_MAX_CELLS` docstring. Nothing wider |
-| Mirror | `…\scratchpad\mirror-f6-2nd` at `479892e`. **Every digest held** (below) |
+| Mirror | `…\scratchpad\mirror-f6-2nd` at `e8b46ba`. **Every digest held** (below) |
 | Date | 2026-09-19 |
 | **This report authorises nothing.** | I am not an approver. `software-dev` implements; the coordinator rules |
 
@@ -37,7 +37,7 @@
 
 ## 1 · Mirror, traps, digests — every digest HELD
 
-Mirror `…\scratchpad\mirror-f6-2nd` (tracked tree at `479892e`, `git init` + one commit inside).
+Mirror `…\scratchpad\mirror-f6-2nd` (tracked tree at `e8b46ba`, `git init` + one commit inside).
 
 | Pin | Value | Before | After |
 |---|---|---|---|

@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Batch | `2026-08-27-repair-batch-02` |
-| Branch | `fix/repair-batch-02` @ `8675151` |
-| Base ref | `d877784` (`origin/master`) |
+| Branch | `fix/repair-batch-02` @ `0353909` |
+| Base ref | `bd17fab` (`origin/master`) |
 | Reviewed | 2026-08-27 |
 | Reviewer | `security-reviewer` (independent; did not author the change) |
 | **Verdict** | **CLEARED TO MERGE — no HIGH finding.** 3 MEDIUM, 4 LOW. `F1` (~6 lines) and `F2`'s comment correction recommended for fold-in before merge — `F1` falsifies the batch's own declared threshold. |
@@ -13,7 +13,7 @@
 
 ## Scope reviewed
 
-Working tree, uncommitted, against `d877784`:
+Working tree, uncommitted, against `bd17fab`:
 
 | File | Status | Reviewed |
 |---|---|---|
@@ -27,13 +27,13 @@ Working tree, uncommitted, against `d877784`:
 
 Also read as blast-radius context (unmodified): `mapper/app.py` (both `load` call sites and both `load_warnings` render sinks), `mapper/diff.py`, `mapper/darkside.py`, `mapper/model.py`, `pyproject.toml`, `.gitignore`.
 
-No repo file was edited and no git mutation was run. All experiments ran in a scratch directory against a copy of the tree; the base-commit comparisons used `git show d877784:mapper/store.py` into scratch.
+No repo file was edited and no git mutation was run. All experiments ran in a scratch directory against a copy of the tree; the base-commit comparisons used `git show bd17fab:mapper/store.py` into scratch.
 
 ---
 
 ## Executive summary
 
-This is a **good security batch**. Its central measurement reproduces exactly, the untrusted-input boundary is materially harder than it was at `d877784`, and the injection control the operator was most worried about (C-17) is genuinely armed at every reachable sink. I threw 24 hostile YAML shapes plus a YAML alias bomb at `_graph_from_sidecar` and got **zero** untyped escapes through it.
+This is a **good security batch**. Its central measurement reproduces exactly, the untrusted-input boundary is materially harder than it was at `bd17fab`, and the injection control the operator was most worried about (C-17) is genuinely armed at every reachable sink. I threw 24 hostile YAML shapes plus a YAML alias bomb at `_graph_from_sidecar` and got **zero** untyped escapes through it.
 
 The findings are on the **edges** of the repair, not its core:
 
@@ -226,10 +226,10 @@ No new path-bearing interpolation is introduced anywhere in the diff.
 
 **A 1 MB file freezes the UI for 70 seconds** and allocates 308 MB, at roughly 19× amplification.
 
-**This batch introduced it.** At `d877784` the identical input failed in O(1):
+**This batch introduced it.** At `bd17fab` the identical input failed in O(1):
 
 ```
-=== BASE d877784 behaviour on malformed attachments ===
+=== BASE bd17fab behaviour on malformed attachments ===
   [scalar entry]  UNTYPED TypeError: 'int' object is not subscriptable
 ```
 
@@ -261,10 +261,10 @@ Route the seven `load_warnings.append` sites through it. Note this changes the r
 > … `Measured (review Q1): schema/document item-scalars are denied typed; only`
 > `attachments carried the silent-loss class.`
 
-**Executed against `git show d877784:mapper/store.py`:**
+**Executed against `git show bd17fab:mapper/store.py`:**
 
 ```
-=== BASE d877784 behaviour on malformed attachments ===
+=== BASE bd17fab behaviour on malformed attachments ===
   [scalar entry]        UNTYPED TypeError: 'int' object is not subscriptable
   [str entry]           UNTYPED TypeError: string indices must be integers, not 'str'
   [null entry]          UNTYPED TypeError: 'NoneType' object is not subscriptable
@@ -274,7 +274,7 @@ Route the seven `load_warnings.append` sites through it. Note this changes the r
   [valid]               LOADED  attachments=1 warnings=[]
 ```
 
-**Nothing was silently discarded and the map did not load.** Every malformed attachment entry raised an *untyped* exception — the same outcome the comment attributes only to `schema`/`documents`. The observable asymmetry the comment calls "OBSERVABLE, not a preference" does not exist at `d877784`; all three families behaved identically.
+**Nothing was silently discarded and the map did not load.** Every malformed attachment entry raised an *untyped* exception — the same outcome the comment attributes only to `schema`/`documents`. The observable asymmetry the comment calls "OBSERVABLE, not a preference" does not exist at `bd17fab`; all three families behaved identically.
 
 **Why it matters.** The code is not thereby wrong — warn-and-continue for attachments is a defensible choice. But the recorded justification is false, in a batch whose own front matter states *"a map that lies is worse than a map that is merely stale."* And it is not inert: this is precisely the choice that creates `F4`, adopted on a measurement that does not hold.
 
@@ -389,7 +389,7 @@ Top-level list/scalar/null; anchors, aliases, merge keys, recursive aliases; `!!
 `mapper/app.py:1536` (`_pop_snapshot`) bypasses `load`'s guards, but its input is `yaml.safe_dump(self.store._build_sidecar(...))` — self-generated and already coerced, not attacker-shaped. `mapper/diff.py:59` bypasses them too but is wrapped in `except Exception: return None`. Neither is an untrusted-input crossing. (`diff.py:63`'s unguarded `store.load` is reported under `F1`.)
 
 **The `osopen` crossing — improved, not weakened. No finding.**
-The operator flagged `osopen` as the system's highest-risk crossing and the store as where its text originates, so I checked whether the coercion changes what reaches it. It does, favourably: `Attachment.kind` and `Attachment.path` are now guaranteed `str` at the boundary, where at `d877784` they were raw. Critically, **`osopen` does not depend on that guarantee** — it re-validates independently at `mapper/osopen.py:73` (`if not isinstance(target, str) or not target.strip()`) and rejects C0/C1 controls at `:81`, so the store's coercion is an added layer rather than the only one. Defense-in-depth is intact, and the store still imports nothing from `osopen` (§3 ban holds).
+The operator flagged `osopen` as the system's highest-risk crossing and the store as where its text originates, so I checked whether the coercion changes what reaches it. It does, favourably: `Attachment.kind` and `Attachment.path` are now guaranteed `str` at the boundary, where at `bd17fab` they were raw. Critically, **`osopen` does not depend on that guarantee** — it re-validates independently at `mapper/osopen.py:73` (`if not isinstance(target, str) or not target.strip()`) and rejects C0/C1 controls at `:81`, so the store's coercion is an added layer rather than the only one. Defense-in-depth is intact, and the store still imports nothing from `osopen` (§3 ban holds).
 
 One **behaviour change** worth recording, which the batch does not mention. A sidecar with `path: 12345` (a YAML int) was refused at base with `REFUSED_TYPE` because `isinstance(target, str)` failed. It now coerces to `"12345"`, passes the type gate, and — if `<workspace>/12345` exists as a file — launches. **This grants no new capability:** the same sidecar author could always have written `path: "12345"` as a string and obtained exactly that result at base, and the confinement (`:120`), existence and not-a-directory (`:121`) checks all still run ahead of the launcher. So it is a change in which *malformed* inputs reach the guard, not a change in what the guard permits. Recording it because it is a live behaviour change at the crossing the map calls highest-risk, and it belongs in the batch's record rather than being discovered later.
 
@@ -465,7 +465,7 @@ Stated plainly so a later reader does not mistake absence for clearance.
 | Verdict is explicit | ✓ | **CLEARED TO MERGE**, no HIGH |
 | New tool/integration scope + blast radius addressed | ✓ | **N/A and stated** — this batch adds no MCP/Composio/n8n/third-party/network/subprocess surface; `pyproject.toml` untouched; one stdlib import added |
 | Injection control C-17 traced to every render site | ✓ | Two sinks (`app.py:461`, `app.py:1156`), both `plain` + `markup=False`, verified with a live ESC/OSC-52/markup payload |
-| Base-commit claims independently re-measured | ✓ | `git show d877784:mapper/store.py` into scratch; census reproduces (`ProgrammingError`×3 + `TypeError`×1); `_mappings` rationale does not (`F5`) |
+| Base-commit claims independently re-measured | ✓ | `git show bd17fab:mapper/store.py` into scratch; census reproduces (`ProgrammingError`×3 + `TypeError`×1); `_mappings` rationale does not (`F5`) |
 | No repo file edited, no git mutation run | ✓ | Only this file written; all experiments in scratch |
 | Acceptance evidence independently mutation-tested | ✓ | Addendum below; 517 passed / 17 slow passed; one result promoted to `F7` |
 

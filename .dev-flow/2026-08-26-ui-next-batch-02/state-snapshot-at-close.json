@@ -42,7 +42,7 @@
       "mode": "full",
       "opened_at": "2026-08-26",
       "closed_at": "2026-08-27",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
     },
     {
@@ -107,7 +107,7 @@
         "behaviour_change": "HLR-N06.3 -- GATED. outline and radial will paint a declaration of the nodes they do NOT show. This changes what the operator sees under overflow, which is why the coordinator required full protocol rather than the lighter lane.",
         "protocol": "FULL protocol, serial reviews, soft cap 3, terminal-boundary pattern available at the cap.",
         "seat_touching": "TBD at the pre-gate -- if a key or seat is involved, the whole-seat keymap spec + pinned row diff per seat is owed.",
-        "ordering": "After Inc-CRUMB (closed 9a773e4), before Inc-REPAIR.",
+        "ordering": "After Inc-CRUMB (closed 19a5921), before Inc-REPAIR.",
         "pregate_2026-09-10": {
           "verdict": "CUT BLOCKED -- the recorded premise is refuted by measurement. Not implemented.",
           "reproduced": "outline 5/8 and radial 2/8 at 30x6 on `legacy` reproduce EXACTLY on today's tree. The recorded numbers hold.",
@@ -154,7 +154,7 @@
         "reason": "A-93's population was WRONG and it was wrong in MY direction. I distrusted the recorded note (correct) and replaced it with a class census that could not see REACHABILITY (incorrect). lane.py's three renderers are constructed nowhere: app.py:1201-1203 builds exactly Layered/Outline/Radial, _current_renderer (app.py:1695-1700) returns one of those three, and no lane renderer is referenced in mapper/ outside mapper/views/. A renderer no operator can reach hides nothing from anyone.",
         "inheritance_note": "HOW lane.py ENTERED THE CUT, and it is a new exhibit for the declaration family: 01-requirements.md:5985 cuts Inc-5 at outline/radial/lane for HIT PAINTING; B-55 was routed to Inc-5 at :8555 because it 'already owns all three of those files'; B-55 then inherited the FILE LIST rather than the SCOPE. A CUT COPIED FROM A NEIGHBOUR IS A SPELLING TOO -- it drifts from what it was copied for, and nothing makes it agree.",
         "lane_obligation_pointer": "NOT dropped, PINNED. tests/test_inc3_census.py::test_a89_the_reached_set_is_pinned_so_wiring_lane_up_pulls_it_in (:229-246) holds the reached renderer set as an EQUALITY, so whichever increment ever wires a lane renderer into app.py goes RED and inherits the painted_ids obligation -- including the open question of how ONE module-level function serves THREE geometries. Recorded here so the pointer cannot evaporate between increments.",
-        "ordering": "Inc-B55a then Inc-B55b, after Inc-CRUMB (9a773e4), before Inc-REPAIR.",
+        "ordering": "Inc-B55a then Inc-B55b, after Inc-CRUMB (19a5921), before Inc-REPAIR.",
         "protocol": "FULL protocol, serial reviews, soft cap 3.",
         "sequencing_within_b55a": "The app.py:1601 hazard is fixed FIRST, before the declaration is wired through that seam.",
         "ruling_2_hazard_first": {
@@ -313,7 +313,7 @@
             "verified": "Byte-level mutants with sha256 restore: over-cut RED on the pilot / GREEN on AT-056 (reproducing F3 independently); under-cut RED on the pilot, where previously only a golden hash caught it."
           },
           "LOW_carried": "F5 the third loop pass is unreachable (200k trials, max 2 passes) so its documented degradation is unreachable too; F6 AT-058 hardcodes three renderers rather than deriving from A-89's pinned set; F7 the declaration SENTENCE is triplicated and unpinned across layered.py:395, outline.py:243 and app.py:2224 -- sharing the token was the easy half; F8 the cost note says 11999 is the largest graph outline renders and the bound is `>`, so 12000 renders.",
-          "reviewer_verified_for_me": "The _rows move is faithful line-by-line against 57fb403; the golden bless comment is exact to the character; _fit's Console is 87 microseconds per frame against ~150 ms of walks, so DO NOT cache it; _rendered_for has exactly two writers and they are the only two writers of #map-canvas; the A-98 tripwire was honoured rather than spent; tc_038 was strengthened."
+          "reviewer_verified_for_me": "The _rows move is faithful line-by-line against f5f1bd5; the golden bless comment is exact to the character; _fit's Console is 87 microseconds per frame against ~150 ms of walks, so DO NOT cache it; _rendered_for has exactly two writers and they are the only two writers of #map-canvas; the A-98 tripwire was honoured rather than spent; tc_038 was strengthened."
         },
         "F2_OPEN_FOR_COORDINATOR": {
           "finding": "At 8 reachable terminal sizes outline hides EVERY node and the canvas declares nothing, while the strip does. AT-056 and AT-057 drive none of them.",
@@ -339,7 +339,7 @@
           },
           "F2_LOW_routed": "One file-derived row's PHYSICAL cost is unbounded: _fit prices each row with render_lines and breaks at the budget with no per-row ceiling, and darkside.plain deliberately passes TAB and LF and bounds no length. Fired: a single hostile root title (400 TABs, 50 LFs, or 200k chars) paints 0 of 9 nodes at 80x24. LOW because the frame DOES NOT LIE -- it declares all 9 hidden and the strip agrees -- and because it is not a regression: pre-increment the compositor clipped those rows anyway and nothing declared them. TAB is the realistic vector and needs no hostility, just a pasted label. Routed to Inc-REPAIR with the reviewer's suggested per-row ceiling.",
           "F3_LOW_routed": "render and painted_ids each walk every node and run up to three _fit passes, a measured ~2x amplification (200k title: 65 + 68 ms). Scaling is linear -- the reviewer found NO input family making render_lines super-linear, including combining-mark and astral sequences. Folds into the existing 150 ms painted_ids-walk carry.",
-          "verified_clean": "No coercion loss versus 57fb403 -- the two plain() sites are BYTE-IDENTICAL to the pre-increment file and no third site exists; render_lines on hostile Text is inert (Text parses no markup, _fit discards the output and uses only len(), Console writes to no stream); the new header declaration carries NO file-derived text and is bounded (wordmark + token + int + literal) -- which REFUTES the suspicion I handed the reviewer that it appends to the root title; LookupError is not data-reachable and its message never reaches the frame, because _pagination_text paints a fixed literal rather than str(exc); no secrets, network, subprocess, filesystem writes or new dependencies.",
+          "verified_clean": "No coercion loss versus f5f1bd5 -- the two plain() sites are BYTE-IDENTICAL to the pre-increment file and no third site exists; render_lines on hostile Text is inert (Text parses no markup, _fit discards the output and uses only len(), Console writes to no stream); the new header declaration carries NO file-derived text and is bounded (wordmark + token + int + literal) -- which REFUTES the suspicion I handed the reviewer that it appends to the root title; LookupError is not data-reachable and its message never reaches the frame, because _pagination_text paints a fixed literal rather than str(exc); no secrets, network, subprocess, filesystem writes or new dependencies.",
           "hostile_sweep": "T1: RLO, PDF, ZWSP, ZWJ, NUL, BEL, ESC-CSI, BOM, bidi isolates, TAG block, combining, astral, soft hyphen and TAB through render AND painted_ids at 100 sizes including w=1 and h=0 -- ZERO leaks.",
           "calibration": "The reviewer spot-checked five of my comment claims by firing them. FOUR held -- the physical-row cut, the fixed point settling, the declaration informing rather than manufacturing its own omission, and rows[0] being the renderer's own header. ONE did not: the P1-guard docstring, which is F1.",
           "could_not_determine": "Whether .mmd/.yml titles can contain LF (parsers not read; TAB and raw length carry F2 regardless); whether F1's operator-reachable variant actually lands (audit, not a negative experiment); whether rich has a super-linear grapheme regime not constructed (measured, not proven)."
@@ -383,7 +383,7 @@
           "verdict": "SIGN-OFF. 0 HIGH, 1 MEDIUM, 1 LOW, 7 verified-OK. No source mutation was needed -- every finding was fired read-only.",
           "coercion_delta": "NO LOSS, and a net gain in declaration honesty. The content coercion site count is 1 before and 1 after -- the same expression, moved only by the dedent. Fired: OSC-52 clipboard payload, U+E0020..U+E0024 TAG block, and U+202E bidi override through the frame AND the exported SVG. Residual control/format code points: NONE in either.",
           "S1_MEDIUM_carried": "A WIDE-CHARACTER TITLE FALSIFIES THE NEW DECLARATION. `darkside.plain` coerces CONTENT, not WIDTH, and radial sizes its pill with `len(title) + 3` -- a CODE-POINT count. An 18-code-point CJK title needs 36 display columns while the pill reserves 21; the ledger is keyed on grid coordinates, sees no collision, and declares the node painted. Fired on the composited screen at 30x20: the title wrapped onto a second physical row and the canvas declared NOTHING hidden. Worse than one unreadable label -- #map-canvas wraps, so an overflowing row consumes an extra physical row and can push the bottom row out of the region. That is B-61 through a content channel rather than an arithmetic one. Measured across renderers at 40x24 against inner=38: layered 38 (correct, it routes through darkside.fit which truncates on cell_len), outline 42, radial 41. Radial is the only renderer sizing with raw len().",
-          "S1_is_NOT_a_regression": "At 10fd573 `_painted_ids_for` returned None for radial, and LLR-N06.3.3 makes that silence mean 'nothing is hidden' -- THE SAME FALSE CLAIM, at every size, for every input. This increment narrows a universally-false declaration to one false only for wide-character titles at narrow terminals. The posture strictly improves, which is why it is a carry and not a block.",
+          "S1_is_NOT_a_regression": "At ca76a00 `_painted_ids_for` returned None for radial, and LLR-N06.3.3 makes that silence mean 'nothing is hidden' -- THE SAME FALSE CLAIM, at every size, for every input. This increment narrows a universally-false declaration to one false only for wide-character titles at narrow terminals. The posture strictly improves, which is why it is a carry and not a block.",
           "S2_LOW_carried": "`overflow_phrase` is a new cross-module sink with an annotation-only int contract. No live defect -- all three call sites pass set cardinalities, and the result lands in Text.append which parses no markup. Hardening: `int(hidden)` in the helper, so the contract is the function's own property rather than a promise three seams must keep.",
           "verified_OK": "Export path byte-identical and still coerced (painted_ids is not on it at all). Nothing file-derived escapes the new return path or the new dicts -- owners values and title_cells keys are node IDS, and no node id reaches a painted surface; an integer does. _paint is pure, no global/nonlocal, so the export call site cannot cross-contaminate -- the docstring's stated reason is now verified rather than asserted. The None-on-layout-failure invariant is TRUE for radial: on a cyclic graph painted_ids AND render both raise, so the silent strip sits beside a visibly failed canvas rather than a plausible-looking wrong one. The new fixture is plain ASCII, a strict subset of the existing corpus, and unreachable from the shipped app. The ledger is LINEAR -- O(21N), no pairwise term, owners bounded by the TERMINAL not the graph, and MAX_RENDER_NODES sits inside _paint so painted_ids short-circuits exactly as render does. No DoS.",
           "spot_checks": "THREE of my corrected numbers checked, ALL THREE HOLD: the 8-of-8 over-declaration at 30x6, the 50x16/30x16 body_h figures, and all three callers applying INK. The reviewer also re-verified the code review's HIGH as genuinely closed at 20x30 -- `erp` now correctly declared hidden where it had been declared painted with its last character shorn off.",
@@ -395,7 +395,7 @@
     "closed": [
       {
         "inc": "Inc-1",
-        "commit": "4eaba35",
+        "commit": "105d238",
         "date": "2026-08-28",
         "source_files": 4,
         "gates": "code-reviewer BLOCK on 1 HIGH -> fixed -> confirmation pass 'the HIGH is discharged, no HIGH survives' (0 HIGH); security-reviewer signed off",
@@ -407,12 +407,12 @@
       },
       {
         "inc": "Inc-2",
-        "commit": "fe50799",
+        "commit": "12e5645",
         "date": "2026-08-28",
         "source_files": 6,
         "source_files_note": "the breach #D5 declared and re-ratified at the re-scope; the gate is 'zero call sites of the old shape survive', so a partial migration leaves two contracts live at once",
         "gates": "code-reviewer BLOCK on 3 HIGH -> fixed -> confirmation pass discharged all three and raised 1 new HIGH -> fixed by RETRACTING a false premise -> narrow third pass: RETRACTION CORRECT, no HIGH, gate PASSES. No HIGH was ever self-cleared.",
-        "suite": "fast 719 passed / 17 deselected; slow 17 passed; ruff 28 (exactly the 4eaba35 baseline, zero new)",
+        "suite": "fast 719 passed / 17 deselected; slow 17 passed; ruff 28 (exactly the 105d238 baseline, zero new)",
         "ledger": "736 = 711 - 0 + 25, node ids enumerated against a detached worktree",
         "census": "AST not grep: 7 definitions, 35 arg-ful call sites, 25 zero-arg Textual sites, **kwargs 0, zero old-shape survivors incl. */** splat and positional. Cardinalities PINNED in the suite, narrated nowhere.",
         "battery": "rounds 7-11; round 7 208 arms, round 11 55 arms; per-arm verdicts; sha256 restore on up to 10 files after every mutant",
@@ -422,8 +422,8 @@
       },
       {
         "inc": "Inc-3",
-        "commit": "bdc4b6a",
-        "post_commit_verification": "The artifact code-point scan's non-vacuity clause used to be keyed on git TRACKING STATE, so it would have reddened on the very commit that landed this increment (measured: 91 artifacts, 84 tracked, 7 untracked). Re-asserted structurally with a probe file. VERIFIED ON THE COMMITTED TREE at bdc4b6a: 0 untracked artifacts, fast lane 801 passed exit 0, zero FAILED lines.",
+        "commit": "abbeb11",
+        "post_commit_verification": "The artifact code-point scan's non-vacuity clause used to be keyed on git TRACKING STATE, so it would have reddened on the very commit that landed this increment (measured: 91 artifacts, 84 tracked, 7 untracked). Re-asserted structurally with a probe file. VERIFIED ON THE COMMITTED TREE at abbeb11: 0 untracked artifacts, fast lane 801 passed exit 0, zero FAILED lines.",
         "date": "2026-08-28",
         "source_files": 6,
         "source_files_note": "DECLARED breach, widened from A-89's five to six by A-97: views/state.py was owed by two PDR-sealed LLRs (pan_x/pan_y at LLR-N06.1.1, folded at LLR-N06.2.1, all three 'NEW -- created in Phase 3') and named by no cut. Arithmetically true when A-89 was written; only the declaration was missing. NOT an A3 -- all three fields carry defaults, the additive case state.py's own docstring exempts.",
@@ -432,14 +432,14 @@
         "ledger": "821 = 737 - 0 + 84 all markers; 804 = 720 - 0 + 84 default lane. Deletions measured at zero against a detached git archive, not asserted.",
         "architect_ruling": "02j: HLR-N06.3 and LLR-N06.3.1 were keyed on a 'declared painted set' that NO requirement gave a mechanism. Ruled a module-level pure painted_ids(graph, state) in views/layered.py sharing one _geometry with render. IRenderer gains nothing, so trigger A3 does NOT re-fire and the sealed PDR stays sealed. The three rejected candidates each died on an executed measurement, not preference (A-98).",
         "headline_defect": "The recurring root cause was ONE number: the header's physical row count. HEADER_ROWS=2 rested on arithmetic that stops holding below avail=48 because BOTH header paddings clamp at 0. Fix 1 replaced it with ceil(len/(w-2)) -- pinned by a test that RE-TYPED the same formula, so the pin could not fail on a wrong divisor, on word-wrap, or on a wide character. Fix 2 measures by actually rendering (Console.render_lines at a measured wrap width) and pins against the COMPOSITED FRAME. Under-charge band 23 of 943 -> 0 on both fixtures, reproduced pre-fix on an independent instrument.",
-        "security": "SEC-F1 SchemaField.key reached the exported SVG uncoerced through the DEFAULT renderer (B-47 verbatim), missed by the increment's own census because its fixture set no graph.schema and legacy mode is selected by bool(graph.schema). SEC-F2 _minimap_text leaked a ficha title. Both DISCHARGED. F-A (HIGH) is PRE-EXISTING at 954f8f3: SchemaField.key is interpolated into a Textual widget id and kills the app on map open -- for hostile code points AND for benign Spanish keys. Confirmed to SUBSUME SEC-F1's attack (the session dies before any SVG is written). Routed to Inc-REPAIR with the obligation landed as an xfail(strict=True) arm whose XPASS(strict)->FAILED mechanism was reproduced.",
+        "security": "SEC-F1 SchemaField.key reached the exported SVG uncoerced through the DEFAULT renderer (B-47 verbatim), missed by the increment's own census because its fixture set no graph.schema and legacy mode is selected by bool(graph.schema). SEC-F2 _minimap_text leaked a ficha title. Both DISCHARGED. F-A (HIGH) is PRE-EXISTING at 909cc27: SchemaField.key is interpolated into a Textual widget id and kills the app on map open -- for hostile code points AND for benign Spanish keys. Confirmed to SUBSUME SEC-F1's attack (the session dies before any SVG is written). Routed to Inc-REPAIR with the obligation landed as an xfail(strict=True) arm whose XPASS(strict)->FAILED mechanism was reproduced.",
         "dependency": "pytest-timeout==2.3.1 added dev-only, pinned, coordinator-authorised. The cycle-guard regression arms failed BY HANGING, which in CI is a stuck run rather than a red report. timeout_method='thread' because Windows has no SIGALRM (verified, not assumed). Mutant N9 now yields exit 1 in 33s instead of wedging.",
         "carries_opened": "B-55 outline/radial hide nodes and declare nothing (5/8 and 2/8 at 30x6) -- routed to Inc-5, pinned by a participation census. B-56/B-60 CLOSED, not re-recorded. F-A/F-B/F-C routed to Inc-REPAIR. OutlineRail.render unguarded at compositor paint time (part-closes F-G). F-H MapStore.save->load not total. pass4 F1: the settle-chase's termination is MEASURED (max 5 passes over 943 configurations; storms and a forced oscillation both terminate) rather than asserted, over a live height:auto feedback path -- named fix is a 3-line pass counter, deliberately NOT taken post-gate because an unreviewed change after a passing gate is the self-clearing pattern this batch forbids.",
         "process_notes": "Two ORCHESTRATOR errors caught by the independent gates and recorded rather than quietly fixed: (a) the ruff gate was checked as an AGGREGATE, and an aggregate cannot see a swap -- one new F401 was exactly masked by one removal; (b) even set-wise the comparison had UNEQUAL SCOPE, because the base worktree carries prototypes/ which the work tree's .gitignore hides from ruff. Also: piping pytest through `tail` reports TAIL's exit status, which is how a run WITH a failure displayed 'exited with code 0'. A flaky arm was found by the orchestrator (1 failure in 11 runs on this tree, 0 in 6 at base -- attribution NOT claimed, since 6 runs cannot exclude the same rate) and fixed deterministically."
       },
       {
         "inc": "Inc-4a",
-        "commit": "68b1c09",
+        "commit": "326ac32",
         "date": "2026-08-29",
         "source_files": 4,
         "scope": "US-N07 search core -- one owner of 'what matches', ViewState.hits, the inline-predicate deletion, LLR-N07.1.3's pill tail, the count line on #map-pagination (#D37)",
@@ -452,7 +452,7 @@
       },
       {
         "inc": "Inc-4b",
-        "commit": "fcff836",
+        "commit": "851d84d",
         "date": "2026-08-29",
         "source_files": 2,
         "scope": "US-N07 seat + walk: the #D5b rebind (map/n->next_hit, map/N->prev_hit, map/M->next_gap), the n/N walk over the tree-ordered list, LLR-N06.2.4 fold auto-open, E1b/E1c toasts, the one-time rebind declaration, state-dependent esc (#D38), the seat-derived hint line, and the test_cd25a seat repair.",
@@ -468,12 +468,12 @@
       },
       {
         "inc": "Inc-4c",
-        "commit": "0b3d130",
+        "commit": "41e4c56",
         "date": "2026-08-29 gated; 2026-09-10 committed",
         "source_files": 1,
         "scope": "LLR-N07.3.4 (#D43) -- one regime, not two. _count_line's above-the-bound arm returned an empty Text; it now returns _suspended_count_line(), painting the query (through darkside.fit, a coercion sink and a cell budget in one call), the whole-graph count from _whole_graph_tally, the working chord read from the seat via _seat_glyph('back_or_home'), and the suspension notice itself. esc clears identically at every graph size. Owns AT-054/AT-055 and takes ownership of the copy Inc-4b shipped with no owning shall clause. FULL protocol (#D44).",
         "gates": "FULL protocol, THREE code-review rounds. R1 BLOCK -> R2 fixes -> confirmation pass BLOCK -> R3 fixes -> pass 3 PASS, no HIGH surviving. security-reviewer SIGN-OFF. No HIGH ever self-cleared; every fixed tree went to a fresh independent pass. 12 mutations fired, 12 KILLED, 12 sha256-verified restores, after a first round that killed only 10 -- both survivors reported as findings and closed.",
-        "suite": "default lane 854 passed / 17 deselected / 3 xfailed exit 0; all markers 871 passed / 3 xfailed exit 0; ruff SET over mapper/ tests/ 27 = 27 against a digest-verified clean 9ba2f26 export, 19 (file,rule) pairs, zero NEW / zero GONE. RE-MEASURED 2026-09-10 by the relay on the exact committed bytes -- not inherited from the 2026-08-29 verdict -- from a tree sha256-pinned before and after both lanes, caches purged (C-46). Lane arithmetic holds independently: 854 + 17 deselected = 871.",
+        "suite": "default lane 854 passed / 17 deselected / 3 xfailed exit 0; all markers 871 passed / 3 xfailed exit 0; ruff SET over mapper/ tests/ 27 = 27 against a digest-verified clean a6dc8d7 export, 19 (file,rule) pairs, zero NEW / zero GONE. RE-MEASURED 2026-09-10 by the relay on the exact committed bytes -- not inherited from the 2026-08-29 verdict -- from a tree sha256-pinned before and after both lanes, caches purged (C-46). Lane arithmetic holds independently: 854 + 17 deselected = 871.",
         "ledger": "Entry baseline 847 (executed at round 1, before a line was written) -> exit 854 default lane; 871 all markers. Round progression 850 -> 853 -> 854, one arm added per review round. Whole-increment net vs HEAD is +5/-1 test FUNCTIONS (P3.5); the +7 COLLECTED-node delta is larger because parametrised functions resolve to several nodes each. The two counts are different units and are recorded as such, not reconciled into one number.",
         "headline_defects": "(F-1) `n recorre` is NOT painted above the bound -- the Statement's third clause is not satisfiable without breaking a shipped, gated AST arm, and the numeric threshold does not require it. Declared, not silently dropped. (F-2) Predicate 1 is NOT observable at the SHIPPED bound: measured, at 12002 nodes the entire MapScreen collapses -- #map-minimap renders ~668 rows over the root's 4001 children and the pagination meter prices one glyph per node, crushing the canvas to 1 row and putting the count region off-viewport. That is Inc-STRIPS' subject and is not closable in one file. (F-3) Inc-4a's cost justification for the bound was stale by TWO ORDERS OF MAGNITUDE; re-measured and corrected in place. A fourth: _whole_graph_tally was briefly a SECOND SearchIndex construction site and the one-site census arm reddened on it -- the count and the paint now share one resolution.",
         "process_notes": "THREE DISCLOSURES BY THE IMPLEMENTER, none buried (R3F.5): (1) the first ruff comparator ran a broken sed, produced two EMPTY sets, and diff duly called them identical -- the third `0 == 0` shape in this batch, visible only because entry counts were printed beside the verdict; (2) the first mutation harness used read_text/write_text, which round-trips CRLF to LF on this checkout, leaving a restore semantically right and BYTE-WRONG -- the sha256 restore assert caught it, which is the entire reason that assert exists; (3) the implementer EDITED A .dev-flow FILE WHILE THE ALL-MARKERS LANE WAS READING THE TREE, and that run was DISCARDED rather than explained. Also a C-56 finding against the confirmation review's own artifact, which spelled a hostile code point verbatim and was caught by the repo's own tracked-file sweep. RELAY, 2026-09-10: two further instrument defects found in the RELAY'S OWN ruff comparator before any verdict was believed -- the clean baseline export, materialised under a temp path, resolved a DIFFERENT ruff config by upward discovery (I001 enabled, reporting 70 against the repo's 27, so the two sides were never comparable; closed with --isolated on both), and ANSI colour survives redirection so the rule-code parse returned SILENTLY EMPTY on both sides (the same 0 == 0 shape as disclosure 1, on a different instrument). The comparator now asserts parsed == declared on each side before it is allowed to compare, and carries a positive control that must report a planted synthetic entry as NEW.",
@@ -482,7 +482,7 @@
       },
       {
         "inc": "Inc-5",
-        "commit": "81165a6",
+        "commit": "7102b02",
         "date": "2026-09-10",
         "source_files": 3,
         "scope": "LLR-N07.2.2b / AT-024 -- five renderer classes across three files paint state.hits distinguishably by STYLE, in the style layered already used, selection painted on top of a hit per layered.py:628. Derived set 1 of 6 -> 6 of 6 compliant; OPERATOR-REACHABLE movement 1 of 3 -> 3 of 3, since the three lane renderers have no production consumer.",
@@ -497,7 +497,7 @@
       },
       {
         "inc": "Inc-W1",
-        "commit": "961d017",
+        "commit": "4b425f8",
         "date": "2026-09-10",
         "source_files": 0,
         "scope": "TESTS ONLY. Closes W1 -- the oracle derived its domain at w=120 while the sibling arms backstopping `first` and `hit` run at w=80, and the B-55 boundary covered `root` alone, so a drop of either member that bit only at w >= 100 was absorbed by the derivation and unseen by the backstops. The boundary now asserts over EVERY member; ALL and TITLES are both DERIVED from _graph().",
@@ -510,7 +510,7 @@
       },
       {
         "inc": "Inc-STRIPS",
-        "commit": "89be440",
+        "commit": "4ef13f7",
         "date": "2026-09-10",
         "source_files": 1,
         "scope": "The 12002-node screen collapse. #map-minimap was height:auto over the root's 4001 children (471 rows at 118x34, 712 at 80x24), the pagination meter priced one glyph per node, and both strips WRAPPED rather than clipping -- so the search count region was off-viewport at both declared sizes. Bounded: the minimap's entries take the ROW'S REMAINDER after caption/legend/declaration are reserved, each name cell-bounded by darkside.fit; METER_STEPS caps the meter; both strips carry max-height:3 + overflow:hidden. The remainder is DECLARED in INK per #D28.",
@@ -524,7 +524,7 @@
       },
       {
         "inc": "Inc-CRUMB",
-        "commit": "9a773e4",
+        "commit": "19a5921",
         "date": "2026-09-10",
         "source_files": 3,
         "scope": "The TITLE-LENGTH vector of the collapse Inc-STRIPS half-closed. TabStrip's crumb was a fourth unbounded strip taking a raw ficha title: ONE 4000-char title rendered TabStrip at 54 rows and put #map-canvas and the count region off a 24-row frame. Bounded where it is BUILT (darkside.tab_strip -> _crumb_line, cell-measured, spent from the RIGHT so the cursor's node survives, remainder DECLARED as `+N …`), #map-toast's detail bounded at the _event_toast seam, stylesheet lids second. A FIFTH strip surfaced mid-increment: KeyBar rendered its first frame at a hard-coded 118 cells.",
@@ -533,7 +533,7 @@
         "closing_evidence": "THE PAIR. title-length 11/11 RED pre -> GREEN post; fanout 11/11 GREEN on BOTH trees; joint run 22 passed. LLR-N07.3.4 flipped to CLOSED on the pair, never on one verdict.",
         "headline_finding": "THE DEFECT WAS A DECLARATION, AGAIN -- third time this batch. KeyBar's docstring and its test arm both said 'a resize fires when the size CHANGES, so a layout that hands this widget its final width immediately never fires one and the 118-cell render stands.' Measured against a reconstruction of the pre-fix widget: the resize DOES fire, keybar IS called again at the true width, and the pre-fix widget HOLDS the corrected render -- it paints BYTE-IDENTICAL text to the fixed one ('nav j siguiente … +32  ? todas'). What survives is the auto-height computed from the 118-cell render when layout ran; a later update() does not re-run it. Region 4 rows vs 1, three taken from a fourteen-row canvas by a widget whose text was already correct.",
         "security_gain": "Unclaimed by the increment and found by the reviewer: removing escape() is a net COERCION IMPROVEMENT. Four crumb producers -- app.py:807 filename, app.py:936 repo name, app.py:1235 link chain, factory.py:351 factory title -- previously reached the frame under escape alone, which coerces NOTHING. They are now coerced through fit -> plain.",
-        "sign_off_transfer": "AST-docstrings-stripped byte-identity across the R4 divergence. chrome.py f1dba13b83748e33bc4dd9137b96d9b8e4b4b82359e8e4f79e94b6b2a4501702 both sides; test_crumb.py 1cd89affad3c039813cccd6866015bff6c8612b3ba6aec41b0eb257c81ebf87f both sides. Arm 2 vs commit 57fb403: zero executable delta outside declared scope.",
+        "sign_off_transfer": "AST-docstrings-stripped byte-identity across the R4 divergence. chrome.py f1dba13b83748e33bc4dd9137b96d9b8e4b4b82359e8e4f79e94b6b2a4501702 both sides; test_crumb.py 1cd89affad3c039813cccd6866015bff6c8612b3ba6aec41b0eb257c81ebf87f both sides. Arm 2 vs commit f5f1bd5: zero executable delta outside declared scope.",
         "self_errors": [
           "Claimed TabStrip 'never touches the 118 fallback' -- refuted by darkside.py:223.",
           "Claimed the init render was UNBOUNDED off a 27-cell fixture that fits under BOTH hypotheses (C-31); at 400 cells/part width=0 yields 117 cells -- bounded, as the reviewer wrote.",
@@ -541,18 +541,18 @@
         ],
         "carries_opened": "SEC-F1 (TabStrip.__init__ renders at _crumb_line 118 fallback; NOT live -- content superseded before paint, height clamped by max-height:3, so THE LID IS LOAD-BEARING for the init path) and DECL-118-TWICE (118 hardcoded in chrome.py and darkside.py:223). Both -> Inc-REPAIR. Five security LOW carried incl. the export toast still painting the username, exposure UNCHANGED by this increment. Inc-REPAIR DROPS F-C, closed by accident here and BOOKED deliberately with two-oracle evidence.",
         "controls_earned": "Measure what the operator reads AND the geometry it stands in; either alone can lie. Pairs with Inc-STRIPS composited-frame rule as two halves of one law.",
-        "docs_commit": "315f8c9"
+        "docs_commit": "e60cf66"
       },
       {
         "inc": "Inc-B55a",
         "commits": [
-          "3920e06",
-          "7a973df",
-          "ff55ab6",
-          "f355499",
-          "45663b6",
-          "a4862bf",
-          "1ab87d8"
+          "69c9791",
+          "6cf948c",
+          "3a855f6",
+          "a9ca92f",
+          "f6e63fa",
+          "c1d824d",
+          "e644781"
         ],
         "date": "2026-09-10",
         "source_files": 2,
@@ -567,9 +567,9 @@
       {
         "inc": "Inc-B55b",
         "commits": [
-          "f828d7b",
-          "540123c",
-          "4bb63bf"
+          "4e6d6de",
+          "4d2bbaf",
+          "942a1de"
         ],
         "date": "2026-09-11",
         "source_files": 3,
@@ -588,7 +588,7 @@
         "stages": "S-A (the 118 fallback) -> S-E (store + coverage) -> S-B(+C) (outline cut and cost, defect 2) -> S-D (radial header residue, AGREE-1 verify, PAN-1). Closed in that order, not the order the cut proposed, and the cut was AMENDED under `C-21` at S-D.",
         "gates": "S-D: code review BLOCKED on 2 HIGH (`F1` pan discarded on a view excursion; `F2` the whole PAN-1 workstream unpinned, proven by a mutant surviving the full lane at 1096) -> corrective pass -> round 2 APPROVED WITH FINDINGS with `BLOCK-UNTIL` discharged BY RE-READ, four LOW all dispositioned. Security PASS WITH FINDINGS, no HIGH; one MEDIUM (`B-68`) ruled pre-existing by CONTROLLED COMPARISON and carried.",
         "suite": "default 1095 passed / 19 deselected / 3 xfailed exit 0; slow 19 passed; ruff 27 project and 27 --isolated against a baseline of 27. Every figure carries the `HERMETIC-1` qualification.",
-        "ledger": "1080 + 14 + 1 = 1095, derived per module and independently re-derived from the base (1083 collected at 2f78ecc -> 1098 now).",
+        "ledger": "1080 + 14 + 1 = 1095, derived per module and independently re-derived from the base (1083 collected at 6add288 -> 1098 now).",
         "battery": "Five mutants, ALL KILLED, with per-arm attribution: M1 (4), M2 (2, firing the excursion arm and nothing else), M3 (1, the latch arm alone), M4 (3, proving the declaration half is pinned separately), M5 (1). sha256 restores, verdicts printed before restore asserts, full baseline re-asserted.",
         "unplanned_defects": "THE FIX INTRODUCED A MEMBER OF THE FAMILY IT CLOSES, for the fourth time in this batch: PAN-1 exists to close 'the app held a pan the picture never reflected' and the first fix shipped 'the app discarded a pan the operator set, without saying so'. And `measured != pinned` RECURRED INSIDE THE INCREMENT THAT MINTED IT -- `F5`'s corrected raise was the one new branch the suite could not see, and `M5` survived until an arm was written. Five instruments across three agents failed their own controls first and every reading was discarded rather than reported.",
         "controls_minted": "measured != pinned (both halves, implementer and coordinator); a newly minted control does not protect the increment that minted it; the closing increment is the likeliest to introduce a member of the family; a prediction about a test is a claim to be measured; a record cited by a reader in flight is frozen, amendments queue; the reviewer-as-author independence template; the instrument is not exempt from the defect it hunts; an inert-and-declared affordance owns a pair of pins."
@@ -596,17 +596,17 @@
       {
         "stage": "Inc-REPAIR S-E",
         "date": "2026-09-11",
-        "gates": "code review BLOCK (3 HIGH) folded at 46075a4; security review BLOCK (2 HIGH) folded here. SEC-H1 and SEC-M1 witnessed by mutation (M-REC, M-CNT, M-TXT -- ALL KILLED, restores sha256-verified). SEC-H2 routed to Inc-CONFIRM. SEC-M2 census done: `plain` at a markup-parsing sink returns ZERO hits outside the one fixed.",
+        "gates": "code review BLOCK (3 HIGH) folded at 9da9e44; security review BLOCK (2 HIGH) folded here. SEC-H1 and SEC-M1 witnessed by mutation (M-REC, M-CNT, M-TXT -- ALL KILLED, restores sha256-verified). SEC-H2 routed to Inc-CONFIRM. SEC-M2 census done: `plain` at a markup-parsing sink returns ZERO hits outside the one fixed.",
         "AT-049_partial": "The WARNING clause of LLR-REPAIR.1 is discharged and witnessed at the STORE. AT-049's CARD clause is NOT: there is no damaged card state in the code (HomeScreen reports a damaged load as a TOAST). §5.4 routes it -- LLR-REPAIR.1 gates Inc-7 because without it AT-025b is vacuous, and LLR-N13.1.5 identifies damaged maps 'by the load path raising or recording a load warning'. AT-025b has no node on disk either. Card clause + containment arm land together at Inc-7. LABELLED PARTIAL, NOT CLAIMED WHOLE.",
         "deviation_declared": "The review asked for a store cap AND a sink bound; its own wording says 'and/or'. Only the store cap landed. store.py:190 and :196 are the ONLY load_warnings.append sites in the codebase, so the joined toast is bounded by arithmetic on the two constants at under 41 KB against the 2.0 GB measured. If a future module appends outside store.py, that reasoning lapses."
       }
     ],
     "next": "dev-flow-sync, phase 6, C-45 PULL",
-    "next_stage": "MERGED to master as squash 46e190b on 2026-10-03. NEXT: dev-flow-sync, phase 6, C-45 PULL, remote-branch decision (M3), next batch.",
-    "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (6d775b8 + c907aa6 + 15723df) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
+    "next_stage": "MERGED to master as squash 2eaabf3 on 2026-10-03. NEXT: dev-flow-sync, phase 6, C-45 PULL, remote-branch decision (M3), next batch.",
+    "next_stage_superseded_4": "Inc-7 RE-REVIEW (reconciled 2026-09-25, see HANDOFF-2026-09-24.md § 7). Inc-7 is LANDED (59eec03 + d3c5076 + fb23e59) but both BLOCKs are undischarged: code-reviewer and security-reviewer each owe a re-read of the corrective pass, SERIAL, under the pinned rev46+ process (C-45 PULL stays deferred). Then Inc-8 -> Inc-9 -> whole-branch gates (FLAKE-1 first; HERMETIC-1 is CLOSED_2026-09-18 per `hermetic_defects`). The handoff's step 'extend DECLARED_VOCABULARY 20 -> 25' is VOID: the declaration is derived and already holds 26 members, and `25` is RETRACTED (01-requirements.md, the fifth wrong generation).",
     "INC-7_RE-REVIEW_ROUND_2_2026-09-25": {
       "date": "2026-09-25",
-      "head_reviewed": "2de10da",
+      "head_reviewed": "d2389ea",
       "process": "rev46+, serial lenses",
       "code_reviewer": "BLOCK-UNTIL CR-F1, CR-F3; CR-F2 DISCHARGED",
       "security_reviewer": "PASS; SEC-F1, SEC-F2 DISCHARGED",
@@ -618,19 +618,19 @@
         "INC7-SEC-R2-F1 LOW SEC-F1 guards have no regression test (carry -> tester)",
         "INC7-SEC-R2-F2 LOW warning map loaded up to 4x per mount, 8 toasts (carry with N-C2, F4)",
         "INC7-SEC-R2-F3 LOW B-64 fourth-mechanism record lacks site anchor app.py:795 (carry -> B-64 re-basing)",
-        "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch 4cda8a92)"
+        "routed->qa: app.py:724-725 table.clear() keeps columns, 8 columns painted (pre-batch b9015a97)"
       ],
       "tests": "test_repair_cycles.py + test_vocabulary_declaration.py: 36 passed; full lane not run",
       "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-019-inc7-re-review.md"
     },
     "INC-7_RELEASED_2026-09-28": {
       "date": "2026-09-28",
-      "head": "c20baa6",
+      "head": "6b1c50a",
       "commits": [
-        "8eb62d9",
-        "e0a17d2",
-        "6cbbeff",
-        "c20baa6"
+        "5021b19",
+        "cc4710c",
+        "eafac36",
+        "6b1c50a"
       ],
       "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-020-inc7-corrective-2.md",
       "rounds": "corrective pass 2 -> code round 3 BLOCK-UNTIL INC7-CR-R3-F1 -> fix -> code round 4 PASS. Security lens not reopened: the mapper/ diff is the constant plus docstring only, no sink touched.",
@@ -645,12 +645,12 @@
         "id": "INC7-CR-R3-F3",
         "severity": "HIGH (product defect, pre-existing, not introduced by Inc-7)",
         "what": "HomeScreen._sparkline_text: max_count = max(counts) if counts else 1, but counts always has 14 entries, so the fallback never fires; a workspace with no .mmd modified in the last 14 days gives max_count 0 and ZeroDivisionError. Breaks the home hero for any workspace idle two weeks.",
-        "measured": "newest fixtures/*.mmd mtime 2026-09-11; mtime-preserving copy at 0c4215a -> test_agree_floor 8 failed; fresh worktrees (mtime today) -> 8 passed at 0c4215a and e0a17d2.",
+        "measured": "newest fixtures/*.mmd mtime 2026-09-11; mtime-preserving copy at f809e14 -> test_agree_floor 8 failed; fresh worktrees (mtime today) -> 8 passed at f809e14 and cc4710c.",
         "consequence": "every full-lane figure taken from this working tree reds 8 arms until fixed; the whole-branch gates cannot produce a clean lane."
       },
       "process_notes": [
         "Implementer on claude-sonnet-5, reviewer on claude-opus-5-5 -- first model split in this batch, operator-approved 2026-09-28.",
-        "c20baa6 lacks its Co-Authored-By trailer; self-reported by the implementer, not amended per instruction. Cosmetic."
+        "6b1c50a lacks its Co-Authored-By trailer; self-reported by the implementer, not amended per instruction. Cosmetic."
       ],
       "tokens_measured_raw": {
         "implementer_sonnet": "16.6M",
@@ -667,13 +667,13 @@
     },
     "SPARKLINE_MICRO_INCREMENT_RELEASED_2026-09-28": {
       "date": "2026-09-28",
-      "head": "fe103a4 (+ coordinator doc fix for F7-F9, this commit)",
+      "head": "6e5a4a3 (+ coordinator doc fix for F7-F9, this commit)",
       "commits": [
-        "54f1cfc",
-        "bc0ba0a",
-        "c371a0d",
-        "239f242",
-        "fe103a4"
+        "9ad8621",
+        "63660b5",
+        "985c990",
+        "b47ba0b",
+        "6e5a4a3"
       ],
       "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-021-sparkline-zero-division.md",
       "requirement": "A-105 (parent HLR-N13.3 via LLR-N13.1.6): zero activity paints every bar at the floor and does not raise; real activity is not flattened; behaviour independent of the date the suite runs on.",
@@ -700,11 +700,11 @@
       "implementation": {
         "model": "claude-opus-5-5",
         "commits_old_to_new": {
-          "1538f4a": "1538f4a",
-          "0f342a1": "0f342a1",
-          "6e5275f": "6e5275f",
-          "8dea408": "e89a347",
-          "fc57ac3": "8e3841e"
+          "f13cafc": "f13cafc",
+          "d235b71": "d235b71",
+          "f3872a2": "f3872a2",
+          "8dea408": "35c8203",
+          "fc57ac3": "9772993"
         },
         "lane": "1198 passed / 0 failed (implementer; confirmed by the code reviewer in its own worktree)",
         "tokens_raw": "26.6M"
@@ -718,9 +718,9 @@
       "corrective_pass_1": {
         "model": "claude-sonnet-5",
         "commits": [
-          "1996637",
-          "cd74eca",
-          "3756b62"
+          "bc3b032",
+          "59aac14",
+          "7b7271e"
         ],
         "fixed": [
           "CR-F1/UX-F1/UX-F10",
@@ -750,11 +750,11 @@
         "authority": "operator verdict Q9, 2026-09-28",
         "backup_branch": "backup/pre-q9-reword-2026-09-28 -> c243eff",
         "hash_map": {
-          "8dea408": "e89a347",
-          "fc57ac3": "8e3841e",
-          "9295135": "1996637",
-          "e7b2f00": "cd74eca",
-          "c243eff": "3756b62"
+          "8dea408": "35c8203",
+          "fc57ac3": "9772993",
+          "9295135": "bc3b032",
+          "e7b2f00": "59aac14",
+          "c243eff": "7b7271e"
         },
         "remote": "unaffected -- the branch was never pushed past 8dea408's parent"
       },
@@ -803,19 +803,19 @@
       "backlog_added": [
         "B-71 whole UI to English (Inc-EN)"
       ],
-      "note_worktrees": "the stale basewt worktree record was pruned as a side effect of reviewer worktree add/remove; its directory and commit 954f8f3 are intact"
+      "note_worktrees": "the stale basewt worktree record was pruned as a side effect of reviewer worktree add/remove; its directory and commit 909cc27 are intact"
     },
     "INC-8_ROUND_3_2026-09-29": {
       "date": "2026-09-29",
       "pass_2_commits": [
-        "9d51593",
-        "29781d6",
-        "9fbc6a8",
-        "4b7c2ba",
-        "27be355",
-        "a4dcdd2",
-        "5d45c93",
-        "7227521"
+        "3498dcd",
+        "3ed1021",
+        "391b03f",
+        "b057d41",
+        "673eee1",
+        "37b1439",
+        "929f7db",
+        "bed1bd7"
       ],
       "pass_2_reviews": {
         "code": "PASS -- 12 carried findings discharged by mutant; geometry confirmed (50/58 canvas cols, 31/31 radial nodes at 118); lane 1247 passed / 0 failed; sealed arms unweakened beyond A-107",
@@ -848,15 +848,15 @@
     "INC-8_ROUND_4_2026-09-29": {
       "date": "2026-09-29",
       "pass_3_commits": [
-        "0a386e3",
-        "8c8c818",
-        "00915cc",
-        "2db8d74",
-        "9b45eb6",
-        "cd4aceb",
-        "46cb2dc",
-        "050572a",
-        "c7cdf85"
+        "8ae96c1",
+        "d1708b9",
+        "9b1a644",
+        "44e32ae",
+        "c0535ef",
+        "d865f5a",
+        "d77ec46",
+        "50aea55",
+        "f5bbd6d"
       ],
       "pass_3_reviews": {
         "code": "BLOCK-UNTIL INC8-P3-CR-F1 (opening the legend moved keyboard focus, every layout); all listed mutants re-fired RED; lane 1275/0",
@@ -866,9 +866,9 @@
       "pass_3_corrective": {
         "model": "claude-sonnet-5",
         "commits": [
-          "4a372dc",
-          "60bf183",
-          "da49eb0"
+          "a89b73a",
+          "597b41f",
+          "070bac6"
         ],
         "fixed": "INC8-P3-CR-F1 (canvas-only repaint via _declare_after_layout; pre-legend focus saved and restored on resume, None included -- also closes INC8-P3-UX-F1 / UX-F7), CR-F2 reopen-after-pan arm, CR-F3 shown_cells arm",
         "lane": "1284 passed, 20 deselected, 3 xfailed, 0 failed (implementer-measured, not yet re-run by a reviewer)",
@@ -885,15 +885,15 @@
     "INC-8_CLOSED_AND_SCRUB_2026-09-29": {
       "date": "2026-09-29",
       "INC-8_CLOSED": {
-        "closing_review": "code PASS -- 'Inc-8 closes' (INC8-FINAL review of 69d9a96..037c733); lane 1293 passed / 0 failed in the reviewer's worktree; 10 mutants, 8 RED as claimed, MUT-H2b and MUT-SEARCH survive -> F2, F3",
+        "closing_review": "code PASS -- 'Inc-8 closes' (INC8-FINAL review of 91ccbdd..2759b3d); lane 1293 passed / 0 failed in the reviewer's worktree; 10 mutants, 8 RED as claimed, MUT-H2b and MUT-SEARCH survive -> F2, F3",
         "closing_pass_commits": [
-          "316007b",
-          "7092526",
-          "ec820c8",
-          "7454211",
-          "0b6f1e2",
-          "35a469d",
-          "037c733"
+          "5c2af4d",
+          "612e1fb",
+          "203b31f",
+          "6fe707f",
+          "ae431e0",
+          "8056ae8",
+          "2759b3d"
         ],
         "operator_rounds": "5 verdict rounds + 1 language ruling + 1 width principle, all in VERDICT-inc8-legend-2026-09-28.md",
         "follow_ups_non_blocking": {
@@ -918,10 +918,10 @@
         "authority": "operator: 'Limpia el usuario de los registros en un incremento propio'",
         "requirement": "A-110",
         "commits": [
-          "0031570",
-          "8cb6260",
-          "dbef9cd",
-          "c704ffa"
+          "ec58cd3",
+          "e0d8d74",
+          "efadbbc",
+          "1664ce9"
         ],
         "result": "70 tracked files, 261 occurrences -> '<operator>' (byte-exact substitution); guard tests/test_no_operator_paths.py (hermetic allow-list arm + environment backstop arm) RED 249 lines / 70 files -> GREEN; lane 1295 passed / 0 failed; coordinator re-verified 0 hits in tree and in commit messages",
         "limit": "the username remains in git HISTORY on the public remote (origin, incl. master); removal needs a history rewrite + force push, NOT authorized",
@@ -932,13 +932,13 @@
       "date": "2026-09-30",
       "G6_CLOSED": {
         "commits": [
-          "1130d4c",
-          "c383d0a",
-          "65621f3",
-          "943e808",
-          "3db2216",
-          "6c205d6",
-          "6fe35f5"
+          "b2a677e",
+          "012a9b0",
+          "28bde27",
+          "159fdbd",
+          "0605c39",
+          "a1f619c",
+          "d0a69ad"
         ],
         "requirement": "A-111",
         "security": "first review BLOCK (G6-SEC-F1/F2/F3/F8 HIGH, F4/F7 MEDIUM, F5/F6 LOW); corrective pass; re-verification PASS -- INC8-P3-SEC-F1 CLOSED; B-67 fully closed",
@@ -946,19 +946,19 @@
           "G6-SEC-F9": "MEDIUM: the save census matches a receiver named literally 'store'; renaming it to 'db' evades it (demonstrated live). Fix after Inc-9.",
           "G6-F1": "_pop_snapshot assigns before the guarded save (carry)",
           "B-73": "torn-write detect-only residual",
-          "lane_anomaly": "the re-verifier saw ~15-20 F in a partial, self-killed run on 6fe35f5 in its own worktree; unattributed. Inc-9's lane on 68e3675 was 0 failed; the whole-branch gate re-runs the lane"
+          "lane_anomaly": "the re-verifier saw ~15-20 F in a partial, self-killed run on d0a69ad in its own worktree; unattributed. Inc-9's lane on 8409d3b was 0 failed; the whole-branch gate re-runs the lane"
         }
       },
       "INC-9_LANDED": {
         "commits": [
-          "7e64508",
-          "b998085",
-          "bd1d99c",
-          "6b39b78",
-          "66fae00",
-          "82a231c",
-          "68e3675",
-          "a1d1a32"
+          "6e478e3",
+          "f8cde32",
+          "a69b664",
+          "abd185f",
+          "1153b38",
+          "a03066f",
+          "8409d3b",
+          "fde250d"
         ],
         "requirement": "A-112",
         "record": ".dev-flow/2026-08-26-ui-next-batch-02/03-increments/increment-025-inc9.md",
@@ -995,23 +995,23 @@
       "VERDICT": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc9-2026-09-30.md (K1-K4, L1-L4)",
       "INC-9b": {
         "commits": [
-          "36304a3",
-          "ce753f9",
-          "bab76c1"
+          "65d8e06",
+          "046e883",
+          "e1351fc"
         ],
         "record": "increment-026-inc9b.md",
         "lane": "1373/0"
       },
       "INC-9c": {
         "commits": [
-          "930be78",
-          "90c8ce8",
-          "8303a60",
-          "5495f5e",
-          "2147205",
-          "a0b63ba",
-          "9994499",
-          "fddd07d"
+          "98beef4",
+          "5096838",
+          "449d636",
+          "6037e24",
+          "8fc3e4a",
+          "aa78b28",
+          "c8759c9",
+          "32d9c47"
         ],
         "record": "increment-027-inc9c.md",
         "lane": "1438/0",
@@ -1024,9 +1024,9 @@
       },
       "INC-SEED": {
         "commits": [
-          "7521ac9",
-          "597b7fa",
-          "06d132c"
+          "4f6aad1",
+          "717a522",
+          "e144c59"
         ],
         "requirement": "A-113",
         "record": "increment-028-seed-safety.md",
@@ -1036,14 +1036,14 @@
       },
       "INC-9d": {
         "commits": [
-          "a5ddf5d",
-          "fe935ac",
-          "147eec7",
-          "c97a0ba",
-          "0ae61e6",
-          "cf16c10",
-          "dedcc81",
-          "a4f8b42"
+          "92696eb",
+          "e3db40f",
+          "a9c8791",
+          "45094ee",
+          "d6d6438",
+          "4f41d40",
+          "6f76053",
+          "d049880"
         ],
         "record": "increment-029-inc9d.md",
         "lane": "1522/0",
@@ -1061,10 +1061,10 @@
       },
       "INC-SEED-2": {
         "commits": [
-          "fd37b9e",
-          "ee6c3f5",
-          "6b9fc44",
-          "e475bd9"
+          "45a663b",
+          "6a17e3f",
+          "521006f",
+          "26ef4b9"
         ],
         "record": "increment-030-seed-2.md",
         "lane": "1541/0",
@@ -1077,11 +1077,11 @@
       },
       "INC-9e": {
         "commits": [
-          "35e77fb",
-          "e8283e0",
-          "54d4a45",
-          "0a37fb6",
-          "e0d73c4"
+          "ede3108",
+          "444b22d",
+          "0129c7c",
+          "70e54ac",
+          "c3801aa"
         ],
         "record": "increment-031-inc9e.md",
         "lane": "1558/0",
@@ -1106,63 +1106,63 @@
       "VERDICT_FILE": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc-en-2026-10-02.md (EN-Q1..Q3, Z1-Z2, E1-E3, E4)",
       "INC-EN": {
         "EN-1": {
-          "head": "31f678f",
+          "head": "03b7b2d",
           "req": "A-129",
           "record": "increment-047-en1.md",
           "lane": "2653/0",
           "review": "OK"
         },
         "EN-2": {
-          "head": "5865bc8",
+          "head": "dbb86b3",
           "req": "A-130",
           "record": "increment-048-en2.md",
           "lane": "2660 (+1 FLAKE-4)",
           "review": "OK; FLAKE-4 measured ~2.5%/run under load, same on base"
         },
         "EN-3": {
-          "head": "d5bedd4",
+          "head": "be54619",
           "req": "A-131 (acta -> record)",
           "record": "increment-049-en3.md",
           "lane": "2667/0",
           "review": "OK"
         },
         "EN-4": {
-          "head": "6fc218c",
+          "head": "02b5fba",
           "req": "A-132 (seeds English, Z1)",
           "record": "increment-050-en4.md",
           "lane": "2677/0",
           "review": "OK"
         },
         "EN-5": {
-          "head": "b5cbd39",
+          "head": "28b86e9",
           "req": "A-133",
           "record": "increment-051-en5.md",
           "lane": "2686/0",
           "review": "OK; 18 unpinned plain() sites -> EN-8"
         },
         "EN-6": {
-          "head": "0b53647",
+          "head": "d24a1f1",
           "req": "A-134 (N2)",
           "record": "increment-052-en6.md",
           "lane": "2694/0",
           "review": "OK"
         },
         "EN-7": {
-          "head": "a3cb911",
+          "head": "44f417e",
           "req": "A-135 (T3/EN-Q3, B-72 closed)",
           "record": "increment-053-en7.md",
           "lane": "2725/0",
           "review": "OK"
         },
         "EN-8": {
-          "head": "dd6b9a9",
+          "head": "a138112",
           "req": "A-136 (E1-E3, six plain() pins)",
           "record": "increment-054-en8.md",
           "lane": "2746/0",
-          "review": "OK; 8952a2a CRLF flip fixed in EN-9"
+          "review": "OK; f2f729d CRLF flip fixed in EN-9"
         },
         "EN-9": {
-          "head": "77389bf",
+          "head": "4cf248e",
           "req": "A-137 (E4)",
           "record": "increment-055-en9.md",
           "lane": "2768/0",
@@ -1190,7 +1190,7 @@
     },
     "MERGED_2026-10-03": {
       "date": "2026-10-03",
-      "MERGED": "squash 46e190b on master (branch tip 4572e52, 391 commits); operator rulings VERDICT-merge-2026-10-03.md M1-M5",
+      "MERGED": "squash 2eaabf3 on master (branch tip daa5c3a, 391 commits); operator rulings VERDICT-merge-2026-10-03.md M1-M5",
       "verification": "tree identical to branch tip; no account name or personal email in tree or commit; full lane on the master tree 2797/0 (first run hit FLAKE-2 test_hlr_n16_4 once, 10/10 alone, second full run clean)",
       "gates": {
         "Gate-1": "FLAKE-1/FLAKE-4 test races fixed, 3 x 2769/0",
@@ -1220,10 +1220,10 @@
       "INC-9_LINE_CLOSED": "2026-10-02, after Inc-9f..9s (14 implementation increments, 14 review rounds); closure condition: a review round with no MEDIUM/HIGH",
       "INC-9s": {
         "commits": [
-          "f372ea2",
-          "2459fd6",
-          "f252606",
-          "f06f8ee"
+          "5273af2",
+          "5647f1c",
+          "932876b",
+          "11ae444"
         ],
         "requirement": "A-127",
         "record": "increment-045-inc9s.md",
@@ -1237,10 +1237,10 @@
       ],
       "INC-X3": {
         "commits": [
-          "086c746",
-          "b4ccca9",
-          "2fa4845",
-          "acb4da3"
+          "52a8217",
+          "f4721ba",
+          "c49f6a4",
+          "1075c69"
         ],
         "requirement": "A-128",
         "record": "increment-046-x3.md",
@@ -1261,10 +1261,10 @@
       "VERDICT_ROUND_14": "Y1 own sentence for ':' in a path; coordinator: step 4 compares walked prefix+tail with full resolve, mismatch is link",
       "INC-9r": {
         "commits": [
-          "b2fa9aa",
-          "929a039",
-          "857cf0b",
-          "85f17a9"
+          "ffa2019",
+          "46df0f2",
+          "305301c",
+          "2eab0fa"
         ],
         "requirement": "A-126",
         "record": "increment-044-inc9r.md",
@@ -1285,10 +1285,10 @@
       "VERDICT_ROUND_13": "X1 per-site hard-link sentences; X2 U1 for allow_list/normalised template refusals; X3 attachment-chip open as its own increment after Inc-9",
       "INC-9q": {
         "commits": [
-          "40b33e6",
-          "3eb6263",
-          "0c95883",
-          "a54b035"
+          "fd68ab4",
+          "fbce8c9",
+          "1f5591b",
+          "7efae4b"
         ],
         "requirement": "A-125",
         "record": "increment-043-inc9q.md",
@@ -1309,15 +1309,15 @@
       "VERDICT_ROUND_12": "W1 generate refusal says where to rename; W2 own sentence for paths through a link",
       "INC-9p": {
         "commits": [
-          "c0235dc",
-          "bdd6d15"
+          "1dee268",
+          "8b1b3c0"
         ],
         "requirement": "A-124",
         "record": "increment-042-inc9p.md",
         "lane": "2508 passed / 2 failed (test_no_operator_paths: the record's own profile path, removed; that file then 2/2) / 3 xfailed; full lane not re-run after the .md fix",
         "mutants": "27/27",
         "source_files": "3 (osopen.py, app.py, screens/factory.py)",
-        "history_fold": "operator-approved 2026-10-02: unpushed c33f680+40ab5bb folded locally into bdd6d15 (tree identical) so the operator name never reached the remote; temp backup branch deleted",
+        "history_fold": "operator-approved 2026-10-02: unpushed c33f680+40ab5bb folded locally into 8b1b3c0 (tree identical) so the operator name never reached the remote; temp backup branch deleted",
         "to_confirm": [
           "hard-link sentence wording",
           "factory template keeps 'archivo de plantilla no encontrado' for allow_list/normalised/unreadable",
@@ -1337,12 +1337,12 @@
       "VERDICT_ROUND_11": "V1 own sentence for outside-workspace attachments; V2 factory says template outside the workspace, import with i",
       "INC-9o": {
         "commits": [
-          "e781be2",
-          "b518c09",
-          "e56662d",
-          "b1dd3f0",
-          "ed9ce49",
-          "a952792"
+          "71359ba",
+          "6cb85eb",
+          "63d371e",
+          "e6a5d06",
+          "2425a48",
+          "74778bd"
         ],
         "requirement": "A-123",
         "record": "increment-041-inc9o.md",
@@ -1364,12 +1364,12 @@
       "VERDICT_ROUND_10": "U1 own toast for a refused path; U2 refuse file attachments at add time",
       "INC-9n": {
         "commits": [
-          "0faec7f",
-          "effe32e",
-          "f06f6b6",
-          "6471156",
-          "3117b0c",
-          "74030a0"
+          "f35daf6",
+          "d8c0478",
+          "9ccc19d",
+          "3f69b6a",
+          "4d2b256",
+          "44009ed"
         ],
         "requirement": "A-122",
         "record": "increment-040-inc9n.md",
@@ -1390,11 +1390,11 @@
       },
       "INC-9m": {
         "commits": [
-          "5b1d61d",
-          "594cc9e",
-          "c740ef8",
-          "a56410e",
-          "455a62d"
+          "4db6703",
+          "2f25b7b",
+          "de16d60",
+          "c4fef4e",
+          "de356a4"
         ],
         "requirement": "A-121",
         "record": "increment-039-inc9m.md",
@@ -1421,10 +1421,10 @@
       "VERDICT_ROUND_9": "T1 refusal sentence names the forms; T2 http refused; T3 '?' types in text fields (Inc-EN)",
       "INC-9l": {
         "commits": [
-          "b64026b",
-          "910cba3",
-          "ae8a76c",
-          "24df266"
+          "93cd0eb",
+          "05cbdda",
+          "7385d82",
+          "a62b4f7"
         ],
         "requirement": "A-120",
         "record": "increment-038-inc9l.md",
@@ -1448,10 +1448,10 @@
       "VERDICT_ROUND_8": "S1: closed allow-list for typed repo URLs; (unrecognised URL) painted otherwise",
       "INC-9k": {
         "commits": [
-          "3f4bcac",
-          "71d2de2",
-          "b7e52cc",
-          "c944cce"
+          "fdde012",
+          "1eec656",
+          "f639952",
+          "b6186e3"
         ],
         "requirement": "A-119 (supersedes A-117 st.5, A-118 st.1-2)",
         "record": "increment-037-inc9k.md",
@@ -1475,11 +1475,11 @@
       "VERDICT_ROUND_7": "R1: redact userinfo on every painted surface; the connect field keeps the typed text",
       "INC-9j": {
         "commits": [
-          "a86c90b",
-          "5887154",
-          "178c582",
-          "51f5da9",
-          "fbda1b8"
+          "755abfe",
+          "b55e330",
+          "9acc2f8",
+          "1fd408f",
+          "a32c479"
         ],
         "requirement": "A-118",
         "record": "increment-036-inc9j.md",
@@ -1493,18 +1493,18 @@
       "date": "2026-10-01",
       "INC-9h": {
         "commits": [
-          "f0c52b0",
-          "09a7499",
-          "6ddc723",
-          "e2d49a1",
-          "150943b",
-          "36e21a5",
-          "927da29",
-          "134d74c"
+          "f36f00a",
+          "cf1ea4e",
+          "c069f91",
+          "b47408a",
+          "b3e29b5",
+          "c3a6808",
+          "b522b76",
+          "6613af4"
         ],
         "requirement": "A-116",
         "record": "increment-034-inc9h.md",
-        "lane": "1722/0 (confirmed uninterrupted by the code reviewer at a0ff3b9)",
+        "lane": "1722/0 (confirmed uninterrupted by the code reviewer at 99d9cbd)",
         "mutants": "33/33"
       },
       "VERDICT_ROUND_6": "Q1: r and r.git are distinct remotes; double clone accepted",
@@ -1522,11 +1522,11 @@
       },
       "INC-9i": {
         "commits": [
-          "ce656dd",
-          "cb6bced",
-          "5badbb0",
-          "7f482d5",
-          "a59f88a"
+          "6581bd8",
+          "ed328d4",
+          "025a018",
+          "9779c28",
+          "256d2a6"
         ],
         "requirement": "A-117",
         "record": "increment-035-inc9i.md",
@@ -1548,21 +1548,21 @@
       "VERDICT": "VERDICT-inc9-2026-09-30.md Round 4 (N1-N4) and Round 5 (P1-P2)",
       "INC-9g": {
         "commits": [
-          "36c1701",
-          "4764561",
-          "8d74b73",
-          "8ad867d",
-          "78459bd",
-          "e34e65a",
-          "28c6c6d",
-          "4f6b568",
-          "3dbd5a4"
+          "e87d215",
+          "50d079e",
+          "78a26eb",
+          "212f158",
+          "ab57c88",
+          "f2377fe",
+          "b6a62e7",
+          "c94336f",
+          "5c887d8"
         ],
         "requirement": "A-115",
         "record": "increment-033-inc9g.md",
         "lane": "1681 passed / 3 xfailed / 0 failed",
         "mutants": "34/34 run killed (record); reviewer: R8 survives, record claim wrong",
-        "pushed": "ce8b240..3dbd5a4"
+        "pushed": "c25a5b9..5c887d8"
       },
       "INC-9g_REVIEWS": {
         "code": "BLOCK-UNTIL INC9G-CR-F1 (HIGH); CR-F2..F7 MEDIUM/LOW",
@@ -1576,7 +1576,7 @@
     "INC-9f_AND_ROUND_3_2026-09-30": {
       "date": "2026-09-30",
       "ROUND_3_REVIEWS": {
-        "scope": "Inc-9d + Inc-SEED-2 + Inc-9e at bd7d673",
+        "scope": "Inc-9d + Inc-SEED-2 + Inc-9e at ee99e6d",
         "code": "PASS (lane 1558/0 uninterrupted; FLAKE-1/2 green)",
         "security": "PASS (no HIGH/MEDIUM)",
         "ux": "PASS-WITH-FINDINGS"
@@ -1584,12 +1584,12 @@
       "VERDICT": ".dev-flow/2026-08-26-ui-next-batch-02/VERDICT-inc9-2026-09-30.md Round 3 (M1, M2 + Inc-9f scope)",
       "INC-9f": {
         "commits": [
-          "7834fec",
-          "1127242",
-          "7f37c61",
-          "f405105",
-          "3a7fa8d",
-          "ce8b240"
+          "951d507",
+          "bceea26",
+          "3802852",
+          "23456fb",
+          "df54cf8",
+          "c25a5b9"
         ],
         "requirement": "A-114",
         "record": "increment-032-inc9f.md",
@@ -1624,14 +1624,14 @@
           "hostile remote creating '--' refs over real fetch unmeasured"
         ]
       },
-      "pushed": "bd7d673..ce8b240 to origin/feat/ui-next-batch-02",
-      "pending_reviews": "Inc-9f launched 2026-09-30 (code, ux, security; separate worktrees at ce8b240)"
+      "pushed": "ee99e6d..c25a5b9 to origin/feat/ui-next-batch-02",
+      "pending_reviews": "Inc-9f launched 2026-09-30 (code, ux, security; separate worktrees at c25a5b9)"
     },
     "next_stage_superseded_3": "none -- Inc-REPAIR is COMPLETE (2026-09-18). All four stages closed: S-A, S-E, S-B(+C), S-D. See `inc_confirm_running_order`. (Pointer left at Inc-CONFIRM while Inc-CONFIRM and Inc-7 landed; replaced 2026-09-25.)",
     "INC_CONFIRM_ITEMS_1_AND_2_CONFIRMED_2026-09-19": {
-      "commit": "f3398f4 on feat/ui-next-batch-02, base a552783. Close shape STAGE-COMMITTED per `close_shape`: source landed first at a verified green, docs commit follows.",
+      "commit": "7a635cf on feat/ui-next-batch-02, base ab592f3. Close shape STAGE-COMMITTED per `close_shape`: source landed first at a verified green, docs commit follows.",
       "resumption": "THIRD agent. Two predecessors died to transient network errors (ENOTFOUND, then ECONNRESET); neither committed, and the first's refusal to commit a degraded export is what made the work recoverable. Nothing was inherited: every figure in increment-016 was re-measured before the commit.",
-      "lanes_re_measured": "default 1133 passed / 20 deselected / 3 xfailed; slow 19 passed; network 1 passed; ruff 27 findings, SETS EQUAL AT EQUAL SCOPE vs a552783 with BOTH parses asserted non-empty (27/27, added 0, removed 0). Reproduced independently a third and fourth time by both reviewers.",
+      "lanes_re_measured": "default 1133 passed / 20 deselected / 3 xfailed; slow 19 passed; network 1 passed; ruff 27 findings, SETS EQUAL AT EQUAL SCOPE vs ab592f3 with BOTH parses asserted non-empty (27/27, added 0, removed 0). Reproduced independently a third and fourth time by both reviewers.",
       "independent_review": "BOTH passes returned OK with 0 HIGH open. code-reviewer: 4 MEDIUM + 2 LOW. security-reviewer: 5 MEDIUM + 4 LOW. CR-F1, SEC-F1, SEC-F2, SEC-F3, SEC-F6 all measured CLOSED by the reviewer's OWN counterfactual -- no HIGH was cleared on a report that the corrective pass ran.",
       "mutation_battery_re_fired": "11 sites against the SHIPPED bytes by the resuming agent, plus 14 sites by code-reviewer and 6 by security-reviewer. All restores byte-identical, negative controls SURVIVED. The CR-F1 PAIR is the load-bearing limb: MUTANT B kills the remedied arm, SURVIVES the pre-remedy one, and the remedy is inert on a healthy export -- so the kill is attributable to the remedy meeting the defect.",
       "EVIDENCE_INTEGRITY_CORRECTION": "increment-016's recorded restore digest for mapper/app.py (60c5dde90e610e20) does NOT describe the file it shipped (914afcb8b0a364a6); the other four match exactly. That battery's app.py sites were fired against a tree edited afterwards. ANNOTATE not STRIKE -- a faithful record taken under an undeclared condition -- and discharged by re-firing rather than by argument. Confirmed independently by both reviewers (N1, S-F13).",
@@ -1662,13 +1662,13 @@
       "ruling_2_the_blind_spot_was_the_PARAMETRISATION": "Every arm in test_views_hits.py rendered at the default focus_owner=\"\", which takes the FOCUSED branch, so the unfocused branch was reachable by the product and by NONE of the 50 arms. `focus_owner` is now a defaulted parameter of the single render call site. The battery carries a BLIND-SPOT CONTROL: rendered at the default the new arm goes QUIET, which is what proves the old parametrisation could not have caught this however many renderers it swept. A parametrisation that samples one value of a field tests one value of it.",
       "ruling_2_THE_TONE_IS_SURFACED_NOT_SETTLED": "The reviewer prescribed the CONSTRAINT and explicitly not the style, and username_subject's standing rule is that TUI design changes get a prototype round with real renders and his verdict before an agent implements. So the DEFECT is fixed and the TONE (MUT on STEP) is offered for verdict. It is the smallest change that breaks the collision and it strengthens this branch's own stated intent -- stop claiming to be active while staying visible -- rather than redesigning it.",
       "ruling_3_export_arm_rescope": "REFUSED AS POSED, and no measurement was brought that would reform it. The ux pass MEASURED the toast and found the actionable half paints INTACT down to 80x10, because ToastRack is bottom-docked and an over-tall toast clips at the TOP. So there is no measured reason the absolute path is the wrong form, and the criterion is NOT weakened. Recorded because the honest outcome of `bring the measurement` was that the measurement refutes the request.",
-      "ruling_4_prototypes_BELIEF_CORRECTED": "NOT UNTRACKED -- 24 files under prototypes/ are TRACKED, since bd889fd, contrary to .gitignore:38. CAUSE: .gitignore never untracks what was already committed; it only stops new files being added. This batch has stated `prototypes/ is untracked BY DESIGN` in briefs and records for weeks and for those 24 files that is FALSE. NO EVIDENCE IS INVALIDATED: the PRACTICE (never stage prototypes/ changes) was honoured throughout, and this batch's ruff figures scope explicitly to `mapper tests` so prototypes/ was never in the compared set. WHAT WAS WRONG WAS THE STATED REASON, NOT THE BEHAVIOUR -- and that distinction is the whole of the correction. Untracking is CARRIED to post-merge with the .gitattributes work, same class: rewriting the index while files are under active measurement.",
+      "ruling_4_prototypes_BELIEF_CORRECTED": "NOT UNTRACKED -- 24 files under prototypes/ are TRACKED, since 9689c05, contrary to .gitignore:38. CAUSE: .gitignore never untracks what was already committed; it only stops new files being added. This batch has stated `prototypes/ is untracked BY DESIGN` in briefs and records for weeks and for those 24 files that is FALSE. NO EVIDENCE IS INVALIDATED: the PRACTICE (never stage prototypes/ changes) was honoured throughout, and this batch's ruff figures scope explicitly to `mapper tests` so prototypes/ was never in the compared set. WHAT WAS WRONG WAS THE STATED REASON, NOT THE BEHAVIOUR -- and that distinction is the whole of the correction. Untracking is CARRIED to post-merge with the .gitattributes work, same class: rewriting the index while files are under active measurement.",
       "ruling_5_next_increment_scope_ORDERED": "UX-F7b (DONE, this round) -> B-64 re-basing -> CR17-F3/F4(DONE)/F5 -> UX-HINT1 -> TC-F3-C -> N3 -> S-F3. Not new blocks; this is the next increment's scope.",
       "ruling_5_B-64_ELEVATED_and_its_GROUNDS_EXPIRED": "B-64 was deferred past merge on the ground that the measured exposure lived in operator-UNREACHABLE renderers. THAT GROUND NO LONGER HOLDS: the driven sweep found app.py:511 (_hero_text) leaks U+202E and U+200D, and it is REACHABLE. So the reachable leak is IN SCOPE for the next increment, not carried past merge. Recorded the same way as ruling 1's off-pump expiry -- a carry keeps its deferral only while the measurement that justified it still describes the tree. Its census is also stale (38 recorded, 45 derived, including views/layered.py which it never names) and must be re-based before anything acts on it."
     },
     "CR17-F6_THE_THIRD_FALSE_CLAIM_OF_THE_SAME_FAMILY_2026-09-19": {
-      "commit": "3114535. Requirements: amendment set 11 -- A-100.6, A-100.7, A-100.8.",
-      "verdict_that_raised_it": "code-reviewer PASS 2 at 344db11: CR17-F1 and CR17-F2 both CLOSED and verified on the shipped bytes, verdict OK to advance, no HIGH. One new MEDIUM. The reviewer checked hardest that the strike landed in ALL THREE places pass 1 cited -- the docstring, A-100's normative clause, and set 9's `What replaces it` paragraph -- because a docstring-only fix would not have closed a finding raised against the REQUIREMENT.",
+      "commit": "460981e. Requirements: amendment set 11 -- A-100.6, A-100.7, A-100.8.",
+      "verdict_that_raised_it": "code-reviewer PASS 2 at 24d6f6e: CR17-F1 and CR17-F2 both CLOSED and verified on the shipped bytes, verdict OK to advance, no HIGH. One new MEDIUM. The reviewer checked hardest that the strike landed in ALL THREE places pass 1 cited -- the docstring, A-100's normative clause, and set 9's `What replaces it` paragraph -- because a docstring-only fix would not have closed a finding raised against the REQUIREMENT.",
       "the_finding": "The sentence that REPLACED the struck universal is false on both halves. Safe side: at start height 30, on the very narrow-title family it was derived from, 4 of 9 runs exceeded 2 s (reproduced here: min 1.321, median 1.890, max 2.139; independently 7 of 9, median 2.059). Monotonicity: the start height FLOORS at 5, so terminals of 15, 12 and 11 rows all admit the identical shape (fan 3,645) and the curve PLATEAUS.",
       "THE_ROOT_CAUSE_IS_A_STATISTIC": "The 1.91 s behind the sentence was a MINIMUM. BEST-OF-N IS THE CORRECT STATISTIC FOR DEMONSTRATING A BREACH AND THE WRONG ONE FOR DEMONSTRATING SAFETY: if the minimum exceeds the bound then every run does (which is why the earlier HIGH stands a fortiori), but if the minimum is under it nothing follows about the rest. A worst-case claim must be established on an upper quantile.",
       "THE_FAMILY_IS_THREE_DEEP_AND_EVERY_LAYER_WAS_A_SOUND_FIX_OF_THE_ONE_BEFORE": "Set 9 struck a contaminated INSTRUMENT. Set 10 struck a SEARCH that held a governing variable fixed. Set 11 strikes the STATISTIC. CORRECTING HOW YOU MEASURE DOES NOT CORRECT WHAT YOU MEASURED OVER -- AND CORRECTING WHAT YOU MEASURED OVER DOES NOT CORRECT WHICH TAIL YOU QUOTED. Three consecutive corrections, each sound, each leaving the next layer untouched; catalog entry 2 now has three proofs in three increments.",
@@ -1676,7 +1676,7 @@
       "THE_REVIEWER_WITHDREW_ITS_OWN_RECOMMENDATION": "Pass 1 recommended an arm pinning the worst admitted shape. At pass 2 the reviewer WITHDREW the timing-arm form on its own new data: it would re-assert in the suite a guarantee the requirement had just withdrawn, and it is flaky by construction (1.978-2.146 s across nine identical runs on one idle machine). Recorded because a recommendation retracted on measurement is worth as much as one made on it.",
       "CR17-F4_sharpened_and_FIXED": "This increment's own principle turned on it. The sentence was justified as saying `only what exists() licenses` -- and then asserted an EXPORT wrote the file, which exists() does not license: a directory or an operator-dropped file would have been called a previous export. Now guarded by is_file() and claiming nothing about the author: `No se escribió nada: el archivo en {path} no corresponde a esta exportación.` Weakening the guard back to exists() reddens the negative control.",
       "OWES_A_SECOND_READER": "The reviewer is the SOLE FINDER of CR17-F6 and the CR17-F1 remedy was its own option (a), so it declined to ratify its own replacement proposal. CR17-F6's fix and the clockless-arm choice both owe an independent reader before the whole-branch gate.",
-      "reviewer_flags": "It has NEVER reviewed SEC-H2 or tests/test_confirm_markup.py in either pass -- that is security-reviewer's lane and its two OKs must not be read as covering it. ruff remains not-run by it in both passes. The working tree had moved again by the end of pass 2 and its verdict is pinned to 344db11.",
+      "reviewer_flags": "It has NEVER reviewed SEC-H2 or tests/test_confirm_markup.py in either pass -- that is security-reviewer's lane and its two OKs must not be read as covering it. ruff remains not-run by it in both passes. The working tree had moved again by the end of pass 2 and its verdict is pinned to 24d6f6e.",
       "still_open_from_that_review": "CR17-F3 (MEDIUM, the export path spelled three times with agreement unpinned), CR17-F5 (LOW). Neither blocks."
     },
     "SEC-H2_CONFIRMED_CLOSED_BY_INDEPENDENT_RE-MEASUREMENT_2026-09-19": {
@@ -1687,15 +1687,15 @@
       "S-F4_FIXED_e4d40ba": "THE ARM CLAIMING TO PROVE THE ORACLE NEVER CALLED THE ORACLE. It asserted things about `Text` and `darkside.plain` and never touched `_painted`. Proven vacuous by the reviewer's own mutation: sabotage `_painted` and the two real arms failed WHILE THE RED-PROOF ARM PASSED. A proof that survives the breakage of its own subject is not a proof of it. It now drives `_painted` over a markup=True and a markup=False Static and requires them to DIFFER; verified, that sabotage now reddens it first.",
       "CORRECTION_TO_THE_ORIGINAL_FINDING_S_WORDING": "Impact (c) is misworded. An UNCLOSED tag does NOT crash Textual 8.2.8 -- `[bold]never closed` renders fine. It is a MALFORMED VALUE tag (`[@click=x?`, `[/`) that raises MarkupError out of the compositor's reflow. This changes what a regression payload must be, and an arm written to the original wording would have been GREEN FOR THE WRONG REASON.",
       "S-F3_SURFACED_MEDIUM": "`rich.markup.escape` is NOT SINK-CORRECT FOR TEXTUAL: its regex requires a closing bracket, so malformed tags pass through unescaped. Rich accepts `[-=!`, `[@=#`, `[/`, `[@click=x?`; Textual raises MarkupError on all four. Exhaustive fuzz over Windows-legal filename characters found 77 crashers at length <= 4. Nothing exploits it today; it is a trap for the next `Static(escape(untrusted))`, and it pairs with B-64: there `escape` is the wrong idiom at a NON-parsing sink, here it is the wrong idiom at a PARSING sink of a different grammar.",
-      "S-F5_SURFACED_LOW_NEEDS_A_RULING": "`prototypes/` is TRACKED -- 24 files -- contrary to .gitignore:38, which lists it. Verified: tracked since bd889fd, and an ignore rule does not untrack what is already in the index. The .gitignore comment declares D13's ruff metric of 29 valid ONLY while they stay untracked. Untracking 24 files rewrites the index and is not the implementer's call. NOTE: this batch's ruff figures are UNAFFECTED -- the harness scopes explicitly to `mapper tests`, so prototypes/ was never in the compared set.",
-      "S-F6_the_reviewer_reported_its_OWN_mirror_incomplete": "282 tracked vs 303 at 3ef067c; prototypes/ on disk but absent from the mirror's index, so git-ls-files-driven gates (the C-56 sweep, the A3 census) run WEAKER there. Reported rather than hidden, which is the behaviour the mirror discipline exists to produce.",
-      "S-F1_the_tree_moved_under_the_reviewer_AGAIN": "HEAD went 152ecd9 -> 2c74347 mid-review (my export-budget commits). The reviewer VERIFIED rather than assumed: it extracted both SEC-H2 regions from both revisions and found them identical -- `_ConfirmScreen` 87da1c4b2ce5291a, archive-action block f760f3a6755ab658. Control 15's reading-side half working, for the second review running.",
+      "S-F5_SURFACED_LOW_NEEDS_A_RULING": "`prototypes/` is TRACKED -- 24 files -- contrary to .gitignore:38, which lists it. Verified: tracked since 9689c05, and an ignore rule does not untrack what is already in the index. The .gitignore comment declares D13's ruff metric of 29 valid ONLY while they stay untracked. Untracking 24 files rewrites the index and is not the implementer's call. NOTE: this batch's ruff figures are UNAFFECTED -- the harness scopes explicitly to `mapper tests`, so prototypes/ was never in the compared set.",
+      "S-F6_the_reviewer_reported_its_OWN_mirror_incomplete": "282 tracked vs 303 at 1c52434; prototypes/ on disk but absent from the mirror's index, so git-ls-files-driven gates (the C-56 sweep, the A3 census) run WEAKER there. Reported rather than hidden, which is the behaviour the mirror discipline exists to produce.",
+      "S-F1_the_tree_moved_under_the_reviewer_AGAIN": "HEAD went 11c16ef -> 24999b5 mid-review (my export-budget commits). The reviewer VERIFIED rather than assumed: it extracted both SEC-H2 regions from both revisions and found them identical -- `_ConfirmScreen` 87da1c4b2ce5291a, archive-action block f760f3a6755ab658. Control 15's reading-side half working, for the second review running.",
       "disclosure": "One of the reviewer's probes drove GitHubConnector, spawning the `gh` CLI and making a real outbound GraphQL call under the operator's credentials -- a read-only lookup that failed (`Could not resolve to a Repository`). A stray GitHub audit-log line dated 2026-09-19 for a nonsense repository name belongs to that probe. No secret transmitted or printed.",
       "still_open_from_that_review": "SEC-F4 explicitly remains open. The control-character surface in `_FichaScreen` (app.py:373-427) and factory.py is real and nothing here closes it -- those sinks build Rich Text, so no grammar executes and the exposure is faithful control characters rather than runnable actions.",
       "reviewer_did_NOT_run": "Slow lane, network lane, ruff, and any lane inside the repo itself. The census is bounded by what the 1143-test suite executes; screens no test composes rest on the weaker AST scan."
     },
     "CR17_FINDINGS_FIXED_2026-09-19_THE_BUDGET_S_TIME_GUARANTEE_IS_WITHDRAWN": {
-      "commit": "344db11. Requirements: amendment set 10 -- A-100.4, A-100.5.",
+      "commit": "24d6f6e. Requirements: amendment set 10 -- A-100.4, A-100.5.",
       "authority": "code-reviewer BLOCK on increment 017: one HIGH (CR17-F1) plus CR17-F2 MEDIUM. BOTH INDEPENDENTLY REPRODUCED BY THE IMPLEMENTER BEFORE BEING ACCEPTED -- a HIGH against one's own increment is still measured, not conceded.",
       "CR17-F1_THE_SECOND_STRIKE_OF_THE_SAME_CONSTANT_FOR_A_DIFFERENT_REASON": "Amendment set 9 struck the FIRST derivation because the INSTRUMENT was contaminated (tracemalloc inside the timed region). The instrument was fixed -- and the SEARCH was left holding a governing variable fixed. `_export_view_state` starts at h = max(5, size.height - 10), so the START HEIGHT comes from the operator's TERMINAL and governs how much node DENSITY a fixed cell budget admits: a shorter terminal admits a far WIDER map, and width is what costs. The set-9 hunt varied graph shape across two families at two TALL heights and then generalised over the whole region.",
       "REPRODUCED_worst_ADMITTED_shape_per_terminal": "118x40 -> 940-wide, 349,711 cells, 1.91 s (under). 118x35 -> 1,121-wide, 2.41 s (1.2x over). 80x24 -> 1,944-wide, 5.94 s (3.0x over). 118x20 -> 2,651-wide, 10.38 s (5.2x over). 118x11 -> 3,645-wide, 17.73 s (8.9x over). OVER TARGET AT THE CLASSIC 80x24 DEFAULT, and over target at the very terminal the struck sentence was measured on. The reviewer additionally drove it through the real `e` chord at 80x24: a 1,945-node map is ACCEPTED, writes a 4.6 MB artifact, and freezes the pump 7.5 s.",
@@ -1722,10 +1722,10 @@
       "probes": "scratchpad/harness/flake1_race.py (rate + pauses-needed) and flake1_why.py (widget state at focus() time). Out of repo, so not evidence under C-59; re-runnable."
     },
     "INC_CONFIRM_ITEM_3_PICKUPS_2026-09-19": {
-      "commit": "3ef067c (SEC-H2) plus the docs commit carrying increment-018-item3-pickups.md. Close shape STAGE-COMMITTED.",
+      "commit": "1c52434 (SEC-H2) plus the docs commit carrying increment-018-item3-pickups.md. Close shape STAGE-COMMITTED.",
       "SEC-H2_CLOSED": "Was a live HIGH and was CONFIRMED LIVE ON THIS TREE before being fixed -- the S-E probe was gone, so arms were written first and captured RED on the real defect. With `[@click=screen.confirm]Acta[/]` as a node title the archive confirmation PAINTED `¿archivar «Acta»?`, identical to the benign sentence, with a runnable action bound to the words the operator reads; one click archives with no `y`. U+202E/U+200D also reached the dialog raw. TWO HAZARDS, TWO FIXES, NOT THE SAME HAZARD: `Static(..., markup=False)` at the SINK stops the title ACTING on the dialog; `darkside.plain` at the SOURCE stops it REORDERING the sentence. Fixed at the sink deliberately rather than escaping the one call site, which would be the instance fix for a class defect. Battery fires each half SEPARATELY -- reverting the sink kills only the markup arm, reverting the source only the coercion arm, negative control SURVIVED.",
       "TWO_OF_THE_TREE_S_OWN_CONTROLS_CAUGHT_THIS_WORK": "Both obeyed rather than worked around. (1) The A3 census refused the new arm while it was untracked -- `stage it, or the gate is not a gate`. (2) The C-56 sweep refused the `\\u202e` ESCAPE spellings in a tracked file; hostile code points are now built with chr(0x...) at test time like every other hostile payload in the suite. Recorded because a control that fires on your own work is the only evidence it is load-bearing.",
-      "B-64_CENSUS_IS_STALE": "The carry records 38 sites (app 14, factory 12, lane 7, editor 4, darkside 1). DERIVED BY AST at 046acea: 45 calls -- app 17, factory 13, lane 9, editor 4, darkside 1, AND views/layered.py 1, a file the census does not name at all. Rider 2 says the carry travels with its measurements; the population those measurements were taken over has MOVED. Instrument validated in both directions before the count was believed: app.py:319 genuinely holds TWO escape calls on one line; grep's extra darkside.py hit is PROSE describing the defect (catalog entry 32 exactly); office.py's six hits are saxutils.escape and re.escape, correctly excluded.",
+      "B-64_CENSUS_IS_STALE": "The carry records 38 sites (app 14, factory 12, lane 7, editor 4, darkside 1). DERIVED BY AST at 58b3647: 45 calls -- app 17, factory 13, lane 9, editor 4, darkside 1, AND views/layered.py 1, a file the census does not name at all. Rider 2 says the carry travels with its measurements; the population those measurements were taken over has MOVED. Instrument validated in both directions before the count was believed: app.py:319 genuinely holds TWO escape calls on one line; grep's extra darkside.py hit is PROSE describing the defect (catalog entry 32 exactly); office.py's six hits are saxutils.escape and re.escape, correctly excluded.",
       "B-64_THE_AXIS_IS_THE_SINK_MECHANISM_NOT_THE_FILE": "A painted value is coerced iff it funnels through a coercing truncator. DRIVEN through the real renderers: layered.py:679 (eliminados ghost) via _clip -> NO survivors, U+FFFD present; layered live card title via _clip -> none; outline via darkside.plain -> none; lane.py:156 via escape->Text.append -> U+202E and U+200D SURVIVE; app.py:511 (_hero_text) via escape->Text.append -> U+202E and U+200D SURVIVE. U+0007 survived nothing, consistent with the carry's own `bidi-and-joiner, not every control byte`.",
       "B-64_BOUNDARY_CLOSED_IN_THE_BAD_DIRECTION": "The carry's BOUNDARY read `Only lane.py's three renderers were driven end to end. The other four files were not.` app.py:511 is the FIRST site outside lane.py driven end to end and it LEAKS. The defect is not confined to lane.py. Remedy remains the post-merge body; this is a measurement, not a fix.",
       "B-64_ONE_GOOD_RESULT": "layered.py:679 -- the only escape site in the EXPORT path, feeding the eliminados strip whose titles come from a previous revision -- does NOT leak. layered._clip is the module's single coercion funnel (`LLR-COERCE.2: coerce, THEN truncate ... EVERY truncator in this module funnels through here`) and the measurement agrees. That escape call is a redundant no-op, not a hole. Relevant to SEC-F4: the ghost strip's inclusion is a disclosure question, not a coercion one.",
@@ -1741,17 +1741,17 @@
       "CORRECTION_TO_MY_BRIEF_FROM_QA": "The CRLF list supplied to the reviewers was INCOMPLETE. radial.py, outline.py and layered.py are also CRLF; lane.py and test_views_hits.py are LF. A \\n anchor at radial.py matches 0x.",
       "CATALOG_ENTRY_35_FIRED_ON_ME": "The first read of this increment's lane used `2>&1 | tail -3`; Textual's `Task was destroyed but it is pending!` teardown noise flooded the tail and pushed the SUMMARY LINE OUT OF VIEW ENTIRELY. A summary line you cannot see is not a green lane. Re-read with stderr separated, the summary matched explicitly, and the pytest exit code taken from the pipeline rather than inferred: 1143 passed, 20 deselected, 3 xfailed, exit 0.",
       "lanes": "default 1143 passed / 20 deselected / 3 xfailed (1143 = 1140 - 0 + 3); slow 19; network 1; ruff 27 SETS EQUAL AT EQUAL SCOPE, both parses asserted non-empty.",
-      "INDEPENDENT_REVIEW_OWED_FOR_SEC-H2": "Neither qa nor ux reviewed SEC-H2 -- ux explicitly recorded it as `not reviewed, security's`. The code-reviewer pass for increment 017 was dispatched against 046acea and does NOT extend to 3ef067c."
+      "INDEPENDENT_REVIEW_OWED_FOR_SEC-H2": "Neither qa nor ux reviewed SEC-H2 -- ux explicitly recorded it as `not reviewed, security's`. The code-reviewer pass for increment 017 was dispatched against 58b3647 and does NOT extend to 1c52434."
     },
     "INCREMENT_017_RULINGS_APPLIED_2026-09-19": {
       "authority": "Coordinator rulings 2026-09-19 on increment 016's confirmation round. Requirements: amendment set 9 -- A-100.1 (budget derivation struck), A-100.2 (a refusal declares its stale artifact), A-100.3 (S-F10 + S-F11).",
       "source_files": "1 of 4 -- mapper/app.py only. S-F10 and S-F11 land in test files (uncapped); A-100 and state.json are docs.",
-      "lanes": "default 1140 passed / 20 deselected / 3 xfailed; slow 19 passed; network 1 passed; ruff 27, SETS EQUAL AT EQUAL SCOPE vs a552783 with both parses asserted non-empty. Signed balance 1140 = 1133 - 0 + 7, itemised.",
+      "lanes": "default 1140 passed / 20 deselected / 3 xfailed; slow 19 passed; network 1 passed; ruff 27, SETS EQUAL AT EQUAL SCOPE vs ab592f3 with both parses asserted non-empty. Signed balance 1140 = 1133 - 0 + 7, itemised.",
       "mutation_battery": "5 sites against the shipped bytes, 4 KILL all killed, 1 expected survivor, restores byte-identical. THE GRANULARITY IS THE RESULT: G1 (cell_len -> len) killed ONLY the two CJK params and left the four narrow-title ones GREEN, which is exactly why that conjunct was unpinned before; G4 killed ONLY the keyword-argv spelling; G2 and G3 pin `it says a stale file is there` and `it never says so falsely` SEPARATELY.",
       "A-100.2_is_the_SIXTH_instance": "Recorded as the sixth instance of `the increment that closes a defect family is the increment most likely to introduce a member of it`, WITH ITS MITIGATION STATED: the operator was told the export refused, just not that the old file persists. Partial mitigation is still an instance -- precision beats both inflating the tally and suppressing it.",
       "DECLARED_NOT_DELETED": "The refusal names the path and says the file is from a previous export; it does NOT delete it. Two grounds: the standard is that nothing is hidden without being DECLARED, not that nothing stale exists; and deleting the operator's file on a refusal without confirmation is the destructive act US-N05 already rules against -- silently deleting would break a standing ruling to soften a lesser one. The sentence is CONDITIONAL because a map's first export has no file to be stale and a claim about the world must not be false.",
       "self_caught_weakness": "The reverse census run for this increment found `anterior` in seven product locations, so the stale-declaration arm's original assertion on the bare word was one refactor away from passing for an unrelated reason. Tightened to the full phrase `exportación anterior` and the battery re-fired, still 5/5. Strengthening an acceptance criterion against the author on measured evidence needs no independent ratification (the asymmetry principle); only weakening one does.",
-      "INDEPENDENT_REVIEW_OWED": "NOT obtained for this increment. Increment 016's two passes cleared the tree at f3398f4 and this increment changes mapper/app.py after that clearance, so their verdicts do NOT extend to it. A COORDINATOR RULING IS NOT AN INDEPENDENT REVIEW -- it authorises the change, it does not inspect the implementation. Owed before the whole-branch gate; gate rows 6 and 15 are marked OWED rather than PENDING.",
+      "INDEPENDENT_REVIEW_OWED": "NOT obtained for this increment. Increment 016's two passes cleared the tree at 7a635cf and this increment changes mapper/app.py after that clearance, so their verdicts do NOT extend to it. A COORDINATOR RULING IS NOT AN INDEPENDENT REVIEW -- it authorises the change, it does not inspect the implementation. Owed before the whole-branch gate; gate rows 6 and 15 are marked OWED rather than PENDING.",
       "commit": "See the docs commit accompanying this entry. Close shape STAGE-COMMITTED."
     },
     "INC_CONFIRM_ROUND_FINDINGS_OPEN_2026-09-19": {
@@ -1945,7 +1945,7 @@
           "why_a_pair": "Either verdict alone would leave the requirement half-closed again -- the state Inc-CRUMB existed to end."
         },
         "closure_authority": "Coordinator ruling 2026-09-10: close under (a) on the construction proof. Security review: \"from the security side there is no remaining objection. The title-length vector is measured closed at every width from 20 to 200 with the hostile fixture.\"",
-        "sign_off_transfer": "Security sign-off transfers by evidence, not by re-review: AST-docstrings-stripped byte-identity across the divergence. chrome.py f1dba13b... == f1dba13b...; test_crumb.py 1cd89aff... == 1cd89aff...; arm 2 confirms zero executable delta outside declared scope vs 57fb403."
+        "sign_off_transfer": "Security sign-off transfers by evidence, not by re-review: AST-docstrings-stripped byte-identity across the divergence. chrome.py f1dba13b... == f1dba13b...; test_crumb.py 1cd89aff... == 1cd89aff...; arm 2 confirms zero executable delta outside declared scope vs f5f1bd5."
       },
       {
         "requirement": "LLR-N06.3.5 / AGREE-1",
@@ -1987,8 +1987,8 @@
           "what": "AGREE-1 / LLR-N06.3.5 RE-MEASURED THROUGH THE REAL SCREEN on the tree with defect 2 fixed, because the prior frame-side numbers (legacy 14/135, anidado 15/135) were taken against a row budget that no longer exists, and because the architect flagged F7_1's figures as renderer-argument sizes that 'must be re-measured via _canvas_size() before being quoted'.",
           "result": "NINE of 90 sizes on legacy and NINE of 90 on anidado, and all eighteen have ONE shape: canvas declares NOTHING while the strip declares the TRUTH. Confined to the narrow/short corner -- widths 24..34 at heights 10 and 12, plus (24,14). The strip is CORRECT at every one of them; the disagreement is the canvas going silent.",
           "THIS_IS_THE_DOCUMENTED_FALLBACK_NOT_AN_IMPLEMENTATION_BUG": "outline.py's `_fit_declared` states this case deliberately: 'THE ONE FLOOR THE RULING STILL LEAVES: never return an EMPTY frame. If the widened header does not fit at all, `_fit` drops it too and the canvas paints NOTHING ... Fall back to the header the frame CAN hold; the strip still declares.' So the measured disagreement IS that ratified fallback firing.",
-          "THE_QUESTION_THIS_RAISED_WAS_A_REQUIREMENTS_ONE_AND_IT_IS_NOW_DECIDED": "DECIDED AND ARMED -- this field previously read 'NOT DECIDED HERE' and that was STALE. The question was: LLR-N06.3.5 says both declaring surfaces agree, while the H1-refined ruling that produced the fallback says never spend everything and inform nothing; at the empty-frame floor the two pull opposite ways. RULED (coordinator): LLR-N06.3.5 ADMITS AN EXPLICIT FLOOR EXCEPTION and the H1 ruling STANDS UNREOPENED, under three conditions -- (1) the exception is CONDITIONAL: at every floor size the strip must be present in the frame and declare the truth, or the exception lapses; (2) it is DERIVED from the geometric condition, never enumerated as a size list; (3) its wording was ratified at the increment's own gate. IMPLEMENTED at `fdabc8d` ('LLR-N06.3.5 gains its empty-frame floor exception, armed') with four arms; mutants M-STRIPQUIET and M-CANVASQUIET both KILLED. Confirmation pass 3b ratified the text.",
-          "WHY_THIS_FIELD_WAS_STALE_AND_WHAT_IT_COST": "A coordination registry went stale against a ruling that had ALREADY LANDED in the tree -- this batch's own two-registries defect (`id_space_merge`), one altitude up: the code was armed at `fdabc8d` while this file still told every later reader the question was open. Nothing downstream was wrong, because the arms were real; what was wrong is that a reader trusting the registry would have re-opened a settled clause. Recorded rather than quietly corrected, because 'the registry disagreed with the tree' is the finding.",
+          "THE_QUESTION_THIS_RAISED_WAS_A_REQUIREMENTS_ONE_AND_IT_IS_NOW_DECIDED": "DECIDED AND ARMED -- this field previously read 'NOT DECIDED HERE' and that was STALE. The question was: LLR-N06.3.5 says both declaring surfaces agree, while the H1-refined ruling that produced the fallback says never spend everything and inform nothing; at the empty-frame floor the two pull opposite ways. RULED (coordinator): LLR-N06.3.5 ADMITS AN EXPLICIT FLOOR EXCEPTION and the H1 ruling STANDS UNREOPENED, under three conditions -- (1) the exception is CONDITIONAL: at every floor size the strip must be present in the frame and declare the truth, or the exception lapses; (2) it is DERIVED from the geometric condition, never enumerated as a size list; (3) its wording was ratified at the increment's own gate. IMPLEMENTED at `38336ed` ('LLR-N06.3.5 gains its empty-frame floor exception, armed') with four arms; mutants M-STRIPQUIET and M-CANVASQUIET both KILLED. Confirmation pass 3b ratified the text.",
+          "WHY_THIS_FIELD_WAS_STALE_AND_WHAT_IT_COST": "A coordination registry went stale against a ruling that had ALREADY LANDED in the tree -- this batch's own two-registries defect (`id_space_merge`), one altitude up: the code was armed at `38336ed` while this file still told every later reader the question was open. Nothing downstream was wrong, because the arms were real; what was wrong is that a reader trusting the registry would have re-opened a settled clause. Recorded rather than quietly corrected, because 'the registry disagreed with the tree' is the finding.",
           "boundary": "Outline only. Radial's AGREE-1 floor is a DISTINCT mechanism per this block's own wording, and radial is S-D's file, so no number here transfers to it.",
           "probe": "An asyncio sweep driving the REAL screen at a size grid, reading both declaring surfaces off the composited frame and comparing them against the truth derived from the renderer's own painted set. Anchored on the OVERFLOW TOKEN, never on 'the first number in the line' -- a first-number parser harvests the pagination POSITION instead and reports a constant across every size, which is an instrument and not a finding.",
           "RADIAL_HALF_RE_MEASURED_2026-09-18_AND_IT_NO_LONGER_REPRODUCES": "The `radial_measured_2026-09-11` verdict below is STALE. Re-driven on the current tree with OUTLINE as the known-present control (`C-55`'s rider: an absence is admissible only if the probe that produced it CAN produce a non-absence): outline reports 52 disagreements, radial reports ZERO over 78 (legacy) and 75 (anidado) exercised sizes. Confirmed POSITIVELY rather than by absence at the two sizes this block recorded as failures -- at (16,14) and (14,12) radial's canvas paints its own token and the strip agrees, truth=8 on both surfaces. DISCLOSED: the first grid ran widths 24..118 and therefore structurally EXCLUDED the recorded failure sizes at widths 14 and 16 -- a `C-31` input-set-as-oracle that would have produced a confident, measured, worthless zero; the grid was widened to 14..118 and re-run, and the zero above is from the widened grid. CONSEQUENCE (coordinator, 2026-09-18): S-D's AGREE-1 workstream is RE-SCOPED from 'fix' to 'verify closed and record'."
@@ -2253,7 +2253,7 @@
         "id": "fold-2 narration confirmation",
         "date": "2026-09-18",
         "authority": "Coordinator ruling 2026-09-18 (2). GRANTED, and it rides THE WHOLE-BRANCH QA GATE -- explicitly NOT S-D.",
-        "scope": "STRICTLY the sentences changed in commits `c921078` and `e2bc4d7`. Nothing wider.",
+        "scope": "STRICTLY the sentences changed in commits `f3df807` and `75d3585`. Nothing wider.",
         "why_it_exists": "The S-B(+C) fold review's findings F18-F22 were applied by the implementer, and the reviewer had written that whoever applies its snippets owes a reviewer who is not it. That second review was NOT obtained; the implementer stopped the recursion deliberately and declared the gap as the fold's hardest risk rather than letting it pass silently.",
         "TERMINAL_BOUNDARY_ATTACHED": "Anything this pass raises OUTSIDE those sentences is a CARRY, not a fix. This is the batch's terminal-boundary pattern (same rule that produced Inc-W1), and here it is load-bearing for the reason the newly minted control states: the narration axis has only a reader for an instrument, and readers do not converge by iteration -- so this is a terminal pass, not another turn of the loop.",
         "why_it_does_not_block_S-D": "The residual risk is docs-only: zero `.py` changes in fold 2, zero executable delta, both lanes green at the close gate, and F18's replacement figures re-derived with a firing control. Blocking a source increment on a docs-only risk would be the wrong trade."
@@ -2267,7 +2267,7 @@
         "what": "`devflow-validate.py` exits 1 with 16 blocks against this project. One is `V7`: the flow bundle's own `FLOW-VERSION.md` header declares `2026-09-18-rev84` while that same file's newest changelog row is `2026-09-18-rev83`.",
         "HONEST_SCOPE": "The bundle's FILE-TABLE INTEGRITY PASSED -- every declared file unmoved, no undeclared file shipping. Only the revision LABEL is internally inconsistent. This is not a corrupted rule set; it is a bundle that cannot prove which revision it is.",
         "why_it_does_not_block": "COORDINATOR RULING 2026-09-18 (D), on SCOPE and not convenience: (1) it lives in `~/.claude`, another session's working tree carrying uncommitted changes that `C-44` protects, so repairing it from here is exactly the cross-tree write this batch has punished four times; (2) the mirror is not editable by rule; (3) it cannot invalidate this batch's measurements -- every gate was taken under the pinned `rev46+` baseline, and a label drift in a bundle does not retroactively move a measurement.",
-        "the_other_15_blocks": "Pre-existing at `ce294f1` on a clean tree. `V2`'s five (AT-033/034/035/041/042 have no node on disk) are a RECORDED instrument limitation of this batch: `01-requirements.md:7141` states the validator harvests every `AT-\\d+` token with no supersession awareness, and AT-032..AT-040 left with `US-N14`'s deferral. The batch record shows prior runs dispositioned at 62 and 51 blocks.",
+        "the_other_15_blocks": "Pre-existing at `a53f6e0` on a clean tree. `V2`'s five (AT-033/034/035/041/042 have no node on disk) are a RECORDED instrument limitation of this batch: `01-requirements.md:7141` states the validator harvests every `AT-\\d+` token with no supersession awareness, and AT-032..AT-040 left with `US-N14`'s deferral. The batch record shows prior runs dispositioned at 62 and 51 blocks.",
         "surfaced_to": "The operator, separately, by the coordinator."
       },
       {
@@ -2496,7 +2496,7 @@
         "R2-4_RECORDED_NOT_CHANGED": "`PAN_INERT_HINT` is 46 cells and fits one row from w=58, against the rail hint's 41 cells from w=57. ONE COLUMN worse than a sibling that already ships, so not a new failure class. Recorded because it is a measured consequence of the reviewer's own round-1 wording recommendation, and because the widget is documented as single-line. No change.",
         "THE_REVIEWER_DECLARED_ITS_OWN_INDEPENDENCE_WEAKER_ON_F1": "Recorded verbatim in substance because it is the kind of thing that is normally lost: the one-line F1 fix now in the tree is the snippet the reviewer PRESCRIBED in round 1, so its round-2 confirmation of that line is partly confirming its own prescription. What actually discharges F1 is evidence the reviewer did NOT author -- the excursion arm, written by the implementer, and `M2`'s kill firing that arm and nothing else. A reviewer naming the limit of its own independence is the boundary discipline working.",
         "gates_after_round_2": "Default lane 1095 passed / 19 deselected / 3 xfailed, exit 0, 333.86 s. Slow lane 19 passed / 1098 deselected, exit 0. ruff 27 project and 27 --isolated, baseline 27. Battery: `M-CR-PAN-A` KILLED 4, `M-F1-ZERO` KILLED 2, `M5-RAISE-DEGRADES` KILLED 1, `M-F3-LATCH` KILLED 1; sha256 restores verified, full baseline re-asserted at 76 passed.",
-        "ledger": "1080 + 14 = 1094 at round 2's read, decomposing per file (agree_floor +4, canvas_header_charge +5, pan +5); then +1 for the R2-1 raise arm = 1095. The reviewer re-derived the 14 from the BASE (1083 collected at 2f78ecc -> 1097 now) rather than relative to round 1."
+        "ledger": "1080 + 14 = 1094 at round 2's read, decomposing per file (agree_floor +4, canvas_header_charge +5, pan +5); then +1 for the R2-1 raise arm = 1095. The reviewer re-derived the 14 from the BASE (1083 collected at 6add288 -> 1097 now) rather than relative to round 1."
       },
       "S-D_stale_offset_direction_HELD": {
         "date": "2026-09-18",
@@ -2605,7 +2605,7 @@
       "B-64_re-basing": "In scope for this increment per the ruling and NOT blocked by the above. Not started -- the block was hit first and surfacing it took precedence over beginning a second workstream inside a blocked increment."
     },
     "INC-7_SHIPPED_2026-09-19": {
-      "commit": "91fdbbd (source) + 1a718e6 (render round). Requirements: amendment sets 11 (A-100.6/.7/.8) and 12 (A-101 cut amendment, A-102).",
+      "commit": "d1f30fd (source) + 6d536ab (render round). Requirements: amendment sets 11 (A-100.6/.7/.8) and 12 (A-101 cut amendment, A-102).",
       "what_shipped": "The sala's damaged-map card is no longer a lie. It carries `⊘` -- 01b section 3.4's V22, DRAWN from the declared vocabulary rather than invented -- plus em-dash node/doc counts, on BOTH load paths.",
       "A-101_discharged": "The vocabulary declaration is CREATED in mapper/darkside.py by Inc-7 and CONSUMED by Inc-8's legend. A clause cannot depend on a declaration the next increment creates.",
       "A-102_discharged": "Both conditions of LLR-N13.1.5 reach the card. The load-warning path used to return the graph and notify through a TRANSIENT toast while the card is PERMANENT -- half the defect, and the half that vanishes when the operator looks away. Reverting it kills EXACTLY the load-warning arm.",
@@ -2752,17 +2752,17 @@
     "lens_reconciliation": ".dev-flow/2026-08-26-ui-next-batch-02/02g-lens-reconciliation.md"
   },
   "baseline": {
-    "base_ref": "3fe0e4b71ef4d35d99e8605d6e3dfef0d2ef62b3",
+    "base_ref": "d8a8536c27cce54e317aa727b9a673d78c48cade",
     "base_ref_name": "origin/master at re-verification",
-    "current_tip": "20f86de",
-    "current_tip_note": "20f86de merges PR #7, which adds only .dev-flow/02g-lens-reconciliation.md (docs). Test counts are unaffected by a docs-only merge; re-measure at any later tip rather than trusting this line.",
+    "current_tip": "ea7693a",
+    "current_tip_note": "ea7693a merges PR #7, which adds only .dev-flow/02g-lens-reconciliation.md (docs). Test counts are unaffected by a docs-only merge; re-measure at any later tip rather than trusting this line.",
     "tests_collected": 647,
     "lanes": "fast 630 passed / 17 deselected exit 0; slow 17 passed / 630 deselected exit 0; 630+17=647",
     "LANE_FIGURE_QUALIFICATION_2026-09-18": "ALL LANE FIGURES RECORDED IN THIS BATCH PRIOR TO THE Inc-CONFIRM FIX WERE TAKEN WITH NETWORK ACCESS AVAILABLE AND `gh` SUCCEEDING. See `p3_progress.hermetic_defects` / `HERMETIC-1`: one node in the default lane shells out to the `gh` CLI over the network, at a measured 4-of-10 isolated failure rate. THE NUMBERS ARE LEFT EXACTLY AS MEASURED AND NONE IS RESTATED -- this is a QUALIFICATION, not a correction. Every figure was an honest measurement; what nobody had declared was the condition it was taken under. Annotating the condition PRESERVES the measurement; restating the numbers would destroy it. Coordinator ruling 2026-09-18.",
     "ruff": "29 errors, exit 1 (pre-existing, unchanged)",
     "measured_by": "pytest -q --collect-only -p no:randomly -o addopts=; then each lane",
     "flow_revision": "rev46+ (~/.claude and ~/.claude/skills both 0 behind upstream)",
-    "a3_census": "SETTLED BY AST at 3fe0e4b. Question: which call expressions invoke the MAP-RENDERER protocol and must migrate when IRenderer.render gains ViewState? 23 arg-ful call sites / 10 files / 6 definitions in mapper/views/. 25 zero-arg .render() sites are Textual's WIDGET protocol and are NOT in the A3. grep over-counts by 1: mapper/widgets/rail.py:180 is a docstring MENTION."
+    "a3_census": "SETTLED BY AST at d8a8536. Question: which call expressions invoke the MAP-RENDERER protocol and must migrate when IRenderer.render gains ViewState? 23 arg-ful call sites / 10 files / 6 definitions in mapper/views/. 25 zero-arg .render() sites are Textual's WIDGET protocol and are NOT in the A3. grep over-counts by 1: mapper/widgets/rail.py:180 is a docstring MENTION."
   },
   "decisions_log": "MOVED to decisions-log.json in this directory at rollover 2026-10-08",
   "coordinator_rulings": [
@@ -2864,24 +2864,24 @@
   },
   "previous_batch": {
     "batch_id": "2026-08-27-repair-batch-02",
-    "merge_commit": "2b59071",
+    "merge_commit": "7d04ba2",
     "pr": "https://github.com/<owner>/mapper/pull/3",
     "closed_at": "2026-08-27",
-    "close_commit": "3fe0e4b",
+    "close_commit": "d8a8536",
     "obsidian_synced": true,
     "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "pr": "https://github.com/<owner>/mapper/pull/2",
-      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
     "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record."
   },
   "obsidian_synced": true,

@@ -43,7 +43,7 @@
       "mode": "full",
       "opened_at": "2026-08-26",
       "closed_at": "2026-08-27",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
     },
     {
@@ -135,7 +135,7 @@
     "metrics": "vault:mapper/dev-flow-batches/2026-10-08-data-safety-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "07dd930890012befa1c10215bf98cdc06bef70e4",
+  "base_ref": "ed67c5833995ac1eababc7ccad1d67fbc2b26c95",
   "artifacts": {
     "plan": ".dev-flow/2026-10-08-data-safety-batch/PLAN.md",
     "P1": ".dev-flow/2026-10-08-data-safety-batch/01-requirements.md",
@@ -200,7 +200,7 @@
     {
       "station": "P3",
       "date": "2026-10-09",
-      "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (fc5141b); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
+      "decision": "P3 closed: Inc-3, Inc-1a, Inc-1b, Inc-4, Inc-1c (UX-1 conditions) and Inc-2 landed on feat/data-safety-batch (569cb90); each with a full default lane (last: 2910 passed / 0 failed before U11's +2 test nodes) and an independent code-reviewer OK; Inc-1c/Inc-2 implemented as eleven small deepseek-v4-pro units per the operator's method ruling; C14 real-terminal smoke still owed to the operator"
     },
     {
       "station": "DDR",
@@ -210,7 +210,7 @@
     {
       "station": "P4",
       "date": "2026-10-09",
-      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on cab8181 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
+      "decision": "P4 PASS-WITH-NOTES (04-validation.md): gate 2920 passed / 0 failed / 3 xfailed on 4b8b103 by the orchestrator; qa-reviewer ACCEPT-WITH-FIXES (4 minors applied); notes A-13..A-15, F5, external V7"
     },
     {
       "station": "P5",
@@ -243,32 +243,32 @@
   },
   "previous_batch": {
     "batch_id": "2026-08-26-ui-next-batch-02",
-    "merge_commit": "46e190b",
+    "merge_commit": "2eaabf3",
     "close_pr": "https://github.com/<owner>/mapper/pull/8",
     "sync_pr": "https://github.com/<owner>/mapper/pull/9",
     "closed_at": "2026-10-08",
-    "close_commit": "bb8328f",
+    "close_commit": "7c50099",
     "obsidian_synced": true,
     "archive": ".dev-flow/2026-08-26-ui-next-batch-02/decisions-log.json + state-snapshot-at-close.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
       "batch_id": "2026-08-26-repair-batch",
-      "merge_commit": "e164a28",
+      "merge_commit": "820e7e3",
       "pr": "https://github.com/<owner>/mapper/pull/2",
-      "closed_at": "d8777840313145fec341687f0081afd7230c755b",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
     "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
-    "artifacts_landed_by": "commit 8675151 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
     "2026-08-27-repair-batch-02": {
       "batch_id": "2026-08-27-repair-batch-02",
-      "merge_commit": "2b59071",
+      "merge_commit": "7d04ba2",
       "pr": "https://github.com/<owner>/mapper/pull/3",
       "closed_at": "2026-08-27",
-      "close_commit": "3fe0e4b",
+      "close_commit": "d8a8536",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
     }

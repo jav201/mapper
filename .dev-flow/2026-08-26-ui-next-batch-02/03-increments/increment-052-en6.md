@@ -1,6 +1,6 @@
 # Increment 052 -- Inc-EN-6: the palette footer advertises the arrows (`N2`)
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `b5cbd39`, code commit `e5b702a`. Authority: `A-134` (appended to `01-requirements.md`), `VERDICT-inc-en-2026-10-02.md` (EN-6 row), `VERDICT-inc9-2026-09-30.md` Round 4 `N2`. 2 source files (cap 4, no overage): `mapper/keymap.py`, `mapper/screens/palette.py`.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `28b86e9`, code commit `a8df2a1`. Authority: `A-134` (appended to `01-requirements.md`), `VERDICT-inc-en-2026-10-02.md` (EN-6 row), `VERDICT-inc9-2026-09-30.md` Round 4 `N2`. 2 source files (cap 4, no overage): `mapper/keymap.py`, `mapper/screens/palette.py`.
 
 ## 1. What changed
 
@@ -38,7 +38,7 @@ The dialog is a fixed 80 columns; `test_en6` asserts `len(footer) <= dialog widt
 
 ## 5. RED / GREEN and mutants
 
-RED on the base: scratch `git worktree` of `b5cbd39` under `%TEMP%` (removed), `tests/test_en6.py` copied in, strict xfail on the 3 test functions that must fail there. Without `--runxfail`: `2 passed, 4 xfailed`; with `--runxfail`: `4 failed, 2 passed` (footer at 118 and at 87, the sentinel, the seat-rows arm). The 2 passes are controls by design: on the base the arrows already worked through `on_key`, so the arrow arm and the typing arm pass there and guard the behaviour across the change. `mapper` imported from the worktree (`__file__` checked). GREEN here: `6 passed`.
+RED on the base: scratch `git worktree` of `28b86e9` under `%TEMP%` (removed), `tests/test_en6.py` copied in, strict xfail on the 3 test functions that must fail there. Without `--runxfail`: `2 passed, 4 xfailed`; with `--runxfail`: `4 failed, 2 passed` (footer at 118 and at 87, the sentinel, the seat-rows arm). The 2 passes are controls by design: on the base the arrows already worked through `on_key`, so the arrow arm and the typing arm pass there and guard the behaviour across the change. `mapper` imported from the worktree (`__file__` checked). GREEN here: `6 passed`.
 
 Mutants: harness in the scratchpad (outside the repo), byte-level read and write, sha256 pin checked after every restore (all `restored True`, final pins True), verdict printed before the restore, `-B -W error::SyntaxWarning -x`, temp HOME. Suites: `test_en6`, `test_palette`, `test_inc9e`, `test_inc9f`, `test_keymap`, `test_key_dispatch`.
 
@@ -57,9 +57,9 @@ Mutants: harness in the scratchpad (outside the repo), byte-level read and write
 
 ## 6. Test results
 
-- Full default lane, once, uninterrupted, last step, on `e5b702a` (code and tests; docs-only commits follow): `2694 passed, 24 deselected, 3 xfailed` (0 failed) in 1619.8 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables. Baseline 2686: the 6 new `test_en6` items account for 2692; the other 2 are inferred, not measured, to be per-row cases of seat-conformance tests that parametrize over `KEYMAP` (two new rows).
-- Lane history, declared: a first full lane ended `6 failed, 2688 passed`. Five were `tests/test_github.py` `Author identity unknown` (my environment fault: the temp HOME had no git identity, the same fault `increment-048` recorded). One was `test_inc9c` `...components_scroll_and_every_tab_stop_is_on_screen[size0]` (`tab stops off screen ... DsPagination`), the layout-timing check `increment-048` also saw. That lane is not counted. Re-running those tests with identity set, three times: 9 passed once, 9 passed once, and once `[size1]` of the same test failed again, so it is intermittent. It sits on the components sheet, which this increment does not touch. NOT measured: the same test repeated on `b5cbd39`, so "pre-existing intermittent" is the inference from `increment-048` plus the untouched screen. The second full lane (above) was clean.
-- Ruff 0.8.4, programmatic set difference on (file, code, message) between `b5cbd39` in a scratch worktree and this tree over the 5 changed files that exist on both: 0 and 0, new: none.
+- Full default lane, once, uninterrupted, last step, on `a8df2a1` (code and tests; docs-only commits follow): `2694 passed, 24 deselected, 3 xfailed` (0 failed) in 1619.8 s, `python -B -W error::SyntaxWarning -m pytest -q -rf -p no:cacheprovider`, temp HOME and USERPROFILE, git identity from environment variables. Baseline 2686: the 6 new `test_en6` items account for 2692; the other 2 are inferred, not measured, to be per-row cases of seat-conformance tests that parametrize over `KEYMAP` (two new rows).
+- Lane history, declared: a first full lane ended `6 failed, 2688 passed`. Five were `tests/test_github.py` `Author identity unknown` (my environment fault: the temp HOME had no git identity, the same fault `increment-048` recorded). One was `test_inc9c` `...components_scroll_and_every_tab_stop_is_on_screen[size0]` (`tab stops off screen ... DsPagination`), the layout-timing check `increment-048` also saw. That lane is not counted. Re-running those tests with identity set, three times: 9 passed once, 9 passed once, and once `[size1]` of the same test failed again, so it is intermittent. It sits on the components sheet, which this increment does not touch. NOT measured: the same test repeated on `28b86e9`, so "pre-existing intermittent" is the inference from `increment-048` plus the untouched screen. The second full lane (above) was clean.
+- Ruff 0.8.4, programmatic set difference on (file, code, message) between `28b86e9` in a scratch worktree and this tree over the 5 changed files that exist on both: 0 and 0, new: none.
 - Cf characters (U+2011 included) in the 6 committed files and the 2 docs: 0; account-name grep: 0. No `prototypes/`, `mapper.db`, `fixtures/.mapper` or `state.json` staged. No `git stash`. The EN-5 reviewer's worktrees under `%TEMP%` were not touched.
 
 ## 7. Risks, unmeasured, next

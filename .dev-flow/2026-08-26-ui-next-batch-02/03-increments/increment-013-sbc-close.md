@@ -47,7 +47,7 @@ that**. None is a defect in the requirement or in any oracle.
 - **(D) `V7` recorded as an EXTERNAL block**, explicitly not green, with its honest scope.
   `C-45` PULL deferred to a post-merge increment. Both at `p3_progress.external_blocks`.
 - **The AGREE-1 floor entry was STALE** — it read "NOT DECIDED HERE" for a clause ruled and
-  shipped at `fdabc8d`. Corrected to decided-and-armed with the citation.
+  shipped at `38336ed`. Corrected to decided-and-armed with the citation.
 
 ---
 
@@ -85,11 +85,11 @@ oversight.
 | 5 | `tests/test_inc3_census.py` function docstring | corrected (**uncharged**) |
 | 6 | `mapper/views/outline.py:228-230` + `:244` | **EXCLUDED — see below** |
 
-**Why sites 4 and 5 were owed.** `git blame`: site 4's paragraph was written by `278fd36`
-(this batch's fold) and the contradicting sentence eleven lines above it by `ce294f1` (the
+**Why sites 4 and 5 were owed.** `git blame`: site 4's paragraph was written by `ef4689d`
+(this batch's fold) and the contradicting sentence eleven lines above it by `a53f6e0` (the
 re-ruling) — **the re-ruling commit manufactured the self-contradiction and left it in
-production code.** Correcting it finishes `ce294f1` rather than widening scope. Site 5 is
-`21809fd`, same batch, same day. Neither edit leaves this batch's own footprint.
+production code.** Correcting it finishes `a53f6e0` rather than widening scope. Site 5 is
+`bf8f80b`, same batch, same day. Neither edit leaves this batch's own footprint.
 
 **Why site 6 is EXCLUDED, on the merits.** `outline.py:229` reads *"That — the title path
 being coerced AT ALL — is the load-bearing property here"*, and `:244` in the same block

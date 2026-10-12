@@ -1,12 +1,12 @@
-# Security Review — Inc-7, `91fdbbd` (the damaged-map card, both load paths)
+# Security Review — Inc-7, `d1f30fd` (the damaged-map card, both load paths)
 
 | | |
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` (sealed) |
 | Increment | `019` — INDEPENDENT security review of Inc-7 |
 | Protocol | FULL, per ruling `D35`. I authored none of this diff. |
-| Subject | `91fdbbd` — `mapper/darkside.py`, `mapper/app.py`, `tests/test_repair_cycles.py` |
-| Mirror used | `…/scratchpad/mirror-inc7-sec` at `7c99df6` (mirror commit `8447a82`) |
+| Subject | `d1f30fd` — `mapper/darkside.py`, `mapper/app.py`, `tests/test_repair_cycles.py` |
+| Mirror used | `…/scratchpad/mirror-inc7-sec` at `0eb5374` (mirror commit `8447a82`) |
 | Repo | untouched except this file |
 
 ## 0 · Instrument integrity (stated before any finding)
@@ -21,8 +21,8 @@
   scratchpad root. The CRLF / `rb`-`wb` trap has no surface here.
 - **Scratch files are not named after stdlib modules** (`probe_inc7_names.py`,
   `probe_inc7_containment.py`, `probe_inc7_loadcount.py`, `probe_inc7_blast.py`, `probe_escape_sink*.py`).
-- **Base validity.** The repo advanced to `f0974b6` (`docs:` only) during the review.
-  `git diff --stat 7c99df6 HEAD -- mapper/app.py mapper/darkside.py tests/test_repair_cycles.py`
+- **Base validity.** The repo advanced to `7c48ce2` (`docs:` only) during the review.
+  `git diff --stat 0eb5374 HEAD -- mapper/app.py mapper/darkside.py tests/test_repair_cycles.py`
   is **empty** — my base is byte-identical to HEAD for all three reviewed files.
 - **Disclosure duty.** My probes spawned **8 local processes** (6 × `python`, 1 × `pytest`, 1 × `ruff`).
   **Zero network calls.** Temporary `.mmd` fixtures were created only under the system temp directory.
@@ -123,7 +123,7 @@ declaration rather than invented. **It cannot itself be a vector.**
 - **Why it matters:** I **audited the invariant and it holds today** — `return None` occurs only in the
   `except` block, `damaged.add` is coupled to `broken.append` under the same `if name not in broken`
   guard, and `grep -n "broken"` shows `broken` is written nowhere else (`591`, `602`, `603` only).
-  So there is **no reachable crash at `7c99df6`/HEAD.** What I measured is the **blast radius if it
+  So there is **no reachable crash at `0eb5374`/HEAD.** What I measured is the **blast radius if it
   is ever broken**: an exception raised in the recents-loop body, at exactly the position
   `graph.schema` occupies, **propagates out of `on_mount` and kills the app** — it is not contained:
 
@@ -324,7 +324,7 @@ literal `dañado`), and the hero + resume surfaces gated on `damaged`.
 **What that does to my verdict — read carefully.**
 
 - **My review is of the COMMITTED state.** Every measurement in §0–§7 was taken in the mirror at
-  `7c99df6`, which I verified byte-identical to `f0974b6` (HEAD) for all three reviewed files.
+  `0eb5374`, which I verified byte-identical to `7c48ce2` (HEAD) for all three reviewed files.
   **My verdict does not extend to the uncommitted delta.** → `not-run`.
 - **I re-read the delta and my four findings survive it unchanged**, which I state because it would
   be dishonest to let the verdict quietly expire:

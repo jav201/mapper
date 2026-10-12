@@ -1,6 +1,6 @@
 # Increment 042 -- Inc-9p: normalised components (SEC-F1), hard links, invisible names, `confine_reason`, W1, W2
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `7ebac19`. Authority: `VERDICT-inc9-2026-09-30.md` Round 12 (W1, W2; the operator took the recommended option on both) and the coordinator's rulings for
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `5356f3f`. Authority: `VERDICT-inc9-2026-09-30.md` Round 12 (W1, W2; the operator took the recommended option on both) and the coordinator's rulings for
 `INC9O-SEC-F1`..`F4`, `INC9O-CR-F1`..`F6`. Amendment: `A-124` (appended to `01-requirements.md`, dated 2026-10-01).
 
 ## 1. What changed
@@ -43,7 +43,7 @@ No sealed arm was weakened: every changed expectation is stricter or names a new
 
 ## 3. Arm table (RED/GREEN)
 
-RED = `c0235dc` (the arms, strict xfail) with `--runxfail`, sources of `7ebac19`, in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9p.py tests/test_inc9o.py tests/test_inc9n.py tests/test_arch_osopen_callers.py`,
+RED = `1dee268` (the arms, strict xfail) with `--runxfail`, sources of `5356f3f`, in a separate `git worktree` under `%TEMP%` (removed): `tests/test_inc9p.py tests/test_inc9o.py tests/test_inc9n.py tests/test_arch_osopen_callers.py`,
 **87 failed, 198 passed**. 87 = the 87 xfail marks, one for one (the strict xfails also passed as `87 xfailed` on the committed head). GREEN = the implementation commit, the same four files plus `test_inc9m`, `test_palette`, `test_darkside_census`, `test_attachments`: **433 passed** (`-W error::SyntaxWarning`).
 
 | Step | Arms (RED on base) | Closed by |
@@ -61,7 +61,7 @@ RED = `c0235dc` (the arms, strict xfail) with `--runxfail`, sources of `7ebac19`
 
 Pins (green on base, killed by a mutant instead): plain names `d/x`, `d.x/y`, `./x`, `..\ws\x`; an accented document name; a bare `~/` still expands; a plain import; the template pins; `_path_refusal` for `docs/a.pdf`, UNC, `con`, `..`, drive-absolute; the unreadable -> V1 reading.
 
-**F4 re-measurement.** With the corrected spies (`_no_fs`, `_Walk`, `_Forms`) the existing `test_inc9o` / `test_inc9m` arms are all still green on `7ebac19` (the 202 passes above): the blind spot hid no existing red. The new `norm` arms use the corrected `_no_fs`. The `ntpath` patch alone was not isolated by a mutant (not measured): `realpath` and `Path.resolve` are also patched by name in the same spies.
+**F4 re-measurement.** With the corrected spies (`_no_fs`, `_Walk`, `_Forms`) the existing `test_inc9o` / `test_inc9m` arms are all still green on `5356f3f` (the 202 passes above): the blind spot hid no existing red. The new `norm` arms use the corrected `_no_fs`. The `ntpath` patch alone was not isolated by a mutant (not measured): `realpath` and `Path.resolve` are also patched by name in the same spies.
 
 ## 4. Mutant table
 
@@ -120,7 +120,7 @@ The W1 renders used `a\u202eb` as the document name and `a\u200bb` as the node i
 
 ## 6. Test results, risks, carries, next
 
-- Ruff on a clean `7ebac19` worktree vs this tree, `ruff check mapper tests`: 26 errors on both, the set (file + code + message, line numbers ignored) identical. Ruff 0.8.4.
+- Ruff on a clean `5356f3f` worktree vs this tree, `ruff check mapper tests`: 26 errors on both, the set (file + code + message, line numbers ignored) identical. Ruff 0.8.4.
 - Risks
   1. The hard-link sentence is new, not operator-ruled; it is a constant in `factory.py`.
   2. Factory deviation from the literal reason map (A-124 item 3): the template keeps the old text for `allow_list`, `normalised`, `unreadable`. One line to flip.
@@ -132,7 +132,7 @@ The W1 renders used `a\u202eb` as the document name and `a\u200bb` as the node i
 
 ## Commits
 
-- `c0235dc` the arms, strict xfail.
+- `1dee268` the arms, strict xfail.
 - the implementation commit (below).
 
 ## Full-lane result

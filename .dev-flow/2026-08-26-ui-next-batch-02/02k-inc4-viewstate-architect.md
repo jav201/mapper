@@ -1,8 +1,8 @@
 # 02k · Inc-4 architect ruling — `ViewState.query` removal, and the fold pill's hit count
 
-**Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Branch:** `feat/ui-next-batch-02` · **Base:** `5f4816c`, clean
+**Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Branch:** `feat/ui-next-batch-02` · **Base:** `8ef1553`, clean
 **Lens:** architect · **Scope:** ruling only. Nothing under `mapper/` or `tests/` was edited.
-**Instrument:** a `--local --no-hardlinks` clone at `5f4816c` in the session scratchpad. The repo tree was
+**Instrument:** a `--local --no-hardlinks` clone at `8ef1553` in the session scratchpad. The repo tree was
 read-only throughout; every mutation below happened in the mirror.
 
 **Mirror fidelity, executed before any change** — the instrument reproduces the declared baseline exactly:
@@ -111,7 +111,7 @@ $ PYTHONUTF8=1 python -m pytest tests/test_a3_census.py -q
 ### P5 — the frozen artifact is byte-identical
 
 ```
---- tree: C:/Users/<operator>/Github/mapper   (baseline 5f4816c)
+--- tree: C:/Users/<operator>/Github/mapper   (baseline 8ef1553)
   IRenderer.render : (self, graph: 'Graph', state: 'ViewState') -> 'Text'
   Layered.render   : (self, graph: 'Graph', state: 'ViewState') -> 'Text'
   ViewState roster : ['selected_id','w','h','focus_owner','query','diff','pan_x','pan_y','folded']
@@ -297,7 +297,7 @@ renumbers on merge.
 - **Before:** *"**Pre-state executed at draft:** `grep -n "qlower" mapper/views/layered.py` returns **4
   hits** at lines `144`, `146`, `147`, `148`, with the `hit` binding at `:145` and its only consumer at
   `:159`."*
-- **After:** *"**Pre-state re-executed at `5f4816c`:** `grep -rn "qlower" mapper/views/` returns **9 hits**
+- **After:** *"**Pre-state re-executed at `8ef1553`:** `grep -rn "qlower" mapper/views/` returns **9 hits**
   — the predicate at `layered.py:113-119` (extracted to a module-level `_matches` by Inc-2/Inc-3, no longer
   inline), the `qlower` binding at `:530`, and **two** consumers: the card highlight at `:535` and the fold
   pill's hit-count tail at `:598-601`. The threshold is unchanged at **0**; the pre-state is **9**, not 4."*
@@ -336,7 +336,7 @@ renumbers on merge.
 - **Deleted tokens:** none (the initial roster stays readable, per D20). **New tokens:** `hits`, `pan_x`,
   `pan_y`, `folded`, `Inc-3`, `Inc-4`.
 - **Evidence, executed:** P5 (both rosters derived via `dataclasses.fields`), P4.
-- **Note:** this row is **already stale at `5f4816c`**, by three fields, independent of Inc-4. The row's own
+- **Note:** this row is **already stale at `8ef1553`**, by three fields, independent of Inc-4. The row's own
   sentence *"`query` is transitional and is replaced by a resolved `hits` set in Inc-4"* is discharged here.
 
 ### A-k4 · The `state.py` docstring's silence on removal is closed
@@ -386,7 +386,7 @@ renumbers on merge.
 - **After:** the row is split. The `+N` clause stays with `HLR-N06.2` and is satisfied by the existing
   `_PILL` arms. **The "hit count when a query is live" clause is re-homed to the new `LLR-N07.1.3` and
   carried as a NEW test case `TC-026b`**, with the row annotated *"second clause **UNIMPLEMENTED at
-  `5f4816c`** — `grep -rn 'TC-026' tests/` returns no hit; discovered by the Inc-4 architect ruling."*
+  `8ef1553`** — `grep -rn 'TC-026' tests/` returns no hit; discovered by the Inc-4 architect ruling."*
 - **Deleted tokens:** none. **New tokens:** `TC-026b`, `LLR-N07.1.3`.
 - **Evidence, executed:** P10.
 - **Why it matters:** this is the reason the behaviour change of P8 is invisible. Without `TC-026b`, Inc-4

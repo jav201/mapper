@@ -1,4 +1,4 @@
-# Security Review — Inc-4a (`feat/ui-next-batch-02`, entry `5f4816c`, working tree)
+# Security Review — Inc-4a (`feat/ui-next-batch-02`, entry `8ef1553`, working tree)
 
 **Verdict: BLOCK.** One HIGH (availability / operator-visible hang), introduced by this
 increment, on a green suite (813 passed). The content-sink axis — the one this batch's

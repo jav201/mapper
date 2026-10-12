@@ -57,10 +57,10 @@ python -B -m pytest -q -p no:cacheprovider tests/test_en8.py   # the repointed L
 
 ## 4 · Test results
 
-A6, A7 and A4 share one gate transcript (`a6a7a4-gate-full-suite.transcript`, run at `45007da`, spine-A complete). Cited verbatim: **`2 failed, 3018 passed, 24 deselected, 3 xfailed in 1567.24s (0:26:07)`**. Both failures name **A4-moved** code, not A7's:
+A6, A7 and A4 share one gate transcript (`a6a7a4-gate-full-suite.transcript`, run at `908a9b0`, spine-A complete). Cited verbatim: **`2 failed, 3018 passed, 24 deselected, 3 xfailed in 1567.24s (0:26:07)`**. Both failures name **A4-moved** code, not A7's:
 
-- `FAILED tests/test_inc9m.py::test_inc9m_s1_one_helper_is_imported_by_the_three_callers` — third `safe_local_path` caller is now `screens/home.py`, fixed in `689d537`.
-- `FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[store.py]` — `store.py` comment cited `app.py:548`, fixed in `689d537`.
+- `FAILED tests/test_inc9m.py::test_inc9m_s1_one_helper_is_imported_by_the_three_callers` — third `safe_local_path` caller is now `screens/home.py`, fixed in `0e7b8c2`.
+- `FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[store.py]` — `store.py` comment cited `app.py:548`, fixed in `0e7b8c2`.
 
 A7's own surface shipped clean: `test_en8.py` (the repointed patch site) passed in the gate — the `LayeredRenderer` patch still bites through `screens/import_preview.py`.
 

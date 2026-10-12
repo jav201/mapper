@@ -9,7 +9,7 @@
 | Acceptance | `AT-003`, `AT-004`, `AT-005`, `AT-006`, `AT-007`, `AT-007b`, `AT-008`, `AT-009` |
 | Agent | `software-dev` (supervised-incremental-development) |
 | Date | 2026-08-28 |
-| Base | `5d8ee0d` on `feat/ui-next-batch-02` |
+| Base | `5686fe0` on `feat/ui-next-batch-02` |
 
 ---
 
@@ -18,7 +18,7 @@
 **The braille edges and pill backgrounds `RadialRenderer` has been drawing all along now reach the
 screen and the exported SVG, the palette gained five tokens with declared jobs and a census that
 fails if any of them acquires a second, and one declared list of code points is coerced out of every
-painted string.** Pre-state, executed at `5d8ee0d`: a radial map painted **0** characters in
+painted string.** Pre-state, executed at `5686fe0`: a radial map painted **0** characters in
 `U+2800`–`U+28FF` while the renderer was writing 267 dots per legacy render that `Canvas.rows()`
 silently discarded.
 
@@ -115,7 +115,7 @@ python -m pytest tests/test_canvas.py tests/test_darkside_census.py -q
 **Ruff reconciled rather than accepted.** 29 → 28 is **−1 and zero new**: the removed error is
 `tests/test_export.py`'s pre-existing unused `Path` import, which `_disk_braille`'s annotation now
 consumes. `mapper/darkside.py`'s two errors (`F401 timedelta`, `F841 running`) were verified
-byte-identical at `5d8ee0d`. All eight other touched files: `All checks passed!`
+byte-identical at `5686fe0`. All eight other touched files: `All checks passed!`
 
 ### RED counterfactual — executed, not predicted
 
@@ -313,7 +313,7 @@ result.
 
 `code-reviewer` re-ran independently over the post-fix tree: **"OK with the listed fixes applied
 first — the HIGH is discharged, no HIGH survives."** It re-derived every number from an archived
-`5d8ee0d` rather than reading them here, executed seven mutations of its own in a detached copy, and
+`5686fe0` rather than reading them here, executed seven mutations of its own in a detached copy, and
 returned **0 HIGH · 7 MEDIUM · 6 LOW**. Verdict at `increment-001-code-review-confirmation.md`.
 
 ### The finding that matters most is against me, and it is recorded verbatim

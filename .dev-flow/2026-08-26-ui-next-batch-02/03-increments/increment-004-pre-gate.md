@@ -1,7 +1,7 @@
 # Inc-4 · PRE-gate measurements — orchestrator-owned
 
 **Batch:** `2026-08-26-ui-next-batch-02` · **Increment:** Inc-4 (US-N07 «búsqueda» + the `#D5b` seat
-rebind + `LLR-N06.2.4`) · **Entry commit:** `5f4816c` · **Date:** 2026-08-29
+rebind + `LLR-N06.2.4`) · **Entry commit:** `8ef1553` · **Date:** 2026-08-29
 **Protocol:** FULL (A-91 — Inc-4 is a data-path + seat-rebind increment; the lighter single-review
 lane is not available to it).
 **SOURCE files: 5 — DECLARED BREACH** (`mapper/search.py`, `mapper/app.py`, `mapper/views/layered.py`,
@@ -17,7 +17,7 @@ recorded as the superseded one rather than quietly replaced.
 
 | Item | Executed value |
 |---|---|
-| branch / HEAD | `feat/ui-next-batch-02` @ `5f4816c`, working tree clean, pushed |
+| branch / HEAD | `feat/ui-next-batch-02` @ `8ef1553`, working tree clean, pushed |
 | fast lane | `801 passed, 17 deselected, 3 xfailed in 130.83s` — **exit 0**, `grep -c "^FAILED"` = **0** |
 | ledger base | **821** all-markers (`801 + 3 xfailed + 17 deselected`) · **804** default lane |
 | ruff, scope `mapper/ tests/` | **19 distinct `(file, rule)` pairs · 27 findings** — full set pinned below |

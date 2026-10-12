@@ -14,7 +14,7 @@ the five declared spec corrections. Detail below, including what I could not ver
 ## Scope reviewed
 
 Working tree of `C:/Users/<operator>/Github/mapper` at branch `feat/ui-next-batch-02`,
-entry commit `a971432`, nothing committed.
+entry commit `8919c2a`, nothing committed.
 
 | File | Δ | Read |
 |---|---|---|
@@ -408,7 +408,7 @@ the branch. That is F2.
   nothing in this diff touches the depth-5000 acceptance path. Taken from the brief.
 - **Ruff NEW/GONE set identity.** I confirmed the mirror reports **27** errors over
   `mapper/ tests/`, matching the entry pin, but did not diff the finding sets code-by-code
-  against `a971432`. The count agreeing is consistent with the declared zero-NEW/zero-GONE
+  against `8919c2a`. The count agreeing is consistent with the declared zero-NEW/zero-GONE
   but is not the same claim.
 - **The other 12 rows of §4.8's mutation table.** I re-ran four by choosing my own
   mutants rather than replaying the author's; two of my four survived (F1, F2). I did not

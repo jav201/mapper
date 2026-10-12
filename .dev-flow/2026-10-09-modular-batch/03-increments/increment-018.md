@@ -11,7 +11,7 @@
 | Lane (if the batch forked) | n/a — one lane |
 | Requirement(s) | `LLR-MOD.1.3` (navigation module owns its census methods) |
 | Acceptance | full suite at the B3–B9 gate · the permanent guard tests (`test_mod_bodies.py`, `test_mod_parity.py`, `test_mod_dispatch.py`) |
-| Agent | Product move `47bed83` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). No test follow-up commit. Gate — orchestrator. |
+| Agent | Product move `ce98bd9` — orchestrator script (`mixin_move.py`, AST cut/paste; Claude Opus 5.5). No test follow-up commit. Gate — orchestrator. |
 | Date | `2026-10-10` |
 
 ---
@@ -19,7 +19,7 @@
 ## 1 · What changed
 
 - **The nav concern moved.** 8 nav methods (86 lines) moved byte-identically from `mapper/screens/map/screen.py` into `mapper/screens/map/navigation.py` — the module that already held `NavigationModel` (A5a) — as `class NavOps` (`navigation.py:62`). `screen.py` composes it as a mixin base.
-- **Recorded deviation: `action_open_ficha` stays in the core.** It constructs `MapScreen` itself; moving it would need a `navigation ↔ screen` import cycle or a changed body. Self-construction is a core concern. The deviation is recorded here and later in `docs/ARCHITECTURE.md` at B12 (`d4948b2`).
+- **Recorded deviation: `action_open_ficha` stays in the core.** It constructs `MapScreen` itself; moving it would need a `navigation ↔ screen` import cycle or a changed body. Self-construction is a core concern. The deviation is recorded here and later in `docs/ARCHITECTURE.md` at B12 (`5b5bc83`).
 - No patch surface moved in this increment and no census test needed a follow-up edit.
 
 ---
@@ -170,7 +170,7 @@ No test files added or deleted; the B3–B9 gate count (3060) is unchanged by th
 
 ## 6 · Pending items / spec deviations
 
-- **Deviation (recorded, accepted):** `action_open_ficha` stays in `screen.py`, deviating from the census classification that would put it with nav. Rationale in the commit body (`47bed83`): it constructs `MapScreen`; moving it needs an import cycle or a changed body. Recorded in `docs/ARCHITECTURE.md` at B12 (`d4948b2`).
+- **Deviation (recorded, accepted):** `action_open_ficha` stays in `screen.py`, deviating from the census classification that would put it with nav. Rationale in the commit body (`ce98bd9`): it constructs `MapScreen`; moving it needs an import cycle or a changed body. Recorded in `docs/ARCHITECTURE.md` at B12 (`5b5bc83`).
 
 ## 7 · Suggested next task
 

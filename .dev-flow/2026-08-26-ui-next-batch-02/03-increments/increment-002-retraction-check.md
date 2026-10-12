@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Reviewer | `code-reviewer` (independent) — third pass, narrow scope |
-| Batch | `2026-08-26-ui-next-batch-02` · branch `feat/ui-next-batch-02` · base `4eaba35` |
+| Batch | `2026-08-26-ui-next-batch-02` · branch `feat/ui-next-batch-02` · base `105d238` |
 | Scope | the `A-96` retraction of `B-51`, plus the `N-M3` / `N-M1` / `N-M4` / `N-M6` repairs |
 | Judging | `increment-002.md` §10 and `increment-002-code-review-confirmation.md` |
 | Date | 2026-08-28 |
@@ -49,7 +49,7 @@ conditions. The conclusion is right; the exhibit is one pause short.
 |---|---|
 | No file under `mapper/`, `tests/`, `docs/` edited | real-repo `git status --short` byte-identical to the state received (21 tracked entries + 3 untracked, unchanged); `fixtures/` appears in no status line and in no diff |
 | No mutating git command in the real repo | `git worktree list` in the repo → the repo alone. The one worktree I created was **inside the mirror** (`mirror/../wt4eaba35`) and is removed; `git worktree list` in the mirror now shows the mirror alone |
-| Mutations | a full copy of the working tree (including `.git`, so `git ls-files` behaves) under the session scratchpad, `PYTHONDONTWRITEBYTECODE=1`, restored from in-memory bytes — never `git checkout`, which in this tree would have reverted the increment to `4eaba35` |
+| Mutations | a full copy of the working tree (including `.git`, so `git ls-files` behaves) under the session scratchpad, `PYTHONDONTWRITEBYTECODE=1`, restored from in-memory bytes — never `git checkout`, which in this tree would have reverted the increment to `105d238` |
 | Live-app probes | every probe built its own `tempfile.mkdtemp()` workspace; no `MapperApp` was ever pointed at the repo's `fixtures/` |
 | Post-battery control | mirror restored → the 7 target arms green; full suite `719 passed` |
 
@@ -59,9 +59,9 @@ conditions. The conclusion is right; the exhibit is one pause short.
 |---|---|
 | fast `719 passed, 17 deselected` | ✓ `719 passed, 17 deselected in 60.82s`, and four more times under 4-way parallel load |
 | slow `17 passed` | ✓ `17 passed, 719 deselected in 23.94s` |
-| ruff `mapper/ tests/` = **28** | ✓ `Found 28 errors.` — exactly the `4eaba35` baseline |
+| ruff `mapper/ tests/` = **28** | ✓ `Found 28 errors.` — exactly the `105d238` baseline |
 | `ruff check fixtures/` clean | ✓ — and still vacuous: `warning: No Python files found under the given path(s)`. `N-L1` was conceded and is labelled; no action |
-| Ledger `736 = 711 + 25`, 0 removed | ✓ **derived myself**, node-id diff of `--collect-only -m ""` against a `4eaba35` worktree: base 711, now 736, `comm -23` (removed) **empty**, `comm -13` (added) **exactly 25** — 15 in `test_a3_census.py`, 5 in `test_app.py`, 3 `AT-010` arms in `test_layered.py`, 2 derived `[state.py]` arms in `test_repair_artifact_claims.py`. Matches §4's table line for line |
+| Ledger `736 = 711 + 25`, 0 removed | ✓ **derived myself**, node-id diff of `--collect-only -m ""` against a `105d238` worktree: base 711, now 736, `comm -23` (removed) **empty**, `comm -13` (added) **exactly 25** — 15 in `test_a3_census.py`, 5 in `test_app.py`, 3 `AT-010` arms in `test_layered.py`, 2 derived `[state.py]` arms in `test_repair_artifact_claims.py`. Matches §4's table line for line |
 
 ---
 
@@ -476,7 +476,7 @@ hole.
 - [✓] **Reuse / duplication** — no new duplication introduced by the retraction's arms.
 - [✓] **Tests reviewed for intent** — 18 mutants across two batteries, 18/18 matching prediction,
       sha256 restore verified on 5 files after every mutant, post-control green.
-- [✓] **Ledger derived independently** — node-id `comm` diff against a `4eaba35` worktree: 711 → 736,
+- [✓] **Ledger derived independently** — node-id `comm` diff against a `105d238` worktree: 711 → 736,
       0 removed, 25 added, all enumerated.
 - [✓] **Stress** — 8 sequential runs of the focus/export arms, 10 more under 4-way full-suite load,
       50 probe replays; zero failures.

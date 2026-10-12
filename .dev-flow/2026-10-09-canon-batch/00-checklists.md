@@ -23,8 +23,8 @@
 | 1 | Context of use per story: user · **task** · **environment** | ✓ | US-001/US-002 maintainer · task: read the canon / keep lint clean · env: the repo (`01-requirements.md` §2.6) |
 | 2 | Observable outcome stated per story | ✓ | AT-063 (canon rows on disk), AT-064 (no unused import) — §3 |
 | 3 | Risk estimate: importance and criticality, used to prioritise | ✓ | low/medium; PLAN.md §Risks |
-| 4 | RC-1: `origin/main` tip fetched and recorded in `PLAN.md` **before** deriving — with no `origin` remote, the local tip and the no-origin premise | ✓ | `origin/master` = `558b41522c7d` fetched before deriving (PLAN.md Header) |
-| 5 | RC-2: `origin` reachable and the age of its newest commit recorded in `PLAN.md` **before** deriving (`git ls-remote --exit-code --heads origin`; V25; with no `origin` remote, RC-1 (a)'s premise line) | ✓ | `git fetch origin` succeeded; tip `558b415` (PR #13 merge, 2026-10-09) |
+| 4 | RC-1: `origin/main` tip fetched and recorded in `PLAN.md` **before** deriving — with no `origin` remote, the local tip and the no-origin premise | ✓ | `origin/master` = `3c0c33883341` fetched before deriving (PLAN.md Header) |
+| 5 | RC-2: `origin` reachable and the age of its newest commit recorded in `PLAN.md` **before** deriving (`git ls-remote --exit-code --heads origin`; V25; with no `origin` remote, RC-1 (a)'s premise line) | ✓ | `git fetch origin` succeeded; tip `3c0c338` (PR #13 merge, 2026-10-09) |
 | 6 | "already shipped?" check per candidate story | ✓ | neither shipped: `grep -c HYG REQUIREMENTS.md` → 0; `ruff check mapper/app.py` → F401 (§2.7) |
 | 7 | `flow_hash` verified against the manifest (C-45 PULL) | ⚠ | `V7` external (F1 fired); `~/.claude` not touched |
 | 8 | **Triggers evaluated AND recorded — the ones that fired and the ones that did not, each with its probe (C-48)** | ✓ | PLAN.md §Triggers: B4, F1 fired; 21 not fired, each with its probe; state.json written by `--fired/--not-fired` |

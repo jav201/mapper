@@ -5,7 +5,7 @@
 > recorded here, or flagged `assumed — verify in Phase 3` in the requirement itself. This file holds
 > the executed output; the requirement holds the predicate written against it.
 >
-> **Tree state for every probe below:** `git rev-parse HEAD` = `d6b60e6b4f18b10123fffc76bbb36891473df653`
+> **Tree state for every probe below:** `git rev-parse HEAD` = `1b51aca7a11582acf2de878d8138d26cef2d301b`
 > (`master`), working tree dirty only in `.dev-flow/**`, `docs/ARCHITECTURE.md` and untracked
 > `prototypes/**`. No `mapper/**` or `tests/**` file was modified by any probe.
 >

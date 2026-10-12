@@ -5,7 +5,7 @@
 | Batch | `2026-08-26-repair-batch` |
 | Increment | `004` — S-07 (`HLR-R04`) and S-08 (`HLR-R05`) |
 | Reviewer | `code-reviewer`, independent of `software-dev` |
-| Base | `origin/master` @ `d6b60e6b4f18b10123fffc76bbb36891473df653`, nothing committed |
+| Base | `origin/master` @ `1b51aca7a11582acf2de878d8138d26cef2d301b`, nothing committed |
 | Date | 2026-08-27 |
 
 ---

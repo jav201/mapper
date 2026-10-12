@@ -1,6 +1,6 @@
 # Increment 035 -- Inc-9i: the Inc-9h review defects
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `a0ff3b9`. Authority: the Inc-9h independent
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `99d9cbd`. Authority: the Inc-9h independent
 reviews, the coordinator's rulings on `INC9H-UX-F1` / `INC9H-SEC-F2`, and the operator's Round 6 Q1
 (`VERDICT-inc9-2026-09-30.md`). Amendment: `A-117` (appended to `01-requirements.md`, dated 2026-10-01). Findings are
 named `INC9H-*`.
@@ -51,12 +51,12 @@ named `INC9H-*`.
 
 ## 3. Arm table (13 default + 1 `network` in `tests/test_inc9i.py`; 1 reworked arm in `tests/test_inc9h.py`)
 
-RED: the two arms files copied into a detached `git worktree` of `a0ff3b9` in `%TEMP%` (no stash), run with
+RED: the two arms files copied into a detached `git worktree` of `99d9cbd` in `%TEMP%` (no stash), run with
 `--runxfail`: **9 failed, 48 passed** (`test_inc9i.py` and `test_inc9h.py`, `-m "not slow"` so the `network` arm is in).
 GREEN: all of them on HEAD (`201 passed, 2 xfailed` after the github step, then `174 passed` for the four neighbouring
 files after the panel step, `3 passed` for the `network` lane).
 
-| arm | RED on `a0ff3b9` | state on HEAD |
+| arm | RED on `99d9cbd` | state on HEAD |
 |---|---|---|
 | `cr_f1_r_dot_git_then_r_in_one_cache_gives_two_clones_and_no_refusal` (a, stub) | RED (`GitHubError`: refusing the cached copy) | green |
 | `cr_f1_real_git_r_dot_git_then_r_shows_each_repos_own_branches` (a, real git, `network`) | RED (same) | green (`-m network`) |
@@ -72,7 +72,7 @@ files after the panel step, `3 passed` for the `network` lane).
 
 ## 4. Mutant table
 
-Harness `mutate9i.py` in the session scratchpad, outside the repo; run on a detached `git worktree` copy of `5badbb0`
+Harness `mutate9i.py` in the session scratchpad, outside the repo; run on a detached `git worktree` copy of `025a018`
 (the code commit) in `%TEMP%`; sha256 of the target file pinned before, byte-level I/O in the file's own line ending
 (CRLF for both `github.py` and `app.py`), the verdict printed before the file is restored, the pin re-checked after:
 **pin OK 11 of 11**, plus one extra `-k base_built` run done by hand (restored in a `finally`, not pin-checked). `old`
@@ -100,8 +100,8 @@ Not run: a mutant for the `authentication required` pin arm (a pin: green on the
 | check | state |
 |---|---|
 | `tests/test_inc9i.py` 13 default + 1 `network` (real local bare repositories, HOME and USERPROFILE in `tmp_path`) and `tests/test_inc9h.py` | executed: green on HEAD; RED/GREEN table above |
-| Full default lane, once, uninterrupted, last step, output to a file | executed: **1735 passed, 3 xfailed, 24 deselected, 0 failed**, 19:09 (baseline 1722: +13 default arms; the `network` arm is deselected). Run on `7f482d5` after the docs commit, because `test_no_operator_paths` reads `.dev-flow`; this result line is the only edit after it |
-| `ruff check . --exclude prototypes` set difference vs `a0ff3b9` (a detached worktree, line and column stripped) | executed: new = none, gone = none (28 findings on each side) |
+| Full default lane, once, uninterrupted, last step, output to a file | executed: **1735 passed, 3 xfailed, 24 deselected, 0 failed**, 19:09 (baseline 1722: +13 default arms; the `network` arm is deselected). Run on `9779c28` after the docs commit, because `test_no_operator_paths` reads `.dev-flow`; this result line is the only edit after it |
+| `ruff check . --exclude prototypes` set difference vs `99d9cbd` (a detached worktree, line and column stripped) | executed: new = none, gone = none (28 findings on each side) |
 | Literal Cf/Cc characters in `tests/test_inc9i.py` and `tests/test_inc9h.py` (scan before every commit) | executed: none |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | not hit |
 | `git stash` | not used |
@@ -140,6 +140,6 @@ as a space. Not measured in a Textual render with NBSP; only the chosen fix was 
 
 ## Commits
 
-`ce656dd` arms (strict xfail; the `test_inc9h` arm reworked) · `cb6bced` `github.py` (key, userinfo) and the `OPEN_STEPS`
-removal for those arms · `5badbb0` `app.py` (panel line), the last `OPEN_STEPS` removal and `red_marks` · docs commit
+`6581bd8` arms (strict xfail; the `test_inc9h` arm reworked) · `ed328d4` `github.py` (key, userinfo) and the `OPEN_STEPS`
+removal for those arms · `025a018` `app.py` (panel line), the last `OPEN_STEPS` removal and `red_marks` · docs commit
 (this record, `A-117`, the `increment-034` correction). No push; `state.json` untouched.

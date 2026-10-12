@@ -1,6 +1,6 @@
 # Increment 051 -- Inc-EN-5: English strings in `app.py`
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `6fc218c`. Authority: `A-133` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 3 source files (cap 4, no overage): `mapper/app.py`, `mapper/screens/editor.py` (binding labels lowercased, `EN1-REV-F4`), `mapper/widgets/inspector.py` (one comment, `EN2-REV-F1`; see the uncertainty in section 7). The 4th slot was not used. `keymap.py`, `screens/palette.py` and the `?` rule were not touched.
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `02b5fba`. Authority: `A-133` (appended to `01-requirements.md`, dated 2026-10-02), `VERDICT-inc-en-2026-10-02.md` (EN-Q1, EN-Q2) and `VERDICT-inc8-legend-2026-09-28.md` section LANGUAGE RULING. 3 source files (cap 4, no overage): `mapper/app.py`, `mapper/screens/editor.py` (binding labels lowercased, `EN1-REV-F4`), `mapper/widgets/inspector.py` (one comment, `EN2-REV-F1`; see the uncertainty in section 7). The 4th slot was not used. `keymap.py`, `screens/palette.py` and the `?` rule were not touched.
 
 ## 1. What changed
 
@@ -16,7 +16,7 @@ Key points, declared:
 
 ## 2. Files modified
 
-Source (3): `mapper/app.py`, `mapper/screens/editor.py`, `mapper/widgets/inspector.py` (comment only). Tests: `tests/test_en5.py` (new, 9 items); relabelled `test_app`, `test_confirm_markup`, `test_darkside_census`, `test_export_state`, `test_fold`, `test_g6_store_surrogates`, `test_inc9d`, `test_inc9f`, `test_inc9h`, `test_inc9i`, `test_inc9m`, `test_inc9n`, `test_inc9o`, `test_inc9x3`, `test_pan`, `test_repair_cycles`, `test_search`, `test_sparkline_floor`, `test_strips`, `test_worklist_safety`; widened `test_overflow` (section 3). Docs: `01-requirements.md` (append `A-133`), this file. `keymap.py`, `screens/palette.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `cb53c57` (code, tests, A-133), then this record.
+Source (3): `mapper/app.py`, `mapper/screens/editor.py`, `mapper/widgets/inspector.py` (comment only). Tests: `tests/test_en5.py` (new, 9 items); relabelled `test_app`, `test_confirm_markup`, `test_darkside_census`, `test_export_state`, `test_fold`, `test_g6_store_surrogates`, `test_inc9d`, `test_inc9f`, `test_inc9h`, `test_inc9i`, `test_inc9m`, `test_inc9n`, `test_inc9o`, `test_inc9x3`, `test_pan`, `test_repair_cycles`, `test_search`, `test_sparkline_floor`, `test_strips`, `test_worklist_safety`; widened `test_overflow` (section 3). Docs: `01-requirements.md` (append `A-133`), this file. `keymap.py`, `screens/palette.py`, `state.json`, `BACKLOG.md`, `prototypes/`, `mapper.db` not touched. Commits: `ecb45e9` (code, tests, A-133), then this record.
 
 ## 3. Sealed-arm changes (labels only; none weakened)
 
@@ -42,7 +42,7 @@ Each is a literal substitution of the pinned text; the comparison (`==`, `in`, `
 
 Total: 20 sealed test files relabelled (82 changed lines, `test_search` alone 23), 1 widened (`test_overflow`).
 
-**Geometry, re-derived by sweep (not edited until green).** `test_overflow::test_a_region_too_short_for_a_body_row_declares_nothing_painted` failed its non-vacuity assert (`no size in the sweep reaches the short-region branch`). Cause, measured with a probe run on `6fc218c` and on this tree (outside the repo): the English minimap strip is one row shorter at 100 columns (`#map-minimap` 2 rows became 1), so at terminal 100x10 the canvas is 3 rows and no longer the short region; on the base that one size (100, 10) was the ONLY size of the sweep in the short branch (`region_h <= charged`). The probe over heights gave the sizes that are short now: `(100, 9)`, `(80, 10)`, `(60, 11)`, `(50, 12)` (region 2, charged 2). These four were ADDED; the 15 old sizes stay, so the identity `declared == traced` is still asserted at every old size. Result: the arm passes with `short` non-empty.
+**Geometry, re-derived by sweep (not edited until green).** `test_overflow::test_a_region_too_short_for_a_body_row_declares_nothing_painted` failed its non-vacuity assert (`no size in the sweep reaches the short-region branch`). Cause, measured with a probe run on `02b5fba` and on this tree (outside the repo): the English minimap strip is one row shorter at 100 columns (`#map-minimap` 2 rows became 1), so at terminal 100x10 the canvas is 3 rows and no longer the short region; on the base that one size (100, 10) was the ONLY size of the sweep in the short branch (`region_h <= charged`). The probe over heights gave the sizes that are short now: `(100, 9)`, `(80, 10)`, `(60, 11)`, `(50, 12)` (region 2, charged 2). These four were ADDED; the 15 old sizes stay, so the identity `declared == traced` is still asserted at every old size. Result: the arm passes with `short` non-empty.
 
 **Digests.** None re-derived (no sha256 fingerprint depends on a string that `app.py` paints).
 
@@ -60,7 +60,7 @@ Measured in `Python len`, one cell per glyph here: minimap caption `  coverage  
 
 ## 5. RED / GREEN and mutants
 
-**Census arm, RED on the base.** A scratch `git worktree` of `6fc218c` under `%TEMP%` (removed), temp HOME, `tests/test_en5.py` copied in with `@pytest.mark.xfail(strict=True)` on the 8 items that must fail there (the census and seven behaviour arms). Without `--runxfail`: `1 passed, 8 xfailed`. With `--runxfail`: `8 failed, 1 passed` (the pass is the oracle control, by design); the census reported 143 Spanish literals on the base. `mapper` was imported from the worktree (its `__file__` checked). GREEN here: `9 passed`. An earlier GREEN check of the CSV arm that ran from the base directory against the repo's path imported the repo's `mapper`; it was discarded and redone by copying the file into the worktree (the numbers above).
+**Census arm, RED on the base.** A scratch `git worktree` of `02b5fba` under `%TEMP%` (removed), temp HOME, `tests/test_en5.py` copied in with `@pytest.mark.xfail(strict=True)` on the 8 items that must fail there (the census and seven behaviour arms). Without `--runxfail`: `1 passed, 8 xfailed`. With `--runxfail`: `8 failed, 1 passed` (the pass is the oracle control, by design); the census reported 143 Spanish literals on the base. `mapper` was imported from the worktree (its `__file__` checked). GREEN here: `9 passed`. An earlier GREEN check of the CSV arm that ran from the base directory against the repo's path imported the repo's `mapper`; it was discarded and redone by copying the file into the worktree (the numbers above).
 
 **Mutants.** Harness `%TEMP%\...\scratchpad\en5\mut.py` (outside the repo): byte-level read and write of `app.py`, sha256 pin checked after every restore (all `restored True`), verdict printed before the restore, `-B`, `-W error::SyntaxWarning`, `-x`, temp HOME and USERPROFILE. 17 run: 16 killed, 1 survived (equivalent, below). Pin `app.py` (working-copy bytes, first 8 hex): `1d558c1c` before and after every mutant.
 
@@ -88,7 +88,7 @@ D1 and Y1 (the ficha modal labels, the `saved` toast) have no pin except the cen
 
 ## 6. Test results
 
-- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `6fc218c` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
+- Ruff 0.8.4, `ruff check mapper tests --output-format json --no-cache`, base `02b5fba` in a scratch worktree vs this tree, a programmatic set difference on (file, code, message): **26 and 26, new: none, gone: none.**
 - `-W error::SyntaxWarning`: every pytest run carried it.
 - Targeted lane before the fixes (60 test files that name a changed string, plus `test_en5`): `73 failed, 1759 passed, 22 deselected, 3 xfailed` in 1380 s: `test_search` (9), `test_repair_cycles` (10), `test_inc9x3` (10), `test_g6_store_surrogates` (7), `test_inc9n` (5), `test_fold` (5), `test_pan` (4), `test_inc9h` (4), `test_export_state` (3), `test_strips` (3), `test_sparkline_floor` (3), `test_worklist_safety` (2), `test_a3_census` (1, the new test file was untracked: fixed by staging it), and one each in `test_app`, `test_darkside_census`, `test_inc9d`, `test_inc9i`, `test_inc9m`, `test_inc9o`, `test_overflow`. All relabelled or re-derived as in section 3, then those files re-run: the groups ran `211 passed`, `581 passed` and `1 failed` (`test_worklist_safety::...n05a`, the `descendiente` pin, fixed), then `9 passed` for `test_en5`.
 - Account-name grep of the staged diff (name read at run time, not printed): 0 hits; no `prototypes/`, `mapper.db`, `fixtures/.mapper` or `state.json` staged; Cf characters in the staged diff: 0 after one fix (the tool expanded my `U+202E` and `U+FFFD` escapes into the raw characters in `test_en5.py`; replaced by the six-character escapes before the commit and re-checked); U+2011: 0.
@@ -104,7 +104,7 @@ D1 and Y1 (the ficha modal labels, the `saved` toast) have no pin except the cen
 
 ## Full-lane result
 
-`2686 passed, 24 deselected, 3 xfailed` (0 failed) in 1749.9 s (29 min 9 s), `python -B -m pytest -rf -q -W error::SyntaxWarning -p no:cacheprovider`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `cb53c57` (the last code and test change), run as the last step before this record. Baseline 2677; the delta is the 9 new `test_en5.py` items (2677 + 9 = 2686). FLAKE-1 and FLAKE-4 did not appear.
+`2686 passed, 24 deselected, 3 xfailed` (0 failed) in 1749.9 s (29 min 9 s), `python -B -m pytest -rf -q -W error::SyntaxWarning -p no:cacheprovider`, one uninterrupted process, temp HOME and USERPROFILE, git identity from environment variables, on `ecb45e9` (the last code and test change), run as the last step before this record. Baseline 2677; the delta is the 9 new `test_en5.py` items (2677 + 9 = 2686). FLAKE-1 and FLAKE-4 did not appear.
 
 Lane history, declared: the first (targeted) lane above is not the gate. The full lane was started once and not interrupted. The `A-133` legend figure (35 cells against 37; the first draft said 32 against 33) was corrected in a docs-only commit after the lane, together with this record.
 

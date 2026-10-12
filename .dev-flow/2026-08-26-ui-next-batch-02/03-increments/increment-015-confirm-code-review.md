@@ -4,7 +4,7 @@
 |---|---|
 | Reviewer | `code-reviewer` (independent; authored none of this diff) |
 | Batch | `2026-08-26-ui-next-batch-02` · FULL protocol per `D35` |
-| Base | `a552783` |
+| Base | `ab592f3` |
 | Date | 2026-09-19 |
 | **Verdict** | **BLOCK — 1 HIGH** |
 
@@ -12,7 +12,7 @@
 
 ## Scope reviewed
 
-`git diff a552783` in full, plus the staged-untracked `tests/test_hermetic.py`:
+`git diff ab592f3` in full, plus the staged-untracked `tests/test_hermetic.py`:
 
 - `mapper/app.py` — `action_export_svg` (3469–3479), `EXPORT_EXTENT_STEPS` (3486), `_export_view_state` (3488–3557)
 - `pyproject.toml` — 33–50 (`addopts`, `markers`)
@@ -221,9 +221,9 @@ except this report.
 | `b50`'s repaired double still kills the `diff=None` mutant | added `diff=None` to the `replace()` at `mapper/app.py:3534–3538` in the scratch copy → `1 failed`, `AssertionError: the export dropped the active diff` | **TRUE** |
 | `b50`'s assertions are unchanged | diffed base vs head bodies: only the double's construction changed (`_current_renderer` factory → `monkeypatch.setattr(screen.renderer, "render", …)`); all seven asserts byte-identical, and `assert "state" in seen` still fails loudly if the spy never fires | **TRUE — not a weakening** |
 | `test_repo_screen_two_pane_renders` is not weakened by mocking the seam | MUTANT C (`self.graph = Graph()` after `worker.wait()` at `mapper/app.py:1166`) → `1 failed`. The **base** arm (`assert table is not None`) would have passed it | **TRUE — strictly strengthened** |
-| A3 zero-arg `34 → 35`, itemised as `test_app.py`'s `table.render().plain` | derived `render_call_sites()` at `a552783` and at head: base 34 / head 35. Delta = `+('tests/test_app.py', 123)` (the new `table.render().plain`) and `477 → 519`, a pure line shift of the pre-existing `hero.render().plain` | **TRUE** |
+| A3 zero-arg `34 → 35`, itemised as `test_app.py`'s `table.render().plain` | derived `render_call_sites()` at `ab592f3` and at head: base 34 / head 35. Delta = `+('tests/test_app.py', 123)` (the new `table.render().plain`) and `477 → 519`, a pure line shift of the pre-existing `hero.render().plain` | **TRUE** |
 | A3 arg-ful `62 → 61`, and the decrease hides no removed renderer-protocol call site | base 62 / head 61. Per-file net: `mapper/app.py` **0**, `tests/test_pan.py` **0**, `tests/test_search.py` **0**, `tests/test_app.py` **−1**. The removed site is base `tests/test_app.py:427` = `return renderer.render(graph, state)` **inside the anonymous `Spy`**. No product call site moved | **TRUE — the decrease is legitimate** |
-| the `R1` pre-fix counterfactual reddens both arms at 47,263 bytes | reproduced accidentally-then-deliberately on the scratch copy with `mapper/app.py` at `a552783`: `2 failed`, message `…47263 bytes at the origin against…`, and arm 2 `dropped 3 of 14 nodes` | **TRUE** |
+| the `R1` pre-fix counterfactual reddens both arms at 47,263 bytes | reproduced accidentally-then-deliberately on the scratch copy with `mapper/app.py` at `ab592f3`: `2 failed`, message `…47263 bytes at the origin against…`, and arm 2 `dropped 3 of 14 nodes` | **TRUE** |
 | the lane guard's `network_reaching` models every argv the product really builds | read the five real sites myself: `github.py:46` `["git","-C",str(cwd)]+args`, `:145` `["git","clone","--mirror",…]`, `:248` `cmd = ["gh"]+args`, `diff.py:36` `["git","show",…]`, `osopen.py:52,54` `["open"/"xdg-open", target]`. Derived executable set `{git, gh, open, xdg-open}` == `DECLARED_SPAWNS` | **TRUE** |
 | the guard's delegation is correct / blast radius is refusals only | every `subprocess.*` call site in `mapper/` and `tests/` passes argv **positionally** — no `args=` keyword anywhere — so `guarded_run(argv, *args, **kwargs)` cannot `TypeError`. Ran every subprocess-spawning module under the guard: `tests/{test_github,test_diff,test_canvas,test_darkside_census,test_fold,test_inc3_census,test_repair_artifact_claims}.py` → **195 passed, 3 xfailed in 37.00s**, zero false refusals | **TRUE** |
 | (bonus, better than claimed) the guard covers only `run`/`Popen` | it covers **more**: `subprocess.run`, `call`, `check_call` and `check_output` all resolve `Popen` from the module globals, so a probe placed inside `tests/` had **all three** of `check_output` / `call` / `run` refused and recorded (3 violations at teardown). Worth saying in the packet — the coverage is wider than §5 claims | **UNDERSTATED, in the safe direction** |

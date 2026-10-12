@@ -4,7 +4,7 @@
 |---|---|
 | Batch | `2026-08-26-ui-next-batch-02` |
 | Increment | `001` |
-| Base | `5d8ee0d` on `feat/ui-next-batch-02` |
+| Base | `5686fe0` on `feat/ui-next-batch-02` |
 | Reviewer | `code-reviewer` (independent confirmation; every disposition re-executed, none accepted) |
 | Date | 2026-08-28 |
 | Environment | Python 3.12 · rich 15.0.0 · textual 8.2.8 · Windows · `PYTHONUTF8=1` |
@@ -17,7 +17,7 @@
 No file under `mapper/`, `tests/` or `docs/` was modified. No mutating git command was run
 (`git status --short` is byte-for-byte identical before and after this pass). Every mutation ran in a
 detached copy at `…/scratchpad/probe`, with `PYTHONDONTWRITEBYTECODE=1`, restored via
-`git checkout --` in that copy and confirmed clean after each. The `5d8ee0d` baseline was extracted
+`git checkout --` in that copy and confirmed clean after each. The `5686fe0` baseline was extracted
 with `git archive` into `…/scratchpad/base`, never a worktree in the repo. No live `MapperApp` was
 started and `fixtures/` was never opened by anything but `pytest`'s own tracked reads —
 `git status` shows `fixtures/` unmodified.
@@ -26,8 +26,8 @@ started and `fixtures/` was never opened by anything but `pytest`'s own tracked 
 
 | Claim | Measured here | |
 |---|---|---|
-| `5d8ee0d` fast lane | `630 passed, 17 deselected` | ✓ |
-| `5d8ee0d` ruff `mapper/ tests/` | `Found 29 errors` | ✓ |
+| `5686fe0` fast lane | `630 passed, 17 deselected` | ✓ |
+| `5686fe0` ruff `mapper/ tests/` | `Found 29 errors` | ✓ |
 | current fast lane | `691 passed, 17 deselected in 54.86s` | ✓ |
 | current slow lane | `17 passed, 691 deselected in 23.84s` | ✓ |
 | current ruff `mapper/ tests/` | `Found 28 errors` | ✓ |
@@ -219,7 +219,7 @@ Verified by mutation `M-E` (add `0x202E` to the preserved set **and** clip `(0x2
 pair in the set is `U+200C` ZWNJ and `U+200D` ZWJ: ZWJ builds emoji sequences (`👨<U+200D>👩<U+200D>👧` becomes
 `👨�👩�👧` after `plain()`) and ZWNJ/ZWJ are orthographically required in Persian and Indic scripts.
 **Both were already coerced by the pre-review 85-point list** (`0x200B–0x200D`), so the post-review
-widening does not introduce them; they entered with Inc-1 relative to `5d8ee0d`'s 63 points. Of the
+widening does not introduce them; they entered with Inc-1 relative to `5686fe0`'s 63 points. Of the
 150 points the widening adds, the only one with any plausible Spanish-text use is `U+00AD` soft
 hyphen, which is invisible in a title and carries no meaning there. The rest — Arabic/Syriac/Kaithi
 format controls, Egyptian hieroglyph controls, Duployan shorthand, musical beams, the TAG block —
@@ -440,7 +440,7 @@ Below, N-1 … N-13. Three MEDIUMs are direct consequences of the fixes; the res
   renders as `👨�👩�👧`; `U+200C`/`U+200D` are orthographically required in Persian and Indic scripts.
 - **Why it matters — and why it is not an objection to A-84.** These were already in the pre-review
   85-point list, so the widening to 235 did **not** introduce them; they entered with Inc-1 relative
-  to `5d8ee0d`. Of the 150 points A-84 adds, only `U+00AD` has any conceivable Spanish-text use and
+  to `5686fe0`. Of the 150 points A-84 adds, only `U+00AD` has any conceivable Spanish-text use and
   it is invisible in a title. **The widening breaks nothing new.**
 - **Suggested fix.** A carry, not a change: record ZWJ/ZWNJ as a *declared accepted cost* beside
   `PRESERVED_CODE_POINTS`, so the next person who meets a broken emoji finds the decision instead of
@@ -476,7 +476,7 @@ Below, N-1 … N-13. Three MEDIUMs are direct consequences of the fixes; the res
 
 ## 5 · Evidence checklist
 
-- [x] **Diff read in full** — `git diff 5d8ee0d -- mapper/ tests/ docs/` (9 files, 538+/26−) plus both
+- [x] **Diff read in full** — `git diff 5686fe0 -- mapper/ tests/ docs/` (9 files, 538+/26−) plus both
       untracked test files read end to end: `mapper/canvas.py:1-182`, `mapper/darkside.py:1-90,328-420`,
       `mapper/views/radial.py:110-259`, `mapper/app.py:876-882,950-1008`, `docs/ARCHITECTURE.md:68,160`,
       `tests/test_canvas.py:1-380`, `tests/test_darkside_census.py:1-587`, `tests/test_export.py` diff,
@@ -485,7 +485,7 @@ Below, N-1 … N-13. Three MEDIUMs are direct consequences of the fixes; the res
       (linear to 20 000 tokens); `frame` resolution measured through a real `Console` in both forms;
       `time_row`'s call chain traced to its only caller. **Defects found: N-1, N-2, N-3.**
 - [x] **Every numeric claim re-derived, not read** — 235 from `unicodedata`; 63 and 630 and ruff 29
-      from a `git archive` of `5d8ee0d`; 691/17/28 and all five per-file collection counts from runs here.
+      from a `git archive` of `5686fe0`; 691/17/28 and all five per-file collection counts from runs here.
 - [x] **Six mutations executed in a detached copy**, `PYTHONDONTWRITEBYTECODE=1`, restored and verified
       clean after each — `M-A` GREEN (N-6), `M-B` RED, `M-C` GREEN (N-7), `M-D` 3 RED, `M-E` 2 RED,
       `M-F` RED, `M-G` parser-correct.
@@ -543,7 +543,7 @@ lean on; N-8 must land before N-7 or the equality passes for the wrong reason. N
 **Everything you asked me to attack, I executed.** Your 235-point claim, your both-directions
 equality, your `PRESERVED` pin, your `meta` question, your allowlist, your `_HAS_BG` deletion, your
 docstring parser and your six baseline numbers are all **correct as stated** — the coercion set
-re-derived from `unicodedata` independently, the baselines from an archived `5d8ee0d`, the census
+re-derived from `unicodedata` independently, the baselines from an archived `5686fe0`, the census
 behaviour from six mutations in a detached copy. The one place the tree is wrong is the one you asked
 about first, and not in the direction anyone expected: **the HIGH you fixed does not reproduce here.**
 `"frame"` is not a theme key in this repo, in rich 15.0.0, or anywhere in textual 8.2.8 — it is the

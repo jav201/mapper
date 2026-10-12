@@ -7,8 +7,8 @@
 | Agent | `software-dev` |
 | Date | 2026-09-30 |
 | Authority | Security review of `increment-028-seed-safety.md` (findings named `SEED2-Fn` here) |
-| Starting state | branch `feat/ui-next-batch-02` @ `a4f8b42`, clean |
-| Commits | `fd37b9e` (arms, strict xfail, RED) -> `ee6c3f5` (F1) -> `6b9fc44` (F2-F5) -> docs commit (this file, `A-113` note, `BACKLOG.md`) |
+| Starting state | branch `feat/ui-next-batch-02` @ `d049880`, clean |
+| Commits | `45a663b` (arms, strict xfail, RED) -> `6a17e3f` (F1) -> `521006f` (F2-F5) -> docs commit (this file, `A-113` note, `BACKLOG.md`) |
 | Source files | 2 (`mapper/store.py`, `mapper/app.py`); cap 4 |
 
 ---
@@ -29,7 +29,7 @@ workspace path, longer than a typical project path. It is a margin, not a measur
 workspace (`B-78`). Characters, not UTF-8 bytes, are counted, so accented names are not penalised.
 
 **`SEED2-F4`, as reproduced.** The review said an id `a` + U+D800 passes, writes both files and then fails at the
-reindex. On `a4f8b42` that is true of `store.save` and `store.create`: both `a<U+D800>.mmd` and
+reindex. On `d049880` that is true of `store.save` and `store.create`: both `a<U+D800>.mmd` and
 `a<U+D800>_nodos.yml` were left on disk, with a `UnicodeEncodeError` from the reindex. It is NOT true of
 `create_seed`: there the id is also the root title, the text encoding fails before any file is created, and the
 toast is the generic `no se pudo crear el mapa '...': UnicodeEncodeError`. The arms cover both (store level:
@@ -72,7 +72,7 @@ Conclusion: no producer passes the sentinel on purpose. A name the operator type
 still equal `new`. A typed `new` in the construct dialog did create a real map and the sentinel then rewrote it:
 the same defect.
 
-### RED before the fix (commit `fd37b9e`, on the `a4f8b42` tree)
+### RED before the fix (commit `45a663b`, on the `d049880` tree)
 
 `pytest tests/test_seed2.py -q`: **8 passed, 13 xfailed** (strict). With `--runxfail`: **13 failed, 8 passed**.
 The 8 passing cases are positive controls that must hold on the base (dot-only ids refused, a 100-character id
@@ -119,9 +119,9 @@ it is killed.
 
 ### Lane, ruff, guards
 
-- **Full default lane, once, after the last code commit** (`6b9fc44`; the docs commit changes no code): `1541 passed, 20 deselected, 3 xfailed in 1223.51s`, 0 failed. Reconciliation against the baseline `1522 passed, 3 xfailed, 20 deselected`: +21 new cases in `test_seed2.py`, -1 `test_g6c_f3_...` removed, -1 case `a..b` removed from `test_seed_safety.py` = 1541. The 3 xfailed and 20 deselected are unchanged (the new file's strict xfails are all closed).
+- **Full default lane, once, after the last code commit** (`521006f`; the docs commit changes no code): `1541 passed, 20 deselected, 3 xfailed in 1223.51s`, 0 failed. Reconciliation against the baseline `1522 passed, 3 xfailed, 20 deselected`: +21 new cases in `test_seed2.py`, -1 `test_g6c_f3_...` removed, -1 case `a..b` removed from `test_seed_safety.py` = 1541. The 3 xfailed and 20 deselected are unchanged (the new file's strict xfails are all closed).
 
-- **Ruff.** `ruff check .` at the repo root, on `a4f8b42` (a `git archive` copy outside the repo) and on HEAD,
+- **Ruff.** `ruff check .` at the repo root, on `d049880` (a `git archive` copy outside the repo) and on HEAD,
   issues compared as `file: code message` without line numbers: **26 and 26, set difference empty** (all in files
   this increment did not touch: `app.py:6` unused `import re`, `darkside.py`, `diff.py`, `model.py`,
   `office.py`, `screens/*`). The archive copy also reports 18 issues under `prototypes/`, which the working tree

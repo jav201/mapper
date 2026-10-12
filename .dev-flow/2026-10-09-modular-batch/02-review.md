@@ -40,7 +40,7 @@
 | ARCH-4 | architect | major | AT-065 | Feasibility: capture timing, `tmp_path`, `EXPORT_DECLARE_PAUSE` (`app.py:4337`). | Merged with QA-1 | applied |
 | QA-3 | qa-reviewer | major | ATs | Layers conflated (AT = LLR node); HLR-MOD.7 has no AT. | Own node per AT; an HLR-MOD.7 chain | applied |
 | QA-4 | qa-reviewer | major | structural tests | "Mutation at Phase 3" has no mechanism. | Checkers take a package root and RED on a tmp-copy mutant | applied |
-| QA-5 | qa-reviewer | major | LLR-MOD.7.2 | The census script and JSON were not in the repo. | Committed to `spike/` (`bcf8384` parent) | fixed by the orchestrator |
+| QA-5 | qa-reviewer | major | LLR-MOD.7.2 | The census script and JSON were not in the repo. | Committed to `spike/` (`ed3b7bb` parent) | fixed by the orchestrator |
 | QA-6 | qa-reviewer | major | AT-066 | Overclaims "every bound key" from a single mixin pilot. | Narrow the claim, or pilot per mixin; the duplicate-handler RED goes to the disjointness guard | applied |
 | QA-7 | qa-reviewer | major | AT-069 | The "no weaker" baseline was not recorded. | Pin per-file counts before Inc-0 | applied |
 | ARCH-5 | architect | minor | dispatch guard | `@on`, `DEFAULT_CSS` and `BINDINGS` are silently ignored in a plain mixin (probed). | AST ban in `test_mod_dispatch` | applied |

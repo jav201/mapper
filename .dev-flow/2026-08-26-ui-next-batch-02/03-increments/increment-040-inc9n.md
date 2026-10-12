@@ -1,6 +1,6 @@
 # Increment 040 -- Inc-9n: the Inc-9m review fixes (sidecar paths, DOS devices, U1, U2, `_fetch_gh`, architecture)
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `73c2670`. Authority: `VERDICT-inc9-2026-09-30.md` Round 10 (U1, U2, S1, T1) and the coordinator's rulings
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `c808628`. Authority: `VERDICT-inc9-2026-09-30.md` Round 10 (U1, U2, S1, T1) and the coordinator's rulings
 for the Inc-9m reviews (`INC9M-SEC-F1`..`F4`, `INC9M-CR-F1`..`F8`). Amendment: `A-122` (appended to `01-requirements.md`, dated 2026-10-01).
 
 ## 1. What changed
@@ -28,7 +28,7 @@ Decisions (declared):
 - `_office_path` now returns the RESOLVED path (what is judged is what is read); the preview line shows it.
 - Attachment OPEN for a refused text toasts U1 from `app` (before `open_external`), because `open_external` returns the same `destino inválido` word for a non-string and for a refused text.
   A `file` attachment that the helper accepts but that is outside the workspace keeps `fuera del espacio de trabajo: <text>`; a missing one keeps `no se pudo abrir: <text>` (unchanged).
-- The U1 sentence is passed as `darkside.plain(PATH_NOT_SUPPORTED)` at its four notify sites: the first full lane failed `test_inc9::test_llr_n06_2_5_notify_sites_are_coerced` (a dynamic notify message must go through `plain()`), fixed in `3117b0c`; `plain` leaves the sentence unchanged (the U1 arms compare it byte for byte).
+- The U1 sentence is passed as `darkside.plain(PATH_NOT_SUPPORTED)` at its four notify sites: the first full lane failed `test_inc9::test_llr_n06_2_5_notify_sites_are_coerced` (a dynamic notify message must go through `plain()`), fixed in `4d2b256`; `plain` leaves the sentence unchanged (the U1 arms compare it byte for byte).
 - The unreachable `if local is None: raise GitHubError(_UNSUPPORTED)` in `fetch` exists only to drop the Optional `.resolve()` (`CR-F8`); an AST arm pins that the chained form is gone.
 
 ## 2. Sealed-arm changes
@@ -43,11 +43,11 @@ Decisions (declared):
 
 ## 3. Arm table (RED/GREEN)
 
-Arms committed as strict xfail in `0faec7f` (no sources touched), then the RED run: the final test files copied into a detached `git worktree` of `73c2670` in `%TEMP%` (no stash), plain run
+Arms committed as strict xfail in `f35daf6` (no sources touched), then the RED run: the final test files copied into a detached `git worktree` of `c808628` in `%TEMP%` (no stash), plain run
 (the `OPEN_STEPS` sets are empty by then). **103 failed, 206 passed** across `test_inc9n`, `test_inc9m`, `test_inc9l`, `test_arch_osopen_callers` (the 206 passes are pins and the untouched 9m/9l arms).
 GREEN on the fix commits: all of them pass. The first RED run (before the junction arm and the ellipsis step key) was 102 failed.
 
-| arm family | cases | RED on `73c2670` | on HEAD |
+| arm family | cases | RED on `c808628` | on HEAD |
 |---|---|---|---|
 | SEC-F1: hostile sidecar docs (`\\h\s\a.docx`, `//h/s/a.docx`, `\??\UNC\h\s\a.docx`, `C:\outside\a.docx`, `con`) mount `FactoryScreen` at 118 and 87 under a spy that refuses and records; app alive, existing missing-document text, zero hits | 10 | RED x10 | green |
 | SEC-F1: `_office_path` is `None` with no filesystem call (all five) | 5 | RED x5 | green |
@@ -75,7 +75,7 @@ GREEN on the fix commits: all of them pass. The first RED run (before the juncti
 
 ## 4. Mutant table
 
-Harness `mutate9n.py` in the session scratchpad, outside the repo, on a detached `git worktree` of `3117b0c` in `%TEMP%`; sha256 pinned before (`osopen.py` `c72ace66920d45cd...`, `github.py` `faa6c3116fd4c838...`,
+Harness `mutate9n.py` in the session scratchpad, outside the repo, on a detached `git worktree` of `4d2b256` in `%TEMP%`; sha256 pinned before (`osopen.py` `c72ace66920d45cd...`, `github.py` `faa6c3116fd4c838...`,
 `app.py` `9d0bf8a457df3f58...`, `factory.py` `2ad2818fa53f048a...`, `ARCHITECTURE.md` `ea6696fb8e6cdf97...`), byte-level I/O in each file's own line ending (`github.py` LF in the checkout is handled by detection),
 `old` must occur exactly once, the verdict printed before the file is restored, the pin re-checked after: **pins re-checked: OK**. `<LF>` is a line break. Run `-x`, `-k` as in the harness; arms = `test_inc9n`,
 `test_inc9m`, `test_arch_osopen_callers`. Backslashes are as in the file. No mutant was run with an arm that could reach a real `resolve()` of a UNC or device path (the `A7`-style "drop the helper from the add
@@ -161,9 +161,9 @@ Not measured: terminals other than Textual's headless driver; widths other than 
 
 | check | state |
 |---|---|
-| `tests/test_inc9n.py`, `test_inc9m.py`, `test_inc9l.py`, `test_arch_osopen_callers.py` | executed: GREEN on the fix commits; RED run on `73c2670` in a worktree: 103 failed, 206 passed |
+| `tests/test_inc9n.py`, `test_inc9m.py`, `test_inc9l.py`, `test_arch_osopen_callers.py` | executed: GREEN on the fix commits; RED run on `c808628` in a worktree: 103 failed, 206 passed |
 | 28 mutants | executed: 28 RED (section 4), pin re-checked |
-| `ruff check . --exclude prototypes --output-format concise`, set difference vs `73c2670` on a CLEAN detached worktree (no arms copied in; line and column stripped) | executed: 28 lines on the base, 26 on HEAD; new = none; gone = the two F401 of `test_inc9m` (`CR-F6`) |
+| `ruff check . --exclude prototypes --output-format concise`, set difference vs `c808628` on a CLEAN detached worktree (no arms copied in; line and column stripped) | executed: 28 lines on the base, 26 on HEAD; new = none; gone = the two F401 of `test_inc9m` (`CR-F6`) |
 | `-W error::SyntaxWarning` compile of `osopen`, `github`, `app`, `screens/factory`, `test_inc9n`, `test_inc9m`, `test_arch_osopen_callers` | executed: clean |
 | Literal Cf characters in every touched file (Python scan by Unicode category) | executed: none |
 | Full default lane, once, uninterrupted, `-rf`, last step | see "Full-lane result" at the end |
@@ -184,20 +184,20 @@ Not measured: terminals other than Textual's headless driver; widths other than 
 
 ## 7. Correction to record 039 (`INC9M-CR-F6`)
 
-`increment-039` section 6 says `ruff ... set difference vs 19b2824 ... new = none`. That measurement is wrong as a claim about the tree: the base worktree it used had the new arms copied in, so the two
+`increment-039` section 6 says `ruff ... set difference vs 2a01ccf ... new = none`. That measurement is wrong as a claim about the tree: the base worktree it used had the new arms copied in, so the two
 unused imports of `tests/test_inc9m.py` (`subprocess`, `textual.widgets.Static`) were in the "base" side as well, and the difference hid them. Measured here on a CLEAN base worktree: `tests/test_inc9m.py`
-carried two F401 at `73c2670`; they are removed in `0faec7f`.
+carried two F401 at `c808628`; they are removed in `f35daf6`.
 
 ## Commits
 
-`0faec7f` arms (strict xfail) · `effe32e` four sources + `ARCHITECTURE.md` + `A-122` + `OPEN_STEPS` emptied · `f06f6b6` junction arm + `A-122` wording · `6471156` this record + the correction note on 039 · `3117b0c` the U1 sentence through `darkside.plain` (census fix) · docs commit (the full-lane result).
+`f35daf6` arms (strict xfail) · `d8c0478` four sources + `ARCHITECTURE.md` + `A-122` + `OPEN_STEPS` emptied · `9ccc19d` junction arm + `A-122` wording · `3f69b6a` this record + the correction note on 039 · `4d2b256` the U1 sentence through `darkside.plain` (census fix) · docs commit (the full-lane result).
 No push; `state.json` untouched.
 
 ## Full-lane result
 
-1 failed, 2344 passed, 24 deselected, 3 xfailed in 1570.52s (26:10), `-rf`, on `3117b0c`'s tree (the record and the lane result are docs commits after it; `test_no_operator_paths` reads `.dev-flow`).
+1 failed, 2344 passed, 24 deselected, 3 xfailed in 1570.52s (26:10), `-rf`, on `4d2b256`'s tree (the record and the lane result are docs commits after it; `test_no_operator_paths` reads `.dev-flow`).
 Baseline 2221/0 plus 117 (`test_inc9n`) + 3 (`test_arch_osopen_callers`) + 4 (the painted-badge arm of `test_inc9m` grew from 2 to 6 cases) = 2345 run = 2344 passed + the 1 flake below. The 3 xfailed are the pre-existing ones.
 
 - The one failure is the known flake FLAKE-3, `tests/test_palette.py::test_at_n03b_selecting_a_palette_entry_executes_it`: it passed 3 of 3 in isolation straight after (1.4 s each). It is not touched by this increment.
-- This is the SECOND full-lane run, not a retry of a flake: the FIRST (on `6471156`, 2344 passed, 1 failed in 1527.91s) failed for real on `test_inc9.py::test_llr_n06_2_5_notify_sites_are_coerced` (see Decisions); that was fixed in `3117b0c`, the 28 mutants and the ruff difference were re-run on it
+- This is the SECOND full-lane run, not a retry of a flake: the FIRST (on `3f69b6a`, 2344 passed, 1 failed in 1527.91s) failed for real on `test_inc9.py::test_llr_n06_2_5_notify_sites_are_coerced` (see Decisions); that was fixed in `4d2b256`, the 28 mutants and the ruff difference were re-run on it
   (28 RED, ruff new = none), and the lane was run again from the start, uninterrupted.

@@ -1,6 +1,6 @@
 # Screen / key map — mapper — Batch 2026-08-26-ui-next-batch-02
 
-> Phase 6 diagram. Every screen and `KEY_SCOPE` below is real at HEAD `46e190b`. Owner role: `docs-writer` — drafted by `deepseek-v4-pro`, verified by the orchestrator.
+> Phase 6 diagram. Every screen and `KEY_SCOPE` below is real at HEAD `2eaabf3`. Owner role: `docs-writer` — drafted by `deepseek-v4-pro`, verified by the orchestrator.
 
 ```mermaid
 flowchart LR

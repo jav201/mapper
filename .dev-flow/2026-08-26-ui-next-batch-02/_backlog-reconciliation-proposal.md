@@ -3,7 +3,7 @@
 > **Read-only on the canonical backlog.** This file proposes how every OPEN row of `.dev-flow/BACKLOG.md`
 > should be classified at this batch's close; it does not edit that file. Drafted by
 > `deepseek/deepseek-v4-pro` (via `opencode run`), to be verified by the orchestrator (Claude Opus 5.5).
-> Merge = squash `46e190b` on `master` (2026-10-03).
+> Merge = squash `2eaabf3` on `master` (2026-10-03).
 
 Rows enumerated with `grep` from `.dev-flow/BACKLOG.md`: **63** open rows (`| B-NN |` not struck `~~B-NN~~ **DONE**`).
 

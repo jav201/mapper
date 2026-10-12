@@ -67,7 +67,7 @@ Increment map (packets in `03-increments/`, evidence in `evidence/`):
 | Gate fix | 8 repo-wide guard failures fixed at root (audit CLI move, re-export, census pins, parity goldens, `records.py` rename, F2 depth bound) | `bac7885` |
 | PERF-RH | LLR-RH.5.4 — parse-cache stat fast path; warm derive 5.27 s → 0.44 s | `6b6750e` |
 
-Full commit list (`git log --oneline fb1d4ce..HEAD`, 40 commits): P0 intake
+Full commit list (`git log --oneline c00dfe9..HEAD`, 40 commits): P0 intake
 `0516b04` → P1 requirements/design `ef84d76`, `feeb34d` → P1 iterations and
 PDR rulings `8bff52e`, `6bac0af`, `9295124`/`4eb5b58`, `2a2c3e0`, `ee67c21`,
 `35a9e28` → RH1–RH6b and their merges/follow-ups `ce590a3` … `0d10b7c` → DDR
@@ -152,7 +152,7 @@ authorization; ux-reviewer stood down, B-123 stands in).
 
 | Metric | Value |
 |---|---|
-| Increments / commits | 9 / 40 (`fb1d4ce..HEAD`) |
+| Increments / commits | 9 / 40 (`c00dfe9..HEAD`) |
 | Requirements | 3 US · 9 HLR · 36 LLR · 9 AT ids |
 | Review findings closed | P1 r1: 47 (3 blocker/9 high/23 major/12 low) · r2: ruled R15–R26 · r3: no HIGH; per-increment code reviews: 6 REQUEST-CHANGES rounds; DDR: 12 conditions + re-check HIGH; K3: 4 LOWs |
 | RED mutations executed | 24+ named arms (M-RG1..5, M-FN1/2, M-PR1, M-BL1..4, M-RL1, M-AU1/2, M-CH6, M-FS1, M-ID3, DDRFIX arms, CLOSE1 LOW arms), each with a transcript and a sha256 restore digest |

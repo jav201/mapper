@@ -1,7 +1,7 @@
 # Increment W1 — the boundary generalised, and the last hand-spelled DOMAIN and TITLE removed
 
 **Batch:** `2026-08-26-ui-next-batch-02` (SEALED) · **Increment:** `Inc-W1` · **Branch:** `feat/ui-next-batch-02`
-**Entry commit:** `6aee286` (Inc-5 close), tree clean at entry · **SOURCE FILE COUNT: 0** — tests only.
+**Entry commit:** `2906b35` (Inc-5 close), tree clean at entry · **SOURCE FILE COUNT: 0** — tests only.
 **Protocol:** lighter lane (tests-only, zero source files) **plus one confirmation scoped to the design call**, per coordinator ruling 2026-09-10.
 **Language:** English (engineering artifact).
 

@@ -69,7 +69,7 @@ python -B -m pytest -q -p no:cacheprovider   # the increment gate — full suite
 | **B · black-box** `AT-066` ↔ story | `core` · `full` | AT-066 pilot (key M through `MapperApp`) | GREEN at gate |
 | **Increment gate — full suite** | — | whole suite | **3034 passed, 1 failed** (`b1b2-gate-full-suite.transcript`: `1 failed, 3034 passed, 24 deselected, 3 xfailed in 1575s`, exit=1) |
 
-The one failure — `tests/test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]` — is the base-class blind spot: the keymap seat scan predates the mixins and does not see methods moved off the core class. It is a **follow-up defect of the batch, not a hints regression**, and was fixed at B7 (`5229b12`). Declared honestly: the gate ran RED-on-one and the increment shipped with that failure named and scheduled.
+The one failure — `tests/test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]` — is the base-class blind spot: the keymap seat scan predates the mixins and does not see methods moved off the core class. It is a **follow-up defect of the batch, not a hints regression**, and was fixed at B7 (`5087cfd`). Declared honestly: the gate ran RED-on-one and the increment shipped with that failure named and scheduled.
 
 ### RED counterfactual — executed, not predicted
 
@@ -189,7 +189,7 @@ The post-move suite count is the gate transcript's: `3034 passed + 1 failed = 30
 
 ## 6 · Pending items / spec deviations
 
-- `test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]` failed at this gate; fixed at B7 (`5229b12`). No deviation from the contract — the follow-up was scheduled in-increment.
+- `test_keymap.py::test_at_n03f_bound_keys_match_the_seat_exactly[map]` failed at this gate; fixed at B7 (`5087cfd`). No deviation from the contract — the follow-up was scheduled in-increment.
 
 ## 7 · Suggested next task
 

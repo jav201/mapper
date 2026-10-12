@@ -1,7 +1,7 @@
 # Security Review — Inc-B55a (`outline` declares what it hides)
 
 **Reviewer:** security-reviewer (independent, second and final gate)
-**Tree:** `C:\Users\<operator>\Github\mapper` @ `d79602c`, working tree clean before and after.
+**Tree:** `C:\Users\<operator>\Github\mapper` @ `8c93856`, working tree clean before and after.
 **Verdict:** **SIGN-OFF** — no HIGH. Two MEDIUM/LOW findings recommended, neither blocking.
 
 ---
@@ -10,12 +10,12 @@
 
 | Reviewed | Not reviewed |
 |---|---|
-| `mapper/views/outline.py` — whole file, and diffed against `3122519` (pre-increment) | `mapper/darkside.py`, `mapper/widgets/chrome.py` (Inc-CRUMB, already gated) |
+| `mapper/views/outline.py` — whole file, and diffed against `8613d49` (pre-increment) | `mapper/darkside.py`, `mapper/widgets/chrome.py` (Inc-CRUMB, already gated) |
 | `mapper/app.py` — `_painted_ids_for`, `_unpainted_ids`, `_declare_after_layout`, `_rendered_for`, `refresh_canvas`, `_pagination_text`, `_canvas_size`, `_view_state`, `on_resize`, `_apply_region_visibility`, `_focus_owner` | `mapper/views/radial.py`, `mapper/views/lane*` (out of cut) |
 | `tests/test_a3_census.py`, `tests/test_inc3_census.py` diffs (the two pins this increment moved) | Wording/register of the new Spanish string (routed to `UI-AT058`) |
 | `increment-009-b55a.md`, `…-code-review.md`, `02m`/`02n`/`02o`, `state.json` → `p3_progress` | The carried export-toast username (exposure unchanged) |
 
-**I mutated nothing.** No source edit was needed to fire the findings below; the only repo file I created was a temporary probe under `tests/`, deleted before this report. `git status --porcelain` is empty at `d79602c`, `__pycache__` purged, `git rev-parse HEAD` = `d79602c3011734517134f1a17667e38b87a44d62`. **No evidence of another writer.**
+**I mutated nothing.** No source edit was needed to fire the findings below; the only repo file I created was a temporary probe under `tests/`, deleted before this report. `git status --porcelain` is empty at `8c93856`, `__pycache__` purged, `git rev-parse HEAD` = `8c93856d9ab4eca98aa203523aa7d4b1ff1d0ed2`. **No evidence of another writer.**
 
 ---
 
@@ -109,7 +109,7 @@
 
 | Claim | Evidence |
 |---|---|
-| **No coercion loss vs `57fb403`.** The two coercion sites in `outline.py` — `darkside.plain(node.ficha.title)` (`:136`) and `darkside.plain(node.ficha.meta)` (`:163`) — are **byte-identical** to `3122519` | `git show 3122519:mapper/views/outline.py`, diffed. No third site existed then or now |
+| **No coercion loss vs `f5f1bd5`.** The two coercion sites in `outline.py` — `darkside.plain(node.ficha.title)` (`:136`) and `darkside.plain(node.ficha.meta)` (`:163`) — are **byte-identical** to `8613d49` | `git show 8613d49:mapper/views/outline.py`, diffed. No third site existed then or now |
 | **No coercion gain either.** The new seams consume `Text` already built in `_rows`; they add no sink | Read. T1: 0 leaks over 100 sizes |
 | **`render_lines` on hostile `Text` is inert.** `Text` never parses markup (`darkside.py:508-511`, verified as the real design, not just a claim), and `_fit` discards the rendered output — only `len()` is used. `Console(no_color=True)` writes to no stream | `outline.py:196-205`; T1 |
 | **The new header declaration is bounded and carries no file-derived text.** `rows[0]` is the static wordmark; the appended token is `▽` + an `int` ≤ `MAX_RENDER_NODES` (5 digits) + a literal | T2. **This refutes the suspicion put to me** that the declaration is appended to the root node's title. It is not — that is a `_rows` body row, not `rows[0]` |
@@ -119,7 +119,7 @@
 | **`_unpainted_ids` has exactly one production call site**, and the raise is confined to it | Grep across `mapper/`: `app.py:2219` only |
 | **`_rows`'s cycle `ValueError` interpolates a file-derived node id**, and its only sink coerces it | T3. Pre-existing, unchanged |
 | **A cyclic map makes the strip silent in outline** (`ValueError` → `_unpainted_ids` `except` → `None`). **Not a regression** — outline returned `None` unconditionally before | Read `app.py:1615-1617` |
-| **Full suite green, tree byte-identical to `d79602c`** | `968 passed, 19 deselected, 3 xfailed`; `git status --porcelain` empty |
+| **Full suite green, tree byte-identical to `8c93856`** | `968 passed, 19 deselected, 3 xfailed`; `git status --porcelain` empty |
 | **No secrets, credentials, tokens, env files, network calls, subprocesses, filesystem writes or new dependencies** in the cut | Full read of both files |
 | **No LFPDPPP / client-data exposure.** Everything stays on the operator's screen; nothing leaves the local system | Full read of both files |
 
@@ -139,7 +139,7 @@
 - [x] Each finding has a severity rating — MEDIUM, LOW, LOW.
 - [x] **No secret values appear in this output.** No secret was found; hostile codepoints are named as `U+XXXX` per `C-56` and never pasted verbatim.
 - [x] Verdict is explicit — **SIGN-OFF**, below.
-- [x] No new tool/integration was added — nothing reaches the network, the filesystem, a subprocess, or a third party. Scope and blast radius are unchanged from `57fb403`; N/A by absence, verified by reading both files end to end.
+- [x] No new tool/integration was added — nothing reaches the network, the filesystem, a subprocess, or a third party. Scope and blast radius are unchanged from `f5f1bd5`; N/A by absence, verified by reading both files end to end.
 
 ---
 

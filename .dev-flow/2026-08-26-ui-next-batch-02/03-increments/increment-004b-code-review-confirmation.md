@@ -10,7 +10,7 @@ None blocks the increment.
 
 ## 0 · Confirmation environment
 
-`git clone --local --no-hardlinks` of the repository at `a971432` into the scratchpad, working tree
+`git clone --local --no-hardlinks` of the repository at `8919c2a` into the scratchpad, working tree
 of `mapper/`, `tests/` and `.dev-flow/` overlaid, index reconciled with `git add -N` **in the mirror
 only**. Overlay fidelity established **before any mutation**, two ways:
 
@@ -32,7 +32,7 @@ mapper/app.py        6f0f14614ff93fa8b3bee31d06339954cd3ae0e58149cb48e0159be7995
 mapper/keymap.py     3846c22ebb2f69b5dc7589a0f29444c3e7f90845189b09a49def70d828d7c159
 tests/test_search.py d66a21c385dee8ae349bde712daf06378971843a896babc395138335f007ab8f
 tests/test_fold.py   420ba5fddb4f9559afed09c9e4c0ee990f24b0bdd744d5a6da289f85f49ea13b
-HEAD = a971432, nothing committed, tests/test_inc4_census.py still staged
+HEAD = 8919c2a, nothing committed, tests/test_inc4_census.py still staged
 ```
 
 ### 0.1 · Arm counts asserted before any verdict was trusted
@@ -315,7 +315,7 @@ two new rows are therefore load-bearing declarations, not a widened allowlist. C
 
 ```
 ruff, scope mapper/ tests/, --output-format concise, line/col normalised, diffed as sorted sets
-  entry (clean a971432 checkout): 27 findings
+  entry (clean 8919c2a checkout): 27 findings
   exit  (working tree):           27 findings
   NEW: (none)   GONE: (none)      -> IDENTICAL
 
@@ -430,7 +430,7 @@ source files changed vs HEAD: mapper/app.py, mapper/keymap.py  -> 2, the declare
 - [✓] **No mutated token and no hostile code point spelled** — described by position and operation
       throughout.
 - [✓] **Real repository unmutated** — four sha256 values identical to the declared exit, `HEAD`
-      still `a971432`, nothing committed.
+      still `8919c2a`, nothing committed.
 - [✓] **Verdict explicit.**
 
 ---

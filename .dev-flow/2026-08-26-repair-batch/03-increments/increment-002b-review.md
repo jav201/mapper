@@ -4,7 +4,7 @@
 |---|---|
 | Reviewer | `code-reviewer` (independent gate) |
 | Date | 2026-08-26 |
-| Scope | `mapper/widgets/rail.py`, `mapper/screens/factory.py`, `tests/test_repair_depth.py`, `pyproject.toml` — diff against `d6b60e6` |
+| Scope | `mapper/widgets/rail.py`, `mapper/screens/factory.py`, `tests/test_repair_depth.py`, `pyproject.toml` — diff against `1b51aca` |
 | Requirement | `HLR-R02` · `LLR-R02.1` as amended by **A-6** · `LLR-R02.2` · `LLR-R02.3` |
 | Verdict | **PASS WITH CONDITIONS** — one HIGH, in the TEST file, not in the source |
 
@@ -335,7 +335,7 @@ Everything else is MEDIUM or LOW and is a recommendation.
 
 | # | Question the brief asked | How I answered it | Result |
 |---|---|---|---|
-| 1 | Do the two stack loops emit the same rows, at the same depths, as the recursive originals? | Differential fuzz against verbatim copies of the `d6b60e6` implementations, over **my own** shape families — random trees, general DAGs, multi-root forests, **duplicate edges**, **dangling child edges** — × derived collapse sets × 4 cursor positions. **46,548 comparisons.** Exceptions compared as values, so a spurious raise counts as a mismatch. | **0 mismatches** across `visible_rows`, `subtree_missing`, `_tree_text`, `_depth`, `_max_depth`. The author's 8-shape set contains none of duplicate edges, dangling edges, or multi-root forests; all three are clean. |
+| 1 | Do the two stack loops emit the same rows, at the same depths, as the recursive originals? | Differential fuzz against verbatim copies of the `1b51aca` implementations, over **my own** shape families — random trees, general DAGs, multi-root forests, **duplicate edges**, **dangling child edges** — × derived collapse sets × 4 cursor positions. **46,548 comparisons.** Exceptions compared as values, so a spurious raise counts as a mismatch. | **0 mismatches** across `visible_rows`, `subtree_missing`, `_tree_text`, `_depth`, `_max_depth`. The author's 8-shape set contains none of duplicate edges, dangling edges, or multi-root forests; all three are clean. |
 | 2 | Is `_missing_map`'s decline condition correct **and complete**? Can it answer and be wrong? | **Exhaustive**, not sampled: every graph on 5 nodes in which each node has ≤1 parent (all 6⁵ parent assignments), every node's total compared against the verbatim shipped dedup walk. | **6,480 answered node-totals checked, 0 wrong.** The in-degree ≤ 1 test is exactly right: it admits precisely the graphs where each node has one path into it, so post-order sum ≡ dedup walk. I could not construct a counter-example and I now believe none exists. |
 | 3 | Do the active-path guards distinguish a real cycle from a legitimate diamond? | Traced the invariant (`visiting` = exactly the set of nodes with a pending `(n, True)` marker = the active path), then confirmed by execution: **335 of 400** generated DAGs contain a node with >1 parent, and the explicit diamond renders with no notice. | **No false refusal on any diamond or DAG.** `visible_rows` on `a→b, a→c, b→d, c→d` = `[('a',0),('b',1),('d',2),('c',1),('d',2)]` — the shipped duplicate-emission preserved exactly. |
 | 4 | Does `_depth`'s seen-set terminate on every cyclic parent chain, and agree on acyclic ones? | 3,000 random graphs in which **every** node has a parent (so a cycle is guaranteed), driving `_depth` on every node plus `_max_depth` and `_tree_lines`. Acyclic agreement covered by (1). | **All terminated, none propagated.** Both `_depth` and `_parent_index` follow first-parent-in-edge-order, so the memoised `_max_depth` and the shipped `parent_of` chain cannot diverge. |
@@ -372,7 +372,7 @@ Everything else is MEDIUM or LOW and is a recommendation.
 
 | Item | ✓/✗ | Evidence |
 |---|---|---|
-| Diff read in full | ✓ | `git diff d6b60e6 -- mapper/widgets/rail.py mapper/screens/factory.py pyproject.toml`; `rail.py:1-269` and `factory.py:1-270` read whole; `tests/test_repair_depth.py` read at `498-540`, `836-1278`, `1364-1440`, `1540-1599`, structure outlined for the rest |
+| Diff read in full | ✓ | `git diff 1b51aca -- mapper/widgets/rail.py mapper/screens/factory.py pyproject.toml`; `rail.py:1-269` and `factory.py:1-270` read whole; `tests/test_repair_depth.py` read at `498-540`, `836-1278`, `1364-1440`, `1540-1599`, structure outlined for the rest |
 | Correctness pass (edge / None / error paths) | ✓ | 46,548 differential comparisons, 0 mismatches; 6,480 exhaustive memo checks, 0 wrong; empty graph, single node, self-loop, dangling child, duplicate edge, multi-root forest all driven |
 | Simplicity pass (no premature abstraction) | ✓ | No finding. `_child_index` / `_parent_index` / `_missing_walk` / `_missing_map` / `_body` / `_tree_text` each earn their existence — the split into raising and never-propagating halves is the shape the requirement asks for, not speculative generality |
 | Reuse / duplication checked | ✗ | **F4** — `factory.py:246` re-solves a problem `darkside.plain` already owns, in the same increment where the sibling file uses it correctly. **F1** — the test duplicates `min(depth, RAIL_WIDTH)` instead of calling the code that holds it |

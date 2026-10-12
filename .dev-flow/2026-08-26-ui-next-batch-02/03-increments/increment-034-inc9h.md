@@ -1,6 +1,6 @@
 # Increment 034 -- Inc-9h: the Inc-9g review defects
 
-Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `8e8f9f0`. Authority: the Inc-9g
+Batch `2026-08-26-ui-next-batch-02`, branch `feat/ui-next-batch-02`, base `7f55a28`. Authority: the Inc-9g
 independent reviews and the operator's `P1`, `P2` (`VERDICT-inc9-2026-09-30.md`, Round 5). Amendment: `A-116`
 (appended to `01-requirements.md`, dated 2026-10-01). Findings are named `INC9G-*`.
 
@@ -63,9 +63,9 @@ independent reviews and the operator's `P1`, `P2` (`VERDICT-inc9-2026-09-30.md`,
 
 ## 3. Arm table (43 arms in `tests/test_inc9h.py`: 41 default lane + 2 `network`)
 
-RED on `8e8f9f0`: the arms file and the two test-file edits copied into a detached `git worktree` of the base in
+RED on `7f55a28`: the arms file and the two test-file edits copied into a detached `git worktree` of the base in
 `%TEMP%` (no stash); `pytest tests/test_inc9h.py -m "not slow"` there: **34 failed, 9 passed**. The first commit of
-the arms (`f0c52b0`, strict xfail, 42 arms then) showed `31 failed, 9 passed, 2 deselected` with `--runxfail` plus
+the arms (`f36f00a`, strict xfail, 42 arms then) showed `31 failed, 9 passed, 2 deselected` with `--runxfail` plus
 2 network arms RED; the foreign-mirror arm was split in two afterwards and both halves were re-run RED on the base.
 GREEN on HEAD: all 43 (`41 passed` default + `2 passed` with `-m network`, real local git).
 
@@ -82,7 +82,7 @@ GREEN on HEAD: all 43 (`41 passed` default + `2 passed` with `-m network`, real 
 | `CR-F5` | typed timeout; typed timeout is the stale category = 2 | missing git on a cache hit raises (kills `O5`) |
 | `CR-F7`, `CR-F6` | stale reset; padded URL stripped once = 2 | |
 
-## 4. Mutant table (harness `mutate.py` in the session scratchpad, outside the repo; run on a detached `git worktree` copy of HEAD in `%TEMP%`; sha256 pinned, byte-level I/O in each file's own line endings, the verdict printed before the file is restored, pin re-checked after every run: OK 33 of 33 in the full run, on `150943b`; then 6 targeted re-runs on `927da29`, pins OK). Run: `tests/test_inc9h.py -m "not slow" -x` (the targeted re-runs add `-k`). 33 mutants, 33 RED, 0 survived, 0 skipped. Every mutant is one replacement; `old` occurs exactly once.
+## 4. Mutant table (harness `mutate.py` in the session scratchpad, outside the repo; run on a detached `git worktree` copy of HEAD in `%TEMP%`; sha256 pinned, byte-level I/O in each file's own line endings, the verdict printed before the file is restored, pin re-checked after every run: OK 33 of 33 in the full run, on `b3e29b5`; then 6 targeted re-runs on `b522b76`, pins OK). Run: `tests/test_inc9h.py -m "not slow" -x` (the targeted re-runs add `-k`). 33 mutants, 33 RED, 0 survived, 0 skipped. Every mutant is one replacement; `old` occurs exactly once.
 
 Texts are written with `\n` for a line break (the file's own ending was used on disk).
 
@@ -131,10 +131,10 @@ the stale line's `plain()` (the category is a fixed string; an equivalent mutant
 | check | state |
 |---|---|
 | `tests/test_inc9h.py`: 41 default + 2 `network` (real local bare repositories, HOME and USERPROFILE in `tmp_path`) | executed: all green on HEAD; 34 RED + 9 green on the base |
-| Full default lane, final run on `150943b`, run once and uninterrupted, output to a file | executed: **1722 passed, 3 xfailed, 23 deselected, 0 failed**, 20:36 (baseline 1681: +41 arms in `test_inc9h.py`; the 2 `network` arms are deselected). A FIRST run on `e2d49a1` had **1 failed, 1721 passed**, 16:01: `test_fold` found the character U+202E written literally in my arms file (the six-character escape I typed was turned into the character on its way to the file; my slip, the same one as Inc-9g); fixed in `150943b`. Two later commits touch only `tests/test_inc9h.py` (`36e21a5` two unused imports, `927da29` env-arm messages): `test_inc9h.py` (43), `test_fold`, `test_no_operator_paths` re-run green after them (see the commit note); the whole lane was NOT re-run a third time |
-| `ruff check .` vs `8e8f9f0` (a detached worktree of the base), set difference, line numbers stripped, `prototypes/` excluded | executed: new = none, gone = none (28 findings on each side). The first comparison found 2 new (`pathlib`, `Input` unused in my arms file); removed in `36e21a5` |
+| Full default lane, final run on `b3e29b5`, run once and uninterrupted, output to a file | executed: **1722 passed, 3 xfailed, 23 deselected, 0 failed**, 20:36 (baseline 1681: +41 arms in `test_inc9h.py`; the 2 `network` arms are deselected). A FIRST run on `b47408a` had **1 failed, 1721 passed**, 16:01: `test_fold` found the character U+202E written literally in my arms file (the six-character escape I typed was turned into the character on its way to the file; my slip, the same one as Inc-9g); fixed in `b3e29b5`. Two later commits touch only `tests/test_inc9h.py` (`c3a6808` two unused imports, `b522b76` env-arm messages): `test_inc9h.py` (43), `test_fold`, `test_no_operator_paths` re-run green after them (see the commit note); the whole lane was NOT re-run a third time |
+| `ruff check .` vs `7f55a28` (a detached worktree of the base), set difference, line numbers stripped, `prototypes/` excluded | executed: new = none, gone = none (28 findings on each side). The first comparison found 2 new (`pathlib`, `Input` unused in my arms file); removed in `c3a6808` |
 | Known flakes (`test_llr_cnv_3_1...`, `test_hlr_n16_4_legend_declares_its_own_keys[size2]`) | not hit in either lane run |
-| `git stash` | not used. `git stash list` still holds the PREVIOUS implementer's `stash@{0}` (WIP 8d74b73): untouched, left for the operator |
+| `git stash` | not used. `git stash list` still holds the PREVIOUS implementer's `stash@{0}` (WIP 78a26eb): untouched, left for the operator |
 
 ## 6. Renders (text frames; the colours are asserted per composited cell and printed)
 
@@ -189,9 +189,9 @@ computed, not asserted anywhere).
 
 ## Commits
 
-`f0c52b0` arms (strict xfail) and the `_Mirror` helper · `09a7499` palette · `6ddc723` github and diff ·
-`e2d49a1` app (panel line, one toast, home hint) and the `test_inc9g` toast text · `150943b` the escape fix
-(`test_fold`) · `36e21a5` unused imports (ruff) · `927da29` env-arm messages · docs commit (this record, `A-116`,
+`f36f00a` arms (strict xfail) and the `_Mirror` helper · `cf1ea4e` palette · `c069f91` github and diff ·
+`b47408a` app (panel line, one toast, home hint) and the `test_inc9g` toast text · `b3e29b5` the escape fix
+(`test_fold`) · `c3a6808` unused imports (ruff) · `b522b76` env-arm messages · docs commit (this record, `A-116`,
 the `increment-033` correction). No push; `state.json` untouched.
 
 ## Correction (appended in Inc-9i, 2026-10-01; section 2 stands as written above)
