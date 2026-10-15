@@ -1,0 +1,128 @@
+# inc004 RED proof transcript — increment 004 (test-only)
+
+Batch `2026-10-11-fixes-batch` · worktree branch `unit/fx004`. All commands run from the
+worktree root with `env -u NO_COLOR -u TERM`, `-p no:cacheprovider`, single files at a time.
+All paths below are relative to the worktree root.
+
+## Baseline GREEN (before any mutation)
+
+```
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_export_state.py tests/test_inc9c.py tests/test_en8.py
+101 passed
+```
+
+Pre-mutation digests (recorded before the first mutant was applied):
+
+```
+a0e7ccf6987237355921751ece7407ff7882b189297a9113f73de982317ebd93  mapper/screens/map/exporting.py
+c539e5d1339f9a07f819f53a27d8acabff309ad8df7d5e501c708eef04b4b366  tests/test_inc9c.py
+18f9393bb40e2b9f8e1b4e64712311a8ddd7d4a9c3562cdda7af72c33f1b0136  tests/test_export_state.py
+```
+
+---
+
+## Mutant M-FX15 — rebind `exporting.py` to `layered.pan_extent`
+
+Mutation applied to the PRODUCT (`mapper/screens/map/exporting.py`):
+
+```diff
+- from mapper.views.layered import pan_extent
++ from mapper.views import layered
+...
+-                 (extent_x, span_x), (extent_y, span_y) = pan_extent(self.graph, state)
++                 (extent_x, span_x), (extent_y, span_y) = layered.pan_extent(self.graph, state)
+```
+
+Backup taken to the scratch dir before the edit; its digest equals the pre-mutation digest above.
+
+### RED (the AT-088 node)
+
+```
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_export_state.py::test_exporting_reads_pan_extent_through_its_own_module_global
+...
+>       assert calls, (
+            "the export never read the pan extent through "
+            "mapper.screens.map.exporting.pan_extent; a re-bind to another reader "
+            "leaves this exact gap invisible to the suite"
+        )
+E       AssertionError: the export never read the pan extent through mapper.screens.map.exporting.pan_extent; a re-bind to another reader leaves this exact gap invisible to the suite
+E       assert []
+
+tests\test_export_state.py:665: AssertionError
+FAILED tests/test_export_state.py::test_exporting_reads_pan_extent_through_its_own_module_global
+1 failed in 0.89s
+```
+
+The spy count is 0 and the artifact still writes — the discriminating RED (not a crash).
+
+### Restore + digest check + GREEN
+
+```
+$ sha256sum mapper/screens/map/exporting.py
+a0e7ccf6987237355921751ece7407ff7882b189297a9113f73de982317ebd93  mapper/screens/map/exporting.py
+
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_export_state.py::test_exporting_reads_pan_extent_through_its_own_module_global
+1 passed in 0.77s
+```
+
+Restore digest equals the pre-mutation digest (byte-identical).
+
+---
+
+## Mutant M-FX16 — the census compares `(file, expr)` again
+
+Mutation applied to the census comparison in `tests/test_inc9c.py` (the `_undeclared`
+helper the census uses):
+
+```diff
+-     return [(p, n, e) for p, n, e in leaks if (p, n, e) not in LEAK_EXCEPTIONS]
++     return [(p, n, e) for p, n, e in leaks if (p, e) not in LEAK_EXCEPTIONS]
+```
+
+Backup taken to the scratch dir before the edit; its digest equals the pre-mutation digest above.
+
+### RED (the AT-089 node)
+
+```
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_inc9c.py::test_at_089_a_second_leak_site_in_an_excused_file_is_still_flagged
+...
+>       assert _undeclared([excused, second]) == [second]
+E       AssertionError: assert [('mapper/scr..., 'str(exc)')] == [('mapper/scr..., 'str(exc)')]
+E
+E         At index 0 diff: ('mapper/screens/home.py', 175, 'str(exc)') != ('mapper/screens/home.py', 412, 'str(exc)')
+E         Left contains one more item: ('mapper/screens/home.py', 412, 'str(exc)')
+E         Use -v to get more diff
+
+tests\test_inc9c.py:330: AssertionError
+FAILED tests/test_inc9c.py::test_at_089_a_second_leak_site_in_an_excused_file_is_still_flagged
+1 failed in 0.92s
+```
+
+The line-sensitive comparison is gone: the second `str(exc)` site (line 412) is silently
+absorbed by the excused line-175 carry, exactly the defect B-113 names.
+
+### Restore + digest check + GREEN
+
+```
+$ sha256sum tests/test_inc9c.py
+c539e5d1339f9a07f819f53a27d8acabff309ad8df7d5e501c708eef04b4b366  tests/test_inc9c.py
+
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_inc9c.py::test_at_089_a_second_leak_site_in_an_excused_file_is_still_flagged
+1 passed in 0.75s
+```
+
+Restore digest equals the pre-mutation digest (byte-identical).
+
+---
+
+## Final verification (after both restores)
+
+```
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_export_state.py tests/test_inc9c.py tests/test_en8.py
+101 passed
+$ ruff check tests/test_export_state.py tests/test_inc9c.py
+All checks passed!
+```
+
+`git status --short` shows only `tests/test_export_state.py` and `tests/test_inc9c.py`
+modified; `mapper/screens/map/exporting.py` is byte-identical to its pre-mutation state.

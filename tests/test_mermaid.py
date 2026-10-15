@@ -9,7 +9,17 @@ from mapper.store import MapStore
 def test_slugify_allows_hyphens():
     assert slugify("Mi Hijo Nuevo") == "mi-hijo-nuevo"
     assert slugify("a_b") == "a_b"
-    assert slugify("---") == "n"
+    # LLR-FX.1.1 (B-115): the pin moved from "n" to "" -- nothing survives, so
+    # callers pick their own placeholder (the import gives `row-N`).
+    assert slugify("---") == ""
+
+
+def test_slugify_returns_empty_when_nothing_survives():
+    assert slugify("") == ""
+    assert slugify("   ") == ""
+    assert slugify("---") == ""
+    assert slugify("!!!") == ""
+    assert slugify("Niño") == "niño"
 
 
 def test_parse_hyphenated_ids():

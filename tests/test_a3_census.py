@@ -382,9 +382,19 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       `#import-preview-canvas` Static paints so the AT-073 arms can assert
     #       the refusal sentence was actually drawn.  A zero-arg Textual WIDGET
     #       render, correctly outside the A3; every preview arm shares the helper.
-    assert len(sites["zeroarg"]) == 37, (
+    # 37 -> 38 at `2026-10-11-fixes-batch` increment 001, ONE site:
+    #   +1  `tests/test_fixes_csv_import.py::_painted` reads what the
+    #       `#import-preview-canvas` Static paints so AT-084/AT-085 assert the
+    #       painted frame (C-32), not the update() argument.  A zero-arg Textual
+    #       WIDGET render, correctly outside the A3.
+    # 38 -> 39 at `2026-10-11-fixes-batch` increment 003, ONE site:
+    #   +1  `tests/test_fixes_roles_thread.py::_painted` reads what a chrome
+    #       widget (the roles screen's hint line and key bar) paints so AT-087
+    #       and the inert-keys node assert the painted frame (C-32).  A zero-arg
+    #       Textual WIDGET render, correctly outside the A3.
+    assert len(sites["zeroarg"]) == 39, (
         f"derived {len(sites['zeroarg'])} zero-arg Textual sites against a pinned "
-        "37; a DROP means widget sites were wrongly swept into the A3"
+        "39; a DROP means widget sites were wrongly swept into the A3"
     )
     assert len(render_definitions()) == 7, (
         f"derived {len(render_definitions())} definitions against a pinned 7 = "
@@ -498,8 +508,8 @@ def test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration():
     # working rather than two independent failures; `HERMETIC-1` is the second,
     # and it reddened a THIRD arm with them -- the untracked-source guard, which
     # caught the new test file before it could be invisible to all of these.
-    assert len(zeroarg) == 37, (
-        f"derived {len(zeroarg)} zero-arg sites against a pinned 37. A floor was "
+    assert len(zeroarg) == 39, (
+        f"derived {len(zeroarg)} zero-arg sites against a pinned 39. A floor was "
         "used here first, in the one requirement that abolished floors: at `>= 20` "
         "five widget sites could be wrongly migrated with the arm still green"
     )
