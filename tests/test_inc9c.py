@@ -260,19 +260,23 @@ def _leaky_interpolations(message) -> list[str]:
     return out
 
 
-#: Declared carries, keyed by (file, the flagged expression).  Each is a value
-#: that is NOT a bare operator path, with the reason it stays.  A stale entry --
-#: one the source no longer produces -- fails `test_..._every_exception_is_real`.
-LEAK_EXCEPTIONS: dict[tuple[str, str], str] = {
+#: Declared carries, keyed by (file, call-site line, the flagged expression).
+#: Each is a value that is NOT a bare operator path, with the reason it stays.
+#: The key carries the LINE so one excuse can never silently cover a second site
+#: with the same expression in the same file (B-113).  A stale entry -- one the
+#: source no longer produces -- fails `test_..._every_exception_is_real`, and the
+#: line-sensitivity is the accepted cost: moving those `notify` calls reddens it
+#: (fail loud by design).
+LEAK_EXCEPTIONS: dict[tuple[str, int, str], str] = {
     # Moved with `HomeScreen` at 2026-10-09-modular-batch A4 (was the app.py row's site).
-    ("mapper/screens/home.py", "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
-                                            "`MapStoreError` text (INC9C-F3) — moved at A4",
+    ("mapper/screens/home.py", 175, "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
+                                                 "`MapStoreError` text (INC9C-F3) — moved at A4",
     # Moved with `MapScreen` at 2026-10-09-modular-batch B0 (was keyed to the app.py row's site).
-    ("mapper/screens/map/screen.py", "str(e)"): "`store.load`'s `MapStoreError`, written path-free at "
-                                                "B-30 — moved at B0",
+    ("mapper/screens/map/screen.py", 214, "str(e)"): "`store.load`'s `MapStoreError`, written path-free at "
+                                                     "B-30 — moved at B0",
     # Moved with `_refusal_toast` at 2026-10-09-modular-batch A1 (was covered by the app.py row).
-    ("mapper/screens/common.py", "str(exc)"): "`_refusal_toast`: a `MapIdError`'s text is authored "
-                                              "by the store and names the rule, never a path (A-113)",
+    ("mapper/screens/common.py", 213, "str(exc)"): "`_refusal_toast`: a `MapIdError`'s text is authored "
+                                                   "by the store and names the rule, never a path (A-113)",
 }
 
 
@@ -292,19 +296,42 @@ def _notify_leaks() -> tuple[list[tuple[str, int, str]], int]:
     return leaks, dynamic
 
 
+def _undeclared(leaks: list[tuple[str, int, str]]) -> list[tuple[str, int, str]]:
+    """The census comparison: a leak is excused only when its file, call-site
+    line AND flagged expression all match a declared carry (B-113)."""
+    return [(p, n, e) for p, n, e in leaks if (p, n, e) not in LEAK_EXCEPTIONS]
+
+
 @red("toasts")
 def test_inc9c_sec_f1_census_no_notify_interpolates_a_raw_exception_or_path():
     leaks, dynamic = _notify_leaks()
     assert dynamic > 10, "the census found (almost) no dynamic notify site: it is vacuous"
-    undeclared = [(p, n, e) for p, n, e in leaks if (p, e) not in LEAK_EXCEPTIONS]
+    undeclared = _undeclared(leaks)
     assert undeclared == [], f"toasts that can paint an absolute path: {undeclared}"
 
 
 def test_inc9c_sec_f1_every_leak_exception_is_still_real():
     leaks, _ = _notify_leaks()
-    found = {(p, e) for p, _, e in leaks}
+    found = {(p, n, e) for p, n, e in leaks}
     stale = [key for key in LEAK_EXCEPTIONS if key not in found]
-    assert stale == [], f"stale leak exceptions, gone from the source: {stale}"
+    assert stale == [], (
+        f"stale leak exceptions, gone from the source: {stale} -- keys are "
+        "line-sensitive (B-113): if a notify call moved, update the key's line"
+    )
+
+
+def test_at_089_a_second_leak_site_in_an_excused_file_is_still_flagged():
+    """AT-089 (US-FX-006 / HLR-FX.6 / LLR-FX.6.1): one excuse covers one site.
+
+    The registry key carries the LINE so an excuse for one `str(exc)` cannot
+    silently absorb a second `str(exc)` later in the same file.  This builds the
+    two-record input directly: the excused call site and a second site with the
+    same file and expression at another line.  Only the second is undeclared.
+    """
+    excused = next(iter(sorted(LEAK_EXCEPTIONS)), None)
+    assert excused is not None, "LEAK_EXCEPTIONS is empty: AT-089 needs one declared carry"
+    second = (excused[0], 412, excused[2])
+    assert _undeclared([excused, second]) == [second]
 
 
 def test_inc9c_sec_f1_the_leak_predicate_discriminates():

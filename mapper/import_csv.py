@@ -22,15 +22,19 @@ def preview_csv(path: Path) -> Graph:
     """Return a Graph built from *path* (CSV or TSV).
 
     Columns:
-      - ``id`` becomes the node id. When empty, a slug of ``title`` or an
-        auto-generated ``row-N`` id is used so the row is not dropped.
+      - ``id`` becomes the node id. When empty, a slug of ``title`` is used;
+        when no slug characters survive (empty or punctuation-only), the next
+        ``row-N`` id is used so the row is not dropped.
       - ``title`` becomes the node title; falls back to id.
       - ``parent`` is an id reference to the parent row.
       - ``depth`` is an integer indentation level used when ``parent`` is absent.
       - Any other header is stored in ``ficha.fields`` keyed by header name.
 
-    Rows whose parent is missing/empty/unknown are parked at the root with their
-    title prefixed by ``"? "`` so they are not silently dropped.
+    A blank ``parent`` cell means "no parent": the row is a root candidate. The
+    root is the first parentless row that was not parked (if every parentless
+    row was parked, the first parentless row). Rows whose parent is
+    missing/unknown, and extra parentless rows, are parked under the root with
+    their title prefixed by ``"? "`` so they are not silently dropped.
     """
     text = path.read_text(encoding="utf-8")
     if not text:
@@ -44,7 +48,8 @@ def preview_csv(path: Path) -> Graph:
         return Graph()
 
     graph = Graph()
-    rows: list[tuple[str, str, str | None, int | None]] = []
+    rows: list[tuple[str, str | None, int | None]] = []
+    parked: set[str] = set()
     last_at_depth: dict[int, str] = {}
     produced: dict[str, list[CsvRow]] = {}
 
@@ -54,9 +59,12 @@ def preview_csv(path: Path) -> Graph:
         raw_id = (row.get("id") or "").strip()
         title = (row.get("title") or "").strip()
         if not raw_id:
-            auto_counter += 1
-            raw_id = title or f"row-{auto_counter}"
+            raw_id = title
         nid = slugify(raw_id)
+        if not nid:
+            auto_counter += 1
+            nid = f"row-{auto_counter}"
+            raw_id = raw_id or nid
         # LLR-CSV.2.1: record every row that produced this slug, with the
         # line number exactly as `csv.DictReader.line_num` reports it (blank
         # lines and CRLF endings count as the reader counts them) and the id
@@ -67,7 +75,8 @@ def preview_csv(path: Path) -> Graph:
 
         title = title if title else raw_id
 
-        parent_id = slugify((row.get("parent") or "").strip())
+        parent_cell = (row.get("parent") or "").strip()
+        parent_id = slugify(parent_cell) if parent_cell else None
         depth_raw = (row.get("depth") or "").strip()
         depth = int(depth_raw) if depth_raw.lstrip("-").isdigit() else None
 
@@ -85,17 +94,19 @@ def preview_csv(path: Path) -> Graph:
     # Second pass: build edges.
     for nid, parent_id, depth in rows:
         node = graph.nodes[nid]
-        if parent_id:
+        if parent_id is not None:
             if parent_id in graph.nodes:
                 graph.add_edge(Edge(parent_id=parent_id, child_id=nid))
             else:
                 _park(node)
+                parked.add(nid)
         elif depth is not None and depth > 0:
             parent = last_at_depth.get(depth - 1)
             if parent is not None:
                 graph.add_edge(Edge(parent_id=parent, child_id=nid))
             else:
                 _park(node)
+                parked.add(nid)
 
         if depth is not None:
             last_at_depth[depth] = nid
@@ -103,13 +114,17 @@ def preview_csv(path: Path) -> Graph:
                 if d > depth:
                     del last_at_depth[d]
 
-    # Attach remaining orphans to the first declared root.
-    root_id = graph.root_id
-    if root_id is not None:
-        for node in graph.nodes.values():
-            if node.id != root_id and graph.parent_of(node.id) is None:
-                graph.add_edge(Edge(parent_id=root_id, child_id=node.id))
-                _park(node)
+    # Root by parentage, not row order: the first parentless row that was not
+    # parked (else the first parentless row; with none, the first row stays).
+    # Every other parentless row is attached under it and parked.
+    parentless = [nid for nid in graph.nodes if graph.parent_of(nid) is None]
+    if parentless:
+        root_id = next((n for n in parentless if n not in parked), parentless[0])
+        graph.root_id = root_id
+        for nid in parentless:
+            if nid != root_id:
+                graph.add_edge(Edge(parent_id=root_id, child_id=nid))
+                _park(graph.nodes[nid])
 
     # LLR-CSV.2.1: expose every slug more than one row produced — including
     # collisions that violate no loader rule, because the preview keys on the

@@ -1,0 +1,2 @@
+env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_roles_screen.py tests/test_fixes_roles_thread.py
+39 passed in 46.75s

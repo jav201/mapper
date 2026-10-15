@@ -44,11 +44,15 @@ def _unescape_mermaid(value: str) -> str:
 
 
 def slugify(value: str) -> str:
-    """Return a safe mermaid id: lowercase, hyphens/underscores allowed."""
+    """Return a safe mermaid id: lowercase, hyphens/underscores allowed.
+
+    Returns ``""`` when nothing survives (blank or punctuation-only input);
+    callers that need a placeholder pick their own.
+    """
     value = value.lower().strip()
     value = re.sub(r"[^\w\s-]", "-", value)
     value = re.sub(r"[-\s]+", "-", value).strip("-")
-    return value[:32] or "n"
+    return value[:32]
 
 
 def _ensure_node(nodes: dict[str, Node], nid: str, label: str | None) -> None:
@@ -129,9 +133,19 @@ def parse(src: str) -> Graph:
 
 
 def dump(graph: Graph) -> str:
-    """Dump the graph to `graph TD` notation."""
+    """Dump the graph to `graph TD` notation.
+
+    `parse` elects the first parentless node in text order as root, and edges
+    are written before orphans.  So when the declared root is written, has no
+    written parent, and text order would elect another node, its declaration
+    line goes right after `graph TD` (B-117).  The decision reuses the two
+    edge passes below; no third pass over `graph.edges`.
+    """
     lines = ["graph TD"]
     emitted: set[str] = set()
+    written_ids: set[str] = set()
+    written_children: set[str] = set()
+    written_parents: list[str] = []
     for edge in graph.edges:
         p = graph.nodes.get(edge.parent_id)
         c = graph.nodes.get(edge.child_id)
@@ -145,6 +159,10 @@ def dump(graph: Graph) -> str:
         if edge.label:
             arrow = f" -->|{_escape_mermaid(edge.label)}| "
         line = f"    {left}{arrow}{right}"
+        written_ids.add(p.id)
+        written_ids.add(c.id)
+        written_children.add(c.id)
+        written_parents.append(p.id)
         if line not in emitted:
             lines.append(line)
             emitted.add(line)
@@ -156,11 +174,22 @@ def dump(graph: Graph) -> str:
     for edge in graph.edges:
         incident.add(edge.parent_id)
         incident.add(edge.child_id)
-    for node in graph.nodes.values():
-        if node.id not in incident:
-            label = _escape_mermaid(node.ficha.title) if node.ficha.title and node.ficha.title != node.id else ""
-            line = f"    {node.id}[{label}]" if label else f"    {node.id}"
-            if line not in emitted:
-                lines.append(line)
-                emitted.add(line)
+    orphans = [node for node in graph.nodes.values() if node.id not in incident]
+    root_id = graph.root_id
+    if root_id in graph.nodes and (root_id in written_ids or root_id not in incident):
+        first_parentless = next((pid for pid in written_parents if pid not in written_children), None)
+        if first_parentless is None and orphans:
+            first_parentless = orphans[0].id
+        if root_id not in written_children and root_id != first_parentless:
+            root = graph.nodes[root_id]
+            rlabel = _escape_mermaid(root.ficha.title) if root.ficha.title and root.ficha.title != root.id else ""
+            rline = f"    {root.id}[{rlabel}]" if rlabel else f"    {root.id}"
+            lines.insert(1, rline)
+            emitted.add(rline)
+    for node in orphans:
+        label = _escape_mermaid(node.ficha.title) if node.ficha.title and node.ficha.title != node.id else ""
+        line = f"    {node.id}[{label}]" if label else f"    {node.id}"
+        if line not in emitted:
+            lines.append(line)
+            emitted.add(line)
     return "\n".join(lines) + "\n"
