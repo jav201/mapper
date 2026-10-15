@@ -1,0 +1,60 @@
+== baseline GREEN (all named nodes, mutants applied: none)
+PASSED tests/test_fixes_csv_import.py::test_at_084_empty_parent_cells_are_roots_not_node_n
+PASSED tests/test_fixes_csv_import.py::test_at_085_child_listed_before_root_imports_saves_and_reopens
+PASSED tests/test_fixes_csv_import.py::test_blank_parent_cell_is_a_root_candidate_not_a_reference_to_n
+PASSED tests/test_fixes_csv_import.py::test_hostile_cells_yield_only_word_ids_and_survive_the_text_round_trip
+PASSED tests/test_fixes_csv_import.py::test_id_with_no_slug_characters_becomes_row_n
+PASSED tests/test_fixes_csv_import.py::test_permutation_of_rows_never_changes_the_tree
+PASSED tests/test_fixes_csv_import.py::test_punctuation_only_parent_cell_parks_the_row
+PASSED tests/test_fixes_csv_import.py::test_root_child_listed_before_root
+PASSED tests/test_fixes_csv_import.py::test_root_unknown_parent_row_before_the_real_root_is_not_root
+PASSED tests/test_mermaid.py::test_slugify_returns_empty_when_nothing_survives
+== M-FX1 edits=1 (every anchor applied exactly once)
+   mapper/mermaid.py pre=7b4d31f7b85dfde5e6e69f36146a3aec8a9243f739237d4a810d6d30b6466fd0 mutated=fa473d5ce17a618901e50eb0bbdf8a915f2e00fbab06673b43b698f187f5929d
+FAILED tests/test_mermaid.py::test_slugify_returns_empty_when_nothing_survives
+FAILED tests/test_fixes_csv_import.py::test_at_084_empty_parent_cells_are_roots_not_node_n
+   restored mapper/mermaid.py post=7b4d31f7b85dfde5e6e69f36146a3aec8a9243f739237d4a810d6d30b6466fd0 equal=True
+-- GREEN after restore
+PASSED tests/test_mermaid.py::test_slugify_returns_empty_when_nothing_survives
+PASSED tests/test_fixes_csv_import.py::test_at_084_empty_parent_cells_are_roots_not_node_n
+== M-FX2 edits=2 (every anchor applied exactly once)
+   mapper/import_csv.py pre=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 mutated=afafd3747f3a77b7cc681726c39f8bfc00fc9ce48ae1691129c50d7642434a74
+FAILED tests/test_fixes_csv_import.py::test_punctuation_only_parent_cell_parks_the_row
+   restored mapper/import_csv.py post=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 equal=True
+-- GREEN after restore
+PASSED tests/test_fixes_csv_import.py::test_punctuation_only_parent_cell_parks_the_row
+== M-FX2b edits=3 (every anchor applied exactly once)
+   mapper/import_csv.py pre=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 mutated=afafd3747f3a77b7cc681726c39f8bfc00fc9ce48ae1691129c50d7642434a74
+   mapper/mermaid.py pre=7b4d31f7b85dfde5e6e69f36146a3aec8a9243f739237d4a810d6d30b6466fd0 mutated=fa473d5ce17a618901e50eb0bbdf8a915f2e00fbab06673b43b698f187f5929d
+FAILED tests/test_fixes_csv_import.py::test_blank_parent_cell_is_a_root_candidate_not_a_reference_to_n
+FAILED tests/test_fixes_csv_import.py::test_at_084_empty_parent_cells_are_roots_not_node_n
+   restored mapper/import_csv.py post=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 equal=True
+   restored mapper/mermaid.py post=7b4d31f7b85dfde5e6e69f36146a3aec8a9243f739237d4a810d6d30b6466fd0 equal=True
+-- GREEN after restore
+PASSED tests/test_fixes_csv_import.py::test_blank_parent_cell_is_a_root_candidate_not_a_reference_to_n
+PASSED tests/test_fixes_csv_import.py::test_at_084_empty_parent_cells_are_roots_not_node_n
+== M-FX3 edits=1 (every anchor applied exactly once)
+   mapper/import_csv.py pre=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 mutated=0daedd92dc220652ced236741b28b0327a438233648e06723e5d953c9faae62b
+FAILED tests/test_fixes_csv_import.py::test_id_with_no_slug_characters_becomes_row_n
+FAILED tests/test_fixes_csv_import.py::test_hostile_cells_yield_only_word_ids_and_survive_the_text_round_trip
+   restored mapper/import_csv.py post=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 equal=True
+-- GREEN after restore
+PASSED tests/test_fixes_csv_import.py::test_id_with_no_slug_characters_becomes_row_n
+PASSED tests/test_fixes_csv_import.py::test_hostile_cells_yield_only_word_ids_and_survive_the_text_round_trip
+== M-FX4 edits=1 (every anchor applied exactly once)
+   mapper/import_csv.py pre=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 mutated=db97a5df502241ec257d081967985adf661422803847fd6c54a50cc29868be1b
+FAILED tests/test_fixes_csv_import.py::test_root_child_listed_before_root
+FAILED tests/test_fixes_csv_import.py::test_permutation_of_rows_never_changes_the_tree
+FAILED tests/test_fixes_csv_import.py::test_at_085_child_listed_before_root_imports_saves_and_reopens
+   restored mapper/import_csv.py post=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 equal=True
+-- GREEN after restore
+PASSED tests/test_fixes_csv_import.py::test_root_child_listed_before_root
+PASSED tests/test_fixes_csv_import.py::test_permutation_of_rows_never_changes_the_tree
+PASSED tests/test_fixes_csv_import.py::test_at_085_child_listed_before_root_imports_saves_and_reopens
+== M-FX5 edits=1 (every anchor applied exactly once)
+   mapper/import_csv.py pre=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 mutated=de262d7877ba7be2a5d3381e25be6f1359a298ea63abbb26bf50c5fdf1053aa2
+FAILED tests/test_fixes_csv_import.py::test_root_unknown_parent_row_before_the_real_root_is_not_root
+   restored mapper/import_csv.py post=554e921e4f636647ceadc96738424c4fd2e3f58801d1b4d8096dbc0db524aaa0 equal=True
+-- GREEN after restore
+PASSED tests/test_fixes_csv_import.py::test_root_unknown_parent_row_before_the_real_root_is_not_root
+== backups deleted

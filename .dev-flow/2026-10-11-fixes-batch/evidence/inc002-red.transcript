@@ -1,0 +1,56 @@
+== baseline GREEN (all named nodes, mutants applied: none)
+PASSED tests/test_fixes_forest_root.py::test_at_086_forest_root_survives_save_and_reload
+PASSED tests/test_fixes_forest_root.py::test_b117_reproduction_bytes
+PASSED tests/test_fixes_forest_root.py::test_orphan_root_is_not_declared_twice
+PASSED tests/test_fixes_forest_root.py::test_edge_parent_root_gets_a_standalone_line_first
+PASSED tests/test_fixes_forest_root.py::test_root_that_is_a_written_child_is_not_hoisted
+PASSED tests/test_fixes_forest_root.py::test_undo_snapshot_of_a_forest_restores_the_declared_root
+PASSED tests/test_csv_safety_store.py::test_save_accepts_legacy_forest_after_edit
+PASSED tests/test_perf_dump.py::test_dump_fixture_goldens
+PASSED tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio
+PASSED tests/test_perf_dump.py::test_at_076_real_save_dump_budget
+   baseline total nodes seen: 32, non-passed: []
+== M-FX6 (hoist removed: the insert and its emitted.add replaced by pass) edits=1 (every anchor applied exactly once)
+   mapper/mermaid.py pre=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 mutated=98d68bf2d99a1bf99356c50bcbeba8b059cbfcb71517700a45537a14ecd92161
+FAILED tests/test_fixes_forest_root.py::test_at_086_forest_root_survives_save_and_reload
+FAILED tests/test_fixes_forest_root.py::test_b117_reproduction_bytes
+FAILED tests/test_fixes_forest_root.py::test_orphan_root_is_not_declared_twice
+FAILED tests/test_fixes_forest_root.py::test_edge_parent_root_gets_a_standalone_line_first
+FAILED tests/test_fixes_forest_root.py::test_undo_snapshot_of_a_forest_restores_the_declared_root
+FAILED tests/test_csv_safety_store.py::test_save_accepts_legacy_forest_after_edit
+FAILED tests/test_fixes_forest_root.py::test_every_parentless_node_set_as_root_reparses_to_itself[graph TD\n    a\n    b --> c\n-a]   (other node)
+FAILED tests/test_fixes_forest_root.py::test_every_parentless_node_set_as_root_reparses_to_itself[graph TD\n    b --> c\n    a --> d\n-a]   (other node)
+FAILED tests/test_fixes_forest_root.py::test_every_parentless_node_set_as_root_reparses_to_itself[graph TD\n    x\n    b --> c\n    a[Alpha] --> d\n    z\n-x]   (other node)
+FAILED tests/test_fixes_forest_root.py::test_every_parentless_node_set_as_root_reparses_to_itself[graph TD\n    x\n    b --> c\n    a[Alpha] --> d\n    z\n-a]   (other node)
+FAILED tests/test_fixes_forest_root.py::test_every_parentless_node_set_as_root_reparses_to_itself[graph TD\n    x\n    b --> c\n    a[Alpha] --> d\n    z\n-z]   (other node)
+FAILED tests/test_fixes_forest_root.py::test_root_already_elected_by_text_order_changes_nothing[graph TD\n    a\n    b --> c\n-a]   (other node)
+   restored mapper/mermaid.py post=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 equal=True
+-- GREEN after restore: True
+== M-FX6b (emitted.add(rline) dropped: orphan root declared twice) edits=1 (every anchor applied exactly once)
+   mapper/mermaid.py pre=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 mutated=8e964ed2853696e9996ec8185a74b68931cc6b273bc599197fd6a0d3ff810caa
+FAILED tests/test_fixes_forest_root.py::test_at_086_forest_root_survives_save_and_reload
+FAILED tests/test_fixes_forest_root.py::test_b117_reproduction_bytes
+FAILED tests/test_fixes_forest_root.py::test_orphan_root_is_not_declared_twice
+FAILED tests/test_fixes_forest_root.py::test_root_already_elected_by_text_order_changes_nothing[graph TD\n    a\n    b --> c\n-a]   (other node)
+   restored mapper/mermaid.py post=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 equal=True
+-- GREEN after restore: True
+== M-FX6c (written-child guard dropped: a child root is hoisted) edits=1 (every anchor applied exactly once)
+   mapper/mermaid.py pre=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 mutated=2843d583b035238ed844aeafa45617da0025f29c22a4df7fbf39855dcf11b0f8
+FAILED tests/test_fixes_forest_root.py::test_root_that_is_a_written_child_is_not_hoisted
+   restored mapper/mermaid.py post=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 equal=True
+-- GREEN after restore: True
+== M-FX7 (root line always written: first_parentless test dropped) edits=1 (every anchor applied exactly once)
+   mapper/mermaid.py pre=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 mutated=215777260d1abaa6646d7f77c78dbc9b2941f3bdecef3c06387d39a140035faf
+FAILED tests/test_perf_dump.py::test_dump_fixture_goldens
+FAILED tests/test_perf_dump.py::test_at_076_real_save_dump_budget
+FAILED tests/test_fixes_forest_root.py::test_root_already_elected_by_text_order_changes_nothing[graph TD\n    b --> c\n    a\n-b]   (other node)
+FAILED tests/test_fixes_forest_root.py::test_root_already_elected_by_text_order_changes_nothing[graph TD\n    a --> b\n    b --> c\n-a]   (other node)
+   restored mapper/mermaid.py post=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 equal=True
+-- GREEN after restore: True
+== M-FX12 (third walk over graph.edges to decide) edits=1 (every anchor applied exactly once)
+   mapper/mermaid.py pre=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 mutated=76aa61e70a40fe0bccaab67a9acd0dfba9f2f72e49f4d164b07691a6157552a1
+FAILED tests/test_perf_dump.py::test_dump_counted_ops_scaling_ratio
+FAILED tests/test_perf_dump.py::test_at_076_real_save_dump_budget
+   restored mapper/mermaid.py post=23e1e1f2ed6be8ae554dd090f6dc80c6b03a91fc1e4fc52cc598c78b04ab30b6 equal=True
+-- GREEN after restore: True
+== backups deleted

@@ -1,0 +1,31 @@
+== baseline
+roles.py sha256 pre 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8
+nodes 17 PASSED 17
+== backup taken after green baseline
+== M-FX8 applied; sha256 358cb1d349b2c57591e243aa96cb04b6fc87d7a1591d27fccb355f4bde191d1b
+M-FX8 RED nodes (6): test_at_087_roles_screen_git_reads_run_off_the_ui_thread, test_roles_escape_pops_while_gated, test_roles_keys_before_first_load_are_inert, test_roles_paints_nothing_until_discovery_returns, test_roles_popped_screen_discards_late_discovery, test_roles_unexpected_discovery_exception_is_not_swallowed
+M-FX8 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX9 applied; sha256 607d484d1968bbcbb6e1609d11d5d640ceb712f74d698fd94ec5466cc7caf3d6
+M-FX9 RED nodes (1): test_roles_keys_before_first_load_are_inert
+M-FX9 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX10 applied; sha256 45802f7906201a9829dcb7c05bb2b0d327f71c656cbf9a910db1a68648a336ea
+M-FX10 RED nodes (3): test_at_087_roles_screen_git_reads_run_off_the_ui_thread, test_roles_keypress_reload_runs_no_git, test_roles_latest_discovery_wins
+M-FX10 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX11 applied; sha256 d4058eb6d5bb24f88e10c69e7645cd2e837dca1e0a818c2e14bcf135dcbe82f9
+M-FX11 RED nodes (1): test_roles_latest_discovery_wins
+M-FX11 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX13 applied; sha256 eb77a90b49aaf0c2e316cb2238e1335580d7c5975cb1d3d5ec8b676d8f56564c
+M-FX13 RED nodes (2): test_roles_latest_discovery_wins, test_roles_popped_screen_discards_late_discovery
+M-FX13 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX13b applied; sha256 c14a7e671fdd61836d0d5fe4bfcdd487256caada20b39765e32f53f34efde5d5
+M-FX13b RED nodes (1): test_roles_popped_screen_discards_late_discovery
+M-FX13b restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX14 applied; sha256 54554acf122c73da5262eecf72d43664031732aeb75232a26703349c48b32b0c
+M-FX14 RED nodes (8): test_roles_discovery_failure_degrades_to_no_repo[OSError-read], test_roles_discovery_failure_degrades_to_no_repo[OSError-repo_root], test_roles_discovery_failure_degrades_to_no_repo[SubprocessError-read], test_roles_discovery_failure_degrades_to_no_repo[SubprocessError-repo_root], test_roles_discovery_failure_degrades_to_no_repo[ValidationError-read], test_roles_discovery_failure_degrades_to_no_repo[ValidationError-repo_root], test_roles_discovery_failure_degrades_to_no_repo[ValueError-read], test_roles_discovery_failure_degrades_to_no_repo[ValueError-repo_root]
+M-FX14 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== M-FX17 applied; sha256 29dc8348efb4d849b13f6dd797b4bd3a6bc94a5a81e4744074914eb1929478a6
+M-FX17 RED nodes (1): test_roles_keys_before_first_load_are_inert
+M-FX17 restored; sha256 4d6388d93a5b231c89a6bbfa58dcea83fc3974b30573deeed7bfd059f985b6a8 equal=True
+== backups deleted
+== final run
+nodes 17 PASSED 17 sha equal True

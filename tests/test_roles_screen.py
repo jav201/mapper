@@ -16,6 +16,7 @@ discovery (D13) finds it through `git rev-parse --show-toplevel`.
 from __future__ import annotations
 
 import ast
+import asyncio
 import hashlib
 import os
 import re
@@ -231,6 +232,12 @@ async def _open_roles(app: MapperApp, pilot) -> RolesScreen:
     await _press(pilot, "R")
     screen = app.screen
     assert isinstance(screen, RolesScreen), type(screen)
+    # B-127: the git discovery runs on a worker; the first paint lands when it
+    # returns, so every drive waits for it before reading the frame.
+    # Bounded (fix-batch increment 003 review L2): a worker that stops
+    # self-bounding fails here by name instead of hanging the suite.
+    await asyncio.wait_for(app.workers.wait_for_complete(), timeout=60)
+    await pilot.pause()
     return screen
 
 

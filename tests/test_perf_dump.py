@@ -133,6 +133,7 @@ def test_dump_fixture_goldens():
     ordered.add_node(Node(id="root", ficha=Ficha(title="raiz")))
     ordered.add_node(Node(id="kid"))
     ordered.add_edge(Edge(parent_id="root", child_id="kid"))
+    ordered.root_id = "root"
     cases.append(
         ("orphan-order", dump(ordered), b"graph TD\n    root[raiz] --> kid\n    zeta\n    alfa\n")
     )

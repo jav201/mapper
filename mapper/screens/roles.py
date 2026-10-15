@@ -39,7 +39,10 @@ columns shrink uniformly and their headers truncate with the ellipsis.
 
 Repo discovery is D13: `git rev-parse --show-toplevel` over the app's
 workspace; a `safe.directory` refusal or any git failure lands on the named
-`no repo` result — the screen says so and offers nothing to edit.
+`no repo` result — the screen says so and offers nothing to edit.  The three
+git calls run on a thread worker (B-127, batch `2026-10-11-fixes-batch`): the
+worker RETURNS the facts and the screen applies them on the UI thread; until
+the first facts arrive the screen paints nothing and its keys are inert.
 
 Every file-derived string (person ids, names, roles, notes, hashes, status
 words) passes through `darkside.plain` and is painted ONLY into
@@ -50,6 +53,7 @@ LLR-RH.8.1 (census-enforced in `tests/test_roles_screen.py`).
 """
 from __future__ import annotations
 
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -58,9 +62,11 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+from textual import work
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Static
+from textual.worker import Worker, WorkerState
 
 from mapper import darkside
 from mapper.keymap import SCOPE_ROLES, groups_for_keybar, hint_pair
@@ -170,13 +176,27 @@ def _verdict(root: Path, report: chain.ChainReport, config: Config) -> str:
     return release.evaluate(config, report, derivation).text
 
 
-def _load(workspace: Path) -> _Snapshot:
-    """One pass over the core: discover the repo (D13), verify the chain,
-    fold the verified prefix, scan the pending store, read the viewer
-    identity.  Every degradation is a named state, never a crash."""
+def _discover(workspace: Path) -> tuple[str, identity.Identity | None]:
+    """The git facts of the screen: the repo top (D13) and the viewer's git
+    identity — the only slow step, so the only one run off the UI thread.
+    A failure of the helper layers is the named `no repo` state; any other
+    exception is a defect and propagates."""
+    try:
+        top = identity.repo_root(workspace)
+        if top == identity.NO_REPO:
+            return identity.NO_REPO, None
+        return top, identity.read(Path(top))
+    except (OSError, ValueError, subprocess.SubprocessError, ValidationError):
+        return identity.NO_REPO, None
+
+
+def _load(top: str, who: identity.Identity | None) -> _Snapshot:
+    """One pass over the core from the discovered git facts: verify the chain,
+    fold the verified prefix, scan the pending store, match the viewer
+    identity.  Runs no git.  Every degradation is a named state, never a
+    crash."""
     snap = _Snapshot()
-    top = identity.repo_root(workspace)
-    if top == identity.NO_REPO:
+    if top == identity.NO_REPO or who is None:
         return snap
     root = Path(top)
     snap.root = root
@@ -219,7 +239,6 @@ def _load(workspace: Path) -> _Snapshot:
     snap.pending_adds = {k: frozenset(v) for k, v in adds.items()}
     snap.pending_removes = {k: frozenset(v) for k, v in removes.items()}
     snap.pending_names = tuple(names)
-    who = identity.read(root)
     viewer = next(
         (
             person
@@ -459,6 +478,8 @@ class RolesScreen(Screen):
         self._snap = _Snapshot()
         self._row = 0
         self._col = 0
+        self._facts: tuple[str, identity.Identity | None] | None = None
+        self._gen = 0
 
     def compose(self) -> ComposeResult:
         yield TabStrip(None, crumb=["home", "roles"])
@@ -466,21 +487,65 @@ class RolesScreen(Screen):
         yield Static(id="roles-body")
         yield Static(id="roles-band")
         yield HintLine("")
-        yield KeyBar(groups_for_keybar(keybar_groups(self.KEY_SCOPE)))
+        yield KeyBar(self._bar_groups())
+
+    def _bar_groups(self) -> list[tuple[str, list[tuple[str, str]]]]:
+        """The key bar's groups; until the first facts arrive the edit keys
+        (propose, approve, reject) are left out — the bar advertises no key
+        that does nothing."""
+        groups = groups_for_keybar(keybar_groups(self.KEY_SCOPE))
+        if self._facts is not None:
+            return groups
+        edit = {
+            hint_pair(SCOPE_ROLES, action)
+            for action in ("propose", "approve", "reject")
+        }
+        return [
+            (header, [row for row in rows if f"{row[0]} {row[1]}" not in edit])
+            for header, rows in groups
+        ]
 
     def on_mount(self) -> None:
-        self._reload()
+        self._start_discovery()
 
     def on_screen_resume(self) -> None:
         """A resolution made elsewhere (another screen, a manual act) is
         re-read, never assumed."""
-        self._reload()
+        self._start_discovery()
 
     # -- loading / painting --------------------------------------------------
 
+    def _start_discovery(self) -> None:
+        self._gen += 1
+        self._discover_worker(Path(self.app.store.workspace), self._gen)  # type: ignore[attr-defined]
+
+    @work(thread=True)
+    def _discover_worker(self, workspace: Path, gen: int):
+        """Runs off the UI thread and touches no widget or attribute: it
+        RETURNS the facts, applied in `on_worker_state_changed`."""
+        return gen, _discover(workspace)
+
+    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        if event.state is not WorkerState.SUCCESS:
+            return
+        result = event.worker.result
+        if not isinstance(result, tuple) or len(result) != 2:
+            return
+        gen, facts = result
+        # `is_mounted` stays True after the screen is popped (measured on
+        # Textual 8.2.8); `is_attached` is the check that sees a dead screen.
+        if gen != self._gen or not self.is_attached:
+            return
+        self._facts = facts
+        self.query_one(KeyBar).set_groups(self._bar_groups())
+        self._reload()
+
     def _reload(self) -> None:
-        workspace = Path(self.app.store.workspace)  # type: ignore[attr-defined]
-        self._snap = _load(workspace)
+        """Re-read the files from the cached git facts and repaint; runs no
+        git.  Before the first facts the screen paints nothing."""
+        if self._facts is None:
+            return
+        self._snap = _load(*self._facts)
         self._paint()
 
     def _paint(self) -> None:
@@ -505,24 +570,34 @@ class RolesScreen(Screen):
     # -- cursor ---------------------------------------------------------------
 
     def action_next_person(self) -> None:
+        if self._facts is None:
+            return
         self._row = self._clamp_row(self._row + 1)
         self._paint()
 
     def action_prev_person(self) -> None:
+        if self._facts is None:
+            return
         self._row = self._clamp_row(self._row - 1)
         self._paint()
 
     def action_next_role(self) -> None:
+        if self._facts is None:
+            return
         self._col = self._clamp_col(self._col + 1)
         self._paint()
 
     def action_prev_role(self) -> None:
+        if self._facts is None:
+            return
         self._col = self._clamp_col(self._col - 1)
         self._paint()
 
     # -- proposing (the only write, and it goes through the core) --------------
 
     def action_propose(self) -> None:
+        if self._facts is None:
+            return
         snap = self._snap
         hint = self.query_one(HintLine)
         if snap.root is None or snap.config_error or snap.read_only:
@@ -588,6 +663,8 @@ class RolesScreen(Screen):
         requests on one cell the action refuses with the named hint instead
         of silently picking the oldest (resolution is core-only, B-126
         follow-up).  A success names the request it resolved."""
+        if self._facts is None:
+            return
         self._reload()  # the core is the authority: read disk at keypress time
         snap = self._snap
         hint = self.query_one(HintLine)

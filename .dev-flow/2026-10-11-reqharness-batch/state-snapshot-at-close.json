@@ -1,0 +1,305 @@
+{
+  "project": "mapper",
+  "language": "en",
+  "batch_id": "2026-10-11-reqharness-batch",
+  "batch_objective": "ReqHarness (B-107): mapper becomes the harness for dev-flow's human-auditable artifacts. Operator rulings B-119 (gallery verdict V, D2-D13), B-121 (a persistent, versioned review registry: canon per type, digest of normative fields, role-bound approval, declared or EV test results, YAML source with generated views, baselines and release rules), B-122 (roles edited in-app; hash-chained admin-approved role log; hand edits ignored and flagged; release blocked on a broken chain; strong mode optional) and B-123 (roles screen = matrix variant B).",
+  "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in the primary checkout of <owner>/mapper. V40 NOTICEs this by design.",
+  "mode": "full",
+  "mode_history": [
+    {
+      "batch_id": "2026-08-18-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-fix-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-medlow-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-24-components-batch",
+      "mode": "core",
+      "closed_at": "2026-08-24"
+    },
+    {
+      "batch_id": "2026-08-25-ui-next-batch-01",
+      "mode": "full",
+      "closed_at": "2026-08-26"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "status": "PARKED at the PDR gate 2026-08-26; UN-PARKED 2026-08-27",
+      "reason": "Trigger A3 fired on the frozen IRenderer.render interface (pre-authorised in the brief); E1, D1, D2, A2, B1, B4 also fired. Client-grade V-model with merge authority granted."
+    },
+    {
+      "batch_id": "2026-08-26-repair-batch",
+      "mode": "full",
+      "opened_at": "2026-08-26",
+      "closed_at": "2026-08-27",
+      "merge_commit": "820e7e3",
+      "reason": "Interposed by operator decision at this batch's PDR gate. Repaired S-01/S-02/S-07/S-08; 245 -> 429 tests. Its close is this batch's new base."
+    },
+    {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "mode": "full",
+      "closed_at": "2026-08-27"
+    },
+    {
+      "batch_id": "2026-08-26-ui-next-batch-02",
+      "mode": "full",
+      "closed_at": "2026-10-08"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "from": null,
+      "to": "full",
+      "date": "2026-10-08",
+      "reason": "operator at kickoff 2026-10-08: 'full (Recomendado)' -- B-36 touches persistence and UX"
+    },
+    {
+      "batch_id": "2026-10-08-data-safety-batch",
+      "mode": "full",
+      "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-hygiene-batch",
+      "mode": "core",
+      "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-canon-batch",
+      "mode": "core",
+      "closed_at": "2026-10-09"
+    },
+    {
+      "batch_id": "2026-10-09-modular-batch",
+      "mode": "full",
+      "closed_at": "2026-10-10"
+    },
+    {
+      "batch_id": "2026-10-10-csv-safety-batch",
+      "mode": "core",
+      "closed_at": "2026-10-10"
+    },
+    {
+      "batch_id": "2026-10-10-perf-batch",
+      "mode": "full",
+      "closed_at": "2026-10-10"
+    }
+  ],
+  "guided": false,
+  "current_station": "P6",
+  "phase_status": "awaiting-sync",
+  "stations_active": [
+    "P0",
+    "ARQ",
+    "P1",
+    "P2",
+    "PDR",
+    "P3",
+    "DDR",
+    "P4",
+    "P5",
+    "P6"
+  ],
+  "iterations_per_station": {
+    "P0": 0,
+    "P1": 2,
+    "P2": 0,
+    "P3": 0,
+    "P4": 0,
+    "P5": 0,
+    "P6": 0,
+    "ARQ": 0,
+    "DDR": 0,
+    "PDR": 0
+  },
+  "triggers": {
+    "evaluated_at": "2026-10-11T00:59:14",
+    "fired": [
+      "A1",
+      "A2",
+      "A3",
+      "B1",
+      "C1",
+      "C4",
+      "C6",
+      "C8",
+      "D1",
+      "E1",
+      "E2",
+      "F1"
+    ],
+    "not_fired": [
+      "A4",
+      "B2",
+      "B3",
+      "B4",
+      "C2",
+      "C3",
+      "C5",
+      "C7",
+      "D2",
+      "E3",
+      "F2"
+    ],
+    "record": ".dev-flow/2026-10-11-reqharness-batch/PLAN.md#triggers"
+  },
+  "artifact_homes": {
+    "requirements": "repo:.dev-flow/2026-10-11-reqharness-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-11-reqharness-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-11-reqharness-batch/06-docs/traceability-matrix.md",
+    "tests": "repo:tests/",
+    "module_map": "repo:docs/ARCHITECTURE.md",
+    "increments": "repo:.dev-flow/2026-10-11-reqharness-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-11-reqharness-batch/evidence/",
+    "backlog": "repo:.dev-flow/BACKLOG.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-11-reqharness-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-11-reqharness-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-11-reqharness-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-11-reqharness-batch/README.md",
+    "requirements_canon": "repo:REQUIREMENTS.md"
+  },
+  "base_ref": "c00dfe9adab435bf392ed11ae9abc4a6e48a7655",
+  "artifacts": {
+    "plan": ".dev-flow/2026-10-11-reqharness-batch/PLAN.md",
+    "P1": ".dev-flow/2026-10-11-reqharness-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-11-reqharness-batch/01-requirements-ledger.md"
+  },
+  "decisions_log": [
+    {
+      "station": "P0",
+      "date": "2026-10-11",
+      "decision": "P0 approved (self-approved under the standing authorization): intake spike/intake.md (Kimi). Slice ruled: this batch = headless mapper/reqharness core (config, hash-chained role log, review events + normative digests + derived states, baselines + release rules, YAML I/O) + roles screen (matrix B, prototype verdict B-123) with the status band folded into it + the D12 proposal document; follow-ups: review/signing screen and baseline/release view (prototype rounds first), US canon + AT table extraction, generated views. O1-O9 ruled: config.yml + roles.yml (YAML stream, hash chain, admin-only) + reviews/ one file per event; status in the roles-screen footer; genesis copy; admin applies changes to others in one key, own changes pending; pending glyphs ◐ add / ◌ remove; D12 as a 06-docs proposal; reqharness/ at repo root, mapper --audit <repo>; baselines named + commit SHA under reqharness/baselines/, tags manual. Triggers A1-A3,B1,C1,C4,C6,C8,D1,E1,E2,F1 fired (E2: identity and authorization surface)"
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-11",
+      "decision": "ARQ drafted (Kimi): design/design-proposal.md — headless mapper/reqharness package (config, hash-chained roles.yml, reviews/ one immutable file per event, derived states, baselines, release rules, audit CLI), roles screen matrix B with status band; scale spike RHS folded as R-SCALE (CSafeLoader, local parse cache, 0.5 s budget); to PDR with P2"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-11",
+      "decision": "P1 drafted (Kimi): US-RH-001..003, HLR-RH.1-9, 23 LLR-RH, AT-077..081, LED .1-.2; to P2 review (architect, qa, security)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-11",
+      "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): both ITERATE (policy outside the chain, canonical hashing breaks on real YAML, cache can change a verdict, one unentitled review blocks forever, pending has no home); qa (Claude Sonnet): REQ ITERATE, PDR approve-with-conditions (pending store, resolve keys, AT-080 vacuous, token census oracle); security (Claude Opus): ITERATE (F1 policy, F2 tail truncation, F3 backdating). Rulings R1-R14 in 02-review.md"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-11",
+      "decision": "P1 iteration 1 approved (self-approved): rulings R1-R14 applied by Kimi (LED .3-.17); to P2 round 2"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-11",
+      "decision": "P2 round 2: iterate-to-refine (self-ruled). architect (Claude Opus) iterate text-only (genesis self-hash, fork recovery vs verify, old-head backdating; batch drifting heavy); qa (Claude Sonnet) and security (Claude Opus) approve-with-conditions (git fsmonitor hardening G1, content recheck G3, residuals G4). Rulings R15-R26 trim scope (committer warning, reactivated class, review progression, fork-recovery UI deferred to B-124..B-126)"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-11",
+      "decision": "P1 iteration 2 approved (self-approved): rulings R15-R26 applied by Kimi (LED .18-.28); scope trimmed per the architect's weight assessment, deferred work in B-124..B-126; to P2 round 3 (targeted re-review)"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-11",
+      "decision": "P2 approved with conditions after three rounds (self-approved): architect (Claude Opus), qa (Claude Sonnet), security (Claude Opus) all approve-with-conditions at round 3; R1-R27 applied (LED .3-.29+); scope trimmed (B-124..B-126)"
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-11",
+      "decision": "PDR sealed approved with conditions (PDR-2026-10-11-reqharness-batch, D1-D7); implementation conditions G1-G6/H1-H4 verified at the increment gates"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-11",
+      "decision": "P3 increments RH1–RH6b complete with code reviews and follow-ups (increment-001..007); standing authorization",
+      "notes": "commits c00dfe9..0d10b7c; each increment code-reviewed, REQUEST-CHANGES findings fixed with RED proofs"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-11",
+      "decision": "DDR approved with conditions (architect, qa-reviewer, security-reviewer); security BLOCK-UNTIL F1/F2 discharged; independent K3 re-check CLEARED-WITH-NITS, nits fixed; standing authorization",
+      "notes": "increment-008-ddr-fix.md, increment-009-gate-fix.md; commits 5492378, bac7885, 1560066"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-11",
+      "decision": "P4 validation PASS: full suite 3376 passed 0 failed at 6b6750e (clean shell); LLR-RH.5.4 met 0.443 s after the stat fast path; standing authorization",
+      "notes": "04-validation.md, evidence/p4-timing.transcript, increment-010-perf.md"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-11",
+      "decision": "P5 post-mortem written; open items B-124, B-125, B-126 (widened), B-127; standing authorization",
+      "notes": "05-postmortem.md"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-11",
+      "decision": "P6 docs approved; PR #22 squash-merged as d216d68 (single squashed commit by operator ruling: public repo, intermediate commits carry personal data and stay local); standing authorization",
+      "notes": "06-docs/; merge d216d68; batch record cites local SHAs by design"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-11",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: mapper/dev-flow-batches/2026-10-11-reqharness-batch/ (+ PDR/DDR in mapper/design/)"
+    }
+  ],
+  "standing_authorization": {
+    "autonomous": true,
+    "merge": true,
+    "asked_on": "2026-10-10",
+    "operator_words": {
+      "go_ahead": "ReqHarness decisions B-119/B-121/B-122/B-123 approved by the operator 2026-10-10/11; batch opened on their answer full + autónomo + merge",
+      "mode_and_authorization": "full + autónomo + merge (Recomendado), chosen by the operator on 2026-10-11 when asked how to open the ReqHarness batch",
+      "worker_model": "Kimi kimi-for-coding primary; DeepSeek for bounded units (balance limited); Claude for reviews",
+      "decision_recording": "not asked as a separate question; the recording obligation is unconditional"
+    },
+    "conditions": "Merge only after a final independent PR-level qa-reviewer pass over the whole diff comes back clean; a HIGH finding blocks regardless. TUI design changes need a prototype verdict from the operator first; the roles screen has one (B-123, variant B); every other new screen goes back to the operator as a prototype round before implementation."
+  },
+  "previous_batch": {
+    "batch_id": "2026-10-10-perf-batch",
+    "merge_commit": "c7d50e1",
+    "close_pr": "https://github.com/<owner>/mapper/pull/20",
+    "sync_pr": "https://github.com/<owner>/mapper/pull/21",
+    "closed_at": "2026-10-10",
+    "close_commit": "c00dfe9",
+    "obsidian_synced": true,
+    "archive": ".dev-flow/2026-10-10-perf-batch/decisions-log.json + state-snapshot-at-close.json"
+  },
+  "batch_history": {
+    "2026-08-26-repair-batch": {
+      "batch_id": "2026-08-26-repair-batch",
+      "merge_commit": "820e7e3",
+      "pr": "https://github.com/<owner>/mapper/pull/2",
+      "closed_at": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
+      "obsidian_synced": true
+    },
+    "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
+    "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
+    "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
+    "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
+    "2026-08-27-repair-batch-02": {
+      "batch_id": "2026-08-27-repair-batch-02",
+      "merge_commit": "7d04ba2",
+      "pr": "https://github.com/<owner>/mapper/pull/3",
+      "closed_at": "2026-08-27",
+      "close_commit": "d8a8536",
+      "obsidian_synced": true,
+      "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
+    }
+  },
+  "obsidian_synced": true,
+  "created_at": "2026-10-11T00:00:00"
+}

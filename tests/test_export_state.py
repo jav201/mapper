@@ -618,6 +618,58 @@ async def test_a_live_search_and_a_moved_cursor_do_not_reach_the_artifact(tmp_pa
 
 
 @pytest.mark.asyncio
+async def test_exporting_reads_pan_extent_through_its_own_module_global(tmp_path, monkeypatch):
+    """AT-088 (US-FX-005 / HLR-FX.5 / LLR-FX.5.1): the export's own read is guarded.
+
+    `exporting.py` reads the pan extent through its OWN module global
+    (`mapper.screens.map.exporting.pan_extent`), and that is a second reader
+    beside `panning.py`.  The suite's only patch site (`tests/test_en8.py`)
+    bites `panning.py`, so a re-bind of `exporting.py` to read
+    `layered.pan_extent` through another name would stay green everywhere — this
+    spy is what turns that re-bind RED.  The spy delegates to the real reader so
+    the export still runs, and the artifact's existence is asserted too: a spy
+    that recorded zero calls cannot be waved off as "the export never needed the
+    extent" if the artifact never appeared either (the positive control).
+    """
+    import mapper.screens.map.exporting as exporting
+    from mapper.app import MapperApp, MapScreen
+
+    calls: list[tuple] = []
+
+    def spy(graph, state):
+        calls.append((graph, state))
+        return pan_extent(graph, state)
+
+    # `raising=False`: under M-FX15 `exporting.py` drops this global (it reads
+    # `layered.pan_extent` instead), so the spy records zero calls and the
+    # assertion below fails on the count — the discriminating RED — rather than
+    # failing at install time on the missing attribute.
+    monkeypatch.setattr(exporting, "pan_extent", spy, raising=False)
+
+    app = MapperApp(tmp_path)
+    async with app.run_test(size=(118, 34)) as pilot:
+        await pilot.pause()
+        app.store.save("m", _wide_and_deep(3, 3))
+        app.push_screen(MapScreen("m"))
+        await pilot.pause()
+        screen = app.screen
+        path = screen.store.workspace / "m.svg"
+        if path.exists():
+            path.unlink()
+
+        await pilot.press("e")
+        await pilot.pause()
+
+    assert path.exists(), "the export produced no artifact; a zero count would be vacuous"
+    assert path.stat().st_size > 0
+    assert calls, (
+        "the export never read the pan extent through "
+        "mapper.screens.map.exporting.pan_extent; a re-bind to another reader "
+        "leaves this exact gap invisible to the suite"
+    )
+
+
+@pytest.mark.asyncio
 async def test_an_ordinary_map_still_exports(tmp_path):
     """The negative control for the budget.
 

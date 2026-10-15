@@ -816,12 +816,13 @@ class MapStore:
         drift from the loader it round-trips through.  Refuses when the parse
         raises, or when the reparsed graph differs from `graph` in the node-id
         set or the edge set as (parent, child) pairs.  The ROOT is deliberately
-        NOT compared (ruling R11 / B-117): `dump` writes edges before parentless
-        nodes and `parse` takes the first parentless node in text order, so a
-        forest's root drifts on reparse and a root comparison would refuse maps
-        that open today.  Edge MULTIPLICITY is compared (a sorted pair list,
-        not a set): `dump` deduplicates exact duplicate edges, so a set
-        comparison would accept a reparse that silently loses a row — refusing
+        NOT compared (ruling R11 / B-117): `dump` now writes the declared root
+        first when text order would elect another, so the root survives the
+        reparse, but a root comparison would still refuse maps that open today
+        whose in-memory root is not parentless.
+        Edge MULTIPLICITY is compared (a sorted pair list, not a set):
+        `dump` deduplicates exact duplicate edges, so a set comparison would
+        accept a reparse that silently loses a row — refusing
         duplicate edges is an intended superset of the loader (architect A5).
         """
         from .mermaid import ParseError, parse

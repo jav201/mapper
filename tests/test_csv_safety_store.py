@@ -186,7 +186,8 @@ def _write_legacy_pair(store: MapStore, map_id: str, mmd_text: str, graph: Graph
 def test_save_accepts_legacy_forest_after_edit(tmp_store):
     # LLR-CSV.1.3: a legacy forest (`a` / `b --> c`, two parentless nodes)
     # loads, accepts an edit, and saves — the round-trip check compares the
-    # node-id set and edge set only, NOT the root (ruling R11 / B-117).
+    # node-id set and edge set only, NOT the root (ruling R11 / B-117); the
+    # root itself survives the save because `dump` writes it first.
     legacy = Graph()
     legacy.add_node(_node("a", title="A"))
     legacy.add_node(_node("b", title="B"))
@@ -207,6 +208,7 @@ def test_save_accepts_legacy_forest_after_edit(tmp_store):
     assert {(e.parent_id, e.child_id) for e in reloaded.edges} == {
         (e.parent_id, e.child_id) for e in loaded.edges
     }
+    assert reloaded.root_id == loaded.root_id == "a"
     assert reloaded.nodes["d"].ficha.title == "D"
 
 

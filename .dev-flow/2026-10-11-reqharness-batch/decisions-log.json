@@ -1,0 +1,83 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-10-11",
+    "decision": "P0 approved (self-approved under the standing authorization): intake spike/intake.md (Kimi). Slice ruled: this batch = headless mapper/reqharness core (config, hash-chained role log, review events + normative digests + derived states, baselines + release rules, YAML I/O) + roles screen (matrix B, prototype verdict B-123) with the status band folded into it + the D12 proposal document; follow-ups: review/signing screen and baseline/release view (prototype rounds first), US canon + AT table extraction, generated views. O1-O9 ruled: config.yml + roles.yml (YAML stream, hash chain, admin-only) + reviews/ one file per event; status in the roles-screen footer; genesis copy; admin applies changes to others in one key, own changes pending; pending glyphs ◐ add / ◌ remove; D12 as a 06-docs proposal; reqharness/ at repo root, mapper --audit <repo>; baselines named + commit SHA under reqharness/baselines/, tags manual. Triggers A1-A3,B1,C1,C4,C6,C8,D1,E1,E2,F1 fired (E2: identity and authorization surface)"
+  },
+  {
+    "station": "ARQ",
+    "date": "2026-10-11",
+    "decision": "ARQ drafted (Kimi): design/design-proposal.md — headless mapper/reqharness package (config, hash-chained roles.yml, reviews/ one immutable file per event, derived states, baselines, release rules, audit CLI), roles screen matrix B with status band; scale spike RHS folded as R-SCALE (CSafeLoader, local parse cache, 0.5 s budget); to PDR with P2"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-11",
+    "decision": "P1 drafted (Kimi): US-RH-001..003, HLR-RH.1-9, 23 LLR-RH, AT-077..081, LED .1-.2; to P2 review (architect, qa, security)"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-11",
+    "decision": "P2 round 1 + PDR pre-review: iterate-to-refine (self-ruled). architect (Claude Opus): both ITERATE (policy outside the chain, canonical hashing breaks on real YAML, cache can change a verdict, one unentitled review blocks forever, pending has no home); qa (Claude Sonnet): REQ ITERATE, PDR approve-with-conditions (pending store, resolve keys, AT-080 vacuous, token census oracle); security (Claude Opus): ITERATE (F1 policy, F2 tail truncation, F3 backdating). Rulings R1-R14 in 02-review.md"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-11",
+    "decision": "P1 iteration 1 approved (self-approved): rulings R1-R14 applied by Kimi (LED .3-.17); to P2 round 2"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-11",
+    "decision": "P2 round 2: iterate-to-refine (self-ruled). architect (Claude Opus) iterate text-only (genesis self-hash, fork recovery vs verify, old-head backdating; batch drifting heavy); qa (Claude Sonnet) and security (Claude Opus) approve-with-conditions (git fsmonitor hardening G1, content recheck G3, residuals G4). Rulings R15-R26 trim scope (committer warning, reactivated class, review progression, fork-recovery UI deferred to B-124..B-126)"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-11",
+    "decision": "P1 iteration 2 approved (self-approved): rulings R15-R26 applied by Kimi (LED .18-.28); scope trimmed per the architect's weight assessment, deferred work in B-124..B-126; to P2 round 3 (targeted re-review)"
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-11",
+    "decision": "P2 approved with conditions after three rounds (self-approved): architect (Claude Opus), qa (Claude Sonnet), security (Claude Opus) all approve-with-conditions at round 3; R1-R27 applied (LED .3-.29+); scope trimmed (B-124..B-126)"
+  },
+  {
+    "station": "PDR",
+    "date": "2026-10-11",
+    "decision": "PDR sealed approved with conditions (PDR-2026-10-11-reqharness-batch, D1-D7); implementation conditions G1-G6/H1-H4 verified at the increment gates"
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-11",
+    "decision": "P3 increments RH1–RH6b complete with code reviews and follow-ups (increment-001..007); standing authorization",
+    "notes": "commits c00dfe9..0d10b7c; each increment code-reviewed, REQUEST-CHANGES findings fixed with RED proofs"
+  },
+  {
+    "station": "DDR",
+    "date": "2026-10-11",
+    "decision": "DDR approved with conditions (architect, qa-reviewer, security-reviewer); security BLOCK-UNTIL F1/F2 discharged; independent K3 re-check CLEARED-WITH-NITS, nits fixed; standing authorization",
+    "notes": "increment-008-ddr-fix.md, increment-009-gate-fix.md; commits 5492378, bac7885, 1560066"
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-11",
+    "decision": "P4 validation PASS: full suite 3376 passed 0 failed at 6b6750e (clean shell); LLR-RH.5.4 met 0.443 s after the stat fast path; standing authorization",
+    "notes": "04-validation.md, evidence/p4-timing.transcript, increment-010-perf.md"
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-11",
+    "decision": "P5 post-mortem written; open items B-124, B-125, B-126 (widened), B-127; standing authorization",
+    "notes": "05-postmortem.md"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-11",
+    "decision": "P6 docs approved; PR #22 squash-merged as d216d68 (single squashed commit by operator ruling: public repo, intermediate commits carry personal data and stay local); standing authorization",
+    "notes": "06-docs/; merge d216d68; batch record cites local SHAs by design"
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-11",
+    "decision": "synced-to-obsidian",
+    "notes": "vault: mapper/dev-flow-batches/2026-10-11-reqharness-batch/ (+ PDR/DDR in mapper/design/)"
+  }
+]
