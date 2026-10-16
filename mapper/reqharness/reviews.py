@@ -46,7 +46,11 @@ from mapper.reqharness.config import (
     check_time,
     load_documents,
 )
-from mapper.reqharness.records import ValidationError
+from mapper.reqharness.records import (
+    AlreadySignedError,
+    ReviewLimitError,
+    ValidationError,
+)
 
 REVIEW_DIR = "reviews"
 
@@ -69,7 +73,12 @@ _REVIEW_KEYS = {
     "roles_seq",
     "roles_hash",
     "note",
+    "owning_batch",
 }
+
+#: `owning_batch` is OPTIONAL (F1): a record written before it existed lacks
+#: the field and loads exactly as today (legacy) — it is never required.
+_REVIEW_REQUIRED_KEYS = _REVIEW_KEYS - {"owning_batch"}
 
 
 @dataclass(frozen=True)
@@ -89,6 +98,7 @@ class ReviewEvent:
     roles_seq: int
     roles_hash: str
     note: str
+    owning_batch: str = ""
 
 
 @dataclass(frozen=True)
@@ -132,7 +142,7 @@ def scan_event_dir(repo: str | Path, subdir: str) -> tuple[list[str], list[str]]
             f"{REQHARNESS_DIR}/{subdir}: cannot read ({exc})"
         ) from exc
     if len(names) > LIMIT_REVIEW_FILE_COUNT:
-        raise ValidationError(
+        raise ReviewLimitError(
             f"{REQHARNESS_DIR}/{subdir}: too many review files "
             f"({len(names)} > {LIMIT_REVIEW_FILE_COUNT} limit)"
         )
@@ -153,6 +163,7 @@ def record_review(
     now: str,
     head: tuple[int, str],
     seq: int,
+    owning_batch: str = "",
 ) -> Path:
     """Write ONE review event, content-named and exclusively created (R8).
 
@@ -160,7 +171,9 @@ def record_review(
     parameter (M-FN1).  *head* is the chain head the review is bound to
     (`verify_chain(repo).head`).  The free-text fields are type-checked
     before anything is written (L3): a non-str verdict, reviewer or object
-    id is a named refusal, never a coerced file."""
+    id is a named refusal, never a coerced file.  *owning_batch* is the
+    object's owning batch at sign time (F1) and is stored only when
+    non-empty, so a record written without it loads exactly as today."""
     if kind not in KINDS:
         raise ValidationError(
             f"record_review: kind must be one of {sorted(KINDS)}, got {kind!r}"
@@ -170,22 +183,24 @@ def record_review(
     object_id = check_str(object_id, where="record_review", field="object")
     verdict = check_str(verdict, where="record_review", field="verdict")
     reviewer = check_str(reviewer, where="record_review", field="reviewer")
-    body = nfc(
-        {
-            "seq": seq,
-            "time": when,
-            "object": object_id,
-            "class": class_id,
-            "normative_digest": normative_digest,
-            "informative_digest": informative_digest,
-            "verdict": verdict,
-            "reviewer": reviewer,
-            "kind": kind,
-            "roles_seq": head[0],
-            "roles_hash": head[1],
-            "note": note,
-        }
-    )
+    owning_batch = check_str(owning_batch, where="record_review", field="owning_batch")
+    body = {
+        "seq": seq,
+        "time": when,
+        "object": object_id,
+        "class": class_id,
+        "normative_digest": normative_digest,
+        "informative_digest": informative_digest,
+        "verdict": verdict,
+        "reviewer": reviewer,
+        "kind": kind,
+        "roles_seq": head[0],
+        "roles_hash": head[1],
+        "note": note,
+    }
+    if owning_batch:
+        body["owning_batch"] = owning_batch
+    body = nfc(body)
     digest = canonical_digest(body)
     name = f"{when[0:4]}{when[5:7]}{when[8:10]}-{digest[:8]}.yml"
     where = f"{REQHARNESS_DIR}/{REVIEW_DIR}/{name}"
@@ -197,7 +212,7 @@ def record_review(
         with resolved.open("x", encoding="utf-8", newline="\n") as handle:
             handle.write(yaml.safe_dump(body, sort_keys=False, allow_unicode=True))
     except FileExistsError:
-        raise ValidationError(
+        raise AlreadySignedError(
             f"{where}: review event already exists (exclusive create, R8)"
         ) from None
     return resolved
@@ -220,7 +235,7 @@ def _validate_review(document: Any, *, name: str, where: str) -> ReviewEvent:
     unknown = sorted(str(k) for k in keys - _REVIEW_KEYS)
     if unknown:
         raise ValidationError(f"{where}: unknown key(s): {', '.join(unknown)}")
-    missing = sorted(_REVIEW_KEYS - keys)
+    missing = sorted(_REVIEW_REQUIRED_KEYS - keys)
     if missing:
         raise ValidationError(f"{where}: missing key(s): {', '.join(missing)}")
     kind = check_str(document["kind"], where=where, field="kind")
@@ -244,6 +259,11 @@ def _validate_review(document: Any, *, name: str, where: str) -> ReviewEvent:
         roles_seq=check_int(document["roles_seq"], where=where, field="roles_seq"),
         roles_hash=check_str(document["roles_hash"], where=where, field="roles_hash"),
         note=check_str(document["note"], where=where, field="note"),
+        # NFC at read (RS1a security re-check L-b): the derive comparison
+        # against the NFC canon cell is then symmetric.
+        owning_batch=nfc(check_str(
+            document.get("owning_batch", ""), where=where, field="owning_batch"
+        )),
     )
 
 

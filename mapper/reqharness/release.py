@@ -49,6 +49,7 @@ RULE_CHAIN = "chain_verified"
 RULE_POLICY = "policy_verified"
 RULE_SIGNERS = "signers_in_force"
 RULE_ALL_REVIEWED = "all_active_reviewed"
+RULE_AUTHORS_DECLARED = "authors_declared"
 
 #: The mandatory three — config may ADD, never remove (R1).
 MANDATORY_RULES = (RULE_CHAIN, RULE_POLICY, RULE_SIGNERS)
@@ -106,11 +107,16 @@ def evaluate(config: Config, report: ChainReport, derivation: Derivation) -> Ver
         for state in derivation.states.values()
         if state != STATE_RETIRED  # retired objects are excluded (R5)
     )
+    # `authors_declared` (HLR-RS.5 / F2): fails when any ACTIVE object's
+    # owning batch is blank or absent from the config `authors` map — the
+    # derivation reports those objects in `authors_missing` by id.
+    authors_declared = not derivation.authors_missing
     known = {
         RULE_CHAIN: report.ok,
         RULE_POLICY: report.policy_ok,
         RULE_SIGNERS: derivation.verifiable,
         RULE_ALL_REVIEWED: active_reviewed,
+        RULE_AUTHORS_DECLARED: authors_declared,
     }
     rules: list[tuple[str, bool]] = [(rule, known[rule]) for rule in MANDATORY_RULES]
     for declared in config.release_rules:
@@ -136,6 +142,7 @@ __all__ = [
     "MANDATORY_RULES",
     "REASON_UNREVIEWED",
     "RULE_ALL_REVIEWED",
+    "RULE_AUTHORS_DECLARED",
     "RULE_CHAIN",
     "RULE_POLICY",
     "RULE_SIGNERS",

@@ -1,0 +1,70 @@
+# RS2 GREEN gate -- final tree, one file at a time, env -u NO_COLOR -u TERM, timeout 900
+== tests/test_review_screen.py
+33 passed in 168.29s (0:02:48)
+== tests/test_roles_screen.py
+22 passed in 59.80s
+== tests/test_fixes_roles_thread.py
+17 passed in 24.20s
+== tests/test_keymap.py
+123 passed in 0.36s
+== tests/test_key_dispatch.py
+34 passed in 18.85s
+== tests/test_help_scope.py
+52 passed in 61.30s (0:01:01)
+== tests/test_inc9.py
+44 passed in 12.25s
+== tests/test_inc9c.py
+61 passed in 25.02s
+== tests/test_inc9e.py
+17 passed in 8.13s
+== tests/test_en5.py
+39 passed in 2.17s
+== tests/test_en8.py
+20 passed in 9.20s
+== tests/test_mod_parity.py
+3 passed in 10.85s
+== tests/test_darkside_census.py
+26 passed in 2.68s
+== tests/test_app_imports_used.py
+44 passed in 0.28s
+== tests/test_a3_census.py
+15 passed, 4 warnings in 11.70s
+== tests/test_repair_map_truth.py
+44 passed in 0.24s
+== tests/test_mod_structure.py
+10 passed in 4.79s
+== tests/test_mod_compat.py
+32 passed, 6 warnings in 28.27s
+== tests/test_no_operator_paths.py
+2 passed in 1.90s
+== tests/test_mod_deps.py
+13 passed in 11.75s
+== tests/test_arch_osopen_callers.py
+5 passed in 1.40s
+== tests/test_requirements_canon.py
+3 passed in 0.13s
+== tests/test_reqharness_baseline.py
+6 passed in 27.97s
+== tests/test_reqharness_cache_fastpath.py
+5 passed in 0.63s
+== tests/test_reqharness_chain.py
+21 passed in 1.98s
+== tests/test_reqharness_config.py
+11 passed, 1 warning in 4.39s
+== tests/test_reqharness_identity.py
+11 passed in 16.68s
+== tests/test_reqharness_modgraph.py
+2 passed in 0.60s
+== tests/test_reqharness_registry.py
+26 passed in 10.65s
+== tests/test_reqharness_release.py
+14 passed in 32.31s
+== tests/test_reqharness_signing.py
+18 passed, 1 warning in 3.22s
+== tests/test_reqharness_yaml_census.py
+2 passed in 0.62s
+== tests/test_legend_design.py
+60 passed in 578.75s (0:09:38)
+== ruff check (touched python files)
+All checks passed!
+DONE

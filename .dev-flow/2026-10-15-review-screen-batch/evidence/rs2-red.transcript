@@ -1,0 +1,320 @@
+# RS2 RED proofs (mutate, node(s) RED, restore, sha256 equal, GREEN)
+# paths are repo-relative; M-RS17 is RED by a collection ERROR (the keymap import KeyError) -- the review scope group is missing from GROUP_SCOPE so nothing imports.
+
+### M-RS1 — mapper/screens/review.py — test_at_090_review_screen_opens_from_home_and_paints_the_registry
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_090_review_screen_opens_from_home_and_paints_the_registry[118]
+FAILED tests/test_review_screen.py::test_at_090_review_screen_opens_from_home_and_paints_the_registry[87]
+2 failed in 3.68s
+GREEN:
+exit=0
+2 passed in 6.51s
+
+### M-RS2 — mapper/screens/review.py — test_at_091_needs_action_filter_preset_lists_only_open_objects
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_091_needs_action_filter_preset_lists_only_open_objects
+1 failed in 1.71s
+GREEN:
+exit=0
+1 passed in 1.56s
+
+### M-RS3 — mapper/screens/review.py — test_at_096_screen_paints_file_derived_text_through_text_sinks_only
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_096_screen_paints_file_derived_text_through_text_sinks_only[118]
+FAILED tests/test_review_screen.py::test_at_096_screen_paints_file_derived_text_through_text_sinks_only[87]
+2 failed in 2.81s
+GREEN:
+exit=0
+2 passed in 2.24s
+
+### M-RS4 — mapper/screens/review.py — test_at_093_b_shows_digest_and_head_and_enter_signs_through_sign_review
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_093_b_shows_digest_and_head_and_enter_signs_through_sign_review
+1 failed in 2.07s
+GREEN:
+exit=0
+1 passed in 2.20s
+
+### M-RS9 — mapper/screens/review.py — test_at_092_detail_pane_shows_history_digest_verdicts_and_informative_badge
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_092_detail_pane_shows_history_digest_verdicts_and_informative_badge
+1 failed in 1.84s
+GREEN:
+exit=0
+1 passed in 2.02s
+
+### M-RS10 — mapper/screens/review.py — test_at_092_detail_pane_shows_history_digest_verdicts_and_informative_badge
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_092_detail_pane_shows_history_digest_verdicts_and_informative_badge
+1 failed in 2.13s
+GREEN:
+exit=0
+1 passed in 3.88s
+
+### M-RS11 — mapper/screens/review.py — test_at_096_screen_paints_file_derived_text_through_text_sinks_only
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_096_screen_paints_file_derived_text_through_text_sinks_only[118]
+FAILED tests/test_review_screen.py::test_at_096_screen_paints_file_derived_text_through_text_sinks_only[87]
+2 failed in 2.53s
+GREEN:
+exit=0
+2 passed in 2.43s
+
+### M-RS12 — mapper/screens/review.py — test_at_107_worker_runs_all_disk_and_git_work_off_thread
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_107_worker_runs_all_disk_and_git_work_off_thread
+1 failed in 1.89s
+GREEN:
+exit=0
+1 passed in 1.84s
+
+### M-RS13 — mapper/screens/review.py — test_at_107_late_snapshot_on_a_popped_screen_is_dropped
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_107_late_snapshot_on_a_popped_screen_is_dropped
+1 failed in 1.78s
+GREEN:
+exit=0
+1 passed in 1.92s
+
+### M-RS15 — mapper/screens/review.py — test_at_098_cold_enter_does_nothing
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_098_cold_enter_does_nothing - Ass...
+1 failed in 2.17s
+GREEN:
+exit=0
+1 passed in 2.68s
+
+### M-RS16 — mapper/keymap.py — test_at_097_review_scope_binds_through_the_seat_and_home_opens_by_v
+restore sha256 equal: True (926f027ccf969f026d22bb68c38cf8279b38e5116a42f578b43b105c440d6c8d)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_097_review_scope_binds_through_the_seat_and_home_opens_by_v
+1 failed in 2.89s
+GREEN:
+exit=0
+1 passed in 4.44s
+
+### M-RS17 — mapper/keymap.py — test_at_097_review_scope_binds_through_the_seat_and_home_opens_by_v
+restore sha256 equal: True (926f027ccf969f026d22bb68c38cf8279b38e5116a42f578b43b105c440d6c8d)
+RED:
+exit=4
+ERROR tests/test_review_screen.py - KeyError: 'review'
+1 error in 0.42s
+GREEN:
+exit=0
+1 passed in 1.69s
+
+### M-RS20 — mapper/screens/review.py — test_at_099_two_thousand_objects_scroll_with_the_cursor_in_view
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_099_two_thousand_objects_scroll_with_the_cursor_in_view
+1 failed in 99.82s (0:01:39)
+GREEN:
+exit=0
+1 passed in 105.77s (0:01:45)
+
+### M-RS21 — mapper/screens/review.py — test_at_100_escape_or_q_cancels_the_arm_and_leaves_only_when_not_armed
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_100_escape_or_q_cancels_the_arm_and_leaves_only_when_not_armed
+1 failed in 1.71s
+GREEN:
+exit=0
+1 passed in 2.29s
+
+### M-RS25 — mapper/screens/review.py — test_at_101_signing_moves_the_cursor_to_the_next_row
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_101_signing_moves_the_cursor_to_the_next_row
+1 failed in 2.69s
+GREEN:
+exit=0
+1 passed in 2.86s
+
+### M-RS26 — mapper/screens/review.py — test_at_098_cold_enter_does_nothing
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_098_cold_enter_does_nothing - Ass...
+1 failed in 2.03s
+GREEN:
+exit=0
+1 passed in 1.72s
+
+### M-RS27 — mapper/screens/review.py — test_at_099_render_line_count_constant_across_n
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_099_render_line_count_constant_across_n
+1 failed in 3.15s
+GREEN:
+exit=0
+1 passed in 4.85s
+
+### M-RS28 — mapper/screens/review.py — test_at_106_second_enter_while_the_sign_worker_runs_is_inert
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_106_second_enter_while_the_sign_worker_runs_is_inert
+1 failed in 2.69s
+GREEN:
+exit=0
+1 passed in 2.08s
+
+### M-RS30 — mapper/screens/review.py — test_at_105_screen_paints_no_string_outside_the_copy_table_or_prototype
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_105_screen_paints_no_string_outside_the_copy_table_or_prototype
+1 failed in 0.90s
+GREEN:
+exit=0
+1 passed in 0.71s
+
+### M-RS31 — mapper/screens/review.py — test_at_103_the_painted_armed_hint_elides_the_middle_of_a_long_object test_at_103_armed_hint_elides_the_middle_and_keeps_the_tail test_at_103_elide_middle_keeps_both_ends_within_the_cell_budget
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_103_the_painted_armed_hint_elides_the_middle_of_a_long_object
+FAILED tests/test_review_screen.py::test_at_103_elide_middle_keeps_both_ends_within_the_cell_budget
+2 failed, 1 passed in 2.15s
+GREEN:
+exit=0
+3 passed in 2.44s
+
+### M-RS32 — mapper/screens/review.py — test_at_104_the_painted_armed_hint_and_row_carry_the_accent_token
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_104_the_painted_armed_hint_and_row_carry_the_accent_token
+1 failed in 2.15s
+GREEN:
+exit=0
+1 passed in 2.87s
+
+### M-RS33 — mapper/screens/review.py — test_at_093_b_down_enter_writes_nothing
+restore sha256 equal: True (0bc8344428c2c1d889434cccbf525e126ce1923971e1ae1d3ec2e6e2901ce63f)
+RED:
+exit=1
+FAILED tests/test_review_screen.py::test_at_093_b_down_enter_writes_nothing
+1 failed in 2.10s
+GREEN:
+exit=0
+1 passed in 2.06s
+
+# RS2-FIX review follow-up RED proofs (code/security F1-F3, F5; UX U1-U5; notices)
+# Workflow per fix: revert the product change -> RED -> restore from the saved
+# green copy -> sha256 equal -> GREEN.  Backups were under
+# /c/Users/<user>/AppData/Local/Temp/opencode/rs2-red/ and are deleted after green.
+# Green sha256: review.py a2e6f7c41e795127511bb9b595f543c8311df14cbe56e85905dcdbd4a34e7d19
+#               keymap.py 99ca57384ee50fc5d7a4730ad4c3cfe115af02fd02dc8f54f57ff7fa71fe698d
+
+### F1 — sign result dropped after resume (_signing stuck) — test_f1_sign_result_survives_a_resume_and_clears_signing
+restore sha256 equal: True (a2e6f7c41e795127511bb9b595f543c8311df14cbe56e85905dcdbd4a34e7d19)
+RED: (revert: gen check moved back before the sign-result detection)
+exit=1
+FAILED tests/test_review_screen.py::test_f1_sign_result_survives_a_resume_and_clears_signing - AssertionError: assert not True (screen._signing stayed True)
+GREEN: exit=0  1 passed
+
+### F2 — non-refusal exception in a worker (exit_on_error / ERROR handler / OSError catch) — test_f2_sign_worker_write_failure_refuses_and_stays_alive + test_f2_load_worker_failure_refuses_and_stays_alive
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: drop exit_on_error=False on both workers, the WorkerState.ERROR branch, and the OSError catch in _sign_worker)
+exit=1
+FAILED tests/test_review_screen.py::test_f2_sign_worker_write_failure_refuses_and_stays_alive
+FAILED tests/test_review_screen.py::test_f2_load_worker_failure_refuses_and_stays_alive
+GREEN: exit=0  2 passed
+
+### F3 — applying a snapshot cancels the arm — test_f3_applying_a_snapshot_cancels_the_arm
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: remove `self._armed = None` from the load branch)
+exit=1
+FAILED tests/test_review_screen.py::test_f3_applying_a_snapshot_cancels_the_arm - AssertionError (screen._armed stayed armed)
+GREEN: exit=0  1 passed
+
+### F5 — refusals built from the _REFUSE_* constants (AT-105 literal census) — test_at_105_screen_paints_no_string_outside_the_copy_table_or_prototype
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: one refusal re-spelled inline `_fit_refusal("cannot sign: ", obj_id, " is retired", …)`)
+exit=1
+FAILED tests/test_review_screen.py::test_at_105_screen_paints_no_string_outside_the_copy_table_or_prototype - AssertionError: ([' is retired', 'cannot sign: '])
+GREEN: exit=0  1 passed
+
+### U1/U2 — list cell bounded to the column width (1-cell gap) — test_u1_long_object_id_truncates_with_ellipsis_in_the_list + test_u2_list_cells_are_bounded_by_the_column_width
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: remove the `_cap_line(parts, width)` cap in _list_row_text)
+exit=1
+FAILED tests/test_review_screen.py::test_u1_long_object_id_truncates_with_ellipsis_in_the_list[118]
+FAILED tests/test_review_screen.py::test_u2_list_cells_are_bounded_by_the_column_width - AssertionError (row cell_len 41 > width-1 40)
+GREEN: exit=0  2 passed
+
+### U3 — honest key bar (b = mark reviewed; enter only while armed; hidden read-only) — test_u3_read_only_key_bar_hides_b_and_enter + test_at_097_review_scope_binds_through_the_seat_and_home_opens_by_v
+restore sha256 equal: True (a2e6f7c4… / 99ca5738…)
+RED: (revert: keymap labels back to "confirm to sign"/"confirm" and the `_bar_groups` enter-hide)
+exit=1
+FAILED tests/test_review_screen.py::test_u3_read_only_key_bar_hides_b_and_enter
+FAILED tests/test_review_screen.py::test_at_097_review_scope_binds_through_the_seat_and_home_opens_by_v - AssertionError ('b mark reviewed' not found; '↵ confirm' still advertised)
+GREEN: exit=0  2 passed
+
+### U4 — loading band paints the prototype heading — test_u4_loading_band_shows_the_prototype_heading
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: remove the on_mount loading band)
+exit=1
+FAILED tests/test_review_screen.py::test_u4_loading_band_shows_the_prototype_heading - AssertionError ('release readiness' not in '')
+GREEN: exit=0  1 passed
+
+### U5 — short object id intact at 87 (head yields before the object) — test_u5_short_object_id_stays_intact_at_87
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: restore the fixed 6-hex-head _fit_armed)
+exit=1
+FAILED tests/test_review_screen.py::test_u5_short_object_id_stays_intact_at_87 - AssertionError ('sign HLR-RH.1 · digest' not in 'next ▸ sign H…1 · digest …')
+GREEN: exit=0  1 passed
+
+### Notices — legend one row, singular "object", b inert on empty canon — test_notice_legend_stays_on_one_row_at_87 + test_notice_registry_counts_singular_object + test_notice_b_on_empty_canon_is_inert
+restore sha256 equal: True (a2e6f7c4…)
+RED: (revert: legend no width cap, "objects" hard-coded, no empty-canon inert branch)
+exit=1
+FAILED tests/test_review_screen.py::test_notice_legend_stays_on_one_row_at_87
+FAILED tests/test_review_screen.py::test_notice_registry_counts_singular_object
+FAILED tests/test_review_screen.py::test_notice_b_on_empty_canon_is_inert - AssertionError ('cannot sign' in 'next ▸ cannot sign: unknown object ')
+GREEN: exit=0  3 passed
+
+# DDR-fix RED proofs (2026-10-16) — C2 + Q2.  Workflow per fix: revert the product
+# change -> node RED -> restore from the saved green copy -> sha256 equal -> GREEN.
+
+### C2 — entitled_to_sign gains the F6 unapproved_config arm — test_entitled_to_sign_refuses_an_unapproved_config
+restore sha256 equal: True (7392b5c51f4960030df8d31f0c31de619e514edb96c1edafc61357ead8b714ba)
+RED: (revert: remove the `_unapproved_config` early check from `entitled_to_sign`)
+exit=1
+FAILED tests/test_reqharness_signing.py::test_entitled_to_sign_refuses_an_unapproved_config - AssertionError: assert (False, 'tampered') == (False, 'unapproved_config')
+GREEN: exit=0  1 passed
+
+### Q2 — hostile armed hint carries no raw control/markup — test_q2_armed_hint_carries_no_raw_control_or_markup
+restore sha256 equal: True (a9b75278382b123420619833c5b4a5d66a7dc58f57fd39b4e3fc87d20bcdab1f)
+RED: (revert: `_coerced` made a no-op AND `darkside.plain` removed from `_hint_text` —
+      the reviewer's "bypass _coerced in _elide_middle" is not alone sufficient, because
+      `_take_cells` also coerces through `_coerced`, so the coercion chain is no-oped here)
+exit=1
+FAILED tests/test_review_screen.py::test_q2_armed_hint_carries_no_raw_control_or_markup - AssertionError: assert '\x1b' not in 'next ▸ sign HLR-EVIL\x1b\u202e\u200b…'
+GREEN: exit=0  1 passed

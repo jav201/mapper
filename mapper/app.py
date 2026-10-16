@@ -35,6 +35,7 @@ from .screens.prompt import (
 )
 from .screens.repo import RepoScreen
 from .screens.roles import RolesScreen
+from .screens.review import ReviewScreen
 from .search import SearchIndex
 from .store import MapStore
 from .views.layered import MAX_RENDER_NODES, pan_extent
@@ -56,6 +57,7 @@ __all__ = [
     "PlugRepoScreen",
     "RepoScreen",
     "RolesScreen",
+    "ReviewScreen",
     "SEARCH_ACTIVE_LABEL",
     "SEARCH_COUNT_SUBJECT",
     "SEARCH_SUSPENDED_NOTICE",
@@ -122,7 +124,7 @@ class MapperApp(App):
 
     MapScreen, PlugRepoScreen { layout: vertical; }
     RepoScreen { layout: vertical; }
-    RolesScreen { layout: vertical; }
+    RolesScreen, ReviewScreen { layout: vertical; }
     #roles-body { height: 1fr; }
     #repo-dashboard { height: 1fr; }
     #repo-sidebar { width: 30; background: #121212; padding: 1 1; }

@@ -43,6 +43,7 @@ from mapper.screens.map.screen import MapScreen
 from mapper.screens.plug_repo import PlugRepoScreen
 from mapper.screens.prompt import _PromptScreen, _TemplateScreen
 from mapper.screens.roles import RolesScreen
+from mapper.screens.review import ReviewScreen
 from mapper.screens.settings import SettingsScreen
 from mapper.store import TEMPLATES
 from mapper.widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
@@ -384,6 +385,9 @@ class HomeScreen(Screen):
         # ReqHarness batch `2026-10-11-reqharness-batch` (LLR-RH.8.1): the
         # roles screen's home door — the row this increment owns.
         "R": "manages team roles",
+        # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the
+        # review screen's home door.
+        "v": "opens the review screen",
     }
 
     def _empty_text(self) -> Text:
@@ -444,6 +448,9 @@ class HomeScreen(Screen):
 
     def action_roles(self) -> None:
         self.app.push_screen(RolesScreen())
+
+    def action_review(self) -> None:
+        self.app.push_screen(ReviewScreen())
 
     def _open_map(self, name: str | None) -> None:
         if not name:

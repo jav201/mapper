@@ -1,0 +1,211 @@
+### M-RS5 — tests/test_reqharness_signing.py::test_sign_review_refuses_when_the_object_digest_head_or_role_moved
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_refuses_when_the_object_digest_head_or_role_moved
+1 failed in 0.37s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.51s
+
+### M-RS6 — tests/test_reqharness_signing.py::test_entitled_to_sign_requires_the_designated_role_at_the_current_head
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_entitled_to_sign_requires_the_designated_role_at_the_current_head
+1 failed in 0.49s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.44s
+
+### M-RS7 — tests/test_reqharness_signing.py::test_entitled_to_sign_truth_table_includes_retired_and_class_undeclared
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_entitled_to_sign_truth_table_includes_retired_and_class_undeclared
+1 failed in 0.51s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.38s
+
+### M-RS8 — tests/test_reqharness_signing.py::test_entitled_to_sign_truth_table_chain_arms
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_entitled_to_sign_truth_table_chain_arms
+1 failed in 0.54s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.39s
+
+### M-RS14 — tests/test_reqharness_signing.py::test_entitled_to_sign_truth_table_identity_and_object_arms
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_entitled_to_sign_truth_table_identity_and_object_arms
+1 failed in 0.45s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.31s
+
+### M-RS19 — tests/test_reqharness_signing.py::test_entitled_to_sign_refuses_an_author_of_the_object_batch
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_entitled_to_sign_refuses_an_author_of_the_object_batch
+1 failed in 0.41s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.32s
+
+### M-RS22 — tests/test_reqharness_signing.py::test_sign_review_refuses_already_signed_identical_content
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_refuses_already_signed_identical_content
+1 failed in 0.45s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.28s
+
+### M-RS29 — tests/test_reqharness_signing.py::test_sign_review_refuses_an_unapproved_config
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_refuses_an_unapproved_config
+1 failed in 0.55s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.32s
+
+### M-RS23 — tests/test_reqharness_signing.py::test_sign_review_has_no_cli_or_entry_point_exposure
+restore sha256 equal: True
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_has_no_cli_or_entry_point_exposure
+1 failed in 0.37s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.60s
+
+# ---------------------------------------------------------------------------
+# Code-review follow-up (RS1b code review, REQUEST-CHANGES, BLOCK-UNTIL F1/F2)
+# ---------------------------------------------------------------------------
+
+### F1 (single snapshot / pure `_entitlement` helper) — tests/test_reqharness_signing.py::test_sign_review_loads_config_chain_and_canon_exactly_once
+mutant: re-introduce the second load (sign_review calls `entitled_to_sign(repo, …)` instead of `_entitlement(report, config, canon, viewer, object_id)`)
+restore sha256 equal: True (signing.py 765a6ab0…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_loads_config_chain_and_canon_exactly_once
+E       AssertionError: assert {'canon': 2, 'config': 2, 'verify': 2} == {'canon': 1, 'config': 1, 'verify': 1}
+1 failed in 0.43s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.41s
+
+### F2 (exposure census catches every import form) — tests/test_reqharness_signing.py::test_signing_import_forms_are_all_detected
+mutant: drop the `from mapper.reqharness import signing` (package-qualified) branch from `_imports_signing`
+restore sha256 equal: True (test_reqharness_signing.py 6126c70e…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_signing_import_forms_are_all_detected
+E       AssertionError: from mapper.reqharness import signing
+1 failed in 0.48s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.30s
+
+### F3 (`confirm_owning_batch` required keyword) — tests/test_reqharness_signing.py::test_sign_review_confirm_owning_batch_is_a_required_keyword
+mutant: restore the `= None` default on `confirm_owning_batch`
+restore sha256 equal: True (signing.py 765a6ab0…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_confirm_owning_batch_is_a_required_keyword
+E           mapper.reqharness.records.SigningRefused: cannot sign: the object changed since b
+1 failed in 0.52s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.36s
+
+### F4 (documented `moved_object`-first precedence) — tests/test_reqharness_signing.py::test_sign_review_refuses_when_the_object_digest_head_or_role_moved
+mutant: reorder the re-checks so `moved_digest` precedes `moved_object`
+restore sha256 equal: True (signing.py 765a6ab0…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_refuses_when_the_object_digest_head_or_role_moved
+E       AssertionError: assert 'moved_digest' == 'moved_object'
+1 failed in 0.68s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.53s
+
+### F5 (two signers, duplicate seq tolerated) — tests/test_reqharness_signing.py::test_two_signers_different_content_both_write_and_duplicate_seq_is_tolerated
+mutant: `record_review` rejects a duplicate `seq` (violates "nothing reads seq")
+restore sha256 equal: True (reviews.py d76aade8…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_two_signers_different_content_both_write_and_duplicate_seq_is_tolerated
+E           mapper.reqharness.records.SigningRefused: cannot sign: record_review: duplicate seq 1 (rejected)
+1 failed in 0.47s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.59s
+
+### F6 (typed refusals, mapped by type not text) — tests/test_reqharness_signing.py::test_sign_review_maps_typed_review_errors_not_message_text
+mutant: revert `signing.py` to the message-text classification ("too many review files" / "exclusive create")
+restore sha256 equal: True (signing.py 765a6ab0…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_sign_review_maps_typed_review_errors_not_message_text
+E       AssertionError: assert 'no_registry' == 'already_signed'
+1 failed in 0.44s
+GREEN:
+exit=0
+.                                                                        [100%]
+1 passed in 0.45s
+
+
+### F2-fix2 (resolve every relative import from the file's package + dynamic import string literals) — tests/test_reqharness_signing.py::test_signing_import_forms_are_all_detected
+mutant: revert `_imports_signing` to the old logic (relative forms only when the file sits directly in `mapper/reqharness/`; no string-literal arm)
+restore sha256 equal: True (test_reqharness_signing.py 1f323800…)
+RED:
+exit=1
+=========================== short test summary info ===========================
+FAILED tests/test_reqharness_signing.py::test_signing_import_forms_are_all_detected
+E       AssertionError: from .reqharness import signing
+E       assert False
+E        +  where False = _imports_signing('from .reqharness import signing\n', package='mapper')
+1 failed in 0.52s
+GREEN:
+exit=0
+18 passed in 2.92s
