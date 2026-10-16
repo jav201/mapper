@@ -144,6 +144,17 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     # cursor, `space` propose, and `q`/`esc` back.  Increment RH6b adds the
     # admin `a`/`r` pending-resolution rows (LLR-RH.8.6).
     ("home", "R"): ("roles", "roles", "R", "doors", False),
+    # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4, increment
+    # RS2): the review door on home and the review scope — the object cursor,
+    # `4` filter, `b` arm, `enter` confirm, and `q`/`esc` back.
+    ("home", "v"): ("review", "review", "v", "doors", False),
+    ("review", "4"): ("filter", "cycle filter", "4", "review", False),
+    ("review", "b"): ("sign", "mark reviewed", "b", "review", False),
+    ("review", "down"): ("next_object", "next object", "↓", "review", False),
+    ("review", "enter"): ("confirm", "sign", "↵", "review", False),
+    ("review", "escape"): ("home", "back", "esc", "review-leave", False),
+    ("review", "q"): ("home", "back", "q", "review-leave", False),
+    ("review", "up"): ("prev_object", "previous object", "↑", "review", False),
     ("roles", "a"): ("approve", "approve", "a", "roles", False),
     ("roles", "r"): ("reject", "reject", "r", "roles", False),
     ("roles", "escape"): ("home", "back", "esc", "roles-leave", False),

@@ -249,9 +249,10 @@ def _check_list(value: Any, *, where: str, field: str) -> list[Any]:
 
 
 def _check_exact_keys(
-    mapping: Any, expected: set[str], *, where: str
+    mapping: Any, expected: set[str], *, where: str, optional: set[str] = frozenset()
 ) -> dict[str, Any]:
-    """Unknown keys rejected, missing keys rejected (LLR-RH.1.3)."""
+    """Unknown keys rejected, missing keys rejected (LLR-RH.1.3).  Keys in
+    *optional* are allowed but never required (the config `authors` map)."""
     if not isinstance(mapping, dict):
         raise ValidationError(
             f"{where}: expected a mapping, got {type(mapping).__name__} "
@@ -261,7 +262,7 @@ def _check_exact_keys(
     unknown = sorted(str(k) for k in keys - expected)
     if unknown:
         raise ValidationError(f"{where}: unknown key(s): {', '.join(unknown)}")
-    missing = sorted(expected - keys)
+    missing = sorted((expected - optional) - keys)
     if missing:
         raise ValidationError(f"{where}: missing key(s): {', '.join(missing)}")
     return mapping
@@ -274,7 +275,8 @@ def _check_str_list(value: Any, *, where: str, field: str) -> tuple[str, ...]:
     return tuple(items)
 
 
-_CONFIG_KEYS = {"version", "people", "roles", "classes", "release_rules"}
+_CONFIG_KEYS = {"version", "people", "roles", "classes", "release_rules", "authors"}
+_OPTIONAL_CONFIG_KEYS = {"authors"}
 _PERSON_KEYS = {"id", "name", "email_sha256"}
 _CLASS_KEYS = {"id", "reviewer_role", "normative_fields", "informative_fields"}
 _ID_KEYS = {"id"}
@@ -283,8 +285,13 @@ _ID_KEYS = {"id"}
 def validate_config(document: Any, *, where: str = f"{REQHARNESS_DIR}/{CONFIG_NAME}") -> Config:
     """The typed schema over a config document, cross-checks included:
     every class's `reviewer_role` must be a declared role, and normative and
-    informative field sets must be disjoint lists of strings (R5)."""
-    document = _check_exact_keys(document, _CONFIG_KEYS, where=where)
+    informative field sets must be disjoint lists of strings (R5).  The
+    optional `authors` map (HLR-RS.5) is validated against `people`, and a
+    duplicate person id / duplicate `email_sha256` is refused by name (the
+    m2 ambiguity gap)."""
+    document = _check_exact_keys(
+        document, _CONFIG_KEYS, where=where, optional=_OPTIONAL_CONFIG_KEYS
+    )
     version = check_str(document["version"], where=where, field="version")
 
     people = []
@@ -299,6 +306,43 @@ def validate_config(document: Any, *, where: str = f"{REQHARNESS_DIR}/{CONFIG_NA
                 ),
             )
         )
+
+    seen: set[str] = set()
+    for person in people:
+        if person.id in seen:
+            raise ValidationError(f"{where}: duplicate person id {person.id!r}")
+        seen.add(person.id)
+    seen = set()
+    for person in people:
+        if person.email_sha256 in seen:
+            raise ValidationError(
+                f"{where}: duplicate email_sha256 {person.email_sha256!r}"
+            )
+        seen.add(person.email_sha256)
+
+    person_ids = {person.id for person in people}
+    authors: list[tuple[str, tuple[str, ...]]] = []
+    authors_raw = document.get("authors", {})
+    if not isinstance(authors_raw, dict):
+        raise ValidationError(
+            f"{where}: field 'authors' must be a mapping, got "
+            f"{type(authors_raw).__name__} ({authors_raw!r})"
+        )
+    for batch_id, raw_ids in authors_raw.items():
+        batch_id = check_str(batch_id, where=where, field="authors key")
+        ids = _check_str_list(
+            raw_ids, where=f"{where}: authors[{batch_id}]", field="authors"
+        )
+        if len(set(ids)) != len(ids):
+            raise ValidationError(
+                f"{where}: authors[{batch_id}] has duplicate person id(s)"
+            )
+        for person_id in ids:
+            if person_id not in person_ids:
+                raise ValidationError(
+                    f"{where}: authors[{batch_id}] names unknown person {person_id!r}"
+                )
+        authors.append((batch_id, ids))
 
     roles = []
     for index, raw in enumerate(_check_list(document["roles"], where=where, field="roles")):
@@ -359,6 +403,7 @@ def validate_config(document: Any, *, where: str = f"{REQHARNESS_DIR}/{CONFIG_NA
         roles=tuple(roles),
         classes=tuple(classes),
         release_rules=tuple(release_rules),
+        authors=tuple(authors),
     )
 
 
@@ -392,8 +437,12 @@ def _dump(document: Any) -> str:
 
 
 def canonical_config(config: Config) -> dict[str, Any]:
-    """The normalised `{field: value}` form hashing binds to (R3)."""
-    return {
+    """The normalised `{field: value}` form hashing binds to (R3).
+
+    `authors` is folded in ONLY when present and non-empty — absent and
+    empty are both omitted, so a config that never declared authorship
+    keeps today's `config_hash` (A2)."""
+    result: dict[str, Any] = {
         "version": config.version,
         "people": [
             {"id": p.id, "name": p.name, "email_sha256": p.email_sha256}
@@ -411,6 +460,11 @@ def canonical_config(config: Config) -> dict[str, Any]:
         ],
         "release_rules": [{"id": rule.id} for rule in config.release_rules],
     }
+    if config.authors:
+        result["authors"] = {
+            batch: list(person_ids) for batch, person_ids in config.authors
+        }
+    return result
 
 
 def config_digest(config: Config) -> str:
@@ -452,7 +506,12 @@ _DEFAULT_CLASSES = (
     },
 )
 
-_DEFAULT_RELEASE_RULES = ("all_active_reviewed", "chain_verified", "signers_in_force")
+_DEFAULT_RELEASE_RULES = (
+    "all_active_reviewed",
+    "authors_declared",
+    "chain_verified",
+    "signers_in_force",
+)
 
 
 class RegistryExistsError(ValidationError):
@@ -492,6 +551,7 @@ def create_registry(
             "roles": [{"id": role} for role in roles],
             "classes": [dict(cls) for cls in classes],
             "release_rules": [{"id": rule} for rule in release_rules],
+            "authors": {},
         }
     )
     config = validate_config(document)

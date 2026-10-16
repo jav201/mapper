@@ -312,4 +312,4 @@ activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█
 
 
 next ▸ ↵ open map · or choose a door
-open c browse maps  p connect repo  n build map  t from template  i import csv  f factory … +9  ? all keys
+open c browse maps  p connect repo  n build map  t from template  i import csv  f factory … +10  ? all keys

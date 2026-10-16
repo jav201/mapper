@@ -269,8 +269,10 @@ def _leaky_interpolations(message) -> list[str]:
 #: (fail loud by design).
 LEAK_EXCEPTIONS: dict[tuple[str, int, str], str] = {
     # Moved with `HomeScreen` at 2026-10-09-modular-batch A4 (was the app.py row's site).
-    ("mapper/screens/home.py", 175, "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
-                                                 "`MapStoreError` text (INC9C-F3) — moved at A4",
+    # Line re-pinned at 176 when `2026-10-15-review-screen-batch` RS2 added the
+    # `ReviewScreen` import above it.
+    ("mapper/screens/home.py", 176, "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
+                                                  "`MapStoreError` text (INC9C-F3) — moved at A4",
     # Moved with `MapScreen` at 2026-10-09-modular-batch B0 (was keyed to the app.py row's site).
     ("mapper/screens/map/screen.py", 214, "str(e)"): "`store.load`'s `MapStoreError`, written path-free at "
                                                      "B-30 — moved at B0",
@@ -432,9 +434,9 @@ async def test_inc9c_ux_f4_home_reads_its_labels_from_the_seat(tmp_path):
         bar = screen.query_one(KeyBar)
         door_text = screen._empty_text().plain  # noqa: SLF001
     assert bar.groups == keymap.groups_for_keybar(keybar_groups(keymap.SCOPE_HOME)), bar.groups
-    doors = [b for b in keymap.bindings_for(keymap.SCOPE_HOME) if b.key in "cpntifR"
+    doors = [b for b in keymap.bindings_for(keymap.SCOPE_HOME) if b.key in "cpntifRv"
              and b.group == "doors"]
-    assert len(doors) == 7, doors
+    assert len(doors) == 8, doors
     for b in doors:
         assert f"{b.glyph} {b.label}" in door_text, (b.glyph, b.label, door_text)
     assert [g for g, _ in bar.groups][-1] == keymap.group_header("app")

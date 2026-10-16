@@ -272,6 +272,47 @@ CONFORMING_SEVERITY = {
     ("mapper/screens/roles.py", '(prefix, f"bold {darkside.WARN}"), (newest, darkside.INK),'),
     ("mapper/screens/roles.py", "(tail, darkside.WARN), (extra, darkside.MUT),"),
     ("mapper/screens/roles.py", "darkside.SAGE if snap.verdict == release.VERDICT_READY else darkside.WARN),"),
+    # `2026-10-15-review-screen-batch` RS2 — the review screen: 28 derived
+    # severity/busy sites (54 -> 82 across the tree), 27 distinct register keys
+    # (the two `(" chain ", …)` lines are one concept and one key).  Each site is
+    # classified INDIVIDUALLY by its own stripped line — the earlier bare
+    # `darkside.ALERT,` / `darkside.WARN,` keys (which covered the six refusals,
+    # the chain refusal, the unentitled line and the suspended tail under two
+    # keys) are gone; the refusals now share one `_paint_templated` line and each
+    # remaining site carries its own text.  The split: every refusal
+    # (`cannot sign: …`), the not-verifiable chain state, the stale digest, the
+    # unentitled review and the not-ready rule marks paint ALERT — failure or
+    # blockage — while the `changed · review` state word, the "suspended" status
+    # tail, the "holds no role" sign line and the not-ready verdict word paint
+    # WARN — outstanding attention, nothing failed.  SAGE's ready branch is
+    # SAGE's own job and is not adjudicated.
+    ("mapper/screens/review.py", "derive.STATE_CHANGED: darkside.WARN,"),
+    ("mapper/screens/review.py", '(" chain ", f"bold {darkside.GROUND} on {darkside.ALERT}"),'),
+    ("mapper/screens/review.py", '(f" {darkside.plain(word)}", darkside.ALERT),'),
+    ("mapper/screens/review.py", '(f" {darkside.plain(snap.status)}", darkside.ALERT),'),
+    ("mapper/screens/review.py", '"  registry not verifiable \\u2014 every derived state is suspended", darkside.WARN'),
+    ("mapper/screens/review.py", 'chip.append(f"  {unentitled} unentitled review", darkside.ALERT)'),
+    ("mapper/screens/review.py", 'digest_word, digest_style = "\\u2717 stale \\u2014 content changed", darkside.ALERT'),
+    ("mapper/screens/review.py", "who_style = darkside.ALERT"),
+    ("mapper/screens/review.py", "style=darkside.ALERT,"),
+    ("mapper/screens/review.py", '(" unentitled ", f"bold {darkside.GROUND} on {darkside.ALERT}"),'),
+    ("mapper/screens/review.py", 'f"{event.roles_seq}:{event.roles_hash[:8]}", darkside.ALERT'),
+    ("mapper/screens/review.py", '_fit_refusal(*_refusal_parts(_REFUSE_CHAIN, status), width), darkside.ALERT'),
+    ("mapper/screens/review.py", '_fit_refusal(*_refusal_parts(template, value), self.size.width), darkside.ALERT'),
+    ("mapper/screens/review.py", '(" b ", f"bold {darkside.GROUND} on {darkside.WARN}"),'),
+    ("mapper/screens/review.py", '(f" {darkside.plain(snap.viewer_id)} holds no {darkside.plain(role)} role", darkside.WARN),'),
+    ("mapper/screens/review.py", '(f"{identity.NO_REPO} \\u00b7 ", darkside.ALERT),'),
+    ("mapper/screens/review.py", '("not ready \\u00b7 no repo", darkside.WARN),'),
+    ("mapper/screens/review.py", '(f"{darkside.plain(NO_REGISTRY)} \\u00b7 ", darkside.ALERT),'),
+    ("mapper/screens/review.py", "(darkside.plain(VERDICT_NO_REGISTRY), darkside.WARN),"),
+    ("mapper/screens/review.py", "mark_style = darkside.SAGE if ok else darkside.ALERT"),
+    ("mapper/screens/review.py", "verdict_colour = darkside.SAGE if snap.verdict.ready else darkside.WARN"),
+    ("mapper/screens/review.py", "border_style=darkside.ALERT if not_ok else darkside.STEP,"),
+    ("mapper/screens/review.py", "self._set_refusal(_REFUSE_AMBIGUOUS, darkside.ALERT)"),
+    ("mapper/screens/review.py", "self._set_refusal(_REFUSE_MOVED, darkside.WARN)"),
+    ("mapper/screens/review.py", "self._set_refusal(_REFUSE_DUP, darkside.ALERT)"),
+    ("mapper/screens/review.py", "self._set_refusal(_REFUSE_LIMIT, darkside.ALERT)"),
+    ("mapper/screens/review.py", "self._set_refusal(darkside.plain(reason), darkside.ALERT)"),
 }
 
 CONFORMING_BLUE = {
@@ -410,7 +451,13 @@ def test_hue_census_every_severity_and_busy_site_is_classified():
     # tampered, forked) paints ALERT, every recovery notice, pending toggle
     # and not-ready verdict paints WARN; the register block carries the
     # per-site judgements.
-    assert len(sites) == 54, f"derived {len(sites)} severity/busy lines, expected 54"
+    # 54 -> 82 at `2026-10-15-review-screen-batch` RS2: 28 sites in
+    # `mapper/screens/review.py` (the refusals, the not-verifiable state, the
+    # stale digest, the unentitled review, the not-ready marks — ALERT; the
+    # changed state, the suspended tail, the not-ready verdict — WARN), judged
+    # line by line and registered above — 27 distinct keys (the two
+    # `(" chain ", …)` lines share one concept and one key).
+    assert len(sites) == 82, f"derived {len(sites)} severity/busy lines, expected 82"
 
     mobile = _mobile_homes()
     unclassified = [

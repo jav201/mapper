@@ -180,6 +180,9 @@ def test_the_home_door_notes_read_in_english():
         # ReqHarness batch `2026-10-11-reqharness-batch` (LLR-RH.8.1): the
         # roles screen's home door.
         "R": "manages team roles",
+        # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the
+        # review screen's home door.
+        "v": "opens the review screen",
     }
 
 

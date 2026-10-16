@@ -98,12 +98,18 @@ def test_llr_coerce_2_the_truncator_set_is_derived_and_non_empty():
     assert derived, "the truncator derivation collapsed; every clause below is vacuous"
     assert set(derived) == {
         "mapper.darkside.fit",
+        "mapper.screens.review._elide_middle",
+        "mapper.screens.review._take_cells",
         "mapper.views.layered._clip",
         "mapper.views.layered._fit",
     }, sorted(derived)
+    # 3 -> 5 at `2026-10-15-review-screen-batch` increment RS2: the review
+    # screen's middle-elision (`_elide_middle`) and its cell-prefix helper
+    # (`_take_cells`) are truncators; both coerce first through `darkside`'s
+    # one row coercion (`_coerced`), which the arms below verify.
     # TWO truncators shipped and only one coerced; the census is scoped so that
     # difference is visible rather than assumed away.
-    assert len(derived) == 3
+    assert len(derived) == 5
 
 
 @pytest.mark.parametrize("width", (1, 2, 5, 8, 13, 40))

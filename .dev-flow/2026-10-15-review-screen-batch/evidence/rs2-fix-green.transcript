@@ -1,0 +1,4 @@
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider tests/test_keymap.py tests/test_key_dispatch.py tests/test_inc9c.py tests/test_a3_census.py tests/test_reqharness_signing.py tests/test_no_operator_paths.py
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+253 passed, 5 warnings in 53.13s

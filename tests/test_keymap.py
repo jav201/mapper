@@ -28,6 +28,7 @@ from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
 from mapper.screens.roles import RolesScreen
+from mapper.screens.review import ReviewScreen
 from mapper.screens.settings import SettingsScreen
 
 # Which class owns each scope's actions.  App-scope actions live on the App and are
@@ -49,6 +50,9 @@ SCOPE_OWNER = {
     # ReqHarness batch `2026-10-11-reqharness-batch` (HLR-RH.8): the roles
     # screen, increment RH6a.
     keymap.SCOPE_ROLES: RolesScreen,
+    # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the review
+    # screen, increment RS2.
+    keymap.SCOPE_REVIEW: ReviewScreen,
 }
 
 # Per-scope sizes, pinned EXACTLY.  A `>=` fence leaves slack, and slack is
@@ -61,7 +65,9 @@ EXPECTED_PER_SCOPE = {
     # 11 -> 12: Inc-9c declares `enter` on home (`INC9-UX-F11`).
     # 12 -> 13: the ReqHarness batch declares the roles door `R` on home
     # (`LLR-RH.8.1`, increment RH6a).
-    keymap.SCOPE_HOME: 13,
+    # 13 -> 14: the review-screen batch declares the review door `v` on home
+    # (`HLR-RS.4`, increment RS2).
+    keymap.SCOPE_HOME: 14,
     # 25 -> 29: Inc-3 adds the four US-N06 pan chords `H` `J` `K` `L` to the
     # `view` group.  Updated deliberately, in the same edit as the seat rows.
     # 29 -> 31: Inc-4b's `#D5b` adds `N` (`prev_hit`, `nav`) and `M`
@@ -95,6 +101,10 @@ EXPECTED_PER_SCOPE = {
     # 7 -> 9: increment RH6b adds the admin `a`/`r` pending-resolution rows
     # (LLR-RH.8.6).
     keymap.SCOPE_ROLES: 9,
+    # 0 -> 7: the review-screen batch's review scope declares the object cursor
+    # (`up`/`down`), `4` (`filter`), `b` (`sign`), `enter` (`confirm`) and
+    # `q`/`esc` (`home`) — HLR-RS.4, increment RS2.
+    keymap.SCOPE_REVIEW: 7,
 }
 
 # Derived from the live module, never hand-listed (control C-31).

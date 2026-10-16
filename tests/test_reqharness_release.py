@@ -38,10 +38,24 @@ from tests.test_reqharness_registry import (
     _grant_reviewer,
     _record_review,
     _row,
-    _seed,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _seed(root: Path) -> None:
+    """The parent batch's default release rules.  This batch (RS1b) seeds
+    `authors_declared` ENABLED into `_DEFAULT_RELEASE_RULES`, but HLR-RH.7's
+    fixtures predate that rule — it is a NEW rule and is not part of what these
+    fixtures assert, so they seed registries without it."""
+    create_registry(
+        root,
+        person="bob",
+        name="Bob Admin",
+        email="bob@example.invalid",
+        now=T0,
+        release_rules=("all_active_reviewed", "chain_verified", "signers_in_force"),
+    )
 
 
 def _git_repo(parent: Path, name: str) -> Path:

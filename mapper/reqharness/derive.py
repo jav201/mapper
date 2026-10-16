@@ -46,10 +46,17 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from mapper.reqharness.canonical import canonical_digest
+from mapper.reqharness.canonical import canonical_digest, nfc
 from mapper.reqharness.chain import ChainReport, effective_roles
 from mapper.reqharness.config import LIMIT_ROLES_YML_BYTES
-from mapper.reqharness.records import Config, ValidationError
+from mapper.reqharness.records import (
+    REASON_AUTHOR,
+    REASON_NO_ROLE,
+    REASON_OWNING_BATCH_MISMATCH,
+    REASON_OWNING_BATCH_MISSING,
+    Config,
+    ValidationError,
+)
 from mapper.reqharness.reviews import ReviewScan
 
 CANON_NAME = "REQUIREMENTS.md"
@@ -71,12 +78,15 @@ _ROW_ID_RE = re.compile(r"^(HLR|LLR)-\S+$")
 class CanonObject:
     """One canon row: id, class (from the id prefix) and its field values
     (`statement`, any informative-field column such as `rationale`, and
-    `status`), remembered by line for named reports."""
+    `status`), remembered by line for named reports.  `owning_batch` is the
+    `Owning batch` column (no longer dropped — HLR-RS.5); a blank cell is
+    the empty string."""
 
     id: str
     class_id: str
     fields: dict[str, str]
     line: int
+    owning_batch: str = ""
 
 
 @dataclass(frozen=True)
@@ -87,15 +97,29 @@ class Derivation:
     recorded head dominates — every other field is empty then and the
     release verdict is `not ready · registry not verifiable`.
 
-    `unentitled` carries the FILE NAMES of the human reviews whose signer
-    held no designated role at their bound head — counted apart from
-    pre-reviews, never blocking alone (R5)."""
+    `unentitled` carries the FILE NAMES of the human reviews that must NOT
+    count toward `reviewed`, counted apart and never blocking alone (R5).
+    An `unentitled` review has ONE OR MORE causes — `no_role` (the signer
+    held no designated role at its bound head), `author` (the signer is an
+    author of the object's owning batch — HLR-RS.5) or
+    `owning_batch_mismatch` (the STORED owning batch differs from the
+    object's current cell — F1).  A fourth cause, `owning_batch_missing`,
+    fires ONLY when authorship is declared (`authors` non-empty): a human
+    review whose record carries no `owning_batch` (absent or empty) is then
+    unentitled because the mismatch cannot be checked.  `unentitled_reasons`
+    records the `(file name, reason code)` pairs; a legacy record without
+    `owning_batch` is evaluated as today (no mismatch or missing cause) only
+    when no authorship is declared.  `authors_missing` lists the object ids
+    of ACTIVE objects whose owning batch is blank or absent from the config
+    `authors` map — the data the `authors_declared` release rule reads."""
 
     verifiable: bool
     states: dict[str, str] = field(default_factory=dict)
     informative_marks: tuple[str, ...] = ()
     pre_reviewed: tuple[str, ...] = ()
     unentitled: tuple[str, ...] = ()
+    unentitled_reasons: tuple[tuple[str, str], ...] = ()
+    authors_missing: tuple[str, ...] = ()
     reported: tuple[str, ...] = ()
     warnings: tuple[str, ...] = ()
     reason: str | None = None
@@ -147,8 +171,24 @@ def parse_canon(text: str) -> tuple[tuple[CanonObject, ...], tuple[str, ...]]:
             for name, value in zip(header, cells)
             if name not in ("id", "owning batch")
         }
+        owning_batch = nfc(
+            _collapse(
+                next(
+                    (value for name, value in zip(header, cells) if name == "owning batch"),
+                    "",
+                )
+            )
+        )
         class_id = first.split("-", 1)[0]
-        objects.append(CanonObject(id=first, class_id=class_id, fields=fields, line=line_no))
+        objects.append(
+            CanonObject(
+                id=first,
+                class_id=class_id,
+                fields=fields,
+                line=line_no,
+                owning_batch=owning_batch,
+            )
+        )
     return tuple(objects), tuple(reported)
 
 
@@ -205,6 +245,35 @@ def _known_head(report: ChainReport, review) -> bool:
     )
 
 
+def _unentitled_reasons(
+    report: ChainReport,
+    review,
+    cls,
+    obj: CanonObject,
+    authors_map: dict[str, tuple[str, ...]],
+) -> tuple[str, ...]:
+    """The causes a human review is unentitled for (HLR-RS.5 / F1), in a
+    fixed order: `owning_batch_missing`, `owning_batch_mismatch`, `author`,
+    `no_role`.  A model review is never unentitled (it stays pre-review).
+    `owning_batch_missing` fires ONLY when authorship is declared
+    (`authors_map` non-empty) and the review's record lacks `owning_batch`
+    (absent or empty) — the mismatch cannot be checked.  A legacy record
+    without `owning_batch` is evaluated as today only when no authorship is
+    declared, and a blank or undeclared owning batch has no author set."""
+    if review.kind != "human":
+        return ()
+    reasons: list[str] = []
+    if authors_map and not review.owning_batch:
+        reasons.append(REASON_OWNING_BATCH_MISSING)
+    if review.owning_batch and review.owning_batch != obj.owning_batch:
+        reasons.append(REASON_OWNING_BATCH_MISMATCH)
+    if obj.owning_batch and review.reviewer in authors_map.get(obj.owning_batch, ()):
+        reasons.append(REASON_AUTHOR)
+    if not _role_in_force(report, review, cls.reviewer_role):
+        reasons.append(REASON_NO_ROLE)
+    return tuple(reasons)
+
+
 def derive_states(
     canon: tuple[CanonObject, ...],
     scan: ReviewScan,
@@ -230,6 +299,7 @@ def derive_states(
         return Derivation(verifiable=False, reason=NOT_VERIFIABLE, reported=tuple(reported))
 
     classes = {cls.id: cls for cls in config.classes}
+    authors_map = {batch: people for batch, people in config.authors}
     by_object: dict[str, list] = {}
     for event in scan.events:
         by_object.setdefault(event.object, []).append(event)
@@ -238,6 +308,8 @@ def derive_states(
     marks: list[str] = []
     pre_reviewed: list[str] = []
     unentitled: list[str] = []
+    unentitled_reasons: list[tuple[str, str]] = []
+    authors_missing: list[str] = []
     warnings: list[str] = []
 
     for obj in canon:
@@ -252,6 +324,8 @@ def derive_states(
         if status.lower().startswith("withdrawn"):
             states[obj.id] = STATE_RETIRED  # excluded from every release rule (R5)
             continue
+        if not obj.owning_batch or obj.owning_batch not in authors_map:
+            authors_missing.append(obj.id)  # the authors_declared rule reads this
         normative, informative = object_digests(cls, obj.fields)
         reviews = sorted(
             by_object.get(obj.id, ()), key=lambda event: (event.time, event.name)
@@ -263,7 +337,8 @@ def derive_states(
         qualifying = [
             r
             for r in matching
-            if r.kind == "human" and _role_in_force(report, r, cls.reviewer_role)
+            if r.kind == "human"
+            and not _unentitled_reasons(report, r, cls, obj, authors_map)
         ]
         if qualifying:
             # Precedence (2): a newer pre-review never downgrades this.
@@ -278,13 +353,14 @@ def derive_states(
             pre_reviewed.append(obj.id)
         else:
             states[obj.id] = STATE_CHANGED  # a stale digest never closes
-        # Unentitled reviews are human reviews whose signer held no
-        # designated role at their bound head — counted apart (R5).
-        unentitled.extend(
-            r.name
-            for r in reviews
-            if r.kind == "human" and not _role_in_force(report, r, cls.reviewer_role)
-        )
+        # Unentitled reviews are human reviews with one or more of the three
+        # causes (role / author / owning-batch mismatch), counted apart (R5).
+        for review in reviews:
+            reasons = _unentitled_reasons(report, review, cls, obj, authors_map)
+            if not reasons:
+                continue
+            unentitled.append(review.name)
+            unentitled_reasons.extend((review.name, reason) for reason in reasons)
         for review in reviews:
             if review.kind != "human":
                 continue
@@ -310,6 +386,8 @@ def derive_states(
         informative_marks=tuple(marks),
         pre_reviewed=tuple(pre_reviewed),
         unentitled=tuple(unentitled),
+        unentitled_reasons=tuple(unentitled_reasons),
+        authors_missing=tuple(authors_missing),
         reported=tuple(reported),
         warnings=tuple(warnings),
     )

@@ -34,12 +34,19 @@ from mapper.reqharness.chain import (
     verify_chain,
 )
 from mapper.reqharness.config import (
+    canonical_config,
+    config_digest,
     create_registry,
     email_sha256,
     load_config,
     load_documents,
 )
-from mapper.reqharness.records import ValidationError
+from mapper.reqharness.records import (
+    REASON_AUTHOR,
+    REASON_OWNING_BATCH_MISMATCH,
+    REASON_OWNING_BATCH_MISSING,
+    ValidationError,
+)
 from tests.test_reqharness_yaml_census import _yaml_load_violations
 
 T0 = "2026-10-11T09:00:00Z"
@@ -51,6 +58,16 @@ T5 = "2026-10-11T09:05:00Z"
 T6 = "2026-10-11T09:06:00Z"
 
 NAME_RE = re.compile(r"\d{8}-[0-9a-f]{8}\.yml\Z")
+
+#: The pre-RS1a `config_digest` of the authors-less registry `_seed` builds
+#: (create_registry(person="bob", name="Bob Admin",
+#: email="bob@example.invalid", now=T0)).  Computed once from
+#: `git show 05c516a~1:mapper/reqharness/config.py` loaded as a separate
+#: module over that exact config document — pins the A2 guarantee that an
+#: authors-less config hashes byte-identically to before RS1a.
+PRE_RS1A_AUTHORS_LESS_DIGEST = (
+    "fa46d573143f51637e87721b6f7d9fe91b8cfd3c00be9bf8e8f66daf4b09074b"
+)
 
 CANON_HEADER = (
     "| Id | Statement | Rationale | Owning batch | Status |\n"
@@ -759,6 +776,357 @@ def test_record_review_type_checks_text_fields(tmp_path):
     assert not reviews_dir.exists()  # refusals happen before any write
 
 
+def _set_authors(root: Path, authors: dict) -> None:
+    """Edit the live config to declare the `authors` map and re-bind it
+    through an admin `policy` event (a config change is otherwise
+    `config changed without approval`)."""
+    path, document = _config_doc(root)
+    document["authors"] = authors
+    path.write_text(
+        yaml.safe_dump(document, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    append_policy(root, approved_by="bob", note="declare authors", now=T3)
+
+
+def test_config_refuses_an_unknown_person_in_authors(tmp_path):
+    """LLR-RS.5.1: an `authors` entry naming an unknown person id is
+    refused BY NAME, never silently accepted."""
+    _seed(tmp_path)
+    path, document = _config_doc(tmp_path)
+    document["authors"] = {"2026-10-11-reqharness-batch": ["mallory"]}
+    path.write_text(
+        yaml.safe_dump(document, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(ValidationError, match="mallory"):
+        load_config(tmp_path)
+
+
+def test_config_refuses_duplicate_person_id_and_duplicate_email_sha256(tmp_path):
+    """LLR-RS.5.1 (the m2 gap): a duplicate person id and a duplicate
+    `email_sha256` are each refused BY NAME, so an identity can never
+    resolve ambiguously."""
+    _seed(tmp_path)
+    path, document = _config_doc(tmp_path)
+    original = document["people"][0]
+
+    dup_id = dict(document)
+    dup_id["people"] = list(document["people"]) + [
+        {
+            "id": "bob",
+            "name": "Bob Again",
+            "email_sha256": email_sha256("again@example.invalid"),
+        }
+    ]
+    path.write_text(
+        yaml.safe_dump(dup_id, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(ValidationError, match="duplicate person id 'bob'"):
+        load_config(tmp_path)
+
+    dup_email = dict(document)
+    dup_email["people"] = list(document["people"]) + [
+        {"id": "ana", "name": "Ana", "email_sha256": original["email_sha256"]}
+    ]
+    path.write_text(
+        yaml.safe_dump(dup_email, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(ValidationError, match="duplicate email_sha256"):
+        load_config(tmp_path)
+
+
+def test_authors_map_changes_config_hash(tmp_path):
+    """LLR-RS.5.1 (M-RS24): the `authors` map is folded into
+    `canonical_config` (and therefore `config_hash`) — two configs that
+    differ only in `authors` hash differently."""
+    _seed(tmp_path)
+    before = config_digest(load_config(tmp_path))
+    path, document = _config_doc(tmp_path)
+    document["authors"] = {"2026-10-11-reqharness-batch": ["bob"]}
+    path.write_text(
+        yaml.safe_dump(document, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    assert config_digest(load_config(tmp_path)) != before
+
+
+def test_an_authors_less_config_hashes_byte_identically_to_today(tmp_path):
+    """LLR-RS.5.1 (A2): an ABSENT `authors` and an EMPTY `authors` are both
+    omitted from `canonical_config`, so a config that never declared
+    authorship keeps today's byte-identical `config_hash`."""
+    _seed(tmp_path)  # create_registry writes `authors: {}`
+    # Model a config written BEFORE this batch: RS1b's new default rule
+    # `authors_declared` is not in it (new registries legitimately hash
+    # differently; what must not move is an EXISTING config's hash).
+    path, document = _config_doc(tmp_path)
+    document["release_rules"] = [
+        rule for rule in document["release_rules"] if rule["id"] != "authors_declared"
+    ]
+    path.write_text(
+        yaml.safe_dump(document, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    config = load_config(tmp_path)
+    assert config.authors == ()
+    assert "authors" not in canonical_config(config)
+    digest_empty = config_digest(config)
+    # A2: byte-identical to the pre-RS1a digest (pinned constant, L2)
+    assert digest_empty == PRE_RS1A_AUTHORS_LESS_DIGEST
+
+    # a config with NO `authors` key at all hashes identically
+    path, document = _config_doc(tmp_path)
+    del document["authors"]
+    path.write_text(
+        yaml.safe_dump(document, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    config_absent = load_config(tmp_path)
+    assert config_absent.authors == ()
+    assert "authors" not in canonical_config(config_absent)
+    assert config_digest(config_absent) == digest_empty
+
+
+def test_create_registry_seeds_authors_and_authors_declared(tmp_path):
+    """LLR-RS.5.1 (F2): `create_registry` seeds an empty `authors` map AND the
+    `authors_declared` release rule ENABLED (in `_DEFAULT_RELEASE_RULES`)."""
+    _seed(tmp_path)
+    path, document = _config_doc(tmp_path)
+    assert document.get("authors") == {}
+    config = load_config(tmp_path)
+    assert config.authors == ()
+    assert any(rule.id == "authors_declared" for rule in config.release_rules)
+
+
+def test_authors_declared_release_rule_fails_when_batch_has_no_authors(tmp_path):
+    """LLR-RS.5.2 (F2): the `authors_declared` rule fails when an ACTIVE
+    object's owning batch is absent from the (empty) `authors` map, and is
+    absent (does not fail) when the rule is not declared."""
+    from mapper.reqharness import release
+
+    _seed(tmp_path)  # authors: {} + authors_declared ENABLED
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)
+    _record_review(tmp_path, "HLR-TEST.1", HLR_FIELDS, now=T3)  # reviewed
+    _write_canon(tmp_path, _ONE_ROW)  # HLR-TEST.1, batch 2026-10-11-reqharness-batch
+    config = load_config(tmp_path)
+    report = verify_chain(tmp_path)
+    scan = reviews.load_reviews(tmp_path)
+    canon, _ = derive.parse_canon(_ONE_ROW)
+    derivation = derive.derive_states(canon, scan, report, config)
+    assert derivation.authors_missing == ("HLR-TEST.1",)
+    assert derivation.states["HLR-TEST.1"] == derive.STATE_REVIEWED
+
+    verdict = release.evaluate(config, report, derivation)
+    assert verdict.ready is False
+    assert verdict.rule(release.RULE_AUTHORS_DECLARED) is False
+    assert verdict.text == "not ready · authors_declared"
+
+
+def _write_canon(root: Path, text: str) -> None:
+    (root / "REQUIREMENTS.md").write_text(text, encoding="utf-8", newline="\n")
+
+
+def test_record_review_roundtrips_the_optional_owning_batch(tmp_path):
+    """LLR-RS.2.1 (F1) record side: `record_review(..., owning_batch=...)`
+    stores the field and the loader reads it back; a record written WITHOUT
+    it loads with `owning_batch == ""` exactly as today (legacy)."""
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)
+    config = load_config(tmp_path)
+    normative, informative = _digests(config, HLR_FIELDS)
+    head = verify_chain(tmp_path).head
+
+    stored = reviews.record_review(
+        tmp_path,
+        object_id="HLR-TEST.1",
+        class_id="HLR",
+        normative_digest=normative,
+        informative_digest=informative,
+        verdict="reviewed",
+        reviewer="ana",
+        kind="human",
+        note="fixture review",
+        now=T3,
+        head=head,
+        seq=reviews.next_seq(tmp_path),
+        owning_batch="2026-10-11-reqharness-batch",
+    )
+    legacy = _record_review(tmp_path, "HLR-TEST.2", HLR_FIELDS, now=T4)
+
+    scan = reviews.load_reviews(tmp_path)
+    by_name = {event.name: event for event in scan.events}
+    assert by_name[stored.name].owning_batch == "2026-10-11-reqharness-batch"
+    assert by_name[legacy.name].owning_batch == ""
+
+
+def test_derive_marks_an_authors_human_review_unentitled(tmp_path):
+    """LLR-RS.5.2 (M-RS18): a hand-written human review whose signer is an
+    author of the object's owning batch derives `pre-reviewed` and is
+    flagged `unentitled` with reason `author` — never `reviewed` — even
+    though the signer holds the designated role at the bound head."""
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)  # ana holds req-reviewer at head 3
+    _set_authors(tmp_path, {"2026-10-11-reqharness-batch": ["ana"]})
+
+    review = _record_review(tmp_path, "HLR-TEST.1", HLR_FIELDS, reviewer="ana", now=T4)
+
+    result, _ = _derive(tmp_path, _ONE_ROW)
+    assert result.states["HLR-TEST.1"] == derive.STATE_PRE_REVIEWED
+    assert review.name in result.unentitled
+    assert (review.name, REASON_AUTHOR) in result.unentitled_reasons
+
+
+def test_derive_marks_a_stored_owning_batch_mismatch_unentitled(tmp_path):
+    """LLR-RS.5.2 (F1): a human review whose STORED owning batch differs
+    from the object's current cell derives `pre-reviewed` and is flagged
+    `unentitled` with reason `owning_batch_mismatch` — never `reviewed`."""
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)
+    config = load_config(tmp_path)
+    normative, informative = _digests(config, HLR_FIELDS)
+    review = reviews.record_review(
+        tmp_path,
+        object_id="HLR-TEST.1",
+        class_id="HLR",
+        normative_digest=normative,
+        informative_digest=informative,
+        verdict="reviewed",
+        reviewer="ana",
+        kind="human",
+        note="fixture review",
+        now=T3,
+        head=verify_chain(tmp_path).head,
+        seq=reviews.next_seq(tmp_path),
+        owning_batch="some-other-batch",
+    )
+
+    result, _ = _derive(tmp_path, _ONE_ROW)
+    assert result.states["HLR-TEST.1"] == derive.STATE_PRE_REVIEWED
+    assert review.name in result.unentitled
+    assert (review.name, REASON_OWNING_BATCH_MISMATCH) in result.unentitled_reasons
+
+
+def test_config_refuses_a_duplicate_person_id_in_one_authors_list(tmp_path):
+    """LLR-RS.5.1 (L1 re-verification): two identical person ids inside ONE
+    batch's `authors` list are refused by name — never silently accepted."""
+    _seed(tmp_path)
+    path, document = _config_doc(tmp_path)
+    document["authors"] = {"2026-10-11-reqharness-batch": ["bob", "bob"]}
+    path.write_text(
+        yaml.safe_dump(document, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+    with pytest.raises(ValidationError, match="duplicate"):
+        load_config(tmp_path)
+
+
+def test_derive_marks_a_legacy_review_without_owning_batch_unentitled_when_authors_declared(tmp_path):
+    """LLR-RS.5.2 (F1 re-verification, H1): with `authors` declared, a human
+    review whose record has NO `owning_batch` (legacy shape) is unentitled —
+    reason `author` when the cell still names the signer's batch, reason
+    `owning_batch_missing` when the cell is blanked or moved to a batch the
+    signer is not listed for.  (The signer holds the role; without the
+    missing-batch cause the review would wrongly derive `reviewed`.)"""
+    B = "2026-10-11-reqharness-batch"
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)  # ana holds req-reviewer at head 3
+    _set_authors(tmp_path, {B: ["ana"], "other-batch": ["bob"]})
+
+    def canon(cell: str) -> str:
+        return CANON_HEADER + (
+            f"| HLR-TEST.1 | {HLR_FIELDS['statement']} | "
+            f"{HLR_FIELDS['rationale']} | {cell} | active |\n"
+        )
+
+    review = _record_review(tmp_path, "HLR-TEST.1", HLR_FIELDS, reviewer="ana", now=T4)
+
+    # cell names the signer's own batch -> `author` (and the missing cause)
+    result, _ = _derive(tmp_path, canon(B))
+    assert result.states["HLR-TEST.1"] == derive.STATE_PRE_REVIEWED
+    assert (review.name, REASON_AUTHOR) in result.unentitled_reasons
+
+    # cell blanked -> the record's stored batch cannot be checked
+    result, _ = _derive(tmp_path, canon(""))
+    assert result.states["HLR-TEST.1"] == derive.STATE_PRE_REVIEWED
+    assert (review.name, REASON_OWNING_BATCH_MISSING) in result.unentitled_reasons
+
+    # cell moved to a batch the signer is not listed for
+    result, _ = _derive(tmp_path, canon("other-batch"))
+    assert result.states["HLR-TEST.1"] == derive.STATE_PRE_REVIEWED
+    assert (review.name, REASON_OWNING_BATCH_MISSING) in result.unentitled_reasons
+
+
+def test_derive_a_legacy_review_without_owning_batch_stays_reviewed_without_authors(tmp_path):
+    """LLR-RS.5.2 (F1 re-verification, H1 legacy arm): with NO `authors`
+    declared, a human review whose record lacks `owning_batch` still derives
+    `reviewed` — behaviour exactly as today (the missing-batch cause only
+    fires when authorship is declared)."""
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)
+
+    _record_review(tmp_path, "HLR-TEST.1", HLR_FIELDS, reviewer="ana", now=T4)
+
+    result, _ = _derive(tmp_path, _ONE_ROW)
+    assert result.states["HLR-TEST.1"] == derive.STATE_REVIEWED
+    assert result.unentitled == ()
+
+
+def test_derive_nfc_normalises_the_owning_batch_cell(tmp_path):
+    """LLR-RS.5.2 (F1 re-verification, M2): the canon `Owning batch` cell is
+    NFC-normalised in `parse_canon`, so a DECOMPOSED batch id in the cell is
+    compared against the NFC config key — an author writing a decomposed cell
+    does not evade the author rule (and no spurious mismatch is raised)."""
+    nfc_batch = "batch-\u00e9"  # batch-é (NFC)
+    decomposed = "batch-e\u0301"  # batch-é, decomposed
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)
+    _set_authors(tmp_path, {nfc_batch: ["ana"]})
+
+    canon = CANON_HEADER + (
+        f"| HLR-TEST.1 | {HLR_FIELDS['statement']} | "
+        f"{HLR_FIELDS['rationale']} | {decomposed} | active |\n"
+    )
+    config = load_config(tmp_path)
+    normative, informative = _digests(config, HLR_FIELDS)
+    review = reviews.record_review(
+        tmp_path,
+        object_id="HLR-TEST.1",
+        class_id="HLR",
+        normative_digest=normative,
+        informative_digest=informative,
+        verdict="reviewed",
+        reviewer="ana",
+        kind="human",
+        note="fixture review",
+        now=T4,
+        head=verify_chain(tmp_path).head,
+        seq=reviews.next_seq(tmp_path),
+        owning_batch=nfc_batch,
+    )
+
+    result, _ = _derive(tmp_path, canon)
+    assert result.states["HLR-TEST.1"] == derive.STATE_PRE_REVIEWED
+    assert (review.name, REASON_AUTHOR) in result.unentitled_reasons
+    assert (review.name, REASON_OWNING_BATCH_MISMATCH) not in result.unentitled_reasons
+
+
 __all__ = [  # the node ids this file owns, for the packet's ledger
     "test_normative_edit_needs_review_informative_marks_only",
     "test_review_by_signer_without_role_in_force_is_pre_reviewed",
@@ -772,4 +1140,52 @@ __all__ = [  # the node ids this file owns, for the packet's ledger
     "test_review_cache_caches_validated_parses_only",
     "test_review_cache_size_guard_is_separate_limit",
     "test_record_review_type_checks_text_fields",
+    "test_config_refuses_an_unknown_person_in_authors",
+    "test_config_refuses_duplicate_person_id_and_duplicate_email_sha256",
+    "test_authors_map_changes_config_hash",
+    "test_an_authors_less_config_hashes_byte_identically_to_today",
+    "test_create_registry_seeds_authors_and_authors_declared",
+    "test_record_review_roundtrips_the_optional_owning_batch",
+    "test_derive_marks_an_authors_human_review_unentitled",
+    "test_derive_marks_a_stored_owning_batch_mismatch_unentitled",
+    "test_config_refuses_a_duplicate_person_id_in_one_authors_list",
+    "test_derive_marks_a_legacy_review_without_owning_batch_unentitled_when_authors_declared",
+    "test_derive_a_legacy_review_without_owning_batch_stays_reviewed_without_authors",
+    "test_derive_nfc_normalises_the_owning_batch_cell",
+    "test_authors_declared_release_rule_fails_when_batch_has_no_authors",
 ]
+
+
+def test_a_stored_owning_batch_is_nfc_normalised_on_read(tmp_path):
+    """RS1a security re-check L-b: a record written with an NFD owning batch
+    reads back NFC, so derive compares it like with like against the NFC
+    canon cell (a missing normalisation would only fail closed, but the
+    comparison must be symmetric)."""
+    _seed(tmp_path)
+    _add_ana(tmp_path)
+    _grant_reviewer(tmp_path)
+    config = load_config(tmp_path)
+    normative, informative = _digests(config, HLR_FIELDS)
+    reviews.record_review(
+        tmp_path,
+        object_id="HLR-TEST.1",
+        class_id="HLR",
+        normative_digest=normative,
+        informative_digest=informative,
+        verdict="reviewed",
+        reviewer="ana",
+        kind="human",
+        note="fixture review",
+        now=T3,
+        head=verify_chain(tmp_path).head,
+        seq=reviews.next_seq(tmp_path),
+        owning_batch="batch-é",
+    )
+    # The writer already stores NFC; a HAND-WRITTEN record can carry NFD.
+    [path] = list((tmp_path / "reqharness" / "reviews").glob("*.yml"))
+    text = path.read_text(encoding="utf-8")
+    assert "batch-é" in text
+    path.write_text(text.replace("batch-é", "batch-é"), encoding="utf-8")
+    scan = reviews.load_reviews(tmp_path)
+    [event] = [e for e in scan.events if e.object == "HLR-TEST.1"]
+    assert event.owning_batch == "batch-é"
