@@ -1,0 +1,47 @@
+[
+    {
+      "station": "P0",
+      "date": "2026-10-15",
+      "decision": "P0 intake approved under the standing authorization: B-115, B-116, B-117, B-127 reproduced on master (spike/intake.md)"
+    },
+    {
+      "station": "ARQ",
+      "date": "2026-10-15",
+      "decision": "ARQ approved: no boundary moves; screens row must claim roles.py (amended in increment 003); A3 contract changes (slugify(\"\")->\"\", forest root written first) with consumer census (design/arq-note.md); standing authorization"
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-15",
+      "decision": "P1 approved: US-FX-001..006, HLR/LLR-FX, AT-084..089; rulings R1-R6; ledger .1-.13; increment 004 (B-110, B-113) from a read-only DeepSeek spike; standing authorization"
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-15",
+      "decision": "P2 approved with conditions by an independent reviewer (DeepSeek, qa-reviewer role): 0 blocker; MAJOR-1/2 and MINOR-1..5 resolved (ledger .7-.11, 02-review.md); standing authorization"
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-15",
+      "decision": "PDR sealed approved with conditions (architect Claude Opus, ux-reviewer Claude Sonnet, qa-reviewer + light security DeepSeek): conditions C1-C8 applied (ledger .14-.17); worker returns facts, applied in on_worker_state_changed; key bar subtraction while loading; B-128..B-132 opened; standing authorization"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-15",
+      "decision": "P3 increments 001-004 implemented and independently reviewed (001 Claude Opus, 002/003 DeepSeek, 004 Claude Sonnet), all approve-with-nits, nits applied; standing authorization"
+    },
+    {
+      "station": "DDR",
+      "date": "2026-10-15",
+      "decision": "DDR sealed approved with conditions, all discharged (architect Claude Opus, qa-reviewer Claude Sonnet); F3b accepted with evidence; L1 residual -> B-133; standing authorization"
+    },
+    {
+      "station": "P4",
+      "date": "2026-10-15",
+      "decision": "P4 PASS-WITH-NOTES: full suite 3432 passed / 0 failed (clean shell); 23/23 requirements pass; blank roles window evidenced with an injected delay only; no real-user evaluation (one-person team); standing authorization"
+    },
+    {
+      "station": "P5",
+      "date": "2026-10-15",
+      "decision": "P5 close written; open B-128..B-133; standing authorization"
+    }
+  ]

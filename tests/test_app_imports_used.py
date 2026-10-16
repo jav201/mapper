@@ -54,6 +54,11 @@ ALLOWED_UNUSED: dict[str, dict[str, str]] = {
             # for the identical reason; the guard is not weakened, the re-export is
             # recorded.
             "RolesScreen",
+            # `2026-10-15-review-screen-batch` RS2: `ReviewScreen` is imported for
+            # the stylesheet's `RolesScreen, ReviewScreen { ... }` selector and
+            # declared in app.py's `__all__` re-export list (LLR-MOD.3.1) — the
+            # same declared-re-export convention.
+            "ReviewScreen",
         )
     },
     "mapper/screens/__init__.py": {

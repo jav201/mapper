@@ -125,6 +125,10 @@ OPENERS = {
     # no repo it paints the named `no repo` state, which is exactly what
     # this opener's workspace (no git repo) exercises.
     "RolesScreen": lambda app, cls: cls(),
+    # ReqHarness batch `2026-10-15-review-screen-batch` (increment RS2): the
+    # review screen opens bare — with no repo it paints the named `no repo`
+    # state, exactly what this opener's workspace (no git repo) exercises.
+    "ReviewScreen": lambda app, cls: cls(),
 }
 
 
@@ -385,6 +389,8 @@ CHROME_LEXICON = frozenset("""
     discard draft stay unsaved
     roles person role propose change
     approve reject
+    review object sign confirm cycle filter
+    mark reviewed
 """.split())
 
 #: Screen headers allowed to stay non-English, owned by the increment that
@@ -689,6 +695,15 @@ DECLARED_ADDED = frozenset({
     # increment RH6b (LLR-RH.8.6): the admin a/r pending-resolution rows
     ("roles", "a", "approve"), ("roles", "r", "reject"),
     ("roles", "q", "home"), ("roles", "escape", "home"),
+    # ReqHarness batch `2026-10-15-review-screen-batch` (increment RS2,
+    # HLR-RS.4): the `v review` home door and the review scope's rows — the
+    # object cursor (`up`/`down`), `4` filter, `b` arm, `enter` confirm and
+    # `q`/`esc` back.
+    ("home", "v", "review"),
+    ("review", "up", "prev_object"), ("review", "down", "next_object"),
+    ("review", "4", "filter"), ("review", "b", "sign"),
+    ("review", "enter", "confirm"),
+    ("review", "q", "home"), ("review", "escape", "home"),
 })
 #: Group headers renamed to English (`A-112` st. 2); no key changes scope.
 DECLARED_REGROUPED = frozenset({("lista", "list"), ("lista", "exit"), ("salir", "leave")})

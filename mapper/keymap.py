@@ -37,6 +37,8 @@ SCOPE_FACTORY = "factory"
 SCOPE_SETTINGS = "settings"
 # ReqHarness batch `2026-10-11-reqharness-batch` (HLR-RH.8): the roles screen.
 SCOPE_ROLES = "roles"
+# ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the review screen.
+SCOPE_REVIEW = "review"
 
 # Screens whose bindings are NOT yet in this seat.  This is not decoration: it is
 # the exception list the conformance tests quantify over, so a screen leaving the
@@ -79,6 +81,8 @@ GROUP_SCOPE: dict[str, str] = {
     "settings": SCOPE_SETTINGS,
     "roles": SCOPE_ROLES,
     "roles-leave": SCOPE_ROLES,
+    "review": SCOPE_REVIEW,
+    "review-leave": SCOPE_REVIEW,
     "palette": SCOPE_PALETTE,
     "help": SCOPE_HELP,
     "draft": SCOPE_DRAFT,
@@ -106,6 +110,8 @@ GROUP_HEADER: dict[str, str] = {
     "settings": "components",
     "roles": "roles",
     "roles-leave": "leave",
+    "review": "review",
+    "review-leave": "leave",
     "palette": "palette",
     "help": "help",
     "draft": "unsaved",
@@ -156,6 +162,9 @@ KEYMAP: list[KeyBinding] = [
     # the roles screen's home door.  Uppercase `R`: the shifted-pair precedent
     # already in this seat; lowercase `r` stays `resume`.
     KeyBinding("R", "R", "roles", "roles", "doors"),
+    # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the review
+    # screen's home door — `v` was free in the home scope (decision in PLAN).
+    KeyBinding("v", "v", "review", "review", "doors"),
     KeyBinding("s", "s", "settings", "components", "doors"),
     KeyBinding("j", "j", "table_down", "next map", "list"),
     KeyBinding("k", "k", "table_up", "previous map", "list"),
@@ -293,6 +302,17 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("r", "r", "reject", "reject", "roles"),
     KeyBinding("q", "q", "home", "back", "roles-leave"),
     KeyBinding("escape", "esc", "home", "back", "roles-leave"),
+    # -- review (ReqHarness batch `2026-10-15-review-screen-batch`, HLR-RS.4) --
+    # Variant A (B-134): the cursor moves object to object, `4` cycles the
+    # state filter, `b` arms the two-key sign, `enter` confirms — through
+    # `signing.sign_review` only, never a direct write.
+    KeyBinding("up", "↑", "prev_object", "previous object", "review"),
+    KeyBinding("down", "↓", "next_object", "next object", "review"),
+    KeyBinding("4", "4", "filter", "cycle filter", "review"),
+    KeyBinding("b", "b", "sign", "mark reviewed", "review"),
+    KeyBinding("enter", "↵", "confirm", "sign", "review"),
+    KeyBinding("q", "q", "home", "back", "review-leave"),
+    KeyBinding("escape", "esc", "home", "back", "review-leave"),
     # -- app (available on every screen) ------------------------------------
     KeyBinding("ctrl+p", "ctrl+p", "palette", "palette", "app"),
     # Not priority, on purpose (`T3`, `EN-Q3`): a focused `Input` consumes `?` before a

@@ -60,9 +60,13 @@ WIDTHS = (118, 87)
 #: "tests/test_mod_parity.py::test_at065_parity_matches_golden[87]"`, and the
 #: verified diff was EXACTLY that one counter line in each golden — no other
 #: painted byte moved.
+#: RE-RECORDED at `2026-10-15-review-screen-batch` (increment RS2): RS2 added
+#: the `v review` door to the home key-hint row, moving the overflow counter
+#: +9 -> +10 (118 cols) and +11 -> +12 (87 cols); the verified diff was EXACTLY
+#: that one counter line in each golden — no other painted byte moved.
 GOLDEN_SHA256 = {
-    118: "8ad7729f2c5696c820c98eb18ddd708bdf2d9815649a0e3d2d55aa57af057dc0",
-    87: "0b6d937c39753d85456a4aed3b0cd695f9eb950698eacd11b7c3878666f3c137",
+    118: "a08101b87fa21985e7d6b03fe19f4f21363e7d72ed70850168dfb60da1f881ec",
+    87: "0132f9396b4e09cf862c2c2961848b94dd852a481fd0cba597e8261ae9dd6ffc",
 }
 
 #: The mutant's one-token change: a PAINTED string constant in

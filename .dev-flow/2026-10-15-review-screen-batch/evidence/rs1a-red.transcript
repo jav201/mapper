@@ -1,0 +1,273 @@
+# RS1a RED proof — mutation battery transcript
+
+Increment RS1a (data layer) of `2026-10-15-review-screen-batch`. Every named
+RS1a mutant is executed RED (mutate → new test FAILS), then the file is
+restored and sha256-verified byte-identical, then re-run GREEN. Commands run
+one at a time from the worktree root with `-p no:cacheprovider`.
+
+Environment: `env -u NO_COLOR -u TERM`, `PYTHONIOENCODING=utf-8`.
+
+---
+
+## 1 · M-RS24 — `authors` omitted from `canonical_config`
+
+Product change under test: the `if config.authors:` fold in
+`mapper/reqharness/config.py::canonical_config`.
+
+Mutation (position/operation): delete the fold block, leave `return result`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_authors_map_changes_config_hash
+FAILED tests/test_reqharness_registry.py::test_authors_map_changes_config_hash - assert 'fa46d573…74b' != 'fa46d573…74b'
+1 failed in 0.29s
+```
+
+Restore: `before=sha256(config.py) after=sha256(config.py)` → `EQUAL`
+(restore digest `e7fd2c02092d799f9b03f94191c8d525b8b6e02716ea0d702a2550531a3f3a72`).
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_authors_map_changes_config_hash
+1 passed in 0.17s
+```
+
+---
+
+## 2 · M-RS18 — author cause dropped from `derive`
+
+Product change under test: the `REASON_AUTHOR` arm in
+`mapper/reqharness/derive.py::_unentitled_reasons`.
+
+Mutation: `if obj.owning_batch and review.reviewer in authors_map.get(...):`
+→ `if False and obj.owning_batch and review.reviewer in authors_map.get(...):`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_marks_an_authors_human_review_unentitled
+FAILED … assert 'reviewed' == 'pre-reviewed'
+1 failed in 0.28s
+```
+
+Restore: sha256 `before=78c35103…67a9 after=78c35103…67a9` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_marks_an_authors_human_review_unentitled
+1 passed in 0.18s
+```
+
+---
+
+## 3 · F1 — `owning_batch_mismatch` cause dropped from `derive`
+
+Product change under test: the `REASON_OWNING_BATCH_MISMATCH` arm in
+`mapper/reqharness/derive.py::_unentitled_reasons`.
+
+Mutation: `if review.owning_batch and review.owning_batch != obj.owning_batch:`
+→ `if False and review.owning_batch and review.owning_batch != obj.owning_batch:`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_marks_a_stored_owning_batch_mismatch_unentitled
+FAILED … assert 'reviewed' == 'pre-reviewed'
+1 failed in 0.24s
+```
+
+Restore: sha256 `before=78c35103…67a9 after=78c35103…67a9` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_marks_a_stored_owning_batch_mismatch_unentitled
+1 passed in 0.15s
+```
+
+---
+
+## 4 · m2 gap — duplicate `email_sha256` refusal dropped from `config`
+
+Product change under test: the duplicate-`email_sha256` refusal loop in
+`mapper/reqharness/config.py::validate_config`.
+
+Mutation: delete the whole `seen = set(); for person in people: …` email block.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_config_refuses_duplicate_person_id_and_duplicate_email_sha256
+FAILED … Failed: DID NOT RAISE <class 'mapper.reqharness.records.ValidationError'>
+1 failed in 0.29s
+```
+
+Restore: sha256 `before=4c85ce32…caad after=4c85ce32…caad` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_config_refuses_duplicate_person_id_and_duplicate_email_sha256
+1 passed in 0.19s
+```
+
+---
+
+## 5 · Security re-verification follow-up — H1 `owning_batch_missing` arm in `derive`
+
+Product change under test: the `if authors_map and not review.owning_batch:`
+arm in `mapper/reqharness/derive.py::_unentitled_reasons` (plus the
+`REASON_OWNING_BATCH_MISSING` literal in `records.py`).
+
+Mutation (position/operation): delete the `owning_batch_missing` arm, leave
+the mismatch/author/no-role arms.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_marks_a_legacy_review_without_owning_batch_unentitled_when_authors_declared
+FAILED … AssertionError: assert 'reviewed' == 'pre-reviewed'
+1 failed in 0.81s
+```
+
+Restore: sha256 `before=cb12f9e4…5316 after=cb12f9e4…5316` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_marks_a_legacy_review_without_owning_batch_unentitled_when_authors_declared
+1 passed in 0.50s
+```
+
+---
+
+## 6 · Security re-verification follow-up — M2 NFC-normalised `Owning batch` cell
+
+Product change under test: the `nfc(_collapse(...))` wrap of the owning-batch
+cell in `mapper/reqharness/derive.py::parse_canon`.
+
+Mutation (position/operation): drop the `nfc(...)` wrap, leave `_collapse(...)`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_nfc_normalises_the_owning_batch_cell
+FAILED … AssertionError: assert ('…', 'author') in (('…', 'owning_batch_mismatch'),)
+1 failed in 0.47s
+```
+
+Restore: sha256 `before=cb12f9e4…5316 after=cb12f9e4…5316` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_derive_nfc_normalises_the_owning_batch_cell
+1 passed in 0.31s
+```
+
+---
+
+## 7 · Security re-verification follow-up — L1 duplicate person ids in one `authors` list
+
+Product change under test: the duplicate-id refusal in
+`mapper/reqharness/config.py::validate_config`.
+
+Mutation (position/operation): delete the `len(set(ids)) != len(ids)` refusal.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_config_refuses_a_duplicate_person_id_in_one_authors_list
+FAILED … Failed: DID NOT RAISE <class 'mapper.reqharness.records.ValidationError'>
+1 failed in 0.32s
+```
+
+Restore: sha256 `before=ce397107…185c after=ce397107…185c` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_config_refuses_a_duplicate_person_id_in_one_authors_list
+1 passed in 0.29s
+```
+
+---
+
+## 8 · Security re-verification follow-up — L2 pinned pre-RS1a authors-less digest
+
+Product change under test: the A2 fold in
+`mapper/reqharness/config.py::canonical_config` (the pinned digest constant
+`PRE_RS1A_AUTHORS_LESS_DIGEST = fa46d573143f51637e87721b6f7d9fe91b8cfd3c00be9bf8e8f66daf4b09074b`,
+computed from `git show 05c516a~1:mapper/reqharness/config.py` loaded as a
+separate module over the seeded config).
+
+Mutation (position/operation): `if config.authors:` → `if True:` (always fold
+`authors`, so the authors-less digest drifts away from the pre-RS1a value).
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_an_authors_less_config_hashes_byte_identically_to_today
+FAILED … AssertionError: assert 'authors' not in {'authors': {}, …}
+1 failed in 0.35s
+```
+
+Restore: sha256 `before=ce397107…185c after=ce397107…185c` → `EQUAL`.
+
+```text
+$ pytest -q -p no:cacheprovider tests/test_reqharness_registry.py::test_an_authors_less_config_hashes_byte_identically_to_today
+1 passed in 0.25s
+```
+
+---
+
+## Gate run
+
+```text
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider \
+    tests/test_reqharness_*.py tests/test_no_operator_paths.py \
+    tests/test_requirements_canon.py tests/test_arch_osopen_callers.py \
+    tests/test_mod_deps.py
+115 passed, 1 warning in 101.31s
+
+$ env -u NO_COLOR -u TERM python -B -m ruff check mapper/reqharness
+All checks passed!
+```
+
+---
+
+## Security re-verification follow-up — gate run
+
+```text
+$ env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider \
+    tests/test_reqharness_*.py tests/test_no_operator_paths.py \
+    tests/test_requirements_canon.py
+101 passed, 1 warning in 93.10s
+
+$ env -u NO_COLOR -u TERM python -B -m ruff check mapper/reqharness
+All checks passed!
+```
+
+---
+
+## Digest verification (2026-10-16)
+
+The full sha256 of each file the transcript names, re-derived from the COMMITTED
+RS1a tree (`git show <commit>:<path> | sha256sum`), checked against the elided
+restore digests recorded above. Original lines above are untouched; this block
+is append-only.
+
+```text
+$ git show 05c516a:mapper/reqharness/config.py | sha256sum
+e7fd2c02092d799f9b03f94191c8d525b8b6e02716ea0d702a2550531a3f3a72
+
+$ git show 05c516a:mapper/reqharness/derive.py | sha256sum
+b1abfb66832d59f7ff6f33cc1782cd2c2f7f4a722cb07211c4a41501fe3e45ff
+
+$ git show 05c516a:mapper/reqharness/records.py | sha256sum
+4f99ff8e34c42d177e89f546f3ea82f10b661b074dabbc3c25795d038919d2a9
+
+$ git show b009a4b:mapper/reqharness/config.py | sha256sum
+ce3971071c42cb3a66e7acb5ad7153bcda168ef0b478adad5c179c80854f185c
+
+$ git show b009a4b:mapper/reqharness/derive.py | sha256sum
+56ac3362106dbb655dc66cac90786e92164141a63399b54d22df356e971ff037
+
+$ git show b009a4b:mapper/reqharness/records.py | sha256sum
+70c7ed828d83a8e2a39d26da98fa6859c189e19ab12c98b375a2672bb20fb278
+```
+
+Result, elided value → committed value:
+
+- `config.py` §1 `e7fd2c02092d799f9b03f94191c8d525b8b6e02716ea0d702a2550531a3f3a72`
+  (full, not elided) = `config.py@05c516a`. **EQUAL.**
+- `config.py` §7/§8 `ce397107…185c` = `config.py@b009a4b`
+  (`ce3971071c42cb3a66e7acb5ad7153bcda168ef0b478adad5c179c80854f185c`). **EQUAL**
+  (prefix `ce397107`, suffix `185c`).
+- `derive.py` §2/§3 `78c35103…67a9` and §5/§6 `cb12f9e4…5316` are the WORKING-TREE
+  hashes at the moment of each RED proof — `derive.py` evolved inside the increment
+  before it was committed, so those intermediate values are not a committed hash
+  (`derive.py@05c516a` = `b1abfb66…`, `derive.py@b009a4b..HEAD` = `56ac3362…`) and
+  are therefore not re-derivable from `git show`. The per-proof restore integrity
+  (`before == after`, each `EQUAL` above) is what those values certify, and that
+  discipline is not falsified by the value not being a commit.
+- `config.py` §4 `4c85ce32…caad` is likewise a working-tree hash (no committed
+  `config.py` matches it; `config.py@05c516a` = `e7fd2c02…`, `@b009a4b` = `ce397107…`).
+- `records.py` is named in §5 but records no elided digest; its committed hashes are
+  printed above for completeness.
+
+Re-pinned: `increment-001.md` evidence table (the `rs1a-red.transcript` sha256 was
+`83f0e0fe…`, now recomputed after this append).

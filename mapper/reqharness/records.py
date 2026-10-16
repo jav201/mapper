@@ -27,6 +27,38 @@ class YamlRefusal(ValidationError):
     duplicate key, or syntax the loader cannot compose."""
 
 
+class SigningRefused(ValidationError):
+    """A signing pre-flight or write was refused, carrying a STABLE reason
+    code (one of the reason-code literals below) plus the interpolation
+    fields the screen uses to paint the named refusal (LLR-RS.2.1).
+
+    A refusal writes nothing; the reason code is the stable identifier the
+    screen maps to its §6.6 string, never a free-text prose guess."""
+
+    def __init__(self, reason: str, message: str = "", **fields: object) -> None:
+        self.reason = reason
+        self.fields = fields
+        super().__init__(message or reason)
+
+
+class ReviewLimitError(ValidationError):
+    """The review-file count limit was reached (too many files under an event
+    directory) — a named, typed refusal the signer maps to `review_limit`."""
+
+
+class AlreadySignedError(ValidationError):
+    """A review event under the same content-named path already exists — the
+    exclusive-create (R8) collision the signer maps to `already_signed`."""
+
+
+#: The stable reason-code literals this batch carries.  RS1a owns the four
+#: `unentitled` causes `derive` assigns; RS1b adds the signing refusal codes.
+REASON_NO_ROLE = "no_role"
+REASON_AUTHOR = "author"
+REASON_OWNING_BATCH_MISMATCH = "owning_batch_mismatch"
+REASON_OWNING_BATCH_MISSING = "owning_batch_missing"
+
+
 @dataclass(frozen=True)
 class Person:
     """A registry member.  The email is stored ONLY as `email_sha256`
@@ -86,10 +118,16 @@ class ChainEvent:
 
 @dataclass(frozen=True)
 class Config:
-    """The validated, NFC-normalised live configuration (LLR-RH.1.1/1.3)."""
+    """The validated, NFC-normalised live configuration (LLR-RH.1.1/1.3).
+
+    `authors` is the optional admin-approved authorship map (HLR-RS.5):
+    owning-batch id -> declared person ids, in config order.  Absent or
+    empty `authors` is omitted from `canonical_config`, so a config that
+    never declared authorship keeps today's `config_hash` (A2)."""
 
     version: str
     people: tuple[Person, ...]
     roles: tuple[str, ...]
     classes: tuple[ReqClass, ...]
     release_rules: tuple[ReleaseRule, ...]
+    authors: tuple[tuple[str, tuple[str, ...]], ...] = ()
