@@ -1,0 +1,47 @@
+[
+ {
+  "station": "P0",
+  "date": "2026-10-15",
+  "decision": "P0 approved under the standing authorization: implement the B-134 review/signing screen verdict; mode core (signing reuses the reviews API validated in the full ReqHarness batch; triggers raise ARQ/PDR/DDR, security and UX); one core gap (pre-write entitlement + digest/head binding) -> new mapper/reqharness/signing.py; plan RS1 signing core, RS2 screen, RS3 seat/home/app"
+ },
+ {
+  "station": "ARQ",
+  "date": "2026-10-15",
+  "decision": "ARQ approved: new leaf module mapper/reqharness/signing.py and screen mapper/screens/review.py; ARCHITECTURE rows amended in the owning increments; standing authorization"
+ },
+ {
+  "station": "P1",
+  "date": "2026-10-15",
+  "decision": "P1 approved: US-RS-001..004, HLR-RS.1..5, LLR-RS.*, AT-090..102/107; rulings R1-R13 incl. authorship per batch (R6, operator) and the operator-approved copy table; standing authorization"
+ },
+ {
+  "station": "P2",
+  "date": "2026-10-15",
+  "decision": "P2 approved with conditions: QA (Claude Sonnet) iterate -> re-check approve-with-conditions, minors closed; security (Claude Opus) approve-with-conditions, MAJOR-1/2 and m1-m7 resolved; standing authorization"
+ },
+ {
+  "station": "PDR",
+  "date": "2026-10-15",
+  "decision": "PDR sealed approved with conditions: architect and security-reviewer (Claude Opus), ux-reviewer and qa-reviewer (Claude Sonnet); conditions C-1..C-18 applied; security F1 re-verified at the RS1a gate; standing authorization"
+ },
+ {
+  "station": "P3",
+  "date": "2026-10-16",
+  "decision": "P3 increments RS1a, RS1b, RS2 implemented (DeepSeek; RS2 finished by Claude Sonnet after a 2-hour timeout) and independently reviewed (Claude Opus code/security incl. F1 re-verified twice; Claude Sonnet UX), all blocks lifted; standing authorization"
+ },
+ {
+  "station": "DDR",
+  "date": "2026-10-16",
+  "decision": "DDR sealed approved with conditions, all discharged (architect Claude Opus, qa-reviewer Claude Sonnet); full suite 3533 passed / 0 failed at b9e7fa7; standing authorization"
+ },
+ {
+  "station": "P4",
+  "date": "2026-10-16",
+  "decision": "P4 PASS-WITH-NOTES: full suite 3543 passed / 0 failed (clean shell); 17/17 requirements; walkthrough by the UX and QA reviewers on the real screen; no real-user evaluation (one-person team); success message after signing left to the operator; standing authorization"
+ },
+ {
+  "station": "P5",
+  "date": "2026-10-16",
+  "decision": "P5 close written; residuals and open items carried (B-124..B-135 as listed); standing authorization"
+ }
+]

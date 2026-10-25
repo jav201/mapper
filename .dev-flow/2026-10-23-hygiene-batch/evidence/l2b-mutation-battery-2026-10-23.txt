@@ -1,0 +1,76 @@
+L2b MUTATION BATTERY — 2026-10-23 — lane L2b, batch 2026-10-23-hygiene-batch
+Every arm must go RED (KILLED); a SURVIVED arm counts as bad for this runner.
+===
+M-Q2-3 before: 0a8c5a3da4a7a32506a952c51049166c59833a3cef82feb6da250bd43b5283eb
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________ test_csv_nul_at_last_probe_byte_refuses_as_binary ______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24277/test_csv_nul_at_last_probe_byt0')
+
+    def test_csv_nul_at_last_probe_byte_refuses_as_binary(tmp_path):
+        """A NUL at byte 8,191 � the last byte inside the probe window."""
+        csv_path = tmp_path / "nul8191.csv"
+        payload = b"id,title\n" + b"x" * (BINARY_PROBE_BYTES - 1 - len(b"id,title\n")) + b"\x00"
+        assert len(payload) == BINARY_PROBE_BYTES
+        assert payload[BINARY_PROBE_BYTES - 1] == 0
+        csv_path.write_bytes(payload)
+>       with pytest.raises(ContentReadError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.osopen.ContentReadError'>
+
+tests\test_ingestion_limits.py:292: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_csv_nul_at_last_probe_byte_refuses_as_binary
+1 failed in 0.33s
+M-Q2-3 after:  0a8c5a3da4a7a32506a952c51049166c59833a3cef82feb6da250bd43b5283eb
+M-Q2-3 tests/test_ingestion_limits.py::test_csv_nul_at_last_probe_byte_refuses_as_binary: RED (KILLED)
+M-Q2-5 before: 264826232bc23bd647541f8af3e23bdb2f816c5b71698a75987b2b94032499b4
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________ test_at_114_csv_refusal_toast_shows_the_reason ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24278/test_at_114_csv_refusal_toast_0')
+
+    async def test_at_114_csv_refusal_toast_shows_the_reason(tmp_path):
+        csv_path = tmp_path / "bom.csv"
+        csv_path.write_bytes(b"id,title\nA,un\x00o\n")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            toasts: list[str] = []
+            real_notify = app.notify
+    
+            def notify(message, **kw):
+                toasts.append(str(message))
+                return real_notify(message, **kw)
+    
+            app.notify = notify
+            await pilot.press("i")
+            await pilot.pause()
+            assert isinstance(app.screen, _PromptScreen), app.screen
+            await pilot.press(*str(csv_path))
+            await pilot.press("enter")
+            for _ in range(6):
+                await pilot.pause()
+        refusal = [t for t in toasts if "could not read CSV" in t]
+        assert refusal, toasts
+>       assert "NUL" in refusal[0], refusal
+E       AssertionError: ["could not read CSV 'bom.csv': ContentReadError"]
+E       assert 'NUL' in "could not read CSV 'bom.csv': ContentReadError"
+
+tests\test_ingestion_limits.py:335: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_at_114_csv_refusal_toast_shows_the_reason
+1 failed in 6.11s
+M-Q2-5 after:  264826232bc23bd647541f8af3e23bdb2f816c5b71698a75987b2b94032499b4
+M-Q2-5 tests/test_ingestion_limits.py::test_at_114_csv_refusal_toast_shows_the_reason: RED (KILLED)
+arms: 2 bad: 0
+runner exit: 0

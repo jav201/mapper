@@ -74,7 +74,7 @@
 
 | File | State | Evidence |
 |---|---|---|
-| `mapper/reqharness/{reviews,records,config,derive,signing,release}.py`, `mapper/screens/review.py`, `mapper/screens/home.py`, `mapper/keymap.py`, `mapper/app.py` | ✅ committed on `feat/review-screen-batch`; merge into the trunk is the operator's (no standing authorization) | `git log 6121987..HEAD` |
+| `mapper/reqharness/{reviews,records,config,derive,signing,release}.py`, `mapper/screens/review.py`, `mapper/screens/home.py`, `mapper/keymap.py`, `mapper/app.py` | ✅ committed on `feat/review-screen-batch`; merged to the trunk by the operator as PR #27 (no standing authorization) — the squash-merge commit `b5dba72` carries every path of this row on the tree this record now stands in | `git log 6121987..HEAD` (branch tip at close) · landed on master as `b5dba72` |
 | `tests/test_reqharness_registry.py`, `tests/test_reqharness_signing.py`, `tests/test_reqharness_release.py`, `tests/test_review_screen.py` + the moved census/seat pins (`test_inc9*.py`, `test_keymap.py`, `test_key_dispatch.py`, `test_darkside_census.py`, `test_mod_parity.py` + the two goldens, `test_en5.py`, `test_app_imports_used.py`, `test_a3_census.py`, `test_repair_map_truth.py`) | ✅ committed | DDR row 5/6 |
 | `docs/ARCHITECTURE.md` | ✅ committed (RS2's A5/F1 amendment) | `increment-003.md:75` |
 | `REQUIREMENTS.md` (17 folded rows), `.dev-flow/BACKLOG.md` (B-133 extended, B-135), `04-validation.md`, `05-close.md`, PDR/DDR seals | 📋 uncommitted at hand-back; the orchestrator commits them | `git status` |

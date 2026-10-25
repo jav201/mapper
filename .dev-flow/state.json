@@ -1,10 +1,10 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-10-15-review-screen-batch",
-  "batch_objective": "ReqHarness REVIEW / SIGNING screen (B-134): implement the review/signing screen, variant A (list + detail) per the 2026-10-15 prototype verdict, with variant C's queue as a 'needs action' filter preset, two-key confirmed signing through the existing reviews.record_review API, a bottom release band, and the informative-change badge; plus its home door + keymap seat and the signing write path (a small headless core orchestration increment).",
+  "batch_id": "2026-10-23-hygiene-batch",
+  "batch_objective": "Hygiene batch Q (QuickMap handoff C9/C10/C11 + §5 rulings 2/7): Q1 mapper renders in colour ALWAYS, even under NO_COLOR=1 (operator ruling Q5); Q2 ingestion limits on _nodos.yml loading (bytes, nesting depth, anchors/aliases refused, node/edge caps) + content-read limits (per-file byte cap, NUL probe) + Windows device-name ids; Q3 scalecheck sweep (every renderer exactly h lines of at most w cells at 80x24, 90x30, 118x34, 160x45, 200x50) + a Canvas.put audit hook recording overprint/clip events. C11 habits as process: move-aside RED counterfactual per deliverable file, close the axis not the instance, every LLR clause added by amendment names its asserting test and mutant.",
   "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in a worktree of the primary checkout. V40 NOTICEs this by design.",
-  "mode": "core",
+  "mode": "full",
   "mode_history": [
     {
       "batch_id": "2026-08-18-batch-01",
@@ -111,11 +111,18 @@
       "to": "core",
       "date": "2026-10-15",
       "reason": "the ReqHarness review/signing screen (B-134): a UI feature over the already-validated reqharness core — not a client deliverable and no regulated context (E3 not fired); the signing write path exercises the existing reviews.record_review API (validated in the parent full batch); the security-relevant controls fire by trigger (C1/C6/C8) regardless of mode. Seeded core per the level table; the orchestrator may promote to full for continuity with the parent ReqHarness batch."
+    },
+    {
+      "batch_id": "2026-10-23-hygiene-batch",
+      "from": null,
+      "to": "full",
+      "date": "2026-10-23",
+      "reason": "operator commission 2026-10-23 («Arranca las tres, delega todo lo que puedas a kimi») — three modules Q1/Q2/Q3; Q3 changes the frozen Canvas interface (trigger A3) so ARQ/PDR/DDR stand; full adds ISO/IEC/IEEE 29148 + strict EARS, post-mortem + 06-docs."
     }
   ],
   "guided": false,
-  "current_station": "P5",
-  "phase_status": "approved",
+  "current_station": "P6",
+  "phase_status": "awaiting-sync",
   "stations_active": [
     "P0",
     "ARQ",
@@ -125,124 +132,165 @@
     "P3",
     "DDR",
     "P4",
-    "P5"
+    "P5",
+    "P6"
   ],
   "iterations_per_station": {
     "P0": 0,
-    "P1": 0,
-    "P2": 0,
+    "P1": 1,
+    "P2": 1,
     "P3": 0,
     "P4": 0,
     "P5": 0,
+    "P6": 0,
     "ARQ": 0,
     "DDR": 0,
     "PDR": 0
   },
   "triggers": {
-    "evaluated_at": "2026-10-15T12:55:41",
+    "evaluated_at": "2026-10-23T09:15:48",
     "fired": [
       "A2",
       "A3",
-      "B4",
-      "C1",
-      "C8",
+      "A4",
+      "B1",
+      "B3",
+      "C6",
       "D1",
-      "E1",
-      "F1"
+      "E1"
     ],
     "not_fired": [
       "A1",
-      "A4",
-      "B1",
       "B2",
-      "B3",
+      "B4",
+      "C1",
       "C2",
       "C3",
       "C4",
       "C5",
-      "C6",
       "C7",
+      "C8",
       "D2",
       "E2",
       "E3",
+      "F1",
       "F2"
     ],
-    "record": ".dev-flow/2026-10-15-review-screen-batch/PLAN.md#triggers"
+    "record": ".dev-flow/2026-10-23-hygiene-batch/PLAN.md#triggers"
   },
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-10-15-review-screen-batch/01-requirements.md",
-    "requirements_ledger": "repo:.dev-flow/2026-10-15-review-screen-batch/01-requirements-ledger.md",
-    "traceability": "repo:.dev-flow/2026-10-15-review-screen-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-10-23-hygiene-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-23-hygiene-batch/01-requirements-ledger.md",
+    "traceability": "repo:.dev-flow/2026-10-23-hygiene-batch/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-10-15-review-screen-batch/03-increments/",
-    "evidence": "repo:.dev-flow/2026-10-15-review-screen-batch/evidence/",
+    "increments": "repo:.dev-flow/2026-10-23-hygiene-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-23-hygiene-batch/evidence/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "design_pdr": "vault:mapper/design/PDR-2026-10-15-review-screen-batch.md",
-    "design_ddr": "vault:mapper/design/DDR-2026-10-15-review-screen-batch.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-10-15-review-screen-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-10-15-review-screen-batch/README.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-23-hygiene-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-23-hygiene-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-23-hygiene-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-23-hygiene-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "3a70ff8a4eedb8ee423fa174fe1930681d8d884d",
+  "base_ref": "b5dba72590c6ac84e8e3b634d7ef6e9b4b84cba2",
   "artifacts": {},
   "decisions_log": [
     {
       "station": "P0",
-      "date": "2026-10-15",
-      "decision": "P0 approved under the standing authorization: implement the B-134 review/signing screen verdict; mode core (signing reuses the reviews API validated in the full ReqHarness batch; triggers raise ARQ/PDR/DDR, security and UX); one core gap (pre-write entitlement + digest/head binding) -> new mapper/reqharness/signing.py; plan RS1 signing core, RS2 screen, RS3 seat/home/app"
+      "date": "2026-10-23",
+      "decision": "P0 approved under the standing authorization: three stories READY (US-Q1-001 colour under NO_COLOR; US-Q2-001 ingestion limits; US-Q3-001 scalecheck + canvas audit); triggers fired A2/A3/A4 (ARQ+PDR+DDR stand), B1, B3, C6, D1, E1; C11 habits as process; ARQ is next"
     },
     {
       "station": "ARQ",
-      "date": "2026-10-15",
-      "decision": "ARQ approved: new leaf module mapper/reqharness/signing.py and screen mapper/screens/review.py; ARCHITECTURE rows amended in the owning increments; standing authorization"
+      "date": "2026-10-23",
+      "decision": "ARQ approved under the standing authorization: ARCHITECTURE.md amended as commitments (no boundary moves; store/import_csv gain the one osopen bounded-read edge each; Canvas.__init__ + optional audit=None constructor-injected, frozen at PDR; B-44 and osopen-caller pins move in the owning increments); R-015 rationale; §6 worksheet declares L1/L2/L3 parallel after PDR; P1 requirements derivation is next"
     },
     {
       "station": "P1",
-      "date": "2026-10-15",
-      "decision": "P1 approved: US-RS-001..004, HLR-RS.1..5, LLR-RS.*, AT-090..102/107; rulings R1-R13 incl. authorship per batch (R6, operator) and the operator-approved copy table; standing authorization"
+      "date": "2026-10-23",
+      "decision": "P1 approved under the standing authorization: contract drafted (3 US / 6 HLR / 12 LLR / AT-108..116, ids grouped by module), 12-row premise table all TRUE with executed evidence, IFC Part A (4 flows) + Part B (2 components), §2.8 fork preconditions (condition 3 PDR-gated), security scan answered in §6.3 (flags session/expose = vocabulary collisions), ledger intentionally empty (no amendments); gate re-run green exit 0 after V4/V14 repairs; P2 cross-review is next — this worker stops here per the unit brief"
     },
     {
       "station": "P2",
-      "date": "2026-10-15",
-      "decision": "P2 approved with conditions: QA (Claude Sonnet) iterate -> re-check approve-with-conditions, minors closed; security (Claude Opus) approve-with-conditions, MAJOR-1/2 and m1-m7 resolved; standing authorization"
+      "date": "2026-10-23",
+      "decision": "P2 intake — P1 contract amended under the standing authorization with the orchestrator's rulings R1-R6 (2026-10-23): R1 node/edge caps set to 100,000/100,000 — the executed measurement (every perf builder shape constructed, every committed golden parsed) put the largest fixture at 6,000 nodes / 5,999 edges (wide6000), which exceeds 1/10 of the proposed 50,000, so the UNLESS clause fired (16.7x headroom; ledger LED-2026-10-23-hygiene-batch.1, asserting test tests/test_ingestion_limits.py::test_count_caps, mutant M-Q2-4); R2 content-read surface confirmed as map files + CSV import, attachments OS-handed with no caps (ledger .2); R3 Q1 mechanism decided — NO_COLOR neutralised in MapperApp.__init__, no --no-color opt-out (ledger .3, asserting test test_no_color_removed_before_super, mutant M-Q1-1); R4 audit events v1 = clip + overprint (overprint = both cells alphanumeric and different), dim-text deferred to BACKLOG B-136 (ledger .4, asserting test test_events, mutant M-Q3-2); R5 condition-3 crossed reverse census stays owed at PDR before lanes fork; R6 sync-owed notes replaced with 'synced 2026-10-23 (light, README only)' — the outgoing batch's light vault sync is DONE, the vault folder is the flag, the outgoing batch's sealed state untouched. Gate re-run green: devflow-validate.py --brief exit 0, 0 BLOCK (V62 retired). All five refinement-log open questions closed. P2 cross-review is the orchestrator's next station — this worker stops here."
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-23",
+      "decision": "P2 dispositions + P2->PDR transition (author pass, under the standing authorization answering the iterate-to-refine gate): the review's 3 requirement-defect majors were amended in P1, not carried open. F1: premise 5 re-measured over the full committed population including the tracked perf-evidence workspaces (largest committed map = 12,000 nodes / 11,999 edges, sidecar 1,369,835 B); caps retained 100,000/100,000 at 8.3x headroom under the >=5x floor re-ruled by the standing authorization (>=10x would force >=120,000); anidado yaml-depth corrected to 4; amendment LED-2026-10-23-hygiene-batch.5 (asserting test tests/test_ingestion_limits.py::test_count_caps, mutant M-Q2-4). F2: mapper/osopen.py added to L2's C-52 file set (contract §2.8 condition 2, docs/ARCHITECTURE.md §6 worksheet 3->4, PLAN.md roadmap/triggers/risks); amendment .6 (asserting pin tests/test_arch_osopen_callers.py). F3: the Q3 sweep state matrix recorded as an explicit artifact at design/state-matrix.md (|states| = 4: plain/folded/empty/orphan, code-derived per C-31; empty state asserts the documented short-circuit) and bound in HLR-Q3.1 / LLR-Q3.1.2 (6 x 5 x 4 = 120); amendment .7 (asserting test tests/test_scalecheck.py::test_sweep, mutant M-Q3-1); derivation found a dangling-edge OutlineRenderer crash (outline.py:214-218) - backlog candidate. Minors: m1 (PLAN 12->11 LLR) and m2 (premise 9 -> ARCHITECTURE.md:200/:214; premise 12 -> store.py:28-31/:58-61) fixed inline; m3 folded ruling R4's second limb into LLR-Q3.2.1's statement (.8, test_events / M-Q3-2); m4 adopted in the design proposal (capped cap+1 read per qm:model.py:498-505); m5/m6 carried to Phase 3 with the owning station named (screen-toast arms; device-name arms named at PDR: test_seed_safety.py BAD_NAMES + test_inc9n.py - the contract's test_store.py example was verified absent). The amended contract owes the reviewers' second P2 pass. PDR: current_station moves P2 -> PDR; design proposal drafted at design/design-proposal.md and the PDR record seeded at design/PDR-2026-10-23-hygiene-batch.md (verdict pending seal - awaits architect + qa-reviewer); the crossed reverse census (ruling R5 / C-52 condition 3) was executed 2026-10-23 and is recorded in the proposal §8 (crossed matrix empty of write hazards; read-only cross presences named: MapStoreError consumed by screens/construct.py:57 + screens/common.py, not app.py; outline.py:311 no_color=True is a renderer pin, out of L1's edit set); D1 (Canvas audit=None signature) and D2 (osopen reader name + constants) are the freeze candidates for the seal. Review Status column updated for the reviewers' re-check. Gate: devflow-validate.py --brief to be run to 0 BLOCK at this unit's close; local commit only."
+    },
+    {
+      "station": "P2",
+      "date": "2026-10-23",
+      "decision": "P2 second pass (independent reviewer unit, four parallel reviewer subagents over the amended contract, evidence .dev-flow/2026-10-23-hygiene-batch/evidence/recheck-*.md): F1/F2/F3 and m1-m4 VERIFIED against the live tree (perf-evidence re-measurement reproduced: 12,000 nodes / 11,999 edges / 1,369,835 B; osopen.py in L2 set at contract:203 + ARCHITECTURE.md:295 + PLAN; state matrix bound 6x5x4=120; citations m2 hold; LLR-Q3.2.1 second limb present; capped cap+1 read mandated in the design); m5/m6 confirmed open-correctly-carried to Phase 3. Gate: approve. Two new contract-record minors N1 (stale 696 KB figure at 01-requirements.md:601 + PLAN.md:143) and N2 (premise 5 .mmd maximum falsified by at076_saved_wide6000_after_add_child.mmd 222,002 B) named in 02-review.md, owning station: trunk record-keeping before the fork seals."
     },
     {
       "station": "PDR",
-      "date": "2026-10-15",
-      "decision": "PDR sealed approved with conditions: architect and security-reviewer (Claude Opus), ux-reviewer and qa-reviewer (Claude Sonnet); conditions C-1..C-18 applied; security F1 re-verified at the RS1a gate; standing authorization"
+      "date": "2026-10-23",
+      "decision": "PDR sealed under the standing authorization: approved with conditions. Participants: architect / qa-reviewer / ux-reviewer (D1 fired) / security-reviewer (C6 fired), each a Kimi K3 subagent executing its agents/<role>.md. D1 (Canvas + audit=None) and D2 (osopen bounded reader name + constants) FREEZE; D1 lands as trunk work first. Four open conditions recorded in the record's section B: (2) F-UX-1 major - the CSV refusal toast at mapper/screens/home.py:524-530 paints only type(e).__name__ and home.py sits in no lane's file set; a trunk amendment must give it an owner and a reachable reason BEFORE the lanes fork; (3) S1 LOW - diff-side git show captures the whole blob before any cap, disposition owed at the L2 gate; (4) N3 diff-row wording; (5) record amendments n1/n2/n4/F-UX-2 at their named gates. Gate: devflow-validate.py --brief exit 0, 0 BLOCK."
+    },
+    {
+      "station": "PDR",
+      "date": "2026-10-23",
+      "decision": "PDR gate closed under the standing authorization: the PDR record is SEALED 2026-10-23, verdict approved with conditions, on the reviewers' second pass + PDR review (architect approved-with-conditions / qa approve / security approve-with-conditions / ux approve-with-conditions; evidence evidence/recheck-{architect,qa,security,ux}.md; merged in 02-review.md). D1 (Canvas + audit=None) and D2 (osopen bounded reader name + constants) FREEZE; D1 lands as trunk work first. Conditions: N3 discharged AT the seal by ruling R8 (diff bars an osopen import — capped reads reach diff only via store's prescan, pinned by tests/test_arch_osopen_callers.py); F-UX-1 discharged AT the seal by ruling R7 — mapper/screens/home.py joins the Q2 lane, L2 forked into L2a {store,diff,osopen} + L2b {import_csv,screens/home} (ledger LED-2026-10-23-hygiene-batch.9, mutant M-Q2-5), AT-114 observed through the running screen per m5; S1 (LOW) rides OPEN to the L2a increment gate (ruling R9 — bound the git show capture or accept with rationale, decided there); minors N1/N2/n1-n4/F-UX-2 fixed in the trunk records at the seal; n3 mints mutant M-Q3-4 (ledger .10). Gate: devflow-validate.py --brief exit 0, 0 BLOCK. P3 lanes L1/L2a/L2b/L3 fork next; this worker stops here per the unit brief."
     },
     {
       "station": "P3",
-      "date": "2026-10-16",
-      "decision": "P3 increments RS1a, RS1b, RS2 implemented (DeepSeek; RS2 finished by Claude Sonnet after a 2-hour timeout) and independently reviewed (Claude Opus code/security incl. F1 re-verified twice; Claude Sonnet UX), all blocks lifted; standing authorization"
+      "date": "2026-10-24",
+      "decision": "increment-001 gate approved — independent review OK-with-notes (0 BLOCKER / 0 MAJOR / 1 MINOR); nit F1 owed to author (green transcript exit-code line)",
+      "notes": "review-inc001.md; swarm agent-001; commit 345e46d"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-24",
+      "decision": "increment-002 gate approved — independent review OK-with-notes (0 BLOCKER / 0 MAJOR / 1 MINOR); F1 owed to author (NO_COLOR set-empty boundary regime untested)",
+      "notes": "review-inc002.md; swarm agent-002; commit 78bba97"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-24",
+      "decision": "increment-003 gate approved — independent review OK-with-notes (0 BLOCKER / 1 MAJOR / 3 MINOR); F1 MAJOR owed to author (unbounded anchor name in prescan refusal, mapper/store.py:724)",
+      "notes": "review-inc003.md; swarm agent-003; commits 0a94362 + 37a8175; code+security lenses"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-24",
+      "decision": "increment-004 gate approved — independent review OK-with-notes (0 BLOCKER / 1 MAJOR / 2 MINOR); F1 MAJOR owed to author (diff.py _show dropped UnicodeDecodeError guard)",
+      "notes": "review-inc004.md; swarm agent-004; commit a4d573f; code+security+UX(AT-114) lenses"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-24",
+      "decision": "P3 phase closed — lanes L1/L2a/L2b/L3 joined at a860a27 with the review-findings follow-ups; P4 validation evaluated and recorded in 04-validation.md: the orchestrator's gate run (PYTHONIOENCODING=utf-8 env -u NO_COLOR -u TERM python -m pytest -q on a860a27, transcript committed as 201646c, sha256 00652d2c...4bd592) — 3575 passed / 1 failed / 24 deselected / 3 xfailed; the single failure is the PRE-EXISTING flake tests/test_reqharness_cache_fastpath.py::test_changed_size_or_mtime_takes_full_path, reproduced 1/6 on master b5dba72 by the orchestrator — disposition BACKLOG B-137; verdict PASS-WITH-NOTES; signed test ledger reconciles 3546 - 0 + 33 = 3579 (base re-derived on a clean b5dba72 worktree); Layer A 18/18 requirements pass, Layer B AT-108..116 each realized on exactly one on-disk node; escaped-bug regression captured (the three sealed LLR-N13.1.7 arms the crossed census missed — ruling R10, ledger .14, mutant M-Q2-1-XB14, xbatch14 red/green/mutant evidence); supersession recorded: the 171-failure full-suite-after-merge transcript was a worker-shell environment artefact (NO_COLOR/TERM exported), superseded by the clean run; BACKLOG B-137/B-138/B-139 added, B-136 kept; DDR record drafted at design/DDR-2026-10-23-hygiene-batch.md with verdict pending — awaits architect + software-dev + qa-reviewer: the P4-stamped gate decision is owed when the reviewers seal the DDR and the batch moves to P4 (the flow refuses to stand at P4 while the DDR gate is undecided); traceability matrix filled at 06-docs/traceability-matrix.md; local commit only, no push"
     },
     {
       "station": "DDR",
-      "date": "2026-10-16",
-      "decision": "DDR sealed approved with conditions, all discharged (architect Claude Opus, qa-reviewer Claude Sonnet); full suite 3533 passed / 0 failed at b9e7fa7; standing authorization"
+      "date": "2026-10-24",
+      "decision": "DDR 2026-10-23-hygiene-batch sealed 2026-10-24: approved with conditions — independent reviewer swarm (architect + software-dev + qa-reviewer, each a Kimi K3 subagent; evidence ddr-{architect,software-dev,qa}.md); 4 findings all MINOR (A-DDR-1 osopen ONE-name prose vs measured six-name import; A-DDR-2 duplicate screens/home.py key in ALLOWED_OUTSIDE_APP; F-SD-1 LEAK_EXCEPTIONS registry entry impossible by construction, inline declaration is the carry; QA-DDR-1 ledger .14 surplus-arm wording nit); conditions C1 (ARCHITECTURE.md ONE-name prose amendment) and C2 (record inline LEAK_EXCEPTIONS carry + comment reword at the trunk join), each individually dischargeable; open points ruled: B1 fixture-content class closed, derived osopen allow-list binds, S1 seam-pinned form accepted (D3 seals), residuals accepted; D1/D2/D3/D4 bind; gate 0 BLOCK"
     },
     {
       "station": "P4",
-      "date": "2026-10-16",
-      "decision": "P4 PASS-WITH-NOTES: full suite 3543 passed / 0 failed (clean shell); 17/17 requirements; walkthrough by the UX and QA reviewers on the real screen; no real-user evaluation (one-person team); success message after signing left to the operator; standing authorization"
+      "date": "2026-10-24",
+      "decision": "P5 post-mortem written for 2026-10-23-hygiene-batch: what worked (machine-derived oracles, P2 requirement-defect catch, lane fork, A-110 x3) and what didn't (orchestrator completion-detection bug - two sessions edited one worktree; home-path leaks caught by A-110 three times; worker-shell NO_COLOR/TERM artefact behind the 171-failure run; crossed census missed the B1 fixture-content consumer); lessons recorded as controls with owners; metrics 20 findings (0B/5M/15m, 18 closed, C1/C2 conditions open), ledger 3546-0+33=3579, gate suite 3575 passed/1 pre-existing flake; open items B-136..B-139 + relation-map port (S1 strategy) + prototype-rounds 2026-10-23/24 traceability gap; conditional-gate table: PDR conditions discharged, DDR C1/C2 owed at the trunk join"
     },
     {
       "station": "P5",
-      "date": "2026-10-16",
-      "decision": "P5 close written; residuals and open items carried (B-124..B-135 as listed); standing authorization"
+      "date": "2026-10-24",
+      "decision": "P6 documentation written for 2026-10-23-hygiene-batch: 06-docs/executive-summary.md (non-technical: context/problem/solution/outcomes/next steps), functionality.md (technical: Q1/Q2/Q3 flows, module table, usage, clean-env convention), traceability-matrix.md finalized (sign-off closed 2026-10-24; matrices were already 0-gap from P4/DDR); diagrams intentionally empty (no new architecture); batch to awaiting-sync — gate decision (close batch / open new / iterate) is the operator's at the P5 gate; backlog reconciliation header refresh and vault sync owed at the close/sync unit"
     }
   ],
   "obsidian_synced": false,
-  "created_at": "2026-10-15T18:52:08Z",
+  "created_at": "2026-10-23T14:59:29Z",
   "previous_batch": {
-    "batch_id": "2026-10-11-reqharness-batch",
-    "merge_commit": "d216d68",
-    "close_pr": "https://github.com/<owner>/mapper/pull/22",
-    "closed_at": "2026-10-11",
-    "close_commit": "5a991c6",
-    "obsidian_synced": true,
-    "archive": ".dev-flow/2026-10-11-reqharness-batch/decisions-log.json + state-snapshot-at-close.json"
+    "batch_id": "2026-10-15-review-screen-batch",
+    "merge_commit": "b5dba72",
+    "close_pr": "https://github.com/<owner>/mapper/pull/27",
+    "closed_at": "2026-10-16",
+    "obsidian_synced": false,
+    "note": "synced 2026-10-23 (light, README only) — orchestrator ruling R6 correction: the outgoing batch's light vault sync is DONE; the vault README was written on 2026-10-23, after this batch's rollover check. SUPERSEDED case of /dev-flow-sync: the vault folder is the flag; the outgoing batch's sealed state is not rewritten.",
+    "archive": ".dev-flow/2026-10-15-review-screen-batch/decisions-log.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
@@ -253,7 +301,6 @@
       "close_commit": "bd17fabe0fbc83eb1dfbaa0ab36d35b9ff0bd8ba",
       "obsidian_synced": true
     },
-    "note": "The parked feature-batch record was PROMOTED to top level here (P-CARRY-1: replace, do not append). The closed repair batch was demoted to previous_batch. why_parked and artifacts_landed_by are preserved below.",
     "why_parked": "REJECTED at its PDR second pass with twelve blockers; four of them were shipped defects on master rather than requirement defects and were lifted into 2026-08-27-repair-batch-02. This record is preserved verbatim so the feature batch can resume without re-deriving it.",
     "artifacts_landed_by": "commit 0353909 on fix/repair-batch-02 -- ~13.5k lines of this batch's PDR artifacts, a legitimate C-44 discharge that was already on the branch when the repair batch resumed. It is NOT the repair batch's work. Recorded here so those artifacts are not re-derived on the assumption they never landed.",
     "triggers_note": "The trigger evaluation is shared and lives at the top level of this file: the evaluation was authored by this batch, and its B3 correction was made by 2026-08-27-repair-batch-02. Copying it here would create a second source of truth for one record.",
@@ -265,6 +312,15 @@
       "close_commit": "d8a8536",
       "obsidian_synced": true,
       "carries": ".dev-flow/2026-08-27-repair-batch-02/05-carries.md"
+    },
+    "2026-10-11-reqharness-batch": {
+      "batch_id": "2026-10-11-reqharness-batch",
+      "merge_commit": "d216d68",
+      "close_pr": "https://github.com/<owner>/mapper/pull/22",
+      "closed_at": "2026-10-11",
+      "close_commit": "5a991c6",
+      "obsidian_synced": true,
+      "archive": ".dev-flow/2026-10-11-reqharness-batch/decisions-log.json + state-snapshot-at-close.json"
     }
   }
 }

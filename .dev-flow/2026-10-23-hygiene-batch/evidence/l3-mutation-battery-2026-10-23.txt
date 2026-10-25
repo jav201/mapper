@@ -1,0 +1,632 @@
+M-Q3-1 before: 1a31396661fdebc1a8a8ee65a76b356d8d4c16efd75e7cc60871b3b7184b06a8
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________________________________ test_sweep __________________________________
+
+    def test_sweep():
+        """LLR-Q3.1.2 / AT-115 — the 120-combo geometry sweep over the state matrix."""
+        failures = []
+        for name, cls in _roster():
+            renderer = cls()
+            for state_name, (graph, kw, fold_graph) in _states().items():
+                for w, h in SIZES:
+                    state = ViewState(w=w, h=h, **kw)
+                    text = renderer.render(graph, state)
+                    _check_geometry(name, graph, text, w, h, state_name, state, failures)
+                    if state_name == "folded" and name != "LayeredRenderer":
+                        # Fold-invariance: the other five renderers must answer a
+                        # folded ViewState byte-identically to the unfolded one on
+                        # the SAME graph (state matrix applicability matrix).
+                        unfolded = renderer.render(
+                            fold_graph, ViewState(w=w, h=h)
+                        ).plain
+                        if unfolded != text.plain:
+                            failures.append(f"{name} {w}x{h} folded: fold-variant vs plain")
+>       assert not failures, "\n".join(failures)
+E       AssertionError: RadialRenderer 80x24 plain: line 1 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 2 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 3 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 4 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 5 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 6 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 7 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 8 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 9 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 10 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 11 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 12 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 13 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 14 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 15 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 16 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 17 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 18 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 19 is 82 cells > 80
+E         RadialRenderer 80x24 plain: line 20 is 82 cells > 80
+E         RadialRenderer 90x30 plain: line 1 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 2 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 3 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 4 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 5 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 6 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 7 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 8 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 9 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 10 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 11 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 12 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 13 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 14 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 15 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 16 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 17 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 18 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 19 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 20 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 21 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 22 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 23 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 24 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 25 is 92 cells > 90
+E         RadialRenderer 90x30 plain: line 26 is 92 cells > 90
+E         RadialRenderer 118x34 plain: line 1 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 2 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 3 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 4 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 5 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 6 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 7 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 8 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 9 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 10 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 11 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 12 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 13 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 14 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 15 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 16 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 17 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 18 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 19 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 20 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 21 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 22 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 23 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 24 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 25 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 26 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 27 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 28 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 29 is 120 cells > 118
+E         RadialRenderer 118x34 plain: line 30 is 120 cells > 118
+E         RadialRenderer 160x45 plain: line 1 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 2 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 3 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 4 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 5 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 6 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 7 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 8 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 9 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 10 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 11 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 12 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 13 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 14 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 15 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 16 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 17 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 18 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 19 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 20 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 21 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 22 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 23 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 24 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 25 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 26 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 27 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 28 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 29 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 30 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 31 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 32 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 33 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 34 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 35 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 36 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 37 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 38 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 39 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 40 is 162 cells > 160
+E         RadialRenderer 160x45 plain: line 41 is 162 cells > 160
+E         RadialRenderer 200x50 plain: line 1 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 2 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 3 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 4 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 5 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 6 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 7 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 8 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 9 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 10 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 11 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 12 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 13 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 14 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 15 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 16 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 17 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 18 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 19 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 20 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 21 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 22 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 23 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 24 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 25 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 26 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 27 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 28 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 29 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 30 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 31 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 32 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 33 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 34 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 35 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 36 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 37 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 38 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 39 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 40 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 41 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 42 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 43 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 44 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 45 is 202 cells > 200
+E         RadialRenderer 200x50 plain: line 46 is 202 cells > 200
+E         RadialRenderer 80x24 folded: line 1 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 2 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 3 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 4 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 5 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 6 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 7 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 8 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 9 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 10 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 11 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 12 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 13 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 14 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 15 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 16 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 17 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 18 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 19 is 82 cells > 80
+E         RadialRenderer 80x24 folded: line 20 is 82 cells > 80
+E         RadialRenderer 90x30 folded: line 1 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 2 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 3 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 4 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 5 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 6 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 7 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 8 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 9 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 10 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 11 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 12 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 13 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 14 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 15 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 16 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 17 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 18 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 19 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 20 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 21 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 22 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 23 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 24 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 25 is 92 cells > 90
+E         RadialRenderer 90x30 folded: line 26 is 92 cells > 90
+E         RadialRenderer 118x34 folded: line 1 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 2 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 3 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 4 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 5 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 6 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 7 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 8 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 9 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 10 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 11 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 12 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 13 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 14 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 15 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 16 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 17 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 18 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 19 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 20 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 21 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 22 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 23 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 24 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 25 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 26 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 27 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 28 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 29 is 120 cells > 118
+E         RadialRenderer 118x34 folded: line 30 is 120 cells > 118
+E         RadialRenderer 160x45 folded: line 1 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 2 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 3 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 4 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 5 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 6 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 7 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 8 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 9 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 10 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 11 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 12 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 13 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 14 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 15 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 16 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 17 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 18 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 19 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 20 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 21 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 22 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 23 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 24 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 25 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 26 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 27 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 28 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 29 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 30 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 31 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 32 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 33 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 34 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 35 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 36 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 37 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 38 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 39 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 40 is 162 cells > 160
+E         RadialRenderer 160x45 folded: line 41 is 162 cells > 160
+E         RadialRenderer 200x50 folded: line 1 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 2 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 3 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 4 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 5 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 6 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 7 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 8 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 9 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 10 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 11 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 12 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 13 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 14 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 15 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 16 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 17 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 18 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 19 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 20 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 21 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 22 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 23 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 24 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 25 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 26 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 27 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 28 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 29 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 30 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 31 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 32 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 33 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 34 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 35 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 36 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 37 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 38 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 39 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 40 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 41 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 42 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 43 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 44 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 45 is 202 cells > 200
+E         RadialRenderer 200x50 folded: line 46 is 202 cells > 200
+E         RadialRenderer 80x24 orphan: line 1 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 2 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 3 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 4 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 5 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 6 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 7 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 8 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 9 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 10 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 11 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 12 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 13 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 14 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 15 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 16 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 17 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 18 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 19 is 82 cells > 80
+E         RadialRenderer 80x24 orphan: line 20 is 82 cells > 80
+E         RadialRenderer 90x30 orphan: line 1 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 2 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 3 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 4 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 5 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 6 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 7 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 8 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 9 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 10 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 11 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 12 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 13 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 14 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 15 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 16 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 17 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 18 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 19 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 20 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 21 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 22 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 23 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 24 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 25 is 92 cells > 90
+E         RadialRenderer 90x30 orphan: line 26 is 92 cells > 90
+E         RadialRenderer 118x34 orphan: line 1 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 2 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 3 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 4 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 5 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 6 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 7 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 8 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 9 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 10 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 11 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 12 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 13 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 14 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 15 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 16 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 17 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 18 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 19 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 20 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 21 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 22 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 23 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 24 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 25 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 26 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 27 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 28 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 29 is 120 cells > 118
+E         RadialRenderer 118x34 orphan: line 30 is 120 cells > 118
+E         RadialRenderer 160x45 orphan: line 1 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 2 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 3 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 4 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 5 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 6 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 7 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 8 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 9 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 10 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 11 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 12 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 13 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 14 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 15 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 16 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 17 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 18 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 19 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 20 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 21 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 22 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 23 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 24 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 25 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 26 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 27 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 28 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 29 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 30 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 31 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 32 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 33 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 34 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 35 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 36 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 37 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 38 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 39 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 40 is 162 cells > 160
+E         RadialRenderer 160x45 orphan: line 41 is 162 cells > 160
+E         RadialRenderer 200x50 orphan: line 1 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 2 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 3 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 4 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 5 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 6 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 7 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 8 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 9 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 10 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 11 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 12 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 13 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 14 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 15 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 16 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 17 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 18 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 19 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 20 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 21 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 22 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 23 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 24 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 25 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 26 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 27 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 28 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 29 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 30 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 31 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 32 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 33 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 34 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 35 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 36 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 37 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 38 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 39 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 40 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 41 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 42 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 43 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 44 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 45 is 202 cells > 200
+E         RadialRenderer 200x50 orphan: line 46 is 202 cells > 200
+E       assert not ['RadialRenderer 80x24 plain: line 1 is 82 cells > 80', 'RadialRenderer 80x24 plain: line 2 is 82 cells > 80', 'Radial...80', 'RadialRenderer 80x24 plain: line 5 is 82 cells > 80', 'RadialRenderer 80x24 plain: line 6 is 82 cells > 80', ...]
+
+tests\test_scalecheck.py:129: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_scalecheck.py::test_sweep - AssertionError: RadialRenderer ...
+1 failed in 0.31s
+M-Q3-1 after:  1a31396661fdebc1a8a8ee65a76b356d8d4c16efd75e7cc60871b3b7184b06a8
+M-Q3-1 tests/test_scalecheck.py::test_sweep: RED (KILLED)
+M-Q3-2 before: decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________________________________ test_events _________________________________
+
+    def test_events():
+        """LLR-Q3.2.1 — clip/overprint coordinates recorded; every other write silent."""
+        audit = {"clip": [], "overprint": []}
+        cv = Canvas(4, 2, audit=audit)
+        cv.put(4, 0, "X")            # out of bounds, non-space  -> clip
+        cv.put(-1, 1, "Y")           # out of bounds, non-space  -> clip
+        cv.put(4, 1, " ")            # out of bounds space       -> nothing
+        cv.put(0, 0, " ")            # in-bounds space write     -> nothing
+        cv.put(0, 0, "A")
+        cv.put(0, 0, "A")            # same character            -> not an overprint
+        cv.put(0, 0, "B")            # different alphanumeric    -> overprint
+        cv.put(1, 0, "\u2502")            # box drawing, not alnum    -> nothing
+        cv.put(1, 0, "\u2500")
+        cv.put(2, 0, "C")
+        cv.put(2, 0, "\u2502")            # held alnum, NEW not alnum -> nothing (M-Q3-4)
+        cv.put(3, 0, "3")
+        cv.put(3, 0, "7")            # digits are alphanumeric   -> overprint
+        assert audit["clip"] == [(4, 0), (-1, 1)]
+>       assert audit["overprint"] == [(0, 0), (3, 0)]
+E       assert [] == [(0, 0), (3, 0)]
+E         
+E         Right contains 2 more items, first extra item: (0, 0)
+E         Use -v to get more diff
+
+tests\test_canvas_audit.py:36: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_canvas_audit.py::test_events - assert [] == [(0, 0), (3, 0)]
+1 failed in 0.13s
+M-Q3-2 after:  decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+M-Q3-2 tests/test_canvas_audit.py::test_events: RED (KILLED)
+M-Q3-3 before: decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____________________________ test_byte_identity ______________________________
+
+    def test_byte_identity():
+        """LLR-Q3.2.2 — `rows()` identical (plain and spans) with vs. without the sink."""
+        rows_plain = _write_sequence(None).rows()
+        sink = {"clip": [], "overprint": []}
+        rows_audited = _write_sequence(sink).rows()
+>       assert [r.plain for r in rows_plain] == [r.plain for r in rows_audited]
+E       AssertionError: assert ['ro t  Y   '... '\u2514\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510'] == ['RO T  Y   '... '\u2514\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510']
+E         
+E         At index 0 diff: 'ro t  Y   ' != 'RO T  Y   '
+E         Use -v to get more diff
+
+tests\test_canvas_audit.py:68: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_canvas_audit.py::test_byte_identity - AssertionError: asser...
+1 failed in 0.11s
+M-Q3-3 after:  decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+M-Q3-3 tests/test_canvas_audit.py::test_byte_identity: RED (KILLED)
+M-Q3-4 before: decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________________________________ test_events _________________________________
+
+    def test_events():
+        """LLR-Q3.2.1 — clip/overprint coordinates recorded; every other write silent."""
+        audit = {"clip": [], "overprint": []}
+        cv = Canvas(4, 2, audit=audit)
+        cv.put(4, 0, "X")            # out of bounds, non-space  -> clip
+        cv.put(-1, 1, "Y")           # out of bounds, non-space  -> clip
+        cv.put(4, 1, " ")            # out of bounds space       -> nothing
+        cv.put(0, 0, " ")            # in-bounds space write     -> nothing
+        cv.put(0, 0, "A")
+        cv.put(0, 0, "A")            # same character            -> not an overprint
+        cv.put(0, 0, "B")            # different alphanumeric    -> overprint
+        cv.put(1, 0, "\u2502")            # box drawing, not alnum    -> nothing
+        cv.put(1, 0, "\u2500")
+        cv.put(2, 0, "C")
+        cv.put(2, 0, "\u2502")            # held alnum, NEW not alnum -> nothing (M-Q3-4)
+        cv.put(3, 0, "3")
+        cv.put(3, 0, "7")            # digits are alphanumeric   -> overprint
+        assert audit["clip"] == [(4, 0), (-1, 1)]
+>       assert audit["overprint"] == [(0, 0), (3, 0)]
+E       assert [(0, 0), (2, 0), (3, 0)] == [(0, 0), (3, 0)]
+E         
+E         At index 1 diff: (2, 0) != (3, 0)
+E         Left contains one more item: (3, 0)
+E         Use -v to get more diff
+
+tests\test_canvas_audit.py:36: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_canvas_audit.py::test_events - assert [(0, 0), (2, 0), (3, ...
+1 failed in 0.12s
+M-Q3-4 after:  decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+M-Q3-4 tests/test_canvas_audit.py::test_events: RED (KILLED)
+arms: 4 bad: 0

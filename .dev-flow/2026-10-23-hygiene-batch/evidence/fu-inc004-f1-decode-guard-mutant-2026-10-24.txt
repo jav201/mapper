@@ -1,0 +1,82 @@
+# follow-up inc004-F1 MUTANT -- the except UnicodeDecodeError limb dropped: bare result.stdout.decode (mapper/diff.py)
+# restore proof: before sha256 55bbed068945f13c6ab7a0740063c4e34cd790358306de9478196ced5cdcc6a2, after restore identical (recomputed after the run below)
+# command: PYTHONIOENCODING=utf-8 env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_diff.py::test_git_diff_undecodable_head_object_returns_none_quietly
+# redaction: the Windows account name is replaced with <user> (A-110) before hashing/storage
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_git_diff_undecodable_head_object_returns_none_quietly __________
+
+tmp_store = <mapper.store.MapStore object at 0x00000278AA8729F0>
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24438/test_git_diff_undecodable_head0')
+
+    @pytest.mark.filterwarnings("error::pytest.PytestUnhandledThreadExceptionWarning")
+    def test_git_diff_undecodable_head_object_returns_none_quietly(tmp_store, tmp_path):
+        """inc004-F1 (independent review, MAJOR): a HEAD object with invalid UTF-8
+        bytes — a legacy latin-1 committed `.mmd`, realistic in an operator's
+        existing repo — must return None, the None-on-error contract, QUIETLY.  The
+        pre-increment decode guard was dropped when the capture moved onto the
+        pinned `subprocess.run` seam (this arm pins the guard restored BEHIND the
+        seam — decode of the captured bytes, not `text=`).  On the broken capture
+        the decode failure fires inside subprocess's reader thread: on POSIX it
+        propagates out of `git_diff`; on Windows it surfaces as pytest's
+        `PytestUnhandledThreadExceptionWarning` — this mark promotes that warning to
+        an error, so either manifestation is fatal here.
+        Mutant: drop the `except UnicodeDecodeError` limb in `mapper/diff.py`'s
+        `_show` → this arm RED."""
+        ws = tmp_store.workspace
+        (ws / "demo.mmd").write_bytes("graph TD\n    A[niño] --> B[B]\n".encode("latin-1"))
+        (ws / "demo_nodos.yml").write_text("{}", encoding="utf-8")
+        subprocess.run(["git", "init", "-q"], cwd=ws, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=ws, check=True)
+        subprocess.run(["git", "config", "user.name", "Test"], cwd=ws, check=True)
+        subprocess.run(["git", "add", "."], cwd=ws, check=True)
+        subprocess.run(["git", "commit", "-m", "legacy latin-1 map", "-q"], cwd=ws, check=True)
+        # The working tree carries a valid UTF-8 version so `store.load` succeeds;
+        # the undecodable object lives only in HEAD.
+        (ws / "demo.mmd").write_text("graph TD\n    A[niño] --> B[B]\n", encoding="utf-8")
+>       assert git_diff("demo", tmp_store) is None
+
+tests\test_diff.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\diff.py:57: in git_diff
+    mmd_text = _show(f"{map_id}.mmd")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'demo.mmd'
+
+    def _show(path: str) -> str | None:
+        try:
+            result = subprocess.run(
+                ["git", "show", f"HEAD:{path}"],
+                cwd=ws,
+                capture_output=True,
+                check=True,
+                # `INC9G-SEC-F5`: the one environment every `git` call here runs in.
+                env=_git_env(),
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+            return None
+        # Review inc004-F1 (MAJOR): the decode happens HERE, behind the pinned
+        # `subprocess.run` seam (`tests/test_inc9h.py` pins argv+env, not
+        # `text=`), never via `text=True` — decoding inside subprocess's reader
+        # thread let an undecodable HEAD object (a legacy latin-1 committed
+        # `.mmd`) escape the None-on-error contract: a raise on POSIX, a
+        # swallowed thread exception (and stderr traceback spam) on Windows.
+        # This is the pre-increment guard, restored on the new seam.
+        # MUTANT (review inc004-F1 battery): the guard limb is dropped — the
+        # decode is unguarded, so an undecodable HEAD object raises straight
+        # out of `_show`.
+>       return result.stdout.decode("utf-8")
+E       UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf1 in position 17: invalid continuation byte
+
+mapper\diff.py:55: UnicodeDecodeError
+---------------------------- Captured stderr call -----------------------------
+warning: in the working copy of 'demo.mmd', LF will be replaced by CRLF the next time Git touches it
+=========================== short test summary info ===========================
+FAILED tests/test_diff.py::test_git_diff_undecodable_head_object_returns_none_quietly
+1 failed in 0.28s
+exit=1

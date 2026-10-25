@@ -79,3 +79,31 @@ def test_git_diff_with_committed_map(tmp_store, tmp_path):
     assert result.removed == {"child"}
     assert "title" in result.changed["root"]
     assert result.removed_titles == {"child": "Child"}
+
+
+@pytest.mark.filterwarnings("error::pytest.PytestUnhandledThreadExceptionWarning")
+def test_git_diff_undecodable_head_object_returns_none_quietly(tmp_store, tmp_path):
+    """inc004-F1 (independent review, MAJOR): a HEAD object with invalid UTF-8
+    bytes — a legacy latin-1 committed `.mmd`, realistic in an operator's
+    existing repo — must return None, the None-on-error contract, QUIETLY.  The
+    pre-increment decode guard was dropped when the capture moved onto the
+    pinned `subprocess.run` seam (this arm pins the guard restored BEHIND the
+    seam — decode of the captured bytes, not `text=`).  On the broken capture
+    the decode failure fires inside subprocess's reader thread: on POSIX it
+    propagates out of `git_diff`; on Windows it surfaces as pytest's
+    `PytestUnhandledThreadExceptionWarning` — this mark promotes that warning to
+    an error, so either manifestation is fatal here.
+    Mutant: drop the `except UnicodeDecodeError` limb in `mapper/diff.py`'s
+    `_show` → this arm RED."""
+    ws = tmp_store.workspace
+    (ws / "demo.mmd").write_bytes("graph TD\n    A[niño] --> B[B]\n".encode("latin-1"))
+    (ws / "demo_nodos.yml").write_text("{}", encoding="utf-8")
+    subprocess.run(["git", "init", "-q"], cwd=ws, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=ws, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=ws, check=True)
+    subprocess.run(["git", "add", "."], cwd=ws, check=True)
+    subprocess.run(["git", "commit", "-m", "legacy latin-1 map", "-q"], cwd=ws, check=True)
+    # The working tree carries a valid UTF-8 version so `store.load` succeeds;
+    # the undecodable object lives only in HEAD.
+    (ws / "demo.mmd").write_text("graph TD\n    A[niño] --> B[B]\n", encoding="utf-8")
+    assert git_diff("demo", tmp_store) is None

@@ -1,0 +1,77 @@
+$ env -u NO_COLOR -u TERM PYTHONDONTWRITEBYTECODE=1 python -B .dev-flow/2026-10-23-hygiene-batch/evidence/mutate_l1.py
+M-Q1-1 before: 7ec4dba61dc8ec8d1ffc20dd62a3082001e6ca988e8592b723153b6b3d7c2152
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____________________ test_no_color_removed_before_super ______________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24226/test_no_color_removed_before_s0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001FB81F2F2F0>
+
+    def test_no_color_removed_before_super(tmp_path, monkeypatch):
+        """LLR-Q1.1.1 layer-0 arm: construction with ``NO_COLOR=1`` removes the
+        variable from the process environment before the Textual base constructor
+        runs, so no ``Monochrome`` filter can be installed."""
+        monkeypatch.setenv("NO_COLOR", "1")
+        app = MapperApp(tmp_path)
+>       assert "NO_COLOR" not in os.environ
+E       AssertionError: assert 'NO_COLOR' not in environ({'ACSETUPSVCPORT': '23210', 'ACSVCPORT': '17532', 'AI_AGENT': 'claude-code_2-1-285_agent', 'ALLUSERSPROFILE': ..., 'PYTEST_CURRENT_TEST': 'tests/test_colour_always_on.py::test_no_color_removed_before_super (call)', 'NO_COLOR': '1'})
+E        +  where environ({'ACSETUPSVCPORT': '23210', 'ACSVCPORT': '17532', 'AI_AGENT': 'claude-code_2-1-285_agent', 'ALLUSERSPROFILE': ..., 'PYTEST_CURRENT_TEST': 'tests/test_colour_always_on.py::test_no_color_removed_before_super (call)', 'NO_COLOR': '1'}) = os.environ
+
+tests\test_colour_always_on.py:42: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_colour_always_on.py::test_no_color_removed_before_super - A...
+1 failed in 0.31s
+M-Q1-1 after:  7ec4dba61dc8ec8d1ffc20dd62a3082001e6ca988e8592b723153b6b3d7c2152
+M-Q1-1 tests/test_colour_always_on.py::test_no_color_removed_before_super: RED (KILLED)
+M-Q1-1 before: 7ec4dba61dc8ec8d1ffc20dd62a3082001e6ca988e8592b723153b6b3d7c2152
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_painted_screen_byte_identical_with_and_without_no_color _________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24227/test_painted_screen_byte_ident0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002B0E45DFDD0>
+
+    async def test_painted_screen_byte_identical_with_and_without_no_color(tmp_path, monkeypatch):
+        """AT-108 black-box arm: the painted screen is byte-identical whether the
+        environment carries ``NO_COLOR=1`` or not — the deliverable, not the
+        mechanism.  Two real apps driven through ``run_test``: one constructed
+        with the variable set, one with it absent."""
+        frames = {}
+        for label, present in (("set", True), ("absent", False)):
+            monkeypatch.delenv("NO_COLOR", raising=False)
+            if present:
+                monkeypatch.setenv("NO_COLOR", "1")
+            app = MapperApp(tmp_path)
+            async with app.run_test(size=SIZE) as pilot:
+                await _open_map(app, pilot, _tree(app))
+                await pilot.pause()
+                # `motion.pulse_cursor` breathes the canvas opacity for 300 ms on
+                # every repaint; capture only after the animation has settled, so
+                # the frame is the settled screen, not a mid-breath sample.
+                await pilot.wait_for_scheduled_animations()
+                frames[label] = _painted_frame(app.screen)
+>       assert frames["set"] == frames["absent"], (
+            "NO_COLOR=1 changed the painted screen — colour policy leaked to the environment"
+        )
+E       AssertionError: NO_COLOR=1 changed the painted screen — colour policy leaked to the environment
+E       assert b"[[(' browse...n #000000')]]" == b"[[(' browse...n #000000')]]"
+E         
+E         At index 38 diff: b'7' != b'1'
+E         Use -v to get more diff
+
+tests\test_colour_always_on.py:67: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_colour_always_on.py::test_painted_screen_byte_identical_with_and_without_no_color
+1 failed in 1.30s
+M-Q1-1 after:  7ec4dba61dc8ec8d1ffc20dd62a3082001e6ca988e8592b723153b6b3d7c2152
+M-Q1-1 tests/test_colour_always_on.py::test_painted_screen_byte_identical_with_and_without_no_color: RED (KILLED)
+arms: 2 bad: 0
+exit=0

@@ -1,0 +1,101 @@
+L2b RED — 2026-10-23 — lane L2b of batch 2026-10-23-hygiene-batch (worktree wt-l2, branch lane/l2, on L2a commit 0a94362)
+The four L2b-pending arms (authored in L2a, declared expected RED at the L2a gate) run
+against the L2a tree: import_csv has no caps yet and the home toast is type-name-only.
+Command: env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider <the four arms>
+---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+_____________________ test_csv_at_file_cap_plus_1_refuses _____________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24256/test_csv_at_file_cap_plus_1_re0')
+
+    def test_csv_at_file_cap_plus_1_refuses(tmp_path):
+        csv_path = tmp_path / "big.csv"
+        csv_path.write_bytes(b"id,title\nA," + b"x" * MAX_FILE_BYTES)
+        with pytest.raises(ContentReadError) as caught:
+>           preview_csv(csv_path)
+
+tests\test_ingestion_limits.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\import_csv.py:58: in preview_csv
+    for row in reader:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <csv.DictReader object at 0x000001B526CB6F60>
+
+    def __next__(self):
+        if self.line_num == 0:
+            # Used only for its side effect.
+            self.fieldnames
+>       row = next(self.reader)
+E       _csv.Error: field larger than field limit (131072)
+
+C:\Users\<user>\anaconda3\Lib\csv.py:116: Error
+__________________ test_csv_nul_at_byte_0_refuses_as_binary ___________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24256/test_csv_nul_at_byte_0_refuses0')
+
+    def test_csv_nul_at_byte_0_refuses_as_binary(tmp_path):
+        csv_path = tmp_path / "nul0.csv"
+        csv_path.write_bytes(b"\x00id,title\nA,uno\n")
+>       with pytest.raises(ContentReadError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.osopen.ContentReadError'>
+
+tests\test_ingestion_limits.py:279: Failed
+______________ test_csv_nul_at_last_probe_byte_refuses_as_binary ______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24256/test_csv_nul_at_last_probe_byt0')
+
+    def test_csv_nul_at_last_probe_byte_refuses_as_binary(tmp_path):
+        """A NUL at byte 8,191 � the last byte inside the probe window."""
+        csv_path = tmp_path / "nul8191.csv"
+        payload = b"id,title\n" + b"x" * (BINARY_PROBE_BYTES - 1 - len(b"id,title\n")) + b"\x00"
+        assert len(payload) == BINARY_PROBE_BYTES
+        assert payload[BINARY_PROBE_BYTES - 1] == 0
+        csv_path.write_bytes(payload)
+>       with pytest.raises(ContentReadError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.osopen.ContentReadError'>
+
+tests\test_ingestion_limits.py:291: Failed
+_______________ test_at_114_csv_refusal_toast_shows_the_reason ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24256/test_at_114_csv_refusal_toast_0')
+
+    async def test_at_114_csv_refusal_toast_shows_the_reason(tmp_path):
+        csv_path = tmp_path / "bom.csv"
+        csv_path.write_bytes(b"id,title\nA,un\x00o\n")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            toasts: list[str] = []
+            real_notify = app.notify
+    
+            def notify(message, **kw):
+                toasts.append(str(message))
+                return real_notify(message, **kw)
+    
+            app.notify = notify
+            await pilot.press("i")
+            await pilot.pause()
+            assert isinstance(app.screen, _PromptScreen), app.screen
+            await pilot.press(*str(csv_path))
+            await pilot.press("enter")
+            for _ in range(6):
+                await pilot.pause()
+        refusal = [t for t in toasts if "could not read CSV" in t]
+>       assert refusal, toasts
+E       AssertionError: []
+E       assert []
+
+tests\test_ingestion_limits.py:333: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_csv_at_file_cap_plus_1_refuses - ...
+FAILED tests/test_ingestion_limits.py::test_csv_nul_at_byte_0_refuses_as_binary
+FAILED tests/test_ingestion_limits.py::test_csv_nul_at_last_probe_byte_refuses_as_binary
+FAILED tests/test_ingestion_limits.py::test_at_114_csv_refusal_toast_shows_the_reason
+4 failed in 7.05s
+exit: 1

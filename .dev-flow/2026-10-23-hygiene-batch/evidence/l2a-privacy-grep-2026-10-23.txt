@@ -1,0 +1,16 @@
+L2a PRIVACY GREP (A-110) — 2026-10-23 — files touched by L2a
+===
+probe 1: emails in touched files:
+mapper/osopen.py:350:        # `https://example.com@evil.example.com/` reads as example.com and goes to
+tests/test_ingestion_limits.py:213:    _git(ws, "config", "user.email", "q2@lane.invalid")
+probe 2: home paths / user handles in touched files:
+  (no hits)
+=== positive control: the SAME probe on a known-present case must NOT return absence:
+someone@example.com sits in this line
+  email probe fires on a planted address: OK
+=== home-path positive control (re-run, standalone):
+probe fired: OK
+=== home-path positive control (pattern C:[/\\]Users):
+plain C:\Users\<user>\file.txt text
+probe fired on the planted path: OK
+--- re-probe touched files with corrected pattern (exit 1 = no hits, shown above)

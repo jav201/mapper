@@ -1,6 +1,7 @@
 """Textual TUI app for mapper — darkside UI."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from textual.app import App
@@ -247,6 +248,10 @@ class MapperApp(App):
     BINDINGS = screen_bindings(SCOPE_APP)
 
     def __init__(self, workspace: Path | str):
+        # LLR-Q1.1.1 (ruling R3): colour is always on — an ambient NO_COLOR
+        # must not install Textual's Monochrome filter, and the base App
+        # constructor reads the variable, so it has to go before super().
+        os.environ.pop("NO_COLOR", None)
         super().__init__()
         self.store = MapStore(workspace)
         # Undo history lives here, not on MapScreen: a screen is rebuilt every

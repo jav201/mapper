@@ -96,9 +96,23 @@ ALLOWED_OUTSIDE_APP = {
     # B3: `MapScreen`'s open concern lives here; its attachment-activated handler is the
     # one launch site and calls `open_external` (moved from screens/map/screen.py).
     "screens/map/opening.py": {"ATTACHMENT_HARD_LINKED", "OK", "open_external"},
-    # `2026-10-09-modular-batch` A4: `HomeScreen` moved out of `app.py` with the two
-    # osopen names its CSV-import door reads (ARCHITECTURE §3 `screens` row).
-    "screens/home.py": {"safe_local_path", "PATH_NOT_SUPPORTED"},
+    # `2026-10-23-hygiene-batch` (ARQ commitment R-015, ledger .6): the bounded content
+    # reader + the frozen D2 caps constants — map-file reads route through them; store is
+    # one of the reader's two sanctioned importers.  Amended in the SAME landing as the
+    # first reader import (the B-44 discipline).
+    "store.py": {"read_capped", "ContentReadError", "MAX_MAP_BYTES", "MAX_DEPTH",
+                 "MAX_NODES", "MAX_EDGES"},
+    # Same batch, increment-004 (lane L2b): the CSV read routes through the reader —
+    # import_csv is the reader's second sanctioned importer (R-015).
+    "import_csv.py": {"read_capped", "MAX_FILE_BYTES"},
+    # `2026-10-09-modular-batch` A4 moved `HomeScreen` out of `app.py` reading
+    # `safe_local_path` / `PATH_NOT_SUPPORTED`; `2026-10-23-hygiene-batch`
+    # increment-004 (ruling R7, F-UX-1) added the reader's refusal class so the
+    # CSV toast's typed branch names the reason — wording only, the screen
+    # launches nothing.  A-DDR-2 (trunk join): the A4 two-name entry was a
+    # duplicate dict key, silently overwritten by this one — removed; this is
+    # the live set.
+    "screens/home.py": {"safe_local_path", "PATH_NOT_SUPPORTED", "ContentReadError"},
     # `2026-10-11-reqharness-batch` (ARQ amendment, R8/R19): the headless
     # reqharness core reuses the ONE containment rule — `confine_reason`
     # (reviews.py, the event-directory listing; config.py, the shared
