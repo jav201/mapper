@@ -279,9 +279,15 @@
       "station": "P5",
       "date": "2026-10-24",
       "decision": "P6 documentation written for 2026-10-23-hygiene-batch: 06-docs/executive-summary.md (non-technical: context/problem/solution/outcomes/next steps), functionality.md (technical: Q1/Q2/Q3 flows, module table, usage, clean-env convention), traceability-matrix.md finalized (sign-off closed 2026-10-24; matrices were already 0-gap from P4/DDR); diagrams intentionally empty (no new architecture); batch to awaiting-sync — gate decision (close batch / open new / iterate) is the operator's at the P5 gate; backlog reconciliation header refresh and vault sync owed at the close/sync unit"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-24",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-10-23-hygiene-batch/ (full sync: 9 artifacts + README; PDR/DDR to mapper/design/)"
     }
   ],
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-23T14:59:29Z",
   "previous_batch": {
     "batch_id": "2026-10-15-review-screen-batch",
