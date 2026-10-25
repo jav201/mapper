@@ -100,7 +100,9 @@ ALLOWED_OUTSIDE_APP = {
     # reader + the frozen D2 caps constants — map-file reads route through them; store is
     # one of the reader's two sanctioned importers.  Amended in the SAME landing as the
     # first reader import (the B-44 discipline).
-    "store.py": {"read_capped", "ContentReadError", "MAX_MAP_BYTES", "MAX_DEPTH",
+    # `2026-10-25-relmap-r1-batch` Inc-3 (LLR-RML.1.4): the prescan moved to `yamlscan.py`,
+    # so `store` no longer reads `MAX_DEPTH`.
+    "store.py": {"read_capped", "ContentReadError", "MAX_MAP_BYTES",
                  "MAX_NODES", "MAX_EDGES"},
     # Same batch, increment-004 (lane L2b): the CSV read routes through the reader —
     # import_csv is the reader's second sanctioned importer (R-015).
@@ -124,6 +126,14 @@ ALLOWED_OUTSIDE_APP = {
     "reqharness/audit.py": {"is_link"},
     "reqharness/config.py": {"confine_reason"},
     "reqharness/reviews.py": {"confine_reason", "is_link"},
+    # `2026-10-25-relmap-r1-batch` Inc-1 (ARQ commitment R-016, LLR-RMP.2.1): the relation
+    # map's model reads the two C9 node/edge caps from the one place they are defined.
+    # Amended in the SAME landing as the import (the B-44 discipline).
+    "relmap/model.py": {"MAX_NODES", "MAX_EDGES"},
+    # Inc-3 (same batch): the leaf prescan reads the depth cap; the descriptor reader uses the
+    # bounded content reader, its refusal class, the descriptor byte cap and the containment rule.
+    "yamlscan.py": {"MAX_DEPTH"},
+    "relmap/descriptor.py": {"read_capped", "ContentReadError", "MAX_MAP_BYTES", "confine_reason", "is_link"},
 }
 
 

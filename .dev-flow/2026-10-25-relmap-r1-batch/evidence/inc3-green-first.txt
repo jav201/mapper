@@ -1,0 +1,19 @@
+# Inc-3 GREEN, first run after the RED (per-file durations; 1 skipped = the FIFO arm, n/a - Windows)
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_yamlscan.py tests/test_relmap_descriptor.py tests/test_relmap_isolation.py tests/test_prescan_refusal_goldens.py --durations=3 -rs
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.....................s.................................................. [ 34%]
+........................................................................ [ 69%]
+..............................................................           [100%]
+============================= slowest 3 durations =============================
+5.84s call     tests/test_relmap_descriptor.py::test_descriptor_at_cap_minus_one_loads_and_at_cap_plus_one_is_k5
+0.19s call     tests/test_relmap_isolation.py::test_only_app_and_the_package_import_relmap
+0.02s call     tests/test_relmap_descriptor.py::test_the_input_class_is_new_no_test_fixture_or_tracked_file_carries_it
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_relmap_descriptor.py:136: n/a - Windows has no mkfifo
+205 passed, 1 skipped in 6.93s
+
+exit code: 0
+wall time: 8 s (whole seconds)

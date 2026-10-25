@@ -1,0 +1,16 @@
+# DDR software-dev MAJOR (M3), ledger .61 pin -- executed by the orchestrator's DDR worker 2026-10-25 (not the original run)
+# new node: tests/test_relmap_adapter.py::test_unknown_status_counts_kept_nodes_only
+## RED with M3 applied (mapper/relmap/adapter.py: sum over all input nodes instead of final.nodes); mutant removed afterwards
+# M3 mutant applied: adapter.py unknown_status counted over all input nodes
+>       assert d.unknown_status == 1
+E       assert 3 == 1
+E        +  where 3 = Derivation(map=<mapper.relmap.model.RelMap object at 0x000001DA90735140>, reported=(), unlinked=(), unknown_status=3).unknown_status
+
+tests\test_relmap_adapter.py:306: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_adapter.py::test_unknown_status_counts_kept_nodes_only
+1 failed, 39 passed in 0.37s
+## Restored: sha256 of mapper/relmap/adapter.py equal to the pre-run value (sha256sum -c: OK), then GREEN
+# restored, hash-verified
+........................................                                 [100%]
+40 passed in 0.32s

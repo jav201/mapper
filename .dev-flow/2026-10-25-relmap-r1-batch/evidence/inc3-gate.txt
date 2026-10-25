@@ -1,0 +1,24 @@
+# devflow-validate --brief . on the Inc-3 tree (PYTHONIOENCODING=utf-8); exit code 1; blocks listed below, notices elided
+<unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+devflow-validate · C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1
+  git · 2.49.0, at or above the 2.28.0 floor
+  stdout · encoding `utf-8`, errors `backslashreplace` -- every finding is emitted verbatim
+  filesystem · FOLDS CASE -- probed at C:\Users\<user>\AppData\Local\Temp, on the same volume as the tree under check
+
+15 block · 744 notice · 54 not applicable
+  [x] V2   tests/: AT-117 has no node on disk
+  [x] V2   tests/: AT-118 has no node on disk
+  [x] V2   tests/: AT-119 has no node on disk
+  [x] V2   tests/: AT-120 has no node on disk
+  [x] V2   tests/: AT-122 has no node on disk
+  [x] V2   tests/: AT-123 has no node on disk
+  [x] V2   tests/: AT-124 has no node on disk
+  [x] V2   tests/: AT-125 has no node on disk
+  [x] V2   tests/: AT-126 has no node on disk
+  [x] V2   tests/: AT-128 has no node on disk
+  [x] V2   tests/: AT-129 has no node on disk
+  [x] V15  dev-flow/scripts/__pycache__/devflow-init.cpython-312.pyc: in the bundle but in neither the manifest table nor the declared exclusions — undeclared content ships to consumers
+  [x] V15  dev-flow/scripts/__pycache__/devflow-validate.cpython-312.pyc: in the bundle but in neither the manifest table nor the declared exclusions — undeclared content ships to consumers
+  [x] V16  ~/.claude: uncommitted changes — the flow being run is not the flow that was shipped
+  [x] V16  ~/.claude/skills: uncommitted changes — the flow being run is not the flow that was shipped
+n/a: 54 rule(s) with no subject on this tree (mode full) — run without --brief to list them

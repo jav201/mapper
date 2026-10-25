@@ -1,0 +1,6 @@
+clean code : seed0 stdout sha256 1675dd004db6b2ba  seed2 stdout sha256 1675dd004db6b2ba  EQUAL
+M-RMU-6    : seed0 stdout sha256 7dcfc6d952e95079  seed2 stdout sha256 1675dd004db6b2ba  DIFFER
+   seed0: structure: profile=reqharness nodes=275 (LLR=199, HLR=76) edges=196 (refines=196) cycles=0
+   seed2: structure: profile=reqharness nodes=275 (HLR=76, LLR=199) edges=196 (refines=196) cycles=0
+restore OK afcd78363a0f
+# exit code: 0

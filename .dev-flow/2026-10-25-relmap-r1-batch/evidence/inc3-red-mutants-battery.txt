@@ -1,0 +1,192 @@
+# Inc-3 RED mutant battery: each mutant applied to a copy of the production file, the named test files run, the file restored from bytes and hash-verified.
+# Environment: PYTHONPATH=<worktree>, NO_COLOR and TERM unset, python -m pytest -q -p no:cacheprovider -x is NOT used (every failing test is counted).
+
+## M-RML-1 - skip the prescan
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 5 s
+verdict: RED
+summary: 3 failed, 86 passed, 1 skipped in 3.57s
+killed by (3):
+  tests/test_relmap_descriptor.py::test_k8_anchor_and_alias_name_nothing
+  tests/test_relmap_descriptor.py::test_k9_depth_65_refused_and_depth_64_loads
+  tests/test_relmap_descriptor.py::test_the_prescan_runs_before_safe_load
+
+## M-RML-2 - path in the message (name = str(path))
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 3 failed, 86 passed, 1 skipped in 6.39s
+killed by (3):
+  tests/test_relmap_descriptor.py::test_descriptor_at_cap_minus_one_loads_and_at_cap_plus_one_is_k5
+  tests/test_relmap_descriptor.py::test_k10_not_valid_yaml_prints_only_the_cause
+  tests/test_relmap_descriptor.py::test_load_descriptor_read_causes_carry_the_base_name_only
+
+## M-RML-3 - accept lineage
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 2 failed, 87 passed, 1 skipped in 6.46s
+killed by (2):
+  tests/test_relmap_descriptor.py::test_schema_table_refusals[profile:
+  tests/test_relmap_descriptor.py::test_the_lineage_profile_is_refused_until_r5
+
+## M-RML-4 - skip path confinement
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 4 failed, 85 passed, 1 skipped in 6.40s
+killed by (4):
+  tests/test_relmap_descriptor.py::test_a_link_inside_the_repository_is_a_k17_link
+  tests/test_relmap_descriptor.py::test_a_unc_string_causes_no_open_and_no_stat_for_that_string
+  tests/test_relmap_descriptor.py::test_paths_confined
+  tests/test_relmap_descriptor.py::test_paths_confined_names_the_field
+
+## M-RML-5 - leaf ignores alias events
+file: mapper/yamlscan.py   restore hash-verified: True   exit code: 1   wall: 8 s
+verdict: RED
+summary: 4 failed, 106 passed, 1 skipped in 6.72s
+killed by (4):
+  tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[alias]
+  tests/test_relmap_descriptor.py::test_k8_anchor_and_alias_name_nothing
+  tests/test_yamlscan.py::test_alias_is_refused_with_its_name
+  tests/test_yamlscan.py::test_the_alias_check_is_independent_of_the_anchor_check
+
+## M-RML-6 - reword a refusal in the store wrapper
+file: mapper/store.py   restore hash-verified: True   exit code: 1   wall: 24 s
+verdict: RED
+summary: 3 failed, 24 passed in 23.00s
+killed by (3):
+  tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[alias]
+  tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[long_anchor]
+  tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[short_anchor]
+
+## M-RML-7 - skip the lstat link/regular checks
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 6 failed, 83 passed, 1 skipped in 6.59s
+killed by (6):
+  tests/test_relmap_descriptor.py::test_k1_k2_via_load_descriptor
+  tests/test_relmap_descriptor.py::test_read_repo_text_directory_is_k2_and_is_never_opened
+  tests/test_relmap_descriptor.py::test_read_repo_text_file_symlink_is_k1
+  tests/test_relmap_descriptor.py::test_read_repo_text_link_is_k1_and_is_never_opened
+  tests/test_relmap_descriptor.py::test_read_repo_text_windows_junction_is_a_reparse_point_is_link_catches
+  tests/test_relmap_descriptor.py::test_repo_root_census_lists_non_regular_entries_so_reading_refuses_them
+
+## M-RML-8 - read the whole file before the size check
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 1 failed, 88 passed, 1 skipped in 6.45s
+killed by (1):
+  tests/test_relmap_descriptor.py::test_read_repo_text_far_over_the_cap_is_never_read_whole
+
+## M-RML-10 - format str(exc) on a parse failure
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 2 failed, 87 passed, 1 skipped in 6.44s
+killed by (2):
+  tests/test_relmap_descriptor.py::test_a_syntax_error_in_the_prescan_is_k10_not_a_crash
+  tests/test_relmap_descriptor.py::test_k10_not_valid_yaml_prints_only_the_cause
+
+## M-RML-11 - compare profile with `in` over a set
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 2 failed, 87 passed, 1 skipped in 6.39s
+killed by (1):
+  tests/test_relmap_descriptor.py::test_schema_table_refusals[profile:
+
+## M-RML-12 - YamlLimitError derives ValueError
+file: mapper/yamlscan.py   restore hash-verified: True   exit code: 1   wall: 1 s
+verdict: RED
+summary: 1 failed, 20 passed in 0.23s
+killed by (1):
+  tests/test_yamlscan.py::test_limit_error_is_not_valueerror
+
+## M-RML-13 - no descriptor count cap
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 1 failed, 88 passed, 1 skipped in 6.43s
+killed by (1):
+  tests/test_relmap_descriptor.py::test_repo_root_census_counts[9]
+
+## M-RML-14 - skip the identity comparison
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 3 failed, 86 passed, 1 skipped in 6.46s
+killed by (3):
+  tests/test_relmap_descriptor.py::test_read_repo_text_device_mismatch_is_k2
+  tests/test_relmap_descriptor.py::test_read_repo_text_identity_mismatch_is_k2
+  tests/test_relmap_descriptor.py::test_read_repo_text_opened_file_not_regular_is_k2
+
+## M-RML-15 - a net that omits the prescan call
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 2 failed, 87 passed, 1 skipped in 6.51s
+killed by (2):
+  tests/test_relmap_descriptor.py::test_a_syntax_error_in_the_prescan_is_k10_not_a_crash
+  tests/test_relmap_descriptor.py::test_k10_not_valid_yaml_prints_only_the_cause
+
+## M-RML-16 - refuse when an inode is 0
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 2 failed, 87 passed, 1 skipped in 6.46s
+killed by (2):
+  tests/test_relmap_descriptor.py::test_read_repo_text_inode_zero_on_both_sides_is_read
+  tests/test_relmap_descriptor.py::test_read_repo_text_inode_zero_on_one_side_only_is_read
+
+## M-RML-17 - CAUSE a plain dict
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 7 s
+verdict: RED
+summary: 1 failed, 88 passed, 1 skipped in 6.48s
+killed by (1):
+  tests/test_relmap_descriptor.py::test_cause_is_read_only
+
+## M-RMP-6 - store re-imports MAX_DEPTH without an allow-list entry
+file: mapper/store.py   restore hash-verified: True   exit code: 1   wall: 1 s
+verdict: RED
+summary: 1 failed, 4 passed in 0.61s
+killed by (1):
+  tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+
+## M-RMP-6b - descriptor imports an osopen name outside its allow-list
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 2 s
+verdict: RED
+summary: 2 failed, 98 passed in 0.95s
+killed by (2):
+  tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+  tests/test_relmap_isolation.py::test_relmap_modules_import_only_what_the_contract_allows[descriptor.py]
+
+## M-RMP-7 - plant `import subprocess` in descriptor.py
+file: mapper/relmap/descriptor.py   restore hash-verified: True   exit code: 1   wall: 1 s
+verdict: RED
+summary: 1 failed, 94 passed in 0.40s
+killed by (1):
+  tests/test_relmap_isolation.py::test_stdlib_bans
+
+## M-STORE-A - store keeps a private anchor display cut (truncation dropped in the leaf)
+file: mapper/yamlscan.py   restore hash-verified: True   exit code: 1   wall: 24 s
+verdict: RED
+summary: 4 failed, 39 passed in 23.37s
+killed by (4):
+  tests/test_ingestion_limits.py::test_at_111_anchor_name_in_refusal_is_bounded
+  tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[long_anchor]
+  tests/test_yamlscan.py::test_anchor_name_is_cut_at_forty_characters[41-gggggggggggggggggggggggggggggggggggggggg\u2026]
+  tests/test_yamlscan.py::test_anchor_name_is_cut_at_forty_characters[5000-gggggggggggggggggggggggggggggggggggggggg\u2026]
+
+## Result
+M-RML-1: RED; restore ok=True
+M-RML-2: RED; restore ok=True
+M-RML-3: RED; restore ok=True
+M-RML-4: RED; restore ok=True
+M-RML-5: RED; restore ok=True
+M-RML-6: RED; restore ok=True
+M-RML-7: RED; restore ok=True
+M-RML-8: RED; restore ok=True
+M-RML-10: RED; restore ok=True
+M-RML-11: RED; restore ok=True
+M-RML-12: RED; restore ok=True
+M-RML-13: RED; restore ok=True
+M-RML-14: RED; restore ok=True
+M-RML-15: RED; restore ok=True
+M-RML-16: RED; restore ok=True
+M-RML-17: RED; restore ok=True
+M-RMP-6: RED; restore ok=True
+M-RMP-6b: RED; restore ok=True
+M-RMP-7: RED; restore ok=True
+M-STORE-A: RED; restore ok=True
+total wall: 154 s

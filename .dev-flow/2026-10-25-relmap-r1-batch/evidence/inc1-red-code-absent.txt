@@ -1,0 +1,67 @@
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider --color=no --continue-on-collection-errors tests/test_relmap_profile.py tests/test_relmap_model.py tests/test_relmap_isolation.py tests/test_arch_osopen_callers.py
+# probe: mapper.__file__ inside worktree: True
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.F...                                                                    [100%]
+=================================== ERRORS ====================================
+________________ ERROR collecting tests/test_relmap_profile.py ________________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\tests\test_relmap_profile.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_profile.py:13: in <module>
+    from mapper.relmap.profile import REQHARNESS, EdgeType, GapRow, Profile
+E   ModuleNotFoundError: No module named 'mapper.relmap'
+_________________ ERROR collecting tests/test_relmap_model.py _________________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\tests\test_relmap_model.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_model.py:16: in <module>
+    from mapper.relmap import model as relmodel
+E   ModuleNotFoundError: No module named 'mapper.relmap'
+_______________ ERROR collecting tests/test_relmap_isolation.py _______________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\tests\test_relmap_isolation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_isolation.py:18: in <module>
+    from mapper.relmap.profile import REQHARNESS
+E   ModuleNotFoundError: No module named 'mapper.relmap'
+================================== FAILURES ===================================
+______ test_outside_app_only_the_allowed_names_are_imported_from_osopen _______
+
+    @red("arch9q")
+    @red("arch9p")
+    def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
+        seen: dict[str, set[str]] = {}
+        for rel, tree in _sources():
+            if rel in OSOPEN_OWNERS:
+                continue
+            imports = list(_osopen_imports(tree))
+            if imports:
+                seen[rel] = {name for _, name in imports}
+        assert seen, "the AST walk found no osopen import outside app: the probe is broken"
+>       assert seen == ALLOWED_OUTSIDE_APP, seen
+E       AssertionError: {'github.py': {'safe_local_path'}, 'import_csv.py': {'MAX_FILE_BYTES', 'read_capped'}, 'reqharness/audit.py': {'is_link'}, 'reqharness/config.py': {'confine_reason'}, ...}
+E       assert {'github.py':...reason'}, ...} == {'github.py':...s_link'}, ...}
+E         
+E         Omitting 10 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'relmap/model.py': {'MAX_EDGES', 'MAX_NODES'}}
+E         Use -v to get more diff
+
+tests\test_arch_osopen_callers.py:146: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+ERROR tests/test_relmap_profile.py
+ERROR tests/test_relmap_model.py
+ERROR tests/test_relmap_isolation.py
+1 failed, 4 passed, 3 errors in 0.79s
+# exit code: 1
+# wall seconds: 1.6

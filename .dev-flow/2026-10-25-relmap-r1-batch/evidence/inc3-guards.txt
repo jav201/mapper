@@ -1,0 +1,20 @@
+# Inc-3 guard suites
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_mod_bodies.py tests/test_mod_census.py tests/test_mod_compat.py tests/test_mod_deps.py tests/test_mod_dispatch.py tests/test_mod_parity.py tests/test_mod_structure.py tests/test_repair_map_truth.py tests/test_arch_osopen_callers.py tests/test_a3_census.py tests/test_no_operator_paths.py tests/test_ingestion_limits.py tests/test_store.py tests/test_diff.py tests/test_repair_sidecar.py tests/test_prescan_refusal_goldens.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+...................................................                      [100%]
+============================== warnings summary ===============================
+<unknown>:296: 1 warning
+tests/test_mod_compat.py: 5 warnings
+tests/test_a3_census.py: 4 warnings
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+195 passed, 10 warnings in 63.94s (0:01:03)
+
+exit code: 0
+wall time: 65 s (whole seconds)

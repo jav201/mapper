@@ -1,0 +1,6 @@
+# cmd: pytest -q -p no:cacheprovider tests/test_relmap_audit.py tests/test_reqharness_release.py tests/test_reqharness_baseline.py tests/test_relmap_adapter.py
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..........................s............................................. [ 66%]
+....................................                                     [100%]
+107 passed, 1 skipped in 43.50s
+wall 45 s

@@ -1,0 +1,95 @@
+# Inc-3 M-RML-6 (reworded: 'are not allowed here' -> 'are not permitted here') on the BASE store.py: golden RED, test_ingestion_limits GREEN. (The literal {shown!r}->{shown} form is ALSO caught by two old arms -- see the packet follow-up.)
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_prescan_refusal_goldens.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFF..                                                                    [100%]
+================================== FAILURES ===================================
+__________ test_prescan_refusal_text_is_byte_identical[short_anchor] __________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25181/test_prescan_refusal_text_is_b0')
+arm = 'short_anchor', yml = 'a: &x 1\n'
+golden_load = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'x')"
+golden_side = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'x')"
+
+    @pytest.mark.parametrize("arm,yml,golden_load,golden_side", ARMS, ids=[a[0] for a in ARMS])
+    def test_prescan_refusal_text_is_byte_identical(tmp_path, arm, yml, golden_load, golden_side):
+        (tmp_path / "m.mmd").write_text(MMD, encoding="utf-8")
+        (tmp_path / "m_nodos.yml").write_text(yml, encoding="utf-8")
+        store = MapStore(tmp_path)
+        with pytest.raises(MapStoreError) as at_load:
+            store.load("m")
+        with pytest.raises(MapStoreError) as at_side:
+            store._capped_side_graph("m", MMD, yml)
+>       assert str(at_load.value) == golden_load
+E       assert "could not re... (anchor 'x')" == "could not re... (anchor 'x')"
+E         
+E         Skipping 53 identical leading characters in diff, use -v to show
+E         - s are not allowed here (anchor 'x')
+E         ?           ^^^^^
+E         + s are not permitted here (anchor 'x')
+E         ?           ^^^^^^^
+
+tests\test_prescan_refusal_goldens.py:72: AssertionError
+_____________ test_prescan_refusal_text_is_byte_identical[alias] ______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25181/test_prescan_refusal_text_is_b1')
+arm = 'alias', yml = 'b: *zz\n'
+golden_load = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'zz')"
+golden_side = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'zz')"
+
+    @pytest.mark.parametrize("arm,yml,golden_load,golden_side", ARMS, ids=[a[0] for a in ARMS])
+    def test_prescan_refusal_text_is_byte_identical(tmp_path, arm, yml, golden_load, golden_side):
+        (tmp_path / "m.mmd").write_text(MMD, encoding="utf-8")
+        (tmp_path / "m_nodos.yml").write_text(yml, encoding="utf-8")
+        store = MapStore(tmp_path)
+        with pytest.raises(MapStoreError) as at_load:
+            store.load("m")
+        with pytest.raises(MapStoreError) as at_side:
+            store._capped_side_graph("m", MMD, yml)
+>       assert str(at_load.value) == golden_load
+E       assert "could not re...(anchor 'zz')" == "could not re...(anchor 'zz')"
+E         
+E         Skipping 53 identical leading characters in diff, use -v to show
+E         - s are not allowed here (anchor 'zz')
+E         ?           ^^^^^
+E         + s are not permitted here (anchor 'zz')
+E         ?           ^^^^^^^
+
+tests\test_prescan_refusal_goldens.py:72: AssertionError
+__________ test_prescan_refusal_text_is_byte_identical[long_anchor] ___________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25181/test_prescan_refusal_text_is_b2')
+arm = 'long_anchor'
+yml = 'a: &ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg...gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg 1\n'
+golden_load = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'gggggggggggggggggggggggggggggggggggggggg…')"
+golden_side = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'gggggggggggggggggggggggggggggggggggggggg…')"
+
+    @pytest.mark.parametrize("arm,yml,golden_load,golden_side", ARMS, ids=[a[0] for a in ARMS])
+    def test_prescan_refusal_text_is_byte_identical(tmp_path, arm, yml, golden_load, golden_side):
+        (tmp_path / "m.mmd").write_text(MMD, encoding="utf-8")
+        (tmp_path / "m_nodos.yml").write_text(yml, encoding="utf-8")
+        store = MapStore(tmp_path)
+        with pytest.raises(MapStoreError) as at_load:
+            store.load("m")
+        with pytest.raises(MapStoreError) as at_side:
+            store._capped_side_graph("m", MMD, yml)
+>       assert str(at_load.value) == golden_load
+E       assert "could not re...gggggggggg…')" == "could not re...gggggggggg…')"
+E         
+E         Skipping 53 identical leading characters in diff, use -v to show
+E         - s are not allowed here (anchor 'gggggggggggggggggggggggggggggggggggggggg…')
+E         ?           ^^^^^
+E         + s are not permitted here (anchor 'gggggggggggggggggggggggggggggggggggggggg…')
+E         ?           ^^^^^^^
+
+tests\test_prescan_refusal_goldens.py:72: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[short_anchor]
+FAILED tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[alias]
+FAILED tests/test_prescan_refusal_goldens.py::test_prescan_refusal_text_is_byte_identical[long_anchor]
+3 failed, 2 passed in 0.15s
+
+exit code: 1
+wall time: 1 s (whole seconds)

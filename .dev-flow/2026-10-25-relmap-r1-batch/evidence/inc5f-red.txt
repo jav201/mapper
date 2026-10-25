@@ -1,0 +1,39 @@
+# F1 RED: M-RMU-9 applied (sources printed as resolved path); F2 guard absent
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(['verdict: not ready · unreviewed requirements', 'verdict: ready'])
+
+tests\test_relmap_audit.py:449: AssertionError
+______________________________ test_byte_stable _______________________________
+
+three_descriptor_repo = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25468/three0/three')
+
+    def test_byte_stable(three_descriptor_repo):
+        """AT-128 / LLR-RMU.1.4: two PRE-PICKED seeds (LED .30) print identical bytes."""
+        a = run_audit(str(three_descriptor_repo), hashseed="0")
+        b = run_audit(str(three_descriptor_repo), hashseed="2")
+        assert a.returncode == b.returncode == 1
+        assert a.stdout == b.stdout
+        block = block_of(a.stdout)
+        assert _by_prefix(block, "structure: descriptor ") == [
+            "structure: descriptor alpha.relmap.yml", "structure: descriptor beta.relmap.yml"]
+        assert _by_prefix(block, "structure: refused") == [
+            "structure: refused (gamma.relmap.yml): unsupported kind - descriptor skipped"]
+        assert SNAPSHOT_SUMMARY in block
+        # LED .59 / M-RMU-9: the sources line shows the CONFIGURED strings, never the resolved path.
+        sources = _by_prefix(block, "structure: sources:")
+>       assert "structure: sources: canon=REQUIREMENTS.md us_canon=docs/us.md at_table=docs/at.md" in sources
+E       AssertionError: assert 'structure: sources: canon=REQUIREMENTS.md us_canon=docs/us.md at_table=docs/at.md' in ['structure: sources: canon=REQUIREMENTS.md us_canon=unset at_table=unset', 'structure: sources: canon=REQUIREMENTS.md...ocs\\us.md at_table=C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25468\\three0\\three\\docs\\at.md']
+
+tests\test_relmap_audit.py:808: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_audit.py::test_hook_line_can_never_forge_a_verdict_line
+FAILED tests/test_relmap_audit.py::test_byte_stable - AssertionError: assert ...
+2 failed, 2 passed, 45 deselected in 2.81s
+exit 1
+# F2 mutant: guard removed
+E        +  where 2 = len(['verdict: not ready · unreviewed requirements', 'verdict: ready'])
+
+tests\test_relmap_audit.py:449: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_audit.py::test_hook_line_can_never_forge_a_verdict_line
+1 failed, 2 passed, 46 deselected in 1.40s

@@ -1,2 +1,3 @@
 .dev-flow/*/evidence/** -text
 tests/goldens/** -text
+tests/fixtures/relmap/** -text

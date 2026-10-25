@@ -1,0 +1,73 @@
+# mutant D (edge-type filter dropped in _lacks) on committed gaps.py; new arms
+gaps.py sha256: 2ac86592cffd25c9b1d70734e7b55a07f23a16b78f17f1b259215232e796557e
+files: tests/test_relmap_gaps.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..........FF........................................F                    [100%]
+================================== FAILURES ===================================
+________ test_edge_type_filter_lacks_in_other_edge_type_is_no_verifier ________
+
+    def test_edge_type_filter_lacks_in_other_edge_type_is_no_verifier():
+        # review-inc002 F1: only an edge of the row's type links; a `refines` into an LLR is no verifier
+        m = mk([Node("HLR1", "HLR"), Node("LLR1", "LLR", "l1")],
+               [Edge("HLR1", "LLR1", "refines")], sourced=("HLR", "LLR", "TC"))
+>       assert [(g.kind, g.node, g.sentence) for g in detect_gaps(m)
+                if g.kind == "LLR NOT VERIFIED"] == [
+            ("LLR NOT VERIFIED", "LLR1", "LLR1 has no verifying TC: l1")]
+E       AssertionError: assert [] == [('LLR NOT VE...ying TC: l1')]
+E         
+E         Right contains one more item: ('LLR NOT VERIFIED', 'LLR1', 'LLR1 has no verifying TC: l1')
+E         Use -v to get more diff
+
+tests\test_relmap_gaps.py:124: AssertionError
+________ test_edge_type_filter_lacks_out_other_edge_type_is_no_binding ________
+
+    def test_edge_type_filter_lacks_out_other_edge_type_is_no_binding():
+        # counterpart for lacks_out: an open AT whose only edge is `covers` is still bound to no test
+        m = mk([Node("AT1", "AT", "a1", open=True), Node("US1", "US")],
+               [Edge("AT1", "US1", "covers")], sourced=("AT", "TC"))
+>       assert [(g.kind, g.node, g.sentence) for g in detect_gaps(m)
+                if g.kind == "OPEN AT WITHOUT TEST"] == [
+            ("OPEN AT WITHOUT TEST", "AT1", "AT1 is open and bound to no test: a1")]
+E       AssertionError: assert [] == [('OPEN AT WI...no test: a1')]
+E         
+E         Right contains one more item: ('OPEN AT WITHOUT TEST', 'AT1', 'AT1 is open and bound to no test: a1')
+E         Use -v to get more diff
+
+tests\test_relmap_gaps.py:133: AssertionError
+____________ test_a_slot_the_pattern_does_not_supply_stays_as_text ____________
+
+    def test_a_slot_the_pattern_does_not_supply_stays_as_text():
+        # review-inc002 F3: `<src>` is an edge-row slot; a lacks_* row naming it keeps it literally
+        prof = Profile(
+            "slot", ("P",), (EdgeType("e", (("P", "P"),), True, "none"),),
+            (GapRow("P ALONE", "MED", "lacks_out", "P", "e", None, False, False, ("P",), "<id> uses <src>"),),
+        )
+        m = build_map(prof, [Node("p1", "P")], [], sourced=("P",))
+>       assert detect_gaps(m)[0].sentence == "p1 uses <src>"
+
+tests\test_relmap_gaps.py:450: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\relmap\gaps.py:97: in detect_gaps
+    found += _lacks(m, row, incoming=False)
+mapper\relmap\gaps.py:73: in _lacks
+    sentence = _fill(row.sentence, id=n.id, title=n.title)
+mapper\relmap\gaps.py:42: in _fill
+    return _SLOT.sub(lambda m: values[m.group(1)], template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+m = <re.Match object; span=(10, 15), match='<src>'>
+
+>   return _SLOT.sub(lambda m: values[m.group(1)], template)
+E   KeyError: 'src'
+
+mapper\relmap\gaps.py:42: KeyError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_gaps.py::test_edge_type_filter_lacks_in_other_edge_type_is_no_verifier
+FAILED tests/test_relmap_gaps.py::test_edge_type_filter_lacks_out_other_edge_type_is_no_binding
+FAILED tests/test_relmap_gaps.py::test_a_slot_the_pattern_does_not_supply_stays_as_text
+3 failed, 50 passed in 5.19s
+exit code: 1
+wall time: 6.1 s

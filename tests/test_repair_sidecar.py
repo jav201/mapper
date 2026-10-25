@@ -27,7 +27,8 @@ So: do not read a green run of this module as `AT-049` discharged.
 
 **THE THREE `LLR-N13.1.7` ARMS WERE AMENDED 2026-10-24** (cross-batch, ruling R10
 of the 2026-10-23-hygiene-batch regression run): the hygiene batch's prescan
-(`LLR-Q2.1.2`, `mapper/store.py::_prescan_sidecar`) refuses ANY anchor before
+(`LLR-Q2.1.2`, now `mapper.yamlscan.prescan`, called by
+`mapper/store.py::_prescan_sidecar`) refuses ANY anchor before
 compose, so these sidecars no longer reach the repair path — the arms now assert
 the typed `MapStoreError` refusal itself. `LLR-N13.1.7` is superseded in part,
 recorded as `LED-2026-10-23-hygiene-batch.14` in that batch's ledger.
@@ -283,7 +284,8 @@ def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
 
     AMENDED 2026-10-24 (cross-batch, ruling R10 of the 2026-10-23-hygiene-batch
     regression run): LLR-N13.1.7 is SUPERSEDED IN PART by `LLR-Q2.1.2` — the
-    hygiene batch's prescan (`mapper/store.py::_prescan_sidecar`) refuses the
+    hygiene batch's prescan (`mapper.yamlscan.prescan`, called by
+    `mapper/store.py::_prescan_sidecar`) refuses the
     first anchor event BEFORE `yaml.safe_load` can compose the document, as a
     typed `MapStoreError`. An anchor-amplified sidecar now never reaches the
     duplicate branch this arm was written against, so there is no graph and no

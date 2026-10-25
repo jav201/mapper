@@ -23,6 +23,24 @@ mapper [workspace-directory]
 The workspace directory stores maps as `.mmd` + `_nodos.yml` pairs. A rebuildable
 `mapper.db` SQLite index is created locally and must never be committed.
 
+## Audit
+
+```bash
+mapper --audit <repository>
+```
+
+Prints the release-readiness report of a repository that carries the registry. How to read it:
+
+- **The verdict is the line that starts with `verdict: `.** It is not the last line: structure lines
+  follow it. In a CI step use `grep '^verdict: '`, not `tail -n 1`.
+- **The `structure:` block is informational.** It starts with the line
+  `structure: informational - does not change the verdict or the exit code`, and it never changes
+  the verdict or the exit code. Its lines start with `structure:`, `structure gap:` or
+  `structure note:`; a line such as `structure: gaps shown 20 of 21 ...` is a count, not a gap row.
+- **`reach=<n>`** on a gap row is how many other nodes a change to that node reaches, following the
+  links downstream from it (the node itself is not counted). It is a ranking aid, not a severity.
+- The first line, `repo: <path>`, prints the absolute path of the repository.
+
 ## Keys
 
 From the home screen:

@@ -1,0 +1,27 @@
+# Inc-3 RED on the code-absent tree, isolation file alone (collection of the other two errors out)
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_relmap_isolation.py -k stdlib_bans or ban_census
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F..................................                                      [100%]
+================================== FAILURES ===================================
+______________________________ test_stdlib_bans _______________________________
+
+    def test_stdlib_bans():
+        files = _ban_files()
+>       assert {"descriptor.py", "model.py", "gaps.py", "yamlscan.py"} <= {p.name for p in files}, files
+E       AssertionError: [WindowsPath('C:/Users/<user>/AppData/Local/Temp/ds-units/wt-r1/mapper/relmap/__init__.py'), WindowsPath('C:/Users/<user>/...-r1/mapper/relmap/model.py'), WindowsPath('C:/Users/<user>/AppData/Local/Temp/ds-units/wt-r1/mapper/relmap/profile.py')]
+E       assert {'descriptor....'yamlscan.py'} <= {'__init__.py... 'profile.py'}
+E         
+E         Extra items in the left set:
+E         'descriptor.py'
+E         'yamlscan.py'
+
+tests\test_relmap_isolation.py:426: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_isolation.py::test_stdlib_bans - AssertionError: [Wi...
+1 failed, 34 passed, 59 deselected in 0.16s
+
+exit code: 1
+wall time: 1 s (whole seconds)

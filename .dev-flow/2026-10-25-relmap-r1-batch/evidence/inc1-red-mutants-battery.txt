@@ -1,0 +1,102 @@
+# Inc-1 battery: move-aside RED per new source file, then the named mutants
+# python 3.12.7; PYTHONDONTWRITEBYTECODE=1; pycache purged before every run
+
+## Baseline (all battery nodes, tree as committed)
+baseline: rc=0 :: 132 passed in 6.53s
+
+## Move-aside RED counterfactual (rename the file out of the tree, run, restore, hash-verify)
+- mapper/relmap/profile.py: before=2a759d01f0ca9576 after-restore=2a759d01f0ca9576 restored=YES
+  run: rc=2 :: 3 errors in 0.29s
+  RED=YES; first failures: [] 
+  cause: ["ModuleNotFoundError: No module named 'mapper.relmap.profile'", "ModuleNotFoundError: No module named 'mapper.relmap.profile'"]
+- mapper/relmap/model.py: before=6ebcf7ea82caac5d after-restore=6ebcf7ea82caac5d restored=YES
+  run: rc=2 :: 1 error in 0.29s
+  RED=YES; first failures: [] 
+  cause: ["ImportError: cannot import name 'model' from 'mapper.relmap' (C:\\Users\\<user>\\AppData\\Local\\Temp\\ds-units\\wt-r1\\mapper\\relmap\\__init__.py)"]
+- mapper/relmap/__init__.py: before=e3b0c44298fc1c14 after-restore=e3b0c44298fc1c14 restored=YES
+  run: rc=1 :: 3 failed, 54 passed in 0.40s
+  RED=YES; first failures: ['tests/test_relmap_isolation.py::test_the_relmap_package_exists_and_the_probe_sees_files', 'tests/test_relmap_isolation.py::test_init_re_exports_nothing', 'tests/test_relmap_isolation.py::test_py310_floor'] 
+  cause: ["AssertionError: {'model.py', 'profile.py'}", "assert {'__init__.py... 'profile.py'} <= {'model.py', 'profile.py'}"]
+
+## Mutation battery (one edit per mutant; restore hash-verified after each)
+verdict KILLED = a named test node failed; SURVIVED = rc 0; BAD = anchor did not apply; CRASH = other
+- M-RMP-1 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.13s
+  assigned nodes failing: ['test_engine_names_no_kind']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMP-2 [mapper/model.py] KILLED: applied=True restored=YES sha=097f1cecddb290c2
+  run: rc=1 :: 1 failed in 0.30s
+  assigned nodes failing: ['test_only_app_and_the_package_import_relmap']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMP-3 [mapper/relmap/profile.py] KILLED: applied=True restored=YES sha=2a759d01f0ca9576
+  run: rc=1 :: 1 failed in 0.12s
+  assigned nodes failing: ['test_edge_table']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMP-4 [mapper/mermaid.py] KILLED: applied=True restored=YES sha=23e1e1f2ed6be8ae
+  run: rc=1 :: 1 failed in 0.13s
+  assigned nodes failing: ['test_tc_rm_01_a_cyclic_tree_map_is_still_refused_at_load']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMP-5 [mapper/relmap/profile.py] KILLED: applied=True restored=YES sha=2a759d01f0ca9576
+  run: rc=1 :: 1 failed in 0.11s
+  assigned nodes failing: ['test_catalogue_table']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMP-6 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.28s
+  assigned nodes failing: ['test_outside_app_only_the_allowed_names_are_imported_from_osopen']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMP-6b [tests/test_arch_osopen_callers.py] KILLED: applied=True restored=YES sha=a8c392ef4ddda91a
+  run: rc=1 :: 1 failed in 0.28s
+  assigned nodes failing: ['test_outside_app_only_the_allowed_names_are_imported_from_osopen']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-1 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 2 failed in 0.18s
+  assigned nodes failing: ['test_problem_disallowed_pair', 'test_problem_mixed_input_yields_six_and_keeps_the_valid_remainder']; assigned nodes GREEN: none
+  all failing nodes: 2
+- M-RMM-2 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 9 failed in 0.24s
+  assigned nodes failing: ['test_direction_per_edge_type', 'test_direction_premise_six_figures_on_the_reqharness_profile']; assigned nodes GREEN: none
+  all failing nodes: 9
+- M-RMM-3 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 3 failed in 0.20s
+  assigned nodes failing: ['test_cycle_self_loop', 'test_cycle_three_nodes_flags_each_cycle_edge_and_still_loads', 'test_cycle_two_disjoint_cycles_in_node_order']; assigned nodes GREEN: none
+  all failing nodes: 3
+- M-RMM-4 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.16s
+  assigned nodes failing: ['test_multi_parent_and_order']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-5a [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.44s
+  assigned nodes failing: ['test_caps_nodes_at_cap_load_and_cap_plus_one_refuses']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-5b [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.58s
+  assigned nodes failing: ['test_caps_edges_at_cap_load_and_cap_plus_one_refuses']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-6 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.16s
+  assigned nodes failing: ['test_reach_diamond_counts_nodes_not_paths']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-7 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.13s
+  assigned nodes failing: ['test_py310_floor']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-8 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 2.39s
+  assigned nodes failing: ['test_reach_chain_at_cap_has_no_recursion_error']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-9 [tests/test_relmap_isolation.py] KILLED: applied=True restored=YES sha=3f5a31f4fb89adc5
+  run: rc=1 :: 1 failed, 5 passed in 0.13s
+  assigned nodes failing: ['test_py310_floor_does_not_flag_a_legitimate_310_name']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-10 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 0.23s
+  assigned nodes failing: ['test_reach_memo_is_counts']; assigned nodes GREEN: none
+  all failing nodes: 1
+- M-RMM-11 [mapper/relmap/model.py] KILLED: applied=True restored=YES sha=6ebcf7ea82caac5d
+  run: rc=1 :: 1 failed in 1.68s
+  assigned nodes failing: ['test_reach_budget_per_row']; assigned nodes GREEN: none
+  all failing nodes: 1
+
+## Totals: {'KILLED': 19, 'SURVIVED': 0, 'BAD': 0, 'CRASH': 0}
+# wall seconds: 34.0
+# exit code: 0 (battery driver; asserts baseline GREEN and every restore hash)

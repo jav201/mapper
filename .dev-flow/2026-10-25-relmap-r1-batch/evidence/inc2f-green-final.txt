@@ -1,0 +1,14 @@
+# final tree F1-F5 + docstring re-points; relmap files (descriptor tests excluded: under review) + touched docstring files
+gaps.py sha256: dd180acf6256830670e33b6b8e721641926a37fa7c0732fc8874ebdcb22a6b3b
+files: tests/test_relmap_gaps.py tests/test_relmap_isolation.py tests/test_relmap_model.py tests/test_relmap_profile.py tests/test_arch_osopen_callers.py tests/test_ingestion_limits.py tests/test_repair_sidecar.py tests/test_prescan_refusal_goldens.py tests/test_yamlscan.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 26%]
+........................................................................ [ 52%]
+........................................................................ [ 78%]
+............................................................             [100%]
+276 passed in 36.76s
+exit code: 0
+wall time: 37.7 s

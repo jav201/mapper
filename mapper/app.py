@@ -347,9 +347,10 @@ def main() -> None:
     # The CLI body itself lives in the domain core (`reqharness.audit.run_cli`)
     # — app.py only dispatches to it (LLR-MOD.1.3: app holds no other defs).
     if "--audit" in sys.argv:
+        from mapper.relmap import audit as relmap_audit
         from mapper.reqharness import audit as reqharness_audit
 
-        raise SystemExit(reqharness_audit.run_cli(sys.argv))
+        raise SystemExit(reqharness_audit.run_cli(sys.argv, extra_lines=relmap_audit.structure_lines))
 
     workspace = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd() / "maps"
     app = MapperApp(workspace)

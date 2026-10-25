@@ -65,6 +65,21 @@ _CITATION = re.compile(r"`([A-Za-z0-9_./\\-]+\.(?:py|md|json)):(\d+)(?:-(\d+))?`
 _TEST_NAME = re.compile(r"\b(test_[a-z0-9_]{6,})\b")
 
 
+# DECLARED EXCEPTIONS to `_resolve`'s ambiguity rule.  The rule itself is untouched:
+# a bare basename with several hits is still a violation unless a row here says
+# which file a SEALED record meant.  Key: (citing artifact basename, cited token).
+# Value: (resolved repo path, reason).  Rows are checked by
+# `test_every_declared_citation_exception_is_still_needed`, so the table cannot
+# silently grow or go stale.
+_CITATION_EXCEPTIONS: dict[tuple[str, str], tuple[str, str]] = {
+    ("04-gate-findings-disposition.md", "model.py"): (
+        "mapper/model.py",
+        "sealed record of 2026-08-27-repair-batch-02 predates mapper/relmap/model.py "
+        "(relmap-r1); bare basename became ambiguous; the record is not edited",
+    ),
+}
+
+
 def _authored() -> list[Path]:
     """This batch's OWN artifacts -- reviewer-authored evidence excluded."""
     return sorted(
@@ -198,7 +213,8 @@ def test_every_path_line_citation_resolves(artifact):
     for match in _CITATION.finditer(artifact.read_text(encoding="utf-8")):
         cited = match.group(1)
         last = int(match.group(3) or match.group(2))
-        target = _resolve(cited, artifact)
+        declared = _CITATION_EXCEPTIONS.get((artifact.name, cited))
+        target = REPO / declared[0] if declared else _resolve(cited, artifact)
         if target is None:
             bad.append(f"{cited}: unresolvable or ambiguous")
             continue
@@ -228,3 +244,27 @@ def test_every_cited_test_identifier_exists(artifact):
     assert not phantom, (
         f"{artifact.name} cites test nodes that do not exist on disk: {phantom}"
     )
+
+
+def test_every_declared_citation_exception_is_still_needed():
+    """The exceptions table cannot silently grow or go stale.
+
+    Each row must (a) resolve to an existing file, (b) name an artifact that is in
+    the corpus and really cites the token, and (c) still be NEEDED: the plain
+    resolver must fail on that token today.  Mutant: drop a row and the citation
+    arm for that artifact goes RED; add an unneeded row and this arm goes RED.
+    """
+    assert _CITATION_EXCEPTIONS, "the table is empty; the arm below would be vacuous"
+    corpus = {p.name: p for p in _corpus()}
+    for (name, token), (path, reason) in _CITATION_EXCEPTIONS.items():
+        assert reason.strip(), f"{name}/{token}: no reason"
+        assert (REPO / path).is_file(), f"{name}/{token}: {path} does not exist"
+        assert name in corpus, f"{name} is not in the corpus"
+        text = corpus[name].read_text(encoding="utf-8")
+        assert any(m.group(1) == token for m in _CITATION.finditer(text)), (
+            f"{name} no longer cites {token}"
+        )
+        assert _resolve(token, corpus[name]) is None, (
+            f"{token} resolves without the exception; remove the row"
+        )
+

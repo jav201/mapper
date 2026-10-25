@@ -1,0 +1,69 @@
+# P4 UX walkthrough - mapper --audit structure block, read at 80 columns (trigger D1)
+# executed 2026-10-25 by the software-dev P4 worker, HEAD 9ba6d6e (code identical to 934e935), worktree on PYTHONPATH, mapper.__file__ inside the worktree
+# driver: tests/_relmap_fixtures.py run_audit = python -c 'from mapper.app import main; main()' --audit <repo> (subprocess, the shipped entry)
+# env: PYTHONDONTWRITEBYTECODE=1 PYTHONIOENCODING=utf-8 env -u NO_COLOR -u TERM ; account name redacted to <user> before storing
+# fixture A: git repo + verified registry + tests/fixtures/relmap/REQUIREMENTS.snapshot.md as REQUIREMENTS.md + beta.relmap.yml (valid, two non-schema keys) + broken.relmap.yml (invalid YAML)
+# fixture B: (a) a directory that is not a git repo, (b) a git repo with no registry
+# ---------------- fixture A: exit code 1 (the snapshot canon is entirely unreviewed; the hook never changes it) ----------------
+repo: C:\Users\<user>\AppData\Local\Temp\ds-units\ux-tmp\work\uxrepo
+chain: chain verified
+counts: reviewed=0, changed · review=0, pre-reviewed=0, not reviewed=272, retired=3
+pre-reviews: 0
+unentitled reviews: 0
+reported: REQUIREMENTS.md line 138: cannot parse row for 'LLR-HYG.1.1' (5 cells, expected 4)
+reported: REQUIREMENTS.md line 143: cannot parse row for 'LLR-CAN.1.1' (6 cells, expected 4)
+reported: REQUIREMENTS.md line 144: cannot parse row for 'LLR-CAN.1.2' (7 cells, expected 4)
+reported: REQUIREMENTS.md line 196: cannot parse row for 'HLR-RH.6' (5 cells, expected 4)
+reported: REQUIREMENTS.md line 224: cannot parse row for 'LLR-RH.6.1' (5 cells, expected 4)
+reported: REQUIREMENTS.md line 228: cannot parse row for 'LLR-RH.7.3' (5 cells, expected 4)
+reported: REQUIREMENTS.md line 285: cannot parse row for 'LLR-Q3.1.2' (6 cells, expected 4)
+identity: identity ceiling: git identity is self-claimed and spoofable by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)
+verdict: not ready · unreviewed requirements
+structure: informational - does not change the verdict or the exit code
+structure: descriptor beta.relmap.yml
+structure: profile=reqharness nodes=275 (HLR=76, LLR=199) edges=196 (refines=196) cycles=0
+structure: sources: canon=REQUIREMENTS.md us_canon=unset at_table=unset
+structure: gaps: 7 (HIGH=0, MED=7, LOW=0)
+structure gap: MED · HLR WITHOUT LLR · HLR-N13.3 · reach=0 · HLR-N13.3 has no LLR under it: While the workspace holds maps, a map that cannot be summarised shall be declared as such on its own card, and every ot…
+structure gap: MED · HLR WITHOUT LLR · HLR-N16.3 · reach=0 · HLR-N16.3 has no LLR under it: When the operator presses the help chord twice in succession, the system shall produce a declared outcome that does not…
+structure gap: MED · HLR WITHOUT LLR · HLR-N16.4 · reach=0 · HLR-N16.4 has no LLR under it: The set of key rows the legend paints for its own scope shall equal the set of keys that have an effect while the legen…
+structure gap: MED · HLR WITHOUT LLR · HLR-REPAIR.1 · reach=0 · HLR-REPAIR.1 has no LLR under it: When the store cannot fully reconcile a map's sidecar against its parsed graph, the load shall record a warning that re… (canon rows near this id could not be parsed or linked: 2)
+structure gap: MED · HLR WITHOUT LLR · HLR-S06.2 · reach=0 · HLR-S06.2 has no LLR under it: When each of the three new tokens is downgraded to the eight-bit colour system, the system shall yield three mutually d…
+structure gap: MED · HLR WITHOUT LLR · HLR-CAN.1 · reach=0 · HLR-CAN.1 has no LLR under it: The canon shall hold, for each requirement heading of 2026-10-09-hygiene-batch's record, exactly one row owned by that … (canon rows near this id could not be parsed or linked: 2)
+structure gap: MED · HLR WITHOUT LLR · HLR-RS.3 · reach=0 · HLR-RS.3 has no LLR under it: Before writing a review, the system shall verify that the chain is verified (not tampered, forked or absent), that the …
+structure note: unparsed row LLR-HYG.1.1
+structure note: unparsed row LLR-CAN.1.1
+structure note: unparsed row LLR-CAN.1.2
+structure note: unparsed row HLR-RH.6
+structure note: unparsed row LLR-RH.6.1
+structure note: unparsed row LLR-RH.7.3
+structure note: unparsed row LLR-Q3.1.2
+structure note: unlinked LLRs (3): LLR-REPAIR.1, LLR-REPAIR.2, LLR-RH.6.2
+structure note: ignored descriptor key: canon
+structure note: ignored descriptor key: notes_for_humans
+structure: refused (broken.relmap.yml): not valid YAML - descriptor skipped
+# ---------------- fixture B ----------------
+### (a) not a git repository rc= 1
+repo: C:\Users\<user>\AppData\Local\Temp\ds-units\ux-tmp\work2\notgit
+chain: no repo
+counts: reviewed=0, changed · review=0, pre-reviewed=0, not reviewed=0, retired=0
+pre-reviews: 0
+unentitled reviews: 0
+identity: identity ceiling: git identity is self-claimed and spoofable by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)
+verdict: not ready · no repo
+structure: unavailable (no repository)
+
+### (b) git repository, no registry rc= 1
+repo: C:\Users\<user>\AppData\Local\Temp\ds-units\ux-tmp\work2\noreg
+chain: no registry yet
+counts: reviewed=0, changed · review=0, pre-reviewed=0, not reviewed=0, retired=0
+pre-reviews: 0
+unentitled reviews: 0
+identity: identity ceiling: git identity is self-claimed and spoofable by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)
+verdict: not ready · no registry yet
+structure: unavailable (no registry)
+
+# ---------------- measurements over fixture A ----------------
+# lines up to and including 'verdict: ' : 14 ; block lines after it : 23 ; lines starting 'verdict: ' : 1
+# 'structure gap:' rows 7 (= gaps: 7) ; 'structure note:' rows 10 ; 'structure:' lines 6
+# width: summary line 90 chars ; gap rows 210-277 chars ; the existing identity: line 157 chars (wraps at 80 already)

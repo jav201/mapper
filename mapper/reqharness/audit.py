@@ -30,7 +30,9 @@ from __future__ import annotations
 import os
 import sys
 import unicodedata
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from itertools import islice
 from pathlib import Path
 
 from mapper.osopen import is_link
@@ -74,6 +76,13 @@ IDENTITY_CEILING = (
 #: `--audit` names this state instead of the alarming `chain broken`).
 NO_REGISTRY = "no registry yet"
 VERDICT_NO_REGISTRY = "not ready · no registry yet"
+
+#: The extra lines `run_cli` prints after the report when a hook is given (LLR-RMU.1.1).  The
+#: verdict is found by its PREFIX `verdict: `: it is no longer the last line of the output.
+HOOK_LINE_LIMIT = 1000
+STRUCTURE_NO_REPO = "structure: unavailable (no repository)"
+STRUCTURE_NO_REGISTRY = "structure: unavailable (no registry)"
+STRUCTURE_TRUNCATED = f"structure: output truncated at {HOOK_LINE_LIMIT} lines"
 
 
 def _visible(value: object) -> str:
@@ -360,13 +369,40 @@ def render(report: Report) -> str:
     return "\n".join(lines)
 
 
-def run_cli(argv: list[str]) -> int:
+def _hook_lines(report: Report, extra_lines: Callable[[Path], Iterable[str]]) -> list[str]:
+    """The lines printed after the report for a hook (LLR-RMU.1.1): one fixed line for the no-repo
+    and no-registry reports (told apart by `chain_status`, never by verdict text, and the hook is
+    NOT called), else at most `HOOK_LINE_LIMIT` lines of one call of the hook (a 1,001st is not
+    consumed past, and one truncation line follows), or one `internal error` line when the hook
+    raises.  The caller escapes every line."""
+    if report.chain_status == identity.NO_REPO:
+        return [STRUCTURE_NO_REPO]
+    if report.chain_status == NO_REGISTRY:
+        return [STRUCTURE_NO_REGISTRY]
+    try:
+        lines = [str(line) for line in islice(extra_lines(Path(report.repo)), HOOK_LINE_LIMIT + 1)]
+    except Exception as exc:  # the hook is informational: it never changes the exit code
+        return [f"structure: unavailable (internal error: {type(exc).__name__})"]
+    if len(lines) > HOOK_LINE_LIMIT:
+        return lines[:HOOK_LINE_LIMIT] + [STRUCTURE_TRUNCATED]
+    return lines
+
+
+def run_cli(
+    argv: list[str], extra_lines: Callable[[Path], Iterable[str]] | None = None
+) -> int:
     """``mapper --audit <repo> [--baseline <name>]`` — the read-only audit
     entry (HLR-RH.7): prints the report and returns 0 on ``ready`` / 1
     otherwise, WITHOUT starting the TUI and without writing anything
     (R4 — the parse cache is OFF, no ``git status`` runs).  ``app.main``
     dispatches ``--audit`` here after the UTF-8 re-wrap and turns the
-    returned code into the process exit status."""
+    returned code into the process exit status.
+
+    ``extra_lines`` (HLR-RMU.1, injected by ``app`` so this module imports nothing from the
+    relation-map package) is called once with the repository root and its lines are printed after
+    the report through the report's own escaper; it never changes the exit code.  ``None`` is
+    byte-identical to the behaviour before the hook existed.  When ``audit`` refuses (no report
+    exists) the hook is not called and no structure line is printed."""
     index = argv.index("--audit")
     if index + 1 >= len(argv) or argv[index + 1].startswith("--"):
         print("usage: mapper --audit <repo> [--baseline <name>]", file=sys.stderr)
@@ -391,10 +427,17 @@ def run_cli(argv: list[str]) -> int:
         print(f"audit: internal error ({type(exc).__name__})", file=sys.stderr)
         return 1
     print(render(report))
+    if extra_lines is not None:
+        for line in _hook_lines(report, extra_lines):
+            shown = _visible(line)
+            if shown.startswith("verdict: "):  # `verdict: ` belongs to the report alone
+                shown = "structure: " + shown
+            print(shown)
     return 0 if report.ready else 1
 
 
 __all__ = [
+    "HOOK_LINE_LIMIT",
     "IDENTITY_CEILING",
     "NO_REGISTRY",
     "Report",

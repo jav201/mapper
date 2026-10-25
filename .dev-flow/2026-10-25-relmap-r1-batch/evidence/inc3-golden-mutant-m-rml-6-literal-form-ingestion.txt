@@ -1,0 +1,44 @@
+# Inc-3 M-RML-6 LITERAL form ({shown!r} -> {shown}): test_ingestion_limits is ALSO RED (2 arms assert the quoted 'x') -- contract wording issue, see packet
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_ingestion_limits.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...FF.................                                                   [100%]
+================================== FAILURES ===================================
+_______________ test_at_111_anchor_refused_names_anchor_and_map _______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25183/test_at_111_anchor_refused_nam0')
+
+    def test_at_111_anchor_refused_names_anchor_and_map(tmp_path):
+        _write_map(tmp_path, yml_text="top: &x 1\nother: *x\n")
+        with pytest.raises(MapStoreError) as caught:
+            MapStore(tmp_path).load("m")
+        msg = str(caught.value)
+>       assert "'x'" in msg, msg
+E       AssertionError: could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)
+E       assert "'x'" in 'could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)'
+
+tests\test_ingestion_limits.py:110: AssertionError
+__________________________ test_at_111_alias_refused __________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25183/test_at_111_alias_refused0')
+
+    def test_at_111_alias_refused(tmp_path):
+        _write_map(tmp_path, yml_text="top: &x [1, 2]\nother: *x\n")
+        with pytest.raises(MapStoreError) as caught:
+            MapStore(tmp_path).load("m")
+>       assert "'x'" in str(caught.value), str(caught.value)
+E       AssertionError: could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)
+E       assert "'x'" in 'could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)'
+E        +  where 'could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)' = str(MapStoreError('could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)'))
+E        +    where MapStoreError('could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)') = <ExceptionInfo MapStoreError('could not read the card of m: YAML anchors and aliases are not allowed here (anchor x)') tblen=3>.value
+
+tests\test_ingestion_limits.py:119: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_at_111_anchor_refused_names_anchor_and_map
+FAILED tests/test_ingestion_limits.py::test_at_111_alias_refused - AssertionE...
+2 failed, 20 passed in 22.35s
+
+exit code: 1
+wall time: 24 s (whole seconds)

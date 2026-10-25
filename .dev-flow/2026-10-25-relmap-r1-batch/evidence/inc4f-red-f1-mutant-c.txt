@@ -1,0 +1,3 @@
+KILLED  F1-mutant-C dot guard removed  [FAILED tests/test_relmap_adapter.py::test_unparsed_count_of_a_dotless_hlr_is_not_doubled; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_unparsed_count_of_a_dotless_hlr_is_not_doubled
+# exit code: 0

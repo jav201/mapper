@@ -47,7 +47,7 @@ def tree_order(graph: Graph) -> list[str]:
     Ids not reachable from the root are NOT dropped -- see `SearchIndex.query`.
 
     THE CHILD INDEX IS BUILT ONCE, AND THAT IS NOT A MICRO-OPTIMISATION.
-    `Graph.children_of` (`model.py:149`) is a full linear scan of `graph.edges`,
+    `Graph.children_of` (`mapper/model.py:149`) is a full linear scan of `graph.edges`,
     so asking it once per node makes this walk `O(N*E)` -- measured at the
     renderer's declared ceiling, 4.19 s for ONE call, against 0.008 s for the
     matching it orders and 0.14 s for the entire frame.  This runs in the

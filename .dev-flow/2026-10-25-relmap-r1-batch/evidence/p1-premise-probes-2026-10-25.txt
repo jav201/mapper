@@ -1,0 +1,13 @@
+P-a mapper resolves inside the worktree (PYTHONPATH set): True
+P-b model.py parses under feature_version=(3, 10)
+P-b gaps.py parses under feature_version=(3, 10)
+P-c kind graph is acyclic (topological order exists): True ['AT', 'US', 'TC', 'HLR', 'LLR']
+P-d rule: only refines downstream | LLR1 change reaches: ['AT1', 'TC1'] | US1 change reaches: ['AT1', 'HLR1', 'LLR1', 'TC1']
+P-d prose: refines+binds downstream | LLR1 change reaches: ['TC1'] | US1 change reaches: ['AT1', 'HLR1', 'LLR1', 'TC1']
+P-e _prescan_sidecar self.<attr> uses: 0 | lines 712 - 749
+P-f osopen names: ['read_capped', 'ContentReadError', 'MAX_MAP_BYTES', 'MAX_DEPTH', 'MAX_NODES', 'MAX_EDGES', 'confine_reason']
+P-g callers of run_cli outside audit.py: ['mapper/app.py:352:        raise SystemExit(reqharness_audit.run_cli(sys.argv))', 'mapper/reqharness/audit.py:363:def run_cli(argv: list[str]) -> int:']
+P-h tracked *.relmap.yml files: []
+P-i tracked mapper/relmap or yamlscan today: []
+P-j QuickMap oracle (read-only checkout, Python 3.12.7, no 3.10 interpreter on this machine): env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_model.py tests/test_gaps.py -> 123 passed in 13.91s
+P-k ARCHITECTURE.md section 2 path column is checked against the tree: first draft listed mapper/relmap/*.py -> tests/test_repair_map_truth.py::test_at_p04_every_owned_path_exists_on_disk FAILED x9; commitment re-worded without backticked paths -> tests/test_mod_census.py test_mod_deps.py test_mod_structure.py test_repair_map_truth.py test_a3_census.py test_arch_osopen_callers.py: 90 passed

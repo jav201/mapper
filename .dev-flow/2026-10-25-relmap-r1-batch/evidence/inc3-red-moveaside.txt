@@ -1,0 +1,12 @@
+# Inc-3 move-aside RED per new source file (C-20): the file is moved out of the tree, its tests run, the file is restored and its sha256 verified.
+
+## yamlscan.py moved aside
+exit code: 4   wall: 0.9 s   restore sha256 equal: True  (084327f8e7fac92d...)
+summary: ?
+first import error: E   ModuleNotFoundError: No module named 'mapper.yamlscan'
+
+## relmap/descriptor.py moved aside
+exit code: 2   wall: 0.9 s   restore sha256 equal: True  (4aad6f80ca334b9f...)
+summary: 1 error in 0.17s
+  tests/test_relmap_descriptor.py - 
+first import error: E   ImportError: cannot import name 'descriptor' from 'mapper.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\mapper\relmap\__init__.py)

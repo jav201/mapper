@@ -14,13 +14,13 @@ import yaml
 from .darkside import plain
 from .model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
 from .osopen import (
-    MAX_DEPTH,
     MAX_EDGES,
     MAX_MAP_BYTES,
     MAX_NODES,
     ContentReadError,
     read_capped,
 )
+from .yamlscan import YamlLimitError, prescan
 
 
 class MapStoreError(Exception):
@@ -41,13 +41,6 @@ _RESERVED_NAMES = frozenset(
 _INVALID_CHARS = frozenset('<>"|?*')
 #: `<id>_nodos.yml` plus a temp suffix must fit MAX_PATH (260) beside the workspace.
 MAX_MAP_ID_LEN = 100
-#: Review inc003-F1 (security): an anchor NAME is attacker-controlled sidecar
-#: content and the prescan refusal names it — LLR-Q2.1.2 — but never verbatim:
-#: the message carries at most this many characters of it, then an ellipsis
-#: (LLR-N13.1.7: a coordinate that carries a value behaves like a value).  A
-#: hostile sidecar is capped by the 8 MiB file limit, so verbatim naming could
-#: push an ~8 MiB string into the operator-facing toast/log pipeline.
-ANCHOR_NAME_DISPLAY = 40
 
 
 def check_map_id(map_id: str) -> None:
@@ -710,43 +703,27 @@ class MapStore:
         return graph
 
     def _prescan_sidecar(self, map_id: str, yml_text: str) -> None:
-        """LLR-Q2.1.2 prescan: an ITERATIVE YAML event-stream scan before any compose.
+        """LLR-Q2.1.2 prescan, delegated to the leaf `yamlscan.prescan` (LLR-RML.1.4).
 
-        Refuses the first anchor or alias event — an anchor-amplified sidecar
-        expands exponentially at compose time, so this scan runs BEFORE
-        `yaml.safe_load` can materialise one (M-Q2-1) — naming the anchor
-        truncated to ANCHOR_NAME_DISPLAY (review inc003-F1: the name is
-        attacker-controlled content), and refuses collection nesting deeper
-        than MAX_DEPTH.  `yaml.parse` is a
-        state machine with an explicit stack: the scan never recurses, so a
-        10,000-nesting document is a typed refusal in milliseconds, never a
-        RecursionError.  Raises MapStoreError (naming the cause, the limit and
-        the map id — never a path); lets yaml.YAMLError propagate to the
-        caller's parser net.
+        The iterative event-stream scan refuses the first anchor or alias and nesting
+        deeper than MAX_DEPTH before any compose (M-Q2-1), naming the anchor truncated
+        (review inc003-F1: the name is attacker-controlled).  This method only words the
+        refusal for the map surface: a `MapStoreError` naming the cause, the limit and the
+        map id, never a path.  A `yaml.YAMLError` from `yaml.parse` propagates to the
+        caller's parser net, as before.
         """
-        depth = 0
-        for event in yaml.parse(yml_text):
-            anchor = getattr(event, "anchor", None)
-            if anchor is not None:
-                # The anchor is NAMED (LLR-Q2.1.2) but TRUNCATED (review
-                # inc003-F1): it is attacker-controlled content, and the refusal
-                # message must not carry it verbatim.
-                shown = anchor[:ANCHOR_NAME_DISPLAY]
-                if len(anchor) > ANCHOR_NAME_DISPLAY:
-                    shown += "…"
+        try:
+            prescan(yml_text)
+        except YamlLimitError as exc:
+            if exc.kind == "anchor":
                 raise MapStoreError(
                     f"could not read the card of {map_id}: YAML anchors and aliases "
-                    f"are not allowed here (anchor {shown!r})"
-                )
-            if isinstance(event, (yaml.SequenceStartEvent, yaml.MappingStartEvent)):
-                depth += 1
-                if depth > MAX_DEPTH:
-                    raise MapStoreError(
-                        f"could not read the card of {map_id}: it nests deeper than "
-                        f"the depth limit ({MAX_DEPTH})"
-                    )
-            elif isinstance(event, (yaml.SequenceEndEvent, yaml.MappingEndEvent)):
-                depth -= 1
+                    f"are not allowed here (anchor {exc.shown!r})"
+                ) from None
+            raise MapStoreError(
+                f"could not read the card of {map_id}: it nests deeper than "
+                f"the depth limit ({exc.limit})"
+            ) from None
 
     def _capped_side_graph(self, map_id: str, mmd_text: str, yml_text: str) -> Graph:
         """Build a Graph from in-memory map texts under the shared Q2 caps.

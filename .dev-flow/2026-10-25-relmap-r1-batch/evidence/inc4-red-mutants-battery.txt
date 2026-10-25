@@ -1,0 +1,78 @@
+# 19 mutants (Inc-4), driver mutants.py (scratch): hash before, one edit, targeted pytest, restore from bytes, hash after
+KILLED  M-RMA-1 resolve unlinked LLR to nearest HLR prefix  [1 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_an_unlinked_llr_is_never_attached_to_a_prefix
+KILLED  M-RMA-2 second canon reader (parse twice)  [1 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_canon_is_read_once_through_read_repo_text
+KILLED  M-RMA-3 re-parse a reported row by splitting on the first 4 pipes  [7 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_snapshot_census
+      tests/test_relmap_adapter.py::test_snapshot_structure_figures
+      tests/test_relmap_adapter.py::test_snapshot_gaps
+      tests/test_relmap_adapter.py::test_live_invariants
+      tests/test_relmap_adapter.py::test_live_invariants_see_a_dropped_row
+      tests/test_relmap_adapter.py::test_rule_d1_table[LLR-RH.6.2-HLR-RH.6-False-False]
+      ... +1 more
+KILLED  M-RMA-4 adapter opens us_canon  [1 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_readonly
+KILLED  M-RMA-5 count only the starts-with branch  [3 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_snapshot_unparsed_counts
+      tests/test_relmap_adapter.py::test_snapshot_gaps
+      tests/test_relmap_adapter.py::test_unparsed_counts
+KILLED  M-RMA-6 skip the last table row  [20 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_snapshot_census
+      tests/test_relmap_adapter.py::test_snapshot_structure_figures
+      tests/test_relmap_adapter.py::test_live_invariants
+      tests/test_relmap_adapter.py::test_live_invariants_see_a_dropped_row
+      tests/test_relmap_adapter.py::test_status_words
+      tests/test_relmap_adapter.py::test_node_fields
+      ... +14 more
+KILLED  M-RMA-7 append a byte to the fixture  [2 failed; 1.2s; restore OK b093c9203f0f]
+      tests/test_relmap_adapter.py::test_snapshot_sha256
+      tests/test_relmap_adapter.py::test_snapshot_sha256_crlf_arm
+KILLED  M-RMA-8 change the id regex in the adapter  [8 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_snapshot_structure_figures
+      tests/test_relmap_adapter.py::test_snapshot_unparsed_counts
+      tests/test_relmap_adapter.py::test_snapshot_gaps
+      tests/test_relmap_adapter.py::test_live_invariants
+      tests/test_relmap_adapter.py::test_reported_rows_are_notes
+      tests/test_relmap_adapter.py::test_unparsed_counts
+      ... +2 more
+KILLED  M-RMA-9 hash the raw bytes (CRLF arm)  [1 failed; 1.3s; restore OK c658f3ee597c]
+      tests/test_relmap_adapter.py::test_snapshot_sha256_crlf_arm
+KILLED  M-RMG-3 gaps ignore sourced  [13 failed; 7.8s; restore OK dd180acf6256]
+      tests/test_relmap_adapter.py::test_snapshot_gaps
+      tests/test_relmap_adapter.py::test_unsourced_kinds_keep_their_gap_kinds_inactive
+      tests/test_relmap_gaps.py::test_hlr_without_llr_positive_and_negative
+      tests/test_relmap_gaps.py::test_an_incoming_refines_does_not_count_as_a_child
+      tests/test_relmap_gaps.py::test_unsourced_kind_is_silent
+      tests/test_relmap_gaps.py::test_retired_node_not_reported_but_traversed[deferred]
+      ... +7 more
+KILLED  M-RMG-3b adapter sources every kind  [4 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_snapshot_census
+      tests/test_relmap_adapter.py::test_snapshot_gaps
+      tests/test_relmap_adapter.py::test_unsourced_kinds_keep_their_gap_kinds_inactive
+      tests/test_relmap_adapter.py::test_readonly
+KILLED  M-RMA-10 unknown status never counted  [2 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_status_words
+      tests/test_relmap_adapter.py::test_duplicate_and_unsafe_ids_are_counted_never_linked
+KILLED  M-RMA-11 status keeps case  [1 failed; 1.3s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_status_words
+KILLED  M-RMA-12 title not cut  [1 failed; 1.2s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_node_fields
+KILLED  M-RMA-13 edges drawn from every parsed node (duplicates, unsafe)  [1 failed; 1.1s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_duplicate_and_unsafe_ids_are_counted_never_linked
+KILLED  M-RMA-14 canon cap is not the derive limit  [9 failed; 1.1s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_canon_is_read_once_through_read_repo_text
+      tests/test_relmap_adapter.py::test_canon_causes[K1]
+      tests/test_relmap_adapter.py::test_canon_causes[K2]
+      tests/test_relmap_adapter.py::test_canon_causes[K3]
+      tests/test_relmap_adapter.py::test_canon_causes[K4]
+      tests/test_relmap_adapter.py::test_canon_causes[K5]
+      ... +3 more
+KILLED  M-RMA-15 report with no id is dropped  [1 failed; 1.2s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_a_report_with_no_id_prints_the_generic_note
+KILLED  M-RMA-16 HLR-class reported row counted as an orphan  [1 failed; 1.2s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_unparsed_counts_ignore_unrelated_ids_and_hlr_rows
+KILLED  M-RMA-17 unlinked list not in canon order  [1 failed; 1.2s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_snapshot_structure_figures
+KILLED  M-RMA-18 unsafe-id LLR stays in unlinked (drop the first pass)  [1 failed; 1.2s; restore OK cd58d79757b9]
+      tests/test_relmap_adapter.py::test_duplicate_and_unsafe_ids_are_counted_never_linked

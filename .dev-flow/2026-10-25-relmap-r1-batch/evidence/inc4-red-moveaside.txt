@@ -1,0 +1,24 @@
+# cmd: python -m pytest -q -p no:cacheprovider tests/test_relmap_adapter.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+=================================== ERRORS ====================================
+________________ ERROR collecting tests/test_relmap_adapter.py ________________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\tests\test_relmap_adapter.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_adapter.py:29: in <module>
+    from mapper.relmap import adapter as amod
+E   ImportError: cannot import name 'adapter' from 'mapper.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\mapper\relmap\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_adapter.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.21s
+# exit code: 2
+# wall time: 1.1 s
+# sha256 before move: cd58d79757b9b863b0c44ff5b398991039de3f7bcbda72d4a1b6006eab226201
+# sha256 after restore: cd58d79757b9b863b0c44ff5b398991039de3f7bcbda72d4a1b6006eab226201 (equal)

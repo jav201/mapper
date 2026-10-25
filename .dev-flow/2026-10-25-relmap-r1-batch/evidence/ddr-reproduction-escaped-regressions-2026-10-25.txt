@@ -1,0 +1,56 @@
+# Reproduction run 2026-10-25 by the orchestrator's DDR worker (Claude Sonnet subagent), NOT the original run.
+# Purpose: DDR QA F-1/F-2/OP-7. The original first full-suite run (4013 passed, 3 failed) left no transcript; this reproduces the pre-fix failures and the two named mutants.
+# Account name redacted to <user>. Executor of every block below: the DDR worker, in a throwaway detached worktree (removed afterwards) and on wt-r1 (mutants restored, sha256-verified).
+
+## 1. Pre-fix RED: detached checkout of the parent of 456da08 (6331206)
+$ git -C <worktree> rev-parse HEAD  (detached parent of 456da08)
+633120617db3d39d63c3221942f48b963f52335f
+$ python -c 'import mapper; print(mapper.__file__)'
+C:\Users\<user>\AppData\Local\Temp\ds-units\r1-seal\wt-parent\mapper\__init__.py
+$ env -u NO_COLOR -u TERM PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider --tb=line tests/test_fold.py tests/test_repair_artifact_claims.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+....F...xxx..................F.......................................... [ 36%]
+.........................F.............................................. [ 72%]
+......................................................                   [100%]
+================================== FAILURES ===================================
+C:\Users\<user>\AppData\Local\Temp\ds-units\r1-seal\wt-parent\tests\test_fold.py:282: AssertionError: [('tests/test_relmap_model.py', ['0x200b', '0x2028', '0x202e']), ('.dev-flow/2026-10-25-relmap-r1-batch/01-requirement...ew.md', ['0x2028']), ('.dev-flow/2026-10-25-relmap-r1-batch/evidence/p2-qa-pass3-and-pdr-qa.md', ['0x200b', '0x2028'])]
+C:\Users\<user>\AppData\Local\Temp\ds-units\r1-seal\wt-parent\tests\test_repair_artifact_claims.py:208: AssertionError: 04-gate-findings-disposition.md cites what disk does not have: ['model.py: unresolvable or ambiguous']
+C:\Users\<user>\AppData\Local\Temp\ds-units\r1-seal\wt-parent\tests\test_repair_artifact_claims.py:208: AssertionError: search.py cites what disk does not have: ['model.py: unresolvable or ambiguous']
+============================== warnings summary ===============================
+tests/test_fold.py::test_tc_032_no_reference_to_the_deleted_fold_state_survives
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_fold.py::test_no_tracked_file_spells_a_coerced_code_point_INCLUDING_the_artifacts
+FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[04-gate-findings-disposition.md]
+FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[search.py]
+3 failed, 192 passed, 3 xfailed, 1 warning in 45.37s
+
+## 2. Mutant .69 (LED .69): one literal U+200B inserted into tests/test_relmap_model.py on the current tree (HEAD e6dc5c5 + DDR test), then restored; sha256 of both mutated files verified equal to the pre-run value (mut.sha: OK)
+$ python -m pytest -q -p no:cacheprovider tests/test_fold.py -k coerced -x
+        fixture and the resulting test passed on everything.  The sweep enforcing
+        passed this arm before these globs were added.  `mapper.db` is untracked and
+E       AssertionError: [('tests/test_relmap_model.py', ['0x200b'])]
+E       assert [('tests/test..., ['0x200b'])] == []
+E         Left contains one more item: ('tests/test_relmap_model.py', ['0x200b'])
+1 failed, 21 deselected in 1.04s
+
+## 3. Mutant .71 (LED .71): the _CITATION_EXCEPTIONS row dropped (table emptied) in tests/test_repair_artifact_claims.py, then restored (sha256 verified)
+$ python -m pytest -q -p no:cacheprovider tests/test_fold.py tests/test_repair_artifact_claims.py
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_repair_artifact_claims.py::test_every_path_line_citation_resolves[04-gate-findings-disposition.md]
+FAILED tests/test_repair_artifact_claims.py::test_every_declared_citation_exception_is_still_needed
+2 failed, 194 passed, 3 xfailed, 1 warning in 36.97s
+
+## 4. Restored tree, same command (GREEN)
+196 passed, 3 xfailed, 1 warning in 37.59s
+
+## 5. Restore verification
+tests/test_relmap_model.py: OK
+tests/test_repair_artifact_claims.py: OK

@@ -1,0 +1,16 @@
+Probe for ledger LED-2026-10-25-relmap-r1-batch.30 and .36 (author, 2026-10-25). Python 3.12.7.
+Model of mutant M-RMU-6: iterate a set of the 17 profile names (5 kinds, 4 edge types, 8 gap kinds).
+Only the relative order of HLR and LLR is visible in the audit output (one edge type, one gap kind present).
+Command: for s in 0..7: PYTHONHASHSEED=$s python probe.py   (probe.py: list(set(names)); print which of HLR/LLR comes first; run twice per seed)
+seed 0: LLR<HLR
+seed 1: LLR<HLR
+seed 2: HLR<LLR
+seed 3: HLR<LLR
+seed 4: HLR<LLR
+seed 5: LLR<HLR
+seed 6: HLR<LLR
+seed 7: HLR<LLR
+Each seed repeated twice with the same result. Pre-picked pair: 0 and 2 (the old pair set 0..3 contained both orders too, but the two-seed AT needs a pair proven to differ).
+The Inc-5 packet re-proves the pair against the real mutant and re-picks if it does not differ.
+Snapshot digest check (ledger .36): git show HEAD:REQUIREMENTS.md | sha256sum = b093c9203f0fe75f218298f56cc723a812902a1f4979424c8c2cb931bd39a25a
+  working copy REQUIREMENTS.md sha256 = 93b18472c40fac24ec818bbe1b2808d66d16c021bf2f9234dfee5a1083c44cc7 (CRLF); with CRs removed = b093c9203f0fe75f218298f56cc723a812902a1f4979424c8c2cb931bd39a25a

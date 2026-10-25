@@ -1,0 +1,8 @@
+# DDR UX F-3: the overflow lines do not start like data rows; executed by the DDR worker 2026-10-25
+# python -m pytest -v ... tests/test_relmap_audit.py::test_gap_cap_is_twenty_with_an_overflow_line tests/test_relmap_audit.py::test_note_cap_is_ten_with_an_overflow_line
+# [21-True] asserts: 20 'structure gap: ' rows, the overflow line is 'structure: gaps shown 20 of 21 (1 lowest-ranked not shown)', and no 'structure gap: ' line contains 'shown'; [11-True] likewise for 'structure note: ' / 'structure: notes shown'
+tests/test_relmap_audit.py::test_gap_cap_is_twenty_with_an_overflow_line[20-False] PASSED [ 25%]
+tests/test_relmap_audit.py::test_gap_cap_is_twenty_with_an_overflow_line[21-True] PASSED [ 50%]
+tests/test_relmap_audit.py::test_note_cap_is_ten_with_an_overflow_line[10-False] PASSED [ 75%]
+tests/test_relmap_audit.py::test_note_cap_is_ten_with_an_overflow_line[11-True] PASSED [100%]
+============================== 4 passed in 0.36s ==============================

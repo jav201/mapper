@@ -1,0 +1,544 @@
+# cmd: python -m pytest -q -p no:cacheprovider tests/test_relmap_audit.py -q
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...................FFFFFFsFFFFFFFFFFFFFFFFFFFFFF                         [100%]
+================================== FAILURES ===================================
+_______________________ test_tc_rm_02_raising_callable ________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_tc_rm_02_raising_callable0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180CB90>
+
+    def test_tc_rm_02_raising_callable(tmp_path, capsys):
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+>       base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+
+tests\test_relmap_audit.py:401: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['--audit', 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_tc_rm_02_raising_callable0\\r']
+hook = None
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180CB90>
+
+    def _run_hook(argv, hook, capsys):
+>       code = audit_mod.run_cli(argv, extra_lines=hook)
+E       TypeError: run_cli() got an unexpected keyword argument 'extra_lines'
+
+tests\test_relmap_audit.py:394: TypeError
+_________________________ test_tc_rm_03_refusal_path __________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_tc_rm_03_refusal_path0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180EC30>
+
+    def test_tc_rm_03_refusal_path(tmp_path, capsys):
+        """The `--baseline` refusal ends before any report: no structure line, the hook is never called."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        calls = []
+>       code, out, err = _run_hook(
+            ["--audit", str(repo), "--baseline", "no-such-baseline"], lambda r: calls.append(r) or ["structure: x"], capsys)
+
+tests\test_relmap_audit.py:416: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['--audit', 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_tc_rm_03_refusal_path0\\r', '--baseline', 'no-such-baseline']
+hook = <function test_tc_rm_03_refusal_path.<locals>.<lambda> at 0x00000225A17D7B00>
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180EC30>
+
+    def _run_hook(argv, hook, capsys):
+>       code = audit_mod.run_cli(argv, extra_lines=hook)
+E       TypeError: run_cli() got an unexpected keyword argument 'extra_lines'
+
+tests\test_relmap_audit.py:394: TypeError
+____________________________ test_hook_line_bound _____________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_hook_line_bound0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180FE60>
+
+    def test_hook_line_bound(tmp_path, capsys):
+        """At most 1,000 hook lines are consumed (security M5); the 1,001st is not printed and the
+        generator is not exhausted."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        pulled = []
+    
+        def endless(_repo):
+            for i in range(5000):
+                pulled.append(i)
+                yield f"structure: line {i}"
+    
+>       code, out, _ = _run_hook(["--audit", str(repo)], endless, capsys)
+
+tests\test_relmap_audit.py:435: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['--audit', 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_hook_line_bound0\\r']
+hook = <function test_hook_line_bound.<locals>.endless at 0x00000225A18E4EA0>
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180FE60>
+
+    def _run_hook(argv, hook, capsys):
+>       code = audit_mod.run_cli(argv, extra_lines=hook)
+E       TypeError: run_cli() got an unexpected keyword argument 'extra_lines'
+
+tests\test_relmap_audit.py:394: TypeError
+____________ test_fixed_lines_key_on_chain_status_not_verdict_text ____________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_fixed_lines_key_on_chain_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000225A180EBA0>
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180F080>
+
+    def test_fixed_lines_key_on_chain_status_not_verdict_text(tmp_path, monkeypatch, capsys):
+        calls = []
+        for status, line in ((identity.NO_REPO, "structure: unavailable (no repository)"),
+                             (audit_mod.NO_REGISTRY, "structure: unavailable (no registry)")):
+            report = dataclasses.replace(audit_mod._no_repo_report(tmp_path), chain_status=status, verdict="reworded verdict")
+            monkeypatch.setattr(audit_mod, "audit", lambda repo, baseline=None, _r=report: _r)
+>           code, out, _ = _run_hook(["--audit", str(tmp_path)], lambda r: calls.append(r) or ["structure: no"], capsys)
+
+tests\test_relmap_audit.py:450: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['--audit', 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_fixed_lines_key_on_chain_0']
+hook = <function test_fixed_lines_key_on_chain_status_not_verdict_text.<locals>.<lambda> at 0x00000225A18E5440>
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180F080>
+
+    def _run_hook(argv, hook, capsys):
+>       code = audit_mod.run_cli(argv, extra_lines=hook)
+E       TypeError: run_cli() got an unexpected keyword argument 'extra_lines'
+
+tests\test_relmap_audit.py:394: TypeError
+_______________ test_run_cli_without_the_hook_is_byte_identical _______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_run_cli_without_the_hook_0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A17F5550>
+
+    def test_run_cli_without_the_hook_is_byte_identical(tmp_path, capsys):
+        repo = ready_repo(tmp_path, "green", ONE_ROW, {"HLR-TEST.1": HLR_FIELDS})
+>       code, out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+
+tests\test_relmap_audit.py:458: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['--audit', 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_run_cli_without_the_hook_0\\green']
+hook = None
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A17F5550>
+
+    def _run_hook(argv, hook, capsys):
+>       code = audit_mod.run_cli(argv, extra_lines=hook)
+E       TypeError: run_cli() got an unexpected keyword argument 'extra_lines'
+
+tests\test_relmap_audit.py:394: TypeError
+______________________ test_sink_escapes_every_hook_line ______________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_sink_escapes_every_hook_l0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180FB00>
+
+    def test_sink_escapes_every_hook_line(tmp_path, capsys):
+        """Inc-3 MINOR-2 (Layer A arm): ESC in a hook line, and a forged verdict behind U+2028 in a gap
+        title formatted by the real formatter -- the sink escapes, the formatter does not."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        m = _small_map(_node("HLR-1", title="\u2028verdict: ready"))
+    
+        def hook(_repo):
+            yield "structure: esc \x1b[31m"
+            yield from _format(m)
+    
+>       code, out, _ = _run_hook(["--audit", str(repo)], hook, capsys)
+
+tests\test_relmap_audit.py:473: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+argv = ['--audit', 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_sink_escapes_every_hook_l0\\r']
+hook = <function test_sink_escapes_every_hook_line.<locals>.hook at 0x00000225A18E5760>
+capsys = <_pytest.capture.CaptureFixture object at 0x00000225A180FB00>
+
+    def _run_hook(argv, hook, capsys):
+>       code = audit_mod.run_cli(argv, extra_lines=hook)
+E       TypeError: run_cli() got an unexpected keyword argument 'extra_lines'
+
+tests\test_relmap_audit.py:394: TypeError
+__________ test_at_117_summary_line_snapshot_and_a_non_default_canon __________
+
+snapshot_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n", stderr='')
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_117_summary_line_snaps0')
+
+    def test_at_117_summary_line_snapshot_and_a_non_default_canon(snapshot_run, tmp_path):
+        block = block_of(snapshot_run.stdout)
+>       assert SNAPSHOT_SUMMARY in block
+E       AssertionError: assert 'structure: profile=reqharness nodes=275 (HLR=76, LLR=199) edges=196 (refines=196) cycles=0' in []
+
+tests\test_relmap_audit.py:501: AssertionError
+_____________ test_at_118_hlr_without_llr_only_where_it_is_a_gap ______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_118_hlr_without_llr_on0')
+
+    def test_at_118_hlr_without_llr_only_where_it_is_a_gap(tmp_path):
+        canon = _text(
+            row("HLR-A.1", "no llr at all", "active"),
+            row("HLR-B.1", "has an llr", "active"), row("LLR-B.1.1", "child", "active"),
+            row("HLR-C.1", "retired", "withdrawn"),
+            row("HLR-D.1", "only a withdrawn llr", "active"), row("LLR-D.1.1", "gone", "withdrawn"),
+        )
+        proc = run_audit(str(registry_repo(tmp_path, "gaps", canon)))
+        gaps = _gap_lines(block_of(proc.stdout))
+>       assert len(gaps) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_relmap_audit.py:520: AssertionError
+_________ test_at_119_reported_rows_are_notes_and_no_edge_is_invented _________
+
+snapshot_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n", stderr='')
+
+    def test_at_119_reported_rows_are_notes_and_no_edge_is_invented(snapshot_run):
+        block = block_of(snapshot_run.stdout)
+        notes = _note_lines(block)
+>       assert len(notes) == 8
+E       assert 0 == 8
+E        +  where 0 = len([])
+
+tests\test_relmap_audit.py:528: AssertionError
+___________________ test_at_120_the_block_is_informational ____________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_120_the_block_is_infor0')
+
+    def test_at_120_the_block_is_informational(tmp_path):
+        repo = ready_repo(tmp_path, "green", ONE_ROW, {"HLR-TEST.1": HLR_FIELDS})
+        plain = run_audit(str(repo))
+        assert plain.returncode == 0, plain.stderr  # exit-0 precondition, with an active HLR lacking an LLR
+        head, block = report_of(plain.stdout)
+>       assert _gap_lines(block)  # a structural gap exists and the exit code is still 0
+E       assert []
+E        +  where [] = _gap_lines([])
+
+tests\test_relmap_audit.py:540: AssertionError
+__________________________ test_exit_code_unchanged ___________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_exit_code_unchanged0')
+
+    def test_exit_code_unchanged(tmp_path):
+        """Exit-0 fixture with and without a gap and a refused descriptor: the code is the verdict's."""
+        no_gap = ready_repo(tmp_path, "nogap", _text(
+            row("HLR-TEST.1", HLR_FIELDS["statement"], "active", "first rationale"), row("LLR-TEST.1.1", "child statement", "active")),
+            {"HLR-TEST.1": HLR_FIELDS, "LLR-TEST.1.1": {"statement": "child statement", "rationale": "", "status": "active"}})
+        with_gap = ready_repo(tmp_path, "gap", ONE_ROW, {"HLR-TEST.1": HLR_FIELDS})
+>       assert _gap_lines(block_of(run_audit(str(with_gap)).stdout))  # a structural gap exists
+E       AssertionError: assert []
+E        +  where [] = _gap_lines([])
+E        +    where [] = block_of('repo: C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_exit_code_unchanged0\\gap\nchain: c...and spoofable by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: ready\n')
+E        +      where 'repo: C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_exit_code_unchanged0\\gap\nchain: c...and spoofable by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: ready\n' = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...e by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: ready\n', stderr='').stdout
+E        +        where CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...e by any committer; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: ready\n', stderr='') = run_audit('C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_exit_code_unchanged0\\gap')
+E        +          where 'C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\test_exit_code_unchanged0\\gap' = str(WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_exit_code_unchanged0/gap'))
+
+tests\test_relmap_audit.py:557: AssertionError
+___________ test_at_121_every_cause_prints_its_fixed_text[k01-k10] ____________
+
+cases = {'k01': ('link', 'is a link'), 'k02': ('dir', 'is not a regular file'), 'k05': ('over', 'exceeds the 8388608 byte limit'), 'k06': (b'a: 1\x00\x00\x01\n', 'looks binary'), ...}
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_121_every_cause_prints0')
+
+    @pytest.mark.parametrize("cases", [K_CASES_ONE, K_CASES_TWO], ids=["k01-k10", "k11-k17"])
+    def test_at_121_every_cause_prints_its_fixed_text(cases, tmp_path):
+        repo = registry_repo(tmp_path, "k", ONE_ROW)
+        scratch = tmp_path / "scratch"
+        scratch.mkdir()
+        _materialise(repo, cases, scratch)
+        proc = run_audit(str(repo))
+        bare = run_audit_nohook(str(repo))
+        assert proc.returncode == bare.returncode == 1, proc.stderr  # audit continues; the code is the verdict's
+        block = block_of(proc.stdout)
+        for key, (_, text) in cases.items():
+>           assert f"structure: refused ({key}.relmap.yml): {text} - descriptor skipped" in block, (key, block[:20])
+E           AssertionError: ('k01', [])
+E           assert 'structure: refused (k01.relmap.yml): is a link - descriptor skipped' in []
+
+tests\test_relmap_audit.py:633: AssertionError
+___________ test_at_121_every_cause_prints_its_fixed_text[k11-k17] ____________
+
+cases = {'k11': ('- just\n- a list\n', 'not a mapping'), 'k12': ('kind: tree\n', 'unsupported kind'), 'k13': ('profile: lineage\n', 'unsupported profile'), 'k13b': ('profile: [x]\n', 'unsupported profile'), ...}
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_121_every_cause_prints1')
+
+    @pytest.mark.parametrize("cases", [K_CASES_ONE, K_CASES_TWO], ids=["k01-k10", "k11-k17"])
+    def test_at_121_every_cause_prints_its_fixed_text(cases, tmp_path):
+        repo = registry_repo(tmp_path, "k", ONE_ROW)
+        scratch = tmp_path / "scratch"
+        scratch.mkdir()
+        _materialise(repo, cases, scratch)
+        proc = run_audit(str(repo))
+        bare = run_audit_nohook(str(repo))
+        assert proc.returncode == bare.returncode == 1, proc.stderr  # audit continues; the code is the verdict's
+        block = block_of(proc.stdout)
+        for key, (_, text) in cases.items():
+>           assert f"structure: refused ({key}.relmap.yml): {text} - descriptor skipped" in block, (key, block[:20])
+E           AssertionError: ('k11', [])
+E           assert 'structure: refused (k11.relmap.yml): not a mapping - descriptor skipped' in []
+
+tests\test_relmap_audit.py:633: AssertionError
+______________________ test_at_121_the_loading_controls _______________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_121_the_loading_contro0')
+
+    def test_at_121_the_loading_controls(tmp_path):
+        """cap-1 loads, depth 63 loads (the controls beside the refusals above)."""
+        repo = registry_repo(tmp_path, "k", ONE_ROW)
+        _write(repo, "ok-cap.relmap.yml", _padded("a: 1\n", MAX_MAP_BYTES - 1))
+        _write(repo, "ok-depth.relmap.yml", "x: " + _nested_flow(63) + "\n")
+        block = block_of(run_audit(str(repo)).stdout)
+>       assert "structure: descriptor ok-cap.relmap.yml" in block
+E       AssertionError: assert 'structure: descriptor ok-cap.relmap.yml' in []
+
+tests\test_relmap_audit.py:645: AssertionError
+____________________ test_at_122_id_with_a_combining_mark _____________________
+
+hostile_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n', stderr='')
+
+    def test_at_122_id_with_a_combining_mark(hostile_run):
+        out = hostile_run.stdout
+>       assert "\u0301" not in out and "HLR-A\\u0301.1" in "\n".join(block_of(out))
+E       AssertionError: assert ('\u0301' not in 'repo: C:\\\\U...quirements\\n'
+E         
+E         '\u0301' is contained here:
+E           quirements and 'HLR-A\\u0301.1' in '')
+E        +  where '' = <built-in method join of str object at 0x00007FF958C10DF0>([])
+E        +    where <built-in method join of str object at 0x00007FF958C10DF0> = '\n'.join
+E        +    and   [] = block_of('repo: C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\hostile0\\hostile\nchain: chain verified...; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n')
+
+tests\test_relmap_audit.py:652: AssertionError
+__________________ test_at_122_id_with_a_variation_selector ___________________
+
+hostile_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n', stderr='')
+
+    def test_at_122_id_with_a_variation_selector(hostile_run):
+        out = hostile_run.stdout
+>       assert "\ufe0f" not in out and "HLR-B\\ufe0f.1" in "\n".join(block_of(out))
+E       AssertionError: assert ('\ufe0f' not in 'repo: C:\\\\U...quirements\\n'
+E         
+E         '\ufe0f' is contained here:
+E           quirements and 'HLR-B\\ufe0f.1' in '')
+E        +  where '' = <built-in method join of str object at 0x00007FF958C10DF0>([])
+E        +    where <built-in method join of str object at 0x00007FF958C10DF0> = '\n'.join
+E        +    and   [] = block_of('repo: C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\hostile0\\hostile\nchain: chain verified...; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n')
+
+tests\test_relmap_audit.py:657: AssertionError
+___________________ test_at_122_statement_with_esc_and_bidi ___________________
+
+hostile_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n', stderr='')
+
+    def test_at_122_statement_with_esc_and_bidi(hostile_run):
+        out = hostile_run.stdout
+        assert "\x1b" not in out and "\u202e" not in out
+        gap = [g for g in _gap_lines(block_of(out)) if "HLR-C.1" in g]
+>       assert gap and all("\\x1b[31mRED\\x1b[0m" in g and "\\u202eEVIL" in g for g in gap)
+E       assert ([])
+
+tests\test_relmap_audit.py:664: AssertionError
+___________ test_at_122_descriptor_base_name_with_a_combining_mark ____________
+
+hostile_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n', stderr='')
+
+    def test_at_122_descriptor_base_name_with_a_combining_mark(hostile_run):
+        block = block_of(hostile_run.stdout)
+>       assert "structure: descriptor e\\u0301.relmap.yml" in block
+E       AssertionError: assert 'structure: descriptor e\\u0301.relmap.yml' in []
+
+tests\test_relmap_audit.py:669: AssertionError
+_______________ test_at_122_forged_verdict_in_a_descriptor_key ________________
+
+hostile_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n', stderr='')
+
+    def test_at_122_forged_verdict_in_a_descriptor_key(hostile_run):
+        out = hostile_run.stdout
+        assert "\u2028" not in out
+>       assert "structure note: ignored descriptor key: \\u2028verdict: ready" in block_of(out)
+E       AssertionError: assert 'structure note: ignored descriptor key: \\u2028verdict: ready' in []
+E        +  where [] = block_of('repo: C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\hostile0\\hostile\nchain: chain verified...; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n')
+
+tests\test_relmap_audit.py:676: AssertionError
+_____________________ test_at_122_esc_in_a_descriptor_key _____________________
+
+hostile_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n', stderr='')
+
+    def test_at_122_esc_in_a_descriptor_key(hostile_run):
+        out = hostile_run.stdout
+        assert "\x1b" not in out
+>       assert "structure note: ignored descriptor key: \\x1b[31mred" in block_of(out)
+E       AssertionError: assert 'structure note: ignored descriptor key: \\x1b[31mred' in []
+E        +  where [] = block_of('repo: C:\\Users\\<user>\\AppData\\Local\\Temp\\pytest-of-<user>\\pytest-25321\\hostile0\\hostile\nchain: chain verified...; the chain proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n')
+
+tests\test_relmap_audit.py:684: AssertionError
+_________ test_at_124_skipped_rows_unknown_status_and_the_arithmetic __________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_124_skipped_rows_unkno0')
+
+    def test_at_124_skipped_rows_unknown_status_and_the_arithmetic(tmp_path):
+        canon = _text(
+            row("HLR-D.1", "dup first", "active"), row("HLR-D.1", "dup second", "active"),
+            row("HLR-EX9\u202e.1", "bidi id", "active"), row("HLR-ZW9\u200b.1", "zero width id", "active"),
+            row("HLR-B\u00a0N.1", "nbsp id", "active"),
+            row("HLR-S.1", "unknown status", "Done"),
+            row("HLR-OK.1", "fine", "active"),
+        )
+        proc = run_audit(str(registry_repo(tmp_path, "skip", canon)))
+        block = block_of(proc.stdout)
+>       assert "structure: skipped 3 canon rows (duplicate id=1, unsafe id=2); unknown status=1" in block
+E       AssertionError: assert 'structure: skipped 3 canon rows (duplicate id=1, unsafe id=2); unknown status=1' in []
+
+tests\test_relmap_audit.py:697: AssertionError
+______ test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed ______
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_125_the_gap_sentence_i0')
+snapshot_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n", stderr='')
+
+    def test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed(tmp_path, snapshot_run):
+        canon = _text(row("HLR-X.1", "has a child that cannot be parsed", "active"),
+                      "| LLR-X.1.1 | a pipe | in it | rationale | batch | active |\n")
+        block = block_of(run_audit(str(registry_repo(tmp_path, "q", canon))).stdout)
+        gap = _gap_lines(block)
+>       assert len(gap) == 1 and gap[0].endswith("(canon rows near this id could not be parsed or linked: 1)")
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests\test_relmap_audit.py:710: AssertionError
+_______________ test_at_126_unavailable_lines_and_no_path_leak ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_126_unavailable_lines_0')
+
+    def test_at_126_unavailable_lines_and_no_path_leak(tmp_path):
+        marker = "zq9marker"
+        plain = tmp_path / f"plain-{marker}"
+        plain.mkdir()
+        norg = _git_repo(tmp_path, f"noreg-{marker}")
+        cases = [(plain, ["structure: unavailable (no repository)"]),
+                 (norg, ["structure: unavailable (no registry)"])]
+        # (c) the canon is over the cap / binary / missing.  A LINKED canon never reaches the hook: the
+        # audit's own confinement sweep refuses it before any report exists (asserted below), so its
+        # K1 text is Layer A (`test_canon_causes`).
+        target = tmp_path / "t"
+        target.mkdir()
+        linked = registry_repo(tmp_path, f"link-{marker}", None)
+        _make_link(linked / "REQUIREMENTS.md", target)
+        refused = run_audit(str(linked))
+        assert refused.returncode == 1 and refused.stdout == "" and "refused (link)" in refused.stderr
+        over = registry_repo(tmp_path, f"over-{marker}", _padded("| Id |\n", LIMIT_ROLES_YML_BYTES + 1))
+        binary = registry_repo(tmp_path, f"bin-{marker}", b"\x00\x01\x02 binary")
+        missing = registry_repo(tmp_path, f"miss-{marker}", None)
+        cases += [
+            (over, [INFO, f"structure: unavailable (canon: exceeds the {LIMIT_ROLES_YML_BYTES} byte limit)"]),
+            (binary, [INFO, "structure: unavailable (canon: looks binary)"]),
+            (missing, [INFO, "structure: unavailable (canon: file not found)"]),
+        ]
+        for repo, expected in cases:
+            hooked, bare = run_audit(str(repo)), run_audit_nohook(str(repo))
+            assert hooked.returncode == bare.returncode, repo
+            block = block_of(hooked.stdout)
+>           assert block == expected, (repo.name, block)
+E           AssertionError: ('plain-zq9marker', [])
+E           assert [] == ['structure: ... repository)']
+E             
+E             Right contains one more item: 'structure: unavailable (no repository)'
+E             Use -v to get more diff
+
+tests\test_relmap_audit.py:744: AssertionError
+_____________ test_at_127_eight_descriptors_then_an_overflow_line _____________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_127_eight_descriptors_0')
+
+    def test_at_127_eight_descriptors_then_an_overflow_line(tmp_path):
+        repo = registry_repo(tmp_path, "many", ONE_ROW)
+        for name in "abcdefghi":
+            _write(repo, f"{name}.relmap.yml", "{}\n")
+        block = block_of(run_audit(str(repo)).stdout)
+>       assert _by_prefix(block, "structure: descriptor ") == [f"structure: descriptor {n}.relmap.yml" for n in "abcdefgh"]
+E       AssertionError: assert [] == ['structure: ...map.yml', ...]
+E         
+E         Right contains 8 more items, first extra item: 'structure: descriptor a.relmap.yml'
+E         Use -v to get more diff
+
+tests\test_relmap_audit.py:754: AssertionError
+______________________________ test_byte_stable _______________________________
+
+three_descriptor_repo = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/three0/three')
+
+    def test_byte_stable(three_descriptor_repo):
+        """AT-128 / LLR-RMU.1.4: two PRE-PICKED seeds (LED .30) print identical bytes."""
+        a = run_audit(str(three_descriptor_repo), hashseed="0")
+        b = run_audit(str(three_descriptor_repo), hashseed="2")
+        assert a.returncode == b.returncode == 1
+        assert a.stdout == b.stdout
+        block = block_of(a.stdout)
+>       assert _by_prefix(block, "structure: descriptor ") == [
+            "structure: descriptor alpha.relmap.yml", "structure: descriptor beta.relmap.yml"]
+E       AssertionError: assert [] == ['structure: ...a.relmap.yml']
+E         
+E         Right contains 2 more items, first extra item: 'structure: descriptor alpha.relmap.yml'
+E         Use -v to get more diff
+
+tests\test_relmap_audit.py:777: AssertionError
+_________________ test_at_129_every_long_value_is_cut_to_120 __________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_at_129_every_long_value_i0')
+
+    def test_at_129_every_long_value_is_cut_to_120(tmp_path):
+        big = 1 << 20
+        desc_repo = registry_repo(tmp_path, "long-desc", ONE_ROW)
+        _write(desc_repo, "big.relmap.yml", "? " + "k" * big + "\n: 1\n")
+        _write(desc_repo, "path.relmap.yml", "source:\n  us_canon: " + "u" * 255 + "\n")
+        block = block_of(run_audit(str(desc_repo)).stdout)
+>       assert max(len(line) for line in block) <= 1000
+E       ValueError: max() iterable argument is empty
+
+tests\test_relmap_audit.py:790: ValueError
+______________________________ test_snapshot_run ______________________________
+
+snapshot_run = CompletedProcess(args=['C:\\Users\\<user>\\anaconda3\\python.exe', '-c', 'from mapper.app import main; main()', '--audi...proves integrity and approval, not authorship (LLR-RH.4.4)\nverdict: not ready � unreviewed requirements\n", stderr='')
+
+    def test_snapshot_run(snapshot_run):
+        """LLR-RMU.1.2 on the shipped surface: block order and the exact figures."""
+        block = block_of(snapshot_run.stdout)
+>       assert block[0] == INFO and block.count(INFO) == 1
+E       IndexError: list index out of range
+
+tests\test_relmap_audit.py:817: IndexError
+___________________ test_the_block_on_the_repository_itself ___________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-25321/test_the_block_on_the_reposito0')
+
+    def test_the_block_on_the_repository_itself(tmp_path):
+        """Invariants only (the live canon moves): the repository's own `REQUIREMENTS.md`."""
+        repo = registry_repo(tmp_path, "live", (ROOT / "REQUIREMENTS.md").read_bytes())
+        proc = run_audit(str(repo))
+        block = block_of(proc.stdout)
+>       assert block[0] == INFO and any(line.startswith("structure: profile=reqharness nodes=") for line in block)
+E       IndexError: list index out of range
+
+tests\test_relmap_audit.py:835: IndexError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_audit.py::test_tc_rm_02_raising_callable - TypeError...
+FAILED tests/test_relmap_audit.py::test_tc_rm_03_refusal_path - TypeError: ru...
+FAILED tests/test_relmap_audit.py::test_hook_line_bound - TypeError: run_cli(...
+FAILED tests/test_relmap_audit.py::test_fixed_lines_key_on_chain_status_not_verdict_text
+FAILED tests/test_relmap_audit.py::test_run_cli_without_the_hook_is_byte_identical
+FAILED tests/test_relmap_audit.py::test_sink_escapes_every_hook_line - TypeEr...
+FAILED tests/test_relmap_audit.py::test_at_117_summary_line_snapshot_and_a_non_default_canon
+FAILED tests/test_relmap_audit.py::test_at_118_hlr_without_llr_only_where_it_is_a_gap
+FAILED tests/test_relmap_audit.py::test_at_119_reported_rows_are_notes_and_no_edge_is_invented
+FAILED tests/test_relmap_audit.py::test_at_120_the_block_is_informational - a...
+FAILED tests/test_relmap_audit.py::test_exit_code_unchanged - AssertionError:...
+FAILED tests/test_relmap_audit.py::test_at_121_every_cause_prints_its_fixed_text[k01-k10]
+FAILED tests/test_relmap_audit.py::test_at_121_every_cause_prints_its_fixed_text[k11-k17]
+FAILED tests/test_relmap_audit.py::test_at_121_the_loading_controls - Asserti...
+FAILED tests/test_relmap_audit.py::test_at_122_id_with_a_combining_mark - Ass...
+FAILED tests/test_relmap_audit.py::test_at_122_id_with_a_variation_selector
+FAILED tests/test_relmap_audit.py::test_at_122_statement_with_esc_and_bidi - ...
+FAILED tests/test_relmap_audit.py::test_at_122_descriptor_base_name_with_a_combining_mark
+FAILED tests/test_relmap_audit.py::test_at_122_forged_verdict_in_a_descriptor_key
+FAILED tests/test_relmap_audit.py::test_at_122_esc_in_a_descriptor_key - Asse...
+FAILED tests/test_relmap_audit.py::test_at_124_skipped_rows_unknown_status_and_the_arithmetic
+FAILED tests/test_relmap_audit.py::test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed
+FAILED tests/test_relmap_audit.py::test_at_126_unavailable_lines_and_no_path_leak
+FAILED tests/test_relmap_audit.py::test_at_127_eight_descriptors_then_an_overflow_line
+FAILED tests/test_relmap_audit.py::test_byte_stable - AssertionError: assert ...
+FAILED tests/test_relmap_audit.py::test_at_129_every_long_value_is_cut_to_120
+FAILED tests/test_relmap_audit.py::test_snapshot_run - IndexError: list index...
+FAILED tests/test_relmap_audit.py::test_the_block_on_the_repository_itself - ...
+# exit code: 1
+# wall time: 15.4 s
+restore hashes: audit 0a0f78f67dc23ea7 -> 0a0f78f67dc23ea7; app 465642cc02046c31 -> 465642cc02046c31

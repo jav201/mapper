@@ -1,0 +1,12 @@
+mapper resolves inside the worktree: True
+REQUIREMENTS.md sha256: 93b18472c40fac24ec818bbe1b2808d66d16c021bf2f9234dfee5a1083c44cc7
+nodes 275 reported 7 unlinked ['LLR-REPAIR.1', 'LLR-REPAIR.2', 'LLR-RH.6.2']
+Rule (LLR-RMA.1.3): LLR-<t> relates to HLR-<s> when <t> starts with '<s>.' or when the row is orphan and its D-1 candidate stem equals <s> minus its last segment
+HLR WITHOUT LLR gaps: 7
+  HLR-N13.3: unparsed=0 []
+  HLR-N16.3: unparsed=0 []
+  HLR-N16.4: unparsed=0 []
+  HLR-REPAIR.1: unparsed=2 ['LLR-REPAIR.1', 'LLR-REPAIR.2']
+  HLR-S06.2: unparsed=0 []
+  HLR-CAN.1: unparsed=2 ['LLR-CAN.1.1', 'LLR-CAN.1.2']
+  HLR-RS.3: unparsed=0 []

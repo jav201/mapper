@@ -1,0 +1,19 @@
+mapper resolves inside the worktree: True
+parse_canon objects: 275 reported rows: 7
+  reported: REQUIREMENTS.md line 138: cannot parse row for 'LLR-HYG.1.1' (5 cells, expected 4)
+  reported: REQUIREMENTS.md line 143: cannot parse row for 'LLR-CAN.1.1' (6 cells, expected 4)
+  reported: REQUIREMENTS.md line 144: cannot parse row for 'LLR-CAN.1.2' (7 cells, expected 4)
+  reported: REQUIREMENTS.md line 196: cannot parse row for 'HLR-RH.6' (5 cells, expected 4)
+  reported: REQUIREMENTS.md line 224: cannot parse row for 'LLR-RH.6.1' (5 cells, expected 4)
+  reported: REQUIREMENTS.md line 228: cannot parse row for 'LLR-RH.7.3' (5 cells, expected 4)
+  reported: REQUIREMENTS.md line 285: cannot parse row for 'LLR-Q3.1.2' (6 cells, expected 4)
+HLR: 76 LLR: 199 duplicate ids: 0
+LLR resolved to an HLR by dropping the last dotted segment: 196 of 199
+LLR unresolved: ['LLR-REPAIR.1', 'LLR-REPAIR.2', 'LLR-RH.6.2']
+edges (refines) derivable: 196
+HLR with no LLR child (all): 7  (active): 7
+    ['HLR-N13.3', 'HLR-N16.3', 'HLR-N16.4', 'HLR-REPAIR.1', 'HLR-S06.2', 'HLR-CAN.1', 'HLR-RS.3']
+status classes: {'active': 254, 'deferred': 13, 'superseded': 4, 'split': 1, 'withdrawn': 3}
+ids whose status is not active that have an active child: []
+statement cells that name another HLR/LLR id: 31
+graph size vs caps: nodes 275 <= 100000; edges 196 <= 100000

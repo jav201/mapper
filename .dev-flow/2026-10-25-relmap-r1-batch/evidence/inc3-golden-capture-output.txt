@@ -1,0 +1,9 @@
+# store: C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1\mapper\store.py
+short_anchor.load = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'x')"
+short_anchor.side = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'x')"
+alias.load = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'zz')"
+alias.side = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'zz')"
+long_anchor.load = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'gggggggggggggggggggggggggggggggggggggggg\u2026')"
+long_anchor.side = "could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'gggggggggggggggggggggggggggggggggggggggg\u2026')"
+depth_65.load = 'could not read the card of m: it nests deeper than the depth limit (64)'
+depth_65.side = 'could not read the card of m: it nests deeper than the depth limit (64)'

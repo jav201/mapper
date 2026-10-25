@@ -126,7 +126,7 @@ def test_at_111_anchor_name_in_refusal_is_bounded(tmp_path):
     behaves like a value) so a hostile sidecar cannot push an unbounded string
     into the operator-facing sink.  A 5,000-char anchor names its 40-char
     prefix and nothing more.  Mutant: revert the truncation in
-    `MapStore._prescan_sidecar` → this arm RED."""
+    `mapper.yamlscan.prescan` → this arm RED."""
     name = "a" * 5000
     _write_map(tmp_path, yml_text=f"top: &{name} 1\n")
     with pytest.raises(MapStoreError) as caught:

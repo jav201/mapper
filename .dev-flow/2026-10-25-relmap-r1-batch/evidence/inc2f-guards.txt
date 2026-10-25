@@ -1,0 +1,21 @@
+# guards (test_mod_*, repair_map_truth, a3_census, no_operator_paths) + relmap_descriptor
+gaps.py sha256: dd180acf6256830670e33b6b8e721641926a37fa7c0732fc8874ebdcb22a6b3b
+files: tests/test_mod_bodies.py tests/test_mod_census.py tests/test_mod_compat.py tests/test_mod_deps.py tests/test_mod_dispatch.py tests/test_mod_parity.py tests/test_mod_structure.py tests/test_repair_map_truth.py tests/test_a3_census.py tests/test_no_operator_paths.py tests/test_relmap_descriptor.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 31%]
+........................................................................ [ 62%]
+.s...................................................................... [ 93%]
+..............                                                           [100%]
+============================== warnings summary ===============================
+<unknown>:296: 1 warning
+tests/test_mod_compat.py: 5 warnings
+tests/test_a3_census.py: 4 warnings
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+229 passed, 1 skipped, 10 warnings in 42.49s
+exit code: 0
+wall time: 43.5 s

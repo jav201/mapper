@@ -1,0 +1,109 @@
+# Inc-5 battery: 27 mutants; hash before, edits, targeted pytest (tests/test_relmap_audit.py and, for descriptor mutants, test_relmap_descriptor.py), restore from bytes, hash after
+KILLED   M-RMU-1 print raw (hook lines bypass the escaper)  [7 failed, 40 passed, 1 skipped in 28.75s; 29.6s; restore OK 0a0f78f67dc2]
+      tests/test_relmap_audit.py::test_sink_escapes_every_hook_line
+      tests/test_relmap_audit.py::test_at_122_id_with_a_combining_mark
+      tests/test_relmap_audit.py::test_at_122_id_with_a_variation_selector
+      tests/test_relmap_audit.py::test_at_122_statement_with_esc_and_bidi
+      tests/test_relmap_audit.py::test_at_122_descriptor_base_name_with_a_combining_mark
+      tests/test_relmap_audit.py::test_at_122_forged_verdict_in_a_descriptor_key
+      tests/test_relmap_audit.py::test_at_122_esc_in_a_descriptor_key
+KILLED   M-RMU-2 callback exception escapes  [1 failed, 46 passed, 1 skipped in 29.06s; 30.0s; restore OK 0a0f78f67dc2]
+      tests/test_relmap_audit.py::test_tc_rm_02_raising_callable
+KILLED   M-RMU-3 no gap cap  [1 failed, 46 passed, 1 skipped in 29.08s; 29.9s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_gap_cap_is_twenty_with_an_overflow_line[21-True]
+KILLED   M-RMU-4 call the hook for the no-repo report  [2 failed, 45 passed, 1 skipped in 26.67s; 27.5s; restore OK 0a0f78f67dc2]
+      tests/test_relmap_audit.py::test_fixed_lines_key_on_chain_status_not_verdict_text
+      tests/test_relmap_audit.py::test_at_126_unavailable_lines_and_no_path_leak
+KILLED   M-RMU-5 skip the 120-character cut  [3 failed, 44 passed, 1 skipped in 29.47s; 30.3s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_format_structure_cuts_inside
+      tests/test_relmap_audit.py::test_reported_note_with_bidi_is_cut_and_escaped
+      tests/test_relmap_audit.py::test_at_129_every_long_value_is_cut_to_120
+KILLED   M-RMU-6 kind list built by iterating a set of the 17 profile names  [5 failed, 42 passed, 1 skipped in 28.86s; 29.7s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_line_formats
+      tests/test_relmap_audit.py::test_at_117_summary_line_snapshot_and_a_non_default_canon
+      tests/test_relmap_audit.py::test_at_119_reported_rows_are_notes_and_no_edge_is_invented
+      tests/test_relmap_audit.py::test_byte_stable
+      tests/test_relmap_audit.py::test_snapshot_run
+KILLED   M-RMU-7 drop the skipped-rows line  [2 failed, 45 passed, 1 skipped in 30.08s; 31.0s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_skipped_rows_line_counts_only
+      tests/test_relmap_audit.py::test_at_124_skipped_rows_unknown_status_and_the_arithmetic
+KILLED   M-RMU-8 exit 1 when a structural gap exists  [1 failed, 46 passed, 1 skipped in 29.98s; 31.2s; restore OK 0a0f78f67dc2]
+      tests/test_relmap_audit.py::test_at_120_the_block_is_informational
+KILLED   M-RMU-10 call the hook on the baseline refusal path  [1 failed, 46 passed, 1 skipped in 30.47s; 31.5s; restore OK 0a0f78f67dc2]
+      tests/test_relmap_audit.py::test_tc_rm_03_refusal_path
+KILLED   M-RMU-11 move the cut from format_structure into structure_lines  [2 failed, 45 passed, 1 skipped in 31.13s; 32.4s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_format_structure_cuts_inside
+      tests/test_relmap_audit.py::test_reported_note_with_bidi_is_cut_and_escaped
+KILLED   M-RMU-12 consume the hook output without a bound  [1 failed, 46 passed, 1 skipped in 31.17s; 32.2s; restore OK 0a0f78f67dc2]
+      tests/test_relmap_audit.py::test_hook_line_bound
+KILLED   M-RMU-13 refusal_line skips the cut  [4 failed, 132 passed, 2 skipped in 40.30s; 41.8s; restore OK 4aad6f80ca33]
+      tests/test_relmap_audit.py::test_refusal_line_hostile_name
+      tests/test_relmap_descriptor.py::test_refusal_line_hostile_base_name_is_cut_to_120[nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn]
+      tests/test_relmap_descriptor.py::test_refusal_line_hostile_base_name_is_cut_to_120[\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301\u0301]
+      tests/test_relmap_descriptor.py::test_refusal_line_hostile_base_name_is_cut_to_120[zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz]
+KILLED   M-RMU-14 drop the informational header  [6 failed, 41 passed, 1 skipped in 31.79s; 33.2s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_header_first
+      tests/test_relmap_audit.py::test_canon_over_the_node_cap_is_one_fixed_line
+      tests/test_relmap_audit.py::test_at_120_the_block_is_informational
+      tests/test_relmap_audit.py::test_at_126_unavailable_lines_and_no_path_leak
+      tests/test_relmap_audit.py::test_snapshot_run
+      tests/test_relmap_audit.py::test_the_block_on_the_repository_itself
+KILLED   M-RMU-15 RelMapLimitError escapes the hook (LED .62)  [1 failed, 46 passed, 1 skipped in 30.90s; 31.9s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_canon_over_the_node_cap_is_one_fixed_line
+KILLED   M-RML-9 derive the canon per descriptor  [1 failed, 46 passed, 1 skipped in 29.85s; 30.8s; restore OK afcd78363a0f]
+      tests/test_relmap_audit.py::test_canon_derived_once
+KILLED   M-RML-13 no descriptor count cap  [2 failed, 134 passed, 2 skipped in 36.02s; 37.2s; restore OK 4aad6f80ca33]
+      tests/test_relmap_audit.py::test_at_127_eight_descriptors_then_an_overflow_line
+      tests/test_relmap_descriptor.py::test_repo_root_census_counts[9]
+KILLED   M-RML-7 skip the link check in read_repo_text  [6 failed, 130 passed, 2 skipped in 35.64s; 36.6s; restore OK 4aad6f80ca33]
+      tests/test_relmap_audit.py::test_at_121_every_cause_prints_its_fixed_text[k01-k10]
+      tests/test_relmap_descriptor.py::test_read_repo_text_link_is_k1_and_is_never_opened
+      tests/test_relmap_descriptor.py::test_read_repo_text_file_symlink_is_k1
+      tests/test_relmap_descriptor.py::test_read_repo_text_windows_junction_is_a_reparse_point_is_link_catches
+      tests/test_relmap_descriptor.py::test_k1_k2_via_load_descriptor
+      tests/test_relmap_descriptor.py::test_repo_root_census_lists_non_regular_entries_so_reading_refuses_them
+KILLED   M-RML-1 skip the prescan  [4 failed, 132 passed, 2 skipped in 28.76s; 29.9s; restore OK 4aad6f80ca33]
+      tests/test_relmap_audit.py::test_at_121_every_cause_prints_its_fixed_text[k01-k10]
+      tests/test_relmap_descriptor.py::test_k8_anchor_and_alias_name_nothing
+      tests/test_relmap_descriptor.py::test_k9_depth_65_refused_and_depth_64_loads
+      tests/test_relmap_descriptor.py::test_the_prescan_runs_before_safe_load
+KILLED   M-RML-10 format str(exc) on a parse failure  [3 failed, 133 passed, 2 skipped in 35.79s; 36.9s; restore OK 4aad6f80ca33]
+      tests/test_relmap_audit.py::test_at_121_every_cause_prints_its_fixed_text[k01-k10]
+      tests/test_relmap_descriptor.py::test_k10_not_valid_yaml_prints_only_the_cause
+      tests/test_relmap_descriptor.py::test_a_syntax_error_in_the_prescan_is_k10_not_a_crash
+KILLED   M-RML-11 compare profile with `in` over a set, no type check  [3 failed, 133 passed, 2 skipped in 34.86s; 36.2s; restore OK 4aad6f80ca33]
+      tests/test_relmap_audit.py::test_at_121_every_cause_prints_its_fixed_text[k11-k17]
+      tests/test_relmap_descriptor.py::test_schema_table_refusals[profile:
+      tests/test_relmap_descriptor.py::test_schema_table_refusals[profile:
+KILLED   M-RMA-1 attach an unlinked LLR to the nearest HLR whose id is a prefix (AT-117)  [5 failed, 42 passed, 1 skipped in 27.11s; 28.2s; restore OK cd58d79757b9]
+      tests/test_relmap_audit.py::test_at_117_summary_line_snapshot_and_a_non_default_canon
+      tests/test_relmap_audit.py::test_at_119_reported_rows_are_notes_and_no_edge_is_invented
+      tests/test_relmap_audit.py::test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed
+      tests/test_relmap_audit.py::test_byte_stable
+      tests/test_relmap_audit.py::test_snapshot_run
+KILLED   M-RMA-6 skip the last table row (AT-117)  [12 failed, 35 passed, 1 skipped in 25.43s; 26.6s; restore OK cd58d79757b9]
+      tests/test_relmap_audit.py::test_canon_over_the_node_cap_is_one_fixed_line
+      tests/test_relmap_audit.py::test_at_117_summary_line_snapshot_and_a_non_default_canon
+      tests/test_relmap_audit.py::test_at_118_hlr_without_llr_only_where_it_is_a_gap
+      tests/test_relmap_audit.py::test_at_119_reported_rows_are_notes_and_no_edge_is_invented
+      tests/test_relmap_audit.py::test_at_120_the_block_is_informational
+      tests/test_relmap_audit.py::test_exit_code_unchanged
+      tests/test_relmap_audit.py::test_at_122_statement_with_esc_and_bidi
+      tests/test_relmap_audit.py::test_at_124_skipped_rows_unknown_status_and_the_arithmetic
+      ... +4 more
+KILLED   M-RMA-3' drop the reported-row notes (AT-119 probe; M-RMA-3 itself is Inc-4's)  [3 failed, 44 passed, 1 skipped in 27.75s; 28.9s; restore OK cd58d79757b9]
+      tests/test_relmap_audit.py::test_reported_note_with_bidi_is_cut_and_escaped
+      tests/test_relmap_audit.py::test_at_119_reported_rows_are_notes_and_no_edge_is_invented
+      tests/test_relmap_audit.py::test_snapshot_run
+KILLED   M-RMA-5 count only the starts-with branch (AT-125)  [2 failed, 45 passed, 1 skipped in 27.50s; 28.6s; restore OK cd58d79757b9]
+      tests/test_relmap_audit.py::test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed
+      tests/test_relmap_audit.py::test_snapshot_run
+KILLED   M-RMG-4 gap sentence never qualified (AT-125)  [2 failed, 45 passed, 1 skipped in 27.84s; 28.9s; restore OK dd180acf6256]
+      tests/test_relmap_audit.py::test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed
+      tests/test_relmap_audit.py::test_snapshot_run
+KILLED   M-RMG-6' eligibility ignored: a withdrawn HLR is reported (AT-118 probe)  [1 failed, 46 passed, 1 skipped in 27.75s; 28.9s; restore OK dd180acf6256]
+      tests/test_relmap_audit.py::test_at_118_hlr_without_llr_only_where_it_is_a_gap
+KILLED   M-RMM-1 unsafe ids are kept as nodes (AT-124)  [2 failed, 45 passed, 1 skipped in 27.93s; 29.4s; restore OK 1b602e844cad]
+      tests/test_relmap_audit.py::test_skipped_rows_line_counts_only
+      tests/test_relmap_audit.py::test_at_124_skipped_rows_unknown_status_and_the_arithmetic
+# exit code: 0 (driver battery5.py); wall time per arm above, about 15 min in all

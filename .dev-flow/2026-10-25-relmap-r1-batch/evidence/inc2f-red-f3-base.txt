@@ -1,0 +1,41 @@
+# committed gaps.py unmutated (eeb3b1cd); new arms
+gaps.py sha256: eeb3b1cd229a384b03b8c1b3f6cc66d462e40a8f55ad585101c5982fda70faec
+files: tests/test_relmap_gaps.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+....................................................F                    [100%]
+================================== FAILURES ===================================
+____________ test_a_slot_the_pattern_does_not_supply_stays_as_text ____________
+
+    def test_a_slot_the_pattern_does_not_supply_stays_as_text():
+        # review-inc002 F3: `<src>` is an edge-row slot; a lacks_* row naming it keeps it literally
+        prof = Profile(
+            "slot", ("P",), (EdgeType("e", (("P", "P"),), True, "none"),),
+            (GapRow("P ALONE", "MED", "lacks_out", "P", "e", None, False, False, ("P",), "<id> uses <src>"),),
+        )
+        m = build_map(prof, [Node("p1", "P")], [], sourced=("P",))
+>       assert detect_gaps(m)[0].sentence == "p1 uses <src>"
+
+tests\test_relmap_gaps.py:450: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\relmap\gaps.py:97: in detect_gaps
+    found += _lacks(m, row, incoming=False)
+mapper\relmap\gaps.py:73: in _lacks
+    sentence = _fill(row.sentence, id=n.id, title=n.title)
+mapper\relmap\gaps.py:42: in _fill
+    return _SLOT.sub(lambda m: values[m.group(1)], template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+m = <re.Match object; span=(10, 15), match='<src>'>
+
+>   return _SLOT.sub(lambda m: values[m.group(1)], template)
+E   KeyError: 'src'
+
+mapper\relmap\gaps.py:42: KeyError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_gaps.py::test_a_slot_the_pattern_does_not_supply_stays_as_text
+1 failed, 52 passed in 5.23s
+exit code: 1
+wall time: 6.1 s

@@ -1,0 +1,11 @@
+# devflow-validate --brief . on the Inc-5 tree (PYTHONIOENCODING=utf-8, PYTHONDONTWRITEBYTECODE=1); exit code 1; wall 11 s; blocks listed below, notices elided
+devflow-validate · C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r1
+  git · 2.49.0, at or above the 2.28.0 floor
+  stdout · encoding `utf-8`, errors `backslashreplace` -- every finding is emitted verbatim
+5 block · 732 notice · 55 not applicable
+  [x] V15  dev-flow/scripts/__pycache__/devflow-init.cpython-312.pyc: in the bundle but in neither the manifest table nor the declared exclusions — undeclared content ships to consumers
+  [x] V15  dev-flow/scripts/__pycache__/devflow-validate.cpython-312.pyc: in the bundle but in neither the manifest table nor the declared exclusions — undeclared content ships to consumers
+  [x] V16  ~/.claude: uncommitted changes — the flow being run is not the flow that was shipped
+  [x] V16  ~/.claude/skills: uncommitted changes — the flow being run is not the flow that was shipped
+  [x] V36  increment-005.md: `**Independent review**` names no reviewer — a valid cell names one of: `code-reviewer` · `security-reviewer` · `qa-reviewer` · `ux-reviewer` · `tester` · `human:<name>` · `WAIVED-BY-OPERATOR — <reason>`. The flow MANDATES this pass, so a cell that names nobody is the EMPTY state and never a value -- from `P3` on, the gate that closes an increment BLOCKs on a packet that carries its work and names no reviewer: record who reviewed it and the verdict; a review still pending means this gate cannot close yet, and `none — <reason>` is only for a review that will not run
+n/a: 55 rule(s) with no subject on this tree (mode full) — run without --brief to list them
