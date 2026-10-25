@@ -1,0 +1,36 @@
+L2a MOVE-ASIDE — 2026-10-23 — lane L2a, batch 2026-10-23-hygiene-batch
+== mapper/store.py aside ==
+before: 4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+ImportError while loading conftest 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-l2\tests\conftest.py'.
+tests\conftest.py:9: in <module>
+    from mapper.store import MapStore
+E   ModuleNotFoundError: No module named 'mapper.store'
+arm exit: 4
+after:  4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+restore: PROVEN (hash equal)
+
+== mapper/diff.py aside ==
+before: 8fb188acc858123bd6fea8691cd5f643a7ea2b9fcdf951f163713fb3c35a2532
+mapper\screens\map\screen.py:21: in <module>
+    from mapper.diff import DiffResult
+E   ModuleNotFoundError: No module named 'mapper.diff'
+=========================== short test summary info ===========================
+ERROR tests/test_ingestion_limits.py
+1 error in 0.25s
+arm exit: 4
+after:  8fb188acc858123bd6fea8691cd5f643a7ea2b9fcdf951f163713fb3c35a2532
+restore: PROVEN (hash equal)
+
+== mapper/osopen.py aside ==
+before: 687c70ee1cc57aae9d576ec4b2dc8f8c1711aac2ee56574141256f825e4c2029
+ImportError while loading conftest 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-l2\tests\conftest.py'.
+tests\conftest.py:9: in <module>
+    from mapper.store import MapStore
+mapper\store.py:16: in <module>
+    from .osopen import (
+E   ModuleNotFoundError: No module named 'mapper.osopen'
+arm exit: 4
+after:  687c70ee1cc57aae9d576ec4b2dc8f8c1711aac2ee56574141256f825e4c2029
+restore: PROVEN (hash equal)
+
+all move-asides done

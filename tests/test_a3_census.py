@@ -312,8 +312,22 @@ def test_tc_a3_the_census_cardinalities_are_PINNED():
     #       module-local `render(report)` — a BARE-NAME call this
     #       attribute-only census does not derive.  The report still renders;
     #       only the census's visibility of the site moved with it.
-    assert len(sites["argful"]) == 83, (
-        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 83; "
+    #
+    # 83 -> 86 at `2026-10-23-hygiene-batch` lane L3 (increment-001), THREE sites,
+    # all arg-ful renderer calls in the new scalecheck sweep — the sweep's whole
+    # subject IS the painted text, so each render is the arm's own input and
+    # cannot be delegated to a shared helper:
+    #   +1  `tests/test_scalecheck.py::test_sweep` -- renders every renderer at
+    #       every size/state for the geometry assertion (the render IS the
+    #       subject under measurement).
+    #   +1  `tests/test_scalecheck.py::test_sweep` (fold-invariance arm) -- renders
+    #       the fold-tree UNFOLDED for the byte-identity comparison; the
+    #       comparison only means anything at the same geometry.
+    #   +1  `tests/test_scalecheck.py::test_sweep_audit_arm` -- renders with the
+    #       audit sink injected at the Canvas construction sites; the sink wraps
+    #       the construction, so the render must run inside the patched scope.
+    assert len(sites["argful"]) == 86, (
+        f"derived {len(sites['argful'])} arg-ful call sites against a pinned 86; "
         "update the pin AND the module map together, or one of them is stale"
     )
     # 25 -> 26 in Inc-3: `tests/test_fold.py` calls `OutlineRail.render()`,
@@ -665,7 +679,7 @@ def test_b44_the_module_map_pins_the_canvas_signature_against_the_real_one():
     from mapper.canvas import Canvas
 
     params = list(inspect.signature(Canvas.__init__).parameters)
-    assert params == ["self", "w", "h", "tones", "fallback"]
+    assert params == ["self", "w", "h", "tones", "fallback", "audit"]
     row = next(
         line for line in (REPO / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8").splitlines()
         if line.startswith("| `canvas` |")

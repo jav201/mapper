@@ -1,0 +1,235 @@
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFF.FF                                                                   [100%]
+================================== FAILURES ===================================
+_________________________________ test_events _________________________________
+
+    def test_events():
+        """LLR-Q3.2.1 — clip/overprint coordinates recorded; every other write silent."""
+        audit = {"clip": [], "overprint": []}
+>       cv = Canvas(4, 2, audit=audit)
+E       TypeError: Canvas.__init__() got an unexpected keyword argument 'audit'
+
+tests\test_canvas_audit.py:21: TypeError
+_________ test_text_and_wire_paths_share_put_and_default_sink_is_none _________
+
+    def test_text_and_wire_paths_share_put_and_default_sink_is_none():
+        """`text` loops through `put` and inherits the audit; no sink, no crash."""
+        cv = Canvas(6, 2)
+        cv.put(9, 9, "X")            # no sink at all: silently dropped, no event
+        audit = {}
+>       watched = Canvas(6, 2, audit=audit)
+E       TypeError: Canvas.__init__() got an unexpected keyword argument 'audit'
+
+tests\test_canvas_audit.py:44: TypeError
+_____________________________ test_byte_identity ______________________________
+
+    def test_byte_identity():
+        """LLR-Q3.2.2 — `rows()` identical (plain and spans) with vs. without the sink."""
+>       rows_plain = _write_sequence(None).rows()
+
+tests\test_canvas_audit.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+audit = None
+
+    def _write_sequence(audit) -> Canvas:
+        """One fixed write sequence — cells, wires, edges, overprint and a clip."""
+>       cv = Canvas(10, 4, audit=audit)
+E       TypeError: Canvas.__init__() got an unexpected keyword argument 'audit'
+
+tests\test_canvas_audit.py:51: TypeError
+_________________________________ test_sweep __________________________________
+
+    def test_sweep():
+        """LLR-Q3.1.2 / AT-115 — exactly h lines of at most w cells per combo."""
+        failures = []
+        for name, cls in _roster():
+            renderer = cls()
+            for state_name, (graph, kw, fold_graph) in _states().items():
+                for w, h in SIZES:
+                    state = ViewState(w=w, h=h, **kw)
+                    text = renderer.render(graph, state)
+                    lines = text.plain.splitlines()
+                    combo = f"{name} {w}x{h} {state_name}"
+                    if state_name == "empty":
+                        # Documented short-circuit: <= h lines, the named text
+                        # present — "exactly h lines" does not hold for zero-node
+                        # graphs (state matrix, LLR-Q3.1.2 threshold note).
+                        if len(lines) > h:
+                            failures.append(f"{combo}: {len(lines)} lines > {h}")
+                        if any(cell_len(line) > w for line in lines):
+                            failures.append(f"{combo}: a line exceeds {w} cells")
+                        if not any(t in text.plain for t in EMPTY_STATE_TEXTS):
+                            failures.append(f"{combo}: no named empty-state text")
+                    else:
+                        if len(lines) != h:
+                            failures.append(f"{combo}: {len(lines)} lines != {h}")
+                        if any(cell_len(line) > w for line in lines):
+                            failures.append(f"{combo}: a line exceeds {w} cells")
+                    if state_name == "folded" and name != "LayeredRenderer":
+                        # Fold-invariance: the other five renderers must answer a
+                        # folded ViewState byte-identically to the unfolded one on
+                        # the SAME graph (state matrix applicability matrix).
+                        unfolded = renderer.render(
+                            fold_graph, ViewState(w=w, h=h)
+                        ).plain
+                        if unfolded != text.plain:
+                            failures.append(f"{combo}: fold-variant vs plain")
+>       assert not failures, "\n".join(failures)
+E       AssertionError: LayeredRenderer 80x24 plain: 20 lines != 24
+E         LayeredRenderer 80x24 plain: a line exceeds 80 cells
+E         LayeredRenderer 90x30 plain: 26 lines != 30
+E         LayeredRenderer 90x30 plain: a line exceeds 90 cells
+E         LayeredRenderer 118x34 plain: 30 lines != 34
+E         LayeredRenderer 118x34 plain: a line exceeds 118 cells
+E         LayeredRenderer 160x45 plain: 41 lines != 45
+E         LayeredRenderer 160x45 plain: a line exceeds 160 cells
+E         LayeredRenderer 200x50 plain: 46 lines != 50
+E         LayeredRenderer 200x50 plain: a line exceeds 200 cells
+E         LayeredRenderer 80x24 folded: 20 lines != 24
+E         LayeredRenderer 80x24 folded: a line exceeds 80 cells
+E         LayeredRenderer 90x30 folded: 26 lines != 30
+E         LayeredRenderer 90x30 folded: a line exceeds 90 cells
+E         LayeredRenderer 118x34 folded: 30 lines != 34
+E         LayeredRenderer 118x34 folded: a line exceeds 118 cells
+E         LayeredRenderer 160x45 folded: 41 lines != 45
+E         LayeredRenderer 160x45 folded: a line exceeds 160 cells
+E         LayeredRenderer 200x50 folded: 46 lines != 50
+E         LayeredRenderer 200x50 folded: a line exceeds 200 cells
+E         LayeredRenderer 80x24 orphan: 20 lines != 24
+E         LayeredRenderer 80x24 orphan: a line exceeds 80 cells
+E         LayeredRenderer 90x30 orphan: 26 lines != 30
+E         LayeredRenderer 90x30 orphan: a line exceeds 90 cells
+E         LayeredRenderer 118x34 orphan: 30 lines != 34
+E         LayeredRenderer 118x34 orphan: a line exceeds 118 cells
+E         LayeredRenderer 160x45 orphan: 41 lines != 45
+E         LayeredRenderer 160x45 orphan: a line exceeds 160 cells
+E         LayeredRenderer 200x50 orphan: 46 lines != 50
+E         LayeredRenderer 200x50 orphan: a line exceeds 200 cells
+E         OutlineRenderer 80x24 plain: 8 lines != 24
+E         OutlineRenderer 90x30 plain: 8 lines != 30
+E         OutlineRenderer 118x34 plain: 8 lines != 34
+E         OutlineRenderer 160x45 plain: 8 lines != 45
+E         OutlineRenderer 200x50 plain: 8 lines != 50
+E         OutlineRenderer 80x24 folded: 8 lines != 24
+E         OutlineRenderer 90x30 folded: 8 lines != 30
+E         OutlineRenderer 118x34 folded: 8 lines != 34
+E         OutlineRenderer 160x45 folded: 8 lines != 45
+E         OutlineRenderer 200x50 folded: 8 lines != 50
+E         OutlineRenderer 80x24 orphan: 5 lines != 24
+E         OutlineRenderer 90x30 orphan: 5 lines != 30
+E         OutlineRenderer 118x34 orphan: 5 lines != 34
+E         OutlineRenderer 160x45 orphan: 5 lines != 45
+E         OutlineRenderer 200x50 orphan: 5 lines != 50
+E         LaneRenderer 80x24 plain: 4 lines != 24
+E         LaneRenderer 90x30 plain: 4 lines != 30
+E         LaneRenderer 118x34 plain: 4 lines != 34
+E         LaneRenderer 160x45 plain: 4 lines != 45
+E         LaneRenderer 200x50 plain: 4 lines != 50
+E         LaneRenderer 80x24 folded: 5 lines != 24
+E         LaneRenderer 90x30 folded: 5 lines != 30
+E         LaneRenderer 118x34 folded: 5 lines != 34
+E         LaneRenderer 160x45 folded: 5 lines != 45
+E         LaneRenderer 200x50 folded: 5 lines != 50
+E         LaneRenderer 80x24 orphan: 5 lines != 24
+E         LaneRenderer 90x30 orphan: 5 lines != 30
+E         LaneRenderer 118x34 orphan: 5 lines != 34
+E         LaneRenderer 160x45 orphan: 5 lines != 45
+E         LaneRenderer 200x50 orphan: 5 lines != 50
+E         HybridLaneRenderer 80x24 plain: 3 lines != 24
+E         HybridLaneRenderer 90x30 plain: 3 lines != 30
+E         HybridLaneRenderer 118x34 plain: 3 lines != 34
+E         HybridLaneRenderer 160x45 plain: 3 lines != 45
+E         HybridLaneRenderer 200x50 plain: 3 lines != 50
+E         HybridLaneRenderer 80x24 folded: 4 lines != 24
+E         HybridLaneRenderer 90x30 folded: 4 lines != 30
+E         HybridLaneRenderer 118x34 folded: 4 lines != 34
+E         HybridLaneRenderer 160x45 folded: 4 lines != 45
+E         HybridLaneRenderer 200x50 folded: 4 lines != 50
+E         HybridLaneRenderer 80x24 orphan: 4 lines != 24
+E         HybridLaneRenderer 90x30 orphan: 4 lines != 30
+E         HybridLaneRenderer 118x34 orphan: 4 lines != 34
+E         HybridLaneRenderer 160x45 orphan: 4 lines != 45
+E         HybridLaneRenderer 200x50 orphan: 4 lines != 50
+E         RailTimelineRenderer 80x24 plain: 21 lines != 24
+E         RailTimelineRenderer 90x30 plain: 27 lines != 30
+E         RailTimelineRenderer 118x34 plain: 31 lines != 34
+E         RailTimelineRenderer 160x45 plain: 42 lines != 45
+E         RailTimelineRenderer 200x50 plain: 47 lines != 50
+E         RailTimelineRenderer 80x24 folded: 21 lines != 24
+E         RailTimelineRenderer 90x30 folded: 27 lines != 30
+E         RailTimelineRenderer 118x34 folded: 31 lines != 34
+E         RailTimelineRenderer 160x45 folded: 42 lines != 45
+E         RailTimelineRenderer 200x50 folded: 47 lines != 50
+E         RailTimelineRenderer 80x24 orphan: 21 lines != 24
+E         RailTimelineRenderer 90x30 orphan: 27 lines != 30
+E         RailTimelineRenderer 118x34 orphan: 31 lines != 34
+E         RailTimelineRenderer 160x45 orphan: 42 lines != 45
+E         RailTimelineRenderer 200x50 orphan: 47 lines != 50
+E         RadialRenderer 80x24 plain: 21 lines != 24
+E         RadialRenderer 90x30 plain: 27 lines != 30
+E         RadialRenderer 118x34 plain: 31 lines != 34
+E         RadialRenderer 160x45 plain: 42 lines != 45
+E         RadialRenderer 200x50 plain: 47 lines != 50
+E         RadialRenderer 80x24 folded: 21 lines != 24
+E         RadialRenderer 90x30 folded: 27 lines != 30
+E         RadialRenderer 118x34 folded: 31 lines != 34
+E         RadialRenderer 160x45 folded: 42 lines != 45
+E         RadialRenderer 200x50 folded: 47 lines != 50
+E         RadialRenderer 80x24 orphan: 21 lines != 24
+E         RadialRenderer 90x30 orphan: 27 lines != 30
+E         RadialRenderer 118x34 orphan: 31 lines != 34
+E         RadialRenderer 160x45 orphan: 42 lines != 45
+E         RadialRenderer 200x50 orphan: 47 lines != 50
+E       assert not ['LayeredRenderer 80x24 plain: 20 lines != 24', 'LayeredRenderer 80x24 plain: a line exceeds 80 cells', 'LayeredRender... cells', 'LayeredRenderer 118x34 plain: 30 lines != 34', 'LayeredRenderer 118x34 plain: a line exceeds 118 cells', ...]
+
+tests\test_scalecheck.py:108: AssertionError
+____________________________ test_sweep_audit_arm _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000017A2A9E8800>
+
+    def test_sweep_audit_arm(monkeypatch):
+        """LLR-Q3.2.3 — an audited canvas per render; unexplained events fail the sweep."""
+        sinks = []
+        real_init = Canvas.__init__
+    
+        def audited_init(self, w, h, tones=(), fallback="", audit=None):
+            sink = {"clip": [], "overprint": []}
+            sinks.append(sink)
+            real_init(self, w, h, tones=tones, fallback=fallback, audit=sink)
+    
+        monkeypatch.setattr(Canvas, "__init__", audited_init)
+        unexplained = []
+        for name, cls in _roster():
+            renderer = cls()
+            for state_name, (graph, kw, _fold_graph) in _states().items():
+                for w, h in SIZES:
+                    before = len(sinks)
+>                   text = renderer.render(graph, ViewState(w=w, h=h, **kw))
+
+tests\test_scalecheck.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\views\layered.py:693: in render
+    cv = Canvas(avail, body_h)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <mapper.canvas.Canvas object at 0x0000017A2A99ECC0>, w = 78, h = 19
+tones = (), fallback = '', audit = None
+
+    def audited_init(self, w, h, tones=(), fallback="", audit=None):
+        sink = {"clip": [], "overprint": []}
+        sinks.append(sink)
+>       real_init(self, w, h, tones=tones, fallback=fallback, audit=sink)
+E       TypeError: Canvas.__init__() got an unexpected keyword argument 'audit'
+
+tests\test_scalecheck.py:119: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_canvas_audit.py::test_events - TypeError: Canvas.__init__()...
+FAILED tests/test_canvas_audit.py::test_text_and_wire_paths_share_put_and_default_sink_is_none
+FAILED tests/test_canvas_audit.py::test_byte_identity - TypeError: Canvas.__i...
+FAILED tests/test_scalecheck.py::test_sweep - AssertionError: LayeredRenderer...
+FAILED tests/test_scalecheck.py::test_sweep_audit_arm - TypeError: Canvas.__i...
+5 failed, 1 passed in 0.40s

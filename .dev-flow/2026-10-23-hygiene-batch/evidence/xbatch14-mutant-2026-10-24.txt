@@ -1,0 +1,115 @@
+MUTANT M-Q2-1-XB14: anchor refusal dropped in mapper/store.py::_prescan_sidecar
+cmd: env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_repair_sidecar.py tests/test_ingestion_limits.py tests/test_store.py
+date: 2026-10-24T17:42:02Z
+---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.....FFF......FF.......F..............                                   [100%]
+================================== FAILURES ===================================
+_______ test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values ________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_llr_n13_1_7_refusal_warni0')
+
+    def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
+        """THE MESSAGE REPORTING THE REFUSAL MUST NOT PERFORM THE MATERIALISATION.
+    
+        AMENDED 2026-10-24 (cross-batch, ruling R10 of the 2026-10-23-hygiene-batch
+        regression run): LLR-N13.1.7 is SUPERSEDED IN PART by `LLR-Q2.1.2` — the
+        hygiene batch's prescan (`mapper/store.py::_prescan_sidecar`) refuses the
+        first anchor event BEFORE `yaml.safe_load` can compose the document, as a
+        typed `MapStoreError`. An anchor-amplified sidecar now never reaches the
+        duplicate branch this arm was written against, so there is no graph and no
+        warning list: the refusal MESSAGE is the whole record, and the oracle
+        carries over unchanged — it must name the COORDINATE (the anchor), never
+        the materialised VALUE, and its SIZE is the leak detector (a message under
+        2,000 chars cannot contain the 522,247-char record five levels would emit).
+    
+        The pre-amendment arm asserted the same property on the warning list: on
+        the shipped tree the benign fixture totalled 31 chars and five levels 107 —
+        19x under the 2,000 bound; with the `!r` defect reintroduced it emitted
+        522,311 chars (the duplicate record 522,247 plus two 32-char `unreadable
+        field` records). That decomposition was checked, not inherited, and the
+        bound is kept here verbatim as the negative control on the message.
+        """
+>       with pytest.raises(MapStoreError) as excinfo:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_repair_sidecar.py:302: Failed
+____________ test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too _____________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_llr_n13_1_7_a_huge_scalar0')
+
+    def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
+        """A TYPE bound is not a LENGTH bound — and the refusal path is bounded too.
+    
+        AMENDED 2026-10-24 (cross-batch, ruling R10): with `LLR-Q2.1.2`'s prescan
+        refusing the first anchor before compose, the 50,000-char scalar bound to
+        `&big` is never materialised at all. The typed refusal must name the anchor
+        and the map id, and the huge scalar VALUE itself must not appear in the
+        message — the original 200,000-char bound is kept as the size negative.
+        """
+>       with pytest.raises(MapStoreError) as excinfo:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_repair_sidecar.py:362: Failed
+______ test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too ______
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_llr_n13_1_7_a_coordinate_0')
+
+    def test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too(tmp_path):
+        """A coordinate is not automatically short — and the refusal is bounded too.
+    
+        AMENDED 2026-10-24 (cross-batch, ruling R10): `LLR-Q2.1.2`'s prescan refuses
+        the first anchor (`&bad`) before compose, so the 1,000-char node id reused
+        across 400 aliased attachment entries is never materialised. The typed
+        refusal must name the anchor and the map id, and the carried VALUE (the
+        long node id) must not appear in the message — the original 200,000-char
+        bound is kept as the size negative.
+        """
+>       with pytest.raises(MapStoreError) as excinfo:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_repair_sidecar.py:438: Failed
+_______________ test_at_111_anchor_refused_names_anchor_and_map _______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_at_111_anchor_refused_nam0')
+
+    def test_at_111_anchor_refused_names_anchor_and_map(tmp_path):
+        _write_map(tmp_path, yml_text="top: &x 1\nother: *x\n")
+>       with pytest.raises(MapStoreError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_ingestion_limits.py:107: Failed
+__________________________ test_at_111_alias_refused __________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_at_111_alias_refused0')
+
+    def test_at_111_alias_refused(tmp_path):
+        _write_map(tmp_path, yml_text="top: &x [1, 2]\nother: *x\n")
+>       with pytest.raises(MapStoreError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_ingestion_limits.py:117: Failed
+___________________ test_diff_side_anchor_head_yields_none ____________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_diff_side_anchor_head_yie0')
+
+    def test_diff_side_anchor_head_yields_none(tmp_path):
+        ws = _repo_with_head(tmp_path, MMD.encode("utf-8"), "top: &x 1\nother: *x\n")
+        (ws / "m_nodos.yml").write_text("{}", encoding="utf-8")
+>       assert git_diff("m", MapStore(ws)) is None
+E       AssertionError: assert DiffResult(added=set(), removed=set(), changed={}, removed_titles={}) is None
+E        +  where DiffResult(added=set(), removed=set(), changed={}, removed_titles={}) = git_diff('m', <mapper.store.MapStore object at 0x000001CAE50C0470>)
+E        +    where <mapper.store.MapStore object at 0x000001CAE50C0470> = MapStore(WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24408/test_diff_side_anchor_head_yie0/repo'))
+
+tests\test_ingestion_limits.py:231: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_repair_sidecar.py::test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values
+FAILED tests/test_repair_sidecar.py::test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too
+FAILED tests/test_repair_sidecar.py::test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too
+FAILED tests/test_ingestion_limits.py::test_at_111_anchor_refused_names_anchor_and_map
+FAILED tests/test_ingestion_limits.py::test_at_111_alias_refused - Failed: DI...
+FAILED tests/test_ingestion_limits.py::test_diff_side_anchor_head_yields_none
+6 failed, 32 passed in 27.19s

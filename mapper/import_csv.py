@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .mermaid import slugify
 from .model import CsvCollision, CsvRow, Edge, Ficha, Graph, Node
+from .osopen import MAX_FILE_BYTES, read_capped
 
 
 def _detect_delimiter(first_line: str) -> str:
@@ -36,7 +37,14 @@ def preview_csv(path: Path) -> Graph:
     missing/unknown, and extra parentless rows, are parked under the root with
     their title prefixed by ``"? "`` so they are not silently dropped.
     """
-    text = path.read_text(encoding="utf-8")
+    # The read goes through the osopen bounded reader (R-015, D2): the 4 MiB
+    # content cap with the stat re-checked on the read bytes plus the NUL
+    # binary probe (LLR-Q2.2.1).  The reader's refusal is typed
+    # (osopen.ContentReadError — `import_csv -> store` stays forbidden, so
+    # MapStoreError cannot be raised from here; declared in increment-003/-004
+    # section 6), path-free, and names the limit, so the home screen's toast
+    # can show it verbatim (ruling R7, AT-114).
+    text = read_capped(path, MAX_FILE_BYTES)
     if not text:
         return Graph()
 

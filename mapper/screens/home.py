@@ -28,7 +28,7 @@ from mapper import darkside
 from mapper.import_csv import preview_csv
 from mapper.keymap import SCOPE_HOME, bindings_for, groups_for_keybar
 from mapper.model import Document, Edge, Ficha, Graph, Node
-from mapper.osopen import PATH_NOT_SUPPORTED, safe_local_path
+from mapper.osopen import PATH_NOT_SUPPORTED, ContentReadError, safe_local_path
 from mapper.screens.common import (
     _home_door_key,
     _refusal_toast,
@@ -45,7 +45,7 @@ from mapper.screens.prompt import _PromptScreen, _TemplateScreen
 from mapper.screens.roles import RolesScreen
 from mapper.screens.review import ReviewScreen
 from mapper.screens.settings import SettingsScreen
-from mapper.store import TEMPLATES
+from mapper.store import MapStoreError, TEMPLATES
 from mapper.widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 
 if TYPE_CHECKING:
@@ -523,6 +523,21 @@ class HomeScreen(Screen):
                 return
             try:
                 preview = preview_csv(path)
+            except (MapStoreError, ContentReadError) as refusal:
+                # Ruling R7 (ledger .9, F-UX-1): a TYPED refusal carries its own
+                # authored, path-free message — show it so the REASON reaches the
+                # operator (AT-114), not just the exception type name.  `refusal`
+                # is bound here (not `e`): both caught types author their message
+                # path-free (the store per C6; the reader per LLR-Q2.2.1), which
+                # is the same declared-carry class as `LEAK_EXCEPTIONS` in
+                # tests/test_inc9c.py — this comment IS the site's declaration
+                # (F-SD-1): a registry entry is impossible by construction,
+                # because `_leaky` never flags `refusal`, so the census never
+                # yields the key and the staleness check would redden on arrival.
+                self.notify(
+                    darkside.plain(f"could not read CSV {path.name!r}: {refusal}"),
+                    severity="error", markup=False)
+                return
             except Exception as e:
                 self.notify(
                     darkside.plain(f"could not read CSV {path.name!r}: {type(e).__name__}"),

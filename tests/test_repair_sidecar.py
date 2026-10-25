@@ -24,6 +24,13 @@ painted from. `AT-025b` has no node on disk either; the card clause and the
 containment arm that consumes it land together at `Inc-7`.
 
 So: do not read a green run of this module as `AT-049` discharged.
+
+**THE THREE `LLR-N13.1.7` ARMS WERE AMENDED 2026-10-24** (cross-batch, ruling R10
+of the 2026-10-23-hygiene-batch regression run): the hygiene batch's prescan
+(`LLR-Q2.1.2`, `mapper/store.py::_prescan_sidecar`) refuses ANY anchor before
+compose, so these sidecars no longer reach the repair path — the arms now assert
+the typed `MapStoreError` refusal itself. `LLR-N13.1.7` is superseded in part,
+recorded as `LED-2026-10-23-hygiene-batch.14` in that batch's ledger.
 """
 from __future__ import annotations
 
@@ -274,49 +281,42 @@ def test_b48_a_mapping_without_attachment_keys_is_refused_not_invented(tmp_path)
 def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
     """THE MESSAGE REPORTING THE REFUSAL MUST NOT PERFORM THE MATERIALISATION.
 
-    The per-key coercion DOES refuse an alias-amplified value -- `unreadable field:
-    document[0].name` is emitted and the name is coerced to `''`. The duplicate
-    branch then interpolates the RAW, UNCOERCED value with `!r`, which
-    materialises the very structure the refusal prevented.
+    AMENDED 2026-10-24 (cross-batch, ruling R10 of the 2026-10-23-hygiene-batch
+    regression run): LLR-N13.1.7 is SUPERSEDED IN PART by `LLR-Q2.1.2` — the
+    hygiene batch's prescan (`mapper/store.py::_prescan_sidecar`) refuses the
+    first anchor event BEFORE `yaml.safe_load` can compose the document, as a
+    typed `MapStoreError`. An anchor-amplified sidecar now never reaches the
+    duplicate branch this arm was written against, so there is no graph and no
+    warning list: the refusal MESSAGE is the whole record, and the oracle
+    carries over unchanged — it must name the COORDINATE (the anchor), never
+    the materialised VALUE, and its SIZE is the leak detector (a message under
+    2,000 chars cannot contain the 522,247-char record five levels would emit).
 
-    THE ORACLE IS THE MESSAGE'S SIZE, NOT THE CLOCK. That is what makes this arm
-    deterministic and cheap: warning length grows 10x per amplification level
-    while wall time barely moves at shallow depths, so the default lane carries
-    no wall-clock assert (`FLAKE-1` is what that discipline is for).
-
-    THE NUMBERS, EACH ATTACHED TO THE TREE IT WAS MEASURED ON. On the SHIPPED
-    tree the benign fixture is 31 chars and five levels is 107 -- 19x UNDER the
-    2,000 bound, which is what a green arm should look like. With the defect
-    REINTRODUCED, five levels emits 522,311 chars: red by 261x for the price of
-    a cheap fixture, which is why five is the level driven.
-
-    That 522,311 decomposes, and I checked it rather than inheriting it: the
-    materialised duplicate record is 522,247 chars and the two `unreadable field:
-    document[i].name` records are 32 each. Only the SECOND half of the duplicate
-    record was ever raw -- `doc.name` is the value the per-key coercion already
-    replaced with `''` -- so interpolating both halves raw reproduces a defect
-    that never shipped and doubles the figure to 1,044,465.
-
-    The first version of this docstring put "measured on the shipped tree" in
-    front of the 522,311 -- a pre-fix figure. The first CORRECTION added the
-    distinction at the top and left the old conclusion standing at the bottom,
-    so the text asserted both "19x under its bound" and "RED by four orders of
-    magnitude" four lines apart. A docstring that contradicts itself is not a
-    corrected one.
+    The pre-amendment arm asserted the same property on the warning list: on
+    the shipped tree the benign fixture totalled 31 chars and five levels 107 —
+    19x under the 2,000 bound; with the `!r` defect reintroduced it emitted
+    522,311 chars (the duplicate record 522,247 plus two 32-char `unreadable
+    field` records). That decomposition was checked, not inherited, and the
+    bound is kept here verbatim as the negative control on the message.
     """
-    graph = _write(tmp_path, amplified(levels=5)).load("m")
-    total = sum(len(w) for w in graph.load_warnings)
+    with pytest.raises(MapStoreError) as excinfo:
+        _write(tmp_path, amplified(levels=5)).load("m")
+    message = str(excinfo.value)
 
-    # POSITIVE CONTROL FIRST. This arm is a pure UPPER bound, so deleting the
-    # diagnostic entirely is a green way to pass it -- fired and confirmed by
-    # the code review. The record must exist before its size is judged.
-    assert any(w.startswith("duplicate document:") for w in graph.load_warnings), (
-        f"the duplicate record is missing entirely: {graph.load_warnings}"
+    # The record IS the exception now — `pytest.raises` is the positive
+    # control the `duplicate document:` check used to be: deleting the refusal
+    # entirely (prescan bypassed) turns this RED, as M-Q2-1 requires.
+    assert "'l0'" in message, (
+        f"the refusal must name the anchor (the coordinate): {message}"
     )
+    assert "card of m" in message, (
+        f"the refusal must name the map id: {message}"
+    )
+    total = len(message)
     assert total < 2_000, (
-        f"the load warnings total {total:,} characters. A diagnostic that "
+        f"the refusal message is {total:,} characters. A diagnostic that "
         "embeds the refused VALUE materialises the structure the refusal "
-        "prevented; every other warning in this module names a COORDINATE."
+        "prevented; the message must name a COORDINATE."
     )
 
 
@@ -351,24 +351,32 @@ def scalar_amplified(payload: int = 50_000, dups: int = 200) -> str:
 
 
 def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
-    """A TYPE bound is not a LENGTH bound.
+    """A TYPE bound is not a LENGTH bound — and the refusal path is bounded too.
 
-    `_raw_origin` first admitted any scalar, and `AT-P02d` needs the origin
-    shown so a coercion collision is distinguishable -- so the answer is
-    truncation, not removal. Both halves of the record are bounded: `doc.name!r`
-    was unbounded too, and being an Attribute rather than a Call, no AST arm
-    shaped around `{call()!r}` could see it.
+    AMENDED 2026-10-24 (cross-batch, ruling R10): with `LLR-Q2.1.2`'s prescan
+    refusing the first anchor before compose, the 50,000-char scalar bound to
+    `&big` is never materialised at all. The typed refusal must name the anchor
+    and the map id, and the huge scalar VALUE itself must not appear in the
+    message — the original 200,000-char bound is kept as the size negative.
     """
-    graph = _write(tmp_path, scalar_amplified()).load("m")
+    with pytest.raises(MapStoreError) as excinfo:
+        _write(tmp_path, scalar_amplified()).load("m")
+    message = str(excinfo.value)
 
-    assert any(w.startswith("duplicate document:") for w in graph.load_warnings), (
-        f"the duplicate record is missing entirely: {graph.load_warnings[:2]}"
+    assert "'big'" in message, (
+        f"the refusal must name the anchor (the coordinate): {message}"
     )
-    total = sum(len(w) for w in graph.load_warnings)
+    assert "card of m" in message, (
+        f"the refusal must name the map id: {message}"
+    )
+    assert "x" * 50_000 not in message, (
+        "the refusal message carries the huge scalar VALUE — the "
+        "materialisation the refusal exists to prevent"
+    )
+    total = len(message)
     assert total < 200_000, (
-        f"a 57 KB sidecar produced {total:,} characters of warnings. These are "
-        "joined and coerced into an operator toast, so a megabyte of them is a "
-        "per-character translate on the way to the screen."
+        f"a 57 KB sidecar produced a {total:,}-character refusal. The message "
+        "is joined and coerced into an operator toast, so it must stay small."
     )
 
 
@@ -418,31 +426,33 @@ def attachment_amplified(id_len: int = 1_000, aliases: int = 400) -> str:
 
 
 def test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too(tmp_path):
-    """A coordinate is not automatically short.
+    """A coordinate is not automatically short — and the refusal is bounded too.
 
-    Every other record in `store.py` names a position and is short by
-    construction. This one interpolates `owner`, a sidecar-supplied node id, so
-    it reads like a coordinate and behaves like a value -- which is how the fix
-    for a materialisation defect shipped a worse one.
-
-    Both free variables are bounded now: per-record length and record COUNT,
-    because 5 bytes of sidecar buys another record and the list is joined into
-    an operator toast before anything else sees it.
+    AMENDED 2026-10-24 (cross-batch, ruling R10): `LLR-Q2.1.2`'s prescan refuses
+    the first anchor (`&bad`) before compose, so the 1,000-char node id reused
+    across 400 aliased attachment entries is never materialised. The typed
+    refusal must name the anchor and the map id, and the carried VALUE (the
+    long node id) must not appear in the message — the original 200,000-char
+    bound is kept as the size negative.
     """
-    graph = _write(tmp_path, attachment_amplified()).load("m")
+    with pytest.raises(MapStoreError) as excinfo:
+        _write(tmp_path, attachment_amplified()).load("m")
+    message = str(excinfo.value)
 
-    assert any("attachment without fields" in w for w in graph.load_warnings), (
-        f"the refusal record is missing entirely: {graph.load_warnings[:2]}"
+    assert "'bad'" in message, (
+        f"the refusal must name the anchor (the coordinate): {message}"
     )
-    total = sum(len(w) for w in graph.load_warnings)
+    assert "card of m" in message, (
+        f"the refusal must name the map id: {message}"
+    )
+    assert "z" * 1_000 not in message, (
+        "the refusal message carries the sidecar-supplied node id VALUE — a "
+        "coordinate that carries a value behaves like a value"
+    )
+    total = len(message)
     assert total < 200_000, (
-        f"this sidecar produced {total:,} characters of records. The security "
-        "review measured the unbounded form at 20,107,707 characters on a "
-        "101 KB file, of which 99.5% came from this one line."
-    )
-    assert len(graph.load_warnings) <= 210, (
-        f"{len(graph.load_warnings)} records; the count is file-linear and must "
-        "be capped before the join, not at it"
+        f"this sidecar produced a {total:,}-character refusal. The message is "
+        "joined into an operator toast, so it must stay small."
     )
 
 

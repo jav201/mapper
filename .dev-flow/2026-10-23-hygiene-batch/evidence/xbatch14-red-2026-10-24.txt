@@ -1,0 +1,186 @@
+cmd: env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_repair_sidecar.py tests/test_ingestion_limits.py tests/test_store.py
+date: 2026-10-24T17:37:51Z
+HEAD: 85cf081
+---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.....FFF..............................                                   [100%]
+================================== FAILURES ===================================
+_______ test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values ________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24399/test_llr_n13_1_7_refusal_warni0')
+
+    def test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values(tmp_path):
+        """THE MESSAGE REPORTING THE REFUSAL MUST NOT PERFORM THE MATERIALISATION.
+    
+        The per-key coercion DOES refuse an alias-amplified value -- `unreadable field:
+        document[0].name` is emitted and the name is coerced to `''`. The duplicate
+        branch then interpolates the RAW, UNCOERCED value with `!r`, which
+        materialises the very structure the refusal prevented.
+    
+        THE ORACLE IS THE MESSAGE'S SIZE, NOT THE CLOCK. That is what makes this arm
+        deterministic and cheap: warning length grows 10x per amplification level
+        while wall time barely moves at shallow depths, so the default lane carries
+        no wall-clock assert (`FLAKE-1` is what that discipline is for).
+    
+        THE NUMBERS, EACH ATTACHED TO THE TREE IT WAS MEASURED ON. On the SHIPPED
+        tree the benign fixture is 31 chars and five levels is 107 -- 19x UNDER the
+        2,000 bound, which is what a green arm should look like. With the defect
+        REINTRODUCED, five levels emits 522,311 chars: red by 261x for the price of
+        a cheap fixture, which is why five is the level driven.
+    
+        That 522,311 decomposes, and I checked it rather than inheriting it: the
+        materialised duplicate record is 522,247 chars and the two `unreadable field:
+        document[i].name` records are 32 each. Only the SECOND half of the duplicate
+        record was ever raw -- `doc.name` is the value the per-key coercion already
+        replaced with `''` -- so interpolating both halves raw reproduces a defect
+        that never shipped and doubles the figure to 1,044,465.
+    
+        The first version of this docstring put "measured on the shipped tree" in
+        front of the 522,311 -- a pre-fix figure. The first CORRECTION added the
+        distinction at the top and left the old conclusion standing at the bottom,
+        so the text asserted both "19x under its bound" and "RED by four orders of
+        magnitude" four lines apart. A docstring that contradicts itself is not a
+        corrected one.
+        """
+>       graph = _write(tmp_path, amplified(levels=5)).load("m")
+
+tests\test_repair_sidecar.py:307: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\store.py:805: in load
+    self._prescan_sidecar(map_id, yml_text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <mapper.store.MapStore object at 0x0000028548643920>, map_id = 'm'
+yml_text = '_anchors:\n  a: &l0 x\n  n1: &l1 [*l0, *l0, *l0, *l0, *l0, *l0, *l0, *l0, *l0, *l0]\n  n2: &l2 [*l1, *l1, *l1, *l1, *... []\ndocuments:\n  - name: *l5\n    path: a.pdf\n  - name: *l5\n    path: b.pdf\nnodes:\n  raiz:\n    title: benigno\n'
+
+    def _prescan_sidecar(self, map_id: str, yml_text: str) -> None:
+        """LLR-Q2.1.2 prescan: an ITERATIVE YAML event-stream scan before any compose.
+    
+        Refuses the first anchor or alias event — an anchor-amplified sidecar
+        expands exponentially at compose time, so this scan runs BEFORE
+        `yaml.safe_load` can materialise one (M-Q2-1) — naming the anchor, and
+        refuses collection nesting deeper than MAX_DEPTH.  `yaml.parse` is a
+        state machine with an explicit stack: the scan never recurses, so a
+        10,000-nesting document is a typed refusal in milliseconds, never a
+        RecursionError.  Raises MapStoreError (naming the cause, the limit and
+        the map id — never a path); lets yaml.YAMLError propagate to the
+        caller's parser net.
+        """
+        depth = 0
+        for event in yaml.parse(yml_text):
+            anchor = getattr(event, "anchor", None)
+            if anchor is not None:
+>               raise MapStoreError(
+                    f"could not read the card of {map_id}: YAML anchors and aliases "
+                    f"are not allowed here (anchor {anchor!r})"
+                )
+E               mapper.store.MapStoreError: could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'l0')
+
+mapper\store.py:722: MapStoreError
+____________ test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too _____________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24399/test_llr_n13_1_7_a_huge_scalar0')
+
+    def test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too(tmp_path):
+        """A TYPE bound is not a LENGTH bound.
+    
+        `_raw_origin` first admitted any scalar, and `AT-P02d` needs the origin
+        shown so a coercion collision is distinguishable -- so the answer is
+        truncation, not removal. Both halves of the record are bounded: `doc.name!r`
+        was unbounded too, and being an Attribute rather than a Call, no AST arm
+        shaped around `{call()!r}` could see it.
+        """
+>       graph = _write(tmp_path, scalar_amplified()).load("m")
+
+tests\test_repair_sidecar.py:362: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\store.py:805: in load
+    self._prescan_sidecar(map_id, yml_text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <mapper.store.MapStore object at 0x00000285482DF2C0>, map_id = 'm'
+yml_text = '_anchors:\n  big: &big xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...  path: p.pdf\n  - name: *big\n    path: p.pdf\n  - name: *big\n    path: p.pdf\nnodes:\n  raiz:\n    title: benigno\n'
+
+    def _prescan_sidecar(self, map_id: str, yml_text: str) -> None:
+        """LLR-Q2.1.2 prescan: an ITERATIVE YAML event-stream scan before any compose.
+    
+        Refuses the first anchor or alias event — an anchor-amplified sidecar
+        expands exponentially at compose time, so this scan runs BEFORE
+        `yaml.safe_load` can materialise one (M-Q2-1) — naming the anchor, and
+        refuses collection nesting deeper than MAX_DEPTH.  `yaml.parse` is a
+        state machine with an explicit stack: the scan never recurses, so a
+        10,000-nesting document is a typed refusal in milliseconds, never a
+        RecursionError.  Raises MapStoreError (naming the cause, the limit and
+        the map id — never a path); lets yaml.YAMLError propagate to the
+        caller's parser net.
+        """
+        depth = 0
+        for event in yaml.parse(yml_text):
+            anchor = getattr(event, "anchor", None)
+            if anchor is not None:
+>               raise MapStoreError(
+                    f"could not read the card of {map_id}: YAML anchors and aliases "
+                    f"are not allowed here (anchor {anchor!r})"
+                )
+E               mapper.store.MapStoreError: could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'big')
+
+mapper\store.py:722: MapStoreError
+______ test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too ______
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24399/test_llr_n13_1_7_a_coordinate_0')
+
+    def test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too(tmp_path):
+        """A coordinate is not automatically short.
+    
+        Every other record in `store.py` names a position and is short by
+        construction. This one interpolates `owner`, a sidecar-supplied node id, so
+        it reads like a coordinate and behaves like a value -- which is how the fix
+        for a materialisation defect shipped a worse one.
+    
+        Both free variables are bounded now: per-record length and record COUNT,
+        because 5 bytes of sidecar buys another record and the list is joined into
+        an operator toast before anything else sees it.
+        """
+>       graph = _write(tmp_path, attachment_amplified()).load("m")
+
+tests\test_repair_sidecar.py:432: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\store.py:805: in load
+    self._prescan_sidecar(map_id, yml_text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <mapper.store.MapStore object at 0x000002854865BA40>, map_id = 'm'
+yml_text = '_anchors:\n  bad: &bad\n    z: 1\nschema: []\nnodes:\n  "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...*bad\n      - *bad\n      - *bad\n      - *bad\n      - *bad\n      - *bad\n      - *bad\n      - *bad\n      - *bad\n'
+
+    def _prescan_sidecar(self, map_id: str, yml_text: str) -> None:
+        """LLR-Q2.1.2 prescan: an ITERATIVE YAML event-stream scan before any compose.
+    
+        Refuses the first anchor or alias event — an anchor-amplified sidecar
+        expands exponentially at compose time, so this scan runs BEFORE
+        `yaml.safe_load` can materialise one (M-Q2-1) — naming the anchor, and
+        refuses collection nesting deeper than MAX_DEPTH.  `yaml.parse` is a
+        state machine with an explicit stack: the scan never recurses, so a
+        10,000-nesting document is a typed refusal in milliseconds, never a
+        RecursionError.  Raises MapStoreError (naming the cause, the limit and
+        the map id — never a path); lets yaml.YAMLError propagate to the
+        caller's parser net.
+        """
+        depth = 0
+        for event in yaml.parse(yml_text):
+            anchor = getattr(event, "anchor", None)
+            if anchor is not None:
+>               raise MapStoreError(
+                    f"could not read the card of {map_id}: YAML anchors and aliases "
+                    f"are not allowed here (anchor {anchor!r})"
+                )
+E               mapper.store.MapStoreError: could not read the card of m: YAML anchors and aliases are not allowed here (anchor 'bad')
+
+mapper\store.py:722: MapStoreError
+=========================== short test summary info ===========================
+FAILED tests/test_repair_sidecar.py::test_llr_n13_1_7_refusal_warnings_carry_coordinates_not_values
+FAILED tests/test_repair_sidecar.py::test_llr_n13_1_7_a_huge_scalar_origin_is_bounded_too
+FAILED tests/test_repair_sidecar.py::test_llr_n13_1_7_a_coordinate_that_carries_a_value_is_bounded_too
+3 failed, 35 passed in 26.39s

@@ -1,0 +1,91 @@
+# follow-up inc004-F1 RED (product unfixed) -- undecodable HEAD object: the None-on-error contract is quiet, never a thread-exception/raise
+# command: PYTHONIOENCODING=utf-8 env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_diff.py::test_git_diff_undecodable_head_object_returns_none_quietly (arm carries filterwarnings error::pytest.PytestUnhandledThreadExceptionWarning)
+# redaction: the Windows account name is replaced with <user> (A-110) before hashing/storage
+# stored bytes are sha256-cited in the owning increment packet follow-up section
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_git_diff_undecodable_head_object_returns_none_quietly __________
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x00000178BE975EE0>
+when = 'call'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        start = timing.time()
+        precise_start = timing.perf_counter()
+        try:
+>           result: TResult | None = func()
+
+C:\Users\<user>\anaconda3\Lib\site-packages\_pytest\runner.py:341: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\<user>\anaconda3\Lib\site-packages\_pytest\runner.py:242: in <lambda>
+    lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
+C:\Users\<user>\anaconda3\Lib\site-packages\pluggy\_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+C:\Users\<user>\anaconda3\Lib\site-packages\pluggy\_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+C:\Users\<user>\anaconda3\Lib\site-packages\_pytest\threadexception.py:92: in pytest_runtest_call
+    yield from thread_exception_runtest_hook()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def thread_exception_runtest_hook() -> Generator[None]:
+        with catch_threading_exception() as cm:
+            try:
+                yield
+            finally:
+                if cm.args:
+                    thread_name = (
+                        "<unknown>" if cm.args.thread is None else cm.args.thread.name
+                    )
+                    msg = f"Exception in thread {thread_name}\n\n"
+                    msg += "".join(
+                        traceback.format_exception(
+                            cm.args.exc_type,
+                            cm.args.exc_value,
+                            cm.args.exc_traceback,
+                        )
+                    )
+>                   warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+E                   pytest.PytestUnhandledThreadExceptionWarning: Exception in thread Thread-2 (_readerthread)
+E                   
+E                   Traceback (most recent call last):
+E                     File "C:\Users\<user>\anaconda3\Lib\threading.py", line 1075, in _bootstrap_inner
+E                       self.run()
+E                     File "C:\Users\<user>\anaconda3\Lib\threading.py", line 1012, in run
+E                       self._target(*self._args, **self._kwargs)
+E                     File "C:\Users\<user>\anaconda3\Lib\subprocess.py", line 1599, in _readerthread
+E                       buffer.append(fh.read())
+E                                     ^^^^^^^^^
+E                     File "<frozen codecs>", line 322, in decode
+E                   UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf1 in position 17: invalid continuation byte
+
+C:\Users\<user>\anaconda3\Lib\site-packages\_pytest\threadexception.py:82: PytestUnhandledThreadExceptionWarning
+---------------------------- Captured stderr call -----------------------------
+warning: in the working copy of 'demo.mmd', LF will be replaced by CRLF the next time Git touches it
+=========================== short test summary info ===========================
+FAILED tests/test_diff.py::test_git_diff_undecodable_head_object_returns_none_quietly
+1 failed in 0.34s
+exit=1

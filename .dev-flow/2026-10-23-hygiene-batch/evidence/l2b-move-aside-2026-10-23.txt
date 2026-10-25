@@ -1,0 +1,26 @@
+L2b MOVE-ASIDE — 2026-10-23 — lane L2b, batch 2026-10-23-hygiene-batch
+== mapper/import_csv.py aside ==
+before: 9b1964de82b1f8b299050d037bf79f0d034ee4b81a74b9c8d51045c0a74076ff
+E   ModuleNotFoundError: No module named 'mapper.import_csv'
+=========================== short test summary info ===========================
+ERROR tests/test_ingestion_limits.py
+ERROR tests/test_import_csv.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+2 errors in 0.31s
+arm exit: 2
+after:  9b1964de82b1f8b299050d037bf79f0d034ee4b81a74b9c8d51045c0a74076ff
+restore: PROVEN (hash equal)
+
+== mapper/screens/home.py aside ==
+before: 264826232bc23bd647541f8af3e23bdb2f816c5b71698a75987b2b94032499b4
+mapper\app.py:25: in <module>
+    from .screens.home import HomeScreen
+E   ModuleNotFoundError: No module named 'mapper.screens.home'
+=========================== short test summary info ===========================
+ERROR tests/test_ingestion_limits.py
+1 error in 0.23s
+arm exit: 4
+after:  264826232bc23bd647541f8af3e23bdb2f816c5b71698a75987b2b94032499b4
+restore: PROVEN (hash equal)
+
+all move-asides done

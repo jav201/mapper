@@ -5,8 +5,6 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import yaml
-
 from .github import _git_env
 from .model import Graph, SchemaField
 from .store import MapStore
@@ -38,14 +36,22 @@ def git_diff(map_id: str, store: MapStore) -> DiffResult | None:
                 ["git", "show", f"HEAD:{path}"],
                 cwd=ws,
                 capture_output=True,
-                text=True,
-                encoding="utf-8",
                 check=True,
                 # `INC9G-SEC-F5`: the one environment every `git` call here runs in.
                 env=_git_env(),
             )
-            return result.stdout
         except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+            return None
+        # Review inc004-F1 (MAJOR): the decode happens HERE, behind the pinned
+        # `subprocess.run` seam (`tests/test_inc9h.py` pins argv+env, not
+        # `text=`), never via `text=True` — decoding inside subprocess's reader
+        # thread let an undecodable HEAD object (a legacy latin-1 committed
+        # `.mmd`) escape the None-on-error contract: a raise on POSIX, a
+        # swallowed thread exception (and stderr traceback spam) on Windows.
+        # This is the pre-increment guard, restored on the new seam.
+        try:
+            return result.stdout.decode("utf-8")
+        except UnicodeDecodeError:
             return None
 
     mmd_text = _show(f"{map_id}.mmd")
@@ -54,12 +60,15 @@ def git_diff(map_id: str, store: MapStore) -> DiffResult | None:
         return None
 
     try:
-        sidecar = yaml.safe_load(yml_text) or {}
-    except yaml.YAMLError:
-        return None
-
-    try:
-        old_graph = store._graph_from_sidecar(mmd_text, sidecar)
+        # The caps reach this side ONLY through the store edge (ruling R8 — no
+        # `diff -> osopen` import).  S1 (PDR security finding, ruling R9) —
+        # disposition REVISED at the L2b gate: the capture stays on the
+        # `subprocess.run` seam because `tests/test_inc9h.py` pins that exact
+        # invocation shape, and bounding it needs `Popen`; the store instead
+        # refuses texts over the map cap before any parse (acceptance with
+        # rationale, recorded in increment-004 section 5/6).  Any refusal here
+        # still becomes None — the None-on-error contract is preserved.
+        old_graph = store._capped_side_graph(map_id, mmd_text, yml_text)
     except Exception:
         return None
 
