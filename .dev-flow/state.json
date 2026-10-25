@@ -293,9 +293,15 @@
       "station": "P6",
       "date": "2026-10-25",
       "decision": "P6 documentation written: 06-docs/executive-summary.md, functionality.md (modules, --audit structure block with a real P4 sample and how to read it), traceability matrix sign-off closed 2026-10-25. Merge not granted at kickoff: no PR opened; operator merges, then /dev-flow-sync. Backlog reconciled for carries (B-156..B-158 added); header refresh and merge marks owed at merge."
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-25",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-10-25-relmap-r1-batch/ (full sync; PDR/DDR to mapper/design/)"
     }
   ],
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-25T09:00:00Z",
   "previous_batch": {
     "batch_id": "2026-10-23-hygiene-batch",
