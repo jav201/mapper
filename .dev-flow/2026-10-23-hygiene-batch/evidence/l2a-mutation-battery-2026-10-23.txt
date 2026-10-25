@@ -1,0 +1,110 @@
+L2a MUTATION BATTERY — 2026-10-23 — lane L2a, batch 2026-10-23-hygiene-batch
+Every arm must go RED (KILLED); a SURVIVED arm is reported as bad by the runner.
+(First capture was discarded: its M-Q2-2 arm fixture — a single 8 MiB line — hung the
+mermaid regex under the surviving mutant; fixtures rebuilt from comment lines, tree
+restored to the pre-mutation hashes, battery re-run from scratch.)
+===
+M-Q2-1 before: 4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________ test_at_111_anchor_refused_names_anchor_and_map _______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24251/test_at_111_anchor_refused_nam0')
+
+    def test_at_111_anchor_refused_names_anchor_and_map(tmp_path):
+        _write_map(tmp_path, yml_text="top: &x 1\nother: *x\n")
+>       with pytest.raises(MapStoreError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_ingestion_limits.py:107: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_at_111_anchor_refused_names_anchor_and_map
+1 failed in 0.33s
+M-Q2-1 after:  4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+M-Q2-1 tests/test_ingestion_limits.py::test_at_111_anchor_refused_names_anchor_and_map: RED (KILLED)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________ test_at_110_depth_65_refuses_naming_depth_limit _______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24252/test_at_110_depth_65_refuses_n0')
+
+    def test_at_110_depth_65_refuses_naming_depth_limit(tmp_path):
+        _write_map(tmp_path, yml_text="nest: " + _nested_flow(64) + "\n")
+>       with pytest.raises(MapStoreError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_ingestion_limits.py:131: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_at_110_depth_65_refuses_naming_depth_limit
+1 failed in 0.33s
+M-Q2-1 after:  4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+M-Q2-1 tests/test_ingestion_limits.py::test_at_110_depth_65_refuses_naming_depth_limit: RED (KILLED)
+M-Q2-2 before: 687c70ee1cc57aae9d576ec4b2dc8f8c1711aac2ee56574141256f825e4c2029
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+___________ test_at_109_byte_cap_grow_between_stat_and_read_refuses ___________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24253/test_at_109_byte_cap_grow_betw0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001FD87F01A30>
+
+    def test_at_109_byte_cap_grow_between_stat_and_read_refuses(tmp_path, monkeypatch):
+        """TOCTOU: the stat reports a small file, the capped re-read reports the truth."""
+        (tmp_path / "m.mmd").write_bytes(_oversize_mmd())
+        (tmp_path / "m_nodos.yml").write_bytes(b"{}")
+        real_stat = os.stat
+    
+        def fake_stat(p, *args, **kwargs):
+            if str(p).endswith("m.mmd"):
+                return types.SimpleNamespace(st_size=1)
+            return real_stat(p, *args, **kwargs)
+    
+        monkeypatch.setattr(os, "stat", fake_stat)
+>       with pytest.raises(MapStoreError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_ingestion_limits.py:86: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_at_109_byte_cap_grow_between_stat_and_read_refuses
+1 failed in 0.38s
+M-Q2-2 after:  687c70ee1cc57aae9d576ec4b2dc8f8c1711aac2ee56574141256f825e4c2029
+M-Q2-2 tests/test_ingestion_limits.py::test_at_109_byte_cap_grow_between_stat_and_read_refuses: RED (KILLED)
+M-Q2-4 before: 4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+__________________ test_at_112_node_count_cap_plus_1_refuses __________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24254/test_at_112_node_count_cap_plu0')
+
+    def test_at_112_node_count_cap_plus_1_refuses(tmp_path):
+        """100,001 nodes refuse: the sidecar carries 100,000 ids the `.mmd` never defined
+        (ghost nodes are still added, per B-29/AT-049) plus the one parsed node."""
+        yml = "nodes:\n" + "".join(f"  n{i:06d}: {{}}\n" for i in range(MAX_NODES))
+        (tmp_path / "m.mmd").write_text(MMD, encoding="utf-8")
+        (tmp_path / "m_nodos.yml").write_text(yml, encoding="utf-8")
+>       with pytest.raises(MapStoreError) as caught:
+E       Failed: DID NOT RAISE <class 'mapper.store.MapStoreError'>
+
+tests\test_ingestion_limits.py:161: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_at_112_node_count_cap_plus_1_refuses
+1 failed in 11.22s
+M-Q2-4 after:  4020a1e43b737584369ada99ab70ff40ad4493ae72ee77c074e3a4aad9b794b3
+M-Q2-4 tests/test_ingestion_limits.py::test_at_112_node_count_cap_plus_1_refuses: RED (KILLED)
+arms: 4 bad: 0
+runner exit: 0

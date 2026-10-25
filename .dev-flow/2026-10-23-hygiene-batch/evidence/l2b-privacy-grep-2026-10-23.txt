@@ -1,0 +1,9 @@
+L2b PRIVACY GREP (A-110) — 2026-10-23 — files touched by L2b
+===
+probe 1: emails (pattern [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,}):
+tests/test_ingestion_limits.py:213:    _git(ws, "config", "user.email", "q2@lane.invalid")
+probe 2: home paths / handles (pattern C:[/\]Users|/home/|<user>):
+  (no hits)
+=== positive controls (the SAME probes on planted cases):
+  email probe fires: OK
+  home-path probe fires: OK

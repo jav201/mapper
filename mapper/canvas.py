@@ -81,10 +81,20 @@ class Canvas:
     and depends on nothing (docs/ARCHITECTURE.md section 3); the guard still
     lives in `rows()`, which is the one place all four layers converge.  Left
     unset, no tone policy applies and every layer value passes through.
+
+    `audit` is an optional injected mapping (same injection ruling as the tone
+    policy — `canvas` depends on nothing, so the sink is constructor-passed,
+    never imported).  When a mapping is supplied, `put` — the one write
+    convergence — appends an `(x, y)` tuple under key `"clip"` for every
+    out-of-bounds write of a non-space character and under key `"overprint"`
+    for every in-bounds write whose cell already holds a DIFFERENT alphanumeric
+    character and whose own written character is also alphanumeric; every other
+    write appends nothing (batch 2026-10-23-hygiene-batch, LLR-Q3.2.1;
+    observational only — the sink never touches the buffer, LLR-Q3.2.2).
     """
 
     def __init__(self, w: int, h: int, tones: Sequence[str] = (),
-                 fallback: str = ""):
+                 fallback: str = "", audit=None):
         if tones and not fallback:
             raise ValueError(
                 "a tone policy requires a fallback: an empty fallback rejects the "
@@ -99,10 +109,25 @@ class Canvas:
         self._wire_tones: dict[tuple[int, int], str] = {}
         self._tones = frozenset(tones)
         self._fallback = fallback
+        self._audit = audit
 
     def put(self, x: int, y: int, ch: str, style: str = "") -> None:
-        if 0 <= x < self.w and 0 <= y < self.h and ch:
-            self.cells[(x, y)] = (ch, style)
+        if not (0 <= x < self.w and 0 <= y < self.h):
+            if self._audit is not None and ch and ch != " ":
+                self._audit.setdefault("clip", []).append((x, y))
+            return
+        if not ch:
+            return
+        if self._audit is not None:
+            held = self.cells.get((x, y))
+            if (
+                held is not None
+                and held[0] != ch
+                and held[0].isalnum()
+                and ch.isalnum()
+            ):
+                self._audit.setdefault("overprint", []).append((x, y))
+        self.cells[(x, y)] = (ch, style)
 
     def wire(self, x: int, y: int, mask: int, tone: str = "frame") -> None:
         if not (0 <= x < self.w and 0 <= y < self.h):

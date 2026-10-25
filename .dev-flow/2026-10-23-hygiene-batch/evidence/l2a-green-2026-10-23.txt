@@ -1,0 +1,43 @@
+L2a GREEN — 2026-10-23 — lane L2a of batch 2026-10-23-hygiene-batch (worktree wt-l2, branch lane/l2)
+L2a arms: tests/test_ingestion_limits.py + tests/test_arch_osopen_callers.py with the FOUR L2b-pending arms deselected
+(test_csv_at_file_cap_plus_1_refuses, test_csv_nul_at_byte_0_refuses_as_binary,
+ test_csv_nul_at_last_probe_byte_refuses_as_binary, test_at_114_csv_refusal_toast_shows_the_reason)
+— declared EXPECTED RED until L2b lands, per PDR section B row 6 / ruling R7.
+Targeted re-runs of existing pins around the touched modules follow.
+===
+run 1: L2a arms
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.....................                                                    [100%]
+21 passed, 4 deselected in 22.93s
+exit: 0
+===
+run 2: pins — diff / import_csv / store
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.................                                                        [100%]
+17 passed in 0.69s
+exit: 0
+===
+run 3: pins — store boundary (privacy/path pins at :401-431 and :884)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 70%]
+..............................                                           [100%]
+102 passed in 2.64s
+exit: 0
+===
+run 4: pins — csv safety store
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.........                                                                [100%]
+9 passed in 0.23s
+exit: 0

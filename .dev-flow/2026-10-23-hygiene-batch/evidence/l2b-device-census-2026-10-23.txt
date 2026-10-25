@@ -1,0 +1,15 @@
+L2b DEVICE-NAME CENSUS PINS (m6 / LLR-Q2.3.1 verify-and-pin) — 2026-10-23
+arms named at PDR section 5: tests/test_seed_safety.py BAD_NAMES (incl. CON, :42) +
+test_seed_store_refuses_every_write_door (:233); tests/test_inc9n.py DEVICES (:59-62) +
+refusal-before-open arms (:257-283); the osopen gate mapper/osopen.py:107
+(PureWindowsPath.is_reserved() per component).
+===
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 44%]
+........................................................................ [ 88%]
+...................                                                      [100%]
+163 passed in 106.70s (0:01:46)
+exit: 0

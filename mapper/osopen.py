@@ -15,6 +15,10 @@ Two bans from `docs/ARCHITECTURE.md` §3 shape the signature: this module import
 nothing from `mapper` (so it cannot discover its own targets, and the audit
 surface stays one file), and only `app` may call it (so the call site is
 countable).  It therefore takes plain strings plus the workspace root.
+
+`2026-10-23-hygiene-batch` (R-015) adds the bounded content reader below: the
+ONE door through which the app reads file content into memory (map files,
+CSV import — ruling R2's confirmed surface).  It stays stdlib-only.
 """
 from __future__ import annotations
 
@@ -69,6 +73,80 @@ PATH_OUTPUT_UNCHECKED = "output path could not be checked: move the workspace to
 # again with the long-path prefix (`INC9Q-CR-F3`).  Measured in UTF-16 units, as Windows counts (`INC9Q-SEC-F1`).
 _MAX_PATH = 260
 _LONG_PREFIX = "\\\\?\\"
+
+# --- Bounded content reads (commitment `2026-10-23-hygiene-batch`, R-015; D2) ---
+#
+# The ONE file-content door for the map files and the CSV import (ruling R2's
+# confirmed content-read surface).  The constants reconcile 1:1 against the
+# oracle (`qm:model.py:39-45`); MAX_NODES/MAX_EDGES deliberately deviate per
+# orchestrator ruling R1 (ledger .1, re-derived .5: 8.3x over the largest
+# committed map of 12,000 nodes / 11,999 edges).  FROZEN at the PDR — the lane
+# consumes, it does not rename (PDR-2026-10-23-hygiene-batch#D2).
+
+#: A map file (`.mmd` or `_nodos.yml`) larger than this is refused (8 MiB,
+#: 6.1x the largest committed sidecar at 1,369,835 B — premise 5, ledger .5).
+MAX_MAP_BYTES = 8 * 1024 * 1024
+#: Collection nesting deeper than this in a sidecar is refused (64 = 16x the
+#: deepest real sidecar, yaml-depth 4).
+MAX_DEPTH = 64
+#: Parsed graphs over these counts are refused (ruling R1: 100,000/100,000).
+MAX_NODES = 100_000
+MAX_EDGES = 100_000
+#: A CSV/spreadsheet content read over this is refused (4 MiB).
+MAX_FILE_BYTES = 4 * 1024 * 1024
+#: The binary probe window: a NUL inside the first 8 KiB refuses the file.
+BINARY_PROBE_BYTES = 8192
+
+
+class ContentReadError(OSError):
+    """A bounded content read refused — oversized, binary or non-UTF-8.
+
+    The message is an AUTHORED CONSTANT that names the limit; it never
+    interpolates the path, so a UI may show it verbatim (C6).  An OSError so
+    the pre-existing generic-error paths still catch it.
+    """
+
+
+def read_capped(path, cap: int, *, probe: int = BINARY_PROBE_BYTES) -> str:
+    """Read at most *cap* bytes of *path* as UTF-8 text, or refuse with ContentReadError.
+
+    The m4-adopted shape (design-proposal section 6 note 4, `qm:model.py:495-503`):
+    stat first, then a CAPPED re-read of at most cap + 1 bytes — never a full read
+    before the re-check — so a file that GROWS between the stat and the read is
+    refused by the same byte limit (TOCTOU, LLR-Q2.1.1).  With *probe* > 0, a NUL
+    inside the first *probe* READ bytes refuses the file as binary; a NUL past the
+    window is outside the probe by design (LLR-Q2.2.1's documented bound).  Bytes
+    that pass both checks but are not valid UTF-8 refuse as non-UTF-8 text
+    (review inc004-F2) — typed, so the reason reaches the operator (AT-114).
+    """
+    try:
+        size = os.stat(path).st_size
+    except OSError as exc:
+        raise ContentReadError(
+            f"could not read file ({type(exc).__name__})") from exc
+    if size > cap:
+        raise ContentReadError(f"file exceeds the byte limit ({cap} bytes)")
+    with open(path, "rb") as handle:  # noqa: SIM115 - the read IS the bound
+        data = handle.read(cap + 1)
+    if len(data) > cap:
+        raise ContentReadError(f"file exceeds the byte limit ({cap} bytes)")
+    if probe and b"\x00" in data[:probe]:
+        raise ContentReadError(
+            f"file looks binary (NUL byte in the first {probe} bytes)")
+    # Universal-newline translation, reproducing the text-mode reads this reader
+    # replaces: the store's `_mmd_hash` fingerprint and the CSV row semantics were
+    # built on them (save() hashes in-memory `\n` text; a binary read would keep
+    # the `\r\n` the text-mode write put on disk and false-positive "out of sync").
+    try:
+        return data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    except UnicodeDecodeError as exc:
+        # Review inc004-F2: bytes that pass the NUL probe but are not UTF-8 used
+        # to escape as a bare `UnicodeDecodeError`, so the operator saw only the
+        # exception type name (the home screen's generic toast branch).  The
+        # refusal is typed, authored and path-free — the reason reaches the
+        # operator (AT-114).  `MapStore.load` already maps ContentReadError to
+        # its typed `MapStoreError`, so map reads keep their refusal family.
+        raise ContentReadError("file is not UTF-8 text") from exc
 
 
 def _utf16_units(text: str) -> int:

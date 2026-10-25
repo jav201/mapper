@@ -1,0 +1,52 @@
+L2a RED — 2026-10-23 — lane L2a of batch 2026-10-23-hygiene-batch (worktree wt-l2, branch lane/l2, base 345e46d)
+Command: env -u NO_COLOR -u TERM python -B -m pytest -q -p no:cacheprovider --continue-on-collection-errors tests/test_ingestion_limits.py tests/test_arch_osopen_callers.py
+Expected: EVERY new arm RED — the D2 reader/caps exist nowhere yet (C-36: NEW in Phase 3); the arch allow-list arm is RED on the amended-but-unlanded allow-list (B-44: the import lands in the SAME increment).
+---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.F...                                                                    [100%]
+=================================== ERRORS ====================================
+_______________ ERROR collecting tests/test_ingestion_limits.py _______________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-l2\tests\test_ingestion_limits.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_ingestion_limits.py:24: in <module>
+    from mapper.osopen import (
+E   ImportError: cannot import name 'BINARY_PROBE_BYTES' from 'mapper.osopen' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-l2\mapper\osopen.py)
+================================== FAILURES ===================================
+______ test_outside_app_only_the_allowed_names_are_imported_from_osopen _______
+
+    @red("arch9q")
+    @red("arch9p")
+    def test_outside_app_only_the_allowed_names_are_imported_from_osopen():
+        seen: dict[str, set[str]] = {}
+        for rel, tree in _sources():
+            if rel in OSOPEN_OWNERS:
+                continue
+            imports = list(_osopen_imports(tree))
+            if imports:
+                seen[rel] = {name for _, name in imports}
+        assert seen, "the AST walk found no osopen import outside app: the probe is broken"
+>       assert seen == ALLOWED_OUTSIDE_APP, seen
+E       AssertionError: {'github.py': {'safe_local_path'}, 'reqharness/audit.py': {'is_link'}, 'reqharness/config.py': {'confine_reason'}, 'reqharness/reviews.py': {'confine_reason', 'is_link'}, ...}
+E       assert {'github.py':...s_link'}, ...} == {'github.py':...s_link'}, ...}
+E         
+E         Omitting 8 identical items, use -vv to show
+E         Right contains 1 more item:
+E         {'store.py': {'ContentReadError',
+E                       'MAX_DEPTH',
+E                       'MAX_EDGES',
+E                       'MAX_MAP_BYTES',...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests\test_arch_osopen_callers.py:133: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_arch_osopen_callers.py::test_outside_app_only_the_allowed_names_are_imported_from_osopen
+ERROR tests/test_ingestion_limits.py
+1 failed, 4 passed, 1 error in 1.07s
+exit: 1

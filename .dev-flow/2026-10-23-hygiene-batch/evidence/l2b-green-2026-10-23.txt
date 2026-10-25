@@ -1,0 +1,29 @@
+L2b GREEN — 2026-10-23 — lane L2b, batch 2026-10-23-hygiene-batch (on L2a commit 0a94362 + L2b working tree)
+run 1: the full shared test file (all 20 arms incl. the four L2b-closed arms) + the arch allow-list
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.........................                                                [100%]
+25 passed in 26.76s
+exit: 0
+===
+run 2: home-screen behavioural pins (grep -rl HomeScreen tests/ — the cheap set) + the CSV-door pins
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\<user>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-30221' coro=<sleep.<locals>.wait() running at C:\Users\<user>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<user>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-30221' coro=<sleep.<locals>.wait() running at C:\Users\<user>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<user>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+exit: 0
+===
+run 3: csv/diff/store pins around the L2b-touched seams
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.................                                                        [100%]
+17 passed in 1.04s
+exit: 0
+===
+run 2 re-capture (the tail -4 above swallowed the summary line; same command, summary kept):
+557 passed, 4 deselected in 91.60s (0:01:31)
+exit: 0

@@ -13,6 +13,14 @@ import yaml
 
 from .darkside import plain
 from .model import Attachment, Document, Edge, Ficha, Graph, Node, SchemaField
+from .osopen import (
+    MAX_DEPTH,
+    MAX_EDGES,
+    MAX_MAP_BYTES,
+    MAX_NODES,
+    ContentReadError,
+    read_capped,
+)
 
 
 class MapStoreError(Exception):
@@ -33,6 +41,13 @@ _RESERVED_NAMES = frozenset(
 _INVALID_CHARS = frozenset('<>"|?*')
 #: `<id>_nodos.yml` plus a temp suffix must fit MAX_PATH (260) beside the workspace.
 MAX_MAP_ID_LEN = 100
+#: Review inc003-F1 (security): an anchor NAME is attacker-controlled sidecar
+#: content and the prescan refusal names it — LLR-Q2.1.2 — but never verbatim:
+#: the message carries at most this many characters of it, then an ellipsis
+#: (LLR-N13.1.7: a coordinate that carries a value behaves like a value).  A
+#: hostile sidecar is capped by the 8 MiB file limit, so verbatim naming could
+#: push an ~8 MiB string into the operator-facing toast/log pipeline.
+ANCHOR_NAME_DISPLAY = 40
 
 
 def check_map_id(map_id: str) -> None:
@@ -62,6 +77,23 @@ def check_map_id(map_id: str) -> None:
     # dots; every dot-only id ends in a dot and dies here.
     if map_id != map_id.rstrip(" .") or map_id != map_id.lstrip(" "):
         raise MapIdError("the map name cannot start with a space or end with a dot or a space")
+
+
+def _check_count_caps(map_id: str, graph: Graph) -> None:
+    """LLR-Q2.1.3 (ruling R1, ledger .1/.5): a parsed graph over the count caps is refused.
+
+    The refusal names the LIMIT and the map id, never a path.  Called by `load`
+    and by `_capped_side_graph` (the diff side).  A unit surface of its own
+    because `mermaid.parse` only builds trees — through `load` edges are
+    structurally `<= nodes - 1`, so the edges cap is exercised synthetically
+    (`tests/test_ingestion_limits.py::test_at_113_edge_count_cap_plus_1_refuses`).
+    """
+    if len(graph.nodes) > MAX_NODES:
+        raise MapStoreError(
+            f"could not read {map_id}: the map has more nodes than the limit ({MAX_NODES})")
+    if len(graph.edges) > MAX_EDGES:
+        raise MapStoreError(
+            f"could not read {map_id}: the map has more edges than the limit ({MAX_EDGES})")
 
 
 def _text_fields(cls: type) -> tuple[str, ...]:
@@ -677,6 +709,77 @@ class MapStore:
             )
         return graph
 
+    def _prescan_sidecar(self, map_id: str, yml_text: str) -> None:
+        """LLR-Q2.1.2 prescan: an ITERATIVE YAML event-stream scan before any compose.
+
+        Refuses the first anchor or alias event — an anchor-amplified sidecar
+        expands exponentially at compose time, so this scan runs BEFORE
+        `yaml.safe_load` can materialise one (M-Q2-1) — naming the anchor
+        truncated to ANCHOR_NAME_DISPLAY (review inc003-F1: the name is
+        attacker-controlled content), and refuses collection nesting deeper
+        than MAX_DEPTH.  `yaml.parse` is a
+        state machine with an explicit stack: the scan never recurses, so a
+        10,000-nesting document is a typed refusal in milliseconds, never a
+        RecursionError.  Raises MapStoreError (naming the cause, the limit and
+        the map id — never a path); lets yaml.YAMLError propagate to the
+        caller's parser net.
+        """
+        depth = 0
+        for event in yaml.parse(yml_text):
+            anchor = getattr(event, "anchor", None)
+            if anchor is not None:
+                # The anchor is NAMED (LLR-Q2.1.2) but TRUNCATED (review
+                # inc003-F1): it is attacker-controlled content, and the refusal
+                # message must not carry it verbatim.
+                shown = anchor[:ANCHOR_NAME_DISPLAY]
+                if len(anchor) > ANCHOR_NAME_DISPLAY:
+                    shown += "…"
+                raise MapStoreError(
+                    f"could not read the card of {map_id}: YAML anchors and aliases "
+                    f"are not allowed here (anchor {shown!r})"
+                )
+            if isinstance(event, (yaml.SequenceStartEvent, yaml.MappingStartEvent)):
+                depth += 1
+                if depth > MAX_DEPTH:
+                    raise MapStoreError(
+                        f"could not read the card of {map_id}: it nests deeper than "
+                        f"the depth limit ({MAX_DEPTH})"
+                    )
+            elif isinstance(event, (yaml.SequenceEndEvent, yaml.MappingEndEvent)):
+                depth -= 1
+
+    def _capped_side_graph(self, map_id: str, mmd_text: str, yml_text: str) -> Graph:
+        """Build a Graph from in-memory map texts under the shared Q2 caps.
+
+        The diff side reaches the caps ONLY through this helper: ruling R8 bars
+        a `diff -> osopen` import, so `git_diff` calls this over the existing
+        `diff -> store` edge (`mapper/diff.py`).  The byte cap is enforced here
+        on the captured texts (S1's accepted bound — see increment-004 section 5):
+        the `git show` capture itself stays on the `subprocess.run` seam pinned
+        by `tests/test_inc9h.py`.  Any refusal here is a typed MapStoreError,
+        which `git_diff` converts to its None-on-error contract.
+        """
+        if (len(mmd_text.encode("utf-8")) > MAX_MAP_BYTES
+                or len(yml_text.encode("utf-8")) > MAX_MAP_BYTES):
+            raise MapStoreError(
+                f"could not read {map_id}: the map is larger than the byte limit "
+                f"({MAX_MAP_BYTES} bytes)"
+            )
+        try:
+            self._prescan_sidecar(map_id, yml_text)
+            sidecar = yaml.safe_load(yml_text) or {}
+        except (yaml.YAMLError, ValueError, RecursionError) as exc:
+            raise MapStoreError(
+                f"could not read the card of {map_id}: the card is unreadable"
+            ) from exc
+        if not isinstance(sidecar, dict):
+            raise MapStoreError(
+                f"could not read the card of {map_id}: the card is unreadable"
+            )
+        graph = self._graph_from_sidecar(mmd_text, sidecar)
+        _check_count_caps(map_id, graph)
+        return graph
+
     def load(self, map_id: str) -> Graph:
         check_map_id(map_id)
         mmd_path = self.workspace / f"{map_id}.mmd"
@@ -689,20 +792,32 @@ class MapStore:
             # the operator asked for and the only part they can act on.
             raise MapStoreError(f"map does not exist: {map_id!r}")
         try:
-            # These reads sat OUTSIDE every net, so invalid UTF-8 in either file
-            # raised a bare `UnicodeDecodeError` straight out of `load`, and an
-            # `OSError` carried its full absolute path -- username included --
-            # into the operator-facing sink.  Threshold 3 said neither could
-            # happen (security review F1/F3).
-            mmd_text = mmd_path.read_text(encoding="utf-8")
+            # The reads route through the osopen bounded reader (D2, R-015):
+            # the 8 MiB map cap with the stat re-checked on the read bytes
+            # (LLR-Q2.1.1) and the NUL probe (LLR-Q2.2.1).  `ContentReadError`'s
+            # message is an authored constant naming the LIMIT, never a path
+            # (C6), so it is interpolated verbatim beside the map id.  Before
+            # this, these reads sat OUTSIDE every net: invalid UTF-8 in either
+            # file raised a bare `UnicodeDecodeError` straight out of `load`,
+            # and an `OSError` carried its full absolute path -- username
+            # included -- into the operator-facing sink (security review F1/F3).
+            mmd_text = read_capped(mmd_path, MAX_MAP_BYTES)
             yml_text = (
-                yml_path.read_text(encoding="utf-8") if yml_path.exists() else "{}"
+                read_capped(yml_path, MAX_MAP_BYTES) if yml_path.exists() else "{}"
             )
+        except ContentReadError as exc:
+            raise MapStoreError(f"could not read {map_id}: {exc}") from exc
         except (OSError, UnicodeDecodeError) as exc:
             raise MapStoreError(
                 f"could not read {map_id}: {type(exc).__name__}"
             ) from exc
         try:
+            # The prescan runs BEFORE `yaml.safe_load`: it is the iterative
+            # event-stream guard (LLR-Q2.1.2) that refuses anchors, aliases and
+            # nesting over MAX_DEPTH without ever composing the document — an
+            # anchor-amplified sidecar expands exponentially at compose time,
+            # so the scan is the only place the bomb can be stopped (M-Q2-1).
+            self._prescan_sidecar(map_id, yml_text)
             sidecar = yaml.safe_load(yml_text) or {}
         except (yaml.YAMLError, ValueError, RecursionError) as exc:
             # `ValueError` is not redundant beside `YAMLError`: PyYAML's own int
@@ -766,6 +881,10 @@ class MapStore:
                 f"could not read the card of {map_id}: {yml_path.name} unreadable "
                 f"({type(exc).__name__})"
             ) from exc
+        # LLR-Q2.1.3 (ruling R1): the parsed graph over the count caps is refused
+        # before a single index row is written; the refusal names the limit and
+        # the map id (M-Q2-4).
+        _check_count_caps(map_id, graph)
         # `G6-C-F8`(b): a two-phase `save()` still has a window between its two
         # `replace()` calls -- a crash there leaves `.mmd` replaced and
         # `_nodos.yml` stale (or the reverse). Detected by comparing the mmd

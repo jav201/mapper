@@ -1,0 +1,17 @@
+L2a PRESCAN COST — 2026-10-23 — lane L2a, batch 2026-10-23-hygiene-batch
+PLAN.md watch-item (prescan adds one pass over the sidecar). Not a gate.
+(First capture discarded: the script resolved 'mapper' from a stale checkout on
+sys.path — REPO parents index corrected to the worktree root.)
+===
+fixture: build_wide(12000) saved via MapStore � sidecar 1398062 bytes, 12,000 nodes / 11,999 edges (equivalent of perf0b-ws-*, ledger .5)
+repetitions: 5
+  rep 1: load 8275.4 ms   prescan 3484.7 ms
+  rep 2: load 8268.3 ms   prescan 3566.8 ms
+  rep 3: load 8639.3 ms   prescan 3540.0 ms
+  rep 4: load 8509.3 ms   prescan 3509.8 ms
+  rep 5: load 8626.0 ms   prescan 3563.0 ms
+median full load:        8509.3 ms
+median prescan pass:     3540.0 ms
+prescan share of load:   41.60 %
+load-time delta (watch-item, not a gate): +3540.0 ms per load
+exit: 0

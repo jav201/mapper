@@ -1,0 +1,28 @@
+pre-move sha256: decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+== move-aside run: tests/test_canvas_audit.py
+ERROR tests/test_canvas_audit.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.17s
+exit: 2
+== move-aside run: tests/test_scalecheck.py
+ERROR tests/test_scalecheck.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.17s
+exit: 2
+== move-aside run: tests/test_a3_census.py
+ERROR tests/test_a3_census.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.18s
+exit: 2
+== move-aside run: tests/test_repair_depth.py
+ERROR tests/test_repair_depth.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.33s
+exit: 2
+== move-aside run: tests/test_perf_paint_clip.py
+ERROR tests/test_perf_paint_clip.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.27s
+exit: 2
+post-restore sha256: decab49cb8b0043046a6a61c140c00fbbd285c3932a080d224d645a09dea765d
+RESTORE PROVEN

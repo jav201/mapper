@@ -1,0 +1,72 @@
+# follow-up inc004-F2 RED (product unfixed) -- non-UTF-8 CSV escapes read_capped as a bare UnicodeDecodeError
+# command: PYTHONIOENCODING=utf-8 env -u NO_COLOR -u TERM python -m pytest -q -p no:cacheprovider tests/test_ingestion_limits.py::test_csv_non_utf8_refuses_typed_naming_the_reason
+# redaction: the Windows account name is replaced with <user> (A-110) before hashing/storage
+# stored bytes are sha256-cited in the owning increment packet follow-up section
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________ test_csv_non_utf8_refuses_typed_naming_the_reason ______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24441/test_csv_non_utf8_refuses_type0')
+
+    def test_csv_non_utf8_refuses_typed_naming_the_reason(tmp_path):
+        """inc004-F2 (independent review, MINOR): bytes that pass the NUL probe but
+        are not UTF-8 used to escape `read_capped` as a bare `UnicodeDecodeError`,
+        so the operator saw only the exception TYPE name (the home screen's generic
+        toast branch).  The reader now refuses it TYPED — an authored, path-free
+        message naming the reason — so the reason reaches the operator (AT-114).
+        Mutant: remove the `except UnicodeDecodeError` limb in
+        `mapper/osopen.py`'s `read_capped` → this arm RED."""
+        csv_path = tmp_path / "latin1.csv"
+        csv_path.write_bytes("id,title\nA,niño\n".encode("latin-1"))
+        with pytest.raises(ContentReadError) as caught:
+>           preview_csv(csv_path)
+
+tests\test_ingestion_limits.py:340: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+mapper\import_csv.py:47: in preview_csv
+    text = read_capped(path, MAX_FILE_BYTES)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-24441/test_csv_non_utf8_refuses_type0/latin1.csv')
+cap = 4194304
+
+    def read_capped(path, cap: int, *, probe: int = BINARY_PROBE_BYTES) -> str:
+        """Read at most *cap* bytes of *path* as UTF-8 text, or refuse with ContentReadError.
+    
+        The m4-adopted shape (design-proposal section 6 note 4, `qm:model.py:495-503`):
+        stat first, then a CAPPED re-read of at most cap + 1 bytes — never a full read
+        before the re-check — so a file that GROWS between the stat and the read is
+        refused by the same byte limit (TOCTOU, LLR-Q2.1.1).  With *probe* > 0, a NUL
+        inside the first *probe* READ bytes refuses the file as binary; a NUL past the
+        window is outside the probe by design (LLR-Q2.2.1's documented bound).
+        """
+        try:
+            size = os.stat(path).st_size
+        except OSError as exc:
+            raise ContentReadError(
+                f"could not read file ({type(exc).__name__})") from exc
+        if size > cap:
+            raise ContentReadError(f"file exceeds the byte limit ({cap} bytes)")
+        with open(path, "rb") as handle:  # noqa: SIM115 - the read IS the bound
+            data = handle.read(cap + 1)
+        if len(data) > cap:
+            raise ContentReadError(f"file exceeds the byte limit ({cap} bytes)")
+        if probe and b"\x00" in data[:probe]:
+            raise ContentReadError(
+                f"file looks binary (NUL byte in the first {probe} bytes)")
+        # Universal-newline translation, reproducing the text-mode reads this reader
+        # replaces: the store's `_mmd_hash` fingerprint and the CSV row semantics were
+        # built on them (save() hashes in-memory `\n` text; a binary read would keep
+        # the `\r\n` the text-mode write put on disk and false-positive "out of sync").
+>       return data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+E       UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf1 in position 13: invalid continuation byte
+
+mapper\osopen.py:138: UnicodeDecodeError
+=========================== short test summary info ===========================
+FAILED tests/test_ingestion_limits.py::test_csv_non_utf8_refuses_typed_naming_the_reason
+1 failed in 0.30s
+exit=1
