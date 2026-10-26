@@ -339,9 +339,15 @@
       "station": "P6",
       "date": "2026-10-26",
       "decision": "P6 documents completed: 06-docs/executive-summary.md + 06-docs/functionality.md written (the relation screens with how-to-read and keys, read from the sealed seat and the stored P4 walkthrough), the traceability matrix signed off final (both DDR conditions discharged, awaiting-sync noted); the batch's 78 requirement ids folded into the REQUIREMENTS.md canon (72 HLR/LLR + 6 US Statements added for the fold - the swarm-drafted story blocks carried no Statement line, the fold refused them, 6 Statements written and 78 folded / 0 refused); PLAN Last updated + gate notices (the doc-row additions to increment-007 section 2 declared, the V59 limb); state.json carries this P4/P5/P6 record; phase_status awaiting-sync - the batch awaits the operator's merge decision and /dev-flow-sync; no push by this unit"
+    },
+    {
+      "station": "P6",
+      "date": "2026-10-26",
+      "decision": "synced-to-obsidian",
+      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-10-25-relmap-r2-batch/ (full sync; PDR/DDR to mapper/design/)"
     }
   ],
-  "obsidian_synced": false,
+  "obsidian_synced": true,
   "created_at": "2026-10-25T15:30:00Z",
   "previous_batch": {
     "batch_id": "2026-10-25-relmap-r1-batch",
