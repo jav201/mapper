@@ -1,0 +1,18 @@
+cmd: PYTHONPATH=<wt> python probe_fcheck.py
+worktree: C:/Users/<user>/AppData/Local/Temp/ds-units/wt-r2-sheet
+PASS mapper.__file__ inside wt-r2-sheet — C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-sheet\mapper\__init__.py
+PASS F-1 text leaf landed
+PASS F-1 leaf exports cut/DISPLAY_MAX/refusal_line
+PASS F-2 host + base landed
+PASS F-2 D1 surface sealed (amended: row_count, no lens) — ['cursor', 'focus', 'gaps', 'height', 'notice', 'relmap', 'width']
+PASS F-2 freeze text names 'direct only'
+PASS F-2 freeze text names 'stacked chain'
+PASS F-2 freeze text names 'enter'
+PASS F-2 freeze text names 'c'
+PASS F-2 freeze text names 'k'
+PASS F-2 freeze text names 'row_count'
+PASS F-3 sheet.py absent (lane lands it)
+PASS F-3 sibling renderer lanes absent from this tree
+PASS F-5 AT-driver seam (Home -> RelMapScreen derives -> q leaves) — home=HomeScreen derived=True after_q=HomeScreen
+RESULT OK
+exit=0

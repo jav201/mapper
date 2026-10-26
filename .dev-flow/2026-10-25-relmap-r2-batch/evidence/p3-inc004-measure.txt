@@ -1,0 +1,69 @@
+# p3-inc004-measure — increment 004 AT-137 measurements + layout renders (COND-QA-3: packet-recorded, never committed asserts)
+# command: python measure_and_render.py   exit=0 wall=5s
+#
+303-node skeleton derivation baseline: nodes=303 runs=['0.013', '0.003', '0.004', '0.005', '0.006'] median=0.005s
+AT-137 recorded budget (10x baseline): 0.048s
+app-level 303-node: open_wall=0.050s r_wall=0.110s derive_calls=['0.005', '0.004'] (the pilot/pause overhead dominates the wall figures; the derivation itself is the timed calls)
+cap-scale 100k map: build=0.257s detect=0.224s rank=0.361s gaps=100000 not_computed=0
+cap-scale paint at 118: 0.663s rows=28 not_computed(re-derived)=0
+cap-scale paint at 87: 0.701s rows=28 not_computed(re-derived)=0
+=== render (118x34) gaps · ranked ===
+ browse maps    connect repo    build map    factory                                                          ● mapper
+reqharness / relmap / gaps
+gaps — what the record does not say                                                   ranked by severity, then reach ↓
+high 0   med 7   low 0   total 7
+no   gap              node          what                                                              reach    status
+01   hlr without llr  HLR-A.2       HLR-A.2 has no LLR under it: the alpha record                     000      med
+02   hlr without llr  HLR-B.3       HLR-B.3 has no LLR under it: the beta record                      000      med
+03   hlr without llr  HLR-CAN.1     HLR-CAN.1 has no LLR under it: the canon record (canon rows nea…  000      med
+04   hlr without llr  HLR-C.4       HLR-C.4 has no LLR under it: the gamma record                     000      med
+05   hlr without llr  HLR-D.5       HLR-D.5 has no LLR under it: the delta record                     000      med
+06   hlr without llr  HLR-REPAIR.1  HLR-REPAIR.1 has no LLR under it: the repair record (canon rows…  000      med
+07   hlr without llr  HLR-E.6       HLR-E.6 has no LLR under it: the epsilon record                   000      med
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+=== render (118x34) gaps · by kind ===
+ browse maps    connect repo    build map    factory                                                          ● mapper
+reqharness / relmap / gaps · by kind
+gaps — what the record does not say                                                   ranked by severity, then reach ↓
+high 0   med 7   low 0   total 7
+no   gap              node          what                                                              reach    status
+ hlr without llr  med   ×7
+01   hlr without llr  HLR-A.2       HLR-A.2 has no LLR under it: the alpha record                     000      med
+02   hlr without llr  HLR-B.3       HLR-B.3 has no LLR under it: the beta record                      000      med
+03   hlr without llr  HLR-CAN.1     HLR-CAN.1 has no LLR under it: the canon record (canon rows nea…  000      med
+04   hlr without llr  HLR-C.4       HLR-C.4 has no LLR under it: the gamma record                     000      med
+05   hlr without llr  HLR-D.5       HLR-D.5 has no LLR under it: the delta record                     000      med
+06   hlr without llr  HLR-REPAIR.1  HLR-REPAIR.1 has no LLR under it: the repair record (canon rows…  000      med
+07   hlr without llr  HLR-E.6       HLR-E.6 has no LLR under it: the epsilon record                   000      med
+same catalogue grouped by gap kind — scan for a detector, not a severity
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+=== render (87x34) gaps · ranked ===
+ browse maps    connect repo    build map    factory                           ● mapper
+reqharness / relmap / gaps
+gaps — what the record does not say                    ranked by severity, then reach ↓
+high 0   med 7   low 0   total 7
+no   gap              node          what                               reach    status
+01   hlr without llr  HLR-A.2       HLR-A.2 has no LLR under it: the…  000      med
+02   hlr without llr  HLR-B.3       HLR-B.3 has no LLR under it: the…  000      med
+03   hlr without llr  HLR-CAN.1     HLR-CAN.1 has no LLR under it: t…  000      med
+04   hlr without llr  HLR-C.4       HLR-C.4 has no LLR under it: the…  000      med
+05   hlr without llr  HLR-D.5       HLR-D.5 has no LLR under it: the…  000      med
+06   hlr without llr  HLR-REPAIR.1  HLR-REPAIR.1 has no LLR under it…  000      med
+07   hlr without llr  HLR-E.6       HLR-E.6 has no LLR under it: the…  000      med
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+=== render (87x34) gaps · by kind ===
+ browse maps    connect repo    build map    factory                           ● mapper
+reqharness / relmap / gaps · by kind
+gaps — what the record does not say                    ranked by severity, then reach ↓
+high 0   med 7   low 0   total 7
+no   gap              node          what                               reach    status
+ hlr without llr  med   ×7
+01   hlr without llr  HLR-A.2       HLR-A.2 has no LLR under it: the…  000      med
+02   hlr without llr  HLR-B.3       HLR-B.3 has no LLR under it: the…  000      med
+03   hlr without llr  HLR-CAN.1     HLR-CAN.1 has no LLR under it: t…  000      med
+04   hlr without llr  HLR-C.4       HLR-C.4 has no LLR under it: the…  000      med
+05   hlr without llr  HLR-D.5       HLR-D.5 has no LLR under it: the…  000      med
+06   hlr without llr  HLR-REPAIR.1  HLR-REPAIR.1 has no LLR under it…  000      med
+07   hlr without llr  HLR-E.6       HLR-E.6 has no LLR under it: the…  000      med
+same catalogue grouped by gap kind — scan for a detector, not a severity
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys

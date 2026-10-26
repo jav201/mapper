@@ -1,10 +1,16 @@
 """The home screen — A4 of batch `2026-10-09-modular-batch` (LLR-MOD.1.1).
 
 Home of `HomeScreen`, the sala the app opens on: the hero, the resume
-row, the recents table and the doors.  It pushes `MapScreen`
-(`mapper.screens.map`), `PlugRepoScreen` (`mapper.screens.plug_repo`),
-`_ImportPreviewScreen` (`mapper.screens.import_preview`) and
-`ConstructScreen` (`mapper.screens.construct`) — never `mapper.app`
+row, the recents table and the doors.  The recents table lists the
+workspace's relation descriptors (`*.relmap.yml`, and the derived
+reqharness row when no descriptor exists) beside the tree maps in one
+name-sorted list (batch `2026-10-25-relmap-r2-batch`, LLR-RVH.1/.3) and
+`↵` routes by kind: tree rows open `MapScreen` (`mapper.screens.map`),
+relation rows open `RelMapScreen` (`mapper.screens.relmap`) read-only
+(LLR-RVH.2.1).  It also pushes `PlugRepoScreen`
+(`mapper.screens.plug_repo`), `_ImportPreviewScreen`
+(`mapper.screens.import_preview`) and `ConstructScreen`
+(`mapper.screens.construct`) — never `mapper.app`
 (§3); the modals come from `mapper.screens.prompt` and the shared
 helpers from `mapper.screens.common`.  `preview_csv` is bound here at
 module level, read by `action_import_csv` — the test patch targets this
@@ -15,7 +21,8 @@ historical `from mapper.app import HomeScreen` sites keep resolving
 from __future__ import annotations
 
 from datetime import date, timedelta
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, NamedTuple
 
 from rich.markup import escape
 from rich.text import Text
@@ -29,6 +36,11 @@ from mapper.import_csv import preview_csv
 from mapper.keymap import SCOPE_HOME, bindings_for, groups_for_keybar
 from mapper.model import Document, Edge, Ficha, Graph, Node
 from mapper.osopen import PATH_NOT_SUPPORTED, ContentReadError, safe_local_path
+from mapper.relmap.descriptor import (
+    DESCRIPTOR_SUFFIX,
+    default_descriptor,
+    discover_descriptors,
+)
 from mapper.screens.common import (
     _home_door_key,
     _refusal_toast,
@@ -42,6 +54,7 @@ from mapper.screens.import_preview import _ImportPreviewScreen
 from mapper.screens.map.screen import MapScreen
 from mapper.screens.plug_repo import PlugRepoScreen
 from mapper.screens.prompt import _PromptScreen, _TemplateScreen
+from mapper.screens.relmap import RelMapScreen
 from mapper.screens.roles import RolesScreen
 from mapper.screens.review import ReviewScreen
 from mapper.screens.settings import SettingsScreen
@@ -50,6 +63,63 @@ from mapper.widgets.chrome import GroupBox, HintLine, KeyBar, TabStrip
 
 if TYPE_CHECKING:
     from mapper.store import MapStore
+
+
+#: The recents kind badge of a relation row (LLR-RVH.1.2) — exactly this
+#: Darkside-casing text, in the tree rows' chip style (`INK on STEP`).
+RELATION_KIND_BADGE = "relation·reqharness"
+
+
+class _RecentEntry(NamedTuple):
+    """One recents row: the name-sorted display name, the DataTable row key,
+    the row kind (`tree` | `relation` | `derived`) and the descriptor path
+    for relation rows.  A tree row's key stays the bare map name — the
+    gate-2 pin reads it back as the opened map id.  Relation and derived
+    keys carry the `relmap:` kind prefix so a tree map named like a
+    descriptor (`<x>.relmap.yml.mmd`, stem `<x>.relmap.yml`) cannot collide
+    with the descriptor row keyed `<x>.relmap.yml` (review-inc006 F2 —
+    the pre-fix identity keys let the DataTable raise DuplicateKey out of
+    `on_mount`)."""
+
+    sort_name: str
+    key: str
+    kind: str
+    name: str
+    path: Path | None
+
+
+def _recent_entries(workspace, mmd_files, descriptor_paths) -> list[_RecentEntry]:
+    """The recents list across BOTH map kinds (LLR-RVH.1.1/.1.3): the tree
+    rows from `*.mmd`, one relation row per discovered descriptor, and —
+    when NO descriptor exists (LLR-RVH.3.1) — ONE derived relation row
+    named by the canon stem, listed only while the canon itself is present
+    at the workspace root (a phantom row for a canon the workspace does
+    not hold would be a second lie next to the damaged-card one).  ONE
+    list, sorted by name regardless of kind — the kind badge, not the
+    list position, is the kind distinguisher."""
+    entries = [
+        _RecentEntry(mmd.stem, mmd.stem, "tree", mmd.stem, None)
+        for mmd in mmd_files
+    ]
+    entries += [
+        _RecentEntry(
+            path.name[: -len(DESCRIPTOR_SUFFIX)],
+            f"relmap:{path.name}",
+            "relation",
+            path.name[: -len(DESCRIPTOR_SUFFIX)],
+            path,
+        )
+        for path in descriptor_paths
+    ]
+    if not descriptor_paths:
+        canon = Path(default_descriptor().canon)
+        if (Path(workspace) / canon).exists():
+            entries.append(
+                _RecentEntry(canon.stem, f"relmap:{canon.stem}.derived",
+                             "derived", canon.stem, None)
+            )
+    entries.sort(key=lambda entry: entry.sort_name)
+    return entries
 
 
 class HomeScreen(Screen):
@@ -207,7 +277,10 @@ class HomeScreen(Screen):
         identity.update(identity_text)
 
         mmd_files = sorted(store.workspace.glob("*.mmd"))
-        self.query_one(HintLine).set_hint(home_hint(bool(mmd_files)))
+        descriptor_paths, _descriptor_overflow = discover_descriptors(store.workspace)
+        entries = _recent_entries(store.workspace, mmd_files, descriptor_paths)
+        self._recent_routes = {entry.key: entry for entry in entries}
+        self.query_one(HintLine).set_hint(home_hint(bool(entries)))
         hero_map: str | None = None
         hero_metrics: dict[str, int] | None = None
 
@@ -292,7 +365,10 @@ class HomeScreen(Screen):
         else:
             self.query_one("#home-resume-box", GroupBox).display = False
 
-        # Recents table
+        # Recents table — ONE name-sorted list across both map kinds
+        # (LLR-RVH.1.1/.1.3): tree rows from `*.mmd`, one relation row per
+        # discovered descriptor, and the single derived reqharness row when
+        # no descriptor exists (LLR-RVH.3.1).
         table = self.query_one("#home-recents", DataTable)
         # `INC9BC-UX-F13`: `clear()` keeps the columns, so each return to home
         # added the four again (24 after three returns).
@@ -300,7 +376,7 @@ class HomeScreen(Screen):
         table.add_columns("▐ name", "kind", "nodes", "docs")
 
         archived = self.query_one("#home-archived", Static)
-        if not mmd_files:
+        if not entries:
             table.display = False
             self.query_one("#home-empty", Static).update(self._empty_text())
             self.query_one("#home-empty", Static).display = True
@@ -318,8 +394,26 @@ class HomeScreen(Screen):
         else:
             archived.display = False
 
-        for mmd in mmd_files:
-            map_name = mmd.stem
+        for entry in entries:
+            if entry.kind != "tree":
+                # A relation row (a descriptor, or the derived entry): the
+                # kind badge in the tree rows' chip style (LLR-RVH.1.2).
+                # Home never derives — the nodes/docs cells stay unread
+                # here (`—`, the honest "not listed at home" value), and a
+                # refused descriptor or canon surfaces at OPEN time on the
+                # relation screen (LLR-RVH.5.1 is host-owned).
+                kind_cell = Text.assemble(
+                    (f" {RELATION_KIND_BADGE} ", f"{darkside.INK} on {darkside.STEP}"),
+                )
+                table.add_row(
+                    escape(entry.name),
+                    kind_cell,
+                    "—",
+                    "—",
+                    key=entry.key,
+                )
+                continue
+            map_name = entry.name
             graph = load_or_notice(map_name)
             # `INC7-SEC-F1`: guarded on `graph is None` DIRECTLY as well as on
             # the `damaged` set.  The two are coupled today -- `damaged.add`
@@ -371,7 +465,7 @@ class HomeScreen(Screen):
                 kind_cell,
                 nodos,
                 docs,
-                key=map_name,
+                key=entry.key,
             )
 
     #: What each door does, in prose (Inc-EN's); the KEY and its NAME come from the seat.
@@ -414,7 +508,7 @@ class HomeScreen(Screen):
         table = self.query_one("#home-recents", DataTable)
         if table.display and table.row_count:
             row = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
-            self._open_map(str(row.value))
+            self._open_recent(str(row.value))
 
     def action_table_down(self) -> None:
         table = self.query_one("#home-recents", DataTable)
@@ -456,6 +550,33 @@ class HomeScreen(Screen):
         if not name:
             return
         self.app.push_screen(MapScreen(name))
+
+    def _open_recent(self, key: str) -> None:
+        """`↵` on a recents row, routed by kind (LLR-RVH.2.1).  A tree row
+        opens `MapScreen` exactly as today; a relation row — a discovered
+        descriptor, or the derived reqharness entry — opens `RelMapScreen`
+        read-only.  The descriptor FILE is handed over (never parsed here),
+        so a refused descriptor or canon surfaces on the relation screen
+        itself (LLR-RVH.5.1 is host-owned); the derived row carries no
+        descriptor at all, so the host derives through `default_descriptor()`
+        at open time (LLR-RVH.3.1).  No route writes the store (LLR-RVH.2.3).
+        """
+        entry = self._recent_routes.get(key)
+        if entry is None:
+            # A row predating the route map (or a stale key): it IS a tree
+            # name — the tree route is the backwards-compatible answer.
+            self._open_map(key)
+            return
+        if entry.kind == "tree":
+            self._open_map(entry.name)
+            return
+        workspace = self.app.store.workspace  # type: ignore[attr-defined]
+        if entry.kind == "relation":
+            self.app.push_screen(
+                RelMapScreen(entry.name, workspace, descriptor_path=entry.path)
+            )
+            return
+        self.app.push_screen(RelMapScreen(entry.name, workspace))
 
     def action_construct(self) -> None:
         def on_name(name: str | None) -> None:
@@ -554,8 +675,7 @@ class HomeScreen(Screen):
         self.app.exit()
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
-        map_id = str(event.row_key.value)
-        self.app.push_screen(MapScreen(map_id))
+        self._open_recent(str(event.row_key.value))
 
     def on_screen_resume(self) -> None:
         """Refresh the home surface when returning."""

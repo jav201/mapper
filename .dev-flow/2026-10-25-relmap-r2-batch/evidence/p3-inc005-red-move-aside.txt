@@ -1,0 +1,10 @@
+cmd: move-aside C-20 — rename sheet.py out, run targeted, restore
+sha256 before: ebadfcf941c7fd787e3c55501d550639681c2cfadb90b8eae92d0031539384c2
+E   ImportError: cannot import name 'sheet' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-sheet\mapper\screens\relmap\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_sheet.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.51s
+pytest-exit=2
+sha256 after:  ebadfcf941c7fd787e3c55501d550639681c2cfadb90b8eae92d0031539384c2
+RESTORE-MATCH

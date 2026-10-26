@@ -1,0 +1,62 @@
+# transcript: p5-cond-ddr2-a110-prefix-red-2026-10-26.txt
+# command: PYTHONPATH=<scratch>/prefix-a110 env -u NO_COLOR -u TERM PYTHONDONTWRITEBYTECODE=1 PYTHONIOENCODING=utf-8 python -m pytest -q -p no:cacheprovider tests/test_no_operator_paths.py
+# tree: detached scratch checkout of cdc4491^ (2e83cf6) — the tree whose committed census-amendment transcript still carried the account profile segment; checkout created and removed under the unit's scratch dir outside the repository
+# phase: COND-DDR-2 capture 2 of 2 — the A-110 privacy backstop failure the orchestrator's gate run 2 surfaced, reproduced on the pre-redaction tree: both the hermetic allow-list arm and the real-username backstop fail on the unredacted evidence transcript
+# exit code: 1 (2 failed) · wall 8s · redacted: account name -> <user> by a Python filter that refuses to write on any profile segment
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FF                                                                       [100%]
+================================== FAILURES ===================================
+________ test_a110_no_undeclared_user_profile_path_in_any_tracked_file ________
+
+    def test_a110_no_undeclared_user_profile_path_in_any_tracked_file():
+        """A-110: every tracked user-profile path segment is a declared placeholder.
+    
+        Hermetic by construction -- it never reads `os.environ`, so the same
+        tree gives the same verdict on any machine, under any account.
+        """
+        bad = undeclared_hits(REPO_ROOT)
+>       assert not bad, (
+            f"{len(bad)} tracked line(s) carry a user-profile path segment that "
+            "is not in ALLOWED_PATH_SEGMENTS (A-110): "
+            + "; ".join(f"{h.path}:{h.line_no} -> {h.segment!r}" for h in bad[:25])
+        )
+E       AssertionError: 3 tracked line(s) carry a user-profile path segment that is not in ALLOWED_PATH_SEGMENTS (A-110): .dev-flow\2026-10-25-relmap-r2-batch\evidence\p3-census-amendment-green.txt:1 -> '<user>'; .dev-flow\2026-10-25-relmap-r2-batch\evidence\p3-census-amendment-green.txt:2 -> '<user>'; .dev-flow\2026-10-25-relmap-r2-batch\evidence\p3-census-amendment-green.txt:24 -> '<user>'
+E       assert not [Hit(path='.dev-flow\\2026-10-25-relmap-r2-batch\\evidence\\p3-census-amendment-green.txt', line_no=1, segment='<user>'...it(path='.dev-flow\\2026-10-25-relmap-r2-batch\\evidence\\p3-census-amendment-green.txt', line_no=24, segment='<user>')]
+
+tests\test_no_operator_paths.py:106: AssertionError
+____________ test_a110_the_real_operator_username_appears_nowhere _____________
+
+    def test_a110_the_real_operator_username_appears_nowhere():
+        """A-110's backstop: literal search for the real account name.
+    
+        Deliberately ignores `ALLOWED_PATH_SEGMENTS` and ignores whether the
+        match sits inside a path at all -- it is the arm that still catches a
+        leak if the allow-list above is ever widened past what it should hold.
+        """
+        username = os.environ.get("USERNAME")
+        if not username:
+            pytest.skip("USERNAME is not set in this environment")
+    
+        offenders: list[str] = []
+        for path in tracked_files(REPO_ROOT):
+            if not path.is_file():
+                continue
+            if username.encode("utf-8") in path.read_bytes():
+                offenders.append(str(path.relative_to(REPO_ROOT)))
+    
+>       assert not offenders, (
+            f"the real account name (read from $USERNAME, not printed here) "
+            f"appears in {len(offenders)} tracked file(s): "
+            + ", ".join(offenders[:25])
+        )
+E       AssertionError: the real account name (read from $USERNAME, not printed here) appears in 1 tracked file(s): .dev-flow\2026-10-25-relmap-r2-batch\evidence\p3-census-amendment-green.txt
+E       assert not ['.dev-flow\\2026-10-25-relmap-r2-batch\\evidence\\p3-census-amendment-green.txt']
+
+tests\test_no_operator_paths.py:131: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_no_operator_paths.py::test_a110_no_undeclared_user_profile_path_in_any_tracked_file
+FAILED tests/test_no_operator_paths.py::test_a110_the_real_operator_username_appears_nowhere
+2 failed in 7.77s

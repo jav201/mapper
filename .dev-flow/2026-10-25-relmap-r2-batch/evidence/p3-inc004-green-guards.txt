@@ -1,0 +1,17 @@
+# p3-inc004-green-guards — increment 004 GREEN, the guard set (C-1)
+# command: pytest -q -p no:cacheprovider tests/test_fold.py tests/test_repair_artifact_claims.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........xxx............................................................. [ 34%]
+........................................................................ [ 68%]
+.................................................................        [100%]
+============================== warnings summary ===============================
+tests/test_fold.py::test_tc_032_no_reference_to_the_deleted_fold_state_survives
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+206 passed, 3 xfailed, 1 warning in 46.60s
+exit=0
+# wall=48s

@@ -14,8 +14,8 @@ byte-identical from run to run.
 Nothing here is written, spawned or opened other than through `descriptor.read_repo_text` (via the
 adapter and the descriptor loader).  A canon over the node or edge cap is one fixed line
 (`LIMIT_LINE`, ledger .62); `reqharness.audit.run_cli` keeps `internal error: <Type>` as the
-fallback for anything else.  `refusal_line` is defined beside the cause table in
-`relmap.descriptor` (ledger .56) and imported here.
+fallback for anything else.  The presentation primitives (`cut`, `refusal_line`) come from the
+`text` leaf, the one definition site and import path (D2).
 """
 from __future__ import annotations
 
@@ -31,11 +31,11 @@ from mapper.relmap.descriptor import (
     default_descriptor,
     discover_descriptors,
     load_descriptor,
-    refusal_line,
 )
 from mapper.relmap.gaps import Gap, detect_gaps, rank_gaps
-from mapper.relmap.model import RelMap, RelMapLimitError, cut
+from mapper.relmap.model import RelMap, RelMapLimitError
 from mapper.relmap.profile import SEVERITIES
+from mapper.relmap.text import cut, refusal_line
 
 HEADER = "structure: informational - does not change the verdict or the exit code"
 LIMIT_LINE = "structure: unavailable (canon: over the node or edge limit)"
@@ -207,5 +207,5 @@ def structure_lines(repo: Path) -> list[str]:
 
 
 __all__ = [
-    "HEADER", "LIMIT_LINE", "format_structure", "refusal_line", "structure_lines",
+    "HEADER", "LIMIT_LINE", "format_structure", "structure_lines",
 ]

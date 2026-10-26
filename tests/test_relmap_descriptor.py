@@ -1,8 +1,9 @@
 """HLR-RML.1 / LLR-RML.1.1-.1.6 -- bounded repository reads and the relation descriptor.
 
 `mapper/relmap/descriptor.py`: `read_repo_text` (lstat, identity, capped read), the closed causes
-K1-K17 (`CAUSE`, read-only), the descriptor reader and schema, path confinement, discovery (cap 8)
-and `refusal_line`.  This module is also the in-process Layer A stand-in for AT-121/AT-127 (the
+K1-K17 (`CAUSE`, read-only), the descriptor reader and schema, path confinement and discovery
+(cap 8); `refusal_line` itself lives in the `text` leaf and is imported here.  This module is
+also the in-process Layer A stand-in for AT-121/AT-127 (the
 Layer B arms run `mapper --audit` and first exist at Inc-5, proposal 2.1 *Layer phasing*): it
 asserts the exact refusal text each cause will print.
 
@@ -35,9 +36,9 @@ from mapper.relmap.descriptor import (
     discover_descriptors,
     load_descriptor,
     read_repo_text,
-    refusal_line,
 )
 from mapper.reqharness.derive import LIMIT_ROLES_YML_BYTES
+from mapper.relmap.text import refusal_line
 
 NAME = "r.relmap.yml"
 CANON = "REQUIREMENTS.md"
@@ -733,7 +734,9 @@ def test_the_input_class_is_new_no_test_fixture_or_tracked_file_carries_it():
     `*.relmap.yml` that the new reader would now trip over.  Only the relmap descriptor suites
     name the suffix."""
     tests_dir = Path(mapper.__file__).resolve().parent.parent / "tests"
-    mine = {"test_relmap_descriptor.py", "test_relmap_isolation.py", "test_relmap_audit.py"}  # audit: Inc-5 Layer B fixtures
+    mine = {"test_relmap_descriptor.py", "test_relmap_isolation.py", "test_relmap_audit.py",  # audit: Inc-5 Layer B fixtures
+            "test_relmap_text.py",  # R2 Inc-1a: the presentation-leaf refusal battery names base names
+            "test_relmap_shell.py"}  # R2 Inc-2: the host's hostile-descriptor arm seeds a `*.relmap.yml`
     hits = {p.name for p in tests_dir.rglob("*.py") if ".relmap.yml" in p.read_text(encoding="utf-8")}
     assert hits <= mine, hits - mine
     root = Path(mapper.__file__).resolve().parent.parent

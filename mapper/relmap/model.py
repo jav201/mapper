@@ -31,7 +31,6 @@ from mapper.osopen import MAX_EDGES, MAX_NODES
 from mapper.relmap.profile import Profile
 
 VISIT_BUDGET = 2_000_000
-DISPLAY_MAX = 120
 ID_MAX = 200
 
 
@@ -62,13 +61,6 @@ class Edge:
 class Problem:
     kind: str
     subject: str
-
-
-def cut(text: str) -> str:
-    """`text` in at most `DISPLAY_MAX` characters; a cut value ends with an ellipsis."""
-    if len(text) <= DISPLAY_MAX:
-        return text
-    return text[: DISPLAY_MAX - 1] + "…"
 
 
 def _unsafe(node_id: str) -> bool:

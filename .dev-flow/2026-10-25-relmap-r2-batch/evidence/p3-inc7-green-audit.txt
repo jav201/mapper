@@ -1,0 +1,8 @@
+R1 audit suite green — tests/test_relmap_audit.py, re-run after the Inc-7 gate amendment (2 arms re-derived: content on the D5 seam, bound on the emitted form)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..........................s......................                        [100%]
+48 passed, 1 skipped in 42.84s
+exit=0 wall=44s

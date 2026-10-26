@@ -1,0 +1,104 @@
+# p3-inc004-mutants — increment 004 mutation battery M-RVG-1..M-RVG-13 (+M-RVG-12-spec)
+# command: python mutation_battery.py   (one runner; per-arm verdict; restore sha256 per arm)
+# runner exit=0 wall=169s; BAD-control pass first: anchor x0 reported BAD, exit 1
+#
+baseline sha256 acf220072df5294b9b69f3e1d381f2d81025c5b64f237104cc8d4e2ff885f445
+M-RVG-1: KILLED (exit 1, wall 15.1s, restore sha256 MATCH) — re-sort rows by node id
+    FAILED tests/test_relmap_scalecheck.py::test_at137_window_follows_the_cursor_and_declares_every_cut_row
+    5 failed, 28 passed in 13.28s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-2: KILLED (exit 1, wall 12.9s, restore sha256 MATCH) — drop the `total` chip
+    FAILED tests/test_relmap_scalecheck.py::test_at137_cap_scale_100k_map_renders_at_118_and_87
+    6 failed, 27 passed in 11.07s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-3: KILLED (exit 1, wall 12.5s, restore sha256 MATCH) — unpadded reach
+    FAILED tests/test_relmap_scalecheck.py::test_at137_what_values_end_ellipsis_at_87_with_reach_and_status_intact
+    7 failed, 26 passed in 10.96s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-4: KILLED (exit 1, wall 11.5s, restore sha256 MATCH) — initial cursor on the last row
+    FAILED tests/test_relmap_gaps_view.py::test_at135_the_ranked_gaps_screen - as...
+    2 failed, 31 passed in 10.13s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-5: KILLED (exit 1, wall 10.7s, restore sha256 MATCH) — the window clamps to the first page
+    FAILED tests/test_relmap_scalecheck.py::test_at137_cap_scale_100k_map_renders_at_118_and_87
+    5 failed, 28 passed in 9.37s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-6: KILLED (exit 1, wall 11.4s, restore sha256 MATCH) — WHAT truncated below its minimum instead of dropped
+    FAILED tests/test_relmap_scalecheck.py::test_at137_the_what_column_drops_whole_below_its_minimum
+    1 failed, 32 passed in 10.21s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-7: KILLED (exit 1, wall 11.8s, restore sha256 MATCH) — bands sorted by row count instead of catalogue order
+    FAILED tests/test_relmap_gaps_view.py::test_rvg_1_5_member_rows_keep_their_global_ranks
+    2 failed, 31 passed in 10.37s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-8: KILLED (exit 1, wall 11.3s, restore sha256 MATCH) — .upper() restored
+    FAILED tests/test_relmap_gaps_view.py::test_at136_by_kind_through_the_app - R...
+    5 failed, 28 passed in 10.09s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-9: KILLED (exit 1, wall 12.7s, restore sha256 MATCH) — one caps chrome string
+    FAILED tests/test_relmap_gaps_view.py::test_at135_the_ranked_gaps_screen - As...
+    3 failed, 30 passed in 10.99s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-10: KILLED (exit 1, wall 11.7s, restore sha256 MATCH) — computed zero rendered as `-`
+    FAILED tests/test_relmap_scalecheck.py::test_at137_what_values_end_ellipsis_at_87_with_reach_and_status_intact
+    7 failed, 26 passed in 10.38s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-11: KILLED (exit 1, wall 12.0s, restore sha256 MATCH) — the not-computed marker dropped
+    FAILED tests/test_relmap_gaps_view.py::test_rvg_2_3_budget_spent_declares_not_computed
+    1 failed, 32 passed in 10.58s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-12: KILLED (exit 1, wall 11.1s, restore sha256 MATCH) — the coercion bypassed for the WHAT segment (plain pass removed)
+    FAILED tests/test_relmap_scalecheck.py::test_at137_what_values_end_ellipsis_at_87_with_reach_and_status_intact
+    4 failed, 29 passed in 9.84s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-13: KILLED (exit 1, wall 12.0s, restore sha256 MATCH) — a markup-parsing sink for the WHAT segment
+    FAILED tests/test_relmap_scalecheck.py::test_at137_what_values_end_ellipsis_at_87_with_reach_and_status_intact
+    5 failed, 28 passed in 10.65s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVG-12-spec: SURVIVED (exit 0, wall 11.7s, restore sha256 MATCH) — the SPECCED plain()-pass removal — expected SURVIVED: the one base.label sink re-coerces idempotently, so the renderer-side pass is belt-and-braces (disclosed; the killable M-RVG-12 variant above guards the real axis)
+    .................................                                        [100%]
+    33 passed in 10.35s
+    C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+    The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+    
+      warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+final sha256 acf220072df5294b9b69f3e1d381f2d81025c5b64f237104cc8d4e2ff885f445 (MATCH)

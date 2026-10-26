@@ -1,8 +1,8 @@
 {
   "project": "mapper",
   "language": "en",
-  "batch_id": "2026-10-25-relmap-r1-batch",
-  "batch_objective": "Relation-map port R1 (QuickMap handoff C1/C2/C9, MAP-TYPES approved 2026-10-23, strategy S1), HEADLESS: a relation-map KIND beside the tree Graph, never a mutation of it. mapper/relmap/ with (a) the per-profile kinds/edge-types table for the reqharness profile (US, HLR, LLR, AT, TC; refines/covers/verifies/binds with direction of change; graduated AT->test bound/tagged/none), (b) the typed multi-parent read model (up/down by change direction, reach, neighbourhood, cycles reported not refused), (c) gap detection with the approved reqharness catalogue ranked by severity then reach, (d) a read-only adapter deriving the relation map from mapper's own canon (HLR/LLR skeleton from REQUIREMENTS.md first; US canon and AT->test table do not exist yet), (e) structural-gap lines in mapper --audit. Ingestion limits (C9, shipped in the hygiene batch) are reused for any YAML a relation map reads. No screen, no view (views are R2).",
+  "batch_id": "2026-10-25-relmap-r2-batch",
+  "batch_objective": "Relation-map port R2 — the VIEWS. Per the prototype verdict of round-2026-10-24 (matrix-panel side-panel impact lens with binds-glyphs cells; gaps-ranked in Darkside casing; sheet-direct node sheet with c for the full chain): a relation screen in the Darkside TUI hosting the three ported views, rendered through the one Canvas adapter with the C10 audit hook; scalecheck sweep at the 118 reference width (87 checked). Shell: home/store list and open of relation maps (.relmap.yml descriptor + derived reqharness map per MAP-TYPES), routing by descriptor kind, keys via the keymap single seat, help/palette entries. Consumes ONLY the R1 frozen API (PDR-2026-10-25-relmap-r1-batch#D3); inherits the R1 DDR section E residual items 10-14 (presentation leaf relmap/text.py before a second printer exists; the double refusal_line import path; default-only derivation noted for R5; B-147 per-line bound for hook lines). English UI, Darkside only, colour always on. OUT of scope: timeline (C5, R4), metro (C6, R5), FTS (C8, R3), editing edges.",
   "owner": "OMITTED -- the project guard A-110 (tests/test_no_operator_paths.py) forbids a user-profile path in any tracked file; the batch is opened in a worktree of the primary checkout. V40 NOTICEs this by design.",
   "mode": "full",
   "mode_history": [
@@ -103,28 +103,35 @@
       "from": null,
       "to": "core",
       "date": "2026-10-11",
-      "reason": "bug fixes only (B-115/116/117/127) — the /dev-flow routing matrix sends any change to product code or tests through /dev-flow at core; not a client deliverable, no ISO/IEC/IEEE 29148 need, four small fixes with no interface freeze"
+      "reason": "bug fixes only (B-115/116/117/127) -- the /dev-flow routing matrix sends any change to product code or tests through /dev-flow at core; not a client deliverable, no ISO/IEC/IEEE 29148 need, four small fixes with no interface freeze"
     },
     {
       "batch_id": "2026-10-15-review-screen-batch",
       "from": null,
       "to": "core",
       "date": "2026-10-15",
-      "reason": "the ReqHarness review/signing screen (B-134): a UI feature over the already-validated reqharness core — not a client deliverable and no regulated context (E3 not fired); the signing write path exercises the existing reviews.record_review API (validated in the parent full batch); the security-relevant controls fire by trigger (C1/C6/C8) regardless of mode. Seeded core per the level table; the orchestrator may promote to full for continuity with the parent ReqHarness batch."
+      "reason": "the ReqHarness review/signing screen (B-134): a UI feature over the already-validated reqharness core -- not a client deliverable and no regulated context (E3 not fired); the signing write path exercises the existing reviews.record_review API (validated in the parent full batch); the security-relevant controls fire by trigger (C1/C6/C8) regardless of mode. Seeded core per the level table; the orchestrator may promote to full for continuity with the parent ReqHarness batch."
     },
     {
       "batch_id": "2026-10-23-hygiene-batch",
       "from": null,
       "to": "full",
       "date": "2026-10-23",
-      "reason": "operator commission 2026-10-23 («Arranca las tres, delega todo lo que puedas a kimi») — three modules Q1/Q2/Q3; Q3 changes the frozen Canvas interface (trigger A3) so ARQ/PDR/DDR stand; full adds ISO/IEC/IEEE 29148 + strict EARS, post-mortem + 06-docs."
+      "reason": "operator commission 2026-10-23 (<<Arranca las tres, delega todo lo que puedas a kimi>>) -- three modules Q1/Q2/Q3; Q3 changes the frozen Canvas interface (trigger A3) so ARQ/PDR/DDR stand; full adds ISO/IEC/IEEE 29148 + strict EARS, post-mortem + 06-docs."
     },
     {
       "batch_id": "2026-10-25-relmap-r1-batch",
       "from": null,
       "to": "full",
       "date": "2026-10-25",
-      "reason": "operator commission 2026-10-23 («Arranca las tres, delega todo lo que puedas a kimi») and «continue» 2026-10-25 — relation-map series R1; a new module (mapper/relmap/, trigger A1) and a new --audit output surface, so ARQ/PDR/DDR stand; full adds ISO/IEC/IEEE 29148 + strict EARS, post-mortem + 06-docs."
+      "reason": "operator commission 2026-10-23 (<<Arranca las tres, delega todo lo que puedas a kimi>>) and <<continue>> 2026-10-25 -- relation-map series R1; a new module (mapper/relmap/, trigger A1) and a new --audit output surface, so ARQ/PDR/DDR stand; full adds ISO/IEC/IEEE 29148 + strict EARS, post-mortem + 06-docs."
+    },
+    {
+      "batch_id": "2026-10-25-relmap-r2-batch",
+      "from": null,
+      "to": "full",
+      "date": "2026-10-25",
+      "reason": "operator commission, series standing authorization 2026-10-23 (<<Arranca las tres...>>) and <<continue>>/<<adelante>> 2026-10-25 -- relation-map series R2 (views); new screens module (trigger A1), >=2 modules (A2), the DDR-mandated relmap/text.py leaf and screen routing change consumed interfaces (A3), planned parallel renderer lanes (A4), so ARQ/PDR/DDR stand; full adds ISO/IEC/IEEE 29148 + strict EARS, post-mortem + 06-docs."
     }
   ],
   "guided": false,
@@ -145,7 +152,7 @@
   "iterations_per_station": {
     "P0": 0,
     "ARQ": 0,
-    "P1": 1,
+    "P1": 2,
     "P2": 0,
     "PDR": 0,
     "P3": 0,
@@ -155,19 +162,19 @@
     "P6": 0
   },
   "triggers": {
-    "evaluated_at": "2026-10-25",
+    "evaluated_at": "2026-10-25T15:12:41",
     "fired": [
       "A1",
       "A2",
       "A3",
+      "A4",
       "B1",
       "C6",
+      "C8",
       "D1",
-      "E1",
-      "F2"
+      "E1"
     ],
     "not_fired": [
-      "A4",
       "B2",
       "B3",
       "B4",
@@ -177,140 +184,173 @@
       "C4",
       "C5",
       "C7",
-      "C8",
       "D2",
       "E2",
       "E3",
-      "F1"
+      "F1",
+      "F2"
     ],
-    "record": ".dev-flow/2026-10-25-relmap-r1-batch/PLAN.md#triggers"
+    "record": ".dev-flow/2026-10-25-relmap-r2-batch/PLAN.md#triggers"
   },
   "artifact_homes": {
-    "requirements": "repo:.dev-flow/2026-10-25-relmap-r1-batch/01-requirements.md",
-    "requirements_ledger": "repo:.dev-flow/2026-10-25-relmap-r1-batch/01-requirements-ledger.md",
-    "traceability": "repo:.dev-flow/2026-10-25-relmap-r1-batch/06-docs/traceability-matrix.md",
+    "requirements": "repo:.dev-flow/2026-10-25-relmap-r2-batch/01-requirements.md",
+    "requirements_ledger": "repo:.dev-flow/2026-10-25-relmap-r2-batch/01-requirements-ledger.md",
+    "acceptance_design": "repo:.dev-flow/2026-10-25-relmap-r2-batch/01b-acceptance-design.md",
+    "traceability": "repo:.dev-flow/2026-10-25-relmap-r2-batch/06-docs/traceability-matrix.md",
     "tests": "repo:tests/",
     "module_map": "repo:docs/ARCHITECTURE.md",
-    "increments": "repo:.dev-flow/2026-10-25-relmap-r1-batch/03-increments/",
-    "evidence": "repo:.dev-flow/2026-10-25-relmap-r1-batch/evidence/",
+    "increments": "repo:.dev-flow/2026-10-25-relmap-r2-batch/03-increments/",
+    "evidence": "repo:.dev-flow/2026-10-25-relmap-r2-batch/evidence/",
     "backlog": "repo:.dev-flow/BACKLOG.md",
-    "design_pdr": "vault:mapper/design/PDR-2026-10-25-relmap-r1-batch.md",
-    "design_ddr": "vault:mapper/design/DDR-2026-10-25-relmap-r1-batch.md",
-    "postmortem": "vault:mapper/dev-flow-batches/2026-10-25-relmap-r1-batch/",
-    "metrics": "vault:mapper/dev-flow-batches/2026-10-25-relmap-r1-batch/README.md",
+    "design_pdr": "vault:mapper/design/PDR-2026-10-25-relmap-r2-batch.md",
+    "design_ddr": "vault:mapper/design/DDR-2026-10-25-relmap-r2-batch.md",
+    "postmortem": "vault:mapper/dev-flow-batches/2026-10-25-relmap-r2-batch/",
+    "metrics": "vault:mapper/dev-flow-batches/2026-10-25-relmap-r2-batch/README.md",
     "requirements_canon": "repo:REQUIREMENTS.md"
   },
-  "base_ref": "194f885c34436dbd1b8bd87e48961880e8b44d32",
-  "artifacts": {},
+  "base_ref": "867dfd7f747b61da9bc7a0659544a4945cd9bd54",
+  "artifacts": {
+    "P1": ".dev-flow/2026-10-25-relmap-r2-batch/01-requirements.md",
+    "P1_ledger": ".dev-flow/2026-10-25-relmap-r2-batch/01-requirements-ledger.md",
+    "P1_acceptance": ".dev-flow/2026-10-25-relmap-r2-batch/01b-acceptance-design.md"
+  },
   "decisions_log": [
     {
       "station": "P0",
       "date": "2026-10-25",
-      "decision": "P0 approved under the standing authorization (operator approval of the series, 2026-10-23, and «continue», 2026-10-25): four stories READY (US-RM-001 traceability graph; US-RM-002 ranked structural gaps; US-RM-003 --audit lines; US-RM-004 bounded descriptor), each stating an observable behaviour; triggers evaluated, fired A1 A2 A3 B1 C6 D1 E1 F2 so ARQ, PDR and DDR stand (PDR is owed after P2, its proposal authored from the reviewed contract); F2 discharged at rollover (BACKLOG header refreshed, B-140..B-143 added); rollover done: 17 outgoing decisions archived, single-slot fields retired, base_ref re-stamped to 194f885; RC-1 (origin/master = HEAD) and RC-2 (origin answered) recorded in PLAN.md"
+      "decision": "P0 approved under the standing authorization (operator series approval, 2026-10-23, and continue/adelante 2026-10-25): six stories READY (US-RMV-001 matrix+lens; US-RMV-002 gaps; US-RMV-003 sheet; US-RMV-004 shell; US-RMV-005 text leaf; US-RMV-006 hook per-line bound); triggers evaluated, fired A1 A2 A3 A4 B1 C6 C8 D1 E1 so ARQ/PDR/DDR stand (A4: parallel renderer lanes planned after the screen host lands); RC-1 (origin/master = HEAD = 867dfd7) and RC-2 (origin answered) recorded in PLAN.md; already-shipped check: no screens/relmap, no relmap/text.py, home globs only *.mmd; F2-adjacent BACKLOG base-ref re-stamp folded into the rollover commit; ARQ is next"
     },
     {
       "station": "ARQ",
       "date": "2026-10-25",
-      "decision": "ARQ approved under the standing authorization: docs/ARCHITECTURE.md amended as COMMITMENTS (banner, section 2 rows relmap and yamlscan, section 3 rows and the app/store edges, R-016 separate kind with derived reqharness data, R-017 shared prescan leaf, section 6 worksheet: five sequential increments, NO lane — A4 not fired); the section 2 path column is tree-checked, so the rows carry the planned paths as prose and are filled as each file lands (first draft failed tests/test_repair_map_truth.py x9, re-worded, 90 passed on the six map-oracle files); the one interface change is additive (reqharness.audit.run_cli optional callable, frozen at PDR); P1 requirements derivation is next"
+      "decision": "ARQ approved under the standing authorization: docs/ARCHITECTURE.md amended as commitments (banner; amendment block — screens/relmap package, relmap/text.py leaf, new edges app->screens/relmap and screens/relmap->relmap (third screen->core edge), screens/home.py sibling-open exception; §2 relmap screen row + relmap row prose re-wording after test_repair_map_truth.py caught two literal planned paths, 52 passed after the re-word — the R1 convention applied; §3 rows; §4 three planned-freeze rows incl. the host-renderer surface frozen at the R2 PDR; §5 R-018 screens-module ruling + R-019 recompute-on-open; §6 worksheet: trunk text-leaf + screen-host, then 4 parallel lanes (matrix/gaps/sheet/shell) + 6b help/palette + hook-bound, pairwise-empty intersections, reverse census named). P1 derivation is next."
     },
     {
       "station": "P1",
       "date": "2026-10-25",
-      "decision": "P1 requirements approved by the orchestrator under the standing authorization (operator, 2026-10-23 «Arranca las tres…» and 2026-10-25 «continue»/«adelante»). Rulings on the open questions: OQ-R1-1 accepted (repo-root *.relmap.yml, else default descriptor); OQ-R1-2 accepted (Layer-A-only evidence for direction queries, cycles and 7/8 gap kinds; end-to-end ATs carried to R2/B-141); OQ-R1-3 no new gap kind in R1 (catalogue as approved; raise with R2 after B-142); OQ-R1-4 implement the mechanical rule (binds upstream), prose fix in the QuickMap repo (B-143); OQ-R1-5 exit code unchanged by structural gaps in R1; OQ-R1-6 extract the prescan to the yamlscan leaf with byte-identical messages; OQ-R1-7 only active nodes are gap-eligible; OQ-R1-8 flat reach accepted in R1. P2 review is next."
+      "decision": "P1 requirements approved under the standing authorization (operator series approval 2026-10-23, continue/adelante 2026-10-25). Contract + acceptance design drafted by a 4-agent module swarm (M-MATRIX/M-GAPS/M-SHEET/M-SHELL) and merged by the orchestrator (RVT text leaf + RVU hook bound drafted by the orchestrator): 6 US, 26 HLR, 52 LLR, AT-130..AT-152 (23), TC-RM-04..TC-RM-30 (27), IFC Part A x6 + Part B (the relation screen boundary is a yes), premise table P1-P12 all TRUE with an executed derivation probe (303 nodes, 215 refines edges, 7 gaps, reach flat 0), fork preconditions F1-F5 for the A4 lanes. Security scan: security_required true, 6 flags answered in contract section 6.3 (C6/C8). Orchestrator rulings on the swarm's open questions folded into the contract (empty-matrix policy, 118+87 sweep, glyph table, Darkside casing everywhere incl. the MED->INK token, contingent by-kind toggle with k key for the PDR, sheet empties/cuts/overflow, one name-sorted home list, canon-stem derived row, escape quiet alias). Gate: first run 52 block (V4 label collision + V26 missing Ledger fields) -> fixed -> re-run 0 block, 806 notice, exit 0; declared V23 (R1 record id vs the rev44 grammar; B-159 recommended) + V26 budget 96,092 chars (same class R1 accepted). P2 cross-review is next."
     },
     {
       "station": "P2",
       "date": "2026-10-25",
-      "decision": "P2 first pass: architect, qa-reviewer and security-reviewer independent reviews all iterate-to-refine (1 blocker Q-1, 22 majors, 16 minors); P1 contract amended under orchestrator rulings R1-R16 (ledger LED-2026-10-25-relmap-r1-batch.1-.16, standing authorization); second P2 pass owed over the amended contract",
-      "notes": "contract 87,832 characters, V26 NOTICE only"
+      "decision": "Orchestrator confirms P1 (the worker recorded it under the standing authorization) and rules the open questions: ship the by-kind toggle on the gaps view (one key, data already computed; matches the round-2026-10-23 verdict note); hook-line bound 240 characters, cut after escaping; glyph table verifies ✓, binds ●/◐/○ as R1 graded, refines •, covers ≡ — Darkside tokens; the two 'assumed — verify in Phase 2' seams (AT-driver host push/fixture injection; workspace-as-repo) are P2 review targets. P2 independent review next."
     },
     {
       "station": "P1",
       "date": "2026-10-25",
-      "decision": "Amended P1 contract re-approved by the orchestrator under the standing authorization after the first P2 pass (iterate-to-refine; rulings R1-R16, ledger .1-.16). Author judgement calls confirmed: R8 visit bound 2,000,000 with reach_not_computed counted; pure format_structure named (Q-10); AT-123 retired to TC-RM-01/02 Layer A; canon read under LIMIT_ROLES_YML_BYTES, descriptors under MAX_MAP_BYTES; no-repo/no-registry lines printed by run_cli without calling the hook; a refused descriptor yields only its refusal line. Contract size 87,832 chars over the 54,000 budget accepted as a V26 NOTICE (closed cause set + AT bodies + matrix). Second P2 pass is next."
+      "decision": "P1 amendment folds all 21 P2 first-pass findings back (VAL-01/02 FLOW colons; census re-counted by script to 20 HLR / 52 LLR with new LLR-RVH.3.3; keymap seat to trunk Inc-2 per ARC-02; both seams discharged by executed probes with rules pinned; by-kind SHIPS on k; hook bound 240 with no-mid-spelling cut; all minors dispositioned in 02-review.md; gate re-run 0 block - 814 notice - 57 n/a; ledger LED-2026-10-25-r2.01..11; commit daddd6d). Unit stops here per the commission - second P2 pass owed next."
+    },
+    {
+      "station": "P1",
+      "date": "2026-10-25",
+      "decision": "P1 second amendment folds the P2 second-pass findings (iterate-to-refine, iteration 2): P2Q-1=P2U-1 (major) — `k` to the by-kind grouping toggle bound in LLR-RVH.4.1 normative Statement, draft-time duplicate removed; P2V-1 (blocker) — all six IFC FLOW blocks NODES re-expressed as `- fn`/`owner` items (one owner per node, combined owners split; owners preserved verbatim) so V10 parses them, the defect was invisible at P1 where the V10 past-Phase-1 condition does not fire and the re-run is measured at the true P2 station; P2Q-2 — matrix negative-arms column caught up (AT-152 names M-RVU-1/2/3, AT-137 names M-RVG-5/6 + M-RVM-1); P2Q-3 — last residual RVT landing-order flag resolved with the decided rule (leaf lands trunk Inc-1 first, before lanes fork). Ledger LED-2026-10-25-r2.12/.13 plus the IFC/matrix amendment record; back-pointers added. Unit stops here per the commission - the orchestrator closes P2 and moves to PDR."
     },
     {
       "station": "P2",
       "date": "2026-10-25",
-      "decision": "P2 closed by the orchestrator under the standing authorization: first pass iterate (39 findings), second pass security+architect approve, QA iterate (N-1,N-2) then pass 3 wording-level items (X-1, N-3, N-7) dispositioned in ledger .29-.31 without a fourth pass; all reviewer verdicts recorded in 02-review.md."
+      "decision": "P2 closed by the orchestrator under the standing authorization after two independent passes (4-lens Kimi K2.8 swarms): first pass iterate (2 blocker, 7 major, 12 minor), second pass architect+security approve, QA+UX iterate on P2Q-1 (k missing from LLR-RVH.4.1's normative Statement) + validator V10 (IFC NODES form); both closed in 24506a7 — orchestrator verified k now in the Statement and the gate is 0 BLOCK at P2. PDR review next."
     },
     {
       "station": "PDR",
       "date": "2026-10-25",
-      "decision": "PDR sealed approved with conditions 2026-10-25 (architect, qa-reviewer, security-reviewer, ux-reviewer — Claude Sonnet subagents); 38 conditions listed with dispositions and owning increment gates. Author judgement calls accepted: 1,000-line hook bound, collection types (cycles tuple of tuples, problems tuple, sourced frozenset), added mutants and TC-RM-03. Phase 3 (Inc-1) is next."
+      "decision": "PDR sealed approved with conditions 2026-10-25 (architect, qa-reviewer, security-reviewer, ux-reviewer — Kimi K2.8 subagents); 13 conditions. Orchestrator ruling on COND-ARCH-2/COND-QA-1: Inc-1 would hold 5 source files, so it splits into Inc-1a and Inc-1b (each ≤4), both trunk, before Inc-2. Author-artifact conditions due at seal are applied next; Phase 3 follows."
     },
     {
       "station": "P3",
       "date": "2026-10-25",
-      "decision": "P3 increment 001 approved: independent code-reviewer approve-with-nits (no BLOCKER/MAJOR; F1-F5 minor, dispositioned in ledger .44-.50 and BACKLOG B-145; evidence/review-inc001.md); 19/19 mutants killed; station stays P3"
+      "decision": "PDR-seal author amendments applied (records-only unit, station P3): COND-ARCH-1 toggle-state channel named (frozen renderer entry toggle(kind) -> str per renderer; proposal §4 D1 + ARCHITECTURE §4 row); COND-ARCH-2/COND-QA-1 discharged under the Inc-1a/1b ruling (text.py + model/descriptor/audit = 4; adapter = 1; byte-identical at each step) across PLAN, proposal §2.1/§4/§5.1/§8 and the ARCHITECTURE §6 worksheet, LLR-RVT.1.1/.1.2; COND-SEC-1 frozen seam reworded to darkside._row_text/fit + LF/TAB in P12 + AT-134/148 one-row arms (M-RVH-18); COND-ARCH-3/COND-UX-3 citations repaired (keymap.py:432 palette_items, keymap :25 + duplicate_chords :445, test_key_dispatch.py:170); COND-QA-2 test_keymap.py relabelled existing + test_key_dispatch.py in Inc-2's run; COND-UX-1 enter/c/k inert off-home (LLR-RVH.4.1 clause + AT-148 arm, M-RVH-19). Ledger LED-2026-10-25-r2.14…17; PDR record conditions table marked with the amendment commit; QA-3/4/5, SEC-2, UX-2 stay open at their owner increments; station unchanged (P3); gate 0 BLOCK; Phase 3 (trunk Inc-1a) next."
     },
     {
       "station": "P3",
       "date": "2026-10-25",
-      "decision": "P3 increment 002 approved: independent review iterate (BLOCK-UNTIL F1) discharged at f02dbbd — the two edge-type-filter arms re-read by the orchestrator, mutant D RED (inc2f-red-mutant-d.txt), F2-F5 dispositioned."
+      "decision": "increment 001a (text leaf, first half) implemented and gated under the standing authorization: text.py leaf + model/descriptor/audit re-points (4 SOURCE), audit.__all__ re-export dropped, tests/test_relmap_text.py new (13 nodes); RED code-absent + move-aside transcripts, M-RVT-1/2/3 KILLED, live probe surfaces byte-identical, guard set green (audit/adapter deferred mid-move to Inc-1b); packet 03-increments/increment-001a.md; independent review pending - orchestrator schedules; Inc-1b next."
     },
     {
       "station": "P3",
       "date": "2026-10-25",
-      "decision": "P3 increment 003 approved: independent review (code + security lenses) approve — golden re-generated from base 25d69fe byte-identical, 10 hostile inputs typed refusals, 7/7 reviewer mutants killed; MINOR-1..3 recorded (MINOR-2 escaping verified at Inc-5)."
+      "decision": "increment 001b (text leaf, second half) implemented and gated under the standing authorization: adapter.py cut re-point (1 SOURCE); relmap.model.cut reader census zero — the text-leaf move is complete, one definition site and one import path (AT-150); full-surface byte-identity proven, probe hash b7ff2e38 equals the base (AT-151); RED census-before-code + move-aside, M-RVT-2/3 KILLED, FULL guard set green 762 passed 2 skipped 3 xfailed, R1 audit-surface suite 14 passed; packet 03-increments/increment-001b.md; COND-ARCH-2/COND-QA-1 discharged by Inc-1a+1b; independent review pending - orchestrator schedules; trunk Inc-2 next."
     },
     {
       "station": "P3",
       "date": "2026-10-25",
-      "decision": "P3 increment 004 approved: independent review (code + security) approve-with-nits; F1 arm RED with reviewer mutant C (inc4f-red-f1-mutant-c.txt), F2 cut+escape arm and F3 limit line landed with the next increment's commit c6a166f, F4 fixed."
+      "decision": "P3 increment 001a approved: independent review evidence/review-inc001ab.md (sha256 ba2506d5104baba16d76bde7c2c00bf8bf195759492823dda85cb3504272ca06) closed approve-with-nits; N-1 fixed (K5_CAUSE==CAUSE['K5'] pin, mutant RED, restore sha256 88c81769...cc2, GREEN), N-2 fixed (definition census widened to mapper/**), OBS-1 verified (descriptor fence mine-set repair landed, suite 89 passed/1 skipped); packet gate rows 6/15 flipped to green; station stays P3"
     },
     {
       "station": "P3",
       "date": "2026-10-25",
-      "decision": "P3 increment 005 approved: independent review (code + security + UX) approve-with-nits; F1 end-to-end sources-line arm RED with M-RMU-9 (inc5f-red.txt), F2 verdict-prefix guard RED without it, F3 K9 wording, F4/F5 docs — c2d244b/837abd3. All five increments approved; DDR is next."
+      "decision": "P3 increment 001b approved: independent review evidence/review-inc001ab.md (sha256 ba2506d5104baba16d76bde7c2c00bf8bf195759492823dda85cb3504272ca06) closed approve-with-nits; N-1 fixed (K5_CAUSE==CAUSE['K5'] pin, mutant RED, restore sha256 88c81769...cc2, GREEN), N-2 fixed (definition census widened to mapper/**), OBS-1 verified (descriptor fence mine-set repair landed, suite 89 passed/1 skipped); packet gate rows 6/15 flipped to green; station stays P3"
     },
     {
       "station": "P3",
       "date": "2026-10-25",
-      "decision": "P3 closed: all five increments approved (decisions P3 001-005); station moves to DDR, which precedes P4 in stations_active. The orchestrator's clean full-suite run at 934e935 (4017 passed, 0 failed) closed the three closing-gate regressions (LED .69-.71)."
+      "decision": "P3 increment 002 approved: independent review iterate (BLOCK-UNTIL F1, F2) discharged at 64bc1bc — D1 amended before any lane forked (row_count, one clamped cursor per view, per-view crumb word); orchestrator re-check: zero-row guard present, 196 targeted tests green. Lanes 3/4/5 and the shell lane may fork."
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-25",
+      "decision": "P3 increment 003 approved: independent review approve-with-nits (evidence/review-inc003.md), 2 MINOR discharged fb336ed (root-limb pin, degenerate-height flap guard)"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-25",
+      "decision": "P3 increment 004 approved: independent review approve-with-nits (evidence/review-inc004.md), 3 MINOR discharged fb336ed"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-25",
+      "decision": "P3 increment 005 approved: independent review iterate discharged fb336ed (2 MAJOR test-only + 2 MINOR)"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-25",
+      "decision": "P3 increment 006 approved: independent review approve-with-nits (evidence/review-inc006.md), F1 declared (B-159), F2 fixed (row keys disjoint across kinds, M-REV-HOME-1 KILLED)"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-25",
+      "decision": "P3 increment 006b approved: independent review approve-with-nits (evidence/review-inc006b7.md), F1 fixed (drop-independent palette arm, reviewer mutant M-R-6B-2 RED, restore sha256 MATCH), F2 declared"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-25",
+      "decision": "P3 increment 007 approved: independent review approve-with-nits (evidence/review-inc006b7.md), F1 fixed (packet prose 251 cells), F2 declared (DDR note + BACKLOG B-161 display-width bound)"
+    },
+    {
+      "station": "P3",
+      "date": "2026-10-26",
+      "decision": "P4 validation evaluated and DDR draft written (records-only unit, station P3): 04-validation.md — Result PASS-WITH-NOTES on the orchestrator's clean gate run (evidence/p4-full-suite-cdc4491-2026-10-26.txt, sha256 7feaa2f1..., 4226 passed 0 failed 2 skipped 3 xfailed at cdc4491); Layer A 72/72 (20 HLR + 52 LLR), Layer B 23/23 (AT-130..152 each reconciled to its on-disk node); signed balance 4023 - 4 + 212 = 4231 (base collect-only on a clean detached 867dfd7 worktree, D/A from the node-id sets); UX walkthrough executed (D1 fired) driving the real screens at 118/87 vs the round-2026-10-23 verdict PNGs (evidence/p4-ux-walkthrough-2026-10-26.txt, privacy-sanitized); both escaped defects (run 1 census trio -> 2e83cf6; run 2 privacy transcript -> cdc4491) recorded with lessons; accepted deviations: two-hatch cut line (Statement wins, review-inc005 F3) and code-points-vs-cells hook bound (B-161); BACKLOG rows added B-162 (M-RVM-4 numbering gap), B-163 (unavailable line double-paint), B-164 (sanitize-at-authoring + staged-tree privacy test, process), B-165 (Python 3.10 re-stamp); traceability matrix at 06-docs/traceability-matrix.md; DDR draft written at design/DDR-2026-10-25-relmap-r2-batch.md, verdict pending — awaits architect + software-dev + qa-reviewer + ux-reviewer; gate 0 block 898 notice; station moves P3 -> DDR per the tool's station order"
     },
     {
       "station": "DDR",
-      "date": "2026-10-25",
-      "decision": "P4 validation evaluated by the dev-flow worker (record only, station stays DDR because the flow orders DDR before P4): 04-validation.md PASS-WITH-NOTES - 35/35 requirements, 12/12 AT as mapper --audit subprocess nodes, gate run by the orchestrator at 934e935 (4017 passed, 0 failed, 2 skipped, 3 xfailed), ledger 3579 - 4 + 447 = 4022, UX walkthrough executed on the real structure block; notes: Python 3.10 not-run (B-148), contract wording drift (B-149), independent ux-reviewer read not-run. DDR drafted (design/DDR-2026-10-25-relmap-r1-batch.md), verdict pending architect + software-dev + qa-reviewer; this entry is NOT the DDR gate decision."
-    },
-    {
-      "station": "DDR",
-      "date": "2026-10-25",
-      "decision": "DDR sealed approved with conditions 2026-10-25 (architect, software-dev, qa-reviewer, ux-reviewer — Claude Sonnet subagents); every reviewer condition dispositioned in def89c8 (M3 pinned RED/GREEN, real reproduction of the 3 escaped regressions at 6331206, accepted deviations with shipped behaviour normative, README Audit section, residual risks owned by the R2 PDR, BACKLOG B-151..B-155). No product code changed after the gate tree 934e935; one test added after the full-suite gate (4022 gated + 1 targeted-green)."
+      "date": "2026-10-26",
+      "decision": "DDR sealed approved with conditions 2026-10-26 (architect - Kimi K2.8 subagent executing agents/architect.md - approved with conditions; software-dev - Kimi K2.8 subagent executing agents/software-dev.md - approved; qa-reviewer - Kimi K2.8 subagent executing agents/qa-reviewer.md - approved with conditions; ux-reviewer - Kimi K2.8 subagent executing agents/ux-reviewer.md - approved with conditions): four independent reviews over the joined tree 3b9eada..7a56db7, each re-reading its DDR rows against the named artifact lines; gate questions answered - C-18 satisfied under the R1 reading (qa-reviewer), the two-hatch D-1 deviation ratified (qa + ux independently, the ux walkthrough of the real screens at 118/87 reproduced the worker's transcript), the P4 gate transcript sha256 7feaa2f1...0ca330 re-verified by the qa-reviewer, the ledger post side re-derived (4231 collected). Reviewer mutants: 6 applied in mapper/screens/relmap/*.py under control C-2, all KILLED, all restores sha256-verified byte-identical. Findings: 2 MAJOR conditions - COND-DDR-1 (the COND-ARCH-3/COND-UX-3 citation repair drifted again before the fork; records-only re-repair due at the P5 close records pass; proposed B-166) and COND-DDR-2 (the two escaped-regression pre-fix REDs are asserted, not stored; capture them or record the accepted gap with the operator's ruling, due P5) - plus 5 MINOR notices dispositioned to the records pass / BACKLOG (as-built lane counts 4/1/4/1/1/1/2/0/1 in D6 wording, fb336ed row-6 parenthetical, darkside.py:576 citation, AT-148 supplementary arm ids, ledger base-side limit). No BLOCKER, no finding re-opens a frozen decision; the gate runs 0 block 919 notice 55 n/a. Station moves DDR -> P4; the P4 validation record stands, P5 close is next"
     },
     {
       "station": "P4",
-      "date": "2026-10-25",
-      "decision": "P4 validation approved: PASS-WITH-NOTES — 35/35 requirements, 12 ATs on real --audit subprocess nodes, 3 accepted deviations, full suite 4017 passed / 0 failed at 934e935 (clean env, orchestrator), balance 3579 - 4 + 447 = 4022 selected; Python 3.10 floor unproven (B-148, operator). P5 post-mortem is next."
+      "date": "2026-10-26",
+      "decision": "P4 validation approved under the standing authorization: the DDR sealed approved with conditions 2026-10-26 (5520508, the JOIN-point review of the A4 fork over the tree 3b9eada..7a56db7) stands; the P4 validation record (04-validation.md, PASS-WITH-NOTES at cdc4491: 72/72 requirements, 23/23 ATs, signed ledger 4023 - 4 + 212 = 4231, orchestrator gate run 4226 passed 0 failed) is approved with the DDR's two MAJOR conditions carried to the P5 close records pass (COND-DDR-1 citation re-repair + folds; COND-DDR-2 pre-fix RED capture); the P4 unit records the DDR seal (station DDR -> P4); P5 close is next"
     },
     {
       "station": "P5",
-      "date": "2026-10-25",
-      "decision": "P5 post-mortem written (05-postmortem.md, local staging; vault copy by /dev-flow-sync): closed with carry-over. Controls: C-1 guard set names test_fold and test_repair_artifact_claims (adopted); C-2 reviewer-authored mutant recorded per independent review (4 mutants survived the author's battery: Inc-2 D, Inc-4 C, Inc-5 M-RMU-9, DDR M3); C-3 contract shape and V26 budget (109,299 chars vs 54,000; AT bodies to a companion; B-156); C-4 worktree hygiene (B-157); C-5 runner switch logged (B-158); C-6 Python 3.10 run (B-148, operator). Open items carried: R2 views, R2 PDR inherits DDR E items 10-12, B-140..B-158, UI batch from round-2026-10-23/24 verdicts."
+      "date": "2026-10-26",
+      "decision": "P5 post-mortem completed by the dev-flow worker as a records-only unit (co-author roles executed by the worker, marked in the artifact; no product or test code touched, the full suite never run): both DDR MAJOR conditions DISCHARGED - COND-DDR-1 (the drifted census citations re-repaired by content match at 01-requirements.md:282/:812/:840 (final positions; was :255/:785/:813 before the canon-fold Statements) and design-proposal.md:254/:255/:304, each new line re-read against the symbol it cites; the DDR record's F-2/F-3 rows + section H D6 amended to the as-built lane counts 4/1/4/1/1/1/2/0/1 - a declared amendment per the section G dispositions; the A-110 staged-tree guard re-run green) and COND-DDR-2 (both escaped-regression pre-fix REDs captured on detached scratch checkouts at 2e83cf6^ and cdc4491^, sanitized by the refuse-on-profile-segment Python filter, stored as evidence/p5-cond-ddr2-census-prefix-red-2026-10-26.txt (exactly the 3 named census nodes fail, 69 passed) and evidence/p5-cond-ddr2-a110-prefix-red-2026-10-26.txt (both A-110 arms fail); scratch created and removed outside the repo); B-166 records the content-anchor citation census; lessons recorded as controls with owners (L-1 guard-set derivation from every whole-tree census, L-2 sanitize-at-authoring + staged-tree privacy test, L-3 trunk-review-before-fork, L-4 lane file-ownership disjointness, L-5 crash recovery by git re-read, L-6 reviewer-authored mutants); metrics from the records (P2 25 findings, PDR 13 conditions, P3 ~19, 2 closing-gate escapes, DDR 7; 62+13 mutants all killed; ledger 4023-4+212=4231); open items R3/R4/R5 + the UI batch from the round-2026-10-23/24 verdicts + B-141..B-166; ledger LED-2026-10-25-r2.32/.33; 05-postmortem.md gate record names the pre-commit tree 5520508; station P5 -> P6"
     },
     {
       "station": "P6",
-      "date": "2026-10-25",
-      "decision": "P6 documentation written: 06-docs/executive-summary.md, functionality.md (modules, --audit structure block with a real P4 sample and how to read it), traceability matrix sign-off closed 2026-10-25. Merge not granted at kickoff: no PR opened; operator merges, then /dev-flow-sync. Backlog reconciled for carries (B-156..B-158 added); header refresh and merge marks owed at merge."
-    },
-    {
-      "station": "P6",
-      "date": "2026-10-25",
-      "decision": "synced-to-obsidian",
-      "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-10-25-relmap-r1-batch/ (full sync; PDR/DDR to mapper/design/)"
+      "date": "2026-10-26",
+      "decision": "P6 documents completed: 06-docs/executive-summary.md + 06-docs/functionality.md written (the relation screens with how-to-read and keys, read from the sealed seat and the stored P4 walkthrough), the traceability matrix signed off final (both DDR conditions discharged, awaiting-sync noted); the batch's 78 requirement ids folded into the REQUIREMENTS.md canon (72 HLR/LLR + 6 US Statements added for the fold - the swarm-drafted story blocks carried no Statement line, the fold refused them, 6 Statements written and 78 folded / 0 refused); PLAN Last updated + gate notices (the doc-row additions to increment-007 section 2 declared, the V59 limb); state.json carries this P4/P5/P6 record; phase_status awaiting-sync - the batch awaits the operator's merge decision and /dev-flow-sync; no push by this unit"
     }
   ],
-  "obsidian_synced": true,
-  "created_at": "2026-10-25T09:00:00Z",
+  "obsidian_synced": false,
+  "created_at": "2026-10-25T15:30:00Z",
   "previous_batch": {
-    "batch_id": "2026-10-23-hygiene-batch",
-    "merge_commit": "f53a925",
-    "close_pr": "https://github.com/<owner>/mapper/pull/28",
-    "closed_at": "2026-10-24",
+    "batch_id": "2026-10-25-relmap-r1-batch",
+    "merge_commit": "c74cbca",
+    "close_commit": "867dfd7",
+    "closed_at": "2026-10-25",
     "obsidian_synced": true,
-    "note": "synced 2026-10-24 (full sync, commit 194f885); rolled over 2026-10-25 by 2026-10-25-relmap-r1-batch.",
-    "archive": ".dev-flow/2026-10-23-hygiene-batch/decisions-log.json"
+    "note": "closed and vault-synced 2026-10-25 on the primary checkout; the R1 record on this tree is the squash-merged line (c74cbca + sync 867dfd7), which the close record predates by 35 commits on the main checkout's line -- V57 NOTICEs the divergence by design. Rollover done 2026-10-25 by 2026-10-25-relmap-r2-batch; 19 decisions archived to .dev-flow/2026-10-25-relmap-r1-batch/decisions-log.json.",
+    "archive": ".dev-flow/2026-10-25-relmap-r1-batch/decisions-log.json"
   },
   "batch_history": {
     "2026-08-26-repair-batch": {
@@ -348,8 +388,26 @@
       "close_pr": "https://github.com/<owner>/mapper/pull/27",
       "closed_at": "2026-10-16",
       "obsidian_synced": false,
-      "note": "synced 2026-10-23 (light, README only) — orchestrator ruling R6 correction: the outgoing batch's light vault sync is DONE; the vault README was written on 2026-10-23, after this batch's rollover check. SUPERSEDED case of /dev-flow-sync: the vault folder is the flag; the outgoing batch's sealed state is not rewritten.",
+      "note": "synced 2026-10-23 (light, README only) -- orchestrator ruling R6 correction: the outgoing batch's light vault sync is DONE; the vault README was written on 2026-10-23, after this batch's rollover check. SUPERSEDED case of /dev-flow-sync: the vault folder is the flag; the outgoing batch's sealed state not rewritten.",
       "archive": ".dev-flow/2026-10-15-review-screen-batch/decisions-log.json"
+    },
+    "2026-10-23-hygiene-batch": {
+      "batch_id": "2026-10-23-hygiene-batch",
+      "merge_commit": "f53a925",
+      "close_pr": "https://github.com/<owner>/mapper/pull/28",
+      "closed_at": "2026-10-24",
+      "obsidian_synced": true,
+      "note": "synced 2026-10-24 (full sync, commit 194f885); rolled over 2026-10-25 by 2026-10-25-relmap-r1-batch.",
+      "archive": ".dev-flow/2026-10-23-hygiene-batch/decisions-log.json"
+    },
+    "2026-10-25-relmap-r1-batch": {
+      "batch_id": "2026-10-25-relmap-r1-batch",
+      "merge_commit": "c74cbca",
+      "close_commit": "867dfd7",
+      "closed_at": "2026-10-25",
+      "obsidian_synced": true,
+      "note": "closed and vault-synced 2026-10-25; the R2 batch inherits its frozen API (PDR-2026-10-25-relmap-r1-batch#D3), the DDR section E residual items 10-14 and the post-mortem controls C-1..C-5. V57 NOTICE: the close record predates this tree (squash merge c74cbca + sync 867dfd7).",
+      "archive": ".dev-flow/2026-10-25-relmap-r1-batch/decisions-log.json"
     }
   }
 }

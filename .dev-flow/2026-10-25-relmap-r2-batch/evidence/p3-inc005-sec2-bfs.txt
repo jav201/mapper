@@ -1,0 +1,11 @@
+cmd: COND-SEC-2 c-chain BFS wall-clock at the 100,000-node cap
+date: 2026-10-25T20:13:39-06:00
+cap: 100000 nodes / 99999 edges (MAX_NODES shipped cap)
+build_map (inline, context): 0.756s
+paint direct  (hop-1 + hop-2 counts): 0.185s
+paint STACKED (c-chain BFS, full depth): 0.164s  <-- COND-SEC-2
+stacked frame last line: '… +99974 more'
+rows painted: 34
+counted-overflow declared: yes
+10x-budget headroom: stacked paint 0.164s vs 10s budget
+exit=0

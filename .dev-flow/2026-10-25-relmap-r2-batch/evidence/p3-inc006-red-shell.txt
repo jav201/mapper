@@ -1,0 +1,313 @@
+# p3-inc006-red-shell.txt — Inc-6 RED counterfactual
+# worktree: wt-r2-shell (lane L6) — shell arms vs UNMODIFIED home/app
+# command: pytest tests/test_relmap_shell.py -k "at_145 or at_146 or at_147 or rvh_1_ or rvh_2_ or rvh_3_1 or boundary"
+# pre-edit sha256 home.py: 35ecdc5b5565138fc8d9e66788a8824da4fe9931800fce6f932c3340088c77c9
+# pre-edit sha256 app.py:  465642cc02046c311752a54b12266a09ed92337cb357d3e332bdb2abf9ba587d
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFFF.F.FFFFFFF                                                           [100%]
+================================== FAILURES ===================================
+___________ test_llr_rvh_1_1_at_145_relation_rows_beside_tree_rows ____________
+
+at145_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_1_1_at_145_relati0')
+
+    async def test_llr_rvh_1_1_at_145_relation_rows_beside_tree_rows(at145_workspace):
+        """The recents table lists `*.relmap.yml` beside `*.mmd` in ONE list:
+        with `demo` < `legacy` the relation row sorts FIRST (M-RVH-1: globbing
+        only `*.mmd` reddens this; M-RVH-3: appending relation rows after the
+        tree rows reddens the order)."""
+        app = MapperApp(at145_workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+>           assert table.row_count == 2, (
+                f"the relation row is absent or duplicated: {table.row_count} rows"
+            )
+E           AssertionError: the relation row is absent or duplicated: 1 rows
+E           assert 1 == 2
+E            +  where 1 = DataTable(id='home-recents').row_count
+
+tests\test_relmap_shell.py:717: AssertionError
+____________ test_llr_rvh_1_3_one_list_sorted_by_name_across_kinds ____________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_1_3_one_list_sort0')
+
+    async def test_llr_rvh_1_3_one_list_sorted_by_name_across_kinds(tmp_path):
+        """Tree and relation rows interleave by name — the badge, not list
+        position, distinguishes kinds (M-RVH-3: kind-grouped ordering reddens
+        this)."""
+        _seed_tree_map(tmp_path, "delta")
+        _seed_tree_map(tmp_path, "hotel")
+        _seed_descriptor(tmp_path, name="echo.relmap.yml")
+        _seed_descriptor(tmp_path, name="alfa.relmap.yml")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+            names = _row_names(table)
+>           assert names == ["alfa", "delta", "echo", "hotel"], names
+E           AssertionError: ['delta', 'hotel']
+E           assert ['delta', 'hotel'] == ['alfa', 'del...cho', 'hotel']
+E             
+E             At index 0 diff: 'delta' != 'alfa'
+E             Right contains 2 more items, first extra item: 'echo'
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:742: AssertionError
+______________ test_llr_rvh_1_2_kind_badge_values_and_chip_style ______________
+
+at145_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_1_2_kind_badge_va0')
+
+    def test_llr_rvh_1_2_kind_badge_values_and_chip_style(at145_workspace):
+        """Layer 0 over the enumeration itself: the relation row's kind cell
+        reads exactly `relation·reqharness` in the tree rows' chip style
+        (`INK on STEP`), Darkside casing (M-RVH-2: an ALL-CAPS badge reddens
+        this).  The tree rows keep their `legacy`/`concept` vocabulary."""
+>       from mapper.screens.home import _recent_entries
+E       ImportError: cannot import name '_recent_entries' from 'mapper.screens.home' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-shell\mapper\screens\home.py)
+
+tests\test_relmap_shell.py:753: ImportError
+_________________ test_llr_rvh_1_2_badge_census_painted_chip __________________
+
+at145_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_1_2_badge_census_0')
+
+    async def test_llr_rvh_1_2_badge_census_painted_chip(at145_workspace):
+        """On the painted table the relation kind cell carries the exact badge
+        text and the `INK on STEP` chip style, and the tree cell keeps its own."""
+        app = MapperApp(at145_workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+>           relation_cell = table.get_row(table.rows[0].key)[1]
+E           KeyError: 0
+
+tests\test_relmap_shell.py:770: KeyError
+_________________ test_llr_rvh_2_1_at_146_open_routes_by_kind _________________
+
+at145_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_2_1_at_146_open_r0')
+
+    async def test_llr_rvh_2_1_at_146_open_routes_by_kind(at145_workspace):
+        """`↵` on the relation row lands on `RelMapScreen` (crumb carries
+        `relmap`, keybar shows `matrix`/`gaps`/`sheet`); on the tree row on
+        `MapScreen` exactly as today (M-RVH-4: routing the relation row to
+        `MapScreen` reddens this)."""
+        app = MapperApp(at145_workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            # row 0 is the relation row (`demo` < `legacy`); `j` moves OFF it,
+            # `k` moves back — a non-default selection reaches the row (C-10).
+            await pilot.press("j")
+            await pilot.pause()
+            await pilot.press("k")
+            await pilot.pause()
+            await pilot.press("enter")
+            await pilot.pause()
+            await pilot.pause()
+>           assert isinstance(app.screen, RelMapScreen), app.screen
+E           AssertionError: MapScreen()
+E           assert False
+E            +  where False = isinstance(MapScreen(), RelMapScreen)
+E            +    where MapScreen() = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'focus', 'dark'}).screen
+
+tests\test_relmap_shell.py:815: AssertionError
+___________ test_llr_rvh_2_3_opening_a_relation_map_writes_nothing ____________
+
+at145_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_2_3_opening_a_rel0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001F944090F80>
+
+    async def test_llr_rvh_2_3_opening_a_relation_map_writes_nothing(at145_workspace, monkeypatch):
+        """LLR-RVH.2.3 instrumented save-count arm: opening (and `r`-refreshing)
+        a relation map performs NO store write (M-RVH-6: a persisted derived
+        node reddens this).  The counters WRAP the real `MapStore` save paths
+        and call through (COND-QA-4)."""
+        from mapper.store import MapStore
+    
+        calls: list[str] = []
+        for method_name in ("save", "create"):
+            real = getattr(MapStore, method_name)
+    
+            def counting(store_self, *args, _real=real, _name=method_name, **kwargs):
+                calls.append(_name)
+                return _real(store_self, *args, **kwargs)
+    
+            monkeypatch.setattr(MapStore, method_name, counting)
+        app = MapperApp(at145_workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            calls.clear()  # count only the OPEN, not the app/store setup
+            await pilot.press("enter")  # row 0 is the relation row
+            await pilot.pause()
+            await pilot.pause()
+>           assert isinstance(app.screen, RelMapScreen), app.screen
+E           AssertionError: MapScreen()
+E           assert False
+E            +  where False = isinstance(MapScreen(), RelMapScreen)
+E            +    where MapScreen() = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'focus', 'dark'}).screen
+
+tests\test_relmap_shell.py:885: AssertionError
+______ test_llr_rvh_3_1_at_147_derived_row_opens_via_default_descriptor _______
+
+at147_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_3_1_at_147_derive0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001F94576C770>
+
+    async def test_llr_rvh_3_1_at_147_derived_row_opens_via_default_descriptor(
+        at147_workspace, monkeypatch
+    ):
+        """With ZERO descriptors Home lists the derived row named by the canon
+        stem; opening it derives through `default_descriptor()` VALUES
+        (M-RVH-7: a hard-coded non-default descriptor reddens the args probe).
+        The derivation-args counter WRAPS the real function (COND-QA-4), and
+        the workspace is NOT a git repository (LLR-RVH.3.3)."""
+        calls: list[tuple[Path, object]] = []
+        real = screen_mod.derive_reqharness_map
+    
+        def counting(repo, descriptor):
+            calls.append((repo, descriptor))
+            return real(repo, descriptor)
+    
+        monkeypatch.setattr(screen_mod, "derive_reqharness_map", counting)
+        assert not (at147_workspace / ".git").exists(), "the fixture must not be a repo"
+        app = MapperApp(at147_workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+            # `R` < `a` by code point: the derived row sorts FIRST.
+>           assert _row_names(table) == ["REQUIREMENTS", "alfa"], _row_names(table)
+E           AssertionError: ['alfa']
+E           assert ['alfa'] == ['REQUIREMENTS', 'alfa']
+E             
+E             At index 0 diff: 'alfa' != 'REQUIREMENTS'
+E             Right contains one more item: 'alfa'
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:919: AssertionError
+_________ test_llr_rvh_3_1_derived_row_absent_when_descriptors_exist __________
+
+at145_workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_3_1_derived_row_a0')
+
+    async def test_llr_rvh_3_1_derived_row_absent_when_descriptors_exist(at145_workspace):
+        """The second half of LLR-RVH.3.1: when descriptors exist each descriptor
+        is one row and NO derived row appears — even with no canon at all."""
+        app = MapperApp(at145_workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+>           assert _row_names(table) == ["demo", "legacy"], _row_names(table)
+E           AssertionError: ['legacy']
+E           assert ['legacy'] == ['demo', 'legacy']
+E             
+E             At index 0 diff: 'legacy' != 'demo'
+E             Right contains one more item: 'legacy'
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:951: AssertionError
+__________ test_llr_rvh_3_1_empty_canon_derives_an_honest_empty_map ___________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_3_1_empty_canon_d0')
+
+    async def test_llr_rvh_3_1_empty_canon_derives_an_honest_empty_map(tmp_path):
+        """AT-147 boundary (b): an EMPTY canon opens an honest empty map — no
+        refusal line, no crash, the relation screen alive with zero nodes."""
+        (tmp_path / "REQUIREMENTS.md").write_text("# nothing here\n", encoding="utf-8")
+        _seed_tree_map(tmp_path, "alfa")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+>           assert _row_names(table) == ["REQUIREMENTS", "alfa"], _row_names(table)
+E           AssertionError: ['alfa']
+E           assert ['alfa'] == ['REQUIREMENTS', 'alfa']
+E             
+E             At index 0 diff: 'alfa' != 'REQUIREMENTS'
+E             Right contains one more item: 'alfa'
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:963: AssertionError
+______ test_llr_rvh_5_1_at_147_boundary_missing_canon_refuses_from_home _______
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_5_1_at_147_bounda0')
+
+    async def test_llr_rvh_5_1_at_147_boundary_missing_canon_refuses_from_home(tmp_path):
+        """A descriptor whose canon does not exist: `↵` from Home lands on the
+        relation screen's fixed refusal line (K3 `file not found`), never
+        `str(exc)`, a path or a YAML snippet — and the app stays alive (M-RVH-13
+        reddens the wording census, M-RVH-14 the app-lives half)."""
+        _seed_tree_map(tmp_path, "legacy")
+        _seed_descriptor(tmp_path)  # demo.relmap.yml — and NO canon at all
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            await pilot.press("enter")  # row 0 is the relation row
+            await pilot.pause()
+            await pilot.pause()
+>           assert isinstance(app.screen, RelMapScreen), app.screen
+E           AssertionError: MapScreen()
+E           assert False
+E            +  where False = isinstance(MapScreen(), RelMapScreen)
+E            +    where MapScreen() = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'focus', 'dark'}).screen
+
+tests\test_relmap_shell.py:997: AssertionError
+__________ test_llr_rvh_5_1_at_147_boundary_corrupt_canon_k7_refuses __________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_5_1_at_147_bounda1')
+
+    async def test_llr_rvh_5_1_at_147_boundary_corrupt_canon_k7_refuses(tmp_path):
+        """AT-147 boundary (a), the K7 limb: a canon that is not UTF-8 text
+        refuses with the closed-set cause `is not UTF-8 text`, app alive."""
+        _seed_descriptor(tmp_path)
+        (tmp_path / "REQUIREMENTS.md").write_bytes(b"\xff\xfe\x00broken")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            await pilot.press("enter")
+            await pilot.pause()
+            await pilot.pause()
+>           assert isinstance(app.screen, RelMapScreen), app.screen
+E           AssertionError: HomeScreen()
+E           assert False
+E            +  where False = isinstance(HomeScreen(), RelMapScreen)
+E            +    where HomeScreen() = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'focus', 'dark'}).screen
+
+tests\test_relmap_shell.py:1021: AssertionError
+_ test_llr_rvh_5_2_at_145_boundary_hostile_descriptor_name_renders_literally __
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26372/test_llr_rvh_5_2_at_145_bounda0')
+
+    async def test_llr_rvh_5_2_at_145_boundary_hostile_descriptor_name_renders_literally(tmp_path):
+        """A descriptor file named `x[y].relmap.yml` lists and opens LITERALLY —
+        no markup parse error, no style leak, no forged row; the app stays
+        alive (M-RVH-15 reddens the markup-safety half)."""
+        _seed_tree_map(tmp_path, "legacy")
+        _seed_descriptor(tmp_path, name="x[y].relmap.yml")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            assert app.is_running, "the app died listing the hostile name"
+            table = app.screen.query_one("#home-recents", DataTable)
+>           assert _row_names(table) == ["x[y]", "legacy"], _row_names(table)
+E           AssertionError: ['legacy']
+E           assert ['legacy'] == ['x[y]', 'legacy']
+E             
+E             At index 0 diff: 'legacy' != 'x[y]'
+E             Right contains one more item: 'legacy'
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:1046: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_llr_rvh_1_1_at_145_relation_rows_beside_tree_rows
+FAILED tests/test_relmap_shell.py::test_llr_rvh_1_3_one_list_sorted_by_name_across_kinds
+FAILED tests/test_relmap_shell.py::test_llr_rvh_1_2_kind_badge_values_and_chip_style
+FAILED tests/test_relmap_shell.py::test_llr_rvh_1_2_badge_census_painted_chip
+FAILED tests/test_relmap_shell.py::test_llr_rvh_2_1_at_146_open_routes_by_kind
+FAILED tests/test_relmap_shell.py::test_llr_rvh_2_3_opening_a_relation_map_writes_nothing
+FAILED tests/test_relmap_shell.py::test_llr_rvh_3_1_at_147_derived_row_opens_via_default_descriptor
+FAILED tests/test_relmap_shell.py::test_llr_rvh_3_1_derived_row_absent_when_descriptors_exist
+FAILED tests/test_relmap_shell.py::test_llr_rvh_3_1_empty_canon_derives_an_honest_empty_map
+FAILED tests/test_relmap_shell.py::test_llr_rvh_5_1_at_147_boundary_missing_canon_refuses_from_home
+FAILED tests/test_relmap_shell.py::test_llr_rvh_5_1_at_147_boundary_corrupt_canon_k7_refuses
+FAILED tests/test_relmap_shell.py::test_llr_rvh_5_2_at_145_boundary_hostile_descriptor_name_renders_literally
+12 failed, 2 passed, 25 deselected in 3.43s
+exit code: 1
+wall time: 5s

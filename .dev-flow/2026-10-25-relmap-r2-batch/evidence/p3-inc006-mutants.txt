@@ -1,0 +1,43 @@
+# p3-inc006-mutants.txt — Inc-6 mutation battery M-RVH-1..M-RVH-7
+# worktree: wt-r2-shell (lane L6) — one runner, per-arm verdict, restore sha256-proven
+# pre-battery sha256 home.py: 83ae62357ef38323e89b8e93af02f0e13cbe6fdc17bb332e131e2e28dd502233
+== M-RVH-1 — glob only `*.mmd` -> the relation row is absent
+M-RVH-1 applied — glob only `*.mmd` -> the relation row is absent
+  [M-RVH-1] exit 1  wall 2.4s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVH-1: KILLED — the arms went RED (exit 1)
+M-RVH-1: restore sha256 MATCH 83ae62357ef3…
+== M-RVH-2 — the badge rendered ALL-CAPS
+M-RVH-2 applied — the badge rendered ALL-CAPS
+  [M-RVH-2] exit 1  wall 2.2s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVH-2: KILLED — the arms went RED (exit 1)
+M-RVH-2: restore sha256 MATCH 83ae62357ef3…
+== M-RVH-3 — relation rows appended after all tree rows
+M-RVH-3 applied — relation rows appended after all tree rows
+  [M-RVH-3] exit 1  wall 2.4s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVH-3: KILLED — the arms went RED (exit 1)
+M-RVH-3: restore sha256 MATCH 83ae62357ef3…
+== M-RVH-4 — the relation row routed to MapScreen
+M-RVH-4 applied — the relation row routed to MapScreen
+  [M-RVH-4] exit 1  wall 3.0s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVH-4: KILLED — the arms went RED (exit 1)
+M-RVH-4: restore sha256 MATCH 83ae62357ef3…
+== M-RVH-6 — the open path persists derived nodes (a store write)
+M-RVH-6 applied — the open path persists derived nodes (a store write)
+  [M-RVH-6] exit 1  wall 3.0s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVH-6: KILLED — the arms went RED (exit 1)
+M-RVH-6: restore sha256 MATCH 83ae62357ef3…
+== M-RVH-7 — the derived entry derives with a hard-coded non-default descriptor
+M-RVH-7 applied — the derived entry derives with a hard-coded non-default descriptor
+  [M-RVH-7] exit 1  wall 2.7s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+M-RVH-7: KILLED — the arms went RED (exit 1)
+M-RVH-7: restore sha256 MATCH 83ae62357ef3…
+== M-RVH-5 — a write action added to the relmap seat (in-process)
+   (the seat is trunk-owned — keymap.py is not editable by this lane;
+    the kill verdict is the census predicate firing on the known-bad input)
+  [M-RVH-5] exit 0  M-RVH-5: census predicate flags the planted write actions -> ['save', 'osopen_launch', 'archive_map']
+M-RVH-5: KILLED — the census predicate fired on the planted seat
+== baseline re-run — every shell arm GREEN after the battery
+  [baseline] exit 0  wall 15.4s  The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session" |  |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+BATTERY VERDICT: all mutants KILLED, every restore proven — exit 0
+exit code: 0
+wall time: 39s

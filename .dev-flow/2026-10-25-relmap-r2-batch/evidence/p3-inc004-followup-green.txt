@@ -1,0 +1,11 @@
+p3-inc004-followup-green — review-inc004 F1 fix (_budget floor tightened to the degenerate value)
+command: pytest -q -p no:cacheprovider tests/test_relmap_gaps_view.py tests/test_relmap_scalecheck.py
+fix: max(height if height > 1 else _DEFAULT_BODY, 4) -> max(height if height > 1 else _DEFAULT_BODY, 1)
+  explicit heights 2–3 now paint 2–3; the degenerate 1 still paints the honest default body 24
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..................................                                       [100%]
+34 passed in 10.78s
+exit=0

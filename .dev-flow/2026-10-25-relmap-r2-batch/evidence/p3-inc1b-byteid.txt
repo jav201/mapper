@@ -1,0 +1,48 @@
+# Inc-1b byte-identity probe (LLR-RVT.1.3, AT-151) — full surface, incl. structure_lines.
+# run on the base worktree (detached worktree of the Inc-1a parent) and on the Inc-1b tree.
+# probe exit: 0 · wall: 0s
+# base full-surface SHA-256:  b7ff2e38aeb79a0629bcf36bc09cc7c231fa25110fe32d59b14991575d2d5a07
+# inc1b full-surface SHA-256: b7ff2e38aeb79a0629bcf36bc09cc7c231fa25110fe32d59b14991575d2d5a07
+# verdict: BYTE-IDENTICAL
+# --- base dump ---
+DISPLAY_MAX=120
+cut[empty]=''
+cut[119]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[120]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[121]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…'
+cut[1m]='bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb…'
+cut[accent]='ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé…'
+cut[newline]='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n…'
+refusal[k1]='structure: refused (a.relmap.yml): is a link - descriptor skipped'
+refusal[k5-limit]='structure: refused (a.relmap.yml): exceeds the 123 byte limit - descriptor skipped'
+refusal[long-name]='structure: refused (nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn…): is a link - descriptor skipped'
+refusal[accent-name]='structure: refused (é.relmap.yml): not valid YAML - descriptor skipped'
+refusal[k3]='structure: refused (x.relmap.yml): file not found - descriptor skipped'
+refusal[k5-nolimit]='structure: refused (z.relmap.yml): exceeds the byte limit - descriptor skipped'
+descriptor-refusal:
+structure: refused (d.relmap.yml): is not a regular file - descriptor skipped
+structure_lines:
+structure: informational - does not change the verdict or the exit code
+structure: unavailable (canon: file not found)
+PROBE-SHA256 b7ff2e38aeb79a0629bcf36bc09cc7c231fa25110fe32d59b14991575d2d5a07
+# --- inc1b dump ---
+DISPLAY_MAX=120
+cut[empty]=''
+cut[119]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[120]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[121]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…'
+cut[1m]='bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb…'
+cut[accent]='ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé…'
+cut[newline]='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n…'
+refusal[k1]='structure: refused (a.relmap.yml): is a link - descriptor skipped'
+refusal[k5-limit]='structure: refused (a.relmap.yml): exceeds the 123 byte limit - descriptor skipped'
+refusal[long-name]='structure: refused (nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn…): is a link - descriptor skipped'
+refusal[accent-name]='structure: refused (é.relmap.yml): not valid YAML - descriptor skipped'
+refusal[k3]='structure: refused (x.relmap.yml): file not found - descriptor skipped'
+refusal[k5-nolimit]='structure: refused (z.relmap.yml): exceeds the byte limit - descriptor skipped'
+descriptor-refusal:
+structure: refused (d.relmap.yml): is not a regular file - descriptor skipped
+structure_lines:
+structure: informational - does not change the verdict or the exit code
+structure: unavailable (canon: file not found)
+PROBE-SHA256 b7ff2e38aeb79a0629bcf36bc09cc7c231fa25110fe32d59b14991575d2d5a07

@@ -118,9 +118,27 @@ def superseded_sites(sources: dict[str, str]) -> list[tuple[str, int, str]]:
 
     AST, not grep: a mention inside a docstring or a comment is not a reference,
     and this batch has already paid for a grep that counted one.
+
+    The relmap screen is OUT OF SCOPE for the `.toggle` half: the R2 PDR
+    freeze (D1, COND-ARCH-1) names the renderer state entry `toggle(kind)`
+    — a different owner than the deleted rail toggle, and a frozen name this
+    census cannot override.  The rail itself stays asserted clean in the
+    caller (`hasattr(OutlineRail, "toggle")` and the instance var census).
     """
     found: list[tuple[str, int, str]] = []
     for path, blob in sorted(sources.items()):
+        if (path.startswith("mapper/screens/relmap/")
+                or path in ("tests/test_relmap_shell.py",
+                            "tests/test_relmap_matrix.py",
+                            "tests/test_relmap_gaps_view.py",
+                            "tests/test_relmap_scalecheck.py",
+                            "tests/test_relmap_sheet.py")):
+            # The D1-frozen entry name, driven from the host and pinned by the
+            # host arms — declared, not swept under a bare `toggle` ban.  The
+            # lane arms (increments 003/004/005) press the frozen `toggle`
+            # entry with the same D1 vocabulary; the allowance names each lane
+            # file exactly, the same scoped shape as the host arms.
+            blob = blob.replace(".toggle(", "._toggle_frozen(")
         for node in ast.walk(ast.parse(blob)):
             if isinstance(node, ast.Attribute) and node.attr == "collapsed":
                 found.append((path, node.lineno, "collapsed"))

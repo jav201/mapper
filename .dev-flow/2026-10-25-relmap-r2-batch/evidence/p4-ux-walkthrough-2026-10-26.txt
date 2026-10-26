@@ -1,0 +1,222 @@
+P4 UX WALKTHROUGH — relmap-R2 batch — evidence transcript
+date: 2026-10-26
+repo: worktree wt-r2, branch feat/relmap-r2, HEAD 352063a (clean tree at start)
+driver: one async script (walk.py) under the scratch dir; REAL MapperApp through
+  run_test(size=(w, 34)) at w=118 then w=87; REAL keys via pilot.press; frames
+  read via screen._compositor.render_strips() (the repo's own painted-frame
+  idiom); screenshots via App.export_screenshot() (Textual 8.2.8 — SVG output;
+  no rasterizer on PATH, so the SVGs were converted to PNG with a PIL script
+  for the visual comparison; all screenshots are scratch-only, deleted after).
+fixture workspace (scratch, <tmp>/ws-main): REQUIREMENTS.md canon —
+  HLR-DEMO.1 (parent one), HLR-DEMO.2 (parent two), HLR-DEMO.3 (childless
+  parent -> exactly 1 gap, `hlr without llr`, severity med), LLR-DEMO.1.1,
+  LLR-DEMO.1.2, LLR-DEMO.2.1, LLR-DEMO.2.2; demo.relmap.yml
+  (`kind: relation`, `profile: reqharness`); one tree map legacy.mmd +
+  legacy_nodos.yml (the shell tests' seed idiom).
+unavailable fixture (scratch, <tmp>/ws-badcanon): demo.relmap.yml +
+  REQUIREMENTS.md as non-UTF8 bytes (b"\xff\xfe\x00\x01 ...") -> closed-set
+  read refusal on open.
+
+PER-CRITERION RESULTS (27 automated checks, all PASS unless noted)
+------------------------------------------------------------------------------
+[PASS] env
+    driven : Home session opened
+    observed: screen=HomeScreen size=118x34
+[PASS] 1. Home lists both rows
+    driven : Home #home-recents rows
+    observed: names=['demo', 'legacy']
+[PASS] 1. Home kind cells
+    driven : Home #home-recents kind cells
+    observed: kinds=[' relation·reqharness ', ' legacy ']
+[PASS] 2. Open relation row
+    driven : j k enter on Home relation row
+    observed: screen=RelMapScreen active_view=matrix
+[PASS] 2. Matrix skeleton
+    driven : matrix paints 'no test columns yet'
+    observed: no test columns yet — the AT→test table (B-141) feeds this view                  parent one                           
+[PASS] 2. Matrix skeleton
+    driven : matrix paints 'row → col'
+    observed: row → col                                               matrix: HLR, LLR × —     lens · HLR-DEMO.1                    
+[PASS] 2. Matrix skeleton
+    driven : matrix paints 'what feeds it ←'
+    observed:                                                                                  what feeds it ←                      
+[PASS] 2. Matrix skeleton
+    driven : matrix paints 'a change reaches →'
+    observed:  1 HLR-DEMO.1                                                                    a change reaches →                   
+[PASS] 2. Lens summary + hop counts
+    driven : down x1 to HLR-DEMO.2
+    observed: focus=HLR-DEMO.2 | 1 HLR-DEMO.1                                                                    a change reaches → | 5 LLR-DEMO.1.2                                                                  hop 1: 2 direct · hop 2: 0 chained
+[PASS] 2. enter -> panel lens
+    driven : enter on matrix
+    observed: demo / relmap / matrix · panel lens                                                                                   
+[PASS] 3. Gaps ranked header
+    driven : press 2
+    observed: gaps — what the record does not say                                                   ranked by severity, then reach ↓
+[PASS] 3. Gaps chips
+    driven : ranked view chips
+    observed: high 0   med 1   low 0   total 1 | high 0   med 1   low 0   total 1
+[PASS] 3. Ranked gap row 01
+    driven : ranked rows
+    observed: 01   hlr without llr  HLR-DEMO.3    HLR-DEMO.3 has no LLR under it: childless parent                  000      med
+[PASS] 3. k -> by-kind bands
+    driven : press k
+    observed: demo / relmap / gaps · by kind | hlr without llr  med   ×1
+[PASS] 3. k back byte-identical
+    driven : press k again
+    observed: byte-identical=True | demo / relmap / gaps
+[PASS] 4. Sheet direct density
+    driven : 1, down x2, press 3
+    observed: demo / relmap / sheet | ↑1 refines HLR-DEMO.1 | next ▸ direct feeders only — the chain is one key away, and the cut is declared
+[PASS] 4. c -> stacked chain
+    driven : press c
+    observed: demo / relmap / sheet · stacked chain | next ▸ feeds it and a change reaches come free from the engine (§3.4 C12)
+[PASS] 4. c back -> direct only
+    driven : press c again
+    observed: demo / relmap / sheet · direct only | next ▸ direct feeders only — the chain is one key away, and the cut is declared
+[PASS] 2-4. app alive after q
+    driven : press q
+    observed: screen=HomeScreen running=True
+[PASS] env
+    driven : 87x34 session opened
+    observed: screen=HomeScreen size=87x34
+[PASS] 6. Open relation row @87
+    driven : enter on Home relation row
+    observed: screen=RelMapScreen
+[PASS] 6. Matrix @87 widths
+    driven : down x1
+    observed: max line width=87
+[PASS] 6. Matrix @87 declared cut
+    driven : summary inside the panel
+    observed: 4 LLR-DEMO.1.1                                            change HLR-DEMO.2 reaches …
+[PASS] 6. Gaps ranked @87
+    driven : press 2
+    observed: gaps — what the record does not say                    ranke… | demo / relmap / gaps | keybar present=True
+[PASS] 6. Sheet @87 crumb/note/keybar
+    driven : 1, down x2, press 3
+    observed: demo / relmap / sheet | next ▸ direct feeders only — the chain is one key away, and the cut is declared
+[PASS] 5. Unavailable refusal
+    driven : open relation row, non-UTF8 canon
+    observed: structure: refused (demo): looks binary - descriptor skipped | relmap=None | running=True
+[PASS] 5. App alive after q
+    driven : press q on the refusal screen
+    observed: screen=HomeScreen running=True
+
+PNG COMPARISON (shipped frames, captured as SVG->PNG from the live app at
+(118,34) and (87,34), against the prototype verdict shots under
+prototypes/round-2026-10-23/shots/png/ and .../png87/)
+
+matrix-panel (png + png87): MATCH in layout. Side lens panel (~30 cols, right),
+`lens - <id>` head, `what feeds it <-` / `a change reaches ->` bands, hop
+markers (up/down arrow + hop count + Darkside-cased edge type), summary
+`change <id> reaches N nodes`, `hop 1: n direct . hop 2: m chained`, yellow
+gauge row, grid window `NN-NN / N`, legend `verifies . ! evidence missing .
+. no verifies edge` bottom-left — all present and same shape as the verdict.
+  Deviations: prototype grid is `LLR x TC` with verifies glyphs per cell and a
+  column ruler; the shipped grid is `HLR, LLR x -` and carries the declared
+  `no test columns yet - the AT->test table (B-141) feeds this view` line
+  instead (scope: B-141 not landed). Prototype paints a `next > same matrix -
+  the lens lives in the side panel, the grid stays clean` explainer above the
+  keybar; the shipped matrix paints no explainer line.
+
+gaps-ranked (png + png87): MATCH in layout. Header `gaps - what the record
+does not say` left + `ranked by severity, then reach` right, severity chips,
+`no/gap/node/what/reach/status` field row, ranked rows with reach and status
+columns; at 87 the WHAT column cuts with one ellipsis keeping reach/status
+intact — same truncation behaviour the verdict shows.
+  Deviations: prototype chips and gap kinds are ALL-CAPS (HIGH 3 / MED 4 /
+  HLR WITHOUT LLR ...); shipped is Darkside-cased (`high 0   med 1   low 0
+  total 1`, `hlr without llr`) — the shipped casing is the pinned contract
+  (AT-135), the prototype shot predates it. Prototype crumb carries a
+  `reach count` scene label (`reqharness / relmap / gaps . reach count`);
+  shipped crumb reads `demo / relmap / gaps` (scene label dropped — the
+  deviation is recorded in the AT-135 increment packet). Prototype paints a
+  `next > ranked by severity, then blast radius - the count column sorts
+  inside a severity` explainer; the shipped ranked view paints none.
+
+gaps-by-kind (png + png87): MATCH in layout. One band per gap kind with the
+`xN` count and worst-severity chip, global ranks kept on the member rows,
+hint line above the keybar.
+  Deviations: casing as in gaps-ranked (prototype CAPS bands, shipped
+  Darkside). Prototype prefixes the hint with `next >`; the shipped hint is
+  the same sentence without the prefix (`same catalogue grouped by gap kind -
+  scan for a detector, not a severity`).
+
+sheet-direct (png + png87): MATCH in layout and wording for the bands
+(`feeds it - what a change to them does to this node`, `a change reaches -
+what changing this node forces`, `gaps on this node`), the hop rows, the
+declared cut line and the density note `next > direct feeders only - the
+chain is one key away, and the cut is declared` (verbatim match).
+  Deviations: the prototype header carries a source segment second row
+  (`TC . tests/test_inc9h.py`); the shipped sheet paints NO source segment
+  (LLR-RVS.1.1 — deliberate, pinned). Prototype edge types CAPS vs shipped
+  Darkside-cased. Prototype cut line `+01 MORE UPSTREAM AT HOP 2` vs shipped
+  `+NN more upstream at hop 2` (Darkside casing). Prototype gap kind
+  `! VERIFIES WITHOUT EVIDENCE` vs shipped `! <kind>` lowercase.
+
+sheet-stacked (png + png87): MATCH in layout — stacked rows with per-row
+minimum-hop markers, same bands, crumb word `stacked chain`.
+  Deviations: prototype density note is ALL-CAPS (`FEEDS IT AND A CHANGE
+  REACHES COME FREE FROM THE ENGINE (S3.4 C12)`); shipped is sentence-case
+  (`feeds it and a change reaches come free from the engine (S3.4 C12)`) —
+  shipped wording pinned by AT-141. Source-segment deviation as in
+  sheet-direct.
+
+binds-glyphs (png + png87): NOT REPRODUCIBLE in the shipped app — the
+verdict shows the `AT x TC - graduated binds` matrix with the
+bound/tagged/none glyph cells and the open/closed AT markers; the shipped
+matrix declares `no test columns yet - the AT->test table (B-141) feeds this
+view` and derives no AT/TC nodes at all. The verifies legend (`verifies .
+! evidence missing . . no verifies edge`) survived verbatim; the graduated
+binds legend (bound/tagged backfill/none) has no shipped surface yet. This
+is a declared scope gap (B-141), not drift.
+
+DRIFT LIST (wording / casing / layout; every item observed on the painted
+frames or in the captured screenshots)
+
+D1  Home kind badge clipped on the painted frame (CRITERION 1 partial).
+    The recents table's kind cell VALUE is exactly ` relation·reqharness ` /
+    ` legacy ` (AT-145 pinned at cell level and re-verified here), but the
+    painted column is ~5 cells wide: at (118,34) AND at (170,40) the badge
+    renders as `rel` (relation row) and `leg` (tree row). No repo test pins
+    the badge's painted visibility — the walkthrough is the first surface to
+    catch it. The operator cannot read the kind off Home.
+D2  Casing. Prototype shots are ALL-CAPS for edge types (REFINES/VERIFIES/
+    BINDS), gap kinds, severity chips and the stacked density note; the
+    shipped app is Darkside-cased throughout. The shipped casing is the
+    pinned contract (AT-131/AT-135/AT-141), so this is prototype-side drift,
+    not an app defect.
+D3  Matrix explainer absent. Prototype `next > same matrix - the lens lives
+    in the side panel, the grid stays clean` has no shipped counterpart.
+D4  Gaps explainer + crumb scene label absent (see gaps-ranked above); the
+    crumb scene label drop is the deviation already recorded in the AT-135
+    increment packet.
+D5  By-kind hint lost the `next >` prefix (text otherwise verbatim).
+D6  Sheet source segment. Prototype header second row (`TC . tests/...`);
+    shipped paints none — deliberate per LLR-RVS.1.1 (no source segment).
+D7  Keybar composition. Prototype static bar: `view 1 matrix 2 gaps 3 sheet .
+    lens enter impact on node . app ? all keys . q quit`. Shipped bar is
+    seat-generated: `view 1 matrix 2 gaps 3 sheet r refresh move ...` and
+    truncates with the declared `... +N ? all keys` marker (+7 at 118, +10
+    at 87). The `enter` lens chord and `q quit` are not visible on the bar
+    (they are in the seat; `? all keys` reaches them).
+D8  Unavailable state paints the refusal line TWICE — once in the host
+    notice strip, once as the renderer body (host chrome arm and renderer
+    notice arm are pinned independently, so both fire). Closed-set line
+    itself exact: `structure: refused (demo): looks binary - descriptor
+    skipped`. Visually redundant; flagged for the UX record.
+D9  binds-glyphs verdict view is out of shipped scope (B-141) — recorded as
+    a scope gap, not drift.
+
+NO-DRIFT FINDINGS (checked and identical): matrix legend wording; lens band
+heads; gaps header/axis/field columns; sheet band wording; direct density
+note; window declaration shape `NN-NN / N`; gauge row shape; crumb format
+`name / relmap / view [. toggle word]`; ranked->by-kind->ranked byte-identical
+toggle-back; 87-column declared cuts (summary, declaration, WHAT) all cut
+with a single trailing ellipsis and never bleed into the panel.
+
+Overall verdict: the R2 relmap screens match the prototype verdicts in
+structure and layout; every divergence found is either the pinned Darkside
+casing, a recorded packet deviation (crumb scene label, sheet source
+segment), a declared scope gap (B-141 test columns), or one genuine new
+finding (D1, the Home kind-badge clip, and the minor D3/D4/D5 explainer
+drops + D8 double refusal line).

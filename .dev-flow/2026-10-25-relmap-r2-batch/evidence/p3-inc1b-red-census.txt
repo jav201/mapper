@@ -1,0 +1,72 @@
+# Inc-1b RED — the Inc-1b census arms run BEFORE the adapter re-point:
+# adapter.py:29 still imports cut from mapper.relmap.model (the declared Inc-1a remainder).
+# command: python -m pytest -q -p no:cacheprovider tests/test_relmap_text.py::test_no_old_path_readers_inc_1b tests/test_relmap_text.py::test_audit_and_adapter_import_the_leaf_for_own_use
+# exit code: 1 (2 failed: the adapter old-path reader + the leaf-identity arm) · wall: 2s · redacted: account name -> <user>
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_______________________ test_no_old_path_readers_inc_1b _______________________
+
+    def test_no_old_path_readers_inc_1b():
+>       assert _old_path_readers(OLD_PATHS_1B) == []
+E       AssertionError: assert ['mapper/relm...ap.model.cut'] == []
+E         
+E         Left contains one more item: 'mapper/relmap/adapter.py:29 mapper.relmap.model.cut'
+E         Use -v to get more diff
+
+tests\test_relmap_text.py:170: AssertionError
+_____________ test_audit_and_adapter_import_the_leaf_for_own_use ______________
+
+    def test_audit_and_adapter_import_the_leaf_for_own_use():
+        """One import path, at runtime: the re-pointed consumers hold the leaf's
+        objects, and the old attribute path on `model` is gone."""
+>       import mapper.relmap.adapter as relmap_adapter
+
+tests\test_relmap_text.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    """The `reqharness` canon adapter: `REQUIREMENTS.md` -> `RelMap`, derived read-only (HLR-RMA.1).
+    
+    The canon carries no parent column, so the HLR -> LLR `refines` edge comes from id structure
+    alone (rule D-1): drop the last dot-separated segment of an LLR id, prefix `HLR-`, and link only
+    when that id is an HLR node.  An LLR that does not resolve is LISTED (`Derivation.unlinked`),
+    never attached to a nearest guess.  A row `parse_canon` could not read is LISTED
+    (`Derivation.reported`), never re-parsed.  Both lists qualify the HLRs near them
+    (`Node.unparsed`), so a gap sentence can say the canon was not fully readable there.
+    
+    Only HLR and LLR are sourced: the canon does not hold US, AT or TC rows, so those kinds are
+    absent from `RelMap.sourced` and every gap row that needs one stays silent (MAP-TYPES 6.1).
+    
+    The canon is read once, through `read_repo_text` (lstat, link and non-regular refusal, capped
+    read) and parsed once with `reqharness.derive.parse_canon`; nothing else is opened, written or
+    spawned.  `us_canon` / `at_table` of a descriptor are never opened here (they are surfaced as
+    "configured, not derivable in R1" by the audit's sources line).
+    
+    `Derivation.reported` holds the PRINTED note text, repository-derived and UNCUT: the formatter
+    cuts and escapes it.
+    """
+    from __future__ import annotations
+    
+    import ast
+    import re
+    from dataclasses import dataclass, replace
+    from pathlib import Path
+    
+    from mapper.relmap.descriptor import Descriptor, RepoReadError, read_repo_text
+>   from mapper.relmap.model import Edge, Node, RelMap, build_map, cut
+E   ImportError: cannot import name 'cut' from 'mapper.relmap.model' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\mapper\relmap\model.py)
+
+mapper\relmap\adapter.py:29: ImportError
+============================== warnings summary ===============================
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_text.py::test_no_old_path_readers_inc_1b - Assertion...
+FAILED tests/test_relmap_text.py::test_audit_and_adapter_import_the_leaf_for_own_use
+2 failed, 1 warning in 1.05s

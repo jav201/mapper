@@ -129,6 +129,10 @@ OPENERS = {
     # review screen opens bare — with no repo it paints the named `no repo`
     # state, exactly what this opener's workspace (no git repo) exercises.
     "ReviewScreen": lambda app, cls: cls(),
+    # Relmap batch `2026-10-25-relmap-r2-batch` (trunk Inc-2): the relation
+    # screen opens on the fixture workspace with no canon — the named
+    # `unavailable` refusal state, exactly what this opener exercises.
+    "RelMapScreen": lambda app, cls: cls("demo", app.store.workspace),
 }
 
 
@@ -377,6 +381,14 @@ def test_llr_n06_2_5_the_census_reads_a_message_keyword():
 #: Data-safety Inc-1a adds the draft guard's `discard draft stay unsaved`.
 #: ReqHarness batch `2026-10-11-reqharness-batch` (increment RH6a, HLR-RH.8)
 #: adds the roles screen's seat words.
+#: Relmap batch `2026-10-25-relmap-r2-batch` (trunk Inc-2, LLR-RVH.4) adds
+#: the relation screen's seat words: the painted labels (`matrix`, `gaps`,
+#: `sheet`, `refresh`, `impact on node`, `lens`, `chain`, `by kind` — ten
+#: new words: by, chain, gaps, impact, kind, lens, matrix, on, refresh,
+#: sheet) and the six `r`-prefixed group handles the seat judges as strings
+#: (`rview`, `rnav`, `rlens`, `rchain`, `rkind`, `rleave` — the prefix only
+#: keeps each id claimable by exactly one scope, per `mapper/keymap.py`; the
+#: unprefixed roots view/nav/lens/chain/kind/leave are all words above).
 CHROME_LEXICON = frozenset("""
     add all app archive attachment back bottom branch browse build card child choose
     close command component components connect coverage csv default details diff disabled
@@ -391,6 +403,7 @@ CHROME_LEXICON = frozenset("""
     approve reject
     review object sign confirm cycle filter
     mark reviewed
+    matrix gaps sheet refresh impact on lens chain by kind rview rnav rlens rchain rkind rleave
 """.split())
 
 #: Screen headers allowed to stay non-English, owned by the increment that
@@ -704,6 +717,20 @@ DECLARED_ADDED = frozenset({
     ("review", "4", "filter"), ("review", "b", "sign"),
     ("review", "enter", "confirm"),
     ("review", "q", "home"), ("review", "escape", "home"),
+    # Relmap batch `2026-10-25-relmap-r2-batch` (trunk Inc-2, HLR-RVH.4 /
+    # LLR-RVH.4.1): the additive `relmap` scope's rows — the view switch
+    # (`1`/`2`/`3`), `r` refresh, the four cursor moves, the three
+    # scope-static inert toggles (`enter` lens, `c` chain, `k` by-kind,
+    # COND-UX-1) and the one `leave` action on its two chords (`q`/`esc`,
+    # the quiet-leave alias).  No home door: the screen is reached from the
+    # glob, not a door row.
+    ("relmap", "1", "matrix"), ("relmap", "2", "gaps"),
+    ("relmap", "3", "sheet"), ("relmap", "r", "refresh"),
+    ("relmap", "up", "move_up"), ("relmap", "down", "move_down"),
+    ("relmap", "left", "move_left"), ("relmap", "right", "move_right"),
+    ("relmap", "enter", "lens"), ("relmap", "c", "chain"),
+    ("relmap", "k", "by_kind"),
+    ("relmap", "q", "leave"), ("relmap", "escape", "leave"),
 })
 #: Group headers renamed to English (`A-112` st. 2); no key changes scope.
 DECLARED_REGROUPED = frozenset({("lista", "list"), ("lista", "exit"), ("salir", "leave")})

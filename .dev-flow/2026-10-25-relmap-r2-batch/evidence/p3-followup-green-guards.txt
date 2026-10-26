@@ -1,0 +1,47 @@
+p3-followup-green-guards — the Inc-3/4/5/6 review follow-up unit over the commission's guard set
+command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider
+  tests/test_fold.py tests/test_repair_artifact_claims.py tests/test_no_operator_paths.py tests/test_mod_*.py
+  tests/test_repair_map_truth.py tests/test_a3_census.py tests/test_arch_osopen_callers.py tests/test_relmap_*.py
+  tests/test_keymap.py tests/test_key_dispatch.py tests/test_inc9c.py tests/test_app*.py
+note: the commission's guard set also names tests/test_home*.py — that glob matches NO file in this tree
+  (home arms live in tests/test_relmap_shell.py, already in the set); the unmatched glob was dropped, not substituted
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........xxx............................................................. [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+...................................................................s.... [ 35%]
+.......................s................................................ [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 77%]
+........................................................................ [ 83%]
+........................................................................ [ 89%]
+........................................................................ [ 95%]
+...........................................................              [100%]
+============================== warnings summary ===============================
+<unknown>:296: 1 warning
+tests/test_fold.py: 1 warning
+tests/test_mod_compat.py: 5 warnings
+tests/test_a3_census.py: 4 warnings
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1a
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1206 passed, 2 skipped, 3 xfailed, 13 warnings in 248.08s (0:04:08)
+Task was destroyed but it is pending!
+task: <Task cancelling name='Animator' coro=<Timer._run_timer() running at C:\Users\<user>\anaconda3\Lib\site-packages\textual\timer.py:146> wait_for=<Task cancelling name='Task-30700' coro=<sleep.<locals>.wait() running at C:\Users\<user>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<user>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>>
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-30700' coro=<sleep.<locals>.wait() running at C:\Users\<user>\anaconda3\Lib\site-packages\textual\_win_sleep.py:115> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\Users\<user>\anaconda3\Lib\asyncio\futures.py:391, Task.task_wakeup()]> cb=[Task.task_wakeup()]>
+exit=0

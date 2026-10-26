@@ -1,0 +1,186 @@
+GREEN guard set — Inc-6b commission set
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........xxx............................................................. [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+...........................................................FF........... [ 23%]
+........................................................................ [ 29%]
+..............................................................s......... [ 35%]
+..................s..................................................... [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+..............F......................................................... [ 76%]
+........................................................................ [ 82%]
+........................................................................ [ 88%]
+................................................F....................... [ 94%]
+................................................................         [100%]
+================================== FAILURES ===================================
+____________________ test_at065_parity_matches_golden[118] ____________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26679/test_at065_parity_matches_gold0')
+width = 118
+
+    @pytest.mark.parametrize("width", WIDTHS)
+    async def test_at065_parity_matches_golden(tmp_path, width):
+        """LLR-MOD.4.2: the scripted session paints the committed golden, 0 diffs,
+        and the on-disk golden still hashes to the recorded sha256."""
+        lines = await _capture(width, tmp_path)
+        golden_path = _golden_path(width)
+    
+        if _update_mode():
+            golden_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    
+        golden = golden_path.read_text(encoding="utf-8").splitlines()
+        if not _update_mode():
+            digest = hashlib.sha256(golden_path.read_bytes()).hexdigest()
+            assert digest == GOLDEN_SHA256[width], (
+                f"golden {golden_path.name} was tampered with: {digest}"
+            )
+        differing = sum(1 for a, b in zip(lines, golden) if a != b) + abs(
+            len(lines) - len(golden)
+        )
+>       assert differing == 0, "\n".join(
+            list(difflib.unified_diff(golden, lines, "golden", "painted", lineterm=""))[:60]
+        )
+E       AssertionError: --- golden
+E         +++ painted
+E         @@ -298,9 +298,9 @@
+E          
+E            with record 2 ███████░░░    no record 1 ███░░░░░░░    coverage 66 %
+E           ↩ resume  ds / raiz   last session
+E         - ▐ name  kind      nodes  docs
+E         - ds       legacy   3      0
+E         -
+E         + ▐ name        kind                   nodes  docs
+E         + REQUIREMENTS   relation·reqharness   —      —
+E         + ds             legacy                3      0
+E          
+E          
+E          
+E       assert 3 == 0
+
+tests\test_mod_parity.py:189: AssertionError
+____________________ test_at065_parity_matches_golden[87] _____________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26679/test_at065_parity_matches_gold1')
+width = 87
+
+    @pytest.mark.parametrize("width", WIDTHS)
+    async def test_at065_parity_matches_golden(tmp_path, width):
+        """LLR-MOD.4.2: the scripted session paints the committed golden, 0 diffs,
+        and the on-disk golden still hashes to the recorded sha256."""
+        lines = await _capture(width, tmp_path)
+        golden_path = _golden_path(width)
+    
+        if _update_mode():
+            golden_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    
+        golden = golden_path.read_text(encoding="utf-8").splitlines()
+        if not _update_mode():
+            digest = hashlib.sha256(golden_path.read_bytes()).hexdigest()
+            assert digest == GOLDEN_SHA256[width], (
+                f"golden {golden_path.name} was tampered with: {digest}"
+            )
+        differing = sum(1 for a, b in zip(lines, golden) if a != b) + abs(
+            len(lines) - len(golden)
+        )
+>       assert differing == 0, "\n".join(
+            list(difflib.unified_diff(golden, lines, "golden", "painted", lineterm=""))[:60]
+        )
+E       AssertionError: --- golden
+E         +++ painted
+E         @@ -298,9 +298,9 @@
+E          
+E            with record 2 ███████░░░    no record 1 ███░░░░░░░    coverage 66 %
+E           ↩ resume  ds / raiz   last session
+E         - ▐ name  kind      nodes  docs
+E         - ds       legacy   3      0
+E         -
+E         + ▐ name        kind                   nodes  docs
+E         + REQUIREMENTS   relation·reqharness   —      —
+E         + ds             legacy                3      0
+E          
+E          
+E          
+E       assert 3 == 0
+
+tests\test_mod_parity.py:189: AssertionError
+___ test_llr_rvh_1_1_at_145_boundary_no_descriptor_no_canon_tree_rows_only ____
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26679/test_llr_rvh_1_1_at_145_bounda0')
+
+    async def test_llr_rvh_1_1_at_145_boundary_no_descriptor_no_canon_tree_rows_only(tmp_path):
+        """AT-145 boundary (a): a plain tree-maps workspace (no `*.relmap.yml`,
+        no canon) lists tree rows ONLY — no phantom relation row."""
+        _seed_tree_map(tmp_path, "legacy")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+>           assert _row_names(table) == ["legacy"], _row_names(table)
+E           AssertionError: ['REQUIREMENTS', 'legacy']
+E           assert ['REQUIREMENTS', 'legacy'] == ['legacy']
+E             
+E             At index 0 diff: 'REQUIREMENTS' != 'legacy'
+E             Left contains one more item: 'legacy'
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:812: AssertionError
+__ test_inc9c_ux_f11_enter_on_home_is_a_seat_row_and_opens_the_selected_map ___
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26679/test_inc9c_ux_f11_enter_on_hom0')
+
+    @red("ux")
+    async def test_inc9c_ux_f11_enter_on_home_is_a_seat_row_and_opens_the_selected_map(tmp_path):
+        row = _row("home", "open_selected")
+        assert (row.key, row.glyph) == ("enter", "↵")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await pilot.pause()
+            map_id = _tree(app)
+            app.screen.on_mount()
+            await pilot.pause()
+            table = app.screen.query_one("#home-recents", DataTable)
+            assert table.row_count >= 1
+            app.set_focus(None)
+            await pilot.press("enter")
+            await pilot.pause()
+            await pilot.pause()
+>           assert isinstance(app.screen, MapScreen) and app.screen.map_id == map_id, app.screen
+E           AssertionError: RelMapScreen()
+E           assert (False)
+E            +  where False = isinstance(RelMapScreen(), MapScreen)
+E            +    where RelMapScreen() = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}).screen
+
+tests\test_inc9c.py:779: AssertionError
+============================== warnings summary ===============================
+<unknown>:296: 1 warning
+tests/test_fold.py: 1 warning
+tests/test_mod_compat.py: 5 warnings
+tests/test_a3_census.py: 4 warnings
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1a
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_mod_parity.py::test_at065_parity_matches_golden[118] - Asse...
+FAILED tests/test_mod_parity.py::test_at065_parity_matches_golden[87] - Asser...
+FAILED tests/test_relmap_shell.py::test_llr_rvh_1_1_at_145_boundary_no_descriptor_no_canon_tree_rows_only
+FAILED tests/test_inc9c.py::test_inc9c_ux_f11_enter_on_home_is_a_seat_row_and_opens_the_selected_map
+4 failed, 1207 passed, 2 skipped, 3 xfailed, 13 warnings in 380.50s (0:06:20)
+exit=1 wall=384s
+
+RE-RUN (commission rule: concurrent reviewers mutate home/app/gaps during guard runs — re-run once)
+....                                                                     [100%]
+4 passed in 7.74s
+exit=0 wall=9s

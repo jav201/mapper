@@ -1,0 +1,32 @@
+p3-inc004-followup-red — review-inc004 F1 (_budget floors explicit heights 2–4 up to 4)
+command: pytest -q -p no:cacheprovider tests/test_relmap_gaps_view.py::test_rvg_1_4_explicit_heights_2_to_3_are_respected_not_floored
+tree: gaps.py UNMODIFIED (explicit heights 2–3 paint 4 rows — the reviewer's finding reproduced)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_rvg_1_4_explicit_heights_2_to_3_are_respected_not_floored ________
+
+    def test_rvg_1_4_explicit_heights_2_to_3_are_respected_not_floored():
+        """review-inc004 F1: the viewport floor applies to the DEGENERATE
+        mount-time 1 only — an explicit height of 2 or 3 painted 4 rows under
+        the old `max(..., 4)` (one or two rows more than the channel names);
+        explicit heights are always respected."""
+        view = base.build_view("gaps")
+        m = hlr_map("HLR-A")
+        ranked, _ = rank_gaps(m, detect_gaps(m), None)
+        for h in (2, 3, 4):
+            state = base.ViewState(m, None, None, 0, tuple(ranked), 118, h)
+            rows = view.paint(state)
+>           assert len(rows) == h, f"explicit height {h} painted {len(rows)} rows"
+E           AssertionError: explicit height 2 painted 4 rows
+E           assert 4 == 2
+E            +  where 4 = len([<text 'gaps — what the record does not say                                                   ranked by severity, then...5f5'), Span(36, 100, '#737373'), Span(102, 105, '#f5f5f5'), Span(111, 118, '#f5f5f5'), Span(0, 118, 'on #262626')] ''>])
+
+tests\test_relmap_gaps_view.py:537: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_gaps_view.py::test_rvg_1_4_explicit_heights_2_to_3_are_respected_not_floored
+1 failed in 0.65s
+exit=1

@@ -270,8 +270,13 @@ def _leaky_interpolations(message) -> list[str]:
 LEAK_EXCEPTIONS: dict[tuple[str, int, str], str] = {
     # Moved with `HomeScreen` at 2026-10-09-modular-batch A4 (was the app.py row's site).
     # Line re-pinned at 176 when `2026-10-15-review-screen-batch` RS2 added the
-    # `ReviewScreen` import above it.
-    ("mapper/screens/home.py", 176, "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
+    # `ReviewScreen` import above it; re-pinned at 240 when
+    # `2026-10-25-relmap-r2-batch` Inc-6 added the relation-screen imports and
+    # the recents enumeration above it; re-pinned at 246 when the Inc-6
+    # review follow-up (review-inc006 F2) kind-prefixed the relation/derived
+    # row keys above it (the census's call-site-line convention: the `notify(`
+    # line, not the `str(exc)` expression line).
+    ("mapper/screens/home.py", 246, "str(exc)"): "`load_or_notice`: `store.load`'s path-free "
                                                   "`MapStoreError` text (INC9C-F3) — moved at A4",
     # Moved with `MapScreen` at 2026-10-09-modular-batch B0 (was keyed to the app.py row's site).
     ("mapper/screens/map/screen.py", 214, "str(e)"): "`store.load`'s `MapStoreError`, written path-free at "

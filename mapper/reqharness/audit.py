@@ -80,6 +80,12 @@ VERDICT_NO_REGISTRY = "not ready · no registry yet"
 #: The extra lines `run_cli` prints after the report when a hook is given (LLR-RMU.1.1).  The
 #: verdict is found by its PREFIX `verdict: `: it is no longer the last line of the output.
 HOOK_LINE_LIMIT = 1000
+#: The per-line bound on a hook line AFTER the escape pass (LLR-RVU.1.1, ruling
+#: `LED-2026-10-25-r2.02`): longer than 240 characters -> cut at 239 with one
+#: trailing ellipsis, never splitting an escape spelling.  The bound predicates
+#: over the EMITTED (escaped) form — a cut on the raw line would count escape
+#: sequences as one cell each and mis-measure every hostile payload (C-42).
+HOOK_LINE_CELLS = 240
 STRUCTURE_NO_REPO = "structure: unavailable (no repository)"
 STRUCTURE_NO_REGISTRY = "structure: unavailable (no registry)"
 STRUCTURE_TRUNCATED = f"structure: output truncated at {HOOK_LINE_LIMIT} lines"
@@ -116,6 +122,36 @@ def _visible(value: object) -> str:
         else:
             out.append(ch)
     return "".join(out)
+
+
+def _cut_hook_line(shown: str) -> str:
+    """The per-line bound on an ESCAPED hook line (LLR-RVU.1.1): longer than
+    `HOOK_LINE_CELLS` (240) -> the first 239 cells plus one trailing ellipsis,
+    so the emitted line is never longer than the bound itself.
+
+    The cut never splits an escape spelling `_visible` produced: when the
+    239-cell boundary lands inside a ``\\xNN`` / ``\\uXXXX`` spelling, the kept
+    part backs to the spelling's start — a spelling is emitted whole or not at
+    all, so the emitted tail can never end mid-spelling (AT-152 straddling
+    arm).  The verdict-prefix rewrite is NOT this function's job: the pipeline
+    order is pinned by F-SEC-3 as escape -> cut -> rewrite check -> print.
+    """
+    if len(shown) <= HOOK_LINE_CELLS:
+        return shown
+    kept = shown[: HOOK_LINE_CELLS - 1]
+    slash = kept.rfind("\\")
+    while slash != -1:
+        if shown.startswith("\\x", slash):
+            width = 4
+        elif shown.startswith("\\u", slash):
+            width = 6
+        else:  # a lone backslash this sink never produces
+            width = 1
+        if slash + width <= len(kept):  # the spelling is whole in the cut
+            break
+        kept = kept[:slash]  # straddle: back to the spelling's start
+        slash = kept.rfind("\\")  # adjacent spellings re-check their own tail
+    return kept + "…"
 
 
 @dataclass(frozen=True)
@@ -374,7 +410,8 @@ def _hook_lines(report: Report, extra_lines: Callable[[Path], Iterable[str]]) ->
     and no-registry reports (told apart by `chain_status`, never by verdict text, and the hook is
     NOT called), else at most `HOOK_LINE_LIMIT` lines of one call of the hook (a 1,001st is not
     consumed past, and one truncation line follows), or one `internal error` line when the hook
-    raises.  The caller escapes every line."""
+    raises.  The caller escapes, per-line bounds and ``verdict: ``-rewrites
+    every line, in the F-SEC-3 order (escape -> cut -> rewrite check -> print)."""
     if report.chain_status == identity.NO_REPO:
         return [STRUCTURE_NO_REPO]
     if report.chain_status == NO_REGISTRY:
@@ -428,8 +465,13 @@ def run_cli(
         return 1
     print(render(report))
     if extra_lines is not None:
+        # F-SEC-3 pins the pipeline order verbatim: escape -> per-line cut ->
+        # `verdict: ` rewrite check -> print.  The cut predicates over the
+        # EMITTED (escaped) form and never splits an escape spelling
+        # (LLR-RVU.1.1); the rewrite runs on the CUT line, so a hook line cut
+        # short still cannot re-expose `verdict: ` to line start.
         for line in _hook_lines(report, extra_lines):
-            shown = _visible(line)
+            shown = _cut_hook_line(_visible(line))
             if shown.startswith("verdict: "):  # `verdict: ` belongs to the report alone
                 shown = "structure: " + shown
             print(shown)

@@ -1,0 +1,15 @@
+...................                                                      [100%]
+============================== warnings summary ===============================
+<unknown>:296: 1 warning
+tests/test_fold.py: 1 warning
+tests/test_mod_compat.py: 5 warnings
+tests/test_a3_census.py: 4 warnings
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1a
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1022 passed, 2 skipped, 3 xfailed, 13 warnings in 218.88s (0:03:38)

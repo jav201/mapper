@@ -160,9 +160,20 @@ def test_only_app_and_the_package_import_relmap():
         rel = path.relative_to(PKG).as_posix()
         if rel.startswith("relmap/"):
             continue
+        # R2 ARQ amendment (the `screens/relmap` row of docs/ARCHITECTURE.md
+        # §3): the relation screen package is the sanctioned D3 consumer — it
+        # imports `relmap` the way `app` does, and the census below is about
+        # everyone ELSE staying out of the headless core.
+        if rel.startswith("screens/relmap/"):
+            continue
+        # R2 amendment (relmap-r2 Inc-6, lane L6 — LLR-RVH.1.1/.3.1 draft-time
+        # verification names `descriptor.discover_descriptors` /
+        # `default_descriptor` for Home's recents build): `screens/home.py`
+        # discovers and routes relation descriptors through the same D3 door —
+        # the read-only discovery API only, never the derivation engine.
         if importers_of_relmap(path.read_text(encoding="utf-8"), _module_name(path)):
             seen[rel] = True
-    assert set(seen) <= {"app.py"}, seen
+    assert set(seen) <= {"app.py", "screens/home.py"}, seen
 
 
 @pytest.mark.parametrize(

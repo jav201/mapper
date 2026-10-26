@@ -26,8 +26,9 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from mapper.relmap.descriptor import Descriptor, RepoReadError, read_repo_text
-from mapper.relmap.model import Edge, Node, RelMap, build_map, cut
+from mapper.relmap.model import Edge, Node, RelMap, build_map
 from mapper.relmap.profile import REQHARNESS
+from mapper.relmap.text import cut
 from mapper.reqharness.derive import LIMIT_ROLES_YML_BYTES, parse_canon
 
 SOURCED = ("HLR", "LLR")

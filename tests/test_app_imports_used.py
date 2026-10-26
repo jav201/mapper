@@ -59,7 +59,13 @@ ALLOWED_UNUSED: dict[str, dict[str, str]] = {
             # declared in app.py's `__all__` re-export list (LLR-MOD.3.1) — the
             # same declared-re-export convention.
             "ReviewScreen",
+            # `2026-10-25-relmap-r2-batch` Inc-6 (LLR-RVH.2.1): `RelMapScreen` joins the
+            # re-exports — the `MapScreen` pattern, declared in `__all__` (LLR-MOD.3.1).
+            "RelMapScreen",
         )
+    },
+    "mapper/screens/relmap/__init__.py": {
+        "RelMapScreen": "deliberate re-export declared in __all__ (trunk Inc-2 — the MapScreen pattern)",
     },
     "mapper/screens/__init__.py": {
         name: "deliberate re-export declared in __all__"

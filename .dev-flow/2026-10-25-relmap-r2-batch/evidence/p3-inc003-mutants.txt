@@ -1,0 +1,68 @@
+transcript: p3-inc003-mutants.txt
+command: python mutants-inc003.py --control-bad; python mutants-inc003.py
+worktree: wt-r2-matrix (branch lane/r2-matrix)
+phase: mutation battery -- every named M-RVM mutant (M-RVM-4 is undefined in the batch artifacts; declared in the packet), one runner, sha256 restore per arm
+runner exit: 0
+wall time: 16s
+---
+CONTROL-BAD: BAD (anchor count 0, expected 1) -- an anchor that exists nowhere
+CONTROL-BAD proof: runner rejected the bogus arm
+control-bad exit: 0
+===
+M-RVM-1a: KILLED (exit 1, 1.4s) -- drop row windowing (paint the whole row set)
+    selector: tests/test_relmap_matrix.py::test_window_declarations_keep_the_selection_visible
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-1b: KILLED (exit 1, 1.4s) -- drop the `NN out of view` column declaration
+    selector: tests/test_relmap_matrix.py::test_columns_out_of_view_and_the_two_digit_ruler
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-2: KILLED (exit 1, 1.4s) -- binds cells render the rejected letters variant
+    selector: tests/test_relmap_matrix.py::test_cell_census_on_the_synthetic_binds_map
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-3: KILLED (exit 1, 1.4s) -- the tagged-binds evidence tone dropped (WARN -> MUT)
+    selector: tests/test_relmap_matrix.py::test_cell_census_on_the_synthetic_binds_map
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-5: KILLED (exit 1, 1.4s) -- hop-2 drawn from the raw 2-neighbourhood (orphans)
+    selector: tests/test_relmap_matrix.py::test_l0_rings_two_hop_same_direction_only
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-6: KILLED (exit 1, 1.4s) -- neighbourhood called per painted row
+    selector: tests/test_relmap_matrix.py::test_neighbourhood_is_called_for_the_focused_node_only
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-7: KILLED (exit 1, 1.5s) -- a None reach coerced to a fabricated 0
+    selector: tests/test_relmap_matrix.py::test_reach_not_computed_renders_honestly
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-8: KILLED (exit 1, 1.4s) -- a phantom `\u00b7` column per row regardless of kinds
+    selector: tests/test_relmap_matrix.py::test_no_test_columns_declaration_and_skeleton_honesty
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-9: KILLED (exit 1, 1.5s) -- an unknown selection id raises
+    selector: tests/test_relmap_matrix.py::test_unknown_focus_paints_the_empty_state_without_raising
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-10: KILLED (exit 1, 1.4s) -- the label pre-cut dropped, clipping leans on `put`
+    selector: tests/test_relmap_matrix.py::test_geometry_audit_sweep_is_clean_at_every_size
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+M-RVM-11: KILLED (exit 1, 1.7s) -- a canon-derived label in a markup-parsing sink
+    selector: tests/test_relmap_matrix.py::test_at134_hostile_payload_on_the_live_surface
+    last line:   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+    restore sha256 MATCH
+---
+battery verdict: ALL KILLED
+battery exit: 0

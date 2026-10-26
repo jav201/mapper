@@ -1,0 +1,28 @@
+mapper.__file__: C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\mapper\__init__.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  8%]
+........xxx............................................................. [ 17%]
+........................................................................ [ 25%]
+........................................................................ [ 34%]
+.................................................................s...... [ 42%]
+.....................s.................................................. [ 51%]
+........................................................................ [ 59%]
+........................................................................ [ 68%]
+........................................................................ [ 77%]
+........................................................................ [ 85%]
+........................................................................ [ 94%]
+.................................................                        [100%]
+============================== warnings summary ===============================
+tests/test_fold.py::test_tc_032_no_reference_to_the_deleted_fold_state_survives
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1a
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+836 passed, 2 skipped, 3 xfailed, 3 warnings in 144.53s (0:02:24)

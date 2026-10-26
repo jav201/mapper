@@ -1,0 +1,46 @@
+# p3-inc004-f5-probe — increment 004 lane-entry F-5 re-check (AT-driver injection in this worktree)
+# command: python probe_f5_inc004.py   (MapperApp(<tmp>) + run_test() -> Home -> pushed RelMapScreen derives the fixture)
+home: HomeScreen
+screen: RelMapScreen
+relmap nodes: ['HLR-DEMO.1', 'LLR-DEMO.1.1', 'LLR-DEMO.1.2']
+gaps: []
+canvas size: Size(width=118, height=1)
+app size: Size(width=118, height=34)
+--- painted ---
+ browse maps    connect repo    build map    factory                                                          ● mapper
+demo / relmap / matrix                                                                                                
+                                                                                                                      
+matrix · HLR-DEMO.1                                                                                                   
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys   
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+--- end ---
+exit=0
+# wall=1s

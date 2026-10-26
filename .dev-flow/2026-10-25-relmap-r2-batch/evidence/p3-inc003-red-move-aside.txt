@@ -1,0 +1,591 @@
+transcript: p3-inc003-red-move-aside.txt
+command: mv mapper/screens/relmap/matrix.py aside; pytest tests/test_relmap_matrix.py; mv back
+worktree: wt-r2-matrix (branch lane/r2-matrix)
+phase: RED counterfactual (C-20) -- the one SOURCE file moved aside, final test file
+sha256 before move-aside: 98f09e7329a341a8447d6a6add770c6331881b8d4394380379d1dca321373772
+sha256 after restore:     98f09e7329a341a8447d6a6add770c6331881b8d4394380379d1dca321373772
+restore match: YES
+exit code: 1
+wall time: 6s
+---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+EEEEEEEEEEEEEEEEEEEEEE.FFFFFFFFF                                         [100%]
+=================================== ERRORS ====================================
+________ ERROR at setup of test_l0_window_centres_where_the_ends_allow ________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+__________ ERROR at setup of test_l0_winning_edge_alert_before_plain __________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_________________ ERROR at setup of test_l0_cell_glyph_table __________________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_________ ERROR at setup of test_l0_rings_two_hop_same_direction_only _________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_________________ ERROR at setup of test_l0_toggle_vocabulary _________________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+____________ ERROR at setup of test_l0_row_count_is_the_node_axis _____________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_________ ERROR at setup of test_notice_paints_only_the_refusal_line __________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+__________ ERROR at setup of test_empty_map_paints_no_node_on_record __________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_ ERROR at setup of test_unknown_focus_paints_the_empty_state_without_raising _
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+__ ERROR at setup of test_relates_to_nothing_when_the_selection_is_isolated ___
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+____ ERROR at setup of test_window_declarations_keep_the_selection_visible ____
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_____ ERROR at setup of test_columns_out_of_view_and_the_two_digit_ruler ______
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+___ ERROR at setup of test_no_test_columns_declaration_and_skeleton_honesty ___
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_____ ERROR at setup of test_geometry_audit_sweep_is_clean_at_every_size ______
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_____ ERROR at setup of test_hop2_rows_fold_below_the_sixty_cell_viewport _____
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+________ ERROR at setup of test_legend_line_names_the_evidence_glyphs _________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+__ ERROR at setup of test_hostile_title_renders_on_one_row_through_the_sink ___
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+________ ERROR at setup of test_cell_census_on_the_synthetic_binds_map ________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_______ ERROR at setup of test_lens_rows_carry_the_edge_evidence_glyphs _______
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_________ ERROR at setup of test_summary_and_gauge_against_the_oracle _________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+_________ ERROR at setup of test_reach_not_computed_renders_honestly __________
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+__ ERROR at setup of test_neighbourhood_is_called_for_the_focused_node_only ___
+
+    @pytest.fixture
+    def matrix_mod():
+        """The renderer module under test — imported lazily so the RED phase
+        fails at assertion/fixture level (PendingView answers `build_view`)
+        rather than killing the whole collection."""
+>       from mapper.screens.relmap import matrix
+E       ImportError: cannot import name 'matrix' from 'mapper.screens.relmap' (C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\mapper\screens\relmap\__init__.py)
+
+tests\test_relmap_matrix.py:63: ImportError
+================================== FAILURES ===================================
+_______________ test_at130_matrix_opens_on_the_honest_skeleton ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at130_matrix_opens_on_the0')
+
+    async def test_at130_matrix_opens_on_the_honest_skeleton(tmp_path):
+        """AT-130 (118x34): the live skeleton derives through the real app;
+        `2`/`1` leave and re-enter the matrix; the selection moves down to a
+        real LLR (non-default); the declaration, the lens heads, the `↑1
+        refines` oracle row and the `NN–NN / 303` window are all painted."""
+        (tmp_path / "REQUIREMENTS.md").write_text(
+            LIVE_CANON.read_text(encoding="utf-8"), encoding="utf-8")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path, "live")
+            await pilot.press("2")
+            await pilot.press("1")
+            target = next(
+                i for i, n in enumerate(screen.relmap.nodes)
+                if n.kind == "LLR" and screen.relmap.up(n.id))
+            for _ in range(target):
+                await pilot.press("down")
+            await pilot.pause()
+            text = "\n".join(_frame_lines(screen))
+>           assert screen.focus == screen.relmap.nodes[target].id
+E           AssertionError: assert 'HLR-CNV.1' == 'LLR-CNV.1.1'
+E             
+E             - LLR-CNV.1.1
+E             ? ^        --
+E             + HLR-CNV.1
+E             ? ^
+
+tests\test_relmap_matrix.py:865: AssertionError
+________________________ test_at130_87_column_boundary ________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at130_87_column_boundary0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018CF297B110>
+
+    async def test_at130_87_column_boundary(tmp_path, monkeypatch):
+        """AT-130's 87x34 arm: the declaration and the lens rows stay inside
+        the panel — zero unexplained audit events at the boundary size."""
+        (tmp_path / "REQUIREMENTS.md").write_text(demo_canon(), encoding="utf-8")
+        sinks = _audit_wrapper(monkeypatch)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(87, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            for _ in range(3):
+                await pilot.press("down")
+            await pilot.pause()
+            lines = _frame_lines(screen)
+            text = "\n".join(lines)
+>           assert "no test columns yet" in text
+E           AssertionError: assert 'no test columns yet' in ' browse maps    connect repo    build map    factory                           ● mapper\ndemo / relmap / matrix      ...                             \n                                                                                       '
+
+tests\test_relmap_matrix.py:892: AssertionError
+______________________ test_at130_zero_node_map_boundary ______________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at130_zero_node_map_bound0')
+
+    async def test_at130_zero_node_map_boundary(tmp_path):
+        """AT-130's boundary arm through the real app: a canon with no
+        requirement rows derives an empty map and the matrix declares it."""
+        (tmp_path / "REQUIREMENTS.md").write_text(
+            "a canon with no table at all\n", encoding="utf-8")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            await pilot.pause()
+            assert screen.relmap is not None and not screen.relmap.nodes
+            text = "\n".join(_frame_lines(screen))
+>           assert "no node on record" in text
+E           AssertionError: assert 'no node on record' in ' browse maps    connect repo    build map    factory                                                          ● mappe...                                                                                                                      '
+
+tests\test_relmap_matrix.py:920: AssertionError
+_______________ test_at131_lens_summary_hop_counts_and_dimming ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at131_lens_summary_hop_co0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018CF3DD4440>
+
+    async def test_at131_lens_summary_hop_counts_and_dimming(tmp_path,
+                                                            monkeypatch):
+        """AT-131 (118x34): an HLR selected at a non-default position; the
+        summary, the hop counts, the gauge row; `enter` focuses the lens —
+        the crumb shows `panel lens` — and the painted frame dims exactly the
+        grid labels outside the selection's 2-neighbourhood."""
+        (tmp_path / "REQUIREMENTS.md").write_text(demo_canon(), encoding="utf-8")
+        sinks = _audit_wrapper(monkeypatch)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            await pilot.press("down")  # HLR-DEMO.2, non-default
+            await pilot.pause()
+            m = screen.relmap
+            focus = screen.focus
+>           assert focus == "HLR-DEMO.2"
+E           AssertionError: assert 'HLR-DEMO.1' == 'HLR-DEMO.2'
+E             
+E             - HLR-DEMO.2
+E             ?          ^
+E             + HLR-DEMO.1
+E             ?          ^
+
+tests\test_relmap_matrix.py:938: AssertionError
+________________________ test_at131_87_column_boundary ________________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at131_87_column_boundary0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018CF3FA9280>
+
+    async def test_at131_87_column_boundary(tmp_path, monkeypatch):
+        """AT-131's 87x34 boundary arm: the summary line is cut INSIDE the
+        panel with zero unexplained audit events."""
+        (tmp_path / "REQUIREMENTS.md").write_text(demo_canon(), encoding="utf-8")
+        sinks = _audit_wrapper(monkeypatch)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(87, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            await pilot.press("down")
+            await pilot.pause()
+            lines = _frame_lines(screen)
+>           summary = next(ln for ln in lines
+                           if " reaches" in ln[57:] and "reaches →" not in ln)
+E           StopIteration
+
+tests\test_relmap_matrix.py:966: StopIteration
+
+The above exception was the direct cause of the following exception:
+
+self = <Coroutine test_at131_87_column_boundary>
+
+    def runtest(self) -> None:
+        self.obj = wrap_in_sync(
+            # https://github.com/pytest-dev/pytest-asyncio/issues/596
+            self.obj,  # type: ignore[has-type]
+        )
+>       super().runtest()
+
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:533: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:1026: in inner
+    _loop.run_until_complete(task)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=False debug=False>
+future = <Task finished name='Task-479' coro=<test_at131_87_column_boundary() done, defined at C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-matrix\tests\test_relmap_matrix.py:955> exception=RuntimeError('coroutine raised StopIteration')>
+
+    def run_until_complete(self, future):
+        """Run until the Future is done.
+    
+        If the argument is a coroutine, it is wrapped in a Task.
+    
+        WARNING: It would be disastrous to call run_until_complete()
+        with the same coroutine twice -- it would wrap it in two
+        different Tasks and that can't be good.
+    
+        Return the Future's result, or raise its exception.
+        """
+        self._check_closed()
+        self._check_running()
+    
+        new_task = not futures.isfuture(future)
+        future = tasks.ensure_future(future, loop=self)
+        if new_task:
+            # An exception is raised if the future didn't complete, so there
+            # is no need to log the "destroy pending task" message
+            future._log_destroy_pending = False
+    
+        future.add_done_callback(_run_until_complete_cb)
+        try:
+            self.run_forever()
+        except:
+            if new_task and future.done() and not future.cancelled():
+                # The coroutine raised a BaseException. Consume the exception
+                # to not log a warning, the caller doesn't have access to the
+                # local task.
+                future.exception()
+            raise
+        finally:
+            future.remove_done_callback(_run_until_complete_cb)
+        if not future.done():
+            raise RuntimeError('Event loop stopped before Future completed.')
+    
+>       return future.result()
+E       RuntimeError: coroutine raised StopIteration
+
+C:\Users\<user>\anaconda3\Lib\asyncio\base_events.py:687: RuntimeError
+________________ test_at132_budget_spent_renders_not_computed _________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at132_budget_spent_render0')
+
+    async def test_at132_budget_spent_renders_not_computed(tmp_path):
+        """AT-132: the shared visit budget exhausted in-test; the lens count
+        renders `not computed` with no fabricated digits; the dimming census
+        is unchanged under the spent budget."""
+        (tmp_path / "REQUIREMENTS.md").write_text(demo_canon(), encoding="utf-8")
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            screen.relmap._visits = VISIT_BUDGET
+            screen.relmap._reach_memo.clear()
+            await pilot.press("down")
+            await pilot.pause()
+            text = "\n".join(_frame_lines(screen))
+>           assert "not computed" in text
+E           AssertionError: assert 'not computed' in ' browse maps    connect repo    build map    factory                                                          ● mappe...                                                                                                                      '
+
+tests\test_relmap_matrix.py:988: AssertionError
+_______________ test_at133_binds_cell_census_through_real_keys ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at133_binds_cell_census_t0')
+
+    async def test_at133_binds_cell_census_through_real_keys(tmp_path):
+        """AT-133: the synthetic binds map injected in-process (the canon
+        cannot source AT/TC nodes); REAL keys move the selection across the
+        bound and unbound AT rows (non-default); the cell census, the legend,
+        the badge tones and the verifies lens glyphs are asserted on the
+        painted surface."""
+        (tmp_path / "REQUIREMENTS.md").write_text(demo_canon(), encoding="utf-8")
+        app = MapperApp(tmp_path)
+        smap = binds_map()
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            screen.relmap = smap
+            screen.focus = smap.nodes[0].id
+            screen._cursors = {n: 0 for n in base.VIEW_NAMES}  # noqa: SLF001
+            await pilot.pause()
+            # move onto the first LLR (verifies lens rows) then to an AT row
+            await pilot.press("down")
+            await pilot.pause()
+>           assert screen.focus == "LLR-T.1.1"
+E           AssertionError: assert 'HLR-T.1' == 'LLR-T.1.1'
+E             
+E             - LLR-T.1.1
+E             ? ^      --
+E             + HLR-T.1
+E             ? ^
+
+tests\test_relmap_matrix.py:1013: AssertionError
+_______________ test_at134_hostile_payload_on_the_live_surface ________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at134_hostile_payload_on_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018CF27B7DD0>
+
+    async def test_at134_hostile_payload_on_the_live_surface(tmp_path,
+                                                            monkeypatch):
+        """AT-134: the hostile canon through the real app; the hostile node
+        selected after real key moves; the payload renders literally — the
+        plained substring is present, zero raw ESC bytes, no forged style,
+        zero unexplained audit events."""
+        hostile = canon(
+            row("HLR-[bold]HOST[/bold].1", statement=(
+                "hostile [bold]t[/bold] \x1b\u202e\u0007xyz")),
+            row("LLR-HOST.1.1", statement="child"),
+        )
+        (tmp_path / "REQUIREMENTS.md").write_text(hostile, encoding="utf-8")
+        sinks = _audit_wrapper(monkeypatch)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            await pilot.press("down")
+            await pilot.press("up")  # back on the hostile node, keys moved
+            await pilot.pause()
+            assert screen.focus == "HLR-[bold]HOST[/bold].1"
+            text = "\n".join(_frame_lines(screen))
+            # the coerced payload rides on ONE row, controls as U+FFFD
+>           assert "hostile [bold]t[/bold] ���xyz" in text
+E           AssertionError: assert 'hostile [bold]t[/bold] ���xyz' in ' browse maps    connect repo    build map    factory                                                          ● mappe...                                                                                                                      '
+
+tests\test_relmap_matrix.py:1072: AssertionError
+________________ test_at134_lf_tab_payload_renders_on_one_row _________________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26556/test_at134_lf_tab_payload_rend0')
+
+    async def test_at134_lf_tab_payload_renders_on_one_row(tmp_path):
+        """AT-134's LF/TAB arm (COND-SEC-1, P12): a title carrying an
+        embedded LF + TAB coerces to single spaces and renders on ONE row —
+        the hostile text cannot forge a second row."""
+        (tmp_path / "REQUIREMENTS.md").write_text(demo_canon(), encoding="utf-8")
+        app = MapperApp(tmp_path)
+        smap = lf_tab_map()
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_relmap(app, pilot, tmp_path)
+            screen.relmap = smap
+            screen.focus = smap.nodes[0].id
+            screen._cursors = {n: 0 for n in base.VIEW_NAMES}  # noqa: SLF001
+            await pilot.pause()
+            await pilot.press("down")
+            await pilot.press("up")
+            await pilot.pause()
+            assert screen.focus == "HLR-LF.1"
+            text = "\n".join(_frame_lines(screen))
+            # the coerced payload rides on exactly ONE row of the screen
+            carriers = [ln for ln in text.splitlines()
+                        if "left right next" in ln]
+>           assert len(carriers) == 1, (
+                f"the payload forged extra rows: {carriers!r}")
+E           AssertionError: the payload forged extra rows: []
+E           assert 0 == 1
+E            +  where 0 = len([])
+
+tests\test_relmap_matrix.py:1111: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_matrix.py::test_at130_matrix_opens_on_the_honest_skeleton
+FAILED tests/test_relmap_matrix.py::test_at130_87_column_boundary - Assertion...
+FAILED tests/test_relmap_matrix.py::test_at130_zero_node_map_boundary - Asser...
+FAILED tests/test_relmap_matrix.py::test_at131_lens_summary_hop_counts_and_dimming
+FAILED tests/test_relmap_matrix.py::test_at131_87_column_boundary - RuntimeEr...
+FAILED tests/test_relmap_matrix.py::test_at132_budget_spent_renders_not_computed
+FAILED tests/test_relmap_matrix.py::test_at133_binds_cell_census_through_real_keys
+FAILED tests/test_relmap_matrix.py::test_at134_hostile_payload_on_the_live_surface
+FAILED tests/test_relmap_matrix.py::test_at134_lf_tab_payload_renders_on_one_row
+ERROR tests/test_relmap_matrix.py::test_l0_window_centres_where_the_ends_allow
+ERROR tests/test_relmap_matrix.py::test_l0_winning_edge_alert_before_plain - ...
+ERROR tests/test_relmap_matrix.py::test_l0_cell_glyph_table - ImportError: ca...
+ERROR tests/test_relmap_matrix.py::test_l0_rings_two_hop_same_direction_only
+ERROR tests/test_relmap_matrix.py::test_l0_toggle_vocabulary - ImportError: c...
+ERROR tests/test_relmap_matrix.py::test_l0_row_count_is_the_node_axis - Impor...
+ERROR tests/test_relmap_matrix.py::test_notice_paints_only_the_refusal_line
+ERROR tests/test_relmap_matrix.py::test_empty_map_paints_no_node_on_record - ...
+ERROR tests/test_relmap_matrix.py::test_unknown_focus_paints_the_empty_state_without_raising
+ERROR tests/test_relmap_matrix.py::test_relates_to_nothing_when_the_selection_is_isolated
+ERROR tests/test_relmap_matrix.py::test_window_declarations_keep_the_selection_visible
+ERROR tests/test_relmap_matrix.py::test_columns_out_of_view_and_the_two_digit_ruler
+ERROR tests/test_relmap_matrix.py::test_no_test_columns_declaration_and_skeleton_honesty
+ERROR tests/test_relmap_matrix.py::test_geometry_audit_sweep_is_clean_at_every_size
+ERROR tests/test_relmap_matrix.py::test_hop2_rows_fold_below_the_sixty_cell_viewport
+ERROR tests/test_relmap_matrix.py::test_legend_line_names_the_evidence_glyphs
+ERROR tests/test_relmap_matrix.py::test_hostile_title_renders_on_one_row_through_the_sink
+ERROR tests/test_relmap_matrix.py::test_cell_census_on_the_synthetic_binds_map
+ERROR tests/test_relmap_matrix.py::test_lens_rows_carry_the_edge_evidence_glyphs
+ERROR tests/test_relmap_matrix.py::test_summary_and_gauge_against_the_oracle
+ERROR tests/test_relmap_matrix.py::test_reach_not_computed_renders_honestly
+ERROR tests/test_relmap_matrix.py::test_neighbourhood_is_called_for_the_focused_node_only
+9 failed, 1 passed, 22 errors in 4.85s

@@ -1,0 +1,32 @@
+cmd: python C:/Users/<user>/AppData/Local/Temp/ds-units/scratch-sheet/run_mutants.py --bad-control
+date: 2026-10-25T20:10:33-06:00
+baseline sha256: ebadfcf941c7fd787e3c55501d550639681c2cfadb90b8eae92d0031539384c2
+mode: BAD-CONTROL (first arm application no-opped)
+M-RVS-1: BAD-CONTROL — mutation intentionally NOT applied
+M-RVS-1: rc=0 SURVIVED (4.8s) — 29 passed in 3.39s
+M-RVS-1: restore sha256 MATCH
+M-RVS-2: rc=1 KILLED (4.6s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_1_2_darkside_casing_on_canon_labels; FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_1_and_2_2_section_oracles_asymmetric; FAILED tests/test_relmap_sh
+M-RVS-2: restore sha256 MATCH
+M-RVS-3: rc=1 KILLED (4.8s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_1_2_darkside_casing_on_canon_labels; FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_1_and_2_2_section_oracles_asymmetric; FAILED tests/test_relmap_sh
+M-RVS-3: restore sha256 MATCH
+M-RVS-4: rc=1 KILLED (4.6s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_1_and_2_2_section_oracles_asymmetric; FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_3_evidence_glyph_table - As...; FAILED tests/test_relmap_sheet
+M-RVS-4: restore sha256 MATCH
+M-RVS-5: rc=1 KILLED (4.4s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_1_2_darkside_casing_on_canon_labels; FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_1_and_2_2_section_oracles_asymmetric; FAILED tests/test_relmap_sh
+M-RVS-5: restore sha256 MATCH
+M-RVS-6: rc=1 KILLED (4.5s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_3_evidence_glyph_table - As...; FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_4_honest_empty_sections - A...; FAILED tests/test_relmap_sheet.py::t
+M-RVS-6: restore sha256 MATCH
+M-RVS-7: rc=1 KILLED (4.6s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_3_evidence_glyph_table - As...; FAILED tests/test_relmap_sheet.py::test_llr_rvs_3_1_declared_hop2_cuts_direct_only; FAILED tests/test_relmap_sheet.py:
+M-RVS-7: restore sha256 MATCH
+M-RVS-8: rc=1 KILLED (4.5s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_1_and_2_2_section_oracles_asymmetric; FAILED tests/test_relmap_sheet.py::test_llr_rvs_2_3_evidence_glyph_table - As...; FAILED tests/test_relmap_sheet
+M-RVS-8: restore sha256 MATCH
+M-RVS-9: rc=1 KILLED (4.5s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_3_2_stacked_lists_every_node_by_minimum_hop; FAILED tests/test_relmap_sheet.py::test_llr_rvs_3_3_c_toggle_flips_rows_note_and_word_together
+M-RVS-9: restore sha256 MATCH
+M-RVS-10: rc=1 KILLED (4.6s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_4_1_only_the_focused_nodes_gaps_as_given; FAILED tests/test_relmap_sheet.py::test_at_140_sheet_on_a_linked_llr - Assert...
+M-RVS-10: restore sha256 MATCH
+M-RVS-11: rc=1 KILLED (4.5s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_1_1_header_is_two_rows_over_relmap_node; FAILED tests/test_relmap_sheet.py::test_llr_rvs_5_1_hostile_frame_renders_byte_literal_on_one_row; FAILED tests
+M-RVS-11: restore sha256 MATCH
+M-RVS-12: rc=1 KILLED (4.6s) — FAILED tests/test_relmap_sheet.py::test_llr_rvs_6_2_overflow_is_counted_never_silent; FAILED tests/test_relmap_sheet.py::test_at_143_87_column_check_and_counted_overflow
+M-RVS-12: restore sha256 MATCH
+RESULT 11/12 killed; restores all match: True
+BAD-CONTROL OBSERVED — the runner reported the survivor
+exit=1

@@ -1,0 +1,5 @@
+GREEN targeted — tests/test_hook_line_bound.py (7 nodes: 2 unit + 5 AT-152)
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.......                                                                  [100%]
+7 passed in 2.15s
+exit=0 wall=4s

@@ -1,0 +1,25 @@
+# p3-inc2-red-move-aside — each net-new source file moved out of the tree (C-20)
+# command: for f in __init__ base screen: mv aside; pytest tests/test_relmap_shell.py; restore
+# verdicts: __init__ exit=2 / base exit=2 / screen exit=2; restore sha256 MATCH x3
+
+--- arm: __init__.py aside ---
+    from mapper.screens.relmap import RelMapScreen
+E   ImportError: cannot import name 'RelMapScreen' from 'mapper.screens.relmap' (unknown location)
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_shell.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.44s
+--- arm: base.py aside ---
+    from mapper.screens.relmap import base
+E   ImportError: cannot import name 'base' from partially initialized module 'mapper.screens.relmap' (most likely due to a circular import) (<user>\AppData\Local\Temp\ds-units\wt-r2\mapper\screens\relmap\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_shell.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.43s
+--- arm: screen.py aside ---
+    from .screen import RelMapScreen
+E   ModuleNotFoundError: No module named 'mapper.screens.relmap.screen'
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_shell.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.39s

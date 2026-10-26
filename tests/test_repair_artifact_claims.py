@@ -77,6 +77,12 @@ _CITATION_EXCEPTIONS: dict[tuple[str, str], tuple[str, str]] = {
         "sealed record of 2026-08-27-repair-batch-02 predates mapper/relmap/model.py "
         "(relmap-r1); bare basename became ambiguous; the record is not edited",
     ),
+    ("layered.py", "screen.py"): (
+        "mapper/screens/map/screen.py",
+        "trunk Inc-2 of 2026-10-25-relmap-r2-batch added mapper/screens/relmap/screen.py; "
+        "the bare basename became ambiguous; the layered.py citation means the "
+        "MapScreen renderer, which is the live one",
+    ),
 }
 
 

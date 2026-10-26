@@ -1,0 +1,135 @@
+RED — tests/test_hook_line_bound.py vs the unmodified sink (no per-line bound yet)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFFFFF.                                                                  [100%]
+================================== FAILURES ===================================
+_______________ test_llr_rvu_1_1_unit_boundaries_and_cut_shape ________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x00000201D5053B00>
+
+    def test_llr_rvu_1_1_unit_boundaries_and_cut_shape(capsys):
+        """TC-RM-30 unit arm on the cut itself: exactly 240 is untouched, 241 and
+        beyond cut at 239 with one trailing ellipsis (240 emitted cells)."""
+>       cut = audit_mod._cut_hook_line
+E       AttributeError: module 'mapper.reqharness.audit' has no attribute '_cut_hook_line'
+
+tests\test_hook_line_bound.py:33: AttributeError
+__________ test_llr_rvu_1_1_unit_cut_never_splits_an_escape_spelling __________
+
+    def test_llr_rvu_1_1_unit_cut_never_splits_an_escape_spelling():
+        """A ``\\xNN`` / ``\\uXXXX`` spelling straddling the 239-cell boundary
+        backs the cut to the spelling's start — the spelling is emitted whole or
+        not at all (AT-152 straddling arm, M-RVU-3)."""
+>       cut = audit_mod._cut_hook_line
+E       AttributeError: module 'mapper.reqharness.audit' has no attribute '_cut_hook_line'
+
+tests\test_hook_line_bound.py:44: AttributeError
+_______ test_at_152_hook_line_longer_than_240_is_cut_with_one_ellipsis ________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26692/test_at_152_hook_line_longer_t0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000201D50284A0>
+
+    def test_at_152_hook_line_longer_than_240_is_cut_with_one_ellipsis(tmp_path, capsys):
+        """AT-152's driver limb: a hook line of 240 + N characters emits cut at
+        239 with one ellipsis; the emitted line is at most 240 cells; a line of
+        exactly 240 is untouched; the hook stays informational (exit code is the
+        report's own)."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        lines = ["a" * 240, "b" * 241, "c" * 300]
+        code, out, _ = _run_hook(["--audit", str(repo)], lambda r: lines, capsys)
+        emitted = out[len(base_out):].splitlines()
+        assert code == base_code, "the hook never changes the exit code (R1 D4)"
+>       assert emitted == ["a" * 240, "b" * 239 + ELLIPSIS, "c" * 239 + ELLIPSIS]
+E       AssertionError: assert ['aaaaaaaaaaa...cccccccccccc'] == ['aaaaaaaaaaa...ccccccccccc…']
+E         
+E         At index 1 diff: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' != 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb…'
+E         Use -v to get more diff
+
+tests\test_hook_line_bound.py:73: AssertionError
+___________ test_at_152_the_bound_predicates_over_the_escaped_form ____________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26692/test_at_152_the_bound_predicat0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000201D4F6BF20>
+
+    def test_at_152_the_bound_predicates_over_the_escaped_form(tmp_path, capsys):
+        """M-RVU-1: the bound counts the EMITTED (escaped) form, never the raw
+        line — 60 raw control chars (62 cells) escape to 242 cells and MUST cut;
+        a cut on the raw line would leave all 60 spellings and emit 242 cells."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        payload = "ab" + "\x01" * 60
+        code, out, _ = _run_hook(["--audit", str(repo)], lambda r: [payload], capsys)
+        emitted = out[len(base_out):].splitlines()
+        assert code == base_code
+        # "ab" + 59 whole spellings + the ellipsis; the 60th spelling (straddling
+        # cell 239) is dropped whole, never split.
+>       assert emitted == ["ab" + "\\x01" * 59 + ELLIPSIS], emitted
+E       AssertionError: ['ab\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x0...01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01']
+E       assert ['ab\\x01\\x0...01\\x01\\x01'] == ['ab\\x01\\x0...1\\x01\\x01…']
+E         
+E         At index 0 diff: 'ab\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01' != 'ab\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\test_hook_line_bound.py:89: AssertionError
+_________ test_at_152_a_straddling_escape_spelling_backs_to_its_start _________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26692/test_at_152_a_straddling_escap0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000201D4E9DA90>
+
+    def test_at_152_a_straddling_escape_spelling_backs_to_its_start(tmp_path, capsys):
+        """AT-152 straddling arm (SEC-1 / M-RVU-3): an escape spelling straddling
+        byte 240 is cut at a spelling boundary — the emitted line never ends
+        mid-spelling — for both the ``\\xNN`` and the ``\\uXXXX`` classes."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        payloads = ["x" * 237 + "\x01", "y" * 235 + "\u202e"]
+        code, out, _ = _run_hook(["--audit", str(repo)], lambda r: payloads, capsys)
+        emitted = out[len(base_out):].splitlines()
+        assert code == base_code
+>       assert emitted == ["x" * 237 + ELLIPSIS, "y" * 235 + ELLIPSIS], emitted
+E       AssertionError: ['xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\\u202e']
+E       assert ['xxxxxxxxxxx...yyyyy\\u202e'] == ['xxxxxxxxxxx...yyyyyyyyyyy…']
+E         
+E         At index 0 diff: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\x01' != 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…'
+E         Use -v to get more diff
+
+tests\test_hook_line_bound.py:104: AssertionError
+________ test_at_152_verdict_prefixed_hook_line_is_cut_then_rewritten _________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26692/test_at_152_verdict_prefixed_h0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000201D4E9D460>
+
+    def test_at_152_verdict_prefixed_hook_line_is_cut_then_rewritten(tmp_path, capsys):
+        """F-SEC-3's pinned order observable end to end: escape -> cut -> rewrite
+        check -> print.  A ``verdict: ``-starting hook line longer than 240 emits
+        ``structure: `` + the 240-cell CUT form (250 cells total): the rewrite
+        runs on the CUT line, never re-exposing ``verdict: `` to line start, and
+        never before the cut (M-RVU-2)."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        _base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        code, out, _ = _run_hook(
+            ["--audit", str(repo)], lambda r: ["verdict: " + "v" * 300], capsys)
+        hook_line = out[len(base_out):].splitlines()[-1]
+        # cut first: "verdict: " + 230 cells + ellipsis (240); then the rewrite.
+>       assert hook_line == "structure: " + "verdict: " + "v" * 230 + ELLIPSIS, hook_line
+E       AssertionError: structure: verdict: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+E       assert 'structure: v...vvvvvvvvvvvvv' == 'structure: v...vvvvvvvvvvvv…'
+E         
+E         Skipping 240 identical leading characters in diff, use -v to show
+E         - vvvvvvvvvv…
+E         + vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+tests\test_hook_line_bound.py:123: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_hook_line_bound.py::test_llr_rvu_1_1_unit_boundaries_and_cut_shape
+FAILED tests/test_hook_line_bound.py::test_llr_rvu_1_1_unit_cut_never_splits_an_escape_spelling
+FAILED tests/test_hook_line_bound.py::test_at_152_hook_line_longer_than_240_is_cut_with_one_ellipsis
+FAILED tests/test_hook_line_bound.py::test_at_152_the_bound_predicates_over_the_escaped_form
+FAILED tests/test_hook_line_bound.py::test_at_152_a_straddling_escape_spelling_backs_to_its_start
+FAILED tests/test_hook_line_bound.py::test_at_152_verdict_prefixed_hook_line_is_cut_then_rewritten
+6 failed, 1 passed in 2.75s
+exit=1 wall=4s

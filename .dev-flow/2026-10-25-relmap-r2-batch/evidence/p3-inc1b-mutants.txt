@@ -1,0 +1,17 @@
+# Inc-1b mutation battery — M-RVT-2 (adapter reverted to the old model.cut path),
+# M-RVT-3 (moved cut drops the ellipsis). runner: one node per arm, restore by sha256.
+# runner exit: 0 · wall: 3s · redacted: account name -> <user>
+arms: 2
+M-RVT-2 on mapper/relmap/adapter.py ['from mapper.relmap.text import cut' -> 'from mapper.relmap.model import cut'] :: tests/test_relmap_text.py::test_no_old_path_readers_inc_1b: RED (KILLED)
+  exit=1 restore-sha256=e163a9fa14cd245dc5fbafff301148120988829e20f703621052cdab69936756
+  tail: >       assert _old_path_readers(OLD_PATHS_1B) == []
+  E       AssertionError: assert ['mapper/relm...ap.model.cut'] == []
+  tests\test_relmap_text.py:170: AssertionError
+  FAILED tests/test_relmap_text.py::test_no_old_path_readers_inc_1b - Assertion...
+M-RVT-3 on mapper/relmap/text.py ['return text[: DISPLAY_MAX - 1] + "…"' -> 'return text[: DISPLAY_MAX]'] :: tests/test_relmap_text.py::test_cut_reproduces_the_r1_contract: RED (KILLED)
+  exit=1 restore-sha256=88c8176984fb5d149d2b418994ca3dcff460e3f730f2fa8d1400a065c2682cc2
+  tail: >       assert len(cut121) == 120 and cut121.endswith("…") and cut121[:-1] == "a" * 119
+  E       AssertionError: assert (120 == 120 and False)
+  tests\test_relmap_text.py:213: AssertionError
+  FAILED tests/test_relmap_text.py::test_cut_reproduces_the_r1_contract - Asser...
+battery exit: 0 (0 bad arms)

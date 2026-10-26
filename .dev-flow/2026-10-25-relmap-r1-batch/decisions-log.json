@@ -1,0 +1,99 @@
+[
+  {
+    "station": "P0",
+    "date": "2026-10-25",
+    "decision": "P0 approved under the standing authorization (operator approval of the series, 2026-10-23, and «continue», 2026-10-25): four stories READY (US-RM-001 traceability graph; US-RM-002 ranked structural gaps; US-RM-003 --audit lines; US-RM-004 bounded descriptor), each stating an observable behaviour; triggers evaluated, fired A1 A2 A3 B1 C6 D1 E1 F2 so ARQ, PDR and DDR stand (PDR is owed after P2, its proposal authored from the reviewed contract); F2 discharged at rollover (BACKLOG header refreshed, B-140..B-143 added); rollover done: 17 outgoing decisions archived, single-slot fields retired, base_ref re-stamped to 194f885; RC-1 (origin/master = HEAD) and RC-2 (origin answered) recorded in PLAN.md"
+  },
+  {
+    "station": "ARQ",
+    "date": "2026-10-25",
+    "decision": "ARQ approved under the standing authorization: docs/ARCHITECTURE.md amended as COMMITMENTS (banner, section 2 rows relmap and yamlscan, section 3 rows and the app/store edges, R-016 separate kind with derived reqharness data, R-017 shared prescan leaf, section 6 worksheet: five sequential increments, NO lane — A4 not fired); the section 2 path column is tree-checked, so the rows carry the planned paths as prose and are filled as each file lands (first draft failed tests/test_repair_map_truth.py x9, re-worded, 90 passed on the six map-oracle files); the one interface change is additive (reqharness.audit.run_cli optional callable, frozen at PDR); P1 requirements derivation is next"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-25",
+    "decision": "P1 requirements approved by the orchestrator under the standing authorization (operator, 2026-10-23 «Arranca las tres…» and 2026-10-25 «continue»/«adelante»). Rulings on the open questions: OQ-R1-1 accepted (repo-root *.relmap.yml, else default descriptor); OQ-R1-2 accepted (Layer-A-only evidence for direction queries, cycles and 7/8 gap kinds; end-to-end ATs carried to R2/B-141); OQ-R1-3 no new gap kind in R1 (catalogue as approved; raise with R2 after B-142); OQ-R1-4 implement the mechanical rule (binds upstream), prose fix in the QuickMap repo (B-143); OQ-R1-5 exit code unchanged by structural gaps in R1; OQ-R1-6 extract the prescan to the yamlscan leaf with byte-identical messages; OQ-R1-7 only active nodes are gap-eligible; OQ-R1-8 flat reach accepted in R1. P2 review is next."
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-25",
+    "decision": "P2 first pass: architect, qa-reviewer and security-reviewer independent reviews all iterate-to-refine (1 blocker Q-1, 22 majors, 16 minors); P1 contract amended under orchestrator rulings R1-R16 (ledger LED-2026-10-25-relmap-r1-batch.1-.16, standing authorization); second P2 pass owed over the amended contract",
+    "notes": "contract 87,832 characters, V26 NOTICE only"
+  },
+  {
+    "station": "P1",
+    "date": "2026-10-25",
+    "decision": "Amended P1 contract re-approved by the orchestrator under the standing authorization after the first P2 pass (iterate-to-refine; rulings R1-R16, ledger .1-.16). Author judgement calls confirmed: R8 visit bound 2,000,000 with reach_not_computed counted; pure format_structure named (Q-10); AT-123 retired to TC-RM-01/02 Layer A; canon read under LIMIT_ROLES_YML_BYTES, descriptors under MAX_MAP_BYTES; no-repo/no-registry lines printed by run_cli without calling the hook; a refused descriptor yields only its refusal line. Contract size 87,832 chars over the 54,000 budget accepted as a V26 NOTICE (closed cause set + AT bodies + matrix). Second P2 pass is next."
+  },
+  {
+    "station": "P2",
+    "date": "2026-10-25",
+    "decision": "P2 closed by the orchestrator under the standing authorization: first pass iterate (39 findings), second pass security+architect approve, QA iterate (N-1,N-2) then pass 3 wording-level items (X-1, N-3, N-7) dispositioned in ledger .29-.31 without a fourth pass; all reviewer verdicts recorded in 02-review.md."
+  },
+  {
+    "station": "PDR",
+    "date": "2026-10-25",
+    "decision": "PDR sealed approved with conditions 2026-10-25 (architect, qa-reviewer, security-reviewer, ux-reviewer — Claude Sonnet subagents); 38 conditions listed with dispositions and owning increment gates. Author judgement calls accepted: 1,000-line hook bound, collection types (cycles tuple of tuples, problems tuple, sourced frozenset), added mutants and TC-RM-03. Phase 3 (Inc-1) is next."
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-25",
+    "decision": "P3 increment 001 approved: independent code-reviewer approve-with-nits (no BLOCKER/MAJOR; F1-F5 minor, dispositioned in ledger .44-.50 and BACKLOG B-145; evidence/review-inc001.md); 19/19 mutants killed; station stays P3"
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-25",
+    "decision": "P3 increment 002 approved: independent review iterate (BLOCK-UNTIL F1) discharged at f02dbbd — the two edge-type-filter arms re-read by the orchestrator, mutant D RED (inc2f-red-mutant-d.txt), F2-F5 dispositioned."
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-25",
+    "decision": "P3 increment 003 approved: independent review (code + security lenses) approve — golden re-generated from base 25d69fe byte-identical, 10 hostile inputs typed refusals, 7/7 reviewer mutants killed; MINOR-1..3 recorded (MINOR-2 escaping verified at Inc-5)."
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-25",
+    "decision": "P3 increment 004 approved: independent review (code + security) approve-with-nits; F1 arm RED with reviewer mutant C (inc4f-red-f1-mutant-c.txt), F2 cut+escape arm and F3 limit line landed with the next increment's commit c6a166f, F4 fixed."
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-25",
+    "decision": "P3 increment 005 approved: independent review (code + security + UX) approve-with-nits; F1 end-to-end sources-line arm RED with M-RMU-9 (inc5f-red.txt), F2 verdict-prefix guard RED without it, F3 K9 wording, F4/F5 docs — c2d244b/837abd3. All five increments approved; DDR is next."
+  },
+  {
+    "station": "P3",
+    "date": "2026-10-25",
+    "decision": "P3 closed: all five increments approved (decisions P3 001-005); station moves to DDR, which precedes P4 in stations_active. The orchestrator's clean full-suite run at 934e935 (4017 passed, 0 failed) closed the three closing-gate regressions (LED .69-.71)."
+  },
+  {
+    "station": "DDR",
+    "date": "2026-10-25",
+    "decision": "P4 validation evaluated by the dev-flow worker (record only, station stays DDR because the flow orders DDR before P4): 04-validation.md PASS-WITH-NOTES - 35/35 requirements, 12/12 AT as mapper --audit subprocess nodes, gate run by the orchestrator at 934e935 (4017 passed, 0 failed, 2 skipped, 3 xfailed), ledger 3579 - 4 + 447 = 4022, UX walkthrough executed on the real structure block; notes: Python 3.10 not-run (B-148), contract wording drift (B-149), independent ux-reviewer read not-run. DDR drafted (design/DDR-2026-10-25-relmap-r1-batch.md), verdict pending architect + software-dev + qa-reviewer; this entry is NOT the DDR gate decision."
+  },
+  {
+    "station": "DDR",
+    "date": "2026-10-25",
+    "decision": "DDR sealed approved with conditions 2026-10-25 (architect, software-dev, qa-reviewer, ux-reviewer — Claude Sonnet subagents); every reviewer condition dispositioned in def89c8 (M3 pinned RED/GREEN, real reproduction of the 3 escaped regressions at 6331206, accepted deviations with shipped behaviour normative, README Audit section, residual risks owned by the R2 PDR, BACKLOG B-151..B-155). No product code changed after the gate tree 934e935; one test added after the full-suite gate (4022 gated + 1 targeted-green)."
+  },
+  {
+    "station": "P4",
+    "date": "2026-10-25",
+    "decision": "P4 validation approved: PASS-WITH-NOTES — 35/35 requirements, 12 ATs on real --audit subprocess nodes, 3 accepted deviations, full suite 4017 passed / 0 failed at 934e935 (clean env, orchestrator), balance 3579 - 4 + 447 = 4022 selected; Python 3.10 floor unproven (B-148, operator). P5 post-mortem is next."
+  },
+  {
+    "station": "P5",
+    "date": "2026-10-25",
+    "decision": "P5 post-mortem written (05-postmortem.md, local staging; vault copy by /dev-flow-sync): closed with carry-over. Controls: C-1 guard set names test_fold and test_repair_artifact_claims (adopted); C-2 reviewer-authored mutant recorded per independent review (4 mutants survived the author's battery: Inc-2 D, Inc-4 C, Inc-5 M-RMU-9, DDR M3); C-3 contract shape and V26 budget (109,299 chars vs 54,000; AT bodies to a companion; B-156); C-4 worktree hygiene (B-157); C-5 runner switch logged (B-158); C-6 Python 3.10 run (B-148, operator). Open items carried: R2 views, R2 PDR inherits DDR E items 10-12, B-140..B-158, UI batch from round-2026-10-23/24 verdicts."
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-25",
+    "decision": "P6 documentation written: 06-docs/executive-summary.md, functionality.md (modules, --audit structure block with a real P4 sample and how to read it), traceability matrix sign-off closed 2026-10-25. Merge not granted at kickoff: no PR opened; operator merges, then /dev-flow-sync. Backlog reconciled for carries (B-156..B-158 added); header refresh and merge marks owed at merge."
+  },
+  {
+    "station": "P6",
+    "date": "2026-10-25",
+    "decision": "synced-to-obsidian",
+    "notes": "vault: 01 - Proyectos/mapper/dev-flow-batches/2026-10-25-relmap-r1-batch/ (full sync; PDR/DDR to mapper/design/)"
+  }
+]

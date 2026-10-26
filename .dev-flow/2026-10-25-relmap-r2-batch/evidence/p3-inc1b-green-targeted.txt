@@ -1,0 +1,17 @@
+# Inc-1b GREEN — targeted: test_relmap_text.py (15 nodes) + the re-pointed adapter/audit suites
+# command: python -m pytest -q -p no:cacheprovider tests/test_relmap_text.py tests/test_relmap_adapter.py tests/test_relmap_audit.py
+# exit code: 0 · wall: 41s · redacted: account name -> <user>
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 69%]
+.........s......................                                         [100%]
+============================== warnings summary ===============================
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1a
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+103 passed, 1 skipped, 2 warnings in 40.20s

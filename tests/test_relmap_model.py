@@ -15,7 +15,6 @@ import pytest
 from mapper.osopen import MAX_EDGES, MAX_NODES
 from mapper.relmap import model as relmodel
 from mapper.relmap.model import (
-    DISPLAY_MAX,
     VISIT_BUDGET,
     Edge,
     Node,
@@ -23,9 +22,9 @@ from mapper.relmap.model import (
     RelMap,
     RelMapLimitError,
     build_map,
-    cut,
 )
 from mapper.relmap.profile import REQHARNESS, EdgeType, Profile
+from mapper.relmap.text import DISPLAY_MAX, cut
 
 CHAIN = Profile("chain", ("N",), (EdgeType("next", (("N", "N"),), True, "none"),), ())
 LOOPY = Profile(

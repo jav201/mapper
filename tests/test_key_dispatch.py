@@ -164,6 +164,25 @@ EXPECTED_SEAT: dict[tuple[str, str], tuple[str, str, str, str, bool]] = {
     ("roles", "l"): ("next_role", "next role", "l", "roles", False),
     ("roles", "q"): ("home", "back", "q", "roles-leave", False),
     ("roles", "space"): ("propose", "propose change", "space", "roles", False),
+    # Relmap batch `2026-10-25-relmap-r2-batch` (trunk Inc-2, LLR-RVH.4.1):
+    # the additive `relmap` scope — view switch, cursor moves, the lens /
+    # chain / by-kind chords (inert off their home view per COND-UX-1),
+    # refresh, and the leave pair.  Both `q` and `escape` dispatch the one
+    # `leave` action (the quiet-leave alias), as `b`/`enter` share `sign` in
+    # the review scope.
+    ("relmap", "1"): ("matrix", "matrix", "1", "rview", False),
+    ("relmap", "2"): ("gaps", "gaps", "2", "rview", False),
+    ("relmap", "3"): ("sheet", "sheet", "3", "rview", False),
+    ("relmap", "down"): ("move_down", "move down", "↓", "rnav", False),
+    ("relmap", "enter"): ("lens", "impact on node", "↵", "rlens", False),
+    ("relmap", "escape"): ("leave", "leave", "esc", "rleave", False),
+    ("relmap", "k"): ("by_kind", "by kind", "k", "rkind", False),
+    ("relmap", "c"): ("chain", "chain", "c", "rchain", False),
+    ("relmap", "left"): ("move_left", "move left", "←", "rnav", False),
+    ("relmap", "q"): ("leave", "quit", "q", "rleave", False),
+    ("relmap", "r"): ("refresh", "refresh", "r", "rview", False),
+    ("relmap", "right"): ("move_right", "move right", "→", "rnav", False),
+    ("relmap", "up"): ("move_up", "move up", "↑", "rnav", False),
 }
 
 

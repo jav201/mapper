@@ -1,0 +1,50 @@
+=== M-REV-3: _move_selection gutted (reviewer's surviving mutant) ===
+applied m-rev-3
+
+tests\test_relmap_shell.py:549: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_review_f2_the_cursor_clamps_at_the_last_row_without_wrapping[118]
+FAILED tests/test_relmap_shell.py::test_review_f2_the_cursor_clamps_at_the_last_row_without_wrapping[87]
+FAILED tests/test_relmap_shell.py::test_review_f2_each_view_keeps_its_own_cursor[118]
+FAILED tests/test_relmap_shell.py::test_review_f2_each_view_keeps_its_own_cursor[87]
+4 failed, 21 deselected in 2.68s
+--- restore ---
+40ac5612d5404a75afdb694864aa572219d60e20fd6f19e6ba45407d399ec9c5 *mapper/screens/relmap/screen.py
+
+=== M-FU-1: clamp -> wraparound ===
+applied m-fu-1
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..                                                                       [100%]
+2 passed, 23 deselected in 2.92s
+--- restore ---
+40ac5612d5404a75afdb694864aa572219d60e20fd6f19e6ba45407d399ec9c5 *mapper/screens/relmap/screen.py
+
+=== M-FU-2: crumb shows ANY view's word (F1 leak) ===
+applied m-fu-2
+E             'by kind' is contained here:
+E               demo / relmap / matrix · by kind
+
+tests\test_relmap_shell.py:492: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_review_f1_the_crumb_never_shows_another_views_state_word[118]
+FAILED tests/test_relmap_shell.py::test_review_f1_the_crumb_never_shows_another_views_state_word[87]
+2 failed, 23 deselected in 1.44s
+--- restore ---
+40ac5612d5404a75afdb694864aa572219d60e20fd6f19e6ba45407d399ec9c5 *mapper/screens/relmap/screen.py
+=== M-FU-1 re-run: clamp -> wraparound (arm strengthened: mid-sequence) ===
+applied m-fu-1
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_review_f2_the_cursor_clamps_at_the_last_row_without_wrapping[118]
+FAILED tests/test_relmap_shell.py::test_review_f2_the_cursor_clamps_at_the_last_row_without_wrapping[87]
+2 failed, 23 deselected in 1.44s
+--- restore ---
+40ac5612d5404a75afdb694864aa572219d60e20fd6f19e6ba45407d399ec9c5 *mapper/screens/relmap/screen.py
+
+=== battery conclusion: full trio GREEN on the restored tree ===
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+....................................................                     [100%]
+196 passed in 26.35s

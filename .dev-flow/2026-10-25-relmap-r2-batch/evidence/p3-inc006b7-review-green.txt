@@ -1,0 +1,12 @@
+MUTANT M-R-6B-2 restore + GREEN re-run (review follow-up F1)
+BEFORE-RESTORE 1ffb221d955c8ce4de908ea6451f65f81813b6b989e45addf4e42dff37f646b3 *mapper/keymap.py
+AFTER  319877a5404f68754d25877cf8928f67bdee85d165cb7798f1513393c012a247 *mapper/keymap.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.                                                                        [100%]
+1 passed in 0.65s
+PYTEST_EXIT=0
+WALL=1.712s
+RESTORE_OK sha256 319877a5404f68754d25877cf8928f67bdee85d165cb7798f1513393c012a247

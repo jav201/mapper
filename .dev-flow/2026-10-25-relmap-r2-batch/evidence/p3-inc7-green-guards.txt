@@ -1,0 +1,37 @@
+GREEN guard set — Inc-7 commission set (re-run: the A3 census requires new files STAGED; the whole increment is staged, uncommitted)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........xxx............................................................. [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+..............................................................s......... [ 35%]
+..................s..................................................... [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 58%]
+........................................................................ [ 64%]
+........................................................................ [ 70%]
+........................................................................ [ 76%]
+........................................................................ [ 82%]
+........................................................................ [ 88%]
+........................................................................ [ 94%]
+.......................................................................  [100%]
+============================== warnings summary ===============================
+<unknown>:296: 1 warning
+tests/test_fold.py: 1 warning
+tests/test_mod_compat.py: 5 warnings
+tests/test_a3_census.py: 4 warnings
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1a
+tests/test_relmap_text.py::test_no_old_path_readers_inc_1b
+  C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_reqharness_config.py:296: SyntaxWarning: invalid escape sequence '\d'
+    """Code-review follow-up H1: the exact time format (R18) is a FULL match
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1218 passed, 2 skipped, 3 xfailed, 13 warnings in 320.94s (0:05:20)
+exit=0 wall=323s

@@ -1,0 +1,72 @@
+arms: 1 (review follow-up F1, drop-independent palette arm)
+MUTANT M-R-6B-2 (review-inc006b7): the 'c chain' seat row dropped from mapper/keymap.py
+BEFORE 319877a5404f68754d25877cf8928f67bdee85d165cb7798f1513393c012a247 *mapper/keymap.py
+MUTANT_APPLIED before=3c6d112cb5fee4a445da1745101dd536bf5da94273f9987e01e9b792563a386c after=1ffb221d955c8ce4de908ea6451f65f81813b6b989e45addf4e42dff37f646b3
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_at_149_palette_rows_match_the_keymaps_declared_relmap_seat _______
+
+workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26801/test_at_149_palette_rows_match0')
+
+    async def test_at_149_palette_rows_match_the_keymaps_declared_relmap_seat(workspace):
+        """Drop-independence for the palette surface (review-inc006b7 F1): the
+        sibling arm compares `palette._items` to `palette_items("", SCOPE_RELMAP)`
+        — both sides derive from the same seat, so a DROPPED seat row shrinks both
+        and the equality still holds (reviewer mutant M-R-6B-2 stayed GREEN there).
+        This arm pins the keymap's DECLARED `SCOPE_RELMAP` bindings as a literal —
+        (glyph, label, action) exactly as `mapper/keymap.py`'s seat declares them —
+        so dropping any seat row reddens the palette side on its own.  Keep the
+        literal in sync with the seat declaration; `tests/test_keymap.py` pins the
+        declaration itself."""
+        declared = {
+            # -- relmap rows, as declared in the seat (mapper/keymap.py) --
+            ("1", "matrix", "matrix"),
+            ("2", "gaps", "gaps"),
+            ("3", "sheet", "sheet"),
+            ("r", "refresh", "refresh"),
+            ("↑", "move up", "move_up"),
+            ("↓", "move down", "move_down"),
+            ("←", "move left", "move_left"),
+            ("→", "move right", "move_right"),
+            ("↵", "impact on node", "lens"),
+            ("c", "chain", "chain"),
+            ("k", "by kind", "by_kind"),
+            ("q", "quit", "leave"),
+            ("esc", "leave", "leave"),
+            # -- the two app chords the palette also offers --
+            ("ctrl+p", "palette", "palette"),
+            ("?", "legend", "help"),
+        }
+        app = MapperApp(workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await _open_and_pause(app, pilot, workspace)
+            await pilot.press("ctrl+p")
+            await pilot.pause()
+            palette = app.screen
+            assert isinstance(palette, CommandPalette), app.screen
+            assert palette.scope == SCOPE_RELMAP
+            offered = {(b.glyph, b.label, b.action) for b in palette._items}
+>           assert offered == declared, (
+                f"the palette must offer exactly the seat's declared rows — "
+                f"offered-but-not-declared: {sorted(offered - declared)}, "
+                f"declared-but-not-offered (a dropped seat row lands here): "
+                f"{sorted(declared - offered)}"
+            )
+E           AssertionError: the palette must offer exactly the seat's declared rows — offered-but-not-declared: [], declared-but-not-offered (a dropped seat row lands here): [('c', 'chain', 'chain')]
+E           assert {('1', 'matri...'leave'), ...} == {('1', 'matri...alette'), ...}
+E             
+E             Extra items in the right set:
+E             ('c', 'chain', 'chain')
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:1234: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_at_149_palette_rows_match_the_keymaps_declared_relmap_seat
+1 failed in 0.78s
+PYTEST_EXIT=1
+/usr/bin/bash: line 20: bc: command not found
+WALL=s

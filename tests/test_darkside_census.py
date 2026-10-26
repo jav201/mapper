@@ -313,6 +313,56 @@ CONFORMING_SEVERITY = {
     ("mapper/screens/review.py", "self._set_refusal(_REFUSE_DUP, darkside.ALERT)"),
     ("mapper/screens/review.py", "self._set_refusal(_REFUSE_LIMIT, darkside.ALERT)"),
     ("mapper/screens/review.py", "self._set_refusal(darkside.plain(reason), darkside.ALERT)"),
+    # `2026-10-25-relmap-r2-batch` (increments 003/005, LLR-RVM/RVS) — the
+    # relation screen's matrix and sheet renderers: 12 derived sites
+    # (82 -> 94 across the tree), itemised here one by one.  Judged by
+    # reading the lines against the two declared jobs, and each judgement is
+    # pinned by the batch's own requirement tests:
+    #  1. `return "!", darkside.ALERT` — the verifies edge whose evidence is
+    #     missing or that sits in a cycle cannot verify: the `!` glyph names
+    #     ALERT verbatim (two call sites, `_cell` and `_evidence_glyph` —
+    #     one register key covers both).
+    #  2. `return "◐", darkside.WARN` — the binds edge whose evidence is only
+    #     MISSING is still owed, nothing failed: the half-disc names WARN
+    #     (two call sites, one register key, as above).
+    #  3. `badge_style = (darkside.ALERT if node.open else darkside.MUT)` —
+    #     the gutter's `○` badge on an OPEN node with no binds edge: it
+    #     cannot be bound shut as it stands (ALERT); the closed sister
+    #     branch is MUT and unadjudicated here.
+    #  4. `darkside.ALERT))` — the lens panel's `╌╌╌ relates to nothing`
+    #     hatch (LLR-RVM.3.2, pinned ALERT by
+    #     `test_relmap_matrix.py::test_relates_to_nothing_when_the_selection_is_isolated`):
+    #     both rings of the selection are empty.
+    #  5. `inner.append_text(base.label("not computed", room, darkside.WARN))`
+    #     and 6. `gauge.append_text(base.label(" not computed", room,
+    #     darkside.WARN))` — reach not computed under a spent visit budget
+    #     (LLR-RVM.2.2): work still owed, never a fabricated number, nothing
+    #     failed — WARN (pinned by
+    #     `test_relmap_matrix.py::test_reach_not_computed_renders_honestly`).
+    #  7. `width=10, fill=darkside.WARN))` — the reach gauge's microbar fill:
+    #     outstanding attention with a quantity, the fold-pill count's
+    #     precedent; nothing has failed, so ALERT would be the wrong token.
+    #  8. `return ("!", darkside.ALERT)` — the sheet's D5 evidence glyph for
+    #     verifies with evidence missing or in cycle: same judgement as 1.
+    #  9. `return ("◐", darkside.WARN)` — the sheet's D5 glyph for binds
+    #     with evidence missing: same judgement as 2.
+    # 10. `line.append(kind_part, f"bold {darkside.ALERT}")` — the sheet's
+    #     `! <kind>  <sentence>` gap head: a gap is a record that cannot
+    #     proceed as it stands (the same family as the review screen's
+    #     refusals and the palette's `missing record` row) — ALERT.
+    ("mapper/screens/relmap/matrix.py", 'return "!", darkside.ALERT'),
+    ("mapper/screens/relmap/matrix.py", 'return "◐", darkside.WARN'),
+    ("mapper/screens/relmap/matrix.py",
+     "badge_style = (darkside.ALERT if node.open else darkside.MUT)"),
+    ("mapper/screens/relmap/matrix.py", "darkside.ALERT))"),
+    ("mapper/screens/relmap/matrix.py",
+     'inner.append_text(base.label("not computed", room, darkside.WARN))'),
+    ("mapper/screens/relmap/matrix.py", "width=10, fill=darkside.WARN))"),
+    ("mapper/screens/relmap/matrix.py",
+     'gauge.append_text(base.label(" not computed", room, darkside.WARN))'),
+    ("mapper/screens/relmap/sheet.py", 'return ("!", darkside.ALERT)'),
+    ("mapper/screens/relmap/sheet.py", 'return ("◐", darkside.WARN)'),
+    ("mapper/screens/relmap/sheet.py", 'line.append(kind_part, f"bold {darkside.ALERT}")'),
 }
 
 CONFORMING_BLUE = {
@@ -457,7 +507,13 @@ def test_hue_census_every_severity_and_busy_site_is_classified():
     # changed state, the suspended tail, the not-ready verdict — WARN), judged
     # line by line and registered above — 27 distinct keys (the two
     # `(" chain ", …)` lines share one concept and one key).
-    assert len(sites) == 82, f"derived {len(sites)} severity/busy lines, expected 82"
+    # 82 -> 94 at `2026-10-25-relmap-r2-batch` (increments 003/005): 12 sites
+    # in `mapper/screens/relmap/{matrix,sheet}.py` (the `!` verifies-missing
+    # glyph — ALERT ×3; the `◐` binds-missing glyph — WARN ×3; the open-node
+    # `○` badge and the `relates to nothing` hatch — ALERT ×2; the `not
+    # computed` words and the reach-gauge fill — WARN ×3; the sheet gap head
+    # — ALERT), each itemised in the register block above.
+    assert len(sites) == 94, f"derived {len(sites)} severity/busy lines, expected 94"
 
     mobile = _mobile_homes()
     unclassified = [

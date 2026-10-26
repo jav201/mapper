@@ -1,0 +1,37 @@
+# p3-inc004-red-move-aside — increment 004 RED counterfactual, arm 2 (C-20 move-aside)
+# command: pytest -q -p no:cacheprovider tests/test_relmap_gaps_view.py tests/test_relmap_scalecheck.py
+# before sha256: acf220072df5294b9b69f3e1d381f2d81025c5b64f237104cc8d4e2ff885f445
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+=================================== ERRORS ====================================
+_______________ ERROR collecting tests/test_relmap_gaps_view.py _______________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-gaps\tests\test_relmap_gaps_view.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_gaps_view.py:22: in <module>
+    import mapper.screens.relmap.gaps as gaps_mod
+E   ModuleNotFoundError: No module named 'mapper.screens.relmap.gaps'
+______________ ERROR collecting tests/test_relmap_scalecheck.py _______________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2-gaps\tests\test_relmap_scalecheck.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_scalecheck.py:27: in <module>
+    from tests.test_relmap_gaps_view import (
+tests\test_relmap_gaps_view.py:22: in <module>
+    import mapper.screens.relmap.gaps as gaps_mod
+E   ModuleNotFoundError: No module named 'mapper.screens.relmap.gaps'
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_gaps_view.py
+ERROR tests/test_relmap_scalecheck.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+2 errors in 0.50s
+exit=2
+# wall=1s
+# restore sha256: acf220072df5294b9b69f3e1d381f2d81025c5b64f237104cc8d4e2ff885f445 MATCH=yes

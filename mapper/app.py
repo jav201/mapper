@@ -37,6 +37,7 @@ from .screens.prompt import (
 from .screens.repo import RepoScreen
 from .screens.roles import RolesScreen
 from .screens.review import ReviewScreen
+from .screens.relmap import RelMapScreen
 from .search import SearchIndex
 from .store import MapStore
 from .views.layered import MAX_RENDER_NODES, pan_extent
@@ -44,6 +45,8 @@ from .views.layered import MAX_RENDER_NODES, pan_extent
 # `2026-10-09-modular-batch`: the screens moved into `mapper/screens/**`; these names stay
 # importable as `from mapper.app import X` for the historical sites (LLR-MOD.3.1).  They are
 # re-exports, declared here so a linter does not read them as unused imports.
+# Amended `2026-10-25-relmap-r2-batch` (LLR-RVH.2.1): `RelMapScreen` joins the re-exports —
+# the `MapScreen` pattern (`docs/ARCHITECTURE.md` §3 `app` row).
 __all__ = [
     "MapperApp",
     "main",
@@ -59,6 +62,7 @@ __all__ = [
     "RepoScreen",
     "RolesScreen",
     "ReviewScreen",
+    "RelMapScreen",
     "SEARCH_ACTIVE_LABEL",
     "SEARCH_COUNT_SUBJECT",
     "SEARCH_SUSPENDED_NOTICE",

@@ -1,0 +1,16 @@
+p3-inc003-followup-green — review-inc003 F1 pin (root hatch line word + MUT tone) + F2 flap guard
+command: pytest -q -p no:cacheprovider tests/test_relmap_matrix.py tests/test_fold.py
+F1: test_relates_to_nothing_when_the_selection_is_isolated gains the root-line limb (test-only)
+F2: the flap's window end clamped to >= 1 (one-line guard in matrix.py:433) + the degenerate-height arm (h=6)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.........................................xxx...........                  [100%]
+============================== warnings summary ===============================
+tests/test_fold.py::test_tc_032_no_reference_to_the_deleted_fold_state_survives
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+52 passed, 3 xfailed, 1 warning in 43.45s
+exit=0

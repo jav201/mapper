@@ -1,0 +1,26 @@
+# p3-inc006-green-guards.txt — Inc-6 GREEN guard + census files
+# worktree: wt-r2-shell (lane L6)
+# command: pytest -q -p no:cacheprovider tests/test_fold.py tests/test_repair_artifact_claims.py
+#   tests/test_relmap_isolation.py tests/test_a3_census.py tests/test_arch_osopen_callers.py
+#   tests/test_mod_deps.py tests/test_no_operator_paths.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........xxx............................................................. [ 21%]
+........................................................................ [ 42%]
+........................................................................ [ 63%]
+........................................................................ [ 84%]
+....................................................                     [100%]
+============================== warnings summary ===============================
+tests/test_fold.py::test_tc_032_no_reference_to_the_deleted_fold_state_survives
+tests/test_a3_census.py::test_tc_a3_the_derived_sets_are_non_empty_before_anything_is_evaluated
+tests/test_a3_census.py::test_tc_a3_the_census_cardinalities_are_PINNED
+tests/test_a3_census.py::test_llr_n07_2_2a_zero_call_sites_of_the_old_shape_survive
+tests/test_a3_census.py::test_llr_n07_2_2a_the_widget_protocol_was_not_swept_into_the_migration
+  <unknown>:296: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+337 passed, 3 xfailed, 5 warnings in 58.39s
+exit code: 0
+wall time: 60s

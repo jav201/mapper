@@ -27,6 +27,7 @@ from mapper.screens.draft_guard import DraftGuardScreen
 from mapper.screens.factory import FactoryScreen
 from mapper.screens.help import HelpScreen
 from mapper.screens.palette import CommandPalette
+from mapper.screens.relmap import RelMapScreen
 from mapper.screens.roles import RolesScreen
 from mapper.screens.review import ReviewScreen
 from mapper.screens.settings import SettingsScreen
@@ -53,6 +54,9 @@ SCOPE_OWNER = {
     # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the review
     # screen, increment RS2.
     keymap.SCOPE_REVIEW: ReviewScreen,
+    # Relmap batch `2026-10-25-relmap-r2-batch` (trunk Inc-2, HLR-RVH.4):
+    # the relation screen host — the additive `relmap` scope, LLR-RVH.4.1.
+    keymap.SCOPE_RELMAP: RelMapScreen,
 }
 
 # Per-scope sizes, pinned EXACTLY.  A `>=` fence leaves slack, and slack is
@@ -105,6 +109,11 @@ EXPECTED_PER_SCOPE = {
     # (`up`/`down`), `4` (`filter`), `b` (`sign`), `enter` (`confirm`) and
     # `q`/`esc` (`home`) — HLR-RS.4, increment RS2.
     keymap.SCOPE_REVIEW: 7,
+    # 0 -> 13: the relmap batch's `relmap` scope (trunk Inc-2, LLR-RVH.4.1) —
+    # the view switch (`1`/`2`/`3`), the four cursor keys (`move`), `enter`
+    # (lens), `c` (chain), `k` (by kind), `r` (refresh), `q`/`esc` (leave).
+    # Updated deliberately, in the same edit as the seat rows.
+    keymap.SCOPE_RELMAP: 13,
 }
 
 # Derived from the live module, never hand-listed (control C-31).
@@ -191,7 +200,7 @@ def test_glyph_is_a_plausible_display_form_of_its_key():
     display = {
         "enter": "↵", "escape": "esc", "slash": "/",
         "equals_sign": "=", "question_mark": "?",
-        "up": "↑", "down": "↓",
+        "up": "↑", "down": "↓", "left": "←", "right": "→",
     }
     for b in ALL_BINDINGS:
         expected = display.get(b.key, b.key)

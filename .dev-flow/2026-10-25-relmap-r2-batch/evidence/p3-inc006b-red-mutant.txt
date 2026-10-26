@@ -1,0 +1,51 @@
+arms: 1 (RED counterfactual)
+BEFORE mapper\screens\help.py 17011f2faa38ec2435cc2924dcc97ad24d708b299b5f21ca6859bbf1e8ed093a
+F.                                                                       [100%]
+================================== FAILURES ===================================
+________________ test_at_149_help_lists_exactly_the_seat_rows _________________
+
+workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26674/test_at_149_help_lists_exactly0')
+
+    async def test_at_149_help_lists_exactly_the_seat_rows(workspace):
+        """`?` from the relation screen opens the legend for THIS scope, and its
+        painted rows are EXACTLY the seat's — equality, not superset: a hand-added
+        row reddens this (M-RVH-12), a dropped seat row reddens it too.  The
+        derivation is the seat reader shipped in the generic legend (the screen's
+        `KEY_SCOPE` is the only input — LLR-RVH.4.4's draft-time verification)."""
+        seat = {(b.glyph, b.label) for b in bindings_for(SCOPE_RELMAP)}
+        app = MapperApp(workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await _open_and_pause(app, pilot, workspace)
+            await pilot.press("?")
+            await pilot.pause()
+            help_screen = app.screen
+            assert isinstance(help_screen, HelpScreen), app.screen
+            assert help_screen.scope == SCOPE_RELMAP
+            painted = set(_help_key_rows(help_screen))
+>           assert painted == seat, (
+                f"help must list exactly the seat rows — hand-added: "
+                f"{sorted(painted - seat)}, missing: {sorted(seat - painted)}"
+            )
+E           AssertionError: help must list exactly the seat rows — hand-added: [('zz', 'hand added')], missing: []
+E           assert {('1', 'matri...alette'), ...} == {('1', 'matri...alette'), ...}
+E             
+E             Extra items in the left set:
+E             ('zz', 'hand added')
+E             Use -v to get more diff
+
+tests\test_relmap_shell.py:1124: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_at_149_help_lists_exactly_the_seat_rows
+1 failed, 1 passed in 1.70s
+
+--- stderr ---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+PYTEST_EXIT=1 WALL=3.0s
+AFTER  mapper\screens\help.py 17011f2faa38ec2435cc2924dcc97ad24d708b299b5f21ca6859bbf1e8ed093a
+M-RVH-12 (hand-added help row in the legend render): RESTORE_OK
+ARM M-RVH-12 (hand-added help row in the legend render): RED (KILLED)
+RUNNER_EXIT=0

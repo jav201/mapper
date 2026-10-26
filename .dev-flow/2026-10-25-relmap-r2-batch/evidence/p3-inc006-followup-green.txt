@@ -1,0 +1,14 @@
+p3-inc006-followup-green — review-inc006 F2 discharge (home.py kind-scoped row keys)
+command: pytest -q -p no:cacheprovider tests/test_relmap_shell.py tests/test_inc9c.py tests/test_relmap_isolation.py
+fix: relation rows key relmap:<descriptor file name>, derived row relmap:<stem>.derived; tree keys stay bare (gate-2)
+correction population: the failing inc9c LEAK_EXCEPTIONS pin named the re-pin (240 -> 246, the notify( call-site line)
+  per the census convention) — B-113 kept, one key one site
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 35%]
+........................................................................ [ 70%]
+...........................................................              [100%]
+203 passed in 36.66s
+exit=0

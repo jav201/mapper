@@ -3,8 +3,9 @@
 `read_repo_text` is the only way the relation-map package reads a repository file; every
 refusal is one of the closed causes K1-K17 (`CAUSE`), a FIXED string: a cause is never
 `str(exc)`, a path, an anchor name or a YAML snippet.  Read-only by contract (no write, no
-process, no network).  The lines `refusal_line` returns are repository-derived and UNESCAPED:
-the sink must escape (`run_cli` does); the base name is cut here.
+process, no network).  The refusal lines the loader reports are repository-derived and
+UNESCAPED: the sink must escape (`run_cli` does); the base name is cut and the line is
+formatted by the `text` leaf (`refusal_line`), which this module imports for its own cuts.
 
 `read_repo_text` is a file-type guard, not a confinement.  `us_canon` / `at_table` are
 confined (`confine_reason`) and NEVER opened in R1; the batch that first opens one calls
@@ -27,8 +28,8 @@ from mapper.osopen import (
     is_link,
     read_capped,
 )
-from mapper.relmap.model import cut
 from mapper.relmap.profile import REQHARNESS
+from mapper.relmap.text import cut
 from mapper.yamlscan import YamlLimitError, prescan
 
 #: The closed cause set.  Read-only (`MappingProxyType`): no caller can rewrite it at run time.
@@ -207,10 +208,3 @@ def discover_descriptors(repo: Path) -> tuple[tuple[Path, ...], int]:
     found = sorted(n for n in names if n.endswith(DESCRIPTOR_SUFFIX))
     return tuple(Path(repo) / n for n in found[:MAX_DESCRIPTORS]), max(0, len(found) - MAX_DESCRIPTORS)
 
-
-def refusal_line(base_name: str, cause: str, limit: int | None = None) -> str:
-    """`structure: refused (<base name>): <cause> - descriptor skipped`.  The base name is cut
-    to 120 characters; K5 renders `exceeds the <limit> byte limit` when `limit` is given."""
-    if cause == CAUSE["K5"] and limit is not None:
-        cause = f"exceeds the {limit} byte limit"
-    return f"structure: refused ({cut(base_name)}): {cause} - descriptor skipped"

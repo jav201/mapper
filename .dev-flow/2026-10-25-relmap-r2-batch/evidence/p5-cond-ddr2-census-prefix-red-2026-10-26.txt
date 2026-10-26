@@ -1,0 +1,83 @@
+# transcript: p5-cond-ddr2-census-prefix-red-2026-10-26.txt
+# command: PYTHONPATH=<scratch>/prefix-census env -u NO_COLOR -u TERM PYTHONDONTWRITEBYTECODE=1 PYTHONIOENCODING=utf-8 python -m pytest -q -p no:cacheprovider tests/test_darkside_census.py tests/test_inc9.py
+# tree: detached scratch checkout of 2e83cf6^ (1b3b151) — the tree BEFORE the census amendment; checkout created and removed under the unit's scratch dir outside the repository
+# phase: COND-DDR-2 capture 1 of 2 — the three whole-corpus census failures the orchestrator's gate run 1 surfaced (4223 passed, 3 failed), reproduced on the pre-fix tree: exactly the 3 named nodes fail, everything else in the two census files passes
+# exit code: 1 (3 failed, 69 passed) · wall 12s · redacted: account name -> <user> by a Python filter that refuses to write on any profile segment
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.....F..........................................F...........F........... [100%]
+================================== FAILURES ===================================
+_________ test_hue_census_every_severity_and_busy_site_is_classified __________
+
+    def test_hue_census_every_severity_and_busy_site_is_classified():
+        """TOTALITY: a derived site with no register row is a failure, not a skip."""
+        sites = _sites(tracked_sources(), ADJUDICATED)
+        # 36 -> 38 in Inc-3: the fold pill's WARN bar and its WARN hit count, both
+        # judged and registered in CONFORMING_SEVERITY above.
+        # 38 -> 40 in data-safety Inc-1b (2026-10-08): the unsaved-draft WARN style
+        # (pending) and the hidden-card hint prefix in ALERT (operator ruling R8),
+        # both judged and registered above.
+        # 40 -> 54 at `2026-10-11-reqharness-batch` RH6a: FOURTEEN sites, all in
+        # `mapper/screens/roles.py`, judged line by line and registered in
+        # CONFORMING_SEVERITY above — the unverifiable chain state (no repo,
+        # tampered, forked) paints ALERT, every recovery notice, pending toggle
+        # and not-ready verdict paints WARN; the register block carries the
+        # per-site judgements.
+        # 54 -> 82 at `2026-10-15-review-screen-batch` RS2: 28 sites in
+        # `mapper/screens/review.py` (the refusals, the not-verifiable state, the
+        # stale digest, the unentitled review, the not-ready marks — ALERT; the
+        # changed state, the suspended tail, the not-ready verdict — WARN), judged
+        # line by line and registered above — 27 distinct keys (the two
+        # `(" chain ", …)` lines share one concept and one key).
+>       assert len(sites) == 82, f"derived {len(sites)} severity/busy lines, expected 82"
+E       AssertionError: derived 94 severity/busy lines, expected 82
+E       assert 94 == 82
+E        +  where 94 = len([('mapper/screens/common.py', 'visual = darkside.Text.assemble((self.draft_prefix, darkside.ALERT), visual)', ('ALERT'...r/screens/home.py', 'number_style = darkside.INK if sin_acta == 0 and vencen == 0 else darkside.WARN', ('WARN',)), ...])
+
+tests\test_darkside_census.py:460: AssertionError
+____________________ test_a112_the_chrome_is_english[seat] ____________________
+
+source = 'seat'
+
+    @pytest.mark.parametrize("source", ["seat", "keybar", "headers"])
+    def test_a112_the_chrome_is_english(source):
+        strings = {"seat": _seat_strings, "keybar": _keybar_literals,
+                   "headers": _screen_headers}[source]()
+        assert strings, f"the {source} derivation is empty: nothing would be judged"
+>       assert _judge(strings) == []
+E       assert [('mapper/key...hain']"), ...] == []
+E         
+E         Left contains 16 more items, first extra item: ('mapper/keymap.py', 'matrix', "not in the chrome lexicon: ['matrix']")
+E         Use -v to get more diff
+
+tests\test_inc9.py:488: AssertionError
+___________ test_cd25a_the_seat_diff_is_exactly_what_inc9_declares ____________
+
+    def test_cd25a_the_seat_diff_is_exactly_what_inc9_declares():
+        before, after = _entry_projection(), _projection(keymap.KEYMAP)
+        # The data-safety batch (2026-10-08) adds rows after Inc-9; this node stays a
+        # statement about Inc-9, so those rows are subtracted by the one census that
+        # declares them (`tests/test_data_safety_census.py`, E-7) instead of widening
+        # `DECLARED_ADDED`.
+        after = {row for row in after if row[:3] not in DATA_SAFETY_ADDED}
+        assert before - after == set(), f"a row was lost or rebound: {sorted(before - after)}"
+>       assert {row[:3] for row in after - before} == DECLARED_ADDED
+E       AssertionError: assert {('factory', ...office'), ...} == frozenset({('...ffice'), ...})
+E         
+E         Extra items in the left set:
+E         ('relmap', 'down', 'move_down')
+E         ('relmap', 'escape', 'leave')
+E         ('relmap', '3', 'sheet')
+E         ('relmap', 'enter', 'lens')
+E         ('relmap', 'r', 'refresh')...
+E         
+E         ...Full output truncated (9 lines hidden), use '-vv' to show
+
+tests\test_inc9.py:746: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_darkside_census.py::test_hue_census_every_severity_and_busy_site_is_classified
+FAILED tests/test_inc9.py::test_a112_the_chrome_is_english[seat] - assert [('...
+FAILED tests/test_inc9.py::test_cd25a_the_seat_diff_is_exactly_what_inc9_declares
+3 failed, 69 passed in 11.10s

@@ -1,0 +1,11 @@
+p3-inc005-followup-mutants — review-inc005 F1/F2 discharge battery
+source: mapper\screens\relmap\sheet.py  baseline sha256 1ff155ee59ac0a0f570c75033a0bdb532610422020f7c055dd159db61d4ad767
+pre-battery baseline == landed digest: True
+
+M-REV-BAD: anchor found 0 times — BAD, control PASS
+M-REV-1: rc=1 KILLED (wall 0.5s) — arm test_llr_rvs_6_1_degenerate_height_paints_the_honest_default_body
+M-REV-1: restore sha256 1ff155ee59ac0a0f570c75033a0bdb532610422020f7c055dd159db61d4ad767 MATCH
+M-REV-2: rc=1 KILLED (wall 0.6s) — arm test_llr_rvs_3_2_stacked_lists_every_node_by_minimum_hop
+M-REV-2: restore sha256 1ff155ee59ac0a0f570c75033a0bdb532610422020f7c055dd159db61d4ad767 MATCH
+
+battery-exit=0

@@ -1,0 +1,38 @@
+# p3-inc2-red-code-absent — tests vs the absent package + absent seat scope
+# command: python -m pytest -q -p no:cacheprovider tests/test_relmap_shell.py tests/test_keymap.py tests/test_key_dispatch.py
+# exit code: 2 (collection errors: No module named 'mapper.screens.relmap')
+# wall: 1.7s
+
+<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+=================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_relmap_shell.py _________________
+ImportError while importing test module '<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_relmap_shell.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_shell.py:25: in <module>
+    from mapper.keymap import SCOPE_RELMAP
+E   ImportError: cannot import name 'SCOPE_RELMAP' from 'mapper.keymap' (<user>\AppData\Local\Temp\ds-units\wt-r2\mapper\keymap.py)
+____________________ ERROR collecting tests/test_keymap.py ____________________
+ImportError while importing test module '<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_keymap.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_keymap.py:30: in <module>
+    from mapper.screens.relmap import RelMapScreen
+E   ModuleNotFoundError: No module named 'mapper.screens.relmap'
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_shell.py
+ERROR tests/test_keymap.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+2 errors in 0.59s
+
+real	0m1.695s
+user	0m0.030s
+sys	0m0.000s

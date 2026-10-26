@@ -1,0 +1,291 @@
+cmd: render capture — sheet via the real host, (118,34)+(87,34), direct+stacked
+date: 2026-10-25T20:13:00-06:00
+===== LLR focus DIRECT 118x34 =====
+00| browse maps    connect repo    build map    factory                                                          ● mapper
+01|demo / relmap / sheet
+02|
+03|LLR-DEMO.1.1 · text
+04| LLR
+05| feeds it — what a change to them does to this node
+06|↑1 refines HLR-DEMO.1
+07| a change reaches — what changing this node forces
+08|╌╌ none on record
+09| gaps on this node
+10|╌╌ none on record
+11|next ▸ direct feeders only — the chain is one key away, and the cut is declared
+12|
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 118: none
+===== LLR focus STACKED 118x34 =====
+00| browse maps    connect repo    build map    factory                                                          ● mapper
+01|demo / relmap / sheet · stacked chain
+02|
+03|LLR-DEMO.1.1 · text
+04| LLR
+05| feeds it — what a change to them does to this node
+06|↑1 refines HLR-DEMO.1
+07| a change reaches — what changing this node forces
+08|╌╌ none on record
+09| gaps on this node
+10|╌╌ none on record
+11|next ▸ feeds it and a change reaches come free from the engine (§3.4 C12)
+12|
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 118: none
+===== HLR focus DIRECT 118x34 =====
+00| browse maps    connect repo    build map    factory                                                          ● mapper
+01|demo / relmap / sheet
+02|
+03|HLR-DEMO.1 · the host arms
+04| HLR
+05| feeds it — what a change to them does to this node
+06|╌╌ none on record
+07| a change reaches — what changing this node forces
+08|↓1 refines LLR-DEMO.1.1
+09|↓1 refines LLR-DEMO.1.2
+10| gaps on this node
+11|╌╌ none on record
+12|next ▸ direct feeders only — the chain is one key away, and the cut is declared
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 118: none
+===== HLR focus STACKED 118x34 =====
+00| browse maps    connect repo    build map    factory                                                          ● mapper
+01|demo / relmap / sheet · stacked chain
+02|
+03|HLR-DEMO.1 · the host arms
+04| HLR
+05| feeds it — what a change to them does to this node
+06|╌╌ none on record
+07| a change reaches — what changing this node forces
+08|↓1 refines LLR-DEMO.1.1
+09|↓1 refines LLR-DEMO.1.2
+10| gaps on this node
+11|╌╌ none on record
+12|next ▸ feeds it and a change reaches come free from the engine (§3.4 C12)
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 118: none
+===== LLR focus DIRECT 87x34 =====
+00| browse maps    connect repo    build map    factory                           ● mapper
+01|demo / relmap / sheet
+02|
+03|LLR-DEMO.1.1 · text
+04| LLR
+05| feeds it — what a change to them does to this node
+06|↑1 refines HLR-DEMO.1
+07| a change reaches — what changing this node forces
+08|╌╌ none on record
+09| gaps on this node
+10|╌╌ none on record
+11|next ▸ direct feeders only — the chain is one key away, and the cut is declared
+12|
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 87: none
+===== LLR focus STACKED 87x34 =====
+00| browse maps    connect repo    build map    factory                           ● mapper
+01|demo / relmap / sheet · stacked chain
+02|
+03|LLR-DEMO.1.1 · text
+04| LLR
+05| feeds it — what a change to them does to this node
+06|↑1 refines HLR-DEMO.1
+07| a change reaches — what changing this node forces
+08|╌╌ none on record
+09| gaps on this node
+10|╌╌ none on record
+11|next ▸ feeds it and a change reaches come free from the engine (§3.4 C12)
+12|
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 87: none
+===== HLR focus DIRECT 87x34 =====
+00| browse maps    connect repo    build map    factory                           ● mapper
+01|demo / relmap / sheet
+02|
+03|HLR-DEMO.1 · the host arms
+04| HLR
+05| feeds it — what a change to them does to this node
+06|╌╌ none on record
+07| a change reaches — what changing this node forces
+08|↓1 refines LLR-DEMO.1.1
+09|↓1 refines LLR-DEMO.1.2
+10| gaps on this node
+11|╌╌ none on record
+12|next ▸ direct feeders only — the chain is one key away, and the cut is declared
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 87: none
+===== HLR focus STACKED 87x34 =====
+00| browse maps    connect repo    build map    factory                           ● mapper
+01|demo / relmap / sheet · stacked chain
+02|
+03|HLR-DEMO.1 · the host arms
+04| HLR
+05| feeds it — what a change to them does to this node
+06|╌╌ none on record
+07| a change reaches — what changing this node forces
+08|↓1 refines LLR-DEMO.1.1
+09|↓1 refines LLR-DEMO.1.2
+10| gaps on this node
+11|╌╌ none on record
+12|next ▸ feeds it and a change reaches come free from the engine (§3.4 C12)
+13|
+14|
+15|
+16|
+17|
+18|
+19|
+20|
+21|
+22|
+23|
+24|
+25|
+26|
+27|view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+28|
+29|
+30|
+31|
+32|
+33|
+width-audit: lines over 87: none
+exit=0

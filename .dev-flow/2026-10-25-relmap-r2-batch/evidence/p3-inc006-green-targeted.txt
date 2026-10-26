@@ -1,0 +1,12 @@
+# p3-inc006-green-targeted.txt — Inc-6 GREEN targeted
+# worktree: wt-r2-shell (lane L6)
+# command: pytest -q -p no:cacheprovider tests/test_relmap_shell.py tests/test_inc9c.py
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 70%]
+..............................                                           [100%]
+102 passed in 35.95s
+exit code: 0
+wall time: 39s

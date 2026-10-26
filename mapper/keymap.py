@@ -39,6 +39,8 @@ SCOPE_SETTINGS = "settings"
 SCOPE_ROLES = "roles"
 # ReqHarness batch `2026-10-15-review-screen-batch` (HLR-RS.4): the review screen.
 SCOPE_REVIEW = "review"
+# Relmap batch `2026-10-25-relmap-r2-batch` (HLR-RVH.4): the relation screen.
+SCOPE_RELMAP = "relmap"
 
 # Screens whose bindings are NOT yet in this seat.  This is not decoration: it is
 # the exception list the conformance tests quantify over, so a screen leaving the
@@ -83,6 +85,16 @@ GROUP_SCOPE: dict[str, str] = {
     "roles-leave": SCOPE_ROLES,
     "review": SCOPE_REVIEW,
     "review-leave": SCOPE_REVIEW,
+    # Relmap batch `2026-10-25-relmap-r2-batch` (trunk Inc-2, LLR-RVH.4.1):
+    # the additive `relmap` scope — view switch, cursor moves, lens/chain/kind,
+    # refresh, leave.  The `r` prefix keeps the group ids claimable by exactly
+    # one scope each (`view`/`leave` already name map-scope groups).
+    "rview": SCOPE_RELMAP,
+    "rnav": SCOPE_RELMAP,
+    "rlens": SCOPE_RELMAP,
+    "rchain": SCOPE_RELMAP,
+    "rkind": SCOPE_RELMAP,
+    "rleave": SCOPE_RELMAP,
     "palette": SCOPE_PALETTE,
     "help": SCOPE_HELP,
     "draft": SCOPE_DRAFT,
@@ -112,6 +124,12 @@ GROUP_HEADER: dict[str, str] = {
     "roles-leave": "leave",
     "review": "review",
     "review-leave": "leave",
+    "rview": "view",
+    "rnav": "move",
+    "rlens": "lens",
+    "rchain": "chain",
+    "rkind": "kind",
+    "rleave": "leave",
     "palette": "palette",
     "help": "help",
     "draft": "unsaved",
@@ -313,6 +331,31 @@ KEYMAP: list[KeyBinding] = [
     KeyBinding("enter", "↵", "confirm", "sign", "review"),
     KeyBinding("q", "q", "home", "back", "review-leave"),
     KeyBinding("escape", "esc", "home", "back", "review-leave"),
+    # -- relmap (trunk Inc-2, `2026-10-25-relmap-r2-batch`, HLR-RVH.4) ----------
+    # The relation screen's seat.  Read-only surface: no write vocabulary
+    # anywhere in this scope (LLR-RVH.2.2).  `enter`/`c`/`k` are bound
+    # scope-static but inert no-ops off their home view — matrix lens, sheet
+    # chain, gaps by-kind respectively (LLR-RVH.4.1, COND-UX-1): the seat
+    # declares, the host's `action_*` decide.  Both `q` and `escape` dispatch
+    # the one `leave` action — the quiet-leave alias — as the review scope's
+    # `b`/`enter` share `sign`.
+    KeyBinding("1", "1", "matrix", "matrix", "rview"),
+    KeyBinding("2", "2", "gaps", "gaps", "rview"),
+    KeyBinding("3", "3", "sheet", "sheet", "rview"),
+    # `r` refreshes the derivation (recompute-on-open, R-019): a view-level
+    # concern, so it lives in the `view` group beside the switch it re-derives.
+    KeyBinding("r", "r", "refresh", "refresh", "rview"),
+    # The cursor moves the host-owned selection; the active renderer receives
+    # it through the frozen surface (D1).
+    KeyBinding("up", "↑", "move_up", "move up", "rnav"),
+    KeyBinding("down", "↓", "move_down", "move down", "rnav"),
+    KeyBinding("left", "←", "move_left", "move left", "rnav"),
+    KeyBinding("right", "→", "move_right", "move right", "rnav"),
+    KeyBinding("enter", "↵", "lens", "impact on node", "rlens"),
+    KeyBinding("c", "c", "chain", "chain", "rchain"),
+    KeyBinding("k", "k", "by_kind", "by kind", "rkind"),
+    KeyBinding("q", "q", "leave", "quit", "rleave"),
+    KeyBinding("escape", "esc", "leave", "leave", "rleave"),
     # -- app (available on every screen) ------------------------------------
     KeyBinding("ctrl+p", "ctrl+p", "palette", "palette", "app"),
     # Not priority, on purpose (`T3`, `EN-Q3`): a focused `Input` consumes `?` before a

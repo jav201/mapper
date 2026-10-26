@@ -1,0 +1,137 @@
+arms: 3 (+1 BAD control)
+BEFORE mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+diff: 'ab\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01' != 'ab\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\test_hook_line_bound.py:89: AssertionError
+_________ test_at_152_a_straddling_escape_spelling_backs_to_its_start _________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26702/test_at_152_a_straddling_escap0')
+capsys = <_pytest.capture.CaptureFixture object at 0x0000021AC4476030>
+
+    def test_at_152_a_straddling_escape_spelling_backs_to_its_start(tmp_path, capsys):
+        """AT-152 straddling arm (SEC-1 / M-RVU-3): an escape spelling straddling
+        byte 240 is cut at a spelling boundary — the emitted line never ends
+        mid-spelling — for both the ``\\xNN`` and the ``\\uXXXX`` classes."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        payloads = ["x" * 237 + "\x01", "y" * 235 + "\u202e"]
+        code, out, _ = _run_hook(["--audit", str(repo)], lambda r: payloads, capsys)
+        emitted = out[len(base_out):].splitlines()
+        assert code == base_code
+>       assert emitted == ["x" * 237 + ELLIPSIS, "y" * 235 + ELLIPSIS], emitted
+E       AssertionError: ['xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\\u202e']
+E       assert ['xxxxxxxxxxx...yyyyy\\u202e'] == ['xxxxxxxxxxx...yyyyyyyyyyy…']
+E         
+E         At index 0 diff: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\x01' != 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…'
+E         Use -v to get more diff
+
+tests\test_hook_line_bound.py:104: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_hook_line_bound.py::test_at_152_the_bound_predicates_over_the_escaped_form
+FAILED tests/test_hook_line_bound.py::test_at_152_a_straddling_escape_spelling_backs_to_its_start
+2 failed, 5 passed in 2.08s
+
+--- stderr ---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+PYTEST_EXIT=1 WALL=3.8s
+AFTER  mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+M-RVU-1 (cut the RAW line before escaping): RESTORE_OK
+ARM M-RVU-1 (cut the RAW line before escaping): RED (KILLED)
+BEFORE mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+.....F.                                                                  [100%]
+================================== FAILURES ===================================
+________ test_at_152_verdict_prefixed_hook_line_is_cut_then_rewritten _________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26703/test_at_152_verdict_prefixed_h0')
+capsys = <_pytest.capture.CaptureFixture object at 0x0000019E4737BBC0>
+
+    def test_at_152_verdict_prefixed_hook_line_is_cut_then_rewritten(tmp_path, capsys):
+        """F-SEC-3's pinned order observable end to end: escape -> cut -> rewrite
+        check -> print.  A ``verdict: ``-starting hook line longer than 240 emits
+        ``structure: `` + the 240-cell CUT form (250 cells total): the rewrite
+        runs on the CUT line, never re-exposing ``verdict: `` to line start, and
+        never before the cut (M-RVU-2)."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        _base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        code, out, _ = _run_hook(
+            ["--audit", str(repo)], lambda r: ["verdict: " + "v" * 300], capsys)
+        hook_line = out[len(base_out):].splitlines()[-1]
+        # cut first: "verdict: " + 230 cells + ellipsis (240); then the rewrite.
+>       assert hook_line == "structure: " + "verdict: " + "v" * 230 + ELLIPSIS, hook_line
+E       AssertionError: structure: verdict: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv…
+E       assert 'structure: v...vvvvvvvvvvvv…' == 'structure: v...vvvvvvvvvvvv…'
+E         
+E         Skipping 229 identical leading characters in diff, use -v to show
+E         - vvvvvvvvvvvvvvvvvvvvv…
+E         + vvvvvvvvvv…
+
+tests\test_hook_line_bound.py:123: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_hook_line_bound.py::test_at_152_verdict_prefixed_hook_line_is_cut_then_rewritten
+1 failed, 6 passed in 2.16s
+
+--- stderr ---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+PYTEST_EXIT=1 WALL=3.3s
+AFTER  mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+M-RVU-2 (the verdict rewrite BEFORE the cut — F-SEC-3 order swap): RESTORE_OK
+ARM M-RVU-2 (the verdict rewrite BEFORE the cut — F-SEC-3 order swap): RED (KILLED)
+BEFORE mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\…' != 'ab\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01\\x01…'
+E         Use -v to get more diff
+
+tests\test_hook_line_bound.py:89: AssertionError
+_________ test_at_152_a_straddling_escape_spelling_backs_to_its_start _________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26704/test_at_152_a_straddling_escap0')
+capsys = <_pytest.capture.CaptureFixture object at 0x00000240C3CB5D90>
+
+    def test_at_152_a_straddling_escape_spelling_backs_to_its_start(tmp_path, capsys):
+        """AT-152 straddling arm (SEC-1 / M-RVU-3): an escape spelling straddling
+        byte 240 is cut at a spelling boundary — the emitted line never ends
+        mid-spelling — for both the ``\\xNN`` and the ``\\uXXXX`` classes."""
+        repo = registry_repo(tmp_path, "r", ONE_ROW)
+        base_code, base_out, _ = _run_hook(["--audit", str(repo)], None, capsys)
+        payloads = ["x" * 237 + "\x01", "y" * 235 + "\u202e"]
+        code, out, _ = _run_hook(["--audit", str(repo)], lambda r: payloads, capsys)
+        emitted = out[len(base_out):].splitlines()
+        assert code == base_code
+>       assert emitted == ["x" * 237 + ELLIPSIS, "y" * 235 + ELLIPSIS], emitted
+E       AssertionError: ['xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\\u20…']
+E       assert ['xxxxxxxxxxx...yyyyyy\\u20…'] == ['xxxxxxxxxxx...yyyyyyyyyyy…']
+E         
+E         At index 0 diff: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\x…' != 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…'
+E         Use -v to get more diff
+
+tests\test_hook_line_bound.py:104: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_hook_line_bound.py::test_llr_rvu_1_1_unit_cut_never_splits_an_escape_spelling
+FAILED tests/test_hook_line_bound.py::test_at_152_the_bound_predicates_over_the_escaped_form
+FAILED tests/test_hook_line_bound.py::test_at_152_a_straddling_escape_spelling_backs_to_its_start
+3 failed, 4 passed in 2.57s
+
+--- stderr ---
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+PYTEST_EXIT=1 WALL=3.7s
+AFTER  mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+M-RVU-3 (mid-spelling cut — the spelling back-off removed): RESTORE_OK
+ARM M-RVU-3 (mid-spelling cut — the spelling back-off removed): RED (KILLED)
+BEFORE mapper\reqharness\audit.py cd73899eb083a0eb361287770aead3892307a13338d5be6ce08f7ff6789733ff
+M-RVU-0-BAD (control: an anchor that matches nothing): BAD -- anchor count 0 (expected 1)
+CONTROL M-RVU-0-BAD (control: an anchor that matches nothing): BAD (expected BAD)
+RUNNER_EXIT=0
+exit=0 wall=12s

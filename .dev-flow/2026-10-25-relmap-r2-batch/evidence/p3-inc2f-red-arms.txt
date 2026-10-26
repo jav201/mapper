@@ -1,0 +1,35 @@
+
+workspace = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26262/test_review_f2_the_placeholder0')
+
+    async def test_review_f2_the_placeholder_has_no_rows_to_cursor_over(workspace):
+        """`PendingView.row_count` is 0 (D1): on a pre-lane view the cursor keys
+        are honest no-ops — no crash, no movement, no wrap."""
+        app = MapperApp(workspace)
+        async with app.run_test(size=(118, 34)) as pilot:
+            screen = await _open_and_pause(app, pilot, workspace)
+            await pilot.press("2")
+            await pilot.pause()
+            await pilot.pause()
+            for _ in range(3):
+                await pilot.press("down")
+                await pilot.pause()
+                await pilot.pause()
+>           assert screen._cursors["gaps"] == 0
+E           AttributeError: 'RelMapScreen' object has no attribute '_cursors'. Did you mean: 'cursor'?
+
+tests\test_relmap_shell.py:575: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_llr_rvh_4_1_view_specific_chords_inert_off_home[2-off_home0]
+FAILED tests/test_relmap_shell.py::test_llr_rvh_4_1_view_specific_chords_inert_off_home[3-off_home1]
+FAILED tests/test_relmap_shell.py::test_llr_rvh_4_1_view_specific_chords_inert_off_home[1-off_home2]
+FAILED tests/test_relmap_shell.py::test_d1_surface_names_are_frozen - Asserti...
+FAILED tests/test_relmap_shell.py::test_d1_freeze_text_names_the_full_toggle_vocabulary
+FAILED tests/test_relmap_shell.py::test_llr_rvh_3_2_unavailable_state_paints_the_notice_through_the_sink
+FAILED tests/test_relmap_shell.py::test_review_f1_the_crumb_never_shows_another_views_state_word[118]
+FAILED tests/test_relmap_shell.py::test_review_f1_the_crumb_never_shows_another_views_state_word[87]
+FAILED tests/test_relmap_shell.py::test_review_f2_the_cursor_clamps_at_the_last_row_without_wrapping[118]
+FAILED tests/test_relmap_shell.py::test_review_f2_the_cursor_clamps_at_the_last_row_without_wrapping[87]
+FAILED tests/test_relmap_shell.py::test_review_f2_each_view_keeps_its_own_cursor[118]
+FAILED tests/test_relmap_shell.py::test_review_f2_each_view_keeps_its_own_cursor[87]
+FAILED tests/test_relmap_shell.py::test_review_f2_the_placeholder_has_no_rows_to_cursor_over
+13 failed, 12 passed in 6.71s

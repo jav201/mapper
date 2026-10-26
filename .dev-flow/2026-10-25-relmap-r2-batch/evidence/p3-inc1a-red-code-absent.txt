@@ -1,0 +1,22 @@
+# Inc-1a RED counterfactual (code-absent) — tests/test_relmap_text.py present, mapper/relmap/text.py absent
+# command: PYTHONPATH=<worktree> env -u NO_COLOR -u TERM PYTHONDONTWRITEBYTECODE=1 PYTHONIOENCODING=utf-8 python -m pytest -q -p no:cacheprovider tests/test_relmap_text.py
+# exit code: 2 (collection interrupted, ModuleNotFoundError) · wall: 2s · redacted: account name -> <user>
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+
+=================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_relmap_text.py __________________
+ImportError while importing test module 'C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\tests\test_relmap_text.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\<user>\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_relmap_text.py:26: in <module>
+    from mapper.relmap.text import DISPLAY_MAX, cut, refusal_line
+E   ModuleNotFoundError: No module named 'mapper.relmap.text'
+=========================== short test summary info ===========================
+ERROR tests/test_relmap_text.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.27s

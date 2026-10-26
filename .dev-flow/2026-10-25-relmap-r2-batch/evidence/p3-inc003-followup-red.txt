@@ -1,0 +1,40 @@
+p3-inc003-followup-red — review-inc003 F2 (degenerate-height flap reads 01–00 / N)
+command: pytest -q -p no:cacheprovider tests/test_relmap_matrix.py::test_degenerate_height_flap_never_reads_an_empty_window
+tree: matrix.py UNGUARDED (the flap guard reverted for this run only — the reviewer's finding reproduced at h=6,
+  the one height where the row budget is 0 AND the flap paints one row above the legend)
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+___________ test_degenerate_height_flap_never_reads_an_empty_window ___________
+
+matrix_mod = <module 'mapper.screens.relmap.matrix' from 'C:\\Users\\<user>\\AppData\\Local\\Temp\\ds-units\\wt-r2\\mapper\\screens\\relmap\\matrix.py'>
+
+    def test_degenerate_height_flap_never_reads_an_empty_window(matrix_mod):
+        """review-inc003 F2: below the 6-row body budget (`_GRID_TOP` 4 + the
+        flap/legend reservation) the row window is EMPTY and the flap must not
+        read `01–00 / N` — the guard clamps the window end to at least 1.
+        Cosmetic-only at terminal heights no contract size reaches (the C10
+        sweep's smallest arm is (40,12)); the painted frame must not raise."""
+        m = demo_map()
+        view = fresh_view(matrix_mod)
+        # h == 6 is the one visible degenerate height: the row budget
+        # (`_GRID_TOP` 4 + flap/legend reservation 2) is exactly 0, the window
+        # is empty, and the flap paints one row above the legend.
+        rows = paint(view, m, focus="HLR-DEMO.1", height=6)
+        text = plain(rows)
+>       assert "01–00" not in text
+E       AssertionError: assert '01–00' not in 'row → col  ...            '
+E         
+E         '01–00' is contained here:
+E                     01–00 / 6                              change HLR-DEMO.1 reaches 2 nodes    
+E         ?           +++++
+E            ✓ verifies · ! evidence missing · · no verifies edge
+
+tests\test_relmap_matrix.py:474: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_matrix.py::test_degenerate_height_flap_never_reads_an_empty_window
+1 failed in 0.64s
+exit=1

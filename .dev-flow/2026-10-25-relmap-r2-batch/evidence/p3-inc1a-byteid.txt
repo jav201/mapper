@@ -1,0 +1,47 @@
+# Inc-1a byte-identity probe (LLR-RVT.1.3, AT-151) — run on the base tree and on the Inc-1a tree.
+# The cut/refusal_line/descriptor surfaces are live on both; the structure_lines surface is
+# AUDIT-SURFACE-SKIPPED mid-move (audit -> adapter is Inc-1b's old-path reader) and must
+# reproduce the base hash after Inc-1b.
+# base full-surface SHA-256:   b7ff2e38aeb79a0629bcf36bc09cc7c231fa25110fe32d59b14991575d2d5a07
+# inc1a live-surface SHA-256:  c78f0fb326443275e1a2f6284510338c5d91f1953f1bf6dcbda5c7d2a72c5ae0  (different set of sections: expected)
+# live-section diff (base vs inc1a, audit block excluded): BYTE-IDENTICAL (see below)
+# --- base dump (base worktree, new probe) ---
+DISPLAY_MAX=120
+cut[empty]=''
+cut[119]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[120]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[121]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…'
+cut[1m]='bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb…'
+cut[accent]='ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé…'
+cut[newline]='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n…'
+refusal[k1]='structure: refused (a.relmap.yml): is a link - descriptor skipped'
+refusal[k5-limit]='structure: refused (a.relmap.yml): exceeds the 123 byte limit - descriptor skipped'
+refusal[long-name]='structure: refused (nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn…): is a link - descriptor skipped'
+refusal[accent-name]='structure: refused (é.relmap.yml): not valid YAML - descriptor skipped'
+refusal[k3]='structure: refused (x.relmap.yml): file not found - descriptor skipped'
+refusal[k5-nolimit]='structure: refused (z.relmap.yml): exceeds the byte limit - descriptor skipped'
+descriptor-refusal:
+structure: refused (d.relmap.yml): is not a regular file - descriptor skipped
+structure_lines:
+structure: informational - does not change the verdict or the exit code
+structure: unavailable (canon: file not found)
+PROBE-SHA256 b7ff2e38aeb79a0629bcf36bc09cc7c231fa25110fe32d59b14991575d2d5a07
+# --- inc1a dump (this tree after Inc-1a) ---
+DISPLAY_MAX=120
+cut[empty]=''
+cut[119]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[120]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+cut[121]='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…'
+cut[1m]='bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb…'
+cut[accent]='ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé…'
+cut[newline]='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n…'
+refusal[k1]='structure: refused (a.relmap.yml): is a link - descriptor skipped'
+refusal[k5-limit]='structure: refused (a.relmap.yml): exceeds the 123 byte limit - descriptor skipped'
+refusal[long-name]='structure: refused (nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn…): is a link - descriptor skipped'
+refusal[accent-name]='structure: refused (é.relmap.yml): not valid YAML - descriptor skipped'
+refusal[k3]='structure: refused (x.relmap.yml): file not found - descriptor skipped'
+refusal[k5-nolimit]='structure: refused (z.relmap.yml): exceeds the byte limit - descriptor skipped'
+descriptor-refusal:
+structure: refused (d.relmap.yml): is not a regular file - descriptor skipped
+AUDIT-SURFACE-SKIPPED: mapper.relmap.audit unimportable mid-move (Inc-1a)
+PROBE-SHA256 c78f0fb326443275e1a2f6284510338c5d91f1953f1bf6dcbda5c7d2a72c5ae0

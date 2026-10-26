@@ -1,0 +1,275 @@
+p3-inc006-followup-red — review-inc006 F2 (DuplicateKey on a tree map named like a descriptor)
+command: pytest -q -p no:cacheprovider tests/test_relmap_shell.py::test_llr_rvh_1_1_row_keys_disjoint_across_kinds
+tree: home.py UNMODIFIED (pre-fix); the arm asserts the disjoint-key fix and fails on the shipped collision
+C:\Users\<user>\anaconda3\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________ test_llr_rvh_1_1_row_keys_disjoint_across_kinds _______________
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26738/test_llr_rvh_1_1_row_keys_disj0')
+
+    async def test_llr_rvh_1_1_row_keys_disjoint_across_kinds(tmp_path):
+        """review-inc006 F2: a tree map named like a descriptor
+        (`demo.relmap.yml.mmd`, stem `demo.relmap.yml`) beside the descriptor
+        `demo.relmap.yml` must not collide — the pre-fix row keys were identical
+        for both kinds, `_recent_routes` silently kept one entry and the
+        DataTable raised DuplicateKey out of `on_mount` (Home died).  Relation
+        and derived rows key on a kind-scoped `relmap:` form; the tree key stays
+        the bare map name (the gate-2 contract).  M-REV-HOME-1 (the prefix
+        dropped) reddens this arm."""
+        _seed_tree_map(tmp_path, "demo.relmap.yml")
+        _seed_descriptor(tmp_path)
+        app = MapperApp(tmp_path)
+        async with app.run_test(size=(118, 34)) as pilot:
+            await pilot.pause()
+>           assert app.is_running, "Home died on mount (the DuplicateKey class)"
+E           AssertionError: Home died on mount (the DuplicateKey class)
+E           assert False
+E            +  where False = MapperApp(title='MapperApp', classes={'-dark-mode'}, pseudo_classes={'focus', 'dark'}).is_running
+
+tests\test_relmap_shell.py:830: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = WindowsPath('C:/Users/<user>/AppData/Local/Temp/pytest-of-<user>/pytest-26738/test_llr_rvh_1_1_row_keys_disj0')
+
+    async def test_llr_rvh_1_1_row_keys_disjoint_across_kinds(tmp_path):
+        """review-inc006 F2: a tree map named like a descriptor
+        (`demo.relmap.yml.mmd`, stem `demo.relmap.yml`) beside the descriptor
+        `demo.relmap.yml` must not collide — the pre-fix row keys were identical
+        for both kinds, `_recent_routes` silently kept one entry and the
+        DataTable raised DuplicateKey out of `on_mount` (Home died).  Relation
+        and derived rows key on a kind-scoped `relmap:` form; the tree key stays
+        the bare map name (the gate-2 contract).  M-REV-HOME-1 (the prefix
+        dropped) reddens this arm."""
+        _seed_tree_map(tmp_path, "demo.relmap.yml")
+        _seed_descriptor(tmp_path)
+        app = MapperApp(tmp_path)
+>       async with app.run_test(size=(118, 34)) as pilot:
+
+tests\test_relmap_shell.py:828: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\<user>\anaconda3\Lib\contextlib.py:231: in __aexit__
+    await self.gen.athrow(value)
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\app.py:2218: in run_test
+    raise self._exception
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\message_pump.py:604: in _pre_process
+    await self._dispatch_message(events.Mount())
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\message_pump.py:727: in _dispatch_message
+    await self.on_event(message)
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\message_pump.py:808: in on_event
+    await self._on_message(event)
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\message_pump.py:829: in _on_message
+    await invoke(method, message)
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\_callback.py:96: in invoke
+    return await _invoke(callback, *params)
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\_callback.py:56: in _invoke
+    result = callback(*params[:parameter_count])
+mapper\screens\home.py:457: in on_mount
+    table.add_row(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = DataTable(id='home-recents'), height = 1, key = 'demo.relmap.yml'
+label = None
+cells = ('demo.relmap.yml', <text ' legacy ' [Span(0, 8, '#f5f5f5 on #262626')] ''>, '2', '0')
+
+    def add_row(
+        self,
+        *cells: CellType,
+        height: int | None = 1,
+        key: str | None = None,
+        label: TextType | None = None,
+    ) -> RowKey:
+        """Add a row at the bottom of the DataTable.
+    
+        Args:
+            *cells: Positional arguments should contain cell data.
+            height: The height of a row (in lines). Use `None` to auto-detect the optimal
+                height.
+            key: A key which uniquely identifies this row. If None, it will be generated
+                for you and returned.
+            label: The label for the row. Will be displayed to the left if supplied.
+    
+        Returns:
+            Unique identifier for this row. Can be used to retrieve this row regardless
+                of its current location in the DataTable (it could have moved after
+                being added due to sorting or insertion/deletion of other rows).
+        """
+        row_key = RowKey(key)
+        if row_key in self._row_locations:
+>           raise DuplicateKey(f"The row key {row_key!r} already exists.")
+E           textual.widgets._data_table.DuplicateKey: The row key <textual.widgets._data_table.RowKey object at 0x0000020F66D40770> already exists.
+
+C:\Users\<user>\anaconda3\Lib\site-packages\textual\widgets\_data_table.py:1693: DuplicateKey
+---------------------------- Captured stderr call -----------------------------
+╭───────────────────── Traceback (most recent call last) ──────────────────────
+│ C:\Users\<user>\AppData\Local\Temp\ds-units\wt-r2\mapper\screens\home.py:457  
+│ in on_mount                                                                  
+│                                                                              
+│   454 │   │   │   │   )                                                      
+│   455 │   │   │   │   nodos = str(len(graph.nodes))                          
+│   456 │   │   │   │   docs = str(len(graph.documents))                       
+│ ❱ 457 │   │   │   table.add_row(                                             
+│   458 │   │   │   │   escape(map_name),                                      
+│   459 │   │   │   │   kind_cell,                                             
+│   460 │   │   │   │   nodos,                                                 
+│                                                                              
+│ ╭───────────────────────────────── locals ─────────────────────────────────╮ 
+│ │                    _ = None                                              │ 
+│ │ _descriptor_overflow = 0                                                 │ 
+│ │             archived = Static(id='home-archived')                        │ 
+│ │       archived_count = 0                                                 │ 
+│ │               broken = []                                                │ 
+│ │              damaged = set()                                             │ 
+│ │     descriptor_paths = (                                                 │ 
+│ │                        │                                                 │ 
+│ │                        WindowsPath('C:/Users/<user>/AppData/Local/Temp/p… │ 
+│ │                        )                                                 │ 
+│ │                 docs = '0'                                               │ 
+│ │              entries = [                                                 │ 
+│ │                        │   _RecentEntry(                                 │ 
+│ │                        │   │   sort_name='demo',                         │ 
+│ │                        │   │   key='demo.relmap.yml',                    │ 
+│ │                        │   │   kind='relation',                          │ 
+│ │                        │   │   name='demo',                              │ 
+│ │                        │   │                                             │ 
+│ │                        path=WindowsPath('C:/Users/<user>/AppData/Local/T… │ 
+│ │                        │   ),                                            │ 
+│ │                        │   _RecentEntry(                                 │ 
+│ │                        │   │   sort_name='demo.relmap.yml',              │ 
+│ │                        │   │   key='demo.relmap.yml',                    │ 
+│ │                        │   │   kind='tree',                              │ 
+│ │                        │   │   name='demo.relmap.yml',                   │ 
+│ │                        │   │   path=None                                 │ 
+│ │                        │   )                                             │ 
+│ │                        ]                                                 │ 
+│ │                entry = _RecentEntry(                                     │ 
+│ │                        │   sort_name='demo.relmap.yml',                  │ 
+│ │                        │   key='demo.relmap.yml',                        │ 
+│ │                        │   kind='tree',                                  │ 
+│ │                        │   name='demo.relmap.yml',                       │ 
+│ │                        │   path=None                                     │ 
+│ │                        )                                                 │ 
+│ │                glyph = '●'                                               │ 
+│ │                graph = Graph(                                            │ 
+│ │                        │   nodes={                                       │ 
+│ │                        │   │   'a': Node(                                │ 
+│ │                        │   │   │   id='a',                               │ 
+│ │                        │   │   │   ficha=Ficha(                          │ 
+│ │                        │   │   │   │   title='A',                        │ 
+│ │                        │   │   │   │   state='',                         │ 
+│ │                        │   │   │   │   meta='',                          │ 
+│ │                        │   │   │   │   notes='',                         │ 
+│ │                        │   │   │   │   fields={},                        │ 
+│ │                        │   │   │   │   attachments=[]                    │ 
+│ │                        │   │   │   )                                     │ 
+│ │                        │   │   ),                                        │ 
+│ │                        │   │   'b': Node(                                │ 
+│ │                        │   │   │   id='b',                               │ 
+│ │                        │   │   │   ficha=Ficha(                          │ 
+│ │                        │   │   │   │   title='B',                        │ 
+│ │                        │   │   │   │   state='',                         │ 
+│ │                        │   │   │   │   meta='',                          │ 
+│ │                        │   │   │   │   notes='',                         │ 
+│ │                        │   │   │   │   fields={},                        │ 
+│ │                        │   │   │   │   attachments=[]                    │ 
+│ │                        │   │   │   )                                     │ 
+│ │                        │   │   )                                         │ 
+│ │                        │   },                                            │ 
+│ │                        │   edges=[                                       │ 
+│ │                        │   │   Edge(                                     │ 
+│ │                        │   │   │   parent_id='a',                        │ 
+│ │                        │   │   │   child_id='b',                         │ 
+│ │                        │   │   │   label=''                              │ 
+│ │                        │   │   )                                         │ 
+│ │                        │   ],                                            │ 
+│ │                        │   root_id='a',                                  │ 
+│ │                        │   schema=[                                      │ 
+│ │                        │   │   SchemaField(                              │ 
+│ │                        │   │   │   key='D',                              │ 
+│ │                        │   │   │   label='documento',                    │ 
+│ │                        │   │   │   required=True,                        │ 
+│ │                        │   │   │   kind='text'                           │ 
+│ │                        │   │   )                                         │ 
+│ │                        │   ],                                            │ 
+│ │                        │   documents={},                                 │ 
+│ │                        │   load_warnings=[]                              │ 
+│ │                        )                                                 │ 
+│ │                 hero = Static(id='home-hero')                            │ 
+│ │             hero_box = GroupBox(id='home-hero-box', classes='group-box') │ 
+│ │             hero_map = 'demo.relmap.yml'                                 │ 
+│ │         hero_metrics = {                                                 │ 
+│ │                        │   'total': 2,                                   │ 
+│ │                        │   'with_record': 0,                             │ 
+│ │                        │   'no_record': 2,                               │ 
+│ │                        │   'due': 0,                                     │ 
+│ │                        │   'coverage': 0                                 │ 
+│ │                        }                                                 │ 
+│ │             identity = Static(id='home-identity')                        │ 
+│ │        identity_text = <text '● mapper   home' [Span(0, 1, '#3a3a3a'),   │ 
+│ │                        Span(1, 8, '#3a3a3a'), Span(8, 15, '#737373')]    │ 
+│ │                        ''>                                               │ 
+│ │                 kind = 'legacy'                                          │ 
+│ │            kind_cell = <text ' legacy ' [Span(0, 8, '#f5f5f5 on          │ 
+│ │                        #262626')] ''>                                    │ 
+│ │             last_map = None                                              │ 
+│ │               map_id = None                                              │ 
+│ │             map_name = 'demo.relmap.yml'                                 │ 
+│ │             microbar = Static(id='home-microbar')                        │ 
+│ │            mmd_files = [                                                 │ 
+│ │                        │                                                 │ 
+│ │                        WindowsPath('C:/Users/<user>/AppData/Local/Temp/p… │ 
+│ │                        ]                                                 │ 
+│ │              node_id = None                                              │ 
+│ │                nodos = '2'                                               │ 
+│ │               resume = Static(id='home-resume')                          │ 
+│ │         resume_graph = None                                              │ 
+│ │                 self = HomeScreen()                                      │ 
+│ │                spark = <text 'activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█' [Span(0, 14, │ 
+│ │                        '#737373'), Span(14, 15, '#3a3a3a'), Span(15, 16, │ 
+│ │                        '#3a3a3a'), Span(16, 17, '#3a3a3a'), Span(17, 18, │ 
+│ │                        '#3a3a3a'), Span(18, 19, '#3a3a3a'), Span(19, 20, │ 
+│ │                        '#3a3a3a'), Span(20, 21, '#3a3a3a'), Span(21, 22, │ 
+│ │                        '#3a3a3a'), Span(22, 23, '#3a3a3a'), Span(23, 24, │ 
+│ │                        '#3a3a3a'), Span(24, 25, '#3a3a3a'), Span(25, 26, │ 
+│ │                        '#3a3a3a'), Span(26, 27, '#3a3a3a'), Span(27, 28, │ 
+│ │                        '#737373')] ''>                                   │ 
+│ │                store = <mapper.store.MapStore object at                  │ 
+│ │                        0x0000020F6A1C63C0>                               │ 
+│ │                table = DataTable(id='home-recents')                      │ 
+│ ╰──────────────────────────────────────────────────────────────────────────╯ 
+│                                                                              
+│ C:\Users\<user>\anaconda3\Lib\site-packages\textual\widgets\_data_table.py:16 
+│ 93 in add_row                                                                
+│                                                                              
+│   1690 │   │   """                                                           
+│   1691 │   │   row_key = RowKey(key)                                         
+│   1692 │   │   if row_key in self._row_locations:                            
+│ ❱ 1693 │   │   │   raise DuplicateKey(f"The row key {row_key!r} already exis 
+│   1694 │   │                                                                 
+│   1695 │   │   # TODO: If there are no columns: do we generate them here?    
+│   1696 │   │   #  If we don't do this, users will be required to call add_co 
+│                                                                              
+│ ╭──────────────────────────────── locals ────────────────────────────────╮   
+│ │   cells = (                                                            │   
+│ │           │   'demo.relmap.yml',                                       │   
+│ │           │   <text ' legacy ' [Span(0, 8, '#f5f5f5 on #262626')] ''>, │   
+│ │           │   '2',                                                     │   
+│ │           │   '0'                                                      │   
+│ │           )                                                            │   
+│ │  height = 1                                                            │   
+│ │     key = 'demo.relmap.yml'                                            │   
+│ │   label = None                                                         │   
+│ │ row_key = RowKey(value='demo.relmap.yml')                              │   
+│ │    self = DataTable(id='home-recents')                                 │   
+│ ╰────────────────────────────────────────────────────────────────────────╯   
+╰──────────────────────────────────────────────────────────────────────────────
+DuplicateKey: The row key <textual.widgets._data_table.RowKey object at 
+0x0000020F66D40770> already exists.
+=========================== short test summary info ===========================
+FAILED tests/test_relmap_shell.py::test_llr_rvh_1_1_row_keys_disjoint_across_kinds
+1 failed in 0.92s
+exit=1

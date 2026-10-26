@@ -1,0 +1,24 @@
+# Inc-1a mutation battery — M-RVT-1 (second def cut in model.py), M-RVT-2 (test imports
+# refusal_line from the old descriptor path), M-RVT-3 (moved cut drops the ellipsis).
+# runner: one node per arm, restore proven by sha256; redacted: account name -> <user>
+# runner exit: 0 · wall: 4s
+arms: 3
+M-RVT-1 on mapper/relmap/model.py ['def _unsafe(node_id: str) -> bool:' -> 'def cut(text: str) -> str:\n    return text\n\n\ndef _unsafe(node_id: str) -> bool:'] :: tests/test_relmap_text.py::test_one_definition_site_per_primitive[cut]: RED (KILLED)
+  exit=1 restore-sha256=f49ca449a56f5b17cef555e6de9516b469b5ecf7a887ad052eb65ac4e07ed40a
+  tail: E       AssertionError: cut
+  E       assert ['model.py', 'text.py'] == ['text.py']
+  tests\test_relmap_text.py:98: AssertionError
+  FAILED tests/test_relmap_text.py::test_one_definition_site_per_primitive[cut]
+M-RVT-2 on tests/test_relmap_descriptor.py ['from mapper.relmap.text import refusal_line' -> 'from mapper.relmap.descriptor import refusal_line'] :: tests/test_relmap_text.py::test_no_old_path_readers_inc_1a: RED (KILLED)
+  exit=1 restore-sha256=7b8e03a6cd801506df9cff157bcb4fa3cc22e50b701b8cba37426377636579c9
+  tail: >       assert _old_path_readers(OLD_PATHS_1A) == []
+  E       AssertionError: assert ['tests/test_...refusal_line'] == []
+  tests\test_relmap_text.py:139: AssertionError
+  FAILED tests/test_relmap_text.py::test_no_old_path_readers_inc_1a - Assertion...
+M-RVT-3 on mapper/relmap/text.py ['return text[: DISPLAY_MAX - 1] + "…"' -> 'return text[: DISPLAY_MAX]'] :: tests/test_relmap_text.py::test_cut_reproduces_the_r1_contract: RED (KILLED)
+  exit=1 restore-sha256=88c8176984fb5d149d2b418994ca3dcff460e3f730f2fa8d1400a065c2682cc2
+  tail: >       assert len(cut121) == 120 and cut121.endswith("…") and cut121[:-1] == "a" * 119
+  E       AssertionError: assert (120 == 120 and False)
+  tests\test_relmap_text.py:188: AssertionError
+  FAILED tests/test_relmap_text.py::test_cut_reproduces_the_r1_contract - Asser...
+battery exit: 0 (0 bad arms)

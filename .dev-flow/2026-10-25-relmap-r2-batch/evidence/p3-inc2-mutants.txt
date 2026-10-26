@@ -1,0 +1,30 @@
+# p3-inc2-mutants — the Inc-2 battery (11 named mutants for the Inc-2 LLRs)
+# runner: scratch mutants_inc2.py (one node set per mutant; restore sha256-proven per arm)
+arms: 11
+M-RVH-8: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.59s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-9: KILLED [mapper/keymap.py] 1 failed in 0.35s
+  restore proven: 319877a5404f68754d25877cf8928f67bdee85d165cb7798f1513393c012a247
+M-RVH-10: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.42s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-11: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.61s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-13: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.47s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-14: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.68s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-15: KILLED [mapper/screens/relmap/base.py] 1 failed in 0.38s
+  restore proven: 530c04f469dc9bce9c8409585cd1e3692caa99907e84f5e8900388ae9413ea7e
+M-RVH-16: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.54s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-17: KILLED [mapper/screens/relmap/screen.py] 1 failed in 0.69s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+M-RVH-18: KILLED [mapper/screens/relmap/base.py] 1 failed in 0.36s
+  restore proven: 530c04f469dc9bce9c8409585cd1e3692caa99907e84f5e8900388ae9413ea7e
+M-RVH-19: KILLED [mapper/screens/relmap/screen.py] 3 failed in 1.36s
+  restore proven: 706db3ee93cf776e2c225a7b11fd6f2a89b6092c0587452c315fc1af6d0dd2bd
+bad: 0
+
+real	0m17.762s
+user	0m0.000s
+sys	0m0.015s

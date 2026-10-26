@@ -31,7 +31,8 @@ from mapper.osopen import MAX_MAP_BYTES
 from mapper.relmap import adapter as adapter_mod
 from mapper.relmap import audit as raudit
 from mapper.relmap.audit import HEADER, format_structure, structure_lines
-from mapper.relmap.descriptor import CAUSE, refusal_line
+from mapper.relmap.descriptor import CAUSE
+from mapper.relmap.text import refusal_line
 from mapper.relmap.gaps import Gap, detect_gaps, rank_gaps
 from mapper.relmap.model import build_map
 from mapper.relmap.profile import REQHARNESS
@@ -327,7 +328,7 @@ def test_format_structure_cuts_inside():
 
 
 def test_refusal_line_hostile_name():
-    """`refusal_line` is the descriptor module's, imported here: a 300-character base name is cut
+    """`refusal_line` is the text leaf's, imported here: a 300-character base name is cut
     to 120 ending in an ellipsis (M-RMU-13), and a combining mark passes through UNESCAPED -- the
     sink escapes it."""
     long = refusal_line("n" * 300, CAUSE["K1"])
@@ -723,16 +724,25 @@ def test_at_124_skipped_rows_unknown_status_and_the_arithmetic(tmp_path):
     assert "EX9" not in text and "ZW9" not in text and "\u202e" not in text
 
 
-def test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed(tmp_path, snapshot_run):
-    """AT-125: the gap sentence is qualified where rows could not be parsed (Layer B)."""
+def test_at_125_the_gap_sentence_is_qualified_where_rows_are_unparsed(tmp_path, snapshot_run, snapshot_repo):
+    """AT-125: the gap sentence is qualified where rows could not be parsed (Layer B).
+
+    Amended at the Inc-7 gate (LLR-RVU.1.1): the two snapshot carrier lines are
+    271/277 cells, so the per-line bound cuts their tails on the shipped
+    surface — the qualifier CONTENT is asserted on the `structure_lines` seam
+    (D5), the bound on the emitted form.
+    """
     canon = _text(row("HLR-X.1", "has a child that cannot be parsed", "active"),
                   "| LLR-X.1.1 | a pipe | in it | rationale | batch | active |\n")
     block = block_of(run_audit(str(registry_repo(tmp_path, "q", canon))).stdout)
     gap = _gap_lines(block)
     assert len(gap) == 1 and gap[0].endswith("(canon rows near this id could not be parsed or linked: 1)")
-    qualified = [g for g in _gap_lines(block_of(snapshot_run.stdout)) if "canon rows near this id" in g]
+    seam = _gap_lines([str(line) for line in structure_lines(snapshot_repo)])
+    qualified = [g for g in seam if "canon rows near this id" in g]
     assert sorted(g.split(DOT)[2] for g in qualified) == ["HLR-CAN.1", "HLR-REPAIR.1"]
     assert all(g.endswith("could not be parsed or linked: 2)") for g in qualified)
+    emitted = _gap_lines(block_of(snapshot_run.stdout))
+    assert len(emitted) == 7 and all(len(g) <= 240 for g in emitted)
 
 
 def test_at_126_unavailable_lines_and_no_path_leak(tmp_path):
@@ -840,7 +850,7 @@ def test_at_129_every_long_value_is_cut_to_120(tmp_path):
     assert len(shown) == 120 and shown.endswith("\u2026")
 
 
-def test_snapshot_run(snapshot_run):
+def test_snapshot_run(snapshot_run, snapshot_repo):
     """LLR-RMU.1.2 on the shipped surface: block order and the exact figures."""
     block = block_of(snapshot_run.stdout)
     assert block[0] == INFO and block.count(INFO) == 1
@@ -849,7 +859,13 @@ def test_snapshot_run(snapshot_run):
     assert block[3] == "structure: sources: canon=REQUIREMENTS.md us_canon=unset at_table=unset"
     assert block[4] == "structure: gaps: 7 (HIGH=0, MED=7, LOW=0)"
     assert len(_gap_lines(block)) == 7
-    assert len([g for g in _gap_lines(block) if "canon rows near this id" in g]) == 2
+    # Amended at the Inc-7 gate (LLR-RVU.1.1): the two qualified carrier lines
+    # are 271/277 cells — over the per-line bound — so the qualifier CONTENT is
+    # asserted on the `structure_lines` seam (D5) and the bound on the emitted
+    # form; the block order and figures above are unchanged.
+    seam_gaps = _gap_lines([str(line) for line in structure_lines(snapshot_repo)])
+    assert len([g for g in seam_gaps if "canon rows near this id" in g]) == 2
+    assert all(len(g) <= 240 for g in _gap_lines(block))
     assert len(_note_lines(block)) == 8
     assert not _by_prefix(block, "structure: skipped") and not _by_prefix(block, "structure: gaps shown")
     assert len(block) == 1 + 1 + 1 + 1 + 1 + 7 + 8

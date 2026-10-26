@@ -1,0 +1,173 @@
+# p3-inc006-renders.txt — Inc-6 shell renders through the real app
+# worktree: wt-r2-shell (lane L6) — Home listing (tree+relation+derived) and the relation screen chrome
+# sizes: (118,34) and (87,34); fixture: alfa.mmd (+sidecar schema), demo.relmap.yml, REQUIREMENTS.md (HLR/LLR tables)
+# NOTE: the recents kind column renders header-width-clipped (legacy->leg) on HEAD too — pre-existing,
+# identical for tree and relation chips; the emitted cell content carries the full badge (see the shell arms).
+===== size (118, 34) — HOME: tree + relation rows (descriptors exist; derived row absent) =====
+ c browse maps    p connect repo    n build map    f factory                                                  ● mapper
+                                                                                                                      
+                                                   ● mapper   home                                                    
+                                                                                                                      
+███                                                                                                                   
+  █                                                                                                                   
+███                                                                                                                   
+█                                                                                                                     
+███                                                                                                                   
+nodes with no record                                                                                                  
+alfa                                                                                                                  
+                                                                                                                      
+activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█                                                                                          
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+  with record 0 ░░░░░░░░░░    no record 2 ██████████    coverage 0 %                                                  
+ ▐ name  kind  nodes  docs                                                                                            
+ alfa     leg  2      0                                                                                               
+ demo     rel  —      —                                                                                               
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+next ▸ ↵ open map · or choose a door                                                                                  
+open c browse maps  p connect repo  n build map  t from template  i import csv  f factory … +10  ? all keys
+===== size (118, 34) — RelMapScreen chrome (relation row open) =====
+ browse maps    connect repo    build map    factory                                                          ● mapper
+demo / relmap / matrix                                                                                                
+                                                                                                                      
+matrix · HLR-DEMO.1                                                                                                   
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+===== size (118, 34) — HOME with ZERO descriptors: the derived row =====
+ c browse maps    p connect repo    n build map    f factory                                                  ● mapper
+                                                                                                                      
+                                                   ● mapper   home                                                    
+                                                                                                                      
+███                                                                                                                   
+  █                                                                                                                   
+███                                                                                                                   
+█                                                                                                                     
+███                                                                                                                   
+nodes with no record                                                                                                  
+alfa                                                                                                                  
+                                                                                                                      
+activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█                                                                                          
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+  with record 0 ░░░░░░░░░░    no record 2 ██████████    coverage 0 %                                                  
+ ▐ name  kind  nodes  docs                                                                                            
+ REQUIR   rel  —      —                                                                                               
+ alfa     leg  2      0                                                                                               
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+                                                                                                                      
+next ▸ ↵ open map · or choose a door                                                                                  
+open c browse maps  p connect repo  n build map  t from template  i import csv  f factory … +10  ? all keys
+===== size (118, 34) — RelMapScreen chrome (derived reqharness map open) =====
+ browse maps    connect repo    build map    factory                                                          ● mapper
+REQUIREMENTS / relmap / matrix                                                                                        
+                                                                                                                      
+matrix · HLR-DEMO.1                                                                                                   
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up  ↓ move down  ← move left  → move right … +7  ? all keys
+
+===== size (87, 34) — HOME: tree + relation rows (descriptors exist; derived row absent) =====
+ c browse maps    p connect repo    n build map    f factory                   ● mapper
+                                                                                       
+                                    ● mapper   home                                    
+                                                                                       
+███                                                                                    
+  █                                                                                    
+███                                                                                    
+█                                                                                      
+███                                                                                    
+nodes with no record                                                                   
+alfa                                                                                   
+                                                                                       
+activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█                                                           
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+  with record 0 ░░░░░░░░░░    no record 2 ██████████    coverage 0 %                   
+ ▐ name  kind  nodes  docs                                                             
+ alfa     leg  2      0                                                                
+ demo     rel  —      —                                                                
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+next ▸ ↵ open map · or choose a door                                                   
+open c browse maps  p connect repo  n build map  t from template … +12  ? all keys
+===== size (87, 34) — RelMapScreen chrome (relation row open) =====
+ browse maps    connect repo    build map    factory                           ● mapper
+demo / relmap / matrix                                                                 
+                                                                                       
+matrix · HLR-DEMO.1                                                                    
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+===== size (87, 34) — HOME with ZERO descriptors: the derived row =====
+ c browse maps    p connect repo    n build map    f factory                   ● mapper
+                                                                                       
+                                    ● mapper   home                                    
+                                                                                       
+███                                                                                    
+  █                                                                                    
+███                                                                                    
+█                                                                                      
+███                                                                                    
+nodes with no record                                                                   
+alfa                                                                                   
+                                                                                       
+activity 14d  ▁▁▁▁▁▁▁▁▁▁▁▁▁█                                                           
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+  with record 0 ░░░░░░░░░░    no record 2 ██████████    coverage 0 %                   
+ ▐ name  kind  nodes  docs                                                             
+ REQUIR   rel  —      —                                                                
+ alfa     leg  2      0                                                                
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+next ▸ ↵ open map · or choose a door                                                   
+open c browse maps  p connect repo  n build map  t from template … +12  ? all keys
+===== size (87, 34) — RelMapScreen chrome (derived reqharness map open) =====
+ browse maps    connect repo    build map    factory                           ● mapper
+REQUIREMENTS / relmap / matrix                                                         
+                                                                                       
+matrix · HLR-DEMO.1                                                                    
+view 1 matrix  2 gaps  3 sheet  r refresh   move ↑ move up … +10  ? all keys
+
+exit code: 0
+wall time: 6s
